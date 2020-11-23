@@ -1,0 +1,77 @@
+#!/bin/bash
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=$(git hash-object -t tree /dev/null)
+fi
+
+# Redirect output to stderr.
+exec 1>&2
+
+# Files and directories that begin with these prefixes are
+# considered commercial and must be in separate commits
+# from files that are non-commercial
+COMMERCIAL=(src/main/java/com src/main/java/javax)
+
+# Count all the files and all the commercial files
+ALLFILES=0
+COMMFILES=0
+
+# Keep track of the names of exemplar non-commercial
+# and commercial files
+AFILE=none
+CFILE=none
+
+# Loop over all the files in this commit...
+for fn in `git diff --cached --name-only`; do
+    # Count all the files
+    ALLFILES=`expr $ALLFILES + 1`
+
+    # Consider all the commercial prexies
+    ISCOMM=0
+    for prefix in ${COMMERCIAL[*]}; do
+        if [[ $fn == ${prefix}* ]]; then
+            # If this filename begins with a commercial prefix,
+            # then there's at least one commercial file in this
+            # commit.
+            ISCOMM=1
+            if [ "X$CFILE" == "Xnone" ]; then
+                CFILE="$fn"
+            fi
+        fi            
+    done
+
+    if [ $ISCOMM != 0 ]; then
+        # Count the commercial files
+        COMMFILES=`expr $COMMFILES + 1`
+    else
+        # If none of the commercial prefixes matched,
+        # then there's at least one non-commercial file
+        # in this commit.
+        if [ "X$AFILE" == "Xnone" ]; then
+            AFILE="$fn"
+        fi
+    fi
+done
+
+# If there's at least one commercial file, and they aren't *all*
+# commercial files, then this is a mixed commit: computer says no!
+if [ $COMMFILES != 0 -a $ALLFILES != $COMMFILES ]; then
+    cat <<EOF
+** ERROR ***********************************************************
+Commits to this repository are automatically mirrored to the open
+source and commercial repositories. You may not have both commercial
+and non-commercial files in the same commit. This commit attempt
+includes at least one non-commercial file:
+  $AFILE
+and at least one commercial file:
+  $CFILE
+Please split this commit into at two commits with no commercial and
+non-commercial files in a single commit.
+********************************************************************
+EOF
+    exit 1;
+fi
