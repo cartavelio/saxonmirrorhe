@@ -1,0 +1,455 @@
+#+TITLE: Windows builds
+
+* Ant builds
+
++ ~dll-n~
+  + ~copysource-development-n~
+  + ~copysrc-hen~
+  + ~preprocess-hen~
+  + ~compile-hen~
+  + ~jar-hen~
+  + ~copysrc-een~
+  + ~preprocess-een~
+  + ~compile-een~
+  + ~jar-een~
+  + ~dll-n-prepare~
+  + ~dll-hen~
+  + ~copysrc-pen~
+  + ~preprocess-pen~
+  + ~compile-pen~
+  + ~jar-pen~
+  + ~dll-pen~
+  + ~dll-een~
+  + ~dll-n~
+
+#+BEGIN_SRC
+Z:\Saxonica\src\saxonica\dev\build99>"c:\Users\Norman Walsh\Projects\apache-ant-1.10.9\bin\ant" dll-n
+Buildfile: Z:\Saxonica\src\saxonica\dev\build99\build.xml
+Trying to override old definition of task jarjar
+
+copysource-development-n:
+
+copysrc-hen:
+
+preprocess-hen:
+     [echo] Done preprocessing for HEN.
+     [copy] Copying 1676 files to Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\hen\source
+     [echo] Import filtering for HEN complete.
+
+compile-hen:
+     [echo] Compile with debug = true, debuglevel = source,lines,vars
+    [javac] Compiling 1391 source files to Z:\Saxonica\src\saxonica\dev\build99\temp\n\classes
+    …
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 25 warnings
+
+jar-hen:
+      [jar] Building jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9he.jar
+      [jar] Updating jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9he.jar
+
+copysrc-een:
+
+preprocess-een:
+     [echo] Done preprocessing for EEN.
+     [copy] Copying 2445 files to Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\een\source
+     [echo] Import filtering for EEN complete.
+
+compile-een:
+     [echo] Compile with debug = true, debuglevel = source,lines,vars
+    [javac] Compiling 2148 source files to Z:\Saxonica\src\saxonica\dev\build99\temp\n\classes
+    …
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 31 warnings
+
+jar-een:
+      [jar] Building jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar
+      [jar] Updating jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar
+
+dll-n-prepare:
+     [echo]
+     [echo]         osDir = MyDotNet/ikvm-8.1.5717.0/bin/ikvmc.exe
+     [echo]         osDebugDir = MyDotNet/ikvm-8.1.5717.0/bin/ikvmc.exe
+     [echo]
+
+dll-hen:
+    [ikvmc]     +file: saxon9he.jar
+    [ikvmc]     +file: xerces.jar
+    [ikvmc] IKVMC Arguments: Z:\Saxonica\src\saxonica\dev\build99\MyDotNet\ikvm-8.1.5717.0\bin\ikvmc.exe -out:Z:\Saxonica\src\saxonica\dev\build99/temp/n/dll/he/saxon9he.dll -assembly:saxon9he -target:library -keyfile:MyDotNet/saxondotnet.snk -version:9.9.1.8 -reference:mscorlib.dll -reference:System.Xml.dll -reference:System.dll -reference:temp/n/dll/he/IKVM.OpenJDK.Core.dll -srcpath:Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\hen\source Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9he.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\xerces.jar
+    [ikvmc] IKVM.NET Compiler version 8.1.5717.0
+    [ikvmc] Copyright (C) 2002-2015 Jeroen Frijters
+    [ikvmc] http://www.ikvm.net/
+    [ikvmc]
+    [ikvmc] warning IKVMC0100: Class "com.saxonica.ee.stream.ManualGroupIterator" not found
+    …
+
+copysrc-pen:
+    [mkdir] Created dir: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jsource\pen
+     [copy] Copying 1831 files to Z:\Saxonica\src\saxonica\dev\build99\temp\n\jsource\pen
+
+preprocess-pen:
+     [echo] Done preprocessing for PEN.
+     [copy] Copying 1826 files to Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\pen\source
+     [echo] Import filtering for PEN complete.
+
+compile-pen:
+    [mkdir] Created dir: Z:\Saxonica\src\saxonica\dev\build99\temp\n\classes\pe
+     [echo] Compile with debug = true, debuglevel = source,lines,vars
+    [javac] Compiling 1541 source files to Z:\Saxonica\src\saxonica\dev\build99\temp\n\classes
+    …
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 26 warnings
+
+jar-pen:
+      [jar] Building jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9pe.jar
+      [jar] Updating jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9pe.jar
+
+dll-pen:
+    [mkdir] Created dir: Z:\Saxonica\src\saxonica\dev\build99\temp\n\dll\pe
+     [copy] Copying 7 files to Z:\Saxonica\src\saxonica\dev\build99\temp\n\dll\pe
+    [ikvmc]     +file: saxon9pe.jar
+    [ikvmc]     +file: icu4j-59_1.jar
+    [ikvmc]     +file: mail.jar
+    [ikvmc]     +file: tagsoup-1.2.1.jar
+    [ikvmc]     +file: xerces.jar
+    [ikvmc] IKVMC Arguments: Z:\Saxonica\src\saxonica\dev\build99\MyDotNet\ikvm-8.1.5717.0\bin\ikvmc.exe -out:Z:\Saxonica\src\saxonica\dev\build99/temp/n/dll/pe/saxon9pe.dll -assembly:saxon9pe -target:library -keyfile:MyDotNet/saxondotnet.snk -version:9.9.1.8 -reference:mscorlib.dll -reference:System.Xml.dll -reference:System.dll -reference:temp/n/dll/pe/IKVM.OpenJDK.Core.dll -reference:System.Security.dll -srcpath:Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\pen\source Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9pe.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\icu4j-59_1.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\mail.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\tagsoup-1.2.1.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\xerces.jar
+    [ikvmc] IKVM.NET Compiler version 8.1.5717.0
+    [ikvmc] Copyright (C) 2002-2015 Jeroen Frijters
+    [ikvmc] http://www.ikvm.net/
+    [ikvmc]
+    [ikvmc] warning IKVMC0100: Class "org.objectweb.asm.commons.TableSwitchGenerator" not found
+    …
+
+dll-een:
+    [ikvmc]     +file: saxon9ee.jar
+    [ikvmc]     +file: asm-5.0.3\asm-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-analysis-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-commons-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-tree-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-util-5.0.3.jar
+    [ikvmc]     +file: icu4j-59_1.jar
+    [ikvmc]     +file: mail.jar
+    [ikvmc]     +file: tagsoup-1.2.1.jar
+    [ikvmc]     +file: xerces.jar
+    [ikvmc] IKVMC Arguments: Z:\Saxonica\src\saxonica\dev\build99\MyDotNet\ikvm-8.1.5717.0\bin\ikvmc.exe -out:Z:\Saxonica\src\saxonica\dev\build99/temp/n/dll/ee/saxon9ee.dll -assembly:saxon9ee -target:library -keyfile:MyDotNet/saxondotnet.snk -version:9.9.1.8 -reference:mscorlib.dll -reference:System.dll -reference:System.Security.dll -reference:System.Xml.dll -reference:temp/n/dll/ee/IKVM.OpenJDK.Core.dll -srcpath:Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\een\source Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-analysis-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-commons-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-tree-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-util-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\icu4j-59_1.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\mail.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\tagsoup-1.2.1.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\xerces.jar
+    [ikvmc] IKVM.NET Compiler version 8.1.5717.0
+    [ikvmc] Copyright (C) 2002-2015 Jeroen Frijters
+    [ikvmc] http://www.ikvm.net/
+    [ikvmc]
+    [ikvmc] warning IKVMC0100: Class "javax.activation.DataSource" not found
+    …
+     [echo] [saxon9ee-debug.dll]
+    [ikvmc]     +file: saxon9ee.jar
+    [ikvmc]     +file: asm-5.0.3\asm-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-analysis-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-commons-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-tree-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-util-5.0.3.jar
+    [ikvmc]     +file: icu4j-59_1.jar
+    [ikvmc]     +file: mail.jar
+    [ikvmc]     +file: tagsoup-1.2.1.jar
+    [ikvmc]     +file: xerces.jar
+    [ikvmc] IKVMC Arguments: Z:\Saxonica\src\saxonica\dev\build99\MyDotNet\ikvm-8.1.5717.0\bin\ikvmc.exe -out:Z:\Saxonica\src\saxonica\dev\build99/temp/n/dll/ee/saxon9ee-debug.dll -assembly:saxon9ee -target:library -keyfile:MyDotNet/saxondotnet.snk -version:9.9.1.8 -reference:mscorlib.dll -reference:System.Xml.dll -reference:System.dll -reference:temp/n/dll/ee/IKVM.OpenJDK.Core.dll -reference:System.Security.dll -debug -srcpath:Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\een\source Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-analysis-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-commons-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-tree-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-util-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\icu4j-59_1.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\mail.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\tagsoup-1.2.1.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\xerces.jar
+    [ikvmc] IKVM.NET Compiler version 8.1.5717.0
+    [ikvmc] Copyright (C) 2002-2015 Jeroen Frijters
+    [ikvmc] http://www.ikvm.net/
+    [ikvmc]
+    [ikvmc] warning IKVMC0100: Class "javax.activation.DataSource" not found
+    …
+
+dll-n:
+
+BUILD SUCCESSFUL
+Total time: 22 minutes 15 seconds
+#+END_SRC
+
++ ~csharp-hen~
+  + ~copysource-development-n~
+  + ~copysrc-hen~
+  + ~preprocess-hen~
+  + ~compile-hen~
+  + ~jar-hen~
+  + ~copysrc-een~
+  + ~preprocess-een~
+  + ~compile-een~
+  + ~jar-een~
+  + ~dll-n-prepare~
+  + ~dll-hen~
+  + ~csharp-hen~
+
+#+BEGIN_SRC
+Z:\Saxonica\src\saxonica\dev\build99>"c:\Users\Norman Walsh\Projects\apache-ant-1.10.9\bin\ant" csharp-hen
+Buildfile: Z:\Saxonica\src\saxonica\dev\build99\build.xml
+Trying to override old definition of task jarjar
+
+copysource-development-n:
+
+copysrc-hen:
+
+preprocess-hen:
+     [echo] Done preprocessing for HEN.
+     [copy] Copying 1676 files to Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\hen\source
+     [echo] Import filtering for HEN complete.
+
+compile-hen:
+     [echo] Compile with debug = true, debuglevel = source,lines,vars
+    [javac] Compiling 1391 source files to Z:\Saxonica\src\saxonica\dev\build99\temp\n\classes
+    …
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 25 warnings
+
+jar-hen:
+      [jar] Building jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9he.jar
+      [jar] Updating jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9he.jar
+
+copysrc-een:
+
+preprocess-een:
+     [echo] Done preprocessing for EEN.
+     [copy] Copying 2445 files to Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\een\source
+     [echo] Import filtering for EEN complete.
+
+compile-een:
+     [echo] Compile with debug = true, debuglevel = source,lines,vars
+    [javac] Compiling 2148 source files to Z:\Saxonica\src\saxonica\dev\build99\temp\n\classes
+    …
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 31 warnings
+
+jar-een:
+      [jar] Building jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar
+      [jar] Updating jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar
+
+dll-n-prepare:
+     [echo]
+     [echo]         osDir = MyDotNet/ikvm-8.1.5717.0/bin/ikvmc.exe
+     [echo]         osDebugDir = MyDotNet/ikvm-8.1.5717.0/bin/ikvmc.exe
+     [echo]
+
+dll-hen:
+    [ikvmc]     +file: saxon9he.jar
+    [ikvmc]     +file: xerces.jar
+    [ikvmc] IKVMC Arguments: Z:\Saxonica\src\saxonica\dev\build99\MyDotNet\ikvm-8.1.5717.0\bin\ikvmc.exe -out:Z:\Saxonica\src\saxonica\dev\build99/temp/n/dll/he/saxon9he.dll -assembly:saxon9he -target:library -keyfile:MyDotNet/saxondotnet.snk -version:9.9.1.8 -reference:mscorlib.dll -reference:System.Xml.dll -reference:System.dll -reference:temp/n/dll/he/IKVM.OpenJDK.Core.dll -srcpath:Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\hen\source Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9he.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\xerces.jar
+    [ikvmc] IKVM.NET Compiler version 8.1.5717.0
+    [ikvmc] Copyright (C) 2002-2015 Jeroen Frijters
+    [ikvmc] http://www.ikvm.net/
+    [ikvmc]
+    [ikvmc] warning IKVMC0100: Class "com.saxonica.ee.stream.ManualGroupIterator" not found
+    …
+
+csharp-hen:
+   [dn:csc] z:\Saxonica\src\saxonica\dev\build99\temp\n\csource\api\Saxon.Api\Feature.cs(227,67): warning CS0612: 'net.sf.saxon.lib.CollectionURIResolver' is obsolete
+    …
+
+BUILD SUCCESSFUL
+Total time: 12 minutes 7 seconds
+#+END_SRC
+
+
++ ~csharp-een~
+  + ~copysource-development-n~
+  + ~copysrc-een~
+  + ~preprocess-een~
+  + ~compile-een~
+  + ~jar-een~
+  + ~dll-n-prepare~
+  + ~dll-een~
+  + ~csharp-een~
+
+#+BEGIN_SRC
+Z:\Saxonica\src\saxonica\dev\build99>"c:\Users\Norman Walsh\Projects\apache-ant-1.10.9\bin\ant" csharp-een
+Buildfile: Z:\Saxonica\src\saxonica\dev\build99\build.xml
+Trying to override old definition of task jarjar
+
+copysource-development-n:
+
+copysrc-een:
+
+preprocess-een:
+     [echo] Done preprocessing for EEN.
+     [copy] Copying 2445 files to Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\een\source
+     [echo] Import filtering for EEN complete.
+
+compile-een:
+     [echo] Compile with debug = true, debuglevel = source,lines,vars
+    [javac] Compiling 2148 source files to Z:\Saxonica\src\saxonica\dev\build99\temp\n\classes
+    …
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 31 warnings
+
+jar-een:
+      [jar] Building jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar
+      [jar] Updating jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar
+
+dll-n-prepare:
+     [echo]
+     [echo]         osDir = MyDotNet/ikvm-8.1.5717.0/bin/ikvmc.exe
+     [echo]         osDebugDir = MyDotNet/ikvm-8.1.5717.0/bin/ikvmc.exe
+     [echo]
+
+dll-een:
+    [ikvmc]     +file: saxon9ee.jar
+    [ikvmc]     +file: asm-5.0.3\asm-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-analysis-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-commons-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-tree-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-util-5.0.3.jar
+    [ikvmc]     +file: icu4j-59_1.jar
+    [ikvmc]     +file: mail.jar
+    [ikvmc]     +file: tagsoup-1.2.1.jar
+    [ikvmc]     +file: xerces.jar
+    [ikvmc] IKVMC Arguments: Z:\Saxonica\src\saxonica\dev\build99\MyDotNet\ikvm-8.1.5717.0\bin\ikvmc.exe -out:Z:\Saxonica\src\saxonica\dev\build99/temp/n/dll/ee/saxon9ee.dll -assembly:saxon9ee -target:library -keyfile:MyDotNet/saxondotnet.snk -version:9.9.1.8 -reference:mscorlib.dll -reference:System.dll -reference:System.Security.dll -reference:System.Xml.dll -reference:temp/n/dll/ee/IKVM.OpenJDK.Core.dll -srcpath:Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\een\source Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-analysis-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-commons-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-tree-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-util-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\icu4j-59_1.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\mail.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\tagsoup-1.2.1.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\xerces.jar
+    [ikvmc] IKVM.NET Compiler version 8.1.5717.0
+    [ikvmc] Copyright (C) 2002-2015 Jeroen Frijters
+    [ikvmc] http://www.ikvm.net/
+    [ikvmc]
+    [ikvmc] warning IKVMC0100: Class "javax.activation.DataSource" not found
+    …
+     [echo] [saxon9ee-debug.dll]
+    [ikvmc]     +file: saxon9ee.jar
+    [ikvmc]     +file: asm-5.0.3\asm-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-analysis-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-commons-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-tree-5.0.3.jar
+    [ikvmc]     +file: asm-5.0.3\asm-util-5.0.3.jar
+    [ikvmc]     +file: icu4j-59_1.jar
+    [ikvmc]     +file: mail.jar
+    [ikvmc]     +file: tagsoup-1.2.1.jar
+    [ikvmc]     +file: xerces.jar
+    [ikvmc] IKVMC Arguments: Z:\Saxonica\src\saxonica\dev\build99\MyDotNet\ikvm-8.1.5717.0\bin\ikvmc.exe -out:Z:\Saxonica\src\saxonica\dev\build99/temp/n/dll/ee/saxon9ee-debug.dll -assembly:saxon9ee -target:library -keyfile:MyDotNet/saxondotnet.snk -version:9.9.1.8 -reference:mscorlib.dll -reference:System.Xml.dll -reference:System.dll -reference:temp/n/dll/ee/IKVM.OpenJDK.Core.dll -reference:System.Security.dll -debug -srcpath:Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\een\source Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-analysis-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-commons-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-tree-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\asm-5.0.3\asm-util-5.0.3.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\icu4j-59_1.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\mail.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\tagsoup-1.2.1.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\xerces.jar
+    [ikvmc] IKVM.NET Compiler version 8.1.5717.0
+    [ikvmc] Copyright (C) 2002-2015 Jeroen Frijters
+    [ikvmc] http://www.ikvm.net/
+    [ikvmc]
+    [ikvmc] warning IKVMC0100: Class "javax.activation.DataSource" not found
+    …
+
+csharp-een:
+   [dn:csc] z:\Saxonica\src\saxonica\dev\build99\temp\n\csource\api\Saxon.Api\Feature.cs(227,67): warning CS0612: 'net.sf.saxon.lib.CollectionURIResolver' is obsolete
+    …
+
+BUILD SUCCESSFUL
+Total time: 6 minutes 24 seconds
+#+END_SRC
+
++ ~product-hen~
+  + ~copysource-development-n~
+  + ~copysrc-hen~
+  + ~preprocess-hen~
+  + ~compile-hen~
+  + ~jar-hen~
+  + ~copysrc-een~
+  + ~preprocess-een~
+  + ~compile-een~
+  + ~jar-een~
+  + ~dll-n-prepare~
+  + ~dll-hen~
+  + ~csharp-hen~
+  + ~product-hen~
+
+#+BEGIN_SRC
+Z:\Saxonica\src\saxonica\dev\build99>"c:\Users\Norman Walsh\Projects\apache-ant-1.10.9\bin\ant" product-hen
+Buildfile: Z:\Saxonica\src\saxonica\dev\build99\build.xml
+Trying to override old definition of task jarjar
+
+copysource-development-n:
+
+copysrc-hen:
+
+preprocess-hen:
+     [echo] Done preprocessing for HEN.
+     [copy] Copying 1676 files to Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\hen\source
+     [echo] Import filtering for HEN complete.
+
+compile-hen:
+     [echo] Compile with debug = true, debuglevel = source,lines,vars
+    [javac] Compiling 1391 source files to Z:\Saxonica\src\saxonica\dev\build99\temp\n\classes
+    …
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 25 warnings
+
+jar-hen:
+      [jar] Building jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9he.jar
+      [jar] Updating jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9he.jar
+
+copysrc-een:
+
+preprocess-een:
+     [echo] Done preprocessing for EEN.
+     [copy] Copying 2445 files to Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\een\source
+     [echo] Import filtering for EEN complete.
+
+compile-een:
+     [echo] Compile with debug = true, debuglevel = source,lines,vars
+    [javac] Compiling 2148 source files to Z:\Saxonica\src\saxonica\dev\build99\temp\n\classes
+    …
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 31 warnings
+
+jar-een:
+      [jar] Building jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar
+      [jar] Updating jar: Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9ee.jar
+
+dll-n-prepare:
+     [echo]
+     [echo]         osDir = MyDotNet/ikvm-8.1.5717.0/bin/ikvmc.exe
+     [echo]         osDebugDir = MyDotNet/ikvm-8.1.5717.0/bin/ikvmc.exe
+     [echo]
+
+dll-hen:
+    [ikvmc]     +file: saxon9he.jar
+    [ikvmc]     +file: xerces.jar
+    [ikvmc] IKVMC Arguments: Z:\Saxonica\src\saxonica\dev\build99\MyDotNet\ikvm-8.1.5717.0\bin\ikvmc.exe -out:Z:\Saxonica\src\saxonica\dev\build99/temp/n/dll/he/saxon9he.dll -assembly:saxon9he -target:library -keyfile:MyDotNet/saxondotnet.snk -version:9.9.1.8 -reference:mscorlib.dll -reference:System.Xml.dll -reference:System.dll -reference:temp/n/dll/he/IKVM.OpenJDK.Core.dll -srcpath:Z:\Saxonica\src\saxonica\dev\build99\temp\preprocessed\hen\source Z:\Saxonica\src\saxonica\dev\build99\temp\n\jar\saxon9he.jar Z:\Saxonica\src\saxonica\ee\latest9.9\lib\xerces.jar
+    [ikvmc] IKVM.NET Compiler version 8.1.5717.0
+    [ikvmc] Copyright (C) 2002-2015 Jeroen Frijters
+    [ikvmc] http://www.ikvm.net/
+    [ikvmc]
+    [ikvmc] warning IKVMC0100: Class "com.saxonica.ee.stream.ManualGroupIterator" not found
+    …
+
+csharp-hen:
+   [dn:csc] z:\Saxonica\src\saxonica\dev\build99\temp\n\csource\api\Saxon.Api\Feature.cs(227,67): warning CS0612: 'net.sf.saxon.lib.CollectionURIResolver' is obsolete
+    …
+
+product-hen:
+     [copy] Copying 4 files to Z:\Saxonica\src\saxonica\dev\build99\output\saxon-build\9.9.1.8\hen\bin
+     [copy] Copying 1 file to Z:\Saxonica\src\saxonica\dev\build99\output\saxon-build\9.9.1.8\hen\bin
+
+BUILD SUCCESSFUL
+Total time: 10 minutes 39 seconds
+#+END_SRC
+
+* Gradle builds
+
+|--------------------------+-------------------------|
+| Ant task                 | Gradle task             |
+|--------------------------+-------------------------|
+| ~compile-een~              | compileEen              |
+| ~compile-hen~              | compileHen              |
+| ~compile-pen~              | compilePen              |
+| ~copysource-development-n~ | copyDevelopmentNSources |
+| ~copysrc-een~              | setupPreprocessEen      |
+| ~copysrc-hen~              | setupPreprocessHen      |
+| ~copysrc-pen~              | setupPreprocessPen      |
+| ~csharp-een~               |                         |
+| ~csharp-hen~               |                         |
+| ~dll-een~                  |                         |
+| ~dll-hen~                  |                         |
+| ~dll-n-prepare~            | prepareNjar             |
+| ~dll-n~                    |                         |
+| ~dll-pen~                  |                         |
+| ~jar-een~                  | jarEen                  |
+| ~jar-hen~                  | jarHen                  |
+| ~jar-pen~                  | jarPen                  |
+| ~preprocess-een~           | eenSources              |
+| ~preprocess-hen~           | henSources              |
+| ~preprocess-pen~           | penSources              |
+| ~product-hen~              |                         |
+|--------------------------+-------------------------|
