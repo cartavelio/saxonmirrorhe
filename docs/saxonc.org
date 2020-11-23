@@ -1,0 +1,51 @@
+#+TITLE: Saxon/C builds
+
+* Ant builds
+
++ ~jar-eec~
+  + ~copysource-development-c~
+  + ~copysrc-c-eej~
+  + ~preprocess-eec~
+  + ~prepare-libs-c~
+  + ~compile-eec~
+  + ~jar-eec~
+
+#+BEGIN_SRC
+$ ant jar-eec
+Buildfile: /Volumes/Saxonica/src/saxonica/dev/build99/build.xml
+     [echo] RP: ../../ee
+     [echo] LIB: ../../ee/latest9.9/lib
+Trying to override old definition of task jarjar
+
+copysource-development-c:
+
+copysrc-c-eej:
+    [mkdir] Created dir: /Volumes/Saxonica/src/saxonica/dev/build99/temp/c/source/eej
+     [copy] Copying 2457 files to /Volumes/Saxonica/src/saxonica/dev/build99/temp/c/source/eej
+
+preprocess-eec:
+     [copy] Copying 2452 files to /Volumes/Saxonica/src/saxonica/dev/build99/temp/c/preprocessed/eej/source
+
+prepare-libs-c:
+    [mkdir] Created dir: /Volumes/Saxonica/src/saxonica/dev/build99/temp/c/classes/libs
+    [unjar] Expanding: /Volumes/Saxonica/src/saxonica/ee/latest9.9/lib/resolver.jar into /Volumes/Saxonica/src/saxonica/dev/build99/temp/c/classes/libs/xerces
+    [unjar] Expanding: /Volumes/Saxonica/src/saxonica/ee/latest9.9/lib/mail.jar into /Volumes/Saxonica/src/saxonica/dev/build99/temp/c/classes/libs/mail
+
+compile-eec:
+    [mkdir] Created dir: /Volumes/Saxonica/src/saxonica/dev/build99/temp/c/classes/ee
+    …
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 41 warnings
+
+jar-eec:
+    [mkdir] Created dir: /Volumes/Saxonica/src/saxonica/dev/build99/output/saxon-build/9.9.1.8/saxon-c/eej
+      [jar] Building jar: /Volumes/Saxonica/src/saxonica/dev/build99/output/saxon-build/9.9.1.8/saxon-c/eej/saxon9ee.jar
+      [jar] Updating jar: /Volumes/Saxonica/src/saxonica/dev/build99/output/saxon-build/9.9.1.8/saxon-c/eej/saxon9ee.jar
+   [jarjar] Updating jar: /Volumes/Saxonica/src/saxonica/dev/build99/output/saxon-build/9.9.1.8/saxon-c/eej/saxon9ee.jar
+      [jar] Updating jar: /Volumes/Saxonica/src/saxonica/dev/build99/output/saxon-build/9.9.1.8/saxon-c/eej/saxon9ee.jar
+
+BUILD SUCCESSFUL
+Total time: 26 seconds
+
+#+END_SRC

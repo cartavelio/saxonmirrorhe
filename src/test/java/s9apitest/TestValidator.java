@@ -1,0 +1,1399 @@
+package s9apitest;
+
+import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.jaxp.SchemaFactoryImpl;
+import jaxptest.ConfigTest;
+import junit.framework.TestCase;
+import millicom.MillicomTest;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.lib.SchemaURIResolver;
+import net.sf.saxon.lib.UnfailingErrorListener;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.TreeModel;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.trace.Instrumentation;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.tiny.TinyDocumentImpl;
+import net.sf.saxon.tree.tiny.TinyTree;
+import net.sf.saxon.type.ValidationException;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import java.io.*;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Tests for the s9api schema validation interface
+ */
+public class TestValidator extends TestCase {
+
+    public void testReportMultipleErrors() {
+
+        // This validation run should report exactly two validation errors.
+
+        String source_xml = "<?xml version='1.0'?><request><user_name>ed</user_name><password>sdsd</password><date1>a2009-01-01</date1><date2>b2009-01-01</date2></request>";
+        String xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t<xs:element name=\"request\">\n" +
+                "\t\t<xs:complexType>\n" +
+                "\t\t\t<xs:sequence>\n" +
+                "\t\t\t\t<xs:element name=\"user_name\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"password\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"date1\" type=\"xs:date\"/>\n" +
+                "\t\t\t\t<xs:element name=\"date2\" type=\"xs:date\"/>\n" +
+                "\t\t\t</xs:sequence>\n" +
+                "\t\t</xs:complexType>\n" +
+                "\t</xs:element>\n" +
+                "</xs:schema>";
+
+        final List<TransformerException> errorList = new ArrayList<>();
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new StringReader(xsd));
+
+            ErrorListener listener = new ErrorListener() {
+                public void error(TransformerException exception)  {
+                    errorList.add(exception);
+                }
+
+                public void fatalError(TransformerException exception) throws TransformerException {
+                    throw exception;
+                }
+
+                public void warning(TransformerException exception)  {
+                    errorList.add(exception);
+                }
+            };
+
+            SchemaValidator sv = sm.newSchemaValidator();
+            sv.setErrorListener(listener);
+            sm.load(source_xsd);
+            StreamSource source = new StreamSource(new StringReader(source_xml));
+
+
+            Serializer serializer = proc.newSerializer();
+            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            serializer.setOutputStream(out);
+            sv.setDestination(serializer);
+
+
+            sv.validate(source);
+
+            out.close();
+            //fail("Validation errors not detected");
+
+        } catch (SaxonApiException sapie) {
+            try {
+                out.close();
+            } catch (IOException ee) {
+                fail();
+            }
+            assertEquals(2, errorList.size());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Test that multiple base URIs derived from a multiple-entity input document are
+     * preserved through validation
+     */
+
+    public void testValidationWithEntities() {
+        try {
+            Processor proc = new Processor(true);
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode doc = builder.build(new File(ConfigTest.DATA_DIR + "book-wrapper.xml"));
+            assertEquals("3 distinct base URIs in input", 3, getAllBaseUris(doc).size());
+            assertTrue("input doc base URI", doc.getBaseURI().toString().endsWith("book-wrapper.xml"));
+
+            SchemaManager mgr = proc.getSchemaManager();
+            mgr.load(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xsd")));
+            SchemaValidator v = mgr.newSchemaValidator();
+            XdmDestination dest = new XdmDestination();
+            v.setDestination(dest);
+            v.validate(doc.asSource());
+
+            XdmNode validDoc = dest.getXdmNode();
+
+            assertEquals("3 distinct base URIs in output", 3, getAllBaseUris(validDoc).size());
+            assertTrue("validated doc base URI", doc.getBaseURI().toString().endsWith("book-wrapper.xml"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    private Set<String> getAllBaseUris(XdmNode root) {
+        Set<String> baseUris = new HashSet<>();
+        XdmSequenceIterator iter = root.axisIterator(Axis.DESCENDANT);
+        while (iter.hasNext()) {
+            XdmNode node = (XdmNode) iter.next();
+            if (node.getNodeKind() == XdmNodeKind.ELEMENT) {
+                baseUris.add(node.getBaseURI().toASCIIString());
+            }
+        }
+        return baseUris;
+    }
+
+
+    public void testMultipleSchemaImportsOn() {
+        multipleSchemaImports(true);
+    }
+
+    public void testMultipleSchemaImportsOff() {
+        multipleSchemaImports(false);
+    }
+
+    private void multipleSchemaImports(boolean on) {
+        try {
+            Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, on);
+            SchemaManager sm = p.getSchemaManager();
+            String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                    "<xs:import namespace='http://ns.example.com/' schemaLocation='file:///1'/>" +
+                    "<xs:import namespace='http://ns.example.com/' schemaLocation='file:///2'/>" +
+                    "</xs:schema>";
+            final String xsd1 =
+                    "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace='http://ns.example.com/'>" +
+                            "<xs:element name=\"a\"/>\n" +
+                            "</xs:schema>";
+            final String xsd2 =
+                    "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace='http://ns.example.com/'>" +
+                            "<xs:element name=\"b\"/>\n" +
+                            "</xs:schema>";
+            p.getUnderlyingConfiguration().setURIResolver(
+                    (href, base) -> {
+                        if ("file:///1".equals(href)) {
+                            return new StreamSource(new StringReader(xsd1), "file:///1");
+                        }
+                        if ("file:///2".equals(href)) {
+                            return new StreamSource(new StringReader(xsd2), "file:///2");
+                        }
+                        return null;
+                    });
+            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
+            SchemaValidator sv = sm.newSchemaValidator();
+            final String xml0 = "<a xmlns='http://ns.example.com/'/>";
+            final String xml1 = "<b xmlns='http://ns.example.com/'/>";
+            sv.validate(new StreamSource(new StringReader(xml0)));
+            sv.validate(new StreamSource(new StringReader(xml1)));
+            if (!on) {
+                fail("Validation should have failed");
+            }
+        } catch (SaxonApiException err) {
+            if (on) {
+                fail(err.getMessage());
+            }
+        }
+    }
+
+    // Test effect of multiple-schema-imports when A imports B, B imports C, and A and C have the same
+    // target namespace
+
+    public void testCycleMultipleSchemaImportsOn() {
+        cycleMultipleSchemaImports(true);
+    }
+
+    public void testCycleMultipleSchemaImportsOff() {
+        cycleMultipleSchemaImports(false);
+    }
+
+    private void cycleMultipleSchemaImports(boolean on) {
+        SchemaManager sm = null;
+        try {
+            Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, on);
+            sm = p.getSchemaManager();
+            String xsd0 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:a'>\n" +
+                    "<xs:import namespace='ns:b' schemaLocation='file:///1'/>" +
+                    "<xs:element name='a'/>\n" +
+                    "</xs:schema>";
+            final String xsd1 =
+                    "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:b'>" +
+                            "<xs:import namespace='ns:a' schemaLocation='file:///2'/>" +
+                            "<xs:element name='b'/>\n" +
+                            "</xs:schema>";
+            final String xsd2 =
+                    "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:a'>" +
+                            "<xs:element name='c'/>\n" +
+                            "</xs:schema>";
+            p.getUnderlyingConfiguration().setURIResolver(
+                    (href, base) -> {
+                        if ("file:///1".equals(href)) {
+                            return new StreamSource(new StringReader(xsd1), "file:///1");
+                        }
+                        if ("file:///2".equals(href)) {
+                            return new StreamSource(new StringReader(xsd2), "file:///2");
+                        }
+                        return null;
+                    });
+            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
+        } catch (SaxonApiException err) {
+            fail(err.getMessage());
+        }
+
+        SchemaValidator sv = sm.newSchemaValidator();
+        final String xml0 = "<a xmlns='ns:a'/>";
+        final String xml1 = "<b xmlns='ns:b'/>";
+        final String xml2 = "<c xmlns='ns:a'/>";
+        try {
+            sv.validate(new StreamSource(new StringReader(xml0)));
+        } catch (SaxonApiException err) {
+            fail(err.getMessage());
+        }
+        try {
+            sv.validate(new StreamSource(new StringReader(xml1)));
+        } catch (SaxonApiException err) {
+            fail(err.getMessage());
+        }
+        try {
+            sv.validate(new StreamSource(new StringReader(xml2)));
+            if (!on) {
+                fail("Validation should have failed");
+            }
+        } catch (SaxonApiException err) {
+            if (on) {
+                fail("Validation should not have failed");
+            }
+        }
+    }
+
+
+    public void testSchemaAwareQueryUsingSCM() {
+        try {
+            Processor proc = new Processor(true);
+            proc.getSchemaManager().importComponents(new StreamSource(new File(ConfigTest.DATA_DIR + "dita/concept.scm")));
+            // define a ns prefix to be associated with a default attribute added to the instance during validation
+            proc.getUnderlyingConfiguration().getNamePool().suggestPrefix("dita", "http://dita.oasis-open.org/architecture/2005/");
+            XdmNode doc = proc.newDocumentBuilder().build(new StreamSource(new File(ConfigTest.DATA_DIR + "dita/concept.xml")));
+            XQueryCompiler c = proc.newXQueryCompiler();
+            c.setSchemaAware(true);
+            XQueryEvaluator e = c.compile("validate{.}").load();
+            e.setContextItem(doc);
+            Serializer s = proc.newSerializer();
+            StringWriter sw = new StringWriter();
+            s.setOutputWriter(sw);
+            e.setDestination(s);
+            e.run();
+            System.out.println(sw);
+            assertTrue(sw.toString().contains("xmlns:dita"));
+            assertTrue(sw.toString().contains("dita:DITAArchVersion=\"1.2\""));
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    public void testImportUsingSchemaUriResolver() {
+        try {
+            Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.SCHEMA_URI_RESOLVER, new SchemaURIResolver() {
+
+                public void setConfiguration(Configuration config) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                public Source[] resolve(String targetNamespace, String baseURI, String[] locations) {
+                    if (targetNamespace.equals("http://two/")) {
+                        return new Source[]{new StreamSource(new StringReader(
+                                "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" targetNamespace=\"http://two/\">\n" +
+                                        "    <xs:simpleType name='date'><xs:restriction base='xs:date'/></xs:simpleType>\n" +
+                                        "</xs:schema> "
+                        ))};
+                    } else {
+                        return null;
+                    }
+                }
+            });
+            SchemaManager sm = p.getSchemaManager();
+            String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='http://two/'>\n" +
+                    "<xs:import namespace='http://two/'/>" +
+                    "<xs:element name='a' type='b:date'/>\n" +
+                    "</xs:schema>";
+
+
+            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
+            SchemaValidator sv = sm.newSchemaValidator();
+            final String xml0 = "<a>2010-11-02</a>";
+            final String xml1 = "<a>orange wednesday</a>";
+            sv.validate(new StreamSource(new StringReader(xml0)));
+            try {
+                sv.validate(new StreamSource(new StringReader(xml1)));
+                fail();
+            } catch (Exception ve) {
+                // OK
+            }
+
+        } catch (SaxonApiException err) {
+            fail();
+            err.printStackTrace();
+        }
+    }
+
+    public void testAssertionsHidingComments() {
+
+        // This validation run should report exactly two validation errors.
+
+        String valid_xml = "<?xml version='1.0'?><request><a/>x<!--comment-->y<b/></request>";
+        String invalid_xml = "<?xml version='1.0'?><request><a/>x<!--comment-->y</request>";
+        String xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t<xs:element name=\"request\">\n" +
+                "\t\t<xs:complexType mixed='true'>\n" +
+                "\t\t\t<xs:sequence>\n" +
+                "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
+                "\t\t\t</xs:sequence>\n" +
+                "\t\t\t<xs:assert test=\"count(child::node()) = 3 and text()='xy'\"/>\n" +
+                "\t\t</xs:complexType>\n" +
+                "\t</xs:element>\n" +
+                "</xs:schema>";
+
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS, false);
+            proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new StringReader(xsd));
+
+            SchemaValidator sv = sm.newSchemaValidator();
+            sm.load(source_xsd);
+            StreamSource source = new StreamSource(new StringReader(valid_xml));
+
+            XdmDestination destination = new XdmDestination();
+            sv.setDestination(destination);
+
+            sv.validate(source);
+
+            XPathCompiler xp = proc.newXPathCompiler();
+            xp.setSchemaAware(true);
+            XdmAtomicValue result = (XdmAtomicValue) xp.evaluate("count(//comment())", destination.getXdmNode());
+            assertEquals(1, result.getLongValue());
+
+            try {
+                sv.validate(new StreamSource(new StringReader(invalid_xml)));
+                fail("Failed to spot errors");
+            } catch (SaxonApiException er) {
+                assertTrue(er.getMessage().contains("validation errors"));
+                // OK
+            }
+        } catch (SaxonApiException sapie) {
+            sapie.printStackTrace();
+            fail();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testAssertionsSeeingComments() {
+
+        String valid_xml = "<?xml version='1.0'?><request><a/><!--comment--><b/></request>";
+        String invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
+        String xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t<xs:element name=\"request\">\n" +
+                "\t\t<xs:complexType>\n" +
+                "\t\t\t<xs:sequence>\n" +
+                "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
+                "\t\t\t</xs:sequence>\n" +
+                "\t\t\t<xs:assert test='count(child::node()) = 3'/>\n" +
+                "\t\t</xs:complexType>\n" +
+                "\t</xs:element>\n" +
+                "</xs:schema>";
+
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS, true);
+            proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new StringReader(xsd));
+
+            SchemaValidator sv = sm.newSchemaValidator();
+            sm.load(source_xsd);
+            StreamSource source = new StreamSource(new StringReader(valid_xml));
+
+            XdmDestination destination = new XdmDestination();
+            sv.setDestination(destination);
+
+            sv.validate(source);
+
+            XPathCompiler xp = proc.newXPathCompiler();
+            xp.setSchemaAware(true);
+            XdmAtomicValue result = (XdmAtomicValue) xp.evaluate("count(//comment())", destination.getXdmNode());
+            assertEquals(1, result.getLongValue());
+
+            try {
+                sv.validate(new StreamSource(new StringReader(invalid_xml)));
+                fail("Failed to spot errors");
+            } catch (SaxonApiException er) {
+                // OK
+            }
+        } catch (SaxonApiException sapie) {
+            fail();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testAssertionsOnBadData() {
+
+        // This validation run should report exactly two validation errors. Bug 4172
+
+        String invalid_xml = "<?xml version='1.0'?><request><a>x</a><b/></request>";
+        String xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t<xs:element name=\"request\">\n" +
+                "\t\t<xs:complexType mixed='true'>\n" +
+                "\t\t\t<xs:sequence>\n" +
+                "\t\t\t\t<xs:element name=\"a\" type=\"xs:decimal\"/>\n" +
+                "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
+                "\t\t\t</xs:sequence>\n" +
+                "\t\t\t<xs:assert test=\"if (string-length(a) = 3) then exists(b) else empty(b)\"/>\n" +
+                "\t\t</xs:complexType>\n" +
+                "\t</xs:element>\n" +
+                "</xs:schema>";
+
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new StringReader(xsd));
+
+            SchemaValidator sv = sm.newSchemaValidator();
+            sm.load(source_xsd);
+
+            XdmDestination destination = new XdmDestination();
+            sv.setDestination(destination);
+
+            try {
+                sv.validate(new StreamSource(new StringReader(invalid_xml)));
+                fail("Failed to spot errors");
+            } catch (SaxonApiException er) {
+                assertTrue(er.getMessage().contains("Two validation errors"));
+                // OK
+            }
+        } catch (SaxonApiException sapie) {
+            sapie.printStackTrace();
+            fail();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+
+    private void assertionUsingXPath3(boolean allow) {
+
+        String xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t<xs:element name=\"request\">\n" +
+                "\t\t<xs:complexType>\n" +
+                "\t\t\t<xs:sequence>\n" +
+                "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
+                "\t\t\t</xs:sequence>\n" +
+                "\t\t\t<xs:assert test='child::node() => count() = 3'/>\n" +
+                "\t\t</xs:complexType>\n" +
+                "\t</xs:element>\n" +
+                "</xs:schema>";
+
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS, true);
+            proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
+            proc.setConfigurationProperty(Feature.XPATH_VERSION_FOR_XSD, allow ? 31 : 20);
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new StringReader(xsd));
+
+            SchemaValidator sv = sm.newSchemaValidator();
+            try {
+                sm.load(source_xsd);
+                if (!allow) {
+                    fail("unexpected success");
+                }
+            } catch (SaxonApiException e) {
+                if (allow) {
+                    fail(e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testAssertionUsingXPath31allowed() {
+        assertionUsingXPath3(true);
+    }
+
+    public void testAssertionUsingXPath31notAllowed() {
+        assertionUsingXPath3(false);
+    }
+
+    /**
+     * Test the effect of changing a schema to add members to a substitution group.
+     * See bug 2174.
+     */
+
+    public void testSchemaChange() {
+        try {
+            String sch1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                    "  <element name=\"FamilyMember\" type=\"string\" />\n" +
+                    "  <element name=\"Parent\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
+                    "  <element name=\"Child\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
+                    "  <element name=\"Family\">\n" +
+                    "    <complexType>\n" +
+                    "      <sequence>\n" +
+                    "        <element ref=\"fam:FamilyMember\" maxOccurs=\"unbounded\"/>\n" +
+                    "      </sequence>\n" +
+                    "    </complexType>\n" +
+                    "  </element>  \n" +
+                    "</schema>";
+
+            String doc1 = "<Family xmlns=\"http://myexample/family\">\n" +
+                    "  <Parent>John</Parent>\n" +
+                    "  <Child>Alice</Child>\n" +
+                    "</Family>";
+
+            String sch2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<schema targetNamespace=\"http://myexample/family_ext\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                    "  <import namespace=\"http://myexample/family\" schemaLocation=\"http://www.valid.nl/taxo3/family.xsd\"/>\n" +
+                    "  <element name=\"Cousin\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
+                    "</schema>";
+
+//            String doc2 = "<Family xmlns=\"http://myexample/family\" xmlns:fam2=\"http://myexample/family_ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://myexample/family_ext http://www.valid.nl/taxo3/family_ext.xsd\" >\n" +
+//                "  <Parent>John</Parent>\n" +
+//                "  <Child>Alice</Child>\n" +
+//                "  <fam2:Cousin>Pete</fam2:Cousin>\n" +
+//                "</Family>";
+
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.load(new StreamSource(new StringReader(sch1)));
+            System.err.println("Schema 1 OK");
+            sm.newSchemaValidator().validate(new StreamSource(new StringReader(doc1)));
+            System.err.println("Doc 1 OK");
+            try {
+                sm.load(new StreamSource(new StringReader(sch2)));
+                fail("Unexpected success");
+            } catch (SaxonApiException e) {
+                assertTrue("expectedError", e.getMessage().contains("It is not possible to add to the substitution group"));
+            }
+//            System.err.println("Schema 2 OK");
+//            try {
+//                sm.newSchemaValidator().validate(new StreamSource(new StringReader(doc2)));
+//                fail("Unexpected success");
+//            } catch (SaxonApiException e) {
+//                assertTrue("expectedError", e.getMessage().contains("It is not possible to add to the substitution group"));
+//            }
+
+        } catch (SaxonApiException sapie) {
+            System.err.println(sapie.getMessage());
+            fail();
+        }
+    }
+
+    public void testImplicitSchemaImportsOption() {
+
+        String source_xml = "<?xml version='1.0'?><e xmlns='http://y.com/ns'><f/></e>";
+        String xsd1 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace='http://y.com/ns' elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t<xs:import namespace='http://x.com/ns'/>\n" +
+                "\t<xs:element name='e' type='x:t' xmlns:x='http://x.com/ns'/>\n" +
+                "\t<xs:element name='f' type='xs:anyType'/>\n" +
+                "</xs:schema>";
+
+        final String xsd2 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace='http://x.com/ns' elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t\t<xs:complexType name='t'>\n" +
+                "\t\t\t<xs:sequence>\n" +
+                "\t\t\t\t<xs:element ref='y:f' xmlns:y='http://y.com/ns'/>\n" +
+                "\t\t\t</xs:sequence>\n" +
+                "\t\t</xs:complexType>\n" +
+                "</xs:schema>";
+
+
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.IMPLICIT_SCHEMA_IMPORTS, true);
+
+            SchemaManager sm = proc.getSchemaManager();
+            sm.setSchemaURIResolver(new SchemaURIResolver() {
+                public Source[] resolve(String targetNamespace, String baseURI, String[] locations) {
+                    if (targetNamespace.equals("http://x.com/ns")) {
+                        return new StreamSource[]{new StreamSource(new StringReader(xsd2))};
+                    } else {
+                        return null;
+                    }
+                }
+
+                public void setConfiguration(Configuration config) {
+
+                }
+            });
+            sm.load(new StreamSource(new StringReader(xsd1)));
+            sm.load(new StreamSource(new StringReader(xsd2)));
+
+            SchemaValidator sv = sm.newSchemaValidator();
+
+            StreamSource source = new StreamSource(new StringReader(source_xml));
+
+
+            Serializer serializer = proc.newSerializer();
+            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            serializer.setOutputStream(out);
+            sv.setDestination(serializer);
+
+
+            sv.validate(source);
+
+            out.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+
+    public void testValidationReporting() {
+        SchemaValidator validator = null;
+        Serializer dest = null;
+        StringWriter sw = new StringWriter();
+        try {
+            String valid_xml = "<?xml version='1.0'?><request><a/><!--comment--><b/></request>";
+            String invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
+            String sch1 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                    "\t<xs:element name=\"request\">\n" +
+                    "\t\t<xs:complexType>\n" +
+                    "\t\t\t<xs:sequence>\n" +
+                    "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
+                    "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
+                    "\t\t\t</xs:sequence>\n" +
+                    "\t\t\t<xs:assert test='count(child::node()) = 3'/>\n" +
+                    "\t\t</xs:complexType>\n" +
+                    "\t</xs:element>\n" +
+                    "</xs:schema>";
+
+            String doc1 = "<Family xmlns=\"http://myexample/family\">\n" +
+                    "  <Parent>John</Parent>\n" +
+                    "  <Child>Alice</Child>\n" +
+                    "</Family>";
+
+            String sch2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<schema targetNamespace=\"http://myexample/family_ext\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                    "  <import namespace=\"http://myexample/family\" schemaLocation=\"http://www.valid.nl/taxo3/family.xsd\"/>\n" +
+                    "  <element name=\"Cousin\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
+                    "</schema>";
+
+            String doc2 = "<Family xmlns=\"http://myexample/family\" xmlns:fam2=\"http://myexample/family_ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://myexample/family_ext http://www.valid.nl/taxo3/family_ext.xsd\" >\n" +
+                    "  <Parent>John</Parent>\n" +
+                    "  <Child>Alice</Child>\n" +
+                    "  <fam2:Cousin>Pete</fam2:Cousin>\n" +
+                    "</Family>";
+
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.setXsdVersion("1.1");
+            sm.load(new StreamSource(new StringReader(sch1)));
+            System.err.println("Schema 1 OK");
+            validator = sm.newSchemaValidator();
+
+            dest = proc.newSerializer(sw);
+            dest.setOutputProperty(Serializer.Property.INDENT, "yes");
+            validator.setValidityReporting(dest);//ConfigTest.DATA_DIR+"/validationReort.xml");
+            StreamSource source1 = new StreamSource(new StringReader(invalid_xml));
+            source1.setSystemId("http://doc1");
+            validator.validate(source1);
+            System.err.println("Doc 1 OK");
+
+
+        } catch (SaxonApiException sapie) {
+            System.err.println(sapie.getMessage());
+
+        } finally {
+            if (dest != null) {
+                System.out.println(sw);
+                assertTrue(sw.toString(), true);
+
+            }
+
+        }
+
+
+    }
+
+    public void testValidationReporting2() {
+        SchemaValidator validator = null;
+        Serializer dest = null;
+        //   StringWriter writer = new StringWriter();
+        try {
+            String valid_xml = "<?xml version='1.0'?><request><a/><!--comment--><b/></request>";
+            String invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
+            String sch1 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                    "\t<xs:element name=\"request\">\n" +
+                    "\t\t<xs:complexType>\n" +
+                    "\t\t\t<xs:sequence>\n" +
+                    "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
+                    "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
+                    "\t\t\t</xs:sequence>\n" +
+                    "\t\t\t<xs:assert test='count(child::node()) = 3'/>\n" +
+                    "\t\t</xs:complexType>\n" +
+                    "\t</xs:element>\n" +
+                    "</xs:schema>";
+
+            String doc1 = "<Family xmlns=\"http://myexample/family\">\n" +
+                    "  <Parent>John</Parent>\n" +
+                    "  <Child>Alice</Child>\n" +
+                    "</Family>";
+
+            String sch2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<schema targetNamespace=\"http://myexample/family_ext\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                    "  <import namespace=\"http://myexample/family\" schemaLocation=\"http://www.valid.nl/taxo3/family.xsd\"/>\n" +
+                    "  <element name=\"Cousin\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
+                    "</schema>";
+
+            String doc2 = "<Family xmlns=\"http://myexample/family\" xmlns:fam2=\"http://myexample/family_ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://myexample/family_ext http://www.valid.nl/taxo3/family_ext.xsd\" >\n" +
+                    "  <Parent>John</Parent>\n" +
+                    "  <Child>Alice</Child>\n" +
+                    "  <fam2:Cousin>Pete</fam2:Cousin>\n" +
+                    "</Family>";
+
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.setXsdVersion("1.1");
+            StreamSource source1 = new StreamSource(new StringReader(sch1));
+            source1.setSystemId("http://doc1");
+            sm.load(source1);
+            //sm.load(new StreamSource(new File("/Users/ond1/work/development/files/millicom/FafaSCript.xsd")));//new StringReader(sch1)));
+            System.err.println("Schema 1 OK");
+            validator = sm.newSchemaValidator();
+
+            dest = proc.newSerializer();
+            dest.setOutputProperty(Serializer.Property.INDENT, "yes");
+            dest.setOutputFile(new File(ConfigTest.DATA_DIR + "/validationReport.xml"));
+
+            // dest.setOutputWriter(writer);
+            validator.setValidityReporting(dest);//ConfigTest.DATA_DIR+"/validationReort.xml");
+            //validator.validate(new StreamSource(new File("/Users/ond1/work/development/files/millicom/_XMLDestination.xml")));//new StringReader(invalid_xml)));
+            StreamSource source2 = new StreamSource(new StringReader(invalid_xml));
+            source2.setSystemId("http://doc2");
+            validator.validate(source2);
+            System.err.println("Doc 1 OK");
+            File file = new File(ConfigTest.DATA_DIR + "/validationReport.xml");
+            XdmNode resultdoc = proc.newDocumentBuilder().build(file);
+            System.out.println(resultdoc.getStringValue());
+            assertTrue("File exists: ", file.exists());
+
+        } catch (SaxonApiException sapie) {
+            System.err.println(sapie.getMessage());
+            sapie.printStackTrace();
+            //  System.out.println(writer.toString());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+
+    }
+
+    /**
+     * Test validating multiple documents with reporting feature on
+     */
+    public void testValidationReporting3() {
+        SchemaValidator validator = null;
+        Serializer dest = null;
+        StringWriter sw = new StringWriter();
+        try {
+            String valid_xml = "<?xml version='1.0'?><request><a/><!--comment--><b/></request>";
+            String invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
+            String sch1 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                    "\t<xs:element name=\"request\">\n" +
+                    "\t\t<xs:complexType>\n" +
+                    "\t\t\t<xs:sequence>\n" +
+                    "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
+                    "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
+                    "\t\t\t</xs:sequence>\n" +
+                    "\t\t\t<xs:assert test='count(child::node()) = 3'/>\n" +
+                    "\t\t</xs:complexType>\n" +
+                    "\t</xs:element>\n" +
+                    "</xs:schema>";
+
+            String doc1 = "<Family xmlns=\"http://myexample/family\">\n" +
+                    "  <Parent>John</Parent>\n" +
+                    "  <Child>Alice</Child>\n" +
+                    "</Family>";
+
+            String sch2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<schema targetNamespace=\"http://myexample/family_ext\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                    "  <import namespace=\"http://myexample/family\" schemaLocation=\"http://www.valid.nl/taxo3/family.xsd\"/>\n" +
+                    "  <element name=\"Cousin\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
+                    "</schema>";
+
+            String doc2 = "<Family xmlns=\"http://myexample/family\" xmlns:fam2=\"http://myexample/family_ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://myexample/family_ext http://www.valid.nl/taxo3/family_ext.xsd\" >\n" +
+                    "  <Parent>John</Parent>\n" +
+                    "  <Child>Alice</Child>\n" +
+                    "  <fam2:Cousin>Pete</fam2:Cousin>\n" +
+                    "</Family>";
+
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.setXsdVersion("1.1");
+            sm.load(new StreamSource(new StringReader(sch1)));
+            System.err.println("Schema 1 OK");
+            validator = sm.newSchemaValidator();
+
+            dest = proc.newSerializer(sw);
+            dest.setOutputProperty(Serializer.Property.INDENT, "yes");
+            dest.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            validator.setValidityReporting(dest);
+            List<Source> sources = new ArrayList<>();
+            sources.add(new StreamSource(new StringReader(invalid_xml)));
+            sources.add(new StreamSource(new StringReader(doc1)));
+            validator.validateMultiple(sources);
+            System.err.println("Doc 1 OK");
+
+
+        } catch (SaxonApiException sapie) {
+            System.err.println(sapie.getMessage());
+
+        } finally {
+            if (dest != null) {
+                System.out.println(sw);
+                assertTrue(sw.toString(), true);
+
+            }
+
+        }
+
+
+    }
+
+
+    /**
+     * Test validating multiple documents with reporting feature off
+     */
+    public void testValidationReporting4() {
+        SchemaValidator validator = null;
+        Serializer dest = null;
+        StringWriter sw = new StringWriter();
+        try {
+            String valid_xml = "<?xml version='1.0'?><request><a/><!--comment--><b/></request>";
+            String invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
+            String sch1 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                    "\t<xs:element name=\"request\">\n" +
+                    "\t\t<xs:complexType>\n" +
+                    "\t\t\t<xs:sequence>\n" +
+                    "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
+                    "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
+                    "\t\t\t</xs:sequence>\n" +
+                    "\t\t\t<xs:assert test='count(child::node()) = 3'/>\n" +
+                    "\t\t</xs:complexType>\n" +
+                    "\t</xs:element>\n" +
+                    "</xs:schema>";
+
+            String doc1 = "<Family xmlns=\"http://myexample/family\">\n" +
+                    "  <Parent>John</Parent>\n" +
+                    "  <Child>Alice</Child>\n" +
+                    "</Family>";
+
+            String sch2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<schema targetNamespace=\"http://myexample/family_ext\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                    "  <import namespace=\"http://myexample/family\" schemaLocation=\"http://www.valid.nl/taxo3/family.xsd\"/>\n" +
+                    "  <element name=\"Cousin\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
+                    "</schema>";
+
+            String doc2 = "<Family xmlns=\"http://myexample/family\" xmlns:fam2=\"http://myexample/family_ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://myexample/family_ext http://www.valid.nl/taxo3/family_ext.xsd\" >\n" +
+                    "  <Parent>John</Parent>\n" +
+                    "  <Child>Alice</Child>\n" +
+                    "  <fam2:Cousin>Pete</fam2:Cousin>\n" +
+                    "</Family>";
+
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.setXsdVersion("1.1");
+            sm.load(new StreamSource(new StringReader(sch1)));
+            System.err.println("Schema 1 OK");
+            validator = sm.newSchemaValidator();
+
+            dest = proc.newSerializer(sw);
+            dest.setOutputProperty(Serializer.Property.INDENT, "yes");
+            dest.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            // validator.setValidityReporting(dest);
+            List<Source> sources = new ArrayList<>();
+            sources.add(new StreamSource(new StringReader(invalid_xml)));
+            sources.add(new StreamSource(new StringReader(doc1)));
+            validator.validateMultiple(sources);
+            System.err.println("Doc 1 OK");
+
+
+        } catch (SaxonApiException sapie) {
+            System.err.println(sapie.getMessage());
+
+        } finally {
+            if (dest != null) {
+                System.out.println(sw);
+                assertTrue(sw.toString(), true);
+
+            }
+
+        }
+
+
+    }
+
+
+    /**
+     * Error handler for collecting Saxon validation errors.
+     */
+    private static class MyErrorHandler implements ErrorHandler {
+        public int warnings = 0;
+        public int errors = 0;
+        public int fatals = 0;
+        public void warning(SAXParseException we) {
+            warnings++;
+            System.out.println("Warning: " + we);
+        }
+
+        public void fatalError(SAXParseException fe) {
+            fatals++;
+            System.out.println("Fatal error: " + fe);
+        }
+
+        public void error(SAXParseException ee)  {
+            errors++;
+            System.out.println("Error: " + ee);
+        }
+    }
+
+    public void testSchemaListenerSaxon() throws SAXException, IOException {
+        runSchemaListener(new com.saxonica.ee.jaxp.SchemaFactoryImpl());
+    }
+
+    public void testSchemaListenerXerces() throws SAXException, IOException {
+        runSchemaListener(SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema",
+                                                    "org.apache.xerces.jaxp.validation.XMLSchemaFactory",
+                                                    this.getClass().getClassLoader()));
+    }
+
+    public void runSchemaListener(SchemaFactory schemaFactory) throws SAXException, IOException {
+        File schemaFile = new File(ConfigTest.DATA_DIR + "personal.xsd");
+        File xmlFile = new File(ConfigTest.DATA_DIR + "personal-schema.xml");
+        MyErrorHandler errorHandler = new MyErrorHandler();
+
+        // Set error handler
+        schemaFactory.setErrorHandler(errorHandler);
+
+        // Strict schema validation
+        //schemaFactory.setProperty(FeatureKeys.SCHEMA_VALIDATION, Validation.STRICT);
+        Schema schema = schemaFactory.newSchema(schemaFile);
+        Validator newValidator = schema.newValidator();
+        newValidator.setErrorHandler(errorHandler);
+        newValidator.validate(new SAXSource(new InputSource(new FileInputStream(xmlFile))));
+        // Note: no exception expected
+
+        assertEquals("warnings", 0, errorHandler.warnings);
+        assertTrue("errors", errorHandler.errors >= 5);
+        assertEquals("fatals", 0, errorHandler.fatals);
+    }
+
+    public void testMillicomErrorListener() {
+        String[] args = {
+                "-xsd:" + ConfigTest.DATA_DIR + "SubsidyTrackingFactXSD11.xsd",
+                "-s:" + ConfigTest.DATA_DIR + "id2278_HN201506_SubsidyTrackingFact.xml",
+                "-verbose",
+                "-xsdversion:1.1"};
+
+
+        try {
+            MillicomTest.main(args);
+        } catch (IOException | SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+
+
+    }
+
+    public void testLeak() {
+        try {
+            final Processor processor = new Processor(true);
+            processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION_MODE, "lax");
+            processor.getSchemaManager().load(new StreamSource(new File(ConfigTest.DATA_DIR + "leak/schema.xsd")));
+
+            final DocumentBuilder builder = processor.newDocumentBuilder();
+            builder.setTreeModel(TreeModel.TINY_TREE);
+
+            XdmNode node = builder.build(new StreamSource(new File(ConfigTest.DATA_DIR + "leak/instance.xml")));
+            WeakReference<TinyTree> tinyTree = new WeakReference<>(((TinyDocumentImpl) node.getUnderlyingNode()).getTree());
+
+            final XPathCompiler compiler = processor.newXPathCompiler();
+            compiler.importSchemaNamespace("http://example.org");
+            compiler.evaluate("namespace-uri-from-QName(//*/foo)", node);
+            node = builder.build(new StreamSource(new File(ConfigTest.DATA_DIR + "leak/instance.xml")));
+            System.gc();
+            assertNull(tinyTree.get());
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    public void testMultipleSchemaImportsTT() {
+        loadMultiple(true, true);
+    }
+
+    public void testMultipleSchemaImportsTF() {
+        loadMultiple(true, false);
+    }
+
+    public void testMultipleSchemaImportsFT() {
+        loadMultiple(false, true);
+    }
+
+    public void testMultipleSchemaImportsFF() {
+        loadMultiple(false, false);
+    }
+
+    private void loadMultiple(boolean multiple, boolean fromNode) {
+
+        try {
+            EnterpriseConfiguration config = new EnterpriseConfiguration();
+
+            config.setBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, multiple);
+
+            String dir = ConfigTest.DATA_DIR + "/petrk/AbstractType-2/";
+
+            System.err.println("Loading from file:");
+
+            if (fromNode) {
+                loadSchemaFromNode(config, new File(dir + "src/schema.xsd"));
+                loadSchemaFromNode(config, new File(dir + "src/schema1.xsd"));
+                loadSchemaFromNode(config, new File(dir + "src/schema2.xsd"));
+            } else {
+                loadSchemaOK(config, new File(dir + "src/schema.xsd"));
+                loadSchemaOK(config, new File(dir + "src/schema1.xsd"));
+                loadSchemaOK(config, new File(dir + "src/schema2.xsd"));
+            }
+
+            System.err.println("Loading successful");
+
+        } catch (XPathException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    private static void loadSchemaOK(EnterpriseConfiguration config, File urlStr) throws XPathException {
+        Source s = new StreamSource(urlStr);
+        config.addSchemaSource(s);
+
+    }
+
+    private static void loadSchemaFromNode(EnterpriseConfiguration config, File urlStr) throws XPathException {
+        Source s = new StreamSource(urlStr);
+        ParseOptions options = new ParseOptions();
+        // Note: At 9.8, the test fails if line numbering is switched off, because line numbers
+        // are used to determined identity of schema components.
+        options.setLineNumbering(true);
+        NodeInfo ni = config.buildDocumentTree(s, options).getRootNode();
+        //System.out.println( QueryResult.serialize(ni) );
+        //System.out.println( ni.getSystemId() );
+        config.addSchemaSource(ni);
+
+    }
+
+    /**
+     * Test the effect of changing a schema to add members to a substitution group.
+     * See bug 3531.
+     */
+
+    public void testMergeSubstitutionGroups() {
+        try {
+
+            String sch0 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                    "  <element name=\"FamilyMember\" type=\"string\" abstract='true'/>\n" +
+                    "  <element name=\"Family\">\n" +
+                    "    <complexType>\n" +
+                    "      <sequence>\n" +
+                    "        <element ref=\"fam:FamilyMember\" maxOccurs=\"unbounded\"/>\n" +
+                    "      </sequence>\n" +
+                    "    </complexType>\n" +
+                    "  </element>  \n" +
+                    "</schema>";
+
+            String sch1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                    "  <include schemaLocation='sch0.xsd'/>" +
+                    "  <element name=\"Parent\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
+                    "</schema>";
+
+            String sch2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                    "  <include schemaLocation='sch0.xsd'/>" +
+                    "  <element name=\"Child\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
+                    "</schema>";
+
+            String doc1 = "<Family xmlns=\"http://myexample/family\">\n" +
+                    "  <Parent>John</Parent>\n" +
+                    "  <Child>Alice</Child>\n" +
+                    "</Family>";
+
+
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, true);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.setSchemaURIResolver(new SchemaURIResolver() {
+                @Override
+                public void setConfiguration(Configuration config) {
+
+                }
+
+                @Override
+                public Source[] resolve(String targetNamespace, String baseURI, String[] locations)  {
+                    Source[] result = new Source[locations.length];
+                    for (int i = 0; i < locations.length; i++) {
+                        switch (locations[i]) {
+                            case "sch0.xsd":
+                                result[i] = new StreamSource(new StringReader(sch0), "http://example.com/sch0.xsd");
+                                break;
+                            case "sch1.xsd":
+                                result[i] = new StreamSource(new StringReader(sch1), "http://example.com/sch1.xsd");
+                                break;
+                            case "sch2.xsd":
+                                result[i] = new StreamSource(new StringReader(sch0), "http://example.com/sch2.xsd");
+                                break;
+                            default:
+                                result[i] = null;
+                                break;
+                        }
+                    }
+                    return result;
+                }
+            });
+            sm.load(new StreamSource(new StringReader(sch1)));
+            System.err.println("Schema 1 OK");
+            sm.load(new StreamSource(new StringReader(sch2)));
+            sm.newSchemaValidator().validate(new StreamSource(new StringReader(doc1)));
+            System.err.println("Doc 1 OK");
+
+
+        } catch (SaxonApiException sapie) {
+            System.err.println(sapie.getMessage());
+            fail();
+        }
+    }
+
+    public void testValidateTransformationOutput() {
+
+        // This validation run should report exactly two validation errors.
+
+        String xml = "<?xml version='1.0'?>"
+                + "<doc><request>"
+                + "<user_name>ed</user_name>"
+                + "<password>sdsd</password>"
+                + "<d1>2009-01-01</d1>"
+                + "<d1>2010-01-01</d1>"
+                + "<d2>2011-01-01</d2>"
+                + "</request></doc>";
+        String xsl = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>"
+                + "<xsl:mode on-no-match='shallow-copy'/>"
+                + "<xsl:template match='/'><xsl:result-document validation='strict'><xsl:apply-templates select='//request'/></xsl:result-document></xsl:template>"
+                + "<xsl:template match='d1'><date1><xsl:value-of select=\"'x' || .\"/></date1></xsl:template>"
+                + "<xsl:template match='d2'><date2><xsl:value-of select=\"'x' || .\"/></date2></xsl:template>"
+                + "</xsl:transform>";
+        String xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t<xs:element name=\"request\">\n" +
+                "\t\t<xs:complexType>\n" +
+                "\t\t\t<xs:sequence>\n" +
+                "\t\t\t\t<xs:element name=\"user_name\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"password\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"date1\" type=\"xs:date\" maxOccurs='unbounded'/>\n" +
+                "\t\t\t\t<xs:element name=\"date2\" type=\"xs:date\"/>\n" +
+                "\t\t\t</xs:sequence>\n" +
+                "\t\t</xs:complexType>\n" +
+                "\t</xs:element>\n" +
+                "</xs:schema>";
+
+        List<TransformerException> errors = new ArrayList<>();
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.load(new StreamSource(new StringReader(xsd)));
+
+            XsltCompiler xsltCompiler = proc.newXsltCompiler();
+            xsltCompiler.setSchemaAware(true);
+            Xslt30Transformer exec = xsltCompiler.compile(new StreamSource(new StringReader(xsl))).load30();
+
+            exec.setErrorListener(new UnfailingErrorListener() {
+                @Override
+                public void warning(TransformerException exception) {
+
+                }
+
+                @Override
+                public void error(TransformerException exception) {
+                    System.err.println(exception.getMessage());
+                    errors.add(exception);
+                }
+
+                @Override
+                public void fatalError(TransformerException exception) {
+                    System.err.println(exception.getMessage());
+                    errors.add(exception);
+                }
+            });
+
+            StreamSource source = new StreamSource(new StringReader(xml));
+            StringWriter sw = new StringWriter();
+            exec.transform(source, proc.newSerializer(sw));
+
+
+            fail("Validation errors not detected");
+
+        } catch (SaxonApiException sapie) {
+            assertEquals("No of errors", 4, errors.size()); // 3 validation errors plus one summary fatal error
+            assertEquals("ContextPath", "/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes());
+
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Test the effect of setting bytecode on or off
+     */
+
+    private void testByteCode(boolean byteCodeOn) {
+        try {
+            String sch1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
+                    "  <simpleType name='percentage'>" +
+                    "     <restriction base='decimal'>" +
+                    "        <minInclusive value='10'/>" +
+                    "        <maxInclusive value='20'/>" +
+                    "        <totalDigits value='5'/>" +
+                    "        <fractionDigits value='2'/>" +
+                    "     </restriction></simpleType>" +
+                    "</schema>";
+
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, byteCodeOn);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.load(new StreamSource(new StringReader(sch1)));
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.setSchemaAware(true);
+            XQueryExecutable qry = comp.compile("import schema namespace s='http://myexample/family\'; sum(for $i in 1 to 100000 return s:percentage($i div 100 mod 10 + 10))");
+            XdmItem result = qry.load().evaluateSingle();
+            assertEquals("result", "1499500", result.getStringValue());
+            //System.err.println(result.getStringValue());
+        } catch (SaxonApiException sapie) {
+            System.err.println(sapie.getMessage());
+            fail();
+        }
+    }
+
+    public void testByteCodeOn() {
+        testByteCode(true);
+    }
+
+    public void testByteCodeOff() {
+        testByteCode(false);
+    }
+
+    /**
+     * Test the effect of setting bytecode on or off using JAXP SchemaFactory
+     */
+
+    private void testByteCodeJaxp(boolean byteCodeOn) {
+        try {
+            String sch1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                    + "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\"\n"
+                    + "    xmlns=\"http://www.w3.org/2001/XMLSchema\">\n"
+                    + "    <element name=\"doc\">\n"
+                    + "        <complexType>\n"
+                    //+ "            <complexContent>\n"
+                    + "                <sequence>\n"
+                    + "                    <element name=\"d\" type=\"f:percentage\" xmlns:f=\"http://myexample/family\"\n"
+                    + "                        maxOccurs=\"unbounded\" form='qualified'/>\n"
+                    + "                </sequence>\n"
+                    //+ "            </complexContent>\n"
+                    + "        </complexType>\n"
+                    + "    </element>\n"
+                    + "    <simpleType name=\"percentage\">\n"
+                    + "        <restriction base=\"decimal\">\n"
+                    + "            <minInclusive value=\"10\"/>\n"
+                    + "            <maxInclusive value=\"200\"/>\n"
+                    + "            <totalDigits value=\"5\"/>\n"
+                    + "            <fractionDigits value=\"2\"/>\n"
+                    + "        </restriction>\n"
+                    + "    </simpleType>\n"
+                    + "</schema>";
+
+            SchemaFactory proc = new SchemaFactoryImpl();
+            proc.setProperty(Feature.GENERATE_BYTE_CODE.name, byteCodeOn);
+            //proc.setProperty(Feature.DEBUG_BYTE_CODE.name, byteCodeOn);
+            Schema sch = proc.newSchema(new StreamSource(new StringReader(sch1)));
+            Validator val = sch.newValidator();
+            StringBuilder sb = new StringBuilder();
+            sb.append("<doc xmlns='http://myexample/family'>");
+            for (int i=10; i<200; i++) {
+                for (int j=10; j<=99; j++)
+                sb.append("<d>").append(i).append('.').append(j).append("</d>");
+            }
+            sb.append("</doc>");
+            val.validate(new StreamSource(new StringReader(sb.toString())));
+
+        } catch (SAXException | IOException sapie) {
+            System.err.println(sapie.getMessage());
+            fail();
+        }
+    }
+
+    public void testByteCodeJaxpOn() {
+        testByteCodeJaxp(true);
+    }
+
+    public void testByteCodeJaxpOff() {
+        testByteCodeJaxp(false);
+    }
+
+
+
+    public void testBug4507() {
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.load(new StreamSource(
+                    new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/schema.xsd")));
+            SchemaValidator val = sm.newSchemaValidator();
+            val.validate(new StreamSource(
+                    new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/data.xml")));
+            Instrumentation.report();
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+    
+}
+
