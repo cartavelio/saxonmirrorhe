@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -20,6 +20,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
+import java.util.EnumSet;
+
 /**
  * An xsl:param element representing a local parameter (template or function parameter) in the stylesheet. <br>
  * The xsl:param element has mandatory attribute name and optional attributes
@@ -28,11 +30,11 @@ import net.sf.saxon.value.Whitespace;
 
 public class XSLLocalParam extends XSLGeneralVariable {
 
-    private int permittedAttributes =
-            SourceBinding.TUNNEL |
-                    SourceBinding.REQUIRED |
-                    SourceBinding.SELECT |
-                    SourceBinding.AS;
+    private EnumSet<SourceBinding.BindingProperty> permittedAttributes = EnumSet.of(
+            SourceBinding.BindingProperty.TUNNEL,
+            SourceBinding.BindingProperty.REQUIRED,
+            SourceBinding.BindingProperty.SELECT,
+            SourceBinding.BindingProperty.AS);
 
     /*@Nullable*/ Expression conversion = null;
     private int slotNumber = -9876;  // initial value designed solely to show up when debugging
@@ -47,6 +49,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
      * @return the binding information if this element binds a variable of this name; otherwise null
      */
 
+    @Override
     public SourceBinding getBindingInformation(StructuredQName name) {
         if (name.equals(sourceBinding.getVariableQName())) {
             return sourceBinding;
@@ -66,21 +69,21 @@ public class XSLLocalParam extends XSLGeneralVariable {
     }
 
     @Override
-    public void prepareAttributes() throws XPathException {
+    public void prepareAttributes() {
         if (!prepared) {
             prepared = true;
-            sourceBinding.setProperty(SourceBinding.PARAM, true);
+            sourceBinding.setProperty(SourceBinding.BindingProperty.PARAM, true);
             if (getParent() instanceof XSLFunction) {
-                permittedAttributes &= ~SourceBinding.SELECT;
-                sourceBinding.setProperty(SourceBinding.DISALLOWS_CONTENT, true);
+                permittedAttributes.remove(SourceBinding.BindingProperty.SELECT);
+                sourceBinding.setProperty(SourceBinding.BindingProperty.DISALLOWS_CONTENT, true);
             }
             sourceBinding.prepareAttributes(permittedAttributes);
-            if (sourceBinding.hasProperty(SourceBinding.TUNNEL) && !(getParent() instanceof XSLTemplate)) {
+            if (sourceBinding.hasProperty(SourceBinding.BindingProperty.TUNNEL) && !(getParent() instanceof XSLTemplate)) {
                 compileError("For attribute 'tunnel' within an " + getParent().getDisplayName() +
                         " parameter, the only permitted value is 'no'", "XTSE0020");
             }
             if (getParent() instanceof XSLFunction && getAttributeValue("", "required") != null) {
-                if (!sourceBinding.hasProperty(SourceBinding.REQUIRED)) {
+                if (!sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
                     compileError("For attribute 'required' within an " + getParent().getDisplayName() +
                         " parameter, the only permitted value is 'yes'", "XTSE0020");
                 }
@@ -90,11 +93,12 @@ public class XSLLocalParam extends XSLGeneralVariable {
 
     public void prepareTemplateSignatureAttributes() throws XPathException {
         if (!prepared) {
-            sourceBinding.setProperty(SourceBinding.PARAM, true);
+            sourceBinding.setProperty(SourceBinding.BindingProperty.PARAM, true);
             sourceBinding.prepareTemplateSignatureAttributes();
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
 
         StructuredQName name = sourceBinding.getVariableQName();
@@ -114,7 +118,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
                 if (name.equals(((XSLLocalParam) node).sourceBinding.getVariableQName())) {
                     compileError("The name of the parameter is not unique", "XTSE0580");
                 }
-            } else if (node instanceof StyleElement && node.getFingerprint() != StandardNames.XSL_CONTEXT_ITEM) {
+            } else if (node instanceof StyleElement && ((StyleElement)node).getFingerprint() != StandardNames.XSL_CONTEXT_ITEM) {
                 compileError("xsl:param must not be preceded by other instructions", "XTSE0010");
             } else {
                 // it must be a text node; allow it if all whitespace
@@ -131,7 +135,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
             slotNumber = p.allocateSlotNumber(name);
         }
 
-        if (sourceBinding.hasProperty(SourceBinding.REQUIRED)) {
+        if (sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
             if (sourceBinding.getSelectExpression() != null) {
                 // NB, we do this test before setting the default select attribute
                 compileError("The select attribute must be omitted when required='yes'", "XTSE0010");
@@ -145,11 +149,11 @@ public class XSLLocalParam extends XSLGeneralVariable {
     }
 
     public boolean isTunnelParam() {
-        return sourceBinding.hasProperty(SourceBinding.TUNNEL);
+        return sourceBinding.hasProperty(SourceBinding.BindingProperty.TUNNEL);
     }
 
     public boolean isRequiredParam() {
-        return sourceBinding.hasProperty(SourceBinding.REQUIRED);
+        return sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED);
     }
 
     @Override
@@ -159,6 +163,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
     }
 
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 //        if (!"iterate".equals(getParent().getLocalPart()) &&
 //                sourceBinding.getReferences().size() == 0 && !sourceBinding.hasProperty(SourceBinding.REQUIRED)) {
@@ -193,9 +198,11 @@ public class XSLLocalParam extends XSLGeneralVariable {
             binding.setVariableQName(name);
             binding.setSlotNumber(slot);
             binding.setRequiredType(getRequiredType());
-            binding.setRequiredParam(sourceBinding.hasProperty(SourceBinding.REQUIRED));
-            binding.setImplicitlyRequiredParam(sourceBinding.hasProperty(SourceBinding.IMPLICITLY_REQUIRED));
-            binding.setTunnel(sourceBinding.hasProperty(SourceBinding.TUNNEL));
+            binding.setRequiredParam(sourceBinding.hasProperty(
+                    SourceBinding.BindingProperty.REQUIRED));
+            binding.setImplicitlyRequiredParam(
+                    sourceBinding.hasProperty(SourceBinding.BindingProperty.IMPLICITLY_REQUIRED));
+            binding.setTunnel(sourceBinding.hasProperty(SourceBinding.BindingProperty.TUNNEL));
             sourceBinding.fixupBinding(binding);
             return compiledParam = binding;
 

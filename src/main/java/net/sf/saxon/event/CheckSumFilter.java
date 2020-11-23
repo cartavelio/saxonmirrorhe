@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,12 +7,10 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.Whitespace;
 
 /**
@@ -28,11 +26,11 @@ public class CheckSumFilter extends ProxyReceiver {
 
     private final static boolean DEBUG = false;
 
-    int checksum = 0;
-    int sequence = 0;
-    boolean checkExistingChecksum = false;
-    boolean checksumCorrect = false;
-    boolean checksumFound = false;
+    private int checksum = 0;
+    private int sequence = 0;
+    private boolean checkExistingChecksum = false;
+    private boolean checksumCorrect = false;
+    private boolean checksumFound = false;
 
     public final static String SIGMA = "\u03A3";
 
@@ -59,13 +57,11 @@ public class CheckSumFilter extends ProxyReceiver {
 
     /**
      * Append an arbitrary item (node or atomic value) to the output
-     *
      * @param item           the item to be appended
      * @param locationId     the location of the calling instruction, for diagnostics
      * @param copyNamespaces if the item is an element node, this indicates whether its namespaces
-     *                       need to be copied. Values are {@link ReceiverOptions#ALL_NAMESPACES},
-     *                       {@link ReceiverOptions#LOCAL_NAMESPACES}; the default (0) means
-     *                       no namespaces
+*                       need to be copied. Values are {@link ReceiverOption#ALL_NAMESPACES};
+     *                            the default (0) means
      */
     @Override
     public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {
@@ -74,31 +70,6 @@ public class CheckSumFilter extends ProxyReceiver {
             System.err.println("After append: " + Integer.toHexString(checksum));
         }
         super.append(item, locationId, copyNamespaces);
-    }
-
-    /**
-     * Notify an attribute. Attributes are notified after the startElement event, and before any
-     * children. Namespaces and attributes may be intermingled.
-     * @param nameCode   The name of the attribute
-     * @param typeCode   The type of the attribute
-     * @param value      The attribute value
-     * @param locationId The location of the attribute
-     * @param properties Bit significant value. The following bits are defined:
-     *                   <dl>
-     *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
-     *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
-     *                   </dl>
-     * @throws IllegalStateException: attempt to output an attribute when there is no open element
-     */
-    @Override
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-        checksum ^= hash(nameCode, sequence);
-        checksum ^= hash(value, sequence);
-        if (DEBUG) {
-            System.err.println("After attribute " + nameCode.getDisplayName() + ": " + checksum +
-                                       "(" + hash(nameCode, sequence) + "," + hash(value, sequence) + ")");
-        }
-        super.attribute(nameCode, typeCode, value, locationId, properties);
     }
 
     /**
@@ -117,19 +88,25 @@ public class CheckSumFilter extends ProxyReceiver {
 
     /**
      * Notify the start of an element
-     * @param elemName   integer code identifying the name of the element within the name pool.
-     * @param typeCode   integer code identifying the element's type within the name pool.
-     * @param location location of the element
-     * @param properties properties of the element node
      */
     @Override
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         checksum ^= hash(elemName, sequence++);
         if (DEBUG) {
             System.err.println("After startElement " + elemName.getDisplayName() + ": " + checksum);
         }
         checksumCorrect = false;
-        super.startElement(elemName, typeCode, location, properties);
+        for (AttributeInfo att : attributes) {
+            checksum ^= hash(att.getNodeName(), sequence);
+            checksum ^= hash(att.getValue(), sequence);
+            if (DEBUG) {
+                System.err.println("After attribute " + att.getNodeName().getDisplayName() + ": " + checksum +
+                                           "(" + hash(att.getNodeName(), sequence) + "," + hash(att.getValue(), sequence) + ")");
+            }
+        }
+        super.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
     /**

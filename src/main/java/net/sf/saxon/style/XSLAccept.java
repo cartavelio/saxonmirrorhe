@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -19,7 +19,7 @@ import net.sf.saxon.trans.*;
  */
 public class XSLAccept extends XSLAcceptExpose {
     @Override
-    protected void prepareAttributes() throws XPathException {
+    protected void prepareAttributes() {
         super.prepareAttributes();
     }
 
@@ -77,34 +77,34 @@ public class XSLAccept extends XSLAcceptExpose {
     }
 
 
-    /**
-     * Accept a component from a used package, modifying its visibility if necessary
-     *
-     * @param component the component to be accepted; as a side-effect of this method, the
-     *                  visibility of the component may change
-     * @throws XPathException if the requested visibility is incompatible with the declared
-     *                        visibility
-     */
-    public void acceptComponent(Component component) throws XPathException {
-        for (ComponentTest test : getExplicitComponentTests()) {
-            if (test.matches(component.getActor())) {
-                // we have already checked that the visibility is compatible
-                component.setVisibility(getVisibility(), VisibilityProvenance.ACCEPTED);
-                return;
-            }
-        }
-        for (ComponentTest test : getWildcardComponentTests()) {
-            if (test.matches(component.getActor())) {
-                if (isCompatible(component.getVisibility(), getVisibility())) {
-                    // set the visibility if it is compatible
-                    component.setVisibility(getVisibility(), VisibilityProvenance.ACCEPTED);
-                    return;
-                }
-            }
-        }
-    }
+//    /**
+//     * Accept a component from a used package, modifying its visibility if necessary
+//     *
+//     * @param component the component to be accepted; as a side-effect of this method, the
+//     *                  visibility of the component may change
+//     * @throws XPathException if the requested visibility is incompatible with the declared
+//     *                        visibility
+//     */
+//    public void acceptComponent(Component component) throws XPathException {
+//        for (ComponentTest test : getExplicitComponentTests()) {
+//            if (test.matches(component.getActor())) {
+//                // we have already checked that the visibility is compatible
+//                component.setVisibility(getVisibility(), VisibilityProvenance.ACCEPTED);
+//                return;
+//            }
+//        }
+//        for (ComponentTest test : getWildcardComponentTests()) {
+//            if (test.matches(component.getActor())) {
+//                if (isCompatible(component.getVisibility(), getVisibility())) {
+//                    // set the visibility if it is compatible
+//                    component.setVisibility(getVisibility(), VisibilityProvenance.ACCEPTED);
+//                    return;
+//                }
+//            }
+//        }
+//    }
 
-    protected void checkCompatibility(SymbolicName name, Visibility declared, Visibility exposed) throws XPathException {
+    protected void checkCompatibility(SymbolicName name, Visibility declared, Visibility exposed) {
         if (!isCompatible(declared, exposed)) {
             String code = "XTSE3040";
             compileError("The " + name + " is declared as " + declared.show() + " and cannot be accepted as " + exposed.show(), code);

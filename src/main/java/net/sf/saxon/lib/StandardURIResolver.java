@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -36,6 +36,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.function.Predicate;
 
 
 /**
@@ -48,14 +49,14 @@ import java.net.URISyntaxException;
  * <p>You can write a subclass to handle other kinds of URI, for example references to data in
  * a database, or to handle standard URIs in non-standard ways, for example by supplying
  * authentication credentials.</p>
- *
- * @author Michael H. Kay
  */
 
 public class StandardURIResolver implements NonDelegatingURIResolver {
 
     /*@Nullable*/ private Configuration config = null;
-    protected boolean recognizeQueryParameters = false;
+    private boolean recognizeQueryParameters = false;
+
+    private Predicate<URI> allowedUriTest = null;
 
     /**
      * Create a StandardURIResolver, with no reference to a Configuration.
@@ -100,6 +101,32 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
     }
 
     /**
+     * Set a Predicate that is applied to a URI to determine whether the resolver should accept it.
+     *
+     * <p>It is possible to set the default predicate by means of the configuration property
+     * {@link Feature#ALLOWED_PROTOCOLS}.</p>
+     *
+     * @param test the predicate to be applied to the absolute URI.
+     */
+
+    public void setAllowedUriTest(Predicate<URI> test) {
+        this.allowedUriTest = test;
+    }
+
+    /**
+     * Set a Predicate that is applied to a URI to determine whether the resolver should accept it.
+     *
+     * <p>The default predicate can be set by means of the configuration property
+     * {@link Feature#ALLOWED_PROTOCOLS}.</p>
+     */
+
+    public Predicate<URI> getAllowedUriTest() {
+        return allowedUriTest == null
+                ? config == null ? uri -> true : config.getAllowedUriTest()
+                : allowedUriTest;
+    }
+
+    /**
      * Get the relevant platform
      *
      * @return the platform
@@ -139,12 +166,13 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
      * @return a Source object representing an XML document
      */
 
+    @Override
     public Source resolve(String href, String base)
             throws XPathException {
 
         if (config != null && config.isTiming()) {
             assert config != null;
-            config.getStandardErrorOutput().println("URIResolver.resolve href=\"" + href + "\" base=\"" + base + "\"");
+            config.getLogger().info("URIResolver.resolve href=\"" + href + "\" base=\"" + base + "\"");
         }
         // System.err.println("StandardURIResolver, href=" + href + ", base=" + base);
 
@@ -181,72 +209,74 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
 
         Source source = null;
         if (recognizeQueryParameters && relativeURI.endsWith(".ptree")) {
-            source = getPTreeSource(relativeURI, base);
+            throw new UnsupportedOperationException("PTree files are no longer supported (from Saxon 10.0)");
         }
 
-        if (source == null) {
-            try {
-                uri = ResolveURI.makeAbsolute(relativeURI, base);
-            } catch (URISyntaxException err) {
-                // System.err.println("Recovering from " + err);
-                // last resort: if the base URI is null, or is itself a relative URI, we
-                // try to expand it relative to the current working directory
-                String expandedBase = ResolveURI.tryToExpand(base);
-                if (!expandedBase.equals(base)) { // prevent infinite recursion
-                    return resolve(href, expandedBase);
-                }
-                //err.printStackTrace();
-                throw new XPathException("Invalid URI " + Err.wrap(relativeURI) + " - base " + Err.wrap(base), err);
+        try {
+            uri = ResolveURI.makeAbsolute(relativeURI, base);
+        } catch (URISyntaxException err) {
+            // System.err.println("Recovering from " + err);
+            // last resort: if the base URI is null, or is itself a relative URI, we
+            // try to expand it relative to the current working directory
+            String expandedBase = ResolveURI.tryToExpand(base);
+            if (!expandedBase.equals(base)) { // prevent infinite recursion
+                return resolve(href, expandedBase);
             }
+            //err.printStackTrace();
+            throw new XPathException("Invalid URI " + Err.wrap(relativeURI) + " - base " + Err.wrap(base), err);
+        }
 
-            // Check that any "%" sign in the URI is part of a well-formed percent-encoded UTF-8 character.
-            // Without this check, dereferencing the resulting URL can fail with arbitrary unchecked exceptions
+        if (!getAllowedUriTest().test(uri)) {
+            throw new XPathException("URI '" + uri.toString() + "' has been disallowed", "FODC0002");
+        }
 
-            final String uriString = uri.toString();
-            EncodeForUri.checkPercentEncoding(uriString);
+        // Check that any "%" sign in the URI is part of a well-formed percent-encoded UTF-8 character.
+        // Without this check, dereferencing the resulting URL can fail with arbitrary unchecked exceptions
 
-            // Handle a URI using the data: URI scheme
-            if ("data".equals(uri.getScheme())) {
-                Resource resource;
+        final String uriString = uri.toString();
+        EncodeForUri.checkPercentEncoding(uriString);
+
+        // Handle a URI using the data: URI scheme
+        if ("data".equals(uri.getScheme())) {
+            Resource resource;
+            try {
+                resource = DataURIScheme.decode(uri);
+            } catch (IllegalArgumentException e) {
+                throw new XPathException("Invalid URI using 'data' scheme: " + e.getMessage());
+            }
+            if (resource instanceof BinaryResource) {
+                byte[] contents  = ((BinaryResource)resource).getData();
+                InputSource is = new InputSource(new ByteArrayInputStream(contents));
+                source = new SAXSource(is);
+                source.setSystemId(uriString);
+            } else {
+                assert resource instanceof UnparsedTextResource;
+                Reader reader = new StringReader(((UnparsedTextResource) resource).getContent());
+                source = new SAXSource(new InputSource(reader));
+                source.setSystemId(uriString);
+            }
+        } else {
+            source = new SAXSource();
+            setSAXInputSource((SAXSource) source, uriString);
+        }
+
+        if (params != null) {
+            Maker<XMLReader> parser = params.getXMLReaderMaker();
+            if (parser != null) {
+                ((SAXSource) source).setXMLReader(parser.make());
+            }
+        }
+
+        if (((SAXSource) source).getXMLReader() == null) {
+            if (config == null) {
                 try {
-                    resource = DataURIScheme.decode(uri);
-                } catch (IllegalArgumentException e) {
-                    throw new XPathException("Invalid URI using 'data' scheme: " + e.getMessage());
-                }
-                if (resource instanceof BinaryResource) {
-                    byte[] contents  = ((BinaryResource)resource).getData();
-                    InputSource is = new InputSource(new ByteArrayInputStream(contents));
-                    source = new SAXSource(is);
-                    source.setSystemId(uriString);
-                } else {
-                    assert resource instanceof UnparsedTextResource;
-                    Reader reader = new StringReader(((UnparsedTextResource)resource).getContent());
-                    source = new SAXSource(new InputSource(reader));
-                    source.setSystemId(uriString);
+                    ((SAXSource) source).setXMLReader(Version.platform.loadParser());
+                } catch (Exception err) {
+                    throw new XPathException(err);
                 }
             } else {
-                source = new SAXSource();
-                setSAXInputSource((SAXSource) source, uriString);
-            }
-
-            if (params != null) {
-                Maker<XMLReader> parser = params.getXMLReaderMaker();
-                if (parser != null) {
-                    ((SAXSource) source).setXMLReader(parser.make());
-                }
-            }
-
-            if (((SAXSource) source).getXMLReader() == null) {
-                if (config == null) {
-                    try {
-                        ((SAXSource) source).setXMLReader(Version.platform.loadParser());
-                    } catch (Exception err) {
-                        throw new XPathException(err);
-                    }
-                } else {
-                    //((SAXSource)source).setXMLReader(config.getSourceParser());
-                    // Leave the Sender to allocate an XMLReader, so that it can be returned to the pool after use
-                }
+                //((SAXSource)source).setXMLReader(config.getSourceParser());
+                // Leave the Sender to allocate an XMLReader, so that it can be returned to the pool after use
             }
         }
 
@@ -259,6 +289,7 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
         if (id != null) {
             final String idFinal = id;
             FilterFactory factory = new FilterFactory() {
+                @Override
                 public ProxyReceiver makeFilter(Receiver next) {
                     return new IDFilter(next, idFinal);
                 }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,11 +9,9 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.sort.GroupIterator;
-import net.sf.saxon.lib.DelegatingErrorListener;
-import net.sf.saxon.lib.UnfailingErrorListener;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -123,7 +121,7 @@ public interface XPathContext {
      *             to the current iterator.
      */
 
-    <T extends Item<?>> FocusIterator<T> trackFocus(SequenceIterator<T> iter);
+    FocusIterator trackFocus(SequenceIterator iter);
 
     /**
      * Set a new sequence iterator.
@@ -132,7 +130,7 @@ public interface XPathContext {
      *             to the current iterator.
      */
 
-    void setCurrentIterator(FocusIterator<?> iter);
+    void setCurrentIterator(FocusIterator iter);
 
     /**
      * Get the current iterator.
@@ -142,7 +140,7 @@ public interface XPathContext {
      *         (which means the context item, position, and size are undefined).
      */
 
-    FocusIterator<?> getCurrentIterator();
+    FocusIterator getCurrentIterator();
 
     /**
      * Get the context item
@@ -150,7 +148,7 @@ public interface XPathContext {
      * @return the context item, or null if the context item is undefined
      */
 
-    Item<?> getContextItem();
+    Item getContextItem();
 
     /**
      * Get the context size (the position of the last item in the current node list)
@@ -184,18 +182,15 @@ public interface XPathContext {
     URIResolver getURIResolver();
 
     /**
-     * Get the error listener. If no ErrorListener
-     * has been set locally, the ErrorListener in the Controller is returned; this in turn defaults
-     * to the ErrorListener set in the Configuration.
+     * Get the error reporter. If no ErrorReporter
+     * has been set locally, the ErrorReporter in the Controller is returned; this in turn defaults
+     * to the ErrorReporter set in the Configuration.
      *
-     * @return the ErrorListener in use. Note that this is not necessarily the ErrorListener that was supplied
-     * by the caller; if that was not an {@link UnfailingErrorListener},
-     * it will have been wrapped in a {@link DelegatingErrorListener}, and it is the DelegatingErrorListener
-     * that this method returns.
-     * @since 9.6
+     * @return the ErrorReporter in use.
+     * @since 9.6. Changed in 10.0 from ErrorListener to ErrorReporter
      */
 
-    UnfailingErrorListener getErrorListener();
+    ErrorReporter getErrorReporter();
 
     /**
      * Get the current component
@@ -236,7 +231,7 @@ public interface XPathContext {
      * @return the value of the variable.
      */
 
-    Sequence<?> evaluateLocalVariable(int slotnumber);
+    Sequence evaluateLocalVariable(int slotnumber);
 
     /**
      * Set the value of a local variable, identified by its slot number
@@ -245,7 +240,7 @@ public interface XPathContext {
      * @param value      the value of the variable
      */
 
-    void setLocalVariable(int slotNumber, Sequence<?> value) throws XPathException;
+    void setLocalVariable(int slotNumber, Sequence value) throws XPathException;
 
     /**
      * Set the XSLT output state to "temporary" or "final"
@@ -276,21 +271,6 @@ public interface XPathContext {
      */
 
     String getCurrentOutputUri();
-
-    /**
-     * Change the SequenceReceiver to which output is written
-     *
-     * @param receiver the SequenceReceiver to be used
-     */
-
-    void setReceiver(Receiver receiver);
-
-    /**
-     * Get the Receiver to which output is currently being written.
-     *
-     * @return the current SequenceReceiver
-     */
-    Receiver getReceiver();
 
     /**
      * Get the current mode.

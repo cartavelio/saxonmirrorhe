@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,9 +10,11 @@ package net.sf.saxon.lib;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.trace.InstructionInfo;
+import net.sf.saxon.trace.Traceable;
+import net.sf.saxon.trans.Mode;
 
 import java.util.EventListener;
+import java.util.Map;
 
 /**
  * This interface defines methods that are called by Saxon during the execution of
@@ -49,18 +51,21 @@ public interface TraceListener extends EventListener {
     void close();
 
     /**
-     * Method that is called when an instruction in the stylesheet gets processed.
+     * Method that is called when an instruction in the stylesheet gets processed. Default implementation
+     * does nothing.
      *
      * @param instruction gives information about the instruction being
      *                    executed, and about the context in which it is executed. This object is mutable,
      *                    so if information from the InstructionInfo is to be retained, it must be copied.
+     * @param properties extra information about the instruction to be included in the trace
+     * @param context  the XPath evaluation context
      */
 
-    void enter(InstructionInfo instruction, XPathContext context);
+    default void enter(Traceable instruction, Map<String, Object> properties, XPathContext context) {}
 
     /**
      * Method that is called after processing an instruction of the stylesheet,
-     * that is, after any child instructions have been processed.
+     * that is, after any child instructions have been processed. Default implementation does nothing.
      *
      * @param instruction gives the same information that was supplied to the
      *                    enter method, though it is not necessarily the same object. Note that the
@@ -68,7 +73,7 @@ public interface TraceListener extends EventListener {
      *                    not the line number of the end tag.
      */
 
-    void leave(InstructionInfo instruction);
+    default void leave(Traceable instruction) {}
 
     /**
      * Method that is called by an instruction that changes the current item
@@ -94,6 +99,22 @@ public interface TraceListener extends EventListener {
      */
 
     void endCurrentItem(Item currentItem);
+
+    /**
+     * Method called when a search for a template rule is about to start
+     */
+
+    default void startRuleSearch() {}
+
+    /**
+     * Method called when a rule search has completed.
+     *
+     * @param rule the rule (or possible built-in ruleset) that has been selected
+     * @param mode the mode in operation
+     * @param item the item that was checked against
+     */
+
+    default void endRuleSearch(Object rule, Mode mode, Item item) {};
 
 }
 

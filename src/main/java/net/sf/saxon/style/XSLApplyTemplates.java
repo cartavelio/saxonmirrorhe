@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,9 +18,8 @@ import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.SymbolicName;
-import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
 
@@ -34,6 +33,7 @@ import java.util.HashMap;
 public class XSLApplyTemplates extends StyleElement {
 
     /*@Nullable*/ private Expression select;
+    private Expression separator;
     private StructuredQName modeName;   // null if no name specified or if conventional values such as #current used
     private boolean useCurrentMode = false;
     private boolean useTailRecursion = false;
@@ -47,30 +47,36 @@ public class XSLApplyTemplates extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
 
 
-    public void prepareAttributes() throws XPathException {
-
-        AttributeCollection atts = getAttributeList();
+    @Override
+    public void prepareAttributes() {
 
         String selectAtt;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             switch (f) {
                 case "mode":
-                    modeAttribute = Whitespace.trim(atts.getValue(a));
+                    modeAttribute = Whitespace.trim(value);
                     break;
                 case "select":
-                    selectAtt = atts.getValue(a);
-                    select = makeExpression(selectAtt, a);
+                    selectAtt = value;
+                    select = makeExpression(selectAtt, att);
                     defaultedSelectExpression = false;
                     break;
+                case "separator":
+                    requireSyntaxExtensions("separator");
+                    separator = makeAttributeValueTemplate(value, att);
+                    break;
                 default:
-                    checkUnknownAttribute(atts.getNodeName(a));
+                    checkUnknownAttribute(attName);
                     break;
             }
         }
@@ -87,18 +93,13 @@ public class XSLApplyTemplates extends StyleElement {
                     // do nothing;
                     break;
                 default:
-                    try {
-                        modeName = makeQName(modeAttribute);
-                    } catch (XPathException err) {
-                        compileError("Mode name " + Err.wrap(modeAttribute) + " is not a valid QName",
-                                     err.getErrorCodeQName());
-                        modeName = null;
-                    }
+                    modeName = makeQName(modeAttribute, null, "mode");
                     break;
             }
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
 
         // get the Mode object
@@ -139,9 +140,7 @@ public class XSLApplyTemplates extends StyleElement {
 
         // handle sorting if requested
 
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while ((child = kids.next()) != null) {
+        for (NodeInfo child : children()) {
             if (child.getNodeKind() == Type.TEXT) {
                 // with xml:space=preserve, white space nodes may still be there
                 if (!Whitespace.isWhite(child.getStringValueCS())) {
@@ -167,6 +166,10 @@ public class XSLApplyTemplates extends StyleElement {
 
         select = typeCheck("select", select);
 
+        if (separator != null) {
+            separator = typeCheck("separator", separator);
+        }
+
     }
 
     /**
@@ -174,12 +177,14 @@ public class XSLApplyTemplates extends StyleElement {
      * For most instructions, this does nothing.
      */
 
+    @Override
     public boolean markTailCalls() {
         useTailRecursion = true;
         return true;
     }
 
 
+    @Override
     public Expression compile(Compilation compilation, ComponentDeclaration decl) throws XPathException {
         SortKeyDefinitionList sortKeys = makeSortKeys(compilation, decl);
         if (sortKeys != null) {
@@ -202,6 +207,9 @@ public class XSLApplyTemplates extends StyleElement {
                 rm);
         app.setActualParams(getWithParamInstructions(app, compilation, decl, false));
         app.setTunnelParams(getWithParamInstructions(app, compilation, decl, true));
+        if (separator != null) {
+            app.setSeparatorExpression(separator);
+        }
         return app;
     }
 

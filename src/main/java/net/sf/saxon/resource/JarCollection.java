@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -85,6 +85,7 @@ public class JarCollection extends AbstractResourceCollection {
      * @return the collection URI
      */
 
+    @Override
     public String getCollectionURI() {
         return collectionURI;
     }
@@ -98,6 +99,7 @@ public class JarCollection extends AbstractResourceCollection {
      * @param context dynamic evaluation context
      */
 
+    @Override
     public Iterator<String> getResourceURIs(XPathContext context) throws XPathException {
         FilenameFilter filter = null;
         boolean recurse = false;
@@ -181,6 +183,7 @@ public class JarCollection extends AbstractResourceCollection {
      * @throws XPathException if it is not possible to get an iterator.
      */
 
+    @Override
     public Iterator<Resource> getResources(XPathContext context) throws XPathException {
         FilenameFilter filter = null;
         boolean recurse = false;
@@ -231,6 +234,7 @@ public class JarCollection extends AbstractResourceCollection {
             advance();
         }
 
+        @Override
         public boolean hasNext() {
             boolean more = next != null;
             if (!more) {
@@ -243,12 +247,14 @@ public class JarCollection extends AbstractResourceCollection {
             return more;
         }
 
+        @Override
         public Resource next() {
             Resource current = next;
             advance();
             return current;
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
@@ -304,7 +310,11 @@ public class JarCollection extends AbstractResourceCollection {
                         }
                         InputDetails details = new InputDetails();
                         details.binaryContent = output.toByteArray();
-                        details.contentType = guessContentTypeFromName(entry.getName());
+                        if (params != null && params.getContentType() != null) {
+                            details.contentType = params.getContentType();
+                        } else {
+                            details.contentType = guessContentTypeFromName(entry.getName());
+                        }
                         if (details.contentType == null) {
                             ByteArrayInputStream bais = new ByteArrayInputStream(details.binaryContent);
                             details.contentType = guessContentTypeFromContent(bais);
@@ -319,7 +329,7 @@ public class JarCollection extends AbstractResourceCollection {
                         details.resourceUri = resourceURI;
                         next = makeResource(context.getConfiguration(), details);
                         if (metadata) {
-                            Map<String, GroundedValue<?>> properties = makeProperties(entry);
+                            Map<String, GroundedValue> properties = makeProperties(entry);
                             next = new MetadataResource(resourceURI, next, properties);
                         }
                         return;
@@ -344,8 +354,8 @@ public class JarCollection extends AbstractResourceCollection {
      * entry-name, size, and last-modified.
      */
 
-    protected Map<String, GroundedValue<?>> makeProperties(ZipEntry entry) {
-        HashMap<String, GroundedValue<?>> map = new HashMap<>(10);
+    protected Map<String, GroundedValue> makeProperties(ZipEntry entry) {
+        HashMap<String, GroundedValue> map = new HashMap<>(10);
         map.put("comment", StringValue.makeStringValue(entry.getComment()));
         map.put("compressed-size", new Int64Value(entry.getCompressedSize()));
         map.put("crc", new Int64Value(entry.getCrc()));

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.flwor;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Atomizer;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
@@ -33,7 +34,8 @@ public class GroupByClausePush extends TuplePush {
     private XPathContext context;
     private GenericAtomicComparer[] comparers;
 
-    public GroupByClausePush(TuplePush destination, GroupByClause groupBy, XPathContext context) {
+    public GroupByClausePush(Outputter outputter, TuplePush destination, GroupByClause groupBy, XPathContext context) {
+        super(outputter);
         this.destination = destination;
         this.groupByClause = groupBy;
         this.context = context;
@@ -85,7 +87,7 @@ public class GroupByClausePush extends TuplePush {
 
     protected static void checkGroupingValues(Sequence[] groupingValues) throws XPathException {
         for (int i = 0; i < groupingValues.length; i++) {
-            Sequence<?> v = groupingValues[i];
+            Sequence v = groupingValues[i];
             if (!(v instanceof EmptySequence || v instanceof AtomicValue)) {
                 v = Atomizer.getAtomizingIterator(v.iterate(), false).materialize();
                 if (SequenceTool.getLength(v) > 1) {
@@ -116,4 +118,4 @@ public class GroupByClausePush extends TuplePush {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

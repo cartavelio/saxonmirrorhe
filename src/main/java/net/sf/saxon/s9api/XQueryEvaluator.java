@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,13 +13,14 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.XQueryExpression;
+import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -161,7 +162,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      */
 
     public XdmItem getContextItem() {
-        Item<?> item = context.getContextItem();
+        Item item = context.getContextItem();
         if (item == null) {
             return null;
         }
@@ -179,7 +180,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
     public void setExternalVariable(QName name, XdmValue value) {
         try {
             context.setParameter(name.getStructuredQName(),
-                                 value == null ? null : ((Sequence<?>) value.getUnderlyingValue()).materialize());
+                                 value == null ? null : ((Sequence) value.getUnderlyingValue()).materialize());
         } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
@@ -193,7 +194,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      */
 
     public XdmValue getExternalVariable(QName name) {
-        GroundedValue<?> oval = context.getParameter(name.getStructuredQName());
+        GroundedValue oval = context.getParameter(name.getStructuredQName());
         if (oval == null) {
             return null;
         }
@@ -399,7 +400,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
             if (systemId == null) {
                 systemId = "";
             }
-            config.getStandardErrorOutput().println("Processing streamed input " + systemId);
+            config.getLogger().info("Processing streamed input " + systemId);
         }
         try {
             SerializationProperties params = expression.getExecutable().getPrimarySerializationProperties();
@@ -425,7 +426,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
             throw new IllegalStateException("Query is updating");
         }
         try {
-            SequenceIterator<?> iter = expression.iterator(context);
+            SequenceIterator iter = expression.iterator(context);
             return XdmValue.wrap(iter.materialize());
         } catch (UncheckedXPathException e) {
             throw new SaxonApiException(e.getXPathException());
@@ -448,8 +449,8 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
 
     public XdmItem evaluateSingle() throws SaxonApiException {
         try {
-            SequenceIterator<?> iter = expression.iterator(context);
-            Item<?> next = iter.next();
+            SequenceIterator iter = expression.iterator(context);
+            Item next = iter.next();
             return next == null ? null : (XdmItem) XdmValue.wrap(next);
         } catch (UncheckedXPathException e) {
             throw new SaxonApiException(e.getXPathException());
@@ -474,6 +475,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      * described in bug 2016.
      */
 
+    @Override
     public XdmSequenceIterator<XdmItem> iterator() throws SaxonApiUncheckedException {
         if (expression.isUpdateQuery()) {
             throw new IllegalStateException("Query is updating");
@@ -485,12 +487,28 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
         }
     }
 
+    /**
+     * Evaluate the query, returning the result as an <code>Stream</code>.
+     *
+     * @return A stream delivering the results of the query.
+     * Each object in this stream will be an instance of <code>XdmItem</code>. Note
+     * that the expression may be evaluated lazily, which means that a successful response
+     * from this method does not imply that the expression has executed successfully: failures
+     * may be reported later while retrieving items from the iterator.
+     * @throws SaxonApiUncheckedException if a dynamic error occurs during XPath evaluation that
+     *                                    can be detected at this point.
+     */
+
+    public XdmStream<XdmItem> stream() throws SaxonApiUncheckedException {
+        return iterator().stream();
+    }
+
     private Receiver getDestinationReceiver(Destination destination) throws SaxonApiException {
         Executable exec = expression.getExecutable();
         PipelineConfiguration pipe = expression.getConfiguration().makePipelineConfiguration();
         Receiver out = destination.getReceiver(pipe, exec.getPrimarySerializationProperties());
         if (Configuration.isAssertionsEnabled()) {
-            return new RegularSequenceChecker(out);
+            return new RegularSequenceChecker(out, true);
         } else {
             return out;
         }
@@ -516,6 +534,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      * @throws IllegalStateException if no Destination has been supplied
      */
 
+    @Override
     public Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) throws SaxonApiException {
         if (destination == null) {
             throw new IllegalStateException("No destination has been supplied");
@@ -537,12 +556,12 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
         SequenceNormalizer sn = params.makeSequenceNormalizer(out);
         sn.onClose(() -> {
             NodeInfo doc = sourceTreeBuilder.getCurrentRoot();
-            doc.getTreeInfo().setSpaceStrippingRule(controller.getSpaceStrippingRule());
-            setSource(doc);
-            sourceTreeBuilder = null;
             if (doc == null) {
                 throw new SaxonApiException("No source document has been built by the previous pipeline stage");
             }
+            doc.getTreeInfo().setSpaceStrippingRule(controller.getSpaceStrippingRule());
+            setSource(doc);
+            sourceTreeBuilder = null;
             run(destination);
             destination.closeAndNotify();
         });
@@ -555,6 +574,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      * to the destination.
      */
 
+    @Override
     public void close() throws SaxonApiException {
 
     }
@@ -605,7 +625,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
                 context.initializeController(controller);
             }
             Configuration config = processor.getUnderlyingConfiguration();
-            Sequence<?>[] vr = SequenceTool.makeSequenceArray(arguments.length);
+            Sequence[] vr = SequenceTool.makeSequenceArray(arguments.length);
             for (int i = 0; i < arguments.length; i++) {
                 net.sf.saxon.value.SequenceType type = fn.getParameterDefinitions()[i].getRequiredType();
                 vr[i] = arguments[i].getUnderlyingValue();
@@ -614,13 +634,11 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
                 if (!type.matches(vr[i], th)) {
                     RoleDiagnostic role = new RoleDiagnostic(
                             RoleDiagnostic.FUNCTION, function.getStructuredQName().getDisplayName(), i);
-                    vr[i] = th.applyFunctionConversionRules(vr[i], type, role, ExplicitLocation.UNKNOWN_LOCATION);
+                    vr[i] = th.applyFunctionConversionRules(vr[i], type, role, Loc.NONE);
                 }
             }
-            Sequence<?> result = fn.call(vr, controller);
+            Sequence result = fn.call(vr, controller);
             return XdmValue.wrap(result);
-        } catch (UncheckedXPathException e) {
-            throw new SaxonApiException(e.getXPathException());
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }

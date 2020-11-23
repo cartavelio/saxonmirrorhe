@@ -1,6 +1,5 @@
 package internaltests;
 
-import junit.framework.TestCase;
 import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
@@ -8,6 +7,7 @@ import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.ElementImpl;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class LinkedTreeTests extends TestCase {
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class LinkedTreeTests {
 
     // JUnit tests for the Linked Tree object model, in particular its updating interfaces
 
@@ -75,6 +77,7 @@ public class LinkedTreeTests extends TestCase {
         return e;
     }
 
+    @Test
     public void testWell() {
         try {
             buildLinkedTree(true);
@@ -84,6 +87,7 @@ public class LinkedTreeTests extends TestCase {
         }
     }
 
+    @Test
     public void testBadly() {
         try {
             buildLinkedTree(false);

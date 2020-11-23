@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,14 +7,10 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 
 /**
  * A ProxyReceiver is an Receiver that filters data before passing it to another
@@ -32,6 +28,7 @@ public class ProxyReceiver extends SequenceReceiver {
         setPipelineConfiguration(nextReceiver.getPipelineConfiguration());
     }
 
+    @Override
     public void setSystemId(String systemId) {
         //noinspection StringEquality
         if (systemId != this.systemId) {
@@ -63,6 +60,7 @@ public class ProxyReceiver extends SequenceReceiver {
     }
 
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         if (pipelineConfiguration != pipe) {
             pipelineConfiguration = pipe;
@@ -76,6 +74,7 @@ public class ProxyReceiver extends SequenceReceiver {
      * Get the namepool for this configuration
      */
 
+    @Override
     public NamePool getNamePool() {
         return pipelineConfiguration.getConfiguration().getNamePool();
     }
@@ -84,6 +83,7 @@ public class ProxyReceiver extends SequenceReceiver {
      * Start of event stream
      */
 
+    @Override
     public void open() throws XPathException {
         nextReceiver.open();
     }
@@ -93,6 +93,7 @@ public class ProxyReceiver extends SequenceReceiver {
      * pipeline.
      */
 
+    @Override
     public void close() throws XPathException {
         // Note: It's wrong to assume that because we've finished writing to this
         // receiver, then we've also finished writing to other receivers in the pipe.
@@ -106,6 +107,7 @@ public class ProxyReceiver extends SequenceReceiver {
      * Start of a document node.
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         nextReceiver.startDocument(properties);
     }
@@ -114,6 +116,7 @@ public class ProxyReceiver extends SequenceReceiver {
      * Notify the end of a document node
      */
 
+    @Override
     public void endDocument() throws XPathException {
         nextReceiver.endDocument();
     }
@@ -121,66 +124,26 @@ public class ProxyReceiver extends SequenceReceiver {
     /**
      * Notify the start of an element
      *
-     * @param elemName   integer code identifying the name of the element within the name pool.
-     * @param type       the element's type annotation.
-     * @param location   a location associated with the event (typically either a location in the
-     *                   source document or the stylesheet)
-     * @param properties properties of the element node
+     * @param elemName   the name of the element.
+     * @param type   the type annotation of the element.
+     * @param attributes the attributes of this element
+     * @param namespaces the in-scope namespaces of this element: generally this is all the in-scope
+     *                   namespaces, without relying on inheriting namespaces from parent elements
+     * @param location   an object providing information about the module, line, and column where the node originated
+     * @param properties bit-significant properties of the element node. If there are no relevant
+     *                   properties, zero is supplied. The definitions of the bits are in class {@link ReceiverOption}
+     * @throws XPathException if an error occurs
      */
-
-    public void startElement(NodeName elemName, SchemaType type, Location location, int properties) throws XPathException {
-        nextReceiver.startElement(elemName, type, location, properties);
-    }
-
-    /**
-     * Notify a namespace. Namespaces are notified <b>after</b> the startElement event, and before
-     * any children for the element. The namespaces that are reported are only required
-     * to include those that are different from the parent element; however, duplicates may be reported.
-     * A namespace must not conflict with any namespaces already used for element or attribute names.
-     *
-     * @param namespaceBindings the prefix/uri pair representing the namespace binding
-     * @param properties        any special properties to be passed on this call
-     */
-
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        nextReceiver.namespace(namespaceBindings, properties);
-    }
-
-    /**
-     * Notify an attribute. Attributes are notified after the startElement event, and before any
-     * children. Namespaces and attributes may be intermingled.
-     *
-     * @param nameCode   The name of the attribute
-     * @param typeCode   The type of the attribute
-     * @param locationId The location of the node
-     * @param properties Bit significant value. The following bits are defined:
-     *                   <dl>
-     *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
-     *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
-     *                   </dl>
-     */
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
-    }
-
-    /**
-     * Notify the start of the content, that is, the completion of all attributes and namespaces.
-     * Note that the initial receiver of output from XSLT instructions will not receive this event,
-     * it has to detect it itself. Note that this event is reported for every element even if it has
-     * no attributes, no namespaces, and no content.
-     */
-
-
-    public void startContent() throws XPathException {
-        nextReceiver.startContent();
+    @Override
+    public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
     /**
      * End of element
      */
 
+    @Override
     public void endElement() throws XPathException {
         nextReceiver.endElement();
     }
@@ -189,6 +152,7 @@ public class ProxyReceiver extends SequenceReceiver {
      * Character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         nextReceiver.characters(chars, locationId, properties);
     }
@@ -198,6 +162,7 @@ public class ProxyReceiver extends SequenceReceiver {
      * Processing Instruction
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
         nextReceiver.processingInstruction(target, data, locationId, properties);
     }
@@ -206,6 +171,7 @@ public class ProxyReceiver extends SequenceReceiver {
      * Output a comment
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         nextReceiver.comment(chars, locationId, properties);
     }
@@ -215,21 +181,20 @@ public class ProxyReceiver extends SequenceReceiver {
      * Set the URI for an unparsed entity in the document.
      */
 
+    @Override
     public void setUnparsedEntity(String name, String uri, String publicId) throws XPathException {
         nextReceiver.setUnparsedEntity(name, uri, publicId);
     }
 
     /**
      * Append an arbitrary item (node or atomic value) to the output
-     *
      * @param item           the item to be appended
      * @param locationId     the location of the calling instruction, for diagnostics
      * @param properties     if the item is an element node, this indicates whether its namespaces
-     *                       need to be copied. Values are {@link ReceiverOptions#ALL_NAMESPACES},
-     *                       {@link ReceiverOptions#LOCAL_NAMESPACES}; the default (0) means
-     *                       no namespaces
+*                       need to be copied. Values are {@link ReceiverOption#ALL_NAMESPACES}; the default (0) means
      */
 
+    @Override
     public void append(Item item, Location locationId, int properties) throws XPathException {
         nextReceiver.append(item, locationId, properties);
     }
@@ -242,6 +207,7 @@ public class ProxyReceiver extends SequenceReceiver {
      * may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return nextReceiver.usesTypeAnnotations();
     }

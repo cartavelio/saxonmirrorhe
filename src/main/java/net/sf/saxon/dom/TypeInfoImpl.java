@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -19,11 +19,13 @@ import org.w3c.dom.TypeInfo;
 
 public class TypeInfoImpl implements TypeInfo {
 
-    private Configuration config;
-    private SchemaType schemaType;
+    private final Configuration config;
+    private final SchemaType schemaType;
 
     /**
      * Construct a TypeInfo based on a SchemaType
+     * @param config the Saxon Configuration
+     * @param type the schema type to be wrapped by this {@code TypeInfo}
      */
 
     public TypeInfoImpl(Configuration config, SchemaType type) {
@@ -36,6 +38,7 @@ public class TypeInfoImpl implements TypeInfo {
      * DOM level 3 TypeInfo interface.
      */
 
+    @Override
     public String getTypeName() {
         return schemaType.getStructuredQName().getLocalPart();
     }
@@ -45,6 +48,7 @@ public class TypeInfoImpl implements TypeInfo {
      * DOM level 3 TypeInfo interface.
      */
 
+    @Override
     public String getTypeNamespace() {
         return schemaType.getStructuredQName().getURI();
     }
@@ -61,6 +65,7 @@ public class TypeInfoImpl implements TypeInfo {
      *                         Zero means derived by any possible route.
      */
 
+    @Override
     public boolean isDerivedFrom(String typeNamespaceArg,
                                  String typeNameArg,
                                  int derivationMethod) throws IllegalStateException {

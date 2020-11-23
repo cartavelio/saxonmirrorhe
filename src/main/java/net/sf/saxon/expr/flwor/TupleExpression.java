@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -88,11 +88,13 @@ public class TupleExpression extends Expression {
     }
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getConfiguration().getJavaExternalObjectType(Object.class);
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor,
                                 /*@Nullable*/ ContextItemStaticInfo contextInfo)
             throws XPathException {
@@ -143,6 +145,7 @@ public class TupleExpression extends Expression {
      * Hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         int h = 77;
         for (Operand o : operands()) {
@@ -159,6 +162,7 @@ public class TupleExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         int n  = getOperanda().getNumberOfOperands();
         List<LocalVariableReference> refs2 = new ArrayList<LocalVariableReference>(n);
@@ -176,6 +180,7 @@ public class TupleExpression extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("tuple", this);
         for (Operand o : operands()) {
@@ -185,6 +190,7 @@ public class TupleExpression extends Expression {
     }
 
 
+    @Override
     public Tuple evaluateItem(XPathContext context) throws XPathException {
         final int n = getSize();
         Sequence[] tuple = new Sequence[n];
@@ -229,10 +235,12 @@ public class TupleExpression extends Expression {
      * @return the static cardinality - EXACTLY_ONE
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 
+    @Override
     public int getIntrinsicDependencies() {
         return 0;
     }

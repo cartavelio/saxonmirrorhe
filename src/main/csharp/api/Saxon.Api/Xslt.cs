@@ -12,7 +12,7 @@ using JConfiguration = net.sf.saxon.Configuration;
 using JPipelineConfiguration = net.sf.saxon.@event.PipelineConfiguration;
 using JSequenceWriter = net.sf.saxon.@event.SequenceWriter;
 using JReceiver = net.sf.saxon.@event.Receiver;
-using JReceiverOptions = net.sf.saxon.@event.ReceiverOptions;
+//using JReceiverOptions = net.sf.saxon.@event.ReceiverOptions;
 using JCompilerInfo = net.sf.saxon.trans.CompilerInfo;
 using JExpressionPresenter = net.sf.saxon.trace.ExpressionPresenter;
 using JValidation = net.sf.saxon.lib.Validation;
@@ -44,12 +44,11 @@ using JPackageDetails = net.sf.saxon.trans.packages.PackageDetails;
 using JPackageLibrary = net.sf.saxon.trans.packages.PackageLibrary;
 using JVersionedPackageName = net.sf.saxon.trans.packages.VersionedPackageName;
 using JMap = java.util.Map;
-using JLocation = net.sf.saxon.expr.parser.Location;
-using JExplicitLocation = net.sf.saxon.expr.parser.ExplicitLocation;
 using JDotNetOutputStream = net.sf.saxon.dotnet.DotNetOutputStream;
 using JDestination = net.sf.saxon.s9api.Destination;
 using javax.xml.transform;
 using JResultDocumentResolver = net.sf.saxon.lib.ResultDocumentResolver;
+using System.Runtime.CompilerServices;
 
 namespace Saxon.Api
 {
@@ -74,7 +73,8 @@ namespace Saxon.Api
     {
         private Processor processor;
         private Uri baseUri;
-        private ErrorGatherer errorGatherer;
+        private ErrorReporterToStaticError errorGatherer;
+        private ErrorReporter errorReporter;
         private IDictionary<QName, XdmValue> variableList = new Dictionary<QName, XdmValue>();
         private JXsltCompiler xsltCompiler;
         private XmlResolver xmlResolver = null;
@@ -86,8 +86,9 @@ namespace Saxon.Api
         {
             this.processor = processor;
             xsltCompiler = processor.JProcessor.newXsltCompiler();
-            errorGatherer = new ErrorGatherer(new List<StaticError>());
-            xsltCompiler.setErrorListener(errorGatherer);
+            errorGatherer = new ErrorReporterToStaticError(new List<StaticError>());
+            errorReporter = new ErrorReporter(new List<XmlProcessingError>());
+            //xsltCompiler.setErrorReporter(errorReporter);
             xsltCompiler.setURIResolver(processor.Implementation.getURIResolver());
         }
 
@@ -296,19 +297,64 @@ namespace Saxon.Api
 		/// By supplying a custom <c>List</c> with a user-written <c>add()</c> method, it is possible to
         /// intercept error conditions as they occur.
         /// </remarks>
-
+        [Obsolete("IList<StaticError> ErrorList is deprecated, please use the methods SetErrorList and GetErrorList which hanldes IList<XmlProcessingError>.")]
         public IList<StaticError> ErrorList
         {
             set
             {
-                errorGatherer = new ErrorGatherer(value);
-                xsltCompiler.setErrorListener(errorGatherer);
+                errorGatherer = new ErrorReporterToStaticError(value);
+                xsltCompiler.setErrorReporter(errorGatherer);
             }
             get
             {
                 return errorGatherer.ErrorList;
             }
         }
+
+        /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined IErrorReporter.
+        /// If this property is used then the ErrorList property and SetErrorList method is overriden </summary>
+        /// <remarks>The <c>IErrorReporter</c> to be used</remarks>
+        public IErrorReporter ErrorReporter
+        {
+            set
+            {
+                errorReporter = null;
+                xsltCompiler.setErrorReporter(new ErrorReporterWrapper(value));
+            }
+
+        }
+
+
+        /// <summary>
+		/// List of errors. The caller may supply an empty list before calling <c>Compile</c>;
+        /// the processor will then populate the list with error information obtained during
+		/// the XSLT compilation. Each error will be included as an object of type <c>XmlProcessingError</c>.
+        /// If no error list is supplied by the caller, error information will be written to
+        /// the standard error stream.
+        /// </summary>
+        /// <remarks>
+		/// <para>By supplying a custom <c>List</c> or IErrorReport implementation with a user-written <c>report()</c> method, it is possible to
+        /// intercept error conditions as they occur.</para>
+        /// <para>Note that this error list is used only for errors detected during the compilation
+        /// of the stylesheet. It is not used for errors detected when executing the stylesheet.</para>
+		/// </remarks>
+		/// <param name="value">Supplied list.</param>
+        public void SetErrorList(IList<XmlProcessingError> value)
+        {
+            errorReporter = new ErrorReporter(value);
+            xsltCompiler.setErrorReporter(errorReporter);
+        }
+
+		/// <summary>
+		/// Get list of errors as <code>IList&lt;XmlProcessingError&gt;</code>
+		/// </summary>
+        public IList<XmlProcessingError> GetErrorList()
+        {
+            return errorReporter.ErrorList;
+
+        }
+
+
 
         /// <summary>
         /// Compile a stylesheet supplied as a Stream.
@@ -322,7 +368,7 @@ namespace Saxon.Api
         /// </example>
         /// <param name="input">A stream containing the source text of the stylesheet</param>
         /// <returns>An <c>XsltExecutable</c> which represents the compiled stylesheet object.
-		/// The <c>XsltExecutable</c> may be loaded as many times as required, in the same or a different
+        /// The <c>XsltExecutable</c> may be loaded as many times as required, in the same or a different
         /// thread. The <c>XsltExecutable</c> is not affected by any changes made to the <c>XsltCompiler</c>
         /// once it has been compiled.</returns>
         /// <remarks>
@@ -344,8 +390,9 @@ namespace Saxon.Api
                 {
                     ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
                 }
-                
-                return new XsltExecutable(xsltCompiler.compile(ss));
+                XsltExecutable executable = new XsltExecutable(xsltCompiler.compile(ss));
+                executable.InternalProcessor = processor;
+                return executable;
             }
             catch (JSaxonApiException err)
             {
@@ -392,13 +439,15 @@ namespace Saxon.Api
                         ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
                     }
                 }
-                JXsltExecutable executable =  xsltCompiler.compile(ss);
+                JXsltExecutable jexecutable =  xsltCompiler.compile(ss);
                
                 if (closeStream)
                 {
                     input.Close();
                 }
-                return new XsltExecutable(executable);
+                XsltExecutable executable = new XsltExecutable(jexecutable);
+                executable.InternalProcessor = processor;
+                return executable;
             }
             catch (JSaxonApiException err)
             {
@@ -408,12 +457,12 @@ namespace Saxon.Api
 
 
 
-		/// <summary>Compile a library package.</summary>
-		/// <remarks>
+        /// <summary>Compile a library package.</summary>
+        /// <remarks>
         /// <para>The source argument identifies an XML file containing an <c>xsl:package</c> element. Any packages
         /// on which this package depends must have been made available to the <c>XsltCompiler</c>
         /// by importing them using <see cref="ImportPackage"/>.</para>
-		/// </remarks>
+        /// </remarks>
         /// <param name='input'>source identifies an XML document holding the the XSLT package to be compiled</param>
         /// <returns>The <c>XsltPackage</c> that results from the compilation. Note that this package
         /// is not automatically imported to this <c>XsltCompiler</c>; if the package is required
@@ -579,8 +628,9 @@ namespace Saxon.Api
 
         public XsltExecutable LoadExecutablePackage(Uri location)
         {
-            return LoadLibraryPackage(location).Link();
-
+            XsltExecutable executable = LoadLibraryPackage(location).Link();
+            executable.InternalProcessor = processor;
+            return executable;
         }
 
 
@@ -628,6 +678,15 @@ namespace Saxon.Api
             }
         }
 
+
+        /// <summary>
+        /// Clear the values of all stylesheet parameters previously set using <c>SetParameter(QName, XdmValue)</c>.
+        /// This resets the parameters to their initial ("undeclared") state
+        /// </summary>
+        public void ClearParameters() {
+            xsltCompiler.clearParameters();
+        }
+
         /// <summary>
         /// Property to check and set fast compilation. Fast compilation will generally be achieved at the expense of run-time performance
         /// and quality of diagnostics. Fast compilation is a good trade-off if (a) the stylesheet is known to be correct,
@@ -643,7 +702,16 @@ namespace Saxon.Api
 		/// defined in the Configuration.</para>
 		/// </remarks>
 
-        public bool FastCompliation {
+        public bool FastCompilation {
+
+            set { xsltCompiler.setFastCompilation(value); }
+            get { return xsltCompiler.isFastCompilation(); }
+        }
+
+
+        [Obsolete("This property has been replaced by FastCompilation.")]
+        public bool FastCompliation
+        {
 
             set { xsltCompiler.setFastCompilation(value); }
             get { return xsltCompiler.isFastCompilation(); }
@@ -684,7 +752,9 @@ namespace Saxon.Api
                     ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
                 }
 
-                return new XsltExecutable(xsltCompiler.compile(ss));
+                XsltExecutable executable = new XsltExecutable(xsltCompiler.compile(ss));
+                executable.InternalProcessor = processor;
+                return executable;
             }
             catch (JSaxonApiException ex) {
                 throw new StaticError(ex);
@@ -713,7 +783,9 @@ namespace Saxon.Api
             {
 
                 // See bug issue #2306
-                return Compile((Stream)obj, uri.ToString(), true);
+                XsltExecutable executable = Compile((Stream)obj, uri.ToString(), true);
+                executable.InternalProcessor = processor;
+                return executable;
 
             }
             else
@@ -770,7 +842,10 @@ namespace Saxon.Api
             }
             source.setSystemId(baseu);
             try {
-                return new XsltExecutable(xsltCompiler.compile(source));
+
+                XsltExecutable executable =  new XsltExecutable(xsltCompiler.compile(source));
+                executable.InternalProcessor = processor;
+                return executable;
             }
             catch (JSaxonApiException e) {
                 throw new StaticError(e);
@@ -792,54 +867,98 @@ namespace Saxon.Api
 
         public XsltExecutable Compile(XdmNode node)
         {
-            return new XsltExecutable(xsltCompiler.compile(node.Implementation));
+            XsltExecutable executable = new XsltExecutable(xsltCompiler.compile(node.Implementation));
+            executable.InternalProcessor = processor;
+            return executable;
         }
 
         /// <summary>Locate and compile a stylesheet identified by an <c>&lt;?xml-stylesheet?&gt;</c>
-        /// processing instruction within a source document.
+		/// processing instruction within a source document, and that match the given criteria.
         /// </summary>
-        /// <param name="source">The document node of the source document containing the
-        /// xml-stylesheet processing instruction.</param>
+        /// <param name="uri">The URI of the source document containing the xml-stylesheet processing instruction.</param>
+        /// <param name="media">The media attribute to be matched. May be null, in which case the 
+        /// "application/xml" mime type will be used when fetching the source document from the Uri.</param>
         /// <returns>An <c>XsltExecutable</c> which represents the compiled stylesheet object.</returns>
-        /// <remarks>There are some limitations in the current implementation. The media type
-        /// is ignored, as are the other parameters of the xml-stylesheet instruction. The
-		/// <c>href</c> attribute must either reference an embedded stylesheet within the same
+		/// <remarks>There are some limitations in the current implementation. Parameters of the xml-stylesheet 
+		/// instruction other than the media type, are ignored. The
+        /// <c>href</c> attribute must either reference an embedded stylesheet within the same
         /// document or a non-embedded external stylesheet.</remarks>
 
-        public XsltExecutable CompileAssociatedStylesheet(XdmNode source)
+        public XsltExecutable CompileAssociatedStylesheet(Uri uri, String media)
         {
+
+            Object obj = XmlResolver.GetEntity(uri, media == null ? "application/xml" : media, Type.GetType("System.IO.Stream"));
+            if (obj is Stream)
+            {
+                JStreamSource ss = new JStreamSource(new JDotNetInputStream((Stream)obj));
+
+                ss.setSystemId(Uri.EscapeUriString(uri.ToString()));
+                try
+                {
+
+                    // See bug issue #2306
+                    XsltExecutable executable = new XsltExecutable(xsltCompiler.compile(xsltCompiler.getAssociatedStylesheet(ss, media, null, null)));
+                    executable.InternalProcessor = processor;
+                    return executable;
+
+                }
+                catch (JSaxonApiException e)
+                {
+                    throw new StaticError(e);
+                }
+
+            }
+            else
+            {
+                throw new ArgumentException("Invalid type of result from XmlResolver.GetEntity: " + obj);
+
+            }
+         
+        }
+
+            /// <summary>Locate and compile a stylesheet identified by an <c>&lt;?xml-stylesheet?&gt;</c>
+            /// processing instruction within a source document.
+            /// </summary>
+            /// <param name="source">The document node of the source document containing the
+            /// xml-stylesheet processing instruction.</param>
+            /// <returns>An <c>XsltExecutable</c> which represents the compiled stylesheet object.</returns>
+            /// <remarks>There are some limitations in the current implementation. The media type
+            /// is ignored, as are the other parameters of the xml-stylesheet instruction. The
+            /// <c>href</c> attribute must either reference an embedded stylesheet within the same
+            /// document or a non-embedded external stylesheet.</remarks>
+
+            public XsltExecutable CompileAssociatedStylesheet(XdmNode source)
+        {
+
+
             // TODO: lift the restrictions
             if (source == null || source.NodeKind != XmlNodeType.Document)
             {
                 throw new ArgumentException("Source must be a document node");
             }
-            IEnumerator kids = source.EnumerateAxis(XdmAxis.Child);
-            QName xmlstyle = new QName("", "xml-stylesheet");
+            IEnumerator kids = source.Children(Predicates.IsProcessingInstruction().And(Predicates.HasName("", "xml-stylesheet"))).GetEnumerator();
             while (kids.MoveNext())
             {
                 XdmNode n = (XdmNode)kids.Current;
-                if (n.NodeKind == XmlNodeType.ProcessingInstruction &&
-                    n.NodeName.Equals(xmlstyle))
+                // TODO: check the media type
+                String href = JProcInstParser.getPseudoAttribute(n.StringValue, "href");
+                if (href == null)
                 {
-                    // TODO: check the media type
-                    String href = JProcInstParser.getPseudoAttribute(n.StringValue, "href");
-                    if (href == null)
+                    throw new DynamicError("xml-stylesheet processing instruction has no href attribute");
+                }
+                String fragment = null;
+                int hash = href.LastIndexOf('#');
+                if (hash == 0)
+                {
+                    if (href.Length == 1)
                     {
-                        throw new DynamicError("xml-stylesheet processing instruction has no href attribute");
+                        throw new DynamicError("Relative URI of '#' is invalid");
                     }
-                    String fragment = null;
-                    int hash = href.LastIndexOf('#');
-                    if (hash == 0)
-                    {
-                        if (href.Length == 1)
-                        {
-                            throw new DynamicError("Relative URI of '#' is invalid");
-                        }
-                        fragment = href.Substring(1);
-                        JNodeInfo target = ((JTreeInfo)source.value).selectID(fragment, true);
-                        XdmNode targetWrapper = null;
-                        if (target == null)
-                        {
+                fragment = href.Substring(1);
+                JNodeInfo target = ((JTreeInfo)source.value).selectID(fragment, true);
+                XdmNode targetWrapper = null;
+                if (target == null)
+                {
                             // There's a problem here because the Microsoft XML parser doesn't
                             // report id values, so selectID() will never work. We work around that
                             // by looking for an attribute named "id" appearing on an xsl:stylesheet
@@ -878,7 +997,7 @@ namespace Saxon.Api
                         Uri uri = new Uri(n.BaseUri, href);
                         return Compile(uri);
                     }
-                }
+                
             }
             throw new DynamicError("xml-stylesheet processing instruction not found");
         }
@@ -900,8 +1019,8 @@ namespace Saxon.Api
     public class XsltExecutable
     {
 
-       // private JPreparedStylesheet pss;
-        //private Processor processor;
+        // private JPreparedStylesheet pss;
+        private Processor processor;
         private JXsltExecutable executable;
 
         // internal constructor
@@ -910,6 +1029,21 @@ namespace Saxon.Api
         {
             //this.processor = proc;
             this.executable = executable;
+        }
+
+        internal Processor InternalProcessor
+        { 
+            set { processor = value;}
+
+        }
+
+        /// <summary>
+        /// Get the Processor that was used to create this XsltExecutable
+        /// </summary>
+        public Processor Processor
+        {
+            get { return processor; }
+
         }
 
         /// <summary>
@@ -991,7 +1125,6 @@ namespace Saxon.Api
 		/// and whose values are <see cref="Saxon.Api.XsltExecutable+ParameterDetails"/> objects giving information about the
         /// corresponding parameter.
         /// </returns>
-
         public Dictionary<QName, ParameterDetails> GetGlobalParameters()
         {
             java.util.HashMap globals = executable.getGlobalParameters();
@@ -1106,7 +1239,7 @@ namespace Saxon.Api
          private JStreamSource streamSource;
          private GlobalParameterSet globalParameters;
          private bool baseOutputUriWasSet = false;*/
-        private XmlDestination destination;
+        private XmlDestination xmlDestination;
         private StandardLogger traceFunctionDestination;
         private IMessageListener messageListener;
         private IMessageListener2 messageListener2;
@@ -1447,6 +1580,10 @@ namespace Saxon.Api
             transformer.setParameter(net.sf.saxon.s9api.QName.fromEQName(name.EQName), net.sf.saxon.s9api.XdmValue.wrap(value.value));
         }
 
+        public JDestination GetUnderlyingDestination() {
+            return transformer;
+        }
+
 
 
         /// <summary>
@@ -1462,19 +1599,14 @@ namespace Saxon.Api
         {
             get
             {
-                return this.destination;
+                return this.xmlDestination;
             }
             set
             {
-                this.destination = value;
+                this.xmlDestination = value;
                 transformer.setDestination(value.GetUnderlyingDestination());
             }
 
-        }
-
-        public JDestination GetUnderlyingDestination()
-        {
-            return transformer;
         }
 
 
@@ -1625,7 +1757,6 @@ namespace Saxon.Api
         /// and that the order of opening, writing, and closing result documents chosen
         /// by the processor does not necessarily bear any direct resemblance to the way
         /// that the XSLT source code is written.</para></remarks>
-
         /**public**/
         XmlDestination HandleResultDocument(string href, Uri baseUri);
 
@@ -1965,6 +2096,7 @@ namespace Saxon.Api
             {
                transformer.setGlobalContextItem(value == null ? null : XdmItem.FromXdmItemItemToJXdmItem(value));
             }
+         
             get { return (XdmItem)XdmItem.Wrap(transformer.getUnderlyingController().getGlobalContextItem()); }
 
         }
@@ -2111,7 +2243,7 @@ namespace Saxon.Api
         /// the supplied values are converted to the declared type of the parameter.
 		/// The contents of the supplied <c>Dictionary</c> are copied by this method,
 		/// so subsequent changes to the <c>Dictionary</c> have no effect.</param>
-
+        
         public void SetStylesheetParameters(Dictionary<QName, XdmValue> parameters)
         {
             try
@@ -2317,7 +2449,7 @@ namespace Saxon.Api
         /// <param name="parameters"> The parameters to be used for the initial template</param>
         /// <param name="tunnel"> true if these values are to be used for setting tunnel parameters;
         /// false if they are to be used for non-tunnel parameters</param>
-
+        
         public void SetInitialTemplateParameters(Dictionary<QName, XdmValue> parameters, bool tunnel)
         {
 
@@ -2698,22 +2830,7 @@ namespace Saxon.Api
             }
         }
 
-        internal class AbstractDestination : XmlDestination
-        {
-            private Xslt30Transformer xslt30Transformer;
-            private XmlDestination destination;
 
-			internal AbstractDestination(Xslt30Transformer xslt30Transformer, XmlDestination destination)
-            {
-                this.xslt30Transformer = xslt30Transformer;
-                this.destination = destination;
-            }
-
-			JDestination XmlDestination.GetUnderlyingDestination()
-            {
-                return xslt30Transformer.GetUnderlyingXslt30Transformer.asDocumentDestination(destination.GetUnderlyingDestination());
-            }
-        }
     }
 
     /// <summary> An <c>XsltPackage</c> object represents the result of compiling an XSLT 3.0 package, as
@@ -2772,8 +2889,10 @@ namespace Saxon.Api
         {
             try
             {
-                JXsltExecutable executable = package.link();
-                return new XsltExecutable(executable);
+                JXsltExecutable jexecutable = package.link();
+                XsltExecutable executable = new XsltExecutable(jexecutable);
+                executable.InternalProcessor = processor;
+                return executable;
             }
             catch (net.sf.saxon.trans.XPathException e)
             {
@@ -2808,13 +2927,17 @@ namespace Saxon.Api
             return package.getUnderlyingPreparedPackage();
         }
 
+        internal JXsltPackage GetUnderlyingXsltPackage() {
+            return package;
+        }
+        
     }
 
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.

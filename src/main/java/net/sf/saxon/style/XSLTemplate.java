@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,23 +12,23 @@ import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.ErrorExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.instruct.*;
+import net.sf.saxon.expr.instruct.NamedTemplate;
+import net.sf.saxon.expr.instruct.SlotManager;
+import net.sf.saxon.expr.instruct.TemplateRule;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
-import net.sf.saxon.trace.LocationKind;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleManager;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.BigDecimalValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
@@ -59,6 +59,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     // A set of compiled template rules exists if the template has a match pattern: one TemplateRule for each mode
     private Map<StructuredQName, TemplateRule> compiledTemplateRules = new HashMap<>();
     private SequenceType requiredType = SequenceType.ANY_SEQUENCE;
+    private boolean declaresRequiredType = false;
     private boolean hasRequiredParams = false;
     private boolean isTailRecursive = false;
     private Visibility visibility = Visibility.PRIVATE;
@@ -74,6 +75,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * Get the corresponding NamedTemplate object that results from the compilation of this
      * StylesheetComponent
      */
+    @Override
     public NamedTemplate getActor() {
         return compiledNamedTemplate;
     }
@@ -117,14 +119,17 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
+    @Override
     protected boolean mayContainParam() {
         return true;
     }
 
+    @Override
     protected boolean isWithinDeclaredStreamableConstruct() {
         try {
             for (Mode m : getApplicableModes()) {
@@ -156,6 +161,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * Specify that xsl:param and xsl:context-item are permitted children
      */
 
+    @Override
     protected boolean isPermittedChild(StyleElement child) {
         return child instanceof XSLLocalParam || child.getFingerprint() == StandardNames.XSL_CONTEXT_ITEM;
     }
@@ -170,22 +176,17 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     /*@Nullable*/
     public StructuredQName getTemplateName() {
 
-        //We use null to mean "not yet evaluated"
-
-        try {
-            if (getObjectName() == null) {
-                // allow for forwards references
-                String nameAtt = getAttributeValue("", "name");
-                if (nameAtt != null) {
-                    setObjectName(makeQName(nameAtt));
-                }
+        if (getObjectName() == null) {
+            // allow for forwards references
+            String nameAtt = getAttributeValue("", "name");
+            if (nameAtt != null) {
+                setObjectName(makeQName(nameAtt, null, "name"));
             }
-            return getObjectName();
-        } catch (XPathException err) {
-            return null;          // the errors will be picked up later
         }
+        return getObjectName();
     }
 
+    @Override
     public SymbolicName getSymbolicName() {
         if (getTemplateName() == null) {
             return null;
@@ -203,6 +204,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     }
 
 
+    @Override
     public void checkCompatibility(Component component) {
         NamedTemplate other = (NamedTemplate) component.getActor();
         if (!getSymbolicName().equals(other.getSymbolicName())) {
@@ -259,11 +261,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             overriddenParams.add(lp0.name);
         }
 
-        AxisIterator params = iterateAxis(AxisInfo.CHILD);
-        NodeInfo param;
-        while ((param = params.next()) != null) {
-            if (param instanceof XSLLocalParam &&
-                    !overriddenParams.contains(((XSLLocalParam) param).getObjectName()) &&
+        for (NodeInfo param : children(XSLLocalParam.class::isInstance)) {
+            if (!overriddenParams.contains(((XSLLocalParam) param).getObjectName()) &&
                     ((XSLLocalParam) param).isRequiredParam()) {
                 ((XSLLocalParam) param).compileError(
                         "An overriding template cannot introduce a required parameter that is not declared in the overridden template", "XTSE3070");
@@ -273,10 +272,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     }
 
     public XSLLocalParam getParam(StructuredQName name) {
-        AxisIterator params = iterateAxis(AxisInfo.CHILD);
-        NodeInfo param;
-        while ((param = params.next()) != null) {
-            if (param instanceof XSLLocalParam && name.equals(((XSLLocalParam) param).getObjectName())) {
+        for (NodeInfo param : children(XSLLocalParam.class::isInstance)) {
+            if (name.equals(((XSLLocalParam) param).getObjectName())) {
                 return (XSLLocalParam) param;
             }
         }
@@ -284,33 +281,36 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     }
 
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String extraAsAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : atts) {
+            NodeName name = att.getNodeName();
+            String f = name.getDisplayName();
             if (f.equals("mode")) {
-                modeAtt = Whitespace.trim(atts.getValue(a));
+                modeAtt = Whitespace.trim(att.getValue());
             } else if (f.equals("name")) {
-                nameAtt = Whitespace.trim(atts.getValue(a));
+                nameAtt = Whitespace.trim(att.getValue());
             } else if (f.equals("match")) {
-                matchAtt = atts.getValue(a);
+                matchAtt = att.getValue();
             } else if (f.equals("priority")) {
-                priorityAtt = Whitespace.trim(atts.getValue(a));
+                priorityAtt = Whitespace.trim(att.getValue());
             } else if (f.equals("as")) {
-                asAtt = atts.getValue(a);
+                asAtt = att.getValue();
             } else if (f.equals("visibility")) {
-                visibilityAtt = Whitespace.trim(atts.getValue(a));
-            } else if (atts.getURI(a).equals(NamespaceConstant.SAXON)) {
-                if (atts.getLocalName(a).equals("as")) {
-                    extraAsAtt = atts.getValue(a);
-                } else if (atts.getLocalName(a).equals("explain")) {
-                    explaining = isYes(Whitespace.trim(atts.getValue(a)));
+                visibilityAtt = Whitespace.trim(att.getValue());
+            } else if (name.hasURI(NamespaceConstant.SAXON)) {
+                isExtensionAttributeAllowed(name.getDisplayName());
+                if (name.getLocalPart().equals("as")) {
+                    extraAsAtt = att.getValue();
+                } else if (name.getLocalPart().equals("explain")) {
+                    explaining = isYes(Whitespace.trim(att.getValue()));
                 }
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(name);
             }
         }
         try {
@@ -339,19 +339,15 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             compileError(err);
         }
 
-        try {
-            if (nameAtt != null) {
-                StructuredQName qName = makeQName(nameAtt);
+        if (nameAtt != null) {
+            if (getObjectName() == null) {
+                StructuredQName qName = makeQName(nameAtt, "XTSE0280", "name");
                 setObjectName(qName);
-                if (compiledNamedTemplate != null /*bug3549*/) {
-                    compiledNamedTemplate.setTemplateName(qName);
-                }
-                diagnosticId = nameAtt;
             }
-        } catch (XPathException err) {
-            err.maybeSetErrorCode("XTSE0280");
-            err.setIsStaticError(true);
-            compileError(err);
+            if (compiledNamedTemplate != null) {
+                compiledNamedTemplate.setTemplateName(getObjectName());
+            }
+            diagnosticId = nameAtt;
         }
 
         prioritySpecified = priorityAtt != null;
@@ -387,13 +383,15 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         if (asAtt != null) {
             try {
                 requiredType = makeSequenceType(asAtt);
+                declaresRequiredType = true;
             } catch (XPathException e) {
                 compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "as");
             }
         }
 
         if (extraAsAtt != null) {
-            SequenceType extraResultType = null;
+            SequenceType extraResultType;
+            declaresRequiredType = true;
             try {
                 extraResultType = makeExtendedSequenceType(extraAsAtt);
             } catch (XPathException e) {
@@ -401,8 +399,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 extraResultType = requiredType; // error recovery
             }
             if (asAtt != null) {
-                int rel = getConfiguration().getTypeHierarchy().sequenceTypeRelationship(extraResultType, requiredType);
-                if (rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMED_BY) {
+                Affinity rel = getConfiguration().getTypeHierarchy().sequenceTypeRelationship(extraResultType, requiredType);
+                if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY) {
                     requiredType = extraResultType;
                 } else {
                     compileErrorInAttribute("When both are present, @saxon:as must be a subtype of @as", "SXER7TBA", "saxon:as");
@@ -424,8 +422,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
     @Override
     public void processAllAttributes() throws XPathException {
-        String mode = getAttributeValue("mode");
-        mode = mode == null ? "" : Whitespace.trim(mode);
+//        String mode = getAttributeValue("mode");
+//        mode = mode == null ? "" : Whitespace.trim(mode);
         if (!isDeferredCompilation(getCompilation())) {
             super.processAllAttributes();      //TODO - sort out the duplicated code. This repeats the code below
         } else {
@@ -477,12 +475,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     allModes = true;
                     mname = Mode.OMNI_MODE;
                 } else {
-                    try {
-                        mname = makeQName(s);
-                    } catch (XPathException e) {
-                        compileError(e.getMessage(), "XTSE0550");
-                        mname = Mode.UNNAMED_MODE_NAME;
-                    }
+                    mname = makeQName(s, "XTSE0550", "mode");
                 }
                 for (int e = 0; e < count; e++) {
                     if (modeNames[e].equals(mname)) {
@@ -536,6 +529,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         return false;
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         stackFrameMap = getConfiguration().makeSlotManager();
         checkTopLevel("XTSE0010", true);
@@ -569,20 +563,16 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         }
 
         // See if there are any required parameters.
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
         boolean hasContent = false;
-        NodeImpl param;
-        while ((param = (NodeImpl) kids.next()) != null) {
-            if (param instanceof StyleElement) {
-                if (param.getFingerprint() == StandardNames.XSL_CONTEXT_ITEM) {
-                    // no action
-                } else if (param instanceof XSLLocalParam) {
-                    if (((XSLLocalParam) param).isRequiredParam()) {
-                        hasRequiredParams = true;
-                    }
-                } else {
-                    hasContent = true;
+        for (NodeInfo param : children(StyleElement.class::isInstance)) {
+            if (param.getFingerprint() == StandardNames.XSL_CONTEXT_ITEM) {
+                // no action
+            } else if (param instanceof XSLLocalParam) {
+                if (((XSLLocalParam) param).isRequiredParam()) {
+                    hasRequiredParams = true;
                 }
+            } else {
+                hasContent = true;
             }
         }
 
@@ -605,6 +595,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         }
     }
 
+    @Override
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) throws XPathException {
         if (getTemplateName() != null) {
             if (compiledNamedTemplate == null) {
@@ -619,6 +610,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * Mark tail-recursive calls on templates and functions.
      */
 
+    @Override
     public boolean markTailCalls() {
         StyleElement last = getLastChildInstruction();
         return last != null && last.markTailCalls();
@@ -628,6 +620,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * Compile: creates the executable form of the template
      */
 
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) throws XPathException {
         if (isDeferredCompilation(compilation)) {
             createSkeletonTemplate(compilation, decl);
@@ -679,10 +672,15 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
         ContextItemStaticInfo cisi = getConfiguration().makeContextItemStaticInfo(requiredContextItemType, mayOmitContextItem);
         Expression body2 = refineTemplateBody(body, cisi);
-
         compiledNamedTemplate.setBody(body2);
 
+        if (getCompilation().getCompilerInfo().getCodeInjector() != null) {
+            getCompilation().getCompilerInfo().getCodeInjector().process(compiledNamedTemplate);
+        }
     }
+
+
+
 
     private Expression refineTemplateBody(Expression body, ContextItemStaticInfo cisi) {
         Expression old = body;
@@ -692,7 +690,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             if (e.isReportableStatically()) {
                 compileError(e);
             } else {
-                body = new ErrorExpression(e);
+                body = new ErrorExpression(new XmlProcessingException(e));
                 ExpressionTool.copyLocationInfo(old, body);
             }
         }
@@ -710,17 +708,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 if (err.isReportableStatically()) {
                     compileError(err);
                 }
-                body = new ErrorExpression(err);
+                body = new ErrorExpression(new XmlProcessingException(err));
                 ExpressionTool.copyLocationInfo(old, body);
-            }
-        }
-
-        if (getCompilation().getCompilerInfo().isCompileWithTracing()) {
-            // Add trace wrapper code if required
-            body = makeTraceInstruction(this, body);
-            if (body instanceof TraceExpression) {
-                ((TraceExpression) body).setProperty("match", matchAtt);
-                ((TraceExpression) body).setProperty("mode", modeAtt);
             }
         }
 
@@ -817,15 +806,10 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             jitCompilationDone = true;
             compilation.setPreScan(false);
             processAllAttributes();
-
             checkForJitCompilationErrors(compilation);
-
             validateSubtree(decl, false);
-
             checkForJitCompilationErrors(compilation);
-
             compileDeclaration(compilation, decl);
-
             checkForJitCompilationErrors(compilation);
         }
 
@@ -920,6 +904,10 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     }
                 }
 
+                if (mode.getDefaultResultType() != null && !declaresRequiredType) {
+                    rule.setRequiredType(mode.getDefaultResultType());
+                }
+
                 // if adding a rule to the omniMode (mode='all') add it to all
                 // the other modes as well. For all but the first, it needs to
                 // be copied because the external component bindings might
@@ -999,6 +987,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * @throws XPathException if errors are found
      */
 
+    @Override
     public void optimize(ComponentDeclaration declaration) throws XPathException {
         Configuration config = getConfiguration();
         if (compiledNamedTemplate != null) {
@@ -1018,7 +1007,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 body.explain(err);
             }
             body.restoreParentPointers();
-            if (config.isDeferredByteCode(Configuration.XSLT) && !isTailRecursive) {
+            if (config.isDeferredByteCode(HostLanguage.XSLT) && !isTailRecursive) {
                 Optimizer opt = config.obtainOptimizer();
                 int evaluationModes = Expression.ITERATE_METHOD | Expression.PROCESS_METHOD;
                 compiledNamedTemplate.setBody(opt.makeByteCodeCandidate(compiledNamedTemplate, body, diagnosticId, evaluationModes));
@@ -1067,7 +1056,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                             }
                         }
 
-                        if (visitor.getConfiguration().isDeferredByteCode(Configuration.XSLT) && !isTailRecursive) {
+                        if (visitor.getConfiguration().isDeferredByteCode(HostLanguage.XSLT) && !isTailRecursive) {
                             int evaluationModes = Expression.ITERATE_METHOD | Expression.PROCESS_METHOD;
                             compiledTemplateRule.setBody(opt.makeByteCodeCandidate(compiledTemplateRule, templateRuleBody, diagnosticId, evaluationModes));
                         }
@@ -1096,18 +1085,18 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             contextItemType = AnyItemType.getInstance();
         }
         if (requiredContextItemType != AnyItemType.getInstance()) {
-            int rel = config.getTypeHierarchy().relationship(contextItemType, requiredContextItemType);
+            Affinity rel = config.getTypeHierarchy().relationship(contextItemType, requiredContextItemType);
             switch (rel) {
-                case TypeHierarchy.DISJOINT:
+                case DISJOINT:
                     XPathException e = new XPathException("The declared context item type is inconsistent with the match pattern", "XPTY0004", this);
                     e.setIsTypeError(true);
                     throw e;
-                case TypeHierarchy.SUBSUMED_BY:
-                case TypeHierarchy.OVERLAPS:
-                case TypeHierarchy.SAME_TYPE:
+                case SUBSUMED_BY:
+                case OVERLAPS:
+                case SAME_TYPE:
                     // no action
                     break;
-                case TypeHierarchy.SUBSUMES:
+                case SUBSUMES:
                     contextItemType = requiredContextItemType;
                     break;
             }
@@ -1123,11 +1112,12 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * @throws XPathException if byte code generation fails
      */
 
+    @Override
     public void generateByteCode(Optimizer opt) throws XPathException {
         // Generate byte code if appropriate
 
         if (getCompilation().getCompilerInfo().isGenerateByteCode() && !isTailRecursive) {
-            ICompilerService compilerService = getConfiguration().makeCompilerService(Configuration.XSLT);
+            ICompilerService compilerService = getConfiguration().makeCompilerService(HostLanguage.XSLT);
             if (getTemplateName() != null) {
                 try {
                     Expression exp = compiledNamedTemplate.getBody();
@@ -1166,6 +1156,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * Get associated Procedure (for details of stack frame)
      */
 
+    @Override
     public SlotManager getSlotManager() {
         return stackFrameMap;
     }
@@ -1179,15 +1170,6 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
     public NamedTemplate getCompiledNamedTemplate() {
         return compiledNamedTemplate;
-    }
-
-    /**
-     * Get the type of construct. This will be a constant in
-     * class {@link LocationKind}. This method is part of the {@link net.sf.saxon.trace.InstructionInfo} interface
-     */
-
-    public int getConstructType() {
-        return StandardNames.XSL_TEMPLATE;
     }
 
 

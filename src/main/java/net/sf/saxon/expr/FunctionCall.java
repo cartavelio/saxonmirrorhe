@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -61,6 +61,7 @@ public abstract class FunctionCall extends Expression {
 
     /**
      * Get the target function to be called
+     *
      * @param context the dynamic evaluation context
      * @return the target function
      * @throws XPathException if the target function cannot be determined
@@ -96,7 +97,7 @@ public abstract class FunctionCall extends Expression {
         setOperanda(new OperandArray(this, args));
     }
 
-    protected void setOperanda(Expression[] args, OperandRole roles[]) {
+    protected void setOperanda(Expression[] args, OperandRole[] roles) {
         setOperanda(new OperandArray(this, args, roles));
     }
 
@@ -109,7 +110,7 @@ public abstract class FunctionCall extends Expression {
 
     public Expression[] getArguments() {
         Expression[] result = new Expression[getArity()];
-        int i=0;
+        int i = 0;
         for (Operand o : operands()) {
             result[i++] = o.getChildExpression();
         }
@@ -118,6 +119,7 @@ public abstract class FunctionCall extends Expression {
 
     /**
      * Get the expression supplied as the Nth argument
+     *
      * @param n the required argument, zero-based
      * @return the expression supplied in the relevant position
      * @throws java.lang.IllegalArgumentException if the value of n is out of range
@@ -129,6 +131,7 @@ public abstract class FunctionCall extends Expression {
     
     /**
      * Set the expression to be used as the Nth argument
+     *
      * @param n the required argument, zero-based
      * @param child the expression to be used in the relevant position
      * @throws java.lang.IllegalArgumentException if the value of n is out of range
@@ -138,6 +141,7 @@ public abstract class FunctionCall extends Expression {
         getOperanda().setOperand(n, child);
         adoptChildExpression(child);
     }
+
     /**
      * Simplify the arguments of the function.
      * Called from the simplify() method of each function.
@@ -165,6 +169,7 @@ public abstract class FunctionCall extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
         checkArguments(visitor);
@@ -172,31 +177,33 @@ public abstract class FunctionCall extends Expression {
     }
 
     protected Expression preEvaluateIfConstant(ExpressionVisitor visitor) throws XPathException {
-        boolean fixed = true;
-        for (Operand o : operands()) {
-            if (!(o.getChildExpression() instanceof Literal)) {
-                fixed = false;
+        Optimizer opt = visitor.obtainOptimizer();
+        if (opt.isOptionSet(OptimizerOptions.CONSTANT_FOLDING)) {
+            boolean fixed = true;
+            for (Operand o : operands()) {
+                if (!(o.getChildExpression() instanceof Literal)) {
+                    fixed = false;
+                }
+            }
+            if (fixed) {
+                try {
+                    return preEvaluate(visitor);
+                } catch (NoDynamicContextException err) {
+                    // Early evaluation failed, typically because the implicit timezone is not yet known.
+                    // Try again later at run-time.
+                    return this;
+                }
             }
         }
-        if (fixed) {
-            try {
-                return preEvaluate(visitor);
-            } catch (NoDynamicContextException err) {
-                // Early evaluation failed, typically because the implicit timezone is not yet known.
-                // Try again later at run-time.
-                return this;
-            }
-        } else {
-            return this;
-        }
+        return this;
     }
 
     /**
      * Check the function call against the declared function signature, applying the
      * function conversion rules to each argument as necessary
      *
-     * @param target the function being called
-     * @param visitor          an expression visitor
+     * @param target  the function being called
+     * @param visitor an expression visitor
      * @throws XPathException if there is a type error
      */
 
@@ -209,9 +216,9 @@ public abstract class FunctionCall extends Expression {
             String name = getFunctionName() == null ? "" : getFunctionName().getDisplayName();
             RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, i);
             setArg(i, tc.staticTypeCheck(
-                getArg(i),
-                argTypes[i],
-                role, visitor));
+                    getArg(i),
+                    argTypes[i],
+                    role, visitor));
         }
     }
 
@@ -232,18 +239,24 @@ public abstract class FunctionCall extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         optimizeChildren(visitor, contextItemType);
 
-        boolean fixed = true;
-        for (Operand o : operands()) {
-            if (!(o.getChildExpression() instanceof Literal)) {
-                fixed = false;
-                break;
+        Optimizer opt = visitor.obtainOptimizer();
+        if (opt.isOptionSet(OptimizerOptions.CONSTANT_FOLDING)) {
+            boolean fixed = true;
+            for (Operand o : operands()) {
+                if (!(o.getChildExpression() instanceof Literal)) {
+                    fixed = false;
+                    break;
+                }
+            }
+            if (fixed) {
+                return preEvaluate(visitor);
             }
         }
-
-        return fixed ? preEvaluate(visitor) : this;
+        return this;
     }
 
     /**
@@ -393,10 +406,11 @@ public abstract class FunctionCall extends Expression {
      * Get a name identifying the kind of expression, in terms meaningful to a user.
      *
      * @return a name identifying the kind of expression, in terms meaningful to a user.
-     *         The name will always be in the form of a lexical XML QName, and should match the name used
-     *         in explain() output displaying the expression.
+     * The name will always be in the form of a lexical XML QName, and should match the name used
+     * in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         return "functionCall";
     }
@@ -457,6 +471,7 @@ public abstract class FunctionCall extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("functionCall", this);
         if (getFunctionName() == null) {
@@ -500,6 +515,7 @@ public abstract class FunctionCall extends Expression {
      * Get hashCode in support of equals() method
      */
 
+    @Override
     public int computeHashCode() {
         if (getFunctionName() == null) {
             return super.computeHashCode();
@@ -525,7 +541,7 @@ public abstract class FunctionCall extends Expression {
      *                                           expression
      */
     @Override
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         Function target = getTargetFunction(context);
         Sequence[] actualArgs = evaluateArguments(context);
         try {
@@ -547,16 +563,17 @@ public abstract class FunctionCall extends Expression {
         return actualArgs;
     }
 
-    /**
+   /**
      * When a call to a Java extension function appears in a context where there the required type
      * is a Java external object (typically an xsl:variable with a declared type, or as an argument
      * to another Java extension function), notify this required type so that the process of converting
      * the result to an XDM value can be short-circuited.
+     *
      * @param requiredType the required type of the result of the function, determined by the context
      *                     in which the function call appears
-     * @throws XPathException if the required return type is incompatible with the type actually returned
-     * by the Java method
      * @return Ok if the type has been successfully adjusted
+     * @throws XPathException if the required return type is incompatible with the type actually returned
+     *                        by the Java method
      */
 
     public boolean adjustRequiredType(JavaExternalObjectType requiredType) throws XPathException {

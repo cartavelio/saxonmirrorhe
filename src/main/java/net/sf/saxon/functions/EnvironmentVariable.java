@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -30,9 +30,10 @@ public class EnvironmentVariable extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public ZeroOrOne<StringValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
 
-        return new ZeroOrOne<>(
+        return new ZeroOrOne(
                 getVariable((StringValue) arguments[0].head(), context));
     }
 
@@ -57,4 +58,4 @@ public class EnvironmentVariable extends SystemFunction {
 
 }
 
-// Copyright (c) 2010-2017 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

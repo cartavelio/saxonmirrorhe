@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,7 @@
 
 package net.sf.saxon.trace;
 
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.StructuredQName;
 
 import java.util.Iterator;
@@ -21,16 +21,6 @@ import java.util.Iterator;
  */
 
 public interface InstructionInfo extends Location {
-
-    /**
-     * Get the type of construct. This will either be the fingerprint of a standard XSLT instruction name
-     * (values in {@link net.sf.saxon.om.StandardNames}: all less than 1024)
-     * or it will be a constant in class {@link LocationKind}.
-     *
-     * @return an integer identifying the kind of construct
-     */
-
-    int getConstructType();
 
     /**
      * Get a name identifying the object of the expression, for example a function name, template name,

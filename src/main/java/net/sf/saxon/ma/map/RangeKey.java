@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,12 +10,12 @@ package net.sf.saxon.ma.map;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
-import net.sf.saxon.expr.sort.CodepointMatchKey;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.regex.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -37,13 +37,13 @@ import java.util.TreeMap;
 
 public class RangeKey implements MapItem {
 
-    private CodepointMatchKey min;
-    private CodepointMatchKey max;
-    private TreeMap<AtomicMatchKey, List<NodeInfo>> index;
+    private UnicodeString min;
+    private UnicodeString max;
+    private TreeMap<AtomicMatchKey, Object> index;
 
-    public RangeKey(String min, String max, TreeMap<AtomicMatchKey, List<NodeInfo>> index) {
-        this.min = min == null ? null : new CodepointMatchKey(min);
-        this.max = max == null ? null : new CodepointMatchKey(max);
+    public RangeKey(String min, String max, TreeMap<AtomicMatchKey, Object> index) {
+        this.min = min == null ? null : UnicodeString.makeUnicodeString(min);
+        this.max = max == null ? null : UnicodeString.makeUnicodeString(max);
         this.index = index;
     }
 
@@ -52,14 +52,18 @@ public class RangeKey implements MapItem {
      * @param key     the value of the key
      * @return the value associated with the given key, or null if the key is not present in the map
      */
-    public GroundedValue<?> get(AtomicValue key)  {
-        CodepointMatchKey k = new CodepointMatchKey(key.getStringValue());
+    @Override
+    public GroundedValue get(AtomicValue key)  {
+        UnicodeString k = UnicodeString.makeUnicodeString(key.getStringValueCS());
         if ((min == null || min.compareTo(k) <= 0) &&
                 (max == null || max.compareTo(k) >= 0)) {
-            List<NodeInfo> nodes = index.get(k);
-            if (nodes == null) {
+            Object value = index.get(k);
+            if (value == null) {
                 return EmptySequence.getInstance();
+            } else if (value instanceof NodeInfo) {
+                return ((NodeInfo)value);
             } else {
+                List<NodeInfo> nodes = (List<NodeInfo>)value;
                 return SequenceExtent.makeSequenceExtent(nodes);
             }
         }
@@ -71,6 +75,7 @@ public class RangeKey implements MapItem {
      *
      * @return the number of keys/entries present in this map
      */
+    @Override
     public int size() {
         try {
             return Count.count(keys());
@@ -84,6 +89,7 @@ public class RangeKey implements MapItem {
      *
      * @return true if and only if the size of the map is zero
      */
+    @Override
     public boolean isEmpty() {
         return keys().next() == null;
     }
@@ -93,6 +99,7 @@ public class RangeKey implements MapItem {
      *
      * @return a set containing all the key values present in the map.
      */
+    @Override
     public AtomicIterator keys() {
         return new RangeKeyIterator();
     }
@@ -102,22 +109,32 @@ public class RangeKey implements MapItem {
      *
      * @return an iterator over the key-value pairs
      */
+    @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-        return () -> new Iterator<KeyValuePair>() {
-            AtomicIterator keys = keys();
-            AtomicValue next = keys.next();
-            public boolean hasNext() {
-                return next != null;
-            }
+        // For .NEU - don't use a lambda expression here
+        return new Iterable<KeyValuePair>() {
+            @Override
+            public Iterator<KeyValuePair> iterator() {
+                return new Iterator<KeyValuePair>() {
+                    AtomicIterator keys = keys();
+                    AtomicValue next = keys.next();
 
-            public KeyValuePair next() {
-                if (next == null) {
-                    return null;
-                } else {
-                    KeyValuePair kvp = new KeyValuePair(next, get(next));
-                    next = keys.next();
-                    return kvp;
-                }
+                    @Override
+                    public boolean hasNext() {
+                        return next != null;
+                    }
+
+                    @Override
+                    public KeyValuePair next() {
+                        if (next == null) {
+                            return null;
+                        } else {
+                            KeyValuePair kvp = new KeyValuePair(next, get(next));
+                            next = keys.next();
+                            return kvp;
+                        }
+                    }
+                };
             }
         };
     }
@@ -129,6 +146,7 @@ public class RangeKey implements MapItem {
      * @return a new map in which the requested entry has been removed; or this map
      *         unchanged if the specified key was not present
      */
+    @Override
     public MapItem remove(AtomicValue key) {
         return HashTrieMap.copy(this).remove(key);
     }
@@ -139,6 +157,7 @@ public class RangeKey implements MapItem {
      * @return the most specific type to which all the keys belong. If the map is
      *         empty, return ErrorType.getInstance() (the type with no instances)
      */
+    @Override
     public UType getKeyUType() {
         return UType.STRING;
     }
@@ -153,7 +172,7 @@ public class RangeKey implements MapItem {
      * @return the new map containing the additional entry
      */
     @Override
-    public MapItem addEntry(AtomicValue key, GroundedValue<?> value) {
+    public MapItem addEntry(AtomicValue key, GroundedValue value) {
         return HashTrieMap.copy(this).addEntry(key, value);
     }
 
@@ -170,7 +189,7 @@ public class RangeKey implements MapItem {
         AtomicIterator keyIter = keys();
         AtomicValue key;
         while ((key = keyIter.next()) != null) {
-            Sequence<?> value = get(key);
+            Sequence value = get(key);
             try {
                 if (!valueType.matches(value, th)) {
                     return false;
@@ -199,6 +218,7 @@ public class RangeKey implements MapItem {
      *
      * @return the function item's type
      */
+    @Override
     public MapType getFunctionItemType() {
         return new MapType(BuiltInAtomicType.STRING, SequenceType.NODE_SEQUENCE);
     }
@@ -210,6 +230,7 @@ public class RangeKey implements MapItem {
      *
      * @return a description of the function for use in error messages
      */
+    @Override
     public String getDescription() {
         return "range key";
     }
@@ -224,6 +245,7 @@ public class RangeKey implements MapItem {
      * @param flags    options for how the comparison is performed
      * @return true if the two function items are deep-equal
      */
+    @Override
     public boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags)  {
         if (other instanceof RangeKey) {
             RangeKey rk = (RangeKey) other;
@@ -236,12 +258,14 @@ public class RangeKey implements MapItem {
     /**
      * Output information about this function item to the diagnostic explain() output
      */
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("range-key-map");
         out.emitAttribute("size", size() + "");
         out.endElement();
     }
 
+    @Override
     public boolean isTrustedResultType() {
         return false;
     }
@@ -253,11 +277,11 @@ public class RangeKey implements MapItem {
     private class RangeKeyIterator implements AtomicIterator {
 
         int pos = 0;
-        CodepointMatchKey curr = null;
-        CodepointMatchKey top;
+        UnicodeString curr = null;
+        UnicodeString top;
 
         public RangeKeyIterator() {
-            top = (CodepointMatchKey) (max == null ? index.lastKey() : index.floorKey(max));
+            top = (UnicodeString) (max == null ? index.lastKey() : index.floorKey(max));
         }
 
         /**
@@ -265,15 +289,16 @@ public class RangeKey implements MapItem {
          *
          * @return the next Item. If there are no more nodes, return null.
          */
+        @Override
         public StringValue next() {
             if (pos <= 0) {
                 if (pos < 0) {
                     return null;
                 }
                 if (min == null) {
-                    curr = (CodepointMatchKey) index.firstKey();
+                    curr = (UnicodeString) index.firstKey();
                 } else {
-                    curr = (CodepointMatchKey) index.ceilingKey(min);
+                    curr = (UnicodeString) index.ceilingKey(min);
                     if(curr != null && max != null && curr.compareTo(max) > 0) {
                         curr = null;
                     }
@@ -281,18 +306,18 @@ public class RangeKey implements MapItem {
             } else if (curr.equals(top)) {
                 curr = null;
             } else {
-                curr = (CodepointMatchKey) index.higherKey(curr);
+                curr = (UnicodeString) index.higherKey(curr);
             }
             if (curr == null) {
                 pos = -1;
                 return null;
             } else {
                 pos++;
-                return new StringValue(curr.getValue());
+                return new StringValue(curr);
             }
         }
 
     }
 }
 
-// Copyright (c) 2012 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

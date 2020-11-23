@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,7 +17,14 @@ import net.sf.saxon.value.StringValue;
  * It returns all the matching and non-matching substrings in an input string, and
  * provides access to their captured groups
  */
-public interface RegexIterator extends SequenceIterator<StringValue> {
+public interface RegexIterator extends SequenceIterator {
+
+    /**
+     * Get the next item in the sequence. This method changes the state of the
+     * iterator.
+     */
+    @Override
+    StringValue next() throws XPathException;
 
     /**
      * Determine whether the current item in the sequence is a matching item or a non-matching item

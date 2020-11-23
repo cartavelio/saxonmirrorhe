@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,11 +10,12 @@ package net.sf.saxon.regex;
 //import net.sf.saxon.expr.regexj.Matcher;
 //import net.sf.saxon.expr.regexj.Pattern;
 
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.value.StringValue;
 
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -74,6 +75,7 @@ public class JavaRegularExpression implements RegularExpression {
      * to matched subgroups.
      */
 
+    @Override
     public RegexIterator analyze(CharSequence input) {
         return new JRegexIterator(input.toString(), pattern);
     }
@@ -85,6 +87,7 @@ public class JavaRegularExpression implements RegularExpression {
      * @return true if the string matches, false otherwise
      */
 
+    @Override
     public boolean containsMatch(CharSequence input) {
         return pattern.matcher(input).find();
     }
@@ -96,6 +99,7 @@ public class JavaRegularExpression implements RegularExpression {
      * @return true if the string matches, false otherwise
      */
 
+    @Override
     public boolean matches(CharSequence input) {
         return pattern.matcher(input).matches();
     }
@@ -111,6 +115,7 @@ public class JavaRegularExpression implements RegularExpression {
      *          if the replacement string is invalid
      */
 
+    @Override
     public CharSequence replace(CharSequence input, CharSequence replacement) throws XPathException {
         Matcher matcher = pattern.matcher(input);
         try {
@@ -118,7 +123,21 @@ public class JavaRegularExpression implements RegularExpression {
         } catch (IndexOutOfBoundsException e) {
             throw new XPathException(e.getMessage(), "FORX0004");
         }
+    }
 
+    /**
+     * Replace all substrings of a supplied input string that match the regular expression
+     * with a replacement string.
+     *
+     * @param input       the input string on which replacements are to be performed
+     * @param replacement a function that is called once for each matching substring, and
+     *                    that returns a replacement for that substring
+     * @return the result of performing the replacement
+     * @throws XPathException if the replacement string is invalid
+     */
+    @Override
+    public CharSequence replaceWith(CharSequence input, Function<CharSequence, CharSequence> replacement) throws XPathException {
+        throw new XPathException("saxon:replace-with() is not supported with the Java regex engine");
     }
 
     /**
@@ -128,9 +147,10 @@ public class JavaRegularExpression implements RegularExpression {
      * @return a SequenceIterator containing the resulting tokens, as objects of type StringValue
      */
 
-    public SequenceIterator<StringValue> tokenize(CharSequence input) {
+    @Override
+    public AtomicIterator<StringValue> tokenize(CharSequence input) {
         if (input.length() == 0) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.ofAtomic();
         }
         return new JTokenIterator(input, pattern);
     }

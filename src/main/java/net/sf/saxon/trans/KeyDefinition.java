@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,12 +14,10 @@ import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.LocationKind;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.UType;
 
@@ -27,8 +25,6 @@ import java.util.Map;
 
 /**
  * Corresponds to a single xsl:key declaration.
- *
- * @author Michael H. Kay
  */
 
 public class KeyDefinition extends Actor implements ContextOriginator {
@@ -210,8 +206,9 @@ public class KeyDefinition extends Actor implements ContextOriginator {
      * Set the map of local variables needed while evaluating the "use" expression
      */
 
+    @Override
     public void setStackFrameMap(SlotManager map) {
-        if (map != null /* && map.getNumberOfVariables() > 0 */) {   // bug 4448
+        if (map != null /*&& map.getNumberOfVariables() > 0 */) {
             super.setStackFrameMap(map);
         }
     }
@@ -220,11 +217,6 @@ public class KeyDefinition extends Actor implements ContextOriginator {
     public void allocateAllBindingSlots(StylesheetPackage pack) {
         super.allocateAllBindingSlots(pack);
         allocateBindingSlotsRecursive(pack, this, match, getDeclaringComponent().getComponentBindings());
-    }
-
-    @Override
-    public int getComponentKind() {
-        return StandardNames.XSL_KEY;
     }
 
     /**
@@ -277,16 +269,6 @@ public class KeyDefinition extends Actor implements ContextOriginator {
 
     public StringCollator getCollation() {
         return collation;
-    }
-
-    /**
-     * Get the type of construct. This will either be the fingerprint of a standard XSLT instruction name
-     * (values in {@link net.sf.saxon.om.StandardNames}: all less than 1024)
-     * or it will be a constant in class {@link LocationKind}.
-     */
-
-    public int getConstructType() {
-        return StandardNames.XSL_KEY;
     }
 
     /**

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,11 +12,13 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class is an EntityResolver used to resolve references to common
@@ -28,31 +30,18 @@ import java.util.List;
  */
 public class StandardEntityResolver implements EntityResolver {
 
-    private static StandardEntityResolver THE_INSTANCE = new StandardEntityResolver();
+    private static HashMap<String, String> publicIds = new HashMap<>(30);
+    private static HashMap<String, String> systemIds = new HashMap<>(30);
 
-    /**
-     * Get a general-purpose instance of this class. This should be treated as immutable,
-     * since it is shared with other users. That is, it should not be associated with any
-     * configuration.
-     *
-     * @return the singleton, general-purpose instance of this class
-     */
-
-    public static StandardEntityResolver getInstance() {
-        return THE_INSTANCE;
-    }
-
-    private static HashMap<String, String> publicIds = new HashMap<String, String>(30);
-    private static HashMap<String, String> systemIds = new HashMap<String, String>(30);
-
-    public Configuration config = null;
+    public Configuration config;
 
     /**
      * Register a DTD or other entity to be resolved by this
      * entity resolver
      *
      * @param publicId the public identifier of the DTD or entity
-     * @param systemId the system identifier of the DTD or entity
+     * @param systemId the system identifier of the DTD or entity. For domains that are known
+     *                 to redirect http: to https:, either scheme is accepted.
      * @param fileName the fileName of the Saxon local copy of the
      *                 resource, relative to the data directory in the JAR file
      */
@@ -66,6 +55,10 @@ public class StandardEntityResolver implements EntityResolver {
         }
         if (systemId != null) {
             systemIds.put(systemId, fileName);
+            if (systemId.startsWith("http://www.w3.org/")) {
+                String httpsId = "https://" + systemId.substring(7);
+                systemIds.put(httpsId, fileName);
+            }
         }
     }
 
@@ -543,7 +536,7 @@ public class StandardEntityResolver implements EntityResolver {
         register("-//XML-DEV//ENTITIES RDDL Resource Module 1.0//EN",
                 "http://www.rddl.org/rddl-resource-1.mod",
                 "w3c/rddl/rddl-resource-1.mod");
-
+        
         register("-//XML-DEV//ELEMENTS RDDL Resource 1.0//EN",
                  "http://www.rddl.org/rddl-resource-1.mod",
                  "w3c/rddl/rddl-resource-1.mod");
@@ -593,6 +586,12 @@ public class StandardEntityResolver implements EntityResolver {
                 "xml-to-json-indent.xsl");
     }
 
+
+    public StandardEntityResolver(Configuration config) {
+        Objects.requireNonNull(config);
+        this.config = config;
+    }
+
     /**
      * Set configuration details. This is used to control tracing of accesses to files
      *
@@ -636,14 +635,11 @@ public class StandardEntityResolver implements EntityResolver {
      *         URI connection to the system identifier.
      * @throws org.xml.sax.SAXException Any SAX exception, possibly
      *                                  wrapping another exception.
-     * @throws java.io.IOException      A Java-specific IO exception,
-     *                                  possibly the result of creating a new InputStream
-     *                                  or Reader for the InputSource.
      * @see org.xml.sax.InputSource
      */
-    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+    @Override
+    public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
         // See if it's a known public ID
-        // System.err.println("Requesting PUBLIC '" + publicId + "' at '" + systemId + "'");
         String fileName = publicIds.get(publicId);
         if (fileName != null) {
             return fetch(fileName, config);
@@ -657,7 +653,16 @@ public class StandardEntityResolver implements EntityResolver {
 
         // If this is a W3C URI, Saxon ought really to have a copy...
         if (systemId.startsWith("http://www.w3.org/") && config.isTiming()) {
-            config.getStandardErrorOutput().println("Saxon does not have a local copy of PUBLIC " + publicId + " SYSTEM " + systemId);
+            config.getLogger().warning("Saxon does not have a local copy of PUBLIC " + publicId + " SYSTEM " + systemId);
+        }
+
+        try {
+            URI uri = new URI(systemId);
+            if (uri.isAbsolute() && !config.getAllowedUriTest().test(uri)) {
+                throw new SAXException("URI scheme '" + uri.getScheme() + "' has been disallowed");
+            }
+        } catch (URISyntaxException err) {
+            // no action, bypass the check if it's not a URI
         }
 
         // If it's a classpath URI, handle it here
@@ -689,8 +694,8 @@ public class StandardEntityResolver implements EntityResolver {
             }
             traceDestination.info("Fetching Saxon copy of " + filename);
         }
-        List<String> messages = new ArrayList<String>();
-        List<ClassLoader> classLoaders = new ArrayList<ClassLoader>();
+        List<String> messages = new ArrayList<>();
+        List<ClassLoader> classLoaders = new ArrayList<>();
         InputStream in = Configuration.locateResource(filename, messages, classLoaders);
         if (tracing) {
             for (String s : messages) {

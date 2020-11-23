@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -72,11 +72,42 @@ public class FingerprintedQName implements NodeName {
     }
 
     /**
+     * Make a FingerprintedQName from a Clark name
+     *
+     * @param expandedName the name in EQName notation "Q{uri}local" if in a namespace, or "local" otherwise.
+     *                     The format "Q{}local" is also accepted for a name in no namespace.
+     * @return the constructed FingerprintedQName
+     * @throws IllegalArgumentException if the EQName name is malformed
+     */
+
+    public static FingerprintedQName fromEQName(String expandedName) {
+        String namespace;
+        String localName;
+        if (expandedName.startsWith("Q{")) {
+            int closeBrace = expandedName.indexOf('}', 2);
+            if (closeBrace < 0) {
+                throw new IllegalArgumentException("No closing '}' in EQName");
+            }
+            namespace = expandedName.substring(2, closeBrace);
+            if (closeBrace == expandedName.length()) {
+                throw new IllegalArgumentException("Missing local part in EQName");
+            }
+            localName = expandedName.substring(closeBrace + 1);
+        } else {
+            namespace = "";
+            localName = expandedName;
+        }
+        return new FingerprintedQName("", namespace, localName);
+    }
+
+
+    /**
      * Ask whether this node name representation has a known namecode and fingerprint
      *
      * @return true if the methods getFingerprint() and getNameCode() will
      * return a result other than -1
      */
+    @Override
     public boolean hasFingerprint() {
         return fingerprint != -1;
     }
@@ -87,6 +118,7 @@ public class FingerprintedQName implements NodeName {
      *
      * @return the fingerprint if known; otherwise -1
      */
+    @Override
     public int getFingerprint() {
         return fingerprint;
     }
@@ -98,6 +130,7 @@ public class FingerprintedQName implements NodeName {
      * @return a fingerprint for this name, newly allocated if necessary
      */
 
+    @Override
     public int obtainFingerprint(NamePool pool) {
         if (fingerprint == -1) {
             fingerprint = pool.allocateFingerprint(getURI(), getLocalPart());
@@ -110,6 +143,7 @@ public class FingerprintedQName implements NodeName {
      *
      * @return the lexical QName
      */
+    @Override
     public String getDisplayName() {
         return qName.getDisplayName();
     }
@@ -119,6 +153,7 @@ public class FingerprintedQName implements NodeName {
      *
      * @return the prefix. Returns the empty string if the name is unprefixed.
      */
+    @Override
     public String getPrefix() {
         return qName.getPrefix();
     }
@@ -128,6 +163,7 @@ public class FingerprintedQName implements NodeName {
      *
      * @return the URI. Returns the empty string to represent the no-namespace
      */
+    @Override
     public String getURI() {
         return qName.getURI();
     }
@@ -137,6 +173,7 @@ public class FingerprintedQName implements NodeName {
      *
      * @return the local part of the QName
      */
+    @Override
     public String getLocalPart() {
         return qName.getLocalPart();
     }
@@ -146,18 +183,9 @@ public class FingerprintedQName implements NodeName {
      *
      * @return the name in the form of a StructuredQName
      */
+    @Override
     public StructuredQName getStructuredQName() {
         return qName;
-    }
-
-    /**
-     * Test whether this name is in the same namespace as another name
-     *
-     * @param other the other name
-     * @return true if the two names are in the same namespace
-     */
-    public boolean isInSameNamespace(NodeName other) {
-        return qName.isInSameNamespace(other);
     }
 
     /**
@@ -166,6 +194,7 @@ public class FingerprintedQName implements NodeName {
      * @param ns the namespace to be tested against
      * @return true if the name is in the specified namespace
      */
+    @Override
     public boolean hasURI(String ns) {
         return qName.hasURI(ns);
     }
@@ -176,6 +205,7 @@ public class FingerprintedQName implements NodeName {
      *
      * @return the corresponding NamespaceBinding
      */
+    @Override
     public NamespaceBinding getNamespaceBinding() {
         return qName.getNamespaceBinding();
     }
@@ -185,6 +215,7 @@ public class FingerprintedQName implements NodeName {
      *
      * @return a hashCode suitable for use when testing for identity.
      */
+    @Override
     public int identityHashCode() {
         return 0;
     }
@@ -199,7 +230,7 @@ public class FingerprintedQName implements NodeName {
                 return getFingerprint() == ((NodeName) other).getFingerprint();
             } else {
                 return getLocalPart().equals(((NodeName) other).getLocalPart()) &&
-                        isInSameNamespace((NodeName) other);
+                        hasURI(((NodeName) other).getURI());
             }
         } else {
             return false;
@@ -222,6 +253,7 @@ public class FingerprintedQName implements NodeName {
      * @param other the other value
      * @return true if the two values are indentical, false otherwise
      */
+    @Override
     public boolean isIdentical(IdentityComparable other) {
         return other instanceof NodeName &&
                 this.equals(other) &&

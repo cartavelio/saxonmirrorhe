@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2013 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,8 +18,8 @@ import java.util.List;
 
 /**
  * Information about the requirements placed by a query or stylesheet on the global
- * context item: whether it is mandatory or optional, what its type must be, whether
- * it is streamable, whether it has a default value.
+ * context item: whether it is mandatory or optional, what its type must be, and
+ * whether it has a default value.
  *
  * In XSLT, if more than one module specifies a global context item type, they must be the same.
  * In XQuery, several modules can specify different required types, and the actual context item
@@ -108,12 +108,6 @@ public class GlobalContextRequirement {
         if (!getRequiredItemType().equals(AnyItemType.getInstance())) {
             out.emitAttribute("type", getRequiredItemType().toExportString());
         }
-        if ("JS".equals(((ExpressionPresenter.ExportOptions) out.getOptions()).target)) {
-            int targetVersion = ((ExpressionPresenter.ExportOptions) out.getOptions()).targetVersion;
-            out.emitAttribute("jsTest", getRequiredItemType().generateJavaScriptItemTypeTest(
-                    AnyItemType.getInstance(), targetVersion));
-
-        }
         out.endElement();
     }
 
@@ -175,4 +169,4 @@ public class GlobalContextRequirement {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

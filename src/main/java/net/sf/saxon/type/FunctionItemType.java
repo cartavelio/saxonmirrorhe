@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -54,10 +54,10 @@ public interface FunctionItemType extends ItemType {
      * Determine the relationship of one function item type to another. This method is only concerned
      * with the type signatures of the two function item types, and not with their annotation assertions.
      *
-     * @return for example {@link TypeHierarchy#SUBSUMES}, {@link TypeHierarchy#SAME_TYPE}
+     * @return for example {@link Affinity#SUBSUMES}, {@link Affinity#SAME_TYPE}
      */
 
-    int relationship(FunctionItemType other, TypeHierarchy th);
+    Affinity relationship(FunctionItemType other, TypeHierarchy th);
 
     /**
      * Get the list of Annotation Assertions associated with this function item type

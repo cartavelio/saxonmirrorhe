@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -40,6 +40,7 @@ public class XSLElement extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -50,13 +51,13 @@ public class XSLElement extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
-
-        AttributeCollection atts = getAttributeList();
+    @Override
+    public void prepareAttributes() {
 
         String nameAtt = null;
         String namespaceAtt = null;
@@ -64,24 +65,34 @@ public class XSLElement extends StyleElement {
         String typeAtt = null;
         String inheritAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
-            if (f.equals("name")) {
-                nameAtt = Whitespace.trim(atts.getValue(a));
-                elementName = makeAttributeValueTemplate(nameAtt, a);
-            } else if (f.equals("namespace")) {
-                namespaceAtt = atts.getValue(a);
-                namespace = makeAttributeValueTemplate(namespaceAtt, a);
-            } else if (f.equals("validation")) {
-                validationAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("type")) {
-                typeAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("inherit-namespaces")) {
-                inheritAtt = Whitespace.trim(atts.getValue(a));
-            } else if (f.equals("use-attribute-sets")) {
-                use = atts.getValue(a);
-            } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String f = attName.getDisplayName();
+            switch (f) {
+                case "name":
+                    nameAtt = Whitespace.trim(value);
+                    elementName = makeAttributeValueTemplate(nameAtt, att);
+                    break;
+                case "namespace":
+                    namespaceAtt = value;
+                    namespace = makeAttributeValueTemplate(namespaceAtt, att);
+                    break;
+                case "validation":
+                    validationAtt = Whitespace.trim(value);
+                    break;
+                case "type":
+                    typeAtt = Whitespace.trim(value);
+                    break;
+                case "inherit-namespaces":
+                    inheritAtt = Whitespace.trim(value);
+                    break;
+                case "use-attribute-sets":
+                    use = value;
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
 
@@ -131,6 +142,7 @@ public class XSLElement extends StyleElement {
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         if (use != null) {
             // get the names of referenced attribute sets
@@ -141,6 +153,7 @@ public class XSLElement extends StyleElement {
         namespace = typeCheck("namespace", namespace);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 
         // deal specially with the case where the element name is known statically
@@ -173,7 +186,7 @@ public class XSLElement extends StyleElement {
                 FingerprintedQName qn = new FingerprintedQName(parts[0], nsuri, parts[1]);
                 qn.obtainFingerprint(getNamePool());
                 FixedElement inst = new FixedElement(qn,
-                        NamespaceBinding.EMPTY_ARRAY,
+                        NamespaceMap.emptyMap(),
                         inheritNamespaces,
                         true, schemaType,
                         validation);

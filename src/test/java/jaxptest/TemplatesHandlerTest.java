@@ -1,17 +1,8 @@
 package jaxptest;
 
-import com.saxonica.config.ProfessionalTransformerFactory;
-import junit.framework.TestCase;
-import net.sf.saxon.TransformerFactoryImpl;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StaticContext;
-import net.sf.saxon.expr.StringLiteral;
-import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.trans.CompilerInfo;
-import net.sf.saxon.trans.SymbolicName;
+import org.junit.jupiter.api.Test;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
@@ -26,14 +17,17 @@ import javax.xml.transform.sax.TemplatesHandler;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  *
  */
-public class TemplatesHandlerTest extends TestCase {
-
-    public static void testTemplatesHandler() throws SAXException,
+public class TemplatesHandlerTest {
+    @Test
+    public void testTemplatesHandler() throws SAXException,
             ParserConfigurationException,
             IOException, TransformerException {
 
@@ -56,71 +50,51 @@ public class TemplatesHandlerTest extends TestCase {
 
         Templates templates = templatesHandler.getTemplates();
         Transformer transformer = templates.newTransformer();
-        transformer.transform(new StreamSource(new File(xml)), new StreamResult(System.out));
+        StringWriter sw = new StringWriter();
+        transformer.transform(new StreamSource(new File(xml)), new StreamResult(sw));
+        assertTrue(sw.toString().startsWith("<!DOCTYPE html>")
+            || sw.toString().startsWith("<!DOCTYPE HTML>"));
 
     }
 
-    public void testAddExtensionLibrary() {
+    @Test
+    public void testTemplatesHandlerStaticExpressions() {
+
+        // Bug 4684
+
         try {
-            final String xsl
-                    = "<?xml version=\"1.0\"?> \n" +
-                    "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
-                    " xmlns:hello='http://my.hello.com/'>" +
-                    "<xsl:template match='/'>\n" +
-                    "<xsl:value-of select='hello:world()'/>\n" +
-                    "</xsl:template>\n" +
-                    "</xsl:stylesheet>";
+            String xsl = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
+                    "<xsl:variable name='x' static='yes' xmlns:t='http://www.w3.org/1999/XSL/Transform' select='system-property(\"t:schema-aware\")'/>" +
+                    "<xsl:template match='/'><out x='{$x}'/></xsl:template>" +
+                    "</xsl:transform>";
+            String xml = ConfigTest.DATA_DIR + "books.xml";
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            factory.setValidating(false);
+            XMLReader reader = factory.newSAXParser().getXMLReader();
 
-            TransformerFactoryImpl tFactory = new ProfessionalTransformerFactory();
-            CompilerInfo info = tFactory.getConfiguration().makeCompilerInfo();
-            info.setExtensionFunctionLibrary(new FunctionLibrary() {
+            SAXTransformerFactory transformerFactory = new net.sf.saxon.TransformerFactoryImpl();
 
-                StructuredQName fnName = new StructuredQName("hello", "http://my.hello.com/", "world");
-                SymbolicName.F fn = new SymbolicName.F(fnName, 0);
+            TemplatesHandler templatesHandler =
+                    transformerFactory.newTemplatesHandler();
+            reader.setContentHandler(templatesHandler);
+            reader.parse(new InputSource(new StringReader(xsl)));
 
-                public Function getFunctionItem(SymbolicName.F functionName, StaticContext env) {
-                    if (functionName.equals(fn) && functionName.getArity() == 0) {
-                        return null;
-                    } else {
-                        return null;
-                    }
-                }
-
-                public boolean isAvailable(SymbolicName.F functionName) {
-                    return functionName.equals(fn) && functionName.getArity() == 0;
-                }
-
-                public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
-                    if (functionName.equals(fn) && staticArgs.length == 0) {
-                        return new StringLiteral("hello world");
-                    } else {
-                        return null;
-                    }
-                }
-
-                public FunctionLibrary copy() {
-                    return this;
-                }
-            });
-
-            Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(xsl)), info);
+            Templates templates = templatesHandler.getTemplates();
             Transformer transformer = templates.newTransformer();
-            transformer.setOutputProperty("method", "text");
-            StringWriter sw = new StringWriter();
-
-            transformer.transform(new StreamSource(new StringReader(xsl)),
-                    new StreamResult(sw));
-            assertEquals(sw.toString(), "hello world");
-        } catch (TransformerException e) {
-            fail();
+            transformer.transform(new StreamSource(new File(xml)), new StreamResult(System.out));
+        } catch (Exception e) {
             e.printStackTrace();
+            fail();
         }
+
     }
 
     /**
      * Test use of a per-stylesheet extension library
      */
 
+    @Test
     public void testExtensionNotFound() {
         try {
             String inputUri = "file:///Users/Mike/bugs/2011/Pedruzzi/base64/books.xml";
@@ -148,28 +122,5 @@ public class TemplatesHandlerTest extends TestCase {
 
 
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
-
 
 

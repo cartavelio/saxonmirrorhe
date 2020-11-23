@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,24 +9,20 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.TraceListener;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.trace.InstructionInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.AttributeCollectionImpl;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.Whitespace;
+import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -59,12 +55,12 @@ public class ContentHandlerProxy implements Receiver {
     private int depth = 0;
     private boolean requireWellFormed = false;
     private boolean undeclareNamespaces = false;
-    private Stack<String> elementStack = new Stack<>();
-    private Stack<String> namespaceStack = new Stack<>();
+    private final Stack<String> elementStack = new Stack<>();
+    private final Stack<String> namespaceStack = new Stack<>();
     private ContentHandlerProxyTraceListener traceListener;
-    protected AttributeCollectionImpl pendingAttributes;
-    private NodeName pendingElement = null;
-    private Location currentLocation = ExplicitLocation.UNKNOWN_LOCATION;
+    //protected AttributeCollectionImpl pendingAttributes;
+    //private NodeName pendingElement = null;
+    private Location currentLocation = Loc.NONE;
 
     // MARKER is a value added to the namespace stack at the start of an element, so that we know how
     // far to unwind the stack on an end-element event.
@@ -114,6 +110,7 @@ public class ContentHandlerProxy implements Receiver {
      * @param pipe the pipeline configuration
      */
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         this.pipe = pipe;
     }
@@ -123,6 +120,7 @@ public class ContentHandlerProxy implements Receiver {
      */
 
     /*@NotNull*/
+    @Override
     public PipelineConfiguration getPipelineConfiguration() {
         return pipe;
     }
@@ -143,6 +141,7 @@ public class ContentHandlerProxy implements Receiver {
      * @param systemId the system ID (effectively the base URI)
      */
 
+    @Override
     public void setSystemId(String systemId) {
         this.systemId = systemId;
     }
@@ -153,6 +152,7 @@ public class ContentHandlerProxy implements Receiver {
      * @return the system ID (effectively the base URI)
      */
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -189,6 +189,7 @@ public class ContentHandlerProxy implements Receiver {
      * @param publicID The public identifier of the unparsed entity
      */
 
+    @Override
     public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
         // Avoid passing unparsed entities to a general-purpose DTDHandler because it's probably
         // expecting them in the context of the rest of the DTD, which we don't make available.
@@ -270,8 +271,8 @@ public class ContentHandlerProxy implements Receiver {
      * Notify the start of the event stream
      */
 
+    @Override
     public void open() throws XPathException {
-        pendingAttributes = new AttributeCollectionImpl(getPipelineConfiguration().getConfiguration());
         if (handler == null) {
             throw new IllegalStateException("ContentHandlerProxy.open(): no underlying handler provided");
         }
@@ -289,6 +290,7 @@ public class ContentHandlerProxy implements Receiver {
      * Notify the end of the event stream
      */
 
+    @Override
     public void close() throws XPathException {
         if (depth >= 0) {
             try {
@@ -302,8 +304,10 @@ public class ContentHandlerProxy implements Receiver {
 
     /**
      * Notify the start of the document.
+     * @param properties
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
     }
 
@@ -311,6 +315,7 @@ public class ContentHandlerProxy implements Receiver {
      * Notify the end of the document
      */
 
+    @Override
     public void endDocument() throws XPathException {
     }
 
@@ -318,23 +323,18 @@ public class ContentHandlerProxy implements Receiver {
      * Notify the start of an element
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         depth++;
         if (depth <= 0 && requireWellFormed) {
             notifyNotWellFormed();
         }
-        pendingElement = nameCode;
         currentLocation = location.saveLocation();
         namespaceStack.push(MARKER);
-    }
 
-    /**
-     * Notify a namespace. Namespaces are notified <b>after</b> the startElement event, and before
-     * any children for the element.
-     */
-
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        for (NamespaceBinding ns : namespaceBindings) {
+        for (NamespaceBinding ns : namespaces) {
             String prefix = ns.getPrefix();
             if (prefix.equals("xml")) {
                 return;
@@ -351,57 +351,45 @@ public class ContentHandlerProxy implements Receiver {
                 handleSAXException(err);
             }
         }
-    }
 
-    /**
-     * Notify an attribute. Attributes are notified after the startElement event, and before any
-     * children.
-     */
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        int index = pendingAttributes.findByNodeName(nameCode);
-        if (index < 0) {
-            pendingAttributes.addAttribute(nameCode, typeCode, value.toString(), locationId, properties);
+        Attributes atts2;
+        if (attributes instanceof Attributes) {
+            atts2 = (Attributes)attributes;
         } else {
-            pendingAttributes.setAttribute(index, nameCode, typeCode, value.toString(), locationId, properties);
+            AttributeCollectionImpl aci = new AttributeCollectionImpl(getConfiguration(), attributes.size());
+            for (AttributeInfo att : attributes) {
+                aci.addAttribute(att.getNodeName(),
+                                 BuiltInAtomicType.UNTYPED_ATOMIC,
+                                 att.getValue(),
+                                 att.getLocation(),
+                                 att.getProperties());
+            }
+            atts2 = aci;
         }
-    }
 
-    /**
-     * Notify the start of the content, that is, the completion of all attributes and namespaces.
-     * Note that the initial receiver of output from XSLT instructions will not receive this event,
-     * it has to detect it itself. Note that this event is reported for every element even if it has
-     * no attributes, no namespaces, and no content.
-     */
+        if (depth > 0 || !requireWellFormed) {
+            try {
+                String uri = elemName.getURI();
+                String localName = elemName.getLocalPart();
+                String qname = elemName.getDisplayName();
 
-    public void startContent() throws XPathException {
-        try {
-            if (depth > 0 || !requireWellFormed) {
-                String uri = pendingElement.getURI();
-                String localName = pendingElement.getLocalPart();
-                String qname = pendingElement.getDisplayName();
-
-                handler.startElement(uri, localName, qname, pendingAttributes);
+                handler.startElement(uri, localName, qname, atts2);
 
                 elementStack.push(uri);
                 elementStack.push(localName);
                 elementStack.push(qname);
 
-                pendingAttributes.clear();
-                pendingElement = null;
+            } catch (SAXException e) {
+                handleSAXException(e);
             }
-        } catch (SAXException err) {
-            handleSAXException(err);
-
         }
     }
-
 
     /**
      * End of element
      */
 
+    @Override
     public void endElement() throws XPathException {
         if (depth > 0) {
             try {
@@ -439,9 +427,10 @@ public class ContentHandlerProxy implements Receiver {
      * Character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         currentLocation = locationId;
-        boolean disable = (properties & ReceiverOptions.DISABLE_ESCAPING) != 0;
+        boolean disable = ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING);
         if (disable) {
             setEscaping(false);
         }
@@ -479,6 +468,7 @@ public class ContentHandlerProxy implements Receiver {
      * Processing Instruction
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
             throws XPathException {
         currentLocation = locationId;
@@ -494,6 +484,7 @@ public class ContentHandlerProxy implements Receiver {
      * is also a SAX2 LexicalHandler.
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties)
             throws XPathException {
         currentLocation = locationId;
@@ -514,6 +505,7 @@ public class ContentHandlerProxy implements Receiver {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }
@@ -566,6 +558,7 @@ public class ContentHandlerProxy implements Receiver {
 
         private Stack<Item> contextItemStack;
 
+        @Override
         public void setOutputDestination(Logger stream) {
             // no action
         }
@@ -585,6 +578,7 @@ public class ContentHandlerProxy implements Receiver {
          * Method called at the start of execution, that is, when the run-time transformation starts
          */
 
+        @Override
         public void open(Controller controller) {
             contextItemStack = new Stack<>();
         }
@@ -593,34 +587,9 @@ public class ContentHandlerProxy implements Receiver {
          * Method called at the end of execution, that is, when the run-time execution ends
          */
 
+        @Override
         public void close() {
             contextItemStack = null;
-        }
-
-        /**
-         * Method that is called when an instruction in the stylesheet gets processed.
-         *
-         * @param instruction gives information about the instruction being
-         *                    executed, and about the context in which it is executed. This object is mutable,
-         *                    so if information from the InstructionInfo is to be retained, it must be copied.
-         */
-
-        public void enter(InstructionInfo instruction, XPathContext context) {
-            // do nothing
-        }
-
-        /**
-         * Method that is called after processing an instruction of the stylesheet,
-         * that is, after any child instructions have been processed.
-         *
-         * @param instruction gives the same information that was supplied to the
-         *                    enter method, though it is not necessarily the same object. Note that the
-         *                    line number of the instruction is that of the start tag in the source stylesheet,
-         *                    not the line number of the end tag.
-         */
-
-        public void leave(InstructionInfo instruction) {
-            // do nothing
         }
 
         /**
@@ -633,6 +602,7 @@ public class ContentHandlerProxy implements Receiver {
          *                    a reference to the Item for later use.
          */
 
+        @Override
         public void startCurrentItem(Item currentItem) {
             if (contextItemStack == null) {
                 contextItemStack = new Stack<>();
@@ -651,6 +621,7 @@ public class ContentHandlerProxy implements Receiver {
          *                    not necessarily be the same actual object.
          */
 
+        @Override
         public void endCurrentItem(Item currentItem) {
             contextItemStack.pop();
         }

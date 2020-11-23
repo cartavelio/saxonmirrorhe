@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,12 +8,20 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.om.AbsolutePath;
+import net.sf.saxon.om.NodeInfo;
 
 import javax.xml.transform.SourceLocator;
 
 /**
- * An Invalidity is a validation error, that is, a failure of the instance document
+ * An {@code Invalidity} is a validation error, that is, a failure of the instance document
  * to conform to the schema being used for validation.
+ *
+ * <p>The class extends {@link SourceLocator}, which makes location information available (for example,
+ * a line and column number). This information will generally be the location of the error as it appears
+ * in error reports intended for a human reader. It is not necessarily the same as the location of the
+ * invalid node. For example, if the schema type for element A does not allow a child element named B,
+ * but in the instance document there is an A element with a B child, then the location information
+ * may relate to element B, whereas it is A that is invalid.</p>
  */
 public interface Invalidity extends SourceLocator {
 
@@ -49,16 +57,28 @@ public interface Invalidity extends SourceLocator {
     String getConstraintReference();
 
     /**
+     * Get the node that was found to be invalid (if any). This will be available only when
+     * validating an input document supplied in the form of an in-memory tree
+     * @return the invalid node, if it is known, or null
+     */
+
+    NodeInfo getInvalidNode();
+
+    /**
      * Get a hierarchic path giving the logical position in the instance document where the
      * validation error was found
-     * @return a path to the location in the document
+     * @return a path to the location in the document where the error was found. This is not necessarily
+     * the same thing as the node that is invalid: for example if the schema type for element A does
+     * not allow a child element named B, but in the instance document there is an A element with a B
+     * child, then the path returned may be the path to B, whereas it is A that is invalid.
      */
 
     AbsolutePath getPath();
 
     /**
-     * Get a hierarchic path giving the logical position in the instance document where the
-     * validation error was found
+     * Get a hierarchic path giving the node being validated (the validation root). If validation
+     * is invoked from XSLT this might be a node selected by the instruction {@code <xsl:copy-of select="X"
+     * validation="strict"/>}; in XQuery it might be the target of a {@code validate} expression.
      * @return a path to the location in the document
      */
 

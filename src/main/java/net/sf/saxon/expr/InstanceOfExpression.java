@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -16,10 +16,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -49,6 +46,7 @@ public final class InstanceOfExpression extends UnaryExpression {
         targetCardinality = target.getCardinality();
     }
 
+    @Override
     protected OperandRole getOperandRole() {
         return targetType instanceof DocumentNodeTest ?
                 OperandRole.ABSORB : OperandRole.INSPECT;
@@ -81,6 +79,7 @@ public final class InstanceOfExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
         Expression operand = getBaseExpression();
@@ -95,12 +94,12 @@ public final class InstanceOfExpression extends UnaryExpression {
 
         if (Cardinality.subsumes(targetCardinality, operand.getCardinality())) {
             final TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-            int relation = th.relationship(operand.getItemType(), targetType);
-            if (relation == TypeHierarchy.SAME_TYPE || relation == TypeHierarchy.SUBSUMED_BY) {
+            Affinity relation = th.relationship(operand.getItemType(), targetType);
+            if (relation == Affinity.SAME_TYPE || relation == Affinity.SUBSUMED_BY) {
                 Literal lit = Literal.makeLiteral(BooleanValue.TRUE, this);
                 ExpressionTool.copyLocationInfo(this, lit);
                 return lit;
-            } else if (relation == TypeHierarchy.DISJOINT) {
+            } else if (relation == Affinity.DISJOINT) {
                 // if the item types are disjoint, the result might still be true if both sequences are empty
                 if (!Cardinality.allowsZero(targetCardinality) || !Cardinality.allowsZero(operand.getCardinality())) {
                     Literal lit = Literal.makeLiteral(BooleanValue.FALSE, this);
@@ -132,6 +131,7 @@ public final class InstanceOfExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         Expression e = super.optimize(visitor, contextInfo);
         if (e != this) {
@@ -139,10 +139,10 @@ public final class InstanceOfExpression extends UnaryExpression {
         }
         if (Cardinality.subsumes(targetCardinality, getBaseExpression().getCardinality())) {
             final TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-            int relation = th.relationship(getBaseExpression().getItemType(), targetType);
-            if (relation == TypeHierarchy.SAME_TYPE || relation == TypeHierarchy.SUBSUMED_BY) {
+            Affinity relation = th.relationship(getBaseExpression().getItemType(), targetType);
+            if (relation == Affinity.SAME_TYPE || relation == Affinity.SUBSUMED_BY) {
                 return Literal.makeLiteral(BooleanValue.TRUE, this);
-            } else if (relation == TypeHierarchy.DISJOINT) {
+            } else if (relation == Affinity.DISJOINT) {
                 // if the item types are disjoint, the result might still be true if both sequences are empty
                 if (!Cardinality.allowsZero(targetCardinality) || !Cardinality.allowsZero(getBaseExpression().getCardinality())) {
                     return Literal.makeLiteral(BooleanValue.FALSE, this);
@@ -189,6 +189,7 @@ public final class InstanceOfExpression extends UnaryExpression {
      * Determine the cardinality
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -201,6 +202,7 @@ public final class InstanceOfExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         InstanceOfExpression exp = new InstanceOfExpression(getBaseExpression().copy(rebindings),
                 SequenceType.makeSequenceType(targetType, targetCardinality));
@@ -213,6 +215,7 @@ public final class InstanceOfExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return BuiltInAtomicType.BOOLEAN;
     }
@@ -234,6 +237,7 @@ public final class InstanceOfExpression extends UnaryExpression {
      * Evaluate the expression
      */
 
+    @Override
     public BooleanValue evaluateItem(XPathContext context) throws XPathException {
         return BooleanValue.get(effectiveBooleanValue(context));
     }
@@ -242,6 +246,7 @@ public final class InstanceOfExpression extends UnaryExpression {
      * Evaluate the expression as a boolean
      */
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         SequenceIterator iter = getBaseExpression().iterate(context);
         return isInstance(iter, context);
@@ -290,17 +295,11 @@ public final class InstanceOfExpression extends UnaryExpression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("instance", this);
-        if (targetCardinality == StaticProperty.ALLOWS_ZERO) {
-            out.emitAttribute("of", "empty-sequence()");
-        } else {
-            out.emitAttribute("of", targetType.toExportString() + Cardinality.getOccurrenceIndicator(targetCardinality));
-        }
-        if ("JS".equals(((ExpressionPresenter.ExportOptions) out.getOptions()).target)) {
-            int targetVersion = ((ExpressionPresenter.ExportOptions) out.getOptions()).targetVersion;
-            out.emitAttribute("jsTest", targetType.generateJavaScriptItemTypeTest(getBaseExpression().getItemType(), targetVersion));
-        }
+        SequenceType st = SequenceType.makeSequenceType(targetType, targetCardinality);
+        out.emitAttribute("of", st.toAlphaCode());
         getBaseExpression().export(out);
         out.endElement();
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.om.EnumSetTool;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -15,15 +16,17 @@ import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
+import java.util.EnumSet;
+
 /**
  * TailIterator iterates over a base sequence starting at an element other than the first.
  * The base sequence is represented by an iterator which is consumed in the process
  */
 
-public class TailIterator<T extends Item<?>>
-        implements SequenceIterator<T>, LastPositionFinder, LookaheadIterator<T> {
+public class TailIterator
+        implements SequenceIterator, LastPositionFinder, LookaheadIterator {
 
-    private SequenceIterator<T> base;
+    private SequenceIterator base;
     private int start;
 
     /**
@@ -39,7 +42,7 @@ public class TailIterator<T extends Item<?>>
      *              when cloning the iterator or when calculating the value of last().
      */
 
-    private TailIterator(SequenceIterator<T> base, int start) {
+    private TailIterator(SequenceIterator base, int start) {
         this.base = base;
         this.start = start;
     }
@@ -59,17 +62,17 @@ public class TailIterator<T extends Item<?>>
      *          if a dynamic error occurs
      */
 
-    public static <T extends Item<?>> SequenceIterator<T> make(SequenceIterator<T> base, int start) throws XPathException {
+    public static <T extends Item> SequenceIterator make(SequenceIterator base, int start) throws XPathException {
         if (start <= 1) {
             return base;
         } else if (base instanceof ArrayIterator) {
-            return ((ArrayIterator<T>) base).makeSliceIterator(start, Integer.MAX_VALUE);
-        } else if ((base.getProperties() & SequenceIterator.GROUNDED) != 0) {
-            GroundedValue<T> value = base.materialize();
+            return ((ArrayIterator) base).makeSliceIterator(start, Integer.MAX_VALUE);
+        } else if (base.getProperties().contains(SequenceIterator.Property.GROUNDED)) {
+            GroundedValue value = base.materialize();
             if (start > value.getLength()) {
                 return EmptyIterator.emptyIterator();
             } else {
-                return new ValueTailIterator<>(value, start - 1);
+                return new ValueTailIterator(value, start - 1);
             }
         } else {
             // discard the first n-1 items from the underlying iterator
@@ -79,24 +82,28 @@ public class TailIterator<T extends Item<?>>
                     return EmptyIterator.emptyIterator();
                 }
             }
-            return new TailIterator<>(base, start);
+            return new TailIterator(base, start);
         }
     }
 
 
-    public T next() throws XPathException {
+    @Override
+    public Item next() throws XPathException {
         return base.next();
     }
 
+    @Override
     public boolean hasNext() {
         return ((LookaheadIterator) base).hasNext();
     }
 
+    @Override
     public int getLength() throws XPathException {
         int bl = ((LastPositionFinder) base).getLength() - start + 1;
         return bl > 0 ? bl : 0;
     }
 
+    @Override
     public void close() {
         base.close();
     }
@@ -105,14 +112,17 @@ public class TailIterator<T extends Item<?>>
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return base.getProperties() & (LAST_POSITION_FINDER | LOOKAHEAD);
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSetTool.intersect(
+                base.getProperties(),
+                EnumSet.of(Property.LAST_POSITION_FINDER, Property.LOOKAHEAD));
     }
 }
 

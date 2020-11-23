@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -38,6 +39,7 @@ public class LocalParamBlock extends Instruction {
         }
     }
 
+    @Override
     public String getExpressionName() {
         return "params";
     }
@@ -51,6 +53,7 @@ public class LocalParamBlock extends Instruction {
         return operanda.length;
     }
 
+    @Override
     public int computeSpecialProperties() {
         return 0;
     }
@@ -64,6 +67,7 @@ public class LocalParamBlock extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         LocalParam[] lps2 = new LocalParam[getNumberOfParams()];
         int i=0;
@@ -83,6 +87,7 @@ public class LocalParamBlock extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public final ItemType getItemType() {
         return ErrorType.getInstance();
     }
@@ -91,6 +96,7 @@ public class LocalParamBlock extends Instruction {
      * Determine the cardinality of the expression
      */
 
+    @Override
     public final int getCardinality() {
         return StaticProperty.EMPTY;
     }
@@ -100,6 +106,7 @@ public class LocalParamBlock extends Instruction {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("params", this);
         for (Operand o : operands()) {
@@ -110,7 +117,8 @@ public class LocalParamBlock extends Instruction {
 
 
     /*@Nullable*/
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         for (Operand o : operands()) {
             LocalParam param = (LocalParam)o.getChildExpression();
             try {
@@ -130,6 +138,7 @@ public class LocalParamBlock extends Instruction {
      * process() methods natively.
      */
 
+    @Override
     public int getImplementationMethod() {
         return PROCESS_METHOD;
     }

@@ -1,8 +1,8 @@
 package jaxptest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.FeatureKeys;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -11,23 +11,26 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringWriter;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Tests for saxon:import-query
  */
-public class TransformCallingQueryTest extends TestCase {
+public class TransformCallingQueryTest {
 
+    @Test
     public void testTransformCallingQuery()
 	{
         // Bug reported 2012-03-28 by Michael Hedenus, Continental Corporation. Only fails if running PE.
         try {
             TransformerFactory transformerFactory = new TransformerFactoryImpl();
             transformerFactory.setAttribute(FeatureKeys.GENERATE_BYTE_CODE, false);
-            Transformer transformer = transformerFactory.newTransformer(new StreamSource("file:///Users/mike/bugs/2012/hedenus/bug.xslt"));
+            Transformer transformer = transformerFactory.newTransformer(new StreamSource(ConfigTest.BUGS_DIR + "hedenus/bug.xslt"));
             transformer.setParameter("myparam", "london");
 
-
             StringWriter writer = new StringWriter();
-            transformer.transform(new StreamSource("file:///Users/mike/bugs/2012/hedenus/bug.xslt"), new StreamResult(writer));
+            transformer.transform(new StreamSource(ConfigTest.BUGS_DIR +"hedenus/bug.xslt"), new StreamResult(writer));
             System.err.println(writer.toString());
             assertTrue(writer.toString().contains("<london><a/></london>"));
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,9 +8,11 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.AtomizingIterator;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.io.Closeable;
+import java.util.EnumSet;
 
 /**
  * A SequenceIterator is used to iterate over any XPath 2 sequence (of values or nodes).
@@ -26,11 +28,10 @@ import java.io.Closeable;
  * iterator in an XPathContext. SequenceIterators than maintain the value of position()
  * and last() are represented by the interface {@link FocusIterator}.</p>
  *
- * @author Michael H. Kay
- * @since 8.4; significant changes in 9.6.
+ * @since 8.4. Significant changes in 9.6. Generics added in 9.9, removed again in 10.0
  */
 
-public interface SequenceIterator<T extends Item<?>> extends Closeable {
+public interface SequenceIterator extends Closeable {
 
     /**
      * Get the next item in the sequence. This method changes the state of the
@@ -45,7 +46,7 @@ public interface SequenceIterator<T extends Item<?>> extends Closeable {
      */
 
     /*@Nullable*/
-    T next() throws XPathException;
+    Item next() throws XPathException;
 
     /**
      * Close the iterator. This indicates to the supplier of the data that the client
@@ -63,56 +64,63 @@ public interface SequenceIterator<T extends Item<?>> extends Closeable {
      * @since 9.1. Default implementation added in 9.9.
      */
 
+    @Override
     default void close() {}
 
     /**
-     * Get properties of this iterator, as a bit-significant integer.
+     * Get properties of this iterator.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
+     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+     *         and {@link Property#LOOKAHEAD}. It is always
+     *         acceptable to return the default value {@code EnumSet.noneOf(Property.class)},
+     *         indicating that there are no known special properties.
+     *         It is acceptable (though unusual) for the properties of the iterator to change depending
+     *         on its state.
      * @since 8.6. Default implementation added in 9.9.
      */
 
-    default int getProperties() {
-        return 0;
+    default EnumSet<Property> getProperties() {
+        return EnumSet.noneOf(Property.class);
     }
 
-    /**
-     * Property value: the iterator is "grounded". This means that (a) the
-     * iterator must be an instance of {@link net.sf.saxon.tree.iter.GroundedIterator}, and (b) the
-     * implementation of the materialize() method must be efficient (in particular,
-     * it should not involve the creation of new objects)
-     */
+    enum Property {
 
-    int GROUNDED = 1;
+        /**
+         * Property value: the iterator is "grounded". This means that (a) the
+         * iterator must be an instance of {@link net.sf.saxon.tree.iter.GroundedIterator}, and (b) the
+         * implementation of the materialize() method must be efficient (in particular,
+         * it should not involve the creation of new objects)
+         */
 
-    /**
-     * Property value: the iterator knows the number of items that it will deliver.
-     * This means that (a) the iterator must be an instance of {@link net.sf.saxon.expr.LastPositionFinder},
-     * and (b) the implementation of the getLastPosition() method must be efficient (in particular,
-     * it should take constant time, rather than time proportional to the length of the sequence)
-     */
+        GROUNDED,
 
-    int LAST_POSITION_FINDER = 1 << 1;
+        /**
+         * Property value: the iterator knows the number of items that it will deliver.
+         * This means that (a) the iterator must be an instance of {@link net.sf.saxon.expr.LastPositionFinder},
+         * and (b) the implementation of the getLastPosition() method must be efficient (in particular,
+         * it should take constant time, rather than time proportional to the length of the sequence)
+         */
 
-    /**
-     * Property value: the iterator knows whether there are more items still to come. This means
-     * that (a) the iterator must be an instance of {@link net.sf.saxon.tree.iter.LookaheadIterator}, and (b) the
-     * implementation of the hasNext() method must be efficient (more efficient than the client doing
-     * it)
-     */
+        LAST_POSITION_FINDER,
 
-    int LOOKAHEAD = 1 << 2;
+        /**
+         * Property value: the iterator knows whether there are more items still to come. This means
+         * that (a) the iterator must be an instance of {@link net.sf.saxon.tree.iter.LookaheadIterator}, and (b) the
+         * implementation of the hasNext() method must be efficient (more efficient than the client doing
+         * it)
+         */
 
-    /**
-     * Property value: the iterator can deliver an atomized result. This means that the iterator
-     * must be an instance of AtomizingIterator.
-     */
+        LOOKAHEAD,
 
-    int ATOMIZING = 1 << 3;
+        /**
+         * Property value: the iterator can deliver an atomized result. This means that the iterator
+         * must be an instance of {@link AtomizingIterator}.
+         */
+
+        ATOMIZING
+
+    }
 
     /**
      * Process all the remaining items delivered by the SequenceIterator using a supplied consumer function.
@@ -122,8 +130,8 @@ public interface SequenceIterator<T extends Item<?>> extends Closeable {
      *                        or (b) the consumer throws an exception.
      */
 
-    default void forEachOrFail(ItemConsumer<T> consumer) throws XPathException {
-        T item;
+    default void forEachOrFail(ItemConsumer<? super Item> consumer) throws XPathException {
+        Item item;
         while ((item = next()) != null) {
             consumer.accept(item);
         }
@@ -144,9 +152,8 @@ public interface SequenceIterator<T extends Item<?>> extends Closeable {
      * @throws XPathException if reading the SequenceIterator throws an error
      */
 
-    default GroundedValue<T> materialize() throws XPathException {
-        //noinspection deprecation
-        return SequenceExtent.fromIterator(this);
+    default GroundedValue materialize() throws XPathException {
+        return new SequenceExtent(this).reduce();
     }
 
 

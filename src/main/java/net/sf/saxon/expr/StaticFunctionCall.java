@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,13 +13,11 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 
 /**
  * A call to a function that is known statically. This is a stricter definition than "static function
@@ -78,6 +76,7 @@ public class StaticFunctionCall extends FunctionCall implements Callable {
      * @return true if the expression is a call on the function
      */
 
+    @Override
     public boolean isCallOn(Class<? extends SystemFunction> function) {
         return function.isAssignableFrom(target.getClass());
     }
@@ -177,7 +176,8 @@ public class StaticFunctionCall extends FunctionCall implements Callable {
      * of the callee to ensure that the type of result conforms to the expected result type.
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence<?>[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         return target.call(context, arguments);
     }
 
@@ -212,44 +212,57 @@ public class StaticFunctionCall extends FunctionCall implements Callable {
                 o.getChildExpression().export(out);
             }
             out.endElement();
-        } else if (target instanceof UnionCastableFunction) {
-            // Bug 2611. Bug 3822.
-            out.startElement("castable", this);
-            out.emitAttribute("emptiable", ((UnionCastableFunction) target).isAllowEmpty() ? "1" : "0");
-            out.emitAttribute("as", ((UnionCastableFunction) target).getTargetType().toExportString());
-            for (Operand o : operands()) {
-                o.getChildExpression().export(out);
-            }
-            out.endElement();
-        } else if (target instanceof ListCastableFunction) {
-            // Bug 2611. Bug 3822.
-            out.startElement("castable", this);
-            out.emitAttribute("emptiable", ((ListCastableFunction) target).isAllowEmpty() ? "1" : "0");
-            out.emitAttribute("as", ((ListCastableFunction) target).getTargetType().getStructuredQName());
-            for (Operand o : operands()) {
-                o.getChildExpression().export(out);
-            }
-            out.endElement();
-        } else if (target instanceof UnionConstructorFunction) {
-            // Bug 2611.
-            out.startElement("cast", this);
-            out.emitAttribute("emptiable", ((UnionConstructorFunction) target).isAllowEmpty() ? "1" : "0");
-            out.emitAttribute("as", ((UnionConstructorFunction) target).getTargetType().toExportString());
-            for (Operand o : operands()) {
-                o.getChildExpression().export(out);
-            }
-            out.endElement();
-        } else if (target instanceof ListConstructorFunction) {
-            // Bug 2611.
-            out.startElement("cast", this);
-            out.emitAttribute("emptiable", ((ListConstructorFunction) target).isAllowEmpty() ? "1" : "0");
-            out.emitAttribute("as", ((ListConstructorFunction) target).getTargetType().getStructuredQName());
-            for (Operand o : operands()) {
-                o.getChildExpression().export(out);
-            }
-            out.endElement();
         } else {
-            super.export(out);
+
+            if (target instanceof UnionCastableFunction) {
+                // Bug 2611. Bug 3822.
+                final UnionType targetType = ((UnionConstructorFunction) target).getTargetType();
+                out.startElement("castable", this);
+                if (targetType instanceof LocalUnionType) {
+                    out.emitAttribute("to", AlphaCode.fromItemType(targetType));
+                } else {
+                    out.emitAttribute("as", targetType.toExportString());
+                }
+                out.emitAttribute("flags", "u" + (((UnionConstructorFunction) target).isAllowEmpty() ? "e" : ""));
+                for (Operand o : operands()) {
+                    o.getChildExpression().export(out);
+                }
+                out.endElement();
+            } else if (target instanceof ListCastableFunction) {
+                // Bug 2611. Bug 3822.
+                out.startElement("castable", this);
+                out.emitAttribute("as", ((ListConstructorFunction) target).getTargetType().getStructuredQName());
+                out.emitAttribute("flags", "l" + (((ListConstructorFunction) target).isAllowEmpty() ? "e" : ""));
+                for (Operand o : operands()) {
+                    o.getChildExpression().export(out);
+                }
+                out.endElement();
+            } else if (target instanceof UnionConstructorFunction) {
+                // Bug 2611.
+                final UnionType targetType = ((UnionConstructorFunction) target).getTargetType();
+                out.startElement("cast", this);
+                if (targetType instanceof LocalUnionType) {
+                    out.emitAttribute("to", AlphaCode.fromItemType(targetType));
+                } else{
+                    out.emitAttribute("as", targetType.toExportString());
+                }
+                out.emitAttribute("flags", "u" + (((UnionConstructorFunction) target).isAllowEmpty() ? "e" : ""));
+                for (Operand o : operands()) {
+                    o.getChildExpression().export(out);
+                }
+                out.endElement();
+            } else if (target instanceof ListConstructorFunction) {
+                // Bug 2611.
+                out.startElement("cast", this);
+                out.emitAttribute("as", ((ListConstructorFunction) target).getTargetType().getStructuredQName());
+                out.emitAttribute("flags", "l" + (((ListConstructorFunction) target).isAllowEmpty() ? "e" : ""));
+                for (Operand o : operands()) {
+                    o.getChildExpression().export(out);
+                }
+                out.endElement();
+            } else {
+                super.export(out);
+            }
         }
     }
 

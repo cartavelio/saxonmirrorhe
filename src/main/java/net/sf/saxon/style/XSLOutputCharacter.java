@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,8 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.XPathException;
 
@@ -23,14 +24,15 @@ public class XSLOutputCharacter extends StyleElement {
     // the character to be substituted, as a Unicode codepoint (may be > 65535)
     private String replacementString = null;
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             if (f.equals("character")) {
-                String s = atts.getValue(a);
+                String s = value;
                 switch (s.length()) {
                     case 0:
                         compileError("character attribute must not be zero-length", "XTSE0020");
@@ -53,9 +55,9 @@ public class XSLOutputCharacter extends StyleElement {
                         codepoint = 256; // for error recovery
                 }
             } else if (f.equals("string")) {
-                replacementString = atts.getValue(a);
+                replacementString = value;
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
         if (codepoint == -1) {
@@ -69,12 +71,14 @@ public class XSLOutputCharacter extends StyleElement {
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         if (!(getParent() instanceof XSLCharacterMap)) {
             compileError("xsl:output-character may appear only as a child of xsl:character-map", "XTSE0010");
         }
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return null;
     }

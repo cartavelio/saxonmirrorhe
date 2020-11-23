@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,15 +12,11 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.InstructionInfo;
-import net.sf.saxon.trace.LocationKind;
-import net.sf.saxon.trans.FunctionStreamability;
-import net.sf.saxon.trans.GlobalVariableManager;
-import net.sf.saxon.trans.SymbolicName;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.jiter.PairIterator;
 import net.sf.saxon.value.SequenceType;
 
@@ -32,7 +28,7 @@ import java.util.List;
  * A user-defined function in an XQuery module
  */
 
-public class XQueryFunction implements InstructionInfo, Declaration {
+public class XQueryFunction implements Declaration, Location {
     private StructuredQName functionName;
     private List<UserFunctionParameter> arguments;
     private SequenceType resultType;
@@ -375,21 +371,13 @@ public class XQueryFunction implements InstructionInfo, Declaration {
                             new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, functionName.getDisplayName(), 0);
                     //role.setSourceLocator(this);
                     body = config.getTypeChecker(false).staticTypeCheck(body, resultType, role, visitor);
-                    if (staticContext.getUserQueryContext().isCompileWithTracing()) {
-                        namespaceResolver = staticContext.getNamespaceResolver();
-                        TraceExpression trace = new TraceExpression(body);
-                        trace.setConstructType(StandardNames.XSL_FUNCTION);
-                        trace.setObjectName(functionName);
-                        trace.setNamespaceResolver(staticContext.getNamespaceResolver());
-                        trace.setLocation(location);
-                        body = trace;
-                    }
+
                 } catch (XPathException e) {
                     e.maybeSetLocation(this);
                     if (e.isReportableStatically()) {
                         throw e;
                     } else {
-                        Expression newBody = new ErrorExpression(e);
+                        Expression newBody = new ErrorExpression(new XmlProcessingException(e));
                         ExpressionTool.copyLocationInfo(body, newBody);
                         body = newBody;
                     }
@@ -407,6 +395,13 @@ public class XQueryFunction implements InstructionInfo, Declaration {
                 compiledFunction.setStackFrameMap(map);
                 compiledFunction.setUpdating(isUpdating);
                 compiledFunction.setAnnotations(annotations);
+
+                if (staticContext.getUserQueryContext().isCompileWithTracing()) {
+                    namespaceResolver = staticContext.getNamespaceResolver();
+                    ComponentTracer trace = new ComponentTracer(compiledFunction);
+                    trace.setLocation(location);
+                    body = trace;
+                }
 
             }
             // bind all references to this function to the UserFunction object
@@ -459,6 +454,7 @@ public class XQueryFunction implements InstructionInfo, Declaration {
         if (opt.isOptionSet(OptimizerOptions.EXTRACT_GLOBALS)) {
             final Executable exec = ((QueryModule)getStaticContext()).getExecutable();
             GlobalVariableManager manager = new GlobalVariableManager() {
+                @Override
                 public void addGlobalVariable(GlobalVariable variable) throws XPathException {
                     PackageData pd = staticContext.getPackageData();
                     variable.setPackageData(pd);
@@ -495,9 +491,9 @@ public class XQueryFunction implements InstructionInfo, Declaration {
 
         compiledFunction.computeEvaluationMode();
         ExpressionTool.allocateSlots(body, arity, compiledFunction.getStackFrameMap());
-        if (config.isGenerateByteCode(Configuration.XQUERY)) {
+        if (config.isGenerateByteCode(HostLanguage.XQUERY)) {
             if (config.getCountDown() == 0) {
-                ICompilerService compilerService = config.makeCompilerService(Configuration.XQUERY);
+                ICompilerService compilerService = config.makeCompilerService(HostLanguage.XQUERY);
                 Expression cbody = opt.compileToByteCode(compilerService, body, getFunctionName().getDisplayName(),
                                                          Expression.PROCESS_METHOD | Expression.ITERATE_METHOD);
                 if (cbody != null) {
@@ -576,15 +572,6 @@ public class XQueryFunction implements InstructionInfo, Declaration {
     }
 
     /**
-     * Get the type of construct. This will be a constant in
-     * class {@link LocationKind}.
-     */
-
-    public int getConstructType() {
-        return StandardNames.XSL_FUNCTION;
-    }
-
-    /**
      * Get a name identifying the object of the expression, for example a function name, template name,
      * variable name, key name, element name, etc. This is used only where the name is known statically.
      */
@@ -601,6 +588,7 @@ public class XQueryFunction implements InstructionInfo, Declaration {
      * always retained.
      */
 
+    @Override
     public String getSystemId() {
         return location.getSystemId();
     }
@@ -611,6 +599,7 @@ public class XQueryFunction implements InstructionInfo, Declaration {
      * not relate to anything in the source code, the value returned may be -1.
      */
 
+    @Override
     public int getLineNumber() {
         return location.getLineNumber();
     }
@@ -623,6 +612,7 @@ public class XQueryFunction implements InstructionInfo, Declaration {
      * @see #getSystemId
      */
     /*@Nullable*/
+    @Override
     public String getPublicId() {
         return null;
     }
@@ -634,6 +624,7 @@ public class XQueryFunction implements InstructionInfo, Declaration {
      * @see #getLineNumber
      */
 
+    @Override
     public int getColumnNumber() {
         return -1;
     }
@@ -643,6 +634,7 @@ public class XQueryFunction implements InstructionInfo, Declaration {
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
+    @Override
     public Location saveLocation() {
         return this;
     }
@@ -690,11 +682,11 @@ public class XQueryFunction implements InstructionInfo, Declaration {
     /**
      * Get the host language (XSLT, XQuery, XPath) used to implement the code in this container
      *
-     * @return typically {@link net.sf.saxon.Configuration#XSLT} or {@link net.sf.saxon.Configuration#XQUERY}
+     * @return {@link HostLanguage#XQUERY}
      */
 
-    public int getHostLanguage() {
-        return Configuration.XQUERY;
+    public HostLanguage getHostLanguage() {
+        return HostLanguage.XQUERY;
     }
 
 }

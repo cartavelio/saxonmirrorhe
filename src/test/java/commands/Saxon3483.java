@@ -9,8 +9,8 @@ import net.sf.saxon.s9api.XQueryCompiler;
 import java.util.Random;
 
 public class Saxon3483 implements Runnable {
-    private static Object printLock = new Object();
-    private static Object compilerLock = new Object();
+    private static final Object printLock = new Object();
+    private static final Object compilerLock = new Object();
     private static XQueryCompiler xqueryCompiler = null;
 
     private static int testCycle = 0;
@@ -44,15 +44,12 @@ public class Saxon3483 implements Runnable {
             getXQueryCompiler().compile(QUERY);
         } catch (Exception e) {
             synchronized(printLock) {
-                if (e.getMessage() != null && e.getMessage().contains("Internal Saxon error")) {
+                if (e.getMessage().contains("Internal Saxon error")) {
                     e.printStackTrace(System.err);
                     System.err.println("total number of test cycles: " + testCycle);
                     System.exit(1);
                 } else {
                     System.err.println(e.getClass().getName() + ": " + e.getMessage());
-                    System.err.println("total number of test cycles: " + testCycle);
-                    e.printStackTrace();
-                    System.exit(1);
                 }
             }
         }
@@ -78,11 +75,11 @@ public class Saxon3483 implements Runnable {
         }
     }
 
-    private static String QUERY = "import module namespace m='MODULE';\n" +
+    private static final String QUERY = "import module namespace m='MODULE';\n" +
             "for $row in saxon:stream(doc('uriresolver:resolve')/records/record)\n" +
             "return $row/[m:string(z1), m:string(t1), m:string(d1), m:string(z2), m:string(t2), m:string(d2)]\n";
 
-    private static String MODULE =
+    private static final String MODULE =
             "xquery version '3.1';\n" +
                     "module namespace m='MODULE';\n" +
                     "\n" +

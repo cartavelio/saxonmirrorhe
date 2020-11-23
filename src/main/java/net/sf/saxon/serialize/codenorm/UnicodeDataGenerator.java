@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -310,7 +310,7 @@ class UnicodeDataGenerator {
                         z = source.length();
                     }
                     try {
-                        result.append((char) Integer.parseInt(source.substring(i, z), 16));
+                        result.cat((char) Integer.parseInt(source.substring(i, z), 16));
                     } catch (NumberFormatException e) {
                         throw new IllegalArgumentException("Bad hex value in " + source);
                     }
@@ -446,14 +446,14 @@ class UnicodeDataGenerator {
         if (!iter.hasNext()) {
             return;
         }
-        buff.append('"');
+        buff.cat('"');
         while (true) {
             if (++count == 20) {
                 count = 0;
                 buff.append("\",");
                 o.println(buff);
                 buff.setLength(0);
-                buff.append('"');
+                buff.cat('"');
             }
             int next = iter.next();
             buff.append(Integer.toString(next, 32));    // values are written in base-32 notation
@@ -556,10 +556,10 @@ class UnicodeDataGenerator {
                 char b1 = "0123456789abcdef".charAt((c >> 4) & 0xf);
                 char b2 = "0123456789abcdef".charAt((c >> 8) & 0xf);
                 char b3 = "0123456789abcdef".charAt((c >> 12) & 0xf);
-                buff.append(b3);
-                buff.append(b2);
-                buff.append(b1);
-                buff.append(b0);
+                buff.cat(b3);
+                buff.cat(b2);
+                buff.cat(b1);
+                buff.cat(b0);
             }
             if (iter.hasNext()) {
                 buff.append(" ");
@@ -594,7 +594,7 @@ class UnicodeDataGenerator {
 
 
     private static void appendJavaString(String value, FastStringBuffer buff) {
-        buff.append('"');
+        buff.cat('"');
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
             if (c == '\\') {
@@ -602,20 +602,20 @@ class UnicodeDataGenerator {
             } else if (c == '"') {
                 buff.append("\\\"");
             } else if (c > 32 && c < 127) {
-                buff.append(c);
+                buff.cat(c);
             } else {
                 buff.append("\\u");
                 char b0 = "0123456789abcdef".charAt(c & 0xf);
                 char b1 = "0123456789abcdef".charAt((c >> 4) & 0xf);
                 char b2 = "0123456789abcdef".charAt((c >> 8) & 0xf);
                 char b3 = "0123456789abcdef".charAt((c >> 12) & 0xf);
-                buff.append(b3);
-                buff.append(b2);
-                buff.append(b1);
-                buff.append(b0);
+                buff.cat(b3);
+                buff.cat(b2);
+                buff.cat(b1);
+                buff.cat(b0);
             }
         }
-        buff.append('"');
+        buff.cat('"');
     }
 
     /**

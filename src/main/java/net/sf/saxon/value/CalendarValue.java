@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -259,6 +259,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      */
 
     /*@Nullable*/
+    @Override
     public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone)
     throws NoDynamicContextException {
         if (ordered && !(this instanceof Comparable)) {
@@ -307,6 +308,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
 
     public abstract int compareTo(CalendarValue other, int implicitTimezone) throws NoDynamicContextException;
 
+    @Override
     public boolean isIdentical(/*@NotNull*/ AtomicValue v) {
         return super.isIdentical(v) && tzMinutes == ((CalendarValue) v).tzMinutes;
     }
@@ -350,7 +352,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
             sb.append(tz > 0 ? "+" : "-");
             tz = Math.abs(tz);
             appendTwoDigits(sb, tz / 60);
-            sb.append(':');
+            sb.cat(':');
             appendTwoDigits(sb, tz % 60);
         }
     }
@@ -376,8 +378,8 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      */
 
     static void appendTwoDigits(/*@NotNull*/ FastStringBuffer sb, int value) {
-        sb.append((char) (value / 10 + '0'));
-        sb.append((char) (value % 10 + '0'));
+        sb.cat((char) (value / 10 + '0'));
+        sb.cat((char) (value % 10 + '0'));
     }
 
     private class CalendarValueMapKey implements AtomicMatchKey {
@@ -386,6 +388,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
          *
          * @return an atomic value that encapsulates this match key
          */
+        @Override
         public CalendarValue asAtomic() {
             return CalendarValue.this;
         }

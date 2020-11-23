@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,8 +9,9 @@ package net.sf.saxon.option.sql;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
@@ -34,6 +35,7 @@ public class SQLColumn extends StyleElement {
      * @return false - it is not an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return false;
     }
@@ -44,30 +46,33 @@ public class SQLColumn extends StyleElement {
      * @return false: no, it may not contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
+    @Override
     protected boolean mayContainFallback() {
         return false;
     }
 
-    public void prepareAttributes() throws XPathException {
-
-        AttributeCollection atts = getAttributeList();
+    @Override
+    public void prepareAttributes() {
 
         String selectAtt = null;
         String nameAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String name = atts.getQName(a);
-            if (name.equals("name")) {
-                nameAtt = Whitespace.trim(atts.getValue(a));
-            } else if (name.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
+            if (f.equals("name")) {
+                nameAtt = Whitespace.trim(value);
+            } else if (f.equals("select")) {
+                selectAtt = value;
+                select = makeExpression(selectAtt, att);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -81,6 +86,7 @@ public class SQLColumn extends StyleElement {
     }
 
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         select = typeCheck("select", select);
         try {
@@ -95,6 +101,7 @@ public class SQLColumn extends StyleElement {
         }
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return select;
     }

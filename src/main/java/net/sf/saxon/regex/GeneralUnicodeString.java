@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -34,6 +34,7 @@ public final class GeneralUnicodeString extends UnicodeString {
         this.end = end;
     }
 
+    @Override
     public UnicodeString uSubstring(int beginIndex, int endIndex) {
         if (endIndex > chars.length) {
             throw new IndexOutOfBoundsException("endIndex=" + endIndex
@@ -46,10 +47,12 @@ public final class GeneralUnicodeString extends UnicodeString {
         return new GeneralUnicodeString(chars, start + beginIndex, start + endIndex);
     }
 
+    @Override
     public int uCharAt(int pos) {
         return chars[start + pos];
     }
 
+    @Override
     public int uIndexOf(int search, int pos) {
         for (int i = pos; i < uLength(); i++) {
             if (chars[start + i] == search) {
@@ -59,10 +62,12 @@ public final class GeneralUnicodeString extends UnicodeString {
         return -1;
     }
 
+    @Override
     public int uLength() {
         return end - start;
     }
 
+    @Override
     public boolean isEnd(int pos) {
         return pos >= (end - start);
     }
@@ -99,6 +104,7 @@ public final class GeneralUnicodeString extends UnicodeString {
      *
      * @return the number of <code>char</code>s in this sequence
      */
+    @Override
     public int length() {
         return obtainCharSequence().length();
     }
@@ -117,6 +123,7 @@ public final class GeneralUnicodeString extends UnicodeString {
      * @throws IndexOutOfBoundsException if the <tt>index</tt> argument is negative or not less than
      *                                   <tt>length()</tt>
      */
+    @Override
     public char charAt(int index) {
         return obtainCharSequence().charAt(index);
     }
@@ -136,6 +143,7 @@ public final class GeneralUnicodeString extends UnicodeString {
      *                                   if <tt>end</tt> is greater than <tt>length()</tt>,
      *                                   or if <tt>start</tt> is greater than <tt>end</tt>
      */
+    @Override
     public CharSequence subSequence(int start, int end) {
         return obtainCharSequence().subSequence(start, end);
     }

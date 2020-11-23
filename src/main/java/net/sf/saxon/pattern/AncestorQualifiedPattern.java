@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -28,11 +28,11 @@ public final class AncestorQualifiedPattern extends Pattern {
 
     private Pattern basePattern;
     private Pattern upperPattern;
-    private byte upwardsAxis = AxisInfo.PARENT;
+    private int upwardsAxis = AxisInfo.PARENT;
     private ItemType refinedItemType;
     private boolean testUpperPatternFirst = false;
 
-    public AncestorQualifiedPattern(Pattern base, Pattern upper, byte axis) {
+    public AncestorQualifiedPattern(Pattern base, Pattern upper, int axis) {
         this.basePattern = base;
         this.upperPattern = upper;
         this.upwardsAxis = axis;
@@ -93,7 +93,7 @@ public final class AncestorQualifiedPattern extends Pattern {
      * @return the relevant axis
      */
 
-    public byte getUpwardsAxis() {
+    public int getUpwardsAxis() {
         return upwardsAxis;
     }
 
@@ -106,6 +106,7 @@ public final class AncestorQualifiedPattern extends Pattern {
      * node without changing the position in the streamed input file
      */
 
+    @Override
     public boolean isMotionless() {
         return basePattern.isMotionless() && upperPattern.isMotionless();
     }
@@ -120,6 +121,7 @@ public final class AncestorQualifiedPattern extends Pattern {
      *
      */
 
+    @Override
     public Pattern simplify() throws XPathException {
         upperPattern = upperPattern.simplify();
         basePattern = basePattern.simplify();
@@ -134,6 +136,7 @@ public final class AncestorQualifiedPattern extends Pattern {
      * @return the optimised Pattern
      */
 
+    @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         basePattern = basePattern.typeCheck(visitor, contextItemType);
         upperPattern = upperPattern.typeCheck(visitor, contextItemType);
@@ -162,6 +165,7 @@ public final class AncestorQualifiedPattern extends Pattern {
      * on local variables. This is analyzed in those patterns where local variables may appear.
      */
 
+    @Override
     public int getDependencies() {
         return basePattern.getDependencies() | upperPattern.getDependencies();
     }
@@ -173,6 +177,7 @@ public final class AncestorQualifiedPattern extends Pattern {
      * @param nextFree    the next slot that is free to be allocated @return the next slot that is free to be allocated
      */
 
+    @Override
     public int allocateSlots(SlotManager slotManager, int nextFree) {
         // See tests cnfr23, idky239, match54
         // SlotManager slotManager = env.getStyleElement().getContainingSlotManager();
@@ -189,7 +194,8 @@ public final class AncestorQualifiedPattern extends Pattern {
      * @return true if the pattern matches, else false
      */
 
-    public boolean matches(Item<?> item, XPathContext context) throws XPathException {
+    @Override
+    public boolean matches(Item item, XPathContext context) throws XPathException {
         return item instanceof NodeInfo && matchesBeneathAnchor((NodeInfo) item, null, context);
     }
 
@@ -204,6 +210,7 @@ public final class AncestorQualifiedPattern extends Pattern {
      * @return true if the node matches the Pattern, false otherwise
      */
 
+    @Override
     public boolean matchesBeneathAnchor(NodeInfo node, NodeInfo anchor, XPathContext context) throws XPathException {
         if (testUpperPatternFirst) {
             return matchesUpperPattern(node, anchor, context) && basePattern.matches(node, context);
@@ -264,6 +271,7 @@ public final class AncestorQualifiedPattern extends Pattern {
      * @return the fingerprint of nodes matched by this pattern.
      */
 
+    @Override
     public int getFingerprint() {
         return basePattern.getFingerprint();
     }
@@ -272,6 +280,7 @@ public final class AncestorQualifiedPattern extends Pattern {
      * Get a NodeTest that all the nodes matching this pattern must satisfy
      */
 
+    @Override
     public ItemType getItemType() {
         if (refinedItemType != null) {
             return refinedItemType;
@@ -312,7 +321,7 @@ public final class AncestorQualifiedPattern extends Pattern {
      * Get the original pattern text
      */
     @Override
-    public String toString() {
+    public String reconstruct() {
         return upperPattern + (upwardsAxis == AxisInfo.PARENT ? "/" : "//") + basePattern;
     }
 
@@ -335,10 +344,12 @@ public final class AncestorQualifiedPattern extends Pattern {
      * hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         return 88267 ^ basePattern.hashCode() ^ upperPattern.hashCode() ^ (upwardsAxis << 22);
     }
 
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.withUpper");
         presenter.emitAttribute("axis", AxisInfo.axisName[getUpwardsAxis()]);
@@ -356,10 +367,12 @@ public final class AncestorQualifiedPattern extends Pattern {
      */
 
     /*@NotNull*/
+    @Override
     public Pattern copy(RebindingMap rebindings) {
         AncestorQualifiedPattern n = new AncestorQualifiedPattern(basePattern.copy(rebindings),
                                                                   upperPattern.copy(rebindings), upwardsAxis);
         ExpressionTool.copyLocationInfo(this, n);
+        n.setOriginalText(getOriginalText());
         return n;
     }
 

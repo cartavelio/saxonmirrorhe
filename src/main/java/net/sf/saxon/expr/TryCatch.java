@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,24 +7,26 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.event.EventBuffer;
 import net.sf.saxon.event.EventMonitor;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.OutputterEventBuffer;
+import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.instruct.BreakInstr;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.QNameTest;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Cardinality;
 
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.TransformerException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,6 +120,7 @@ public class TryCatch extends Expression {
      * Determine the cardinality of the function.
      */
 
+    @Override
     public int computeCardinality() {
         int card = getTryExpr().getCardinality();
         for (CatchClause catchClause : catchClauses) {
@@ -131,6 +134,7 @@ public class TryCatch extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         ItemType type = getTryExpr().getItemType();
         for (CatchClause catchClause : catchClauses) {
@@ -199,6 +203,7 @@ public class TryCatch extends Expression {
      * Hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         int h = 0x836b12a0;
         for (int i = 0; i < catchClauses.size(); i++) {
@@ -215,6 +220,7 @@ public class TryCatch extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         TryCatch t2 = new TryCatch(tryOp.getChildExpression().copy(rebindings));
         for (CatchClause clause : catchClauses) {
@@ -231,6 +237,7 @@ public class TryCatch extends Expression {
      * @param c the dynamic XPath evaluation context
      */
 
+    @Override
     public Item evaluateItem(XPathContext c) throws XPathException {
         XPathContext c1 = c.newMinorContext();
         try {
@@ -241,7 +248,7 @@ public class TryCatch extends Expression {
             } else {
                 StructuredQName code = err.getErrorCodeQName();
                 if (code == null) {
-                    code = new StructuredQName("saxon", NamespaceConstant.SAXON, "SXWN9000");
+                    code = new StructuredQName("saxon", NamespaceConstant.SAXON, "XXXX9999");
                 }
                 for (CatchClause clause : catchClauses) {
                     if (clause.nameTest.matches(code)) {
@@ -262,13 +269,14 @@ public class TryCatch extends Expression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext c) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext c) throws XPathException {
         XPathContextMajor c1 = c.newContext();
         c1.createThreadManager();
-        c1.setErrorListener(new FilteringErrorListener(c.getErrorListener()));
+        c1.setErrorReporter(new FilteringErrorReporter(c.getErrorReporter()));
         try {
             // Need to do eager iteration of the first argument to flush any errors out
-            Sequence<?> v = ExpressionTool.eagerEvaluate(tryOp.getChildExpression(), c1);
+            Sequence v = ExpressionTool.eagerEvaluate(tryOp.getChildExpression(), c1);
             c1.waitForChildThreads();
             // check for xsl:break within xsl:try - test iterate-035
             TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
@@ -281,16 +289,16 @@ public class TryCatch extends Expression {
                 err.setIsGlobalError(false);
             } else {
                 StructuredQName code = err.getErrorCodeQName();
+                if (code == null) {
+                    code = new StructuredQName("saxon", NamespaceConstant.SAXON, "XXXX9999");
+                }
                 for (CatchClause clause : catchClauses) {
-                    if (code == null) {
-                        code = new StructuredQName("saxon", NamespaceConstant.SAXON, "SXWN9000");
-                    }
                     if (clause.nameTest.matches(code)) {
                         Expression caught = clause.catchOp.getChildExpression();
                         XPathContextMajor c2 = c.newContext();
                         c2.setCurrentException(err);
                         // check for xsl:break within xsl:catch - test iterate-036
-                        Sequence<?> v = ExpressionTool.eagerEvaluate(caught, c2);
+                        Sequence v = ExpressionTool.eagerEvaluate(caught, c2);
                         TailCallLoop.TailCallInfo tci = c2.getTailCallInfo();
                         if (tci instanceof BreakInstr) {
                             ((BreakInstr) tci).markContext(c);
@@ -305,29 +313,31 @@ public class TryCatch extends Expression {
     }
 
     @Override
-    public void process(XPathContext context) throws XPathException {
+    public void process(Outputter output, XPathContext context) throws XPathException {
+        PipelineConfiguration pipe = output.getPipelineConfiguration();
         XPathContextMajor c1 = context.newContext();
         c1.createThreadManager();
-        c1.setErrorListener(new FilteringErrorListener(context.getErrorListener()));
-        EventBuffer buffer = null;
-        EventMonitor monitor = null;
+        c1.setErrorReporter(new FilteringErrorReporter(context.getErrorReporter()));
+        //Outputter original = context.getReceiver();
+        Outputter o2;
         if (rollbackOutput) {
-            buffer = new EventBuffer(context.getReceiver().getPipelineConfiguration());
-            c1.setReceiver(buffer);
+            o2 = new OutputterEventBuffer();
+            o2.setPipelineConfiguration(pipe);
         } else {
-            monitor = new EventMonitor(context.getReceiver());
-            c1.setReceiver(monitor);
+            o2 = new EventMonitor(output);
+            o2.setPipelineConfiguration(pipe);
         }
         try {
-            tryOp.getChildExpression().process(c1);
+            tryOp.getChildExpression().process(o2, c1);
             c1.waitForChildThreads();
+            //context.setReceiver(original);
             // check for xsl:break within xsl:try - test iterate-035
             TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
             if (tci instanceof BreakInstr) {
                 ((BreakInstr) tci).markContext(context);
             }
             if (rollbackOutput) {
-                buffer.replay(context.getReceiver());
+                ((OutputterEventBuffer)o2).replay(output);
             }
         } catch (XPathException err) {
             if (err.isGlobalError()) {
@@ -335,11 +345,11 @@ public class TryCatch extends Expression {
             } else {
                 StructuredQName code = err.getErrorCodeQName();
                 if (code == null) {
-                    code = new StructuredQName("saxon", NamespaceConstant.SAXON, "SXWN9000");
+                    code = new StructuredQName("saxon", NamespaceConstant.SAXON, "XXXX9999");
                 }
                 for (CatchClause clause : catchClauses) {
                     if (clause.nameTest.matches(code)) {
-                        if (monitor != null && monitor.hasBeenWrittenTo()) {
+                        if (o2 instanceof EventMonitor && ((EventMonitor)o2).hasBeenWrittenTo()) {
                             // rollback=no was specified, and output has been written, so we cannot recover
                             String message = err.getMessage() +
                                     ". The error could not be caught, because rollback-output=no was specified, and output was already written to the result tree";
@@ -352,13 +362,13 @@ public class TryCatch extends Expression {
                         XPathContextMajor c2 = context.newContext();
                         c2.setCurrentException(err);
                         // check for xsl:break within xsl:catch - test iterate-036
-                        Sequence<?> v = ExpressionTool.eagerEvaluate(caught, c2);
+                        Sequence v = ExpressionTool.eagerEvaluate(caught, c2);
                         TailCallLoop.TailCallInfo tci = c2.getTailCallInfo();
                         if (tci instanceof BreakInstr) {
                             ((BreakInstr) tci).markContext(context);
                         }
-                        ((GroundedValue<?>) v).iterate().forEachOrFail(
-                                item -> c2.getReceiver().append(item)
+                        ((GroundedValue) v).iterate().forEachOrFail(
+                                item -> output.append(item)
                         );
                         return;
                     }
@@ -390,6 +400,7 @@ public class TryCatch extends Expression {
      * @param out the expression presenter used to display the structure
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("try", this);
         if (rollbackOutput) {
@@ -398,11 +409,12 @@ public class TryCatch extends Expression {
         tryOp.getChildExpression().export(out);
         for (CatchClause clause : catchClauses) {
             out.startElement("catch");
-            out.emitAttribute("err", clause.nameTest.toString());
-            if ("JS".equals(((ExpressionPresenter.ExportOptions) out.getOptions()).target)) {
-                int targetVersion = ((ExpressionPresenter.ExportOptions) out.getOptions()).targetVersion;
-                out.emitAttribute("test", clause.nameTest.generateJavaScriptNameTest(targetVersion));
-            }
+            out.emitAttribute("errors", clause.nameTest.exportQNameTest());
+//            out.emitAttribute("err", clause.nameTest.toString());
+//            if ("JS".equals(((ExpressionPresenter.ExportOptions) out.getOptions()).target)) {
+//                int targetVersion = ((ExpressionPresenter.ExportOptions) out.getOptions()).targetVersion;
+//                out.emitAttribute("test", clause.nameTest.generateJavaScriptNameTest(targetVersion));
+//            }
             clause.catchOp.getChildExpression().export(out);
             out.endElement();
         }
@@ -419,42 +431,28 @@ public class TryCatch extends Expression {
      * An error listener that filters out reporting of any errors that are caught be the try/catch
      */
 
-    private class FilteringErrorListener implements ErrorListener {
+    private class FilteringErrorReporter implements ErrorReporter {
 
-        private ErrorListener base;
+        private ErrorReporter base;
 
-        FilteringErrorListener(ErrorListener base) {
+        FilteringErrorReporter(ErrorReporter base) {
             this.base = base;
         }
 
-        private boolean isCaught(TransformerException err) {
-            if (err instanceof XPathException) {
-                StructuredQName code = ((XPathException) err).getErrorCodeQName();
-                for (CatchClause clause : catchClauses) {
-                    if (clause.nameTest.matches(code)) {
-                        return true;
-                    }
+        private boolean isCaught(XmlProcessingError err) {
+            StructuredQName code = err.getErrorCode().getStructuredQName();
+            for (CatchClause clause : catchClauses) {
+                if (clause.nameTest.matches(code)) {
+                    return true;
                 }
             }
             return false;
         }
 
         @Override
-        public void warning(TransformerException exception) throws TransformerException {
-            base.warning(exception);
-        }
-
-        @Override
-        public void error(TransformerException exception) throws TransformerException {
-            if (!isCaught(exception)) {
-                base.error(exception);
-            }
-        }
-
-        @Override
-        public void fatalError(TransformerException exception) throws TransformerException {
-            if (!isCaught(exception)) {
-                base.fatalError(exception);
+        public void report(XmlProcessingError error) {
+            if (error.isWarning() || !isCaught(error)) {
+                base.report(error);
             }
         }
     }

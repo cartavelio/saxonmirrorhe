@@ -1,6 +1,5 @@
 package internaltests;
 
-import junit.framework.TestCase;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ValidationException;
@@ -8,14 +7,17 @@ import net.sf.saxon.value.DateTimeValue;
 import net.sf.saxon.value.DateValue;
 import net.sf.saxon.value.DayTimeDurationValue;
 import net.sf.saxon.value.DurationValue;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 
 import static java.time.temporal.ChronoField.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class DateTimeTests extends TestCase {
+public class DateTimeTests {
 
     /**
      * Test that DateTimeValue implements TemporalAccessor correctly
@@ -34,42 +36,51 @@ public class DateTimeTests extends TestCase {
 
             long expected = d2.getLong(cf);
             long actual = d1.getLong(cf);
-            assertEquals(cf + " of " + in, expected, actual);
+            assertEquals(actual, expected, cf + " of " + in);
         }
     }
 
+    @Test
     public void test01() {
         tryTemporalAccessor("1966-01-01T09:20:36.123Z");
     }
 
+    @Test
     public void test02() {
         tryTemporalAccessor("1970-01-01T00:00:00Z");
     }
 
+    @Test
     public void test03() {
         tryTemporalAccessor("1972-02-29T12:00:00Z");
     }
 
+    @Test
     public void test04() {
         tryTemporalAccessor("2012-02-29T12:00:00-05:00");
     }
 
+    @Test
     public void test05() {
         tryTemporalAccessor("2012-02-29T14:00:00-05:00");
     }
 
+    @Test
     public void test06() {
         tryTemporalAccessor("2012-02-29T14:00:00+10:15");
     }
 
+    @Test
     public void test07() {
         tryTemporalAccessor("1066-10-14T13:00:00Z");
     }
 
+    @Test
     public void test08() {
         tryTemporalAccessor("-0055-03-14T13:00:00Z");
     }
 
+    @Test
     public void testJulianDayNumber() {
         // test Julian day number across the year zero divide
         try {
@@ -78,59 +89,63 @@ public class DateTimeTests extends TestCase {
             for (int i=j; i>j-1000; i--) {
                 DateValue d = DateValue.dateFromJulianDayNumber(i);
                 int k = d.getJulianDayNumber();
-                assertEquals(d.getStringValue(), i, k);
+                assertEquals(i, k, d.getStringValue());
             }
         } catch (ValidationException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testZonedDateTime() {
         try {
             DateTimeValue val = DateTimeValue.parse("2012-02-29T14:00:00+10:15");
             ZonedDateTime zdt = val.toZonedDateTime();
             DateTimeValue val2 = DateTimeValue.fromZonedDateTime(zdt);
-            assertEquals("round-trip", val, val2);
+            assertEquals(val, val2, "round-trip");
             DateTimeValue val3 = DateTimeValue.parse("2012-02-29T14:00:00");
             ZonedDateTime zdt2 = val3.toZonedDateTime();
             DateTimeValue val4 = DateTimeValue.fromZonedDateTime(zdt2);
-            assertEquals("round-trip2", val4, DateTimeValue.parse("2012-02-29T14:00:00Z"));
+            assertEquals(DateTimeValue.parse("2012-02-29T14:00:00Z"), val4, "round-trip2");
         } catch (Exception e) {
             e.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testLocalDateTime() {
         try {
             DateTimeValue val = DateTimeValue.parse("2012-02-29T14:00:00");
             LocalDateTime zdt = val.toLocalDateTime();
             DateTimeValue val2 = DateTimeValue.fromLocalDateTime(zdt);
-            assertEquals("round-trip", val, val2);
+            assertEquals(val, val2, "round-trip");
             DateTimeValue val3 = DateTimeValue.parse("2012-02-29T14:00:00-05:00");
             LocalDateTime zdt2 = val.toLocalDateTime();
             DateTimeValue val4 = DateTimeValue.fromLocalDateTime(zdt2);
-            assertEquals("round-trip2", val4, DateTimeValue.parse("2012-02-29T14:00:00"));
+            assertEquals(DateTimeValue.parse("2012-02-29T14:00:00"), val4, "round-trip2");
         } catch (Exception e) {
             fail();
             e.printStackTrace();
         }
     }
 
+    @Test
     public void testNanosecondPrecision() {
         try {
             DateTimeValue val = DateTimeValue.parse("2012-02-29T14:00:00.123456789");
             DateTimeValue val2 = val.add((DurationValue)DayTimeDurationValue.makeDayTimeDurationValue("PT0.000000001S").asAtomic());
-            assertEquals("val2", DateTimeValue.parse("2012-02-29T14:00:00.12345679"), val2);
+            assertEquals(val2, DateTimeValue.parse("2012-02-29T14:00:00.12345679"), "val2");
             DateTimeValue val3 = val2.add(DayTimeDurationValue.fromNanoseconds(-1));
-            assertEquals("val3", "2012-02-29T14:00:00.123456789", val3.getStringValue());
-            assertEquals("dtd", DayTimeDurationValue.fromNanoseconds(1_000_000_000), DayTimeDurationValue.makeDayTimeDurationValue("PT1S"));
+            assertEquals("2012-02-29T14:00:00.123456789", val3.getStringValue(), "val3");
+            assertEquals(DayTimeDurationValue.fromNanoseconds(1_000_000_000), DayTimeDurationValue.makeDayTimeDurationValue("PT1S"), "dtd");
         } catch (XPathException e) {
             e.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testWeekNumber() {
 
         assertEquals(1, DateValue.getWeekNumber(2018, 12, 31));

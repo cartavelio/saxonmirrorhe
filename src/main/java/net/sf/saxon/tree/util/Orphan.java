@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,10 +9,9 @@ package net.sf.saxon.tree.util;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -20,6 +19,8 @@ import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.UntypedAtomicValue;
+
+import java.util.function.Predicate;
 
 /**
  * A node (implementing the NodeInfo interface) representing an attribute, text node,
@@ -38,7 +39,7 @@ public final class Orphan implements MutableNodeInfo {
     /*@Nullable*/ private NodeName nodeName = null;
     private CharSequence stringValue;
     private SchemaType typeAnnotation = null;
-    private int options = 0; // Bit-settings defined in ReceiverOptions
+    private int options = ReceiverOption.NONE;
     private GenericTreeInfo treeInfo;
 
     /**
@@ -58,6 +59,7 @@ public final class Orphan implements MutableNodeInfo {
      * @return the TreeInfo
      * @since 9.7
      */
+    @Override
     public TreeInfo getTreeInfo() {
         return treeInfo;
     }
@@ -153,6 +155,7 @@ public final class Orphan implements MutableNodeInfo {
      * @param typeAnnotation the type annotation
      */
 
+    @Override
     public void setTypeAnnotation(SchemaType typeAnnotation) {
         this.typeAnnotation = typeAnnotation;
     }
@@ -164,19 +167,19 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     public void setIsId(boolean id) {
-        setOption(ReceiverOptions.IS_ID, id);
+        setOption(ReceiverOption.IS_ID, id);
     }
 
     private void setOption(int option, boolean on) {
         if (on) {
-            this.options |= option;
+            options |= option;
         } else {
-            this.options &= ~option;
+            options &= ~option;
         }
     }
 
     private boolean isOption(int option) {
-        return (this.options & option) != 0;
+        return ReceiverOption.contains(options, option);
     }
 
     /**
@@ -186,7 +189,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     public void setIsIdref(boolean idref) {
-        setOption(ReceiverOptions.IS_IDREF, idref);
+        setOption(ReceiverOption.IS_IDREF, idref);
     }
 
     /**
@@ -195,7 +198,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     public void setDisableOutputEscaping(boolean doe) {
-        setOption(ReceiverOptions.DISABLE_ESCAPING, doe);
+        setOption(ReceiverOption.DISABLE_ESCAPING, doe);
     }
 
     /**
@@ -204,6 +207,7 @@ public final class Orphan implements MutableNodeInfo {
      * @return one of the values Type.ELEMENT, Type.TEXT, Type.ATTRIBUTE, etc.
      */
 
+    @Override
     public int getNodeKind() {
         return kind;
     }
@@ -249,6 +253,7 @@ public final class Orphan implements MutableNodeInfo {
      * @since 8.5
      */
 
+    @Override
     public AtomicSequence atomize() throws XPathException {
         switch (getNodeKind()) {
             case Type.COMMENT:
@@ -280,6 +285,7 @@ public final class Orphan implements MutableNodeInfo {
      *         xs:anyType if it has.
      * @since 9.4
      */
+    @Override
     public SchemaType getSchemaType() {
         if (typeAnnotation == null) {
             if (kind == Type.ELEMENT) {
@@ -322,6 +328,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     /*@Nullable*/
+    @Override
     public String getBaseURI() {
         if (kind == Type.PROCESSING_INSTRUCTION) {
             return getSystemId();
@@ -335,6 +342,7 @@ public final class Orphan implements MutableNodeInfo {
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
+    @Override
     public Location saveLocation() {
         return this;
     }
@@ -349,6 +357,7 @@ public final class Orphan implements MutableNodeInfo {
      *         return true, and the two nodes will produce the same result for generateId())
      */
 
+    @Override
     public int compareOrder(/*@NotNull*/ NodeInfo other) {
 
         // are they the same node?
@@ -364,6 +373,7 @@ public final class Orphan implements MutableNodeInfo {
      * @return the string value of the node
      */
 
+    @Override
     public String getStringValue() {
         return stringValue.toString();
     }
@@ -373,6 +383,7 @@ public final class Orphan implements MutableNodeInfo {
      * the version of the method that returns a String.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         return stringValue;
     }
@@ -383,6 +394,7 @@ public final class Orphan implements MutableNodeInfo {
      * @return the local part of the name. For an unnamed node, returns "".
      */
 
+    @Override
     public String getLocalPart() {
         if (nodeName == null) {
             return "";
@@ -399,6 +411,7 @@ public final class Orphan implements MutableNodeInfo {
      *         For a node with an empty prefix, return an empty string.
      */
 
+    @Override
     public String getURI() {
         if (nodeName == null) {
             return "";
@@ -414,6 +427,7 @@ public final class Orphan implements MutableNodeInfo {
      * @return The prefix of the name of the node.
      */
 
+    @Override
     public String getPrefix() {
         if (nodeName == null) {
             return "";
@@ -430,6 +444,7 @@ public final class Orphan implements MutableNodeInfo {
      *         For a node with no name, return an empty string.
      */
 
+    @Override
     public String getDisplayName() {
         if (nodeName == null) {
             return "";
@@ -445,6 +460,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo getParent() {
         return null;
     }
@@ -457,7 +473,8 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     /*@NotNull*/
-    public AxisIterator iterateAxis(byte axisNumber) {
+    @Override
+    public AxisIterator iterateAxis(int axisNumber) {
         switch (axisNumber) {
             case AxisInfo.ANCESTOR_OR_SELF:
             case AxisInfo.DESCENDANT_OR_SELF:
@@ -474,7 +491,7 @@ public final class Orphan implements MutableNodeInfo {
             case AxisInfo.PRECEDING:
             case AxisInfo.PRECEDING_SIBLING:
             case AxisInfo.PRECEDING_OR_ANCESTOR:
-                return EmptyIterator.OfNodes.THE_INSTANCE;
+                return EmptyIterator.ofNodes();
             default:
                 throw new IllegalArgumentException("Unknown axis number " + axisNumber);
         }
@@ -490,7 +507,8 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     /*@NotNull*/
-    public AxisIterator iterateAxis(byte axisNumber, /*@NotNull*/ NodeTest nodeTest) {
+    @Override
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ANCESTOR_OR_SELF:
             case AxisInfo.DESCENDANT_OR_SELF:
@@ -507,7 +525,7 @@ public final class Orphan implements MutableNodeInfo {
             case AxisInfo.PRECEDING:
             case AxisInfo.PRECEDING_SIBLING:
             case AxisInfo.PRECEDING_OR_ANCESTOR:
-                return EmptyIterator.OfNodes.THE_INSTANCE;
+                return EmptyIterator.ofNodes();
             default:
                 throw new IllegalArgumentException("Unknown axis number " + axisNumber);
         }
@@ -523,6 +541,7 @@ public final class Orphan implements MutableNodeInfo {
      *         if this node is not an element.
      * @since 9.4
      */
+    @Override
     public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
         return null;
     }
@@ -533,6 +552,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     /*@NotNull*/
+    @Override
     public NodeInfo getRoot() {
         return this;
     }
@@ -543,6 +563,7 @@ public final class Orphan implements MutableNodeInfo {
      * @return false - an orphan node never has any children
      */
 
+    @Override
     public boolean hasChildNodes() {
         return false;
     }
@@ -557,8 +578,9 @@ public final class Orphan implements MutableNodeInfo {
      *               unique across all documents.
      */
 
+    @Override
     public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
-        buffer.append('Q');
+        buffer.cat('Q');
         buffer.append(Integer.toString(hashCode()));
     }
 
@@ -578,7 +600,23 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     /*@Nullable*/
+    @Override
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
+        return null;
+    }
+
+    /**
+     * Get all the namespace bindings that are in-scope for this element.
+     * <p>For an element return all the prefix-to-uri bindings that are in scope. This may include
+     * a binding to the default namespace (represented by a prefix of ""). It will never include
+     * "undeclarations" - that is, the namespace URI will never be empty; the effect of an undeclaration
+     * is to remove a binding from the in-scope namespaces, not to add anything.</p>
+     * <p>For a node other than an element, returns null.</p>
+     *
+     * @return the in-scope namespaces for an element, or null for any other kind of node.
+     */
+    @Override
+    public NamespaceMap getAllNamespaces() {
         return null;
     }
 
@@ -588,8 +626,9 @@ public final class Orphan implements MutableNodeInfo {
      * @return true if the node is an ID
      */
 
+    @Override
     public boolean isId() {
-        return isOption(ReceiverOptions.IS_ID) || (kind == Type.ATTRIBUTE && nodeName.equals(StandardNames.XML_ID_NAME));
+        return isOption(ReceiverOption.IS_ID) || (kind == Type.ATTRIBUTE && nodeName.equals(StandardNames.XML_ID_NAME));
     }
 
     /**
@@ -598,8 +637,9 @@ public final class Orphan implements MutableNodeInfo {
      * @return true if the node is an IDREF or IDREFS element or attribute
      */
 
+    @Override
     public boolean isIdref() {
-        return isOption(ReceiverOptions.IS_IDREF);
+        return isOption(ReceiverOption.IS_IDREF);
     }
 
     /**
@@ -608,7 +648,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     public boolean isDisableOutputEscaping() {
-        return isOption(ReceiverOptions.DISABLE_ESCAPING);
+        return isOption(ReceiverOption.DISABLE_ESCAPING);
     }
 
     /**
@@ -625,6 +665,7 @@ public final class Orphan implements MutableNodeInfo {
      *                if such namespaces are to be undeclared
      */
 
+    @Override
     public void insertChildren(NodeInfo[] source, boolean atStart, boolean inherit) {
         // no action: node is not a document or element node
     }
@@ -644,8 +685,20 @@ public final class Orphan implements MutableNodeInfo {
      *                if such namespaces are to be undeclared
      */
 
+    @Override
     public void insertSiblings(NodeInfo[] source, boolean before, boolean inherit) {
         // no action: node has no parent
+    }
+
+    /**
+     * Set the attribute list for this (element) node
+     *
+     * @param attributes the new attribute list
+     * @throws UnsupportedOperationException if this is not an element node
+     */
+    @Override
+    public void setAttributes(AttributeMap attributes) {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -657,6 +710,7 @@ public final class Orphan implements MutableNodeInfo {
      * @param attribute the attribute node to be removed
      */
 
+    @Override
     public void removeAttribute(NodeInfo attribute) {
         // no action: node is not an element
     }
@@ -666,13 +720,13 @@ public final class Orphan implements MutableNodeInfo {
      * <p>If this node is not an element, or if the supplied node is not an attribute, the method
      * takes no action. If the element already has an attribute with this name, the existing attribute
      * is replaced.</p>
-     *
      * @param nameCode   the name of the new attribute
      * @param attType    the type annotation of the new attribute
      * @param value      the string value of the new attribute
      * @param properties properties including IS_ID and IS_IDREF properties
      */
 
+    @Override
     public void addAttribute(NodeName nameCode, SimpleType attType, CharSequence value, int properties) {
         // no action: node is not an element
     }
@@ -684,6 +738,7 @@ public final class Orphan implements MutableNodeInfo {
      * with respect to its predecessors is undefined).</p>
      */
 
+    @Override
     public void delete() {
         // no action other than to mark it deleted: node has no parent from which it can be detached
         kind = -1;
@@ -697,6 +752,7 @@ public final class Orphan implements MutableNodeInfo {
      * @return true if this node has been deleted
      */
 
+    @Override
     public boolean isDeleted() {
         return kind == -1;
     }
@@ -713,6 +769,7 @@ public final class Orphan implements MutableNodeInfo {
      * @throws IllegalStateException    if this node is deleted or if it has no parent node.
      */
 
+    @Override
     public void replace(NodeInfo[] replacement, boolean inherit) {
         throw new IllegalStateException("Cannot replace a parentless node");
     }
@@ -727,6 +784,7 @@ public final class Orphan implements MutableNodeInfo {
      * @param stringValue the new string value
      */
 
+    @Override
     public void replaceStringValue(CharSequence stringValue) {
         this.stringValue = stringValue;
     }
@@ -744,6 +802,7 @@ public final class Orphan implements MutableNodeInfo {
      *                                  namespace binding.
      */
 
+    @Override
     public void rename(NodeName newNameCode) {
         if (kind == Type.ATTRIBUTE || kind == Type.PROCESSING_INSTRUCTION) {
             nodeName = newNameCode;
@@ -758,12 +817,12 @@ public final class Orphan implements MutableNodeInfo {
      *                added. If the target element already has a namespace binding with this (prefix, uri) pair, the call has
      *                no effect. If the target element currently has a namespace binding with this prefix and a different URI, an
      *                exception is raised.
-     * @param unused
      * @throws IllegalArgumentException if the namespace code is not present in the namepool, or if the target
      *                                  element already has a namespace binding for this prefix
      */
 
-    public void addNamespace(NamespaceBinding nscode, boolean unused) {
+    @Override
+    public void addNamespace(NamespaceBinding nscode) {
         // no action: node is not an element
     }
 
@@ -773,6 +832,7 @@ public final class Orphan implements MutableNodeInfo {
      * (Note: the caller is responsible for updating the set of nodes marked for revalidation)
      */
 
+    @Override
     public void removeTypeAnnotation() {
         typeAnnotation = BuiltInAtomicType.UNTYPED_ATOMIC;
     }
@@ -784,6 +844,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     /*@NotNull*/
+    @Override
     public Builder newBuilder() {
         throw new UnsupportedOperationException("Cannot create children for an Orphan node");
     }

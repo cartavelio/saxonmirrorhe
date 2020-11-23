@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,7 @@ package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.CopyOptions;
 import net.sf.saxon.om.NodeInfo;
@@ -91,6 +91,7 @@ public class VirtualUntypedCopy extends VirtualCopy {
      * @since 8.5
      */
 
+    @Override
     public AtomicSequence atomize() throws XPathException {
         switch (getNodeKind()) {
             case Type.ELEMENT:
@@ -102,6 +103,7 @@ public class VirtualUntypedCopy extends VirtualCopy {
     }
 
 
+    @Override
     public void copy(Receiver out, int copyOptions, Location locationId) throws XPathException {
         super.copy(out, copyOptions & ~CopyOptions.TYPE_ANNOTATIONS, locationId);
     }
@@ -111,6 +113,7 @@ public class VirtualUntypedCopy extends VirtualCopy {
      * is separated out so that it can be overridden in a subclass.
      */
 
+    @Override
     protected VirtualCopy wrap(NodeInfo node) {
         VirtualUntypedCopy vc = new VirtualUntypedCopy(node, root);
         vc.tree = tree;
@@ -123,6 +126,7 @@ public class VirtualUntypedCopy extends VirtualCopy {
      * @return true if the node has the is-nilled property
      */
 
+    @Override
     public boolean isNilled() {
         return false;
     }

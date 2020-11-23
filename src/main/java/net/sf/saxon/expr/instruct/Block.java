@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
@@ -176,6 +177,7 @@ public class Block extends Instruction {
         }
     }
 
+    @Override
     public String getExpressionName() {
         return "sequence";
     }
@@ -192,6 +194,7 @@ public class Block extends Instruction {
     }
 
 
+    @Override
     public int computeSpecialProperties() {
         if (size() == 0) {
             // An empty sequence has all special properties except "has side effects".
@@ -213,7 +216,7 @@ public class Block extends Instruction {
                 allSubtreeAxis = false;
                 break;
             }
-            byte axis = ((AxisExpression) child).getAxis();
+            int axis = ((AxisExpression) child).getAxis();
             if (axis != AxisInfo.CHILD) {
                 allChildAxis = false;
             }
@@ -242,6 +245,7 @@ public class Block extends Instruction {
         return p;
     }
 
+    @Override
     public boolean implementsStaticTypeCheck() {
         return true;
     }
@@ -259,6 +263,7 @@ public class Block extends Instruction {
      *                        is incompatible with the required type
      */
 
+    @Override
     public Expression staticTypeCheck(SequenceType req,
                                       boolean backwardsCompatible,
                                       RoleDiagnostic role, ExpressionVisitor visitor)
@@ -312,8 +317,8 @@ public class Block extends Instruction {
             Expression exp = o.getChildExpression();
             if (!exp.hasSpecialProperty(StaticProperty.ALL_NODES_UNTYPED)) {
                 ItemType it = exp.getItemType();
-                if (th.relationship(it, NodeKindTest.ELEMENT) != TypeHierarchy.DISJOINT ||
-                        th.relationship(it, NodeKindTest.ATTRIBUTE) != TypeHierarchy.DISJOINT) {
+                if (th.relationship(it, NodeKindTest.ELEMENT) != Affinity.DISJOINT ||
+                        th.relationship(it, NodeKindTest.ATTRIBUTE) != Affinity.DISJOINT) {
                     return false;
                 }
             }
@@ -374,6 +379,7 @@ public class Block extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         Expression[] c2 = new Expression[size()];
         for (int c = 0; c < size(); c++) {
@@ -395,6 +401,7 @@ public class Block extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public final ItemType getItemType() {
         if (size() == 0) {
             return ErrorType.getInstance();
@@ -444,6 +451,7 @@ public class Block extends Instruction {
      * Determine the cardinality of the expression
      */
 
+    @Override
     public int computeCardinality() {
         if (size() == 0) {
             return StaticProperty.EMPTY;
@@ -464,6 +472,7 @@ public class Block extends Instruction {
      * returns true.
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         return someOperandCreatesNewNodes();
     }
@@ -477,6 +486,7 @@ public class Block extends Instruction {
      *          if the expression has a non-permitted updateing subexpression
      */
 
+    @Override
     public void checkForUpdatingSubexpressions() throws XPathException {
         if (size() < 2) {
             return;
@@ -512,6 +522,7 @@ public class Block extends Instruction {
      * @return true if this expression is vacuous
      */
 
+    @Override
     public boolean isVacuousExpression() {
         // true if all subexpressions are vacuous
         for (Operand o : operands()) {
@@ -534,6 +545,7 @@ public class Block extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
         boolean allAtomic = true;
         boolean nested = false;
@@ -573,7 +585,7 @@ public class Block extends Instruction {
             for (int c = 0; c < size(); c++) {
                 values[c] = (AtomicValue) ((Literal) child(c)).getValue();
             }
-            Expression result = Literal.makeLiteral(new SequenceExtent<>(values), this);
+            Expression result = Literal.makeLiteral(new SequenceExtent(values), this);
             result.setParentExpression(getParentExpression());
             return result;
         } else {
@@ -591,7 +603,7 @@ public class Block extends Instruction {
      */
 
     private void flatten(List<Expression> targetList) throws XPathException {
-        List<Item<?>> currentLiteralList = null;
+        List<Item> currentLiteralList = null;
         for (Operand o : operands()) {
             Expression child = o.getChildExpression();
             if (Literal.isEmptySequence(child)) {
@@ -601,7 +613,7 @@ public class Block extends Instruction {
                 currentLiteralList = null;
                 ((Block) child).flatten(targetList);
             } else if (child instanceof Literal && !(((Literal) child).getValue() instanceof IntegerRange)) {
-                SequenceIterator<?> iterator = ((Literal) child).getValue().iterate();
+                SequenceIterator iterator = ((Literal) child).getValue().iterate();
                 if (currentLiteralList == null) {
                     currentLiteralList = new ArrayList<>(10);
                 }
@@ -619,9 +631,9 @@ public class Block extends Instruction {
         flushCurrentLiteralList(currentLiteralList, targetList);
     }
 
-    private void flushCurrentLiteralList(List<Item<?>> currentLiteralList, List<Expression> list) {
+    private void flushCurrentLiteralList(List<Item> currentLiteralList, List<Expression> list) {
         if (currentLiteralList != null) {
-            ListIterator<Item<?>> iter = new ListIterator<>(currentLiteralList);
+            ListIterator<Item> iter = new ListIterator<>(currentLiteralList);
             Literal lit = Literal.makeLiteral(iter.materialize(), this);
             list.add(lit);
         }
@@ -644,6 +656,7 @@ public class Block extends Instruction {
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
         if (neverReturnsTypedNodes(this, visitor.getConfiguration().getTypeHierarchy())) {
@@ -654,6 +667,7 @@ public class Block extends Instruction {
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         optimizeChildren(visitor, contextInfo);
         boolean canSimplify = false;
@@ -700,6 +714,7 @@ public class Block extends Instruction {
      * static validation can continue recursively.
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         for (Operand o : operands()) {
             Expression child = o.getChildExpression();
@@ -712,6 +727,7 @@ public class Block extends Instruction {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("sequence", this);
         for (Operand o : operands()) {
@@ -726,15 +742,16 @@ public class Block extends Instruction {
         return "(" + child(0).toShortString() + ", ...)";
     }
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         TailCall tc = null;
         for (Operand o : operands()) {
             Expression child = o.getChildExpression();
             try {
                 if (child instanceof TailCallReturner) {
-                    tc = ((TailCallReturner) child).processLeavingTail(context);
+                    tc = ((TailCallReturner) child).processLeavingTail(output, context);
                 } else {
-                    child.process(context);
+                    child.process(output, context);
                     tc = null;
                 }
             } catch (XPathException e) {
@@ -752,6 +769,7 @@ public class Block extends Instruction {
      * process() methods natively.
      */
 
+    @Override
     public int getImplementationMethod() {
         return ITERATE_METHOD | PROCESS_METHOD;
     }
@@ -761,7 +779,8 @@ public class Block extends Instruction {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         if (size() == 0) {
             return EmptyIterator.emptyIterator();
         } else if (size() == 1) {
@@ -781,6 +800,7 @@ public class Block extends Instruction {
      * @param pul     the pending update list to which the results should be written
      */
 
+    @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         for (Operand o : operands()) {
             Expression child = o.getChildExpression();

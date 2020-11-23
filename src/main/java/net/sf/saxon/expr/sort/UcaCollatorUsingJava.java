@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -143,7 +143,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
                 error("lang", "a valid language code");
             }
             String language, country = "", variant = "";
-            String parts[] = lang.split("-");
+            String[] parts = lang.split("-");
             language = parts[0];
             if (parts.length > 1) {
                 country = parts[1];
@@ -213,7 +213,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
         String query = AnyURIValue.decode(uuri.getRawQuery());
         if (query != null && !query.isEmpty()) {
             for (String s : query.split(";")) {
-                String tokens[] = s.split("=");
+                String[] tokens = s.split("=");
                 if (!keys.contains(tokens[0])) {
                     unknownKeys.add(tokens[0]);
                 }
@@ -303,6 +303,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
      * @return true iff s1 contains s2
      */
 
+    @Override
     public boolean contains(String s1, String s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
         CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
@@ -319,6 +320,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
      * @return true iff s1 ends with s2
      */
 
+    @Override
     public boolean endsWith(String s1, String s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
         CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
@@ -335,6 +337,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
      * @return true iff s1 starts with s2
      */
 
+    @Override
     public boolean startsWith(String s1, String s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
         CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
@@ -351,6 +354,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
      * @return the part of s1 that follows the first occurrence of s2
      */
 
+    @Override
     public String substringAfter(String s1, String s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
         CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
@@ -373,6 +377,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
      * @return the part of s1 that precedes the first occurrence of s2
      */
 
+    @Override
     public String substringBefore(String s1, String s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
         CollationElementIterator iter1 = collator.getCollationElementIterator(s1);

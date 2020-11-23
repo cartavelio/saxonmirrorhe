@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,8 @@
 package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
@@ -32,6 +33,7 @@ public class CommentImpl extends NodeImpl {
         this.comment = content;
     }
 
+    @Override
     public final String getStringValue() {
         return comment;
     }
@@ -42,10 +44,12 @@ public class CommentImpl extends NodeImpl {
      */
 
     /*@NotNull*/
+    @Override
     public AtomicSequence atomize() {
         return new StringValue(getStringValue());
     }
 
+    @Override
     public final int getNodeKind() {
         return Type.COMMENT;
     }
@@ -54,8 +58,9 @@ public class CommentImpl extends NodeImpl {
      * Copy this node to a given outputter
      */
 
+    @Override
     public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId) throws XPathException {
-        out.comment(comment, locationId, 0);
+        out.comment(comment, locationId, ReceiverOption.NONE);
     }
 
 
@@ -65,6 +70,7 @@ public class CommentImpl extends NodeImpl {
      * @param stringValue the new string value
      */
 
+    @Override
     public void replaceStringValue(/*@NotNull*/ CharSequence stringValue) {
         comment = stringValue.toString();
     }
@@ -88,6 +94,7 @@ public class CommentImpl extends NodeImpl {
      * @return the system identifier
      */
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -96,6 +103,7 @@ public class CommentImpl extends NodeImpl {
      * Get the line number of the node within its source entity
      */
 
+    @Override
     public int getLineNumber() {
         return lineNumber;
     }
@@ -104,6 +112,7 @@ public class CommentImpl extends NodeImpl {
      * Get the column number of the node within its source entity
      */
 
+    @Override
     public int getColumnNumber() {
         return columnNumber;
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,11 +10,10 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.Choose;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.value.BooleanValue;
 
 import java.util.Arrays;
@@ -34,25 +33,23 @@ public class XSLChoose extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
 
 
-    public void prepareAttributes() throws XPathException {
-        AttributeCollection atts = getAttributeList();
-        for (int a = 0; a < atts.getLength(); a++) {
-            checkUnknownAttribute(atts.getNodeName(a));
+    @Override
+    public void prepareAttributes() {
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            checkUnknownAttribute(attName);
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        while (true) {
-            NodeInfo curr = kids.next();
-            if (curr == null) {
-                break;
-            }
+        for (NodeInfo curr : children()) {
             if (curr instanceof XSLWhen) {
                 if (otherwise != null) {
                     otherwise.compileError("xsl:otherwise must come last", "XTSE0010");
@@ -80,22 +77,18 @@ public class XSLChoose extends StyleElement {
      * Mark tail-recursive calls on templates and functions.
      */
 
+    @Override
     public boolean markTailCalls() {
         boolean found = false;
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        while (true) {
-            NodeInfo curr = kids.next();
-            if (curr == null) {
-                return found;
-            }
-            if (curr instanceof StyleElement) {
-                found |= ((StyleElement) curr).markTailCalls();
-            }
+        for (NodeInfo curr : children(StyleElement.class::isInstance)) {
+            found |= ((StyleElement) curr).markTailCalls();
         }
+        return found;
     }
 
 
     /*@Nullable*/
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 
         int entries = numberOfWhens + (otherwise == null ? 0 : 1);
@@ -103,12 +96,7 @@ public class XSLChoose extends StyleElement {
         Expression[] actions = new Expression[entries];
 
         int w = 0;
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        while (true) {
-            NodeInfo curr = kids.next();
-            if (curr == null) {
-                break;
-            }
+        for (NodeInfo curr : children()) {
             if (curr instanceof XSLWhen) {
                 conditions[w] = ((XSLWhen) curr).getCondition();
                 Expression b = ((XSLWhen) curr).compileSequenceConstructor(exec, decl, true);

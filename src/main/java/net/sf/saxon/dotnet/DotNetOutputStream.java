@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -37,6 +37,7 @@ public class DotNetOutputStream extends OutputStream {
      *                             an <code>IOException</code> may be thrown if the
      *                             output stream has been closed.
      */
+    @Override
     public void write(int b) throws IOException {
         stream.WriteByte((byte) b);
     }
@@ -66,7 +67,8 @@ public class DotNetOutputStream extends OutputStream {
      *                             an <code>IOException</code> is thrown if the output
      *                             stream is closed.
      */
-    public void write(byte b[], int off, int len) throws IOException {
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
         stream.Write(b, off, len);
     }
 
@@ -80,7 +82,8 @@ public class DotNetOutputStream extends OutputStream {
      * @throws java.io.IOException if an I/O error occurs.
      * @see java.io.OutputStream#write(byte[], int, int)
      */
-    public void write(byte b[]) throws IOException {
+    @Override
+    public void write(byte[] b) throws IOException {
         stream.Write(b, 0, b.length);
     }
 
@@ -100,6 +103,7 @@ public class DotNetOutputStream extends OutputStream {
      *
      * @throws java.io.IOException if an I/O error occurs.
      */
+    @Override
     public void flush() throws IOException {
         stream.Flush();
     }
@@ -113,6 +117,7 @@ public class DotNetOutputStream extends OutputStream {
      *
      * @throws java.io.IOException if an I/O error occurs.
      */
+    @Override
     public void close() throws IOException {
         //System.err.println("close");
         stream.Close();

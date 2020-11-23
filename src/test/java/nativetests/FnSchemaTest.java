@@ -1,18 +1,21 @@
 package nativetests;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import junit.framework.TestCase;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  *   Test the "born-binary" schema for the FN namespace (the result of fn:analyze-string)
  */
-public class FnSchemaTest extends TestCase {
+public class FnSchemaTest {
 
+    @Test
     public void testSchema() {
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
@@ -28,6 +31,7 @@ public class FnSchemaTest extends TestCase {
         }
     }
 
+    @Test
     public void testSchema2() {
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
@@ -43,6 +47,7 @@ public class FnSchemaTest extends TestCase {
         }
     }
 
+    @Test
     public void testSchemaInvalid() {
         // Note, this test produces error messages on system.err, but succeeds anyway.
         // 2016-11-03: the instance actually validates, see bug 29976. Changed to an instance that doesn't validate.

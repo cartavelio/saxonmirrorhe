@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,10 +9,9 @@ package net.sf.saxon.query;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.om.CopyOptions;
-import net.sf.saxon.om.DocumentInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.serialize.SerializationProperties;
@@ -73,14 +72,12 @@ public class QueryResult {
      */
 
     /*@Nullable*/
-    public static DocumentInfo wrap(SequenceIterator iterator, /*@NotNull*/ Configuration config) throws XPathException {
+    public static NodeInfo wrap(SequenceIterator iterator, /*@NotNull*/ Configuration config) throws XPathException {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         TinyBuilder builder = new TinyBuilder(pipe);
         builder.setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
-        NamespaceReducer reducer = new NamespaceReducer(builder);
-        ComplexContentOutputter outputter = new ComplexContentOutputter(reducer);
-        sendWrappedSequence(iterator, outputter);
-        return new DocumentInfo(builder.getCurrentRoot());
+        sendWrappedSequence(iterator, builder);
+        return builder.getCurrentRoot();
     }
 
     /**
@@ -121,10 +118,10 @@ public class QueryResult {
     /**
      * Serialize a document or element node.
      *
-     * @param node             The document or element to be serialized
-     * @param destination      The Result object to contain the serialized form
-     * @param properties       Serialization options as defined in JAXP. The requested properties are
-     *                         not validated.
+     * @param node        The document or element to be serialized
+     * @param destination The Result object to contain the serialized form
+     * @param properties  Serialization options as defined in JAXP. The requested properties are
+     *                    not validated.
      * @throws XPathException If serialization fails
      * @since 9.9.1.3
      */
@@ -134,6 +131,7 @@ public class QueryResult {
         Configuration config = node.getConfiguration();
         serializeSequence(SingletonIterator.makeIterator(node), config, destination, properties);
     }
+
 
     /**
      * Serialize an arbitrary sequence, without any special wrapping.
@@ -148,7 +146,7 @@ public class QueryResult {
      */
 
     public static void serializeSequence(
-            SequenceIterator<?> iterator, Configuration config, OutputStream destination, Properties outputProps)
+            SequenceIterator iterator, Configuration config, OutputStream destination, Properties outputProps)
             throws XPathException {
         serializeSequence(iterator, config, new StreamResult(destination), outputProps);
         try {
@@ -171,7 +169,7 @@ public class QueryResult {
      */
 
     public static void serializeSequence(
-            SequenceIterator<?> iterator, Configuration config, Writer writer, Properties outputProps)
+            SequenceIterator iterator, Configuration config, Writer writer, Properties outputProps)
             throws XPathException {
         serializeSequence(iterator, config, new StreamResult(writer), outputProps);
         try {
@@ -194,28 +192,27 @@ public class QueryResult {
      */
 
     public static void serializeSequence(
-            /*@NotNull*/ SequenceIterator<?> iterator, Configuration config, Result result, Properties outputProperties)
+            /*@NotNull*/ SequenceIterator iterator, Configuration config, Result result, Properties outputProperties)
             throws XPathException {
         SerializerFactory sf = config.getSerializerFactory();
         Receiver tr = sf.getReceiver(result, new SerializationProperties(outputProperties));
-        tr = new NamespaceReducer(tr);
         SequenceCopier.copySequence(iterator, tr);
     }
 
     /**
      * Serialize a sequence to a given result. This version of the method allows character maps to be supplied
      *
-     * @param iterator         the sequence to be serialized
-     * @param config           the Saxon Configuration
-     * @param result           the destination to receive the output
-     * @param properties       the serialization properties to be used. The requested properties are
-     *                         not validated.
+     * @param iterator   the sequence to be serialized
+     * @param config     the Saxon Configuration
+     * @param result     the destination to receive the output
+     * @param properties the serialization properties to be used. The requested properties are
+     *                   not validated.
      * @throws XPathException if any failure occurs
      * @since 9.9.1.3
      */
 
     public static void serializeSequence(
-            SequenceIterator<?> iterator, Configuration config, Result result, SerializationProperties properties)
+            SequenceIterator iterator, Configuration config, Result result, SerializationProperties properties)
             throws XPathException {
         SerializerFactory sf = config.getSerializerFactory();
         Receiver tr = sf.getReceiver(result, properties);
@@ -290,7 +287,7 @@ public class QueryResult {
         Configuration config = doc.getConfiguration();
         SerializerFactory factory = config.getSerializerFactory();
         Receiver r = factory.getReceiver(new StreamResult(existingFile), new SerializationProperties(outputProperties));
-        doc.copy(r, CopyOptions.ALL_NAMESPACES, ExplicitLocation.UNKNOWN_LOCATION);
+        doc.copy(r, CopyOptions.ALL_NAMESPACES, Loc.NONE);
         r.close();
     }
 }

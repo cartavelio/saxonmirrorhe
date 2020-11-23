@@ -1,18 +1,19 @@
 package nativetests;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DOMNodeWrapper;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.dom.DocumentWrapper;
 import net.sf.saxon.dom.NodeOverNodeInfo;
-import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.tiny.TinyTree;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 
@@ -22,9 +23,11 @@ import javax.xml.transform.dom.DOMSource;
 import java.io.StringReader;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
-public class TestXQueryDOM extends TestCase {
+public class TestXQueryDOM {
 
     private static final String query1 = ".//form";
     private static final String query2 = ".//input";
@@ -33,6 +36,7 @@ public class TestXQueryDOM extends TestCase {
             "<?xml version='1.0' encoding='UTF-8'?><form><input/><input/></form>";
 
     // Bug report against 9.1: native XQuery interface with DOMSource
+    @Test
     public void testXQueryDOM() {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -66,10 +70,12 @@ public class TestXQueryDOM extends TestCase {
 
     //
 
+    @Test
     public void testNamespaceUndeclaration10() {
         runNamespaceUndeclarationTest(Configuration.XML10);
     }
 
+    @Test
     public void testNamespaceUndeclaration11() {
         runNamespaceUndeclarationTest(Configuration.XML11);
     }
@@ -80,7 +86,6 @@ public class TestXQueryDOM extends TestCase {
 
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            config.setConfigurationProperty(FeatureKeys.XQUERY_VERSION, "1.0");
             config.setXMLVersion(version);
 
             String query =
@@ -101,10 +106,12 @@ public class TestXQueryDOM extends TestCase {
             DynamicQueryContext dynamicContext = new DynamicQueryContext(config);
             Object result = ex.evaluateSingle(dynamicContext);
 
-            Node doc = NodeOverNodeInfo.wrap(config.buildDocumentTree((NodeInfo) result).getRootNode());
+            final TreeInfo treeInfo = config.buildDocumentTree((NodeInfo) result);
+            ((TinyTree)treeInfo).diagnosticDump();
+            Node doc = NodeOverNodeInfo.wrap(treeInfo.getRootNode());
 
             boolean foundUndeclaration = printChildren(((Document) doc).getDocumentElement(), 0, version);
-            assertEquals(version != Configuration.XML10, foundUndeclaration);
+            assertEquals(version != Configuration.XML10, foundUndeclaration, "foundUndeclaration");
 
 
         } catch (XPathException e) {
@@ -120,7 +127,8 @@ public class TestXQueryDOM extends TestCase {
         System.out.println("--------------" + e.getNodeName());
         boolean foundUndeclaration = false;
         if (nodes != null) {
-            for (int i = 0; i < nodes.getLength(); i++) {
+            int len = nodes.getLength();
+            for (int i = 0; i < len; i++) {
                 Node node = nodes.item(i);
                 String value = node.getNodeValue();
                 String name = node.getNodeName();

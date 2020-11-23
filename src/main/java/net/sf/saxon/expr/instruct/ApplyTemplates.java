@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,14 +7,18 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.util.Orphan;
+import net.sf.saxon.type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +31,7 @@ import java.util.List;
 public class ApplyTemplates extends Instruction implements ITemplateCall, ComponentInvocation {
 
     private Operand selectOp;
+    private Operand separatorOp;
     private WithParam[] actualParams;
     private WithParam[] tunnelParams;
 
@@ -89,12 +94,25 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
     }
 
     /**
+     * Set the separator expression (Saxon extension)
+     */
+
+    public void setSeparatorExpression(Expression separator) {
+        separatorOp = new Operand(this, separator, OperandRole.SINGLE_ATOMIC);
+    }
+
+    public Expression getSeparatorExpression() {
+        return separatorOp == null ? null : separatorOp.getChildExpression();
+    }
+
+    /**
      * Get the actual parameters passed to the called template
      *
      * @return the non-tunnel parameters
      */
 
 
+    @Override
     public WithParam[] getActualParams() {
         return actualParams;
     }
@@ -106,6 +124,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      */
 
 
+    @Override
     public WithParam[] getTunnelParams() {
         return tunnelParams;
     }
@@ -122,6 +141,9 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
     public Iterable<Operand> operands() {
         List<Operand> operanda = new ArrayList<>();
         operanda.add(selectOp);
+        if (separatorOp != null) {
+            operanda.add(separatorOp);
+        }
         WithParam.gatherOperands(this, getActualParams(), operanda);
         WithParam.gatherOperands(this, getTunnelParams(), operanda);
         return operanda;
@@ -131,6 +153,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      * Get the name of this instruction for diagnostic and tracing purposes
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_APPLY_TEMPLATES;
     }
@@ -140,6 +163,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      * This method indicates which of these methods is prefered. For instructions this is the process() method.
      */
 
+    @Override
     public int getImplementationMethod() {
         return super.getImplementationMethod() | Expression.WATCH_METHOD;
     }
@@ -156,6 +180,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      */
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
         WithParam.simplify(getActualParams());
         WithParam.simplify(getTunnelParams());
@@ -164,6 +189,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         WithParam.typeCheck(actualParams, visitor, contextInfo);
         WithParam.typeCheck(tunnelParams, visitor, contextInfo);
@@ -194,6 +220,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         WithParam.optimize(visitor, actualParams, contextInfo);
         WithParam.optimize(visitor, tunnelParams, contextInfo);
@@ -206,6 +233,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
         return this;
     }
 
+    @Override
     public int getIntrinsicDependencies() {
         // If the instruction uses mode="#current", this represents a dependency on the context
         // which means the instruction cannot be loop-lifted or moved to a global variable.
@@ -227,6 +255,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ApplyTemplates a2 = new ApplyTemplates(
                 getSelect().copy(rebindings), useCurrentMode, useTailRecursion, implicitSelect, inStreamableConstruct, mode, ruleManager);
@@ -234,6 +263,9 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
         a2.setTunnelParams(WithParam.copy(a2, getTunnelParams(), rebindings));
         ExpressionTool.copyLocationInfo(this, a2);
         a2.ruleManager = ruleManager;
+        if (separatorOp != null) {
+            a2.setSeparatorExpression(getSeparatorExpression().copy(rebindings));
+        }
         return a2;
     }
 
@@ -243,22 +275,41 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      * doing any further analysis to find out more precisely).
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         return true;
     }
 
-    public void process(XPathContext context) throws XPathException {
-        apply(context, false);
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
+        apply(output, context, false);
     }
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
-        return apply(context, useTailRecursion);
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
+        return apply(output, context, useTailRecursion);
     }
 
-    protected TailCall apply(XPathContext context, boolean returnTailCall) throws XPathException {
+
+    protected NodeInfo makeSeparator(XPathContext context) throws XPathException {
+        NodeInfo separator;
+        CharSequence sepValue = separatorOp.getChildExpression().evaluateAsString(context);
+        Orphan orphan = new Orphan(context.getConfiguration());
+        orphan.setNodeKind(Type.TEXT);
+        orphan.setStringValue(sepValue);
+        separator = orphan;
+        return separator;
+    }
+
+    protected TailCall apply(Outputter output, XPathContext context, boolean returnTailCall) throws XPathException {
 
         Component.M targetMode = getTargetMode(context);
         Mode thisMode = targetMode.getActor();
+
+        NodeInfo separator = null;
+        if (separatorOp != null) {
+            separator = makeSeparator(context);
+        }
 
         // handle parameters if any
 
@@ -270,7 +321,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
             c2.setOrigin(this);
             return new ApplyTemplatesPackage(
                     ExpressionTool.lazyEvaluate(getSelect(), context, false),
-                    targetMode, params, tunnels, c2, getLocation());
+                    targetMode, params, tunnels, separator, output, c2, getLocation());
         }
 
         // Get an iterator to iterate through the selected nodes in original order
@@ -293,11 +344,11 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
         if (inStreamableConstruct) {
             c2.setCurrentGroupIterator(null);
         }
-        PipelineConfiguration pipe = c2.getReceiver().getPipelineConfiguration();
+        PipelineConfiguration pipe = output.getPipelineConfiguration();
         pipe.setXPathContext(c2);
 
         try {
-            TailCall tc = thisMode.applyTemplates(params, tunnels, c2, getLocation());
+            TailCall tc = thisMode.applyTemplates(params, tunnels, separator, output, c2, getLocation());
             while (tc != null) {
                 tc = tc.processLeavingTail();
             }
@@ -395,6 +446,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      *
      * @return the bound component if the binding has been fixed
      */
+    @Override
     public Component getFixedTarget() {
         return mode.getDeclaringComponent();
     }
@@ -404,6 +456,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      *
      * @return the symbolic name of the mode used by this instructon, or null if the instruction uses mode="#current"
      */
+    @Override
     public SymbolicName getSymbolicName() {
         return mode==null ? null : mode.getSymbolicName();
     }
@@ -428,6 +481,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      *         expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         // This logic is assuming the mode is streamable (so that called templates can't return streamed nodes)
         PathMap.PathMapNodeSet result = super.addToPathMap(pathMap, pathMapNodeSet);
@@ -443,6 +497,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      * @param out output destination
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
 
         out.startElement("applyT", this);
@@ -465,6 +520,10 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
         out.emitAttribute("bSlot", "" + getBindingSlot());
         out.setChildRole("select");
         getSelect().export(out);
+        if (separatorOp != null) {
+            out.setChildRole("separator");
+            getSeparatorExpression().export(out);
+        }
         if (getActualParams().length != 0) {
             WithParam.exportParameters(getActualParams(), out, false);
         }
@@ -502,6 +561,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      *             can be found.
      */
 
+    @Override
     public void setBindingSlot(int slot) {
         bindingSlot = slot;
     }
@@ -515,6 +575,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      * can be found.
      */
 
+    @Override
     public int getBindingSlot() {
         return bindingSlot;
     }
@@ -529,32 +590,39 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
 
     protected static class ApplyTemplatesPackage implements TailCall {
 
-        private Sequence<?> selectedItems;
+        private Sequence selectedItems;
         private Component.M targetMode;
         private ParameterSet params;
         private ParameterSet tunnelParams;
+        private NodeInfo separator;
         private XPathContextMajor evaluationContext;
+        private Outputter output;
         private Location locationId;
 
-        ApplyTemplatesPackage(Sequence<?> selectedItems,
+        ApplyTemplatesPackage(Sequence selectedItems,
                               Component.M targetMode,
                               ParameterSet params,
                               ParameterSet tunnelParams,
+                              NodeInfo separator,
+                              Outputter output,
                               XPathContextMajor context,
                               Location locationId) {
             this.selectedItems = selectedItems;
             this.targetMode = targetMode;
             this.params = params;
             this.tunnelParams = tunnelParams;
+            this.separator = separator;
+            this.output = output;
             evaluationContext = context;
             this.locationId = locationId;
         }
 
+        @Override
         public TailCall processLeavingTail() throws XPathException {
             evaluationContext.trackFocus(selectedItems.iterate());
             evaluationContext.setCurrentMode(targetMode);
             evaluationContext.setCurrentComponent(targetMode);
-            return targetMode.getActor().applyTemplates(params, tunnelParams, evaluationContext, locationId);
+            return targetMode.getActor().applyTemplates(params, tunnelParams, separator, output, evaluationContext, locationId);
         }
     }
 

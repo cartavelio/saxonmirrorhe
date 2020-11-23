@@ -2,6 +2,7 @@
 using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using JConfiguration = net.sf.saxon.Configuration;
 using JNamePool = net.sf.saxon.om.NamePool;
 using JAtomicValue = net.sf.saxon.value.AtomicValue;
@@ -14,6 +15,7 @@ using JSequenceExtent = net.sf.saxon.value.SequenceExtent;
 using JConversionResult = net.sf.saxon.type.ConversionResult;
 using JValidationFailure = net.sf.saxon.type.ValidationFailure;
 using JSequenceIterator = net.sf.saxon.om.SequenceIterator;
+using JDotNetIterator = net.sf.saxon.dotnet.DotNetIterator;
 using JSequenceXdmIterator = net.sf.saxon.s9api.XdmSequenceIterator;
 using JStandardNames = net.sf.saxon.om.StandardNames;
 using JStructuredQName = net.sf.saxon.om.StructuredQName;
@@ -26,7 +28,6 @@ using JCharSequence = java.lang.CharSequence;
 using JSequence = net.sf.saxon.om.Sequence;
 using JNodeInfo = net.sf.saxon.om.NodeInfo;
 using JAxisInfo = net.sf.saxon.om.AxisInfo;
-using JInscopeNamespaceResolver = net.sf.saxon.om.InscopeNamespaceResolver;
 using JNameChecker = net.sf.saxon.om.NameChecker;
 using JSingletonIterator = net.sf.saxon.tree.iter.SingletonIterator;
 using JQNameValue = net.sf.saxon.value.QNameValue;
@@ -46,7 +47,7 @@ using JSchemaType = net.sf.saxon.type.SchemaType;
 using JType = net.sf.saxon.type.Type;
 using JStringToDouble = net.sf.saxon.type.StringToDouble;
 using JSequenceTool = net.sf.saxon.om.SequenceTool;
-using JExplicitLocation = net.sf.saxon.expr.parser.ExplicitLocation;
+using JLoc = net.sf.saxon.expr.parser.Loc;
 using JHashTrieMap = net.sf.saxon.ma.map.HashTrieMap;
 using JMapItem = net.sf.saxon.ma.map.MapItem;
 using JArrayItem = net.sf.saxon.ma.arrays.ArrayItem;
@@ -56,7 +57,6 @@ using JDecimalValue = net.sf.saxon.value.DecimalValue;
 using JObjectValue = net.sf.saxon.value.ObjectValue;
 using JGroundedValue = net.sf.saxon.om.GroundedValue;
 using JQName = net.sf.saxon.s9api.QName;
-using JItemConsumer = net.sf.saxon.om.ItemConsumer;
 using JXdmValue = net.sf.saxon.s9api.XdmValue;
 
 namespace Saxon.Api
@@ -96,7 +96,7 @@ namespace Saxon.Api
         internal XdmValue() { }
 
         /// <summary>
-        /// Create a value from a collection of items
+        /// Create a value from a collection of items.
         /// </summary>
         /// <param name="items">An enumerable collection providing the items to make up the sequence. Every
         /// member of this collection must be an instance of <c>XdmItem</c>
@@ -112,23 +112,188 @@ namespace Saxon.Api
             value = JSequenceExtent.makeSequenceExtent(list);
         }
 
+
+        /// <summary>
+		/// Get an <c>IEnumerable</c> by applying a <c>Step</c> to the items in this value. This operation
+        /// is analogous to the <c>SelectMany</c> operation in C#, or to the "!" operator
+        /// in XPath.
+        /// </summary>
+		/// <typeparam name="TInput">Input items to the <c>Step</c> function, which can be subclass of <c>XdmItem</c></typeparam>
+		/// <typeparam name="TResult">Result items to the <c>Step</c> function, which can be subclass of <c>XdmItem</c></typeparam>
+		/// <param name="step">The <c>Step</c> to be applied to the items in this value.</param>
+		/// <returns>An <c>IEnumerable</c> of items obtained by replacing each item X in this value by the items obtained
+		/// by applying the <c>Step</c> function to X.</returns>
+        public IEnumerable<TResult> Select<TInput, TResult>(Step<TInput, TResult> step)
+        where TInput : XdmItem
+        where TResult : XdmItem
+        {
+            foreach (XdmItem item in this)
+            {
+                if (item is TInput)
+                {
+                    foreach (TResult tresult in step.Invoke((TInput)item))
+                    {
+                        yield return tresult;
+                    }
+                }
+
+            }
+
+        }
+
+
+        /// <summary>
+		/// Concatenate two <c>IEnumerable</c> objects of <c>XdmItem</c> objects or items of its subclass.
+        /// </summary>
+		/// <typeparam name="TInput">The types of object to enumerate. The object must be an <c>XdmItem</c> or a derived type.</typeparam>
+        /// <param name="first">The first enumerable object</param>
+        /// <param name="second">The second enumerable object</param>
+        /// <returns>The enumerable object as a result of the concatenation.</returns>
+        public static IEnumerable<TInput> Concat<TInput>(IEnumerable<TInput> first, IEnumerable<TInput> second)
+            where TInput : XdmItem
+        {
+            if (first == null)
+            {
+                throw new ArgumentNullException("first");
+            }
+            if (second == null)
+            {
+                throw new ArgumentNullException("second");
+            }
+            return ConcatImpl(first, second);
+        }
+
+        private static IEnumerable<TInput> ConcatImpl<TInput>(
+    IEnumerable<TInput> first,
+    IEnumerable<TInput> second)
+            where TInput : XdmItem
+        {
+            foreach (TInput item in first)
+            {
+                yield return item;
+            }
+            first = null;
+            foreach (TInput item in second)
+            {
+                yield return item;
+            }
+        }
+
+        /// <summary>
+        /// Get the enumerable object of items that satisfy a supplied <c>Predicate</c>.
+        /// </summary>
+		/// <typeparam name="T">The types of object to enumerate. The object must be an <c>XdmItem</c> or a derived type.</typeparam>
+        /// <param name="predicate">The predicate to be applied</param>
+        /// <returns>An enumerable of items that satisfy the suppplied <c>Predicate</c>.</returns>
+        public IEnumerable<T> Where<T>(IPredicate<T> predicate)
+            where T : XdmItem
+        {
+
+            if (predicate == null)
+            {
+                throw new ArgumentNullException("Predicate is null");
+            }
+            return this.Select(new Step<T, T>(x => {
+                if (!(x is T)) {
+                    throw new Exception("Type error for item in XdmValue");
+                }
+                return Enumerable.Repeat((T)x, predicate.Invoke((T)x) ? 1 : 0);
+                }));
+
+        }
+
+        /// <summary>
+		/// Returns whether any items of this <c>XdmValue</c> match the provided predicate.
+        /// May not evaluate the predicate on all items if not necessary for 
+        /// determining the result. 
+        /// </summary>
+		/// <typeparam name="T">The types of object in the enumerable. The object must be an <c>XdmItem</c> or a derived type.</typeparam>
+		/// <param name="predicate">The predicate to apply to items of this <c>XdmValue</c></param>
+		/// <returns>True if any items of the <c>XdmValue</c> match the provided predicate, otherwise false.</returns>
+        public bool AnyMatch<T>(IPredicate<T> predicate)
+            where T : XdmItem
+        {
+            if (predicate == null)
+            {
+                throw new ArgumentNullException("Predicate is null");
+            }
+
+            foreach (XdmItem item in this)
+            {
+                if (item is T && predicate.Func((T)item))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+		/// Returns whether all items of this <c>XdmValue</c> match the provided predicate.
+        /// May not evaluate the predicate on all items if not necessary for determining the result.
+        /// </summary>
+		/// <typeparam name="T">The types of object in the enumerable. The object must be an <c>XdmItem</c> or a derived type.</typeparam>
+		/// <param name="predicate">The predicate to apply to items of this <c>XdmValue</c></param>
+		/// <returns><c>true</c> if either all items of the <c>XdmValue</c> match the provided predicate or the <c>XdmValue</c> is empty, otherwise <c>false</c></returns>
+        public bool AllMatch<T>(IPredicate<T> predicate)
+            where T : XdmItem
+        {
+            if (predicate == null)
+            {
+                throw new ArgumentNullException("Predicate is null");
+            }
+
+            foreach (XdmItem item in this)
+            {
+                if (!(item is T)) {
+                    return false;
+                }
+
+                if (!predicate.Func((T)item))
+                {
+                    return false;
+                }
+            }
+            return true;
+
+        }
+
+        /// <summary>
+		/// Create an <c>XdmValue</c> from an enumerator of <c>XdmItem</c> objects.
+        /// </summary>
+		/// <param name="items">An enumerator of <c>XdmItem</c> objects</param>
+        public XdmValue(IEnumerator<XdmItem> items)
+        {
+            JArrayList list = new JArrayList();
+            while (items.MoveNext())
+            {
+                list.add((JItem)items.Current.Unwrap());
+            }
+            value = JSequenceExtent.makeSequenceExtent(list);
+        }
+
+
+
         /// <summary>
         /// Create a new <c>XdmValue</c> by concatenating the sequences of items in 
-        /// this <c>XdmValue</c> and another <c>XdmValue</c>
+        /// this <c>XdmValue</c> and another <c>XdmValue</c>.
         /// </summary>
         /// <remarks>
-        /// Neither of the input <c>XdmValue</c> objects is modified by this operation
+        /// Neither of the input <c>XdmValue</c> objects is modified by this operation.
         /// </remarks>
         /// <param name="otherValue">
-        /// The other <c>XdmValue</c>, whose items are to be appended to the items from this <c>XdmValue</c>
+        /// The other <c>XdmValue</c>, whose items are to be appended to the items from this <c>XdmValue</c>.
         /// </param>
-        
-        public XdmValue Append(XdmValue otherValue) {
+
+        public XdmValue Append(XdmValue otherValue)
+        {
             JArrayList list = new JArrayList();
-            foreach (XdmItem item in this) {
+            foreach (XdmItem item in this)
+            {
                 list.add(item.Unwrap());
             }
-            foreach (XdmItem item in otherValue) {
+            foreach (XdmItem item in otherValue)
+            {
                 list.add(item.Unwrap());
             }
             JGroundedValue gv = JSequenceExtent.makeSequenceExtent(list);
@@ -150,7 +315,8 @@ namespace Saxon.Api
 
         public static XdmValue Wrap(JSequence value)
         {
-            if (value == null) {
+            if (value == null)
+            {
                 return XdmEmptySequence.INSTANCE;
             }
             JGroundedValue gv;
@@ -158,7 +324,8 @@ namespace Saxon.Api
             {
                 gv = value.materialize();
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 throw new DynamicError(e.Message);
             }
             XdmValue result;
@@ -166,7 +333,9 @@ namespace Saxon.Api
             {
 
                 return XdmEmptySequence.INSTANCE;
-            } else if (gv.getLength() == 1) {
+            }
+            else if (gv.getLength() == 1)
+            {
                 JItem first = gv.head();
                 if (first is JAtomicValue)
                 {
@@ -211,27 +380,30 @@ namespace Saxon.Api
                     result = new XdmExternalObjectValue(((JObjectValue)first).getObject());
                     return result;
                 }
-                else {
+                else
+                {
                     result = new XdmValue();
                     result.value = first;
                     return result;
                 }
 
-            } 
+            }
             else
             {
                 return FromGroundedValue(gv);
             }
-            
+
         }
 
-        static internal XdmValue FromGroundedValue(JGroundedValue value) {
+        static internal XdmValue FromGroundedValue(JGroundedValue value)
+        {
             XdmValue result = new XdmValue();
             result.value = value;
             return result;
         }
 
-        static internal JXdmValue FromGroundedValueToJXdmValue(JGroundedValue value) {
+        static internal JXdmValue FromGroundedValueToJXdmValue(JGroundedValue value)
+        {
             return net.sf.saxon.s9api.XdmValue.wrap(value);
         }
 
@@ -251,9 +423,10 @@ namespace Saxon.Api
 		/// </list>
 		/// </remarks>
         /// <param name="o">The supplied object</param>
-        /// <returns>the result of conversion if successful</returns>
-        public static XdmValue MakeValue(object o) {
-           
+        /// <returns>The result of conversion if successful.</returns>
+        public static XdmValue MakeValue(object o)
+        {
+
             if (o == null)
             {
                 return null;
@@ -270,9 +443,12 @@ namespace Saxon.Api
             {
                 return XdmMap.MakeMap((IDictionary)o);
             }
-            else if (o.GetType().IsArray) {
+            else if (o.GetType().IsArray)
+            {
                 return XdmArray.MakeArray((object[])o);
-            } else if (o is IEnumerable) {
+            }
+            else if (o is IEnumerable)
+            {
                 return XdmValue.MakeSequence((IEnumerable)o);
             }
 
@@ -326,11 +502,11 @@ namespace Saxon.Api
         }
 
         /// <summary>
-        /// Get the sequence of items in the form of an <c>IList</c>
+        /// Get the sequence of items in the form of an <c>IList</c>.
         /// </summary>
         /// <returns>
         /// The list of items making up this XDM value. Each item in the list
-        /// will be an object of type <c>XdmItem</c>
+        /// will be an object of type <c>XdmItem</c>.
         /// </returns>        
 
         public IList<XdmItem> GetList()
@@ -362,7 +538,8 @@ namespace Saxon.Api
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator() {
+        IEnumerator IEnumerable.GetEnumerator()
+        {
             if (value == null)
             {
                 return EmptyEnumerator<XdmItem>.INSTANCE;
@@ -378,14 +555,14 @@ namespace Saxon.Api
         }
 
         /// <summary>
-        /// Get the sequence of items in the form of an <c>IEnumerator</c>
+        /// Get the sequence of items in the form of an <c>IEnumerator</c>.
         /// </summary>
         /// <returns>
         /// An enumeration over the list of items making up this XDM value. Each item in the list
-        /// will be an object of type <c>XdmItem</c>
+        /// will be an object of type <c>XdmItem</c>.
         /// </returns>    
 
-       IEnumerator<XdmItem> IEnumerable<XdmItem>.GetEnumerator()
+        IEnumerator<XdmItem> IEnumerable<XdmItem>.GetEnumerator()
         {
             if (value == null)
             {
@@ -402,12 +579,14 @@ namespace Saxon.Api
         }
 
 
+
+
         /// <summary>
-        /// Get the sequence of items in the form of an <c>IEnumerator</c>
+        /// Get the sequence of items in the form of an <c>IEnumerator</c>.
         /// </summary>
         /// <returns>
         /// An enumeration over the list of items making up this XDM value. Each item in the list
-        /// will be an object of type <c>XdmItem</c>
+        /// will be an object of type <c>XdmItem</c>.
         /// </returns>    
 
         public IEnumerator<XdmItem> GetEnumerator()
@@ -430,18 +609,21 @@ namespace Saxon.Api
         /// <summary>
         /// Get the i'th item in the value, counting from zero.
         /// </summary>
-        /// <param name="i">the item that irequired, counting the first item in the sequence as item zero</param>
-        /// <returns>the i'th item in the sequence making up the value, counting from zero.</returns>
+        /// <param name="i">The item that is required, counting the first item in the sequence as item zero.</param>
+        /// <returns>The i'th item in the sequence making up the value, counting from zero.</returns>
         public XdmItem ItemAt(int i)
         {
-            if (i < 0 || i >= Count) {
+            if (i < 0 || i >= Count)
+            {
                 throw new IndexOutOfRangeException("" + i);
             }
-            try {
+            try
+            {
                 JItem item = JSequenceTool.itemAt(value, i);
                 return (XdmItem)XdmItem.Wrap(item);
             }
-            catch (net.sf.saxon.trans.XPathException e) {
+            catch (net.sf.saxon.trans.XPathException e)
+            {
                 throw new StaticError(e);
             }
 
@@ -453,8 +635,9 @@ namespace Saxon.Api
         /// Create a string representation of the value. The is the result of serializing
         /// the value using the adaptive serialization method.
         /// </summary>
-        /// <returns>a string representation of the value</returns>
-        public override String ToString() {
+        /// <returns>A string representation of the value.</returns>
+        public override String ToString()
+        {
             return XdmValue.FromGroundedValueToJXdmValue(value).toString();
 
         }
@@ -463,11 +646,12 @@ namespace Saxon.Api
 
 
         /// <summary>
-        /// Return a new XdmValue containing the nodes present in this XdmValue,
-        /// with duplicates eliminated, and sorted into document order
+		/// Return a new <c>XdmValue</c> containing the nodes present in this <c>XdmValue</c>,
+        /// with duplicates eliminated, and sorted into document order.
         /// </summary>
-        /// <returns>the same nodes, sorted into document order, with duplicates eliminated</returns>
-        public XdmValue DocumentOrder() {
+        /// <returns>The same nodes, sorted into document order, with duplicates eliminated.</returns>
+        public XdmValue DocumentOrder()
+        {
             try
             {
                 JSequenceIterator iter = value.iterate();
@@ -475,14 +659,15 @@ namespace Saxon.Api
                 return XdmValue.Wrap(sorted.materialize());
 
             }
-            catch (net.sf.saxon.trans.XPathException e) {
+            catch (net.sf.saxon.trans.XPathException e)
+            {
                 throw new StaticError(e);
             }
 
         }
 
         /// <summary>
-        /// Get the number of items in the sequence
+        /// Get the number of items in the sequence.
         /// </summary>
         /// <returns>
         /// The number of items in the sequence. Note that for a single item (including
@@ -522,7 +707,7 @@ namespace Saxon.Api
         /// <item>If it is a wrapper around a .NET object, it will be an instance of <c>XdmExternalObjectValue</c></item>
         /// </list>
 		/// </remarks>
-		/// <returns>The XDM value reduced to the simplest possible form</returns>
+		/// <returns>The XDM value reduced to the simplest possible form.</returns>
 
         public XdmValue Simplify
         {
@@ -563,19 +748,19 @@ namespace Saxon.Api
     {
 
         /// <summary>
-        /// Constructor to create an <c>XdmExternalObjectValue</c> that wraps a supplied .NET object
+        /// Constructor to create an <c>XdmExternalObjectValue</c> that wraps a supplied .NET object.
         /// </summary>
-        /// <param name="o">the supplied .NET object</param>
+        /// <param name="o">The supplied .NET object.</param>
         public XdmExternalObjectValue(object o)
         {
             value = new JDotNetObjectValue(o);
         }
 
         /// <summary>
-        /// Determine whether the item is an atomic value
+        /// Determine whether the item is an atomic value.
         /// </summary>
         /// <returns>
-        /// false (the item is not an atomic value)
+        /// False (the item is not an atomic value).
         /// </returns>
         public override bool IsAtomic()
         {
@@ -585,28 +770,30 @@ namespace Saxon.Api
 
 
         /// <summary>
-        /// Compare two external objects for equality. Two instances of XdmExternalObjectValue are equal
+		/// Compare two external objects for equality. Two instances of <c>XdmExternalObjectValue</c> are equal
         /// if the .NET objects that they wrap are equal.
         /// </summary>
-        /// <param name="other">the object to be compared</param>
-        /// <returns>tre if the other object is an XdmExternalObjectValue and the two wrapped objects are 
+        /// <param name="other">The object to be compared</param>
+		/// <returns>True if the other object is an <c>XdmExternalObjectValue</c> and the two wrapped objects are 
         /// equal under the equals method.</returns>
-        public bool Equals(XdmExternalObjectValue other) {
+        public bool Equals(XdmExternalObjectValue other)
+        {
             return other is XdmExternalObjectValue && value == other.value;
         }
 
         /// <summary>
-        /// Return a hash code for the object. This respects the semantics of equals(Object)
+		/// Return a hash code for the object. This respects the semantics of <c>equals(Object)</c>.
         /// </summary>
-        /// <returns>a suitable hash code</returns>
-        public override int GetHashCode() {
+        /// <returns>A suitable hash code.</returns>
+        public override int GetHashCode()
+        {
             return ((java.lang.Object)value).hashCode();
         }
 
         /// <summary>
-        /// Get the wrapped .NET object
+        /// Get the wrapped .NET object.
         /// </summary>
-        /// <returns>the wrapped object</returns>
+        /// <returns>The wrapped object.</returns>
         public object GetExternalObject()
         {
             return ((JObjectValue)value).getObject();
@@ -615,13 +802,13 @@ namespace Saxon.Api
         /// <summary>
         /// Get the result of converting the external value to a string.
         /// </summary>
-        /// <returns>the result of applying <c>ToString()</c> to the wrapped external object</returns>
+        /// <returns>The result of applying <c>ToString()</c> to the wrapped external object.</returns>
         public override string ToString()
         {
             return GetExternalObject().ToString();
         }
     }
-    
+
     /// <summary inherits="XdmValue">
     /// The class <c>XdmItem</c> represents an item in a sequence, as defined
     /// by the XDM data model. An item may be an atomic value, a node, a function (including maps
@@ -634,7 +821,7 @@ namespace Saxon.Api
     /// value.</para>
     /// <para>It cannot be assumed that every sequence of length one will always be 
     /// represented by an <c>XdmItem</c>. It is quite possible for an <c>XdmValue</c>
-	/// that is not an <c>XdmItem</c> to hold a singleton sequence. Use <see cref="XdmValue.Simplify"/> 
+    /// that is not an <c>XdmItem</c> to hold a singleton sequence. Use <see cref="XdmValue.Simplify"/> 
     /// to ensure that a singleton is represented as an <c>XdmItem</c>.</para>
     /// </remarks> 
 
@@ -643,45 +830,55 @@ namespace Saxon.Api
     {
 
         /// <summary>
-        /// Determine whether the item is an atomic value
+        /// Determine whether the item is an atomic value.
         /// </summary>
         /// <returns>
-        /// true if the item is an atomic value, false if it is a node, function, or external object
+        /// True if the item is an atomic value, false if it is a node, function, or external object.
         /// </returns>
 
         public abstract bool IsAtomic();
-        
+
         /// <summary>
-		/// Get the string value of the item. 
-		/// </summary>
-		/// <remarks>
+        /// Determine whether the item is a node or some other type of item.
+        /// </summary>
+        /// <returns>True if the item is a node, false if it is an atomic value or a function (including maps and arrays).</returns>
+        public bool IsNode()
+        {
+            return value is JNodeInfo;
+        }
+
+        /// <summary>
+        /// Get the string value of the item. 
+        /// </summary>
+        /// <remarks>
         /// <list>
         /// <item>For an atomic value, the result is the same as casting the value to a string.</item>
         /// <item>For a node, the method returns the string
-		/// value of the node. This is not the same as the result of <see cref="XdmNode.ToString()"/>, which
+        /// value of the node. This is not the same as the result of <see cref="XdmNode.ToString()"/>, which
         /// returns the result of serializing the node.</item>
         /// <item>For a function, including a map or array, the result is an error.</item>
         /// <item>For an external object, the result is the same as the result of calling <c>ToString()</c>
         /// on the external object.</item>
-		/// </list>
-		/// <para>In all cases the result is the same as applying the XPath <c>string()</c> function.</para>
-		/// </remarks>
-        /// <returns>The result of converting the item to a string</returns>
-        
-        public String GetStringValue() {
+        /// </list>
+        /// <para>In all cases the result is the same as applying the XPath <c>string()</c> function.</para>
+        /// </remarks>
+        /// <returns>The result of converting the item to a string.</returns>
+
+        public String GetStringValue()
+        {
             return ((JItem)value).getStringValue();
         }
 
         internal static net.sf.saxon.s9api.XdmItem FromXdmItemItemToJXdmItem(XdmItem value)
         {
-            return (net.sf.saxon.s9api.XdmItem)net.sf.saxon.s9api.XdmValue.wrap(value== null ? null : value.value);
+            return (net.sf.saxon.s9api.XdmItem)net.sf.saxon.s9api.XdmValue.wrap(value == null ? null : value.value);
         }
 
         /// <summary>
-        /// Determine whether this item matches a given item type
+        /// Determine whether this item matches a given item type.
         /// </summary>
-        /// <param name="typei">typei the item type to be tested against this item</param>
-        /// <returns>true if the item matches this item type, false if it does not match.</returns>
+        /// <param name="typei">The item type to be tested against this item</param>
+        /// <returns>True if the item matches this item type, false if it does not match.</returns>
         public bool Matches(XdmItemType typei)
         {
             return typei.Matches(this);
@@ -692,7 +889,7 @@ namespace Saxon.Api
     /// The class <c>XdmAtomicValue</c> represents an item in an XDM sequence
     /// that is an atomic value. The value may belong to any of the 19 primitive types
     /// defined in XML Schema, or to a type derived from these primitive types, or to 
-    /// the XDM-specific type <c>xs:untypedAtomic</c>
+    /// the XDM-specific type <c>xs:untypedAtomic</c>.
     /// </summary>
     /// <remarks>
     /// Note that there is no guarantee that every <c>XdmValue</c> comprising a single
@@ -703,7 +900,7 @@ namespace Saxon.Api
     [Serializable]
     public class XdmAtomicValue : XdmItem
     {
-		// Internal constructor
+        // Internal constructor
 
         internal XdmAtomicValue() { }
 
@@ -711,7 +908,7 @@ namespace Saxon.Api
         /// Determine whether the item is an atomic value
         /// </summary>
         /// <returns>
-        /// true (the item is an atomic value)
+        /// True (the item is an atomic value).
         /// </returns>
 
         public override bool IsAtomic()
@@ -766,7 +963,7 @@ namespace Saxon.Api
 
         public XdmAtomicValue(decimal d)
         {
-            this.value = new JBigDecimalValue(new JBigDecimal(d.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            this.value = new JBigDecimalValue(new JBigDecimal(d.ToString( System.Globalization.CultureInfo.InvariantCulture)));
         }
 
         /// <summary>
@@ -778,6 +975,43 @@ namespace Saxon.Api
         {
             this.value = new JFloatValue(f);
         }
+
+        /// <summary>
+        /// Construct an atomic value of type <c>xs:dateTime</c> from a .NET DateTime object
+        /// Here we probe the object for timezone offset information to create the resulting value. 
+        /// </summary>
+        /// <param name="dt">The DateTime object value</param>
+        public XdmAtomicValue(DateTime dt)
+        {
+            if (dt.Kind == DateTimeKind.Local)
+            {
+                int offsetMinutes = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).Minutes;
+                this.value = new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month), Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute), Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)), offsetMinutes);
+            }
+            else if (dt.Kind == DateTimeKind.Utc)
+            {
+                this.value = new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month), Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute), Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)), 0);
+
+            }
+            else if (dt.Kind == DateTimeKind.Unspecified)
+            {
+                int offsetMinutes = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).Minutes;
+                this.value = new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month), Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute), Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)), net.sf.saxon.value.CalendarValue.NO_TIMEZONE);
+            }
+        }
+
+        /// <summary>
+        /// Construct an atomic value of type <c>xs:dateTime</c> with a specific timezone offset from a DateTimeOffset object.
+        /// </summary>
+        /// <param name="offset">The DateTimeOffset value</param>
+        public XdmAtomicValue(DateTimeOffset offset)
+        {
+            int offsetMinutes = offset.Offset.Minutes;
+            DateTime dt = offset.DateTime;
+            this.value = new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month), Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute), Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)), offsetMinutes);
+        }
+
+
 
         /// <summary>
         /// Construct an atomic value of type <c>xs:double</c>
@@ -818,22 +1052,25 @@ namespace Saxon.Api
         {
             this.value = new JQNameValue(
                 q.Prefix, q.Uri, q.LocalName);
-		}
+        }
 
-		/// <summary>
-		/// Construct an atomic value of a given type
-		/// </summary>
-		/// <param name="lexicalForm">The string representation of the value (any value that is acceptable
-		/// in the lexical space, as defined by XML Schema Part 2). Whitespace normalization as defined by
-		/// the target type will be applied to the value.</param>
-		/// <param name="type">The type given as an <c>XdmAtomicType</c></param>
+        /// <summary>
+        /// Construct an atomic value of a given type
+        /// </summary>
+        /// <param name="lexicalForm">The string representation of the value (any value that is acceptable
+        /// in the lexical space, as defined by XML Schema Part 2). Whitespace normalization as defined by
+        /// the target type will be applied to the value.</param>
+        /// <param name="type">The type given as an <c>XdmAtomicType</c></param>
 
-        public XdmAtomicValue(String lexicalForm, XdmAtomicType type) {
+        public XdmAtomicValue(String lexicalForm, XdmAtomicType type)
+        {
             net.sf.saxon.type.ItemType it = type.Unwrap().getUnderlyingItemType();
-            if (!it.isPlainType()) {
+            if (!it.isPlainType())
+            {
                 throw new StaticError(new net.sf.saxon.s9api.SaxonApiException("Requested type is not atomic"));
             }
-            if (((JAtomicType)it).isAbstract()) {
+            if (((JAtomicType)it).isAbstract())
+            {
                 throw new StaticError(new net.sf.saxon.s9api.SaxonApiException("Requested type is not namespace-sensitive"));
 
             }
@@ -842,8 +1079,10 @@ namespace Saxon.Api
                 net.sf.saxon.type.StringConverter Converter = ((JAtomicType)it).getStringConverter(type.Unwrap().getConversionRules());
                 this.value = Converter.convertString(lexicalForm).asAtomic();
             }
-            catch (Exception ex) { }
-            
+            catch (Exception ex) {
+                throw new DynamicError(ex.Message);
+            }
+
         }
 
         /// <summary>
@@ -868,13 +1107,13 @@ namespace Saxon.Api
 
         public XdmAtomicValue(String lexicalForm, QName type, Processor processor)
         {
-			JConfiguration jconfig = processor.Implementation;
+            JConfiguration jconfig = processor.Implementation;
             int fp = jconfig.getNamePool().getFingerprint(type.Uri, type.LocalName);
             if (fp == -1)
             {
                 throw new ArgumentException("Unknown name " + type);
             }
-			JSchemaType st = jconfig.getSchemaType(new JStructuredQName("", type.Uri.ToString(), type.LocalName));
+            JSchemaType st = jconfig.getSchemaType(new JStructuredQName("", type.Uri.ToString(), type.LocalName));
             if (st == null)
             {
                 throw new ArgumentException("Unknown type " + type);
@@ -883,12 +1122,12 @@ namespace Saxon.Api
             {
                 throw new ArgumentException("Specified type " + type + " is not atomic");
             }
-            if (((JAtomicType)st).isNamespaceSensitive())
+            if (((net.sf.saxon.type.SimpleType)st).isNamespaceSensitive())
             {
                 throw new ArgumentException("Specified type " + type + " is namespace-sensitive");
             }
-			JConversionResult result = ((JAtomicType)st).getStringConverter(jconfig.getConversionRules()).convertString((JCharSequence)lexicalForm);
- 
+            JConversionResult result = ((JAtomicType)st).getStringConverter(jconfig.getConversionRules()).convertString((JCharSequence)lexicalForm);
+
             if (result is JValidationFailure)
             {
                 throw new ArgumentException(((JValidationFailure)result).getMessage());
@@ -897,12 +1136,12 @@ namespace Saxon.Api
         }
 
 
-        
+
         /// <summary>
-		/// Create an atomic value of a type appropriate to the supplied value. 
-		/// </summary>
-		/// <remarks>
-		/// The supplied value must be one of the following:
+        /// Create an atomic value of a type appropriate to the supplied value. 
+        /// </summary>
+        /// <remarks>
+        /// The supplied value must be one of the following:
         /// <list>
         /// <item>An instance of the Saxon Java class <c>net.sf.saxon.value.AtomicValue</c></item>
         /// <item>A <c>Boolean</c> - returns an instance of <c>xs:boolean</c></item>
@@ -915,7 +1154,7 @@ namespace Saxon.Api
         /// <item>A <c>URI</c> - returns an instance of <c>xs:anyURI</c></item>
         /// <item>A <c>QName</c> - returns an instance of <c>xs:QName</c></item>
         /// </list>
-		/// </remarks>
+        /// </remarks>
         /// <param name="value">The value to be converted.</param>
         /// <returns>The converted value</returns>
 
@@ -985,47 +1224,64 @@ namespace Saxon.Api
 
 
         /// <summary>
-        /// Get the value converted to a boolean using the XPath casting rules
+        /// Get the value converted to a boolean using the XPath casting rules.
         /// </summary>
-        /// <returns>the result of converting to a boolean (Note: this is not the same as the
+        /// <returns>The result of converting to a boolean (Note: this is not the same as the
         /// effective boolean value).</returns> 
 
         public bool GetBooleanValue()
         {
             JAtomicValue av = (JAtomicValue)this.value;
-            if (av is JBooleanValue) {
+            if (av is JBooleanValue)
+            {
                 return ((JBooleanValue)av).getBooleanValue();
-            } else if (av is JNumericValue) {
+            }
+            else if (av is JNumericValue)
+            {
                 return !av.isNaN() && ((JNumericValue)av).signum() != 0;
-            } else if (av is JStringValue) {
+            }
+            else if (av is JStringValue)
+            {
                 String s = av.getStringValue().Trim();
                 return "1".Equals(s) || "true".Equals(s);
-            } else {
+            }
+            else
+            {
                 throw new ArgumentException("Cannot cast item to a boolean");
             }
         }
 
 
         /// <summary>
-        /// Get the value converted to a long using the XPath casting rules
+        /// Get the value converted to a long using the XPath casting rules.
         /// </summary>
-        /// <returns>the result of converting to a long</returns>
+        /// <returns>The result of converting to a long</returns>
 
         public long GetLongValue()
         {
             JAtomicValue av = (JAtomicValue)this.value;
-            if (av is JBooleanValue) {
+            if (av is JBooleanValue)
+            {
                 return ((JBooleanValue)av).getBooleanValue() ? 0L : 1L;
-            } else if (av is JNumericValue) {
-            try {
-                return ((JNumericValue)av).longValue();
-            } catch (Exception) {
-                throw new ArgumentException("Cannot cast item to an integer");
             }
-            } else if (av is JStringValue) {
+            else if (av is JNumericValue)
+            {
+                try
+                {
+                    return ((JNumericValue)av).longValue();
+                }
+                catch (Exception)
+                {
+                    throw new ArgumentException("Cannot cast item to an integer");
+                }
+            }
+            else if (av is JStringValue)
+            {
                 JStringToDouble converter = JStringToDouble.getInstance();
                 return (long)converter.stringToNumber(av.getStringValueCS());
-            } else {
+            }
+            else
+            {
                 throw new ArgumentException("Cannot cast item to an integer");
             }
         }
@@ -1036,47 +1292,67 @@ namespace Saxon.Api
 		/// </summary>
         /// <remarks>If the value is a string, the XSD 1.1 rules are used, which means that the string
 		/// "+INF" is recognised.</remarks>
-        /// <returns>the result of converting to a double</returns>
+        /// <returns>The result of converting to a double</returns>
 
         public double GetDoubleValue()
         {
             JAtomicValue av = (JAtomicValue)this.value;
-            if (av is JBooleanValue) {
+            if (av is JBooleanValue)
+            {
                 return ((JBooleanValue)av).getBooleanValue() ? 0.0 : 1.0;
-            } else if (av is JNumericValue) {
-                return ((JNumericValue)av).getDoubleValue();
-            } else if (av is JStringValue) {
-            try {
-                JStringToDouble converter = JStringToDouble11.getInstance();
-                return converter.stringToNumber(av.getStringValueCS());
-            } catch (Exception e) {
-                throw new ArgumentException(e.Message);
             }
-            } else {
+            else if (av is JNumericValue)
+            {
+                return ((JNumericValue)av).getDoubleValue();
+            }
+            else if (av is JStringValue)
+            {
+                try
+                {
+                    JStringToDouble converter = JStringToDouble11.getInstance();
+                    return converter.stringToNumber(av.getStringValueCS());
+                }
+                catch (Exception e)
+                {
+                    throw new ArgumentException(e.Message);
+                }
+            }
+            else
+            {
                 throw new ArgumentException("Cannot cast item to a double");
             }
         }
 
 
         /// <summary>
-        /// Get the value converted to a decimal using the XPath casting rules
+        /// Get the value converted to a decimal using the XPath casting rules.
         /// </summary>
-        /// <returns>the result of converting to a decimal</returns>
+        /// <returns>The result of converting to a decimal</returns>
 
-        public Decimal GetDecimalValue() 
+        public Decimal GetDecimalValue()
         {
             JAtomicValue av = (JAtomicValue)this.value;
-            if (av is JBooleanValue) {
-                return ((JBooleanValue)av).getBooleanValue() ? 0  : 1;
-            } else if (av is JNumericValue) {
-                try {
+            if (av is JBooleanValue)
+            {
+                return ((JBooleanValue)av).getBooleanValue() ? 0 : 1;
+            }
+            else if (av is JNumericValue)
+            {
+                try
+                {
                     return Convert.ToDecimal(((JNumericValue)av).getDecimalValue().toString());
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     throw new ArgumentException("Cannot cast item to a decimal");
-                }   
-            } else if (av is JStringValue) {
+                }
+            }
+            else if (av is JStringValue)
+            {
                 return Convert.ToDecimal(av.getStringValueCS().toString());
-            } else {
+            }
+            else
+            {
                 throw new ArgumentException("Cannot cast item to a decimal");
             }
         }
@@ -1093,13 +1369,14 @@ namespace Saxon.Api
         {
             return ((JAtomicValue)value).getStringValue();
         }
-        
+
         /// <summary>
         /// Compare two atomic values for equality
-        /// </summary>
+		/// </summary>
+		/// <param name="other">The object to be compared</param>
         /// <returns>The result of the equality comparison, using the rules of the
-		/// <c>op:is-same-key()</c> comparison used for comparing key values in maps</returns>
-        
+        /// <c>op:is-same-key()</c> comparison used for comparing key values in maps.</returns>
+
         public override Boolean Equals(object other)
         {
             if (other is XdmAtomicValue)
@@ -1112,21 +1389,21 @@ namespace Saxon.Api
                 return false;
             }
         }
-        
+
         /// <summary>
         /// Get a hash code to support equality comparison
         /// </summary>
         /// <returns>A suitable hash code</returns>
-        
+
         public override int GetHashCode()
         {
             return ((JAtomicValue)value).asMapKey().GetHashCode();
-        }         
+        }
 
         /// <summary>
         /// Get the name of the value's XDM type
         /// </summary>
-		/// <returns>The type of the value, as a QName.</returns>
+        /// <returns>The type of the value, as a QName.</returns>
 
 
         public QName GetTypeName()
@@ -1136,13 +1413,13 @@ namespace Saxon.Api
                              sqname.getURI(),
                              sqname.getLocalPart());
         }
-        
+
         /// <summary>
         /// Get the name of the value's XDM type
         /// </summary>
         /// <param name="processor">The <code>Processor</code> object. 
         /// This parameter is no longer used, but is accepted for backwards compatibility.</param>
-		/// <returns>The type of the value, as a QName.</returns>
+        /// <returns>The type of the value, as a QName.</returns>
 
 
         public QName GetTypeName(Processor processor)
@@ -1251,8 +1528,8 @@ namespace Saxon.Api
         /// <summary>
         /// The name of the function, as a QName
         /// </summary>
-		/// <returns>The name of the function. The result will be null if the function is anonymous.</returns>
-        
+        /// <returns>The name of the function. The result will be null if the function is anonymous.</returns>
+
         public QName FunctionName
         {
             get
@@ -1288,14 +1565,14 @@ namespace Saxon.Api
         }
 
 
-            /// <summary>
-            /// Invoke the function
-            /// </summary>
-            /// <param name="arguments">The arguments to the function</param>
-            /// <param name="processor">The Saxon processor, used to provide context information</param>
-            /// <returns>The result of calling the function</returns>
-            /// 
-            public XdmValue Invoke(XdmValue[] arguments, Processor processor)
+        /// <summary>
+        /// Invoke the function
+        /// </summary>
+        /// <param name="arguments">The arguments to the function</param>
+        /// <param name="processor">The Saxon processor, used to provide context information</param>
+        /// <returns>The result of calling the function</returns>
+        /// 
+        public XdmValue Invoke(XdmValue[] arguments, Processor processor)
         {
             JXdmValue[] args = new JXdmValue[arguments.Length];
             for (int i = 0; i < arguments.Length; i++)
@@ -1305,7 +1582,7 @@ namespace Saxon.Api
             JFunction function = (JFunction)value;
             net.sf.saxon.s9api.XdmFunctionItem functionItem = new net.sf.saxon.s9api.XdmFunctionItem(function);
             JXdmValue result = functionItem.call(processor.JProcessor, args);
-           
+
             return XdmValue.Wrap(result.getUnderlyingValue());
         }
     }
@@ -1321,8 +1598,9 @@ namespace Saxon.Api
     {
 
 
-		///<summary> Constructor to create an empty <c>XdmArray</c></summary>
-        public XdmArray() {
+        ///<summary> Constructor to create an empty <c>XdmArray</c></summary>
+        public XdmArray()
+        {
             this.value = JSimpleArrayItem.EMPTY_ARRAY;
         }
 
@@ -1345,24 +1623,27 @@ namespace Saxon.Api
         /// to the array will have no effect on the <c>XdmArray</c>.</param>
 
 
-        public XdmArray(XdmValue[] members) {
+        public XdmArray(XdmValue[] members)
+        {
             JArrayList list = new JArrayList(members.Length);
-            for (int i =0; i< members.Length;i++) {
+            for (int i = 0; i < members.Length; i++)
+            {
                 list.add(members[i].Unwrap());
             }
             this.value = new JSimpleArrayItem(list);
         }
 
-		// Internal constructor
+        // Internal constructor
 
         internal XdmArray(JArrayList list)
         {
             this.value = new JSimpleArrayItem(list);
         }
 
-		// Internal constructor
+        // Internal constructor
 
-        internal XdmArray(JArrayItem array) {
+        internal XdmArray(JArrayItem array)
+        {
             this.value = array;
         }
 
@@ -1370,11 +1651,12 @@ namespace Saxon.Api
         /// <summary>Create an <c>XdmArray</c> supplying the members as a list of <c>XdmValue</c> objects</summary>
         /// <param name="members">A sequence of <c>XdmValue</c> objects. Note that if this is supplied as 
         /// a list or similar collection, subsequent changes to the list/collection will have no effect on 
-		/// the <c>XdmValue</c>.</param>
-		/// <remarks>Note that the argument can be a single <c>XdmValue</c> representing a sequence, in which case the
+        /// the <c>XdmValue</c>.</param>
+        /// <remarks>Note that the argument can be a single <c>XdmValue</c> representing a sequence, in which case the
         ///  constructed array will have one member for each item in the supplied sequence.</remarks>
-    
-        public XdmArray(List<XdmValue> members) {
+
+        public XdmArray(List<XdmValue> members)
+        {
             JArrayList list = new JArrayList(members.Count);
             for (int i = 0; i < members.Count; i++)
             {
@@ -1389,7 +1671,8 @@ namespace Saxon.Api
         /// <returns>the number of members in the array.</returns> 
 		/// <remarks>(Note that the <see cref="XdmValue.Count"/> property returns 1 (one),
         /// because an XDM array is an item.)</remarks>
-        public int ArrayLength() {
+        public int ArrayLength()
+        {
             return ((JArrayItem)value).arrayLength();
         }
 
@@ -1399,12 +1682,15 @@ namespace Saxon.Api
 		/// <param name="n">the position of the member that is required, counting the first member in 
 		/// the array as member zero</param>
         /// <returns>the n'th member in the sequence making up the array, counting from zero</returns>
-        public XdmValue Get(int n) {
-            try {
+        public XdmValue Get(int n)
+        {
+            try
+            {
                 JSequence member = ((JArrayItem)value).get(n);
                 return XdmValue.Wrap(member);
             }
-            catch (Exception) {
+            catch (Exception)
+            {
                 throw new IndexOutOfRangeException();
             }
         }
@@ -1417,10 +1703,14 @@ namespace Saxon.Api
         /// in the array as member zero</param>
         /// <param name="valuei">the new value</param>
         /// <returns>the new array</returns>
-        public XdmArray Put(int n, XdmValue valuei) {
-            try {
+        public XdmArray Put(int n, XdmValue valuei)
+        {
+            try
+            {
                 return (XdmArray)XdmValue.Wrap(((JArrayItem)this.value).put(n, valuei.value));
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 throw new IndexOutOfRangeException();
             }
         }
@@ -1431,13 +1721,16 @@ namespace Saxon.Api
         /// </summary>
         /// <param name="value">the new member</param>
         /// <returns>a new array, one item longer than the original</returns>
-        public XdmArray AppendMember(XdmValue value) {
-            try {
+        public XdmArray AppendMember(XdmValue value)
+        {
+            try
+            {
                 JGroundedValue member = value.value;
                 JArrayItem newArray = net.sf.saxon.ma.arrays.ArrayFunctionSet.ArrayAppend.append((JArrayItem)this.value, member);
                 return (XdmArray)Wrap(newArray);
             }
-            catch (net.sf.saxon.trans.XPathException e) {
+            catch (net.sf.saxon.trans.XPathException e)
+            {
                 throw new StaticError(e);
             }
         }
@@ -1467,12 +1760,14 @@ namespace Saxon.Api
         /// Get the members of the array in the form of a list.
         /// </summary>
         /// <returns>A list of the members of this array.</returns>
-        public List<XdmValue> AsList() {
+        public List<XdmValue> AsList()
+        {
 
             JArrayItem val = ((JArrayItem)value);
-            java.util.Iterator  iter = val.members().iterator();
+            java.util.Iterator iter = val.members().iterator();
             List<XdmValue> result = new List<XdmValue>(val.getLength());
-            while (iter.hasNext()) {
+            while (iter.hasNext())
+            {
                 result.Add(XdmValue.Wrap((JSequence)iter.next()));
 
             }
@@ -1482,15 +1777,15 @@ namespace Saxon.Api
         /// <summary>
         /// Make an XDM array from an object array. Each member of the supplied array
         /// is converted to a single member in the result array using the method
-		/// <see cref="XdmValue.MakeValue(Object)"/>        
+        /// <see cref="XdmValue.MakeValue(Object)"/>        
         /// </summary>
         /// <param name="o">the array of objects</param>
         /// <returns>the result of the conversion if successful</returns>
-        
+
         public static XdmArray MakeArray(object[] o)
         {
             JArrayList list = new JArrayList(o.Length);
-            for (int i = 0; i <o.Length; i++)
+            for (int i = 0; i < o.Length; i++)
             {
                 list.add(XdmValue.MakeValue(o[i]).Unwrap());
             }
@@ -1498,11 +1793,11 @@ namespace Saxon.Api
         }
 
         /// <summary>
-		/// Make an <c>XdmArray</c> whose members are <c>xs:boolean</c> values       
+        /// Make an <c>XdmArray</c> whose members are <c>xs:boolean</c> values       
         /// </summary>
         /// <param name="o">the input array of booleans</param>
-		/// <returns>an <c>XdmArray</c> whose members are <c>xs:boolean</c> values corresponding one-to-one with the input</returns>
-        
+        /// <returns>an <c>XdmArray</c> whose members are <c>xs:boolean</c> values corresponding one-to-one with the input</returns>
+
         public static XdmArray MakeArray(bool[] o)
         {
             JArrayList list = new JArrayList(o.Length);
@@ -1515,11 +1810,11 @@ namespace Saxon.Api
 
 
         /// <summary>
-		/// Make an <c>XdmArray</c> whose members are <c>xs:integer</c> values      
+        /// Make an <c>XdmArray</c> whose members are <c>xs:integer</c> values      
         /// </summary>
         /// <param name="o">the input array of long values</param>
-		/// <returns>an <c>XdmArray</c> whose members are <c>xs:integer</c> values corresponding one-to-one with the input</returns>
-        
+        /// <returns>an <c>XdmArray</c> whose members are <c>xs:integer</c> values corresponding one-to-one with the input</returns>
+
         public static XdmArray MakeArray(long[] o)
         {
             JArrayList list = new JArrayList(o.Length);
@@ -1532,11 +1827,11 @@ namespace Saxon.Api
 
 
         /// <summary>
-		/// Make an <c>XdmArray</c> whose members are <c>xs:integer</c> values      
+        /// Make an <c>XdmArray</c> whose members are <c>xs:integer</c> values      
         /// </summary>
         /// <param name="o">the input array of int values</param>
-		/// <returns>an <c>XdmArray</c> whose members are <c>xs:integer</c> values corresponding one-to-one with the input</returns>
-        
+        /// <returns>an <c>XdmArray</c> whose members are <c>xs:integer</c> values corresponding one-to-one with the input</returns>
+
         public static XdmArray MakeArray(int[] o)
         {
             JArrayList list = new JArrayList(o.Length);
@@ -1548,11 +1843,11 @@ namespace Saxon.Api
         }
 
         /// <summary>
-		/// Make an <c>XdmArray</c> whose members are <c>xs:integer</c> values      
+        /// Make an <c>XdmArray</c> whose members are <c>xs:integer</c> values      
         /// </summary>
         /// <param name="o">the input array of byte values</param>
-		/// <returns>an <c>XdmArray</c> whose members are <c>xs:integer</c> values corresponding one-to-one with the input</returns>
-        
+        /// <returns>an <c>XdmArray</c> whose members are <c>xs:integer</c> values corresponding one-to-one with the input</returns>
+
         public static XdmArray MakeArray(byte[] o)
         {
             JArrayList list = new JArrayList(o.Length);
@@ -1572,44 +1867,49 @@ namespace Saxon.Api
 
 
     [Serializable]
-    public class XdmMap :  XdmFunctionItem
+    public class XdmMap : XdmFunctionItem
     {
-  
+
 
         /// <summary>
-		/// Create an empty <c>XdmMap</c>
+        /// Create an empty <c>XdmMap</c>
         /// </summary>
-        public XdmMap() { 
-			this.value = new JHashTrieMap(); 
-		}
+        public XdmMap()
+        {
+            this.value = new JHashTrieMap();
+        }
 
-		// Internal constructor
+        // Internal constructor
 
-        internal XdmMap(JHashTrieMap map) { 
-			this.value = map; 
-		}
+        internal XdmMap(JHashTrieMap map)
+        {
+            this.value = map;
+        }
 
 
         /// <summary>
         /// Get the number of entries in the map
         /// </summary>
-		/// <remarks>(Note that the <see cref="XdmValue.Count"/> method returns 1 (one),
+        /// <remarks>(Note that the <see cref="XdmValue.Count"/> method returns 1 (one),
         /// because an XDM map is an item.)</remarks>
-        
-        public int Size {
-            get {
+
+        public int Size
+        {
+            get
+            {
                 return ((JMapItem)value).size();
             }
         }
 
 
         /// <summary>
-		/// Ask whether the <c>XdmMap</c> is empty
+        /// Ask whether the <c>XdmMap</c> is empty
         /// </summary>
         /// <returns>Returns <code>true</code> if this map contains no key-value pairs, that is
         /// if the <c>Size</c> property is zero.</returns>
-        
-        public bool IsEmpty() {
+
+        public bool IsEmpty()
+        {
             return ((JMapItem)value).isEmpty();
         }
 
@@ -1620,7 +1920,7 @@ namespace Saxon.Api
         /// <param name="key">The key of the new entry.</param>
         /// <param name="value">The value part of the new entry.</param>
         /// <returns>A new map containing the additional entry (or replaced entry). The original map is unchanged.</returns>
-        
+
         public XdmMap Put(XdmAtomicValue key, XdmValue value)
         {
             XdmMap map2 = new XdmMap();
@@ -1636,7 +1936,7 @@ namespace Saxon.Api
         /// </summary>
         /// <param name="key">The key of the entry that is to be removed</param>
         /// <returns>A map without the specified entry. The original map is unchanged.</returns>
-        
+
         public XdmMap Remove(XdmAtomicValue key)
         {
             XdmMap map2 = new XdmMap();
@@ -1650,13 +1950,15 @@ namespace Saxon.Api
         /// </summary>
         /// <returns>A mutable Dictionary from atomic values to (sequence) values, containing the
         /// same entries as this map</returns>
-        
-        public Dictionary<XdmAtomicValue, XdmValue> AsDictionary() {
+
+        public Dictionary<XdmAtomicValue, XdmValue> AsDictionary()
+        {
             Dictionary<XdmAtomicValue, XdmValue> map = new Dictionary<XdmAtomicValue, XdmValue>();
             JMapItem jmap = (JMapItem)value;
             java.util.Iterator iter = jmap.keyValuePairs().iterator();
             JKeyValuePair pair = null;
-            while (iter.hasNext()) {
+            while (iter.hasNext())
+            {
                 pair = (JKeyValuePair)iter.next();
                 map.Add((XdmAtomicValue)XdmValue.Wrap(pair.key), XdmValue.Wrap(pair.value));
             }
@@ -1691,33 +1993,35 @@ namespace Saxon.Api
         /// </summary>
         /// <param name="key">the key whose presence in this map is to be tested</param>
         /// <returns><c>true</c> if this map contains a mapping for the specified key</returns>
-        
-        public bool ContainsKey(XdmAtomicValue key) {
+
+        public bool ContainsKey(XdmAtomicValue key)
+        {
             JAtomicValue k = (JAtomicValue)key.value;
-            return ((JMapItem)value).get(k)!= null;
+            return ((JMapItem)value).get(k) != null;
         }
 
 
         /// <summary>
         /// Returns the value to which the specified key is mapped,
-		/// or <c>null</c> if this map contains no mapping for the key.
+        /// or <c>null</c> if this map contains no mapping for the key.
         /// </summary>
         /// <param name="key">the key whose associated value is to be returned. If this is
-		/// not an <c>XdmAtomicValue</c>, the method attempts to construct an
-		/// <c>XdmAtomicValue</c> using the method <see cref="XdmAtomicValue.MakeAtomicValue(Object)"/>;
+        /// not an <c>XdmAtomicValue</c>, the method attempts to construct an
+        /// <c>XdmAtomicValue</c> using the method <see cref="XdmAtomicValue.MakeAtomicValue(Object)"/>;
         /// it is therefore possible to pass a simple key such as a string or integer.</param>
         /// <returns>the value to which the specified key is mapped, or
-		/// <c>null</c> if this map contains no mapping for the key</returns>
-        
+        /// <c>null</c> if this map contains no mapping for the key</returns>
+
         public XdmValue Get(XdmAtomicValue key)
         {
-            if (key == null) {
+            if (key == null)
+            {
                 throw new ArgumentNullException();
             }
-           
+
             JAtomicValue k = (JAtomicValue)(key).value;
             JSequence v = ((JMapItem)value).get(k);
-            return v==null ? null : XdmValue.Wrap(v);
+            return v == null ? null : XdmValue.Wrap(v);
         }
 
         /// <summary>
@@ -1734,7 +2038,7 @@ namespace Saxon.Api
             {
                 throw new ArgumentNullException();
             }
-    
+
             JAtomicValue k = (JAtomicValue)(new XdmAtomicValue(key)).value;
             JSequence v = ((JMapItem)value).get(k);
             return v == null ? null : XdmValue.Wrap(v);
@@ -1763,11 +2067,12 @@ namespace Saxon.Api
         /// <returns>A collection of the values found in this map, that is, the value
         /// parts of the key-value pairs. The result may contain duplicates, and the
         /// order of results is unpredictable.</returns>
-        public ICollection Values() {
+        public ICollection Values()
+        {
             List<XdmValue> result = new List<XdmValue>();
 
             JMapItem jmap = (JMapItem)value;
-            java.util.Iterator iter = jmap.iterator();
+            java.util.Iterator iter = jmap.keyValuePairs().iterator();
             JKeyValuePair pair = null;
             while ((pair = (JKeyValuePair)iter.next()) != null)
             {
@@ -1782,10 +2087,11 @@ namespace Saxon.Api
 		/// Returns a <c>HashSet</c> view of the mappings contained in this map.
         /// </summary>
         /// <returns>a set view of the mappings contained in this map</returns>
-        public HashSet<DictionaryEntry> EntrySet() {
+        public HashSet<DictionaryEntry> EntrySet()
+        {
             HashSet<DictionaryEntry> result = new HashSet<DictionaryEntry>();
             JMapItem jmap = (JMapItem)value;
-            java.util.Iterator iter = jmap.iterator();
+            java.util.Iterator iter = jmap.keyValuePairs().iterator();
             JKeyValuePair pair = null;
             while ((pair = (JKeyValuePair)iter.next()) != null)
             {
@@ -1805,26 +2111,27 @@ namespace Saxon.Api
         /// </summary>
         /// <param name="input">the supplied map</param>
 		/// <returns>the resulting <c>XdmMap</c></returns>
-        public static XdmMap MakeMap(IDictionary input) {
+        public static XdmMap MakeMap(IDictionary input)
+        {
             JHashTrieMap result = new JHashTrieMap();
             XdmAtomicValue key;
             XdmValue value;
-            
+
             foreach (object keyi in input.Keys)
             {
                 key = XdmAtomicValue.MakeAtomicValue(keyi);
                 value = XdmValue.MakeValue(input[keyi]);
                 result.initialPut((JAtomicValue)key.Unwrap(), value.value);
             }
-           
+
             return new XdmMap(result);
         }
 
-        
+
 
 
     }
-    
+
     /// <summary inherits="XdmItem">
     /// The class <c>XdmNode</c> represents a Node in the XDM Data Model. A Node
     /// is an <c>XdmItem</c>, and is therefore an <c>XdmValue</c> in its own right, and may also participate
@@ -1913,33 +2220,35 @@ namespace Saxon.Api
         }
 
         /// <summary>
-		/// Get the line number of the node in a source document. 
-		/// </summary>
-		/// <remarks>
-		/// For a document constructed using the document
+        /// Get the line number of the node in a source document. 
+        /// </summary>
+        /// <remarks>
+        /// For a document constructed using the document
         /// builder, this is available only if the line numbering option was set when the document was built (and
         /// then only for element nodes). If the line number is not available, the value -1 is returned.
         /// Line numbers will typically be as reported by a SAX parser; this means that the line number for an element
         /// node is the line number containing the closing ">" of the start tag.
-		/// </remarks>
-         
-        public int LineNumber {
+        /// </remarks>
+
+        public int LineNumber
+        {
             get { return ((JNodeInfo)value).getLineNumber(); }
         }
 
 
+
         /// <summary>
-		/// Get the column number of the node in a source document. 
-		/// </summary>
-		/// <remarks>
-		/// For a document constructed using the document
+        /// Get the column number of the node in a source document. 
+        /// </summary>
+        /// <remarks>
+        /// For a document constructed using the document
         /// builder, this is available only if the line numbering option was set when the document was built (and
         /// then only for element nodes). If the column number is not available, the value -1 is returned.
         /// Line numbers will typically be as reported by a SAX parser; this means that the column number for an element
         /// node is the column number containing the closing ">" of the start tag.
-		/// </remarks>
-        
-		public int ColumnNumber
+        /// </remarks>
+
+        public int ColumnNumber
         {
             get { return ((JNodeInfo)value).getColumnNumber(); }
         }
@@ -1973,15 +2282,18 @@ namespace Saxon.Api
         /// </remarks>
 		/// <returns>Returns a <c>Processor</c> suitable for performing further operations on this node, for example
 		/// for creating a <see cref="Serializer"/> or an <see cref="XPathCompiler"/>.</returns>
-        public Processor Processor {
-            get {
+        public Processor Processor
+        {
+            get
+            {
                 JConfiguration config = Implementation.getConfiguration();
                 object originator = config.getProcessor();
                 if (originator is Processor)
                 {
                     return (Processor)originator;
                 }
-                else {
+                else
+                {
                     return new Processor(new net.sf.saxon.s9api.Processor(config));
                 }
             }
@@ -2023,9 +2335,10 @@ namespace Saxon.Api
 
         public XdmNode Parent
         {
-            get {
+            get
+            {
                 JNodeInfo parent = ((JNodeInfo)value).getParent();
-                return (parent == null ? null : (XdmNode)XdmValue.Wrap(parent)); 
+                return (parent == null ? null : (XdmNode)XdmValue.Wrap(parent));
             }
         }
 
@@ -2065,6 +2378,102 @@ namespace Saxon.Api
         {
             return ((JNodeInfo)value).getAttributeValue(name.Uri, name.LocalName);
         }
+
+
+        /// <summary>
+        /// Get a the string value of a named attribute (in no namespace) of this element. 
+        /// </summary>
+        /// <remarks>
+        /// Returns null if this node is not an element, or if this element has no
+        /// attribute with the specified name.
+        /// </remarks>
+        /// <param name="name">The name of the attribute whose value is required, interpreted as no-namespace name</param>
+
+        public String GetAttributeValue(String name)
+        {
+            return ((JNodeInfo)value).getAttributeValue("", name);
+        }
+
+        /// <summary>
+        /// Get a IEnumerable of XdmNodes by applying a <c>Step</c> to this
+        /// XdmNode value.
+        /// </summary>
+        /// <param name="step">the <c>Step</c> to be applied to this node</param>
+        /// <returns>an IEnumerable of nodes obtained by applying the <c>Step</c> function to this node</returns>
+        
+        public IEnumerable<XdmNode> Select(Step<XdmNode, XdmNode> step) {
+            return step.Invoke(this);
+        }
+
+		/// <summary>
+		/// Get the nodes found on the child axis that satisfy a supplied <c>Predicate</c>.
+		/// </summary>
+		/// <param name="filter">the predicate to be applied</param>
+		/// <returns> an <c>Iterable</c> containing those nodes found on the child axis that satisfy the supplied predicate.</returns>
+
+        public IEnumerable<XdmNode> Children(IPredicate<XdmNode> filter)
+        {
+            IEnumerable<XdmNode> enumerable = Children();
+            foreach (XdmNode node in enumerable)
+                if (filter.Func(node))
+                {
+                    yield return node;
+                }
+        }
+
+		/// <summary>
+		/// Get the element children of this node
+		/// </summary>
+		/// <returns> an <c>Iterable</c> containing all nodes on the child axis.</returns>
+
+        public IEnumerable<XdmNode> Children()
+        {
+            return new SequenceEnumerable<XdmNode>(JSequenceXdmIterator.ofNodes(((JNodeInfo)value).iterateAxis(GetAxisNumber(XdmAxis.Child))));
+        }
+
+		/// <summary>
+		/// Get the element children of this node having a specified local name, irrespective of the namespace
+		/// </summary>
+		/// <param name="localName">the local name of the child elements to be selected, or "*" to select all children that are element nodes</param>
+		/// <returns> an <c>Iterable</c> containing the element children of this node that have the required local name.</returns>
+
+        public IEnumerable<XdmNode> Children(String localName)
+        {
+            Step<XdmNode, XdmNode> localNameStep = Steps.Child(localName);
+            return localNameStep.Invoke(this);
+		}
+
+		/// <summary>
+		/// Get the element children having a specified namespace URI and local name
+		/// </summary>
+		/// <param name="uri">the namespace URI of the child elements to be selected: 
+		/// supply a zero-length string to indicate the null namespace</param>
+		/// <param name="localName">the local name of the child elements to be selected</param>
+		/// <returns> an <c>Iterable</c> containing the element children of this node that have the required local name and namespace URI.</returns>
+
+        public IEnumerable<XdmNode> Children(String uri, String localName)
+        {
+            return Children().SelectMany(Steps.Child(uri, localName).Func);
+        }
+
+        /// <summary>
+        /// Get an enumerable that supplies all the nodes on one of the XPath
+        /// axes, starting with this node.
+        /// </summary>
+        /// <param name="axis">
+        /// The axis to be navigated, for example <c>XdmAxis.Child</c> for the child axis.
+        /// </param>
+        /// <remarks>
+        /// The nodes are returned in axis order: that is, document order for a forwards
+        /// axis, reverse document order for a reverse axis.
+        /// </remarks>
+
+        public IEnumerable<XdmNode> EnumerableOverAxis(XdmAxis axis)
+        {
+            return (new SequenceEnumerable<XdmNode>(JSequenceXdmIterator.ofNodes(((JNodeInfo)value).iterateAxis(GetAxisNumber(axis)))));
+        }
+
+
 
         /// <summary>
         /// Get an enumerator that supplies all the nodes on one of the XPath
@@ -2148,13 +2557,15 @@ namespace Saxon.Api
 
         public Uri BaseUri
         {
-            get { 
-				string baseUriStr = ((JNodeInfo)value).getBaseURI();
-				if (baseUriStr == null || baseUriStr.Equals("")) {
-					return null;
-				}
-				return new Uri(baseUriStr); 
-			}
+            get
+            {
+                string baseUriStr = ((JNodeInfo)value).getBaseURI();
+                if (baseUriStr == null || baseUriStr.Equals(""))
+                {
+                    return null;
+                }
+                return new Uri(baseUriStr);
+            }
         }
 
         /// <summary>
@@ -2192,7 +2603,7 @@ namespace Saxon.Api
             JDotNetReceiver receiver = new JDotNetReceiver(writer);
             receiver.setPipelineConfiguration(node.getConfiguration().makePipelineConfiguration());
             receiver.open();
-			node.copy(receiver, net.sf.saxon.om.CopyOptions.ALL_NAMESPACES, JExplicitLocation.UNKNOWN_LOCATION);
+            node.copy(receiver, net.sf.saxon.om.CopyOptions.ALL_NAMESPACES, JLoc.NONE);
             receiver.close();
         }
 
@@ -2225,7 +2636,9 @@ namespace Saxon.Api
                     val = val.Replace("<", "&lt;");
                     val = val.Replace("&", "&amp;");
                     return node.getDisplayName() + "=\"" + val + '"';
-                } else if (node.getNodeKind() == JType.NAMESPACE) {
+                }
+                else if (node.getNodeKind() == JType.NAMESPACE)
+                {
                     String val = node.getStringValue().Replace("\"", "&quot;");
                     val = val.Replace("<", "&lt;");
                     val = val.Replace("&", "&amp;");
@@ -2233,17 +2646,17 @@ namespace Saxon.Api
                     name = (name.Equals("") ? "xmlns" : "xmlns:" + name);
                     return name + "=\"" + val + '"';
                 }
-                return net.sf.saxon.query.QueryResult.serialize(node);
-                
+                return net.sf.saxon.query.QueryResult.serialize(node).Trim();
+
             }
         }
 
         /// <summary>
-		/// Two instances of <c>XdmNode</c> are equal if they represent the same node. That is, the <c>Equals()</c>
+        /// Two instances of <c>XdmNode</c> are equal if they represent the same node. That is, the <c>Equals()</c>
         /// method returns the same result as the XPath "is" operator.
         /// </summary>
         /// <param name="obj">The object node to be compared</param>
-         
+
         public override bool Equals(object obj)
         {
             return obj is XdmNode && ((JNodeInfo)value).equals((JNodeInfo)((XdmNode)obj).value);
@@ -2288,6 +2701,7 @@ namespace Saxon.Api
 
 
     }
+
 
 
     /// <summary inherits="XdmValue">
@@ -2388,10 +2802,11 @@ namespace Saxon.Api
             {
                 sqName = new JQName("", "", local);
             }
-            else {
-                
-                    throw new ArgumentException("Local name contains a colon");
-                }             
+            else
+            {
+
+                throw new ArgumentException("Local name contains a colon");
+            }
         }
 
         /// <summary>
@@ -2473,8 +2888,8 @@ namespace Saxon.Api
             try
             {
                 JNodeInfo node = (JNodeInfo)element.value;
-				sqName = new JQName(JStructuredQName.fromLexicalQName(lexicalQName, true, true, new JInscopeNamespaceResolver(node)));
-				
+                sqName = new JQName(JStructuredQName.fromLexicalQName(lexicalQName, true, true, node.getAllNamespaces()));
+
             }
             catch (net.sf.saxon.trans.XPathException err)
             {
@@ -2553,18 +2968,18 @@ namespace Saxon.Api
 
 
         /// <summary>
-		/// Factory method to construct a <c>QName</c> from a string containing the expanded
+        /// Factory method to construct a <c>QName</c> from a string containing the expanded
         /// QName in EQName notation, that is, <c>Q{uri}local</c>
         /// </summary>
         /// <remarks>
         /// The prefix part of the <c>QName</c> will be set to an empty string.
         /// </remarks>
         /// <param name="expandedName">The QName in EQName notation: <c>Q{uri}local</c>. 
-		/// For a name in no namespace, either of the
+        /// For a name in no namespace, either of the
         /// forms <c>Q{}local</c> or simply <c>local</c> are accepted.</param>
         /// <returns> the QName corresponding to the supplied name in EQName notation. This will always
         /// have an empty prefix.</returns>
-       
+
         public static QName FromEQName(String expandedName)
         {
             String namespaceURI;
@@ -2595,7 +3010,8 @@ namespace Saxon.Api
         // internal method: Factory method to construct a QName from Saxon's internal <c>StructuredQName</c>
         // representation.
 
-        internal static QName FromStructuredQName(JStructuredQName sqn) {
+        internal static QName FromStructuredQName(JStructuredQName sqn)
+        {
             return new QName(sqn.getPrefix(), sqn.getURI(), sqn.getLocalPart());
         }
 
@@ -2610,7 +3026,7 @@ namespace Saxon.Api
 		/// <param name="processor">The <c>Processor</c> in which the name is to be registered.</param>
         [System.Obsolete("This method is no longer in use")]
         public void Register(Processor processor)
-        {}
+        { }
 
         /// <summary>
 		/// Validate the <c>QName</c> against the XML 1.0 or XML 1.1 rules for valid names.
@@ -2624,15 +3040,15 @@ namespace Saxon.Api
         {
             return IsValid();
         }
-        
+
         /// <summary>
-		/// Validate the <c>QName</c> against the XML rules for valid names.
+        /// Validate the <c>QName</c> against the XML rules for valid names.
         /// </summary>
         /// <returns>true if the name is valid, false if not</returns>
 
         public bool IsValid()
         {
-            if(this.Prefix != String.Empty)
+            if (this.Prefix != String.Empty)
             {
                 if (!JNameChecker.isValidNCName(Prefix))
                 {
@@ -2646,7 +3062,7 @@ namespace Saxon.Api
             return true;
         }
 
-		/// <summary>Get the prefix of the <c>QName</c>. This plays no role in operations such as comparison
+        /// <summary>Get the prefix of the <c>QName</c>. This plays no role in operations such as comparison
         /// of QNames for equality, but is retained (as specified in XPath) so that a string representation
         /// can be reconstructed.
         /// </summary>
@@ -2659,7 +3075,7 @@ namespace Saxon.Api
             get { return sqName.getPrefix(); }
         }
 
-		/// <summary>Get the namespace URI of the <c>QName</c>. Returns "" (the zero-length string) if the
+        /// <summary>Get the namespace URI of the <c>QName</c>. Returns "" (the zero-length string) if the
         /// QName is not in a namespace.
         /// </summary>
 
@@ -2668,7 +3084,7 @@ namespace Saxon.Api
             get { return sqName.getNamespaceURI(); }
         }
 
-		/// <summary>Get the local part of the <c>QName</c></summary>
+        /// <summary>Get the local part of the <c>QName</c></summary>
 
         public String LocalName
         {
@@ -2720,7 +3136,7 @@ namespace Saxon.Api
             }
             else
             {
-				return Prefix + ":" + LocalName;
+                return Prefix + ":" + LocalName;
             }
         }
 
@@ -2769,14 +3185,14 @@ namespace Saxon.Api
             return new XmlQualifiedName(LocalName, Uri);
         }
 
-		// internal method: Convert to a net.sf.saxon.value.QNameValue
+        // internal method: Convert to a net.sf.saxon.value.QNameValue
 
         internal JQNameValue ToQNameValue()
         {
             return new JQNameValue(sqName.getPrefix(), sqName.getNamespaceURI(), sqName.getLocalName(), null);
-		}
+        }
 
-		// internal method
+        // internal method
 
         internal JStructuredQName ToStructuredQName()
         {
@@ -2795,12 +3211,1607 @@ namespace Saxon.Api
 
     }
 
+    /// <summary>
+	/// Interface that represents a predicate (boolean-valued <c>Func</c>) of one argument.
+    /// </summary>
+	/// <remarks>This is a functional interface whose functional method is <c>Invoke(object)</c>.</remarks>
+    /// <typeparam name="XdmItem">The type of the input to the predicate.</typeparam>
+    public interface IPredicate<in XdmItem>
+    {
+
+        /// <summary>
+        /// Returns a composed predicate that represents a short-circuiting logical
+        /// OR of this predicate and another. When evaluating the composed
+        /// predicate, if this predicate is <c>true</c>, then the <c>other</c>
+        /// predicate is not evaluated.
+        /// </summary>
+        /// <typeparam name="T">The type of the input argument</typeparam>
+        /// <param name="other">A predicate that will be logically-ORed with this predicate</param>
+		/// <returns>A composed predicate that represents the short-circuiting logical OR of this predicate and the <c>other</c>
+		/// predicate.</returns>
+		/**public**/ IPredicate<T> Or<T>(IPredicate<T> other) where T : XdmItem;
+
+        /// <summary>
+        /// Returns a composed predicate that represents a short-circuiting logical
+        /// AND of this predicate and another. When evaluating the composed
+        /// predicate, if this predicate is <c>false</c>, then the <c>other</c>
+        /// predicate is not evaluated.
+        /// </summary>
+        /// <typeparam name="T">The type of the input argument</typeparam>
+        /// <param name="other">A predicate that will be logically-ANDed with this predicate</param>
+		/// <returns>A composed predicate that represents the short-circuiting logical AND of this predicate the <c>other</c>
+		/// predicate.</returns>
+		/**public**/ IPredicate<T> And<T>(IPredicate<T> other) where T : XdmItem;
+
+        /// <summary>
+        /// Returns a predicate that represents the logical negation of this predicate.
+        /// </summary>
+        /// <returns>A predicate that represents the logical negation of this predicate.</returns>
+		/**public**/ IPredicate<XdmItem> Negate();
+
+        /// <summary>
+        /// Evaluates this predicate on the given argument.
+        /// </summary>
+        /// <typeparam name="T">The type of the input argument</typeparam>
+        /// <param name="item">The input item</param>
+        /// <returns><c>true</c> if the input argument matches the predicate, otherwise <c>false</c>.</returns>
+		/**public**/ bool Invoke<T>(T item) where T : XdmItem;
+
+        /// <summary>
+        /// Unwrapped Func property which evaluates to boolean.
+        /// </summary>
+		/**public**/ Func<XdmItem, bool> Func { get; }
+    }
+
+
+    /// <summary>
+	/// This class implements the <c>IPredicate</c> interface which represents a predicate (boolean-valued <c>Func</c>) of one argument.
+    /// </summary>
+	/// <typeparam name="T">The type of the input to the predicate, which must be of type <c>XdmItem</c> or one of its subclasses.</typeparam>
+    public class Predicate<T> : IPredicate<T>
+      where T : XdmItem
+    {
+
+        private Func<T, bool> function;
+
+        /// <summary>
+		/// Predicate constructor method to wrap the <c>Func</c> object.
+        /// </summary>
+		/// <param name="f">boolean-valued <c>Func</c> object</param>
+        public Predicate(Func<T, bool> f)
+        {
+            function = f;
+        }
+
+        /// <summary>
+        /// Evaluates this predicate on the given argument.
+        /// </summary>
+        /// <typeparam name="T1">The type of the input argument</typeparam>
+        /// <param name="item">The input item</param>
+        /// <returns><c>true</c> if the input argument matches the predicate, otherwise <c>false</c>.</returns>
+        public bool Invoke<T1>(T1 item) where T1 : T
+        {
+            return function(item);
+        }
+
+
+        /// <summary>
+        /// Returns a compose predicate that represents a short-circuiting logical
+        /// AND of this predicate and another. When evaluating the composed predicate,
+        /// if this predicate is <c>false</c>, then the other predicate is not evaluated.
+        /// </summary>
+        /// <param name="other">A predicate that will be logically-ANDed with this predicate</param>
+        /// <returns>A composed predicate that represents the short-circuiting logical 
+		/// AND of this predicate and the <c>other</c> predicate.</returns>
+		/**public**/ IPredicate<T1> IPredicate<T>.And<T1>(IPredicate<T1> other)
+        {
+            return new Predicate<T1>(item => function(item) && other.Func(item));
+        }
+
+        /// <summary>
+        /// Returns a composed predicate that represents a short-circuiting logical
+        /// OR of this predicate and another. When evaluating the composed
+        /// predicate, if this predicate is <c>true</c>, then the <c>other</c>
+        /// predicate is not evaluated.
+        /// </summary>
+        /// <param name="other">A predicate that will be logically-ORed with this predicate.</param>
+        /// <returns>A composed predicate that represents the short-circuiting logical
+        /// OR of this predicate and the <c>other</c> predicate.</returns>
+		/**public**/ IPredicate<T1> IPredicate<T>.Or<T1>(IPredicate<T1> other)
+        {
+            return new Predicate<T1>(item => function(item) || other.Func(item));
+        }
+
+        /// <summary>
+        /// Return a predicate that represents the logical negation of this predicate.
+        /// </summary>
+        /// <returns>A predicate that represents the logical negation of this predicate.</returns>
+		/**public**/ IPredicate<T> IPredicate<T>.Negate()
+        {
+            return new Predicate<T>(item => !function(item));
+        }
+
+
+        /// <summary>
+		/// The <c>Func</c> Property represents the wrapped delegate method which can be invoked.
+        /// </summary>
+        public Func<T, bool> Func
+        {
+            get
+            {
+                return function;
+            }
+        }
+
+    }
+
+
+    /// <summary>
+    /// This non-instantiable class provides a number of useful implementations of the <c>Predicate</c>
+    /// interface, designed for use when navigating streams of XDM items.
+    /// </summary>
+    public class Predicates
+    {
+
+        /// <summary>
+        /// A predicate to test whether an item is an attribute node.
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is an attribute node.</returns>
+        public static IPredicate<XdmItem> IsAttribute()
+        {
+            return NodeKindPredicate(XmlNodeType.Attribute);
+        }
+
+        /// <summary>
+        /// A predicate to test whether an item is a node.
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is a node.</returns>
+        public static IPredicate<XdmItem> IsNode()
+        {
+            return new Predicate<XdmItem>(item => item is XdmNode);
+        }
+
+        /// <summary>
+        /// A predicate to test whether an item is an element node.
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is an element node.</returns>
+        public static IPredicate<XdmItem> IsElement()
+        {
+            return NodeKindPredicate(XmlNodeType.Element);
+        }
+
+        /// <summary>
+        /// A predicate to test whether an item is a text node.
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is a text node.</returns>
+        public static IPredicate<XdmItem> IsText()
+        {
+            return NodeKindPredicate(XmlNodeType.Text);
+        }
+
+        /// <summary>
+        /// A predicate to test whether an item is a comment node.
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is a comment node.</returns>
+        public static IPredicate<XdmItem> IsComment()
+        {
+            return NodeKindPredicate(XmlNodeType.Comment);
+        }
+
+        /// <summary>
+        /// A predicate to test whether an item is a processing instruction node.
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is a processing instruction node.</returns>
+        public static IPredicate<XdmItem> IsProcessingInstruction()
+        {
+            return NodeKindPredicate(XmlNodeType.ProcessingInstruction);
+        }
+
+        /// <summary>
+        /// A predicate to test whether an item is a document node.
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is a document node.</returns>
+        public static IPredicate<XdmItem> IsDocument()
+        {
+            return NodeKindPredicate(XmlNodeType.Document);
+        }
+
+        /// <summary>
+        /// A predicate to test whether an item is a namespace node.
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is a namespace node.</returns>
+        public static IPredicate<XdmItem> IsNamespace()
+        {
+            return NodeKindPredicate(XmlNodeType.None);
+        }
+
+        /// <summary>
+        /// A predicate to test whether an item is an atomic value.
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is an atomic value.</returns>
+        public static IPredicate<XdmItem> IsAtomic()
+        {
+            return new Predicate<XdmItem>(item => item is XdmAtomicValue);
+        }
+
+        /// <summary>
+        /// A predicate to test whether an item is a function value (this includes maps and arrays).
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is a function, including
+        /// maps and arrays.</returns>
+        public static IPredicate<XdmItem> IsFunction()
+        {
+
+            return new Predicate<XdmItem>(item => item is XdmFunctionItem);
+
+        }
+
+
+        /// <summary>
+        /// A predicate to test whether an item is an XDM map.
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is a map.</returns>
+        public static IPredicate<XdmItem> IsMap()
+        {
+
+            return new Predicate<XdmItem>(item => item is XdmMap);
+
+        }
+
+        /// <summary>
+        /// A predicate to test whether an item is an XDM array.
+        /// </summary>
+        /// <returns>A predicate that returns true if given an item that is an array.</returns>
+        public static IPredicate<XdmItem> IsArray()
+        {
+
+            return new Predicate<XdmItem>(item => item is XdmArray);
+
+        }
+
+        /// <summary>
+        /// Obtain a predicate that tests whether a supplied <c>Step</c> delivers an empty result.
+        /// </summary>
+        /// <param name="step">A step to be applied to the item being tested</param>
+        /// <returns>A predicate that returns true if the supplied step returns an empty result.</returns>
+        public static IPredicate<TInput> Empty<TInput, TResult>(Step<TInput, TResult> step)
+            where TInput: XdmItem
+            where TResult: XdmItem
+        {
+            return new Predicate<TInput>(item => step.Invoke(item).Count() == 0);
+
+        }
+
+
+        /// <summary>
+        /// Return an <c>IPredicate</c> that is the negation of a supplied <c>IPredicate</c>.
+        /// </summary>
+        /// <typeparam name="TInput">The type of object to which the predicate is applicable</typeparam>
+        /// <param name="condition">The supplied predicate</param>
+        /// <returns>A predicate that matches an item if and only if the supplied predicate does not match the item.</returns>
+        public static IPredicate<TInput> Not<TInput>(IPredicate<TInput> condition)
+            where TInput: XdmItem
+        {
+
+            return condition.Negate();
+        }
+
+
+        /// <summary>
+        /// Obtain a predicate that tests whether a supplied <c>Step</c> delivers a non-empty result.
+        /// </summary>
+        /// <param name="step">A step to be applied to the item being tested</param>
+        /// <returns>A predicate that returns true if the step returns a non-empty result.</returns>
+        public static IPredicate<XdmItem> Exists(Step<XdmItem, XdmItem> step)
+        {
+            return new Predicate<XdmItem>(item => step.Invoke(item).Count() > 0);
+
+        }
+
+
+
+
+        /// <summary>
+        /// Obtain a predicate that tests whether an item is a node with a given namespace URI and local name.
+        /// </summary>
+        /// <param name="uri">The required namespace URI: supply a zero-length string to indicate the null namespace</param>
+        /// <param name="localName">The required local name</param>
+        /// <returns>A predicate that returns true if and only if the supplied item is a node with the given namespace URI and local name.</returns>
+        public static IPredicate<XdmNode> HasName(String uri, String localName)
+        {
+
+            return new Predicate<XdmNode>(item =>
+            {
+                QName name = item.NodeName;
+                return item != null && name.LocalName.Equals(localName) && name.Uri.Equals(uri);
+            });
+        }
+
+
+
+        internal static IPredicate<XdmNode> ExpandedNamePredicate(String ns, String local)
+        {
+            return new Predicate<XdmNode>(item =>
+            {
+                if (!(item is XdmNode)) { return false; }
+                XdmNode node = (XdmNode)item;
+                return node.NodeKind == XmlNodeType.Element
+                        && node.NodeName.LocalName.Equals(local) && node.NodeName.Uri.Equals(ns);
+            });
+
+        }
+
+       internal static IPredicate<XdmNode> LocalNamePredicate(String given)
+        {
+            if ("*".Equals(given))
+            {
+                return IsElement();
+            }
+            return new Predicate<XdmNode>(item =>
+            {
+
+                XdmNode node = (XdmNode)item;
+                return node.NodeKind == XmlNodeType.Element
+                            && node.NodeName.LocalName.Equals(given);
+
+
+            });
+
+        }
+
+
+        /// <summary>
+        /// Obtain a predicate that tests whether an item is a node with a given local name, irrespective of the namespace.
+        /// </summary>
+        /// <param name="localName">The required local name</param>
+        /// <returns>A predicate that returns true if and only if the supplied item is a node with the given namespace URI and local name.</returns>
+        public static IPredicate<XdmNode> HasLocalName(String localName)
+        {
+
+
+            return new Predicate<XdmNode>(item =>
+            {
+                QName name = item.NodeName;
+                return name != null &&
+                        name.LocalName.Equals(localName);
+            });
+
+        }
+
+        /// <summary>
+        /// Obtain a predicate that tests whether an item is a node with a given namespace URI.
+        /// </summary>
+        /// <param name="uri">The required namespace URI: supply a zero-length string to identify the null namespace</param>
+        /// <returns>A predicate that returns true if and only if the supplied item is a node with the given
+        /// namespace URI. If a zero-length string is supplied, the predicate will also match nodes having no name,
+        /// such as text and comment nodes, and nodes having a local name only, such as namespace and processing-instruction
+        /// nodes.</returns>
+        public static IPredicate<XdmNode> HasNamespace(String uri)
+        {
+
+            return new Predicate<XdmNode>(item => {
+                QName name = item.NodeName;
+                return name != null && name.Uri.Equals(uri);
+            });
+        }
+
+
+        /// <summary>
+        /// Obtain a predicate that tests whether an item is an element node with a given attribute (whose name is in no namespace).
+        /// </summary>
+        /// <param name="local">The required attribute name</param>
+        /// <returns>A predicate that returns true if and only if the supplied item is an element having an attribute
+        /// with the given local name, in no namespace.</returns>
+        public static IPredicate<XdmNode> HasAttribute(String local)
+        {
+
+            return new Predicate<XdmNode>(item => (item).GetAttributeValue(local) != null);
+
+        }
+
+        /// <summary>
+        /// Obtain a predicate that tests whether an item is an element node with a given attribute (whose
+        /// name is in no namespace) whose string value is equal to a given value.
+        /// </summary>
+        /// <param name="local">The required attribute name</param>
+        /// <param name="value">The required attribute value</param>
+        /// <returns>A predicate that returns true if and only if the supplied item is an element having an attribute
+        /// with the given local name, in no namespace, whose string value is equal to the given value.</returns>
+        public static IPredicate<XdmNode> AttributeEq(String local, String value)
+        {
+
+            return new Predicate<XdmNode>(item => value.Equals(item.GetAttributeValue(local)));
+
+        }
+
+
+        /// <summary>
+        /// Obtain a predicate that tests whether an atomic value compares equal to a supplied atomic value of
+        /// a comparable type.
+        /// </summary>
+        /// <param name="value2">The atomic value to be compared with</param>
+        /// <returns>A predicate which returns true when applied to a value that is equal to the supplied
+        /// value under the "is-same-key" comparison rules. (These are the rules used to compare key values
+        /// in an XDM map. The rules are chosen to be context-free, error-free, and transitive.)</returns>
+        public static IPredicate<XdmAtomicValue> Eq(XdmAtomicValue value2)
+        {
+            return new Predicate<XdmAtomicValue>(value1 => value1.Equals(value2));
+        }
+
+        /// <summary>
+		/// Obtain a predicate that tests whether the result of applying the XPath <c>string()</c> function to an item
+        /// is equal to a given string.
+        /// </summary>
+        /// <param name="value">The string being tested</param>
+        /// <returns>A predicate which returns true if the string value of the item being tested
+        /// is equal to the given string under Java comparison rules for comparing strings.</returns>
+        public static IPredicate<XdmItem> Eq(string value)
+        {
+            return new Predicate<XdmItem>(item => item.GetStringValue().Equals(value));
+        }
+
+        /// <summary>
+        /// Obtain a predicate that tests whether there is some item in the result of applying a step,
+        /// whose string value is equal to a given string. For example, <c>Eq(attribute("id"), "foo")</c>
+        /// matches an element if it has an "id" attribute whose value is "foo".
+        /// </summary>
+		/// <typeparam name="TInput">The type of the input object to the <c>Step</c> function</typeparam>
+        /// <typeparam name="TResult">The result type after invoking the function</typeparam>
+        /// <param name="step">The step to be evaluated</param>
+        /// <param name="value">The string to be compared against the items returned by the step</param>
+        /// <returns>A predicate which returns true if some item selected by the step has as string value
+        /// equal to the given string.</returns>
+        public static IPredicate<TInput> Eq<TInput, TResult>(Step<TInput, TResult> step, string value)
+            where TInput : XdmItem
+            where TResult : XdmItem
+        {
+            return Some(step, Eq(value));
+        }
+
+        /// <summary>
+		/// Obtain a predicate that tests whether the result of applying the XPath <c>string()</c> function to an item
+        /// matches a given regular expression.
+        /// </summary>
+        /// <param name="regex">The regular expression (this is a Java regular expression, not an XPath regular expression)</param>
+        /// <returns>A predicate which returns true if the string value of the item being tested
+        /// contains a substring that matches the given regular expression. To test the string in its entirety,
+        /// use anchors "^" and "$" in the regular expression.</returns>
+        public static Predicate<XdmItem> MatchesRegex(String regex)
+        {
+            return new Predicate<XdmItem>(item1 =>
+            {
+                return System.Text.RegularExpressions.Regex.Match(item1.GetStringValue(), regex).Success;
+            });
+        }
+
+        /// <summary>
+        /// Obtain a predicate that tests whether there is some item in the result of applying a step that
+        /// satisfies the supplied condition.
+        /// </summary>
+		/// <remarks><para>For example, <c>some(CHILD, exists(attribute("foo"))</c> matches an element if it has a child
+        /// element with an attribute whose local name is "foo".</para>
+        /// <para>If the step returns an empty sequence the result will always be false.</para></remarks>
+		/// <typeparam name="TInput">The type of the input object to the <c>Step</c> function</typeparam>
+        /// <typeparam name="TResult">The expected result type after invoking the function. The predicate must also be of this type.</typeparam>
+        /// <param name="step">The step to be evaluated</param>
+        /// <param name="condition">The predicate to be applied to the items returned by the step</param>
+		/// <returns>A predicate which returns true if some item selected by the step satisfies the supplied condition.</returns>
+        public static IPredicate<TInput> Some<TInput, TResult>(Step<TInput, TResult> step, IPredicate<TResult> condition)
+            where TInput : XdmItem
+            where TResult : XdmItem
+        {
+            return new Predicate<TInput>(item => step.Invoke(item).Any(condition.Func));
+
+        }
+
+
+        /// <summary>
+        /// Obtain a predicate that tests whether every item in the result of applying a step
+        /// satisfies the supplied condition.
+        /// </summary>
+		/// <remarks> <para>For example, <c>every(CHILD, exists(attribute("foo"))</c> matches an element if each of its child
+        /// elements has an attribute whose local name is "foo".</para>
+        /// <para>If the step returns an empty sequence the result will always be true.</para></remarks>
+		/// <typeparam name="TInput">the type of the input object to the <c>Step</c> function</typeparam>
+        /// <typeparam name="TResult">The expected result type after invoking the function. The predicate must also be of this type.</typeparam>
+		/// <param name="step">The step to be evaluated</param>
+		/// <param name="condition">The predicate to be applied to the items returned by the step</param>
+		/// <returns>A predicate which returns true if every item selected by the step satisfies the supplied condition.</returns>
+        public static IPredicate<TInput> Every<TInput, TResult>(Step<TInput, TResult> step, IPredicate<TResult> condition)
+            where TInput : XdmItem
+            where TResult : XdmItem
+        {
+            return new Predicate<TInput>(item => step.Invoke(item).All(condition.Func));
+
+        }
+
+
+        internal static IPredicate<XdmItem> NodeKindPredicate(XmlNodeType kind)
+        {
+            return new Predicate<XdmItem>(node => node.IsNode() && ((XdmNode)node).NodeKind == kind);
+
+        }
+
+
+
+    }
+
+
+
+
+    /// <summary>
+    /// A <c>Step</c> class wraps a delegate method that can be applied to an item
+    /// to return a <c>XdmValue</c> of items.
+    /// </summary>
+    public class Step<TInput, TResult>
+    where TInput : XdmItem
+    where TResult : XdmItem
+    {
+        private Func<TInput, IEnumerable<TResult>> function;
+
+        /// <summary>
+        /// Constructor method to wrap a delegate method.
+        /// </summary>
+		/// <param name="f">Passes a delegate as a <c>Func</c> with encapsulated type <c>XdmItem</c> and the return value <c>IEnumerable</c> of items.</param>
+        public Step(Func<TInput, IEnumerable<TResult>> f)
+        {
+            function = f;
+
+        }
+
+
+        /// <summary>
+		/// Obtain a <c>Step</c> that filters the results of this <c>Step</c> using a supplied <c>Func</c> predicate.
+        /// <p>For example, <c>Child.Where(Predicate.IsText())</c>
+        /// returns a <c>Step</c> whose effect is to select the text node children 
+        /// of a supplied element or document node.</p>
+        /// </summary>
+		/// <param name="predicate">The predicate is a <c>Func</c> delegate enapsulating the filter which will be applied to the results of this <c>Step</c></param>
+        /// <returns>A new <c>Step</c> (that is, a wrapped delegate from one <c>Step</c> of items to another) that
+        /// filters the results of this step by selecting only the items that satisfy the predicate.</returns>
+        public Step<TInput, TResult> Where(IPredicate<TResult> predicate)
+        {
+            return new Step<TInput, TResult>(item => {
+                return function.Invoke(item).Where(predicate.Func);
+            });
+        }
+
+
+        /// <summary>
+		/// Obtain a <c>Step</c> that combines the results of this step with the results of another step.
+        /// </summary>
+        /// <param name="next">The step which will be applied to the results of this step</param>
+		/// <returns>A new <c>Step</c> (that is, a function from one <c>IEnumerable</c> of items to another) that
+		/// performs this step and the next step in turn. The result is equivalent to the <c>IEnumerable</c> method <c>SelectMany()</c>
+        /// function or the XPath <c>!</c> operator: there is no sorting of nodes into document order, and
+        /// no elimination of duplicates.</returns>
+        public Step<TInput, TResult> Then(Step<TResult, TResult> next)
+        {
+
+            return new Step<TInput, TResult>(item => { return function.Invoke(item).SelectMany(next.Func); });
+        }
+
+        /// <summary>
+		/// Obtain a <c>Step</c> that selects the Nth item in the results of this step.
+        /// </summary>
+        /// <param name="index">The zero-based index of the item to be selected</param>
+		/// <returns>A new <c>Step</c> (that is, a function from one <c>IEnumerable</c> of items to another) that
+        /// filters the results of this step by selecting only the items that satisfy the predicate.</returns>
+        public Step<TInput, TResult> At(int index)
+        {
+
+            return new Step<TInput, TResult>(item => {
+                List<TResult> list = new List<TResult>(1);
+                list.Add(function.Invoke(item).ElementAt(index));
+                return list;
+            });
+        }
+
+
+        /// <summary>
+		/// Obtain a <c>Step</c> that concatenates the results of this <c>Step</c> with the result of another
+		/// <c>Step</c> applied to the same input item.
+        /// </summary>
+        /// <remarks><p>For example, <c>Attribute().Cat(Child())</c> returns a step whose effect is
+		/// to select the attributes of a supplied element followed by its children.</p></remarks>
+        /// <param name="other">The step whose results will be concatenated with the results of this step</param>
+		/// <returns>A new <c>Step</c> (that is, a function from one <c>IEnumerable</c> of items to another) that
+        /// concatenates the results of applying this step to the input item, followed by the
+        /// results of applying the other step to the input item.</returns>
+        public Step<TInput, TResult> Cat(Step<TInput, TResult> other)
+        {
+
+            return new Step<TInput, TResult>(item => {
+                return function.Invoke(item).Concat(other.Invoke(item));
+            });
+        }
+
+
+        /// <summary>
+		/// The <c>Func</c> property that represents the wrapped delegate method which can be invoked.
+        /// </summary>
+        public Func<TInput, IEnumerable<TResult>> Func
+        {
+            get
+            {
+                return function;
+            }
+        }
+
+
+        /// <summary>
+        /// Invokes this function to the given argument.
+        /// </summary>
+        /// <param name="item">The function argument</param>
+        /// <returns>The function result.</returns>
+        public IEnumerable<TResult> Invoke(TInput item)
+        {
+            return function.Invoke(item);
+        }
+
+
+    }
+
+
+    /// <summary>
+    /// This non-instantiable class provides a number of useful implementations of the <c>Step</c>
+	/// class which wraps a <c>Func</c> object, used to navigate XDM trees, typically getting the <c>Func</c> property 
+    /// and used as an argument to <c>XdmValue#Select</c> and <c>XdmValue#SelectMany</c>.
+    /// </summary>
+    public class Steps
+    {
+
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that selects the root node of the containing document (which may or may not
+        /// be a document node). If not a node a wrapped empty sequence is returned.
+        /// </summary>
+		/// <returns>A <c>Step</c> that selects the root node of the containing document.</returns>
+        public static Step<XdmNode, XdmNode> Root()
+        {
+            return new Step<XdmNode, XdmNode>(origin =>
+            { IList<XdmNode> list = new List<XdmNode>(1);
+                list.Add(origin.Root);
+                return list;
+
+            });
+
+        }
+
+        internal static Step<XdmNode, XdmNode> AxisStep(XdmAxis axis)
+        {
+            return new Step<XdmNode, XdmNode>(item => {
+                return item.EnumerableOverAxis(axis);
+
+
+            });
+
+
+		}
+
+
+		/// <summary>
+		/// Obtain a <c>Step</c> to navigate from a node to its ancestors, in reverse document
+		/// order (that is, nearest ancestor first, root node last).
+		/// </summary>
+		/// <returns>A <c>Step</c> that selects all nodes on the ancestor axis.</returns>
+		public static Step<XdmNode, XdmNode> Ancestor()
+		{
+			return AxisStep(XdmAxis.Ancestor);
+		}
+
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that navigates from a node to its ancestor elements having a specified
+		/// local name, irrespective of the namespace. The nodes are returned in reverse document
+		/// order (that is, nearest ancestor first, root node last).
+		/// </summary>
+		/// <param name="localName">The local name of the ancestors to be selected by the <c>Step</c>,
+		/// or "*" to select all ancestors that are element nodes</param>
+		/// <returns>A <c>Step</c>, which selects the ancestors of a supplied node that have the
+		/// required local name.</returns>
+		public static Step<XdmNode, XdmNode> Ancestor(String localName)
+		{
+			return Ancestor().Where(Predicates.HasLocalName(localName));
+		}
+
+
+		/// <summary>
+		/// Return a <c>Step</c> that navigates from a node to its ancestors having a specified
+		/// namespace URI and local name, in reverse document order (that is, nearest ancestor first,
+		/// root node last).
+		/// </summary>
+		/// <param name="uri">The namespace URI of the ancestors to be selected by the <c>Step</c></param>
+		/// <param name="localName">The local name of the ancestors to be selected by the <c>Step</c></param>
+		/// <returns>A <c>Step</c>, which selects the ancestors (at most one) of a supplied node that have the
+		/// required local name and namespace URI.</returns>
+		public static Step<XdmNode, XdmNode> Ancestor(String uri, String localName)
+		{
+			return Ancestor().Where(Predicates.HasName(uri, localName));
+		}
+
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that filters the nodes found on the ancestor axis using a supplied <c>Predicate</c>.
+		/// Nodes are returned in reverse document order (that is, nearest ancestor first, root node last).
+		/// </summary>
+		/// <remarks>The function call <c>Ancestor(predicate)</c> is equivalent to <c>Ancestor.Where(predicate)</c>.</remarks>
+		/// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the ancestor-or-self axis using the supplied predicate.</returns>
+		public static Step<XdmNode, XdmNode> Ancestor(Predicate<XdmItem> filter)
+		{
+			return Ancestor().Where(filter);
+		}
+
+		/// <summary>
+		/// Obtain a <c>Step</c> to navigate from a node to its ancestors, in reverse document
+		/// order, with the node itself returned at the start of the sequence (that is, origin node first,
+		/// root node last).
+		/// </summary>
+		/// <returns>A <c>Step</c> that selects all nodes on the ancestor-or-self axis.</returns>
+		public static Step<XdmNode, XdmNode> AncestorOrSelf()
+		{
+			return AxisStep(XdmAxis.AncestorOrSelf);
+		}
+
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that navigates from a node to its ancestor elements having a specified
+		/// local name, irrespective of the namespace. The nodes are returned in reverse document
+		/// order (that is, nearest ancestor first, root node last), and include the node itself.
+		/// </summary>
+		/// <param name="localName">The local name of the ancestors to be selected by the <c>Step</c>,
+		/// or "*" to select all ancestor-or-self nodes that are element nodes</param>
+		/// <returns>A <c>Step</c>, which selects the ancestors-or-self of a supplied node that have 
+		/// the required local name.</returns>
+		public static Step<XdmNode, XdmNode> AncestorOrSelf(String localName)
+		{
+			return AncestorOrSelf().Where(Predicates.HasLocalName(localName));
+		}
+
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that navigates from a node to its ancestors-or-self having a specified
+		/// namespace URI and local name, in reverse document order (that is, nearest ancestor first, root node last).
+		/// </summary>
+		/// <param name="uri">The namespace URI of the ancestors to be selected by the <c>Step</c>:
+		/// supply a zero-length string to indicate the null namespace</param>
+		/// <param name="localName">The local name of the ancestors to be selected by the <c>Step</c></param>
+		/// <returns>A <c>Step</c>, which selects the ancestors-or-self of a supplied node that have the
+		/// required local name and namespace URI.</returns>
+		public static Step<XdmNode, XdmNode> AncestorOrSelf(String uri, String localName)
+		{
+			return Ancestor().Where(Predicates.HasName(uri, localName));
+		}
+
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that filters the nodes found on the ancestor-or-self axis using a supplied <c>Predicate</c>.
+		/// Nodes are returned in reverse document order (that is, origin node first, root node last).
+		/// </summary>
+		/// <remarks>The function call <c>AncestorOrSelf(predicate)</c> is equivalent to <c>AncestorOrSelf.Where(predicate)</c>.</remarks>
+		/// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the ancestor-or-self axis using a supplied predicate.</returns>
+		public static Step<XdmNode, XdmNode> AncestorOrSelf(Predicate<XdmItem> filter)
+		{
+			return AncestorOrSelf().Where(filter);
+		}
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> to navigate from a node to its attributes.
+        /// </summary>
+		/// <returns>A <c>Step</c> that selects all attribute nodes.</returns>
+        public static Step<XdmNode, XdmNode> Attribute()
+        {
+            return AxisStep(XdmAxis.Attribute);
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to its attributes having a specified
+        /// local name, irrespective of the namespace.
+        /// </summary>
+        /// <param name="localName">The local name of the attributes to be selected by the <c>Step</c>, or
+        /// "*" to select all attributes</param>
+        /// <returns>A <c>Step</c>, which selects the attributes of a supplied node that have the
+        /// required local name.</returns>
+        public static Step<XdmNode, XdmNode> Attribute(String localName)
+        {
+            if (localName.Equals("*"))
+            {
+                return AxisStep(XdmAxis.Attribute);
+            }
+            else
+            {
+                return AxisStep(XdmAxis.Attribute).Where(Predicates.HasLocalName(localName));
+            }
+        }
+
+
+        /// <summary>
+        /// Return a <c>Step</c> that navigates from a node to its attribute having a specified
+        /// namespace URI and local name.
+        /// </summary>
+        /// <param name="uri">The namespace URI of the attributes to be selected by the <c>Step</c>:
+        /// supply a zero-length string to indicate the null namespace</param>
+        /// <param name="localName">The local name of the attributes to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the attributes (at most one) of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> Attribute(String uri, String localName)
+        {
+            return AxisStep(XdmAxis.Attribute).Where(Predicates.HasName(uri, localName));
+
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that filters the nodes found on the attribute axis using a supplied <c>Predicate</c>.
+        /// The function call <c>Attribute(predicate)</c> is equivalent to <c>Attribute.Where(predicate)</c>.
+        /// </summary>
+		/// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the attribute axis using the supplied predicate.</returns>
+        public static Step<XdmNode, XdmNode> Attribute(IPredicate<XdmNode> filter)
+        {
+            return AxisStep(XdmAxis.Attribute).Where(filter);
+
+        }
+
+        /// <summary>
+        /// Obtain a <c>Step</c> to navigate from a node to its children
+        /// </summary>
+		/// <returns>A <c>Step</c> that selects all nodes on the child axis</returns>
+        public static Step<XdmNode, XdmNode> Child()
+        {
+            return AxisStep(XdmAxis.Child);
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the element children having a specified
+        /// local name, irrespective of the namespace.
+        /// </summary>
+		/// <param name="localName">The local name of the child elements to be selected by the <c>Step</c>,
+        /// or "*" to select all children that are element nodes</param>
+        /// <returns>A <c>Step</c>, which selects the element children of a supplied node that have the required local name.</returns>
+        public static Step<XdmNode, XdmNode> Child(String localName)
+        {
+            return AxisStep(XdmAxis.Child).Where(Predicates.LocalNamePredicate(localName));
+        }
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the element children having a specified
+        /// namespace URI and local name.
+        /// </summary>
+        /// <param name="uri">The namespace URI of the child elements to be selected by the <c>Step</c>:
+        /// supply a zero-length string to indicate the null namespace</param>
+        /// <param name="localName">The local name of the child elements to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the element children of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> Child(String uri, String localName)
+        {
+            return AxisStep(XdmAxis.Child).Where(Predicates.ExpandedNamePredicate(uri, localName));
+		}
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that filters the nodes found on the child axis using a supplied <c>Predicate</c>.
+		/// The function call <c>Child(predicate)</c> is equivalent to <c>Child.Where(predicate)</c>.
+		/// For example, <c>Child(IsElement())</c> returns a <c>Step</c> that selects the element node children
+		/// of a given node.
+		/// </summary>
+		/// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the child axis using the supplied predicate.</returns>
+		public static Step<XdmNode, XdmNode> Child(IPredicate<XdmNode> filter)
+		{
+			return AxisStep(XdmAxis.Child).Where(filter);
+		}
+
+
+		/// <summary>
+		/// Obtain a <c>Step</c> to navigate from a node to its descendants, which are returned in document order.
+		/// </summary>
+		/// <returns>A <c>Step</c> that selects all nodes on the descendant axis.</returns>
+		public static Step<XdmNode, XdmNode> Descendant()
+		{
+			return AxisStep(XdmAxis.Descendant);
+		}
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that navigates from a node to the descendant elements having a specified
+		/// local name, irrespective of the namespace. These are returned in document order.
+		/// </summary>
+		/// <param name="localname">The local name of the descendant elements to be selected by the <c>Step</c>,
+		/// or "*" to select all descendants that are element nodes</param>
+		/// <returns>A <c>Step</c>, which selects the element descendants of a supplied node that have the
+		/// required local name.</returns>
+		public static Step<XdmNode, XdmNode> Descendant(String localname)
+		{
+
+			return Descendant().Where(Predicates.HasLocalName(localname));
+
+		}
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that navigates from a node to the descendant elements having a specified
+		/// namespace URI and local name.
+		/// </summary>
+		/// <param name="uri">The namespace URI of the elements to be selected by the <c>Step</c>:
+		/// supply a zero-length string to indicate the null namespace</param>
+		/// <param name="localName">The local name of the elements to be selected by the <c>Step</c></param>
+		/// <returns>A <c>Step</c>, which selects the element descendants of a supplied node that have the required
+		/// local name and namespace URI.</returns>
+		public static Step<XdmNode, XdmNode> Descendant(String uri, String localName)
+		{
+			return Descendant().Where(Predicates.HasName(uri, localName));
+		}
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that filters the nodes found on the descendant axis using a supplied <c>Predicate</c>.
+		/// The function call <c>Descendant(predicate)</c> is equivalent to <c>Descendant.Where(predicate)</c>.
+		/// For example, <c>Steps.Descendant(Predicates.IsElement())</c>
+		/// returns a <c>Step</c> that selects the element node descendants
+		/// of a given node, while <c>Descendant(Predicate.Exists(attribute("id")))</c> selects those that have an attribute
+		/// named "id". These are returned in document order.
+		/// </summary>
+		/// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the descendant axis using the supplied predicate.</returns>
+		public static Step<XdmNode, XdmNode> Descendant(IPredicate<XdmNode> filter)
+		{
+			return Descendant().Where(filter);
+		}
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> to navigate from a node to its descendants, which are returned in document order,
+        /// preceded by the origin node itself.
+        /// </summary>
+		/// <returns>A <c>Step</c> that selects all nodes on the descendant-or-self axis.</returns>
+        public static Step<XdmNode, XdmNode> DescendantOrSelf()
+        {
+            return AxisStep(XdmAxis.DescendantOrSelf);
+		}
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that navigates from a node to the descendant-or-self elements having a specified
+		/// local name, irrespective of the namespace. These are returned in document order.
+		/// </summary>
+		/// <param name="localname">The local name of the descendant-or-self elements to be selected by the <c>Step</c>,
+		/// or "*" to select all descendant-or-self that are element nodes</param>
+		/// <returns>A <c>Step</c>, which selects the descendant-or-self elements of a supplied node that have the
+		/// required local name.</returns>
+		public static Step<XdmNode, XdmNode> DescendantOrSelf(String localname)
+		{
+
+			return DescendantOrSelf().Where(Predicates.HasLocalName(localname));
+
+		}
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that navigates from a node to the descendant-or-self elements having a specified
+		/// namespace URI and local name.
+		/// </summary>
+		/// <param name="uri">The namespace URI of the elements to be selected by the <c>Step</c>:
+		/// supply a zero-length string to indicate the null namespace</param>
+		/// <param name="localName">The local name of the elements to be selected by the <c>Step</c></param>
+		/// <returns>A <c>Step</c>, which selects the descendant-or-self elements of a supplied node that have the required
+		/// local name and namespace URI.</returns>
+		public static Step<XdmNode, XdmNode> DescendantOrSelf(String uri, String localName)
+		{
+			return DescendantOrSelf().Where(Predicates.HasName(uri, localName));
+		}
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that filters the nodes found on the descendant-or-self axis using a supplied <c>Predicate</c>.
+		/// The function call <c>DescendantOrSelf(predicate)</c> is equivalent to <c>DescendantOrSelf.Where(predicate)</c>.
+		/// For example, <c>Steps.DescendantOrSelf(Predicates.IsElement())</c>
+		/// returns a <c>Step</c> that selects the descendant-or-self element nodes
+		/// of a given node, while <c>DescendantOrSelf(Predicate.Exists(attribute("id")))</c> selects those that have an attribute
+		/// named "id". These are returned in document order.
+		/// </summary>
+		/// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the descendant-or-self axis using the supplied predicate.</returns>
+		public static Step<XdmNode, XdmNode> DescendantOrSelf(IPredicate<XdmNode> filter)
+		{
+			return DescendantOrSelf().Where(filter);
+		}
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> to navigate from a node to its following nodes
+        /// (excluding descendants), which are returned in document order.
+        /// </summary>
+		/// <returns>A <c>Step</c> that selects all nodes on the following axis.</returns>
+        public static Step<XdmNode, XdmNode> Following()
+        {
+            return AxisStep(XdmAxis.Following);
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the following elements having a specified
+        /// local name, irrespective of the namespace. These are returned in document order.
+        /// </summary>
+        /// <param name="localName">The local name of the following elements to be selected by the <c>Step</c>,
+        /// or "*" to select all following nodes that are elements</param>
+        /// <returns>A <c>Step</c>, which selects the following elements of a supplied node that have the
+        /// required local name.</returns>
+        public static Step<XdmNode, XdmNode> Following(String localName)
+        {
+            return AxisStep(XdmAxis.Following).Where(Predicates.HasLocalName(localName));
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the following elements having a specified
+        /// namespace URI and local name. These are returned in document order.
+        /// </summary>
+        /// <param name="uri">The namespace URI of the following elements to be selected by the <c>Step</c>:
+        /// supply a zero-length string to indicate the null namespace</param>
+        /// <param name="localName">The local name of the following elements to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the following elements of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> Following(String uri, String localName)
+        {
+            return AxisStep(XdmAxis.Following).Where(Predicates.HasName(uri, localName));
+        }
+
+
+        /// <summary>
+		/// Obtain a <c>Step</c> that filters the nodes found on the following axis using a supplied <c>Predicate</c>.
+        /// The function call <c>Following(predicate)</c> is equivalent to <c>Following().Where(predicate)</c>.
+        /// For example, <c>Following(IsElement())</c> returns a <c>Step</c> that selects the following elements
+        /// of a given node, while <c>Following(Exists(Attribute("id")))</c> selects those that have an attribute
+        /// named "id". These are returned in document order.
+        /// </summary>
+		/// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the following axis using the supplied predicate.</returns>
+        public static Step<XdmNode, XdmNode> Following(Predicate<XdmItem> filter)
+        {
+            return AxisStep(XdmAxis.Following).Where(filter);
+        }
+
+        /// <summary>
+        /// Obtain a <c>Step</c> to navigate from a node to its following siblings, which are returned in document order.
+        /// </summary>
+		/// <returns>A <c>Step</c> that selects all nodes on the following-sibling axis.</returns>
+        public static Step<XdmNode, XdmNode> FollowingSibling()
+        {
+            return AxisStep(XdmAxis.FollowingSibling);
+        }
+
+        /// <summary>
+        ///  Obtain a <c>Step</c> that navigates from a node to the following sibling elements having a specified
+        ///  local name, irrespective of the namespace. These are returned in document order.
+        /// </summary>
+        /// <param name="localName">The local name of the following sibling elements to be selected by the <c>Step</c>,
+        /// or "*" to select all following siblings that are element nodes</param>
+        /// <returns>A <c>Step</c>, which selects the following sibling elements of a supplied node that have the
+        /// required local name.</returns>
+        public static Step<XdmNode, XdmNode> FollowingSibling(String localName)
+        {
+            return AxisStep(XdmAxis.FollowingSibling).Where(Predicates.HasLocalName(localName));
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the following sibling elements having a specified
+        /// namespace URI and local name. These are returned in document order.
+        /// </summary>
+        /// <param name="uri">The namespace URI of the following sibling elements to be selected by the <c>Step</c>:
+        /// supply a zero-length string to indicate the null namespace</param>
+        /// <param name="localName">The local name of the following sibling elements to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the following sibling elements of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> FollowingSibling(String uri, String localName)
+        {
+            return AxisStep(XdmAxis.FollowingSibling).Where(Predicates.HasName(uri, localName));
+		}
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that filters the nodes found on the following sibling axis using a supplied <c>Predicate</c>.
+		/// The function call <c>FollowingSibling(predicate)</c> is equivalent to <c>FollowingSibling.Where(predicate)</c>.
+		/// For example, <c>FollowingSibling(IsElement())</c> returns a <c>Step</c> that selects the following sibling 
+		/// elements of a given node, while <c>FollowingSibling(Exists(Attribute("id")))</c> 
+		/// selects those that have an attribute named "id". These are returned in document order.
+		/// </summary>
+		/// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the following sibling axis using the supplied predicate.</returns>
+		public static Step<XdmNode, XdmNode> FollowingSibling(Predicate<XdmItem> filter)
+		{
+			return AxisStep(XdmAxis.FollowingSibling).Where(filter);
+		}
+
+
+        /// <summary>
+		/// Obtain a <c>Step</c> to navigate from a node to its namespace nodes.
+        /// </summary>
+		/// <returns>A <c>Step</c> that selects all nodes on the namespace axis.</returns>
+        public static Step<XdmNode, XdmNode> Namespace()
+        {
+            return AxisStep(XdmAxis.Namespace);
+        }
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to its namespaces having a specified
+        /// local name. The local name of a namespace node corresponds to the prefix used in the
+        /// namespace binding.
+        /// </summary>
+        /// <param name="localName">The local name (representing the namespace prefix) of the namespace nodes
+        /// to be selected by the <c>Step</c>, or "*" to select all namespaces</param>
+        /// <returns>A <c>Step</c>, which selects the namespaces of a supplied node that have a
+        /// given local name (prefix).</returns>
+        public static Step<XdmNode, XdmNode> Namespace(String localName)
+        {
+            if (localName.Equals("*"))
+            {
+                return AxisStep(XdmAxis.Namespace);
+            }
+            else
+            {
+                return AxisStep(XdmAxis.Namespace).Where(Predicates.HasLocalName(localName));
+            }
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that filters the nodes found on the namespace axis using a supplied <c>Predicate</c>.
+        /// The function call <c>Namespace(predicate)</c> is equivalent to <c>Namespace().Where(predicate)</c>.
+        /// For example, <c>Namespace(Eq("http://www.w3.org/1999/XSL/Transform")</c>
+        /// selects a namespace node that binds a prefix to the XSLT namespace.
+        /// </summary>
+        /// <param name="filter">The predicate to be applied</param>
+        /// <returns>A <c>Step</c> that filters the nodes found on the namespace axis using the supplied predicate.</returns>
+        public static Step<XdmNode, XdmNode> Namespace(Predicate<XdmItem> filter)
+        {
+            return AxisStep(XdmAxis.Namespace).Where(filter);
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> to navigate from a node to its parent.
+        /// </summary>
+        /// <returns>A <c>Step</c> that selects all nodes on the parent axis (of which there is at most one).</returns>
+        public static Step<XdmNode, XdmNode> Parent()
+        {
+            return AxisStep(XdmAxis.Parent);
+        }
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the parent element provided it has a specified
+        /// local name, irrespective of the namespace.
+        /// </summary>
+        /// <param name="localName">The local name of the parent element to be selected by the <c>Step</c>,
+        ///  or "*" to select the parent node provided it is an element</param>
+        /// <returns>A <c>Step</c>, which selects the parent of a supplied node provided it is an element with the
+        /// required local name.</returns>
+        public static Step<XdmNode, XdmNode> Parent(String localName)
+        {
+            return AxisStep(XdmAxis.Parent).Where(Predicates.HasLocalName(localName));
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the parent element provided it has a specified
+        /// namespace URI and local name.
+        /// </summary>
+        /// <param name="uri">The namespace URI of the parent element to be selected by the <c>Step</c>:
+        /// supply a zero-length string to indicate the null namespace</param>
+        /// <param name="localName">The local name of the parent element to be selected by the <c>Step</c></param>
+		/// <returns>A <c>Step</c>, which selects the parent element of a supplied node provided it is an 
+		/// element with the required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> Parent(String uri, String localName)
+        {
+            return AxisStep(XdmAxis.Parent).Where(Predicates.HasName(uri, localName));
+        }
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that filters the node found on the parent axis using a supplied <c>Predicate</c>.
+        /// The function call <c>Parent(filter)</c> is equivalent to <c>Parent(filter).where(Predicate)</c>.
+		/// For example, <c>Parent(Predicate.IsElement()).GetFunc</c> returns a <c>Step</c> that selects the parent node provided it is an element
+        /// </summary>
+		/// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the parent axis using the supplied predicate.</returns>
+        public static Step<XdmNode, XdmNode> Parent(Predicate<XdmItem> filter)
+        {
+            return AxisStep(XdmAxis.Parent).Where(filter);
+
+        }
+
+		/// <summary>
+		/// Obtain a <c>Step</c> to navigate from a node to its preceding siblings, which are returned
+		/// in reverse document order.
+		/// </summary>
+		/// <returns>A <c>Step</c> that selects all nodes on the preceding-sibling axis.</returns>
+        public static Step<XdmNode, XdmNode> PrecedingSibling()
+        {
+            return AxisStep(XdmAxis.PrecedingSibling);
+		}
+
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that navigates from a node to the preceding sibling elements having a specified
+		/// local name. These are returned in reverse document order.
+		/// </summary>
+		/// <param name="localName">The local name of the preceding sibling elements to be selected by the <c>Step</c>,
+		/// or "*" to select all descendants that are element nodes</param>
+		/// <returns>A <c>Step</c>, which selects the preceding sibling elements of a supplied node that have the
+		/// required local name.</returns>
+		public static Step<XdmNode, XdmNode> PrecedingSibling(String localName)
+		{
+			return PrecedingSibling().Where(Predicates.HasLocalName(localName));
+		}
+
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that navigates from a node to the preceding sibling elements having a specified
+		/// namespace URI and local name. These are returned in reverse document order.
+		/// </summary>
+		/// <param name="uri">The namespace URI of the preceding sibling elements to be selected by the <c>Step</c>:
+		/// supply a zero-length string to indicate the null namespace</param>
+		/// <param name="localName">The local name of the preceding sibling elements to be selected by the <c>Step</c></param>
+		/// <returns>A <c>Step</c>, which selects the preceding sibling elements of a supplied node that have the
+		/// required local name and namespace URI.</returns>
+		public static Step<XdmNode, XdmNode> PrecedingSibling(String uri, String localName)
+		{
+			return PrecedingSibling().Where(Predicates.ExpandedNamePredicate(uri, localName));
+		}
+
+
+		/// <summary>
+		/// Obtain a <c>Step</c> that filters the nodes found on the preceding sibling axis using a supplied <c>Predicate</c>.
+		/// The function call <c>PrecedingSibling(predicate)</c> is equivalent to <c>PrecedingSibling().Where(predicate)</c>.
+		/// For example, <c>PrecedingSibling(isElement())</c> returns a <c>Step</c> that selects the preceding sibling elements 
+		/// of a given node, while <c>PrecedingSibling(Predicate.Exists(attribute("id")))</c> selects those that have an attribute named "id". 
+		/// These are returned in reverse document order.
+		/// </summary>
+		/// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the following sibling axis using the supplied predicate.</returns>
+		public static Step<XdmNode, XdmNode> PrecedingSibling(Predicate<XdmItem> filter)
+		{
+			return PrecedingSibling().Where(filter);
+		}
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> to navigate from a node to its preceding nodes (excluding ancestors),
+        /// which are returned in reverse document order.
+        /// </summary>
+		/// <returns>A <c>Step</c> that selects all nodes on the preceding axis.</returns>
+        public static Step<XdmNode, XdmNode> Preceding()
+        {
+            return AxisStep(XdmAxis.Preceding);
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the preceding elements having a specified
+        /// local name. These are returned in reverse document order.
+        /// </summary>
+        /// <param name="localName">The local name of the preceding elements to be selected by the <c>Step</c>,
+        /// or "*" to select all descendants that are element nodes</param>
+        /// <returns>A <c>Step</c>, which selects the preceding elements of a supplied node that have the
+        /// required local name.</returns>
+        public static Step<XdmNode, XdmNode> Preceding(String localName)
+        {
+            return Preceding().Where(Predicates.HasLocalName(localName));
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the preceding elements having a specified
+        /// namespace URI and local name. These are returned in reverse document order.
+        /// </summary>
+        /// <param name="uri">The namespace URI of the preceding elements to be selected by the <c>Step</c>:
+        /// supply a zero-length string to indicate the null namespace</param>
+        /// <param name="localName">The local name of the preceding elements to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the preceding elements of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> Preceding(String uri, String localName)
+        {
+            return Preceding().Where(Predicates.ExpandedNamePredicate(uri, localName));
+        }
+
+
+        /// <summary>
+		/// Obtain a Step that filters the nodes found on the preceding axis using a supplied <c>Predicate</c> .
+		/// The function call <c>Preceding(predicate)</c> is equivalent to <c>Preceding().Where(predicate)</c>.
+		/// For example, <c>Preceding(isElement())</c> returns a <c>Step</c> that selects the preceding elements 
+        /// of a given node, while <c>Preceding(Predicate.Exists(attribute("id")))</c> selects those that have an attribute named "id". 
+        /// These are returned in reverse document order.
+        /// </summary>
+        /// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the following axis using the supplied predicate.</returns>
+        public static Step<XdmNode, XdmNode> Preceding(Predicate<XdmItem> filter)
+        {
+            return Preceding().Where(filter);
+        }
+
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> to navigate from a node to itself (useful only if applying a predicate).
+        /// </summary>
+        /// <returns>A <c>Step</c> that selects all nodes on the self axis (that is, the node itself).</returns>
+        public static Step<XdmNode, XdmNode> Self()
+        {
+            return AxisStep(XdmAxis.Self);
+        }
+
+
+        /// <summary>
+		/// Obtain a <c>Step</c> that navigates from a node to itself provided it is an element with a specified
+        /// local name, irrespective of the namespace.
+        /// </summary>
+        /// <param name="localName">The local name of the element to be selected by the <c>Step</c>,
+        /// or "*" to select the node provided that it is an element node</param>
+        /// <returns>A <c>Step</c>, which selects the supplied node provided it has a given local name.</returns>
+        public static Step<XdmNode, XdmNode> Self(String localName)
+        {
+            return AxisStep(XdmAxis.Self).Where(Predicates.HasLocalName(localName));
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to itself provided it has a specified
+        /// namespace URI and local name.
+        /// </summary>
+        /// <param name="uri">The namespace URI of the element to be selected by the <c>Step</c>:
+        /// supply a zero-length string to indicate the null namespace</param>
+        /// <param name="localName">The local name of the element to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the supplied node provided it is an element with a given local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> Self(String uri, String localName)
+        {
+            return AxisStep(XdmAxis.Self).Where(Predicates.HasName(uri, localName));
+        }
+
+
+        /// <summary>
+		/// Obtain a <c>Step</c> that filters the node found on the self axis using a supplied <c>Predicate</c> filter.
+		/// The function call <c>Self(predicate)</c> is equivalent to <c>Self().Where(predicate)</c>.
+		/// For example, <c>self(isElement())</c> returns a <c>Step</c> that selects the supplied node provided it is an element.
+        /// </summary>
+        /// <param name="filter">The predicate to be applied</param>
+		/// <returns>A <c>Step</c> that filters the nodes found on the self axis using the supplied predicate.</returns>
+        public static Step<XdmNode, XdmNode> Self(Predicate<XdmNode> filter)
+        {
+            return AxisStep(XdmAxis.Self).Where(filter);
+        }
+
+
+        /// <summary>
+		/// Obtain an selector that atomizes an item to produce a <c>XdmValue</c> of atomic values. Atomizing a node will
+        /// usually produce a single atomic value, but in the case of schema-typed nodes using a list type, there may
+        /// be more than one atomic value. Atomizing an array also returns multiple atomic values.
+        /// </summary>
+        public static Step<XdmItem, XdmAtomicValue> Atomize()
+        {
+            return new Step<XdmItem, XdmAtomicValue>(
+                item =>
+                {
+                    IList<XdmAtomicValue> list = new List<XdmAtomicValue>();
+
+                    if (item is XdmAtomicValue)
+                    {
+                        list.Add((XdmAtomicValue)item);
+
+                    }
+                    else if (item is XdmNode)
+                    {
+                        try
+                        {
+                            var value = ((XdmNode)item).value;
+                            list.Add((XdmAtomicValue)XdmValue.Wrap(((JNodeInfo)value).atomize()).ItemAt(0));
+
+
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception("Cannot atomize supplied value");
+                        }
+
+                    }
+                    else if (item is XdmArray)
+                    {
+                        list.Add((XdmAtomicValue)XdmValue.Wrap(((JArrayItem)((XdmArray)item).value).atomize()));
+                    }
+                    else
+                    {
+                        throw new Exception("Cannot atomize supplied value");
+
+                    }
+                    return list;
+                });
+        }
+
+
+        /// <summary>
+		/// Obtain a <c>Step</c> that returns text nodes found on the child axis.
+		/// The function call <c>Text()</c> is equivalent to <c>Child().Where(Predicate.IsText)</c>.
+        /// </summary>
+        /// <returns>A <c>Step</c> that returns the text nodes found on the child axis.</returns>
+            public static Step<XdmNode, XdmNode> Text()
+            {
+
+                return Child().Where(Predicates.IsText());
+            }
+
+
+
+
+            /// <summary>
+            /// Obtain a <c>Step</c> whose effect is to tokenize the supplied item on whitespace
+            /// boundaries, returning a sequence of strings as <c>XdmAtomicValue</c> instances.
+            /// </summary>
+            /// <remarks><p>Note: the tokenize step, when applied to a string with leading and trailing whitespace,
+            /// has the effect of removing this whitespace. In addition to its primary role, the function
+            /// can therefore be useful for trimming the content of a single string.</p></remarks>
+            /// <returns>A <c>Step</c> whose effect is to take a supplied item and split its string
+		/// value into a sequence of <c>xs:string</c> instances</returns>
+            public static Step<XdmAtomicValue, XdmAtomicValue> Tokenize()
+            {
+                return new Step<XdmAtomicValue, XdmAtomicValue>(item => {
+                    {
+                        var iter = new SequenceEnumerable<XdmAtomicValue>(JSequenceXdmIterator.ofAtomicValues(new net.sf.saxon.value.Whitespace.Tokenizer(item.GetStringValue())));
+
+                        return iter;
+
+                    }
+
+                });
+
+
+        }
+        
+        /// <summary>
+		/// Obtain a Step whose effect is to interpret the supplied item as an <c>xs:ID</c> value
+        /// and return the nodes (in a given document) that have that string as their ID.
+        /// </summary>
+        /// <param name="doc">The root node (document node) of the document within which the ID
+        /// value should be sought</param>
+		/// <returns>A <c>Step</c> whose effect is to return the nodes that have the given string as their ID.</returns>
+        public static Step<XdmNode, XdmNode> id(XdmNode doc)
+        {
+                return new Step<XdmNode, XdmNode>(item => {
+                        IList<XdmNode> list = new List<XdmNode>();
+                        XdmNode doci = (XdmNode)doc;
+                        JNodeInfo target = ((JNodeInfo)((XdmNode)doci).value).getTreeInfo().selectID(doci.GetStringValue(), true);
+
+                        if (target == null) {
+                            XdmNode result = new XdmNode();
+                            result.value = (JNodeInfo)target;
+                            list.Add(result);
+                        }
+                        return list;
+                });
+
+
+            }
+
+
+        /// <summary>
+        /// Construct a path as a composite <c>Step</c> from a sequence of steps composed together.
+        /// </summary>
+        /// <param name="steps">The constituent steps in the path</param>
+        /// <returns>A composite step.</returns>
+        public static Step<XdmNode, XdmNode> Path(params string[] steps) {
+
+            IList<Step<XdmNode, XdmNode>> pathSteps = new List<Step<XdmNode, XdmNode>>();
+
+            foreach (string step in steps) {
+                if (step.Equals("/"))
+                {
+                    pathSteps.Add(Steps.Root().Where(Predicates.IsDocument()));
+                }
+                else if (step.Equals(".."))
+                {
+                    pathSteps.Add(Steps.Parent());
+                }
+                else if (step.Equals("*"))
+                {
+                    pathSteps.Add(Steps.Child(Predicates.IsElement()));
+                }
+                else if (step.Equals("//"))
+                {
+                    pathSteps.Add(Steps.DescendantOrSelf());
+                }
+                else if (step.StartsWith("@"))
+                {
+                    String name = step.Substring(1);
+                    if (!net.sf.saxon.om.NameChecker.isValidNCName(name))
+                    {
+                        throw new System.ArgumentException("Invalid attribute name " + name);
+                    }
+                    pathSteps.Add(Steps.Attribute(name));
+                }
+                else
+                {
+                    if (!net.sf.saxon.om.NameChecker.isValidNCName(step))
+                    {
+                        throw new System.ArgumentException("Invalid element name "+step);
+                    }
+                    pathSteps.Add(Steps.Child(step));
+                }
+
+            }
+
+            return PathFromEnumerable(pathSteps);
+
+        }
+
+       
+	internal static Step<XdmNode, XdmNode> PathFromEnumerable(IEnumerable<Step<XdmNode, XdmNode>> steps)
+    {
+
+        List<Step<XdmNode, XdmNode>> list = steps.ToList();
+        return PathFromList(list);
+
+    }
+
+
+        /// <summary>
+        /// Construct a path as a composite <c>Step</c> from a list of steps composed together.
+        /// </summary>
+        /// <param name="steps">The constituent steps in the path</param>
+        /// <returns>A composite step.</returns>
+        public static Step<XdmNode, XdmNode> PathFromList(List<Step<XdmNode, XdmNode>> steps)
+        {
+  
+            if (steps.Count == 0)
+            {
+                return new Step<XdmNode, XdmNode>(item => { return new List<XdmNode>(); });
+            }
+            else if (steps.Count == 1)
+            {
+                return steps.ElementAt(0);
+            }
+            else
+            {
+                return steps.ElementAt(0).Then(PathFromList(steps.GetRange(1, steps.Count-1)));
+            }
+        }
+
+
+    }
+
+
+/// <summary>
+/// This class is an implementation of <c>IEnumerator</c> that wraps
+/// a (Java) <c>SequenceIterator</c>.
+/// </summary>
+/// <remarks>
+/// Because the underlying value can be evaluated lazily, it is possible
+/// for exceptions to occur as the sequence is being read.
+/// </remarks>
+
+[Serializable]
+    internal class SequenceEnumerable<T> : IEnumerable<T>
+          where T : XdmItem
+    {
+
+        private JSequenceXdmIterator iterator;
+
+        internal SequenceEnumerable(JSequenceXdmIterator iterator)
+        {
+            this.iterator = iterator;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return (IEnumerator<T>)new SequenceEnumerator<XdmNode>(iterator);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return (IEnumerator<T>)new SequenceEnumerator<XdmNode>(iterator);
+        }
+    }
 
 
 
     /// <summary>
     /// This class is an implementation of <c>IEnumerator</c> that wraps
-	/// a (Java) <c>SequenceIterator</c>.
+    /// a (Java) <c>SequenceIterator</c>.
     /// </summary>
     /// <remarks>
     /// Because the underlying value can be evaluated lazily, it is possible
@@ -2809,7 +4820,7 @@ namespace Saxon.Api
 
     [Serializable]
     internal class SequenceEnumerator<T> : IEnumerator<T>
-          where T : XdmItem
+      where T : XdmItem
     {
 
         private JSequenceXdmIterator iter;
@@ -2827,14 +4838,16 @@ namespace Saxon.Api
         /// 
         public XdmItem Current
         {
-            get {
+            get
+            {
                 return current == null ? null : (XdmItem)XdmValue.Wrap(current);
             }
         }
 
         object IEnumerator.Current
         {
-            get {
+            get
+            {
                 return Current;
             }
         }
@@ -2857,19 +4870,19 @@ namespace Saxon.Api
                     return false;
                 }
             }
-            catch (net.sf.saxon.s9api.SaxonApiUncheckedException e)
+            catch (net.sf.saxon.s9api.SaxonApiUncheckedException)
             {
                 return false;
             }
             net.sf.saxon.s9api.XdmItem nextXdmItem = iter.next();
-                if (nextXdmItem != null)
-                {
-                    JItem nextItem = nextXdmItem.getUnderlyingValue();
-                    current = nextItem;
-                    return (nextItem != null);
-                }
-                return false;
-            
+            if (nextXdmItem != null)
+            {
+                JItem nextItem = nextXdmItem.getUnderlyingValue();
+                current = nextItem;
+                return (nextItem != null);
+            }
+            return false;
+
         }
 
         /// <summary>Deprecated. Reset the enumeration so that the next call of
@@ -2878,7 +4891,7 @@ namespace Saxon.Api
         [System.Obsolete("MethodAccessException no longer used")]
         public void Reset()
         {
-            
+
         }
 
         /// <summary>
@@ -2886,111 +4899,11 @@ namespace Saxon.Api
         /// </summary>
         public void Dispose()
         {
-           
+
         }
     }
 
-    /// <summary>
-	/// Implementation of the (Java) interface <c>SequenceIterator</c> that wraps
-	/// a (.NET) <c>IEnumerator</c>
-    /// </summary>
 
-    internal class DotNetSequenceIterator : JSequenceIterator
-    {
-        // TODO: catch errors and throw an XPathException if necessary.
-
-        IEnumerator iter;
-        int pos = 0;
-
-        public DotNetSequenceIterator(IEnumerator iter)
-        {
-            this.iter = iter;
-        }
-
-        public JItem next()
-        {
-            if (pos < 0)
-            {
-                return null;
-            }
-            bool more = iter.MoveNext();
-            if (more)
-            {
-                pos++;
-                XdmItem i = (XdmItem)iter.Current;
-                return (JItem)i.Unwrap();
-            }
-            else
-            {
-                pos = -1;
-                return null;
-            }
-
-        }
-
-        public JItem current()
-        {
-            if (pos < 0)
-            {
-                return null;
-            }
-            XdmItem i = (XdmItem)iter.Current;
-            return (JItem)i.Unwrap();
-        }
-
-        public int position()
-        {
-            return pos;
-        }
-
-        public void close()
-        {
-        }
-
-
-        public int getProperties()
-        {
-            return 0;
-        }
-
-        public void forEachOrFail(JItemConsumer consumer)
-        {
-            JItem item = null;
-
-            while ((item = next()) != null)
-            {
-                consumer.accept(item);
-            }
-        }
-
-        public void forEachOrFail(JSequenceIterator value1, JItemConsumer consumer)
-        {
-            JItem item = null;
-
-            while ((item = value1.next()) != null)
-            {
-                consumer.accept(item);
-            }
-        }
-
-        public JGroundedValue materialize() {
-            return JSequenceExtent.fromIterator(this);
-        }
-
-
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
-        JGroundedValue JSequenceIterator.materialize()
-        {
-            return JSequenceExtent.fromIterator(this);
-        }
-
-
-    }
 
     /// <summary>
     /// Enumeration identifying the thirteen XPath axes
@@ -3050,7 +4963,7 @@ namespace Saxon.Api
         /// Reset the enumerator
         /// </summary>
         public void Reset() { }
-        
+
 
 
 
@@ -3082,9 +4995,9 @@ namespace Saxon.Api
             return false;
         }
 
-		/// <summary>
-		/// The Dispose method is not implemented on this Enumerator
-		/// </summary>
+        /// <summary>
+        /// The Dispose method is not implemented on this Enumerator
+        /// </summary>
         public void Dispose()
         {
             throw new NotImplementedException();
@@ -3095,7 +5008,7 @@ namespace Saxon.Api
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -24,6 +24,7 @@ import net.sf.saxon.value.*;
 public class Sum extends FoldingFunction {
 
     /*@NotNull*/
+    @Override
     public ItemType getResultItemType(Expression[] args) {
         TypeHierarchy th = getRetainedStaticContext().getConfiguration().getTypeHierarchy();
         ItemType base = Atomizer.getAtomizedItemType(args[0], false, th);
@@ -41,6 +42,7 @@ public class Sum extends FoldingFunction {
         }
     }
 
+    @Override
     public int getCardinality(Expression[] arguments) {
         if (getArity() == 1 || arguments[1].getCardinality() == 1) {
             return StaticProperty.EXACTLY_ONE;
@@ -75,7 +77,7 @@ public class Sum extends FoldingFunction {
      * @throws XPathException if a dynamic error occurs
      */
 
-    public static AtomicValue total(SequenceIterator<?> in, XPathContext context, Location locator) throws XPathException {
+    public static AtomicValue total(SequenceIterator in, XPathContext context, Location locator) throws XPathException {
         try {
             SumFold fold = new SumFold(context, null);
             in.forEachOrFail(fold::processItem);
@@ -111,7 +113,8 @@ public class Sum extends FoldingFunction {
          * @param item the item to be processed from the input sequence
          * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
          */
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void processItem(Item item) throws XPathException {
             AtomicValue next = (AtomicValue)item;
             if (atStart) {
                 atStart = false;
@@ -174,6 +177,7 @@ public class Sum extends FoldingFunction {
          * @return true if the result of the function is now available even though not all
          * items in the sequence have been processed
          */
+        @Override
         public boolean isFinished() {
             return data instanceof DoubleValue && data.isNaN();
         }
@@ -183,7 +187,8 @@ public class Sum extends FoldingFunction {
          *
          * @return the result of the function
          */
-        public Sequence<?> result() {
+        @Override
+        public Sequence result() {
             if (atStart) {
                 return zeroValue == null ? EmptySequence.getInstance() : zeroValue;
             } else {
@@ -192,6 +197,7 @@ public class Sum extends FoldingFunction {
         }
     }
 
+    @Override
     public String getCompilerName() {
         return "SumCompiler";
     }

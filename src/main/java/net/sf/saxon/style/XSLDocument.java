@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,7 +11,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.DocumentInstr;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
@@ -33,6 +34,7 @@ public class XSLDocument extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -43,24 +45,27 @@ public class XSLDocument extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
-        AttributeCollection atts = getAttributeList();
+    @Override
+    public void prepareAttributes() {
 
         String validationAtt = null;
         String typeAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             if (f.equals("validation")) {
-                validationAtt = Whitespace.trim(atts.getValue(a));
+                validationAtt = Whitespace.trim(value);
             } else if (f.equals("type")) {
-                typeAtt = Whitespace.trim(atts.getValue(a));
+                typeAtt = Whitespace.trim(value);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -82,10 +87,12 @@ public class XSLDocument extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         //
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 
         DocumentInstr inst = new DocumentInstr(false, null);

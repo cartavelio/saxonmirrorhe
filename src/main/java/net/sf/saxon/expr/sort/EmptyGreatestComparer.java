@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,7 +17,7 @@ import net.sf.saxon.value.AtomicValue;
  * as opposed to the default which sorts them first.
  */
 
-public class EmptyGreatestComparer implements AtomicComparer, java.io.Serializable {
+public class EmptyGreatestComparer implements AtomicComparer {
 
     private AtomicComparer baseComparer;
 
@@ -42,6 +42,7 @@ public class EmptyGreatestComparer implements AtomicComparer, java.io.Serializab
         return baseComparer;
     }
 
+    @Override
     public StringCollator getCollator() {
         return baseComparer.getCollator();
     }
@@ -54,6 +55,7 @@ public class EmptyGreatestComparer implements AtomicComparer, java.io.Serializab
      *         is known. The original AtomicComparer is not modified
      */
 
+    @Override
     public AtomicComparer provideContext(XPathContext context) {
         AtomicComparer newBase = baseComparer.provideContext(context);
         if (newBase != baseComparer) {
@@ -78,6 +80,7 @@ public class EmptyGreatestComparer implements AtomicComparer, java.io.Serializab
      * @throws ClassCastException if the objects are not comparable
      */
 
+    @Override
     public int compareAtomicValues(/*@Nullable*/ AtomicValue a, AtomicValue b) throws NoDynamicContextException {
         if (a == null) {
             if (b == null) {
@@ -108,6 +111,7 @@ public class EmptyGreatestComparer implements AtomicComparer, java.io.Serializab
      * @throws ClassCastException if the objects are not comparable
      */
 
+    @Override
     public boolean comparesEqual(AtomicValue a, AtomicValue b) throws NoDynamicContextException {
         return (a == null && b == null) || baseComparer.comparesEqual(a, b);
     }
@@ -118,6 +122,7 @@ public class EmptyGreatestComparer implements AtomicComparer, java.io.Serializab
      *
      * @return a string representation of the AtomicComparer
      */
+    @Override
     public String save() {
         return "EG|" + baseComparer.save();
     }

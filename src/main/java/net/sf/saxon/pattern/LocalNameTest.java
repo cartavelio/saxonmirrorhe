@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,9 +9,11 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
+import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntSet;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.IntPredicate;
 
@@ -19,8 +21,6 @@ import java.util.function.IntPredicate;
  * NodeTest is an interface that enables a test of whether a node has a particular
  * name and type. A LocalNameTest matches the node type and the local name,
  * it represents an XPath 2.0 test of the form *:name.
- *
- * @author Michael H. Kay
  */
 
 public final class LocalNameTest extends NodeTest implements QNameTest {
@@ -53,6 +53,7 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return uType;
     }
@@ -68,6 +69,11 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
     public Optional<IntSet> getRequiredNodeNames() {
         // See bug 3713
         return Optional.empty();
+    }
+
+    @Override
+    public String getFullAlphaCode() {
+        return getBasicAlphaCode() + " n*:" + localName;
     }
 
     /**
@@ -90,11 +96,23 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
         return name != null && nodeKind == this.nodeKind && localName.equals(name.getLocalPart());
     }
 
+    @Override
     public IntPredicate getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         final int[] nameCodeArray = tree.getNameCodeArray();
-        return nodeNr -> (nodeKindArray[nodeNr] & 0x0f) == nodeKind &&
-                localName.equals(namePool.getLocalName(nameCodeArray[nodeNr] & 0xfffff));
+        if (nodeKind == Type.ELEMENT && tree instanceof TinyTree) {
+             Map<String, IntSet> localNameIndex = ((TinyTree)tree).getLocalNameIndex();
+             IntSet intSet = localNameIndex.get(localName);
+             if (intSet == null) {
+                 return i -> false;
+             } else {
+                 return nodeNr -> intSet.contains(nameCodeArray[nodeNr] & NamePool.FP_MASK)
+                         && (nodeKindArray[nodeNr] & 0x0f) == Type.ELEMENT;
+             }
+        } else {
+            return nodeNr -> (nodeKindArray[nodeNr] & 0x0f) == nodeKind &&
+                    localName.equals(namePool.getLocalName(nameCodeArray[nodeNr] & NamePool.FP_MASK));
+        }
     }
 
     /**
@@ -105,7 +123,8 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
      * @param node the node to be matched
      */
 
-    public boolean matchesNode(NodeInfo node) {
+    @Override
+    public boolean test(NodeInfo node) {
         return localName.equals(node.getLocalPart()) && nodeKind == node.getNodeKind();
     }
 
@@ -116,6 +135,7 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
      * @return true if the name matches, false if not
      */
 
+    @Override
     public boolean matches(StructuredQName qname) {
         return localName.equals(qname.getLocalPart());
     }
@@ -124,6 +144,7 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
+    @Override
     public final double getDefaultPriority() {
         return -0.25;
     }
@@ -145,6 +166,7 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
      * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
      */
 
+    @Override
     public int getPrimitiveType() {
         return nodeKind;
     }
@@ -180,6 +202,18 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
     public NamePool getNamePool() {return namePool;}
 
     /**
+     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
+     *
+     * @return a string representation of the QNameTest, suitable for use in export files. The format is
+     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
+     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
+     */
+    @Override
+    public String exportQNameTest() {
+        return "*:" + localName;
+    }
+
+    /**
      * Generate Javascript code to test if a name matches the test.
      *
      * @return JS code as a string. The generated code will be used
@@ -188,28 +222,9 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
      * uri and local.
      * @param targetVersion the version of Saxon-JS being targeted
      */
+    @Override
     public String generateJavaScriptNameTest(int targetVersion) {
         return "q.local==='" + localName + "'";
-    }
-
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @param knownToBe An item type that the supplied item is known to conform to; the generated code
-     *                  can assume that the item is an instance of this type.
-     * @param targetVersion The version of Saxon-JS for which code is being generated. Currently either 1 or 2.
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) {
-        if (targetVersion == 1) {
-            return "var q=SaxonJS.U.nameOfNode(item); return SaxonJS.U.isNode(item) && item.nodeType===" +
-                    nodeKind + "&&" + generateJavaScriptNameTest(targetVersion);
-        } else {
-            return "return SaxonJS.U.isNode(item) && item.nodeType===" + nodeKind + " && SaxonJS.U.hasLocalName(item, '" + localName + "')";
-        }
     }
 
     /**

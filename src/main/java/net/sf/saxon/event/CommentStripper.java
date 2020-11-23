@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,8 +7,10 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.CompressedWhitespace;
@@ -21,14 +23,13 @@ import net.sf.saxon.type.SchemaType;
  * processing stylesheets; it is also used for removing comments and PIs from the tree seen
  * by XPath expressions used to process XSD 1.1 assertions
  *
- * @author Michael H. Kay
  */
 
 
 public class CommentStripper extends ProxyReceiver {
 
     /*@Nullable*/ private CompressedWhitespace savedWhitespace = null;
-    private FastStringBuffer buffer = new FastStringBuffer(FastStringBuffer.C256);
+    private final FastStringBuffer buffer = new FastStringBuffer(FastStringBuffer.C256);
 
     /**
      * Default constructor for use in subclasses
@@ -40,16 +41,20 @@ public class CommentStripper extends ProxyReceiver {
         super(next);
     }
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties)
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
             throws XPathException {
         flush();
-        nextReceiver.startElement(nameCode, typeCode, location, properties);
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
     /**
      * Callback interface for SAX: not for application use
      */
 
+    @Override
     public void endElement() throws XPathException {
         flush();
         nextReceiver.endElement();
@@ -63,6 +68,7 @@ public class CommentStripper extends ProxyReceiver {
      * more common case, so that it can easily be detected and stripped downstream.
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (chars instanceof CompressedWhitespace) {
             if (buffer.isEmpty() && savedWhitespace == null) {
@@ -75,7 +81,7 @@ public class CommentStripper extends ProxyReceiver {
                 savedWhitespace.uncompress(buffer);
                 savedWhitespace = null;
             }
-            buffer.append(chars);
+            buffer.cat(chars);
         }
 
     }
@@ -84,6 +90,7 @@ public class CommentStripper extends ProxyReceiver {
      * Remove comments
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) {
     }
 
@@ -91,6 +98,7 @@ public class CommentStripper extends ProxyReceiver {
      * Remove processing instructions
      */
 
+    @Override
     public void processingInstruction(String name, CharSequence data, Location locationId, int properties) {
     }
 
@@ -103,9 +111,9 @@ public class CommentStripper extends ProxyReceiver {
 
     private void flush() throws XPathException {
         if (!buffer.isEmpty()) {
-            nextReceiver.characters(buffer, ExplicitLocation.UNKNOWN_LOCATION, 0);
+            nextReceiver.characters(buffer, Loc.NONE, ReceiverOption.NONE);
         } else if (savedWhitespace != null) {
-            nextReceiver.characters(savedWhitespace, ExplicitLocation.UNKNOWN_LOCATION, 0);
+            nextReceiver.characters(savedWhitespace, Loc.NONE, ReceiverOption.NONE);
         }
         savedWhitespace = null;
         buffer.setLength(0);

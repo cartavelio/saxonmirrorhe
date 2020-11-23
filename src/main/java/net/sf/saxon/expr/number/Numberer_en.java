@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -55,6 +55,7 @@ public class Numberer_en extends AbstractNumberer {
      *                 numbers in the range 21-99.
      */
 
+    @Override
     public void setLanguage(String language) {
         super.setLanguage(language);
         if (language.endsWith("-x-hyphen")) {
@@ -75,6 +76,7 @@ public class Numberer_en extends AbstractNumberer {
      * @return the ordinal suffix to be appended to the formatted number
      */
 
+    @Override
     protected String ordinalSuffix(String ordinalParam, long number) {
         int penult = (int) (number % 100) / 10;
         int ult = (int) (number % 10);
@@ -102,6 +104,7 @@ public class Numberer_en extends AbstractNumberer {
      * @return the number formatted as English words
      */
 
+    @Override
     public String toWords(long number) {
         if (number >= 1000000000) {
             long rem = number % 1000000000;
@@ -139,6 +142,7 @@ public class Numberer_en extends AbstractNumberer {
      * @return the formatted number
      */
 
+    @Override
     public String toOrdinalWords(String ordinalParam, long number, int wordCase) {
         String s;
         if (number >= 1000000000) {
@@ -209,6 +213,7 @@ public class Numberer_en extends AbstractNumberer {
      * @param maxWidth The maximum number of characters
      */
 
+    @Override
     public String monthName(int month, int minWidth, int maxWidth) {
         String name = englishMonths[month - 1];
         if (maxWidth < 3) {
@@ -238,6 +243,7 @@ public class Numberer_en extends AbstractNumberer {
      * @param maxWidth The maximum number of characters
      */
 
+    @Override
     public String dayName(int day, int minWidth, int maxWidth) {
         String name = englishDays[day - 1];
         if (maxWidth < 2) {

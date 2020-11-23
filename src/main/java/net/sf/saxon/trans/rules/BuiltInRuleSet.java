@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,10 +7,11 @@
 
 package net.sf.saxon.trans.rules;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ParameterSet;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 
@@ -26,6 +27,7 @@ public interface BuiltInRuleSet extends ContextOriginator {
      * @param item         the item to be processed
      * @param parameters   the parameters supplied to apply-templates
      * @param tunnelParams the tunnel parameters to be passed through
+     * @param output the destination for the result
      * @param context      the dynamic evaluation context
      * @param locationId   location of the instruction (apply-templates, apply-imports etc) that caused
      *                     the built-in template to be invoked
@@ -35,6 +37,7 @@ public interface BuiltInRuleSet extends ContextOriginator {
     void process(Item item,
                  ParameterSet parameters,
                  ParameterSet tunnelParams,
+                 Outputter output,
                  XPathContext context,
                  Location locationId) throws XPathException;
 

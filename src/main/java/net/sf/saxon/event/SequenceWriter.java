@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,15 +7,13 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
-import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 
 /**
@@ -25,25 +23,16 @@ import net.sf.saxon.type.Type;
  * resulting items.
  * <p>
  * Items may be supplied in either "composed" form (by calling the {@link #append(Item)} method,
- * or in "decomposed" form (by a sequence of calls representing XML push events: {@link #startDocument(int)},
- * {@link #startElement(NodeName, SchemaType, Location, int)}, and so on. When items are supplied
+ * or in "decomposed" form (by a sequence of calls representing XML push events: {@link Outputter#startDocument(int)},
+ * {@link Outputter#startElement(NodeName, SchemaType, Location, int)}, and so on. When items are supplied
  * in decomposed form, a tree will be built, and the resulting document or element node is then
  * written to the sequence in the same way as if it were supplied directly as a {@link NodeInfo} item.
- * <p>
- * This class is not used to build temporary trees. For that, the {@link ComplexContentOutputter}
- * is used. The {@code ComplexContentOutputter} provides richer functionality than this class:
- * it detects illegal sequences of events, detects duplicate or inconsistent attributes and namespaces,
- * performs namespace fixup, allocates prefixes where necessary, and detects where it is necessary
- * to call {@link #startContent()} to mark the end of a start tag. By contrast, this class should
- * only be used where it is known that the sequence of events is complete and consistent.</p>
  */
 
 public abstract class SequenceWriter extends SequenceReceiver {
-    private Receiver outputter = null;
     private TreeModel treeModel = null;
     private Builder builder = null;
     private int level = 0;
-    private boolean inStartTag = false;
 
     public SequenceWriter(/*@NotNull*/ PipelineConfiguration pipe) {
         super(pipe);
@@ -54,7 +43,7 @@ public abstract class SequenceWriter extends SequenceReceiver {
      * Abstract method to be supplied by subclasses: output one item in the sequence.
      *
      * @param item the item to be written to the sequence
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws XPathException
      *          if any failure occurs while writing the item
      */
 
@@ -62,11 +51,11 @@ public abstract class SequenceWriter extends SequenceReceiver {
 
     @Override
     public void startDocument(int properties) throws XPathException {
-        if (outputter == null) {
-            createTree((properties & ReceiverOptions.MUTABLE_TREE) != 0);
+        if (builder == null) {
+            createTree(ReceiverOption.contains(properties, ReceiverOption.MUTABLE_TREE));
         }
         if (level++ == 0) {
-            outputter.startDocument(properties);
+            builder.startDocument(properties);
         }
     }
 
@@ -82,7 +71,7 @@ public abstract class SequenceWriter extends SequenceReceiver {
      *
      * @param mutable set to true if the tree is required to support in-situ updates (other that the initial
      *                sequential writing of nodes to construct the tree)
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws XPathException
      *          if any error occurs while creating the tree
      */
     private void createTree(boolean mutable) throws XPathException {
@@ -111,14 +100,7 @@ public abstract class SequenceWriter extends SequenceReceiver {
         builder.setBaseURI(systemId);
         builder.setTiming(false);
         builder.setUseEventLocation(false);
-
-        NamespaceReducer reducer = new NamespaceReducer(builder);
-
-        outputter = new ComplexContentOutputter(reducer);
-
-        outputter.setSystemId(systemId);
-        outputter.setPipelineConfiguration(pipe);
-        outputter.open();
+        builder.open();
     }
 
     /**
@@ -144,89 +126,44 @@ public abstract class SequenceWriter extends SequenceReceiver {
     @Override
     public void endDocument() throws XPathException {
         if (--level == 0) {
-            outputter.endDocument();
-            outputter = null;
+            builder.endDocument();
             NodeInfo doc = builder.getCurrentRoot();
             // add the constructed document to the result sequence
-            append(doc, ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.ALL_NAMESPACES);
+            append(doc, Loc.NONE, ReceiverOption.ALL_NAMESPACES);
+            builder = null;
             systemId = null;
         }
         previousAtomic = false;
     }
 
     @Override
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
 
-        if (inStartTag) {
-            startContent();
-        }
-
-        if (outputter == null) {
-            createTree((properties & ReceiverOptions.MUTABLE_TREE) != 0);
+        if (builder == null) {
+            createTree(ReceiverOption.contains(properties, ReceiverOption.MUTABLE_TREE));
         }
         //System.err.println("SEQUENCE_WRITER startElement " + this);
-        outputter.startElement(elemName, typeCode, location, properties);
+        builder.startElement(elemName, type, attributes, namespaces, location, properties);
         level++;
-        inStartTag = true;
         previousAtomic = false;
     }
 
     @Override
     public void endElement() throws XPathException {
-        if (inStartTag) {
-            startContent();
-        }
         //System.err.println("SEQUENCE_WRITER endElement " + this);
-        outputter.endElement();
+        builder.endElement();
         if (--level == 0) {
-            outputter.close();
-            outputter = null;
+            builder.close();
             NodeInfo element = builder.getCurrentRoot();
-            append(element, ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.ALL_NAMESPACES);
+            append(element, Loc.NONE, ReceiverOption.ALL_NAMESPACES);
+            builder = null;
             systemId = null;
         }
         previousAtomic = false;
     }
 
-    @Override
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties)
-            throws XPathException {
-        if (level == 0) {
-            for (NamespaceBinding ns : namespaceBindings) {
-                Orphan o = new Orphan(getConfiguration());
-                o.setNodeKind(Type.NAMESPACE);
-                o.setNodeName(new NoNamespaceName(ns.getPrefix()));
-                o.setStringValue(ns.getURI());
-                append(o, ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.ALL_NAMESPACES);
-            }
-        } else {
-            outputter.namespace(namespaceBindings, properties);
-        }
-        previousAtomic = false;
-    }
-
-    @Override
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        if (level == 0) {
-            Orphan o = new Orphan(getConfiguration());
-            o.setNodeKind(Type.ATTRIBUTE);
-            o.setNodeName(attName);
-            o.setStringValue(value);
-            o.setTypeAnnotation(typeCode);
-            append(o, locationId, ReceiverOptions.ALL_NAMESPACES);
-        } else {
-            outputter.attribute(attName, typeCode, value, locationId, properties);
-        }
-        previousAtomic = false;
-    }
-
-    @Override
-    public void startContent() throws XPathException {
-        inStartTag = false;
-        outputter.startContent();
-        previousAtomic = false;
-    }
 
     @Override
     public void characters(CharSequence s, Location locationId, int properties) throws XPathException {
@@ -237,10 +174,7 @@ public abstract class SequenceWriter extends SequenceReceiver {
             write(o);
         } else {
             if (s.length() > 0) {
-                if (inStartTag) {
-                    startContent();
-                }
-                outputter.characters(s, locationId, properties);
+                builder.characters(s, locationId, properties);
             }
         }
         previousAtomic = false;
@@ -248,25 +182,19 @@ public abstract class SequenceWriter extends SequenceReceiver {
 
     @Override
     public void comment(CharSequence comment, Location locationId, int properties) throws XPathException {
-        if (inStartTag) {
-            startContent();
-        }
         if (level == 0) {
             Orphan o = new Orphan(getConfiguration());
             o.setNodeKind(Type.COMMENT);
             o.setStringValue(comment);
             write(o);
         } else {
-            outputter.comment(comment, locationId, properties);
+            builder.comment(comment, locationId, properties);
         }
         previousAtomic = false;
     }
 
     @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
-        if (inStartTag) {
-            startContent();
-        }
         if (level == 0) {
             Orphan o = new Orphan(getConfiguration());
             o.setNodeName(new NoNamespaceName(target));
@@ -274,7 +202,7 @@ public abstract class SequenceWriter extends SequenceReceiver {
             o.setStringValue(data);
             write(o);
         } else {
-            outputter.processingInstruction(target, data, locationId, properties);
+            builder.processingInstruction(target, data, locationId, properties);
         }
         previousAtomic = false;
     }
@@ -282,8 +210,8 @@ public abstract class SequenceWriter extends SequenceReceiver {
     @Override
     public void close() throws XPathException {
         previousAtomic = false;
-        if (outputter != null) {
-            outputter.close();
+        if (builder != null) {
+            builder.close();
         }
     }
 
@@ -301,32 +229,8 @@ public abstract class SequenceWriter extends SequenceReceiver {
 
     @Override
     public boolean usesTypeAnnotations() {
-        return outputter == null || outputter.usesTypeAnnotations();
+        return builder == null || builder.usesTypeAnnotations();
     }
 
-
-    public boolean isReadyForBulkCopy() {
-        return level > 0 && outputter instanceof ComplexContentOutputter &&
-                ((ComplexContentOutputter)outputter).isReadyForBulkCopy();
-    }
-
-    public void bulkCopyElementNode(TinyElementImpl node, int copyOptions) throws XPathException {
-        if (inStartTag) {
-            startContent();
-        }
-        ((ComplexContentOutputter) outputter).bulkCopyElementNode(node, copyOptions);
-    }
-
-    public boolean isReadyForGrafting() {
-        return level > 0 && outputter instanceof ComplexContentOutputter &&
-                ((ComplexContentOutputter) outputter).isReadyForGrafting();
-    }
-
-    public void graftElementNode(TinyElementImpl node, int copyOptions) throws XPathException {
-        if (inStartTag) {
-            startContent();
-        }
-        ((ComplexContentOutputter) outputter).graftElementNode(node, copyOptions);
-    }
 }
 

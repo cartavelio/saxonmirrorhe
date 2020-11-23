@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -78,7 +78,7 @@ public class PackageDetails {
      * contains this alias; the baseName contains the original name as defined in the XSLT source
      * code.
      */
-    public Map<StructuredQName, GroundedValue<?>> staticParams;
+    public Map<StructuredQName, GroundedValue> staticParams;
     /**
      * During processing (compilation) of a package, the <code>beingProcessed</code> field
      * indicates the thread in which this processing is taking place; at other times, the field

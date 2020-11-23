@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,8 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -38,15 +39,18 @@ public final class Comment extends SimpleNodeConstructor {
      * return the string "xsl:comment"
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_COMMENT;
     }
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return NodeKindTest.COMMENT;
     }
 
+    @Override
     public int getCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -60,6 +64,7 @@ public final class Comment extends SimpleNodeConstructor {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         Comment exp = new Comment();
         ExpressionTool.copyLocationInfo(this, exp);
@@ -67,6 +72,7 @@ public final class Comment extends SimpleNodeConstructor {
         return exp;
     }
 
+    @Override
     public void localTypeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         // Do early checking of content if known statically
 
@@ -84,14 +90,15 @@ public final class Comment extends SimpleNodeConstructor {
      * Process the value of the node, to create the new node.
      *
      * @param value   the string value of the new node
+     * @param output the destination for the result
      * @param context the dynamic evaluation context
      * @throws XPathException if a dynamic error occurs
      */
 
-    public void processValue(CharSequence value, XPathContext context) throws XPathException {
+    @Override
+    public void processValue(CharSequence value, Outputter output, XPathContext context) throws XPathException {
         String comment = checkContent(value.toString(), context);
-        Receiver out = context.getReceiver();
-        out.comment(comment, getLocation(), 0);
+        output.comment(comment, getLocation(), ReceiverOption.NONE);
     }
 
 
@@ -131,7 +138,7 @@ public final class Comment extends SimpleNodeConstructor {
         while ((hh = comment.indexOf("--")) >= 0) {
             comment = comment.substring(0, hh + 1) + ' ' + comment.substring(hh + 1);
         }
-        if (comment.length() > 0 && comment.charAt(comment.length() - 1) == '-') {
+        if (comment.endsWith("-")) {
             comment = comment + ' ';
         }
         return comment;
@@ -162,6 +169,7 @@ public final class Comment extends SimpleNodeConstructor {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("comment", this);
         String flags = "";

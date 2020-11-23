@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,9 +11,10 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.TraceListener;
-import net.sf.saxon.lib.TraceListener2;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.SimpleMode;
+
+import java.util.Map;
 
 /**
  * A class which implements efficient and thread-safe multi-cast event
@@ -35,6 +36,7 @@ public class TraceEventMulticaster implements TraceListener {
         this.b = b;
     }
 
+    @Override
     public void setOutputDestination(Logger stream) {
         a.setOutputDestination(stream);
         b.setOutputDestination(stream);
@@ -66,6 +68,7 @@ public class TraceEventMulticaster implements TraceListener {
      * Called at start
      */
 
+    @Override
     public void open(Controller controller) {
         a.open(controller);
         b.open(controller);
@@ -75,6 +78,7 @@ public class TraceEventMulticaster implements TraceListener {
      * Called at end
      */
 
+    @Override
     public void close() {
         a.close();
         b.close();
@@ -84,15 +88,18 @@ public class TraceEventMulticaster implements TraceListener {
     /**
      * Called when an element of the stylesheet gets processed
      */
-    public void enter(InstructionInfo element, XPathContext context) {
-        a.enter(element, context);
-        b.enter(element, context);
+    @Override
+    public void enter(Traceable element, Map<String, Object> properties, XPathContext context) {
+        a.enter(element, properties, context);
+        b.enter(element, properties, context);
     }
 
     /**
      * Called after an element of the stylesheet got processed
+     * @param element
      */
-    public void leave(InstructionInfo element) {
+    @Override
+    public void leave(Traceable element) {
         a.leave(element);
         b.leave(element);
     }
@@ -100,6 +107,7 @@ public class TraceEventMulticaster implements TraceListener {
     /**
      * Called when an item becomes current
      */
+    @Override
     public void startCurrentItem(Item item) {
         a.startCurrentItem(item);
         b.startCurrentItem(item);
@@ -108,6 +116,7 @@ public class TraceEventMulticaster implements TraceListener {
     /**
      * Called when an item ceases to be the current item
      */
+    @Override
     public void endCurrentItem(Item item) {
         a.endCurrentItem(item);
         b.endCurrentItem(item);
@@ -115,13 +124,10 @@ public class TraceEventMulticaster implements TraceListener {
     /**
      * Called at the start of a rule search
      */
+    @Override
     public void startRuleSearch() {
-        if (a instanceof TraceListener2) {
-            ((TraceListener2) a).startRuleSearch();
-        }
-        if (b instanceof TraceListener2) {
-            ((TraceListener2) b).startRuleSearch();
-        }
+        a.startRuleSearch();
+        b.startRuleSearch();
     }
 
     /**
@@ -131,12 +137,8 @@ public class TraceEventMulticaster implements TraceListener {
      * @param item
      */
     public void endRuleSearch(Object rule, SimpleMode mode, Item item) {
-        if (a instanceof TraceListener2) {
-            ((TraceListener2) a).endRuleSearch(rule, mode, item);
-        }
-        if (b instanceof TraceListener2) {
-            ((TraceListener2) b).endRuleSearch(rule, mode, item);
-        }
+        a.endRuleSearch(rule, mode, item);
+        b.endRuleSearch(rule, mode, item);
     }
 
     /**

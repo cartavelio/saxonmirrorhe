@@ -1,13 +1,13 @@
 package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
@@ -25,13 +25,17 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  *
  */
-public class ParserTest extends TestCase {
+public class ParserTest {
 
-    public void testValidationError() {
+    @Test
+    public void testValidationError() throws Exception {
         try {
             TransformerFactory factory = new net.sf.saxon.TransformerFactoryImpl();
             System.out.println("Using " + factory.getClass().getName());
@@ -46,6 +50,7 @@ public class ParserTest extends TestCase {
         }
     }
 
+    @Test
     public void testValidationErrorRecovered() throws Exception {
         try {
             TransformerFactory factory = new net.sf.saxon.TransformerFactoryImpl();
@@ -60,6 +65,7 @@ public class ParserTest extends TestCase {
         }
     }
 
+    @Test
     public void testTransformerHandler() throws Exception {
 
         try {
@@ -88,6 +94,7 @@ public class ParserTest extends TestCase {
 
     }
 
+    @Test
     public void testSetParserProperties() {
         try {
             String xsl = ConfigTest.DATA_DIR + "bills.xsl";
@@ -103,6 +110,7 @@ public class ParserTest extends TestCase {
         }
     }
 
+    @Test
     public void testExpandDefaultAttributes() throws Exception {
         try {
             Processor proc = new Processor(true);
@@ -121,6 +129,7 @@ public class ParserTest extends TestCase {
         }
     }
 
+    @Test
     public void testSuppressDefaultAttributes() throws Exception {
         try {
             Processor proc = new Processor(true);
@@ -140,6 +149,7 @@ public class ParserTest extends TestCase {
         }
     }
 
+    @Test
     public void testMarkDefaultAttributes() throws Exception {
         try {
             Processor proc = new Processor(true);
@@ -168,6 +178,7 @@ public class ParserTest extends TestCase {
         }
     }
 
+    @Test
     public void testXercesSchemaDefaultedAttributes() {
 
         // bug 3068
@@ -203,11 +214,16 @@ public class ParserTest extends TestCase {
                 e.printStackTrace();
                 fail(e.getMessage());
             }
-        } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
+//        } catch (TransformerConfigurationException e) {
+//            fail();
+        } catch (SAXNotRecognizedException e) {
+            fail();
+        } catch (SAXNotSupportedException e) {
             fail();
         }
     }
 
+    @Test
     public void testXercesSchemaDefaultedAttributesXmlSpace() {
 
         // bug 3068
@@ -259,10 +275,11 @@ public class ParserTest extends TestCase {
 
     private void expectLocation(XPathCompiler xpc, XdmNode doc, String path, int line, int column) throws SaxonApiException {
         XdmNode found = (XdmNode)xpc.evaluateSingle(path, doc);
-        assertEquals(path + " - line", line, found.getLineNumber());
-        assertEquals(path + " - column", column, found.getColumnNumber());
+        assertEquals(line, found.getLineNumber(), path + " - line");
+        assertEquals(column, found.getColumnNumber(), path + " - column");
     }
 
+    @Test
     public void testLineNumberingTinyTree() {
         try {
             Processor proc = new Processor(true);
@@ -283,6 +300,7 @@ public class ParserTest extends TestCase {
         }
     }
 
+    @Test
     public void testLineNumberingLinkedTree() {
         try {
             Processor proc = new Processor(true);
@@ -302,6 +320,7 @@ public class ParserTest extends TestCase {
         }
     }
 
+    @Test
     public void testParseXmlFragment() {
         // Bug 4127
         try {
@@ -312,7 +331,7 @@ public class ParserTest extends TestCase {
             XdmValue value = exec.load().evaluate();
             assertEquals(1, value.size());
             assertTrue(value instanceof XdmNode);
-            assertSame(((XdmNode) value).getNodeKind(), XdmNodeKind.DOCUMENT);
+            assertEquals(XdmNodeKind.DOCUMENT, ((XdmNode)value).getNodeKind());
             assertEquals(2, value.select(child()).count());
         } catch (SaxonApiException err) {
             err.printStackTrace();

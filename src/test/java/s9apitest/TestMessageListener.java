@@ -1,19 +1,24 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Attempts to reproduce a bug from Stephen P Cuzner where the MessageListener gets an AIOOB exception
  * reading the string value of a node from a TinyTree used to construct a message; the tree has been
  * passed to the listener after endDocument() but before close(), which means there is no stopper node
  */
-public class TestMessageListener extends TestCase {
+public class TestMessageListener {
 
+    @Test
     public void testMessage() {
         try {
             // Write lots of empty messages. Each message is a empty document of a single node. All the documents
@@ -43,13 +48,14 @@ public class TestMessageListener extends TestCase {
             });
             t.setDestination(p.newSerializer(System.out));
             t.transform();
-            assertEquals(sb.length(), 100);
+            assertEquals(100, sb.length());
         } catch (SaxonApiException e1) {
             e1.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testMessageTerminate() {
         // 2020-02-10: report on saxon help forum that in 9.9.1.6, the message listener is not called
         // when terminate="yes". Bug 4457.
@@ -72,14 +78,14 @@ public class TestMessageListener extends TestCase {
                 public void message(XdmNode content, boolean terminate, SourceLocator locator) {
                     System.err.println(content.getStringValue() + terminate);
                     sb.append(content.getStringValue());
-                    assertEquals("terminate", terminate, content.getStringValue().equals("GOTCHA5!"));
+                    assertEquals(terminate, content.getStringValue().equals("GOTCHA5!"), "terminate");
                 }
             });
             t.setDestination(p.newSerializer(System.out));
             t.transform();
             fail("Expected xsl:messge termination exception");
         } catch (SaxonApiException e1) {
-            assertTrue("exception", e1.getMessage().contains("Processing terminated by xsl:message"));
+            assertTrue(e1.getMessage().contains("Processing terminated by xsl:message"), "exception");
         }
     }
 }

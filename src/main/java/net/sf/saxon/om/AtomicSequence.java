@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,13 +18,14 @@ import net.sf.saxon.value.AtomicValue;
  * is in memory, making operations such as {@link #itemAt(int)} and {@link #getLength()} possible.</p>
  */
 
-public interface AtomicSequence extends GroundedValue<AtomicValue> {
+public interface AtomicSequence extends GroundedValue, Iterable<AtomicValue> {
 
     /**
      * Get the first item in the sequence
      * @return the first item in the sequence, or null if the sequence is empty
      */
 
+    @Override
     AtomicValue head();
 
     /**
@@ -32,6 +33,7 @@ public interface AtomicSequence extends GroundedValue<AtomicValue> {
      * @return an iterator over the items in the sequence
      */
 
+    @Override
     AtomicIterator iterate();
 
     /**
@@ -40,6 +42,7 @@ public interface AtomicSequence extends GroundedValue<AtomicValue> {
      * @return the Nth item in the sequence, or null if the index is out of range
      */
 
+    @Override
     AtomicValue itemAt(int n);
 
     /**
@@ -47,6 +50,7 @@ public interface AtomicSequence extends GroundedValue<AtomicValue> {
      * @return the number of items in the sequence
      */
 
+    @Override
     int getLength();
 
     /**
@@ -70,7 +74,7 @@ public interface AtomicSequence extends GroundedValue<AtomicValue> {
      * @return a Comparable that follows XML Schema comparison rules
      */
 
-    Comparable getSchemaComparable();
+    Comparable<?> getSchemaComparable();
 
     /**
      * Get a string representation of the sequence. The is the space-separated concatenation of the result of
@@ -79,6 +83,7 @@ public interface AtomicSequence extends GroundedValue<AtomicValue> {
      * as a CharSequence.
      */
 
+    @Override
     CharSequence getStringValueCS();
 
     /**
@@ -89,6 +94,7 @@ public interface AtomicSequence extends GroundedValue<AtomicValue> {
      * as a String.
      */
 
+    @Override
     String getStringValue();
 
 }

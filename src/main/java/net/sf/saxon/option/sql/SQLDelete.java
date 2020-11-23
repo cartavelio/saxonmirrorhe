@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,8 +12,9 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SimpleExpression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.EmptyAtomicSequence;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
@@ -45,37 +46,40 @@ public class SQLDelete extends ExtensionInstruction {
     String table;
     Expression where;
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        table = getAttributeList().getValue("", "table");
+        final AttributeMap atts = attributes();
+        table = atts.getValue("", "table");
         if (table == null) {
             reportAbsence("table");
             table = "saxon-error-table";
         }
         table = SQLConnect.quoteSqlName(table);
 
-        String dbWhere = getAttributeList().getValue("", "where");
+        AttributeInfo dbWhere = atts.get("", "where");
         if (dbWhere == null) {
             where = new StringLiteral(StringValue.EMPTY_STRING);
         } else {
-            where = makeAttributeValueTemplate(dbWhere, getAttributeList().getIndex("", "where"));
+            where = makeAttributeValueTemplate(dbWhere.getValue(), dbWhere);
         }
 
-
-        String connectAtt = getAttributeList().getValue("", "connection");
+        AttributeInfo connectAtt = atts.get("", "connection");
         if (connectAtt == null) {
             reportAbsence("connection");
         } else {
-            connection = makeExpression(connectAtt, getAttributeList().getIndex("", "connection"));
+            connection = makeExpression(connectAtt.getValue(), connectAtt);
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
         where = typeCheck("where", where);
         connection = typeCheck("connection", connection);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return new DeleteInstruction(connection, "DELETE FROM " + table, where);
     }
@@ -100,16 +104,19 @@ public class SQLDelete extends ExtensionInstruction {
          * This method indicates which of the three is provided.
          */
 
+        @Override
         public int getImplementationMethod() {
             return Expression.EVALUATE_METHOD;
         }
 
+        @Override
         public String getExpressionType() {
             return "sql:delete";
         }
 
         /*@Nullable*/
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             // Prepare the SQL statement (only do this once)
 
             Connection connection = SQLFunctionSet.expectConnection(arguments[CONNECTION], context);

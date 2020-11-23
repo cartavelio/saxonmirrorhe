@@ -1,9 +1,9 @@
 package nativetests;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.query.StaticQueryContext;
@@ -11,6 +11,7 @@ import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.om.*;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -18,13 +19,17 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestXQueryUpdate extends TestCase {
+
+public class TestXQueryUpdate {
     private static final String xml =
             "<?xml version='1.0' encoding='UTF-8'?><record><datafield ind1=' '></datafield></record>";
 
     // Bug report against 9.1: compiling a query against one Configuration and
     // running using another appears to give no error
+    @Test
     public void testUpdateConfig() {
 
         try {
@@ -48,7 +53,7 @@ public class TestXQueryUpdate extends TestCase {
 
             java.util.Set<MutableNodeInfo> s = exp.runUpdate(dynamicContext);
 
-            assertTrue("one updated node", s.size() == 1);
+            assertEquals(1, s.size(), "one updated node");
         } catch (XPathException e) {
             fail(e.getMessage());
         }
@@ -57,6 +62,7 @@ public class TestXQueryUpdate extends TestCase {
 
     // bug report against 9.1 - adding a namespace node to a MutableNodeInfo
 
+    @Test
     public void testAddNamespace() {
         try {
             Configuration config = new EnterpriseConfiguration();
@@ -66,10 +72,10 @@ public class TestXQueryUpdate extends TestCase {
             NodeName name = new FingerprintedQName("a", "http://foo.bar/", "x");
             NamespaceBinding nsCode = new NamespaceBinding("a", "http://foo.bar/");
             MutableNodeInfo elem = (MutableNodeInfo)doc.iterateAxis(AxisInfo.CHILD).next();
-            elem.addAttribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, "xxxx", 0);
-            elem.addNamespace(nsCode, false);
+            elem.addAttribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, "xxxx", ReceiverOption.NONE);
+            elem.addNamespace(nsCode);
             String s = QueryResult.serialize(elem).trim();
-            assertEquals("result", "<foo xmlns:a=\"http://foo.bar/\" a:x=\"xxxx\"/>", s);
+            assertEquals("<foo xmlns:a=\"http://foo.bar/\" a:x=\"xxxx\"/>", s, "result");
             //System.err.println(s);
 
         } catch (XPathException e) {

@@ -30,7 +30,7 @@
     place in the pipeline if Unicode normalization is requested in the serialization parameters.</p>
 
 <p>The immediate output of node constructors in a query or stylesheet goes to a {@link
-    net.sf.saxon.event.SequenceReceiver}.
+    net.sf.saxon.event.Outputter}.
     This is a subclass of <code>Receiver</code> that can handle an arbitrary sequence, containing atomic values
     as well as nodes. When constructing the content of an element, a {@link net.sf.saxon.event.ComplexContentOutputter}
     is used;

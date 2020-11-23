@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -60,8 +60,12 @@ public class ItemTypeFactory {
      */
 
     public ItemType getAtomicType(QName name) throws SaxonApiException {
-        String uri = name.getNamespaceURI();
-        String local = name.getLocalName();
+        return getAtomicType(name.getStructuredQName());
+    }
+
+    private ItemType getAtomicType(StructuredQName name) throws SaxonApiException {
+        String uri = name.getURI();
+        String local = name.getLocalPart();
         if (NamespaceConstant.SCHEMA.equals(uri)) {
             int fp = StandardNames.getFingerprint(uri, local);
             Configuration config = processor.getUnderlyingConfiguration();
@@ -73,7 +77,7 @@ public class ItemTypeFactory {
             }
         } else {
             Configuration config = processor.getUnderlyingConfiguration();
-            SchemaType type = config.getSchemaType(new StructuredQName("", name.getNamespaceURI(), local));
+            SchemaType type = config.getSchemaType(new StructuredQName("", uri, local));
             if (type == null || !type.isAtomicType()) {
                 throw new SaxonApiException("Unknown atomic type " + name.getClarkName());
             }
@@ -570,7 +574,7 @@ public class ItemTypeFactory {
             AtomicValue value = (AtomicValue) item.getUnderlyingValue();
             AtomicType type = value.getItemType();
             return new ConstructedItemType(type, processor);
-        } else if (item.getUnderlyingValue() instanceof NodeInfo) {
+        } else if (item.isNode()) {
             NodeInfo node = (NodeInfo) item.getUnderlyingValue();
             int kind = node.getNodeKind();
             if (node.getLocalPart().isEmpty()) {
@@ -595,7 +599,6 @@ public class ItemTypeFactory {
     /**
      * Obtain a s9api {@code ItemType} corresponding to an underlying instance of
      * {@link net.sf.saxon.type.ItemType}
-     *
      * @param it the supplied instance of {@link net.sf.saxon.type.ItemType}
      * @return a corresponding instance of {@link ItemType}
      * @since 10.0

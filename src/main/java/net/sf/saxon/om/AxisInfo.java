@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -25,55 +25,55 @@ public final class AxisInfo {
      * Constant representing the ancestor axis
      */
 
-    public static final byte ANCESTOR = 0;
+    public static final int ANCESTOR = 0;
     /**
      * Constant representing the ancestor-or-self axis
      */
-    public static final byte ANCESTOR_OR_SELF = 1;
+    public static final int ANCESTOR_OR_SELF = 1;
     /**
      * Constant representing the attribute axis
      */
-    public static final byte ATTRIBUTE = 2;
+    public static final int ATTRIBUTE = 2;
     /**
      * Constant representing the child axis
      */
-    public static final byte CHILD = 3;
+    public static final int CHILD = 3;
     /**
      * Constant representing the descendant axis
      */
-    public static final byte DESCENDANT = 4;
+    public static final int DESCENDANT = 4;
     /**
      * Constant representing the descendant-or-self axis
      */
-    public static final byte DESCENDANT_OR_SELF = 5;
+    public static final int DESCENDANT_OR_SELF = 5;
     /**
      * Constant representing the following axis
      */
-    public static final byte FOLLOWING = 6;
+    public static final int FOLLOWING = 6;
     /**
      * Constant representing the following-sibling axis
      */
-    public static final byte FOLLOWING_SIBLING = 7;
+    public static final int FOLLOWING_SIBLING = 7;
     /**
      * Constant representing the namespace axis
      */
-    public static final byte NAMESPACE = 8;
+    public static final int NAMESPACE = 8;
     /**
      * Constant representing the parent axis
      */
-    public static final byte PARENT = 9;
+    public static final int PARENT = 9;
     /**
      * Constant representing the preceding axis
      */
-    public static final byte PRECEDING = 10;
+    public static final int PRECEDING = 10;
     /**
      * Constant representing the preceding-sibling axis
      */
-    public static final byte PRECEDING_SIBLING = 11;
+    public static final int PRECEDING_SIBLING = 11;
     /**
      * Constant representing the self axis
      */
-    public static final byte SELF = 12;
+    public static final int SELF = 12;
 
     // preceding-or-ancestor axis gives all preceding nodes including ancestors,
     // in reverse document order
@@ -81,7 +81,7 @@ public final class AxisInfo {
     /**
      * Constant representing the preceding-or-ancestor axis. This axis is used internally by the xsl:number implementation, it returns the union of the preceding axis and the ancestor axis.
      */
-    public static final byte PRECEDING_OR_ANCESTOR = 13;
+    public static final int PRECEDING_OR_ANCESTOR = 13;
 
     /**
      * Table indicating the principal node type of each axis
@@ -144,28 +144,6 @@ public final class AxisInfo {
                     true,           // SELF;
                     false,          // PRECEDING_OR_ANCESTOR;
             };
-
-    /**
-     * Table indicating for each axis whether it is in reverse document order
-     */
-
-//    public static final boolean[] isReverse =
-//    {
-//        true,           // ANCESTOR
-//        true,           // ANCESTOR_OR_SELF;
-//        false,          // ATTRIBUTE;
-//        false,          // CHILD;
-//        false,          // DESCENDANT;
-//        false,          // DESCENDANT_OR_SELF;
-//        false,          // FOLLOWING;
-//        false,          // FOLLOWING_SIBLING;
-//        false,          // NAMESPACE;
-//        true,           // PARENT;
-//        true,           // PRECEDING;
-//        true,           // PRECEDING_SIBLING;
-//        true,           // SELF;
-//        true,           // PRECEDING_OR_ANCESTOR;
-//    };
 
     /**
      * Table indicating for each axis whether it is a peer axis. An axis is a peer
@@ -250,68 +228,40 @@ public final class AxisInfo {
      * @throws XPathException if the axis name is not one of the defined axes
      */
 
-    public static byte getAxisNumber(String name) throws XPathException {
-        switch (name.length()) {
-            case 4:
-                if (name.equals("self")) {
-                    return SELF;
-                }
-                break;
-            case 5:
-                if (name.equals("child")) {
-                    return CHILD;
-                }
-                break;
-            case 6:
-                if (name.equals("parent")) {
-                    return PARENT;
-                }
-                break;
-            case 8:
-                if (name.equals("ancestor")) {
-                    return ANCESTOR;
-                }
-                break;
-            case 9:
-                if (name.equals("attribute")) {
-                    return ATTRIBUTE;
-                }
-                if (name.equals("following")) {
-                    return FOLLOWING;
-                }
-                if (name.equals("namespace")) {
-                    return NAMESPACE;
-                }
-                if (name.equals("preceding")) {
-                    return PRECEDING;
-                }
-                break;
-            case 10:
-                if (name.equals("descendant")) {
-                    return DESCENDANT;
-                }
-                break;
-            case 16:
-                if (name.equals("ancestor-or-self")) {
-                    return ANCESTOR_OR_SELF;
-                }
-                break;
-            case 17:
-                if (name.equals("following-sibling")) {
-                    return FOLLOWING_SIBLING;
-                }
-                if (name.equals("preceding-sibling")) {
-                    return PRECEDING_SIBLING;
-                }
-                break;
-            case 18:
-                if (name.equals("descendant-or-self")) {
-                    return DESCENDANT_OR_SELF;
-                }
-                break;
+    public static int getAxisNumber(String name) throws XPathException {
+        switch (name) {
+            case "ancestor":
+                return ANCESTOR;
+            case "ancestor-or-self":
+                return ANCESTOR_OR_SELF;
+            case "attribute":
+                return ATTRIBUTE;
+            case "child":
+                return CHILD;
+            case "descendant":
+                return DESCENDANT;
+            case "descendant-or-self":
+                return DESCENDANT_OR_SELF;
+            case "following":
+                return FOLLOWING;
+            case "following-sibling":
+                return FOLLOWING_SIBLING;
+            case "namespace":
+                return NAMESPACE;
+            case "parent":
+                return PARENT;
+            case "preceding":
+                return PRECEDING;
+            case "preceding-sibling":
+                return PRECEDING_SIBLING;
+            case "self":
+                return SELF;
+            case "preceding-or-ancestor":
+                return PRECEDING_OR_ANCESTOR;
+                // preceding-or-ancestor cannot be used in an XPath expression
+            default:
+                throw new XPathException("Unknown axis name: " + name);
         }
-        // preceding-or-ancestor cannot be used in an XPath expression
-        throw new XPathException("Unknown axis name: " + name);
 
     }
 
@@ -397,7 +347,7 @@ public final class AxisInfo {
      * which has no simple inverse: this table gives the inverse as CHILD
      */
 
-    public static byte[] inverseAxis = {
+    public static int[] inverseAxis = {
             DESCENDANT,             //        ANCESTOR
             DESCENDANT_OR_SELF,     //        ANCESTOR_OR_SELF;
             PARENT,                 //        ATTRIBUTE;
@@ -418,7 +368,7 @@ public final class AxisInfo {
      * work for the self axis itself).
      */
 
-    public static byte[] excludeSelfAxis = {
+    public static int[] excludeSelfAxis = {
             ANCESTOR,              //        ANCESTOR
             ANCESTOR,              //        ANCESTOR_OR_SELF;
             ATTRIBUTE,             //        ATTRIBUTE;
@@ -435,14 +385,14 @@ public final class AxisInfo {
     };
 
 
-    private static IntHashMap<UType> axisTransitions = new IntHashMap<UType>(50);
+    private static IntHashMap<UType> axisTransitions = new IntHashMap<>(50);
 
-    private static void e(PrimitiveUType origin, byte axis, UType target) {
+    private static void e(PrimitiveUType origin, int axis, UType target) {
         axisTransitions.put(makeKey(origin, axis), target);
     }
 
-    private static int makeKey(PrimitiveUType origin, byte axis) {
-        return origin.getBit()<<16 | (int)axis;
+    private static int makeKey(PrimitiveUType origin, int axis) {
+        return origin.getBit()<<16 | axis;
     }
 
     /**
@@ -452,11 +402,14 @@ public final class AxisInfo {
      * @return the set of possible node kinds in the result of the axis expression, as a UType
      */
 
-    public static UType getTargetUType(UType origin, byte axis) {
+    public static UType getTargetUType(UType origin, int axis) {
         UType resultType = UType.VOID;
         Set<PrimitiveUType> origins = origin.intersection(UType.ANY_NODE).decompose();
         for (PrimitiveUType u : origins) {
             UType r = axisTransitions.get(makeKey(u, axis));
+            if (r == null) {
+                System.err.println("Unknown transitions for primitive type " + u.toString() + "::" + axis);
+            }
             resultType = resultType.union(r);
         }
         return resultType;

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,9 +7,8 @@
 
 package net.sf.saxon.trans;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
@@ -18,11 +17,10 @@ import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.TemplateRule;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.TraceListener;
-import net.sf.saxon.lib.TraceListener2;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.ModeTraceListener;
 import net.sf.saxon.trans.rules.*;
@@ -31,6 +29,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.Collections;
 import java.util.Set;
@@ -50,15 +49,17 @@ public abstract class Mode extends Actor {
     public static final StructuredQName DEFAULT_MODE_NAME =
         new StructuredQName("xsl", NamespaceConstant.XSLT, "default");
 
-
     protected StructuredQName modeName;
     private boolean streamable;
-    private int recoveryPolicy = Configuration.RECOVER_WITH_WARNINGS; // since 9.2 fixed at compile time
+
+    public static final int RECOVER_WITH_WARNINGS = 1;
+    private RecoveryPolicy recoveryPolicy = RecoveryPolicy.RECOVER_WITH_WARNINGS;
     public boolean mustBeTyped = false;
     public boolean mustBeUntyped = false;
     boolean hasRules = false;
     boolean bindingSlotsAllocated = false;
     boolean modeTracing = false;
+    SequenceType defaultResultType = null;
 
     private Set<? extends Accumulator> accumulators;
 
@@ -177,17 +178,8 @@ public abstract class Mode extends Actor {
 
 
     @Override
-    public int getComponentKind() {
-        return StandardNames.XSL_MODE;
-    }
-
-    @Override
     public SymbolicName getSymbolicName() {
         return new SymbolicName(StandardNames.XSL_MODE, getModeName());
-    }
-
-    public int getConstructType() {
-        return StandardNames.XSL_MODE;
     }
 
     public StructuredQName getObjectName() {
@@ -208,11 +200,10 @@ public abstract class Mode extends Actor {
      * made at run-time, but for the "ambiguous template match" error, the decision is (since 9.2)
      * fixed at compile time.
      *
-     * @param policy the recovery policy to be used. The options are {@link Configuration#RECOVER_SILENTLY},
-     *               {@link Configuration#RECOVER_WITH_WARNINGS}, or {@link Configuration#DO_NOT_RECOVER}.
+     * @param policy the recovery policy to be used.
      */
 
-    public void setRecoveryPolicy(int policy) {
+    public void setRecoveryPolicy(RecoveryPolicy policy) {
         recoveryPolicy = policy;
     }
 
@@ -228,7 +219,7 @@ public abstract class Mode extends Actor {
      * @return the current policy.
      */
 
-    public int getRecoveryPolicy() {
+    public RecoveryPolicy getRecoveryPolicy() {
         return recoveryPolicy;
     }
 
@@ -263,6 +254,14 @@ public abstract class Mode extends Actor {
 
     public abstract Set<String> getExplicitNamespaces(NamePool pool);
 
+    public void setDefaultResultType(SequenceType type) {
+        defaultResultType = type;
+    }
+
+    public SequenceType getDefaultResultType() {
+        return defaultResultType;
+    }
+
 
     /**
      * Walk over all the rules, applying a specified action to each one.
@@ -273,6 +272,28 @@ public abstract class Mode extends Actor {
 
     public abstract void processRules(RuleAction action) throws XPathException;
 
+//    /**
+//     * Ask whether any template rule in this mode invokes the last() function in the
+//     * context of the calling xsl:apply-templates
+//     * @return true if any rule has a "top-level" call on the last() function
+//     */
+//
+//    public boolean callsLast() {
+//        List<Boolean> result = new ArrayList<>();
+//        try {
+//            processRules((rule) -> {
+//                if (result.isEmpty()) {
+//                    int dep = (((TemplateRule) rule.getAction()).getBody()).getDependencies();
+//                    if ((dep & StaticProperty.DEPENDS_ON_LAST) != 0) {
+//                        result.add(true);
+//                    }
+//                }
+//            });
+//            return !result.isEmpty();
+//        } catch (XPathException e) {
+//            return true;
+//        }
+//    }
 
     /**
      * Make a new XPath context for evaluating patterns if there is any possibility that the
@@ -399,6 +420,9 @@ public abstract class Mode extends Actor {
      * @param tunnelParameters A ParameterSet containing the parameters to
      *                         the handler/template being invoked. Specify null if there are no
      *                         parameters.
+     * @param separator        Text node to be inserted between the output of successive input items;
+     *                         may be null
+     * @param output           The destination for the result of the selected templates
      * @param context          A newly-created context object (this must be freshly created by the caller,
      *                         as it will be modified by this method). The nodes to be processed are those
      *                         selected by the currentIterator in this context object. There is also a precondition
@@ -413,12 +437,13 @@ public abstract class Mode extends Actor {
     public TailCall applyTemplates(
             ParameterSet parameters,
             ParameterSet tunnelParameters,
+            NodeInfo separator,
+            Outputter output,
             XPathContextMajor context,
             Location locationId)
             throws XPathException {
         Controller controller = context.getController();
         boolean tracing = modeTracing || controller.isTracing();
-        PipelineConfiguration pipe = context.getReceiver().getPipelineConfiguration();
         SequenceIterator iterator = context.getCurrentIterator();
         TailCall tc = null;
         TraceListener traceListener = null;
@@ -433,8 +458,10 @@ public abstract class Mode extends Actor {
 
         // Iterate over this sequence
 
-        boolean lookahead = (iterator.getProperties() & SequenceIterator.LOOKAHEAD) != 0;
+        boolean lookahead = iterator.getProperties().contains(SequenceIterator.Property.LOOKAHEAD);
         TemplateRule previousTemplate = null;
+        boolean first = true;
+
         while (true) {
 
             // process any tail calls returned from previous nodes. We need to do this before changing
@@ -455,6 +482,14 @@ public abstract class Mode extends Actor {
             Item item = iterator.next();
             if (item == null) {
                 break;
+            }
+
+            if (separator != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    output.append(separator);
+                }
             }
 
             if (mustBeTyped) {
@@ -481,18 +516,18 @@ public abstract class Mode extends Actor {
 
             // find the template rule for this node
 
-            if (tracing && traceListener instanceof TraceListener2) {
-                ((TraceListener2)traceListener).startRuleSearch();
+            if (tracing) {
+                traceListener.startRuleSearch();
             }
 
             Rule rule = getRule(item, context);
-            if (tracing && traceListener instanceof TraceListener2) {
-                ((TraceListener2) traceListener).endRuleSearch((rule != null) ? rule : getBuiltInRuleSet(), this, item);
+            if (tracing) {
+                traceListener.endRuleSearch((rule != null) ? rule : getBuiltInRuleSet(), this, item);
             }
 
             if (rule == null) {             // Use the default action for the node
                 // No need to open a new stack frame
-                getBuiltInRuleSet().process(item, parameters, tunnelParameters, context, locationId);
+                getBuiltInRuleSet().process(item, parameters, tunnelParameters, output, context, locationId);
 
             } else {
 
@@ -516,9 +551,9 @@ public abstract class Mode extends Actor {
                 if (tracing) {
                     traceListener.startCurrentItem(item);
                     if (modeTracing) {
-                        traceListener.enter(template, context);
+                        traceListener.enter(template, Collections.emptyMap(), context);
                     }
-                    tc = template.applyLeavingTail(context);
+                    tc = template.applyLeavingTail(output, context);
                     if (tc != null) {
                         // disable tail call optimization while tracing
                         do {
@@ -530,7 +565,7 @@ public abstract class Mode extends Actor {
                     }
                     traceListener.endCurrentItem(item);
                 } else {
-                    tc = template.applyLeavingTail(context);
+                    tc = template.applyLeavingTail(output, context);
                 }
             }
         }
@@ -596,6 +631,7 @@ public abstract class Mode extends Actor {
         return base;
     }
 
+    @Override
     public final void export(ExpressionPresenter presenter) throws XPathException {
         int s = presenter.startElement("mode");
         if (!isUnnamedMode()) {
@@ -615,9 +651,9 @@ public abstract class Mode extends Actor {
         if (mustBeUntyped) {
             flags += "u";
         }
-        if (recoveryPolicy == Configuration.DO_NOT_RECOVER) {
+        if (recoveryPolicy == RecoveryPolicy.DO_NOT_RECOVER) {
             flags += "F";
-        } else if (recoveryPolicy == Configuration.RECOVER_WITH_WARNINGS) {
+        } else if (recoveryPolicy == RecoveryPolicy.RECOVER_WITH_WARNINGS) {
             flags += "W";
         }
         if (!hasRules) {
@@ -660,9 +696,9 @@ public abstract class Mode extends Actor {
         if (mustBeUntyped) {
             flags += "u";
         }
-        if (recoveryPolicy == Configuration.DO_NOT_RECOVER) {
+        if (recoveryPolicy == RecoveryPolicy.DO_NOT_RECOVER) {
             flags += "F";
-        } else if (recoveryPolicy == Configuration.RECOVER_WITH_WARNINGS) {
+        } else if (recoveryPolicy == RecoveryPolicy.RECOVER_WITH_WARNINGS) {
             flags += "W";
         }
         if (!flags.isEmpty()) {

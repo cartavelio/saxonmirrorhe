@@ -1,7 +1,6 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.flwor.ClauseInfo;
@@ -16,8 +15,10 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.InstructionInfo;
+import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.SimpleMode;
 import net.sf.saxon.type.Type;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.helpers.XMLFilterImpl;
 
 import javax.xml.transform.stream.StreamSource;
@@ -27,12 +28,17 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * JUnit tests for the s9api XQueryCompiler
  */
-public class TestXQueryEvaluator extends TestCase {
+public class TestXQueryEvaluator {
 
+    @Test
     public void testReturnDocumentNode() {
         try {
             Processor p = new Processor(false);
@@ -46,16 +52,17 @@ public class TestXQueryEvaluator extends TestCase {
             XdmDestination dest = new XdmDestination();
             eval.run(dest);
             XdmNode doc = dest.getXdmNode();
-            assertSame("Push result is document", doc.getNodeKind(), XdmNodeKind.DOCUMENT);
+            assertSame(doc.getNodeKind(), XdmNodeKind.DOCUMENT, "Push result is document");
 
             // Now run in pull mode
             XdmNode doc2 = (XdmNode) eval.evaluate();
-            assertSame("Pull result is document", doc2.getNodeKind(), XdmNodeKind.DOCUMENT);
+            assertSame(doc2.getNodeKind(), XdmNodeKind.DOCUMENT, "Pull result is document");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testXQueryLineNumber() {
         try {
             Processor proc = new Processor(true);
@@ -78,13 +85,14 @@ public class TestXQueryEvaluator extends TestCase {
             out.setOutputWriter(sw);
             eval.run(out);
             //System.out.println(sw.toString());
-            assertEquals("linenumber", "15", sw.toString());
+            assertEquals("15", sw.toString(), "linenumber");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testXdmDestinationMultipleNodes() {
         try {
             Processor p = new Processor(false);
@@ -94,8 +102,8 @@ public class TestXQueryEvaluator extends TestCase {
             XdmDestination dest = new XdmDestination();
             eval.run(dest);
             XdmNode doc = dest.getXdmNode();
-            assertEquals("kind", doc.getNodeKind(), XdmNodeKind.DOCUMENT);
-            assertEquals("child-count", doc.axisIterator(Axis.CHILD).stream().count(), 3);
+            assertEquals(doc.getNodeKind(), XdmNodeKind.DOCUMENT, "kind");
+            assertEquals(3, doc.axisIterator(Axis.CHILD).stream().count(), "child-count");
 
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -103,6 +111,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testXdmDestinationItemSeparator() {
         try {
             Processor p = new Processor(false);
@@ -117,9 +126,9 @@ public class TestXQueryEvaluator extends TestCase {
             XdmDestination dest = new XdmDestination();
             eval.run(dest);
             XdmNode doc = dest.getXdmNode();
-            assertEquals("kind", XdmNodeKind.DOCUMENT, doc.getNodeKind());
-            assertEquals("child-count", 3, doc.axisIterator(Axis.CHILD).stream().count());
-            assertEquals("content", "<!--start-->~1~2~3~<!--end-->", doc.toString());
+            assertEquals(XdmNodeKind.DOCUMENT, doc.getNodeKind(), "kind");
+            assertEquals(3, doc.axisIterator(Axis.CHILD).stream().count(), "child-count");
+            assertEquals("<!--start-->~1~2~3~<!--end-->", doc.toString(), "content");
 
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -127,6 +136,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testXdmDestinationSpaceSeparator() {
         try {
             Processor p = new Processor(false);
@@ -141,9 +151,9 @@ public class TestXQueryEvaluator extends TestCase {
             XdmDestination dest = new XdmDestination();
             eval.run(dest);
             XdmNode doc = dest.getXdmNode();
-            assertEquals("kind", XdmNodeKind.DOCUMENT, doc.getNodeKind());
-            assertEquals("child-count", 3, doc.axisIterator(Axis.CHILD).stream().count());
-            assertEquals("content", "<!--start-->1 2 3<!--end-->", doc.toString());
+            assertEquals(XdmNodeKind.DOCUMENT, doc.getNodeKind(), "kind");
+            assertEquals(3, doc.axisIterator(Axis.CHILD).stream().count(), "child-count");
+            assertEquals("<!--start-->1 2 3<!--end-->", doc.toString(), "content");
 
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -156,6 +166,7 @@ public class TestXQueryEvaluator extends TestCase {
      * Test writing a text node only to an XdmDestination
      */
 
+    @Test
     public void testXdmDestinationTextNodeOnly() {
         try {
             Processor processor = new Processor(false);
@@ -164,9 +175,9 @@ public class TestXQueryEvaluator extends TestCase {
             XdmDestination dest = new XdmDestination();
             s.run(dest);
             XdmNode doc = dest.getXdmNode();
-            assertEquals("kind", doc.getNodeKind(), XdmNodeKind.DOCUMENT);
-            assertEquals("child-count", doc.axisIterator(Axis.CHILD).stream().count(), 1);
-            assertEquals("child-kind", doc.axisIterator(Axis.CHILD).next().getNodeKind(), XdmNodeKind.TEXT);
+            assertEquals(XdmNodeKind.DOCUMENT, doc.getNodeKind(), "kind");
+            assertEquals(1, doc.axisIterator(Axis.CHILD).stream().count(), "child-count");
+            assertEquals(XdmNodeKind.TEXT, doc.axisIterator(Axis.CHILD).next().getNodeKind(), "child-kind");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -174,6 +185,7 @@ public class TestXQueryEvaluator extends TestCase {
     }
 
 
+    @Test
     public void testRawDestinationMultipleDocumentNodes() {
         try {
             Processor p = new Processor(false);
@@ -183,8 +195,8 @@ public class TestXQueryEvaluator extends TestCase {
             RawDestination dest = new RawDestination();
             eval.run(dest);
             XdmValue result = dest.getXdmValue();
-            assertEquals("kind", ((XdmNode) result.itemAt(0)).getNodeKind(), XdmNodeKind.DOCUMENT);
-            assertEquals("count", result.size(), 3);
+            assertEquals(XdmNodeKind.DOCUMENT, ((XdmNode) result.itemAt(0)).getNodeKind(), "kind");
+            assertEquals(3, result.size(), "count");
 
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -192,6 +204,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testRawDestinationMultipleElementNodes() {
         try {
             Processor p = new Processor(false);
@@ -201,16 +214,17 @@ public class TestXQueryEvaluator extends TestCase {
             RawDestination dest = new RawDestination();
             eval.run(dest);
             XdmValue result = dest.getXdmValue();
-            assertEquals("kind", ((XdmNode) result.itemAt(0)).getNodeKind(), XdmNodeKind.ELEMENT);
-            assertEquals("att", "2", ((XdmNode) result.itemAt(1)).attribute("x"));
-            assertEquals("child", "y", result.itemAt(2).select(child("y")).asNode().getNodeName().getLocalName());
-            assertEquals("count", result.size(), 3);
+            assertEquals(XdmNodeKind.ELEMENT, ((XdmNode) result.itemAt(0)).getNodeKind(), "kind");
+            assertEquals("2", ((XdmNode) result.itemAt(1)).attribute("x"), "att");
+            assertEquals("y", result.itemAt(2).select(child("y")).asNode().getNodeName().getLocalName(), "child");
+            assertEquals(3, result.size(), "count");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testRawDestinationMultipleAttributeNodes() {
         try {
             Processor p = new Processor(false);
@@ -220,10 +234,10 @@ public class TestXQueryEvaluator extends TestCase {
             RawDestination dest = new RawDestination();
             eval.run(dest);
             XdmValue result = dest.getXdmValue();
-            assertEquals("kind", ((XdmNode) result.itemAt(0)).getNodeKind(), XdmNodeKind.ATTRIBUTE);
-            assertEquals("att", "2", result.itemAt(1).getStringValue());
-            assertEquals("child", "a", ((XdmNode) result.itemAt(2)).getNodeName().getLocalName());
-            assertEquals("count", result.size(), 3);
+            assertEquals(XdmNodeKind.ATTRIBUTE, ((XdmNode) result.itemAt(0)).getNodeKind(), "kind");
+            assertEquals("2", result.itemAt(1).getStringValue(), "att");
+            assertEquals("a", ((XdmNode) result.itemAt(2)).getNodeName().getLocalName(), "child");
+            assertEquals(3, result.size(), "count");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
@@ -231,6 +245,7 @@ public class TestXQueryEvaluator extends TestCase {
     }
 
 
+    @Test
     public void testRawDestinationAtomic() {
         try {
             Processor p = new Processor(false);
@@ -247,6 +262,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testSerializerWithItemSeparator() {
         try {
             Processor p = new Processor(false);
@@ -265,6 +281,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testSerializerWithItemSeparator2() {
         try {
             Processor p = new Processor(false);
@@ -283,6 +300,7 @@ public class TestXQueryEvaluator extends TestCase {
     }
 
 
+    @Test
     public void testSeparateCompilationFromFile() {
         try {
             Processor proc = new Processor(true);
@@ -290,13 +308,11 @@ public class TestXQueryEvaluator extends TestCase {
             comp.compileLibrary(new File(ConfigTest.DATA_DIR + "module-one.xq"));
             String q1 = "import module namespace m='http://www.example.com/module-one'; m:add(2,2)";
             XQueryEvaluator ev = comp.compile(q1).load();
-            assertEquals("2+2", "4", ev.evaluate().toString());
+            assertEquals("4", ev.evaluate().toString(), "2+2");
             String q2 = "import module namespace m='http://www.example.com/module-one'; m:add($m:ten,5)";
             ev = comp.compile(q2).load();
-            assertEquals("10+5", "15", ev.evaluate().toString());
-        } catch (SaxonApiException e) {
-            fail(e.getMessage());
-        } catch (IOException e) {
+            assertEquals("15", ev.evaluate().toString(), "10+5");
+        } catch (SaxonApiException | IOException e) {
             fail(e.getMessage());
         }
     }
@@ -307,6 +323,7 @@ public class TestXQueryEvaluator extends TestCase {
      * Query. This is a very efficient way of invoking a query
      */
 
+    @Test
     public void testDirectFunction() {
         try {
             final Processor processor = new Processor(true);
@@ -320,8 +337,8 @@ public class TestXQueryEvaluator extends TestCase {
             XdmValue v1 = new XdmAtomicValue(10);
             XdmValue v2 = new XdmAtomicValue("5", ItemType.UNTYPED_ATOMIC);
             XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), new XdmValue[]{v1, v2});
-            assertTrue("isAtomic", result instanceof XdmAtomicValue);
-            assertEquals("equals2", "2", result.toString());
+            assertTrue(result instanceof XdmAtomicValue, "isAtomic");
+            assertEquals("2", result.toString(), "equals2");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -333,6 +350,7 @@ public class TestXQueryEvaluator extends TestCase {
      * Query. This is a very efficient way of invoking a query
      */
 
+    @Test
     public void testDirectFunctionWithGlobalVar() {
         try {
             final Processor processor = new Processor(true);
@@ -347,8 +365,8 @@ public class TestXQueryEvaluator extends TestCase {
             XdmValue v1 = new XdmAtomicValue(10);
             XdmValue v2 = new XdmAtomicValue("5", ItemType.UNTYPED_ATOMIC);
             XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), new XdmValue[]{v1, v2});
-            assertTrue("isAtomic", result instanceof XdmAtomicValue);
-            assertEquals("equals2", "91", result.toString());
+            assertTrue(result instanceof XdmAtomicValue, "isAtomic");
+            assertEquals("91", result.toString(), "equals2");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -361,6 +379,7 @@ public class TestXQueryEvaluator extends TestCase {
      * Query, with mismatched arguments
      */
 
+    @Test
     public void testDirectFunctionArgConversion() {
         try {
             final Processor processor = new Processor(true);
@@ -374,12 +393,12 @@ public class TestXQueryEvaluator extends TestCase {
             XdmValue v1 = new XdmAtomicValue(10);
             XdmValue v2 = new XdmAtomicValue("5e0", ItemType.UNTYPED_ATOMIC);
             XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), new XdmValue[]{v1, v2});
-            assertTrue("isAtomic", result instanceof XdmAtomicValue);
+            assertTrue(result instanceof XdmAtomicValue, "isAtomic");
             assertEquals("double", ((XdmAtomicValue) result).getPrimitiveTypeName().getLocalName());
-            assertEquals("equals2", "2", result.toString());
+            assertEquals("2", result.toString(), "equals2");
         } catch (SaxonApiException e) {
             e.printStackTrace();
-            assertTrue("type-error", e.getMessage().contains("does not match the required type"));
+            assertTrue(e.getMessage().contains("does not match the required type"), "type-error");
         }
     }
 
@@ -388,6 +407,7 @@ public class TestXQueryEvaluator extends TestCase {
      * Query, with mismatched arguments
      */
 
+    @Test
     public void testDirectFunctionTypeError() {
         try {
             final Processor processor = new Processor(true);
@@ -404,7 +424,7 @@ public class TestXQueryEvaluator extends TestCase {
             fail("Failed to throw error"); // expect failure
         } catch (SaxonApiException e) {
             //e.printStackTrace();
-            assertTrue("type-error", e.getMessage().contains("required item type of the second argument"));
+            assertTrue(e.getMessage().contains("required item type of the second argument"), "type-error");
         }
     }
 
@@ -476,6 +496,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testDirectFunctionInLibraryModule2() {
         try {
             final Processor processor = new Processor(true);
@@ -504,6 +525,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testTraceListener() {
         try {
             Processor proc = new Processor(true);
@@ -524,6 +546,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testFlworTracing() {
         try {
             String doc = "<a xmlns='http://a/'><b>1</b><b>2</b><b>3</b><b>4</b></a>";
@@ -538,15 +561,15 @@ public class TestXQueryEvaluator extends TestCase {
             eval.setTraceListener(new TraceListener() {
                 int i = 0;
 
-                public void setOutputDestination(Logger stream) {
+                @Override public void setOutputDestination(Logger stream) {
 
                 }
 
-                public void open(Controller controller) {
+                @Override public void open(Controller controller) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
 
-                public void close() {
+                @Override public void close() {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
 
@@ -554,37 +577,36 @@ public class TestXQueryEvaluator extends TestCase {
                     if (!(instruction instanceof TraceExpression)) {
                         switch (i++) {
                             case 0:
-                                assertTrue("isClauseInfo0", instruction instanceof ClauseInfo);
-                                assertEquals("rightPrefix0", "http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false));
-                                assertTrue("isForClause0", ((ClauseInfo) instruction).getClause() instanceof ForClause);
-                                assertEquals("lineNumber0", 2, instruction.getLineNumber());
+                                assertTrue(instruction instanceof ClauseInfo, "isClauseInfo0");
+                                assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix0");
+                                assertTrue(((ClauseInfo) instruction).getClause() instanceof ForClause, "isForClause0");
+                                assertEquals(2, instruction.getLineNumber(), "lineNumber0");
                                 break;
                             case 1:
-                                assertTrue("isClauseInfo1", instruction instanceof ClauseInfo);
-                                assertEquals("rightPrefix1", "http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false));
-                                assertTrue("isWhereClause1", ((ClauseInfo) instruction).getClause() instanceof WhereClause);
-                                assertEquals("lineNumber1", 3, instruction.getLineNumber());
+                                assertTrue(instruction instanceof ClauseInfo, "isClauseInfo1");
+                                assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix1");
+                                assertTrue(((ClauseInfo) instruction).getClause() instanceof WhereClause, "isWhereClause1");
+                                assertEquals(3, instruction.getLineNumber(), "lineNumber1");
                                 break;
                             case 4:
-                                assertTrue("isClauseInfo4", instruction instanceof ClauseInfo);
-                                assertEquals("rightPrefix4", "http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false));
-                                assertTrue("isOrderBy4", ((ClauseInfo) instruction).getClause() instanceof OrderByClause);
-                                assertEquals("lineNumber4", 4, instruction.getLineNumber());
+                                assertTrue(instruction instanceof ClauseInfo, "isClauseInfo4");
+                                assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix4");
+                                assertTrue(((ClauseInfo) instruction).getClause() instanceof OrderByClause, "isOrderBy4");
+                                assertEquals(4, instruction.getLineNumber(), "lineNumber4");
                                 break;
                             default:
                         }
                     }
                 }
-
-                public void leave(InstructionInfo instruction) {
+                @Override public void leave(Traceable instruction) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
 
-                public void startCurrentItem(Item currentItem) {
+                @Override public void startCurrentItem(Item currentItem) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
 
-                public void endCurrentItem(Item currentItem) {
+                @Override public void endCurrentItem(Item currentItem) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
 
@@ -602,7 +624,7 @@ public class TestXQueryEvaluator extends TestCase {
                 /**
                  * Method called when a search for a template rule is about to start
                  */
-                public void startRuleSearch() {
+                @Override public void startRuleSearch() {
                     //
                 }
             });
@@ -615,6 +637,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testStreaming() {
         try {
             Processor p = new Processor(true);
@@ -638,6 +661,7 @@ public class TestXQueryEvaluator extends TestCase {
      * works because byte code generation is suppressed for streamable code.
      */
 
+    @Test
     public void testStreamingWithByteCode() {
         try {
             Processor p = new Processor(true);
@@ -656,6 +680,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testStreamingFailure() {
         try {
             Processor p = new Processor(true);
@@ -674,6 +699,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testXmlParseTryCatch() {
         // Bug 2896: try to prevent reporting parse errors to the standard error output if the error
         // then gets caught.
@@ -695,7 +721,7 @@ public class TestXQueryEvaluator extends TestCase {
             XQueryExecutable q = c.compile(query);
             XdmValue result = q.load().evaluateSingle();
             System.err.println(result.toString());
-            assertTrue(result.toString().contains("<error code=\"err:FODC0006\""));
+            assertTrue(result.toString().contains("code=\"err:FODC0006\""));
             assertTrue(result.toString().contains("The element type &#34;para&#34; must " +
                                                           "be terminated by the matching end-tag &#34;&lt;/para&gt;&#34;"));
         } catch (SaxonApiException e) {
@@ -704,6 +730,7 @@ public class TestXQueryEvaluator extends TestCase {
 
     }
 
+    @Test
     public void testContextItemExternalWithDefault() {
         try {
             Processor p = new Processor(false);
@@ -741,6 +768,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testContextItemInternalWithDefault() {
         try {
             Processor p = new Processor(false);
@@ -785,6 +813,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testContextItemExternalWithoutDefault() {
         try {
             Processor p = new Processor(false);
@@ -827,6 +856,7 @@ public class TestXQueryEvaluator extends TestCase {
         }
     }
 
+    @Test
     public void testContextItemInternalWithoutDefault() {
         try {
             Processor p = new Processor(false);
@@ -842,6 +872,7 @@ public class TestXQueryEvaluator extends TestCase {
 
     }
 
+    @Test
     public void testMapItemType() {
         // bug 4490
         try {
@@ -854,6 +885,7 @@ public class TestXQueryEvaluator extends TestCase {
                                                       + "    map:entry(\"two\", 2)\n"
                                                       + "))");
             XdmValue result = exec.load().evaluate();
+            assertTrue(result instanceof XdmMap);
             net.sf.saxon.type.ItemType type = Type.getItemType(result.itemAt(0).getUnderlyingValue(), null);
             assertTrue(type instanceof MapType);
         } catch (SaxonApiException e) {

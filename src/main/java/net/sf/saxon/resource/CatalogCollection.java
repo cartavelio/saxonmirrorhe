@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,6 +10,7 @@ package net.sf.saxon.resource;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.DocumentFn;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Resource;
@@ -48,12 +49,14 @@ public class CatalogCollection extends AbstractResourceCollection {
     }
 
 
+    @Override
     public Iterator<String> getResourceURIs(XPathContext context) throws XPathException {
         StandardCollectionFinder.checkNotNull(collectionURI, context);
         return catalogContents(collectionURI, context);
     }
 
 
+    @Override
     public Iterator<Resource> getResources(final XPathContext context) throws XPathException {
 
         StandardCollectionFinder.checkNotNull(collectionURI, context);
@@ -201,7 +204,7 @@ public class CatalogCollection extends AbstractResourceCollection {
             }
             String uri;
             try {
-                uri = new URI(item.getBaseURI()).resolve(hrefAtt).toString();
+                uri = ResolveURI.makeAbsolute(hrefAtt, item.getBaseURI()).toString();
             } catch (URISyntaxException e) {
                 XPathException err = new XPathException("Invalid base URI or href URI in collection catalog: ("
                                                                 + item.getBaseURI() + ", " + hrefAtt + ")");

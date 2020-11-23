@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,18 +11,18 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.expr.accum.Accumulator;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.SpaceStrippingRule;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationParams;
-import net.sf.saxon.value.Whitespace;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
@@ -36,6 +36,7 @@ import java.util.*;
  * class because the two operations are often performed together.
  */
 
+@SuppressWarnings("WeakerAccess")
 public class ParseOptions {
 
     private int schemaValidation = Validation.DEFAULT;
@@ -50,7 +51,7 @@ public class ParseOptions {
     private SpaceStrippingRule spaceStrippingRule = null;
     /*@Nullable*/ private Boolean lineNumbering = null;
     private boolean pleaseClose = false;
-    /*@Nullable*/ private transient UnfailingErrorListener errorListener = null;
+    /*@Nullable*/ private transient ErrorReporter errorReporter = null;
     /*@Nullable*/ private transient EntityResolver entityResolver = null;
     /*@Nullable*/ private transient ErrorHandler errorHandler = null;
     /*@Nullable*/ private List<FilterFactory> filters = null;
@@ -96,7 +97,7 @@ public class ParseOptions {
         lineNumbering = p.lineNumbering;
         pleaseClose = p.pleaseClose;
         errorHandler = p.errorHandler;
-        errorListener = p.errorListener;
+        errorReporter = p.errorReporter;
         entityResolver = p.entityResolver;
         invalidityHandler = p.invalidityHandler;
         stable = p.stable;
@@ -168,8 +169,8 @@ public class ParseOptions {
         if (options.pleaseClose) {
             pleaseClose = true;
         }
-        if (options.errorListener != null) {
-            errorListener = options.errorListener;
+        if (options.errorReporter != null) {
+            errorReporter = options.errorReporter;
         }
         if (options.entityResolver != null) {
             entityResolver = options.entityResolver;
@@ -230,12 +231,9 @@ public class ParseOptions {
         if (lineNumbering == null) {
             lineNumbering = config.isLineNumbering();
         }
-        if (errorListener == null) {
-            setErrorListener(config.getErrorListener());
+        if (errorReporter == null) {
+            setErrorReporter(config.makeErrorReporter());
         }
-//        if (invalidityHandler == null) {
-//            invalidityHandler = new InvalidityHandlerWrappingErrorListener(errorListener);
-//        }
 
     }
 
@@ -264,57 +262,20 @@ public class ParseOptions {
     }
 
     /**
-     * Set the space-stripping action to be applied to the source document
-     *
-     * @param stripAction one of {@link net.sf.saxon.value.Whitespace#IGNORABLE},
-     *                    {@link net.sf.saxon.value.Whitespace#ALL}, or {@link net.sf.saxon.value.Whitespace#NONE}
-     * @deprecated since 9.8. Use {@link #setSpaceStrippingRule}
-     */
-
-    public void setStripSpace(int stripAction) {
-        switch (stripAction) {
-            case Whitespace.ALL:
-                spaceStrippingRule = AllElementsSpaceStrippingRule.getInstance();
-                break;
-            case Whitespace.NONE:
-                spaceStrippingRule = NoElementsSpaceStrippingRule.getInstance();
-                break;
-            case Whitespace.IGNORABLE:
-                spaceStrippingRule = IgnorableSpaceStrippingRule.getInstance();
-                break;
-            case Whitespace.UNSPECIFIED:
-                spaceStrippingRule = null;
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
-    }
-
-    /**
      * Get the space-stripping action to be applied to the source document
      *
-     * @return one of {@link net.sf.saxon.value.Whitespace#IGNORABLE},
-     * {@link net.sf.saxon.value.Whitespace#ALL}, or {@link net.sf.saxon.value.Whitespace#NONE}
-     * @deprecated since 9.8. Use {@link #getSpaceStrippingRule}
+     * @return the space stripping rule to be used
      */
-
-    public int getStripSpace() {
-        if (spaceStrippingRule == AllElementsSpaceStrippingRule.getInstance()) {
-            return Whitespace.ALL;
-        } else if (spaceStrippingRule == NoElementsSpaceStrippingRule.getInstance()) {
-            return Whitespace.NONE;
-        } else if (spaceStrippingRule == IgnorableSpaceStrippingRule.getInstance()) {
-            return Whitespace.IGNORABLE;
-        } else if (spaceStrippingRule == null) {
-            return Whitespace.IGNORABLE;
-        } else {
-            return Whitespace.XSLT;
-        }
-    }
 
     public SpaceStrippingRule getSpaceStrippingRule() {
         return spaceStrippingRule;
     }
+
+    /**
+     * Set the space-stripping action to be applied to the source document
+     *
+     * @param rule space stripping rule to be used
+     */
 
     public void setSpaceStrippingRule(SpaceStrippingRule rule) {
         spaceStrippingRule = rule;
@@ -323,7 +284,7 @@ public class ParseOptions {
     /**
      * Set the tree model to use. Default is the tiny tree
      *
-     * @param model one of {@link net.sf.saxon.event.Builder#TINY_TREE},
+     * @param model typically {@link net.sf.saxon.event.Builder#TINY_TREE},
      *              {@link net.sf.saxon.event.Builder#LINKED_TREE} or {@link net.sf.saxon.event.Builder#TINY_TREE_CONDENSED}
      */
 
@@ -398,7 +359,7 @@ public class ParseOptions {
     /**
      * Get the tree model that will be used.
      *
-     * @return one of {@link net.sf.saxon.event.Builder#TINY_TREE}, {@link net.sf.saxon.event.Builder#LINKED_TREE},
+     * @return typically {@link net.sf.saxon.event.Builder#TINY_TREE}, {@link net.sf.saxon.event.Builder#LINKED_TREE},
      * or {@link net.sf.saxon.event.Builder#TINY_TREE_CONDENSED},
      * or {@link net.sf.saxon.event.Builder#UNSPECIFIED_TREE_MODEL} if no call on setTreeModel() has been made
      */
@@ -838,34 +799,29 @@ public class ParseOptions {
     }
 
     /**
-     * Set an ErrorListener to be used when parsing
+     * Set an ErrorReporter to be used when parsing
      *
-     * @param listener the ErrorListener to be used; or null, to indicate that the standard ErrorListener is to be used.
-     *                 If necessary the supplied ErrorListener will be wrapped with one that suppresses any checked Exceptions thrown
-     *                 by its methods.
+     * @param reporter the ErrorReporter to be used; or null, to indicate that the
+     *                 standard ErrorReporter is to be used.
      */
 
-    public void setErrorListener(/*@Nullable*/ ErrorListener listener) {
-        if (listener == null) {
-            listener = new StandardErrorListener();
+    public void setErrorReporter(/*@Nullable*/ ErrorReporter reporter) {
+        if (reporter == null) {
+            reporter = new StandardErrorReporter();
         }
-        if (listener instanceof UnfailingErrorListener) {
-            errorListener = (UnfailingErrorListener) listener;
-        } else {
-            errorListener = new DelegatingErrorListener(listener);
-        }
+        errorReporter = reporter;
     }
 
     /**
-     * Get the ErrorListener that will be used when parsing
+     * Get the ErrorReporter that will be used when parsing
      *
-     * @return the ErrorListener, if one has been set using {@link #setErrorListener},
+     * @return the ErrorReporter, if one has been set using {@link #setErrorReporter},
      * otherwise null.
      */
 
     /*@Nullable*/
-    public UnfailingErrorListener getErrorListener() {
-        return errorListener;
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
     }
 
     /**

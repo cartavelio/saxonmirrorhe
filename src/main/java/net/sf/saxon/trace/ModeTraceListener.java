@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,6 @@ package net.sf.saxon.trace;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.TemplateRule;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.Item;
 
 import java.util.Stack;
@@ -28,6 +27,7 @@ public class ModeTraceListener extends AbstractTraceListener {
      * Generate attributes to be included in the opening trace element
      */
 
+    @Override
     protected String getOpeningAttributes() {
         return "xmlns:xsl=\"" + NamespaceConstant.XSLT + '\"';
     }
@@ -52,14 +52,13 @@ public class ModeTraceListener extends AbstractTraceListener {
      * Called when an instruction in the stylesheet gets processed
      */
 
-    public void enter(/*@NotNull*/ InstructionInfo info, XPathContext context) {
+    public void enter(/*@NotNull*/ Traceable info, XPathContext context) {
         if (info instanceof TemplateRule) {
-            String tag = "rule";
-            String file = StandardErrorListener.abbreviatePath(info.getSystemId());
+            String file = abbreviateLocationURI(info.getLocation().getSystemId());
             String msg = AbstractTraceListener.spaces(indent)
                     + "<rule match=\""
                     + escape(((TemplateRule) info).getMatchPattern().toString()) + '"'
-                    + " line=\"" + info.getLineNumber() + '"'
+                    + " line=\"" + info.getLocation().getLineNumber() + '"'
                     + " module=\"" + escape(file) + '"'
                     + '>';
             out.info(msg);
@@ -68,7 +67,7 @@ public class ModeTraceListener extends AbstractTraceListener {
     }
 
     @Override
-    public void leave(InstructionInfo info) {
+    public void leave(Traceable info) {
         if (info instanceof TemplateRule) {
             indent--;
             out.info(AbstractTraceListener.spaces(indent) + "</rule>");
@@ -76,7 +75,7 @@ public class ModeTraceListener extends AbstractTraceListener {
     }
 
     @Override
-    protected String tag(int construct) {
+    protected String tag(Traceable info) {
         return "";
     }
 }

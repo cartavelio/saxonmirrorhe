@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -74,6 +74,7 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
      * prefix if available.
      */
 
+    @Override
     public final String getPrimitiveStringValue() {
         return qName.getDisplayName();
     }
@@ -86,6 +87,16 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
 
     public final String getClarkName() {
         return qName.getClarkName();
+    }
+
+    /**
+     * Get the QName in EQName notation, that is "Q{uri}local" if in a namespace, or "Q{}local" otherwise
+     *
+     * @return the name in EQName notation
+     */
+
+    public final String getEQName() {
+        return qName.getEQName();
     }
 
     /**
@@ -139,6 +150,7 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
      */
 
     /*@Nullable*/
+    @Override
     public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
         return ordered ? null : this;
     }
@@ -147,6 +159,7 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
         return qName.hashCode();
     }
 
+    @Override
     public boolean isIdentical(/*@NotNull*/ AtomicValue v) {
         return super.isIdentical(v) && qName.getPrefix().equals(((QualifiedNameValue) v).getPrefix());
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,6 +17,7 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 
 /**
  * A Sequence implementation that represents a lazy evaluation of a supplied iterator. Items
@@ -25,52 +26,52 @@ import java.util.Arrays;
  * to the end) contains the entire value.
  */
 
-public class MemoSequence<T extends Item<?>> implements Sequence<T> {
+public class MemoSequence implements Sequence {
 
-    SequenceIterator<T> inputIterator;
+    SequenceIterator inputIterator;
 
-    private T[] reservoir = null;
+    private Item[] reservoir = null;
     private int used;
-    protected int state;
 
-    // State in which no items have yet been read
-    private static final int UNREAD = 0;
+    private enum State {
+        // State in which no items have yet been read
+        UNREAD,
+        // State in which zero or more items are in the reservoir and it is not known
+        // whether more items exist
+        MAYBE_MORE,
+        // State in which all the items are in the reservoir
+        ALL_READ,
+        // State in which we are getting the base iterator. If the closure is called in this state,
+        // it indicates a recursive entry, which is only possible on an error path
+        BUSY,
+        // State in which we know that the value is an empty sequence
+        EMPTY}
 
-    // State in which zero or more items are in the reservoir and it is not known
-    // whether more items exist
-    private static final int MAYBE_MORE = 1;
+    protected State state = State.UNREAD;
 
-    // State in which all the items are in the reservoir
-    private static final int ALL_READ = 3;
-
-    // State in which we are getting the base iterator. If the closure is called in this state,
-    // it indicates a recursive entry, which is only possible on an error path
-    private static final int BUSY = 4;
-
-    // State in which we know that the value is an empty sequence
-    protected static final int EMPTY = 5;
-
-    public MemoSequence(SequenceIterator<T> iterator) {
+    public MemoSequence(SequenceIterator iterator) {
         this.inputIterator = iterator;
     }
 
-    public T head() throws XPathException {
+    @Override
+    public Item head() throws XPathException {
         return iterate().next();
     }
 
 
-    public synchronized SequenceIterator<T> iterate() throws XPathException {
+    @Override
+    public synchronized SequenceIterator iterate() throws XPathException {
 
         switch (state) {
             case UNREAD:
-                state = BUSY;
+                state = State.BUSY;
                 if (inputIterator instanceof EmptyIterator) {
-                    state = EMPTY;
+                    state = State.EMPTY;
                     return inputIterator;
                 }
-                reservoir = (T[])new Item[50];
+                reservoir = new Item[50];
                 used = 0;
-                state = MAYBE_MORE;
+                state = State.MAYBE_MORE;
                 return new ProgressiveIterator();
 
             case MAYBE_MORE:
@@ -79,7 +80,7 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
             case ALL_READ:
                 switch (used) {
                     case 0:
-                        state = EMPTY;
+                        state = State.EMPTY;
                         return EmptyIterator.emptyIterator();
                     case 1:
                         assert reservoir != null;
@@ -119,17 +120,17 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
         if (reservoir != null && n < used) {
             return reservoir[n];
         }
-        if (state == ALL_READ || state == EMPTY) {
+        if (state == State.ALL_READ || state == State.EMPTY) {
             return null;
         }
-        if (state == UNREAD) {
-            T item = inputIterator.next();
+        if (state == State.UNREAD) {
+            Item item = inputIterator.next();
             if (item == null) {
-                state = EMPTY;
+                state = State.EMPTY;
                 return null;
             } else {
-                state = MAYBE_MORE;
-                reservoir = (T[])new Item[50];
+                state = State.MAYBE_MORE;
+                reservoir = new Item[50];
                 append(item);
                 if (n == 0) {
                     return item;
@@ -139,14 +140,14 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
         // We have read some items from the input sequence but not enough. Read as many more as are needed.
         int diff = n - used + 1;
         while (diff-- > 0) {
-            T i = inputIterator.next();
+            Item i = inputIterator.next();
             if (i == null) {
-                state = ALL_READ;
+                state = State.ALL_READ;
                 condense();
                 return null;
             }
             append(i);
-            state = MAYBE_MORE;
+            state = State.MAYBE_MORE;
         }
         //noinspection ConstantConditions
         return reservoir[n];
@@ -160,7 +161,7 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
      * @param item the item to be added
      */
 
-    private void append(T item) {
+    private void append(Item item) {
         assert reservoir != null;
         if (used >= reservoir.length) {
             reservoir = Arrays.copyOf(reservoir, used * 2);
@@ -186,7 +187,7 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
      */
 
     public final class ProgressiveIterator
-            implements SequenceIterator<T>, LastPositionFinder, GroundedIterator<T> {
+            implements SequenceIterator, LastPositionFinder, GroundedIterator {
 
         int position = -1;  // zero-based position in the reservoir of the
         // item most recently read
@@ -208,7 +209,8 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
         }
 
         /*@Nullable*/
-        public T next() throws XPathException {
+        @Override
+        public Item next() throws XPathException {
             synchronized (MemoSequence.this) {
                 // synchronized for the case where a multi-threaded xsl:for-each is reading the variable
                 if (position == -2) {   // means we've already returned null once, keep doing so if called again.
@@ -217,27 +219,28 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
                 if (++position < used) {
                     assert reservoir != null;
                     return reservoir[position];
-                } else if (state == ALL_READ) {
+                } else if (state == State.ALL_READ) {
                     // someone else has read the input to completion in the meantime
                     position = -2;
                     return null;
                 } else {
                     assert inputIterator != null;
-                    T i = inputIterator.next();
+                    Item i = inputIterator.next();
                     if (i == null) {
-                        state = ALL_READ;
+                        state = State.ALL_READ;
                         condense();
                         position = -2;
                         return null;
                     }
                     position = used;
                     append(i);
-                    state = MAYBE_MORE;
+                    state = State.MAYBE_MORE;
                     return i;
                 }
             }
         }
 
+        @Override
         public void close() {
         }
 
@@ -245,10 +248,11 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
          * Get the last position (that is, the number of items in the sequence)
          */
 
+        @Override
         public int getLength() throws XPathException {
-            if (state == ALL_READ) {
+            if (state == State.ALL_READ) {
                 return used;
-            } else if (state == EMPTY) {
+            } else if (state == State.EMPTY) {
                 return 0;
             } else {
                 // save the current position
@@ -270,10 +274,11 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
          */
 
         /*@Nullable*/
-        public GroundedValue<T> materialize() throws XPathException {
-            if (state == ALL_READ) {
+        @Override
+        public GroundedValue materialize() throws XPathException {
+            if (state == State.ALL_READ) {
                 return makeExtent();
-            } else if (state == EMPTY) {
+            } else if (state == State.EMPTY) {
                 return EmptySequence.getInstance();
             } else {
                 // save the current position
@@ -288,15 +293,14 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
             }
         }
 
-        private GroundedValue<T> makeExtent() {
+        private GroundedValue makeExtent() {
             if (used == reservoir.length) {
                 if (used == 0) {
                     return EmptySequence.getInstance();
                 } else if (used == 1) {
-                    T item = reservoir[0];
-                    return (Item<T>)reservoir[0];
+                    return reservoir[0];
                 } else {
-                    return new SequenceExtent<>(reservoir);
+                    return new SequenceExtent(reservoir);
                 }
             } else {
                 return SequenceExtent.makeSequenceExtent(Arrays.asList(reservoir).subList(0, used));
@@ -304,10 +308,10 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
         }
 
         @Override
-        public GroundedValue<T> getResidue() throws XPathException {
-            if (state == EMPTY || position >= used || position == -2) {
+        public GroundedValue getResidue() throws XPathException {
+            if (state == State.EMPTY || position >= used || position == -2) {
                 return EmptySequence.getInstance();
-            } else if (state == ALL_READ) {
+            } else if (state == State.ALL_READ) {
                 return SequenceExtent.makeSequenceExtent(Arrays.asList(reservoir).subList(position + 1, used));
             } else {
                 // save the current position
@@ -327,14 +331,15 @@ public class MemoSequence<T extends Item<?>> implements Sequence<T> {
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link #GROUNDED} and {@link #LAST_POSITION_FINDER}. It is always
+         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED} and {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          */
 
-        public int getProperties() {
+        @Override
+        public EnumSet<Property> getProperties() {
             // bug 1740 shows that it is better to report the iterator as grounded even though this
             // may trigger eager evaluation of the underlying sequence.
-            return GROUNDED | LAST_POSITION_FINDER;
+            return EnumSet.of(Property.GROUNDED, Property.LAST_POSITION_FINDER);
         }
     }
 

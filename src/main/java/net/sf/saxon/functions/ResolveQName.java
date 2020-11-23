@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -30,9 +30,10 @@ public class ResolveQName extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public ZeroOrOne<QNameValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue lex = (AtomicValue) arguments[0].head();
-        return new ZeroOrOne<>(
+        return new ZeroOrOne(
                 lex == null ? null :
                         resolveQName(lex.getStringValueCS(), (NodeInfo) arguments[1].head()));
     }
@@ -49,7 +50,7 @@ public class ResolveQName extends SystemFunction {
 
     /*@Nullable*/
     public static QNameValue resolveQName(CharSequence lexicalQName, NodeInfo element) throws XPathException {
-        NamespaceResolver resolver = new InscopeNamespaceResolver(element);
+        NamespaceResolver resolver = element.getAllNamespaces();
         StructuredQName qName = StructuredQName.fromLexicalQName(lexicalQName, true, false, resolver);
         return new QNameValue(qName, BuiltInAtomicType.QNAME);
     }

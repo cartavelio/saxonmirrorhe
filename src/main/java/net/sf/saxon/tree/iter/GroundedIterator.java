@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,6 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 
@@ -24,7 +23,7 @@ import net.sf.saxon.trans.XPathException;
  * the iterator can raise an exception.</p>
  */
 
-public interface GroundedIterator<T extends Item<?>> extends SequenceIterator<T> {
+public interface GroundedIterator extends SequenceIterator {
 
     /**
      * Return a GroundedValue containing all the items in the sequence returned by this
@@ -37,7 +36,8 @@ public interface GroundedIterator<T extends Item<?>> extends SequenceIterator<T>
      * which cause evaluation of expressions while materializing the value.
      */
 
-    GroundedValue<T> materialize() throws XPathException;
+    @Override
+    GroundedValue materialize() throws XPathException;
 
     /**
      * Return a GroundedValue containing all the remaining items in the sequence returned by this
@@ -50,6 +50,6 @@ public interface GroundedIterator<T extends Item<?>> extends SequenceIterator<T>
      *                        which cause evaluation of expressions while materializing the value.
      */
 
-    GroundedValue<T> getResidue() throws XPathException;
+    GroundedValue getResidue() throws XPathException;
 }
 

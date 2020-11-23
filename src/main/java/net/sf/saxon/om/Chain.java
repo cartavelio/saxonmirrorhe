@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -39,10 +39,10 @@ import java.util.*;
  * second phase occurs when any of the methods itemAt(), reduce(), or subsequence()
  * is called.</p>
  */
-public class Chain implements GroundedValue<Item<?>> {
+public class Chain implements GroundedValue {
 
-    private List<GroundedValue<?>> children = new ArrayList<>();
-    private List<Item<?>> extent = null;
+    private List<GroundedValue> children;
+    private List<Item> extent = null;
 
     /**
      * Create a chain from a list of grounded values
@@ -52,7 +52,7 @@ public class Chain implements GroundedValue<Item<?>> {
      *                 modify the list after return from this constructor.
      */
 
-    public Chain(List<GroundedValue<?>> children) {
+    public Chain(List<GroundedValue> children) {
         this.children = children;
 
         int size = 0;
@@ -71,7 +71,7 @@ public class Chain implements GroundedValue<Item<?>> {
         }
         if (copy) {
             this.children = new ArrayList<>(size);
-            for (GroundedValue<?> gv : children) {
+            for (GroundedValue gv : children) {
                 if (gv instanceof Chain) {
                     if (((Chain) gv).children.size() < 30) {
                         this.children.addAll(((Chain) gv).children);
@@ -85,12 +85,13 @@ public class Chain implements GroundedValue<Item<?>> {
         }
     }
 
-    public Item<?> head() {
+    @Override
+    public Item head() {
         if (extent != null) {
             return extent.isEmpty() ? null : extent.get(0);
         }
-        for (GroundedValue<?> seq : children) {
-            Item<?> head = seq.head();
+        for (GroundedValue seq : children) {
+            Item head = seq.head();
             if (head != null) {
                 return head;
             }
@@ -98,7 +99,8 @@ public class Chain implements GroundedValue<Item<?>> {
         return null;
     }
 
-    public UnfailingIterator<Item<?>> iterate() {
+    @Override
+    public UnfailingIterator iterate() {
         if (extent != null) {
             return new net.sf.saxon.tree.iter.ListIterator<>(extent);
         } else {
@@ -120,7 +122,7 @@ public class Chain implements GroundedValue<Item<?>> {
         }
         if (item != null) {
             //noinspection unchecked
-            children.add((GroundedValue<?>)item);
+            children.add((GroundedValue)item);
         }
     }
 
@@ -141,7 +143,8 @@ public class Chain implements GroundedValue<Item<?>> {
      * @param n the index of the required item, with 0 representing the first item in the sequence
      * @return the n'th item if it exists, or null otherwise
      */
-    public Item<?> itemAt(int n) {
+    @Override
+    public Item itemAt(int n) {
         if (n == 0) {
             return head();
         } else {
@@ -166,7 +169,8 @@ public class Chain implements GroundedValue<Item<?>> {
      *               of the sequence
      * @return the required subsequence.
      */
-    public GroundedValue<Item<?>> subsequence(int start, int length) {
+    @Override
+    public GroundedValue subsequence(int start, int length) {
         consolidate();
         int newStart;
         if (start < 0) {
@@ -186,7 +190,7 @@ public class Chain implements GroundedValue<Item<?>> {
                 newEnd = extent.size();
             }
         }
-        return new SequenceExtent<>(extent.subList(newStart, newEnd));
+        return new SequenceExtent(extent.subList(newStart, newEnd));
     }
 
     /**
@@ -194,6 +198,7 @@ public class Chain implements GroundedValue<Item<?>> {
      *
      * @return the number of items in the sequence
      */
+    @Override
     public int getLength() {
         if (extent != null) {
             return extent.size();
@@ -213,6 +218,7 @@ public class Chain implements GroundedValue<Item<?>> {
      * @throws net.sf.saxon.trans.XPathException
      *          if the sequence has no effective boolean value (for example a sequence of two integers)
      */
+    @Override
     public boolean effectiveBooleanValue() throws XPathException {
         return ExpressionTool.effectiveBooleanValue(iterate());
     }
@@ -226,6 +232,7 @@ public class Chain implements GroundedValue<Item<?>> {
      * @throws net.sf.saxon.trans.XPathException
      *          if the sequence contains items that have no string value (for example, function items)
      */
+    @Override
     public String getStringValue() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
@@ -239,6 +246,7 @@ public class Chain implements GroundedValue<Item<?>> {
      * @throws net.sf.saxon.trans.XPathException
      *          if the sequence contains items that have no string value (for example, function items)
      */
+    @Override
     public CharSequence getStringValueCS() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
@@ -251,14 +259,15 @@ public class Chain implements GroundedValue<Item<?>> {
      *
      * @return the simplified sequence
      */
-    public GroundedValue<Item<?>> reduce() {
+    @Override
+    public GroundedValue reduce() {
         consolidate();
         return SequenceExtent.makeSequenceExtent(extent);
     }
 
-    private static class ChainIterator implements UnfailingIterator<Item<?>>, GroundedIterator<Item<?>> {
+    private static class ChainIterator implements UnfailingIterator, GroundedIterator {
 
-        private class ChainPosition {
+        private static class ChainPosition {
             Chain chain;
             int offset;
 
@@ -268,7 +277,7 @@ public class Chain implements GroundedValue<Item<?>> {
             }
         }
 
-        private Queue<UnfailingIterator<Item<?>>> queue = new LinkedList<>();
+        private Queue<UnfailingIterator> queue = new LinkedList<>();
 
         private Stack<ChainPosition> stack;
 
@@ -289,14 +298,15 @@ public class Chain implements GroundedValue<Item<?>> {
          * @return the next item, or null if there are no more items.
          */
 
-        public Item<?> next() {
+        @Override
+        public Item next() {
 
             // If there are iterators on the queue waiting to be processed, then take the first
             // item from the first iterator on the queue.
             while (!queue.isEmpty()) {
-                UnfailingIterator<Item<?>> ui = queue.peek();
+                UnfailingIterator ui = queue.peek();
                 while (ui != null) {
-                    Item<?> current = ui.next();
+                    Item current = ui.next();
                     if (current != null) {
                         return current;
                     } else {
@@ -317,13 +327,13 @@ public class Chain implements GroundedValue<Item<?>> {
                     stack.pop();
                     continue;
                 }
-                GroundedValue<?> gv = cp.chain.children.get(cp.offset++);
+                GroundedValue gv = cp.chain.children.get(cp.offset++);
                 if (gv instanceof Chain) {
                     stack.push(new ChainPosition((Chain) gv, 0));
                 } else if (gv instanceof Item) {
-                    return (Item<?>)gv;
+                    return (Item)gv;
                 } else {
-                    queue.offer((UnfailingIterator<Item<?>>)gv.iterate());
+                    queue.offer(gv.iterate());
                     return next();
                 }
             }
@@ -333,22 +343,19 @@ public class Chain implements GroundedValue<Item<?>> {
             return null;
         }
 
-        public void close() {
-
-        }
-
         /**
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link SequenceIterator#GROUNDED}, {@link SequenceIterator#LAST_POSITION_FINDER},
-         *         and {@link SequenceIterator#LOOKAHEAD}. It is always
+         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          *         It is acceptable for the properties of the iterator to change depending on its state.
          */
 
-        public int getProperties() {
-            return SequenceIterator.GROUNDED;
+        @Override
+        public EnumSet<Property> getProperties() {
+            return EnumSet.of(Property.GROUNDED);
         }
 
         /**
@@ -358,7 +365,8 @@ public class Chain implements GroundedValue<Item<?>> {
          * @return the corresponding Value
          */
 
-        public GroundedValue<Item<?>> materialize() {
+        @Override
+        public GroundedValue materialize() {
             return thisChain;
         }
 
@@ -371,8 +379,9 @@ public class Chain implements GroundedValue<Item<?>> {
          *                        which cause evaluation of expressions while materializing the value.
          */
 
-        public GroundedValue<Item<?>> getResidue() throws XPathException {
-            return new SequenceExtent<>(this);
+        @Override
+        public GroundedValue getResidue() throws XPathException {
+            return new SequenceExtent(this);
         }
     }
 

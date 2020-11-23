@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -22,14 +22,16 @@ import net.sf.saxon.trans.XPathException;
 public class AnyFunctionTypeWithAssertions extends AnyFunctionType {
 
     private AnnotationList assertions;
+    private Configuration config;
 
     /**
      * Construct an item type representing the item type function(*) with a list of annotation assertions
      * @param assertions the annotation assertions
      */
 
-    public AnyFunctionTypeWithAssertions(AnnotationList assertions) {
+    public AnyFunctionTypeWithAssertions(AnnotationList assertions, Configuration config) {
         this.assertions = assertions;
+        this.config = config;
     }
 
     /**
@@ -38,6 +40,7 @@ public class AnyFunctionTypeWithAssertions extends AnyFunctionType {
      * @return the list of annotation assertions, or an empty list if there are none
      */
 
+    @Override
     public AnnotationList getAnnotationAssertions() {
         return assertions;
     }

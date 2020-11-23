@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,12 +15,14 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
 
+import java.util.EnumSet;
+
 /**
  * This class is a fast path iterator for the child axis in the TinyTree, where the axis specifies
  * an explicit name test for the required element nodes.
  */
 
-final class NamedChildIterator implements AxisIterator, LookaheadIterator<NodeInfo>, AtomizedValueIterator<NodeInfo> {
+final class NamedChildIterator implements AxisIterator, LookaheadIterator, AtomizedValueIterator {
 
     private TinyTree tree;
     private int nextNodeNr;
@@ -61,6 +63,7 @@ final class NamedChildIterator implements AxisIterator, LookaheadIterator<NodeIn
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
         if (needToAdvance) {
             final int thisNode = nextNodeNr;
@@ -88,6 +91,7 @@ final class NamedChildIterator implements AxisIterator, LookaheadIterator<NodeIn
      * @throws XPathException
      *          if a failure occurs reading or atomizing the next value
      */
+    @Override
     public AtomicSequence nextAtomizedValue() throws XPathException {
         if (needToAdvance) {
             final int thisNode = nextNodeNr;
@@ -115,6 +119,7 @@ final class NamedChildIterator implements AxisIterator, LookaheadIterator<NodeIn
      * @return true if there are more items in the sequence
      */
 
+    @Override
     public boolean hasNext() {
         int n = nextNodeNr;
         if (needToAdvance) {
@@ -131,8 +136,9 @@ final class NamedChildIterator implements AxisIterator, LookaheadIterator<NodeIn
         }
     }
 
-    public int getProperties() {
-        return LOOKAHEAD | ATOMIZING;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD, Property.ATOMIZING);
     }
 
 }

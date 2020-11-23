@@ -25,9 +25,8 @@
     in this package are implementations of the <code>Receiver</code> interface.</p>
 
 <p>The immediate output of node constructors in a query or stylesheet goes to a {@link
-    net.sf.saxon.event.SequenceReceiver}.
-    This is a subclass of <code>Receiver</code> that can handle an arbitrary sequence, containing atomic values
-    as well as nodes. When constructing the content of an element, a {@link net.sf.saxon.event.ComplexContentOutputter}
+    net.sf.saxon.event.Outputter}.When constructing the content of an element,
+    a {@link net.sf.saxon.event.ComplexContentOutputter}
     is used;
     when constructing the content of a node such as a text node or attribute, a <code>SequenceOutputter</code>
     is used instead.</p>

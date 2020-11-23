@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,21 +7,22 @@
 
 package net.sf.saxon.type;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.Cardinality;
@@ -39,6 +40,7 @@ public class SpecificFunctionType extends AnyFunctionType {
     private SequenceType[] argTypes;
     private SequenceType resultType;
     private AnnotationList annotations;
+    private Configuration config;
 
     public SpecificFunctionType(SequenceType[] argTypes, SequenceType resultType) {
         this.argTypes = Objects.requireNonNull(argTypes);
@@ -68,6 +70,7 @@ public class SpecificFunctionType extends AnyFunctionType {
      * @return the list of argument types
      */
 
+    @Override
     public SequenceType[] getArgumentTypes() {
         return argTypes;
     }
@@ -78,6 +81,7 @@ public class SpecificFunctionType extends AnyFunctionType {
      * @return the result type
      */
 
+    @Override
     public SequenceType getResultType() {
         return resultType;
     }
@@ -128,10 +132,11 @@ public class SpecificFunctionType extends AnyFunctionType {
         }
         sb.append(") as ");
         sb.append(resultType.toString());
-        sb.append(')');
+        sb.cat(')');
         return sb.toString();
     }
 
+    @Override
     public String toExportString() {
         FastStringBuffer sb = new FastStringBuffer(100);
         sb.append("(function(");
@@ -143,7 +148,7 @@ public class SpecificFunctionType extends AnyFunctionType {
         }
         sb.append(") as ");
         sb.append(resultType.toExportString());
-        sb.append(')');
+        sb.cat(')');
         return sb.toString();
     }
 
@@ -191,84 +196,99 @@ public class SpecificFunctionType extends AnyFunctionType {
      * Determine the relationship of one function item type to another. This method is only concerned
      * with the type signatures of the two function item types, and not with their annotation assertions.
      *
-     * @return for example {@link TypeHierarchy#SUBSUMES}, {@link TypeHierarchy#SAME_TYPE}
+     * @return for example {@link Affinity#SUBSUMES}, {@link Affinity#SAME_TYPE}
      */
 
-    public int relationship(FunctionItemType other, TypeHierarchy th) {
+    @Override
+    public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
         if (other == AnyFunctionType.getInstance() || other instanceof AnyFunctionTypeWithAssertions) {
-            return TypeHierarchy.SUBSUMED_BY;
+            return Affinity.SUBSUMED_BY;
         } else if (equals(other)) {
-            return TypeHierarchy.SAME_TYPE;
+            return Affinity.SAME_TYPE;
         } else if (other instanceof ArrayItemType || other instanceof MapType) {
-            int rrel = other.relationship(this, th);
+            Affinity rrel = other.relationship(this, th);
             switch (rrel) {
-                case TypeHierarchy.SUBSUMES:
-                    return TypeHierarchy.SUBSUMED_BY;
-                case TypeHierarchy.SUBSUMED_BY:
-                    return TypeHierarchy.SUBSUMES;
+                case SUBSUMES:
+                    return Affinity.SUBSUMED_BY;
+                case SUBSUMED_BY:
+                    return Affinity.SUBSUMES;
                 default:
                     return rrel;
             }
         } else {
             if (argTypes.length != other.getArgumentTypes().length) {
-                return TypeHierarchy.DISJOINT;
+                return Affinity.DISJOINT;
             }
             boolean wider = false;
             boolean narrower = false;
             for (int i = 0; i < argTypes.length; i++) {
-                int argRel = th.sequenceTypeRelationship(argTypes[i], other.getArgumentTypes()[i]);
+                Affinity argRel = th.sequenceTypeRelationship(argTypes[i], other.getArgumentTypes()[i]);
                 switch (argRel) {
-                    case TypeHierarchy.DISJOINT:
-                        return TypeHierarchy.DISJOINT;
-                    case TypeHierarchy.SUBSUMES:
+                    case DISJOINT:
+                        return Affinity.DISJOINT;
+                    case SUBSUMES:
                         narrower = true;
                         break;
-                    case TypeHierarchy.SUBSUMED_BY:
+                    case SUBSUMED_BY:
                         wider = true;
                         break;
-                    case TypeHierarchy.OVERLAPS:
+                    case OVERLAPS:
                         wider = true;
                         narrower = true;
                         break;
-                    case TypeHierarchy.SAME_TYPE:
+                    case SAME_TYPE:
                     default:
                         break;
                 }
             }
 
-            int resRel = th.sequenceTypeRelationship(resultType, other.getResultType());
+            Affinity resRel = th.sequenceTypeRelationship(resultType, other.getResultType());
             switch (resRel) {
-                case TypeHierarchy.DISJOINT:
-                    return TypeHierarchy.DISJOINT;
-                case TypeHierarchy.SUBSUMES:
+                case DISJOINT:
+                    return Affinity.DISJOINT;
+                case SUBSUMES:
                     wider = true;
                     break;
-                case TypeHierarchy.SUBSUMED_BY:
+                case SUBSUMED_BY:
                     narrower = true;
                     break;
-                case TypeHierarchy.OVERLAPS:
+                case OVERLAPS:
                     wider = true;
                     narrower = true;
                     break;
-                case TypeHierarchy.SAME_TYPE:
+                case SAME_TYPE:
                 default:
                     break;
             }
 
             if (wider) {
                 if (narrower) {
-                    return TypeHierarchy.OVERLAPS;
+                    return Affinity.OVERLAPS;
                 } else {
-                    return TypeHierarchy.SUBSUMES;
+                    return Affinity.SUBSUMES;
                 }
             } else {
                 if (narrower) {
-                    return TypeHierarchy.SUBSUMED_BY;
+                    return Affinity.SUBSUMED_BY;
                 } else {
-                    return TypeHierarchy.SAME_TYPE;
+                    return Affinity.SAME_TYPE;
                 }
             }
         }
+    }
+
+    /**
+     * Get the default priority when this ItemType is used as an XSLT pattern
+     *
+     * @return the default priority
+     */
+    @Override
+    public double getDefaultPriority() {
+        double prio = 1;
+        for (SequenceType st : getArgumentTypes()) {
+            prio *= st.getPrimaryType().getNormalizedDefaultPriority();
+        }
+        return prio;
     }
 
     /**
@@ -289,7 +309,7 @@ public class SpecificFunctionType extends AnyFunctionType {
         if (item instanceof MapItem) {
             // Bug 2938: Essentially a map is an instance of function(X) as Y
             // if (a) X is a subtype of xs:anyAtomicType, and (b) all the values in the map are instances of Y
-            // Bug 4692: Adds the condition that the empty sequence must be an instance of Y.
+            // Bug 4692: adds the condition (c) the empty sequence is an instance of Y
             if (getArity() == 1 &&
                     argTypes[0].getCardinality() == StaticProperty.EXACTLY_ONE &&
                     argTypes[0].getPrimaryType().isPlainType() &&
@@ -315,11 +335,11 @@ public class SpecificFunctionType extends AnyFunctionType {
             if (getArity() == 1 &&
                     argTypes[0].getCardinality() == StaticProperty.EXACTLY_ONE &&
                     argTypes[0].getPrimaryType().isPlainType()) {
-                int rel = th.relationship(argTypes[0].getPrimaryType(), BuiltInAtomicType.INTEGER);
-                if (!(rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMED_BY)) {
+                Affinity rel = th.relationship(argTypes[0].getPrimaryType(), BuiltInAtomicType.INTEGER);
+                if (!(rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY)) {
                     return false;
                 }
-                for (Sequence<?> member : ((ArrayItem) item).members()) {
+                for (Sequence member : ((ArrayItem) item).members()) {
                     try {
                         if (!resultType.matches(member, th)) {
                             return false;
@@ -334,8 +354,8 @@ public class SpecificFunctionType extends AnyFunctionType {
             }
         }
 
-        int rel = th.relationship(((Function) item).getFunctionItemType(), this);
-        return rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMED_BY;
+        Affinity rel = th.relationship(((Function) item).getFunctionItemType(), this);
+        return rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY;
     }
 
     /**
@@ -391,13 +411,13 @@ public class SpecificFunctionType extends AnyFunctionType {
             if (getArity() == 1) {
                 if (argTypes[0].getCardinality() == StaticProperty.EXACTLY_ONE &&
                         argTypes[0].getPrimaryType().isPlainType()) {
-                    int rel = th.relationship(argTypes[0].getPrimaryType(), BuiltInAtomicType.INTEGER);
-                    if (!(rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMED_BY)) {
+                    Affinity rel = th.relationship(argTypes[0].getPrimaryType(), BuiltInAtomicType.INTEGER);
+                    if (!(rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY)) {
                         String s = "The function expects an argument of type " + argTypes[0] +
                                 "; an array can only be supplied for a function that expects an integer";
                         return Optional.of(s);
                     } else {
-                        for (GroundedValue<?> member : (ArrayItem) item) {
+                        for (GroundedValue member : ((ArrayItem) item).members()) {
                             try {
                                 if (!resultType.matches(member, th)) {
                                     String s = "The supplied array contains an entry (" + Err.depictSequence(member) +
@@ -431,15 +451,15 @@ public class SpecificFunctionType extends AnyFunctionType {
                     "; the supplied function has arity " + ((Function) item).getArity();
             return Optional.of(s);
         }
-        int rel = th.sequenceTypeRelationship(resultType, other.getResultType());
-        if (rel != TypeHierarchy.SAME_TYPE && rel != TypeHierarchy.SUBSUMES) {
+        Affinity rel = th.sequenceTypeRelationship(resultType, other.getResultType());
+        if (rel != Affinity.SAME_TYPE && rel != Affinity.SUBSUMES) {
             String s = "The return type of the required function is " + resultType + " but the return"
                     + "type of the supplied function is " + other.getResultType();
             return Optional.of(s);
         }
         for (int j=0; j<getArity(); j++) {
             rel = th.sequenceTypeRelationship(argTypes[j], other.getArgumentTypes()[j]);
-            if (rel != TypeHierarchy.SAME_TYPE && rel != TypeHierarchy.SUBSUMED_BY) {
+            if (rel != Affinity.SAME_TYPE && rel != Affinity.SUBSUMED_BY) {
                 String s = "The type of the " + RoleDiagnostic.ordinal(j+1) +
                         " argument of the required function is " + argTypes[j] + " but the declared"
                         + "type of the corresponding argument of the supplied function is " +
@@ -450,24 +470,10 @@ public class SpecificFunctionType extends AnyFunctionType {
         return Optional.empty();
     }
 
+    @Override
     public Expression makeFunctionSequenceCoercer(Expression exp, RoleDiagnostic role)
             throws XPathException {
-        return exp.getConfiguration().makeFunctionSequenceCoercer(this, exp, role);
+        return new FunctionSequenceCoercer(exp, this, role);
     }
 
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @throws XPathException if JS code cannot be generated for this item type, for example because
-     *                        the test is schema-aware.
-     * @param knownToBe
-     * @param targetVersion
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        throw new XPathException("Cannot generate JS code for function type tests", SaxonErrorCode.SXJS0001);
-    }
 }

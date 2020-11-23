@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,14 +7,16 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.*;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Operand;
+import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.trace.LocationKind;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -45,6 +47,7 @@ public abstract class Instruction extends Expression implements TailCallReturner
      * This method indicates which of these methods is prefered. For instructions this is the process() method.
      */
 
+    @Override
     public int getImplementationMethod() {
         return Expression.PROCESS_METHOD;
     }
@@ -73,6 +76,7 @@ public abstract class Instruction extends Expression implements TailCallReturner
      *         in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         int code = getInstructionNameCode();
         if (code >= 0 & code < 1024) {
@@ -89,6 +93,7 @@ public abstract class Instruction extends Expression implements TailCallReturner
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return Type.ITEM_TYPE;
     }
@@ -99,6 +104,7 @@ public abstract class Instruction extends Expression implements TailCallReturner
      * @return the static cardinality
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
@@ -111,6 +117,8 @@ public abstract class Instruction extends Expression implements TailCallReturner
      * must be implemented in each subclass. The results of the instruction are written
      * to the current Receiver, which can be obtained via the Controller.
      *
+     *
+     * @param output the destination for the result
      * @param context The dynamic context of the transformation, giving access to the current node,
      *                the current variables, etc.
      * @return null if the instruction has completed execution; or a TailCall indicating
@@ -118,18 +126,20 @@ public abstract class Instruction extends Expression implements TailCallReturner
      *         been unwound so as to save stack space.
      */
 
-    public abstract TailCall processLeavingTail(XPathContext context) throws XPathException;
+    @Override
+    public abstract TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException;
 
     /**
      * Process the instruction, without returning any tail calls
      *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
      */
 
-    public void process(XPathContext context) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
         try {
-            TailCall tc = processLeavingTail(context);
+            TailCall tc = processLeavingTail(output, context);
             while (tc != null) {
                 tc = tc.processLeavingTail();
             }
@@ -237,6 +247,7 @@ public abstract class Instruction extends Expression implements TailCallReturner
      * @return a set of flags indicating static properties of this expression
      */
 
+    @Override
     public int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         if (alwaysCreatesNewNodes()) {
@@ -319,7 +330,8 @@ public abstract class Instruction extends Expression implements TailCallReturner
      *                        expression
      */
 
-    public Item<?> evaluateItem(XPathContext context) throws XPathException {
+    @Override
+    public Item evaluateItem(XPathContext context) throws XPathException {
         int m = getImplementationMethod();
         if ((m & EVALUATE_METHOD) != 0) {
             throw new AssertionError(
@@ -346,10 +358,11 @@ public abstract class Instruction extends Expression implements TailCallReturner
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         int m = getImplementationMethod();
         if ((m & EVALUATE_METHOD) != 0) {
-            Item<?> item = evaluateItem(context);
+            Item item = evaluateItem(context);
             if (item == null) {
                 return EmptyIterator.emptyIterator();
             } else {
@@ -380,6 +393,7 @@ public abstract class Instruction extends Expression implements TailCallReturner
      *                                      expression is not xs:string?
      */
 
+    @Override
     public final CharSequence evaluateAsString(XPathContext context) throws XPathException {
         Item item = evaluateItem(context);
         if (item == null) {
@@ -390,23 +404,13 @@ public abstract class Instruction extends Expression implements TailCallReturner
     }
 
     /**
-     * Get the type of this expression for use in tracing and diagnostics
-     *
-     * @return the type of expression, as enumerated in class {@link LocationKind}
-     */
-
-    public int getConstructType() {
-        return getInstructionNameCode();
-    }
-
-    /**
      * Establish whether this is an XSLT instruction or an XQuery instruction
      * (used to produce appropriate diagnostics)
      *
      * @return true for XSLT, false for XQuery
      */
     public boolean isXSLT() {
-        return getPackageData().getHostLanguage() == Configuration.XSLT;
+        return getPackageData().isXSLT();
     }
 
 

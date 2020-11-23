@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.accum;
 
 import net.sf.saxon.functions.AccumulatorFn;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -35,11 +34,10 @@ public class AccumulatorRegistry {
      * Process the use-accumulators attribute of instructions such as xsl:stream, xsl:mode, etc
      * @param useAccumulatorsAtt the value of the use-accumulators attribute
      * @return the list of accumulators referenced
-     * @throws net.sf.saxon.trans.XPathException if the attribute is invalid
      */
 
-    public Set<Accumulator> getUsedAccumulators(String useAccumulatorsAtt, StyleElement styleElement) throws XPathException {
-        Set<Accumulator> accumulators = new HashSet<Accumulator>();
+    public Set<Accumulator> getUsedAccumulators(String useAccumulatorsAtt, StyleElement styleElement) {
+        Set<Accumulator> accumulators = new HashSet<>();
         String attNames = Whitespace.trim(useAccumulatorsAtt);
         String[] tokens = attNames.split("[ \t\r\n]+");
         if (tokens.length == 1 && tokens[0].equals("#all")) {
@@ -49,18 +47,24 @@ public class AccumulatorRegistry {
         } else if (tokens.length == 1 && tokens[0].isEmpty()) {
             // do nothing - empty list
         } else {
-            List<StructuredQName> names = new ArrayList<StructuredQName>(tokens.length);
+            List<StructuredQName> names = new ArrayList<>(tokens.length);
             for (String token : tokens) {
                 if (token.equals("#all")) {
-                    throw new XPathException("If use-accumulators contains the token '#all', it must be the only token", "XTSE3300");
+                    styleElement.compileErrorInAttribute(
+                            "If use-accumulators contains the token '#all', it must be the only token", "XTSE3300", "use-accumulators");
+                    break;
                 }
-                StructuredQName name = styleElement.makeQName(token);
+                StructuredQName name = styleElement.makeQName(token, "XTSE3300", "use-accumulators");
                 if (names.contains(name)) {
-                    throw new XPathException("Duplicate QName in use-accumulators attribute: " + token, "XTSE3300");
+                    styleElement.compileErrorInAttribute(
+                            "Duplicate QName in use-accumulators attribute: " + token, "XTSE3300", "use-accumuators");
+                    break;
                 }
                 Accumulator acc = getAccumulator(name);
                 if (acc == null) {
-                    throw new XPathException("Unknown accumulator name: " + token, "XTSE3300");
+                    styleElement.compileErrorInAttribute(
+                            "Unknown accumulator name: " + token, "XTSE3300", "use-accumulators");
+                    break;
                 }
                 names.add(name);
                 accumulators.add(acc);
@@ -68,6 +72,7 @@ public class AccumulatorRegistry {
         }
         return accumulators;
     }
+
 
     /**
      * Register an accumulator
@@ -109,7 +114,7 @@ public class AccumulatorRegistry {
      * @throws XPathException if a dynamic error occurs
      */
 
-    public Sequence<?> getStreamingAccumulatorValue(NodeInfo node, Accumulator accumulator, AccumulatorFn.Phase phase)
+    public Sequence getStreamingAccumulatorValue(NodeInfo node, Accumulator accumulator, AccumulatorFn.Phase phase)
             throws XPathException {
         return null;
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -25,6 +25,7 @@ public final class RoundHalfToEven extends SystemFunction {
      * Determine the cardinality of the function.
      */
 
+    @Override
     public int getCardinality(Expression[] arguments) {
         return arguments[0].getCardinality();
     }
@@ -38,7 +39,8 @@ public final class RoundHalfToEven extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public ZeroOrOne<NumericValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
         NumericValue val0 = (NumericValue) arguments[0].head();
         if (val0 == null) {
             return ZeroOrOne.empty();
@@ -48,16 +50,17 @@ public final class RoundHalfToEven extends SystemFunction {
         if (arguments.length == 2) {
             NumericValue scaleVal = (NumericValue) arguments[1].head();
             if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
-                return new ZeroOrOne<>(val0);
+                return new ZeroOrOne(val0);
             } else if (scaleVal.compareTo(Integer.MIN_VALUE) < 0) {
                 scale = Integer.MIN_VALUE;
             } else {
                 scale = (int) scaleVal.longValue();
             }
         }
-        return new One<>(val0.roundHalfToEven(scale));
+        return new One(val0.roundHalfToEven(scale));
     }
 
+    @Override
     public String getCompilerName() {
         return "RoundingCompiler";
     }

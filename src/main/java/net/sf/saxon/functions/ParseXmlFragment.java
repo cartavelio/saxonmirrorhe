@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,9 +17,9 @@ import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
@@ -45,9 +45,10 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public ZeroOrOne<NodeInfo> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue input = (StringValue) arguments[0].head();
-        return input == null ? ZeroOrOne.empty() : new ZeroOrOne<>(evalParseXml(input, context));
+        return input == null ? ZeroOrOne.empty() : new ZeroOrOne(evalParseXml(input, context));
     }
 
     private NodeInfo evalParseXml(StringValue inputArg, XPathContext context) throws XPathException {
@@ -72,7 +73,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                 is.setSystemId(baseURI);
                 SAXSource source = new SAXSource(is);
                 XMLReader reader;
-                if (attempt == 1234) {
+                if (attempt == 1) {
                     reader = configuration.getSourceParser();
                     if (reader.getEntityResolver() != null) {
                         continue;
@@ -81,11 +82,10 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                     }
                 } else {
                     //try {
-                        reader = Version.platform.loadParserForXmlFragments();// SAXParserFactoryImpl.newInstance().newSAXParser().getXMLReader();
+                        reader = Version.platform.loadParserForXmlFragments();//SAXParserFactoryImpl.newInstance().newSAXParser().getXMLReader();
                     /*} catch (ParserConfigurationException | SAXException e) {
                         throw XPathException.makeXPathException(e);
                     } */
-
                 }
 
                 source.setXMLReader(reader);
@@ -97,8 +97,8 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                 }
                 Receiver s = b;
                 ParseOptions options = new ParseOptions();
-                options.setDTDValidationMode(Validation.SKIP);
                 options.setSchemaValidationMode(Validation.SKIP);
+                options.setDTDValidationMode(Validation.SKIP);
                 List<Boolean> safetyCheck = new ArrayList<>();
                 reader.setEntityResolver((publicId, systemId) -> {
                     if ("http://www.saxonica.com/parse-xml-fragment/actual.xml".equals(systemId)) {
@@ -173,28 +173,14 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
 
         /**
          * Notify the start of an element
-         * @param elemName   integer code identifying the name of the element within the name pool.
-         * @param typeCode   integer code identifying the element's type within the name pool.
-         * @param location   location of the origin of the event
-         * @param properties properties of the element node
          */
         @Override
-        public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
-            if (level > 0) {
-                super.startElement(elemName, typeCode, location, properties);
-            } else {
-                // The Linked Tree builder rejects two calls on startContent(), so we must suppress the next one
-                suppressStartContent = true;
+        public void startElement(NodeName elemName, SchemaType type,
+                                 AttributeMap attributes, NamespaceMap namespaces,
+                                 Location location, int properties) throws XPathException {
+            if (level++ > 0) {
+                super.startElement(elemName, type, attributes, namespaces, location, properties);
             }
-            level++;
-        }
-
-        @Override
-        public void startContent() throws XPathException {
-            if (!suppressStartContent) {
-                super.startContent();
-            }
-            suppressStartContent = false;
         }
 
         /**
@@ -202,12 +188,11 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
          */
         @Override
         public void endElement() throws XPathException {
-            level--;
-            if (level > 0) {
+            if (--level > 0) {
                 super.endElement();
             }
         }
     }
 }
 
-//Copyright (c) 2012 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

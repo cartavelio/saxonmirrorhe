@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,17 +9,13 @@ package net.sf.saxon.trace;
 
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.event.SequenceReceiver;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.Whitespace;
 
 import java.io.PrintStream;
@@ -73,52 +69,31 @@ public class TracingFilter extends ProxyReceiver {
 
     /**
      * Append an arbitrary item (node or atomic value) to the output
-     *
      * @param item           the item to be appended
      * @param locationId     the location of the calling instruction, for diagnostics
      * @param copyNamespaces if the item is an element node, this indicates whether its namespaces
-     *                       need to be copied. Values are {@link ReceiverOptions#ALL_NAMESPACES},
-     *                       {@link ReceiverOptions#LOCAL_NAMESPACES}; the default (0) means
-     *                       no namespaces
+*                       need to be copied. Values are {@link ReceiverOption#ALL_NAMESPACES}; the default (0) means
      */
 
+    @Override
     public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {
         out.println("RCVR " + id + indent + " APPEND " + item.getClass().getName());
         if (nextReceiver instanceof SequenceReceiver) {
-            ((SequenceReceiver) nextReceiver).append(item, locationId, copyNamespaces);
+            nextReceiver.append(item, locationId, copyNamespaces);
         } else {
             super.append(item, locationId, copyNamespaces);
         }
     }
 
     /**
-     * Notify an attribute. Attributes are notified after the startElement event, and before any
-     * children. Namespaces and attributes may be intermingled.
-     *
-     * @param nameCode   The name of the attribute
-     * @param typeCode   The type of the attribute
-     * @param locationId the location of the node in the source, or of the instruction that created it
-     * @param properties Bit significant value. The following bits are defined:
-     *                   <dl>
-     *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
-     *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
-     *                   </dl>
-     * @throws IllegalStateException: attempt to output an attribute when there is no open element
-     *                                start tag
-     */
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-        out.println("RCVR " + id + indent + " ATTRIBUTE " + nameCode.getDisplayName());
-        nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
-    }
-
-    /**
      * Character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         out.println("RCVR " + id + indent + " CHARACTERS " + (Whitespace.isWhite(chars) ? "(whitespace)" : ""));
-        FastStringBuffer sb = new FastStringBuffer(chars.length() * 3);
+        FastStringBuffer sb = new FastStringBuffer(chars.length() * 4);
+        sb.cat(chars).append(":");
         for (int i = 0; i < chars.length(); i++) {
             sb.append((int) chars.charAt(i) + " ");
         }
@@ -130,6 +105,7 @@ public class TracingFilter extends ProxyReceiver {
      * End of document
      */
 
+    @Override
     public void close() throws XPathException {
         out.println("RCVR " + id + indent + " CLOSE");
         nextReceiver.close();
@@ -139,6 +115,7 @@ public class TracingFilter extends ProxyReceiver {
      * Output a comment
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         out.println("RCVR " + id + indent + " COMMENT");
         nextReceiver.comment(chars, locationId, properties);
@@ -148,6 +125,7 @@ public class TracingFilter extends ProxyReceiver {
      * Notify the end of a document node
      */
 
+    @Override
     public void endDocument() throws XPathException {
         out.println("RCVR " + id + indent + " END DOCUMENT");
         nextReceiver.endDocument();
@@ -157,9 +135,10 @@ public class TracingFilter extends ProxyReceiver {
      * End of element
      */
 
+    @Override
     public void endElement() throws XPathException {
         if (indent.isEmpty()) {
-            throw new XPathException("RCVR " + id + "Unmatched end tag");
+            throw new XPathException("RCVR " + id + " Unmatched end tag");
         }
         indent = indent.substring(2);
         out.println("RCVR " + id + indent + " END ELEMENT");
@@ -167,28 +146,10 @@ public class TracingFilter extends ProxyReceiver {
     }
 
     /**
-     * Notify a namespace. Namespaces are notified <b>after</b> the startElement event, and before
-     * any children for the element. The namespaces that are reported are only required
-     * to include those that are different from the parent element; however, duplicates may be reported.
-     * A namespace must not conflict with any namespaces already used for element or attribute names.
-     *
-     * @param namespaceBindings the namespace (prefix, uri) pair to be notified
-     * @throws IllegalStateException: attempt to output a namespace when there is no open element
-     *                                start tag
-     */
-
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        for (NamespaceBinding ns : namespaceBindings) {
-            out.println("RCVR " + id + indent + " NAMESPACE " +
-                    ns.getPrefix() + "=" + ns.getURI());
-        }
-        nextReceiver.namespace(namespaceBindings, properties);
-    }
-
-    /**
      * Start of event stream
      */
 
+    @Override
     public void open() throws XPathException {
         out.println("RCVR " + id + indent + " OPEN");
         nextReceiver.open();
@@ -198,28 +159,18 @@ public class TracingFilter extends ProxyReceiver {
      * Processing Instruction
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
         out.println("RCVR " + id + indent + " PROCESSING INSTRUCTION");
         nextReceiver.processingInstruction(target, data, locationId, properties);
     }
 
     /**
-     * Notify the start of the content, that is, the completion of all attributes and namespaces.
-     * Note that the initial receiver of output from XSLT instructions will not receive this event,
-     * it has to detect it itself. Note that this event is reported for every element even if it has
-     * no attributes, no namespaces, and no content.
-     */
-
-
-    public void startContent() throws XPathException {
-        out.println("RCVR " + id + indent + " START CONTENT");
-        nextReceiver.startContent();
-    }
-
-    /**
      * Start of a document node.
+     * @param properties
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         out.println("RCVR " + id + indent + " START DOCUMENT");
         nextReceiver.startDocument(properties);
@@ -227,16 +178,15 @@ public class TracingFilter extends ProxyReceiver {
 
     /**
      * Notify the start of an element
-     *  @param nameCode   integer code identifying the name of the element within the name pool.
-     * @param typeCode   integer code identifying the element's type within the name pool.
-     * @param location  provides information such as line number and system ID.
-     * @param properties properties of the element node
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
-        out.println("RCVR " + id + indent + " START ELEMENT " + nameCode.getDisplayName());
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+        out.println("RCVR " + id + indent + " START ELEMENT " + elemName.getDisplayName());
         indent = indent + "  ";
-        nextReceiver.startElement(nameCode, typeCode, location, properties);
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 }
 

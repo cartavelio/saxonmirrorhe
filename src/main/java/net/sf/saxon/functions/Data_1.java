@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,7 +15,6 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
 
 /**
  * Implement XPath function fn:data() with a single argument
@@ -46,12 +45,13 @@ public class Data_1 extends SystemFunction  {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<? extends AtomicValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Sequence<?> arg = arguments[0];
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        Sequence arg = arguments[0];
         if (arg instanceof Item) {
             return ((Item)arg).atomize();
         } else {
-            SequenceIterator<? extends AtomicValue> a = Atomizer.getAtomizingIterator(arg.iterate(), false);
+            SequenceIterator a = Atomizer.getAtomizingIterator(arg.iterate(), false);
             return SequenceTool.toLazySequence(a);
         }
     }

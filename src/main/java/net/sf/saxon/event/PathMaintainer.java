@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,9 +7,8 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.AbsolutePath;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SchemaType;
@@ -26,17 +25,21 @@ import java.util.Stack;
 
 public class PathMaintainer extends ProxyReceiver {
 
-    private Stack<AbsolutePath.PathElement> path = new Stack<>();
-    private Stack<HashMap<NodeName, Integer>> siblingCounters = new Stack<>();
+    private final Stack<AbsolutePath.PathElement> path = new Stack<>();
+    private final Stack<HashMap<NodeName, Integer>> siblingCounters = new Stack<>();
 
     public PathMaintainer(/*@NotNull*/ Receiver next) {
         super(next);
         siblingCounters.push(new HashMap<>());
     }
 
-    public void startElement(NodeName elemName, SchemaType type, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
+            throws XPathException {
         // System.err.println("startElement " + nameCode);
-        nextReceiver.startElement(elemName, type, location, properties);
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
         HashMap<NodeName, Integer> counters = siblingCounters.peek();
         int index = 1;
         Integer preceding = counters.get(elemName);
@@ -54,6 +57,7 @@ public class PathMaintainer extends ProxyReceiver {
      * Handle an end-of-element event
      */
 
+    @Override
     public void endElement() throws XPathException {
         nextReceiver.endElement();
         siblingCounters.pop();
@@ -72,25 +76,25 @@ public class PathMaintainer extends ProxyReceiver {
     public String getPath(boolean useURIs) {
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
         for (AbsolutePath.PathElement pe : path) {
-            fsb.append('/');
+            fsb.cat('/');
             if (useURIs) {
                 String uri = pe.getName().getURI();
                 if (!uri.isEmpty()) {
-                    fsb.append('"');
+                    fsb.cat('"');
                     fsb.append(uri);
-                    fsb.append('"');
+                    fsb.cat('"');
                 }
             } else {
                 String prefix = pe.getName().getPrefix();
                 if (!prefix.isEmpty()) {
                     fsb.append(prefix);
-                    fsb.append(':');
+                    fsb.cat(':');
                 }
             }
             fsb.append(pe.getName().getLocalPart());
-            fsb.append('[');
+            fsb.cat('[');
             fsb.append(pe.getIndex() + "");
-            fsb.append(']');
+            fsb.cat(']');
         }
         return fsb.toString();
     }

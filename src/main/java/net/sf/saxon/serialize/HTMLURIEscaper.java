@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,16 +10,15 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
 import net.sf.saxon.serialize.codenorm.Normalizer;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 
 /**
  * This class is used as a filter on the serialization pipeline; it performs the function
@@ -106,8 +105,10 @@ public class HTMLURIEscaper extends ProxyReceiver {
 
     /**
      * Start of a document node.
+     * @param properties
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         nextReceiver.startDocument(properties);
         pool = getPipelineConfiguration().getConfiguration().getNamePool();
@@ -115,42 +116,46 @@ public class HTMLURIEscaper extends ProxyReceiver {
 
     /**
      * Notify the start of an element
-     *  @param nameCode   integer code identifying the name of the element within the name pool.
-     * @param typeCode   integer code identifying the element's type within the name pool.
-     * @param location
-     * @param properties properties of the element node
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName nameCode, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         currentElement = nameCode;
-        nextReceiver.startElement(nameCode, typeCode, location, properties);
-    }
-
-    /**
-     * Notify an attribute. Attributes are notified after the startElement event, and before any
-     * children. Namespaces and attributes may be intermingled.
-     *
-     * @param nameCode   The name of the attribute
-     * @param typeCode   The type of the attribute
-     * @param locationId the location of the node in the source, or of the instruction that created it
-     * @param properties Bit significant value. The following bits are defined:
-     *                   <dl>
-     *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
-     *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
-     *                   </dl>
-     * @throws IllegalStateException: attempt to output an attribute when there is no open element
-     *                                start tag
-     */
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-        if (escapeURIAttributes &&
-                isUrlAttribute(currentElement, nameCode) &&
-                (properties & ReceiverOptions.DISABLE_ESCAPING) == 0) {
-            nextReceiver.attribute(nameCode, typeCode, escapeURL(value, true, getConfiguration()), locationId,
-                    properties | ReceiverOptions.DISABLE_CHARACTER_MAPS);
-        } else {
-            nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
+        AttributeMap atts2 = attributes;
+        if (escapeURIAttributes) {
+            try {
+                atts2 = attributes.apply(att -> {
+                    if (!ReceiverOption.contains(att.getProperties(), ReceiverOption.DISABLE_ESCAPING)) {
+                        NodeName attName = att.getNodeName();
+                        if (isUrlAttribute(nameCode, attName)) {
+                            String value = att.getValue();
+                            try {
+                                return new AttributeInfo(
+                                        att.getNodeName(),
+                                        att.getType(),
+                                        escapeURL(value, true, getConfiguration()).toString(),
+                                        att.getLocation(),
+                                        att.getProperties() | ReceiverOption.DISABLE_CHARACTER_MAPS);
+                            } catch (XPathException e) {
+                                throw new UncheckedXPathException(e);
+                            }
+                        } else {
+                            return att;
+                        }
+                    } else {
+                        return att;
+                    }
+                });
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
+        nextReceiver.startElement(nameCode, type,
+                                  atts2,
+                                  namespaces,
+                                  location, properties);
     }
 
     /**
@@ -193,13 +198,13 @@ public class HTMLURIEscaper extends ProxyReceiver {
                 for (int b = 0; b < used; b++) {
                     //int v = (array[b]>=0 ? array[b] : 256 + array[b]);
                     int v = ((int) array[b]) & 0xff;
-                    sb.append('%');
-                    sb.append(hex.charAt(v / 16));
-                    sb.append(hex.charAt(v % 16));
+                    sb.cat('%');
+                    sb.cat(hex.charAt(v / 16));
+                    sb.cat(hex.charAt(v % 16));
                 }
 
             } else {
-                sb.append(ch);
+                sb.cat(ch);
             }
         }
         return sb;

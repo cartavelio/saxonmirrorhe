@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -21,13 +21,15 @@ import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.trace.LocationKind;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
+
+import java.util.EnumSet;
 
 /**
  * Handler for xsl:variable elements appearing as a child of xsl:stylesheet.
@@ -54,6 +56,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
         return sourceBinding.getVariableQName();
     }
 
+    @Override
     public StructuredQName getObjectName() {
         return sourceBinding.getVariableQName();
     }
@@ -64,6 +67,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
@@ -84,18 +88,9 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
      * children have been validated.
      */
 
+    @Override
     public void postValidate() throws XPathException {
         sourceBinding.postValidate();
-    }
-
-    /**
-     * Get the type of construct. This will be a constant in
-     * class {@link LocationKind}. This method is part of the
-     * {@link net.sf.saxon.trace.InstructionInfo} interface
-     */
-
-    public int getConstructType() {
-        return StandardNames.XSL_VARIABLE;
     }
 
     public GlobalVariable getCompiledVariable() {
@@ -105,16 +100,15 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
 
 
     public XSLGlobalVariable() {
-        sourceBinding.setProperty(SourceBinding.GLOBAL, true);
+        sourceBinding.setProperty(SourceBinding.BindingProperty.GLOBAL, true);
     }
 
-    protected int getPermittedAttributes() {
-        return
-                SourceBinding.ASSIGNABLE |
-                        SourceBinding.SELECT |
-                        SourceBinding.AS |
-                        SourceBinding.STATIC |
-                        SourceBinding.VISIBILITY;
+    protected EnumSet<SourceBinding.BindingProperty> getPermittedAttributes() {
+        return EnumSet.of(SourceBinding.BindingProperty.ASSIGNABLE,
+                        SourceBinding.BindingProperty.SELECT,
+                        SourceBinding.BindingProperty.AS,
+                        SourceBinding.BindingProperty.STATIC,
+                        SourceBinding.BindingProperty.VISIBILITY);
     }
 
     private int state = 0;
@@ -128,6 +122,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
      * Get the corresponding Procedure object that results from the compilation of this
      * StylesheetProcedure
      */
+    @Override
     public Actor getActor() throws XPathException {
         GlobalVariable gv = getCompiledVariable();
         if (gv == null) {
@@ -149,10 +144,12 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
         return gv;
     }
 
+    @Override
     public SymbolicName getSymbolicName() {
         return new SymbolicName(StandardNames.XSL_VARIABLE, getObjectName());
     }
 
+    @Override
     public void checkCompatibility(Component component) {
         SequenceType st1 = getSourceBinding().getDeclaredType();
         if (st1 == null) {
@@ -160,8 +157,8 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
         }
         GlobalVariable other = (GlobalVariable) component.getActor();
         TypeHierarchy th = component.getDeclaringPackage().getConfiguration().getTypeHierarchy();
-        int relation = th.sequenceTypeRelationship(st1, other.getRequiredType());
-        if (relation != TypeHierarchy.SAME_TYPE) {
+        Affinity relation = th.sequenceTypeRelationship(st1, other.getRequiredType());
+        if (relation != Affinity.SAME_TYPE) {
             compileError(
                 "The declared type of the overriding variable $" + getVariableQName().getDisplayName() +
                     " is different from that of the overridden variable",
@@ -177,6 +174,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
      * @return the binding information if this element binds a variable of this name; otherwise null
      */
 
+    @Override
     public SourceBinding getBindingInformation(StructuredQName name) {
         if (name.equals(sourceBinding.getVariableQName())) {
             return sourceBinding;
@@ -185,7 +183,8 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
         }
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
         if (state == 2) {
             return;
         }
@@ -217,7 +216,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
      */
 
     public boolean isAssignable() {
-        return sourceBinding.hasProperty(SourceBinding.ASSIGNABLE);
+        return sourceBinding.hasProperty(SourceBinding.BindingProperty.ASSIGNABLE);
     }
 
     /**
@@ -237,6 +236,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
      * @return false - a global variable is not an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return false;
     }
@@ -263,6 +263,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
      * this global variable
      */
 
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) throws XPathException {
 
         // Commented out: Can't eliminate unused variables at this stage because they might be xsl:expose'd as public
@@ -286,17 +287,21 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
             }
             if (sourceBinding.isStatic()) {
                 inst.setStatic(true);
-                GroundedValue<?> value =
+                GroundedValue value =
                         compilation.getStaticVariable(sourceBinding.getVariableQName());
                 if (value == null) {
                     throw new AssertionError();
                 }
                 Expression select = Literal.makeLiteral(value);
                 select.setRetainedStaticContext(makeRetainedStaticContext());
-                inst.setSelectExpression(select);
+                inst.setBody(select);
             } else {
                 Expression select = sourceBinding.getSelectExpression();
-                inst.setSelectExpression(select);
+                inst.setBody(select);
+
+                if (compilation.getCompilerInfo().getCodeInjector() != null) {
+                    compilation.getCompilerInfo().getCodeInjector().process(inst);
+                }
             }
             inst.setRetainedStaticContext(makeRetainedStaticContext());
             initializeBinding(inst);
@@ -310,10 +315,6 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
                 checkCompatibility(overridden);
             }
 
-//            if (unused) {
-//                // Happens when there are no references, but compileWithTracing is set
-//                inst.setUnused(true);
-//            }
         }
 
     }
@@ -326,7 +327,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
 
     protected void initializeBinding(GlobalVariable var) {
 
-        Expression select = var.getSelectExpression();
+        Expression select = var.getBody();
         Expression exp2 = select;
         if (exp2 != null) {
             try {
@@ -348,7 +349,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
         //pack.registerGlobalVariable(gvar);
 
         if (exp2 != select) {
-            var.setSelectExpression(exp2);
+            var.setBody(exp2);
         }
 
     }
@@ -361,6 +362,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
      * @return the associated SlotManager object
      */
 
+    @Override
     public SlotManager getSlotManager() {
         return slotManager;
     }
@@ -371,9 +373,10 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
      * @param declaration the declaration of this variable
      */
 
+    @Override
     public void optimize(ComponentDeclaration declaration) throws XPathException {
-        if (!redundant && compiledVariable.getSelectExpression() != null) {
-            Expression exp2 = compiledVariable.getSelectExpression();
+        if (!redundant && compiledVariable.getBody() != null) {
+            Expression exp2 = compiledVariable.getBody();
             ExpressionVisitor visitor = makeExpressionVisitor();
 
             exp2 = ExpressionTool.optimizeComponentBody(
@@ -385,8 +388,8 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
                 compiledVariable.setContainsLocals(slotManager);
             }
 
-            if (exp2 != compiledVariable.getSelectExpression()) {
-                compiledVariable.setSelectExpression(exp2);
+            if (exp2 != compiledVariable.getBody()) {
+                compiledVariable.setBody(exp2);
             }
         }
     }
@@ -409,6 +412,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
      * @param opt the optimizer
      *
      */
+    @Override
     public void generateByteCode(Optimizer opt) {}
 
 

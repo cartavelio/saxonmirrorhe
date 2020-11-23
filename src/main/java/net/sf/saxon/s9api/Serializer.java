@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -21,6 +21,7 @@ import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.OutputStream;
@@ -34,22 +35,26 @@ import java.util.Objects;
 import java.util.Properties;
 
 /**
- * A Serializer takes a tree representation of XML and turns it into lexical XML markup.
+ * A <code>Serializer</code> takes a tree representation of XML and turns it into lexical XML markup.
+ * <p>To construct a <code>Serializer</code>, use the factory method {@link Processor#newSerializer(File)}.</p>
  * <p><i>Note that this is XML serialization in the sense of the W3C XSLT and XQuery specifications.
  * This has nothing to do with the serialization of Java objects, or the {@link java.io.Serializable}
  * interface.</i></p>
  * <p>The serialization may be influenced by a number of serialization parameters. A parameter has a name,
- * which is an instance of {@link net.sf.saxon.s9api.Serializer.Property}, and a value, which is expressed as a string.
+ * which is an instance of {@link Serializer.Property}, and a value, which is expressed as a string.
  * The effect of most of the properties is as described in the W3C specification
  * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">XSLT 3.0 and XQuery 3.1 Serialization</a>.
  * Saxon supports all the serialization parameters defined in that specification, together with some
  * additional parameters, whose property names are prefixed "SAXON_".</p>
+ * <p>A <code>Serializer</code> may also be created from an {@link Xslt30Transformer} using the method
+ * {@link Xslt30Transformer#newSerializer()} or one of its variants. In this case the serializer
+ * is initialized with properties taken from the default output declaration in the stylesheet.</p>
  * <p>Serialization parameters defined via this interface take precedence over any serialization parameters
- * defined within the source of the query or stylesheet. The {@link #getReceiver} method is supplied with
+ * supplied when {@link #getReceiver} is called. The {@link #getReceiver} method is supplied with
  * parameters derived from the query or stylesheet, which are merged with the parameters set on this
  * {@code Serializer}.</p>
  * <p><i>Changed in 9.9 so the {@code Serializer} now only holds one set of output properties. Additional
- * (default) serialization properties (taken from the source of the query or stylesheet) can be supplied
+ * serialization properties can be supplied
  * when {@link #getReceiver(PipelineConfiguration, SerializationProperties)}
  * is called, but these are not stored within the {@code Serializer} itself.</i></p>
  */
@@ -82,7 +87,7 @@ public class Serializer extends AbstractDestination {
 
     public enum Property {
         /**
-         * Serialization method: xml, html, xhtml, or text
+         * Serialization method: xml, html, xhtml, text, json, adaptive; or <code>Q{uri}local</code>
          */
         METHOD(OutputKeys.METHOD),
         /**
@@ -111,7 +116,7 @@ public class Serializer extends AbstractDestination {
          */
         DOCTYPE_SYSTEM(OutputKeys.DOCTYPE_SYSTEM),
         /**
-         * Space-separated list of QNames (in Clark form) of elements
+         * Space-separated list of QNames (in Clark form or EQName form) of elements
          * whose content is to be wrapped in CDATA sections
          */
         CDATA_SECTION_ELEMENTS(OutputKeys.CDATA_SECTION_ELEMENTS),
@@ -125,7 +130,7 @@ public class Serializer extends AbstractDestination {
         MEDIA_TYPE(OutputKeys.MEDIA_TYPE),
         /**
          * List of names of character maps to be used. Character maps can only be specified in an XSLT
-         * stylesheet.
+         * stylesheet. Supplied as a space-separated list of QNames in Clark or EQName format.
          */
         USE_CHARACTER_MAPS(SaxonOutputKeys.USE_CHARACTER_MAPS),
         /**
@@ -134,7 +139,7 @@ public class Serializer extends AbstractDestination {
          */
         INCLUDE_CONTENT_TYPE(SaxonOutputKeys.INCLUDE_CONTENT_TYPE),
         /**
-         * Set to "yes" or "no" to indicate (for XML 1.1) whether namespace that go out of scope should
+         * Set to "yes" or "no" to indicate (for XML 1.1) whether namespaces that go out of scope should
          * be undeclared
          */
         UNDECLARE_PREFIXES(SaxonOutputKeys.UNDECLARE_PREFIXES),
@@ -161,7 +166,7 @@ public class Serializer extends AbstractDestination {
          */
         HTML_VERSION(SaxonOutputKeys.HTML_VERSION),
         /**
-         * Build-tree option (XSLT only)
+         * Build-tree option (XSLT only), "yes" or "no"
          */
         BUILD_TREE(SaxonOutputKeys.BUILD_TREE),
         /**
@@ -175,14 +180,16 @@ public class Serializer extends AbstractDestination {
          */
         SAXON_LINE_LENGTH(SaxonOutputKeys.LINE_LENGTH),
         /**
-         * Saxon extension: set to a space-separated list of attribute names, in Clark notation,
+         * Saxon extension: set to a space-separated list of attribute names, in Clark or EQName notation,
+         * followed optionally by "*" and then another space-separated list of attribute names
          * indicating that attributes present in the list should be serialized in the order
-         * indicated, followed by attributes not present in the list (these are sorted first
-         * by namespace, then by local name).
+         * indicated: specific attributes listed before the "*" come first in the order specified;
+         * then attributes not present in the list (these are sorted first by namespace, then by local name),
+         * and finally specific attributes listed after the "*", in the order specified.
          */
         SAXON_ATTRIBUTE_ORDER(SaxonOutputKeys.ATTRIBUTE_ORDER),
         /**
-         * Saxon extension: request canonical XML output.
+         * Saxon extension: request canonical XML output. Value is "yes" or "no"
          */
         SAXON_CANONICAL(SaxonOutputKeys.CANONICAL),
         /**
@@ -192,9 +199,9 @@ public class Serializer extends AbstractDestination {
          */
         SAXON_NEWLINE(SaxonOutputKeys.NEWLINE),
         /**
-         * Set to a space-separated list of element names, in Clark notation,
-         * within which no content is to be indented. This is typically because the element contains
-         * mixed content in which whitespace is significant.
+         * Set to a space-separated list of element names (in Clark or EQName notation),
+         * identifying elements (such as <code>para</code>) within which no content is to be indented.
+         * This is typically because the element contains mixed content in which whitespace is significant.
          * <p>
          * This was originally a Saxon extension to the W3C specifications, but it then became
          * a standard serialization attribute. The "SAXON_" prefix on the name of the enumeration
@@ -203,14 +210,15 @@ public class Serializer extends AbstractDestination {
          */
         SAXON_SUPPRESS_INDENTATION(SaxonOutputKeys.SUPPRESS_INDENTATION),
         /**
-         * Saxon extension: set to a space-separated list of element names, in Clark notation,
+         * Saxon extension: set to a space-separated list of element names, in Clark or EQName notation,
          * representing elements that will be preceded by an extra blank line in the output in addition
          * to normal indentation.
          */
         SAXON_DOUBLE_SPACE(SaxonOutputKeys.DOUBLE_SPACE),
         /**
          * Saxon extension for internal use: used in XSLT to tell the serializer whether the
-         * stylesheet used version="1.0" or version="2.0"
+         * stylesheet used version="1.0" or version="2.0" (etc). Needed primarily because the
+         * algorithm for selecting a default output method is version-sensitive.
          */
         SAXON_STYLESHEET_VERSION(SaxonOutputKeys.STYLESHEET_VERSION),
         /**
@@ -220,12 +228,12 @@ public class Serializer extends AbstractDestination {
         SAXON_CHARACTER_REPRESENTATION(SaxonOutputKeys.CHARACTER_REPRESENTATION),
         /**
          * Saxon extension for use when writing to the text output method; this option causes the processing
-         * instructions hex and b64 to be recognized containing hexBinary or base64 data respectively.
+         * instructions hex and b64 to be recognized as containing hexBinary or base64 data respectively.
          */
         SAXON_RECOGNIZE_BINARY(SaxonOutputKeys.RECOGNIZE_BINARY),
         /**
          * Saxon extension for use when output is sent to a SAX ContentHandler: indicates that the output
-         * is required to be well-formed (exactly one top-level element)
+         * is required to be well-formed (exactly one top-level element, no top-level text nodes)
          */
         SAXON_REQUIRE_WELL_FORMED(SaxonOutputKeys.REQUIRE_WELL_FORMED),
         /**
@@ -233,13 +241,9 @@ public class Serializer extends AbstractDestination {
          * such that each item in the result sequence is enclosed in an element indicating its type
          */
         SAXON_WRAP(SaxonOutputKeys.WRAP),
+
         /**
-         * Saxon extension for internal use in XSLT, indicates that this output document is the implicitly
-         * created result tree as distinct from a tree created using &lt;xsl:result-document&gt;
-         */
-        SAXON_IMPLICIT_RESULT_DOCUMENT(SaxonOutputKeys.IMPLICIT_RESULT_DOCUMENT),
-        /**
-         * Saxon extension for interfacing with debuggers; indicates that the location information is
+         * Saxon extension for interfacing with debuggers; indicates that location information is
          * available for events in this output stream
          */
         SAXON_SUPPLY_SOURCE_LOCATOR(SaxonOutputKeys.SUPPLY_SOURCE_LOCATOR);
@@ -319,8 +323,6 @@ public class Serializer extends AbstractDestination {
      * Set output properties, from a {@link Properties} object. The keys in the supplied
      * {@code Properties} object are QNames in Clark format, that is "{uri}local"; any QNames
      * within the values must also be in this format.
-     * The values supplied are typically those specified in the stylesheet or query. In the case of XSLT,
-     * they are typically the properties associated with unnamed xsl:output declarations.
      *
      * @param suppliedProperties the output properties to be used. These overwrite any properties
      *                           that have been individually specified using
@@ -369,7 +371,7 @@ public class Serializer extends AbstractDestination {
      *
      * @param characterMap a set of named character maps. A character map in this set will only
      *                     be used if the name of the character map is added to the value
-     *                     of the {@link net.sf.saxon.s9api.Serializer.Property#USE_CHARACTER_MAPS} serialization
+     *                     of the {@link Serializer.Property#USE_CHARACTER_MAPS} serialization
      *                     property. The character maps in this index are added to the existing
      *                     set of character maps known to the serializer, unless they have the
      *                     same names as existing character maps, in which case the new one
@@ -476,7 +478,7 @@ public class Serializer extends AbstractDestination {
             }
             if (uri.equals(NamespaceConstant.SAXON) && property.getLocalName().equals("next-in-chain")) {
                 // reject the next-in-chain property: it's not relevant to a Serializer
-                throw new IllegalArgumentException("saxon:next-in-chain is not a serialization property");
+                throw new IllegalArgumentException("saxon:next-in-chain is not a valid serialization property");
             }
         }
         if (value == null) {
@@ -580,7 +582,7 @@ public class Serializer extends AbstractDestination {
      *
      * @param value The value to be serialized
      * @throws IllegalStateException if no outputStream, Writer, or File has been supplied as the
-     *                               destination for the serialized output, or if no Processor is associated with the serializer
+     *                               destination for the serialized output
      * @throws SaxonApiException     if a serialization error or I/O error occurs
      * @since 9.3
      */
@@ -601,6 +603,56 @@ public class Serializer extends AbstractDestination {
         }
         closeAndNotify();
 
+    }
+
+    /**
+     * Serialize an arbitrary JAXP Source to the selected output destination using this serializer. The supplied
+     * sequence is first wrapped in a document node according to the rules given in section 2 (Sequence Normalization) of the
+     * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">XSLT/XQuery serialization specification</a>; the resulting
+     * document nodes is then serialized using the serialization parameters defined in this serializer.
+     *
+     * @param source The value to be serialized
+     * @throws IllegalStateException if no outputStream, Writer, or File has been supplied as the
+     *                               destination for the serialized output
+     * @throws SaxonApiException     if a serialization error or I/O error occurs
+     * @since 10.0
+     */
+
+    public void serialize(Source source) throws SaxonApiException {
+        try {
+            SerializerFactory sf = processor.getUnderlyingConfiguration().getSerializerFactory();
+            Receiver tr = sf.getReceiver(result, new SerializationProperties(getLocallyDefinedProperties()));
+            Sender.send(source, tr, processor.getUnderlyingConfiguration().getParseOptions());
+            closeAndNotify();
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
+        }
+    }
+
+    /**
+     * Serialize an arbitrary JAXP Source to a string using this serializer. The supplied
+     * sequence is first wrapped in a document node according to the rules given in section 2 (Sequence Normalization) of the
+     * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">XSLT/XQuery serialization specification</a>; the resulting
+     * document nodes is then serialized using the serialization parameters defined in this serializer.
+     *
+     * @param source The value to be serialized
+     * @return the serialized result, as a string
+     * @throws SaxonApiException     if a serialization error or I/O error occurs
+     * @since 10.0
+     */
+
+    public String serializeToString(Source source) throws SaxonApiException {
+        try {
+            SerializerFactory sf = processor.getUnderlyingConfiguration().getSerializerFactory();
+            StringWriter sw = new StringWriter();
+            Receiver tr = sf.getReceiver(new StreamResult(sw),
+                                         new SerializationProperties(getLocallyDefinedProperties()));
+            Sender.send(source, tr, processor.getUnderlyingConfiguration().getParseOptions());
+            closeAndNotify();
+            return sw.toString();
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
+        }
     }
 
     /**
@@ -704,6 +756,7 @@ public class Serializer extends AbstractDestination {
      * @return a receiver to which XML events will be sent
      */
 
+    @Override
     public Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) throws SaxonApiException {
         try {
             SerializerFactory sf = pipe.getConfiguration().getSerializerFactory();
@@ -792,6 +845,7 @@ public class Serializer extends AbstractDestination {
      * by the calling application.
      */
 
+    @Override
     public void close() throws SaxonApiException {
         if (mustClose) {
             // This relies on the fact that the SerializerFactory sets the OutputStream

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,16 +7,12 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.ProxyReceiver;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.Sink;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -50,6 +46,7 @@ public class StreamAvailable extends SystemFunction implements Callable {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the argument
      */
+    @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         boolean result = isAvailable(arguments[0].head().getStringValue(), context);
         return BooleanValue.get(result);
@@ -87,7 +84,9 @@ public class StreamAvailable extends SystemFunction implements Callable {
         }
 
         @Override
-        public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+        public void startElement(NodeName elemName, SchemaType type,
+                                 AttributeMap attributes, NamespaceMap namespaces,
+                                 Location location, int properties) throws XPathException {
             throw new QuitParsingException(false);
         }
 

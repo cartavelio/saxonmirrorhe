@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -24,6 +24,7 @@ abstract public class AbstractDestination implements Destination {
      * @param baseURI the base URI to be used
      */
 
+    @Override
     public void setDestinationBaseURI(URI baseURI) {
         this.baseURI = baseURI;
     }
@@ -34,6 +35,7 @@ abstract public class AbstractDestination implements Destination {
      * @return the baseURI, or null if none is known
      */
 
+    @Override
     public URI getDestinationBaseURI() {
         return baseURI;
     }
@@ -44,6 +46,7 @@ abstract public class AbstractDestination implements Destination {
      *                 is successfully completed
      */
 
+    @Override
     final public void onClose(Action listener) {
         helper.onClose(listener);
     }
@@ -56,6 +59,7 @@ abstract public class AbstractDestination implements Destination {
      * @throws SaxonApiException if the close() method throws {@code SaxonApiException}.
      */
 
+    @Override
     public void closeAndNotify() throws SaxonApiException {
         helper.closeAndNotify();
     }

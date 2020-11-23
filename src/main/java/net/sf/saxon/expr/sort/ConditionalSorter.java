@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -91,7 +91,7 @@ public class ConditionalSorter extends Expression {
 
     /*@NotNull*/
     public DocumentSorter getDocumentSorter() {
-        return (DocumentSorter)sorterOp.getChildExpression();
+        return (DocumentSorter) sorterOp.getChildExpression();
     }
 
     @Override
@@ -105,6 +105,7 @@ public class ConditionalSorter extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         return rewrite(exp -> exp.typeCheck(visitor, contextInfo));
     }
@@ -115,12 +116,13 @@ public class ConditionalSorter extends Expression {
      * actually evaluating the result.
      *
      * @return one of the values Cardinality.ONE_OR_MORE,
-     *         Cardinality.ZERO_OR_MORE, Cardinality.EXACTLY_ONE,
-     *         Cardinality.ZERO_OR_ONE, Cardinality.EMPTY. This default
-     *         implementation returns ZERO_OR_MORE (which effectively gives no
-     *         information).
+     * Cardinality.ZERO_OR_MORE, Cardinality.EXACTLY_ONE,
+     * Cardinality.ZERO_OR_ONE, Cardinality.EMPTY. This default
+     * implementation returns ZERO_OR_MORE (which effectively gives no
+     * information).
      */
 
+    @Override
     public int getCardinality() {
         return getDocumentSorter().getCardinality();
     }
@@ -135,6 +137,7 @@ public class ConditionalSorter extends Expression {
      * @return the special properties, as a bit-significant integer
      */
 
+    @Override
     protected int computeSpecialProperties() {
         return getCondition().getSpecialProperties()
                 | StaticProperty.ORDERED_NODESET
@@ -147,9 +150,10 @@ public class ConditionalSorter extends Expression {
      * indirectly, using an implementation that relies on one of the other methods.
      *
      * @return the implementation method, for example {@link #ITERATE_METHOD} or {@link #EVALUATE_METHOD} or
-     *         {@link #PROCESS_METHOD}
+     * {@link #PROCESS_METHOD}
      */
 
+    @Override
     public int getImplementationMethod() {
         return ITERATE_METHOD;
     }
@@ -195,10 +199,11 @@ public class ConditionalSorter extends Expression {
      * Compute the static cardinality of this expression
      *
      * @return the computed cardinality, as one of the values {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ZERO_OR_ONE},
-     *         {@link net.sf.saxon.expr.StaticProperty#EXACTLY_ONE}, {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ONE_OR_MORE},
-     *         {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ZERO_OR_MORE}
+     * {@link net.sf.saxon.expr.StaticProperty#EXACTLY_ONE}, {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ONE_OR_MORE},
+     * {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ZERO_OR_MORE}
      */
 
+    @Override
     protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
@@ -206,11 +211,12 @@ public class ConditionalSorter extends Expression {
     /**
      * Copy an expression. This makes a deep copy.
      *
-     * @return the copy of the original expression
      * @param rebindings
+     * @return the copy of the original expression
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ConditionalSorter cs = new ConditionalSorter(getCondition().copy(rebindings), (DocumentSorter) getDocumentSorter().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, cs);
@@ -224,6 +230,7 @@ public class ConditionalSorter extends Expression {
      * @param out the expression presenter used to display the structure
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("conditionalSort", this);
         getCondition().export(out);
@@ -240,10 +247,11 @@ public class ConditionalSorter extends Expression {
      * that is available at the time.</p>
      *
      * @return a value such as Type.STRING, Type.BOOLEAN, Type.NUMBER,
-     *         Type.NODE, or Type.ITEM (meaning not known at compile time)
+     * Type.NODE, or Type.ITEM (meaning not known at compile time)
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getDocumentSorter().getItemType();
     }
@@ -258,14 +266,14 @@ public class ConditionalSorter extends Expression {
      *
      * @param context supplies the context for evaluation
      * @return a SequenceIterator that can be used to iterate over the result
-     *         of the expression
-     * @throws net.sf.saxon.trans.XPathException
-     *          if any dynamic error occurs evaluating the
-     *          expression
+     * of the expression
+     * @throws net.sf.saxon.trans.XPathException if any dynamic error occurs evaluating the
+     *                                           expression
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         boolean b = getCondition().effectiveBooleanValue(context);
         if (b) {
             return getDocumentSorter().iterate(context);
@@ -285,7 +293,6 @@ public class ConditionalSorter extends Expression {
     public String getExpressionName() {
         return "conditionalSort";
     }
-
 
 
 }

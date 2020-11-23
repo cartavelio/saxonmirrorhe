@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,13 +18,13 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
@@ -57,6 +57,7 @@ public class XSLEvaluate extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -65,6 +66,7 @@ public class XSLEvaluate extends StyleElement {
      * Specify that xsl:sort is a permitted child
      */
 
+    @Override
     protected boolean isPermittedChild(StyleElement child) {
         return child instanceof XSLLocalParam;
     }
@@ -86,14 +88,16 @@ public class XSLEvaluate extends StyleElement {
      * @return false: no, it may not contain a sequence constructor
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
 
         String xpathAtt = null;
         String asAtt = null;
@@ -103,41 +107,44 @@ public class XSLEvaluate extends StyleElement {
         String schemaAwareAtt = null;
         String withParamsAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : atts) {
+            final NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
             switch (f) {
                 case "xpath":
-                    xpathAtt = atts.getValue(a);
-                    xpath = makeExpression(xpathAtt, a);
+                    xpathAtt = att.getValue();
+                    xpath = makeExpression(xpathAtt, att);
                     break;
                 case "as":
-                    asAtt = atts.getValue(a);
+                    asAtt = att.getValue();
                     break;
                 case "context-item":
-                    contextItemAtt = atts.getValue(a);
-                    contextItem = makeExpression(contextItemAtt, a);
+                    contextItemAtt = att.getValue();
+                    contextItem = makeExpression(contextItemAtt, att);
                     break;
                 case "base-uri":
-                    baseUriAtt = atts.getValue(a);
-                    baseUri = makeAttributeValueTemplate(baseUriAtt, a);
+                    baseUriAtt = att.getValue();
+                    baseUri = makeAttributeValueTemplate(baseUriAtt, att);
                     break;
                 case "namespace-context":
-                    namespaceContextAtt = atts.getValue(a);
-                    namespaceContext = makeExpression(namespaceContextAtt, a);
+                    namespaceContextAtt = att.getValue();
+                    namespaceContext = makeExpression(namespaceContextAtt, att);
                     break;
                 case "schema-aware":
-                    schemaAwareAtt = Whitespace.trim(atts.getValue(a));
-                    schemaAware = makeAttributeValueTemplate(schemaAwareAtt, a);
+                    schemaAwareAtt = Whitespace.trim(att.getValue());
+                    schemaAware = makeAttributeValueTemplate(schemaAwareAtt, att);
                     break;
                 case "with-params":
-                    withParamsAtt = atts.getValue(a);
-                    withParams = makeExpression(withParamsAtt, a);
+                    withParamsAtt = att.getValue();
+                    withParams = makeExpression(withParamsAtt, att);
                     break;
                 default:
-                    if (atts.getLocalName(a).equals("options") && atts.getURI(a).equals(NamespaceConstant.SAXON)) {
-                        options = makeExpression(atts.getValue(a), a);
+                    if (attName.getLocalPart().equals("options") && attName.getURI().equals(NamespaceConstant.SAXON)) {
+                        if (isExtensionAttributeAllowed(attName.getDisplayName())) {
+                            options = makeExpression(att.getValue(), att);
+                        }
                     } else {
-                        checkUnknownAttribute(atts.getNodeName(a));
+                        checkUnknownAttribute(attName);
                     }
                     break;
             }
@@ -148,7 +155,6 @@ public class XSLEvaluate extends StyleElement {
         }
 
         if (asAtt != null) {
-            requiredType = makeSequenceType(asAtt);
             try {
                 requiredType = makeSequenceType(asAtt);
             } catch (XPathException e) {
@@ -168,15 +174,16 @@ public class XSLEvaluate extends StyleElement {
 
         if (withParamsAtt == null) {
             withParamsAtt = "map{}";
-            withParams = makeExpression(withParamsAtt, -1);
+            withParams = makeExpression(withParamsAtt, null);
         }
 
         if (options == null) {
-            options = makeExpression("map{}", -1);
+            options = makeExpression("map{}", null);
         }
     }
 
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         getContainingPackage().setRetainUnusedFunctions();
         if (xpath == null) {
@@ -190,7 +197,7 @@ public class XSLEvaluate extends StyleElement {
         withParams = typeCheck("with-params", withParams);
         options = typeCheck("options", options);
 
-        iterateAxis(AxisInfo.CHILD).forEachOrFail(child -> {
+        for (NodeInfo child : children()) {
             if (child instanceof XSLWithParam) {
                 // OK
             } else if (child instanceof XSLFallback) {
@@ -204,7 +211,7 @@ public class XSLEvaluate extends StyleElement {
                 compileError("Child element " + Err.wrap(child.getDisplayName(), Err.ELEMENT) +
                                      " is not allowed as a child of xsl:evaluate", "XTSE0010");
             }
-        });
+        };
 
         try {
             ExpressionVisitor visitor = makeExpressionVisitor();
@@ -269,10 +276,11 @@ public class XSLEvaluate extends StyleElement {
     }
 
     /*@Nullable*/
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (getConfiguration().getBooleanProperty(Feature.DISABLE_XSL_EVALUATE)) {
             // If xsl:evaluate is statically disabled then we should execute any fallback children
-            validationError = new XPathException("xsl:evaluate is not available in this configuration", "XTDE3175");
+            validationError = new XmlProcessingIncident("xsl:evaluate is not available in this configuration", "XTDE3175");
             return fallbackProcessing(exec, decl, this);
         } else {
             Expression evaluateExpr = getConfiguration().makeEvaluateInstruction(this, decl);
@@ -291,12 +299,8 @@ public class XSLEvaluate extends StyleElement {
                 conditions[1] = Literal.makeLiteral(BooleanValue.TRUE);
                 Expression[] actions = new Expression[2];
                 List<Expression> fallbackExpressions = new ArrayList<>();
-                NodeInfo child;
-                AxisIterator kids = iterateChildren(AnyNodeTest.getInstance());
-                while ((child = kids.next()) != null) {
-                    if (child instanceof XSLFallback) {
-                        fallbackExpressions.add(((XSLFallback)child).compileSequenceConstructor(exec, decl, false));
-                    }
+                for (NodeInfo child : children(XSLFallback.class::isInstance)) {
+                    fallbackExpressions.add(((XSLFallback) child).compileSequenceConstructor(exec, decl, false));
                 }
                 actions[0] = new Block(fallbackExpressions.toArray(new Expression[0]));
                 actions[1] = evaluateExpr;

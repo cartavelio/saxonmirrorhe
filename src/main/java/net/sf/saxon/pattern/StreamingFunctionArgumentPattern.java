@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -54,6 +54,7 @@ public class StreamingFunctionArgumentPattern extends Pattern {
      * @return the optimised Pattern
      */
 
+    @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         return this;
     }
@@ -68,9 +69,10 @@ public class StreamingFunctionArgumentPattern extends Pattern {
      * @return true if the node matches the Pattern, false otherwise
      */
 
-    public boolean matches(Item<?> item, XPathContext context) throws XPathException {
-        Sequence<?> arg = context.getStackFrame().getStackFrameValues()[0];
-        SequenceIterator<?> iter = arg.iterate();
+    @Override
+    public boolean matches(Item item, XPathContext context) throws XPathException {
+        Sequence arg = context.getStackFrame().getStackFrameValues()[0];
+        SequenceIterator iter = arg.iterate();
         Item j;
         while ((j = iter.next()) != null) {
             if (j == item) {
@@ -86,12 +88,13 @@ public class StreamingFunctionArgumentPattern extends Pattern {
      * @return a NodeTest, as specific as possible, which all the matching nodes satisfy
      */
 
+    @Override
     public ItemType getItemType() {
         return AnyNodeTest.getInstance();
     }
 
-    /*@NotNull*/
-    public String toString() {
+    @Override
+    public String reconstruct() {
         return "$$";
     }
 
@@ -110,6 +113,7 @@ public class StreamingFunctionArgumentPattern extends Pattern {
      */
 
     /*@NotNull*/
+    @Override
     public Pattern copy(RebindingMap rebindings) {
         return this;
     }

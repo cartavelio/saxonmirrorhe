@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.dom;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.GenericTreeInfo;
@@ -114,6 +115,7 @@ public class DocumentWrapper extends GenericTreeInfo {
      *         that comes last should be returned.
      */
 
+    @Override
     public NodeInfo selectID(String id, boolean getParent) {
         synchronized (docNode) {
             Node node = ((DOMNodeWrapper)getRootNode()).node;
@@ -151,6 +153,7 @@ public class DocumentWrapper extends GenericTreeInfo {
      * @since 9.1 (implemented for this subclass since 9.2)
      */
 
+    @Override
     public Iterator<String> getUnparsedEntityNames() {
         synchronized (docNode) {
             Node node = ((DOMNodeWrapper) getRootNode()).node;
@@ -193,6 +196,7 @@ public class DocumentWrapper extends GenericTreeInfo {
      * @since 8.4 (implemented for this subclass since 9.2)
      */
 
+    @Override
     public String[] getUnparsedEntity(String name) {
         synchronized (docNode) {
             Node node = ((DOMNodeWrapper) getRootNode()).node;
@@ -216,8 +220,7 @@ public class DocumentWrapper extends GenericTreeInfo {
                     if (!systemIdURI.isAbsolute()) {
                         String base = getRootNode().getBaseURI();
                         if (base != null) {
-                            systemIdURI = new URI(base).resolve(systemIdURI);
-                            systemId = systemIdURI.toString();
+                            systemId = ResolveURI.makeAbsolute(systemId, base).toString();
                         } else {
                             // base URI unknown: return the relative URI as written
                         }

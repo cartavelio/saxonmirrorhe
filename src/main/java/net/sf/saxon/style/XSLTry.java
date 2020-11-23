@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,14 +7,13 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.expr.TryCatch;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.expr.TryCatch;
+import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.QNameTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +40,7 @@ public class XSLTry extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -51,29 +51,31 @@ public class XSLTry extends StyleElement {
      * @return true: yes, it may contain a sequence constructor
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         String selectAtt = null;
         String rollbackOutputAtt = null;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getNodeName(a).getDisplayName();
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             switch (f) {
                 case "select":
-                    selectAtt = atts.getValue(a);
-                    select = makeExpression(selectAtt, a);
+                    selectAtt = value;
+                    select = makeExpression(selectAtt, att);
                     break;
                 case "rollback-output":
-                    rollbackOutputAtt = atts.getValue(a);
+                    rollbackOutputAtt = value;
                     break;
                 default:
-                    checkUnknownAttribute(atts.getNodeName(a));
+                    checkUnknownAttribute(attName);
                     break;
             }
         }
@@ -83,16 +85,16 @@ public class XSLTry extends StyleElement {
         }
     }
 
+    @Override
     protected boolean isPermittedChild(StyleElement child) {
         return child instanceof XSLCatch;
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         select = typeCheck("select", select);
         boolean foundCatch = false;
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo kid;
-        while ((kid = kids.next()) != null) {
+        for (NodeInfo kid : children()) {
             if (kid instanceof XSLCatch) {
                 foundCatch = true;
             } else if (kid instanceof XSLFallback) {
@@ -111,6 +113,7 @@ public class XSLTry extends StyleElement {
         }
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression content = compileSequenceConstructor(exec, decl, true);
         if (select == null) {

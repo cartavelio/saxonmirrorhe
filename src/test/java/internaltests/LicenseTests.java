@@ -2,21 +2,39 @@ package internaltests;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.LicenseException;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * A number of tests to ensure that certain constructs require a valid license,
  * especially after export/import
  */
 
-public class LicenseTests extends TestCase {
+public class LicenseTests {
+
+    private void noLicenseNeeded(String xsl) {
+        ProfessionalConfiguration config = new ProfessionalConfiguration();
+        config.disableLicensing();
+        Processor proc = new Processor(config);
+        XsltCompiler compiler = proc.newXsltCompiler();
+        try {
+            compiler.compile(new StreamSource(new StringReader(xsl)));
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+
+    }
+
 
     private void requireProfessionalLicenseXslt(String xsl) {
         ProfessionalConfiguration config = new ProfessionalConfiguration();
@@ -111,6 +129,7 @@ public class LicenseTests extends TestCase {
         }
     }
 
+    @Test
     public void testSaxonExtensionFunction() {
         String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
                 "<xsl:template name='main' xmlns:saxon='http://saxon.sf.net/'>"
@@ -119,6 +138,7 @@ public class LicenseTests extends TestCase {
         requireProfessionalLicenseXslt(xsl);
     }
 
+    @Test
     public void testSaxonEvaluate() {
         String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
                 "<xsl:param name='in' select=\"'3'\"/>" +
@@ -128,33 +148,37 @@ public class LicenseTests extends TestCase {
         requireProfessionalLicenseXslt(xsl);
     }
 
+    @Test
     public void testHof() {
         String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
                 "<xsl:param name='in' select=\"head#1\"/>" +
                 "<xsl:template name='main'>"
                 + "<xsl:value-of select=\"function-name($in)\"/>"
                 + "</xsl:template></xsl:stylesheet>";
-        requireProfessionalLicenseXslt(xsl);
+        noLicenseNeeded(xsl);
     }
 
+    @Test
     public void testHof2() {
         String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
                 "<xsl:param name='in' select=\"10\"/>" +
                 "<xsl:template name='main'>"
                 + "<xsl:value-of select=\"function($x){$x+1}($in)\"/>"
                 + "</xsl:template></xsl:stylesheet>";
-        requireProfessionalLicenseXslt(xsl);
+        noLicenseNeeded(xsl);
     }
 
+    @Test
     public void testHof3() {
         String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
                 "<xsl:param name='in' select=\"function($x){$x+1}\"/>" +
                 "<xsl:template name='main'>"
                 + "<xsl:value-of select=\"function-name($in)\"/>"
                 + "</xsl:template></xsl:stylesheet>";
-        requireProfessionalLicenseXslt(xsl);
+        noLicenseNeeded(xsl);
     }
 
+    @Test
     public void testSerializationExtensions() {
         String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
                 "<xsl:output saxon:line-length='120' xmlns:saxon='http://saxon.sf.net/'/>" +
@@ -164,6 +188,7 @@ public class LicenseTests extends TestCase {
         requireProfessionalLicenseXslt(xsl);
     }
 
+    @Test
     public void testStreaming() {
         String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
                 "<xsl:template name='main'>"
@@ -172,6 +197,7 @@ public class LicenseTests extends TestCase {
         requireEnterpriseLicenseXslt(xsl);
     }
 
+    @Test
     public void testSchemaAwareness() {
         String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                 "<xsl:import-schema namespace='http://example.com/'/>" +
@@ -181,6 +207,7 @@ public class LicenseTests extends TestCase {
         requireEnterpriseLicenseXslt(xsl);
     }
 
+    @Test
     public void testSchemaAwareness2() {
         String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                 "<xsl:template name='main'>"
@@ -189,6 +216,7 @@ public class LicenseTests extends TestCase {
         requireEnterpriseLicenseXslt(xsl);
     }
 
+    @Test
     public void testOEMActivation() {
         try {
             Processor processor = new Processor(true);
@@ -197,8 +225,25 @@ public class LicenseTests extends TestCase {
             xpc.declareNamespace("saxon", "http://saxon.sf.net/");
             XPathExecutable xpe = xpc.compile("saxon:decimal-divide(10.0, 3.0, 5)");
             XdmValue result = xpe.load().evaluate();
-            assertEquals(3.33333, ((XdmAtomicValue)result).getDoubleValue());
-            assertEquals("V010024", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
+            assertEquals(3.33333, ((XdmAtomicValue) result).getDoubleValue());
+            assertEquals("V009048", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testOEMActivationExpired() {
+        try {
+            Processor processor = new Processor(true);
+            ActivateSaxon.activateExpired(processor);
+            XPathCompiler xpc = processor.newXPathCompiler();
+            xpc.declareNamespace("saxon", "http://saxon.sf.net/");
+            XPathExecutable xpe = xpc.compile("saxon:decimal-divide(10.0, 3.0, 5)");
+            XdmValue result = xpe.load().evaluate();
+            fail("Unexpected success " + result);
+        } catch (LicenseException e) {
+            assertTrue(e.getMessage().contains("(serial number V010024)"), "serial");
         } catch (SaxonApiException e) {
             fail();
         }

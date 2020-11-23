@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -62,6 +62,7 @@ public class GYearValue extends GDateValue {
      * @param typeLabel
      */
 
+    @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
         GYearValue v = new GYearValue(year, getTimezoneInMinutes(), true);
         v.typeLabel = typeLabel;
@@ -75,11 +76,13 @@ public class GYearValue extends GDateValue {
      * and xs:untypedAtomic. For external objects, the result is AnyAtomicType.
      */
 
+    @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.G_YEAR;
     }
 
     /*@NotNull*/
+    @Override
     public CharSequence getPrimitiveStringValue() {
 
         FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
@@ -87,7 +90,7 @@ public class GYearValue extends GDateValue {
         if (year <= 0) {
             yr = -yr + (hasNoYearZero ? 1 : 0);           // no year zero in lexical space for XSD 1.0
             if (yr != 0) {
-                sb.append('-');
+                sb.cat('-');
             }
         }
         appendString(sb, yr, (yr > 9999 ? (yr + "").length() : 4));
@@ -110,6 +113,7 @@ public class GYearValue extends GDateValue {
      *
      */
 
+    @Override
     public CalendarValue add(DurationValue duration) throws XPathException {
         XPathException err = new XPathException("Cannot add a duration to an xs:gYear");
         err.setErrorCode("XPTY0004");
@@ -124,6 +128,7 @@ public class GYearValue extends GDateValue {
      * @return the date/time in the new timezone
      */
 
+    @Override
     public CalendarValue adjustTimezone(int tz) {
         DateTimeValue dt = (DateTimeValue) toDateTime().adjustTimezone(tz);
         return new GYearValue(dt.getYear(), dt.getTimezoneInMinutes(), hasNoYearZero);

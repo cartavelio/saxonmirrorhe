@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,10 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Operand;
-import net.sf.saxon.expr.OperandRole;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StandardNames;
@@ -51,6 +48,14 @@ public class WithParam  {
     }
 
     /**
+     * Get the select operand
+     */
+
+    public Operand getSelectOperand() {
+        return selectOp;
+    }
+
+    /**
      * Get the expression to which this variable is bound
      *
      * @return the initializing expression
@@ -60,9 +65,6 @@ public class WithParam  {
         return selectOp.getChildExpression();
     }
 
-    public Operand getSelectOperand() {
-        return selectOp;
-    }
     /**
      * Set the required type of this variable
      *
@@ -194,14 +196,14 @@ public class WithParam  {
     /**
      * Get the evaluation mode of the variable
      *
-     * @return the evaluation mode (a constant in {@link ExpressionTool}
+     * @return the evaluation mode (a constant in {@link EvaluationMode}
      */
 
-    public int getEvaluationMode() {
+    public EvaluationMode getEvaluationMode() {
         if (evaluator == null) {
             computeEvaluator();
         }
-        return evaluator.getCode();
+        return evaluator.getEvaluationMode();
     }
 
 
@@ -277,10 +279,7 @@ public class WithParam  {
                 }
                 ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
                 if (param.getRequiredType() != SequenceType.ANY_SEQUENCE) {
-                    out.emitAttribute("as", param.getRequiredType().toExportString());
-                    if (options.target.equals("JS") && options.targetVersion == 2) {
-                        out.emitAttribute("asJ", param.getRequiredType().toExportString2());
-                    }
+                    out.emitAttribute("as", param.getRequiredType().toAlphaCode());
                 }
                 if (param.getSlotNumber() != -1) {
                     out.emitAttribute("slot", param.getSlotNumber() + "");
@@ -303,7 +302,7 @@ public class WithParam  {
      *          with a dynamic error
      */
 
-    public Sequence<?> getSelectValue(XPathContext context) throws XPathException {
+    public Sequence getSelectValue(XPathContext context) throws XPathException {
         // There is a select attribute: do a lazy evaluation of the expression,
         // which will already contain any code to force conversion to the required type.
         if (evaluator == null) {
@@ -311,7 +310,7 @@ public class WithParam  {
         }
         int savedOutputState = context.getTemporaryOutputState();
         context.setTemporaryOutputState(StandardNames.XSL_WITH_PARAM);
-        Sequence<?> result = evaluator.evaluate(selectOp.getChildExpression(), context);
+        Sequence result = evaluator.evaluate(selectOp.getChildExpression(), context);
         context.setTemporaryOutputState(savedOutputState);
         return result;
     }

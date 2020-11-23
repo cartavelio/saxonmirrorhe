@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,18 +9,18 @@ package net.sf.saxon.dom;
 
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.Whitespace;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.util.Stack;
 
 
 /**
@@ -36,11 +36,17 @@ public class DOMWriter extends Builder {
     private int level = 0;
     private boolean canNormalize = true;
     private String systemId;
+    private final Stack<NamespaceMap> nsStack = new Stack<>();
+
+    public DOMWriter() {
+        nsStack.push(NamespaceMap.emptyMap());
+    }
 
     /**
      * Set the pipelineConfiguration
      */
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         this.pipe = pipe;
         config = pipe.getConfiguration();
@@ -51,6 +57,7 @@ public class DOMWriter extends Builder {
      */
 
     /*@NotNull*/
+    @Override
     public PipelineConfiguration getPipelineConfiguration() {
         return pipe;
     }
@@ -59,6 +66,7 @@ public class DOMWriter extends Builder {
      * Set the System ID of the destination tree
      */
 
+    @Override
     public void setSystemId(String systemId) {
         this.systemId = systemId;
     }
@@ -71,6 +79,7 @@ public class DOMWriter extends Builder {
      * @param publicID The public identifier of the unparsed entity
      */
 
+    @Override
     public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
         // no-op
     }
@@ -81,6 +90,7 @@ public class DOMWriter extends Builder {
      * @return The system identifier that was set with setSystemId,
      *         or null if setSystemId was not called.
      */
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -89,6 +99,7 @@ public class DOMWriter extends Builder {
      * Start of the document.
      */
 
+    @Override
     public void open() {
     }
 
@@ -96,6 +107,7 @@ public class DOMWriter extends Builder {
      * End of the document.
      */
 
+    @Override
     public void close() {
     }
 
@@ -103,6 +115,7 @@ public class DOMWriter extends Builder {
      * Start of a document node.
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         if (document == null) {
             try {
@@ -120,6 +133,7 @@ public class DOMWriter extends Builder {
      * Notify the end of a document node
      */
 
+    @Override
     public void endDocument() throws XPathException {
     }
 
@@ -127,9 +141,12 @@ public class DOMWriter extends Builder {
      * Start of an element.
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
-        String qname = nameCode.getDisplayName();
-        String uri = nameCode.getURI();
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+        String qname = elemName.getDisplayName();
+        String uri = elemName.getURI();
         try {
             Element element = document.createElementNS("".equals(uri) ? null : uri, qname);
             if (nextSibling != null && level == 0) {
@@ -138,58 +155,50 @@ public class DOMWriter extends Builder {
                 currentNode.appendChild(element);
             }
             currentNode = element;
+
+            NamespaceMap parentNamespaces = nsStack.peek();
+            if (namespaces != parentNamespaces) {
+                NamespaceBinding[] declarations = namespaces.getDifferences(parentNamespaces, false);
+                for (NamespaceBinding ns : declarations) {
+                    String prefix = ns.getPrefix();
+                    String nsuri = ns.getURI();
+                    if (!nsuri.equals(NamespaceConstant.XML)) {
+                        if (prefix.isEmpty()) {
+                            element.setAttributeNS(NamespaceConstant.XMLNS, "xmlns", nsuri);
+                        } else {
+                            element.setAttributeNS(NamespaceConstant.XMLNS, "xmlns:" + prefix, nsuri);
+
+                        }
+                    }
+                }
+            }
+            nsStack.push(namespaces);
+
+            for (AttributeInfo att : attributes) {
+                NodeName attName = att.getNodeName();
+                String atturi = attName.getURI();
+                element.setAttributeNS("".equals(atturi) ? null : atturi, attName.getDisplayName(), att.getValue());
+                if (attName.equals(StandardNames.XML_ID_NAME) ||
+                        ReceiverOption.contains(properties, ReceiverOption.IS_ID) ||
+                        attName.hasURI(NamespaceConstant.XML) && attName.getLocalPart().equals("id")) {
+                    String localName = attName.getLocalPart();
+                    element.setIdAttributeNS("".equals(atturi) ? null : atturi, localName, true);
+                }
+            }
+
         } catch (DOMException err) {
             throw new XPathException(err);
         }
         level++;
     }
 
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        try {
-            for (NamespaceBinding ns : namespaceBindings) {
-                String prefix = ns.getPrefix();
-                String uri = ns.getURI();
-                Element element = (Element) currentNode;
-                if (!uri.equals(NamespaceConstant.XML)) {
-                    if (prefix.isEmpty()) {
-                        element.setAttributeNS(NamespaceConstant.XMLNS, "xmlns", uri);
-                    } else {
-                        element.setAttributeNS(NamespaceConstant.XMLNS, "xmlns:" + prefix, uri);
-
-                    }
-                }
-            }
-        } catch (DOMException err) {
-            throw new XPathException(err);
-        }
-    }
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        String qname = nameCode.getDisplayName();
-        String uri = nameCode.getURI();
-        try {
-            Element element = (Element) currentNode;
-            element.setAttributeNS("".equals(uri) ? null : uri, qname, value.toString());
-            if (nameCode.equals(StandardNames.XML_ID_NAME) ||
-                    (properties & ReceiverOptions.IS_ID) != 0 ||
-                    nameCode.hasURI(NamespaceConstant.XML) && nameCode.getLocalPart().equals("id")) {
-                String localName = nameCode.getLocalPart();
-                element.setIdAttributeNS("".equals(uri) ? null : uri, localName, true);
-            }
-        } catch (DOMException err) {
-            throw new XPathException(err);
-        }
-    }
-
-    public void startContent() throws XPathException {
-    }
-
     /**
      * End of an element.
      */
 
+    @Override
     public void endElement() throws XPathException {
+        nsStack.pop();
         if (canNormalize) {
             try {
                 currentNode.normalize();
@@ -207,6 +216,7 @@ public class DOMWriter extends Builder {
      * Character data.
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (level == 0 && nextSibling == null && Whitespace.isWhite(chars)) {
             return; // no action for top-level whitespace
@@ -228,6 +238,7 @@ public class DOMWriter extends Builder {
      * Handle a processing instruction.
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
             throws XPathException {
         try {
@@ -247,6 +258,7 @@ public class DOMWriter extends Builder {
      * Handle a comment.
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         try {
             Comment comment = document.createComment(chars.toString());
@@ -268,6 +280,7 @@ public class DOMWriter extends Builder {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }

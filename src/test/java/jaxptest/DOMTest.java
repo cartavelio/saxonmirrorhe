@@ -5,26 +5,22 @@ import com.saxonica.config.EnterpriseTransformerFactory;
 import com.saxonica.config.ProfessionalTransformerFactory;
 import com.saxonica.ee.domino.DominoTree;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
-import net.sf.saxon.dom.DOMObjectModel;
-import net.sf.saxon.dom.DOMWriter;
-import net.sf.saxon.dom.DocumentWrapper;
+import net.sf.saxon.dom.*;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.sort.CodepointCollatingComparer;
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
 import net.sf.saxon.lib.AugmentedSource;
 import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.om.CopyOptions;
-import net.sf.saxon.om.NoNamespaceName;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.TreeModel;
+import net.sf.saxon.om.*;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
@@ -35,6 +31,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.xpath.XPathEvaluator;
 import net.sf.saxon.xpath.XPathFactoryImpl;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -46,6 +43,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -59,18 +57,24 @@ import java.util.*;
 
 import static net.sf.saxon.s9api.streams.Predicates.isText;
 import static net.sf.saxon.s9api.streams.Steps.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 //import org.apache.xpath.NodeSet;
 
 /**
  *
  */
-public class DOMTest extends TestCase {
+public class DOMTest {
 
     /**
      * Test that namespaces are copied OK by an identity transform
      */
 
+    @Test
     public void testCopyNamespaces() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -92,64 +96,17 @@ public class DOMTest extends TestCase {
             StringWriter sw = new StringWriter();
             transformer.transform(source, new StreamResult(sw));
             //System.err.println(sw.toString());
-            assertTrue("Namespace is present in output", sw.toString().contains("http://lost.namespace.com/"));
-            assertTrue("Namespace is present in output", sw.toString().contains("xmlns:xsi="));
-            assertTrue("Attribute is present in output", sw.toString().contains("xsi:value"));
+            assertTrue(sw.toString().contains("http://lost.namespace.com/"), "Namespace is present in output");
+            assertTrue(sw.toString().contains("xmlns:xsi="), "Namespace is present in output");
+            assertTrue(sw.toString().contains("xsi:value"), "Attribute is present in output");
         } catch (Exception e) {
+            e.printStackTrace();
             fail(e.getMessage());
         }
     }
 
-    /**
-     * Get the string value of a document node
-     */
 
-    public void testStringValueOfDocHE() {
-        testStringValueOfDoc(new TransformerFactoryImpl());
-    }
-
-    public void testStringValueOfDocPE() {
-        testStringValueOfDoc(new ProfessionalTransformerFactory());
-    }
-
-    public void testStringValueOfDocEE() {
-        testStringValueOfDoc(new EnterpriseTransformerFactory());
-    }
-
-
-    public void testStringValueOfDoc(TransformerFactory tFactory) {
-        try {
-            String xml = "<!DOCTYPE test [\n" +
-                " <!ENTITY omega 'theta'>\n" +
-                "]>\n" +
-                "<test>[&omega;]</test>";
-
-            // Read an XML file to a DOM
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            DocumentBuilder db = factory.newDocumentBuilder();
-            InputSource is = new InputSource(new StringReader(xml));
-            Document doc = db.parse(is);
-
-            String stylesheet =
-                "<?xml version=\"1.0\"?> \n" +
-                    "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
-                    "<xsl:template match='/'>\n" +
-                    "<out><xsl:value-of select='.'/></out>\n" +
-                    "</xsl:template>\n" +
-                    "</xsl:stylesheet>";
-
-            Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(stylesheet)));
-            Transformer transformer = templates.newTransformer();
-            StringWriter sw = new StringWriter();
-            transformer.transform(new DOMSource(doc), new StreamResult(sw));
-            //System.err.println(sw.toString());
-            assertTrue(sw.toString().contains("<out>[theta]</out>"));
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-    }
-
+    @Test
     public void testDescendantAxis() {
         // Bug 4683
         try {
@@ -204,22 +161,77 @@ public class DOMTest extends TestCase {
     }
 
     /**
+     * Get the string value of a document node
+     */
+
+    @Test
+    public void testStringValueOfDocHE() {
+        testStringValueOfDoc(new TransformerFactoryImpl());
+    }
+
+    @Test
+    public void testStringValueOfDocPE() {
+        testStringValueOfDoc(new ProfessionalTransformerFactory());
+    }
+
+    @Test
+    public void testStringValueOfDocEE() {
+        testStringValueOfDoc(new EnterpriseTransformerFactory());
+    }
+
+    private void testStringValueOfDoc(TransformerFactory tFactory) {
+        try {
+            String xml = "<!DOCTYPE test [\n" +
+                " <!ENTITY omega 'theta'>\n" +
+                "]>\n" +
+                "<test>[&omega;]</test>";
+
+            // Read an XML file to a DOM
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder db = factory.newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(xml));
+            Document doc = db.parse(is);
+
+            String stylesheet =
+                "<?xml version=\"1.0\"?> \n" +
+                    "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
+                    "<xsl:template match='/'>\n" +
+                    "<out><xsl:value-of select='.'/></out>\n" +
+                    "</xsl:template>\n" +
+                    "</xsl:stylesheet>";
+
+            Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(stylesheet)));
+            Transformer transformer = templates.newTransformer();
+            StringWriter sw = new StringWriter();
+            transformer.transform(new DOMSource(doc), new StreamResult(sw));
+            //System.err.println(sw.toString());
+            assertTrue(sw.toString().contains("<out>[theta]</out>"));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
      * Test calling an extension function when the stylesheet has stripped whitespace (virtually)
      */
 
+    @Test
     public void testStripSpaceHE() {
         testStripSpace(new TransformerFactoryImpl());
     }
 
+    @Test
     public void testStripSpacePE() {
         testStripSpace(new ProfessionalTransformerFactory());
     }
 
+    @Test
     public void testStripSpaceEE() {
         testStripSpace(new EnterpriseTransformerFactory());
     }
 
-    public void testStripSpace(TransformerFactory tFactory) {
+    private void testStripSpace(TransformerFactory tFactory) {
         try {
             String in = "<?xml version='1.0'?> \n" +
                 "<Document> <e> <f/><f/> </e> </Document>";
@@ -255,7 +267,7 @@ public class DOMTest extends TestCase {
             StringWriter sw = new StringWriter();
             transformer.transform(source, new StreamResult(sw));
             //System.err.println(sw.toString());
-            assertTrue("Extension function not called", sw.toString().contains("[f][f]{e}"));
+            assertTrue(sw.toString().contains("[f][f]{e}"), "Extension function not called");
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -285,6 +297,7 @@ public class DOMTest extends TestCase {
      * Test Configuration.buildDocument given a DOMSource that wraps an Element node
      */
 
+    @Test
     public void testBuildFromDomElement() {
         // Note, this works rather inelegantly. Rather than creating a DOMSender, it wraps the Element
         // node is a Saxon XOMNodeWrapper and uses the generic Navigator.copy() method on the XOMNodeWrapper
@@ -300,10 +313,10 @@ public class DOMTest extends TestCase {
             Document doc = db.parse(is);
             Element ele = doc.getDocumentElement();
             NodeInfo nodeInfo = DOMObjectModel.getInstance().wrap(ele, new Configuration());
-            assertTrue("not-copied", nodeInfo instanceof VirtualNode);
+            assertTrue(nodeInfo instanceof VirtualNode, "not-copied");
             NodeInfo elemInfo = DOMObjectModel.getInstance().copy(ele, TreeModel.TINY_TREE, new Configuration());
-            assertFalse("copied", elemInfo instanceof VirtualNode);
-            assertEquals("is-element", elemInfo.getNodeKind(), Type.ELEMENT);
+            assertFalse(elemInfo instanceof VirtualNode, "copied");
+            assertEquals(Type.ELEMENT, elemInfo.getNodeKind(), "is-element");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -314,15 +327,26 @@ public class DOMTest extends TestCase {
      * Test that Saxon treats a text node with "null" content as if it had zero-length content
      */
 
+    @Test
     public void testNullTextNodes() {
         try {
             Configuration config = new Configuration();
-            Document doc = makeDocWithNullTextNode();
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder db = factory.newDocumentBuilder();
+            Document doc = db.newDocument();
+            Element top = doc.createElement("top");
+            doc.appendChild(top);
+            Text text = doc.createTextNode("data");
+            /////////////////////////
+            text.setData(null);
+            /////////////////////////
+            top.appendChild(text);
             DocumentWrapper wrapper = new DocumentWrapper(doc, "http://base.uri/", config);
             StringWriter sw = new StringWriter();
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw));
-            wrapper.getRootNode().copy(out, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, ExplicitLocation.UNKNOWN_LOCATION);
-            assertEquals("wrong output " + sw, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><top/>", sw.toString());
+            wrapper.getRootNode().copy(out, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, Loc.NONE);
+            assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><top/>", sw.toString(), "wrong output " + sw);
         } catch (ParserConfigurationException | XPathException e) {
             fail(e.getMessage());
         } catch (Exception err) {
@@ -331,6 +355,8 @@ public class DOMTest extends TestCase {
         }
     }
 
+
+    @Test
     public void testNullTextNodesDomino() {
         try {
             Configuration config = new EnterpriseConfiguration();
@@ -338,8 +364,8 @@ public class DOMTest extends TestCase {
             NodeInfo wrapper = DominoTree.makeTree(doc, config, "http://base.uri/").getRootNode();
             try (StringWriter sw = new StringWriter()) {
                 Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw));
-                wrapper.copy(out, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, ExplicitLocation.UNKNOWN_LOCATION);
-                assertEquals("wrong output " + sw, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><top/>", sw.toString());
+                wrapper.copy(out, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, Loc.NONE);
+                assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><top/>", sw.toString(), "wrong output " + sw);
             }
         } catch (ParserConfigurationException | XPathException e) {
             fail(e.getMessage());
@@ -364,6 +390,7 @@ public class DOMTest extends TestCase {
         return doc;
     }
 
+    @Test
     public void testAdjacentTextNodesWithDomino() {
         try {
             Configuration config = new EnterpriseConfiguration();
@@ -380,6 +407,7 @@ public class DOMTest extends TestCase {
         }
     }
 
+    @Test
     public void testAdjacentTextNodesWithPlainDomWrapper() {
         try {
             Configuration config = new EnterpriseConfiguration();
@@ -402,17 +430,17 @@ public class DOMTest extends TestCase {
         long count = top.select(child()).count();
         assertEquals(1, count);
         XdmNode text = top.select(child()).asNode();
-        assertEquals("t1", "text1text2", text.getStringValue());
+        assertEquals("text1text2", text.getStringValue(), "t1");
 
         count = docNode.select(descendant()).count();
-        assertEquals("t2", 2, count);
+        assertEquals(2, count, "t2");
         text = docNode.select(descendant(isText())).asNode();
-        assertEquals("t3", "text1text2", text.getStringValue());
+        assertEquals("text1text2", text.getStringValue(), "t3");
 
         count = top.select(descendant()).count();
-        assertEquals("t4", 1, count);
+        assertEquals(1, count, "t4");
         text = top.select(descendant()).asNode();
-        assertEquals("t5", "text1text2", text.getStringValue());
+        assertEquals("text1text2", text.getStringValue(), "t5");
 
     }
 
@@ -422,40 +450,41 @@ public class DOMTest extends TestCase {
         long count = top.select(child()).count();
         assertEquals(3, count);
         XdmNode text = top.select(child(isText())).asNode();
-        assertEquals("t1", "text1text2", text.getStringValue());
+        assertEquals("text1text2", text.getStringValue(), "t1");
 
         count = docNode.select(descendant()).count();
         assertEquals(4, count);
         text = docNode.select(descendant(isText())).asNode();
-        assertEquals("t2", "text1text2", text.getStringValue());
+        assertEquals("text1text2", text.getStringValue(), "t2");
 
         count = top.select(descendant()).count();
         assertEquals(3, count);
         text = top.select(descendant(isText())).asNode();
-        assertEquals("t3", "text1text2", text.getStringValue());
+        assertEquals("text1text2", text.getStringValue(), "t3");
 
-        XdmNode alpha  = text.select(precedingSibling()).asNode();
-        assertEquals("t4", "alpha", alpha.getNodeName().getLocalName());
+        XdmNode alpha = text.select(precedingSibling()).asNode();
+        assertEquals("alpha", alpha.getNodeName().getLocalName(), "t4");
 
         XdmNode omega = text.select(followingSibling()).asNode();
-        assertEquals("t5", "omega", omega.getNodeName().getLocalName());
+        assertEquals("omega", omega.getNodeName().getLocalName(), "t5");
 
         XdmNode preOmega = omega.select(precedingSibling()).first().asNode();
-        assertEquals("t6", "text1text2", preOmega.getStringValue());
+        assertEquals("text1text2", preOmega.getStringValue(), "t6");
 
         XdmNode prePreOmega = preOmega.select(precedingSibling()).first().asNode();
-        assertEquals("t7", "alpha", prePreOmega.getNodeName().getLocalName());
+        assertEquals("alpha", prePreOmega.getNodeName().getLocalName(), "t7");
 
         NodeInfo omegaInfo = omega.getUnderlyingNode();
         if (omegaInfo instanceof SteppingNode) {
             NodeInfo preOmegaInfo = ((SteppingNode) omegaInfo).getPreviousSibling();
-            assertEquals("t8", "text1text2", preOmegaInfo.getStringValue());
+            assertEquals("text1text2", preOmegaInfo.getStringValue(), "t8");
             NodeInfo prePreOmegaInfo = ((SteppingNode) preOmegaInfo).getPreviousSibling();
-            assertEquals("t9", "alpha", prePreOmegaInfo.getLocalPart());
+            assertEquals("alpha", prePreOmegaInfo.getLocalPart(), "t9");
         }
 
     }
 
+    @Test
     public void testAdjacentTextNodesWithDominoMixed() {
         try {
             Configuration config = new EnterpriseConfiguration();
@@ -472,6 +501,7 @@ public class DOMTest extends TestCase {
         }
     }
 
+    @Test
     public void testAdjacentTextNodesWithPlainDomWrapperMixed() {
         try {
             Configuration config = new EnterpriseConfiguration();
@@ -489,6 +519,7 @@ public class DOMTest extends TestCase {
     }
 
 
+    @Test
     public void testAdjacentTextNodesDomino() {
         try {
             Configuration config = new EnterpriseConfiguration();
@@ -496,13 +527,13 @@ public class DOMTest extends TestCase {
             NodeInfo wrapper = DominoTree.makeTree(doc, config, "http://base.uri/").getRootNode();
             StringWriter sw = new StringWriter();
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw));
-            wrapper.copy(out, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, ExplicitLocation.UNKNOWN_LOCATION);
-            assertEquals("wrong output " + sw, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><top>text1text2</top>", sw.toString());
-            XPathFactoryImpl xf =  new net.sf.saxon.xpath.XPathFactoryImpl();
+            wrapper.copy(out, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, Loc.NONE);
+            assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><top>text1text2</top>", sw.toString(), "wrong output " + sw);
+            XPathFactoryImpl xf = new net.sf.saxon.xpath.XPathFactoryImpl();
             xf.setConfiguration(config);
             XPath xp = xf.newXPath();
             String result = xp.evaluate("count(.//text())", wrapper);
-            assertEquals("number of text nodes ", "1", result);
+            assertEquals("1", result, "number of text nodes ");
         } catch (ParserConfigurationException | XPathException e) {
             fail(e.getMessage());
         } catch (Exception err) {
@@ -534,10 +565,12 @@ public class DOMTest extends TestCase {
     }
 
 
+
     /**
      * Test JAXP XPath API delivering a DOM NodeList given a DOM Node as input
      */
 
+    @Test
     public void testXPathNodeList() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -549,7 +582,7 @@ public class DOMTest extends TestCase {
             Document doc = db.parse(is);
             XPathEvaluator xpe = new XPathEvaluator();
             NodeList isList = (NodeList) xpe.evaluate("/*/*", doc, XPathConstants.NODESET);
-            assertEquals("length", 3, isList.getLength());
+            assertEquals(3, isList.getLength(), "length");
         } catch (ParserConfigurationException | XPathExpressionException | IOException | SAXException e) {
             fail(e.getMessage());
         }
@@ -559,6 +592,7 @@ public class DOMTest extends TestCase {
      * Test JAXP XPath API delivering a DOM NodeList given a DOMSource as input
      */
 
+    @Test
     public void testXPathNodeListFromDOMSource() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -571,7 +605,7 @@ public class DOMTest extends TestCase {
             DOMSource source = new DOMSource(doc);
             XPathEvaluator xpe = new XPathEvaluator();
             NodeList isList = (NodeList) xpe.evaluate("/*/*", source, XPathConstants.NODESET);
-            assertEquals("length", 3, isList.getLength());
+            assertEquals(3, isList.getLength(), "length");
         } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
             fail(e.getMessage());
         }
@@ -581,6 +615,7 @@ public class DOMTest extends TestCase {
      * Test JAXP XPath API delivering a DOM NodeList given a Saxon DOM NodeWrapper
      */
 
+    @Test
     public void testXPathNodeListFromWrapper() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -593,12 +628,13 @@ public class DOMTest extends TestCase {
             XPathEvaluator xpe = new XPathEvaluator();
             DocumentWrapper wrapper = new DocumentWrapper(doc, "http://example.com/", xpe.getConfiguration());
             NodeList isList = (NodeList) xpe.evaluate("/*/*", wrapper, XPathConstants.NODESET);
-            assertEquals("length", 3, isList.getLength());
+            assertEquals(3, isList.getLength(), "length");
         } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testNodeListFromXsltExtension() {
         String stylesheet =
             "<?xml version=\"1.0\"?> \n" +
@@ -618,7 +654,7 @@ public class DOMTest extends TestCase {
             StreamSource source = new StreamSource(new StringReader("<doc/>"));
             StringWriter sw = new StringWriter();
             transformer.transform(source, new StreamResult(sw));
-            assertTrue(sw.toString(), sw.toString().contains("<a>5</a><b>0</b><c>0</c>"));
+            assertTrue(sw.toString().contains("<a>5</a><b>0</b><c>0</c>"), sw.toString());
         } catch (TransformerException e) {
             fail(e.getMessage());
             e.printStackTrace();
@@ -648,6 +684,7 @@ public class DOMTest extends TestCase {
      * Test showing a DOM NodeList returned by an extension function
      */
 
+    @Test
     public void testXPathNodeListFromExtensionFunction() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -660,20 +697,23 @@ public class DOMTest extends TestCase {
             XPathEvaluator xpe = new XPathEvaluator();
             String exp = "ext:sortArrayToNodeList(//book)";
             xpe.setNamespaceContext(new NamespaceContext() {
+                @Override
                 public String getNamespaceURI(String prefix) {
                     return prefix.equals("ext") ? "java:jaxptest.DOMTest" : null;
                 }
 
+                @Override
                 public String getPrefix(String namespaceURI) {
                     return null;
                 }
 
+                @Override
                 public Iterator getPrefixes(String namespaceURI) {
                     return null;
                 }
             });
             NodeList isList = (NodeList) xpe.evaluate(exp, doc, XPathConstants.NODESET);
-            assertEquals("length", 4, isList.getLength());
+            assertEquals(4, isList.getLength(), "length");
         } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
             fail(e.getMessage());
             e.printStackTrace();
@@ -685,6 +725,7 @@ public class DOMTest extends TestCase {
      * implemented using the JAXP FunctionResolver
      */
 
+    @Test
     public void testXPathNodeListFromJaxpExtensionFunction() {
         try {
             String in = "<?xml version='1.0'?> \n" +
@@ -698,11 +739,11 @@ public class DOMTest extends TestCase {
             XPath xpath = getXPath();
             NodeList isList = (NodeList) xpath.evaluate(
                 "ext:sortArrayToSequence(//book)", doc, XPathConstants.NODESET);
-            assertEquals("length", 4, isList.getLength());
+            assertEquals(4, isList.getLength(), "length");
 
             isList = (NodeList) xpath.evaluate("ext:sortArrayToNodeList(//book)", doc, XPathConstants.NODESET);
 
-            assertEquals("length", 4, isList.getLength());
+            assertEquals(4, isList.getLength(), "length");
 
         } catch (ParserConfigurationException | SAXException | IOException e) {
             fail(e.getMessage());
@@ -715,14 +756,17 @@ public class DOMTest extends TestCase {
     public XPath getXPath() {
         XPath xpath = new XPathEvaluator();
         xpath.setNamespaceContext(new NamespaceContext() {
+            @Override
             public String getNamespaceURI(String prefix) {
                 return prefix.equals("ext") ? "http://extString" : null;
             }
 
+            @Override
             public String getPrefix(String namespaceURI) {
                 return null;
             }
 
+            @Override
             public Iterator getPrefixes(String namespaceURI) {
                 return null;
             }
@@ -764,10 +808,12 @@ public class DOMTest extends TestCase {
 
         return new NodeList() {
 
+            @Override
             public Node item(int index) {
                 return textNodes.get(index);
             }
 
+            @Override
             public int getLength() {
                 return textNodes.size();
             }
@@ -807,6 +853,7 @@ public class DOMTest extends TestCase {
             m_funcName = funcName;
         }
 
+        @Override
         public Object evaluate(List args) throws XPathFunctionException {
             Class[] clsArr = new Class[args.size()];
             Object[] objArr = new Object[args.size()];
@@ -826,6 +873,7 @@ public class DOMTest extends TestCase {
         }
     }
 
+    @Test
     public void testTopLevelWhitespaceText() throws Exception {
         // effect of adding top-level whitespace text node
         String stylesheet =
@@ -845,7 +893,7 @@ public class DOMTest extends TestCase {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
             transformer.transform(source, new DOMResult(document));
-            assertEquals("result", "a", document.getDocumentElement().getNodeName());
+            assertEquals("a", document.getDocumentElement().getNodeName(), "result");
         } catch (TransformerException e) {
             fail(e.getMessage());
             e.printStackTrace();
@@ -853,6 +901,7 @@ public class DOMTest extends TestCase {
 
     }
 
+    @Test
     public void testTopLevelNonWhitespaceText() throws Exception {
         // effect of adding top-level whitespace text node
         String stylesheet =
@@ -879,6 +928,7 @@ public class DOMTest extends TestCase {
 
     }
 
+    @Test
     public void testIdentityTransformOfDOMTextNode() throws Exception {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
@@ -898,17 +948,18 @@ public class DOMTest extends TestCase {
 
         StringWriter sw = new StringWriter();
         transformer.transform(new DOMSource(textNode), new StreamResult(sw));
-        assertEquals("text node", sw.toString(), "some text");
+        assertEquals( "some text", sw.toString(),"text node");
 
         sw = new StringWriter();
         transformer.transform(new DOMSource(commentNode), new StreamResult(sw));
-        assertEquals("text node", sw.toString(), "<!--a comment-->");
+        assertEquals("<!--a comment-->", sw.toString(), "comment");
 
         sw = new StringWriter();
         transformer.transform(new DOMSource(piNode), new StreamResult(sw));
-        assertEquals("text node", sw.toString(), "<?tgt some data?>");
+        assertEquals("<?tgt some data?>", sw.toString(), "processing instruction");
     }
 
+    @Test
     public void testIdentityTransformOfEmptyDOMSource() throws Exception {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
@@ -934,18 +985,22 @@ public class DOMTest extends TestCase {
      * Test case(s) from T-Mobile, 8 April 2010: validate an element in a DOM that is not the root node
      */
 
+    @Test
     public void testElementValidationYN() {
         tryElementValidation(true, false);
     }
 
+    @Test
     public void testElementValidationYY() {
         tryElementValidation(true, true);
     }
 
+    @Test
     public void testElementValidationNN() {
         tryElementValidation(false, false);
     }
 
+    @Test
     public void testElementValidationNY() {
         tryElementValidation(false, true);
     }
@@ -1025,7 +1080,7 @@ public class DOMTest extends TestCase {
             factory.setNamespaceAware(namespaceAware);
 
             // Assume we're running with Xerces, but if not, it doesn't really affect the test
-            assertEquals("xerces?", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl", factory.getClass().getName());
+            assertEquals("org.apache.xerces.jaxp.DocumentBuilderFactoryImpl", factory.getClass().getName(), "xerces?");
 
             DocumentBuilder domBuilder = factory.newDocumentBuilder();
 
@@ -1034,7 +1089,7 @@ public class DOMTest extends TestCase {
 
             Node node = doc.getDocumentElement().getElementsByTagName("foo").item(0);
             if (namespaceAware) {
-                assertEquals(node.getNamespaceURI(), "http://foo");
+                assertEquals("http://foo", node.getNamespaceURI());
             } else {
                 assertNull(node.getNamespaceURI());
             }
@@ -1042,8 +1097,8 @@ public class DOMTest extends TestCase {
             dynamicContext.setContextItem(build(new DOMSource(node), config));
 
             List result = xq.evaluate(dynamicContext);
-            assertEquals(result.size(), 1);
-            assertEquals(((NodeInfo) result.get(0)).getURI(), "http://foo");
+            assertEquals(1, result.size());
+            assertEquals("http://foo", ((NodeInfo) result.get(0)).getURI());
 
 
         } catch (Exception e) {
@@ -1074,59 +1129,20 @@ public class DOMTest extends TestCase {
         return newdoc;
     }
 
-//    public void testSaxonDocumentBuilder() {
-//        try {
-//            DocumentBuilderFactoryImpl domFactory = new net.sf.saxon.dom.DocumentBuilderFactoryImpl();
-//            Configuration config = (Configuration)domFactory.getAttribute(FeatureKeys.CONFIGURATION);
-//            domFactory.setNamespaceAware(true);
-//            XPathFactory xpathFactory = new net.sf.saxon.xpath.XPathFactoryImpl(config);
-//
-//            String in = "<?xml version='1.0'?> \n" +
-//                        "<files> <file name='a' md5='true'/> <file name='b' md5='false'/> </files>";
-//
-//            // Read an XML file to a DOM
-//            InputSource is = new InputSource(new StringReader(in));
-//            Document dom = domFactory.newDocumentBuilder().parse(is);
-//            XPath xp = xpathFactory.newXPath();
-//            NodeList result = (NodeList)xp.evaluate("/files/file", dom, XPathConstants.NODESET);
-//            Properties ret = new Properties();
-//            for (int i=0; i<result.getLength(); i++) {
-//                Element file = (Element)result.item(i);
-//                ret.setProperty(file.getAttribute("name"), file.getAttribute("md5"));
-//            }
-//            assertTrue("result", ret.getProperty("a").equals("true"));
-//        } catch (SAXException e) {
-//            e.printStackTrace();
-//            fail(e.getMessage());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            fail(e.getMessage());
-//        } catch (ParserConfigurationException e) {
-//            e.printStackTrace();
-//            fail(e.getMessage());
-//        } catch (XPathExpressionException e) {
-//            e.printStackTrace();
-//            fail(e.getMessage());
-//        }
-//
-//    }
-
-    /**
-     * DOM-to-DOM identity transform: Copy an element in a DOM that is not the root node
-     */
-
-    public void testElementCopyYN() {
-        tryElementCopy(true, false);
-    }
-
+    @Test
     public void testElementCopyYY() {
         tryElementCopy(true, true);
     }
 
+    @Test
     public void testElementCopyNN() {
+        // MHK 2020-03-13: this is failing on 10.0. The call on getNamespaceURI() on the 'foo' element returns
+        // "", not the actual namespace http://foo. I think this is OK: we don't actually support a non-namespace-aware
+        // DOM, and we can't detect that the DOM is non-namespace-aware.
         tryElementCopy(false, false);
     }
 
+    @Test
     public void testElementCopyNY() {
         tryElementCopy(false, true);
     }
@@ -1149,7 +1165,7 @@ public class DOMTest extends TestCase {
             factory.setNamespaceAware(namespaceAware);
 
             // Assume we're running with Xerces, but if not, it doesn't really affect the test
-            assertEquals("xerces?", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl", factory.getClass().getName());
+            assertEquals( "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl", factory.getClass().getName(), "xerces?");
 
             DocumentBuilder domBuilder = factory.newDocumentBuilder();
 
@@ -1158,7 +1174,7 @@ public class DOMTest extends TestCase {
 
             Node node = doc.getDocumentElement().getElementsByTagName("foo").item(0);
             if (namespaceAware) {
-                assertEquals(node.getNamespaceURI(), "http://foo");
+                assertEquals("http://foo", node.getNamespaceURI());
             } else {
                 assertNull(node.getNamespaceURI());
             }
@@ -1173,7 +1189,7 @@ public class DOMTest extends TestCase {
             XPathContext context = config.getConversionContext();
             boolean comparison = net.sf.saxon.functions.DeepEqual.deepEqual(
                 one.iterate(), two.iterate(), CodepointCollatingComparer.getInstance(), context, 0);
-            assertTrue("Copy is not deep-equal", comparison);
+            assertTrue(comparison, "Copy is not deep-equal");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -1182,6 +1198,7 @@ public class DOMTest extends TestCase {
     }
 
 
+    @Test
     public void testTypedDom() {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -1200,7 +1217,7 @@ public class DOMTest extends TestCase {
             Document d2 = (Document) r.getNode();
             Element e = d2.getDocumentElement();
             TypeInfo ti = e.getSchemaTypeInfo();
-            assertNull("TypeInfo null", ti.getTypeName());
+            assertNull(ti.getTypeName(), "TypeInfo null");
             //System.out.println(ti.getTypeName());
             // This doesn't actually work. Saxon has no way of setting the type info in the dom, because there
             // is no setTypeInfo() method.
@@ -1211,6 +1228,7 @@ public class DOMTest extends TestCase {
         }
     }
 
+    @Test
     public void testTypedDom11() {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -1230,7 +1248,7 @@ public class DOMTest extends TestCase {
             Document d2 = (Document) r.getNode();
             Element e = d2.getDocumentElement();
             TypeInfo ti = e.getSchemaTypeInfo();
-            assertNull("TypeInfo null", ti.getTypeName());
+            assertNull(ti.getTypeName(), "TypeInfo null");
             // This doesn't actually work. Saxon has no way of setting the type info in the dom, because there
             // is no setTypeInfo() method.
 
@@ -1240,6 +1258,7 @@ public class DOMTest extends TestCase {
         }
     }
 
+    @Test
     public void testReusableValidator() {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -1268,6 +1287,7 @@ public class DOMTest extends TestCase {
     }
 
 
+    @Test
     public void testNullNamespace() {
         try {
             String xml =
@@ -1312,6 +1332,7 @@ public class DOMTest extends TestCase {
         }
     }
 
+    @Test
     public void testNullNamespaceNonNamespaceAware() {
         try {
             String xml =
@@ -1357,25 +1378,30 @@ public class DOMTest extends TestCase {
     }
 
 
+    @Test
     public void testBug1781() {
         try {
             Configuration config = new Configuration();
             DOMWriter domWriter = new DOMWriter();
             domWriter.setPipelineConfiguration(config.makePipelineConfiguration());
             domWriter.open();
-            domWriter.startDocument(0);
-            domWriter.startElement(new NoNamespaceName("root"), Untyped.getInstance(), ExplicitLocation.UNKNOWN_LOCATION, 0);
-            domWriter.attribute(new NoNamespaceName("id"), BuiltInAtomicType.UNTYPED_ATOMIC, "iii", ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.IS_ID);
+            domWriter.startDocument(ReceiverOption.NONE);
+            AttributeMap atts = EmptyAttributeMap.getInstance();
+            atts = atts.put(new AttributeInfo(new NoNamespaceName("id"), BuiltInAtomicType.UNTYPED_ATOMIC, "iii", Loc.NONE, ReceiverOption.IS_ID));
+            domWriter.startElement(new NoNamespaceName("root"), Untyped.getInstance(),
+                                   atts, NamespaceMap.emptyMap(),
+                                   Loc.NONE, ReceiverOption.NONE);
             domWriter.endElement();
             domWriter.endDocument();
             domWriter.close();
-            assertEquals(domWriter.getCurrentRoot().getStringValue(), "");
+            assertEquals("", domWriter.getCurrentRoot().getStringValue());
         } catch (Exception err) {
             err.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testEmptyDom() {
         // Bug 2102
         try {
@@ -1385,13 +1411,14 @@ public class DOMTest extends TestCase {
             String ss = "<z xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xsl:version='2.0' count='{count(//*)}'/>";
             Transformer transformer = factory.newTransformer(new StreamSource(new StringReader(ss)));
             transformer.transform(source, new StreamResult(sw));
-            assertEquals(sw.toString(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?><z count=\"0\"/>");
+            assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><z count=\"0\"/>", sw.toString());
         } catch (TransformerException e1) {
             fail(e1.getMessage());
             e1.printStackTrace();
         }
     }
 
+    @Test
     public void testEmptyDomResult() {
         // Bug 2164
         try {
@@ -1407,6 +1434,7 @@ public class DOMTest extends TestCase {
         }
     }
 
+    @Test
     public void testSpaceStrippedDomWithExtensionFunction() {
         // Bug 3142
         try {
@@ -1449,6 +1477,7 @@ public class DOMTest extends TestCase {
      * Test subclass of DOMSource (bug 3241)
      */
 
+    @Test
     public void testDOMSourceSubclass() {
         try {
             String xml = "<test>[theta]</test>";
@@ -1486,6 +1515,7 @@ public class DOMTest extends TestCase {
         }
     }
 
+    @Test
     public void testBug3164() {
         try {
             String xml = "<test width='5'></test>";
@@ -1517,6 +1547,7 @@ public class DOMTest extends TestCase {
         return attributeNode;
     }
 
+    @Test
     public void testBug4121() {
         Transformer transformer;
         Transformer identityTransformer;
@@ -1557,30 +1588,97 @@ public class DOMTest extends TestCase {
 
     }
 
+    @Test
+    public void testBug4509() {
+        try {
+            Processor proc = new Processor(false);
+            net.sf.saxon.s9api.DocumentBuilder builder = proc.newDocumentBuilder();
+            builder.setTreeModel(DOMObjectModel.getInstance());
+            XdmNode tree = builder.build(new StreamSource(new StringReader("<root xmlns='namespace'><a/><b/></root>")));
+            Document doc = (Document)((DOMNodeWrapper)tree.getUnderlyingNode()).getUnderlyingNode();
+            Element root = doc.getDocumentElement();
+            assertTrue(root.hasAttribute("xmlns"));
+            Element a = (Element)root.getChildNodes().item(0);
+            assertFalse(a.hasAttribute("xmlns"));
+            assertEquals(0, a.getAttributes().getLength());
+            Element b = (Element) root.getChildNodes().item(1);
+            assertFalse(b.hasAttribute("xmlns"));
+            assertEquals(0, b.getAttributes().getLength());
+        } catch (SaxonApiException err) {
+            fail(err.getMessage());
+        }
+    }
+
+    @Test
+    public void testBug4509a() {
+        try {
+            Processor proc = new Processor(false);
+            net.sf.saxon.s9api.DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode tree = builder.build(new StreamSource(new StringReader("<root xmlns='namespace'><a/><b/></root>")));
+            Document doc = (DocumentOverNodeInfo) DocumentOverNodeInfo.wrap(tree.getUnderlyingNode());
+            Element root = doc.getDocumentElement();
+            assertTrue(root.hasAttribute("xmlns"));
+            Element a = (Element) root.getChildNodes().item(0);
+            assertFalse(a.hasAttribute("xmlns"));
+            assertEquals(0, a.getAttributes().getLength());
+            Element b = (Element) root.getChildNodes().item(1);
+            assertFalse(b.hasAttribute("xmlns"));
+            assertEquals(0, b.getAttributes().getLength());
+        } catch (SaxonApiException err) {
+            fail(err.getMessage());
+        }
+    }
+
+
+    @Test
+    public void testBug4509b () {
+        try {
+            Processor processor = new Processor(false);
+            net.sf.saxon.s9api.DocumentBuilder documentBuilder = processor.newDocumentBuilder();
+            SAXSource saxSource = new SAXSource(new InputSource(new StringReader("<root xmlns='namespace' abc='100'><element0 def='200'/><element1 ghi='300'/></root>")));
+            XdmNode node = documentBuilder.build(saxSource);
+            Document document = (DocumentOverNodeInfo) DocumentOverNodeInfo.wrap(node.getUnderlyingNode());
+            Element root = document.getDocumentElement();
+            Element element0 = (Element) root.getChildNodes().item(0);
+            System.out.println(String.format("%s", element0.getNodeName()));
+            for (int i = 0; i < element0.getAttributes().getLength(); i++) {
+                System.out.println(String.format("element0 attribute[%d] %s=%s", i, element0.getAttributes().item(i).getNodeName(), element0.getAttributes().item(i).getNodeValue()));
+            }
+            System.out.println("");
+            Element element1 = (Element) root.getChildNodes().item(1);
+            System.out.println(String.format("%s", element1.getNodeName()));
+            for (int i = 0; i < element1.getAttributes().getLength(); i++) {
+                System.out.println(String.format("element1 attribute[%d] %s=%s", i, element1.getAttributes().item(i).getNodeName(), element1.getAttributes().item(i).getNodeValue()));
+            }
+            System.out.println("");
+            System.out.println(String.format("treeModel=%s", documentBuilder.getTreeModel().getClass().getName()));
+            System.out.println("java -cp 'SaxonHE9-9-17J\\saxon9he.jar';. TEST");
+            System.out.println("ACTUAL OUTPUT ON MY PC");
+            System.out.println("element0");
+            System.out.println("element0 attribute[0] xmlns:xml=http://www.w3.org/XML/1998/namespace");
+            System.out.println("element0 attribute[1] def=200");
+            System.out.println("element1");
+            System.out.println("element1 attribute[0] xmlns:xml=http://www.w3.org/XML/1998/namespace");
+            System.out.println("element1 attribute[1] ghi=300");
+            System.out.println("treeModel=net.sf.saxon.om.TreeModel$TinyTree");
+            System.out.println("");
+            System.out.println("java -cp 'SaxonHE10-0J\\saxon-he-10.0.jar';. TEST");
+            System.out.println("ACTUAL OUTPUT ON MY PC");
+            System.out.println("element0");
+            System.out.println("element0 attribute[0] xmlns=namespace");
+            System.out.println("element0 attribute[1] def=200");
+            System.out.println("element1");
+            System.out.println("element1 attribute[0] xmlns=namespace");
+            System.out.println("element1 attribute[1] ghi=300");
+            System.out.println("treeModel=net.sf.saxon.om.TreeModel$TinyTree");
+            System.out.println("");
+        }
+                catch(Exception e){
+        }
+    }
+
 
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
 
 
 

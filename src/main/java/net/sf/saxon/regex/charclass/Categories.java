@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -53,10 +53,12 @@ public class Categories {
             this.predicate = predicate;
         }
 
+        @Override
         public boolean test(int value) {
             return predicate.test(value);
         }
 
+        @Override
         public boolean isDisjoint(CharacterClass other) {
             if (other instanceof Category) {
                 char majorCat0 = label.charAt(0);
@@ -87,6 +89,7 @@ public class Categories {
             }
         }
 
+        @Override
         public IntSet getIntSet() {
             return extent(predicate);
         }
@@ -131,12 +134,11 @@ public class Categories {
         iter.forEach(item -> {
             String cat = ((TinyElementImpl)item).getAttributeValue(fp_name);
             IntRangeSet irs = new IntRangeSet();
-            AxisIterator iter2 = item.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
-            iter2.forEach(r -> {
+            for (NodeInfo r : ((NodeInfo)item).children(NodeKindTest.ELEMENT)) {
                 String from = ((TinyElementImpl)r).getAttributeValue(fp_f);
                 String to = ((TinyElementImpl) r).getAttributeValue(fp_t);
                 irs.addRange(Integer.parseInt(from, 16), Integer.parseInt(to, 16));
-            });
+            }
             CATEGORIES.put(cat, new Category(cat, new IntSetPredicate(irs)));
         });
 

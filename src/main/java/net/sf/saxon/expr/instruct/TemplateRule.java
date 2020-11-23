@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,8 +7,9 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.StandardNames;
@@ -17,21 +18,19 @@ import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.InstructionInfo;
-import net.sf.saxon.trace.LocationKind;
+import net.sf.saxon.trace.TraceableComponent;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleTarget;
-import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * The runtime object corresponding to an xsl:template element in the stylesheet.
@@ -43,7 +42,7 @@ import java.util.List;
  * <p>From Saxon 9.8, a subclass is used in Saxon-EE</p>
  */
 
-public class TemplateRule implements RuleTarget, Location, ExpressionOwner, InstructionInfo {
+public class TemplateRule implements RuleTarget, Location, ExpressionOwner, TraceableComponent {
 
     // The body of the template is represented by an expression,
     // which is responsible for any type checking that's needed.
@@ -88,8 +87,31 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
 
     }
 
+    @Override
     public Expression getBody() {
         return body;
+    }
+
+    @Override
+    public Expression getChildExpression() {
+        return body;
+    }
+
+    @Override
+    public Location getLocation() {
+        return this;
+    }
+
+    /**
+     * Get the properties of this object to be included in trace messages, by supplying
+     * the property values to a supplied consumer function
+     *
+     * @param consumer the function to which the properties should be supplied, as (property name,
+     *                 value) pairs.
+     */
+    @Override
+    public void gatherProperties(BiConsumer<String, Object> consumer) {
+        consumer.accept("match", getMatchPattern().toShortString());
     }
 
     /**
@@ -126,6 +148,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
      * @param body the body of the template
      */
 
+    @Override
     public void setBody(Expression body) {
         this.body = body;
         bodyIsTailCallReturner = (body instanceof TailCallReturner);
@@ -196,6 +219,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
      *
      * @param rule a rule in which this is the target
      */
+    @Override
     public void registerRule(Rule rule) {
         rules.add(rule);
     }
@@ -224,10 +248,12 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
         this.packageData = data;
     }
 
+    @Override
     public String getPublicId() {
         return null;
     }
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -236,6 +262,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
         this.systemId = id;
     }
 
+    @Override
     public int getLineNumber() {
         return lineNumber;
     }
@@ -244,6 +271,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
         this.lineNumber = line;
     }
 
+    @Override
     public int getColumnNumber() {
         return -1;
     }
@@ -253,6 +281,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
+    @Override
     public Location saveLocation() {
         return this;
     }
@@ -306,13 +335,15 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
      * Process the template, without returning any tail calls. This path is used by
      * xsl:apply-imports and xsl:next-match
      *
+     *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
      * @throws XPathException if a dynamic error occurs while evaluating
      *                        the template
      */
 
-    public void apply(XPathContextMajor context) throws XPathException {
-        TailCall tc = applyLeavingTail(context);
+    public void apply(Outputter output, XPathContextMajor context) throws XPathException {
+        TailCall tc = applyLeavingTail(output, context);
         while (tc != null) {
             tc = tc.processLeavingTail();
         }
@@ -322,6 +353,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
      * Process this template, with the possibility of returning a tail call package if the template
      * contains any tail calls that are to be performed by the caller.
      *
+     * @param output the destination for the result
      * @param context the XPath dynamic context
      * @return null if the template exited normally; but if it was a tail call, details of the call
      * that hasn't been made yet and needs to be made by the caller
@@ -329,7 +361,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
      *                        the template
      */
 
-    public TailCall applyLeavingTail(XPathContext context) throws XPathException {
+    public TailCall applyLeavingTail(Outputter output, XPathContext context) throws XPathException {
         //initialize();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         if (requiredContextItemType != AnyItemType.getInstance() &&
@@ -349,9 +381,9 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
 
         try {
             if (bodyIsTailCallReturner) {
-                return ((TailCallReturner) body).processLeavingTail(context);
+                return ((TailCallReturner) body).processLeavingTail(output, context);
             } else {
-                body.process(context);
+                body.process(output, context);
                 return null;
             }
         } catch (UncheckedXPathException e) {
@@ -373,38 +405,13 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
     }
 
     /**
-     * Get the type of construct. This will either be the fingerprint of a standard XSLT instruction name
-     * (values in {@link StandardNames}: all less than 1024)
-     * or it will be a constant in class {@link LocationKind}.
-     */
-
-    public int getConstructType() {
-        return LocationKind.TEMPLATE;
-    }
-
-    /**
      * Output diagnostic explanation to an ExpressionPresenter
      */
 
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         // NOT USED - see Rule.export
         throw new UnsupportedOperationException();
-//        presenter.startElement("template");
-//
-//        explainProperties(presenter);
-//
-//        presenter.emitAttribute("slots", "" + getStackFrameMap().getNumberOfVariables());
-//        //presenter.emitAttribute("binds", "" + getDeclaringComponent().getComponentBindings().size());
-//
-//        if (matchPattern != null) {
-//            presenter.setChildRole("match");
-//            matchPattern.export(presenter);
-//        }
-//        if (getBody() != null) {
-//            presenter.setChildRole("body");
-//            getBody().export(presenter);
-//        }
-//        presenter.endElement();
     }
 
     /**
@@ -426,11 +433,8 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
 
     public void explainProperties(ExpressionPresenter presenter) throws XPathException {
         if (getRequiredContextItemType() != AnyItemType.getInstance()) {
-            presenter.emitAttribute("cxt", getRequiredContextItemType().toString());
-            if ("JS".equals(((ExpressionPresenter.ExportOptions) presenter.getOptions()).target)) {
-                int targetVersion = ((ExpressionPresenter.ExportOptions) presenter.getOptions()).targetVersion;
-                presenter.emitAttribute("jsTest", getRequiredContextItemType().generateJavaScriptItemTypeTest(AnyItemType.getInstance(), targetVersion));
-            }
+            SequenceType st = SequenceType.makeSequenceType(getRequiredContextItemType(), StaticProperty.EXACTLY_ONE);
+            presenter.emitAttribute("cxt", st.toAlphaCode());
         }
 
         String flags = "";
@@ -439,7 +443,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
         }
         presenter.emitAttribute("flags", flags);
         if (getRequiredType() != SequenceType.ANY_SEQUENCE) {
-            presenter.emitAttribute("as", getRequiredType().toExportString());
+            presenter.emitAttribute("as", getRequiredType().toAlphaCode());
         }
         presenter.emitAttribute("line", getLineNumber() + "");
         presenter.emitAttribute("module", getSystemId());
@@ -501,23 +505,19 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Inst
         tr.lineNumber = lineNumber;
     }
 
+    @Override
     public void setChildExpression(Expression expr) {
         setBody(expr);
     }
 
     @Override
     public StructuredQName getObjectName() {
-        return StandardNames.getStructuredQName(StandardNames.XSL_TEMPLATE);
+        return null;
     }
 
     @Override
-    public Object getProperty(String name) {
-        return name.equals("match") ? getMatchPattern().toShortString() : null;
-    }
-
-    @Override
-    public Iterator<String> getProperties() {
-        return new MonoIterator<>("match");
+    public String getTracingTag() {
+        return "xsl:template";
     }
 
 

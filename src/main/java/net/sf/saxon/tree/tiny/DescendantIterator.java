@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,7 +18,7 @@ import java.util.function.IntPredicate;
  * This class supports both the descendant:: and descendant-or-self:: axes, which are
  * identical except for the route to the first candidate node.
  * It enumerates descendants of the specified node. This version includes all text nodes
- * in the result (assuming they are matched), but does not handle grafted external nodes
+ * in the result (assuming they are matched).
  * The calling code must ensure that the start node is not an attribute or namespace node.
  */
 
@@ -47,6 +47,7 @@ final class DescendantIterator implements AxisIterator {
     }
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
         do {
             if (pending != null) {

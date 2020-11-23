@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -73,7 +73,7 @@ public class PathMap {
          * @return the newly-constructed target of the new arc
          */
 
-        public PathMapNode createArc(byte axis, /*@NotNull*/ NodeTest test) {
+        public PathMapNode createArc(int axis, /*@NotNull*/ NodeTest test) {
             for (PathMapArc a : arcs) {
                 if (a.getAxis() == axis && a.getNodeTest().equals(test)) {
                     return a.getTarget();
@@ -93,7 +93,7 @@ public class PathMap {
          * @param target the target node of the new arc
          */
 
-        public void createArc(byte axis, /*@NotNull*/ NodeTest test, /*@NotNull*/ PathMapNode target) {
+        public void createArc(int axis, /*@NotNull*/ NodeTest test, /*@NotNull*/ PathMapNode target) {
             for (PathMapArc a : arcs) {
                 if (a.getAxis() == axis && a.getNodeTest().equals(test) && a.getTarget() == target) {
                     // TODO: if it's a different target, then merge the two targets into one. XMark Q8
@@ -277,7 +277,7 @@ public class PathMap {
 
     public static class PathMapArc {
         private PathMapNode target;
-        private byte axis;
+        private int axis;
         private NodeTest test;
 
         /**
@@ -287,7 +287,7 @@ public class PathMap {
          * @param test   the node test
          * @param target the node reached by following this arc
          */
-        private PathMapArc(byte axis, /*@NotNull*/ NodeTest test, /*@NotNull*/ PathMapNode target) {
+        private PathMapArc(int axis, /*@NotNull*/ NodeTest test, /*@NotNull*/ PathMapNode target) {
             this.axis = axis;
             this.test = test;
             this.target = target;
@@ -299,7 +299,7 @@ public class PathMap {
          * @return the axis, a constant from class {@link net.sf.saxon.om.AxisInfo}
          */
 
-        public byte getAxis() {
+        public int getAxis() {
             return axis;
         }
 
@@ -357,7 +357,7 @@ public class PathMap {
          */
 
         /*@NotNull*/
-        public PathMapNodeSet createArc(byte axis, /*@NotNull*/ NodeTest test) {
+        public PathMapNodeSet createArc(int axis, /*@NotNull*/ NodeTest test) {
             PathMapNodeSet targetSet = new PathMapNodeSet();
             for (PathMapNode node : this) {
                 targetSet.add(node.createArc(axis, test));
@@ -652,7 +652,7 @@ public class PathMap {
             newRoot = makeNewRoot(slash);
             for (int i = root.arcs.size() - 1; i >= 0; i--) {
                 PathMapArc arc = root.arcs.get(i);
-                byte axis = arc.getAxis();
+                int axis = arc.getAxis();
                 switch (axis) {
                     case AxisInfo.ATTRIBUTE:
                     case AxisInfo.NAMESPACE: {
@@ -710,7 +710,7 @@ public class PathMap {
             //AxisExpression axisStep = thisArc.getStep();
             PathMapNode grandParent =
                     (nodeStack.size() < 2 ? null : nodeStack.get(nodeStack.size() - 2));
-            byte lastAxis = -1;
+            int lastAxis = -1;
             if (grandParent != null) {
                 for (PathMapArc arc1 : grandParent.arcs) {
                     PathMapArc arc = (arc1);

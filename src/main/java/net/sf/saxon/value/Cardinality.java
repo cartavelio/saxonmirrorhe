@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -110,6 +110,11 @@ public final class Cardinality {
         return fromMinAndMax(min, max);
     }
 
+    /**
+     * Get the minimum number of occurrences permitted by a given cardinality
+     * @param cardinality the cardinality code
+     * @return the minimum size of a sequence that satisfies this cardinality
+     */
     static int min(int cardinality) {
         if (allowsZero(cardinality)) {
             return 0;
@@ -120,6 +125,13 @@ public final class Cardinality {
         }
     }
 
+    /**
+     * Get the maximum number of occurrences permitted by a given cardinality
+     *
+     * @param cardinality the cardinality code
+     * @return the maximum size of a sequence that satisfies this cardinality,
+     * where 2 represents infinity.
+     */
     static int max(int cardinality) {
         if (allowsMany(cardinality)) {
             return 2;
@@ -209,7 +221,7 @@ public final class Cardinality {
     }
 
     /**
-     * Get the occurrence indicator representing the cardinality
+     * Get the occurence indicator representing the cardinality
      *
      * @param cardinality the cardinality value
      * @return the occurrence indicator, for example "*", "+", "?", "".
@@ -229,34 +241,31 @@ public final class Cardinality {
             case StaticProperty.ALLOWS_MANY:
                 return "+";
             case StaticProperty.EMPTY:
-                return "\u00B0";
+                return "0";
             default:
                 return "*";
                 // Covers no bits set (which shouldn't arise) and zero_or_many (which can arise, but is too specific for our purposes)
         }
     }
 
-    /**
-     * Get the cardinality code from an occurrence indicator
-     *
-     * @param cardinality the cardinality value
-     * @return the occurrence indicator, for example "*", "+", "?", "".
-     */
-
-    /*@NotNull*/
-    public static int fromOccurrenceIndicator(char cardinality) {
-        switch (cardinality) {
-            case '?':
-            return StaticProperty.ALLOWS_ZERO_OR_ONE;
-            case '1': return StaticProperty.EXACTLY_ONE;
-            case '*': return StaticProperty.ALLOWS_ZERO_OR_MORE;
-            case '+': return StaticProperty.ALLOWS_ONE_OR_MORE;
-            case '\u00B0': return StaticProperty.ALLOWS_ZERO;
+    public static int fromOccurrenceIndicator(String indicator) {
+        switch (indicator) {
+            case "?":
+                return StaticProperty.ALLOWS_ZERO_OR_ONE;
+            case "*":
+                return StaticProperty.ALLOWS_ZERO_OR_MORE;
+            case "+":
+                return StaticProperty.ALLOWS_ONE_OR_MORE;
+            case "1":
+                return StaticProperty.ALLOWS_ONE;
+            case "":
+                return StaticProperty.ALLOWS_ONE;
+            case "\u00B0":  // TODO: obsolescent, delete this
+            case "0":
             default:
-                throw new AssertionError();
+                return StaticProperty.ALLOWS_ZERO;
         }
     }
-
 
     /**
      * Generate Javascript code to check whether a number satisfies the cardinality property.

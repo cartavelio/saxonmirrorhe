@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,9 +7,9 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.lib.StandardErrorListener;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 
@@ -33,23 +33,23 @@ public class NoOpenStartTagException extends XPathException {
      */
 
     public static NoOpenStartTagException makeNoOpenStartTagException(
-        int nodeKind, String name, int hostLanguage, boolean parentIsDocument,
+            int nodeKind, String name, HostLanguage hostLanguage, boolean parentIsDocument,
             /*@Nullable*/  Location startElementLocationId) {
         String message;
         String errorCode;
         if (parentIsDocument) {
             String kind = nodeKind == Type.ATTRIBUTE ? "an attribute" : "a namespace";
             message = "Cannot create " + kind + " node (" + name + ") whose parent is a document node";
-            errorCode = hostLanguage == Configuration.XSLT ? "XTDE0420" : "XPTY0004";
+            errorCode = hostLanguage == HostLanguage.XSLT ? "XTDE0420" : "XPTY0004";
         } else {
             String kind = nodeKind == Type.ATTRIBUTE ? "An attribute" : "A namespace";
             message = kind + " node (" + name + ") cannot be created after a child of the containing element";
-            errorCode = hostLanguage == Configuration.XSLT ? "XTDE0410" : "XQTY0024";
+            errorCode = hostLanguage == HostLanguage.XSLT ? "XTDE0410" : "XQTY0024";
         }
         if (startElementLocationId != null && startElementLocationId.getLineNumber() != -1) {
             message += ". Most recent element start tag was output at line " +
                 startElementLocationId.getLineNumber() + " of module " +
-                    StandardErrorListener.abbreviatePath(startElementLocationId.getSystemId());
+                    new StandardDiagnostics().abbreviateLocationURI(startElementLocationId.getSystemId());
         }
         NoOpenStartTagException err = new NoOpenStartTagException(message);
         err.setErrorCode(errorCode);

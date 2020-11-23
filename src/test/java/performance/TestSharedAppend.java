@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
@@ -7,15 +7,20 @@
 
 package performance;
 
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Performance test of recursive functions that append or prepend to a sequence. This should have linear performance
  */
 
-public class TestSharedAppend extends TestCase {
+public class TestSharedAppend {
 
+    @Test
     public void testAppend() {
         try {
             Processor p = new Processor(false);
@@ -38,14 +43,14 @@ public class TestSharedAppend extends TestCase {
                     qe.setExternalVariable(param, new XdmAtomicValue(n));
                     long start = System.nanoTime();
                     XdmItem result = qe.evaluateSingle();
-                    assertEquals("result", (long)n, ((XdmAtomicValue)result).getLongValue());
+                    assertEquals((long)n, ((XdmAtomicValue)result).getLongValue(), "result");
                     long end = System.nanoTime();
                     totaltime += (end - start) / 1000000e0;
                 }
                 last = totaltime / runs;
                 System.err.println("Append: " + n + " time: " + (totaltime / runs) + " ms");
             }
-            assertTrue("performance", last < 1200);
+            assertTrue(last < 1200, "performance");
             // Saxon 9.6 with new Chain implementation takes 968ms for n=1000000
             // Saxon 9.7 - 520ms
         } catch (SaxonApiException e) {
@@ -53,6 +58,7 @@ public class TestSharedAppend extends TestCase {
         }
     }
 
+    @Test
     public void testPrepend() {
         try {
             Processor p = new Processor(false);
@@ -74,14 +80,14 @@ public class TestSharedAppend extends TestCase {
                     qe.setExternalVariable(param, new XdmAtomicValue(n));
                     long start = System.nanoTime();
                     XdmItem result = qe.evaluateSingle();
-                    assertEquals("result", (long)n, ((XdmAtomicValue)result).getLongValue());
+                    assertEquals((long)n, ((XdmAtomicValue)result).getLongValue(), "result");
                     long end = System.nanoTime();
                     totaltime += (end - start) / 1000000e0;
                 }
                 last = totaltime / runs;
                 System.err.println("Prepend: " + n + " time: " + (totaltime / runs) + " ms");
             }
-            assertTrue("performance", last < 1500);
+            assertTrue(last < 1500, "performance");
             // Saxon 9.6 with new Chain implementation takes 968ms for n=1000000
             // Saxon 9.7: 699ms
         } catch (SaxonApiException e) {
@@ -89,6 +95,7 @@ public class TestSharedAppend extends TestCase {
         }
     }
 
+    @Test
     public void testChainSubscript() {
         try {
             Processor p = new Processor(false);
@@ -111,14 +118,14 @@ public class TestSharedAppend extends TestCase {
                     qe.setExternalVariable(param, new XdmAtomicValue(n));
                     long start = System.nanoTime();
                     XdmItem result = qe.evaluateSingle();
-                    assertEquals("result", (long)n+6, ((XdmAtomicValue)result).getLongValue());
+                    assertEquals((long)n+6, ((XdmAtomicValue)result).getLongValue(), "result");
                     long end = System.nanoTime();
                     totaltime += (end - start) / 1000000e0;
                 }
                 last = totaltime / runs;
                 System.err.println("Subscript: " + n + " time: " + (totaltime / runs) + " ms");
             }
-            assertTrue("performance", last < 100);
+            assertTrue(last < 100, "performance");
             // Saxon 9.6 with new Chain implementation takes 76ms regardless of the subscript
             // Saxon 9.7: 52-56ms
         } catch (SaxonApiException e) {

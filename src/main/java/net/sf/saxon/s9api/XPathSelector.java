@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,11 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.om.*;
+import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
@@ -129,6 +133,21 @@ public class XPathSelector implements Iterable<XdmItem> {
     }
 
     /**
+     * Set a callback to be used for reporting of run-time errors and warnings.
+     * Note that fatal run-time errors are always reported by throwing an exception,
+     * so this is primarily useful for controlling the way that warnings are reported.
+     * By default, warnings are reported to the {@link ErrorReporter} associated with the
+     * Saxon Configuration.
+     * @param reporter the user-supplied error reporter to be called when dynamic errors and warnings
+     *                 arise
+     * @since 10.0
+     */
+
+    public void setErrorReporter(ErrorReporter reporter) {
+        dynamicContext.setErrorReporter(reporter);
+    }
+
+    /**
      * Evaluate the expression, returning the result as an <code>XdmValue</code> (that is,
      * a sequence of nodes and/or atomic values).
      * <p>Note: Although a singleton result <i>may</i> be represented as an <code>XdmItem</code>, there is
@@ -141,7 +160,7 @@ public class XPathSelector implements Iterable<XdmItem> {
      */
 
     public XdmValue evaluate() throws SaxonApiException {
-        Sequence<?> value;
+        Sequence value;
         try {
             value = exp.iterate(dynamicContext).materialize();
         } catch (XPathException e) {
@@ -163,7 +182,7 @@ public class XPathSelector implements Iterable<XdmItem> {
 
     public XdmItem evaluateSingle() throws SaxonApiException {
         try {
-            Item<?> i = exp.evaluateSingle(dynamicContext);
+            Item i = exp.evaluateSingle(dynamicContext);
             if (i == null) {
                 return null;
             }
@@ -196,9 +215,10 @@ public class XPathSelector implements Iterable<XdmItem> {
      *                                    be thrown by the <code>hasNext()</code> method of the returned iterator.
      */
 
+    @Override
     public XdmSequenceIterator<XdmItem> iterator() throws SaxonApiUncheckedException {
         try {
-            return new XdmSequenceIterator<>(exp.iterate(dynamicContext));
+            return new XdmSequenceIterator(exp.iterate(dynamicContext));
         } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
         }

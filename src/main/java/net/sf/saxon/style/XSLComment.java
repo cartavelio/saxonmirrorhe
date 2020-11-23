@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,8 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.Comment;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 
@@ -20,23 +21,26 @@ import net.sf.saxon.value.StringValue;
 
 public final class XSLComment extends XSLLeafNodeConstructor {
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         String selectAtt = null;
 
-        AttributeCollection atts = getAttributeList();
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()){
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
+                selectAtt = value;
+                select = makeExpression(selectAtt, att);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         select = typeCheck("select", select);
         super.validate(decl);
@@ -48,11 +52,13 @@ public final class XSLComment extends XSLLeafNodeConstructor {
      * @return the error code defined for this condition, for this particular instruction
      */
 
+    @Override
     protected String getErrorCodeForSelectPlusContent() {
         return "XTSE0940";
     }
 
     /*@NotNull*/
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Comment inst = new Comment();
         compileContent(exec, decl, inst, new StringLiteral(StringValue.SINGLE_SPACE));

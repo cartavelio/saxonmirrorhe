@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -21,9 +21,9 @@ import net.sf.saxon.value.*;
  * so this class does no optimizations for numeric predicates.
  */
 
-public class FilterIterator<T extends Item<?>> implements SequenceIterator<T> {
+public class FilterIterator implements SequenceIterator {
 
-    protected FocusIterator<T> base;
+    protected FocusIterator base;
     protected Expression filter;
     protected XPathContext filterContext;
 
@@ -35,7 +35,7 @@ public class FilterIterator<T extends Item<?>> implements SequenceIterator<T> {
      * @param context The context in which the expression is being evaluated
      */
 
-    public FilterIterator(SequenceIterator<T> base, Expression filter,
+    public FilterIterator(SequenceIterator base, Expression filter,
                           XPathContext context) {
         this.filter = filter;
         filterContext = context.newMinorContext();
@@ -49,16 +49,17 @@ public class FilterIterator<T extends Item<?>> implements SequenceIterator<T> {
      * @param context the context in which the (outer) filter expression is evaluated
      */
 
-    public void setSequence(SequenceIterator<?> base, XPathContext context) {
+    public void setSequence(SequenceIterator base, XPathContext context) {
         filterContext = context.newMinorContext();
-        this.base = (FocusIterator<T>)filterContext.trackFocus(base);
+        this.base = filterContext.trackFocus(base);
     }
 
     /**
      * Get the next item if there is one
      */
 
-    public T next() throws XPathException {
+    @Override
+    public Item next() throws XPathException {
         return getNextMatchingItem();
     }
 
@@ -70,8 +71,8 @@ public class FilterIterator<T extends Item<?>> implements SequenceIterator<T> {
      * @throws XPathException if a dynamic error occurs
      */
 
-    protected T getNextMatchingItem() throws XPathException {
-        T next;
+    protected Item getNextMatchingItem() throws XPathException {
+        Item next;
         while ((next = base.next()) != null) {
             if (matches()) {
                 return next;
@@ -141,30 +142,18 @@ public class FilterIterator<T extends Item<?>> implements SequenceIterator<T> {
         }
     }
 
+    @Override
     public void close() {
         base.close();
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIterator#GROUNDED}, {@link SequenceIterator#LAST_POSITION_FINDER},
-     *         and {@link SequenceIterator#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    public int getProperties() {
-        return 0;
-    }
 
     /**
      * Subclass to handle the common special case where it is statically known
      * that the filter cannot return a numeric value
      */
 
-    public static final class NonNumeric<T extends Item<?>> extends FilterIterator<T> {
+    public static final class NonNumeric extends FilterIterator {
 
         /**
          * Create a CompiledFilterIterator for the situation where it is known that the filter
@@ -177,7 +166,7 @@ public class FilterIterator<T extends Item<?>> implements SequenceIterator<T> {
          *                A new context will be created to evaluate the predicate.
          */
 
-        public NonNumeric(SequenceIterator<T> base, Expression filter,
+        public NonNumeric(SequenceIterator base, Expression filter,
                           XPathContext context) {
             super(base, filter, context);
         }
@@ -186,6 +175,7 @@ public class FilterIterator<T extends Item<?>> implements SequenceIterator<T> {
          * Determine whether the context item matches the filter predicate
          */
 
+        @Override
         protected boolean matches() throws XPathException {
             return filter.effectiveBooleanValue(filterContext);
         }

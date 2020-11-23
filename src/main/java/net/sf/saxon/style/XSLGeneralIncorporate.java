@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,8 +9,9 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.DocumentFn;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.DocumentURI;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.DocumentKey;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.ElementImpl;
@@ -51,16 +52,17 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
 
     public abstract boolean isImport();
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             if (f.equals("href")) {
-                href = Whitespace.trim(atts.getValue(a));
+                href = Whitespace.trim(value);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -69,6 +71,7 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         validateInstruction();
     }
@@ -76,10 +79,6 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
     public void validateInstruction() {
         checkEmpty();
         checkTopLevel(isImport() ? "XTSE0190" : "XTSE0170", false);
-    }
-
-    public void setTargetDoc(DocumentImpl doc) {
-        this.targetDoc = doc;
     }
 
     /**
@@ -109,7 +108,7 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
             XSLStylesheet includedSheet;
             StylesheetModule incModule;
 
-            DocumentURI key = DocumentFn.computeDocumentKey(href, getBaseURI(), getCompilation().getPackageData(), resolver, false);
+            DocumentKey key = DocumentFn.computeDocumentKey(href, getBaseURI(), getCompilation().getPackageData(), resolver, false);
             includedSheet = (XSLStylesheet)psm.getStylesheetDocument(key);
             if (includedSheet != null) {
                 // we already have the stylesheet document in cache; but we need to create a new module,
@@ -126,9 +125,8 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
 
 //                Map<DocumentURI, TreeInfo> map = getCompilation().getStylesheetModules();
 //                DocumentImpl includedDoc = (DocumentImpl)map.get(key);
-                DocumentImpl includedDoc = targetDoc;    // Bug 4326
+                DocumentImpl includedDoc = targetDoc;
                 assert includedDoc != null;
-
                 ElementImpl outermost = includedDoc.getDocumentElement();
 
                 if (outermost instanceof LiteralResultElement) {
@@ -150,9 +148,9 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
                 includedSheet.validate(decl);
 
                 if (includedSheet.validationError != null) {
-                    if (reportingCircumstances == REPORT_ALWAYS) {
+                    if (reportingCircumstances == OnFailure.REPORT_ALWAYS) {
                         includedSheet.compileError(includedSheet.validationError);
-                    } else if (includedSheet.reportingCircumstances == REPORT_UNLESS_FORWARDS_COMPATIBLE
+                    } else if (includedSheet.reportingCircumstances == OnFailure.REPORT_UNLESS_FORWARDS_COMPATIBLE
                         // not sure if this can still happen
                         /*&& !incSheet.forwardsCompatibleModeIsEnabled()*/) {
                         includedSheet.compileError(includedSheet.validationError);
@@ -177,13 +175,17 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
         }
     }
 
+    public void setTargetDocument(DocumentImpl doc) {
+        this.targetDoc = doc;
+    }
+
     private boolean checkForRecursion(StylesheetModule importer, Source source) {
         StylesheetModule anc = importer;
 
         if (source.getSystemId() != null) {
             while (anc != null) {
-                if (DocumentURI.normalizeURI(source.getSystemId())
-                        .equals(DocumentURI.normalizeURI(anc.getRootElement().getSystemId()))) {
+                if (DocumentKey.normalizeURI(source.getSystemId())
+                        .equals(DocumentKey.normalizeURI(anc.getRootElement().getSystemId()))) {
                     compileError("A stylesheet cannot " + getLocalPart() + " itself",
                             this instanceof XSLInclude ? "XTSE0180" : "XTSE0210");
                     return true;
@@ -194,6 +196,7 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
         return false;
     }
 
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) {
         // no action. The node will never be compiled, because it replaces itself
         // by the contents of the included file.

@@ -1,7 +1,6 @@
 package pulltests;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.event.PipelineConfiguration;
@@ -10,16 +9,22 @@ import net.sf.saxon.pull.PullPushCopier;
 import net.sf.saxon.pull.StaxBridge;
 import net.sf.saxon.serialize.XMLEmitter;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Test input from a Stax (JSR173) parser
  */
-public class StaxBridgeTest extends TestCase {
+public class StaxBridgeTest {
 
 
+    @Test
     public void testFromStaxToSerializer() {
         try {
             // Use Woodstox as the pull parser by default. The Sun (Zephyr) parser is too buggy...
@@ -47,6 +52,7 @@ public class StaxBridgeTest extends TestCase {
      * Variant of the above where the XmlStreamReader is a PullToStax
      */
 
+    @Test
     public void testPullToStax() {
 //        try {
 //            Configuration config = new Configuration();
@@ -75,6 +81,7 @@ public class StaxBridgeTest extends TestCase {
      * Variant of the above with comments and processing instructions
      */
 
+    @Test
     public void testPullToStaxPIandComments() {
         try {
             // Use Woodstox as the pull parser by default. The Sun (Zephyr) parser is too buggy...
@@ -86,11 +93,11 @@ public class StaxBridgeTest extends TestCase {
             String piContent = null;
             File f = new File(ConfigTest.DATA_DIR + "birthdays.xml");
             puller.setInputStream(f.toURI().toString(), new FileInputStream(f));
-            int ev;
-            while ((ev = puller.next()) != PullProvider.END_OF_INPUT) {
-                if (ev == PullProvider.COMMENT) {
+            PullProvider.Event ev;
+            while ((ev = puller.next()) != PullProvider.Event.END_OF_INPUT) {
+                if (ev == PullProvider.Event.COMMENT) {
                     comment = puller.getStringValue().toString();
-                } else if (ev == PullProvider.PROCESSING_INSTRUCTION) {
+                } else if (ev == PullProvider.Event.PROCESSING_INSTRUCTION) {
                     piName = puller.getNodeName().getLocalPart();
                     piContent = puller.getStringValue().toString();
                 }
@@ -105,6 +112,7 @@ public class StaxBridgeTest extends TestCase {
         }
     }
 
+    @Test
     public void testXsltFromStax() {
         // This is particularly designed to check that namespace information is getting through;
         // XSLT makes heavy use of QNames in content
@@ -141,14 +149,13 @@ public class StaxBridgeTest extends TestCase {
 //            assertTrue(sw.toString().contains("<?xml-stylesheet type=\"text/xsl\" href=\"bills.xsl\"?>"));
 //            assertTrue(sw.toString().contains("<Bill No=\"10030\" Name=\"John Doe\">"));
 //            assertTrue(sw.toString().contains("<!--Observation-->"));
-        } catch (XPathException e) {
-            fail(e.getMessage());
-        } catch (UnsupportedEncodingException e) {
+        } catch (XPathException | UnsupportedEncodingException e) {
             fail(e.getMessage());
         }
     }
 
 
+    @Test
     public void testDOMToStax() {
 //        try {
 //            String xml = "<a><b> <c>x</c></b></a>";
@@ -191,28 +198,5 @@ public class StaxBridgeTest extends TestCase {
 //        }
     }
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
-
 
 

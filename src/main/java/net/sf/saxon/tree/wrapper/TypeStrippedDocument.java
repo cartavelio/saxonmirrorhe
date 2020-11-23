@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -41,17 +41,6 @@ public class TypeStrippedDocument extends GenericTreeInfo {
         return TypeStrippedNode.makeWrapper(node, this, null);
     }
 
-
-    /**
-     * Ask whether the document contains any nodes whose type annotation is anything other than
-     * UNTYPED
-     *
-     * @return true if the document contains elements whose type is other than UNTYPED
-     */
-    public boolean isTyped() {
-        return false;
-    }
-
     /**
      * Get the element with a given ID, if any
      *
@@ -61,6 +50,7 @@ public class TypeStrippedDocument extends GenericTreeInfo {
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo selectID(String id, boolean getParent) {
         NodeInfo n = underlyingTree.selectID(id, false);
         if (n == null) {

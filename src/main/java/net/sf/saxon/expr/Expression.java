@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,8 +8,8 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.KeyFn;
 import net.sf.saxon.functions.SuperId;
@@ -20,8 +20,9 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeSetPattern;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.LocationKind;
+import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -59,7 +60,7 @@ import java.util.*;
  * no subexpressions.</p>
  */
 
-public abstract class Expression implements IdentityComparable, ExportAgent, Locatable {
+public abstract class Expression implements IdentityComparable, ExportAgent, Locatable, Traceable {
 
     public static final int EVALUATE_METHOD = 1;
     public static final int ITERATE_METHOD = 2;
@@ -71,7 +72,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
 
 
     protected int staticProperties = -1;
-    private Location location = ExplicitLocation.UNKNOWN_LOCATION;
+    private Location location = Loc.NONE;
     private Expression parentExpression;
     private RetainedStaticContext retainedStaticContext;
     private int[] slotsUsed;
@@ -847,7 +848,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
 
     /*@Nullable*/
-    public Item<?> evaluateItem(XPathContext context) throws XPathException {
+    public Item evaluateItem(XPathContext context) throws XPathException {
         return iterate(context).next();
     }
 
@@ -867,8 +868,8 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
-        Item<?> value = evaluateItem(context);
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
+        Item value = evaluateItem(context);
         return value == null ? EmptyIterator.emptyIterator() : SingletonIterator.rawIterator(value);
     }
 
@@ -924,34 +925,35 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     /**
      * Process the instruction, without returning any tail calls
      *
+     *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
      *                the current variables, etc.
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs
      */
 
-    public void process(XPathContext context) throws XPathException {
+    public void process(Outputter output, XPathContext context) throws XPathException {
         int m = getImplementationMethod();
 
-        if ((m & EVALUATE_METHOD) != 0) {
-            Item item = evaluateItem(context);
-            if (item != null) {
-                context.getReceiver().append(item, getLocation(), ReceiverOptions.ALL_NAMESPACES);
+        boolean hasEvaluateMethod = (m & EVALUATE_METHOD) != 0;
+        boolean hasIterateMethod = (m & ITERATE_METHOD) != 0;
+
+        try {
+            if (hasEvaluateMethod && (!hasIterateMethod || !Cardinality.allowsMany(getCardinality()))) {
+                Item item = evaluateItem(context);
+                if (item != null) {
+                    output.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
+                }
+            } else if (hasIterateMethod) {
+                iterate(context).forEachOrFail(it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES));
+            } else {
+                throw new AssertionError("process() is not implemented in the subclass " + getClass());
             }
-
-        } else if ((m & ITERATE_METHOD) != 0) {
-
-            Receiver out = context.getReceiver();
-            try {
-                iterate(context).forEachOrFail(it -> out.append(it, getLocation(), ReceiverOptions.ALL_NAMESPACES));
-            } catch (XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                throw e;
-            }
-
-        } else {
-            throw new AssertionError("process() is not implemented in the subclass " + getClass());
+        } catch (XPathException e) {
+            e.maybeSetLocation(getLocation());
+            e.maybeSetContext(context);
+            throw e;
         }
     }
 
@@ -1033,6 +1035,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      * in the target environment.
      */
 
+    @Override
     public abstract void export(ExpressionPresenter out) throws XPathException;
 
     /**
@@ -1108,9 +1111,9 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
             child.retainedStaticContext = retainedStaticContext;
         }
 
-        if (getLocation() == null || getLocation() == ExplicitLocation.UNKNOWN_LOCATION) {
+        if (getLocation() == null || getLocation() == Loc.NONE) {
             ExpressionTool.copyLocationInfo(child, Expression.this);
-        } else if (child.getLocation() == null || child.getLocation() == ExplicitLocation.UNKNOWN_LOCATION) {
+        } else if (child.getLocation() == null || child.getLocation() == Loc.NONE) {
             ExpressionTool.copyLocationInfo(Expression.this, child);
         }
         resetLocalStaticProperties();
@@ -1133,11 +1136,12 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      *         location information by reference to a location provider
      */
 
+    @Override
     public final Location getLocation() {
         int limit = 0;
         Expression exp = this;
         while (limit < 10) {
-            if ((exp.location == null || exp.location == ExplicitLocation.UNKNOWN_LOCATION)
+            if ((exp.location == null || exp.location == Loc.NONE)
                     && exp.getParentExpression() != null) {
                 // avoid infinite recursion: bug 3703#1
                 exp = exp.getParentExpression();
@@ -1473,17 +1477,12 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
         throw e;
     }
 
-    /**
-     * Get the type of this expression for use in tracing and diagnostics
-     *
-     * @return the type of expression, as enumerated in class {@link LocationKind}
-     */
-
-    public int getConstructType() {
-        return LocationKind.XPATH_EXPRESSION;
+    public String getTracingTag() {
+        return getExpressionName();
     }
 
     /*@Nullable*/
+    @Override
     public StructuredQName getObjectName() {
         return null;
     }
@@ -1684,6 +1683,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      * @param other the value to be compared with
      * @return true if the two values are indentical, false otherwise
      */
+    @Override
     public boolean isIdentical(IdentityComparable other) {
         return this == other;
     }
@@ -1693,6 +1693,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      *
      * @return a hashCode suitable for use when testing for identity.
      */
+    @Override
     public int identityHashCode() {
         return System.identityHashCode(Expression.this.getLocation());
     }

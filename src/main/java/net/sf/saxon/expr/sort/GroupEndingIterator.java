@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,6 @@ package net.sf.saxon.expr.sort;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Count;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -23,7 +22,7 @@ import java.util.ArrayList;
  * order of first appearance.
  */
 
-public class GroupEndingIterator extends GroupMatchingIterator implements GroupIterator, LookaheadIterator<Item<?>> {
+public class GroupEndingIterator extends GroupMatchingIterator implements GroupIterator, LookaheadIterator {
 
     public GroupEndingIterator(Expression select, Pattern endPattern,
                                XPathContext context)
@@ -43,6 +42,7 @@ public class GroupEndingIterator extends GroupMatchingIterator implements GroupI
         return Count.steppingCount(another);
     }
 
+    @Override
     protected void advance() throws XPathException {
         currentMembers = new ArrayList<>(20);
         currentMembers.add(current);

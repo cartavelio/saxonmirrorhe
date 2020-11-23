@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@ package net.sf.saxon.dotnet;
 import cli.System.Collections.IEnumerator;
 import cli.System.Text.RegularExpressions.Match;
 import cli.System.Text.RegularExpressions.Regex;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.StringValue;
 
 /**
@@ -18,11 +18,11 @@ import net.sf.saxon.value.StringValue;
  * a string using a regular expression
  */
 
-public class DotNetTokenIterator implements SequenceIterator<StringValue> {
+public class DotNetTokenIterator implements AtomicIterator {
 
-    private String input;
-    private Regex pattern;
-    private IEnumerator matches;
+    private final String input;
+    private final Regex pattern;
+    private final IEnumerator matches;
     private int prevEnd = 0;
 
 
@@ -37,6 +37,7 @@ public class DotNetTokenIterator implements SequenceIterator<StringValue> {
         prevEnd = 0;
     }
 
+    @Override
     public StringValue next() {
         if (prevEnd < 0) {
             return null;
@@ -54,15 +55,6 @@ public class DotNetTokenIterator implements SequenceIterator<StringValue> {
         return StringValue.makeStringValue(current);
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator.
-     */
-
-    public int getProperties() {
-        return 0;
-    }
 
     /**
      * Close the iterator. This indicates to the supplier of the data that the client
@@ -76,6 +68,7 @@ public class DotNetTokenIterator implements SequenceIterator<StringValue> {
      *
      * @since 9.1
      */
+    @Override
     public void close() {
         // no-op
     }

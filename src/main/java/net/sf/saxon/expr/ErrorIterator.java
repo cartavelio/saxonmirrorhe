@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,7 +15,7 @@ import net.sf.saxon.trans.XPathException;
  * A SequenceIterator that throws an exception as soon as its next() method is called. Used when
  * the method that returns the iterator isn't allowed to throw a checked exception itself.
  */
-public class ErrorIterator implements SequenceIterator<Item<?>> {
+public class ErrorIterator implements SequenceIterator {
 
     private XPathException exception;
 
@@ -37,28 +37,16 @@ public class ErrorIterator implements SequenceIterator<Item<?>> {
      * @since 8.4
      */
 
+    @Override
     public Item next() throws XPathException {
         throw exception;
     }
 
+    @Override
     public void close() {
 
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     * @since 8.6
-     */
-
-    public int getProperties() {
-        return 0;
-    }
 
 }
 

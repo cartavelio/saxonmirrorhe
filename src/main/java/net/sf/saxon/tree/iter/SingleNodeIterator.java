@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,8 +9,9 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
+
+import java.util.EnumSet;
 
 
 /**
@@ -18,9 +19,9 @@ import net.sf.saxon.value.EmptySequence;
  */
 
 public class SingleNodeIterator implements AxisIterator,
-        ReversibleIterator<NodeInfo>, LastPositionFinder, GroundedIterator<NodeInfo>, LookaheadIterator<NodeInfo> {
+        ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
-    private NodeInfo item;
+    private final NodeInfo item;
     private int position = 0;
 
     /**
@@ -44,7 +45,7 @@ public class SingleNodeIterator implements AxisIterator,
     /*@NotNull*/
     public static AxisIterator makeIterator(/*@Nullable*/ NodeInfo item) {
         if (item == null) {
-            return EmptyIterator.OfNodes.THE_INSTANCE;
+            return EmptyIterator.ofNodes();
         } else {
             return new SingleNodeIterator(item);
         }
@@ -59,11 +60,13 @@ public class SingleNodeIterator implements AxisIterator,
      * @return true if there are more items
      */
 
+    @Override
     public boolean hasNext() {
         return position == 0;
     }
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
         if (position == 0) {
             position = 1;
@@ -76,16 +79,14 @@ public class SingleNodeIterator implements AxisIterator,
         }
     }
 
+    @Override
     public int getLength() {
         return 1;
     }
 
-    public void close() {
-    }
-
-
     /*@NotNull*/
-    public SequenceIterator<NodeInfo> getReverseIterator() {
+    @Override
+    public SequenceIterator getReverseIterator() {
         return new SingleNodeIterator(item);
     }
 
@@ -102,12 +103,13 @@ public class SingleNodeIterator implements AxisIterator,
      */
 
     /*@NotNull*/
-    public GroundedValue<NodeInfo> materialize() {
+    @Override
+    public GroundedValue materialize() {
         return new ZeroOrOne<>(item);
     }
 
     @Override
-    public GroundedValue<NodeInfo> getResidue() throws XPathException {
+    public GroundedValue getResidue() {
         return item==null ? EmptySequence.getInstance() : new One<>(item);
     }
 
@@ -115,14 +117,15 @@ public class SingleNodeIterator implements AxisIterator,
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return GROUNDED | LAST_POSITION_FINDER | LOOKAHEAD;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD, Property.LAST_POSITION_FINDER, Property.GROUNDED);
     }
 
 }

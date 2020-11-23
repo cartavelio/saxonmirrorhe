@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -80,7 +80,9 @@ public interface Platform {
 
 
     /**
-     * Get a parser by instantiating the SAXParserFactory
+     * Get an XML parser suitable for use for reading XML fragments. This may differ
+     * from the parser used for reading complete XML documents, because some parsers
+     * may lack the capability to read fragments. See bug 4253.
      *
      * @return the parser (XMLReader)
      */
@@ -88,20 +90,19 @@ public interface Platform {
     XMLReader loadParserForXmlFragments();
 
     /**
-     * Convert a StreamSource to either a SAXSource or a PullSource, depending on the native
+     * Convert a StreamSource to a different kind of Source, depending on the native
      * parser of the selected platform
      *
      * @param pipe          the pipeline Configuration
      * @param input         the supplied StreamSource
      * @param validation    required validation mode, for example Validation.STRICT
      * @param dtdValidation true if DTD-based input validation is required
-     * @param stripspace    option for whitespace-stripping  (ALL, NONE, or IGNORABLE)
      * @return the PullSource or SAXSource, initialized with a suitable parser, or the original
      *         input Source, if now special handling is required or possible
      */
 
     Source getParserSource(PipelineConfiguration pipe, StreamSource input,
-                                  int validation, boolean dtdValidation, int stripspace);
+                           int validation, boolean dtdValidation);
 
     /**
      * Obtain a collation with a given set of properties. The set of properties is extensible
@@ -236,8 +237,9 @@ public interface Platform {
      *  Checks if the supplied static context is an instance of the JAXP static context.
      *  On Java we create namespace information from the JAXP XPath static context.
      *  On the .NET platform we do nothing.
-     *  @param retainedStaticContext
-     *  @param sc
+     *  @param retainedStaticContext If the static context is a JAXPStaticContext, then its namespaces
+     *                               are used to update the retainedStaticContext
+     *  @param sc the possible JAXPStaticContext
      *  @return boolean
      *  @since 9.7.0.5
      *

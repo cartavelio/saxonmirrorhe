@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,10 +8,7 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.ComplexContentOutputter;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.OperandRole;
@@ -59,6 +56,7 @@ public class Doctype extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         throw new UnsupportedOperationException("Doctype.copy()");
     }
@@ -69,6 +67,7 @@ public class Doctype extends Instruction {
      * This implementation returns true.
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         return true;
     }
@@ -77,26 +76,25 @@ public class Doctype extends Instruction {
      * Get the name of this instruction for diagnostic and tracing purposes
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.SAXON_DOCTYPE;
     }
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter out, XPathContext context) throws XPathException {
         Controller controller = context.getController();
 
-        Receiver out = context.getReceiver();
         PipelineConfiguration pipe = controller.makePipelineConfiguration();
         pipe.setXPathContext(context);
         pipe.setHostLanguage(getPackageData().getHostLanguage());
         TinyBuilder builder = new TinyBuilder(pipe);
         builder.setStatistics(pipe.getConfiguration().getTreeStatistics().RESULT_TREE_STATISTICS);
         builder.open();
-        builder.startDocument(0);
-        context.setReceiver(ComplexContentOutputter.makeComplexContentReceiver(builder, null));
-        getContent().process(context);
+        builder.startDocument(ReceiverOption.NONE);
+        getContent().process(ComplexContentOutputter.makeComplexContentReceiver(builder, null), context);
         builder.endDocument();
         builder.close();
-        context.setReceiver(out);
         NodeInfo dtdRoot = builder.getCurrentRoot();
 
         SequenceIterator children = dtdRoot.iterateAxis(AxisInfo.CHILD);
@@ -229,14 +227,10 @@ public class Doctype extends Instruction {
                     write(out, "NDATA " + notation + ' ');
                 }
 
-                SequenceIterator contents = child.iterateAxis(AxisInfo.CHILD);
-                while (true) {
-                    NodeInfo content = (NodeInfo) contents.next();
-                    if (content == null) {
-                        break;
-                    }
+                for (NodeInfo content : child.children()) {
                     content.copy(out, 0, getLocation());
                 }
+
                 write(out, ">");
 
             } else if (localname.equals("notation")) {
@@ -282,8 +276,8 @@ public class Doctype extends Instruction {
 
     }
 
-    private void write(Receiver out, String s) throws XPathException {
-        out.characters(s, getLocation(), ReceiverOptions.DISABLE_ESCAPING);
+    private void write(Outputter out, String s) throws XPathException {
+        out.characters(s, getLocation(), ReceiverOption.DISABLE_ESCAPING);
     }
 
 
@@ -292,6 +286,7 @@ public class Doctype extends Instruction {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("saxonDoctype", this);
         getContent().export(out);

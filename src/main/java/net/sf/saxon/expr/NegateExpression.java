@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -58,11 +58,13 @@ public class NegateExpression extends UnaryExpression {
         return backwardsCompatible;
     }
 
+    @Override
     protected OperandRole getOperandRole() {
         return OperandRole.SINGLE_ATOMIC;
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
         RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.UNARY_EXPR, "-", 0);
@@ -84,8 +86,14 @@ public class NegateExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getBaseExpression().getItemType().getPrimitiveItemType();
+    }
+
+    @Override
+    public int computeCardinality() {
+        return getBaseExpression().getCardinality() & ~StaticProperty.ALLOWS_MANY;
     }
 
     /**
@@ -105,6 +113,7 @@ public class NegateExpression extends UnaryExpression {
      * Evaluate the expression.
      */
 
+    @Override
     public NumericValue evaluateItem(XPathContext context) throws XPathException {
 
         NumericValue v1 = (NumericValue) getBaseExpression().evaluateItem(context);
@@ -123,12 +132,14 @@ public class NegateExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         NegateExpression exp = new NegateExpression(getBaseExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
 
+    @Override
     protected String displayOperator(Configuration config) {
         return "-";
     }
@@ -145,6 +156,7 @@ public class NegateExpression extends UnaryExpression {
         return "minus";
     }
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("minus", this);
         if (backwardsCompatible) {

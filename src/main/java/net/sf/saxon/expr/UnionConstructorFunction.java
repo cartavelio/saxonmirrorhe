@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -79,6 +79,7 @@ public class UnionConstructorFunction extends AbstractFunction {
      *
      * @return the function item's type
      */
+    @Override
     public FunctionItemType getFunctionItemType() {
         SequenceType resultType = targetType.getResultTypeOfCast();
 
@@ -93,8 +94,9 @@ public class UnionConstructorFunction extends AbstractFunction {
      *
      * @return the function name, or null for an anonymous inline function
      */
+    @Override
     public StructuredQName getFunctionName() {
-        return targetType.getStructuredQName();
+        return targetType.getTypeName();
     }
 
     /**
@@ -104,6 +106,7 @@ public class UnionConstructorFunction extends AbstractFunction {
      *
      * @return a description of the function for use in error messages
      */
+    @Override
     public String getDescription() {
         return getFunctionName().getDisplayName();
     }
@@ -113,6 +116,7 @@ public class UnionConstructorFunction extends AbstractFunction {
      *
      * @return the number of arguments in the function signature
      */
+    @Override
     public int getArity() {
         return 1;
     }
@@ -148,10 +152,10 @@ public class UnionConstructorFunction extends AbstractFunction {
         // 2. If the value is an instance of a type in the transitive membership of the union, return it unchanged
 
         AtomicType label = value.getItemType();
-        Iterable<PlainType> memberTypes = targetType.getPlainMemberTypes();
+        Iterable<? extends PlainType> memberTypes = ((UnionType)targetType).getPlainMemberTypes();
 
         // 2a. Is the type annotation itself a member type of the union, and of the union type itself?
-        if (targetType.isPlainType()) {
+        if (((UnionType)targetType).isPlainType()) {
             for (PlainType member : memberTypes) {
                 if (label.equals(member)) {
                     return value;
@@ -203,6 +207,7 @@ public class UnionConstructorFunction extends AbstractFunction {
      * @return the result of invoking the function
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs within the function
      */
+    @Override
     public AtomicSequence call(XPathContext context, Sequence[] args) throws XPathException {
         AtomicValue val = (AtomicValue) args[0].head();
         if (val == null) {
@@ -250,7 +255,7 @@ public class UnionConstructorFunction extends AbstractFunction {
         // 2. If the value is an instance of a type in the transitive membership of the union, return it unchanged
 
         AtomicType label = value.getItemType();
-        Iterable<PlainType> memberTypes = targetType.getPlainMemberTypes();
+        Iterable<? extends PlainType> memberTypes = targetType.getPlainMemberTypes();
 
         // 2a. Is the type annotation itself a member type of the union?
         for (PlainType member : memberTypes) {
@@ -290,6 +295,6 @@ public class UnionConstructorFunction extends AbstractFunction {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -48,11 +48,13 @@ public final class IsLastExpression extends Expression {
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) {
         return this;
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) {
         return this;
     }
@@ -63,11 +65,13 @@ public final class IsLastExpression extends Expression {
      * @return {@link StaticProperty#NO_NODES_NEWLY_CREATED}.
      */
 
+    @Override
     public int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         return p | StaticProperty.NO_NODES_NEWLY_CREATED;
     }
 
+    @Override
     public BooleanValue evaluateItem(XPathContext c) throws XPathException {
         return BooleanValue.get(condition == c.isAtLast());
     }
@@ -79,6 +83,7 @@ public final class IsLastExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return BuiltInAtomicType.BOOLEAN;
     }
@@ -87,6 +92,7 @@ public final class IsLastExpression extends Expression {
      * Determine the static cardinality
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -95,6 +101,7 @@ public final class IsLastExpression extends Expression {
      * Get the dependencies of this expression on the context
      */
 
+    @Override
     public int getIntrinsicDependencies() {
         return StaticProperty.DEPENDS_ON_POSITION | StaticProperty.DEPENDS_ON_LAST;
     }
@@ -107,6 +114,7 @@ public final class IsLastExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         IsLastExpression exp = new IsLastExpression(condition);
         ExpressionTool.copyLocationInfo(this, exp);
@@ -141,6 +149,7 @@ public final class IsLastExpression extends Expression {
      * Hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         return condition ? 0x236b91a0 : 0x896b92a0;
     }
@@ -162,6 +171,7 @@ public final class IsLastExpression extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("isLast", this);
         destination.emitAttribute("test", condition ? "1" : "0");

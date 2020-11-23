@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Saxonica Limited.
+// Copyright (c) 2015-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -20,6 +20,7 @@ import java.util.Properties;
  */
 public class StAXResultHandlerImpl implements StAXResultHandler {
 
+    @Override
     public Receiver getReceiver(Result result, Properties properties) {
         if (((StAXResult) result).getXMLStreamWriter() != null) {
             return new ReceiverToXMLStreamWriter(((StAXResult) result).getXMLStreamWriter());

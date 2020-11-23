@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -71,6 +71,7 @@ public class ExecutableFunctionLibrary implements FunctionLibrary {
      *         null if no extension function was found matching the required name and arity.
      */
 
+    @Override
     public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         UserFunction fn = functions.get(functionName);
         if (fn == null) {
@@ -83,8 +84,6 @@ public class ExecutableFunctionLibrary implements FunctionLibrary {
         fc.setStaticType(fn.getResultType());
         return fc;
     }
-
-//#ifdefined HOF
 
     /**
      * Test whether a function with a given name and arity is available; if so, return a function
@@ -100,6 +99,7 @@ public class ExecutableFunctionLibrary implements FunctionLibrary {
      *          in the event of certain errors, for example attempting to get a function
      *          that is private
      */
+    @Override
     public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
         UserFunction fn = functions.get(functionName);
         if (fn != null && fn.isUpdating()) {
@@ -107,7 +107,6 @@ public class ExecutableFunctionLibrary implements FunctionLibrary {
         }
         return fn;
     }
-//#endif
 
     /**
      * Test whether a function with a given name and arity is available
@@ -117,6 +116,7 @@ public class ExecutableFunctionLibrary implements FunctionLibrary {
      * @return true if a function of this name and arity is available for calling
      */
 
+    @Override
     public boolean isAvailable(SymbolicName.F functionName) {
         return functions.get(functionName) != null;
     }
@@ -129,6 +129,7 @@ public class ExecutableFunctionLibrary implements FunctionLibrary {
      * @return a copy of this function library. This must be an instance of the original class.
      */
 
+    @Override
     public FunctionLibrary copy() {
         ExecutableFunctionLibrary efl = new ExecutableFunctionLibrary(config);
         efl.functions = new HashMap<>(functions);

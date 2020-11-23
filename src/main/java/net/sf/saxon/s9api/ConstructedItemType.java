@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,9 +8,10 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.TypeHierarchy;
+
+import java.util.Objects;
 
 /**
  * An item type constructed by the {@link ItemTypeFactory} (as distinct from one that is predefined)
@@ -29,13 +30,9 @@ class ConstructedItemType extends ItemType {
      * @param processor      The s9api processor Must not be null
      */
 
-        protected ConstructedItemType(/*@Nullable*/ net.sf.saxon.type.ItemType underlyingType, Processor processor) {
-        if (processor == null) {
-            throw new NullPointerException("processor");
-        }
-        if (underlyingType == null) {
-            throw new NullPointerException("underlyingType");
-        }
+    protected ConstructedItemType(/*@Nullable*/ net.sf.saxon.type.ItemType underlyingType, Processor processor) {
+            Objects.requireNonNull(processor);
+            Objects.requireNonNull(underlyingType);
         this.processor = processor;
         this.underlyingType = underlyingType;
     }
@@ -48,6 +45,7 @@ class ConstructedItemType extends ItemType {
      * @return the conversion rules
      */
 
+    @Override
     public ConversionRules getConversionRules() {
         return processor.getUnderlyingConfiguration().getConversionRules();
     }
@@ -62,10 +60,11 @@ class ConstructedItemType extends ItemType {
      * error in the course of checking
      */
 
+    @Override
     public boolean matches(XdmItem item) throws SaxonApiUncheckedException {
         try {
             TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
-            return underlyingType.matches((Item) item.getUnderlyingValue(), th);
+            return underlyingType.matches(item.getUnderlyingValue(), th);
         } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
@@ -82,6 +81,7 @@ class ConstructedItemType extends ItemType {
      * @since 9.1
      */
 
+    @Override
     public boolean subsumes(ItemType other) {
         TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
         return th.isSubType(other.getUnderlyingItemType(), underlyingType);
@@ -94,6 +94,7 @@ class ConstructedItemType extends ItemType {
      * @return the underlying Saxon implementation object
      */
 
+    @Override
     public net.sf.saxon.type.ItemType getUnderlyingItemType() {
         return underlyingType;
     }

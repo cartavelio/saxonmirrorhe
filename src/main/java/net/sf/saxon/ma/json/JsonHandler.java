@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -43,7 +43,7 @@ public class JsonHandler {
         return context;
     }
 
-    public Sequence<?> getResult() throws XPathException {
+    public Sequence getResult() throws XPathException {
         return null;
     }
 
@@ -118,6 +118,7 @@ public class JsonHandler {
         CharSequence escaped;
         if (escape) {
             escaped = JsonReceiver.escape(val, true, new IntPredicate() {
+                @Override
                 public boolean test(int value) {
                     return (value >= 0 && value <= 0x1F) ||
                             (value >= 0x7F && value <= 0x9F) ||
@@ -230,9 +231,9 @@ public class JsonHandler {
      */
     private String replace(String s, XPathContext context) throws XPathException {
         if (fallbackFunction != null) {
-            Sequence<?>[] args = new Sequence[1];
+            Sequence[] args = new Sequence[1];
             args[0] = new StringValue(s);
-            Sequence<?> result = SystemFunction.dynamicCall(fallbackFunction, context, args).head();
+            Sequence result = SystemFunction.dynamicCall(fallbackFunction, context, args).head();
             Item first = result.head();
             return first == null ? "" : first.getStringValue();
         } else {
@@ -240,8 +241,8 @@ public class JsonHandler {
         }
     }
 
-    public void setFallbackFunction(Map<String, Sequence<?>> options, XPathContext context) throws XPathException {
-        Sequence<?> val = options.get("fallback");
+    public void setFallbackFunction(Map<String, Sequence> options, XPathContext context) throws XPathException {
+        Sequence val = options.get("fallback");
         if (val != null) {
             Item fn = val.head();
             if (fn instanceof Function) {
@@ -261,4 +262,4 @@ public class JsonHandler {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

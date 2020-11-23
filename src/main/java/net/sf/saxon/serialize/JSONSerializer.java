@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -101,6 +101,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
      * @return the properties that were set using setOutputProperties
      */
 
+    @Override
     public Properties getOutputProperties() {
         return outputProperties;
     }
@@ -160,7 +161,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
                 if (!allowDuplicateKeys && !keys.add(stringKey)) {
                     throw new XPathException("Key value \"" + stringKey + "\" occurs more than once in JSON map", "SERE0022");
                 }
-                Sequence<?> value = ((MapItem) item).get(key);
+                Sequence value = ((MapItem) item).get(key);
                 writeSequence(value.materialize());
             }
             emitter.endMap();
@@ -168,7 +169,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             boolean oneLiner = !isIndenting || isOneLinerArray((ArrayItem) item);
             emitter.startArray(oneLiner);
             boolean first = true;
-            for (Sequence<?> member : ((ArrayItem) item).members()) {
+            for (Sequence member : ((ArrayItem) item).members()) {
                 writeSequence(member.materialize());
             }
             emitter.endArray();
@@ -189,7 +190,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
         if (array.arrayLength() < 2) {
             return true;
         }
-        for (Sequence<?> member : array.members()) {
+        for (Sequence member : array.members()) {
             if (!(member instanceof AtomicValue)) {
                 return false;
             }
@@ -229,7 +230,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
         return sw.toString().trim();
     }
 
-    private void writeSequence(GroundedValue<?> seq) throws XPathException {
+    private void writeSequence(GroundedValue seq) throws XPathException {
         int len = seq.getLength();
         if (len == 0) {
             emitter.writeAtomicValue(null);

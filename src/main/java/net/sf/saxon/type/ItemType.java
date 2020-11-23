@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -121,6 +121,22 @@ public interface ItemType {
     UType getUType();
 
     /**
+     * Get the default priority when this ItemType is used as an XSLT pattern
+     * @return the default priority
+     */
+
+    double getDefaultPriority();
+
+    /**
+     * Get the default priority normalized into the range 0 to 1
+     * @return the default priority plus one divided by two
+     */
+
+    default double getNormalizedDefaultPriority() {
+        return (getDefaultPriority() + 1) / 2;
+    }
+
+    /**
      * Get the item type of the atomic values that will be produced when an item
      * of this type is atomized
      *
@@ -144,10 +160,22 @@ public interface ItemType {
      * Get an alphabetic code representing the type, or at any rate, the nearest built-in type
      * from which this type is derived. The codes are designed so that for any two built-in types
      * A and B, alphaCode(A) is a prefix of alphaCode(B) if and only if A is a supertype of B.
-     * @return the alphacode for the nearest containing built-in type
+     * @return the alphacode for the nearest containing built-in type. For example: for xs:string
+     * return "AS", for xs:boolean "AB", for node() "N", for element() "NE", for map(*) "FM", for
+     * array(*) "FA".
      */
 
-    String getAlphaCode();
+    String getBasicAlphaCode();
+
+    /**
+     * Get the full alpha code for this item type. As well as the basic alpha code, this contains
+     * additional information, for example <code>element(EFG)</code> has a basic alpha code of
+     * <code>NE</code>, but the full alpha code of <code>NE nQ{}EFG</code>.
+     */
+
+    default String getFullAlphaCode() {
+        return getBasicAlphaCode();
+    }
 
     /**
      * Return a string representation of this ItemType suitable for use in stylesheet
@@ -162,34 +190,6 @@ public interface ItemType {
         return toString();
     }
 
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     * @param knownToBe An item type that the supplied item is known to conform to; the generated code
-     *                  can assume that the item is an instance of this type.
-     * @param targetVersion The version of Saxon-JS for which code is being generated. Currently either 1 or 2.
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @throws XPathException if JS code cannot be generated for this item type, for example because
-     *                        the test is schema-aware.
-     *
-     */
-
-    String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException;
-
-
-    /**
-     * Generate Javascript code to convert a supplied Javascript value to this item type,
-     * if conversion is possible, or throw an error otherwise.
-     * @param errorCode the error to be thrown if conversion is not possible
-     * @param targetVersion the version of Saxon-JS for which code is being generated
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns the result of conversion to this type, or throws
-     * an error if conversion is not possible. The variable "val" will hold the supplied Javascript
-     * value.
-     */
-
-    String generateJavaScriptItemTypeAcceptor(String errorCode, int targetVersion) throws XPathException;
 
     /**
      * Extension of the ItemType interface implemented by some item types, to provide

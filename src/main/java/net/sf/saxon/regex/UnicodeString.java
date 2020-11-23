@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,10 @@
 
 package net.sf.saxon.regex;
 
+import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Base64BinaryValue;
 
 /**
  * An abstract class that efficiently handles Unicode strings including
@@ -15,9 +18,9 @@ import net.sf.saxon.tree.util.FastStringBuffer;
  * strings whose maximum character code is 255, 65535, or 1114111.
  */
 
-public abstract class UnicodeString implements CharSequence, Comparable<UnicodeString> {
+public abstract class UnicodeString implements CharSequence, Comparable<UnicodeString>, AtomicMatchKey {
 
-    int cachedHash = -1;
+    private int cachedHash = -1;
 
     /**
      * Make a UnicodeString for a given CharSequence
@@ -58,7 +61,7 @@ public abstract class UnicodeString implements CharSequence, Comparable<UnicodeS
         }
         FastStringBuffer fsb = new FastStringBuffer(in.length);
         for (int ch : in) {
-            fsb.append((char) ch);
+            fsb.cat((char) ch);
         }
         return new BMPString(fsb);
     }
@@ -99,7 +102,7 @@ public abstract class UnicodeString implements CharSequence, Comparable<UnicodeS
      * with codepoints &gt;255 and/or &gt;65535
      */
 
-    public static int getMaxWidth(CharSequence value) {
+    private static int getMaxWidth(CharSequence value) {
         if (value instanceof LatinString || value instanceof EmptyString) {
             return 1;
         }
@@ -176,7 +179,7 @@ public abstract class UnicodeString implements CharSequence, Comparable<UnicodeS
     /**
      * Implementations of UnicodeString can be compared with each other, but not with
      * other implementations of CharSequence
-     * @return a hashCode that distinuishes this UnicodeString from others
+     * @return a hashCode that distinguishes this UnicodeString from others
      */
 
     @Override
@@ -222,6 +225,7 @@ public abstract class UnicodeString implements CharSequence, Comparable<UnicodeS
      * @return less than 0, 0, or greater than 0 depending on the ordering of the two strings
      */
 
+    @Override
     public int compareTo(UnicodeString other) {
         int alen = uLength();
         int blen = other.uLength();
@@ -256,7 +260,7 @@ public abstract class UnicodeString implements CharSequence, Comparable<UnicodeS
      * @return a byte array that can act as a collation key
      */
 
-    public final byte[] getCodepointCollationKey() {
+    private byte[] getCodepointCollationKey() {
         int len = uLength();
         byte[] result = new byte[len * 3];
         for (int i = 0, j = 0; i < len; i++) {
@@ -266,5 +270,15 @@ public abstract class UnicodeString implements CharSequence, Comparable<UnicodeS
             result[j++] = (byte) c;
         }
         return result;
+    }
+
+    /**
+     * Get an atomic value that encapsulates this match key. Needed to support the collation-key() function.
+     *
+     * @return an atomic value that encapsulates this match key
+     */
+    @Override
+    public AtomicValue asAtomic() {
+        return new Base64BinaryValue(getCodepointCollationKey());
     }
 }

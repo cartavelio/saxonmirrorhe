@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -23,11 +23,11 @@ import net.sf.saxon.trans.XPathException;
  * used in the implementation of the document(), key(), and id() functions.</p>
  */
 
-public class MappingIterator<F extends Item<?>, T extends Item<?>> implements SequenceIterator<T> {
+public class MappingIterator implements SequenceIterator {
 
-    private SequenceIterator<F> base;
-    private MappingFunction<? super F, ? extends T> action;
-    private SequenceIterator<? extends T> results = null;
+    private SequenceIterator base;
+    private MappingFunction action;
+    private SequenceIterator results = null;
 
     /**
      * Construct a MappingIterator that will apply a specified MappingFunction to
@@ -37,13 +37,14 @@ public class MappingIterator<F extends Item<?>, T extends Item<?>> implements Se
      * @param action the mapping function to be applied
      */
 
-    public MappingIterator(SequenceIterator<F> base, MappingFunction<? super F, ? extends T> action) {
+    public MappingIterator(SequenceIterator base, MappingFunction action) {
         this.base = base;
         this.action = action;
     }
 
-    public T next() throws XPathException {
-        T nextItem;
+    @Override
+    public Item next() throws XPathException {
+        Item nextItem;
         while (true) {
             if (results != null) {
                 nextItem = results.next();
@@ -53,10 +54,10 @@ public class MappingIterator<F extends Item<?>, T extends Item<?>> implements Se
                     results = null;
                 }
             }
-            F nextSource = base.next();
+            Item nextSource = base.next();
             if (nextSource != null) {
                 // Call the supplied mapping function
-                SequenceIterator<? extends T> obj = action.map(nextSource);
+                SequenceIterator obj = action.map(nextSource);
 
                 // The result may be null (representing an empty sequence),
                 //  or a SequenceIterator (any sequence)
@@ -80,25 +81,12 @@ public class MappingIterator<F extends Item<?>, T extends Item<?>> implements Se
         return nextItem;
     }
 
+    @Override
     public void close() {
         if (results != null) {
             results.close();
         }
         base.close();
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIterator#GROUNDED}, {@link SequenceIterator#LAST_POSITION_FINDER},
-     *         and {@link SequenceIterator#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    public int getProperties() {
-        return 0;
     }
 
 }

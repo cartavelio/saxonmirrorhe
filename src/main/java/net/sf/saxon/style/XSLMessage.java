@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,7 +12,8 @@ import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.Message;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
@@ -35,6 +36,7 @@ public final class XSLMessage extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -45,41 +47,44 @@ public final class XSLMessage extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         String terminateAtt = null;
         String selectAtt = null;
         String errorCodeAtt = null;
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            String value = att.getValue();
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
             switch (f) {
                 case "terminate":
-                    terminateAtt = Whitespace.trim(atts.getValue(a));
-                    terminate = makeAttributeValueTemplate(terminateAtt, a);
+                    terminateAtt = Whitespace.trim(value);
+                    terminate = makeAttributeValueTemplate(terminateAtt, att);
                     break;
                 case "select":
-                    selectAtt = atts.getValue(a);
-                    select = makeExpression(selectAtt, a);
+                    selectAtt = value;
+                    select = makeExpression(selectAtt, att);
                     break;
                 case "error-code":
-                    errorCodeAtt = atts.getValue(a);
-                    errorCode = makeAttributeValueTemplate(errorCodeAtt, a);
+                    errorCodeAtt = value;
+                    errorCode = makeAttributeValueTemplate(errorCodeAtt, att);
                     break;
                 default:
-                    if (atts.getURI(a).equals(NamespaceConstant.SAXON) && atts.getLocalName(a).equals("time")) {
-                        boolean timed = processBooleanAttribute("saxon:time", atts.getValue(a));
+                    if (attName.hasURI(NamespaceConstant.SAXON) && attName.getLocalPart().equals("time")) {
+                        isExtensionAttributeAllowed(attName.getDisplayName());
+                        boolean timed = processBooleanAttribute("saxon:time", value);
                         if (timed) {
                             timer = makeExpression(
-                                    "format-dateTime(Q{http://saxon.sf.net/}timestamp(),'[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f,3-3] - ')", a);
+                                    "format-dateTime(Q{http://saxon.sf.net/}timestamp(),'[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f,3-3] - ')", att);
                         }
                     } else {
-                        checkUnknownAttribute(atts.getNodeName(a));
+                        checkUnknownAttribute(attName);
                     }
                     break;
             }
@@ -87,13 +92,14 @@ public final class XSLMessage extends StyleElement {
 
         if (terminateAtt == null) {
             terminateAtt = "no";
-            terminate = makeAttributeValueTemplate(terminateAtt, -1);
+            terminate = makeAttributeValueTemplate(terminateAtt, null);
         }
 
         checkAttributeValue("terminate", terminateAtt, true, StyleElement.YES_NO);
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         select = typeCheck("select", select);
         terminate = typeCheck("terminate", terminate);
@@ -104,6 +110,7 @@ public final class XSLMessage extends StyleElement {
         }
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression b = compileSequenceConstructor(exec, decl, true);
         if (b != null) {
@@ -126,7 +133,7 @@ public final class XSLMessage extends StyleElement {
             // resolve any QName prefix now
             String code = ((StringLiteral) errorCode).getStringValue();
             if (code.contains(":") && !code.startsWith("Q{")) {
-                StructuredQName name = makeQName(code);
+                StructuredQName name = makeQName(code, null, "error-code");
                 errorCode = new StringLiteral(name.getEQName());
             }
         }

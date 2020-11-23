@@ -1,17 +1,22 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.lib.FunctionAnnotationHandler;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.Affinity;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * test that annotations and annotation assertions can be handled using a FunctionAnnotationHandler
  */
-public class TestAnnotationHandler extends TestCase {
+public class TestAnnotationHandler {
 
     private static class ColourHandler implements FunctionAnnotationHandler {
 
@@ -41,11 +46,12 @@ public class TestAnnotationHandler extends TestCase {
             }
         }
 
-        public int relationship(AnnotationList firstList, AnnotationList secondList) {
-            return TypeHierarchy.OVERLAPS;
+        public Affinity relationship(AnnotationList firstList, AnnotationList secondList) {
+            return Affinity.OVERLAPS;
         }
     }
 
+    @Test
     public void testSimple() {
         try {
             String q = "" +
@@ -60,13 +66,14 @@ public class TestAnnotationHandler extends TestCase {
             XQueryExecutable e = c.compile(q);
             XQueryEvaluator t = e.load();
             XdmValue result = t.evaluateSingle();
-            assertTrue("returned true", ((XdmAtomicValue)result).getBooleanValue());
+            assertTrue(((XdmAtomicValue)result).getBooleanValue(), "returned true");
         } catch (SaxonApiException e1) {
             e1.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testNegative() {
         try {
             String q = "" +
@@ -81,13 +88,14 @@ public class TestAnnotationHandler extends TestCase {
             XQueryExecutable e = c.compile(q);
             XQueryEvaluator t = e.load();
             XdmValue result = t.evaluateSingle();
-            assertFalse("returned false", ((XdmAtomicValue) result).getBooleanValue());
+            assertFalse(((XdmAtomicValue) result).getBooleanValue(), "returned false");
         } catch (SaxonApiException e1) {
             e1.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testInference() {
         try {
             String q = "" +
@@ -103,13 +111,14 @@ public class TestAnnotationHandler extends TestCase {
             XQueryExecutable e = c.compile(q);
             XQueryEvaluator t = e.load();
             XdmValue result = t.evaluateSingle();
-            assertEquals("returned Paris", ((XdmAtomicValue) result).getStringValue(), "Paris");
+            assertEquals("Paris", ((XdmAtomicValue) result).getStringValue(), "returned Paris");
         } catch (SaxonApiException e1) {
             e1.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testTypeError() {
         try {
             String q = "" +
@@ -127,7 +136,7 @@ public class TestAnnotationHandler extends TestCase {
             XdmValue result = t.evaluateSingle();
             fail("Unexpected success");
         } catch (SaxonApiException e1) {
-            assertTrue("errorCode", e1.getErrorCode().getLocalName().equals("XPTY0004"));
+            assertTrue(e1.getErrorCode().getLocalName().equals("XPTY0004"), "errorCode");
         }
     }
 

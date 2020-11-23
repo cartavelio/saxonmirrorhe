@@ -1,8 +1,8 @@
 package jaxptest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.FeatureKeys;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -21,24 +21,29 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestIdentityTransformer extends TestCase {
 
+public class TestIdentityTransformer {
+
+    @Test
     public void testIdentityTransformToDom() {
         try {
             Node node = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
             Transformer identityTransformer = new net.sf.saxon.TransformerFactoryImpl().newTransformer();
             SAXSource source = new SAXSource(new InputSource(new ByteArrayInputStream("<hello/>".getBytes())));
             identityTransformer.transform(source, new DOMResult(node));
-            assertEquals(node.getChildNodes().item(0).getNodeName(), "hello");
+            assertEquals("hello", node.getChildNodes().item(0).getNodeName());
             //System.out.println(node.getChildNodes().item(0).getNodeName());
-        } catch (ParserConfigurationException e) {
-            fail(e.getMessage());
-        } catch (TransformerException e) {
+        } catch (ParserConfigurationException | TransformerException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testIdentityTransformFromDom() {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -74,6 +79,7 @@ public class TestIdentityTransformer extends TestCase {
 
     }
 
+    @Test
     public void testWhitespaceStripping() {
         try {
             String in = "<rows>" + "   " +
@@ -126,6 +132,7 @@ public class TestIdentityTransformer extends TestCase {
         }
     }
 
+    @Test
     public void testResetOutputProperties() {
         try {
             System.setProperty("javax.xml.transform.TransformerFactory",
@@ -153,13 +160,14 @@ public class TestIdentityTransformer extends TestCase {
 
     }
 
+    @Test
     public void testErrorListener() {
 
         MyErrorListener listener = new MyErrorListener();
         try {
             TransformerFactory factory = new TransformerFactoryImpl();
-            factory.setErrorListener(listener);
             Transformer trans = factory.newTransformer();
+            trans.setErrorListener(listener);
             String in = "<illformed>";
             StreamSource ss = new StreamSource(new StringReader(in));
             StringWriter sw = new StringWriter();
@@ -168,9 +176,9 @@ public class TestIdentityTransformer extends TestCase {
         } catch (TransformerConfigurationException e) {
             fail(e.getMessage());
         } catch (TransformerException e) {
-            assertEquals(listener.warnings, 0);
-            assertEquals(listener.errors, 0);
-            assertEquals(listener.fatalErrors, 1);
+            assertEquals(0, listener.warnings, "W");
+            assertEquals(0, listener.errors, "E");
+            assertEquals(1, listener.fatalErrors, "F");
         }
 
     }
@@ -192,6 +200,7 @@ public class TestIdentityTransformer extends TestCase {
         }
     }
 
+    @Test
     public void testIdentityNamespaces() {
         try {
             String xml = "<?xml version=\"1.0\" ?>\n" +
@@ -211,6 +220,7 @@ public class TestIdentityTransformer extends TestCase {
         }
     }
 
+    @Test
     public void testIdentityTransformFromDomPerformance() {
         try {
             ((com.sun.management.ThreadMXBean) ManagementFactory.getThreadMXBean()).setThreadAllocatedMemoryEnabled(true);
@@ -240,19 +250,7 @@ public class TestIdentityTransformer extends TestCase {
                 System.out.println("           Xalan: " + (System.nanoTime() - start) / 1000000 + "ms in " + (getUsedMemory() - used) + "bytes");
             }
 
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        } catch (TransformerException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        } catch (SAXException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        } catch (IOException e) {
+        } catch (ParserConfigurationException | TransformerException | SAXException | IOException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

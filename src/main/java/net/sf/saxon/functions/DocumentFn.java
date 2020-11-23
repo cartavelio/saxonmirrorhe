@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,12 +9,9 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Builder;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.Sender;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
@@ -24,10 +21,7 @@ import net.sf.saxon.lib.RelativeURIResolver;
 import net.sf.saxon.lib.StandardErrorHandler;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
-import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.NonDelegatingURIResolver;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.value.Cardinality;
 
@@ -53,6 +47,7 @@ public class DocumentFn extends SystemFunction implements Callable {
      * Determine the static cardinality
      */
 
+    @Override
     public int getCardinality(Expression[] arguments) {
         Expression expression = arguments[0];
         if (Cardinality.allowsMany(expression.getCardinality())) {
@@ -70,6 +65,7 @@ public class DocumentFn extends SystemFunction implements Callable {
      * @param arguments the expressions supplied as arguments to the function call
      */
 
+    @Override
     public int getSpecialProperties(Expression[] arguments) {
         return StaticProperty.ORDERED_NODESET |
                 StaticProperty.PEER_NODESET |
@@ -96,7 +92,8 @@ public class DocumentFn extends SystemFunction implements Callable {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         int numArgs = getArity();
 
         SequenceIterator hrefSequence = arguments[0].iterate();
@@ -138,6 +135,7 @@ public class DocumentFn extends SystemFunction implements Callable {
             this.context = context;
         }
 
+        @Override
         public Item mapItem(Item item) throws XPathException {
             String b = baseURI;
             if (b == null) {
@@ -147,45 +145,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                     b = stylesheetURI;
                 }
             }
-            try {
-                return makeDoc(item.getStringValue(), b, packageData, null, context, locator, false);
-            } catch (XPathException xerr) {
-                switch (xerr.getErrorCodeLocalPart()) {
-                    case "XTRE1160":
-                        // Invalid fragment identifier: error code changes in XSLT 3.0
-                        xerr.setErrorCode("XTDE1160");
-                        // Report a "recoverable error"
-                        try {
-                            context.getController().recoverableError(xerr);
-                        } catch (XPathException err2) {
-                            throw xerr;
-                        }
-                        // If recovering, the recovery action is to ignore the fragment identifier
-                        String href = item.getStringValue();
-                        int hash = href.indexOf('#');
-                        href = href.substring(0, hash);
-                        return makeDoc(href, b, packageData, null, context, locator, false);
-                    case "XTDE1162":
-                        // non-recoverable error
-                        throw xerr;
-                    default:
-                        // Other errors
-                        if (!xerr.hasBeenReported()) {
-                            xerr.maybeSetLocation(locator);
-                            String code = (xerr.getException() instanceof URISyntaxException) ? "FODC0005" : "FODC0002";
-                            xerr.maybeSetErrorCode(code);
-                            try {
-                                context.getController().recoverableError(xerr);
-                            } catch (XPathException err2) {
-                                throw xerr;
-                            }
-                        } else {
-                            throw xerr;
-                        }
-                        break;
-                }
-                return null;
-            }
+            return makeDoc(item.getStringValue(), b, packageData, null, context, locator, false);
         }
     }
 
@@ -200,7 +160,8 @@ public class DocumentFn extends SystemFunction implements Callable {
      * @param options parse options to be used. May be null.
      * @param c       the dynamic XPath context
      * @param locator used to identify the location of the instruction in event of error
-     * @param silent  if true, errors should not be notified to the ErrorListener        @return the root of the constructed document, or the selected element within the document
+     * @param silent  if true, errors should not be notified to the ErrorListener
+     * @return the root of the constructed document, or the selected element within the document
      *         if a fragment identifier was supplied
      * @throws XPathException if reading or parsing the document fails
      */
@@ -224,7 +185,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                 href = href.substring(0, hash);
                 if (!NameChecker.isValidNCName(fragmentId)) {
                     XPathException de = new XPathException("The fragment identifier " + Err.wrap(fragmentId) + " is not a valid NCName");
-                    de.setErrorCode("XTRE1160");
+                    de.setErrorCode("XTDE1160");
                     de.setXPathContext(c);
                     de.setLocator(locator);
                     throw de;
@@ -238,7 +199,7 @@ public class DocumentFn extends SystemFunction implements Callable {
         }
 
         // Resolve relative URI
-        DocumentURI documentKey = computeDocumentKey(href, baseURI, packageData, c);
+        DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData, c);
 
         // see if the document is already loaded
 
@@ -318,7 +279,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                 }
 
                 if (silent) {
-                    StandardErrorHandler eh = new StandardErrorHandler(controller.getErrorListener());
+                    StandardErrorHandler eh = new StandardErrorHandler(controller.getErrorReporter());
                     eh.setSilent(true);
                     options.setErrorHandler(eh);
                 }
@@ -413,20 +374,25 @@ public class DocumentFn extends SystemFunction implements Callable {
             }
         } catch (Exception ex) {
             //ex.printStackTrace();
-            XPathException de = new XPathException("Exception thrown by URIResolver", ex);
+            XPathException de = new XPathException("Exception thrown by URIResolver resolving `"
+                                                           + href + "` against `" + baseURI + "'", ex);
             if (context.getConfiguration().getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS)) {
                 ex.printStackTrace();
             }
             throw de;
         }
 
-        if(source instanceof StreamSource && ((StreamSource)source).getInputStream() == null && ((StreamSource)source).getReader() == null) {
+        if (source instanceof StreamSource && ((StreamSource)source).getInputStream() == null && ((StreamSource)source).getReader() == null) {
             String uri = source.getSystemId();
-            resolver = context.getController().getStandardURIResolver();
-            try {
-                source = resolver.resolve(uri, "");
-            } catch (TransformerException ex) {
-                throw XPathException.makeXPathException(ex);
+            if (uri != null) {
+                resolver = context.getController().getStandardURIResolver();
+                try {
+                    source = resolver.resolve(uri, "");
+                } catch (TransformerException ex) {
+                    throw XPathException.makeXPathException(ex);
+                }
+            } else {
+                source = null; // the supplied source is useless, treat it as if the URIResolver had returned null
             }
         }
         // if a user URI resolver returns null, try the standard one
@@ -451,7 +417,7 @@ public class DocumentFn extends SystemFunction implements Callable {
      * Compute a document key
      */
 
-    protected static DocumentURI computeDocumentKey(String href, String baseURI, PackageData packageData, XPathContext c) throws XPathException {
+    protected static DocumentKey computeDocumentKey(String href, String baseURI, PackageData packageData, XPathContext c) throws XPathException {
         // Resolve relative URI
         Controller controller = c.getController();
 
@@ -473,15 +439,15 @@ public class DocumentFn extends SystemFunction implements Callable {
      *              otherwise (typically a stylesheet module)
      */
 
-    public static DocumentURI computeDocumentKey(
+    public static DocumentKey computeDocumentKey(
             String href, String baseURI, PackageData packageData, URIResolver resolver, boolean strip) {
-        String documentKey;
+        String absURI;
         if (resolver instanceof RelativeURIResolver) {
             // If this is the case, the URIResolver is responsible for absolutization as well as dereferencing
             try {
-                documentKey = ((RelativeURIResolver) resolver).makeAbsolute(href, baseURI);
+                absURI = ((RelativeURIResolver) resolver).makeAbsolute(href, baseURI);
             } catch (TransformerException e) {
-                documentKey = '/' + href;
+                absURI = '/' + href;
             }
         } else {
             // Saxon takes charge of absolutization, leaving the user URIResolver to handle dereferencing only
@@ -489,20 +455,19 @@ public class DocumentFn extends SystemFunction implements Callable {
             if (baseURI == null) {    // no base URI available
                 try {
                     // the href might be an absolute URL
-                    documentKey = new URI(href).toString();
+                    absURI = new URI(href).toString();
                 } catch (URISyntaxException err) {
                     // it isn't; but the URI resolver might know how to cope
-                    documentKey = '/' + href;
+                    absURI = '/' + href;
                 }
             } else if (href.isEmpty()) {
                 // common case in XSLT, which java.net.URI#resolve() does not handle correctly
-                documentKey = baseURI;
+                absURI = baseURI;
             } else {
                 try {
-                    URI uri = new URI(baseURI).resolve(href);
-                    documentKey = uri.toString();
+                    absURI = ResolveURI.makeAbsolute(href, baseURI).toString();
                 } catch (URISyntaxException | IllegalArgumentException err) {
-                    documentKey = baseURI + "/../" + href;
+                    absURI = baseURI + "/../" + href;
                 }
             }
         }
@@ -510,10 +475,10 @@ public class DocumentFn extends SystemFunction implements Callable {
                 ((StylesheetPackage) packageData).getSpaceStrippingRule() != NoElementsSpaceStrippingRule.getInstance()) {
             String name = ((StylesheetPackage) packageData).getPackageName();
             if (name != null) {
-                documentKey = name + " " + ((StylesheetPackage) packageData).getPackageVersion() + " " + documentKey;
+                return new DocumentKey(absURI, name, ((StylesheetPackage) packageData).getPackageVersion());
             }
         }
-        return new DocumentURI(documentKey);
+        return new DocumentKey(absURI);
     }
 
     /**
@@ -561,11 +526,8 @@ public class DocumentFn extends SystemFunction implements Callable {
                 documentKey = baseURI;
             } else {
                 try {
-                    URI uri = new URI(baseURI).resolve(href);
-                    documentKey = uri.toString();
-                } catch (URISyntaxException err) {
-                    documentKey = baseURI + "/../" + href;
-                } catch (IllegalArgumentException err) {
+                    documentKey = ResolveURI.makeAbsolute(href, baseURI).toString();
+                } catch (URISyntaxException | IllegalArgumentException err) {
                     documentKey = baseURI + "/../" + href;
                 }
             }
@@ -659,11 +621,8 @@ public class DocumentFn extends SystemFunction implements Callable {
             documentKey = baseURL;
         } else {
             try {
-                URI url = new URI(baseURL).resolve(href);
-                documentKey = url.toString();
-            } catch (URISyntaxException err) {
-                documentKey = baseURL + "/../" + href;
-            } catch (IllegalArgumentException err) {
+                documentKey = ResolveURI.makeAbsolute(href, baseURL).toString();
+            } catch (URISyntaxException | IllegalArgumentException err) {
                 documentKey = baseURL + "/../" + href;
             }
         }
@@ -730,8 +689,7 @@ public class DocumentFn extends SystemFunction implements Callable {
      *         given id value; or null if no such element is found.
      */
 
-    private static NodeInfo getFragment(TreeInfo doc, String fragmentId, XPathContext context, SourceLocator locator)
-            throws XPathException {
+    private static NodeInfo getFragment(TreeInfo doc, String fragmentId, XPathContext context, Location locator) {
         // TODO: we only support one kind of fragment identifier. The rules say
         // that the interpretation of the fragment identifier depends on media type,
         // but we aren't getting the media type from the URIResolver.
@@ -739,15 +697,7 @@ public class DocumentFn extends SystemFunction implements Callable {
             return doc.getRootNode();
         }
         if (!NameChecker.isValidNCName(fragmentId)) {
-            XPathException err = new XPathException("Invalid fragment identifier in URI");
-            err.setXPathContext(context);
-            err.setErrorCode("XTRE1160");
-            err.setLocator(locator);
-            try {
-                context.getController().recoverableError(err);
-            } catch (XPathException dynamicError) {
-                throw err;
-            }
+            context.getController().warning("Invalid fragment identifier in URI", "XTDE1160", locator);
             return doc.getRootNode();
         }
         return doc.selectID(fragmentId, false);

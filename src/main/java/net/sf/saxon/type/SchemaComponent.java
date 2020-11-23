@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,6 @@
 
 package net.sf.saxon.type;
 
-import com.saxonica.ee.schema.UserSchemaComponent;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.value.SequenceType;
 
@@ -15,7 +14,7 @@ import net.sf.saxon.value.SequenceType;
  * This is a marker interface that represents any "schema component" as defined in the XML Schema
  * specification. This may be a user-defined schema component or a built-in schema component. Since
  * all built-in schema components are types, every SchemaComponent in practice is either a
- * {@link UserSchemaComponent} or a {@link SchemaType} or both.
+ * {@link com.saxonica.ee.schema.UserSchemaComponent} or a {@link SchemaType} or both.
  */
 public interface SchemaComponent {
 
@@ -42,8 +41,7 @@ public interface SchemaComponent {
 
     int getRedefinitionLevel();
 
-//#ifdefined SCHEMA
-
+    //#ifdefined SCHEMA
     /**
      * Get the schema component in the form of a function item. This allows schema information
      * to be made visible to XSLT or XQuery code. The function makes available the contents of the
@@ -56,6 +54,7 @@ public interface SchemaComponent {
      */
 
     Function getComponentAsFunction();
+    //#endif
 
 
     /**
@@ -64,7 +63,6 @@ public interface SchemaComponent {
 
     FunctionItemType COMPONENT_FUNCTION_TYPE =
             new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.ANY_SEQUENCE);
-//#endif
 
 }
 

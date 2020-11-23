@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -95,6 +95,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
     }
 
     /*@NotNull*/
+    @Override
     public ItemType getResultItemType(Expression[] args) {
         TypeHierarchy th = getRetainedStaticContext().getConfiguration().getTypeHierarchy();
         ItemType base = Atomizer.getAtomizedItemType(args[0], false, th);
@@ -108,6 +109,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
      * Determine the cardinality of the function.
      */
 
+    @Override
     public int getCardinality(Expression[] arguments) {
         if (!Cardinality.allowsZero(arguments[0].getCardinality())) {
             return StaticProperty.EXACTLY_ONE;
@@ -124,7 +126,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
             ItemType it = arguments[0].getItemType().getPrimitiveItemType();
             if (it instanceof BuiltInAtomicType && ((BuiltInAtomicType)it).isOrdered(false)) {
                 TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-                if (th.relationship(it, BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT) {
+                if (th.relationship(it, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT) {
                     return UntypedSequenceConverter.makeUntypedSequenceConverter(
                             visitor.getConfiguration(), arguments[0], BuiltInAtomicType.DOUBLE).typeCheck(visitor, contextInfo);
                 } else {
@@ -136,6 +138,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
     }
 
 
+    @Override
     public AtomicComparer getAtomicComparer(XPathContext context)  {
         AtomicComparer comparer = getPreAllocatedAtomicComparer();
         if (comparer != null) {
@@ -325,8 +328,9 @@ public abstract class Minimax extends CollatingFunctionFixed {
      * @return the result of the evaluation, in the form of a Sequence
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
      */
-    public ZeroOrOne<AtomicValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return new ZeroOrOne<>(
+    @Override
+    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+        return new ZeroOrOne(
                 minimax(arguments[0].iterate(), isMaxFunction(), getAtomicComparer(context), ignoreNaN, context));
     }
 
@@ -347,6 +351,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
         }
     }
 
+    @Override
     public String getStreamerName() {
         return "Minimax";
     }
@@ -356,6 +361,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
      */
 
     public static class Min extends Minimax {
+        @Override
         public boolean isMaxFunction() {
             return false;
         }
@@ -366,6 +372,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
      */
 
     public static class Max extends Minimax {
+        @Override
         public boolean isMaxFunction() {
             return true;
         }

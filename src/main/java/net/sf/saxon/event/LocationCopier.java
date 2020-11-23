@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,8 +7,8 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NodeInfo;
 
 /**
@@ -22,7 +22,7 @@ import net.sf.saxon.om.NodeInfo;
 
 public class LocationCopier implements CopyInformee<Location> {
     
-    private boolean wholeDocument;
+    private final boolean wholeDocument;
 
     public LocationCopier(boolean wholeDocument) {
         this.wholeDocument = wholeDocument;
@@ -35,6 +35,7 @@ public class LocationCopier implements CopyInformee<Location> {
      * @param element the node being copied, which must be an element node
      */
 
+    @Override
     public Location notifyElementNode(NodeInfo element) {
         String systemId = wholeDocument ? element.getSystemId() : element.getBaseURI();
         // The logic behind this is that if we are copying the whole document, we will be copying all
@@ -45,7 +46,7 @@ public class LocationCopier implements CopyInformee<Location> {
         // but XDM doesn't work that way.
         int lineNumber = element.getLineNumber();
         int columnNumber = element.getColumnNumber();
-        return new ExplicitLocation(systemId, lineNumber, columnNumber);
+        return new Loc(systemId, lineNumber, columnNumber);
     }
 }
 

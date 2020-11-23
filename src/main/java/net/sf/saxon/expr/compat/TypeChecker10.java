@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -34,6 +34,7 @@ public class TypeChecker10 extends TypeChecker {
     public TypeChecker10() {
     }
 
+    @Override
     public Expression staticTypeCheck(Expression supplied,
                                       SequenceType req,
                                       RoleDiagnostic role,
@@ -96,14 +97,17 @@ public class TypeChecker10 extends TypeChecker {
 
     }
 
+    @Override
     public Expression makeArithmeticExpression(Expression lhs, int operator, Expression rhs) {
         return new ArithmeticExpression10(lhs, operator, rhs);
     }
 
+    @Override
     public Expression makeGeneralComparison(Expression lhs, int operator, Expression rhs) {
         return new GeneralComparison10(lhs, operator, rhs);
     }
 
+    @Override
     public Expression processValueOf(Expression select, Configuration config) {
         TypeHierarchy th = config.getTypeHierarchy();
         if (!select.getItemType().isPlainType()) {

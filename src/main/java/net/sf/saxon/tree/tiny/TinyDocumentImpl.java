@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,13 +9,12 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.CopyOptions;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
@@ -52,6 +51,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * Get the tree containing this node
      */
 
+    @Override
     public TinyTree getTree() {
         return tree;
     }
@@ -70,6 +70,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * Get the configuration previously set using setConfiguration
      */
 
+    @Override
     public Configuration getConfiguration() {
         return tree.getConfiguration();
     }
@@ -78,6 +79,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * Set the system id of this node
      */
 
+    @Override
     public void setSystemId(String uri) {
         tree.setSystemId(nodeNr, uri);
     }
@@ -86,6 +88,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * Get the system id of this root node
      */
 
+    @Override
     public String getSystemId() {
         return tree.getSystemId(nodeNr);
     }
@@ -104,6 +107,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * Get the base URI of this root node.
      */
 
+    @Override
     public String getBaseURI() {
         if (baseURI != null) {
             return baseURI;
@@ -117,6 +121,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * @return 0 always
      */
 
+    @Override
     public int getLineNumber() {
         return 0;
     }
@@ -137,6 +142,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * @return Type.DOCUMENT (always)
      */
 
+    @Override
     public final int getNodeKind() {
         return Type.DOCUMENT;
     }
@@ -148,6 +154,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      */
 
     /*@Nullable*/
+    @Override
     public TinyNodeImpl getParent() {
         return null;
     }
@@ -159,6 +166,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      */
 
     /*@NotNull*/
+    @Override
     public NodeInfo getRoot() {
         return this;
     }
@@ -169,8 +177,9 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * @param buffer to contain an identifier based on the document number
      */
 
+    @Override
     public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
-        buffer.append('d');
+        buffer.cat('d');
         buffer.append(Long.toString(getTreeInfo().getDocumentNumber()));
     }
 
@@ -182,6 +191,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      */
 
     /*@NotNull*/
+    @Override
     public AtomicSequence atomize() throws XPathException {
         return new UntypedAtomicValue(getStringValueCS());
     }
@@ -230,13 +240,6 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
                 if ((kind & 0x0f) == Type.ELEMENT &&
                         (tree.nameCode[i] & 0xfffff) == fingerprint) {
                     list.add(tree.getNode(i));
-                } else if (kind == Type.EXTERNAL_NODE_REFERENCE) {
-                    AxisIterator externals = tree.externalNodes.get(tree.alpha[i])
-                            .iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, fingerprint, getNamePool()));
-                    NodeInfo ext;
-                    while ((ext = externals.next()) != null) {
-                        list.add(ext);
-                    }
                 }
                 i++;
             }
@@ -262,6 +265,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      *         xs:anyType if it has.
      * @since 9.4
      */
+    @Override
     public SchemaType getSchemaType() {
         AxisIterator children = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         NodeInfo node = children.next();
@@ -276,6 +280,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * Copy this node to a given outputter
      */
 
+    @Override
     public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId) throws XPathException {
 
         out.startDocument(CopyOptions.getStartDocumentProperties(copyOptions));
@@ -294,7 +299,9 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
 
         // output the children
 
-        iterateAxis(AxisInfo.CHILD).forEachOrFail(n -> n.copy(out, copyOptions, locationId));
+        for (NodeInfo child : children()) {
+            child.copy(out, copyOptions, locationId);
+        }
 
         out.endDocument();
     }
@@ -316,14 +323,6 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
         // Chosen to give a hashcode that is likely (a) to be distinct from other documents, and (b) to
         // be distinct from other nodes in the same document
         return (int) tree.getDocumentNumber();
-    }
-
-    /**
-     * Diagnostic method
-     * @return true if the tree contains grafted nodes
-     */
-    public boolean containsGraftedNodes() {
-        return tree.externalNodes != null && !tree.externalNodes.isEmpty();
     }
 
 

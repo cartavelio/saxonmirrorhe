@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -60,6 +60,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
      *
      * @return true if the document contains elements whose type is other than UNTYPED
      */
+    @Override
     public boolean isTyped() {
         return underlyingTree.isTyped();
     }
@@ -81,6 +82,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo selectID(String id, boolean getParent) {
         NodeInfo n = underlyingTree.selectID(id, false);
         if (n == null) {
@@ -98,6 +100,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
      *         information is not available then an empty iterator is returned
      */
 
+    @Override
     public Iterator<String> getUnparsedEntityNames() {
         return underlyingTree.getUnparsedEntityNames();
     }
@@ -108,6 +111,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
      * @param name the name of the entity
      */
 
+    @Override
     public String[] getUnparsedEntity(String name) {
         return underlyingTree.getUnparsedEntity(name);
     }

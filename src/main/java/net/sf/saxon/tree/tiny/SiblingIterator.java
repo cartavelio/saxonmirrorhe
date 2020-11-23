@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,7 +18,9 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
 import net.sf.saxon.z.IntSetPredicate;
 
+import java.util.EnumSet;
 import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 /**
  * This class supports both the child:: and following-sibling:: axes, which are
@@ -29,14 +31,14 @@ import java.util.function.IntPredicate;
  * using NodeInfo#iterateAxis()
  */
 
-final class SiblingIterator implements AxisIterator, LookaheadIterator<NodeInfo>, AtomizedValueIterator<NodeInfo> {
+final class SiblingIterator implements AxisIterator, LookaheadIterator, AtomizedValueIterator {
 
     // NOTE: have experimented with a dedicated iterator for the child axis matching against
     // elements only, by fingerprint - no measurable improvement obtained.
 
     private TinyTree tree;
     private int nextNodeNr;
-    /*@Nullable*/ private NodeTest test;
+    /*@Nullable*/ private Predicate<? super NodeInfo> test;
     private TinyNodeImpl startNode;
     private TinyNodeImpl parentNode;
     private boolean getChildren;
@@ -55,10 +57,10 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator<NodeInfo>
      */
 
     SiblingIterator(/*@NotNull*/ TinyTree tree, /*@NotNull*/ TinyNodeImpl node,
-                    /*@Nullable*/ NodeTest nodeTest, boolean getChildren) {
+                                 Predicate<? super NodeInfo> nodeTest, boolean getChildren) {
         this.tree = tree;
         test = nodeTest;
-        matcher = nodeTest == null ? IntSetPredicate.ALWAYS_TRUE : nodeTest.getMatcher(tree);
+        matcher = nodeTest instanceof NodeTest ? ((NodeTest)nodeTest).getMatcher(tree): IntSetPredicate.ALWAYS_TRUE;
         startNode = node;
         this.getChildren = getChildren;
         if (getChildren) {          // child:: axis
@@ -100,11 +102,12 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator<NodeInfo>
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
         if (needToAdvance) {
             final int thisNode = nextNodeNr;
             final int[] tNext = tree.next;
-            final NodeTest nTest = test;
+            final Predicate<? super NodeInfo> nTest = test;
             if (nTest == null) {
                 do {
                     nextNodeNr = tNext[nextNodeNr];
@@ -138,10 +141,11 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator<NodeInfo>
      * @throws net.sf.saxon.trans.XPathException
      *          if a failure occurs reading or atomizing the next value
      */
+    @Override
     public AtomicSequence nextAtomizedValue() throws XPathException {
         if (needToAdvance) {
             final int thisNode = nextNodeNr;
-            final NodeTest nTest = test;
+            final Predicate<? super NodeInfo> nTest = test;
             final int[] tNext = tree.next;
             if (nTest == null) {
                 do {
@@ -192,10 +196,11 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator<NodeInfo>
      * @return true if there are more items in the sequence
      */
 
+    @Override
     public boolean hasNext() {
         int n = nextNodeNr;
         if (needToAdvance) {
-            final NodeTest nTest = test;
+            final Predicate<? super NodeInfo> nTest = test;
             final int[] tNext = tree.next;
             if (nTest == null) {
                 do {
@@ -215,8 +220,9 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator<NodeInfo>
         return n != -1;
     }
 
-    public int getProperties() {
-        return LOOKAHEAD | ATOMIZING;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD, Property.ATOMIZING);
     }
 
 }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,16 +8,17 @@
 package net.sf.saxon.expr;
 
 import com.saxonica.ee.stream.Streamability;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.flwor.LocalVariableBinding;
 import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.expr.instruct.LocalParam;
 import net.sf.saxon.expr.instruct.LocalParamBlock;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.lib.StandardErrorListener;
+import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -35,7 +36,7 @@ public abstract class VariableReference extends Expression implements BindingRef
     /*@Nullable*/ protected Binding binding = null;     // This will be null until fixup() is called; it will also be null
     // if the variable reference has been inlined
     protected SequenceType staticType = null;
-    protected GroundedValue<?> constantValue = null;
+    protected GroundedValue constantValue = null;
     private StructuredQName variableName = null;
     private boolean flattened = false;
     private boolean inLoop = false;
@@ -89,6 +90,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      */
 
     /*@NotNull*/
+    @Override
     public abstract Expression copy(RebindingMap rebindings);
 
 
@@ -121,7 +123,8 @@ public abstract class VariableReference extends Expression implements BindingRef
      * @param properties static properties of the expression to which the variable is bound
      */
 
-    public void setStaticType(SequenceType type, GroundedValue<?> value, int properties) {
+    @Override
+    public void setStaticType(SequenceType type, GroundedValue value, int properties) {
         // System.err.println(this + " Set static type = " + type);
         if (type == null) {
             type = SequenceType.ANY_SEQUENCE;
@@ -146,6 +149,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      * of the parent expression. At present, only variable references take any notice of this notification.
      */
 
+    @Override
     public void setFlattened(boolean flattened) {
         this.flattened = flattened;
     }
@@ -165,6 +169,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      * This notification currently has no effect except when the expression is a variable reference.
      */
 
+    @Override
     public void setFiltered(boolean filtered) {
         this.filtered = filtered;
     }
@@ -208,6 +213,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         if (constantValue != null) {
             binding = null;
@@ -242,6 +248,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         if (binding instanceof LetExpression &&
                 ((LetExpression)binding).getSequence() instanceof Literal &&
@@ -259,7 +266,7 @@ public abstract class VariableReference extends Expression implements BindingRef
             return result;
         }
         if (binding instanceof GlobalParam && ((GlobalParam)binding).isStatic()) {
-            Expression select = ((GlobalParam)binding).getSelectExpression();
+            Expression select = ((GlobalParam) binding).getBody();
             if (select instanceof Literal) {
                 binding = null;
                 Optimizer.trace(visitor.getConfiguration(), "Replaced static parameter " + getDisplayName() + " by its value", select);
@@ -275,6 +282,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      * to be located at run-time.
      */
 
+    @Override
     public void fixup(Binding newBinding) {
         boolean indexed = binding instanceof LocalBinding && ((LocalBinding)binding).isIndexedVariable();
         this.binding = newBinding;
@@ -294,7 +302,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      * @param properties    additional static properties of the variable's initializer
      */
 
-    public void refineVariableType(ItemType type, int cardinality, GroundedValue<?> constantValue, int properties) {
+    public void refineVariableType(ItemType type, int cardinality, GroundedValue constantValue, int properties) {
         TypeHierarchy th = getConfiguration().getTypeHierarchy();
         ItemType oldItemType = getItemType();
         ItemType newItemType = oldItemType;
@@ -322,6 +330,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (staticType == null || staticType.getPrimaryType() == AnyItemType.getInstance()) {
             if (binding != null) {
@@ -389,6 +398,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      * Get the static cardinality
      */
 
+    @Override
     public int computeCardinality() {
         if (staticType == null) {
             if (binding == null) {
@@ -413,6 +423,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      * @return {@link StaticProperty#NO_NODES_NEWLY_CREATED} (unless the variable is assignable using saxon:assign)
      */
 
+    @Override
     public int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         if (binding == null || !binding.isAssignable()) {
@@ -451,11 +462,13 @@ public abstract class VariableReference extends Expression implements BindingRef
      * get HashCode for comparing two expressions
      */
 
+    @Override
     public int computeHashCode() {
         return binding == null ? 73619830 : binding.hashCode();
     }
 
 
+    @Override
     public int getIntrinsicDependencies() {
         int d = 0;
         if (binding == null) {
@@ -482,6 +495,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      * natively.
      */
 
+    @Override
     public int getImplementationMethod() {
         return (Cardinality.allowsMany(getCardinality()) ? 0 : EVALUATE_METHOD)
                 | ITERATE_METHOD | PROCESS_METHOD;
@@ -538,6 +552,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      * expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         return pathMap.getPathForVariable(getBinding());
     }
@@ -551,9 +566,10 @@ public abstract class VariableReference extends Expression implements BindingRef
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext c) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext c) throws XPathException {
         try {
-            Sequence<?> actual = evaluateVariable(c);
+            Sequence actual = evaluateVariable(c);
             assert actual != null;
             return actual.iterate();
         } catch (XPathException err) {
@@ -563,20 +579,21 @@ public abstract class VariableReference extends Expression implements BindingRef
             err.printStackTrace();
             String msg = "Internal error: no value for variable $" + getDisplayName() +
                     " at line " + getLocation().getLineNumber() + (getLocation().getSystemId() == null ? "" : " of " + getLocation().getSystemId());
-            StandardErrorListener.printStackTrace(c, c.getConfiguration().getLogger(), 2);
+            new StandardDiagnostics().printStackTrace(c, c.getConfiguration().getLogger(), 2);
             throw new AssertionError(msg);
         } catch (AssertionError err) {
             err.printStackTrace();
             String msg = err.getMessage() + ". Variable reference $" + getDisplayName() +
                     " at line " + getLocation().getLineNumber() + (getLocation().getSystemId() == null ? "" : " of " + getLocation().getSystemId());
-            StandardErrorListener.printStackTrace(c, c.getConfiguration().getLogger(), 2);
+            new StandardDiagnostics().printStackTrace(c, c.getConfiguration().getLogger(), 2);
             throw new AssertionError(msg);
         }
     }
 
+    @Override
     public Item evaluateItem(XPathContext c) throws XPathException {
         try {
-            Sequence<?> actual = evaluateVariable(c);
+            Sequence actual = evaluateVariable(c);
             assert actual != null;
             return actual.head();
         } catch (XPathException err) {
@@ -585,12 +602,12 @@ public abstract class VariableReference extends Expression implements BindingRef
         }
     }
 
-    public void process(XPathContext c) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext c) throws XPathException {
         try {
-            SequenceIterator<?> iter = evaluateVariable(c).iterate();
-            Receiver out = c.getReceiver();
+            SequenceIterator iter = evaluateVariable(c).iterate();
             Location loc = getLocation();
-            iter.forEachOrFail(item -> out.append(item, loc, ReceiverOptions.ALL_NAMESPACES));
+            iter.forEachOrFail(item -> output.append(item, loc, ReceiverOption.ALL_NAMESPACES));
         } catch (XPathException err) {
             err.maybeSetLocation(getLocation());
             throw err;
@@ -606,7 +623,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      */
 
     /*@NotNull*/
-    public Sequence<?> evaluateVariable(XPathContext c) throws XPathException {
+    public Sequence evaluateVariable(XPathContext c) throws XPathException {
         try {
             return binding.evaluateVariable(c);
         } catch (NullPointerException err) {
@@ -702,6 +719,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("varRef", this);
         destination.emitAttribute("name", variableName);

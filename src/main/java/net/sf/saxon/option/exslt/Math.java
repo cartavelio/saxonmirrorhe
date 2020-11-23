@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -75,13 +75,13 @@ public abstract class Math {
      * The items are returned in the order of the original sequence.
      */
 
-    public static Sequence<?> highest(XPathContext context, SequenceIterator<?> nsv) throws XPathException {
+    public static Sequence highest(XPathContext context, SequenceIterator nsv) throws XPathException {
         double max = Double.NEGATIVE_INFINITY;
         StringToDouble converter = context.getConfiguration().getConversionRules().getStringToDoubleConverter();
         try {
-            List<Item<?>> highest = new ArrayList<>();
+            List<Item> highest = new ArrayList<>();
             while (true) {
-                Item<?> it = nsv.next();
+                Item it = nsv.next();
                 if (it == null) {
                     break;
                 }
@@ -97,7 +97,7 @@ public abstract class Math {
                     highest.add(it);
                 }
             }
-            return new SequenceExtent<>(highest);
+            return new SequenceExtent(highest);
         } catch (NumberFormatException e) {
             return EmptySequence.getInstance();
         }
@@ -109,13 +109,13 @@ public abstract class Math {
      * The items are returned in the order of the original sequence.
      */
 
-    public static Sequence<?> lowest(XPathContext context, SequenceIterator nsv) throws XPathException {
+    public static Sequence lowest(XPathContext context, SequenceIterator nsv) throws XPathException {
         double min = Double.POSITIVE_INFINITY;
         StringToDouble converter = context.getConfiguration().getConversionRules().getStringToDoubleConverter();
         try {
-            List<Item<?>> lowest = new ArrayList<>();
+            List<Item> lowest = new ArrayList<>();
             while (true) {
-                Item<?> it = nsv.next();
+                Item it = nsv.next();
                 if (it == null) {
                     break;
                 }
@@ -131,7 +131,7 @@ public abstract class Math {
                     lowest.add(it);
                 }
             }
-            return new SequenceExtent<>(lowest);
+            return new SequenceExtent(lowest);
         } catch (NumberFormatException e) {
             return EmptySequence.getInstance();
         }

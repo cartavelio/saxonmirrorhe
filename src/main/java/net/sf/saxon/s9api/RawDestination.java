@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,10 +7,7 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.event.CloseNotifier;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SequenceOutputter;
+import net.sf.saxon.event.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
 
@@ -23,7 +20,7 @@ import net.sf.saxon.trans.XPathException;
 
 public class RawDestination extends AbstractDestination {
 
-    private SequenceOutputter sequenceOutputter;
+    private SequenceCollector sequenceOutputter;
     private boolean closed = false;
 
 
@@ -43,6 +40,7 @@ public class RawDestination extends AbstractDestination {
      * @return the Receiver to which events are to be sent.
      */
 
+    @Override
     public Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) {
         // The Receiver returned by this method is a SequenceOutputter. The SequenceOutputter
         // builds a list of all top-level items passed to it. A top-level document or element
@@ -51,7 +49,7 @@ public class RawDestination extends AbstractDestination {
         // node in this tree is then added to the same list as a composed items. On completion
         // the sequence represented by the list of items is available by calling the getXmlValue()
         // method.
-        sequenceOutputter = new SequenceOutputter(pipe);
+        sequenceOutputter = new SequenceCollector(pipe);
         closed = false;
         helper.onClose(() -> closed=true);
         return new CloseNotifier(sequenceOutputter, helper.getListeners());
@@ -62,6 +60,7 @@ public class RawDestination extends AbstractDestination {
      * it has finished writing to the destination.
      */
 
+    @Override
     public void close() throws SaxonApiException {
         try {
             sequenceOutputter.close();

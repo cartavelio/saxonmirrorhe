@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,12 +8,10 @@
 package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.z.IntHashMap;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.z.IntHashMap;
 
 import java.util.Arrays;
 
@@ -38,6 +36,7 @@ public class TinyBuilderCondensed extends TinyBuilder {
 
     public IntHashMap<int[]> textValues = new IntHashMap<>(100);
 
+    @Override
     public void endElement() throws XPathException {
         // When ending an element, consider whether the just-completed text node can be commoned-up with
         // any other text nodes. (Don't bother if its more than 256 chars, as it's then likely to be unique)
@@ -100,8 +99,9 @@ public class TinyBuilderCondensed extends TinyBuilder {
      * string value of the attribute.
      */
 
-    public void attribute(/*@NotNull*/ NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-        super.attribute(nameCode, typeCode, value.toString().intern(), locationId, properties);
+    @Override
+    protected String getAttValue(AttributeInfo att) {
+        return super.getAttValue(att).intern();
     }
 
     /**

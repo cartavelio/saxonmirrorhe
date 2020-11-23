@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,10 +9,11 @@ package net.sf.saxon.ma.json;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
-import net.sf.saxon.event.NamespaceReducer;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardEntityResolver;
 import net.sf.saxon.om.*;
@@ -22,7 +23,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.transform.sax.SAXSource;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
@@ -32,19 +32,18 @@ import java.util.Stack;
  */
 public class JsonHandlerXML extends JsonHandler {
 
-    private Receiver out;
+    private Outputter out;
     private Builder builder;
 
     private Stack<String> keys;
-    private Stack<Boolean> inMap = new Stack<Boolean>();
+    private Stack<Boolean> inMap = new Stack<>();
 
-    public boolean allowAnyTopLevel;
-    public boolean liberal;
+    private boolean allowAnyTopLevel;
     public boolean validate;
-    public boolean checkForDuplicates;
+    private boolean checkForDuplicates;
 
-    public static final String SCHEMA_URI = "http://www.w3.org/2005/xpath-functions.xsd";
-    public static final String JSON_NS = NamespaceConstant.FN;
+    private static final String SCHEMA_URI = "http://www.w3.org/2005/xpath-functions.xsd";
+    private static final String JSON_NS = NamespaceConstant.FN;
     public static final String PREFIX = "";
 
     private NamePool namePool;
@@ -64,7 +63,7 @@ public class JsonHandlerXML extends JsonHandler {
     private static final BuiltInAtomicType STRING_TYPE = BuiltInAtomicType.STRING;
 
     public HashMap<String, SchemaType> types;
-    private Stack<HashSet<String>> mapKeys = new Stack<HashSet<String>>();
+    private Stack<HashSet<String>> mapKeys = new Stack<>();
 
 
     /**
@@ -104,9 +103,9 @@ public class JsonHandlerXML extends JsonHandler {
         builder = context.getController().makeBuilder();
         builder.setSystemId(staticBaseUri);
         builder.setTiming(false);
-        out = new NamespaceReducer(builder);
+        out = new ComplexContentOutputter(builder);
         out.open();
-        out.startDocument(0);
+        out.startDocument(ReceiverOption.NONE);
     }
 
     /**
@@ -128,7 +127,7 @@ public class JsonHandlerXML extends JsonHandler {
         allowAnyTopLevel = (flags & JsonParser.ALLOW_ANY_TOP_LEVEL) != 0;
         validate = (flags & JsonParser.VALIDATE) != 0;
         checkForDuplicates = validate || (flags & JsonParser.DUPLICATES_RETAINED) == 0;
-        types = new HashMap<String, SchemaType>();
+        types = new HashMap<>();
 
         namePool = context.getConfiguration().getNamePool();
         mapQN = qnameNS("map");
@@ -152,24 +151,20 @@ public class JsonHandlerXML extends JsonHandler {
                 synchronized (config) {
                     config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "validation", -1);
                     if (!config.isSchemaAvailable(JSON_NS)) {
-                        InputSource is = StandardEntityResolver.getInstance().resolveEntity(null, SCHEMA_URI);
+                        InputSource is = new StandardEntityResolver(config).resolveEntity(null, SCHEMA_URI);
                         if (config.isTiming()) {
                             config.getLogger().info("Loading a schema from resources for: " + JSON_NS);
                         }
                         config.addSchemaSource(new SAXSource(is));
                     }
                 }
-                String typeNames[] = {"mapType", "arrayType", "stringType", "numberType", "booleanType", "nullType",
+                String[] typeNames = {"mapType", "arrayType", "stringType", "numberType", "booleanType", "nullType",
                     "mapWithinMapType", "arrayWithinMapType", "stringWithinMapType",
                     "numberWithinMapType", "booleanWithinMapType", "nullWithinMapType"};
                 for (String t : typeNames) {
                     setType(t, config.getSchemaType(new StructuredQName(PREFIX, JSON_NS, t)));
                 }
-            } catch (SchemaException e) {
-                throw new XPathException(e);
-            } catch (SAXException e) {
-                throw new XPathException(e);
-            } catch (IOException e) {
+            } catch (SchemaException | SAXException e) {
                 throw new XPathException(e);
             }
         }
@@ -195,6 +190,7 @@ public class JsonHandlerXML extends JsonHandler {
      *                  option is yes; if escape=no, the reEscaped form is the same as the unEscaped form.
      * @return true if the key is already present in the map, false if it is not
      */
+    @Override
     public boolean setKey(String unEscaped, String reEscaped) {
         this.keys.push(unEscaped);
         return checkForDuplicates && !mapKeys.peek().add(reEscaped);
@@ -204,8 +200,9 @@ public class JsonHandlerXML extends JsonHandler {
      * Return the complete parsed result
      *
      * @return the XML document for this JSON
-     * @throws XPathException
+     * @throws XPathException if an error occurs downstream
      */
+    @Override
     public Item getResult() throws XPathException {
         out.endDocument();
         out.close();
@@ -218,7 +215,7 @@ public class JsonHandlerXML extends JsonHandler {
      * @param literal the string to be checked
      * @return true if the string contains a backslash
      */
-    protected boolean containsEscape(String literal) {
+    private boolean containsEscape(String literal) {
         return literal.indexOf('\\') >= 0;
     }
 
@@ -245,15 +242,21 @@ public class JsonHandlerXML extends JsonHandler {
      * @throws XPathException if a dynamic error occurs
      */
     private void startElement(FingerprintedQName qn, SchemaType st) throws XPathException {
-        out.startElement(qn, validate && st != null ? st : UNTYPED, ExplicitLocation.UNKNOWN_LOCATION, 0);
+        out.startElement(qn, validate && st != null ? st : UNTYPED,
+                         Loc.NONE, ReceiverOption.NONE);
         if (isInMap()) {
             String k = keys.pop();
             k = reEscape(k);
             if (escape) {
                 markAsEscaped(k, true);
             }
-            out.attribute(keyQN, validate ? STRING_TYPE : SIMPLE_TYPE, k, ExplicitLocation.UNKNOWN_LOCATION, 0);
+            out.attribute(keyQN, validate ? STRING_TYPE : SIMPLE_TYPE, k,
+                          Loc.NONE, ReceiverOption.NONE);
         }
+    }
+
+    private void startContent() throws XPathException {
+        out.startContent();
     }
 
     /**
@@ -263,7 +266,7 @@ public class JsonHandlerXML extends JsonHandler {
      * @throws XPathException if a dynamic error occurs
      */
     private void characters(String s) throws XPathException {
-        out.characters(s, ExplicitLocation.UNKNOWN_LOCATION, 0);
+        out.characters(s, Loc.NONE, ReceiverOption.NONE);
     }
 
     /**
@@ -282,9 +285,11 @@ public class JsonHandlerXML extends JsonHandler {
      * @throws XPathException if a dynamic error occurs
      */
 
+    @Override
     public void startArray() throws XPathException {
         startElement(arrayQN, isInMap() ? "arrayWithinMapType" : "arrayType");
         inMap.push(false);
+        startContent();
     }
 
     /**
@@ -293,6 +298,7 @@ public class JsonHandlerXML extends JsonHandler {
      * @throws XPathException if a dynamic error occurs
      */
 
+    @Override
     public void endArray() throws XPathException {
         inMap.pop();
         endElement();
@@ -303,12 +309,14 @@ public class JsonHandlerXML extends JsonHandler {
      *
      * @throws XPathException if a dynamic error occurs
      */
+    @Override
     public void startMap() throws XPathException {
         startElement(mapQN, isInMap() ? "mapWithinMapType": "mapType");
         if (checkForDuplicates) {
-            mapKeys.push(new HashSet<String>());
+            mapKeys.push(new HashSet<>());
         }
         inMap.push(true);
+        startContent();
     }
 
     /**
@@ -316,6 +324,7 @@ public class JsonHandlerXML extends JsonHandler {
      *
      * @throws XPathException if a dynamic error occurs
      */
+    @Override
     public void endMap() throws XPathException {
         inMap.pop();
         if (checkForDuplicates) {
@@ -331,8 +340,10 @@ public class JsonHandlerXML extends JsonHandler {
      * @param asDouble the double representation of the value
      * @throws XPathException if a dynamic error occurs
      */
+    @Override
     public void writeNumeric(String asString, double asDouble) throws XPathException {
         startElement(numberQN, isInMap() ? "numberWithinMapType" : "numberType");
+        startContent();
         characters(asString);
         endElement();
     }
@@ -344,12 +355,14 @@ public class JsonHandlerXML extends JsonHandler {
      *            in the flags, otherwise it may contain JSON escape sequences
      * @throws XPathException if a dynamic error occurs
      */
+    @Override
     public void writeString(String val) throws XPathException {
         startElement(stringQN, isInMap() ? "stringWithinMapType" : "stringType");
         CharSequence escaped = reEscape(val);
         if (escape) {
             markAsEscaped(escaped, false);
         }
+        startContent();
         characters(escaped.toString());
         endElement();
     }
@@ -358,7 +371,8 @@ public class JsonHandlerXML extends JsonHandler {
     protected void markAsEscaped(CharSequence escaped, boolean isKey) throws XPathException {
         if (containsEscape(escaped.toString()) && escape) {
             NodeName name = isKey ? escapedKeyQN : escapedQN;
-            out.attribute(name, validate ? BOOLEAN_TYPE : SIMPLE_TYPE, "true", ExplicitLocation.UNKNOWN_LOCATION, 0);
+            out.attribute(name, validate ? BOOLEAN_TYPE : SIMPLE_TYPE, "true",
+                          Loc.NONE, ReceiverOption.NONE);
         }
     }
 
@@ -368,8 +382,10 @@ public class JsonHandlerXML extends JsonHandler {
      * @param value the boolean value to be written
      * @throws XPathException if a dynamic error occurs
      */
+    @Override
     public void writeBoolean(boolean value) throws XPathException {
         startElement(booleanQN, isInMap() ? "booleanWithinMapType" : "booleanType");
+        startContent();
         characters(Boolean.toString(value));
         endElement();
     }
@@ -379,10 +395,12 @@ public class JsonHandlerXML extends JsonHandler {
      *
      * @throws XPathException if a dynamic error occurs
      */
+    @Override
     public void writeNull() throws XPathException {
         startElement(nullQN, isInMap() ? "nullWithinMapType" : "nullType");
+        startContent();
         endElement();
     }
 }
 
-// Copyright (c) 2014-2015 Saxonica Limited.
+// Copyright (c) 2014-2020 Saxonica Limited

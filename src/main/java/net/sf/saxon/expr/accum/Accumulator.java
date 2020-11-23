@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,7 +17,6 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.LocationKind;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.value.SequenceType;
@@ -280,26 +279,6 @@ public class Accumulator extends Actor {
     }
 
     /**
-     * Get the kind of component that this represents, using integer constants such as
-     * {@link net.sf.saxon.om.StandardNames#XSL_FUNCTION}
-     */
-    @Override
-    public int getComponentKind() {
-        return StandardNames.XSL_ACCUMULATOR;
-    }
-
-    /**
-     * Get the type of construct. This will either be the fingerprint of a standard XSLT instruction name
-     * (values in {@link net.sf.saxon.om.StandardNames}: all less than 1024)
-     * or it will be a constant in class {@link LocationKind}.
-     *
-     * @return an integer identifying the kind of construct
-     */
-    public int getConstructType() {
-        return StandardNames.XSL_ACCUMULATOR;
-    }
-
-    /**
      * Get a name identifying the object of the expression, for example a function name, template name,
      * variable name, key name, element name, etc. This is used only where the name is known statically.
      *
@@ -335,7 +314,7 @@ public class Accumulator extends Actor {
         out.emitAttribute("name", getObjectName());
         out.emitAttribute("line", getLineNumber() + "");
         out.emitAttribute("module", getSystemId());
-        out.emitAttribute("as", type.toExportString());
+        out.emitAttribute("as", type.toAlphaCode());
         out.emitAttribute("streamable", streamable ? "1" : "0");
         out.emitAttribute("slots", getSlotManagerForInitialValueExpression().getNumberOfVariables()+"");
         if (componentIdMap != null) {
@@ -348,6 +327,7 @@ public class Accumulator extends Actor {
         initialValueExpression.export(out);
 
         SimpleMode.RuleAction action = new SimpleMode.RuleAction() {
+            @Override
             public void processRule(Rule r) throws XPathException {
                 out.startElement("accRule");
                 out.emitAttribute("slots", ((AccumulatorRule)r.getAction()).getStackFrameMap().getNumberOfVariables()+"");

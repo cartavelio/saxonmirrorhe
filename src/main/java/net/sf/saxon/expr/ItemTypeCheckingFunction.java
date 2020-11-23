@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
@@ -22,7 +22,7 @@ import net.sf.saxon.type.UType;
  * all the items in a sequence are instances of a given item type
  *
  */
-public class ItemTypeCheckingFunction<T extends Item<?>> implements ItemMappingFunction<T, T> {
+public class ItemTypeCheckingFunction implements ItemMappingFunction {
 
     private ItemType requiredItemType;
     private RoleDiagnostic role;
@@ -54,12 +54,13 @@ public class ItemTypeCheckingFunction<T extends Item<?>> implements ItemMappingF
         this.config = config;
     }
 
-    public T mapItem(T item) throws XPathException {
+    @Override
+    public Item mapItem(Item item) throws XPathException {
         testConformance(item, config);
         return item;
     }
 
-    private void testConformance(T item, Configuration config) throws XPathException {
+    private void testConformance(Item item, Configuration config) throws XPathException {
         final TypeHierarchy th = config.getTypeHierarchy();
         if (requiredItemType.matches(item, th)) {
             // OK, no action

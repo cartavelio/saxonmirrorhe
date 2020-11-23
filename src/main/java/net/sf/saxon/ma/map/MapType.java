@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -116,7 +116,7 @@ public class MapType extends AnyFunctionType {
      * @return the alphacode for the nearest containing built-in type
      */
     @Override
-    public String getAlphaCode() {
+    public String getBasicAlphaCode() {
         return "FM";
     }
 
@@ -128,8 +128,19 @@ public class MapType extends AnyFunctionType {
      * @param th The type hierarchy cache
      */
 
+    @Override
     public boolean isAtomizable(TypeHierarchy th) {
         return false; 
+    }
+
+    /**
+     * Get the default priority when this ItemType is used as an XSLT pattern
+     *
+     * @return the default priority
+     */
+    @Override
+    public double getDefaultPriority() {
+        return keyType.getNormalizedDefaultPriority() * valueType.getPrimaryType().getNormalizedDefaultPriority();
     }
 
     /**
@@ -172,6 +183,7 @@ public class MapType extends AnyFunctionType {
      * @return the list of argument types of this map, viewed as a function
      */
 
+    @Override
     public SequenceType[] getArgumentTypes() {
         // regardless of the key type, a function call on this map can supply any atomic value
         return new SequenceType[]{SequenceType.makeSequenceType(BuiltInAtomicType.ANY_ATOMIC, StaticProperty.EXACTLY_ONE)};
@@ -183,6 +195,7 @@ public class MapType extends AnyFunctionType {
      * @return the result type of this map, viewed as a function
      */
 
+    @Override
     public SequenceType getResultType() {
         // a function call on this map can always return ()
         if (Cardinality.allowsZero(valueType.getCardinality())) {
@@ -203,7 +216,7 @@ public class MapType extends AnyFunctionType {
         if (this == ANY_MAP_TYPE) {
             return "map(*)";
         } else if (this == EMPTY_MAP_TYPE) {
-            return "map(\u00B0)";
+            return "map{}";
         } else {
             FastStringBuffer sb = new FastStringBuffer(100);
             sb.append("map(");
@@ -229,7 +242,7 @@ public class MapType extends AnyFunctionType {
         if (this == ANY_MAP_TYPE) {
             return "map(*)";
         } else if (this == EMPTY_MAP_TYPE) {
-            return "map(\u00B0)";
+            return "map{}";
         } else {
             FastStringBuffer sb = new FastStringBuffer(100);
             sb.append("map(");
@@ -267,58 +280,55 @@ public class MapType extends AnyFunctionType {
     /**
      * Determine the relationship of one function item type to another
      *
-     * @return for example {@link net.sf.saxon.type.TypeHierarchy#SUBSUMES}, {@link net.sf.saxon.type.TypeHierarchy#SAME_TYPE}
+     * @return for example {@link Affinity#SUBSUMES}, {@link Affinity#SAME_TYPE}
      */
 
-    public int relationship(FunctionItemType other, TypeHierarchy th) {
+    @Override
+    public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
         if (other == AnyFunctionType.getInstance()) {
-            return TypeHierarchy.SUBSUMED_BY;
+            return Affinity.SUBSUMED_BY;
         } else if (equals(other)) {
-            return TypeHierarchy.SAME_TYPE;
+            return Affinity.SAME_TYPE;
         } else if (other == MapType.ANY_MAP_TYPE) {
-            return TypeHierarchy.SUBSUMED_BY;
+            return Affinity.SUBSUMED_BY;
         } else if (other.isArrayType()) {
-            return TypeHierarchy.DISJOINT;
+            return Affinity.DISJOINT;
         } else if (other instanceof TupleItemType) {
             return TypeHierarchy.inverseRelationship(other.relationship(this, th));
         } else if (other instanceof MapType) {
             // See bug 3720. Two map types can never be disjoint because the empty
             // map is an instance of every map type
             MapType f2 = (MapType) other;
-            int keyRel = th.relationship(keyType, f2.keyType);
-            if (keyRel == TypeHierarchy.DISJOINT) {
-                return TypeHierarchy.OVERLAPS;
+            Affinity keyRel = th.relationship(keyType, f2.keyType);
+            if (keyRel == Affinity.DISJOINT) {
+                return Affinity.OVERLAPS;
             }
-            int valueRel = th.sequenceTypeRelationship(valueType, f2.valueType);
+            Affinity valueRel = th.sequenceTypeRelationship(valueType, f2.valueType);
 
-            if (valueRel == TypeHierarchy.DISJOINT) {
-                return TypeHierarchy.OVERLAPS;
+            if (valueRel == Affinity.DISJOINT) {
+                return Affinity.OVERLAPS;
             }
             if (keyRel == valueRel) {
                 return keyRel;
             }
-            if ((keyRel == TypeHierarchy.SAME_TYPE || keyRel == TypeHierarchy.SUBSUMES) &&
-                    (valueRel == TypeHierarchy.SAME_TYPE || valueRel == TypeHierarchy.SUBSUMES)) {
-                return TypeHierarchy.SUBSUMES;
+            if ((keyRel == Affinity.SAME_TYPE || keyRel == Affinity.SUBSUMES) &&
+                    (valueRel == Affinity.SAME_TYPE || valueRel == Affinity.SUBSUMES)) {
+                return Affinity.SUBSUMES;
             }
-            if ((keyRel == TypeHierarchy.SAME_TYPE || keyRel == TypeHierarchy.SUBSUMED_BY) &&
-                    (valueRel == TypeHierarchy.SAME_TYPE || valueRel == TypeHierarchy.SUBSUMED_BY)) {
-                return TypeHierarchy.SUBSUMED_BY;
+            if ((keyRel == Affinity.SAME_TYPE || keyRel == Affinity.SUBSUMED_BY) &&
+                    (valueRel == Affinity.SAME_TYPE || valueRel == Affinity.SUBSUMED_BY)) {
+                return Affinity.SUBSUMED_BY;
             }
-            return TypeHierarchy.OVERLAPS;
+            return Affinity.OVERLAPS;
         } else {
-            int rel = TypeHierarchy.DISJOINT;
-            //#ifdefined HOF
             // see Bug #4692
             SequenceType st = getResultType();
             if (!Cardinality.allowsZero(st.getCardinality())) {
                 st = SequenceType.makeSequenceType(st.getPrimaryType(), Cardinality.union(st.getCardinality(), StaticProperty.ALLOWS_ZERO));
             }
-            rel = new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.ATOMIC_SEQUENCE}, st)
+            return new SpecificFunctionType(
+                        new SequenceType[]{SequenceType.ATOMIC_SEQUENCE}, st)
                     .relationship(other, th);
-            //#endif
-            return rel;
         }
     }
 
@@ -362,41 +372,9 @@ public class MapType extends AnyFunctionType {
     @Override
     public Expression makeFunctionSequenceCoercer(Expression exp, RoleDiagnostic role)
             throws XPathException {
-        Expression result = exp;
-        //#ifdefined HOF
-        result = new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
-        //#endif
-        return result;
+        return new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
     }
 
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @param knownToBe a type that this item is known to conform to
-     * @param targetVersion
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @throws XPathException if JS code cannot be generated for this item type, for example because
-     *                        the test is schema-aware.
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        if (this == ANY_MAP_TYPE) {
-            return "return SaxonJS.U.isMap(item)";
-        }
-        FastStringBuffer fsb = new FastStringBuffer(256);
-        fsb.append("function k(item) {" + keyType.generateJavaScriptItemTypeTest(BuiltInAtomicType.ANY_ATOMIC, targetVersion) + "};");
-        fsb.append("function v(item) {" + valueType.getPrimaryType().generateJavaScriptItemTypeTest(AnyItemType.getInstance(), targetVersion) + "};");
-        int card = valueType.getCardinality();
-        fsb.append(Cardinality.generateJavaScriptChecker(card));
-        if (targetVersion == 1) {
-            fsb.append("return SaxonJS.U.isMap(item) && item.conforms(k, v, c);");
-        } else {
-            fsb.append("return SaxonJS.U.isConstrainedMap(item, k, v, c);");
-        }
-        return fsb.toString();
-    }
 }
 
-// Copyright (c) 2011-2016 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

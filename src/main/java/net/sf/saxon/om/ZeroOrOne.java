@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,27 +9,28 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
+import net.sf.saxon.tree.iter.ConstrainedIterator;
 import net.sf.saxon.value.EmptySequence;
 
 /**
  * A value that is a sequence containing zero or one items.
  */
 
-public class ZeroOrOne<T extends Item<?>> implements GroundedValue<T> {
+public class ZeroOrOne<T extends Item> implements GroundedValue {
 
     private T item; // may be null, to represent an empty sequence
 
-    private static ZeroOrOne<Item<?>> EMPTY = new ZeroOrOne<>(null);
+    @SuppressWarnings("rawtypes")
+    private static ZeroOrOne EMPTY = new ZeroOrOne<>(null);
 
     /**
      * Return the instance of ZeroOrOne that represents the empty sequence
      * @return a representation of the empty sequence that satisfies the type ZeroOrOne
      */
 
-    public static <T extends Item<?>> ZeroOrOne<T> empty() {
-        return (ZeroOrOne<T>) EMPTY;
+    @SuppressWarnings("unchecked")
+    public static <T extends Item> ZeroOrOne<T> empty() {
+        return EMPTY;
     }
 
     /**
@@ -50,6 +51,7 @@ public class ZeroOrOne<T extends Item<?>> implements GroundedValue<T> {
      * @return the string value of the sequence.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         return item == null ? "" : item.getStringValueCS();
     }
@@ -62,6 +64,7 @@ public class ZeroOrOne<T extends Item<?>> implements GroundedValue<T> {
      */
 
     /*@NotNull*/
+    @Override
     public String getStringValue() {
         return item == null ? "" : item.getStringValue();
     }
@@ -72,6 +75,7 @@ public class ZeroOrOne<T extends Item<?>> implements GroundedValue<T> {
      * @return the first item in the sequence if there is one, or null if the sequence
      *         is empty
      */
+    @Override
     public T head() {
         return item;
     }
@@ -80,6 +84,7 @@ public class ZeroOrOne<T extends Item<?>> implements GroundedValue<T> {
      * Get the length of the sequence
      */
 
+    @Override
     public int getLength() {
         return item == null ? 0 : 1;
     }
@@ -93,6 +98,7 @@ public class ZeroOrOne<T extends Item<?>> implements GroundedValue<T> {
      */
 
     /*@Nullable*/
+    @Override
     public T itemAt(int n) {
         if (n == 0 && item != null) {
             return item;
@@ -116,7 +122,8 @@ public class ZeroOrOne<T extends Item<?>> implements GroundedValue<T> {
      */
 
     /*@NotNull*/
-    public GroundedValue<T> subsequence(int start, int length) {
+    @Override
+    public GroundedValue subsequence(int start, int length) {
         if (item != null && start <= 0 && start + length > 0) {
             return this;
         } else {
@@ -125,20 +132,57 @@ public class ZeroOrOne<T extends Item<?>> implements GroundedValue<T> {
     }
 
     /**
-     * Return an enumeration of this nodeset value.
+     * Return an iterator over this value.
      */
+    @Override
+    public ConstrainedIterator<T> iterate() {
+        return new ConstrainedIterator<T>() {
+            boolean gone = false;
 
-    /*@NotNull*/
-    public UnfailingIterator<T> iterate() {
-        return SingletonIterator.makeIterator(item); // handles null properly
+            @Override
+            public boolean hasNext() {
+                return item != null && !gone;
+            }
+
+            @Override
+            public T next() {
+                if (gone) {
+                    return null;
+                } else {
+                    gone = true;
+                    return item;
+                }
+            }
+
+            @Override
+            public int getLength() {
+                return item == null ? 0 : 1;
+            }
+
+            @Override
+            public GroundedValue materialize() {
+                return item == null ? EmptySequence.getInstance() : item;
+            }
+
+            @Override
+            public GroundedValue getResidue() {
+                return gone ? EmptySequence.getInstance() : item;
+            }
+
+            @Override
+            public SequenceIterator getReverseIterator() {
+                return iterate();
+            }
+        };
     }
 
     /**
      * Get the effective boolean value
      */
 
+    @Override
     public boolean effectiveBooleanValue() throws XPathException {
-        return ExpressionTool.effectiveBooleanValue(item);   // handles null properly
+        return ExpressionTool.effectiveBooleanValue(item);
     }
 
     /**
@@ -159,11 +203,12 @@ public class ZeroOrOne<T extends Item<?>> implements GroundedValue<T> {
      *
      * @return the simplified sequence
      */
-    public GroundedValue<T> reduce() {
+    @Override
+    public GroundedValue reduce() {
         if (item == null) {
             return EmptySequence.getInstance();
         } else {
-            return (Item<T>) item;
+            return item;
         }
     }
 }

@@ -1,7 +1,6 @@
 package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.om.TreeInfo;
@@ -9,6 +8,7 @@ import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
@@ -20,10 +20,12 @@ import java.io.StringReader;
 import java.net.URI;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * XQuery executor sample class.
  */
-public class TestXQueryToSaxDestination extends TestCase {
+public class TestXQueryToSaxDestination {
 
     static class ContentHandlerAdapter implements org.xml.sax.ContentHandler {
 
@@ -38,13 +40,13 @@ public class TestXQueryToSaxDestination extends TestCase {
             String text = new String(ch, start, length);
             if (text.equals("Big")) {
                 assertEquals("file://my.xqy", locator.getSystemId());
-                assertEquals(locator.getLineNumber(), 6);
+                assertEquals(6, locator.getLineNumber());
             } else if (text.equals("Boss")) {
-                assertEquals(locator.getSystemId(), "file://my.xqy");
-                assertEquals(locator.getLineNumber(), 6);
+                assertEquals("file://my.xqy", locator.getSystemId());
+                assertEquals(6, locator.getLineNumber());
             } else if (text.equals(" - ")) {
-                assertEquals(locator.getSystemId(), "file://my.xqy");
-                assertEquals(locator.getLineNumber(), 6);
+                assertEquals("file://my.xqy", locator.getSystemId());
+                assertEquals(6, locator.getLineNumber());
             }
         }
 
@@ -76,6 +78,7 @@ public class TestXQueryToSaxDestination extends TestCase {
         }
     }
 
+    @Test
     public void testQueryToSaxDestination() throws Exception {
         try {
             Processor proc = new Processor(false);
@@ -119,6 +122,7 @@ public class TestXQueryToSaxDestination extends TestCase {
         }
     }
 
+    @Test
     public void testQueryToSaxResult() throws Exception {
         try {
             Configuration config = new EnterpriseConfiguration();

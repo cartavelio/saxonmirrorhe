@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -53,16 +53,18 @@ public class AtomicArray implements AtomicSequence {
      * @throws ClassCastException if any of the items returned by the SequenceIterator is not atomic
      */
 
-    public AtomicArray(SequenceIterator<? extends AtomicValue> iter) throws XPathException {
+    public AtomicArray(SequenceIterator iter) throws XPathException {
         ArrayList<AtomicValue> list = new ArrayList<>(10);
-        iter.forEachOrFail(list::add);
+        iter.forEachOrFail(item -> list.add((AtomicValue)item));
         content = list;
     }
 
+    @Override
     public AtomicValue head() {
         return content.isEmpty() ? null : content.get(0);
     }
 
+    @Override
     public AtomicIterator iterate() {
         return new ListIterator.Atomic(content);
     }
@@ -74,6 +76,7 @@ public class AtomicArray implements AtomicSequence {
      * @return the n'th item if n is in range, or null otherwise
      */
 
+    @Override
     public AtomicValue itemAt(int n) {
         if (n >= 0 && n < content.size()) {
             return content.get(n);
@@ -88,6 +91,7 @@ public class AtomicArray implements AtomicSequence {
      * @return the number of items in the sequence
      */
 
+    @Override
     public int getLength() {
         return content.size();
     }
@@ -105,6 +109,7 @@ public class AtomicArray implements AtomicSequence {
      * @return the required subsequence
      */
 
+    @Override
     public AtomicArray subsequence(int start, int length) {
         if (start < 0) {
             start = 0;
@@ -123,6 +128,7 @@ public class AtomicArray implements AtomicSequence {
      * of casting to string according to the XPath 2.0 rules
      */
 
+    @Override
     public CharSequence getCanonicalLexicalRepresentation() {
         return getStringValueCS();
     }
@@ -132,24 +138,27 @@ public class AtomicArray implements AtomicSequence {
      * the version of the method that returns a String.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
         boolean first = true;
         for (AtomicValue av : content) {
             if (!first) {
-                fsb.append(' ');
+                fsb.cat(' ');
             } else {
                 first = false;
             }
-            fsb.append(av.getStringValueCS());
+            fsb.cat(av.getStringValueCS());
         }
         return fsb.condense();
     }
 
+    @Override
     public String getStringValue() {
         return getStringValueCS().toString();
     }
 
+    @Override
     public boolean effectiveBooleanValue() throws XPathException {
         return ExpressionTool.effectiveBooleanValue(iterate());
     }
@@ -168,6 +177,7 @@ public class AtomicArray implements AtomicSequence {
      * @return a Comparable that follows XML Schema comparison rules
      */
 
+    @Override
     public Comparable getSchemaComparable() {
         if (content.size() == 1) {
             return content.get(0).getSchemaComparable();
@@ -181,6 +191,7 @@ public class AtomicArray implements AtomicSequence {
             return AtomicArray.this;
         }
 
+        @Override
         public int compareTo(ValueSchemaComparable obj) {
             UnfailingIterator iter1 = getValue().iterate();
             UnfailingIterator iter2 = obj.getValue().iterate();
@@ -234,7 +245,8 @@ public class AtomicArray implements AtomicSequence {
      *
      * @return the simplified sequence
      */
-    public GroundedValue<AtomicValue> reduce() {
+    @Override
+    public GroundedValue reduce() {
         int len = getLength();
         if (len == 0) {
             return EmptySequence.getInstance();
@@ -251,6 +263,7 @@ public class AtomicArray implements AtomicSequence {
      * @return an Iterator.
      */
 
+    @Override
     public Iterator<AtomicValue> iterator() {
         return content.iterator();
     }

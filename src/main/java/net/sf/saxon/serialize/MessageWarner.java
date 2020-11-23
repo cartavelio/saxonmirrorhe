@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,13 +7,12 @@
 
 package net.sf.saxon.serialize;
 
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
 
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.TransformerException;
 import java.io.StringWriter;
 
 
@@ -28,12 +27,13 @@ import java.io.StringWriter;
 
 public class MessageWarner extends XMLEmitter {
 
-    boolean abort = false;
-    String errorCode = null;
+    private boolean abort = false;
+    private String errorCode = null;
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         setWriter(new StringWriter());
-        abort = (properties & ReceiverOptions.TERMINATE) != 0;
+        abort = ReceiverOption.contains(properties, ReceiverOption.TERMINATE);
         super.startDocument(properties);
     }
 
@@ -46,25 +46,17 @@ public class MessageWarner extends XMLEmitter {
         }
     }
 
+    @Override
     public void endDocument() throws XPathException {
-        ErrorListener listener = getPipelineConfiguration().getErrorListener();
-        XPathException de = new XPathException(getWriter().toString());
-        if (errorCode != null) {
-            de.setErrorCodeQName(StructuredQName.fromEQName(errorCode));
-        } else {
-            de.setErrorCode("XTMM9000");
+        ErrorReporter reporter = getPipelineConfiguration().getErrorReporter();
+        XmlProcessingIncident de = new XmlProcessingIncident(getWriter().toString(), errorCode==null ? "XTMM9000" : errorCode);
+        if (!abort) {
+            de = de.asWarning();
         }
-        try {
-            if (abort) {
-                listener.error(de);
-            } else {
-                listener.warning(de);
-            }
-        } catch (TransformerException te) {
-            throw XPathException.makeXPathException(te);
-        }
+        reporter.report(de);
     }
 
+    @Override
     public void close() {
         // do nothing
     }

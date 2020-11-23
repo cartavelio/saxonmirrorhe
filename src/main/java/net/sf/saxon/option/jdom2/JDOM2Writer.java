@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,16 +8,13 @@
 package net.sf.saxon.option.jdom2;
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.Whitespace;
 import org.jdom2.*;
 
@@ -30,9 +27,10 @@ import java.util.Stack;
 public class JDOM2Writer extends net.sf.saxon.event.Builder {
 
     private Document document;
-    private Stack<Parent> ancestors = new Stack<Parent>();
+    private Stack<Parent> ancestors = new Stack<>();
     private boolean implicitDocumentNode = false;
     private FastStringBuffer textBuffer = new FastStringBuffer(FastStringBuffer.C256);
+    private Stack<NamespaceMap> nsStack = new Stack<>();
 
     /**
      * Create a JDOM2Writer using the default node factory
@@ -42,6 +40,7 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
 
     public JDOM2Writer(PipelineConfiguration pipe) {
         super(pipe);
+        nsStack.push(NamespaceMap.emptyMap());
     }
 
     /**
@@ -52,6 +51,7 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
      * @param publicID The public identifier of the unparsed entity
      */
 
+    @Override
     public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
         // no-op
     }
@@ -60,6 +60,7 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
      * Start of the document.
      */
 
+    @Override
     public void open() {
     }
 
@@ -67,13 +68,16 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
      * End of the document.
      */
 
+    @Override
     public void close() {
     }
 
     /**
      * Start of a document node.
+     * @param properties
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         document = new Document();
         document.setBaseURI(systemId);
@@ -85,6 +89,7 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
      * Notify the end of a document node
      */
 
+    @Override
     public void endDocument() throws XPathException {
         ancestors.pop();
     }
@@ -93,14 +98,17 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
      * Start of an element.
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         flush();
-        String local = nameCode.getLocalPart();
-        String uri = nameCode.getURI();
-        String prefix = nameCode.getPrefix();
+        String local = elemName.getLocalPart();
+        String uri = elemName.getURI();
+        String prefix = elemName.getPrefix();
         Element element;
         if (ancestors.isEmpty()) {
-            startDocument(0);
+            startDocument(ReceiverOption.NONE);
             implicitDocumentNode = true;
         }
         element = new Element(local, prefix, uri);
@@ -110,15 +118,38 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
             ancestors.peek().addContent(element);
         }
         ancestors.push(element);
-    }
 
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        for (NamespaceBinding ns : namespaceBindings) {
-            namespace(ns, properties);
+        NamespaceMap parentMap = nsStack.peek();
+        if (namespaces != parentMap) {
+            NamespaceBinding[] declarations = namespaces.getDifferences(parentMap, false);
+            for (NamespaceBinding ns : declarations) {
+                namespace(element, ns);
+            }
+        }
+        nsStack.push(namespaces);
+
+        for (AttributeInfo att : attributes) {
+            NodeName nameCode = att.getNodeName();
+            String attlocal = nameCode.getLocalPart();
+            String atturi = nameCode.getURI();
+            String attprefix = nameCode.getPrefix();
+            String value = att.getValue();
+            Namespace ns = attprefix.isEmpty() ?
+                    Namespace.getNamespace(atturi) :
+                    Namespace.getNamespace(attprefix, atturi);
+            boolean isXmlId = uri.equals(NamespaceConstant.XML) && attlocal.equals("id");
+            if (isXmlId) {
+                value = Whitespace.trim(value);
+            }
+            Attribute attr = new Attribute(attlocal, value, ns);
+            if (isXmlId) {
+                attr.setAttributeType(AttributeType.ID);
+            }
+            element.getAttributes().add(attr);
         }
     }
 
-    private void namespace(NamespaceBinding namespaceBinding, int properties) throws XPathException {
+    private void namespace(Element element, NamespaceBinding namespaceBinding) throws XPathException {
         String prefix = namespaceBinding.getPrefix();
         String uri = namespaceBinding.getURI();
         if (uri.isEmpty() && prefix.length() != 0) {
@@ -128,36 +159,18 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
         Namespace ns = prefix.isEmpty() ?
                 Namespace.getNamespace(uri) :
                 Namespace.getNamespace(prefix, uri);
-        ((Element) ancestors.peek()).addNamespaceDeclaration(ns);
-    }
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        String local = nameCode.getLocalPart();
-        String uri = nameCode.getURI();
-        String prefix = nameCode.getPrefix();
-        Namespace ns = prefix.isEmpty() ?
-            Namespace.getNamespace(uri) :
-            Namespace.getNamespace(prefix, uri);
-        Attribute att = new Attribute(local, value.toString(), ns);
-        if (uri.equals(NamespaceConstant.XML) && local.equals("id")) {
-            value = Whitespace.trim(value);
-            att.setAttributeType(AttributeType.ID);
-        }
-        ((Element) ancestors.peek()).getAttributes().add(att);
-    }
-
-    public void startContent() throws XPathException {
-        flush();
+        element.addNamespaceDeclaration(ns);
     }
 
     /**
      * End of an element.
      */
 
+    @Override
     public void endElement() throws XPathException {
         flush();
         ancestors.pop();
+        nsStack.pop();
         Object parent = ancestors.peek();
         if (parent == document && implicitDocumentNode) {
             endDocument();
@@ -168,8 +181,9 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
      * Character data.
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        textBuffer.append(chars);
+        textBuffer.cat(chars);
     }
 
     private void flush() {
@@ -185,6 +199,7 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
      * Handle a processing instruction.
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
             throws XPathException {
         flush();
@@ -196,6 +211,7 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
      * Handle a comment.
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         flush();
         Comment comment = new Comment(chars.toString());
@@ -210,6 +226,7 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }
@@ -230,10 +247,11 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
      * @return a Saxon wrapper around the constructed XOM document node
      */
 
+    @Override
     public NodeInfo getCurrentRoot() {
         return new JDOM2DocumentWrapper(document, config).getRootNode();
     }
 }
 
 
-// Original Code is Copyright (c) 2009 Saxonica Limited.
+// Original Code is Copyright (c) 2009-2020 Saxonica Limited

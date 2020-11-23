@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.flwor;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -15,6 +16,8 @@ import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.ItemType;
 
 import java.util.List;
+
+import static net.sf.saxon.expr.flwor.Clause.ClauseName.WHERE;
 
 /**
  * A "where" clause in a FLWOR expression
@@ -36,7 +39,7 @@ public class WhereClause extends Clause {
     }
 
     @Override
-    public int getClauseKey() {
+    public ClauseName getClauseKey() {
         return WHERE;
     }
 
@@ -48,6 +51,7 @@ public class WhereClause extends Clause {
         predicateOp.setChildExpression(predicate);
     }
 
+    @Override
     public WhereClause copy(FLWORExpression flwor, RebindingMap rebindings) {
         WhereClause w2 = new WhereClause(flwor, getPredicate().copy(rebindings));
         w2.setLocation(getLocation());
@@ -98,13 +102,14 @@ public class WhereClause extends Clause {
      * output to another tuple stream
      *
      * @param destination the output tuple stream
+     * @param output the destination for the result
      * @param context     the dynamic evaluation context
      * @return the push tuple stream that implements the functionality of this clause of the FLWOR
      *         expression
      */
     @Override
-    public TuplePush getPushStream(TuplePush destination, XPathContext context) {
-        return new WhereClausePush(destination, getPredicate());
+    public TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context) {
+        return new WhereClausePush(output, destination, getPredicate());
     }
 
     /**
@@ -135,6 +140,7 @@ public class WhereClause extends Clause {
         out.endElement();
     }
 
+    @Override
     public String toShortString() {
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
         fsb.append("where ");

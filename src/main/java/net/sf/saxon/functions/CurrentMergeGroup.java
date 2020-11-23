@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -37,7 +37,7 @@ public class CurrentMergeGroup extends SystemFunction {
      * Set the containing xsl:merge instruction, if there is one
      * @param instruction the (innermost) containing xsl:merge instruction
      * @param isInLoop true if the current-merge-group() expression is evaluated more than once during
-     * evaluation of the body of the for-each-group instruction
+     * evaluation of the body of the xsl:merge instruction
      */
 
     public void setControllingInstruction(MergeInstr instruction, boolean isInLoop) {
@@ -117,7 +117,8 @@ public class CurrentMergeGroup extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments /*@NotNull*/) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments /*@NotNull*/) throws XPathException {
         String source = null;
         if (arguments.length > 0) {
             source = arguments[0].head().getStringValue();
@@ -133,7 +134,7 @@ public class CurrentMergeGroup extends SystemFunction {
      * @throws XPathException if a dynamic error occurs
      */
 
-    private SequenceIterator<?> currentGroup(String source, XPathContext c) throws XPathException {
+    private SequenceIterator currentGroup(String source, XPathContext c) throws XPathException {
         GroupIterator gi = c.getCurrentMergeGroupIterator();
         if (gi == null) {
             throw new XPathException("There is no current merge group", "XTDE3480");
@@ -150,6 +151,7 @@ public class CurrentMergeGroup extends SystemFunction {
 
     }
 
+    @Override
     public String getStreamerName() {
         return "CurrentMergeGroup";
     }

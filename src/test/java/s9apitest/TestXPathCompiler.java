@@ -2,7 +2,6 @@ package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.XPathContext;
@@ -15,10 +14,10 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.sxpath.IndependentContext;
-import net.sf.saxon.trace.InstructionInfo;
+import net.sf.saxon.trace.Traceable;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
@@ -27,13 +26,18 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * JUnit tests for the s9api XPathCompiler
- *
- * @author Michael Kay
  */
-public class TestXPathCompiler extends TestCase {
+public class TestXPathCompiler {
 
+    @Test
     public void testSimple() {
         try {
             Processor p = new Processor(false);
@@ -53,6 +57,7 @@ public class TestXPathCompiler extends TestCase {
      * Test using declared variables
      */
 
+    @Test
     public void testWithDeclaredVariables() {
         try {
             Processor p = new Processor(false);
@@ -75,6 +80,7 @@ public class TestXPathCompiler extends TestCase {
      * Test using undeclared variables
      */
 
+    @Test
     public void testWithUndeclaredVariables() {
         try {
             Processor p = new Processor(false);
@@ -96,6 +102,7 @@ public class TestXPathCompiler extends TestCase {
      * Test using undeclared variables when disallowed
      */
 
+    @Test
     public void testWithDisallowedUndeclaredVariables() {
         try {
             Processor p = new Processor(false);
@@ -118,6 +125,7 @@ public class TestXPathCompiler extends TestCase {
      * Test with statically-known collation
      */
 
+    @Test
     public void testStaticallyKnownSaxonCollation() {
         try {
             Processor p = new Processor(false);
@@ -133,6 +141,7 @@ public class TestXPathCompiler extends TestCase {
      * Test with dynamicall-computed collation
      */
 
+    @Test
     public void testDynamicallyKnownSaxonCollation() {
         try {
             Processor p = new Processor(false);
@@ -149,6 +158,7 @@ public class TestXPathCompiler extends TestCase {
      * Test with function-lookup
      */
 
+    @Test
     public void testFunctionLookup() {
         try {
             Processor p = new Processor(true);
@@ -164,6 +174,7 @@ public class TestXPathCompiler extends TestCase {
      * Test for XPath 2.1 EQName syntax
      */
 
+    @Test
     public void testEQNameAllowedIn30FunctionName() {
         try {
             Processor p = new Processor(true);
@@ -177,6 +188,7 @@ public class TestXPathCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testEQNameAllowedIn30NameTest() {
         try {
             Processor p = new Processor(true);
@@ -187,7 +199,7 @@ public class TestXPathCompiler extends TestCase {
             XPathExecutable e = c.compile("data(/Q{urn:a}doc)");
             XPathSelector s = e.load();
             s.setContextItem(root);
-            assertTrue("element not found", s.iterator().hasNext());
+            assertTrue(s.iterator().hasNext(), "element not found");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
@@ -197,6 +209,7 @@ public class TestXPathCompiler extends TestCase {
      * Test for XPath 3.0 EQName syntax
      */
 
+    @Test
     public void testEQNameDisallowedIn20FunctionName() {
         try {
             Processor p = new Processor(false);
@@ -209,6 +222,7 @@ public class TestXPathCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testEQNameDisallowedIn20NameTest() {
         try {
             Processor p = new Processor(false);
@@ -225,6 +239,7 @@ public class TestXPathCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testCaching() {
         try {
             Processor p = new Processor(false);
@@ -232,11 +247,11 @@ public class TestXPathCompiler extends TestCase {
             c.setCaching(true);
             XPathExecutable e1 = c.compile("2+2");
             XPathExecutable e2 = c.compile("2+2");
-            assertSame("Found in cache", e1, e2);
+            assertSame(e1, e2, "Found in cache");
             c.setCaching(false);
             XPathExecutable e3 = c.compile("2+2");
-            assertNotSame("Not found in cache", e3, e2);
-            assertEquals("Not identical, but equal", e3.getUnderlyingExpression().getInternalExpression(), e2.getUnderlyingExpression().getInternalExpression());
+            assertNotSame(e3, e2, "Not found in cache");
+            assertEquals(e3.getUnderlyingExpression().getInternalExpression(), e2.getUnderlyingExpression().getInternalExpression(), "Not identical, but equal");
             c.setCaching(true);
             XPathExecutable e4 = c.compile("2+2");
             try {
@@ -245,7 +260,7 @@ public class TestXPathCompiler extends TestCase {
                 fail(err.getMessage());
             }
             XPathExecutable e5 = c.compile("2+2");
-            assertNotSame("Not found in cache", e5, e4);
+            assertNotSame(e5, e4, "Not found in cache");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
@@ -255,6 +270,7 @@ public class TestXPathCompiler extends TestCase {
      * Test "let" expression allowed in XPath 3.0
      */
 
+    @Test
     public void testLetAllowedIn21() {
         try {
             Processor p = new Processor(true);
@@ -272,6 +288,7 @@ public class TestXPathCompiler extends TestCase {
      * Test "let" expression disallowed in XPath 2.0
      */
 
+    @Test
     public void testLetDisallowedIn20() {
         try {
             Processor p = new Processor(true);
@@ -290,6 +307,7 @@ public class TestXPathCompiler extends TestCase {
      * isn't actually used
      */
 
+    @Test
     public void testOkNotToBindUnusedButDeclaredVariable() {
         try {
             Processor p = new Processor(false);
@@ -308,6 +326,7 @@ public class TestXPathCompiler extends TestCase {
      * is actually used
      */
 
+    @Test
     public void testFailureToBindVariable() {
         try {
             Processor p = new Processor(false);
@@ -326,6 +345,7 @@ public class TestXPathCompiler extends TestCase {
      * Test use of required context item type
      */
 
+    @Test
     public void testContextItemTypeOk() {
         try {
             Processor p = new Processor(false);
@@ -335,12 +355,13 @@ public class TestXPathCompiler extends TestCase {
             XPathSelector s = e.load();
             s.setContextItem(new XdmAtomicValue(2));
             XdmAtomicValue result = (XdmAtomicValue) s.evaluate();
-            assertEquals(result.getLongValue(), 5);
+            assertEquals(5, result.getLongValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testContextItemTypeNotOk() {
         try {
             Processor p = new Processor(false);
@@ -357,6 +378,7 @@ public class TestXPathCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testContextItemTypeNotConverted() {
         try {
             Processor p = new Processor(false);
@@ -373,6 +395,7 @@ public class TestXPathCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testContextItemTypeStaticError() {
         try {
             Processor p = new Processor(false);
@@ -476,6 +499,7 @@ public class TestXPathCompiler extends TestCase {
      * Test case from malik@metamoji.com, Sept 2010
      */
 
+    @Test
     public void testUseXQueryFunctions() {
 
         // NOTE: this test fetches schema documents from the internet.
@@ -577,6 +601,7 @@ public class TestXPathCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testStringLength() {
         // bug report from Norm Walsh, 2 Dec 2011
         try {
@@ -628,6 +653,7 @@ public class TestXPathCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testReflexiveExtension() {
         try {
             Processor proc = new Processor(true);
@@ -646,63 +672,20 @@ public class TestXPathCompiler extends TestCase {
         }
     }
 
-    public void testAakashPerf() {
-        try {
-            Processor p = new Processor(false);
-            DocumentBuilder b = p.newDocumentBuilder();
-            long start = System.nanoTime();
-            XdmNode foo = b.build(new StreamSource(new File(ConfigTest.DATA_DIR + "aip_520.xml")));
-            long buildTime = (System.nanoTime() - start) / 1000000;
-            assertTrue("buildTime " + buildTime, buildTime < 500);
-            System.err.println("Build time: " + buildTime + "ms");
-            XPathCompiler c = p.newXPathCompiler();
-            c.declareNamespace("premis", "info:lc/xmlns/premis-v2");
-            c.declareNamespace("mets", "http://www.loc.gov/METS/");
-            String path1 = "//premis:event\n" +
-                    "        [premis:eventType != 'normalize' and premis:eventType != 'migrate' ]\n" +
-                    "        [premis:linkingObjectIdentifier/premis:linkingObjectIdentifierValue = 'info:fda/ED5UQP1LG_4F4AKG/file/197']";
-            String path2 = "/mets:mets/mets:amdSec/mets:digiprovMD//premis:event\n" +
-                    "        [premis:eventType != 'normalize' and premis:eventType != 'migrate' ]\n" +
-                    "        [premis:linkingObjectIdentifier/premis:linkingObjectIdentifierValue = 'info:fda/ED5UQP1LG_4F4AKG/file/197']";
-            for (int k = 0; k < 10; k++) {
-                int which=0;
-                for (String path : new String[]{path1, path2}) {
-                    which++;
-                    start = System.nanoTime();
-                    XPathExecutable e = c.compile(path);
-                    long compileTime = (System.nanoTime() - start) / 1000;
-                    assertTrue("compileTime " + compileTime, k < 5 || compileTime < 4000);
-                    System.err.println("Compile time: " + compileTime + "microsecs");
-                    XPathSelector s = e.load();
-                    s.setContextItem(foo);
-                    start = System.nanoTime();
-                    for (int i = 0; i < 1000; i++) {
-                        XdmValue v = s.evaluate();
-                        v.size();
-                    }
-                    long runTime = (System.nanoTime() - start) / 1000000;
-                    System.err.println("Execution time for path " + which + ": " + runTime + "microsecs");
-                    assertTrue("runTime " + runTime, k < 5 || runTime < 500);
-                }
-            }
-
-        } catch (SaxonApiException e) {
-            fail(e.getMessage());
-        }
-    }
-
+    @Test
     public void testErrorListener() {
         // From 9.7, static errors are no longer notified to the Configuration's ErrorListener
+        // From 10.0, the Configuration no longer owns an ErrorListener, so the test becomes rather pointless
         final List<String> errors = new ArrayList<>();
         try {
             Processor p = new Processor(false);
-            p.getUnderlyingConfiguration().setErrorListener(
-                    new StandardErrorListener() {
-                        public void error(TransformerException exception) {
-                            errors.add(exception.getMessageAndLocation());
-                        }
-                    }
-            );
+//            p.getUnderlyingConfiguration().setErrorListener(
+//                    new StandardErrorListener() {
+//                        public void error(TransformerException exception) {
+//                            errors.add(exception.getMessageAndLocation());
+//                        }
+//                    }
+//            );
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable e = c.compile("count(//z:*)");
             DocumentBuilder b = p.newDocumentBuilder();
@@ -715,16 +698,18 @@ public class TestXPathCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testSchemaAwareEqualityGood() {
         try {
             boolean result = trySchemaAwareEquality(true);
-            assertTrue("result", result);
+            assertTrue(result, "result");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testSchemaAwareEqualityBad() {
         try {
             trySchemaAwareEquality(false);
@@ -786,6 +771,7 @@ public class TestXPathCompiler extends TestCase {
 
     }
 
+    @Test
     public void testXPathTraceListener() throws SaxonApiException {
         net.sf.saxon.s9api.Processor processor = new net.sf.saxon.s9api.Processor(true);
         XPathCompiler newXPathCompiler = processor.newXPathCompiler();
@@ -800,11 +786,11 @@ public class TestXPathCompiler extends TestCase {
             public void open(Controller controller) {
             }
 
-            public void leave(InstructionInfo instruction) {
+            public void leave(Traceable instruction) {
             }
 
-            public void enter(InstructionInfo instruction, XPathContext context) {
-                assertTrue(instruction.getLineNumber() > 0);
+            public void enter(Traceable instruction, XPathContext context) {
+                assertTrue(instruction.getLocation().getLineNumber() > 0);
             }
 
             public void endCurrentItem(Item currentItem) {
@@ -824,6 +810,7 @@ public class TestXPathCompiler extends TestCase {
 
     }
 
+    @Test
     public void testDecimalFormat() {
         try {
             Processor p = new Processor(false);
@@ -841,6 +828,7 @@ public class TestXPathCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testBug3188() {
 
         String xpathString = "/xbrli:xbrl/xbrli:context[xbrli:scenario/xbrldi:typedMember[fn:resolve-QName(string(@dimension), .) =\n"
@@ -881,6 +869,7 @@ public class TestXPathCompiler extends TestCase {
      * round#2 is rejected under version 2.0
      */
 
+    @Test
     public void testAbsent30Function() {
         try {
             Processor p = new Processor(false);
@@ -891,6 +880,109 @@ public class TestXPathCompiler extends TestCase {
             fail("unexpected success");
         } catch (SaxonApiException e) {
             assertEquals("XPST0017", e.getErrorCode().getLocalName());
+        }
+    }
+
+    /**
+     * Invoke functions in an XSLT library package
+     */
+
+    @Test
+    public void testInvokeXsltFunction() {
+        try {
+            Processor p = new Processor(false);
+
+            XsltCompiler compiler = p.newXsltCompiler();
+            String xsl = "<xsl:package\n" +
+                    "    name = \"package-002.xsl\"\n" +
+                    "    package-version = \"2.1.0.5\"\n" +
+                    "    version = \"3.0\" xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema'>\n" +
+                    "        <xsl:function name='Q{http://square.com/}square' visibility='public'>\n" +
+                    "          <xsl:param name='x' as='xs:double'/>\n" +
+                    "          <xsl:sequence select='$x*$x'/>\n" +
+                    "        </xsl:function>\n" +
+                    "</xsl:package>";
+            XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(xsl)));
+            XPathCompiler c = p.newXPathCompiler();
+            c.setLanguageVersion("3.1");
+            c.addXsltFunctionLibrary(pack);
+            c.setAllowUndeclaredVariables(true);
+            XPathExecutable e = c.compile("Q{http://square.com/}square($x)");
+            XPathSelector exp = e.load();
+            exp.setVariable(new QName("x"), new XdmAtomicValue(5e0));
+            XdmItem result = exp.evaluateSingle();
+            assertEquals(((XdmAtomicValue)result).getDoubleValue(), 25e0);
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    /**
+     * Invoke functions in an XSLT library package
+     */
+
+    @Test
+    public void testInvokeXsltFunctionExposedAsPublic() {
+        try {
+            Processor p = new Processor(false);
+
+            XsltCompiler compiler = p.newXsltCompiler();
+            String xsl = "<xsl:package\n" +
+                    "    name = \"package-002.xsl\"\n" +
+                    "    package-version = \"2.1.0.5\"\n" +
+                    "    version = \"3.0\" xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema'>\n" +
+                    "        <xsl:function name='Q{http://square.com/}square'>\n" +
+                    "          <xsl:param name='x' as='xs:double'/>\n" +
+                    "          <xsl:sequence select='$x*$x'/>\n" +
+                    "        </xsl:function>\n" +
+                    "        <xsl:expose component='function' names='Q{http://square.com/}square#1' visibility='public'/>\n" +
+                    "</xsl:package>";
+            XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(xsl)));
+            XPathCompiler c = p.newXPathCompiler();
+            c.setLanguageVersion("3.1");
+            c.addXsltFunctionLibrary(pack);
+            c.setAllowUndeclaredVariables(true);
+            XPathExecutable e = c.compile("Q{http://square.com/}square($x)");
+            XPathSelector exp = e.load();
+            exp.setVariable(new QName("x"), new XdmAtomicValue(5e0));
+            XdmItem result = exp.evaluateSingle();
+            assertEquals(((XdmAtomicValue) result).getDoubleValue(), 25e0);
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    /**
+     * Fail to invoke private functions in an XSLT library package
+     */
+
+    @Test
+    public void testInvokePrivateXsltFunction() {
+        try {
+            Processor p = new Processor(false);
+
+            XsltCompiler compiler = p.newXsltCompiler();
+            String xsl = "<xsl:package\n" +
+                    "    name = \"package-002.xsl\"\n" +
+                    "    package-version = \"2.1.0.5\"\n" +
+                    "    version = \"3.0\" xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema'>\n" +
+                    "        <xsl:function name='Q{http://square.com/}square'>\n" +
+                    "          <xsl:param name='x' as='xs:double'/>\n" +
+                    "          <xsl:sequence select='$x*$x'/>\n" +
+                    "        </xsl:function>\n" +
+                    "</xsl:package>";
+            XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(xsl)));
+            XPathCompiler c = p.newXPathCompiler();
+            c.setLanguageVersion("3.1");
+            c.addXsltFunctionLibrary(pack);
+            c.setAllowUndeclaredVariables(true);
+            XPathExecutable e = c.compile("Q{http://square.com/}square($x)");
+            XPathSelector exp = e.load();
+            exp.setVariable(new QName("x"), new XdmAtomicValue(5e0));
+            XdmItem result = exp.evaluateSingle();
+            fail("unexpected success");
+        } catch (SaxonApiException e) {
+            System.err.println("Failed as expected: " + e.getMessage());
         }
     }
 

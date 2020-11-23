@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -22,7 +22,6 @@ import java.util.function.IntPredicate;
  * Class NumberFormatter defines a method to format a ArrayList of integers as a character
  * string according to a supplied format specification.
  *
- * @author Michael H. Kay
  */
 
 public class NumberFormatter {
@@ -203,7 +202,7 @@ public class NumberFormatter {
                 if (c >= '0' && c <= '9') {
                     sb.appendWideChar(digits[c - '0']);
                 } else {
-                    sb.append(c);
+                    sb.cat(c);
                 }
             }
             return sb.toString();

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,6 +10,7 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.om.Item;
@@ -46,9 +47,6 @@ public class Executable {
     // the set of packages making up this Executable
     private List<PackageData> packages = new ArrayList<>();
 
-    // List of global variables and parameters
-    private List<GlobalVariable> compiledGlobalVariables;
-
     // default output properties (for the unnamed output format)
     private Properties defaultOutputProperties;
 
@@ -65,7 +63,7 @@ public class Executable {
     private FunctionLibraryList functionLibrary;
 
     // flag to indicate whether the principal language is for example XSLT or XQuery
-    private int hostLanguage = Configuration.XSLT;
+    private HostLanguage hostLanguage = HostLanguage.XSLT;
 
     // a list of required parameters, identified by the structured QName of their names
     private Map<StructuredQName, GlobalParam> globalParams = new HashMap<>();
@@ -146,23 +144,22 @@ public class Executable {
 
     /**
      * Set the host language
-     *  @param language     the host language, as a constant such as {@link Configuration#XSLT} or
-     *                     {@link Configuration#XQUERY}
+     *  @param language     the host language, as a constant such as {@link HostLanguage#XSLT} or
+     *                     {@link HostLanguage#XQUERY}
      *
      */
 
-    public void setHostLanguage(int language) {
+    public void setHostLanguage(HostLanguage language) {
         hostLanguage = language;
     }
 
     /**
      * Get the host language
      *
-     * @return a value identifying the host language: {@link Configuration#XQUERY} or {@link Configuration#XSLT}
-     *         or {@link Configuration#JAVA_APPLICATION}
+     * @return a value identifying the host language: {@link HostLanguage#XQUERY} or {@link HostLanguage#XSLT}
      */
 
-    public int getHostLanguage() {
+    public HostLanguage getHostLanguage() {
         return hostLanguage;
     }
     
@@ -211,7 +208,7 @@ public class Executable {
         }
         return characterMapIndex;
     }
-    
+
     /**
      * Set the default output properties (the properties for the unnamed output format)
      *
@@ -465,6 +462,7 @@ public class Executable {
      * Explain (that is, output an expression tree) the global variables
      *
      * @param presenter the destination for the explanation of the global variables
+     * @throws XPathException if writing to the output fails
      */
 
     public void explainGlobalVariables(ExpressionPresenter presenter) throws XPathException {
@@ -617,7 +615,7 @@ public class Executable {
                 if (!type.matches(contextItem, config.getTypeHierarchy())) {
                     RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "supplied global context item", 0);
                     String s = role.composeErrorMessage(type, contextItem, th);
-                    throw new XPathException(s, getHostLanguage() == Configuration.XSLT ? "XTTE0590" : "XPTY0004");
+                    throw new XPathException(s, getHostLanguage() == HostLanguage.XSLT ? "XTTE0590" : "XPTY0004");
                 }
             }
         }

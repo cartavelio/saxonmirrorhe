@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.OperandRole;
@@ -63,6 +64,7 @@ public class Fork extends Instruction {
      *         the fingerprint of a name in the XSLT namespace
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_FORK;
     }
@@ -92,6 +94,7 @@ public class Fork extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (getSize() == 0) {
             return ErrorType.getInstance();
@@ -126,6 +129,7 @@ public class Fork extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         Expression[] e2 = new Expression[getSize()];
         int i=0;
@@ -142,13 +146,13 @@ public class Fork extends Instruction {
      * non-streamed mode of operation, which processes the child expressions
      * in turn exactly like a sequence constructor.
      *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
      */
     @Override
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         for (Operand o : operands()) {
-            o.getChildExpression().process(context);
+            o.getChildExpression().process(output, context);
         }
         return null;
     }
@@ -160,6 +164,7 @@ public class Fork extends Instruction {
      * @param out the expression presenter used to display the structure
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("fork", this);
         for (Operand o : operands()) {

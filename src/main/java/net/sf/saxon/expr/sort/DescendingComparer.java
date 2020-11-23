@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,7 +17,7 @@ import net.sf.saxon.value.AtomicValue;
  * delivered by the base comparer.
  */
 
-public class DescendingComparer implements AtomicComparer, java.io.Serializable {
+public class DescendingComparer implements AtomicComparer {
 
     private AtomicComparer baseComparer;
 
@@ -35,6 +35,7 @@ public class DescendingComparer implements AtomicComparer, java.io.Serializable 
         return baseComparer;
     }
 
+    @Override
     public StringCollator getCollator() {
         return baseComparer.getCollator();
     }
@@ -45,10 +46,10 @@ public class DescendingComparer implements AtomicComparer, java.io.Serializable 
      * @param context the dynamic evaluation context
      * @return either the original AtomicComparer, or a new AtomicComparer in which the context
      *         is known. The original AtomicComparer is not modified
-     * @throws NoDynamicContextException if the context is an "early evaluation" (compile-time) context
      */
 
     /*@NotNull*/
+    @Override
     public AtomicComparer provideContext(XPathContext context) {
         AtomicComparer newBase = baseComparer.provideContext(context);
         if (newBase != baseComparer) {
@@ -65,6 +66,7 @@ public class DescendingComparer implements AtomicComparer, java.io.Serializable 
      * @throws ClassCastException if the objects are of the wrong type for this Comparer
      */
 
+    @Override
     public int compareAtomicValues(AtomicValue a, AtomicValue b) throws NoDynamicContextException {
         return 0 - baseComparer.compareAtomicValues(a, b);
     }
@@ -82,6 +84,7 @@ public class DescendingComparer implements AtomicComparer, java.io.Serializable 
      * @throws ClassCastException if the objects are not comparable
      */
 
+    @Override
     public boolean comparesEqual(AtomicValue a, AtomicValue b) throws NoDynamicContextException {
         return baseComparer.comparesEqual(a, b);
     }
@@ -92,6 +95,7 @@ public class DescendingComparer implements AtomicComparer, java.io.Serializable 
      *
      * @return a string representation of the AtomicComparer
      */
+    @Override
     public String save() {
         return "DESC|" + baseComparer.save();
     }

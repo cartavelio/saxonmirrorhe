@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,12 +9,11 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.SaxonOutputKeys;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.CharSlice;
 import net.sf.saxon.type.SchemaType;
@@ -23,7 +22,7 @@ import java.util.*;
 
 
 /**
- * HTMLIndenter: This ProxyEmitter indents HTML elements, by adding whitespace
+ * HTMLIndenter: This ProxyReceiver indents HTML elements, by adding whitespace
  * character data where appropriate.
  * The character data is never added when within an inline element.
  * The string used for indentation defaults to three spaces
@@ -109,8 +108,8 @@ public class HTMLIndenter extends ProxyReceiver {
             suppressed = new HashSet<>(8);
             StringTokenizer st = new StringTokenizer(s, " \t\r\n");
             while (st.hasMoreTokens()) {
-                String clarkName = st.nextToken();
-                suppressed.add(FingerprintedQName.fromClarkName(clarkName).getLocalPart().toLowerCase());
+                String eqName = st.nextToken();
+                suppressed.add(FingerprintedQName.fromEQName(eqName).getLocalPart().toLowerCase());
             }
         }
     }
@@ -141,9 +140,12 @@ public class HTMLIndenter extends ProxyReceiver {
      * Output element start tag
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         int withinSuppressed = level == 0 ? 0 : (propertyStack[level - 1] & IS_SUPPRESSED);
-        int tagProps = classifyTag(nameCode) | withinSuppressed;
+        int tagProps = classifyTag(elemName) | withinSuppressed;
         if (level >= propertyStack.length) {
             propertyStack = Arrays.copyOf(propertyStack, level * 2);
         }
@@ -153,7 +155,7 @@ public class HTMLIndenter extends ProxyReceiver {
             indent();
         }
 
-        nextReceiver.startElement(nameCode, typeCode, location, properties);
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
 
         inFormattedTag = inFormattedTag || ((tagProps & IS_FORMATTED) != 0);
         level++;
@@ -167,6 +169,7 @@ public class HTMLIndenter extends ProxyReceiver {
      * Output element end tag
      */
 
+    @Override
     public void endElement() throws XPathException {
         level--;
         boolean thisInline = (propertyStack[level] & IS_INLINE) != 0;
@@ -191,10 +194,11 @@ public class HTMLIndenter extends ProxyReceiver {
      * Output character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (inFormattedTag ||
-                (properties & ReceiverOptions.USE_NULL_MARKERS) != 0 ||
-                (properties & ReceiverOptions.DISABLE_ESCAPING) != 0) {
+                ReceiverOption.contains(properties, ReceiverOption.USE_NULL_MARKERS) ||
+                ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
             // don't split the text if in a tag such as <pre>, or if the text contains the result of
             // expanding a character map or was produced using disable-output-escaping
             nextReceiver.characters(chars, locationId, properties);
@@ -237,6 +241,7 @@ public class HTMLIndenter extends ProxyReceiver {
      * Output a comment
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (afterEndElement && level != 0 && (propertyStack[level - 1] & IS_INLINE) == 0) {
             indent();
@@ -273,7 +278,8 @@ public class HTMLIndenter extends ProxyReceiver {
             Arrays.fill(c2, indentChars.length, c2.length, ' ');
             indentChars = c2;
         }
-        nextReceiver.characters(new CharSlice(indentChars, 0, spaces + 1), ExplicitLocation.UNKNOWN_LOCATION, 0);
+        nextReceiver.characters(new CharSlice(indentChars, 0, spaces + 1),
+                                Loc.NONE, ReceiverOption.NONE);
         sameLine = false;
     }
 

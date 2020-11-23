@@ -15,18 +15,17 @@
 package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import junit.framework.TestCase;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.lib.UnfailingErrorListener;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.namespace.QName;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.util.HashSet;
@@ -34,11 +33,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * @author Ignacio
  *
  */
-public class TestXPathErrorCode extends TestCase {
+public class TestXPathErrorCode {
 
 	static NamespaceResolver voidNamespaceResolver = new NamespaceResolver() {
 
@@ -52,6 +55,7 @@ public class TestXPathErrorCode extends TestCase {
 	;
 
 
+    @Test
     public void testXPathFoo() {
         try {
             String expression = "$foo:c1";
@@ -130,7 +134,8 @@ public class TestXPathErrorCode extends TestCase {
 		return fpXPath;
 	}
 
-	public void test4300() {
+    @Test
+    public void test4300() {
         try {
             Processor processor = new Processor(true);
             DocumentBuilder builder = processor.newDocumentBuilder();
@@ -146,8 +151,8 @@ public class TestXPathErrorCode extends TestCase {
             XPathExecutable xx = xpath.compile("saxon:deep-equal($vmgv:node1, $vmgv:node2, () ,'w?')");
 
             XPathSelector selector = xx.load();
-            LocalErrorListener errorListener = new LocalErrorListener();
-            selector.getUnderlyingXPathContext().setErrorListener(errorListener);
+            LocalErrorReporter errorListener = new LocalErrorReporter();
+            selector.setErrorReporter(errorListener);
             selector.setVariable(new net.sf.saxon.s9api.QName("urn:us:xpath:var", "node1"), node1);
             selector.setVariable(new net.sf.saxon.s9api.QName("urn:us:xpath:var", "node2"), node2);
 
@@ -163,32 +168,24 @@ public class TestXPathErrorCode extends TestCase {
 
     }
 
-    private static class LocalErrorListener implements UnfailingErrorListener {
+    private static class LocalErrorReporter implements ErrorReporter {
         private final StringBuilder errors;
 
-        LocalErrorListener() {
+        LocalErrorReporter() {
             errors = new StringBuilder();
         }
 
         @Override
-        public void warning(TransformerException e) {
-            errors.append(e.getMessage());
+        public void report(XmlProcessingError error) {
+            if (error.isWarning()) {
+                errors.append(error.getMessage());
+            } else {
+                fail(error.getMessage());
+            }
         }
 
-        @Override
-        public void error(TransformerException e) {
-            errors.append(e.getMessage());
-        }
-
-        @Override
-        public void fatalError(TransformerException e) {
-            errors.append(e.getMessage());
-        }
-
-        public String getErrors() {
-            return errors.toString();
-        }
     }
 
 
 }
+

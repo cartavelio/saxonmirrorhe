@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,13 +10,11 @@ package net.sf.saxon.pattern;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.flwor.LocalVariableBinding;
 import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.Current;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -108,7 +106,7 @@ public class PatternThatSetsCurrent extends Pattern {
      * @return true if the item matches the Pattern, false otherwise
      */
     @Override
-    public boolean matches(Item<?> item, XPathContext context) throws XPathException {
+    public boolean matches(Item item, XPathContext context) throws XPathException {
         context.setLocalVariable(binding.getLocalSlotNumber(), item);
         return wrappedPattern.matches(item, context);
     }
@@ -174,17 +172,17 @@ public class PatternThatSetsCurrent extends Pattern {
      * Get the original pattern text
      */
     @Override
-    public String toString() {
+    public String reconstruct() {
         return wrappedPattern.toString();
     }
 
     /**
      * Get the host language (XSLT, XQuery, XPath) used to implement the code in this container
      *
-     * @return typically {@link net.sf.saxon.Configuration#XSLT} or {@link net.sf.saxon.Configuration#XQUERY}
+     * @return typically {@link HostLanguage#XSLT} or {@link HostLanguage#XQUERY}
      */
     @Override
-    public int getHostLanguage() {
+    public HostLanguage getHostLanguage() {
         return wrappedPattern.getHostLanguage();
     }
 
@@ -243,14 +241,17 @@ public class PatternThatSetsCurrent extends Pattern {
      */
 
     /*@NotNull*/
+    @Override
     public Pattern copy(RebindingMap rebindings) {
         LocalVariableBinding newCurrent = new LocalVariableBinding(Current.FN_CURRENT, SequenceType.SINGLE_ITEM);
         rebindings.put(binding, newCurrent);
         PatternThatSetsCurrent n = new PatternThatSetsCurrent(wrappedPattern.copy(rebindings), newCurrent);
         ExpressionTool.copyLocationInfo(this, n);
+        n.setOriginalText(getOriginalText());
         return n;
     }
 
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.withCurrent");
         wrappedPattern.export(presenter);

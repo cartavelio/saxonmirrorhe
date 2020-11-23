@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -45,64 +45,76 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         return THE_INSTANCE;
     }
 
+
+
     private void init() {
 
-        register("merge", 1, MapMerge.class, MapType.ANY_MAP_TYPE, ONE, 0, 0)
+        register("merge", 1, MapMerge.class, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null);
+
+        SpecificFunctionType ON_DUPLICATES_CALLBACK_TYPE = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE
+        );
+
+        SequenceType oneOnDuplicatesFunction = SequenceType.makeSequenceType(
+                ON_DUPLICATES_CALLBACK_TYPE, StaticProperty.EXACTLY_ONE);
 
         OptionsParameter mergeOptionDetails = new OptionsParameter();
         mergeOptionDetails.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, new StringValue("use-first"));
         // duplicates=unspecified is retained because that's what the XSLT 3.0 Rec incorrectly uses
-        mergeOptionDetails.setAllowedValues("duplicates", "FOJS0005", "use-first", "use-last", "combine", "reject", "unspecified", "use-any");
-        mergeOptionDetails.addAllowedOption("duplicates-error-code", SequenceType.SINGLE_STRING, new StringValue("FOJS0003"));
-        mergeOptionDetails.addAllowedOption("Q{" + NamespaceConstant.SAXON + "}key-type", SequenceType.SINGLE_STRING, new StringValue("anyAtomicType"));
-        mergeOptionDetails.addAllowedOption("Q{" + NamespaceConstant.SAXON + "}final", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        mergeOptionDetails.setAllowedValues("duplicates", "FOJS0005", "use-first", "use-last", "combine", "reject", "unspecified", "use-any", "use-callback");
+        mergeOptionDetails.addAllowedOption(MapMerge.errorCodeKey, SequenceType.SINGLE_STRING, new StringValue("FOJS0003"));
+        mergeOptionDetails.addAllowedOption(MapMerge.keyTypeKey, SequenceType.SINGLE_STRING, new StringValue("anyAtomicType"));
+        mergeOptionDetails.addAllowedOption(MapMerge.finalKey, SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        mergeOptionDetails.addAllowedOption(MapMerge.onDuplicatesKey, oneOnDuplicatesFunction, null);
 
-        register("merge", 2, MapMerge.class, MapType.ANY_MAP_TYPE, ONE, 0, 0)
+
+        register("merge", 2, MapMerge.class, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
                 .optionDetails(mergeOptionDetails);
 
-        register("entry", 2, MapEntry.class, MapType.ANY_MAP_TYPE, ONE, 0, 0)
+        register("entry", 2, MapEntry.class, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null);
 
-        register("find", 2, MapFind.class, ArrayItemType.getInstance(), ONE, 0, 0)
+        register("find", 2, MapFind.class, ArrayItemType.getInstance(), ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
 
-        register("get", 2, MapGet.class, AnyItemType.getInstance(), STAR, 0, 0)
+        register("get", 2, MapGet.class, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
 
-        register("put", 3, MapPut.class, MapType.ANY_MAP_TYPE, ONE, 0, 0)
+        register("put", 3, MapPut.class, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
                 .arg(2, AnyItemType.getInstance(), STAR | NAV, null);
 
-        register("contains", 2, MapContains.class, BuiltInAtomicType.BOOLEAN, ONE, 0, 0)
+        register("contains", 2, MapContains.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
 
-        register("remove", 2, MapRemove.class, MapType.ANY_MAP_TYPE, ONE, 0, 0)
+        register("remove", 2, MapRemove.class, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR | ABS, null);
 
-        register("keys", 1, MapKeys.class, BuiltInAtomicType.ANY_ATOMIC, STAR, 0, 0)
+        register("keys", 1, MapKeys.class, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
 
-        register("size", 1, MapSize.class, BuiltInAtomicType.INTEGER, ONE, 0, 0)
+        register("size", 1, MapSize.class, BuiltInAtomicType.INTEGER, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
 
         ItemType actionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("for-each", 2, MapForEach.class, AnyItemType.getInstance(), STAR, 0, 0)
+        register("for-each", 2, MapForEach.class, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, actionType, ONE | INS, null);
 
-        register("untyped-contains", 2, MapUntypedContains.class, BuiltInAtomicType.BOOLEAN, ONE, 0, 0)
+        register("untyped-contains", 2, MapUntypedContains.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
 
@@ -125,6 +137,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapContains extends SystemFunction {
 
+        @Override
         public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             AtomicValue key = (AtomicValue) arguments[1].head();
@@ -161,8 +174,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     }
                 }
                 TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-                int relation = th.relationship(arguments[1].getItemType(), BuiltInAtomicType.STRING);
-                if (relation == TypeHierarchy.DISJOINT) {
+                Affinity relation = th.relationship(arguments[1].getItemType(), BuiltInAtomicType.STRING);
+                if (relation == Affinity.DISJOINT) {
                     XPathException xe = new XPathException("Key for tuple type must be a string (actual type is " + arguments[1].getItemType(), "XPTY0004");
                     xe.setIsTypeError(true);
                     throw xe;
@@ -250,11 +263,12 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             }
         }
 
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             assert map != null;
             AtomicValue key = (AtomicValue) arguments[1].head();
-            Sequence<?> value = map.get(key);
+            Sequence value = map.get(key);
             if (value == null) {
                 return EmptySequence.getInstance();
             } else {
@@ -269,21 +283,22 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapFind extends SystemFunction {
 
+        @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-            List<GroundedValue<?>> result = new ArrayList<>();
+            List<GroundedValue> result = new ArrayList<>();
             AtomicValue key = (AtomicValue) arguments[1].head();
             processSequence(arguments[0], key, result);
             return new SimpleArrayItem(result);
         }
 
-        private void processSequence(Sequence<?> in, AtomicValue key, List<GroundedValue<?>> result) throws XPathException {
+        private void processSequence(Sequence in, AtomicValue key, List<GroundedValue> result) throws XPathException {
             in.iterate().forEachOrFail(item -> {
                 if (item instanceof ArrayItem) {
-                    for (Sequence<?> sequence : ((ArrayItem) item).members()) {
+                    for (Sequence sequence : ((ArrayItem) item).members()) {
                         processSequence(sequence, key, result);
                     }
                 } else if (item instanceof MapItem) {
-                    GroundedValue<?> value = ((MapItem) item).get(key);
+                    GroundedValue value = ((MapItem) item).get(key);
                     if (value != null) {
                         result.add(value);
                     }
@@ -301,10 +316,11 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapEntry extends SystemFunction {
 
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             AtomicValue key = (AtomicValue) arguments[0].head();
             assert key != null;
-            GroundedValue<?> value = ((Sequence<?>)arguments[1]).iterate().materialize();
+            GroundedValue value = ((Sequence)arguments[1]).iterate().materialize();
             return new SingleEntryMap(key, value);
         }
 
@@ -327,6 +343,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                SequenceType.makeSequenceType(args[1].getItemType(), args[1].getCardinality()));
         }
 
+        @Override
         public String getStreamerName() {
             return "MapEntry";
         }
@@ -338,12 +355,13 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapForEach extends SystemFunction {
 
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             Function fn = (Function) arguments[1].head();
-            List<GroundedValue<?>> results = new ArrayList<>();
+            List<GroundedValue> results = new ArrayList<>();
             for (KeyValuePair pair : map.keyValuePairs()) {
-                Sequence<?> seq = dynamicCall(fn, context, new Sequence[]{pair.key, pair.value});
+                Sequence seq = dynamicCall(fn, context, new Sequence[]{pair.key, pair.value});
                 results.add(seq.materialize());
             }
             return new Chain(results);
@@ -355,7 +373,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapKeys extends SystemFunction {
 
-        public Sequence<? extends Item<AtomicValue>> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             assert map != null;
             return SequenceTool.toLazySequence(map.keys());
@@ -370,8 +389,14 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapMerge extends SystemFunction {
 
+        final static String finalKey = "Q{" + NamespaceConstant.SAXON + "}final";
+        final static String keyTypeKey ="Q{"+NamespaceConstant.SAXON +"}key-type";
+        final static String onDuplicatesKey = "Q{" + NamespaceConstant.SAXON + "}on-duplicates";
+        final static String errorCodeKey = "Q{" + NamespaceConstant.SAXON + "}duplicates-error-code";
+
         private String duplicates = "use-first";
         private String duplicatesErrorCode = "FOJS0003";
+        private Function onDuplicates = null;
         private boolean allStringKeys = false;
         private boolean treatAsFinal = false;
 
@@ -390,15 +415,21 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments) throws XPathException {
             if (arguments.length == 2 && arguments[1] instanceof Literal) {
                 MapItem options = (MapItem) ((Literal)arguments[1]).getValue().head();
-                Map<String, Sequence<?>> values = getDetails().optionDetails.processSuppliedOptions(
+                Map<String, Sequence> values = getDetails().optionDetails.processSuppliedOptions(
                         options, visitor.getStaticContext().makeEarlyEvaluationContext());
                 String duplicates = ((StringValue) values.get("duplicates")).getStringValue();
-                String duplicatesErrorCode = ((StringValue) values.get("duplicates-error-code")).getStringValue();
-                boolean isFinal = ((BooleanValue) values.get("Q{" + NamespaceConstant.SAXON + "}final")).getBooleanValue();
-                String keyType = ((StringValue) values.get("Q{" + NamespaceConstant.SAXON + "}key-type")).getStringValue();
+                String duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
+                Function onDuplicates = (Function)values.get(onDuplicatesKey);
+                if (onDuplicates != null) {
+                    duplicates = "use-callback";
+                }
+
+                boolean isFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
+                String keyType = ((StringValue) values.get(keyTypeKey)).getStringValue();
                 MapMerge mm2 = (MapMerge)MapFunctionSet.getInstance().makeFunction("merge", 1);
                 mm2.duplicates = duplicates;
                 mm2.duplicatesErrorCode = duplicatesErrorCode;
+                mm2.onDuplicates = onDuplicates;
                 mm2.allStringKeys = keyType.equals("string");
                 mm2.treatAsFinal = isFinal;
                 return mm2.makeFunctionCall(arguments[0]);
@@ -425,7 +456,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     MapItem options = (MapItem) ((Literal) args[1]).getValue().head();
                     GroundedValue dupes = options.get(new StringValue("duplicates"));
                     try {
-                        if (dupes == null || !"combine".equals(dupes.getStringValue())) {
+                        if (dupes != null && !"combine".equals(dupes.getStringValue())) {
                             maybeCombined = false;
                         }
                     } catch (XPathException e) {
@@ -443,18 +474,24 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             }
         }
 
+        @Override
         public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             String duplicates = this.duplicates;
             String duplicatesErrorCode = this.duplicatesErrorCode;
             boolean allStringKeys = this.allStringKeys;
             boolean treatAsFinal = this.treatAsFinal;
+            Function onDuplicates = this.onDuplicates;
             if (arguments.length > 1) {
                 MapItem options = (MapItem) arguments[1].head();
-                Map<String, Sequence<?>> values = getDetails().optionDetails.processSuppliedOptions(options, context);
+                Map<String, Sequence> values = getDetails().optionDetails.processSuppliedOptions(options, context);
                 duplicates = ((StringValue) values.get("duplicates")).getStringValue();
-                duplicatesErrorCode = ((StringValue) values.get("duplicates-error-code")).getStringValue();
-                treatAsFinal = ((BooleanValue) values.get("Q{" + NamespaceConstant.SAXON + "}final")).getBooleanValue();
-                allStringKeys = "string".equals(((StringValue)values.get("Q{" + NamespaceConstant.SAXON + "}key-type")).getStringValue());
+                duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
+                treatAsFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
+                allStringKeys = "string".equals(((StringValue)values.get(keyTypeKey)).getStringValue());
+                onDuplicates = (Function) values.get(onDuplicatesKey);
+                if (onDuplicates != null) {
+                    duplicates = "use-callback";
+                }
             }
 
             if (treatAsFinal && allStringKeys) {
@@ -482,7 +519,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                 if (!(pair.key instanceof StringValue)) {
                                     throw new XPathException("The keys in this map must all be strings (found " + pair.key.getItemType() + ")");
                                 }
-                                Sequence<?> existing = baseMap.get(pair.key);
+                                Sequence existing = baseMap.get(pair.key);
                                 if (existing != null) {
                                     switch (duplicates) {
                                         case "use-first":
@@ -496,8 +533,13 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                         case "combine":
                                             InsertBefore.InsertIterator combinedIter =
                                                     new InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
-                                            GroundedValue<?> combinedValue = combinedIter.materialize();
+                                            GroundedValue combinedValue = combinedIter.materialize();
                                             baseMap.initialPut(pair.key.getStringValue(), combinedValue);
+                                            break;
+                                        case "use-callback":
+                                            Sequence[] args = new Sequence[]{existing, pair.value};
+                                            Sequence combined = onDuplicates.call(context, args);
+                                            baseMap.initialPut(pair.key.getStringValue(), combined.materialize());
                                             break;
                                         default:
                                             throw new XPathException("Duplicate key in constructed map: " +
@@ -522,7 +564,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     MapItem next;
                     while ((next = (MapItem) iter.next()) != null) {
                         for (KeyValuePair pair : next.keyValuePairs()) {
-                            Sequence<?> existing = baseMap.get(pair.key);
+                            Sequence existing = baseMap.get(pair.key);
                             if (existing != null) {
                                 switch (duplicates) {
                                     case "use-first":
@@ -536,8 +578,16 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                     case "combine":
                                         InsertBefore.InsertIterator combinedIter =
                                                 new InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
-                                        GroundedValue<?> combinedValue = combinedIter.materialize();
+                                        GroundedValue combinedValue = combinedIter.materialize();
                                         baseMap = baseMap.addEntry(pair.key, combinedValue);
+                                        break;
+                                    case "use-callback":
+                                        assert onDuplicates != null;
+                                        Sequence[] args = onDuplicates.getArity() == 2 ?
+                                                new Sequence[]{existing, pair.value} :
+                                                new Sequence[]{existing, pair.value, pair.key};
+                                        Sequence combined = onDuplicates.call(context, args);
+                                        baseMap = baseMap.addEntry(pair.key, combined.materialize());
                                         break;
                                     default:
                                         throw new XPathException("Duplicate key in constructed map: " +
@@ -554,6 +604,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
         }
 
+        @Override
         public String getStreamerName() {
             return "NewMap";
         }
@@ -580,6 +631,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
     public static class MapPut extends SystemFunction {
 
+        @Override
         public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
 
             MapItem baseMap = (MapItem) arguments[0].head();
@@ -589,7 +641,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             }
 
             AtomicValue key = (AtomicValue) arguments[1].head();
-            GroundedValue<?> value = ((Sequence<?>)arguments[2]).materialize();
+            GroundedValue value = ((Sequence)arguments[2]).materialize();
             return baseMap.addEntry(key, value);
         }
     }
@@ -600,6 +652,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapRemove extends SystemFunction {
 
+        @Override
         public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             SequenceIterator iter = arguments[1].iterate();
@@ -617,6 +670,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapSize extends SystemFunction {
 
+        @Override
         public IntegerValue call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             return new Int64Value(map.size());

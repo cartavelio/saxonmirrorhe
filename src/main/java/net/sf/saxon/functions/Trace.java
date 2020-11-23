@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,15 +10,14 @@ package net.sf.saxon.functions;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.instruct.InstructionDetails;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trace.LocationKind;
+import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
@@ -26,7 +25,8 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
 
-import javax.xml.transform.SourceLocator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class supports the XPath 2.0 function trace().
@@ -35,9 +35,9 @@ import javax.xml.transform.SourceLocator;
  */
 
 
-public class Trace extends SystemFunction {
+public class Trace extends SystemFunction implements Traceable {
 
-    Location location = ExplicitLocation.UNKNOWN_LOCATION;
+    Location location = Loc.NONE;
 
     /**
      * Get the static properties of this expression (other than its type). The result is
@@ -46,24 +46,23 @@ public class Trace extends SystemFunction {
      * @param arguments the actual arguments
      */
 
+    @Override
     public int getSpecialProperties(Expression[] arguments) {
         return arguments[0].getSpecialProperties();
     }
 
+    @Override
     public int getCardinality(Expression[] arguments) {
         return arguments[0].getCardinality();
     }
 
-    public void notifyListener(String label, Sequence<?> val, SourceLocator loc, XPathContext context) {
-        InstructionDetails info = new InstructionDetails();
-        info.setConstructType(LocationKind.TRACE_CALL);
-        info.setLineNumber(loc.getLineNumber());
-        info.setSystemId(loc.getSystemId());
-        info.setProperty("label", label);
-        info.setProperty("value", val);
+    public void notifyListener(String label, Sequence val, XPathContext context) {
+        Map<String, Object> info = new HashMap<>();
+        info.put("label", label);
+        info.put("value", val);
         TraceListener listener = context.getController().getTraceListener();
-        listener.enter(info, context);
-        listener.leave(info);
+        listener.enter(this, info, context);
+        listener.leave(this);
     }
 
     @Override
@@ -98,6 +97,11 @@ public class Trace extends SystemFunction {
         }
     }
 
+    @Override
+    public Location getLocation() {
+        return location;
+    }
+
     /**
      * Evaluate the expression
      *
@@ -107,12 +111,13 @@ public class Trace extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Controller controller = context.getController();
         String label = arguments.length == 1 ? "*" : arguments[1].head().getStringValue();
         if (controller.isTracing()) {
-            Sequence<?> value = arguments[0].iterate().materialize();
-            notifyListener(label, value, location, context);
+            Sequence value = arguments[0].iterate().materialize();
+            notifyListener(label, value, context);
             return value;
         } else {
             Logger out = controller.getTraceFunctionDestination();
@@ -123,6 +128,17 @@ public class Trace extends SystemFunction {
                         label, out));
             }
         }
+    }
+
+    /**
+     * Get a name identifying the object of the expression, for example a function name, template name,
+     * variable name, key name, element name, etc. This is used only where the name is known statically.
+     *
+     * @return the QName of the object declared or manipulated by this instruction or expression
+     */
+    @Override
+    public StructuredQName getObjectName() {
+        return null;
     }
 
     /**
@@ -144,6 +160,7 @@ public class Trace extends SystemFunction {
             this.out = out;
         }
 
+        @Override
         public Item next() throws XPathException {
             Item n = base.next();
             position++;
@@ -158,25 +175,14 @@ public class Trace extends SystemFunction {
             return n;
         }
 
+        @Override
         public void close() {
             base.close();
         }
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-         *         and {@link #LOOKAHEAD}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         *         It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        public int getProperties() {
-            return 0;
-        }
     }
 
+    @Override
     public String getStreamerName() {
         return "Trace";
     }

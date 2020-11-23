@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,8 +9,12 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.regex.*;
-import net.sf.saxon.tree.iter.UnfailingIterator;
+import net.sf.saxon.regex.BMPString;
+import net.sf.saxon.regex.EmptyString;
+import net.sf.saxon.regex.LatinString;
+import net.sf.saxon.regex.UnicodeString;
+import net.sf.saxon.tree.iter.AtomicIterator;
+import net.sf.saxon.tree.util.CharSequenceConsumer;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -88,6 +92,7 @@ public class StringValue extends AtomicValue {
      *                  the value actually conforms to this type.
      */
 
+    @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
         StringValue v = new StringValue(value);
         v.typeLabel = typeLabel;
@@ -101,6 +106,7 @@ public class StringValue extends AtomicValue {
      * and xs:untypedAtomic. For external objects, the result is AnyAtomicType.
      */
 
+    @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.STRING;
     }
@@ -138,20 +144,11 @@ public class StringValue extends AtomicValue {
         }
     }
 
-//    public static StringValue makeStringValue(UnicodeString value) {
-//        if (value == null || value.uLength() == 0) {
-//            return StringValue.EMPTY_STRING;
-//        } else {
-//            StringValue sv = new StringValue(value.getCharSequence());
-//            sv.unicodeString = value;
-//            return sv;
-//        }
-//    }
-
     /**
      * Get the string value as a CharSequence
      */
 
+    @Override
     public final CharSequence getPrimitiveStringValue() {
         return value;
     }
@@ -281,7 +278,7 @@ public class StringValue extends AtomicValue {
      */
 
     /*@NotNull*/
-    public synchronized UnfailingIterator<Int64Value> iterateCharacters() {
+    public synchronized AtomicIterator<Int64Value> iterateCharacters() {
         if (value instanceof UnicodeString) {
             return new UnicodeCharacterIterator((UnicodeString)value);
         } else {
@@ -354,6 +351,7 @@ public class StringValue extends AtomicValue {
      *         no ordering is defined, or will be a Comparable
      */
 
+    @Override
     public AtomicMatchKey getXPathComparable(boolean ordered, /*@NotNull*/ StringCollator collator, int implicitTimezone) {
         return collator.getCollationKey(value);
     }
@@ -366,7 +364,6 @@ public class StringValue extends AtomicValue {
      * @throws ClassCastException always
      */
 
-    @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass", "Contract"})
     public boolean equals(Object other) {
         throw new ClassCastException("equals on StringValue is not allowed");
     }
@@ -404,8 +401,9 @@ public class StringValue extends AtomicValue {
      * @return true if the string has length greater than zero
      */
 
+    @Override
     public boolean effectiveBooleanValue() {
-        return value.length() > 0;
+        return !isZeroLength();
     }
 
 
@@ -414,6 +412,7 @@ public class StringValue extends AtomicValue {
         return "\"" + value + '\"';
     }
 
+    @Override
     public String toShortString() {
         String s = value.toString();
         if (s.length() > 40) {
@@ -429,6 +428,7 @@ public class StringValue extends AtomicValue {
      * equality, not for ordering, and the equality rules for strings in XML schema are the same as in Java.
      */
 
+    @Override
     public Comparable getSchemaComparable() {
         return getStringValue();
     }
@@ -446,6 +446,7 @@ public class StringValue extends AtomicValue {
      * @return true if the two values are identical, false otherwise.
      */
 
+    @Override
     public boolean isIdentical(/*@NotNull*/ AtomicValue v) {
         return v instanceof StringValue &&
                 (this instanceof AnyURIValue == v instanceof AnyURIValue) &&
@@ -466,11 +467,11 @@ public class StringValue extends AtomicValue {
         for (int i = 0, len = s.length(); i < len; i++) {
             char c = s.charAt(i);
             if (c >= 0x20 && c <= 0x7e) {
-                fsb.append(c);
+                fsb.cat(c);
             } else {
                 fsb.append("\\u");
                 for (int shift = 12; shift >= 0; shift -= 4) {
-                    fsb.append("0123456789ABCDEF".charAt((c >> shift) & 0xF));
+                    fsb.cat("0123456789ABCDEF".charAt((c >> shift) & 0xF));
                 }
             }
         }
@@ -483,7 +484,7 @@ public class StringValue extends AtomicValue {
      */
 
 
-    public final static class CharacterIterator implements UnfailingIterator<Int64Value> {
+    public final static class CharacterIterator implements AtomicIterator<Int64Value> {
 
         int inpos = 0;        // 0-based index of the current Java char
         private CharSequence value;
@@ -497,6 +498,7 @@ public class StringValue extends AtomicValue {
         }
 
         /*@Nullable*/
+        @Override
         public Int64Value next() {
             if (inpos < value.length()) {
                 int c = value.charAt(inpos++);
@@ -522,7 +524,7 @@ public class StringValue extends AtomicValue {
 
     }
 
-    public final static class UnicodeCharacterIterator implements UnfailingIterator<Int64Value> {
+    public final static class UnicodeCharacterIterator implements AtomicIterator<Int64Value> {
 
         UnicodeString uValue;
         int inpos = 0;        // 0-based index of the current Java char
@@ -536,6 +538,7 @@ public class StringValue extends AtomicValue {
         }
 
         /*@Nullable*/
+        @Override
         public Int64Value next() {
             if (inpos < uValue.uLength()) {
                 return new Int64Value(uValue.uCharAt(inpos++));
@@ -544,20 +547,26 @@ public class StringValue extends AtomicValue {
             }
         }
 
-        public void close() {
+    }
+
+    public static final class Builder implements CharSequenceConsumer {
+        
+        FastStringBuffer buffer = new FastStringBuffer(256);
+
+        @Override
+        public CharSequenceConsumer cat(CharSequence chars) {
+            return buffer.cat(chars);
         }
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link #GROUNDED} and {@link #LAST_POSITION_FINDER}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         */
-
-        public int getProperties() {
-            return 0;
+        @Override
+        public CharSequenceConsumer cat(char c) {
+            return buffer.cat(c);
         }
+
+        public StringValue getStringValue() {
+            return new StringValue(buffer.condense());
+        }
+
     }
 
 }

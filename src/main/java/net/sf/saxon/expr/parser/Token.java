@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -16,12 +16,17 @@ import java.util.HashMap;
 
 public abstract class Token {
 
-    /**
+    /*
      * Token numbers. Those in the range 0 to LAST_OPERATOR are tokens that can be followed
      * by a name or expression; those above this range are tokens that can be
      * followed by an binary operator.
      */
 
+    /**
+     * Pseudo-token representing implicit end of expression (the parser doesn't care what follows
+     * the expression)
+     */
+    public static final int IMPLICIT_EOF = -1;
     /**
      * Pseudo-token representing the end of the expression
      */
@@ -216,14 +221,6 @@ public abstract class Token {
      */
     public static final int TREAT_AS = 47;
     /**
-     * Tilde, used in XSLT patterns
-     */
-    public static final int TILDE = 48;
-    /**
-     * Pilcrow, used in export files
-     */
-    public static final int PILCROW = 49;
-    /**
      * operator "eq"
      */
     public static final int FEQ = 50;       // "Fortran" style comparison operators eq, ne, etc
@@ -324,32 +321,36 @@ public abstract class Token {
      * "for sliding" (XQuery 3.0)
      */
     public static final int FOR_SLIDING = 74;
+    /**
+     * "for member" (Saxon extension)
+     */
+    public static final int FOR_MEMBER = 75;
 
     // map colon key-entry separator
     /**
      * ":" (XPath 3.0 maps)
      */
-    public static final int COLON = 75;
+    public static final int COLON = 76;
     /**
      * Arrow operator "=&gt;" (XQuery 3.1)
      */
-    public static final int ARROW = 76;
+    public static final int ARROW = 77;
     /**
-     * First part of a string template
+     * First part of a string template. Token value includes all the text from ``[ up to the first `{
      */
-    public static final int STRING_TEMPLATE_INITIAL = 77;
+    public static final int STRING_CONSTRUCTOR_INITIAL = 78;
     /**
-     * Intermediate part of a string template
+     * "otherwise" (Saxon extension)
      */
-    public static final int STRING_TEMPLATE_INTERMEDIATE = 78;
+    public static final int OTHERWISE = 79;
     /**
      * "andAlso" (Saxon extension)
      */
-    public static final int AND_ALSO = 79;
+    public static final int AND_ALSO = 80;
     /**
      * "orElse" (Saxon extension)
      */
-    public static final int OR_ELSE = 80;
+    public static final int OR_ELSE = 81;
 
 
     // The following tokens are used only in the query prolog. They are categorized
@@ -589,13 +590,9 @@ public abstract class Token {
      */
     public static final int COUNT = 220;
     /**
-     * Final part of a string template
-     */
-    public static final int STRING_TEMPLATE_FINAL = 221;
-    /**
      * Complete string template with no embedded expressions
      */
-    public static final int STRING_TEMPLATE_COMPLETE = 222;
+    public static final int STRING_LITERAL_BACKTICKED = 222;
 
     /**
      * Unary minus sign
@@ -615,7 +612,6 @@ public abstract class Token {
         tokens[UNION] = "|";
         tokens[SLASH] = "/";
         tokens[AT] = "@";
-        tokens[TILDE] = "~";
         tokens[LSQB] = "[";
         tokens[LPAR] = "(";
         tokens[EQUALS] = "=";
@@ -679,16 +675,14 @@ public abstract class Token {
         tokens[WITH] = "with";
         tokens[MODIFY] = "modify";
         tokens[AS] = "as";
-        tokens[PILCROW] = "\u00B6";
 
         tokens[COLON] = ":";
         tokens[ARROW] = "=>";
         tokens[AND_ALSO] = "andAlso";
         tokens[OR_ELSE] = "orElse";
-        tokens[STRING_TEMPLATE_INITIAL] = "``[<string>`{";
-        tokens[STRING_TEMPLATE_INTERMEDIATE] = "}`<string>`{";
-        tokens[STRING_TEMPLATE_FINAL] = "}`<string>]``";
-        tokens[STRING_TEMPLATE_COMPLETE] = "``[<string>]``";
+        tokens[STRING_CONSTRUCTOR_INITIAL] = "``[<string>`{";
+        tokens[STRING_LITERAL_BACKTICKED] = "``[<string>]``";
+        tokens[OTHERWISE] = "otherwise";
 
         tokens[NAME] = "<name>";
         tokens[STRING_LITERAL] = "<string-literal>";
@@ -719,7 +713,7 @@ public abstract class Token {
     /**
      * Lookup table for composite (two-keyword) tokens
      */
-    /*@NotNull*/ public static HashMap<String, Integer> doubleKeywords = new HashMap<String, Integer>(30);
+    public static HashMap<String, Integer> doubleKeywords = new HashMap<>(30);
     /**
      * Pseudo-token representing the start of the expression
      */
@@ -736,6 +730,7 @@ public abstract class Token {
         mapDouble("group by", GROUP_BY);
         mapDouble("for tumbling", FOR_TUMBLING);
         mapDouble("for sliding", FOR_SLIDING);
+        mapDouble("for member", FOR_MEMBER);
         mapDouble("xquery version", XQUERY_VERSION);
         mapDouble("xquery encoding", XQUERY_ENCODING);
         mapDouble("declare namespace", DECLARE_NAMESPACE);

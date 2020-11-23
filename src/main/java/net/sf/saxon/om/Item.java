@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,13 +7,9 @@
 
 package net.sf.saxon.om;
 
-import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.EmptySequence;
-
-import java.util.Iterator;
 
 /**
  * An Item is an object that can occur as a member of a sequence.
@@ -25,14 +21,9 @@ import java.util.Iterator;
  * <p>Note: there is no method getItemType(). This is to avoid having to implement it
  * on every implementation of NodeInfo. Instead, use the static method Type.getItemType(Item).</p>
  *
- * @param <T> (inherited from Sequence): the type of items that can exist in the sequence.
- *           This is a bit of a curiosity because the only item that can exist
- *           in a singleton sequence is the item itself. This leads to some strange abuses
- *           of the Java generics mechanisms.
- *
  */
 
-public interface Item<T extends Item<?>> extends GroundedValue<T> {
+public interface Item extends GroundedValue {
 
     /**
      * Get the genre of this item (to distinguish the top-level categories of item,
@@ -50,9 +41,9 @@ public interface Item<T extends Item<?>> extends GroundedValue<T> {
      * is empty
      */
 
-    @SuppressWarnings("unchecked")
-    default T head() {
-        return (T) this;
+    @Override
+    default Item head() {
+        return this;
     }
 
     /**
@@ -71,6 +62,7 @@ public interface Item<T extends Item<?>> extends GroundedValue<T> {
      * @since 8.4
      */
 
+    @Override
     String getStringValue();
 
     /**
@@ -91,6 +83,7 @@ public interface Item<T extends Item<?>> extends GroundedValue<T> {
      * @since 8.4
      */
 
+    @Override
     CharSequence getStringValueCS();
 
     /**
@@ -108,20 +101,21 @@ public interface Item<T extends Item<?>> extends GroundedValue<T> {
      * @return a depiction of the item suitable for use in error messages
      */
 
+    @Override
     default String toShortString() {
         return toString();
     }
 
-    /**
-     * Get the contents of this value in the form of a Java {@link java.util.Iterator},
-     * so that the sequence value can be used in a for-each expression
-     *
-     * @return an Iterator delivering a sequence of items containing this single item only
-     */
-
-    default Iterator<T> iterator() {
-        return new MonoIterator<>(head());
-    }
+//    /**
+//     * Get the contents of this value in the form of a Java {@link java.util.Iterator},
+//     * so that the sequence value can be used in a for-each expression
+//     *
+//     * @return an Iterator delivering a sequence of items containing this single item only
+//     */
+//
+//    default Iterator<Item> iterator() {
+//        return new MonoIterator<>(head());
+//    }
 
     /**
      * Get the n'th item in the value, counting from 0
@@ -129,7 +123,8 @@ public interface Item<T extends Item<?>> extends GroundedValue<T> {
      * @param n the index of the required item, with 0 representing the first item in the sequence
      * @return the n'th item if it exists, or null otherwise
      */
-    default T itemAt(int n) {
+    @Override
+    default Item itemAt(int n) {
         return n == 0 ? head() : null;
     }
 
@@ -145,7 +140,8 @@ public interface Item<T extends Item<?>> extends GroundedValue<T> {
      *               of the sequence
      * @return the required subsequence. If min is
      */
-    default GroundedValue<T> subsequence(int start, int length) {
+    @Override
+    default GroundedValue subsequence(int start, int length) {
         return start <= 0 && (start + length) > 0 ? this : EmptySequence.getInstance();
     }
 
@@ -155,6 +151,7 @@ public interface Item<T extends Item<?>> extends GroundedValue<T> {
      * @return the number of items in the sequence. Note that for a single item, including a map or array,
      * the result is always 1 (one).
      */
+    @Override
     default int getLength() {
         return 1;
     }
@@ -164,8 +161,9 @@ public interface Item<T extends Item<?>> extends GroundedValue<T> {
      *
      * @return an iterator over all the items
      */
-    default UnfailingIterator<T> iterate() {
-        return SingletonIterator.makeIterator(head());
+    @Override
+    default SingletonIterator<? extends Item> iterate() {
+        return new SingletonIterator<>(this);
     }
 
     /**
@@ -176,11 +174,12 @@ public interface Item<T extends Item<?>> extends GroundedValue<T> {
      *
      * @return the simplified sequence
      */
-    default GroundedValue<T> reduce() {
+    @Override
+    default GroundedValue reduce() {
         return this;
     }
 
-    static <T extends Item<?>> GroundedValue<T> toGroundedValue(Item<T> item) {
+    static GroundedValue toGroundedValue(Item item) {
         return item.reduce();
     }
 

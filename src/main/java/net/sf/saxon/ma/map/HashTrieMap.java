@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,6 @@
 
 package net.sf.saxon.ma.map;
 
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
 import net.sf.saxon.ma.trie.ImmutableMap;
@@ -15,10 +14,8 @@ import net.sf.saxon.ma.trie.Tuple2;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
@@ -30,9 +27,6 @@ import java.util.Iterator;
  * An immutable map. This implementation, which uses a hash trie, was introduced in Saxon 9.6
  */
 public class HashTrieMap implements MapItem {
-
-    public final static SequenceType SINGLE_MAP_TYPE = SequenceType.makeSequenceType(
-            MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE);
 
     // The underlying trie holds key-value pairs, but these do not correspond directly
     // to the key value pairs in the XDM map. Instead, the key in the trie is an AtomicMatchKey
@@ -67,7 +61,7 @@ public class HashTrieMap implements MapItem {
     private int valueCardinality = 0;
 
     // The number of entries in the map; -1 if unknown
-    private int entries = -1;
+    private int entries;
 
     /**
      * Create an empty map
@@ -81,12 +75,12 @@ public class HashTrieMap implements MapItem {
 
     /**
      * Create a singleton map with a single key and value
-     * @param key the key value
+     * @param key   the key value
      * @param value the associated value
      * @return a singleton map
      */
 
-    public static HashTrieMap singleton(AtomicValue key, GroundedValue<?> value) {
+    public static HashTrieMap singleton(AtomicValue key, GroundedValue value) {
         return new HashTrieMap().addEntry(key, value);
     }
 
@@ -102,17 +96,13 @@ public class HashTrieMap implements MapItem {
 
     /**
      * Create a map whose entries are copies of the entries in an existing MapItem
-     *
-     * @param map       the existing map to be copied
+     * @param map the existing map to be copied
      * @return the new map
      */
 
     public static HashTrieMap copy(MapItem map) {
-//        if (Instrumentation.ACTIVE) {
-//            Instrumentation.count("copies");
-//        }
         if (map instanceof HashTrieMap) {
-            return (HashTrieMap)map;
+            return (HashTrieMap) map;
         }
         HashTrieMap m2 = new HashTrieMap();
         for (KeyValuePair pair : map.keyValuePairs()) {
@@ -123,15 +113,12 @@ public class HashTrieMap implements MapItem {
 
     /**
      * After adding an entry to the map, update the cached type information
-     * @param key the new key
-     * @param val the new associated value
+     * @param key      the new key
+     * @param val      the new associated value
      * @param wasEmpty true if the map was empty before adding these values
      */
 
-    private void updateTypeInformation(AtomicValue key, Sequence<?> val, boolean wasEmpty) {
-//        if (Instrumentation.ACTIVE) {
-//            Instrumentation.count("updateTypeInformation");
-//        }
+    private void updateTypeInformation(AtomicValue key, Sequence val, boolean wasEmpty) {
         if (wasEmpty) {
             keyUType = key.getUType();
             valueUType = SequenceTool.getUType(val);
@@ -155,16 +142,14 @@ public class HashTrieMap implements MapItem {
      * Get the size of the map
      */
 
+    @Override
     public int size() {
-//        if (Instrumentation.ACTIVE) {
-//            Instrumentation.count("size");
-//        }
         if (entries >= 0) {
             return entries;
         }
         int count = 0;
         //noinspection UnusedDeclaration
-        for (KeyValuePair entry: keyValuePairs()) {
+        for (KeyValuePair entry : keyValuePairs()) {
             count++;
         }
         return entries = count;
@@ -175,10 +160,8 @@ public class HashTrieMap implements MapItem {
      *
      * @return true if and only if the size of the map is zero
      */
+    @Override
     public boolean isEmpty() {
-//        if (Instrumentation.ACTIVE) {
-//            Instrumentation.count("isEmpty");
-//        }
         return entries == 0 || !imap.iterator().hasNext();
     }
 
@@ -187,14 +170,11 @@ public class HashTrieMap implements MapItem {
      *
      * @param requiredKeyType   the required keyType
      * @param requiredValueType the required valueType
-     * @param th        the type hierarchy cache for the configuration
+     * @param th                the type hierarchy cache for the configuration
      * @return true if the map conforms to the required type
      */
     @Override
     public boolean conforms(AtomicType requiredKeyType, SequenceType requiredValueType, TypeHierarchy th) {
-//        if (Instrumentation.ACTIVE) {
-//            Instrumentation.count("conforms");
-//        }
         if (isEmpty()) {
             return true;
         }
@@ -205,10 +185,10 @@ public class HashTrieMap implements MapItem {
         boolean needFullCheck = false;
         if (requiredKeyType != BuiltInAtomicType.ANY_ATOMIC) {
             ItemType upperBoundKeyType = keyUType.toItemType();
-            int rel = th.relationship(requiredKeyType, upperBoundKeyType);
-            if (rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMES) {
+            Affinity rel = th.relationship(requiredKeyType, upperBoundKeyType);
+            if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMES) {
                 // The key type is matched
-            } else if (rel == TypeHierarchy.DISJOINT) {
+            } else if (rel == Affinity.DISJOINT) {
                 return false;
             } else {
                 needFullCheck = true;
@@ -217,10 +197,10 @@ public class HashTrieMap implements MapItem {
         ItemType requiredValueItemType = requiredValueType.getPrimaryType();
         if (requiredValueItemType != BuiltInAtomicType.ANY_ATOMIC) {
             ItemType upperBoundValueType = valueUType.toItemType();
-            int rel = th.relationship(requiredValueItemType, upperBoundValueType);
-            if (rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMES) {
+            Affinity rel = th.relationship(requiredValueItemType, upperBoundValueType);
+            if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMES) {
                 // The value type is matched
-            } else if (rel == TypeHierarchy.DISJOINT) {
+            } else if (rel == Affinity.DISJOINT) {
                 return false;
             } else {
                 needFullCheck = true;
@@ -233,7 +213,7 @@ public class HashTrieMap implements MapItem {
 
         if (needFullCheck) {
             // we need to test the entries individually
-            AtomicIterator keyIter = keys();
+            AtomicIterator<?> keyIter = keys();
             AtomicValue key;
             while ((key = keyIter.next()) != null) {
                 if (!requiredKeyType.matches(key, th)) {
@@ -268,16 +248,16 @@ public class HashTrieMap implements MapItem {
         ItemType valueType = null;
         int valueCard = 0;
         // we need to test the entries individually
-        AtomicIterator keyIter = keys();
+        AtomicIterator<?> keyIter = keys();
         AtomicValue key;
         while ((key = keyIter.next()) != null) {
-            Sequence<?> val = get(key);
+            Sequence val = get(key);
             if (keyType == null) {
                 keyType = key.getItemType();
                 valueType = SequenceTool.getItemType(val, th);
                 valueCard = SequenceTool.getCardinality(val);
             } else {
-                keyType = (AtomicType)Type.getCommonSuperType(keyType, key.getItemType(), th);
+                keyType = (AtomicType) Type.getCommonSuperType(keyType, key.getItemType(), th);
                 valueType = Type.getCommonSuperType(valueType, SequenceTool.getItemType(val, th), th);
                 valueCard = Cardinality.union(valueCard, SequenceTool.getCardinality(val));
             }
@@ -300,8 +280,9 @@ public class HashTrieMap implements MapItem {
      * Get the lowest common item type of the keys in the map
      *
      * @return the most specific type to which all the keys belong. If the map is
-     *         empty, return UType.VOID (the type with no instances)
+     * empty, return UType.VOID (the type with no instances)
      */
+    @Override
     public UType getKeyUType() {
         return keyUType;
     }
@@ -311,12 +292,13 @@ public class HashTrieMap implements MapItem {
      * without modifying the original. If there is already an entry with the specified key,
      * this entry is replaced by the new entry.
      *
-     * @param key     the key of the new entry
-     * @param value   the value associated with the new entry
+     * @param key   the key of the new entry
+     * @param value the value associated with the new entry
      * @return the new map containing the additional entry
      */
 
-    public HashTrieMap addEntry(AtomicValue key, GroundedValue<?> value) {
+    @Override
+    public HashTrieMap addEntry(AtomicValue key, GroundedValue value) {
         boolean empty = isEmpty();
         ImmutableMap<AtomicMatchKey, KeyValuePair> imap2 = imap.put(makeKey(key), new KeyValuePair(key, value));
         HashTrieMap t2 = new HashTrieMap(imap2);
@@ -334,12 +316,12 @@ public class HashTrieMap implements MapItem {
      * must only be called while initially populating the map, and must not be called if
      * anyone else might already be using the map.
      *
-     * @param key     the key of the new entry. Any existing entry with this key is replaced.
-     * @param value   the value associated with the new entry
+     * @param key   the key of the new entry. Any existing entry with this key is replaced.
+     * @param value the value associated with the new entry
      * @return true if an existing entry with the same key was replaced
      */
 
-    public boolean initialPut(AtomicValue key, GroundedValue<?> value) {
+    public boolean initialPut(AtomicValue key, GroundedValue value) {
 //        if (Instrumentation.ACTIVE) {
 //            Instrumentation.count("initialPut");
 //        }
@@ -359,11 +341,12 @@ public class HashTrieMap implements MapItem {
     /**
      * Remove an entry from the map
      *
-     * @param key     the key of the entry to be removed
+     * @param key the key of the entry to be removed
      * @return a new map in which the requested entry has been removed; or this map
-     *         unchanged if the specified key was not present
+     * unchanged if the specified key was not present
      */
 
+    @Override
     public HashTrieMap remove(AtomicValue key) {
 //        if (Instrumentation.ACTIVE) {
 //            Instrumentation.count("remove");
@@ -377,26 +360,27 @@ public class HashTrieMap implements MapItem {
         result.keyUType = keyUType;
         result.valueUType = valueUType;
         result.valueCardinality = valueCardinality;
-        result.entries = entries-1;
+        result.entries = entries - 1;
         return result;
     }
 
     /**
      * Get an entry from the Map
      *
-     * @param key     the value of the key
+     * @param key the value of the key
      * @return the value associated with the given key, or null if the key is not present in the map
      */
 
-    public GroundedValue<?> get(AtomicValue key)  {
+    @Override
+    public GroundedValue get(AtomicValue key) {
         KeyValuePair o = imap.get(makeKey(key));
-        return o==null ? null : o.value;
+        return o == null ? null : o.value;
     }
 
     /**
      * Get an key/value pair from the Map
      *
-     * @param key     the value of the key
+     * @param key the value of the key
      * @return the key-value-pair associated with the given key, or null if the key is not present in the map
      */
 
@@ -406,14 +390,17 @@ public class HashTrieMap implements MapItem {
 
     /**
      * Get the set of all key values in the map
+     *
      * @return an iterator over the keys, in undefined order
      */
 
-    public AtomicIterator keys() {
-        return new AtomicIterator() {
+    @Override
+    public AtomicIterator<? extends AtomicValue> keys() {
+        return new AtomicIterator<AtomicValue>() {
 
             Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> base = imap.iterator();
 
+            @Override
             public AtomicValue next() {
                 if (base.hasNext()) {
                     return base.next()._2.key;
@@ -428,81 +415,84 @@ public class HashTrieMap implements MapItem {
     /**
      * Get the set of all key-value pairs in the map
      *
-     * @return an iterator over the key-value pairs
+     * @return an iterable whose iterator delivers the key-value pairs
      */
+    @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-//        if (Instrumentation.ACTIVE) {
-//            Instrumentation.count("keyValuePairs");
-//        }
-        return () -> new Iterator<KeyValuePair>() {
-            Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> base = imap.iterator();
+        // For .NEU - don't use a lambda expression here
+        return new Iterable<KeyValuePair>() {
+            @Override
+            public Iterator<KeyValuePair> iterator() {
+                return new Iterator<KeyValuePair>() {
+                    Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> base = imap.iterator();
 
-            public boolean hasNext() {
-                return base.hasNext();
-            }
+                    @Override
+                    public boolean hasNext() {
+                        return base.hasNext();
+                    }
 
-            public KeyValuePair next() {
-                return base.next()._2;
-            }
+                    @Override
+                    public KeyValuePair next() {
+                        return base.next()._2;
+                    }
 
-            public void remove() {
-                base.remove();
-            }
+                    @Override
+                    public void remove() {
+                        base.remove();
+                    }
+                };
+            };
         };
-
-
     }
 
 
     public void diagnosticDump() {
         System.err.println("Map details:");
-        Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> iter = imap.iterator();
-        while (iter.hasNext()) {
-            Tuple2<AtomicMatchKey, KeyValuePair> entry = iter.next();
+        for (Tuple2<AtomicMatchKey, KeyValuePair> entry : imap) {
             AtomicMatchKey k1 = entry._1;
             AtomicValue k2 = entry._2.key;
-            Sequence<?> v = entry._2.value;
+            Sequence v = entry._2.value;
             System.err.println(k1.getClass() + " " + k1 +
                                        " #:" + k1.hashCode() +
                                        " = (" + k2.getClass() + " " + k2 + " : " + v + ")");
         }
     }
 
-    public String toShortString() {
-        int size = size();
-        if (size == 0) {
-            return "map{}";
-        } else if (size > 5) {
-            return "map{(:size " + size + ":)}";
-        } else {
-            FastStringBuffer buff = new FastStringBuffer(256);
-            buff.append("map{");
-            Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> iter = imap.iterator();
-            while (iter.hasNext()) {
-                Tuple2<AtomicMatchKey, KeyValuePair> entry = iter.next();
-                AtomicMatchKey k1 = entry._1;
-                AtomicValue k2 = entry._2.key;
-                Sequence<?> v = entry._2.value;
-                buff.append(k2.toShortString());
-                buff.append(':');
-                buff.append(Err.depictSequence(v).toString().trim());
-                buff.append(", ");
-            }
-            if (size == 1) {
-                buff.append("}");
-            } else {
-                buff.setCharAt(buff.length() - 2, '}');
-            }
-            return buff.toString().trim();
-        }
-    }
+//    public String toShortString() {
+//        int size = size();
+//        if (size == 0) {
+//            return "map{}";
+//        } else if (size > 5) {
+//            return "map{(:size " + size + ":)}";
+//        } else {
+//            FastStringBuffer buff = new FastStringBuffer(256);
+//            buff.append("map{");
+//            Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> iter = imap.iterator();
+//            while (iter.hasNext()) {
+//                Tuple2<AtomicMatchKey, KeyValuePair> entry = iter.next();
+//                AtomicMatchKey k1 = entry._1;
+//                AtomicValue k2 = entry._2.key;
+//                Sequence v = entry._2.value;
+//                buff.append(k2.toShortString());
+//                buff.append(':');
+//                buff.append(Err.depictSequence(v).toString().trim());
+//                buff.append(", ");
+//            }
+//            if (size == 1) {
+//                buff.append("}");
+//            } else {
+//                buff.setCharAt(buff.length() - 2, '}');
+//            }
+//            return buff.toString().trim();
+//        }
+//    }
 
     public String toString() {
         return MapItem.mapToString(this);
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 
 
 

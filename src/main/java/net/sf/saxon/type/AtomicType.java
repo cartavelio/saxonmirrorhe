@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -21,7 +21,7 @@ import java.util.Optional;
  * for items in a sequence) and a SchemaType (a possible type for validating and
  * annotating nodes).
  */
-public interface AtomicType extends SimpleType, PlainType {
+public interface AtomicType extends SimpleType, PlainType, CastingTarget {
 
     /**
      * Determine the Genre (top-level classification) of this type
@@ -79,11 +79,32 @@ public interface AtomicType extends SimpleType, PlainType {
     boolean isPrimitiveType();
 
     /**
+     * Ask whether this type is an ID type. This is defined to be any simple type
+     * who typed value may contain atomic values of type xs:ID: that is, it includes types derived
+     * from ID by restriction, list, or union. Note that for a node to be treated
+     * as an ID, its typed value must be a *single* atomic value of type ID; the type of the
+     * node, however, can still allow a list.
+     */
+
+    @Override
+    boolean isIdType();
+
+    /**
+     * Ask whether this type is an IDREF or IDREFS type. This is defined to be any simple type
+     * who typed value may contain atomic values of type xs:IDREF: that is, it includes types derived
+     * from IDREF or IDREFS by restriction, list, or union
+     */
+
+    @Override
+    boolean isIdRefType();
+
+    /**
      * Determine whether the atomic type is a built-in type. The built-in atomic types are the 41 atomic types
      * defined in XML Schema, plus xs:dayTimeDuration and xs:yearMonthDuration,
      * xs:untypedAtomic, and all supertypes of these (xs:anyAtomicType, xs:numeric, ...)
      */
 
+    @Override
     boolean isBuiltInType();
 
     /**
@@ -93,6 +114,7 @@ public interface AtomicType extends SimpleType, PlainType {
      * @return the name of the atomic type, or null if the type is anonymous.
      */
 
+    @Override
     StructuredQName getTypeName();
 
 
@@ -121,6 +143,27 @@ public interface AtomicType extends SimpleType, PlainType {
         } else {
             return Optional.of("The supplied value is " + item.getGenre().getDescription());
         }
+    }
+
+    /**
+     * Get the default priority when this ItemType is used as an XSLT pattern.
+     * @return the default priority. For an atomic type this is 1 minus 0.5^N, where
+     * N is the depth of the type in the type hierarchy. The result is 0 for
+     * xs:anyAtomicType, 0.5 for a primitive type such as xs:date, and between 0.5 and
+     * 1.0 for derived atomic types.
+     */
+    @Override
+    default double getDefaultPriority() {
+        if (this == BuiltInAtomicType.ANY_ATOMIC) {
+            return 0;
+        }
+        double factor = 1;
+        SchemaType at = this;
+        do {
+            factor *= 0.5;
+            at = at.getBaseType();
+        } while (at != BuiltInAtomicType.ANY_ATOMIC);
+        return 1 - factor;
     }
 }
 

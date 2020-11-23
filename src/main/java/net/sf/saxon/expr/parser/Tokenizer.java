@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -21,7 +21,6 @@ import java.util.List;
  */
 
 
-@SuppressWarnings({"StringEquality"})
 public final class Tokenizer {
 
 
@@ -306,18 +305,25 @@ public final class Tokenizer {
                     break;
 
                 case Token.DOLLAR:
-                    if (currentTokenValue.equals("for")) {
-                        currentToken = Token.FOR;
-                    } else if (currentTokenValue.equals("some")) {
-                        currentToken = Token.SOME;
-                    } else if (currentTokenValue.equals("every")) {
-                        currentToken = Token.EVERY;
-                    } else if (currentTokenValue.equals("let")) {
-                        currentToken = Token.LET;
-                    } else if (currentTokenValue.equals("count")) {
-                        currentToken = Token.COUNT;
-                    } else if (currentTokenValue.equals("copy")) {
-                        currentToken = Token.COPY;
+                    switch (currentTokenValue) {
+                        case "for":
+                            currentToken = Token.FOR;
+                            break;
+                        case "some":
+                            currentToken = Token.SOME;
+                            break;
+                        case "every":
+                            currentToken = Token.EVERY;
+                            break;
+                        case "let":
+                            currentToken = Token.LET;
+                            break;
+                        case "count":
+                            currentToken = Token.COUNT;
+                            break;
+                        case "copy":
+                            currentToken = Token.COPY;
+                            break;
                     }
                     break;
 
@@ -329,14 +335,19 @@ public final class Tokenizer {
 
                 case Token.NAME:
                     int candidate = -1;
-                    if (currentTokenValue.equals("element")) {
-                        candidate = Token.ELEMENT_QNAME;
-                    } else if (currentTokenValue.equals("attribute")) {
-                        candidate = Token.ATTRIBUTE_QNAME;
-                    } else if (currentTokenValue.equals("processing-instruction")) {
-                        candidate = Token.PI_QNAME;
-                    } else if (currentTokenValue.equals("namespace")) {
-                        candidate = Token.NAMESPACE_QNAME;
+                    switch (currentTokenValue) {
+                        case "element":
+                            candidate = Token.ELEMENT_QNAME;
+                            break;
+                        case "attribute":
+                            candidate = Token.ATTRIBUTE_QNAME;
+                            break;
+                        case "processing-instruction":
+                            candidate = Token.PI_QNAME;
+                            break;
+                        case "namespace":
+                            candidate = Token.NAMESPACE_QNAME;
+                            break;
                     }
                     if (candidate != -1) {
                         // <'element' QName '{'> constructor
@@ -397,7 +408,7 @@ public final class Tokenizer {
      * Peek ahead at the next token
      */
 
-    public int peekAhead() {
+    int peekAhead() {
         return nextToken;
     }
 
@@ -467,9 +478,6 @@ public final class Tokenizer {
                 case '@':
                     nextToken = Token.AT;
                     return;
-                case '~':
-                    nextToken = Token.TILDE;
-                    return;
                 case '?':
                     nextToken = Token.QMARK;
                     return;
@@ -483,36 +491,8 @@ public final class Tokenizer {
                     nextToken = Token.LCURLY;
                     return;
                 case '}':
-//                    if (inputOffset < inputLength && input.charAt(inputOffset) == '`') {
-//                        inputOffset++;
-//                        int j = inputOffset;
-//                        int newlines = 0;
-//                        while (true) {
-//                            if (j >= inputLength) {
-//                                throw new XPathException("Unclosed string template in expression");
-//                            }
-//                            if (input.charAt(j) == '\n') {
-//                                newlines++;
-//                            } else if (input.charAt(j) == '`' && j + 1 < inputLength && input.charAt(j + 1) == '{') {
-//                                nextToken = Token.STRING_TEMPLATE_INTERMEDIATE;
-//                                nextTokenValue = input.substring(inputOffset, j);
-//                                inputOffset = j + 2;
-//                                incrementLineNumber(newlines);
-//                                return;
-//                            } else if (input.charAt(j) == ']' && j + 2 < inputLength
-//                                    && input.charAt(j + 1) == '`' && input.charAt(j + 2) == '`') {
-//                                nextToken = Token.STRING_TEMPLATE_FINAL;
-//                                nextTokenValue = input.substring(inputOffset, j);
-//                                inputOffset = j + 3;
-//                                incrementLineNumber(newlines);
-//                                return;
-//                            }
-//                            j++;
-//                        }
-//                    } else {
-                        nextToken = Token.RCURLY;
-                        return;
-//                    }
+                    nextToken = Token.RCURLY;
+                    return;
                 case ';':
                     nextToken = Token.SEMICOLON;
                     state = DEFAULT_STATE;
@@ -666,6 +646,13 @@ public final class Tokenizer {
                         nextToken = Token.DOTDOT;
                         return;
                     }
+                    if (inputOffset < inputLength
+                            && input.charAt(inputOffset) == '{') {
+                        inputOffset++;
+                        nextTokenValue = ".";
+                        nextToken = Token.KEYWORD_CURLY;
+                        return;
+                    }
                     if (inputOffset == inputLength
                             || input.charAt(inputOffset) < '0'
                             || input.charAt(inputOffset) > '9') {
@@ -787,7 +774,7 @@ public final class Tokenizer {
                     nextToken = Token.STRING_LITERAL;
                     return;
                 case '`':
-                    if (inputOffset < inputLength - 1
+                    if (isXQuery && inputOffset < inputLength - 1
                             && input.charAt(inputOffset) == '`'
                             && input.charAt(inputOffset + 1) == '[') {
                         inputOffset += 2;
@@ -800,14 +787,15 @@ public final class Tokenizer {
                             if (input.charAt(j) == '\n') {
                                 newlines++;
                             } else if (input.charAt(j) == '`' && j + 1 < inputLength && input.charAt(j + 1) == '{') {
-                                nextToken = Token.STRING_TEMPLATE_INITIAL;
+                                nextToken = Token.STRING_CONSTRUCTOR_INITIAL;
                                 nextTokenValue = input.substring(inputOffset, j);
                                 inputOffset = j + 2;
                                 incrementLineNumber(newlines);
                                 return;
                             } else if (input.charAt(j) == ']' && j + 2 < inputLength
                                     && input.charAt(j + 1) == '`' && input.charAt(j + 2) == '`') {
-                                nextToken = Token.STRING_TEMPLATE_COMPLETE;
+                                nextToken = Token.STRING_LITERAL_BACKTICKED;
+                                // Can't return STRING_LITERAL because it's not accepted everywhere that a string literal is
                                 nextTokenValue = input.substring(inputOffset, j);
                                 inputOffset = j + 3;
                                 incrementLineNumber(newlines);
@@ -947,120 +935,77 @@ public final class Tokenizer {
      *         known operator
      */
 
-    public int getBinaryOp(String s) {
-        switch (s.length()) {
-            case 2:
-                if (s.equals("or")) {
-                    return Token.OR;
-                }
-                if (s.equals("is")) {
-                    return Token.IS;
-                }
-                if (s.equals("to")) {
-                    return Token.TO;
-                }
-                if (s.equals("in")) {
-                    return Token.IN;
-                }
-                if (s.equals("eq")) {
-                    return Token.FEQ;
-                }
-                if (s.equals("ne")) {
-                    return Token.FNE;
-                }
-                if (s.equals("gt")) {
-                    return Token.FGT;
-                }
-                if (s.equals("ge")) {
-                    return Token.FGE;
-                }
-                if (s.equals("lt")) {
-                    return Token.FLT;
-                }
-                if (s.equals("le")) {
-                    return Token.FLE;
-                }
-                if (s.equals("as")) {
-                    return Token.AS;
-                }
-                break;
-            case 3:
-                if (s.equals("and")) {
-                    return Token.AND;
-                }
-                if (s.equals("div")) {
-                    return Token.DIV;
-                }
-                if (s.equals("mod")) {
-                    return Token.MOD;
-                }
-                break;
-            case 4:
-                if (s.equals("idiv")) {
-                    return Token.IDIV;
-                }
-                if (s.equals("then")) {
-                    return Token.THEN;
-                }
-                if (s.equals("else")) {
-                    return Token.ELSE;
-                }
-                if (s.equals("case")) {
-                    return Token.CASE;
-                }
-                if (s.equals("into")) {
-                    return Token.INTO;
-                }
-                if (s.equals("with")) {
-                    return Token.WITH;
-                }
-                break;
-            case 5:
-                if (s.equals("where")) {
-                    return Token.WHERE;
-                }
-                if (s.equals("union") && !disallowUnionKeyword) {
-                    return Token.UNION;
-                }
-                if (s.equals("after")) {
-                    return Token.AFTER;
-                }
-                break;
-            case 6:
-                if (s.equals("except")) {
-                    return Token.EXCEPT;
-                }
-                if (s.equals("return")) {
-                    return Token.RETURN;
-                }
-                if (s.equals("before")) {
-                    return Token.BEFORE;
-                }
-                if (s.equals("modify")) {
-                    return Token.MODIFY;
-                }
-                if (s.equals("orElse") && allowSaxonExtensions) {
-                    return Token.OR_ELSE;
-                }
-                break;
-            case 7:
-                if (s.equals("default")) {
-                    return Token.DEFAULT;
-                }
-                if (s.equals("andAlso") && allowSaxonExtensions) {
-                    return Token.AND_ALSO;
-                }
-                break;
-            case 9:
-                if (s.equals("intersect")) {
-                    return Token.INTERSECT;
-                }
-                if (s.equals("satisfies")) {
-                    return Token.SATISFIES;
-                }
-                break;
+    int getBinaryOp(String s) {
+        switch (s) {
+            case "after":
+                return Token.AFTER;
+            case "and":
+                return Token.AND;
+            case "as":
+                return Token.AS;
+            case "before":
+                return Token.BEFORE;
+            case "case":
+                return Token.CASE;
+            case "default":
+                return Token.DEFAULT;
+            case "div":
+                return Token.DIV;
+            case "else":
+                return Token.ELSE;
+            case "eq":
+                return Token.FEQ;
+            case "except":
+                return Token.EXCEPT;
+            case "ge":
+                return Token.FGE;
+            case "gt":
+                return Token.FGT;
+            case "idiv":
+                return Token.IDIV;
+            case "in":
+                return Token.IN;
+            case "intersect":
+                return Token.INTERSECT;
+            case "into":
+                return Token.INTO;
+            case "is":
+                return Token.IS;
+            case "le":
+                return Token.FLE;
+            case "lt":
+                return Token.FLT;
+            case "mod":
+                return Token.MOD;
+            case "modify":
+                return Token.MODIFY;
+            case "ne":
+                return Token.FNE;
+            case "or":
+                return Token.OR;
+            case "otherwise":
+                return Token.OTHERWISE;
+            case "return":
+                return Token.RETURN;
+            case "satisfies":
+                return Token.SATISFIES;
+            case "then":
+                return Token.THEN;
+            case "to":
+                return Token.TO;
+            case "union":
+                return Token.UNION;
+            case "where":
+                return Token.WHERE;
+            case "with":
+                return Token.WITH;
+            case "orElse":
+                return allowSaxonExtensions ? Token.OR_ELSE : Token.UNKNOWN;
+            case "andAlso":
+                return allowSaxonExtensions ? Token.AND_ALSO : Token.UNKNOWN;
+            default:
+                return Token.UNKNOWN;
         }
-        return Token.UNKNOWN;
     }
 
     /**
@@ -1072,95 +1017,41 @@ public final class Tokenizer {
      */
 
     private int getFunctionType(String s) {
-        switch (s.length()) {
-            case 2:
-                if (s.equals("if")) {
-                    return Token.IF;
-                }
-                break;
-            case 3:
-                if (s.equals("map")) {
-                    return languageLevel == 20 ? Token.FUNCTION : Token.NODEKIND;  // map() in XPath 3.0
-                }
-                break;
-            case 4:
-                if (s.equals("node")) {
-                    return Token.NODEKIND;
-                }
-                if (s.equals("item")) {
-                    return Token.NODEKIND;
-                }
-                if (s.equals("text")) {
-                    return Token.NODEKIND;
-                }
-                break;
-            case 5:
-                if (s.equals("array")) {
-                    return languageLevel == 20 ? Token.FUNCTION : Token.NODEKIND;  // array() in XPath 3.1
-                }
-                if (s.equals("tuple")) {
-                    return allowSaxonExtensions ? Token.NODEKIND : Token.FUNCTION; // Saxon tuple(...) types
-                }
-                if (s.equals("union")) {
-                    return allowSaxonExtensions ? Token.NODEKIND : Token.FUNCTION; // Saxon union(...) types
-                }
-                break;
-            case 6:
-                if (s.equals("switch")) {
-                    // Reserved in XPath 3.0, even though only used in XQuery
-                    return languageLevel == 20 ? Token.FUNCTION : Token.SWITCH;
-                }
-                break;
-            case 7:
-                if (s.equals("element")) {
-                    return Token.NODEKIND;
-                }
-                if (s.equals("comment")) {
-                    return Token.NODEKIND;
-                }
-                break;
-            case 8:
-                if (s.equals("function")) {
-                    return languageLevel == 20 ? Token.FUNCTION : Token.NODEKIND;
-                    // Higher order functions in XPath 3.0
-                }
-                break;
-            case 9:
-                if (s.equals("attribute")) {
-                    return Token.NODEKIND;
-                }
-                break;
-            case 10:
-                if (s.equals("typeswitch")) {
-                    return Token.TYPESWITCH;
-                }
-                break;
-            case 13:
-                if (s.equals("document-node")) {
-                    return Token.NODEKIND;
-                }
-                break;
-            case 14:
-                if (s.equals("empty-sequence")) {
-                    return Token.NODEKIND;
-                }
-                if (s.equals("namespace-node")) {
-                    return languageLevel == 20 ? Token.FUNCTION : Token.NODEKIND;
-                }
-                if (s.equals("schema-element")) {
-                    return Token.NODEKIND;
-                }
-                break;
+        switch (s) {
+            case "if":
+                return Token.IF;
+            case "map":
+            case "namespace-node":
+            case "array":
+            case "function":
+                return languageLevel == 20 ? Token.FUNCTION : Token.NODEKIND;
+            case "node":
+            case "schema-attribute":
+            case "schema-element":
+            case "processing-instruction":
+            case "empty-sequence":
+            case "document-node":
+            case "comment":
+            case "element":
+            case "item":
+            case "text":
+            case "attribute":
+                return Token.NODEKIND;
+            case "atomic":
+            case "tuple":
+            case "type":
+            case "union":
+                return allowSaxonExtensions ? Token.NODEKIND : Token.FUNCTION; // Saxon extension types
+            case "switch":
+                // Reserved in XPath 3.0, even though only used in XQuery
+                return languageLevel == 20 ? Token.FUNCTION : Token.SWITCH;
+            case "otherwise":
+                return Token.OTHERWISE;
+            case "typeswitch":
+                return Token.TYPESWITCH;
             default:
-                if (s.equals("schema-attribute")) {
-                    return Token.NODEKIND;
-                }
-                if (s.equals("processing-instruction")) {
-                    return Token.NODEKIND;
-                }
-                break;
+                return Token.FUNCTION;
         }
-        return Token.FUNCTION;
     }
 
     /**
@@ -1201,7 +1092,7 @@ public final class Tokenizer {
     private void incrementLineNumber() {
         nextLineNumber++;
         if (newlineOffsets == null) {
-            newlineOffsets = new ArrayList<Integer>(20);
+            newlineOffsets = new ArrayList<>(20);
         }
         newlineOffsets.add(inputOffset - 1);
     }
@@ -1241,7 +1132,7 @@ public final class Tokenizer {
      * @return a chunk of text leading up to the error
      */
 
-    public String recentText(int offset) {
+    String recentText(int offset) {
         if (offset == -1) {
             // if no offset was supplied, we want the text immediately before the current reading position
             if (inputOffset > inputLength) {
@@ -1294,9 +1185,9 @@ public final class Tokenizer {
      * @return the line and column number, packed together
      */
 
-    public long getLineAndColumn(int offset) {
+    private long getLineAndColumn(int offset) {
         if (newlineOffsets == null) {
-            return (long) offset;
+            return offset;
         }
         for (int line = newlineOffsets.size() - 1; line >= 0; line--) {
             int nloffset = newlineOffsets.get(line);
@@ -1304,7 +1195,7 @@ public final class Tokenizer {
                 return ((long) (line+1) << 32) | (long) (offset - nloffset);
             }
         }
-        return (long) offset;
+        return offset;
     }
 
     /**

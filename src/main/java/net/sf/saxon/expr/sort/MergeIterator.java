@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,6 +13,8 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
+
+import java.util.EnumSet;
 
 /**
  * An iterator representing the sorted merge of two merge inputs, retaining all duplicates.
@@ -52,10 +54,12 @@ public class MergeIterator implements
         nextItem2 = (ObjectValue<ItemWithMergeKeys>)e2.next();
     }
 
+    @Override
     public boolean hasNext() {
         return nextItem1 != null || nextItem2 != null;
     }
 
+    @Override
     public ObjectValue<ItemWithMergeKeys> next() throws XPathException {
 
         // main merge loop: take an item from whichever set has the lower value otherwise take value from first and move iterator on by one.
@@ -102,6 +106,7 @@ public class MergeIterator implements
         return null;
     }
 
+    @Override
     public void close() {
         e1.close();
         e2.close();
@@ -111,14 +116,15 @@ public class MergeIterator implements
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return LOOKAHEAD;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD);
     }
 
 }

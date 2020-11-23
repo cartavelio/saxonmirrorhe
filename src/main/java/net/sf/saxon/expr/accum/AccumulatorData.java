@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,11 +13,13 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.Evaluator;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
@@ -43,6 +45,7 @@ public class AccumulatorData implements IAccumulatorData {
      * @return the accumulator
      */
 
+    @Override
     public Accumulator getAccumulator() {
         return accumulator;
     }
@@ -69,8 +72,8 @@ public class AccumulatorData implements IAccumulatorData {
         SlotManager sf = accumulator.getSlotManagerForInitialValueExpression();
         Sequence[] slots = new Sequence[sf.getNumberOfVariables()];
         c2.setStackFrame(sf, slots);
-        c2.setCurrentIterator(new ManualIterator<>(doc));
-        Sequence<?> val = initialValue.iterate(c2).materialize();
+        c2.setCurrentIterator(new ManualIterator(doc));
+        Sequence val = initialValue.iterate(c2).materialize();
         values.add(new DataPoint(new Visit(doc, false), val));
         val = visit(doc, val, c2);
         values.add(new DataPoint(new Visit(doc, true), val));
@@ -101,31 +104,39 @@ public class AccumulatorData implements IAccumulatorData {
      */
 
     @SuppressWarnings({"InfiniteRecursion"}) //Spurious warning from IntelliJ
-    private Sequence<?> visit(NodeInfo node, Sequence<?> value, XPathContext context) throws XPathException {
-        ((ManualIterator)context.getCurrentIterator()).setContextItem(node);
-        Rule rule = accumulator.getPreDescentRules().getRule(node, context);
-        if (rule != null) {
-            value = processRule(rule, node, false, value, context);
-            if (accumulator.isTracing()) {
-                context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
-                                                                    " BEFORE " + Navigator.getPath(node) + ": " + Err.depictSequence(value));
+    private Sequence visit(NodeInfo node, Sequence value, XPathContext context) throws XPathException {
+        try {
+            ((ManualIterator)context.getCurrentIterator()).setContextItem(node);
+            Rule rule = accumulator.getPreDescentRules().getRule(node, context);
+            if (rule != null) {
+                value = processRule(rule, node, false, value, context);
+                logChange(node, value, context, " BEFORE ");
             }
-        }
-        AxisIterator iter = node.iterateAxis(AxisInfo.CHILD);
-        NodeInfo kid;
-        while ((kid = iter.next()) != null) {
-            value = visit(kid, value, context);
-        }
-        ((ManualIterator) context.getCurrentIterator()).setContextItem(node);
-        rule = accumulator.getPostDescentRules().getRule(node, context);
-        if (rule != null) {
-            value = processRule(rule, node, true, value, context);
-            if (accumulator.isTracing()) {
-                context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
-                                                                    " AFTER " + Navigator.getPath(node) + ": " + Err.depictSequence(value));
+            for (NodeInfo kid : node.children()) {
+                value = visit(kid, value, context);
             }
+            ((ManualIterator) context.getCurrentIterator()).setContextItem(node);
+            rule = accumulator.getPostDescentRules().getRule(node, context);
+            if (rule != null) {
+                value = processRule(rule, node, true, value, context);
+                logChange(node, value, context, " AFTER ");
+            }
+            return value;
+        } catch (StackOverflowError e) {
+            XPathException err = new XPathException.StackOverflow(
+                    "Too many nested accumulator evaluations. The accumulator definition may have cyclic dependencies",
+                    "XTDE3400", accumulator);
+            err.setXPathContext(context);
+            throw err;
         }
-        return value;
+    }
+
+    private void logChange(NodeInfo node, Sequence value, XPathContext context, String phase) {
+        if (accumulator.isTracing()) {
+            context.getConfiguration().getLogger().info(
+                    accumulator.getAccumulatorName().getDisplayName()
+                            + phase + Navigator.getPath(node) + ": " + Err.depictSequence(value));
+        }
     }
 
     /**
@@ -140,13 +151,13 @@ public class AccumulatorData implements IAccumulatorData {
      * @throws XPathException if a dynamic error occurs during the evaluation
      */
 
-    private Sequence<?> processRule(Rule rule, NodeInfo node, boolean isPostDescent, Sequence<?> value, XPathContext context) throws XPathException {
+    private Sequence processRule(Rule rule, NodeInfo node, boolean isPostDescent, Sequence value, XPathContext context) throws XPathException {
         AccumulatorRule target = (AccumulatorRule) rule.getAction();
         Expression delta = target.getNewValueExpression();
         XPathContextMajor c2 = context.newCleanContext();
         final Controller controller = c2.getController();
         assert controller != null;
-        ManualIterator<NodeInfo> initialNode = new ManualIterator<>(node);
+        ManualIterator initialNode = new ManualIterator(node);
         c2.setCurrentIterator(initialNode);
         c2.openStackFrame(target.getStackFrameMap());
         c2.setLocalVariable(0, value);
@@ -176,7 +187,8 @@ public class AccumulatorData implements IAccumulatorData {
 //        return search(0, values.size(), visit);
 //    }
 
-    public Sequence<?> getValue(NodeInfo node, boolean postDescent) {
+    @Override
+    public Sequence getValue(NodeInfo node, boolean postDescent) {
         Visit visit = new Visit(node, postDescent);
         return search(0, values.size(), visit);
         //System.err.println("Searched " + values.size() + " " + ((TinyNodeImpl) visit.node).getNodeNumber() + " : " + seq);
@@ -191,7 +203,7 @@ public class AccumulatorData implements IAccumulatorData {
      * @return the value associated with this node
      */
 
-    private Sequence<?> search(int start, int end, Visit sought) {
+    private Sequence search(int start, int end, Visit sought) {
         //System.err.println("-- Search " + start + ".." + end);
         if (start == end) {
             // sometimes we want the value for the visit we've found, sometimes for the previous visit
@@ -238,6 +250,7 @@ public class AccumulatorData implements IAccumulatorData {
          * @return -1 if this visit is earlier, 0 if they are the same visit, +1 if this visit is later
          */
 
+        @Override
         public int compareTo(Visit other) {
             int relation = Navigator.comparePosition(node, other.node);
             switch (relation) {
@@ -267,9 +280,9 @@ public class AccumulatorData implements IAccumulatorData {
 
     private static class DataPoint {
         public Visit visit;
-        public Sequence<?> value;
+        public Sequence value;
 
-        public DataPoint(Visit visit, Sequence<?> value) {
+        public DataPoint(Visit visit, Sequence value) {
             this.visit = visit;
             this.value = value;
         }

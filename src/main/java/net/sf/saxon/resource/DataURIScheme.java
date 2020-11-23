@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -25,6 +25,7 @@ public class DataURIScheme {
     /**
      * Parse the content of a URI that uses the data: URI scheme defined in RFC 2397, and
      * return a Resource representing the content of the URI
+     *
      * @param uri a valid URI using the data: URI scheme
      * @return either a BinaryResource (if the URI specifies "base64") or an UnparsedTextResource
      * (otherwise) representing the data part of the URI (the part after the comma)
@@ -39,9 +40,9 @@ public class DataURIScheme {
             throw new IllegalArgumentException("Missing comma in data URI");
         }
         String header = path.substring(0, comma);
-        String content = path.substring(comma+1);
+        String content = path.substring(comma + 1);
         boolean isBase64 = header.endsWith(";base64");
-        String contentType = header.substring(0, isBase64 ? comma-7 : comma);
+        String contentType = header.substring(0, isBase64 ? comma - 7 : comma);
         if (isBase64) {
             try {
                 byte[] octets = Base64BinaryValue.decode(content);

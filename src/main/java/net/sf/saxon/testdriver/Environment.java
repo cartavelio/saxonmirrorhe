@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,6 +10,8 @@ package net.sf.saxon.testdriver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DocumentWrapper;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.ResolveURI;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.expr.sort.SimpleCollation;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
@@ -287,17 +289,7 @@ public class Environment implements URIResolver {
                         environment.exportedStylesheet = driver.exportStylesheet(environment.xsltCompiler, sourceFile);
                     } else if (driver.xxCompilerLocation != null && !environment.xsltCompiler.isSchemaAware()) {
                         if (driver.xxCompiler == null) {
-
-                            XdmMap options = new XdmMap();
-                            boolean assertionsEnabled = environment.xsltCompiler.isAssertionsEnabled();
-                            options = options.put(new XdmAtomicValue("enable-assertions"), new XdmAtomicValue(assertionsEnabled));
-
                             XsltCompiler c = driver.driverProc.newXsltCompiler();
-                            c.setAssertionsEnabled(true);
-                            c.setParameter(new QName("FAST_JAVA_XPATH"), new XdmAtomicValue(true));
-                            c.setParameter(new QName("options"), options);
-                            c.setFastCompilation(true); // TODO: temporary
-
                             driver.xxCompiler = c.compile(new StreamSource(new File(driver.xxCompilerLocation)));
                         }
                         File exportFile = new File(driver.resultsDir + "/export/" + name + ".sef");
@@ -308,6 +300,7 @@ public class Environment implements URIResolver {
                         environment.xsltExecutable = environment.xsltCompiler.loadExecutablePackage(exportFile.toURI());
                     } else {
                         File exportFile = new File(driver.resultsDir + "/export/" + name + ".sef");
+                        System.err.println("Exporting package to " + exportFile.getAbsolutePath());
                         XsltPackage compiledPack = environment.xsltCompiler.compilePackage(styleSource);
                         compiledPack.save(exportFile);
                         environment.xsltExecutable = environment.xsltCompiler.loadExecutablePackage(exportFile.toURI());
@@ -317,6 +310,7 @@ public class Environment implements URIResolver {
                 }
             } catch (SaxonApiException e) {
                 //e.printStackTrace();
+                driver.println(e.getMessage());
                 driver.println("**** failure while compiling environment-defined stylesheet " + fileName);
                 environment.failedToBuild = true;
                 environment.usable = false;
@@ -331,10 +325,12 @@ public class Environment implements URIResolver {
         if (environment.processor.getSaxonEdition().equals("EE")) {
             if (generate == 0) {
                 environment.processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
+                environment.processor.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, 1);
                 environment.processor.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
                 environment.processor.setConfigurationProperty(Feature.MAX_COMPILED_CLASSES, 1000000);
             } else  if (generate > 0) {
-                environment.processor.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, generate);
+                environment.processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
+                environment.processor.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, generate);
                 environment.processor.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
                 environment.processor.setConfigurationProperty(Feature.MAX_COMPILED_CLASSES, 1000000);
             } else {
@@ -345,11 +341,6 @@ public class Environment implements URIResolver {
             if (generate >= 0 && driver.isDebugByteCode()) {
                 environment.processor.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, true);
                 environment.processor.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, "debugByteCode");
-                environment.processor.setConfigurationProperty(Feature.MONITOR_HOT_SPOT_BYTE_CODE, true);
-                driver.driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, true);
-                driver.driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, "debugByteCode");
-                driver.driverProc.setConfigurationProperty(Feature.MONITOR_HOT_SPOT_BYTE_CODE, true);
-                driver.driverProc.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, "-f");
             }
         }
     }
@@ -396,7 +387,9 @@ public class Environment implements URIResolver {
             if (defaultAtt != null && (defaultAtt.trim().equals("true") || defaultAtt.trim().equals("1"))) {
                 environment.xpathCompiler.declareDefaultCollation(uri);
                 environment.xqueryCompiler.declareDefaultCollation(uri);
-                environment.xsltCompiler.declareDefaultCollation(uri);
+                if (environment.xsltCompiler != null) {
+                    environment.xsltCompiler.declareDefaultCollation(uri);
+                }
             }
         }
     }
@@ -496,7 +489,7 @@ public class Environment implements URIResolver {
             QName varQName;
             int colon = varName.indexOf(':');
             if (colon >= 0) {
-                NamespaceResolver resolver = new InscopeNamespaceResolver(param.getUnderlyingNode());
+                NamespaceResolver resolver = param.getUnderlyingNode().getAllNamespaces();
                 String namespace = resolver.getURIForPrefix(varName.substring(0, colon), false);
                 varQName = new QName(namespace, varName);
             } else {
@@ -529,7 +522,7 @@ public class Environment implements URIResolver {
                 } else {
                     try {
                         formatQName = StructuredQName.fromLexicalQName(formatName, false, true,
-                                new InscopeNamespaceResolver(decimalFormat.getUnderlyingNode()));
+                                decimalFormat.getUnderlyingNode().getAllNamespaces());
                     } catch (XPathException e) {
                         driver.println("**** Invalid QName as decimal-format name");
                         formatQName = new StructuredQName("", "", "error-name");
@@ -540,7 +533,7 @@ public class Environment implements URIResolver {
                 environment.paramDecimalDeclarations.append("declare default decimal-format ");
             }
             DecimalSymbols symbols = formatQName == null ? dfm.getDefaultDecimalFormat() : dfm.obtainNamedDecimalFormat(formatQName);
-            symbols.setHostLanguage(Configuration.XQUERY, driver.spec.getNumericVersion());
+            symbols.setHostLanguage(HostLanguage.XQUERY, driver.spec.getNumericVersion());
             for (XdmItem decimalFormatAtt : xpc.evaluate("@* except @name", (XdmNode) decimalFormat)) {
                 XdmNode formatAttribute = (XdmNode) decimalFormatAtt;
                 String property = formatAttribute.getNodeName().getLocalName();
@@ -719,10 +712,12 @@ public class Environment implements URIResolver {
                     resourcesi.add(r);
                 }
 
+                @Override
                 public String getCollectionURI() {
                     return cURI;
                 }
 
+                @Override
                 public Iterator<String> getResourceURIs(XPathContext context) {
                     List<String> resourceUris = new ArrayList<>();
                     for (Resource resource : resourcesi) {
@@ -731,6 +726,7 @@ public class Environment implements URIResolver {
                     return resourceUris.iterator();
                 }
 
+                @Override
                 public Iterator<Resource> getResources(XPathContext context) {
                     return resourcesi.iterator();
                 }
@@ -821,14 +817,17 @@ public class Environment implements URIResolver {
 
                 for (final XdmItem itemi : result) {
                     resourcesi.add(new Resource() {
+                        @Override
                         public String getResourceURI() {
                             return "";
                         }
 
+                        @Override
                         public Item getItem(XPathContext context) {
                             return itemi.getUnderlyingValue();
                         }
 
+                        @Override
                         public String getContentType() {
                             return null;
                         }
@@ -841,11 +840,12 @@ public class Environment implements URIResolver {
 
         if (collections != null) {
             environment.processor.getUnderlyingConfiguration().setCollectionFinder(new CollectionFinder() {
+                @Override
                 public ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException {
-                if (collectionURI == null) {
-                   collectionURI = "";
-                }
-                return collections.get(collectionURI);
+                    if (collectionURI == null) {
+                        collectionURI = "";
+                    }
+                    return collections.get(collectionURI);
                 }
             });
 
@@ -859,12 +859,12 @@ public class Environment implements URIResolver {
                 ResourceCollection contents = entry.getValue();
                 XPathContext context = environment.processor.getUnderlyingConfiguration().getConversionContext();
                 try {
-                    Iterator<? extends Resource> iter = contents.getResources (context);
+                    Iterator<? extends Resource> iter = contents.getResources(context);
                     while (iter.hasNext()) {
                         Resource resource = iter.next();
                         Item item = resource.getItem(context);
                         if (item instanceof NodeInfo) {
-                            String lexicalXml = QueryResult.serialize((NodeInfo)item);
+                            String lexicalXml = QueryResult.serialize((NodeInfo) item);
                             lexicalContents.add(lexicalXml);
                         }
                     }
@@ -1080,6 +1080,7 @@ public class Environment implements URIResolver {
      * The environment acts as a URIResolver
      */
 
+    @Override
     public Source resolve(String href, String base) throws TransformerException {
         XdmNode node = sourceDocs.get(href);
         if (node == null) {
@@ -1089,7 +1090,7 @@ public class Environment implements URIResolver {
                 href = "";
             }
             try {
-                uri = new URI(base).resolve(href).toString();
+                uri = ResolveURI.makeAbsolute(href, base).toString();
             } catch (URISyntaxException | IllegalArgumentException e) {
                 uri = href;
             }

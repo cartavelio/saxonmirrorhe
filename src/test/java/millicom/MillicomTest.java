@@ -47,22 +47,22 @@ public class MillicomTest {
         List <String>xmlFiles = new ArrayList<String>();
 
 
-        for (int i = 0; i < args.length; i++) 
+        for (int i = 0; i < args.length; i++)
 		{
-            if(args[i].startsWith("-xsd:")) 
+            if(args[i].startsWith("-xsd:"))
 			{
                 xsd = args[i].substring(5);
 				xsd = xsd.replace('\\', '/');
             }
-            else if (args[i].startsWith("-xsdversion:")) 
+            else if (args[i].startsWith("-xsdversion:"))
 			{
                 xsdVersion = args[i].substring(12);
-            } 
-			else if (args[i].startsWith("-s:")) 
+            }
+			else if (args[i].startsWith("-s:"))
 			{
 				String value = args[i].substring(3);
 				value = value.replace('\\', '/');
-				if(value.contains(";")) 
+				if(value.contains(";"))
 				{
 				   xmlFiles = Arrays.asList(value.split(";"));
 				}
@@ -71,12 +71,12 @@ public class MillicomTest {
 					xmlFiles.add(args[i].substring(3));
 				}
 
-            } 
-			else if (args[i].startsWith("-verbose")) 
+            }
+			else if (args[i].startsWith("-verbose"))
 			{
                 verbose = true;
-            } 
-			else 
+            }
+			else
 			{
                 System.out.println("command line option not recognized:" + args[i]);
             }
@@ -151,7 +151,7 @@ public class MillicomTest {
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
                 listener = new MyErrorListener(writer);
-               // sv.setErrorListener(listener);
+               // sv.setErrorReporter(listener);
 
 
                 StreamSource source = new StreamSource((new File(xmlFile)).toURI().toString());
@@ -189,7 +189,7 @@ public class MillicomTest {
 
 					// delete temporary file
                     File file = new File(outFile + "_temp");
-                    try 
+                    try
 					{
 						boolean success = file.delete();
 						if (verbose)
@@ -199,8 +199,8 @@ public class MillicomTest {
 						   else
 							  System.out.println("File " + file.getName() + " failed to delete.");
 						}
-					} 
-					catch (SecurityException e) 
+					}
+					catch (SecurityException e)
 					{
 						if (verbose)
 						{
@@ -208,7 +208,7 @@ public class MillicomTest {
 						}
 					}
                 }
-				
+
 				if (verbose)
 				{
 					 System.out.println("End time: "+ getDateTime().getStringValue());
@@ -276,7 +276,7 @@ public class MillicomTest {
             trans.setDestination(serializer);
             trans.setInitialTemplate(new QName("main"));
             trans.transform();
-			
+
 			try{
 				out.flush();
 				out.close();

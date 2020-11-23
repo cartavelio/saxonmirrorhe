@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -25,10 +25,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -64,6 +61,7 @@ public class LookupAllExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public final ItemType getItemType() {
         ItemType base = getBaseExpression().getItemType();
         if (base instanceof MapType) {
@@ -93,6 +91,7 @@ public class LookupAllExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         Configuration config = visitor.getConfiguration();
@@ -106,8 +105,8 @@ public class LookupAllExpression extends UnaryExpression {
         boolean isMapLookup = containerType instanceof MapType || containerType instanceof TupleType;
 
         if (!isArrayLookup && !isMapLookup) {
-            if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == TypeHierarchy.DISJOINT &&
-                    th.relationship(containerType, ArrayItemType.getInstance()) == TypeHierarchy.DISJOINT) {
+            if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT &&
+                    th.relationship(containerType, ArrayItemType.getInstance()) == Affinity.DISJOINT) {
                 XPathException err = new XPathException("The left-hand operand of '?' must be a map or an array; the supplied expression is of type " + containerType, "XPTY0004");
                 err.setLocation(getLocation());
                 err.setIsTypeError(true);
@@ -123,6 +122,7 @@ public class LookupAllExpression extends UnaryExpression {
         return this;
     }
 
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         getOperand().optimize(visitor, contextItemType);
 
@@ -153,7 +153,7 @@ public class LookupAllExpression extends UnaryExpression {
      * and we assume that a sequence has length 5. The resulting estimates may be used, for
      * example, to reorder the predicates in a filter expression so cheaper predicates are
      * evaluated first.
-     * @return
+     * @return a rough estimate of the cost of evaluation
      */
     @Override
     public double getCost() {
@@ -181,6 +181,7 @@ public class LookupAllExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public LookupAllExpression copy(RebindingMap rebindings) {
         return new LookupAllExpression(getBaseExpression().copy(rebindings));
     }
@@ -189,6 +190,7 @@ public class LookupAllExpression extends UnaryExpression {
      * Determine the static cardinality of the expression
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
@@ -209,6 +211,7 @@ public class LookupAllExpression extends UnaryExpression {
      * get HashCode for comparing two expressions
      */
 
+    @Override
     public int computeHashCode() {
         return "LookupAll".hashCode() ^ getBaseExpression().hashCode();
     }
@@ -220,11 +223,12 @@ public class LookupAllExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(final XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(final XPathContext context) throws XPathException {
 
         return new SequenceIterator() {
 
-            SequenceIterator level0 = getBaseExpression().iterate(context);
+            final SequenceIterator level0 = getBaseExpression().iterate(context);
             Iterator<?> level1 = null;
                 // delivers GroundedValue in the case of an array, or KeyValuePair in the case of a map
             SequenceIterator level2 = null;
@@ -257,11 +261,10 @@ public class LookupAllExpression extends UnaryExpression {
                             } else {
                                 throw new IllegalStateException();
                             }
-                            return next();
                         } else {
                             level1 = null;
-                            return next();
                         }
+                        return next();
                     }
                 } else {
                     Item next = level2.next();
@@ -293,6 +296,7 @@ public class LookupAllExpression extends UnaryExpression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("lookupAll", this);
         getBaseExpression().export(destination);
@@ -311,6 +315,7 @@ public class LookupAllExpression extends UnaryExpression {
         return ExpressionTool.parenthesize(getBaseExpression()) + "?*";
     }
 
+    @Override
     public String toShortString() {
         return getBaseExpression().toShortString() + "?*";
     }

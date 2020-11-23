@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -43,6 +43,7 @@ public class XSLSourceDocument extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -53,66 +54,67 @@ public class XSLSourceDocument extends StyleElement {
      * @return true: yes, it may contain a sequence constructor
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
+    @Override
     protected boolean isWithinDeclaredStreamableConstruct() {
         return true;
     }
 
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         parseOptions = new ParseOptions(getConfiguration().getParseOptions());
-
-        AttributeCollection atts = getAttributeList();
 
         String hrefAtt = null;
         String validationAtt = null;
         String typeAtt = null;
         String useAccumulatorsAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            StructuredQName name = attName.getStructuredQName();
+            String value = att.getValue();
+            String f = name.getClarkName();
             if (f.equals("href")) {
-                hrefAtt = atts.getValue(a);
-                href = makeAttributeValueTemplate(hrefAtt, a);
+                hrefAtt = value;
+                href = makeAttributeValueTemplate(hrefAtt, att);
             } else if (f.equals("validation")) {
-                validationAtt = Whitespace.trim(atts.getValue(a));
+                validationAtt = Whitespace.trim(value);
             } else if (f.equals("type")) {
-                typeAtt = Whitespace.trim(atts.getValue(a));
+                typeAtt = Whitespace.trim(value);
             } else if (f.equals("use-accumulators")) {
-                useAccumulatorsAtt = Whitespace.trim(atts.getValue(a));
+                useAccumulatorsAtt = Whitespace.trim(value);
             } else if (f.equals("streamable")) {
-                streaming = processStreamableAtt(atts.getValue(a));
-            } else if (NamespaceConstant.SAXON.equals(atts.getURI(a))) {
-                String local = atts.getLocalName(a);
-                getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION,
-                                                        atts.getQName(a),
-                                                        getPackageData().getLocalLicenseId());
+                streaming = processStreamableAtt(value);
+            } else if (attName.hasURI(NamespaceConstant.SAXON)) {
+                isExtensionAttributeAllowed(attName.getDisplayName());
+                String local = attName.getLocalPart();
                 switch (local) {
                     case "dtd-validation":
-                        parseOptions.setDTDValidationMode(processBooleanAttribute(f, atts.getValue(a)) ? Validation.STRICT : Validation.SKIP);
+                        parseOptions.setDTDValidationMode(processBooleanAttribute(f, value) ? Validation.STRICT : Validation.SKIP);
                         break;
                     case "expand-attribute-defaults":
-                        parseOptions.setExpandAttributeDefaults(processBooleanAttribute(f, atts.getValue(a)));
+                        parseOptions.setExpandAttributeDefaults(processBooleanAttribute(f, value));
                         break;
                     case "line-numbering":
-                        parseOptions.setLineNumbering(processBooleanAttribute(f, atts.getValue(a)));
+                        parseOptions.setLineNumbering(processBooleanAttribute(f, value));
                         break;
                     case "xinclude":
-                        parseOptions.setXIncludeAware(processBooleanAttribute(f, atts.getValue(a)));
+                        parseOptions.setXIncludeAware(processBooleanAttribute(f, value));
 //                } else if (local.equals("tree-model")) {
 //                    List<TreeModel> models = getConfiguration().getExternalObjectModels()
-//                    parseOptions.setModel(processBooleanAttribute(f, atts.getValue(a)));
+//                    parseOptions.setModel(processBooleanAttribute(f, value));
                         break;
                     case "validation-params":
                         // TODO
                         break;
                     case "strip-space":
-                        String value = Whitespace.normalizeWhitespace(atts.getValue(a)).toString();
-                        switch (value) {
+                        switch (Whitespace.normalizeWhitespace(value).toString()) {
                             case "#all":
                                 parseOptions.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
                                 break;
@@ -131,11 +133,11 @@ public class XSLSourceDocument extends StyleElement {
                         }
                         break;
                     default:
-                        checkUnknownAttribute(atts.getNodeName(a));
+                        checkUnknownAttribute(attName);
                         break;
                 }
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -170,6 +172,7 @@ public class XSLSourceDocument extends StyleElement {
     }
 
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         //checkParamComesFirst(false);
         href = typeCheck("select", href);
@@ -179,6 +182,7 @@ public class XSLSourceDocument extends StyleElement {
     }
 
     /*@Nullable*/
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Configuration config = getConfiguration();
         if (parseOptions.getSpaceStrippingRule() == null) {
