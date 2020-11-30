@@ -143,7 +143,6 @@ configurations.compileClasspath.each { cp ->
   }
   if (cp.toString().endsWith(resolverJar)) {
     resolverJar = cp.toString()
-    println(resolverJar)
   }
 }
 
