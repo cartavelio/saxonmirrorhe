@@ -389,6 +389,7 @@ task hej_setupPreprocess(
 
 task hej_setupPreprocessForPej(
   type: Copy,
+  dependsOn: ["hej_featureKeys"],
   description: "Copy HE sources for preprocessing PE"
 ) {
   from "${projectDir}/src/main/java"
@@ -445,6 +446,7 @@ task pej_setupPreprocess(
 
 task hej_setupPreprocessForEej(
   type: Copy,
+  dependsOn: ["hej_featureKeys"],
   description: "Copy HE sources for EE build"
 ) {
   from "${projectDir}/src/main/java"

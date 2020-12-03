@@ -17,6 +17,7 @@ if (hasProperty("ikvmDebug")) {
 
 task hen_setupPreprocess(
   type: Copy,
+  dependsOn: ["hej_featureKeys"],
   description: "Copy HE sources for preprocessing HE"
 ) {
   from "${projectDir}/src/main/java"
@@ -48,6 +49,7 @@ task hen_setupPreprocess(
 
 task pen_setupPreprocess(
   type: Copy,
+  dependsOn: ["hec_featureKeys"],
   description: "Copy PE sources for preprocessing PE"
 ) {
   from "${projectDir}/src/main/java"
@@ -110,6 +112,7 @@ task pen_setupPreprocess(
 
 task een_setupPreprocess(
   type: Copy,
+  dependsOn: ["hec_featureKeys"],
   description: "Copy EE sources for preprocessing EE"
 ) {
   from "${projectDir}/src/main/java"
