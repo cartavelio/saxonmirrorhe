@@ -1,2 +1,23 @@
 .gradle/
 build/
+
+# Auto-generated sources
+/src/main/java/net/sf/saxon/lib/Feature.java
+/src/main/java/net/sf/saxon/lib/FeatureCode.java
+/src/main/java/net/sf/saxon/lib/FeatureKeys.java
+/src/main/csharp/api/Saxon.Api/Feature.cs
+/src/main/csharp/api/Saxon.Api/FeatureKeys.cs
+/src/samples/config/config.xsd
+/userdoc/src/featureKeys/ConfigFileDoc-collation.xml
+/userdoc/src/featureKeys/ConfigFileDoc-extensionElement.xml
+/userdoc/src/featureKeys/ConfigFileDoc-fileExtension.xml
+/userdoc/src/featureKeys/ConfigFileDoc-global.xml
+/userdoc/src/featureKeys/ConfigFileDoc-localization.xml
+/userdoc/src/featureKeys/ConfigFileDoc-package.xml
+/userdoc/src/featureKeys/ConfigFileDoc-resources.xml
+/userdoc/src/featureKeys/ConfigFileDoc-serialization.xml
+/userdoc/src/featureKeys/ConfigFileDoc-withParam.xml
+/userdoc/src/featureKeys/ConfigFileDoc-xquery.xml
+/userdoc/src/featureKeys/ConfigFileDoc-xsd.xml
+/userdoc/src/featureKeys/ConfigFileDoc-xslt.xml
+/userdoc/src/featureKeys/FeatureKeysDoc.xml
