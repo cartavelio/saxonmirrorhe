@@ -119,9 +119,8 @@ ext {
   tagsoupJar = null
   mailJar = null
   resolverJar = null
+  version_h = saxonVersion.replace(".", "-")
 }
-
-def version_h = saxonVersion.replace(".", "-")
 
 // ============================================================
 // Find jar files that need to be part of the build or release
