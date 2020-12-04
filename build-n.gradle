@@ -10,6 +10,11 @@ def csharpCompiler = null
   }
 }
 
+def additionalIkvmOptions = []
+if (hasProperty("ikvmDebug")) {
+  additionalIkvmOptions += ["-debug"]
+}
+
 task hen_setupPreprocess(
   type: Copy,
   description: "Copy HE sources for preprocessing HE"
@@ -540,19 +545,23 @@ task henDll(
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
   outputs.file("build/n/bin/he/saxon9he.dll")
-  commandLine "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe",
-    "-out:${buildDir}/n/bin/he/saxon9he.dll",
-    "-assembly:saxon9he",
-    "-target:library",
-    "-keyfile:${ikvmDir}/saxondotnet.snk",
-    "-version:${saxonVersion}",
-    "-srcpath:${buildDir}/preprocess/hen",
-    "-reference:mscorlib.dll",
-    "-reference:System.Xml.dll",
-    "-reference:System.dll",
-    "-reference:${buildDir}/n/bin/he/IKVM.OpenJDK.Core.dll",
-    "${buildDir}/n/jar/saxon9he.jar",
-    "${buildDir}/n/jar/xerces.jar"
+
+  def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
+  + additionalIkvmOptions \
+  + ["-out:${buildDir}/n/bin/he/saxon9he.dll",
+     "-assembly:saxon9he",
+     "-target:library",
+     "-keyfile:${ikvmDir}/saxondotnet.snk",
+     "-version:${saxonVersion}",
+     "-srcpath:${buildDir}/preprocess/hen",
+     "-reference:mscorlib.dll",
+     "-reference:System.Xml.dll",
+     "-reference:System.dll",
+     "-reference:${buildDir}/n/bin/he/IKVM.OpenJDK.Core.dll",
+     "${buildDir}/n/jar/saxon9he.jar",
+     "${buildDir}/n/jar/xerces.jar"]
+
+  commandLine ikvmCommand
   doFirst {
     mkdir "${buildDir}/n/bin/he"
   }
@@ -567,23 +576,27 @@ task penDll(
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
   outputs.file("build/n/bin/pe/saxon9pe.dll")
-  commandLine "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe",
-    "-out:${buildDir}/n/bin/pe/saxon9pe.dll",
-    "-assembly:saxon9pe",
-    "-target:library",
-    "-keyfile:${ikvmDir}/saxondotnet.snk",
-    "-version:${saxonVersion}",
-    "-srcpath:${buildDir}/preprocess/pen",
-    "-reference:mscorlib.dll",
-    "-reference:System.Xml.dll",
-    "-reference:System.dll",
-    "-reference:${buildDir}/n/bin/pe/IKVM.OpenJDK.Core.dll",
-    "-reference:System.Security.dll",
-    "${buildDir}/n/jar/saxon9pe.jar",
-    "${buildDir}/n/jar/xerces.jar",
-    "${buildDir}/n/jar/tagsoup-${tagsoupVersion}.jar",
-    "${buildDir}/n/jar/javax.mail-${mailVersion}.jar",
-    "${buildDir}/n/jar/icu4j-${icu4jVersion}.jar"
+
+  def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
+  + additionalIkvmOptions \
+  + ["-out:${buildDir}/n/bin/pe/saxon9pe.dll",
+     "-assembly:saxon9pe",
+     "-target:library",
+     "-keyfile:${ikvmDir}/saxondotnet.snk",
+     "-version:${saxonVersion}",
+     "-srcpath:${buildDir}/preprocess/pen",
+     "-reference:mscorlib.dll",
+     "-reference:System.Xml.dll",
+     "-reference:System.dll",
+     "-reference:${buildDir}/n/bin/pe/IKVM.OpenJDK.Core.dll",
+     "-reference:System.Security.dll",
+     "${buildDir}/n/jar/saxon9pe.jar",
+     "${buildDir}/n/jar/xerces.jar",
+     "${buildDir}/n/jar/tagsoup-${tagsoupVersion}.jar",
+     "${buildDir}/n/jar/javax.mail-${mailVersion}.jar",
+     "${buildDir}/n/jar/icu4j-${icu4jVersion}.jar"]
+
+  commandLine ikvmCommand
   doFirst {
     mkdir "${buildDir}/n/bin/pe"
   }
@@ -598,28 +611,32 @@ task eenDll(
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
   outputs.file("build/n/bin/ee/saxon9ee.dll")
-  commandLine "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe",
-    "-out:${buildDir}/n/bin/ee/saxon9ee.dll",
-    "-assembly:saxon9ee",
-    "-target:library",
-    "-keyfile:${ikvmDir}/saxondotnet.snk",
-    "-version:${saxonVersion}",
-    "-srcpath:${buildDir}/preprocess/een",
-    "-reference:mscorlib.dll",
-    "-reference:System.Xml.dll",
-    "-reference:System.dll",
-    "-reference:${buildDir}/n/bin/ee/IKVM.OpenJDK.Core.dll",
-    "-reference:System.Security.dll",
-    "${buildDir}/n/jar/saxon9ee.jar",
-    "${buildDir}/n/jar/xerces.jar",
-    "${buildDir}/n/jar/asm-${asmVersion}/asm-${asmVersion}.jar",
-    "${buildDir}/n/jar/asm-${asmVersion}/asm-analysis-${asmVersion}.jar",
-    "${buildDir}/n/jar/asm-${asmVersion}/asm-commons-${asmVersion}.jar",
-    "${buildDir}/n/jar/asm-${asmVersion}/asm-tree-${asmVersion}.jar",
-    "${buildDir}/n/jar/asm-${asmVersion}/asm-util-${asmVersion}.jar",
-    "${buildDir}/n/jar/tagsoup-${tagsoupVersion}.jar",
-    "${buildDir}/n/jar/javax.mail-${mailVersion}.jar",
-    "${buildDir}/n/jar/icu4j-${icu4jVersion}.jar"
+
+  def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
+  + additionalIkvmOptions \
+  + ["-out:${buildDir}/n/bin/ee/saxon9ee.dll",
+     "-assembly:saxon9ee",
+     "-target:library",
+     "-keyfile:${ikvmDir}/saxondotnet.snk",
+     "-version:${saxonVersion}",
+     "-srcpath:${buildDir}/preprocess/een",
+     "-reference:mscorlib.dll",
+     "-reference:System.Xml.dll",
+     "-reference:System.dll",
+     "-reference:${buildDir}/n/bin/ee/IKVM.OpenJDK.Core.dll",
+     "-reference:System.Security.dll",
+     "${buildDir}/n/jar/saxon9ee.jar",
+     "${buildDir}/n/jar/xerces.jar",
+     "${buildDir}/n/jar/asm-${asmVersion}/asm-${asmVersion}.jar",
+     "${buildDir}/n/jar/asm-${asmVersion}/asm-analysis-${asmVersion}.jar",
+     "${buildDir}/n/jar/asm-${asmVersion}/asm-commons-${asmVersion}.jar",
+     "${buildDir}/n/jar/asm-${asmVersion}/asm-tree-${asmVersion}.jar",
+     "${buildDir}/n/jar/asm-${asmVersion}/asm-util-${asmVersion}.jar",
+     "${buildDir}/n/jar/tagsoup-${tagsoupVersion}.jar",
+     "${buildDir}/n/jar/javax.mail-${mailVersion}.jar",
+     "${buildDir}/n/jar/icu4j-${icu4jVersion}.jar"]
+
+  commandLine ikvmCommand
   doFirst {
     mkdir "${buildDir}/n/bin/ee"
   }
