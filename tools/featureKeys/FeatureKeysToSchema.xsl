@@ -76,6 +76,6 @@
     </xsl:template>
     
     <xsl:strip-space elements="*"/>
-    <xsl:output indent="yes" saxon:double-space="xs:element" xmlns:saxon="http://saxon.sf.net/"/>
+    <xsl:output indent="yes"/>
     
 </xsl:stylesheet>
