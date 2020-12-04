@@ -120,6 +120,7 @@ task een_setupPreprocess(
   exclude "net/sf/saxon/BasicTransformerFactory.java"
   exclude "net/sf/saxon/option/cpp/**"
   exclude "net/sf/saxon/jetonnet/**"
+  exclude "net/sf/saxon/Gizmo.java"
   exclude "**/ant/**"
   exclude "**/dom/**"
   exclude "**/dom4j/**"
