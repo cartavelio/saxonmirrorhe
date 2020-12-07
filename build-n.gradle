@@ -296,7 +296,7 @@ task hen_ApiAssemblyInfo(
         writer.writeLine("          [assembly: AssemblyConfiguration(\"\")]")
         writer.writeLine("          [assembly: AssemblyCompany(\"Saxonica\")]")
         writer.writeLine("          [assembly: AssemblyProduct(\"Saxon.Api\")]")
-        writer.writeLine("          [assembly: AssemblyCopyright(\"Copyright © Saxonica 2019\")]")
+        writer.writeLine("          [assembly: AssemblyCopyright(\"Copyright © Saxonica 2020\")]")
         writer.writeLine("          [assembly: AssemblyTrademark(\"\")]")
         writer.writeLine("          [assembly: AssemblyCulture(\"\")]")
         writer.writeLine("          [assembly: ComVisible(false)]")
@@ -549,12 +549,12 @@ task henDll(
   inputs.files("${buildDir}/n/bin/he")
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
-  outputs.file("build/n/bin/he/saxon10he.dll")
+  outputs.file("build/n/bin/he/saxon-he-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
   def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
   + additionalIkvmOptions \
-  + ["-out:${buildDir}/n/bin/he/saxon10he.dll",
-     "-assembly:saxon10he",
+  + ["-out:${buildDir}/n/bin/he/saxon-he-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+     "-assembly:saxon-he-${saxonMajorVersion}.${saxonMinorVersion}",
      "-target:library",
      "-keyfile:${ikvmDir}/saxondotnet.snk",
      "-version:${saxonVersion}",
@@ -580,12 +580,12 @@ task penDll(
   inputs.files("${buildDir}/n/bin/pe")
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
-  outputs.file("build/n/bin/pe/saxon10pe.dll")
+  outputs.file("build/n/bin/pe/saxon-pe-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
   def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
   + additionalIkvmOptions \
-  + ["-out:${buildDir}/n/bin/pe/saxon10pe.dll",
-     "-assembly:saxon10pe",
+  + ["-out:${buildDir}/n/bin/pe/saxon-pe-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+     "-assembly:saxon-pe-${saxonMajorVersion}.${saxonMinorVersion}",
      "-target:library",
      "-keyfile:${ikvmDir}/saxondotnet.snk",
      "-version:${saxonVersion}",
@@ -615,12 +615,12 @@ task eenDll(
   inputs.files("${buildDir}/n/bin/ee")
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
-  outputs.file("build/n/bin/ee/saxon10ee.dll")
+  outputs.file("build/n/bin/ee/saxon-ee-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
   def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
   + additionalIkvmOptions \
-  + ["-out:${buildDir}/n/bin/ee/saxon10ee.dll",
-     "-assembly:saxon10ee",
+  + ["-out:${buildDir}/n/bin/ee/saxon-ee-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+     "-assembly:saxon-ee-${saxonMajorVersion}.${saxonMinorVersion}",
      "-target:library",
      "-keyfile:${ikvmDir}/saxondotnet.snk",
      "-version:${saxonVersion}",
@@ -706,7 +706,7 @@ task hen_cmdAssemblyInfo(
         writer.writeLine("          using System.Runtime.InteropServices;")
         writer.writeLine("          [assembly: AssemblyCompany(\"Saxonica\")]")
         writer.writeLine("          [assembly: AssemblyProduct(\"Saxon.HE\")]")
-        writer.writeLine("          [assembly: AssemblyCopyright(\"Copyright © Saxonica 2019\")]")
+        writer.writeLine("          [assembly: AssemblyCopyright(\"Copyright © Saxonica 2020\")]")
         writer.writeLine("          [assembly: AssemblyVersion(\"${saxonVersion}\")]")
         writer.writeLine("          [assembly: AssemblyFileVersion(\"${saxonVersion}\")]")
       }
@@ -754,12 +754,12 @@ if (csharpCompiler == null) {
   ) {
     inputs.files("${buildDir}/n/build/dll/he")
     inputs.files("${buildDir}/n/csharp/api")
-    outputs.file("${buildDir}/n/bin/he/saxon10he-api.dll")
+    outputs.file("${buildDir}/n/bin/he/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
     doLast {
       def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/he/saxon10he-api.dll",
-                  "-target:library", "-doc:${buildDir}/n/saxon10he-api.xml",
+                  "-out:${buildDir}/n/bin/he/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+                  "-target:library", "-doc:${buildDir}/n/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
                   "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/he",
                include: "*.dll").each { dll ->
@@ -836,12 +836,12 @@ if (csharpCompiler == null) {
   ) {
     inputs.files("${buildDir}/n/build/dll/pe")
     inputs.files("${buildDir}/n/csharp/api")
-    outputs.file("${buildDir}/n/bin/pe/saxon10pe-api.dll")
+    outputs.file("${buildDir}/n/bin/pe/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
     doLast {
       def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/pe/saxon10pe-api.dll",
-                  "-target:library", "-doc:${buildDir}/n/saxon10pe-api.xml",
+                  "-out:${buildDir}/n/bin/pe/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+                  "-target:library", "-doc:${buildDir}/n/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
                   "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/pe",
                include: "*.dll").each { dll ->
@@ -918,12 +918,12 @@ if (csharpCompiler == null) {
   ) {
     inputs.files("${buildDir}/n/build/dll/ee")
     inputs.files("${buildDir}/n/csharp/api")
-    outputs.file("${buildDir}/n/bin/ee/saxon10ee-api.dll")
+    outputs.file("${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
     doLast {
       def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/ee/saxon10ee-api.dll",
-                  "-target:library", "-doc:${buildDir}/n/saxon10ee-api.xml",
+                  "-out:${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+                  "-target:library", "-doc:${buildDir}/n/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
                   "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/ee",
                include: "*.dll").each { dll ->
@@ -1027,7 +1027,7 @@ task henProduct(
   dependsOn: ["hen_csharpApi", "hen_csharpTransform", "hen_csharpQuery"],
   description: "Build Saxon HE for .NET"
 ) {
-  from "${buildDir}/n/saxon10he-api.xml"
+  from "${buildDir}/n/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.xml"
   into "${buildDir}/n/bin/he"
 }
 
@@ -1036,7 +1036,7 @@ task penProduct(
   dependsOn: ["pen_csharpApi", "pen_csharpTransform", "pen_csharpQuery"],
   description: "Build Saxon PE for .NET"
 ) {
-  from "${buildDir}/n/saxon10pe-api.xml"
+  from "${buildDir}/n/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.xml"
   into "${buildDir}/n/bin/pe"
 }
 
@@ -1045,7 +1045,7 @@ task eenProduct(
   dependsOn: ["een_csharpApi", "een_csharpTransform", "een_csharpQuery", "een_csharpValidate"],
   description: "Build Saxon EE for .NET"
 ) {
-  from "${buildDir}/n/saxon10ee-api.xml"
+  from "${buildDir}/n/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.xml"
   into "${buildDir}/n/bin/ee"
 }
 

@@ -17,7 +17,7 @@ OutputBaseFilename=SaxonEE@@VERSION_H@@N-setup
 AppCopyright=Copyright (c) @@COPYRIGHT_YEAR@@ Saxonica
 
 [Files]
-; GAC Files
+; GAC Files-
 
 Source: "IKVM.Runtime.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "IKVM.Runtime, @@IKVM_STRONGNAME@@"
 Source: "IKVM.OpenJDK.Core.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "IKVM.OpenJDK.Core, @@IKVM_STRONGNAME@@"
@@ -26,9 +26,9 @@ Source: "IKVM.OpenJDK.Security.dll"; DestDir: "{app}\bin"; Flags: gacinstall; St
 Source: "IKVM.OpenJDK.Util.dll"; DestDir: "{app}\bin" ; Flags: gacinstall; StrongAssemblyName: "IKVM.OpenJDK.Util, @@IKVM_STRONGNAME@@"
 Source: "IKVM.OpenJDK.Text.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "IKVM.OpenJDK.Text, @@IKVM_STRONGNAME@@"
 Source: "IKVM.OpenJDK.XML.API.dll"; DestDir: "{app}\bin"; Flags: gacinstall ; StrongAssemblyName: "IKVM.OpenJDK.XML.API, @@IKVM_STRONGNAME@@"
-Source: "saxon10ee.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "saxon10ee, ${saxon.strongname}"
-Source: "saxon10ee-api.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "saxon10ee-api, ${saxon.strongname}"
-Source: "saxon10ee-api.xml"; DestDir: "{app}\bin"
+Source: "saxon-ee-@@MAJOR_VERSION@@.@@MINOR_VERSION@@.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "saxon10ee, ${saxon.strongname}"
+Source: "saxon-ee-api-@@MAJOR_VERSION@@.@@MINOR_VERSION@@.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "saxon10ee-api, ${saxon.strongname}"
+Source: "saxon-ee-api-@@MAJOR_VERSION@@.@@MINOR_VERSION@@.xml"; DestDir: "{app}\bin"
 Source: "..\..\notices\APACHE-RESOLVER.txt" ; DestDir: "{app}\notices"
 Source: "..\..\notices\APACHE-XERCES.txt" ; DestDir: "{app}\notices"
 Source: "..\..\notices\ASM.txt" ; DestDir: "{app}\notices"
