@@ -6,7 +6,7 @@ AppName=Saxon-PE @@VERSION@@
 AppVerName=Saxon-PE @@VERSION@@
 AppPublisher=Saxonica
 AppVersion=@@VERSION@@
-DefaultDirName=c:\Program Files\Saxonica\SaxonPE@@MAJOR_VERSION@@N
+DefaultDirName=C:\Program Files\Saxonica\SaxonPE@@MAJOR_VERSION@@-@@MINOR_VERSION@@N
 DefaultGroupName=Saxon-PE @@VERSION@@
 PrivilegesRequired=none
 Compression=lzma
@@ -26,9 +26,9 @@ Source: "IKVM.OpenJDK.Security.dll"; DestDir: "{app}\bin"; Flags: gacinstall; St
 Source: "IKVM.OpenJDK.Util.dll"; DestDir: "{app}\bin" ; Flags: gacinstall; StrongAssemblyName: "IKVM.OpenJDK.Util, @@IKVM_STRONGNAME@@"
 Source: "IKVM.OpenJDK.Text.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "IKVM.OpenJDK.Text, @@IKVM_STRONGNAME@@"
 Source: "IKVM.OpenJDK.XML.API.dll"; DestDir: "{app}\bin"; Flags: gacinstall ; StrongAssemblyName: "IKVM.OpenJDK.XML.API, @@IKVM_STRONGNAME@@"
-Source: "saxon9pe.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "saxon9pe, ${saxon.strongname}"
-Source: "saxon9pe-api.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "saxon9pe-api, ${saxon.strongname}"
-Source: "saxon9pe-api.xml"; DestDir: "{app}\bin"
+Source: "saxon10pe.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "saxon10pe, ${saxon.strongname}"
+Source: "saxon10pe-api.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "saxon10pe-api, ${saxon.strongname}"
+Source: "saxon10pe-api.xml"; DestDir: "{app}\bin"
 Source: "..\..\notices\APACHE-RESOLVER.txt" ; DestDir: "{app}\notices"
 Source: "..\..\notices\APACHE-XERCES.txt" ; DestDir: "{app}\notices"
 Source: "..\..\notices\CERN.txt" ; DestDir: "{app}\notices"

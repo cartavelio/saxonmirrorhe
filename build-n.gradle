@@ -526,6 +526,7 @@ task "n_notices"(
         .replace("@@VERSION_H@@", version_h) \
         .replace("@@IKVM_STRONGNAME@@", ikvmStrongname) \
         .replace("@@MAJOR_VERSION@@", saxonMajorVersion) \
+        .replace("@@MINOR_VERSION@@", saxonMinorVersion) \
         .replace("@@COPYRIGHT_YEAR@@", "2020")
     }
   }
