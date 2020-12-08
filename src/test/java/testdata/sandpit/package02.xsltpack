@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns='http://ns.saxonica.com/xslt/export' xmlns:fn='http://www.w3.org/2005/xpath-functions' xmlns:java-type='http://saxon.sf.net/java-type' xmlns:vv='http://saxon.sf.net/generated-variable' xmlns:xs='http://www.w3.org/2001/XMLSchema' when='2020-12-01T11:59:54.519Z' id='0' name='package-002.xsl' version='30' declaredModes='1' packageVersion='2.1.0.5' saxonProduct='SAXON-EE' saxonVersion='11.0' buildDateTime='2020-12-01T11:59:54.519Z' target='EE' targetVersion='1' relocatable='false' implicit='false'>
+ <co id='0' binds=''>
+  <globalParam name='Q{}c' as='*' line='5' module='' visibility='PUBLIC'>
+   <int val='2'/>
+  </globalParam>
+ </co>
+ <co id='1' binds='1'>
+  <mode onNo='TC' flags='dW' patternSlots='0'>
+   <templateRule prec='0' prio='-0.5' seq='0' rank='0' minImp='0' slots='0' matches='ND' flags='s' line='5' module=''>
+    <p.nodeTest role='match' test='ND'/>
+    <elem role='action' baseUri='' ns='xsl=~ xml=~' line='6' name='out' nsuri=''>
+     <applyT flags='i' bSlot='0'>
+      <axis role='select' name='child' nodeTest='N'/>
+     </applyT>
+    </elem>
+   </templateRule>
+   <templateRule prec='0' prio='0.5' seq='1' rank='1' minImp='0' slots='0' matches='NE' flags='s' line='8' module=''>
+    <p.withUpper role='match' axis='parent' upFirst='false'>
+     <p.nodeTest test='NE'/>
+     <p.nodeTest test='ND'/>
+    </p.withUpper>
+    <elem role='action' baseUri='' ns='xsl=~ xml=~' line='9' name='in' nsuri=''>
+     <valueOf flags='l'>
+      <fn name='name'>
+       <dot type='1NE'/>
+      </fn>
+     </valueOf>
+    </elem>
+   </templateRule>
+  </mode>
+ </co>
+ <overridden/>
+ <output>
+  <property name='Q{http://saxon.sf.net/}stylesheet-version' value='30'/>
+ </output>
+ <decimalFormat/>
+</package>
+<?Σ 8fe2a57b?>

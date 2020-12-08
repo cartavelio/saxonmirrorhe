@@ -1,0 +1,7 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" 
+    targetNamespace="defAttrNS"
+    xmlns:ns1="defAttrNS">
+    
+    <xs:attribute name="defAttr1" type="xs:string"/> 
+
+</xs:schema>

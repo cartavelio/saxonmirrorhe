@@ -1,0 +1,8 @@
+<?xml version="1.0"?> 
+<doc>
+  <composer name="mozart"/>
+  <composer name="beethoven"/>
+  <composer name="elgar"/>
+  <composer name="schubert"/>
+  <composer name="bach"/>
+</doc>

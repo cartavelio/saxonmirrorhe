@@ -1,0 +1,12 @@
+<project name="testproject" default="test" basedir=".">
+	<target name="test">
+	  <xslt in="in.html" out="out.xml" style="test.xsl" force="true">
+        <factory name="net.sf.saxon.TransformerFactoryImpl">
+          <attribute name="http://saxon.sf.net/feature/sourceParserClass"  value="org.ccil.cowan.tagsoup.Parser"/>
+          <attribute name="http://saxon.sf.net/feature/ignoreSAXSourceParser" value="true"/>
+        </factory>
+        <!--<classpath location="${tagsoup.jar}"/>
+        <classpath location="${saxon9.jar}"/>-->
+    </xslt>
+	</target>
+</project>

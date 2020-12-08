@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EDIFACT>
+	<ORDERS>
+		<UNH>
+			<UNH01><!--0062:  MESSAGE REFERENCE NUMBER-->SSDD1</UNH01>
+			<UNH02>
+				<UNH0201><!--0065: Message type-->ORDERS<!--Purchase order message--></UNH0201>
+				<UNH0202><!--0052: Message version number-->D<!--Draft version/UN/EDIFACT Directory--></UNH0202>
+				<UNH0203><!--0054: Message release number-->03B<!--Release 2003 - B--></UNH0203>
+				<UNH0204><!--0051: Controlling agency, coded-->UN<!--UN/CEFACT--></UNH0204>
+				<UNH0205><!--0057: Association assigned code-->EAN008</UNH0205>
+			</UNH02>
+		</UNH>
+		<BGM>
+			<BGM01>
+				<BGM0101><!--1001: Document name code-->220<!--Order--></BGM0101>
+			</BGM01>
+			<BGM02>
+				<BGM0201><!--1004: Document identifier-->BKOD99</BGM0201>
+			</BGM02>
+			<BGM03><!--1225: Message function code-->9<!--Original--></BGM03>
+		</BGM>
+		<DTM>
+			<DTM01>
+				<DTM0101><!--2005: Date or time or period function code qualifier-->137<!--Document/message date/time--></DTM0101>
+				<DTM0102><!--2380: Date or time or period text-->20051107</DTM0102>
+				<DTM0103><!--2379: Date or time or period format code-->102<!--CCYYMMDD--></DTM0103>
+			</DTM01>
+		</DTM>
+		<UNS>
+			<UNS01><!--0081: SECTION IDENTIFICATION-->S<!--Detail/summary section separation--></UNS01>
+		</UNS>
+		<CNT>
+			<CNT01>
+				<CNT0101><!--6069: Control total type code qualifier-->2<!--Number of line items in message--></CNT0101>
+				<CNT0102><!--6066: Control total quantity-->4</CNT0102>
+			</CNT01>
+		</CNT>
+		<UNT>
+			<UNT01><!--0074: NUMBER OF SEGMENTS IN A MESSAGE-->22</UNT01>
+			<UNT02><!--0062: MESSAGE REFERENCE NUMBER-->SSDD1</UNT02>
+		</UNT>
+	</ORDERS>
+	<UNZ>
+		<UNZ01><!--0036: INTERCHANGE CONTROL COUNT-->1</UNZ01>
+		<UNZ02><!--0020: INTERCHANGE CONTROL REFERENCE-->6002</UNZ02>
+	</UNZ>
+</EDIFACT>

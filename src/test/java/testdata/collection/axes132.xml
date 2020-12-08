@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<?pi?>
+<!--comment-->
+<a xmlns="http://banana/">
+  <b/>
+  <c/>
+  <d/>
+  <e>
+    <f custard="pie" xml:space="preserve">clown</f>
+    <g/>
+  </e>
+  <h/>
+</a>
