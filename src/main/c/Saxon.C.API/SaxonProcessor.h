@@ -107,6 +107,14 @@ class SaxonProcessor {
 
     friend class XdmAtomicValue;
 
+    friend class XdmFunctionItem;
+
+    friend class XdmNode;
+
+    friend class XdmMap;
+
+    friend class XdmArray;
+
 public:
 
     //! A default constructor.
