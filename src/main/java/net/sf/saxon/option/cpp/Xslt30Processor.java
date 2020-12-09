@@ -512,7 +512,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    public static String applyTemplatesReturningString(String cwd, XsltExecutable executable, Object sourceObj, String[] params, Object[] values) throws SaxonApiException {
+    public static byte [] applyTemplatesReturningString(String cwd, XsltExecutable executable, Object sourceObj, String[] params, Object[] values) throws SaxonApiException {
         Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
@@ -524,8 +524,8 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
-        StringWriter sw = new StringWriter();
-        Serializer serializer = processor.newSerializer(sw);
+        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+        Serializer serializer = processor.newSerializer(bStream);
 
         applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
 
@@ -561,7 +561,7 @@ public class Xslt30Processor extends SaxonCAPI {
         } else {
             throw new SaxonApiException("Source object is not of type (String, XdmValue or XdmValue[])");
         }
-        return sw.toString();
+        return bStream.toByteArray();
     }
 
     private static XdmValue[] getArguments(Object[] arguments) throws SaxonApiException {
@@ -633,7 +633,7 @@ public class Xslt30Processor extends SaxonCAPI {
         return result;
     }
 
-    public static String callFunctionReturningString(String cwd, XsltExecutable executable, String cFuncName, Object[] arguments, String[] params, Object[] values) throws SaxonApiException {
+    public static byte [] callFunctionReturningString(String cwd, XsltExecutable executable, String cFuncName, Object[] arguments, String[] params, Object[] values) throws SaxonApiException {
         Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
@@ -647,13 +647,13 @@ public class Xslt30Processor extends SaxonCAPI {
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
 
-        StringWriter sw = new StringWriter();
-        Serializer serializer = processor.newSerializer(sw);
+        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+        Serializer serializer = processor.newSerializer(bStream);
         applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
 
         transformer.callFunction(qname, getArguments(arguments), serializer);
         serializer = null;
-        return sw.toString();
+        return bStream.toByteArray();
     }
 
 
@@ -662,7 +662,7 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
-        
+
         if(executable == null) {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
@@ -756,7 +756,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    public static String callTemplateReturningString(String cwd, XsltExecutable executable, String clarkName, String[] params, Object[] values) throws SaxonApiException {
+    public static byte[] callTemplateReturningString(String cwd, XsltExecutable executable, String clarkName, String[] params, Object[] values) throws SaxonApiException {
         QName qname = null;
         if (clarkName != null) {
             qname = QName.fromClarkName(clarkName);
@@ -774,8 +774,8 @@ public class Xslt30Processor extends SaxonCAPI {
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
 
-        StringWriter sw = new StringWriter();
-        Serializer serializer = processor.newSerializer(sw);
+        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+        Serializer serializer = processor.newSerializer(bStream);
 
         //setsource(cwd, transformer, sourceObj, paramsMap);
 
@@ -783,7 +783,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
         transformer.callTemplate(qname, serializer);
-        return sw.toString();
+        return bStream.toByteArray();
     }
 
     /**
@@ -823,7 +823,7 @@ public class Xslt30Processor extends SaxonCAPI {
             } else {
                   throw new SaxonApiException("Error XsltExecutable is null");
             }
-            
+
             if (outFilename != null) {
                 serializer = resolveOutputFile(processor, cwd, outFilename);
             } else if (paramsMap.containsKey("o")) {
@@ -978,24 +978,6 @@ public class Xslt30Processor extends SaxonCAPI {
 
             }
 
-            if (map.containsKey("resources")) {
-                valuei = map.get("resources");
-                char separatorChar = '/';
-                if (SaxonCAPI.RESOURCES_DIR == null && valuei instanceof String) {
-                    String dir1 = (String) valuei;
-                    if (!dir1.endsWith("/")) {
-                        dir1 = dir1.concat("/");
-                    }
-                    if (File.separatorChar != '/') {
-                        dir1.replace(separatorChar, File.separatorChar);
-                        separatorChar = '\\';
-                        dir1.replace('/', '\\');
-                    }
-                    SaxonCAPI.RESOURCES_DIR = dir1;
-
-                }
-
-            }
 
             if (map.containsKey("tunnel")) {
                 valuei = map.get("tunnel");
@@ -1252,7 +1234,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         XsltExecutable executable1 = cpp.compileFromFile(cwd2, "xsl/fooExFunc.xsl", false, null, null);
         XdmValue resultV = cpp.callFunctionReturningValue(cwd2, executable1, "{http://www.saxonica.com/myfunction}is-licensed-EE", null, null, null);
-        String resultCF = cpp.callFunctionReturningString(cwd2, executable1,  "{http://www.saxonica.com/myfunction}is-licensed-EE", null, new String[]{"!omit-xml-declaration"}, new Object[]{"yes"});
+        String resultCF = new String(cpp.callFunctionReturningString(cwd2, executable1,  "{http://www.saxonica.com/myfunction}is-licensed-EE", null, new String[]{"!omit-xml-declaration"}, new Object[]{"yes"}));
 
         System.out.println("Running callFunction is-licensed-EE= " + resultV.toString());
         System.out.println("Running callFunction is-licensed-EE= " + resultCF);
@@ -1339,6 +1321,5 @@ public class Xslt30Processor extends SaxonCAPI {
         //System.out.println("xslMessage output:" + cpp.getXslMessages().length);
 
     }
-
-
+    
 }
