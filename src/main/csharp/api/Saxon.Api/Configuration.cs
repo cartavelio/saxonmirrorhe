@@ -548,10 +548,16 @@ namespace Saxon.Api
         /// </remarks>
         /// <param name="name">The property name</param>
         /// <param name="value">The property value</param>
-        [Obsolete("Use the SetProperty<T>(Feature<T> feature, T value) method instead.")]
         public void SetProperty(String name, String value)
         {
-            processor.setConfigurationProperty(net.sf.saxon.lib.Feature.byName(name), value);
+            if (name.Equals("http://saxonica.com/oem-data"))
+            {
+                processor.setConfigurationProperty("http://saxonica.com/oem-data", value);
+            }
+            else
+            {
+                processor.setConfigurationProperty(net.sf.saxon.lib.Feature.byName(name), value);
+            }
         }
 
         /// <summary>
@@ -560,8 +566,16 @@ namespace Saxon.Api
         /// <param name="feature">The property feature</param>
         /// <param name="value">The property value</param>
 
-        public void SetProperty<T>(Feature<T> feature, T value) {
-            processor.setConfigurationProperty(feature.JFeature, value);
+        public void SetProperty<T>(Feature<T> feature, T value)
+        {
+            if (value.GetType() == typeof(Boolean))
+            {
+                processor.setConfigurationProperty(feature.JFeature, java.lang.Boolean.valueOf((bool)(object)value));
+            }
+            else
+            {
+                processor.setConfigurationProperty(feature.JFeature, (object)value);
+            }
         }
 
         /// <summary>
