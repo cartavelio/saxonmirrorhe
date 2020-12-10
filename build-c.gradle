@@ -278,24 +278,8 @@ task test_jetHome(
   }
 }
 
-task hec_featureKeys(
-  type: JavaExec,
-  dependsOn: ["hej_featureKeys"],
-  description: "Construct the feature keys for HE"
-) {
-  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
-  outputs.file "${projectDir}/src/main/csharp/api/Saxon.Api/Feature.cs"
-  outputs.file "${projectDir}/src/main/csharp/api/Saxon.Api/FeatureKeys.cs"
-  classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
-  args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
-    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToCSharp.xsl",
-    "-o:${projectDir}/src/main/csharp/api/Saxon.Api/establish-an-output-base-uri"
-}
-
 task hec_setupPreprocess(
   type: Copy,
-  dependsOn: ["hec_featureKeys"],
   description: "Copy HE sources for preprocessing HE"
 ) {
   into "${buildDir}/filtered/hec"
@@ -318,7 +302,6 @@ task hec_setupPreprocess(
 
 task pec_setupPreprocess(
   type: Copy,
-  dependsOn: ["hec_featureKeys"],
   description: "Copy PE sources for preprocessing PE"
 ) {
   into "${buildDir}/filtered/pec"
@@ -363,7 +346,6 @@ task pec_setupPreprocess(
 
 task eec_setupPreprocess(
   type: Copy,
-  dependsOn: ["hec_featureKeys"],
   description: "Copy EE sources for preprocessing EE"
 ) {
   into "${buildDir}/filtered/eec"

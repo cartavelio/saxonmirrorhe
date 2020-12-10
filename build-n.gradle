@@ -15,9 +15,23 @@ if (hasProperty("ikvmDebug")) {
   additionalIkvmOptions += ["-debug"]
 }
 
+task hen_featureKeys(
+  type: JavaExec,
+  description: "Construct the feature keys for HE"
+) {
+  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
+  outputs.file "${projectDir}/src/main/csharp/api/Saxon.Api/Feature.cs"
+  outputs.file "${projectDir}/src/main/csharp/api/Saxon.Api/FeatureKeys.cs"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
+    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToCSharp.xsl",
+    "-o:${projectDir}/src/main/csharp/api/Saxon.Api/establish-an-output-base-uri"
+}
+
 task hen_setupPreprocess(
   type: Copy,
-  dependsOn: ["hej_featureKeys"],
+  dependsOn: ["hen_featureKeys"],
   description: "Copy HE sources for preprocessing HE"
 ) {
   from "${projectDir}/src/main/java"
@@ -49,7 +63,7 @@ task hen_setupPreprocess(
 
 task pen_setupPreprocess(
   type: Copy,
-  dependsOn: ["hec_featureKeys"],
+  dependsOn: ["hen_featureKeys"],
   description: "Copy PE sources for preprocessing PE"
 ) {
   from "${projectDir}/src/main/java"
@@ -112,7 +126,7 @@ task pen_setupPreprocess(
 
 task een_setupPreprocess(
   type: Copy,
-  dependsOn: ["hec_featureKeys"],
+  dependsOn: ["hen_featureKeys"],
   description: "Copy EE sources for preprocessing EE"
 ) {
   from "${projectDir}/src/main/java"
