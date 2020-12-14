@@ -11,51 +11,100 @@ fi
 # Redirect output to stderr.
 exec 1>&2
 
-# Files and directories that begin with these prefixes are
-# considered commercial and must be in separate commits
-# from files that are non-commercial
+# Files and directories that begin with these prefixes are considered
+# commercial and must be in separate commits from files that are
+# non-commercial
 COMMERCIAL=(src/main/java/com src/main/java/javax)
 
-# Count all the files and all the commercial files
+# Files and directories that begin with these prefixes will be
+# excluded from mirroring. (Update the mirror script as well if you
+# change this list!) Files that begin with these prefixes must be
+# in separate commits from all other files.
+EXCLUDE=(src/test/bugs src/test/nunit src/test/xmark)
+
+# Count all the files, all the commercial files, and all the excluded
+# files
 ALLFILES=0
 COMMFILES=0
+EXFILES=0
 
-# Keep track of the names of exemplar non-commercial
-# and commercial files
+# Keep track of the names of exemplar files from each category
 AFILE=none
 CFILE=none
+EFILE=none
 
 # Loop over all the files in this commit...
 for fn in `git diff --cached --name-only`; do
     # Count all the files
     ALLFILES=`expr $ALLFILES + 1`
 
-    # Consider all the commercial prexies
+    # Consider all the commercial prefixes
     ISCOMM=0
     for prefix in ${COMMERCIAL[*]}; do
         if [[ $fn == ${prefix}* ]]; then
-            # If this filename begins with a commercial prefix,
-            # then there's at least one commercial file in this
-            # commit.
+            # This filename begins with a commercial prefix, so
+            # there's at least one commercial file in this commit.
             ISCOMM=1
             if [ "X$CFILE" == "Xnone" ]; then
                 CFILE="$fn"
             fi
         fi            
     done
-
     if [ $ISCOMM != 0 ]; then
         # Count the commercial files
         COMMFILES=`expr $COMMFILES + 1`
-    else
-        # If none of the commercial prefixes matched,
-        # then there's at least one non-commercial file
-        # in this commit.
+    fi
+
+    # Consider all the excluded prefixes
+    ISEXCL=0
+    if [ $ISCOMM = 0 ]; then
+        for prefix in ${EXCLUDE[*]}; do
+            if [[ $fn == ${prefix}* ]]; then
+                # This filename begins with an exclude prefix, so
+                # there's at least one excluded file in this commit.
+                ISEXCL=1
+                if [ "X$EFILE" == "Xnone" ]; then
+                    EFILE="$fn"
+                fi
+            fi            
+        done
+        if [ $ISEXCL != 0 ]; then
+            # Count the excluded files
+            EXFILES=`expr $EXFILES + 1`
+        fi
+    fi
+
+    if [ $ISCOMM = 0 -a $ISEXCL = 0 ]; then
+        # If none of the commercial or exclude prefixes matched, then
+        # there's at least one non-commercial file in this commit.
         if [ "X$AFILE" == "Xnone" ]; then
             AFILE="$fn"
         fi
     fi
 done
+
+# If there's at least one excluded file, and they aren't *all*
+# excluded files, then this is a mixed commit: computer says no!
+if [ $EXFILES != 0 -a $ALLFILES != $EXFILES ]; then
+    NEFILE=$CFILE
+    if [ "X$AFILE" != "Xnone" ]; then
+        NEFILE=$AFILE
+    fi
+    cat <<EOF
+** ERROR ***********************************************************
+Commits to this repository are automatically mirrored to the open
+source and commercial repositories. Some directories are excluded:
+${EXCLUDE[*]}
+This commit attempt includes at least one excluded file:
+  $EFILE
+and at least one non-excluded file:
+  $NEFILE
+Please split this commit into at two commits with no excluded and
+non-excluded files in a single commit.
+********************************************************************
+EOF
+    exit 1;
+fi
 
 # If there's at least one commercial file, and they aren't *all*
 # commercial files, then this is a mixed commit: computer says no!
