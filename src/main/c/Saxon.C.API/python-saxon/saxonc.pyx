@@ -3489,7 +3489,7 @@ cdef class PyXdmItem(PyXdmValue):
         """
         return self
 
-     def ge_atomic_value(self):
+     def get_atomic_value(self):
         """
         get_atomic_value(self)
         Get the subclass PyXdmAtomicValue for this PyXdmItem object current object if it is an atomic value
