@@ -27,6 +27,7 @@ import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.JavaRegularExpression;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.resource.StandardCollectionFinder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ExternalObjectType;
 import org.xml.sax.SAXException;
@@ -67,6 +68,7 @@ public class DotNetPlatform implements Platform {
     @Override
     public void initialize(Configuration config) {
         config.setURIResolver(new DotNetURIResolver(new XmlUrlResolver()));
+        config.setCollectionFinder(new StandardCollectionFinder());
     }
 
 

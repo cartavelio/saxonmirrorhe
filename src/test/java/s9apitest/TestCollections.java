@@ -666,4 +666,27 @@ public class TestCollections {
     }
 
 
+    @Test
+    public void testCollectionOnDocxFile() {
+        try {
+            Processor p = new Processor(true);
+            Configuration config = p.getUnderlyingConfiguration();
+
+            config.registerFileExtension("docx", "application/java-archive");
+
+            XQueryCompiler c = p.newXQueryCompiler();
+            XQueryExecutable exec = c.compile("for $x in collection(.) return " +
+                                                      "if($x instance of node()) then true() else false()");
+            XQueryEvaluator eval = exec.load();
+            eval.setContextItem(new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "collecton_test_doc.docx?select=*.xml;validation=skip;content-type=text/plain"));
+            XdmValue val = eval.evaluate();
+            assertEquals(false, ((XdmAtomicValue) val.itemAt(1)).getBooleanValue());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+
+
+    }
+
+
 }

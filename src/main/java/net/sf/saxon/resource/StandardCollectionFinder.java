@@ -151,6 +151,7 @@ public class StandardCollectionFinder implements CollectionFinder {
     protected boolean isJarFileURI(String collectionURI) {
         return collectionURI.endsWith(".jar") ||
             collectionURI.endsWith(".zip") ||
+                collectionURI.endsWith(".docx") ||
             collectionURI.startsWith("jar:");
     }
 
