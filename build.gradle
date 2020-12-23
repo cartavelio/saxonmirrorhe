@@ -1036,7 +1036,7 @@ task eejJar(
     include "net/**/*.class"
     include "com/saxonica/**/*.class"
     include "javax/xml/xquery/*.class"
-    include "org/objectweb/**/*.class"
+    exclude "org/objectweb/**/*.class"
     exclude "**/sql/**/*.class"
     exclude "com/saxonica/StatsTransform*.class"
     exclude "com/saxonica/functions/sql/**"
