@@ -243,7 +243,6 @@ public class TinyElementImpl extends TinyParentNodeImpl {
 
     @Override
     public void copy(/*@NotNull*/ Receiver receiver, int copyOptions, Location location) throws XPathException {
-
         boolean copyTypes = CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS);
 
         short level = -1;
