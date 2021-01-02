@@ -320,7 +320,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             AtomicValue key = (AtomicValue) arguments[0].head();
             assert key != null;
-            GroundedValue value = ((Sequence)arguments[1]).iterate().materialize();
+            GroundedValue value = arguments[1].iterate().materialize();
             return new SingleEntryMap(key, value);
         }
 
@@ -362,7 +362,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             List<GroundedValue> results = new ArrayList<>();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 Sequence seq = dynamicCall(fn, context, new Sequence[]{pair.key, pair.value});
-                results.add(seq.materialize());
+                final GroundedValue val = seq.materialize();
+                if (val.getLength() > 0) {
+                    results.add(val);
+                }
             }
             return new Chain(results);
         }
@@ -641,7 +644,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             }
 
             AtomicValue key = (AtomicValue) arguments[1].head();
-            GroundedValue value = ((Sequence)arguments[2]).materialize();
+            GroundedValue value = arguments[2].materialize();
             return baseMap.addEntry(key, value);
         }
     }
