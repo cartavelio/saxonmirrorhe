@@ -68,6 +68,9 @@ public class TypeHierarchy {
 
     public Sequence applyFunctionConversionRules(Sequence value, SequenceType requiredType, final RoleDiagnostic role, Location locator)
             throws XPathException {
+        if (requiredType.matches(value, this)) {
+            return value;
+        }
         ItemType suppliedItemType = SequenceTool.getItemType(value, this);
 
         SequenceIterator iterator = value.iterate();
