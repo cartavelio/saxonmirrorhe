@@ -476,6 +476,41 @@ namespace Saxon.Api
 
     }
 
+    public class DirectoryCollection : ResourceCollection
+    {
+       
+        public DirectoryCollection(Processor proc, String collectionURI, String directoryName)
+        {
+            resourceCollection = new net.sf.saxon.resource.DirectoryCollection(proc.Implementation, collectionURI, new  java.io.File(directoryName),null);
+            
+        }
+
+     
+    }
+
+    public class JarCollection : ResourceCollection
+    {
+
+        public JarCollection(DynamicContext context, String collectionURI)
+        {
+            resourceCollection = new net.sf.saxon.resource.JarCollection(context.context, collectionURI, null);
+
+        }
+
+    }
+
+    public class CatalogCollection : ResourceCollection
+    {
+
+        public CatalogCollection(Processor proc, String collectionURI)
+        {
+            resourceCollection = new net.sf.saxon.resource.CatalogCollection(proc.Implementation, collectionURI);
+
+        }
+
+
+    }
+
 
     /// <summary>
     /// Default implementation of the CollectionFinder interface. 
@@ -611,10 +646,14 @@ namespace Saxon.Api
 
     public class ResourceCollection : IResourceCollection
     {
-        net.sf.saxon.lib.ResourceCollection resourceCollection;
+        protected net.sf.saxon.lib.ResourceCollection resourceCollection;
+
+        internal ResourceCollection()
+        {
+        }
 
 
-        public ResourceCollection(net.sf.saxon.lib.ResourceCollection rc) {
+        internal ResourceCollection(net.sf.saxon.lib.ResourceCollection rc) {
             resourceCollection = rc;
         }
 
@@ -650,8 +689,10 @@ namespace Saxon.Api
 
         public bool IsStable(DynamicContext context)
         {
-            return false;
+            return resourceCollection.isStable(context.context);
         }
+
+
     }
 
     public class Resource : IResource
