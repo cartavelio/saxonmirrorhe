@@ -605,10 +605,15 @@ namespace SaxonNUnit
 
         class MyCollectionFinder : ICollectionFinder
         {
+
+            Processor proc;
+            public MyCollectionFinder(Processor proc) {
+                this.proc = proc;
+            }
             public IResourceCollection FindCollection(DynamicContext context, String collectionURI) {
                 /*return new DirectoryCollection(config, "http://example.com/collection", new File(ConfigTest.DATA_DIR + "trax/"),
                     new URIQueryParameters("select=*.xml;recurse=yes", context.getConfiguration()));*/
-                return null;
+                return new DirectoryCollection(proc, "http://example.com/collection", ConfigTest.DATA_DIR + "trax/");
             }
 
             public bool IsStable()
@@ -616,35 +621,7 @@ namespace SaxonNUnit
                 return true;
             }
         }
-
-        //TODO docx handling
-
-        class DirectoryCollection : IResourceCollection
-        {
-            String directoryName;
-            String collectionURI;
-
-            public DirectoryCollection(String curi, String name) {
-                directoryName = name;
-                collectionURI = curi;
-
-            }
-
-            public string CollectionURI()
-            {
-                throw new NotImplementedException();
-            }
-
-            public List<IResource> GetResources(DynamicContext context)
-            {
-                throw new NotImplementedException();
-            }
-
-            public List<string> GetResourceURIs(DynamicContext context)
-            {
-                throw new NotImplementedException();
-            }
-        }
+        
 
         [Test]
     public void TestCollectionFinder()
@@ -652,7 +629,7 @@ namespace SaxonNUnit
     try
     {
         Processor p = new Processor(true);
-                p.CollectionFinder = new MyCollectionFinder();
+                p.CollectionFinder = new MyCollectionFinder(p);
     XQueryCompiler c = p.NewXQueryCompiler();
     XQueryExecutable exec = c.Compile("for $x in collection(.) return " +
         "if($x instance of node()) then true() else false()");
