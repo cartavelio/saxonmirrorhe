@@ -426,8 +426,6 @@ namespace Saxon.Api
         IResourceCollection FindCollection(DynamicContext context, String collectionURI);
 
 
-        bool IsStable();
-
     }
 
 
@@ -476,24 +474,39 @@ namespace Saxon.Api
 
     }
 
+
+    /// <summary>
+    /// This class represents a resource collection containing all, or selected, files within a filestore directory
+    /// </summary>
     public class DirectoryCollection : ResourceCollection
     {
        
-        public DirectoryCollection(Processor proc, String collectionURI, String directoryName)
+        /// <summary>
+        /// Create a directory collection
+        /// </summary>
+        /// <param name="proc">Processor object for configuration properties</param>
+        /// <param name="collectionURI">the collection URI</param>
+        /// <param name="directoryName">the directory containing the files</param>
+        /// <param name="parameters">query parameter supplied as part of the URI</param>
+        public DirectoryCollection(Processor proc, String collectionURI, String directoryName, URIQueryParameters parameters)
         {
-            resourceCollection = new net.sf.saxon.resource.DirectoryCollection(proc.Implementation, collectionURI, new  java.io.File(directoryName),null);
+            resourceCollection = new net.sf.saxon.resource.DirectoryCollection(proc.Implementation, collectionURI, new  java.io.File(directoryName), parameters.Implementation());
             
         }
 
      
     }
 
+    /// <summary>
+    /// A JarCollection represents a collection of resources held in a JAR or ZIP archive, accessess typically
+    /// using a URI using the "jar" URI scheme, or simply a "file" URI where the target file is a JAR or ZIP file.
+    /// </summary>
     public class JarCollection : ResourceCollection
     {
 
-        public JarCollection(DynamicContext context, String collectionURI)
+        public JarCollection(DynamicContext context, String collectionURI, URIQueryParameters parameters)
         {
-            resourceCollection = new net.sf.saxon.resource.JarCollection(context.context, collectionURI, null);
+            resourceCollection = new net.sf.saxon.resource.JarCollection(context.context, collectionURI, parameters.Implementation());
 
         }
 
@@ -529,11 +542,21 @@ namespace Saxon.Api
             collectionFinder = (JStandardCollectionFinder)cf;
         }
 
+        /// <summary>
+        /// Locate the collection of  resources corresponding to a collection URI
+        /// </summary>
+        /// <param name="context">The XPath dynamic evaluation context</param>
+        /// <param name="collectionURI">The collection URI: an absolute URI, formed by resolving the argument
+        /// supplied to the fn:collection or fn:uri-collection against the static base URI</param>
+        /// <returns>a ResourceCollection object representing resources in the collection identified by this collection URI</returns>
         public IResourceCollection FindCollection(DynamicContext context, string collectionURI)
         {
             return new ResourceCollection(collectionFinder.findCollection(context.context, collectionURI));
         }
 
+        /// <summary>
+        /// The underlying java CollectionFinder object
+        /// </summary>
         public JCollectionFinder Implementation {
             get {
                 return collectionFinder;
@@ -551,11 +574,6 @@ namespace Saxon.Api
 
         }
 
-        public bool IsStable()
-        {
-
-            return false; //TODO collectionFinder;
-        }
     }
 
 
@@ -695,6 +713,9 @@ namespace Saxon.Api
 
     }
 
+    /// <summary>
+    /// Resource Wrapper class for a Java Resource object
+    /// </summary>
     public class Resource : IResource
     {
         JResource resource;
