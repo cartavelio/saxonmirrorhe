@@ -748,6 +748,10 @@ const char * XsltProcessor::getErrorMessage(){
  	if(exception == nullptr) {
  	    return nullptr;
  	}
- 	return exception->getErrorMessage();
+ 	return exception->getMessage();
  }
+
+SaxonApiException* XsltProcessor::getException() {
+    return exception;
+}
 

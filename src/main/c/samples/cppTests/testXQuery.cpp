@@ -63,13 +63,12 @@ queryProc->setcwd(".");
      queryProc->executeQueryToFile(NULL, "catOutput.xml", NULL);
 
 		if (queryProc->exceptionOccurred()) {
-		    cout<<"Exception found. Count="<<queryProc->exceptionCount()<<endl;
-			for(int i=0;i<queryProc->exceptionCount();i++){
-				const char * message = queryProc->getErrorMessage(i);
+
+		    cout<<"Exception found. "<<endl;
+				const char * message = queryProc->getErrorMessage();
 				if(message != NULL) {
 					cout<<"Error Message = "<<message<<endl;		
-				}		
-			}
+				}
 		
 		}
 }
@@ -86,9 +85,9 @@ void testxQueryError2(SaxonProcessor * processor, XQueryProcessor * queryProc){
    if(result != NULL){
     	cout<<"Result :"<<result<<endl;
     } else {
-	const char * message = queryProc->getErrorMessage(0);
+	const char * message = queryProc->getErrorMessage();
 	if(message != NULL) {
-		cout<<"Error Message="<<message<<" Line number= "<<processor->getException()->getLineNumber(0)<<endl;
+		cout<<"Error Message="<<message<<" Line number= "<<queryProc->getException()->getLineNumber()<<endl;
 	} else {
 		cout<<"Error Message - NULL check"<<endl;
 	}
@@ -167,13 +166,11 @@ cout<<"XdmValue size="<<val2->size()<<", "<<(val2->itemAt(0))->getStringValue()<
 	}
 
 if (queryProc->exceptionOccurred()) {
-		    cout<<"Exception found. Count="<<queryProc->exceptionCount()<<endl;
-			for(int i=0;i<queryProc->exceptionCount();i++){
-				const char * message = queryProc->getErrorMessage(i);
+				const char * message = queryProc->getErrorMessage();
 				if(message != NULL) {
 					cout<<"Error Message = "<<message<<endl;		
 				}		
-			}
+
 		
 		}
 	
@@ -195,13 +192,12 @@ void testXQueryLineNumberError(XQueryProcessor * queryProc){
     } else {
 	cout<<"Some faiure"<<endl;
 	if (queryProc->exceptionOccurred()) {
-		    cout<<"Exception found. Count="<<queryProc->exceptionCount()<<endl;
-			for(int i=0;i<queryProc->exceptionCount();i++){
-				const char * message = queryProc->getErrorMessage(i);
+		    cout<<"Exception found. "<<endl;
+		    const char * message = queryProc->getException()->getMessage();
 				if(message != NULL) {
 					cout<<"Error Message = "<<message<<endl;		
 				}		
-			}
+
 		
 		}
 	
@@ -227,13 +223,12 @@ void testXQueryLineNumber(){
     } else {
 	cout<<"Some faiure"<<endl;
 	if (queryProc->exceptionOccurred()) {
-		    cout<<"Exception found. Count="<<queryProc->exceptionCount()<<endl;
-			for(int i=0;i<queryProc->exceptionCount();i++){
-				const char * message = queryProc->getErrorMessage(i);
+		    cout<<"Exception found."<<endl;
+				const char * message = queryProc->getErrorMessage();
 				if(message != NULL) {
 					cout<<"Error Message = "<<message<<endl;		
 				}		
-			}
+
 		
 		}
 	

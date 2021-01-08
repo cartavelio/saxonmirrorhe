@@ -36,6 +36,7 @@
 #include "SaxonCXPath.h"
 #include "XsltProcessor.h"
 #include "Xslt30Processor.h"
+#include "XsltExecutable.h"
 #include "XQueryProcessor.h"
 #include "XPathProcessor.h"
 #include "SchemaValidator.h"
@@ -71,9 +72,6 @@ class XsltExecutable;
 
 
 // The Saxon XSLT interface class
-
-//std::mutex mtx;
-
 
 typedef struct {
     jobjectArray stringArray;

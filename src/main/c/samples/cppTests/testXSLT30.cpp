@@ -32,7 +32,9 @@ void testApplyTemplatesString1(Xslt30Processor * trans, sResultCount *sresult){
 	
   cout<<endl<<"Test: TransformToString1:"<<endl;
    trans->setInitialMatchSelectionAsFile("cat.xml");
-    const char * output = trans->applyTemplatesReturningString("test.xsl");
+   XsltExecutable * executable = trans->compileFromString("test.xsl");
+
+    const char * output = executable->applyTemplatesReturningString("test.xsl");
    if(output == NULL) {
       printf("result is null ====== FAIL ====== \n");
       sresult->failure++;
@@ -100,9 +102,9 @@ void testApplyTemplatesString2(SaxonProcessor * processor, Xslt30Processor * tra
 	cout<<"Source document is null."<<endl;
 
     }
-
-     trans->setInitialMatchSelection((XdmValue*)input);
-    const char * output = trans->applyTemplatesReturningString("test.xsl");
+    XsltExecutable * executable = trans->compileFromFile("test.xsl");
+   executable->setInitialMatchSelection((XdmValue*)input);
+    const char * output = executable->applyTemplatesReturningString();
    if(output == NULL) {
       printf("result is null ====== FAIL ======  \n");
 	sresult->failureList.push_back("testApplyTemplatesString2");

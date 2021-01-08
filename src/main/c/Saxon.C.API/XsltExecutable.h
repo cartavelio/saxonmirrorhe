@@ -29,7 +29,8 @@ class XdmArray;
  */
 class XsltExecutable {
 
-friend class XsltProcessor;
+friend class Xslt30Processor;
+
 
 public:
 
@@ -423,9 +424,9 @@ public:
 
 
 
-    //! Check for exception thrown.
+    //! Check for exception thrown and return the SaxonApiException object.
     /**
-    * @return cha*. Returns the exception message if thrown otherwise return nullptr
+    * @return SaxonApiException. Returns the exception message if thrown otherwise return nullptr
     */
     SaxonApiException* getException();
 
@@ -453,6 +454,7 @@ public:
      * @return char* - The error code of the i'th exception. The error code are related to the specific specification
     */
     const char * getErrorCode();
+
 
 
 

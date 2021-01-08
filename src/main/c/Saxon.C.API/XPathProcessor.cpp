@@ -467,7 +467,12 @@ const char * XPathProcessor::getErrorCode() {
 
 const char * XPathProcessor::getErrorMessage(){
 	if(exception == nullptr) {return nullptr;}
-	return exception->getErrorMessage();
+	return exception->getMessage();
+}
+
+    SaxonApiException * XPathProcessor::getException() {
+        return exception;
+
 }
 
     bool XPathProcessor::exceptionOccurred(){

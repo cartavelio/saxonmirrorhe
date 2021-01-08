@@ -258,6 +258,14 @@ public:
      * @return char* - The error code of the exception.
     */
     const char * getErrorCode();
+
+    //! Get the SaxonApiException object created when we have an error
+    /**
+     * After the execution of the processor if there is an error, then a SaxonApiException is created.
+     * NULL returned if there is no error.
+     * @return SaxomApiException object of the exception thrown.
+     */
+    SaxonApiException * getException();
     
 
 private:

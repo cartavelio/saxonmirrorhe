@@ -200,9 +200,9 @@ void XsltExecutable::setResultAsRawValue(bool option) {
     }
 }
 
-Xslt30Processor * Xslt30Processor::clone() {
-    Xslt30Processor * proc = new Xslt30Processor(*this);
-    return proc;
+XsltExecutable * XsltExecutable::clone() {
+    XsltExecutable * executable = new XsltExecutable(*this);
+    return executable;
 
 }
 

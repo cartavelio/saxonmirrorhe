@@ -166,7 +166,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 #endif
     	if(name != nullptr) {
     	    int s = properties.size();
-    		std:string skey = std::string(name);
+    		std::string skey = std::string(name);
     		properties.insert(std::pair<std::string, std::string>(skey, std::string((value == nullptr ? "" : value))));
 
     		if(s == properties.size()) {
@@ -506,9 +506,6 @@ const char* XQueryProcessor::checkException(){
 
 
 
-/*int XQueryProcessor::exceptionCount(){
-	if(proc->exception != nullptr){
-		return proc->exception->count();
-	}
-	return 0;
-}   */
+SaxonApiException* XQueryProcessor::getException() {
+    return exception;
+}

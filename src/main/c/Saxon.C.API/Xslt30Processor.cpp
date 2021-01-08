@@ -182,12 +182,8 @@ void Xslt30Processor::exceptionClear(){
     }
    }
 
-const char* Xslt30Processor::checkException() {
-	/*if(proc->exception == nullptr) {
-	 proc->exception = proc->checkForException(environi, cpp);
-	 }
-	 return proc->exception;*/
-	return proc->checkException(cppXT);
+SaxonApiException* Xslt30Processor::getException() {
+    return exception;
 }
 
 
@@ -358,7 +354,7 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
 		
 		if(source == nullptr) {
 			std::cerr << "Error in compileFromFile method - The Stylesheet file is nullptr" <<std::endl;
-			return;
+			return nullptr;
 		}
 		JParameters comboArrays;
 		comboArrays = SaxonProcessor::createParameterJArray2(parameters);
@@ -399,7 +395,7 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
 		
 		if(stylesheet == nullptr) {
 			std::cerr << "Error in compileFromFile method - The Stylesheet file is nullptr" <<std::endl;
-			return;
+			return nullptr;
 		}
 		JParameters comboArrays;
 		comboArrays = SaxonProcessor::createParameterJArray2(parameters);
