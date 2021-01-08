@@ -23,6 +23,8 @@ using net.sf.saxon.expr;
 using net.sf.saxon.lib;
 using net.sf.saxon.om;
 using java.util;
+using net.sf.saxon;
+using net.sf.saxon.resource;
 
 namespace Saxon.Api
 {
@@ -714,12 +716,43 @@ namespace Saxon.Api
     }
 
     /// <summary>
+    /// A ResourceFactory is used for constructing a particular type of resource
+    /// </summary>
+    public interface IResourceFactory {
+
+
+        /// <summary>
+        /// Create a Resource with given content
+        /// </summary>
+        /// <param name="proc">the Saxon Processor</param>
+        /// <returns>the resource</returns>
+        IResource MakeResource(Processor proc);
+
+    }
+
+    internal class ResourceFactoryWrapper : net.sf.saxon.lib.ResourceFactory
+    {
+        private IResourceFactory resourceFactory;
+        private Processor proc;
+
+        internal ResourceFactoryWrapper(IResourceFactory factory, Processor proc) {
+            this.resourceFactory = factory;
+        }
+
+        public JResource makeResource(JConfiguration c, AbstractResourceCollection.InputDetails details)
+        {
+            return new ResourceWrapper(resourceFactory.MakeResource(proc));
+        }
+    }
+
+    /// <summary>
     /// Resource Wrapper class for a Java Resource object
     /// </summary>
     public class Resource : IResource
     {
-        JResource resource;
+        internal JResource resource = null;
 
+        public Resource() { resource = null; }
 
         public Resource(JResource rc) {
             resource = rc;
@@ -739,6 +772,16 @@ namespace Saxon.Api
         {
             return XdmItem.FromGroundedValue(resource.getItem(context.context).materialize()).ItemAt(0);
         }
+    }
+
+    public class BinaryResource : Resource {
+
+
+        public BinaryResource(String href, String contentType, byte [] content) {
+            resource = new net.sf.saxon.resource.BinaryResource(href, contentType, content); 
+        }
+
+
     }
 
 
