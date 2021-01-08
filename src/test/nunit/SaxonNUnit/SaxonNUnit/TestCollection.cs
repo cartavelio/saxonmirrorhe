@@ -285,21 +285,22 @@ namespace SaxonNUnit
         }
     }
 
-        /*
-    [Test]
+        public class ResourceFactory: IResourceFactory
+        {
+            
+            public Resource MakeResource(Processor proc, AbstractResourceCollection.InputDetails details) {
+                return new JSONResource(details);
+            }
+        }
+
+        [Test]
     public void TestCustomMediaType()
     {
         try
         {
             Processor p = new Processor(true);
-            Configuration config = p.Implementation;
-            config.registerFileExtension("json", "personal/plain");
-            config.registerMediaType("personal/plain", new ResourceFactory()
-            {
-                public Resource makeResource(Configuration config, AbstractResourceCollection.InputDetails details) throws XPathException {
-                return new JSONResource(details);
-            }
-        });
+            p.RegisterFileExtension("json", "personal/plain");
+            p.RgisterMediaType("personal/plain", new ResourceFactory());
         XPathCompiler c = p.NewXPathCompiler();
         c.XPathLanguageVersion = "3.1";
         XPathExecutable exec = c.Compile("for $X in (collection(.))" +
@@ -313,7 +314,7 @@ namespace SaxonNUnit
             Assert.Fail(e.Message);
 }
     }
-    */
+    
 
         /*  [Test]
           public void TestMixedCollection()
@@ -611,9 +612,8 @@ namespace SaxonNUnit
                 this.proc = proc;
             }
             public IResourceCollection FindCollection(DynamicContext context, String collectionURI) {
-                /*return new DirectoryCollection(config, "http://example.com/collection", new File(ConfigTest.DATA_DIR + "trax/"),
-                    new URIQueryParameters("select=*.xml;recurse=yes", context.getConfiguration()));*/
-                return new DirectoryCollection(proc, "http://example.com/collection", ConfigTest.DATA_DIR + "trax/");
+                
+                return new DirectoryCollection(proc, "http://example.com/collection", ConfigTest.DATA_DIR + "trax/", new URIQueryParameters("select=*.xml;recurse=yes", proc));
             }
 
             public bool IsStable()
@@ -629,7 +629,7 @@ namespace SaxonNUnit
     try
     {
         Processor p = new Processor(true);
-                p.CollectionFinder = new MyCollectionFinder(p);
+        p.CollectionFinder = new MyCollectionFinder(p);
     XQueryCompiler c = p.NewXQueryCompiler();
     XQueryExecutable exec = c.Compile("for $x in collection(.) return " +
         "if($x instance of node()) then true() else false()");
