@@ -31,6 +31,7 @@ JNINativeMethod cppMethods[] =
 void testApplyTemplatesString1(Xslt30Processor * trans, sResultCount *sresult){
 	
   cout<<endl<<"Test: TransformToString1:"<<endl;
+    XsltExecutable * executable1 = trans->compileFromFile("test.xsl");
    trans->setInitialMatchSelectionAsFile("cat.xml");
    XsltExecutable * executable = trans->compileFromString("test.xsl");
 
@@ -96,6 +97,7 @@ void testApplyTemplatesString2(SaxonProcessor * processor, Xslt30Processor * tra
   cout<<endl<<"Test: TransformToString2:"<<endl;
   trans->clearParameters(true);
   trans->clearProperties();
+
     XdmNode * input = processor->parseXmlFromFile("cat.xml");
 
    if(input == NULL) {
