@@ -570,6 +570,17 @@ task "n_notices"(
     commandLine "${dotNetInstaller}",
       "/cc", "${buildDir}/n/${release}.iss"
   }
+
+  task "${release}nSigner"(
+    type: Exec,
+    dependsOn: ["${release}nInstaller"]
+  ) {
+    commandLine "signtool",
+      "sign", "/a",
+      "/tr", "http://rfc3161timestamp.globalsign.com/advanced",
+      "/td", "SHA256",
+      "${buildDir}/distributions/Saxon${RELEASE}${saxonMajorVersion}-${saxonMinorVersion}N-setup.exe"
+  }
 }
 
 task henDll(

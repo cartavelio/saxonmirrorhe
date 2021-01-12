@@ -202,6 +202,49 @@ if (currentBranch != builtBranch
 }
 
 // ============================================================
+// Private options required for signing jars. (Can't be
+// checked into the repository because they're sekrit.)
+def eToken = "THIS-IS-NOT-THE-ETOKEN"
+["${System.getenv("SAXON_SIGN_ETOKEN")}",
+ "${projectDir}/../../private/eToken/macos/eToken.cfg",
+ "z:/some/other/token/path"].each { path ->
+  if (eToken == "THIS-IS-NOT-THE-ETOKEN"
+      && new File(path).exists()) {
+    eToken = path
+  }
+}
+
+def signkeyNewAlias = "THIS-IS-NOT-THE-ALIAS"
+if (System.getenv("SAXON_SIGN_ALIAS") != null) {
+  signkeyNewAlias = System.getenv("SAXON_SIGN_ALIAS")
+}
+
+def signkeyPassword = "THIS-IS-NOT-THE-PASSWORD"
+if (System.getenv("SAXON_SIGN_PASSWORD") != null) {
+  signkeyPassword = System.getenv("SAXON_SIGN_PASSWORD")
+}
+
+def canSignJars = (!eToken.startsWith("THIS-IS-NOT")
+                   && !signkeyNewAlias.startsWith("THIS-IS-NOT")
+                   && !signkeyPassword.startsWith("THIS-IS-NOT"))
+
+def signjarArgs = null
+if (OperatingSystem.current().isWindows()) {
+  signjarArgs = ["jarsigner",
+                 "-keystore", "NONE",
+                 "-storetype", "PKCS11",
+                 "-tsa", "http://rfc3161timestamp.globalsign.com/advanced",
+                 "-providerClass", "sun.security.pkcs11.SunPKCS11",
+                 "-providerArg", eToken]
+} else {
+  signjarArgs = ["jarsigner",
+                 "-tsa", "http://rfc3161timestamp.globalsign.com/advanced",
+                 "-storetype", "PKCS11",
+                 "-providerClass", "sun.security.pkcs11.SunPKCS11",
+                 "-providerArg", eToken]
+}
+
+// ============================================================
 // Find jar files that need to be part of the build or release
 //
 def filesep = System.getProperty("file.separator")
@@ -1130,6 +1173,134 @@ task eejJarSql(
     include "net/sf/saxon/option/sql/*.class"
     include "com/saxonica/functions/sql/*.class"
   }
+}
+
+// ============================================================
+
+task signJars(
+  dependsOn: ["hejSignJars", "pejSignJars", "eejSignJars"],
+  description: "Sign all the jar files."
+) {
+  // Just a container to hang dependencies on
+}
+
+task hejSignJars(
+  description: "Sign the HEJ jar files"
+) {
+  // Just a container to hang dependencies on
+}
+
+task pejSignJars(
+  description: "Sign the PEJ jar files"
+) {
+  // Just a container to hang dependencies on
+}
+
+task eejSignJars(
+  description: "Sign the EEJ jar files"
+) {
+  // Just a container to hang dependencies on
+}
+
+// Create tasks for signing jars...
+["he", "pe", "ee"].each { rel ->
+  if (canSignJars) {
+    Task t = task "${rel}_jJarSignJar"(
+      type: Exec,
+      dependsOn: ["${rel}jJar"],
+      description: "Sign the ${rel.toUpperCase()}J jar file"
+    ) {
+      inputs.file "${buildDir}/libs/saxon-${rel}-${saxonVersion}.jar"
+      def args = signjarArgs +
+        ["${buildDir}/libs/saxon-${rel}-${saxonVersion}.jar",
+         signkeyNewAlias,
+         "-storepass", signkeyPassword]
+      commandLine args
+    }
+    tasks.findByName("${rel}jSignJars").dependsOn t
+
+    t = task "${rel}j_JarSignTests"(
+      type: Exec,
+      dependsOn: ["${rel}jJarTests"],
+      description: "Sign the ${rel.toUpperCase()}J test jar file"
+    ) {
+      inputs.file "${buildDir}/libs/saxon-${rel}-test-${saxonVersion}.jar"
+      def args = signjarArgs +
+        ["${buildDir}/libs/saxon-${rel}-test-${saxonVersion}.jar",
+         signkeyNewAlias,
+         "-storepass", signkeyPassword]
+      commandLine args
+    }
+    tasks.findByName("${rel}jSignJars").dependsOn t
+
+    t = task "${rel}j_JarSignXqj"(
+      type: Exec,
+      dependsOn: ["${rel}jJarXqj"],
+      description: "Sign the ${rel.toUpperCase()}J XQJ jar file"
+    ) {
+      inputs.file "${buildDir}/libs/saxon-${rel}-xqj-${saxonVersion}.jar"
+      def args = signjarArgs +
+        ["${buildDir}/libs/saxon-${rel}-xqj-${saxonVersion}.jar",
+         signkeyNewAlias,
+         "-storepass", signkeyPassword]
+      commandLine args
+    }
+    tasks.findByName("${rel}jSignJars").dependsOn t
+
+    if (rel != 'he') {
+      t = task "${rel}j_JarSignSql"(
+        type: Exec,
+        dependsOn: ["${rel}jJarSql"],
+        description: "Sign the ${rel.toUpperCase()} jar file"
+      ) {
+        inputs.file "${buildDir}/libs/saxon-${rel}-sql-${saxonVersion}.jar"
+        def args = signjarArgs +
+          ["${buildDir}/libs/saxon-${rel}-sql-${saxonVersion}.jar",
+           signkeyNewAlias,
+           "-storepass", signkeyPassword]
+        commandLine args
+      }
+      tasks.findByName("${rel}jSignJars").dependsOn t
+    }
+  } else {
+    Task t = task "${rel}j_JarSignJar"(
+      description: "Cannot sign the ${rel.toUpperCase()}J jar file"
+    ) {
+      doLast {
+        throw new GradleException("Jar signing is not configured.")
+      }
+    }
+    tasks.findByName("${rel}jSignJars").dependsOn t
+
+    t = task "${rel}j_JarSignTests"(
+      description: "Cannot sign the ${rel.toUpperCase()}J test jar file"
+    ) {
+      doLast {
+        throw new GradleException("Jar signing is not configured.")
+      }
+    }
+    tasks.findByName("${rel}jSignJars").dependsOn t
+
+    t = task "${rel}j_JarSignXqj"(
+      description: "Cannot sign the ${rel.toUpperCase()}J XQJ jar file"
+    ) {
+      doLast {
+        throw new GradleException("Jar signing is not configured.")
+      }
+    }
+    tasks.findByName("${rel}jSignJars").dependsOn t
+
+    if (rel != 'he') {
+      t = task "${rel}j_JarSignSql"(
+        description: "Cannot sign the ${rel.toUpperCase()} jar file"
+      ) {
+        doLast {
+          throw new GradleException("Jar signing is not configured.")
+        }
+      }
+      tasks.findByName("${rel}jSignJars").dependsOn t
+    }
+  }    
 }
 
 // ============================================================
