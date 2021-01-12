@@ -1,0 +1,143 @@
+<documentation-pages>
+    <!-- version    @number     = version number
+                    @dir        = name of folder containing documentation and contents pages
+                    @dynamic    = name of folder containing dynamic documentation
+                    @static     = path from @dir to folder containing static documentation
+                    
+    index-link  @dynamic    = dynamic documentation page name with extension 
+                @static     = static documentation page name with extension
+                
+    dynamic-page    @doc-entry = path from dynamic documentation page to dynamic documentation
+        paths from dynamic documentation page to the different types of documentations, dynamic and static 
+        
+    static-page     @doc-entry  = path from static documentation page to static documentation
+        paths from static documentation page to the different types of documentations, static only -->
+    <version number="10" dir="documentation" dynamic="documentation" static="../html/documentation">
+        <index-link dynamic="documentation.xml" static="documentation.html"/>        
+        <dynamic-page doc-entry="index.html#!">
+            <documentation type="Saxon" dynamic="index.html" static="../html/documentation/about/index.html"/>
+            <documentation type="Javadoc API" dynamic="index.html#!javadoc" static="../html/documentation/javadoc/index.html"/>
+            <documentation type=".NET API" dynamic="index.html#!dotnetdoc" static="../html/documentation/dotnetdoc/index.html"/> 
+            <saxonc type="Saxon/C 1.2" dynamic="../saxon-c/documentation/index.html"/>
+            <browser type="Saxon-JS 2" dynamic="../saxon-js/documentation/index.html"/>
+        </dynamic-page>
+        <static-page doc-entry="">
+            <documentation type="Saxon" static="about/index.html"/>
+            <documentation type="Javadoc API" static="javadoc/index.html"/>
+            <documentation type=".NET API" static="dotnetdoc/index.html"/> 
+            <saxonc type="Saxon/C 1.2" dynamic="http://www.saxonica.com/saxon-c/documentation/index.html"/>
+            <browser type="Saxon-JS 2" dynamic="http://www.saxonica.com/saxon-js/documentation/index.html"/>
+        </static-page>         
+    </version>
+    <version number="9.9" dir="documentation9.9" dynamic="documentation9.9" static="../html/documentation9.9">
+        <index-link dynamic="documentation.xml" static="documentation.html"/>        
+        <dynamic-page doc-entry="index.html#!">
+            <documentation type="Saxon" dynamic="index.html" static="../html/documentation9.9/about/index.html"/>
+            <documentation type="Javadoc API" dynamic="index.html#!javadoc" static="../html/documentation9.9/javadoc/index.html"/>
+            <documentation type=".NET API" dynamic="index.html#!dotnetdoc" static="../html/documentation9.9/dotnetdoc/index.html"/> 
+            <saxonc type="Saxon/C 1.2" dynamic="../saxon-c/documentation/index.html"/>
+            <browser type="Saxon-JS 1.2" dynamic="../saxon-js/documentation1.2/index.html"/>
+        </dynamic-page>
+        <static-page doc-entry="">
+            <documentation type="Saxon" static="about/index.html"/>
+            <documentation type="Javadoc API" static="javadoc/index.html"/>
+            <documentation type=".NET API" static="dotnetdoc/index.html"/> 
+            <saxonc type="Saxon/C 1.2" dynamic="http://www.saxonica.com/saxon-c/documentation/index.html"/>
+            <browser type="Saxon-JS 1.2" dynamic="http://www.saxonica.com/saxon-js/documentation1.2/index.html"/>
+        </static-page>         
+    </version>
+    <version number="9.8" dir="documentation9.8" dynamic="documentation9.8" static="../html/documentation9.8">
+        <index-link dynamic="documentation.xml" static="documentation.html"/>        
+        <dynamic-page doc-entry="index.html#!">
+            <documentation type="Saxon" dynamic="index.html" static="../html/documentation9.8/about/index.html"/>
+            <documentation type="Javadoc API" dynamic="index.html#!javadoc" static="../html/documentation9.8/javadoc/index.html"/>
+            <documentation type=".NET API" dynamic="index.html#!dotnetdoc" static="../html/documentation9.8/dotnetdoc/index.html"/> 
+            <saxonc type="Saxon/C 1.2" dynamic="../saxon-c/documentation/index.html"/>
+            <browser type="Saxon-JS 1.2" dynamic="../saxon-js/documentation1.2/index.html"/>
+        </dynamic-page>
+        <static-page doc-entry="">
+            <documentation type="Saxon" static="about/index.html"/>
+            <documentation type="Javadoc API" static="javadoc/index.html"/>
+            <documentation type=".NET API" static="dotnetdoc/index.html"/> 
+            <saxonc type="Saxon/C 1.2" dynamic="http://www.saxonica.com/saxon-c/documentation/index.html"/>
+            <browser type="Saxon-JS 1.2" dynamic="http://www.saxonica.com/saxon-js/documentation1.2/index.html"/>
+        </static-page>         
+    </version>
+    <version number="9.7" dir="documentation9.7" dynamic="documentation9.7" static="../html/documentation9.7">
+        <index-link dynamic="documentation.xml" static="documentation.html"/>        
+        <dynamic-page doc-entry="index.html#!">
+            <documentation type="Saxon" dynamic="index.html" static="../html/documentation9.7/about/index.html"/>
+            <documentation type="Javadoc API" dynamic="index.html#!javadoc" static="../html/documentation9.7/javadoc/index.html"/>
+            <documentation type=".NET API" dynamic="index.html#!dotnetdoc" static="../html/documentation9.7/dotnetdoc/index.html"/> 
+            <saxonc type="Saxon/C 1.0" static="../saxon-c/doc1.0/html/index.html"/>
+            <browser type="Saxon-JS 1.1" dynamic="../saxon-js/documentation1.1/index.html"/>
+            <browser type="Saxon-JS 1.0" dynamic="../saxon-js/documentation1.0/index.html"/>
+        </dynamic-page>
+        <static-page doc-entry="">
+            <documentation type="Saxon" static="about/index.html"/>
+            <documentation type="Javadoc API" static="javadoc/index.html"/>
+            <documentation type=".NET API" static="dotnetdoc/index.html"/> 
+            <saxonc type="Saxon/C 1.0" static="../../saxon-c/doc1.0/html/index.html"/>
+            <browser type="Saxon-JS 1.1" dynamic="http://www.saxonica.com/saxon-js/documentation1.1/index.html"/>
+            <browser type="Saxon-JS 1.0" dynamic="http://www.saxonica.com/saxon-js/documentation1.0/index.html"/>
+        </static-page>         
+    </version>
+    <version number="9.6" dir="documentation9.6" dynamic="documentation9.6" static="../html/documentation9.6">
+        <index-link dynamic="documentation.xml" static="documentation.html"/>        
+        <dynamic-page doc-entry="index.html#!">
+            <documentation type="Saxon" dynamic="index.html" static="../html/documentation9.6/about/index.html"/>
+            <documentation type="Javadoc API" dynamic="index.html#!javadoc" static="../html/documentation9.6/javadoc/index.html"/>
+            <documentation type=".NET API" dynamic="index.html#!dotnetdoc" static="../html/documentation9.6/dotnetdoc/index.html"/> 
+            <browser type="Saxon-CE 1.1" dynamic="../ce/user-doc/1.1/index.html" static="../../ce/user-doc/1.1/html/about/index.html"/>
+        </dynamic-page>
+        <static-page doc-entry=""> <!-- TODO? -->
+            <documentation type="Saxon" static="about/index.html"/>
+            <documentation type="Javadoc API" static="javadoc/index.html"/>
+            <documentation type=".NET API" static="dotnetdoc/index.html"/> 
+            <browser type="Saxon-CE 1.1" static="../../ce/user-doc/1.1/html/about/index.html"/>
+        </static-page>         
+    </version>
+    <version number="9.5" dir="documentation9.5" dynamic="documentation9.5" static="documentation9.5">
+        <index-link dynamic="documentation.xml" static="documentation.html"/>
+        <dynamic-page doc-entry="index.html#!">
+            <documentation type="Saxon" dynamic="index.html" static="about/index.html"/>
+            <documentation type="Javadoc API" dynamic="index.html#!javadoc" static="javadoc/index.html"/>
+            <documentation type=".NET API" dynamic="index.html#!dotnetdoc" static="dotnetdoc/index.html"/> 
+        </dynamic-page>
+        <static-page doc-entry="../../documentation9.5/">
+            <documentation type="Saxon" static="../../documentation9.5/about/index.html"/>
+            <documentation type="Javadoc API" static="../../documentation9.5/javadoc/index.html"/>
+            <documentation type=".NET API" static="../../documentation9.5/dotnetdoc/index.html"/> 
+        </static-page>         
+    </version>
+    <version number="9.4" dir="documentation9.4" dynamic="documentation9.4-demo" static="../html/documentation9.4">
+        <index-link dynamic="documentation.xml" static="documentation.html"/>
+        <dynamic-page doc-entry="../documentation9.4-demo/index.html#!">
+            <documentation type="Saxon" dynamic="index.html" static="../html/documentation9.4/about/index.html"/>
+            <documentation type="Javadoc API" dynamic="index.html#!javadoc" static="javadoc/index.html"/>
+            <documentation type=".NET API" static="dotnetdoc/index.html"/> 
+        </dynamic-page>
+        <static-page doc-entry="">
+            <documentation type="Saxon" static="about/index.html"/>
+            <documentation type="Javadoc API" static="../../documentation9.4/javadoc/index.html"/>
+            <documentation type=".NET API" static="../../documentation9.4/dotnetdoc/index.html"/> 
+        </static-page>         
+    </version>
+    <version number="9.3" dir="documentation9.3">
+        <index-link dynamic="index.html" static="index.html"/>        
+    </version>
+    <version number="9.2" dir="documentation9.2">
+        <index-link dynamic="index.html" static="index.html"/>        
+    </version>
+    <version number="9.1" dir="documentation9.1">
+        <index-link dynamic="index.html" static="index.html"/>        
+    </version>
+    <version number="9.0" dir="documentation9.0">
+        <index-link dynamic="index.html" static="index.html"/>        
+    </version>
+    <version number="8.9" dir="documentation8.9">
+        <index-link dynamic="index.html" static="index.html"/>        
+    </version>
+    
+</documentation-pages>
+

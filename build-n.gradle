@@ -1,3 +1,14 @@
+// To support the documentation builds, we need to be able to run
+// the CSharp compiler under Mono. This is not used for releases.
+def mono = null
+["${System.getenv("SAXON_MONO_FRAMEWORK")}/bin/mono",
+ "${monoFramework}/bin/mono",
+ "z:/some/other/mono/path"].each { path ->
+  if (mono == null && new File(path).exists()) {
+    mono = path
+  }
+}
+
 // Find C# compiler: the first path that exists in this list
 // will be used as the C# compiler.
 //
@@ -6,8 +17,14 @@ def csharpCompiler = null
  "z:/some/other/compiler/path"].each { csc ->
   // This only makes sense on Windows, so always using file:/// is ok
   if (csharpCompiler == null && pathExists(csc)) {
-    csharpCompiler = csc
+    csharpCompiler = [ csc ]
   }
+}
+
+def ikvmExecutable = ["${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe"]
+if (mono != null) {
+  ikvmExecutable = [mono, "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe"]
+  csharpCompiler = [mono, "${monoFramework}/lib/mono/4.5/csc.exe"]
 }
 
 def additionalIkvmOptions = []
@@ -560,12 +577,12 @@ task henDll(
   dependsOn: ["hen_setupDll"],
   description: "Build HE .dll with IKVM"
 ) {
-  inputs.files("${buildDir}/n/bin/he")
+  inputs.files("${buildDir}/n/bin/jar")
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
   outputs.file("build/n/bin/he/saxon-he-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
-  def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
+  def ikvmCommand = ikvmExecutable \
   + additionalIkvmOptions \
   + ["-out:${buildDir}/n/bin/he/saxon-he-${saxonMajorVersion}.${saxonMinorVersion}.dll",
      "-assembly:saxon-he-${saxonMajorVersion}.${saxonMinorVersion}",
@@ -591,12 +608,12 @@ task penDll(
   dependsOn: ["pen_setupDll"],
   description: "Build PE .dll with IKVM"
 ) {
-  inputs.files("${buildDir}/n/bin/pe")
+  inputs.files("${buildDir}/n/bin/jar")
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
   outputs.file("build/n/bin/pe/saxon-pe-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
-  def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
+  def ikvmCommand = ikvmExecutable \
   + additionalIkvmOptions \
   + ["-out:${buildDir}/n/bin/pe/saxon-pe-${saxonMajorVersion}.${saxonMinorVersion}.dll",
      "-assembly:saxon-pe-${saxonMajorVersion}.${saxonMinorVersion}",
@@ -626,12 +643,12 @@ task eenDll(
   dependsOn: ["een_setupDll"],
   description: "Build EE .dll with IKVM"
 ) {
-  inputs.files("${buildDir}/n/bin/ee")
+  inputs.files("${buildDir}/n/bin/jar")
   inputs.file("${buildDir}/xerces/xerces.jar")
   inputs.file("${ikvmDir}/saxondotnet.snk")
-  outputs.file("build/n/bin/ee/saxon-ee-${saxonMajorVersion}.${saxonMinorVersion}.dll")
+  outputs.file("${buildDir}/n/bin/ee/saxon-ee-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
-  def ikvmCommand = [ "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe" ] \
+  def ikvmCommand = ikvmExecutable \
   + additionalIkvmOptions \
   + ["-out:${buildDir}/n/bin/ee/saxon-ee-${saxonMajorVersion}.${saxonMinorVersion}.dll",
      "-assembly:saxon-ee-${saxonMajorVersion}.${saxonMinorVersion}",
@@ -687,10 +704,14 @@ task unjar_Resolver(
   type: Copy,
   description: "Unjar Resolver for .NET build"
 ) {
-  inputs.file("${resolverJar}")
-  outputs.files(fileTree("${buildDir}/xerces/org/apache/xml/resolver"))
-  from zipTree(file("${resolverJar}"))
+  from zipTree(file(resolverJar))
   into "${buildDir}/xerces"
+}
+// This task is always out of date because
+// .../build/xerces/META-INF/MANIFEST.MF has changed.
+// Skip this if it doesn't seem to be necessary
+unjar_Resolver.onlyIf {
+  !file("${buildDir}/xerces/org/apache/xml/resolver/Catalog.class").exists()
 }
 
 task rejar_Xerces(
@@ -698,6 +719,8 @@ task rejar_Xerces(
   dependsOn: ["unjar_XercesImpl", "unjar_Resolver"],
   description: "Unjar Xerces and Resolver for .NET build"
 ) {
+  inputs.files fileTree("${buildDir}/xerces/org")
+  outputs.file "${buildDir}/xerces/xerces.jar"
   archiveBaseName = "xerces"
   destinationDirectory = file("${buildDir}/xerces")
   from ("${buildDir}/xerces") {
@@ -771,10 +794,11 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/he/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/he/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
-                  "-target:library", "-doc:${buildDir}/n/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/he/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+         "-target:library",
+         "-doc:${buildDir}/n/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/he",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -799,10 +823,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/he/Transform.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/he/Transform.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/he/Transform.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/he",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -826,10 +850,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/he/Query.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/he/Query.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/he/Query.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/he",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -853,10 +877,11 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/pe/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/pe/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
-                  "-target:library", "-doc:${buildDir}/n/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/pe/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+         "-target:library",
+         "-doc:${buildDir}/n/saxon-pe-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/pe",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -881,10 +906,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/pe/Transform.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/pe/Transform.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/pe/Transform.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/pe",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -908,10 +933,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/pe/Query.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/pe/Query.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/pe/Query.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/pe",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -935,10 +960,11 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
-                  "-target:library", "-doc:${buildDir}/n/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+         "-target:library",
+         "-doc:${buildDir}/n/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/ee",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -963,10 +989,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/ee/Transform.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/ee/Transform.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/ee/Transform.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/ee",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -990,10 +1016,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/ee/Query.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/ee/Query.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/ee/Query.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/ee",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]
@@ -1017,10 +1043,10 @@ if (csharpCompiler == null) {
     outputs.file("${buildDir}/n/bin/ee/Validate.exe")
 
     doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/ee/Validate.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+      def args = csharpCompiler \
+      + ["-out:${buildDir}/n/bin/ee/Validate.exe",
+         "-target:exe",
+         "-keyfile:${ikvmDir}/saxondotnet.snk"]
       fileTree(dir: "${buildDir}/n/bin/ee",
                include: "*.dll").each { dll ->
         args += ["-reference:${dll}"]

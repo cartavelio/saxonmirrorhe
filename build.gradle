@@ -29,6 +29,8 @@ configurations {
   ikvm.extendsFrom(implementation)
   compileDotNet.extendsFrom(implementation)
   asmDotNet.extendsFrom(implementation)
+  documentation.extendsFrom(implementation)
+  jeldoclet.extendsFrom(implementation)
 }
 
 // Set saxonLicenseDir in gradle.properties, or from the
@@ -109,6 +111,19 @@ dependencies {
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
     files("${buildDir}/classes/${saxonEdition}j")
   )
+  documentation (
+    [group: "com.saxonica", name: "Saxon-EE", version: "10.3"],
+    files(saxonLicenseDir)
+  )
+  jeldoclet (
+    files("lib/jeldoc.jar"),
+    // I don't really understand why this has to be done explicitly...
+    files("${System.getProperty('java.home')}/../lib/tools.jar")
+  )
+}
+
+javadoc {
+  classpath = configurations.implementation
 }
 
 test {
@@ -140,6 +155,7 @@ ext {
   resolverJar = null
   version_h = saxonVersion.replace(".", "-")
   pathSeparator = System.getProperty("file.separator")
+  DSTAMP=new Date().format("yyyyMMdd")
 }
 
 public class DeleteFilesRecursively {
