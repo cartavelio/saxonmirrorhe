@@ -312,10 +312,10 @@ public class ComputedElement extends ElementCreator {
                     localName = qn.getLocalPart();
                     uri = qn.getURI();
                 } catch (IllegalArgumentException e) {
-                    throw new XPathException("Invalid EQName in computed attribute constructor: " + e.getMessage(), "XQDY0074");
+                    throw new XPathException("Invalid EQName in computed element constructor: " + e.getMessage(), "XQDY0074");
                 }
                 if (!NameChecker.isValidNCName(localName)) {
-                    throw new XPathException("Local part of EQName in computed attribute constructor is invalid", "XQDY0074");
+                    throw new XPathException("Local part of EQName in computed element constructor is invalid", "XQDY0074");
 
                 }
             } else {
