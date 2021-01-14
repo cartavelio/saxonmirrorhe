@@ -25,6 +25,20 @@
 	}
 
 
+SaxonApiException::SaxonApiException(const char * m){
+    if(m != nullptr) {
+        message = std::string(m);
+    } else {
+        message = "";
+    }
+
+    lineNumber = -1;
+    errorCode = "";
+    systemId = "";
+
+}
+
+
 	SaxonApiException::SaxonApiException(const char * m, const char * ec, const char * sysId, int linenumber){
 		if(m != nullptr) {
 		    message = std::string(m);

@@ -25,6 +25,18 @@ bool XdmItem::isAtomic(){
 
 
 
+bool XdmItem::isNode(){
+    return false;
+
+}
+
+bool XdmItem::isFunction(){
+   return false;
+
+}
+
+
+
 
    XdmItem * XdmItem::getHead(){ return this;}
 

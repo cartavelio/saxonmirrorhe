@@ -10,6 +10,8 @@
 
 
 #include "XdmItem.h"
+#include "XdmAtomicValue.h"
+#include "XdmNode.h"
 #include <string>
 
 #include <stdlib.h>

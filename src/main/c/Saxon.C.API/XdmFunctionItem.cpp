@@ -106,7 +106,7 @@
                        } else {
 
                                  jobjectArray argumentJArray = SaxonProcessor::createJArray(arguments, argument_length);
-                                 jobject result = (jobject)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmFunctionClass, xffmID, cpp_processor->proc, argumentJArray);
+                                 jobject result = (jobject)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmFunctionClass, xffmID, cpp_processor->proc, argumentJArray));
                                  if(argumentJArray != nullptr) {
                                     	SaxonProcessor::sxn_environ->env->DeleteLocalRef(argumentJArray);
 
@@ -147,7 +147,7 @@
                                         }
 
                                  } else {
-                                 	    return nullptr
+                                 	    return nullptr;
 
                                  }
 

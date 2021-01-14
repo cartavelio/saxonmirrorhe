@@ -158,8 +158,8 @@ void testTransformToString2b(SaxonProcessor * processor, XsltProcessor * trans){
     const char * output = trans->transformFileToString(NULL, "test-error.xsl");
    if(output == NULL) {
       printf("result is null \nCheck For errors:");
-      if(trans->exceptionCount()>0) {
-	cout<<trans->getErrorMessage(0)<<endl;
+      if(trans->exceptionOccurred()) {
+	cout<<trans->getErrorMessage()<<endl;
       }	
     }else {
       printf("%s", output);
@@ -280,8 +280,8 @@ trans->setSourceFromXdmNode((XdmNode*)input);
  const char * output = trans->transformToString();
   if(output == NULL) {
       printf("result is null \nCheck For errors:\n");
-      if(trans->exceptionCount()>0) {
-	cout<<"Error count="<<trans->exceptionCount()<<", "<<trans->getErrorMessage(0)<<endl;
+      if(trans->exceptionOccurred()) {
+	cout<<"Error count="<<trans->exceptionOccurred()<<", "<<trans->getErrorMessage()<<endl;
      }	
     }else {
       printf("%s", output);
@@ -586,8 +586,8 @@ void xmarkTest1(XsltProcessor  *proc){
 			cout<<"XdmNode returned"<<endl;
 		} else {
 			 printf("result is null \nCheck For errors:");
-             if(proc->exceptionCount()>0) {
-            	cout<<proc->getErrorMessage(0)<<endl;
+             if(proc->exceptionOccurred()) {
+            	cout<<proc->getErrorMessage()<<endl;
              }
 		}
 		proc->clearParameters(true);
@@ -607,8 +607,8 @@ void xmarkTest1(XsltProcessor  *proc){
  			cout<<"XdmNode returned"<<endl;
  		} else {
  			 printf("result is null \nCheck For errors:");
-              if(proc->exceptionCount()>0) {
-             	cout<<proc->getErrorMessage(0)<<endl;
+              if(proc->exceptionOccurred()) {
+             	cout<<proc->getErrorMessage()<<endl;
               }
  		}
  		proc->clearParameters(true);
@@ -627,8 +627,8 @@ void exampleSimple_xmark(XsltProcessor  *proc){
 			cout<<"XdmNode returned"<<endl;
 		} else {
 			 printf("result is null \nCheck For errors:");
-             if(proc->exceptionCount()>0) {
-            	cout<<proc->getErrorMessage(0)<<endl;
+             if(proc->exceptionOccurred()) {
+            	cout<<proc->getErrorMessage()<<endl;
              }
 		}
 		proc->clearParameters(true);
@@ -691,69 +691,6 @@ void testPackage2(XsltProcessor * trans){
     delete output;
 }
 
-void testCatalog(SaxonProcessor * proc) {
-
-Xslt30Processor * trans = proc->newXslt30Processor();
-  bool trace = false;
-    
- proc->setCatalog("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/catalog.xml", trace); 
-
-
- //trans->setSourceFromFile("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/example.xml");
-trans->setInitialMatchSelectionAsFile("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/example.xml"); 
-//trans->compileFromFile("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/test1.xsl");
- const char *result = trans->applyTemplatesReturningString("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/test1.xsl");//transformToString();
-
-if(result != NULL)
-std::cerr<<"testCatalog result= "<<result<<std::endl;
-
-}
-
-
-void *RunThread(void *args) {
-
-    struct arg_struct *argsi = (struct arg_struct *)args;
-    int threadid = argsi->id;
-    Xslt30Processor * trans = argsi->trans;
-    long tid;
-    tid = (long)threadid;
-
-    trans->attachThread();
-
-   trans->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
-
-    const char *result = trans->applyTemplatesReturningString();
-    cout<<" Result from THREAD ID: "<< tid << ", " << result<<endl;
-    delete result;
-    //pthread_exit(NULL);
-    trans->detachThread();
-}
-
-void testThreads (SaxonProcessor * processor) {
-    pthread_t threads[NUM_THREADS];
-    int rc;
-    int i;
-
-    Xslt30Processor *  trans = processor->newXslt30Processor();
-
-    trans->compileFromFile("../php/xsl/foo.xsl");
-    struct arg_struct args;
-    args.trans = trans;
-
-    for( i = 0; i < NUM_THREADS; i++ ) {
-        cout << "main() : creating thread, " << i << endl;
-        args.id = i;
-        rc = pthread_create(&threads[i], NULL, RunThread, (void *)&args);
-
-        if (rc) {
-            cout << "Error:unable to create thread," << rc << endl;
-            exit(-1);
-        }
-	(void) pthread_join(threads[i], NULL);
-    }
-  //  pthread_exit(NULL);
-}
-
 
 
 int main()
@@ -764,7 +701,7 @@ SaxonProcessor::jvmCreatedCPP = 1;
     cout<<"Test: XsltProcessor with Saxon version="<<processor->version()<<endl<<endl; 
     //processor->setcwd("/home");
    processor->setConfigurationProperty("http://saxon.sf.net/feature/generateByteCode","false");
-testCatalog(processor);
+
   
     XsltProcessor * trans = processor->newXsltProcessor();
    exampleSimple1Err(trans);

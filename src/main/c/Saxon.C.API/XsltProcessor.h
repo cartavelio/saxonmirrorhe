@@ -325,13 +325,20 @@ public:
     /**
      * After the execution of the processor if there is an error, then a SaxonApiException is created.
      * NULL returned if there is no error.
-     * @return SaxomApiException object of the exception thrown.
+     * @return SaxonApiException object of the exception thrown.
      */
     SaxonApiException * getException();
 
 
      //! Clear any exception thrown
     void exceptionClear();
+
+
+    //! Check for exception thrown.
+    /**
+    * @return char*. Returns the exception message if thrown otherwise return nullptr
+    */
+    const char* checkException();
 
 
      //! Get the ith error message if there are any error

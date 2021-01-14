@@ -229,7 +229,7 @@ public:
 
      //! Check for exception thrown.
 	/**
-	* @return cha*. Returns the exception message if thrown otherwise return nullptr
+	* @return char*. Returns the exception message if thrown otherwise return nullptr
 	*/
     const char* checkException();
 

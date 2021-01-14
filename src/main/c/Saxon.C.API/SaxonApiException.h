@@ -29,7 +29,7 @@ public:
           * A constructor. Create a SaxonApiException
           * @param message - The detail message string of this throwable.
           */
-     explicit SaxonApiException(const char * message);
+     SaxonApiException(const char * message);
 
     /**
      * A Copy constructor. Create a SaxonApiException

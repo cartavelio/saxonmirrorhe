@@ -29,11 +29,27 @@ public:
     virtual void incrementRefCount();
 
     virtual void decrementRefCount();
-    
+
+    /**
+     * Determine whether the item is an atomic value or some other type of item
+     *
+     * @return true if the item is an atomic value, false if it is a node or a function (including maps and arrays)
+     */
     virtual bool isAtomic();
 
+
+    /**
+     * Determine whether the item is a node or some other type of item
+     *
+     * @return true if the item is a node, false if it is an atomic value or a function (including maps and arrays)
+     */
     virtual bool isNode();
 
+    /**
+     * Determine whether the item is a function or some other type of item
+     *
+     * @return true if the item is a Xdm function item, false if it is an atomic value or a function (including maps and arrays)
+     */
     virtual bool isFunction();
 
     /**

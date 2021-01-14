@@ -101,6 +101,16 @@ public:
 
 	}
 
+    /**
+     * Determine whether the item is a node or some other type of item
+     *
+     * @return true if the item is a node, false if it is an atomic value or a function (including maps and arrays)
+     */
+    bool isNode(){
+        return true;
+    }
+
+
 
 	XdmNode** getChildren();
 
