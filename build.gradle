@@ -560,6 +560,9 @@ task hej_featureKeys(
     "-o:${projectDir}/src/main/java/net/sf/saxon/lib/establish-an-output-base-uri"
 }
 
+// Make sure we create feature keys before compiling Java
+compileJava.dependsOn hej_featureKeys
+
 task hej_setupPreprocess(
   type: Copy,
   dependsOn: ["hej_featureKeys", "record_branch"],
