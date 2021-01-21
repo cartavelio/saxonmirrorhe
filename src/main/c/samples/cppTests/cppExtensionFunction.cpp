@@ -1,22 +1,27 @@
-#include <sstream>
 
+
+
+#include "cppExtensionFunction.h"
+
+/*
+ * #include <sstream>
 #include "../../Saxon.C.API/SaxonProcessor.h"
 #include "../../Saxon.C.API/XdmValue.h"
 #include "../../Saxon.C.API/XdmItem.h"
 #include "../../Saxon.C.API/XdmNode.h"
 #include "../../Saxon.C.API/XdmAtomicValue.h"
-#include <string>
+#include <string> */
 
 // TODO: write test case for checking parameters which are null
 
 
-using namespace std;
+//using namespace std;
 
 
 /*
 * Test transform to String. Source and stylesheet supplied as arguments
 */
-jobject JNICALL cppNativeCall
+jobject JNICALL cppExtensionFunction::cppNativeCall
   (jstring funcName, jobjectArray arguments, jobjectArray argTypes){
 
 
@@ -124,7 +129,7 @@ jobject JNICALL cppNativeCall
 	return SaxonProcessor::sxn_environ->env->NewStringUTF("result from extension!!");
 }
 
-string nativeExtensionMethod(char * param1, int number){
+string cppExtensionFunction::nativeExtensionMethod(char * param1, int number){
 
 	if(param1!=NULL) {
 		//do nothing

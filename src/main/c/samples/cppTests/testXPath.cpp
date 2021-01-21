@@ -2,6 +2,7 @@
 #include "../../Saxon.C.API/XdmValue.h"
 #include "../../Saxon.C.API/XdmItem.h"
 #include "../../Saxon.C.API/XdmNode.h"
+#include "CppTestUtils.h"
 #include <string>
 
 using namespace std;
@@ -9,7 +10,7 @@ using namespace std;
 
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have morethan one XdmItem.
-void testXPathSingle(SaxonProcessor * processor, XPathProcessor * xpath){
+void testXPathSingle(SaxonProcessor * processor, XPathProcessor * xpath, sResultCount *sresult){
 
        cout<<endl<<"Test testXPathSingle:"<<endl; 
       XdmNode * input = processor->parseXmlFromString("<out><person>text1</person><person>text2</person><person>text3</person></out>");
@@ -19,6 +20,9 @@ void testXPathSingle(SaxonProcessor * processor, XPathProcessor * xpath){
 	
 	if(result == NULL) {
 		 printf("result is null \n");
+        sresult->failure++;
+        sresult->failureList.push_back("testXPathSingle");
+
 	} else {
 		cout<<"Number of items="<<result->size()<<endl;
 		cout<<"String Value of result="<<result->getStringValue()<<endl;
@@ -30,7 +34,7 @@ void testXPathSingle(SaxonProcessor * processor, XPathProcessor * xpath){
 }
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have morethan one XdmItem.
-void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath){
+void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResultCount *sresult){
      cout<<endl<<"Test testXPathValues:"<<endl; 
   	xpath->clearParameters(true);
   	xpath->clearProperties();
@@ -68,7 +72,7 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath){
 }
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have morethan one XdmItem.
-void testXPathAttrValues(SaxonProcessor * processor, XPathProcessor * xpath){
+void testXPathAttrValues(SaxonProcessor * processor, XPathProcessor * xpath, sResultCount *sresult){
      cout<<endl<<"Test testXPathValues1:"<<endl; 
   	xpath->clearParameters(true);
   	xpath->clearProperties();
@@ -114,7 +118,7 @@ void testXPathAttrValues(SaxonProcessor * processor, XPathProcessor * xpath){
 }
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have morethan one XdmItem.
-void testXPathOnFile(SaxonProcessor * processor, XPathProcessor * xpath){
+void testXPathOnFile(SaxonProcessor * processor, XPathProcessor * xpath, sResultCount *sresult){
     	 cout<<endl<<"Test testXPath with file source:"<<endl;
   	xpath->clearParameters(true);
   	xpath->clearProperties(); 
@@ -141,7 +145,7 @@ void testXPathOnFile(SaxonProcessor * processor, XPathProcessor * xpath){
 }
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have morethan one XdmItem.
-void testXPathOnFile2(XPathProcessor * xpath){
+void testXPathOnFile2(XPathProcessor * xpath, sResultCount *sresult){
     	 cout<<endl<<"Test testXPath with file source:"<<endl;
   	xpath->clearParameters(true);
   	xpath->clearProperties(); 
@@ -175,19 +179,31 @@ void testXPathOnFile2(XPathProcessor * xpath){
 
 }
 
-int main()
+int main4()
 {
 
     SaxonProcessor * processor = new SaxonProcessor(false);
     XPathProcessor * xpathProc = processor->newXPathProcessor();
-
+    sResultCount *sresult = new sResultCount();
     cout<<endl<<"Test: XPathProcessor with Saxon version="<<processor->version()<<endl; 
-    testXPathSingle(processor, xpathProc);   
-    testXPathValues(processor, xpathProc);
-    testXPathAttrValues(processor, xpathProc);
-    testXPathOnFile(processor, xpathProc);
-    testXPathOnFile2(xpathProc);
+    testXPathSingle(processor, xpathProc, sresult);
+    testXPathValues(processor, xpathProc, sresult);
+    testXPathAttrValues(processor, xpathProc, sresult);
+    testXPathOnFile(processor, xpathProc, sresult);
+    testXPathOnFile2(xpathProc, sresult);
 
+
+    std::cout << "\nTest Results - Number of tests= " << (sresult->success + sresult->failure) << ", Successes = "
+              << sresult->success << ",  Failures= " << sresult->failure << std::endl;
+
+    std::list<std::string>::iterator it;
+    std::cout << "Failed tests:" << std::endl;
+// Make iterate point to begining and incerement it one by one till it reaches the end of list.
+    for (it = sresult->failureList.begin(); it != sresult->failureList.end(); it++) {
+        //Print the contents
+        std::cout << it->c_str() << std::endl;
+
+    }
 
      processor->release();
     return 0;

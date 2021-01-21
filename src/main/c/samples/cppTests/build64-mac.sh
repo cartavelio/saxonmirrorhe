@@ -24,6 +24,8 @@ gcc -m64 -fPIC -I$jdkdir -I$jdkdir/unix  -c ../../Saxon.C.API/SaxonCGlue.c -o bi
 
 gcc -m64 -fPIC -I$jdkdir -I$jdkdir/unix  -c ../../Saxon.C.API/SaxonCXPath.c -o bin/SaxonCXPath.o $1 $2
 
+g++ -std=c++14 -m64 -fPIC -I$jdkdir -I$jdkdir/unix  -c cppExentionFunction.cpp -o bin/cppExentionFunction.o $1 $2
+
 g++ -std=c++14 -m64 -fPIC -I$jdkdir -I$jdkdir/unix  -c ../../Saxon.C.API/XdmValue.cpp -o bin/XdmValue.o $1 $2
 
 g++ -std=c++14 -m64 -fPIC -I$jdkdir -I$jdkdir/unix  -c ../../Saxon.C.API/XdmItem.cpp -o bin/XdmItem.o $1 $2

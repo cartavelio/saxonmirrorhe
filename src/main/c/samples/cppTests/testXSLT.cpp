@@ -8,24 +8,15 @@
 #include "../../Saxon.C.API/XdmValue.h"
 #include "../../Saxon.C.API/XdmItem.h"
 #include "../../Saxon.C.API/XdmNode.h"
-#include "cppExtensionFunction.cpp"
+#include "CppTestUtils.h"
+
 #include <string>
 
 // TODO: write test case for checking parameters which are null
 
 
 using namespace std;
-char fname[] = "_nativeCall";
-char funcParameters[] = "(Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;)Ljava/lang/Object;";
 
-JNINativeMethod cppMethods[] =
-{
-    {
-         fname,
-         funcParameters,
-         (void *)&cppNativeCall
-    }
-};
 
 
 /*
@@ -48,33 +39,6 @@ void testTransformToString1(XsltProcessor * trans){
 
 }
 
-/*
-* Test transform to String. Source and stylesheet supplied as arguments
-*/
-void testTransformToStringExtensionFunc(SaxonProcessor * processor, XsltProcessor * trans){
-	
-  cout<<endl<<"Test: TransformToStringExtensionFunc:"<<endl;
-trans->setProperty("extc", "home/ond1/work/svn/latest9.9-saxonc/samples/cppTests/cppExtensionFunction");
-
-bool nativeFound = processor->registerNativeMethods(SaxonProcessor::sxn_environ->env, "com/saxonica/functions/extfn/cpp/NativeCall",
-    cppMethods, sizeof(cppMethods) / sizeof(cppMethods[0]));
-if(nativeFound) {
-    const char * output = trans->transformFileToString("cat.xml", "testExtension.xsl");
-//XdmValue* output = trans->transformFileToValue("cat.xml", "testExtension.xsl");
-   if(output == NULL) {
-	SaxonProcessor::sxn_environ->env->ExceptionDescribe();
-      printf("result is null \n");
-
-    }else {
-      //printf("%s", output);
-      printf("result is OK \n");
-    }
-      fflush(stdout);
-	delete output;
-} else{
-    printf("native Class not foun");
-}
-}
 
 
 
@@ -431,18 +395,6 @@ void exampleSimple1Err(XsltProcessor  *proc){
 		proc->clearProperties();            
             }
 
-int exists(const char *fname)
-{
-    FILE *file;
-    file = fopen(fname, "r");
-    if (file)
-    {
-        fclose(file);
-        return 1;
-    }
-    return 0;
-}
-
 
   void exampleSimple2(XsltProcessor  *proc){
 		cout<<"<b>exampleSimple2:</b><br/>"<<endl;
@@ -452,7 +404,7 @@ int exists(const char *fname)
 		proc->setOutputFile(filename);
                 proc->transformToFile();
 				
-		if (exists(filename)) {
+		if (CppTestUtils::exists(filename)) {
 		    cout<<"The file $filename exists"<<endl;;
 		} else {
 		    cout<<"The file $filename does not exist"<<endl;
@@ -693,7 +645,7 @@ void testPackage2(XsltProcessor * trans){
 
 
 
-int main()
+int main2()
 {
 SaxonProcessor::jvmCreatedCPP = 1;
 
@@ -744,8 +696,6 @@ SaxonProcessor::jvmCreatedCPP = 1;
 
     xmarkTest2(trans);
 
-   //Available in PE and EE
-   //testTransformToStringExtensionFunc(processor, trans);
 
     delete trans;
 delete processor;

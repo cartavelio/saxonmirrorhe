@@ -3,21 +3,12 @@
 #include "../../Saxon.C.API/XdmItem.h"
 #include "../../Saxon.C.API/XdmNode.h"
 #include "../../Saxon.C.API/XdmAtomicValue.h"
+#include "CppTestUtils.h"
 #include <string>
 
 using namespace std;
 
-int exists(const char *fname)
-{
-    FILE *file;
-   file = fopen(fname, "r");
-    if (file)
-    {
-        fclose(file);
-        return 1;
-    }
-    return 0;
-}
+
 
 
 /*
@@ -44,7 +35,7 @@ return;
 	queryProc->setcwd(".");
      queryProc->executeQueryToFile(NULL, "catOutput.xml", NULL);
 
-		if (exists("catOutput.xml")) {
+		if (CppTestUtils::exists("catOutput.xml")) {
 		    cout<<"The file $filename exists"<<endl;;
 		} else {
 		    cout<<"The file $filename does not exist"<<endl;
@@ -237,7 +228,7 @@ void testXQueryLineNumber(){
 
 }
 
-int main()
+int main5()
 {
 
     SaxonProcessor * processor = new SaxonProcessor(false);

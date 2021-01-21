@@ -5,8 +5,8 @@
 #include "../../Saxon.C.API/XdmItem.h"
 #include "../../Saxon.C.API/XdmNode.h"
 #include "../../Saxon.C.API/XdmFunctionItem.h"
-#include "cppExtensionFunction.cpp"
-#include "cppTestUnits.h"
+#include "cppExtensionFunction.h"
+#include "CppTestUtils.h"
 #include <string>
 
 // TODO: write test case for checking parameters which are null
@@ -21,7 +21,7 @@ JNINativeMethod cppMethods[] =
                 {
                         fname,
                         funcParameters,
-                        (void *) &cppNativeCall
+                        (void *) &cppExtensionFunction::cppNativeCall
                 }
         };
 
@@ -508,32 +508,20 @@ void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
 }
 
 void exampleSimple1Err(Xslt30Processor *proc, sResultCount *sresult) {
-    cout << "ExampleSimple1 taken from PHP:" << endl;
+    cout << "ExampleSimple1Err taken from PHP:" << endl;
 
     XsltExecutable * executable = proc->compileFromFile("err.xsl");
-    executable->setInitialMatchSelectionAsFile("cat.xml");
-
-    const char *result = executable->applyTemplatesReturningString();
-    if (result != NULL) {
-        cout << result << endl;
-        sresult->failure++;
-        sresult->failureList.push_back("exampleSimple1Err");
-    } else {
+    if(proc->exceptionOccurred()) {
         cout << "Result expected as null " << endl;
         sresult->success++;
+    } else {
+
+        sresult->failure++;
+        sresult->failureList.push_back("exampleSimple1Err");
+
     }
     proc->clearParameters(true);
 
-}
-
-int exists(const char *fname) {
-    FILE *file;
-    file = fopen(fname, "r");
-    if (file) {
-        fclose(file);
-        return 1;
-    }
-    return 0;
 }
 
 
@@ -547,7 +535,7 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
     executable->setOutputFile(filename);
     executable->applyTemplatesReturningFile("output1.xml");
 
-    if (exists("output1.xml")) {
+    if (CppTestUtils::exists("output1.xml")) {
         cout << "The file $filename exists" << endl;
         remove("output1.xml");
         sresult->success++;
@@ -1235,27 +1223,38 @@ int main() {
 
     SaxonProcessor *processor = new SaxonProcessor(true);
     cout << "Test: Xslt30Processor with Saxon version=" << processor->version() << endl << endl;
-    //processor->setcwd("/home");
+    char cwd[256];
+    char buff[FILENAME_MAX]; //create string buffer to hold path
+    GetCurrentDir( buff, FILENAME_MAX );
+    processor->setcwd("/Users/ond1/work/development/git/saxon-dev/saxondev/src/main/c/samples/cppTests"); //set to the current working directory
     if (processor->isSchemaAwareProcessor()) {
 
         std::cerr << "Processor is Schema Aware" << std::endl;
     } else {
         std::cerr << "Processor is not Schema Aware" << std::endl;
     }
-    processor->setConfigurationProperty("http://saxon.sf.net/feature/generateByteCode", "false");
+
     sResultCount *sresult = new sResultCount();
     Xslt30Processor *trans = processor->newXslt30Processor();
     //testValidation(trans,sresult);
+    std::cerr << "cp0" << std::endl;
     testInitialTemplate(processor, trans, sresult);
+    std::cerr << "cp1" << std::endl;
     exampleSimple1Err(trans, sresult);
+    std::cerr << "cp2" << std::endl;
     exampleSimple1(trans, sresult);
+    std::cerr << "cp3" << std::endl;
+
     exampleSimple_xmark(trans, sresult);
+    std::cerr << "cp4" << std::endl;
     exampleSimple2(trans, sresult);
+    std::cerr << "cp5" << std::endl;
     exampleSimple3(processor, trans, sresult);
+    std::cerr << "cp6" << std::endl;
     exampleSimple3a(processor, trans, sresult);
-
+    std::cerr << "cp7" << std::endl;
     testApplyTemplatesString1(trans, sresult);
-
+    std::cerr << "cp8" << std::endl;
     testApplyTemplatesString2(processor, trans, sresult);
 
     testApplyTemplates2a(processor, trans, sresult);

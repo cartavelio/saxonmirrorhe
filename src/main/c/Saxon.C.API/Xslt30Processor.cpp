@@ -271,10 +271,10 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 	if (cStringmID == nullptr) {
 			cStringmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass,
 					"compileFromString",
-					"(Ljava/lang/String;Ljava/lang/String;Z;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XsltExecutable;");
+					"(Ljava/lang/String;Ljava/lang/String;Z[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XsltExecutable;");
 	}
 					
-	if (!cStringmID) {
+	if (cStringmID== nullptr) {
 		std::cerr << "Error: "<<getDllname() << ".compileFromString"
 				<< " not found\n" << std::endl;
 		return nullptr;
@@ -308,7 +308,7 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
 	static jmethodID cNodemID = nullptr;
     if(cNodemID == nullptr) {
 			cNodemID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass,"compileFromXdmNode",
-			"(Ljava/lang/String;Ljava/lang/Object;Z;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XsltExecutable;");
+			"(Ljava/lang/String;Ljava/lang/Object;Z[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XsltExecutable;");
 	}
 	if (!cNodemID) {
 		std::cerr << "Error: "<< getDllname() << ".compileFromXdmNode"
@@ -384,7 +384,7 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
 	if(cFilemID == nullptr) {
 	    cFilemID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass,
 					"compileFromFile",
-					"(Ljava/lang/String;Ljava/lang/String;Z;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XsltExecutable;");
+					"(Ljava/lang/String;Ljava/lang/String;Z[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XsltExecutable;");
 	}
 	if (!cFilemID) {
 		std::cerr << "Error: "<<getDllname() << ".compileFromFile"
@@ -392,31 +392,36 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
 		return nullptr;
 
 	} else {
-		
-		if(stylesheet == nullptr) {
-			std::cerr << "Error in compileFromFile method - The Stylesheet file is nullptr" <<std::endl;
-			return nullptr;
-		}
-		JParameters comboArrays;
-		comboArrays = SaxonProcessor::createParameterJArray2(parameters);
-		jobject executableObject = (jobject)(
-				SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, cFilemID,
-						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
-						SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet), jitCompilation, comboArrays.stringArray, comboArrays.objectArray));
-		if (!executableObject) {
-			proc->checkAndCreateException(cppClass);
-			return nullptr;
-     		
-		}
-		if (comboArrays.stringArray != nullptr) {
-			SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);
-			SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
-		}
+
+        if (stylesheet == nullptr) {
+            std::cerr << "Error in compileFromFile method - The Stylesheet file is nullptr" << std::endl;
+            return nullptr;
+        }
+        JParameters comboArrays;
+        comboArrays = SaxonProcessor::createParameterJArray2(parameters);
+        jobject executableObject = (jobject) (
+                SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, cFilemID,
+                                                                   SaxonProcessor::sxn_environ->env->NewStringUTF(
+                                                                           cwdXT.c_str()),
+                                                                   SaxonProcessor::sxn_environ->env->NewStringUTF(
+                                                                           stylesheet), jitCompilation,
+                                                                   comboArrays.stringArray, comboArrays.objectArray));
+        if (!executableObject) {
+            proc->checkAndCreateException(cppClass);
+            return nullptr;
+
+        }
+        if (comboArrays.stringArray != nullptr) {
+            SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);
+            SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
+        }
 
         XsltExecutable *executable;
         executable = new XsltExecutable(SaxonProcessor::sxn_environ->env->NewGlobalRef(executableObject), cwdXT);
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(executableObject);
-		return executable;
+
+        return executable;
+
 	}
 
 }

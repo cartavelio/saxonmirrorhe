@@ -1,6 +1,8 @@
 #include "../../Saxon.C.API/SaxonProcessor.h"
 #include "../../Saxon.C.API/XdmValue.h"
 #include "../../Saxon.C.API/XdmNode.h"
+#include "CppTestUtils.h"
+
 #include <string>
 
 using namespace std;
@@ -162,7 +164,7 @@ void testValidator6(SaxonProcessor * processor, SchemaValidator * val){
     }
 }
 
-int main()
+int main6()
 {
 
 	SaxonProcessor * processor = new SaxonProcessor(true);

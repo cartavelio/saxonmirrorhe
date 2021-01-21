@@ -823,223 +823,202 @@ PHP_METHOD(XsltProcessor, transformFileToString)
 	enumArrXdmValue
 };*/
 
+
 jobject JNICALL phpNativeCall
-  (JNIEnv *env, jobject object, jstring funcName, jobjectArray arguments, jobjectArray argTypes){
-	JNIEnv *senv = SaxonProcessor::sxn_environ->env;
-//	std::cerr<<"phpNative called"<<std::endl;
-	char *nativeString = (char *)senv->GetStringUTFChars(funcName, nullptr);
-	std::string nativeString2 = std::string(nativeString);
-	if(nativeString == nullptr) {
-		return nullptr;
-	}
-	int nativeStrLen = strlen(nativeString);
-//std::cerr<<"phpNative called. nativeString="<<nativeString<<", length="<<nativeStrLen<<std::endl;
-	zval function_name;
-	zval retval;
-	
-	int argLength = 0;
-	zvalArr * php_argv= nullptr;
-	if(arguments != nullptr) {
-		argLength = (int)senv->GetArrayLength(arguments);
-		php_argv = new zvalArr[argLength];
-	}
-	zval *params;
-	if(argLength>0) {
-		//(*params) = (zval**)malloc(sizeof(zval*) * argLength);
-		params =  new zval[argLength];
-	} else {
-		params = nullptr;
-	}
-	std::map<std::string, saxonTypeEnum> typeMap;
-	typeMap["node"] = enumNode;
-	typeMap["string"] = enumString;
-	typeMap["integer"] = enumInteger;
-	typeMap["double"] = enumDouble;
-	typeMap["float"] = enumFloat;
-	typeMap["boolean"] = enumBool;
-	typeMap["[xdmvalue"] = enumArrXdmValue;
-	sxnc_value* sresult = (sxnc_value *)malloc(sizeof(sxnc_value));
-	SaxonProcessor * nprocessor = new SaxonProcessor(true); //processor object created for XdmNode
+        (JNIEnv *env, jobject object, jstring funcName, jobjectArray arguments, jobjectArray argTypes){
+    JNIEnv *senv = SaxonProcessor::sxn_environ->env;
+    char *nativeString = (char *)senv->GetStringUTFChars(funcName, NULL);
+    //std::string nativeString2 = std::string(nativeString);
+    if(nativeString == NULL) {
+        return NULL;
+    }
+    int nativeStrLen = strlen(nativeString);
+    //std::cerr<<"phpNative called. nativeString="<<nativeString<<", length="<<nativeStrLen<<std::endl;
+    zval function_name;
+    zval retval;
+
+    int argLength = 0;
+    zval  *  params;
+    if(arguments != NULL) {
+        argLength = (int)senv->GetArrayLength(arguments);
+        //(*params) = (zval**)malloc(sizeof(zval*) * argLength);
+        params =  new zval[argLength];
+    } else {
+        params = NULL;
+    }
+    std::map<std::string, saxonTypeEnum> typeMap;
+    typeMap["node"] = enumNode;
+    typeMap["string"] = enumString;
+    typeMap["integer"] = enumInteger;
+    typeMap["double"] = enumDouble;
+    typeMap["float"] = enumFloat;
+    typeMap["boolean"] = enumBool;
+    typeMap["[xdmvalue"] = enumArrXdmValue;
+    sxnc_value* sresult = (sxnc_value *)malloc(sizeof(sxnc_value));
+
+    SaxonProcessor * nprocessor = new SaxonProcessor(true); //processor object created for XdmNode
 	jclass xdmValueForCppClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmValueForCpp");
 	jmethodID procForNodeMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmValueForCppClass, "getProcessor", "(Ljava/lang/Object;)Lnet/sf/saxon/s9api/Processor;");
-		
-//std::cerr<<"phpNative called cp2"<<std::endl;
 
-	for(int i=0; i<argLength;i++){
+    for(int i=0; i<argLength;i++){
+        jstring argType = (jstring)senv->GetObjectArrayElement(argTypes, i);
+        jobject argObj = senv->GetObjectArrayElement(arguments, i);
 
-		jstring argType = (jstring)senv->GetObjectArrayElement(argTypes, i);
-		jobject argObj = senv->GetObjectArrayElement(arguments, i);
+        const char * str = senv->GetStringUTFChars(argType,NULL);
+        const char *stri = NULL;
+        double dnumber = 0;
+        long lnumber = 0;
+        bool bvalue = false;
+        float fnumber = 0;
 
-		const char * str = senv->GetStringUTFChars(argType,nullptr);
-		const char *stri = nullptr;
-		double dnumber = 0;
-		long lnumber = 0;
-		bool bvalue = false;
-		float fnumber = 0;
-		
 
-         
-		struct xdmNode_object* vobj;
-		zend_object* zend_vobj;
-		XdmNode * node = nullptr;
-		std::map<std::string, saxonTypeEnum>::iterator it = typeMap.find(str);
-		if (it != typeMap.end()){
-			switch (it->second)
-			{
-				case enumNode:
-					if(!nprocessor->proc){
-						nprocessor->proc = (jobject)SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmValueForCppClass, procForNodeMID, argObj);
-					}
-					if (object_init_ex(php_argv[i]._val, xdmNode_ce) != SUCCESS) {
-						//error
-						
-						//php_error(E_WARNING,"error phpNative xdmNode creation failed");
-            					break;
-        				} 
-					node = new XdmNode(argObj);
-					node->setProcessor(nprocessor);
 
-					//MAKE_STD_ZVAL(php_argv[i]._val);
-					zend_vobj = Z_OBJ_P(php_argv[i]._val);
-	   				vobj = (xdmNode_object *)((char *)zend_vobj - XtOffsetOf(xdmNode_object, std));
-            				assert (vobj != nullptr);
-	    
-                			vobj->xdmNode = node;
-					break;
-				case enumString:
-					stri = senv->GetStringUTFChars((jstring)argObj, nullptr);
-					//ZVAL_STRING(php_argv[i]._val);
-					_ZVAL_STRING(php_argv[i]._val, stri);
-					break;
-				case enumInteger:
-					sresult->xdmvalue = argObj; 
-					lnumber = getLongValue(SaxonProcessor::sxn_environ, *sresult, 0);
+        struct xdmNode_object* vobj;
+        zend_object* zend_vobj;
+        XdmNode * node = NULL;
+        std::map<std::string, saxonTypeEnum>::iterator it = typeMap.find(str);
+        if (it != typeMap.end()){
+            switch (it->second)
+            {
+                case enumNode:
+                    std::cerr<<"enumNode path - cp0 - phpNtiveCall"<<std::endl;
+                    if(!nprocessor->proc){
+                        nprocessor->proc = (jobject)SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmValueForCppClass, procForNodeMID, argObj);
+                    }
+                    if (object_init_ex(&params[i], xdmNode_ce) != SUCCESS) {
+                        //error
 
-					//MAKE_STD_ZVAL(php_argv[i]._val);
-					ZVAL_LONG(php_argv[i]._val, lnumber);					
-					break;
-				case enumDouble:
-					sresult->xdmvalue = argObj; 
-					dnumber = getDoubleValue(SaxonProcessor::sxn_environ, *sresult, 0);
-					//MAKE_STD_ZVAL(php_argv[i]._val);
-					ZVAL_DOUBLE(php_argv[i]._val, dnumber);
-					break;
-				case enumFloat:
-					sresult->xdmvalue = argObj; 
-					fnumber = getFloatValue(SaxonProcessor::sxn_environ, *sresult, 0);
-					//MAKE_STD_ZVAL(php_argv[i]._val);
-					ZVAL_DOUBLE(php_argv[i]._val, fnumber);					
-					break;
-				case enumBool:
-					sresult->xdmvalue = argObj; 
-					bvalue = getBooleanValue(SaxonProcessor::sxn_environ, *sresult);
-					//MAKE_STD_ZVAL(php_argv[i]._val);
-					ZVAL_BOOL(php_argv[i]._val, bvalue);						
-					break;
-				case enumArrXdmValue:
-					//TODO - not currently supported
-					argLength--;
-					break;
-			}
-			senv->ReleaseStringUTFChars(argType, str);
-		} 
+                        //php_error(E_WARNING,"error phpNative xdmNode creation failed");
+                        break;
+                    }
+                    node = new XdmNode(argObj);
+                    node->setProcessor(nprocessor);
 
-}
+                    //MAKE_STD_ZVAL(php_argv[i]._val);
+                    zend_vobj = Z_OBJ_P(&params[i]);
+                    vobj = (xdmNode_object *)((char *)zend_vobj - XtOffsetOf(xdmNode_object, std));
+                    assert (vobj != NULL);
 
-	//TODO should free sresult but it causes memory corruption	
-		
-// array of zvals to execute
-    
-//std::cerr<<"phpNative called cp3"<<std::endl;
- 
-    	// convert all the values
-   	 for(int i = 0; i < argLength; i++) { 
+                    vobj->xdmNode = node;
+                    break;
+                case enumString:
+                    //sresult->xdmvalue = argObj;
+                    stri = stringValue(SaxonProcessor::sxn_environ, argObj);
+                    //stri = getStringValue(SaxonProcessor::sxn_environ, *sresult);
+                    //stri = senv->GetStringUTFChars((jstring)argObj, 0);
+                    //ZVAL_STRING(php_argv[i]._val);
+                    ZVAL_STRING(&params[i], stri);
+                    break;
+                case enumInteger:
+                    sresult->xdmvalue = argObj;
+                    lnumber = getLongValue(SaxonProcessor::sxn_environ, *sresult, 0);
 
-		params[i] = *php_argv[i]._val; }
-
-	//std::cerr<<"phpNative called cp3-1"<<std::endl;
-	//note: no implicit type conversion.
-
-	zval *argvv = nullptr;//xparams;
-	zval* callOnObj = nullptr;
-	//MAKE_STD_ZVAL(function_name);
-	//nativeString[nativeStrLen] = '\0';
-
-	ZVAL_STRING(&function_name, nativeString);
-//std::cerr<<"phpNative called cp3-2, argumentLen="<<argLength<<std::endl;
-	if(call_user_function_ex(CG(function_table), (zval*)callOnObj, &function_name, &retval, argLength, params, 0, nullptr) != SUCCESS)
-	{
- 	   zend_error(E_ERROR, "Function call failed");
-	}
-
-	if(Z_TYPE(retval) ==0){
-		zend_error(E_ERROR, "Function returned nullptr");
-	}
-
-	char * sVal = nullptr;
-	int len = 0;
-	jobject obj = nullptr;
-//TODO handle XdmValue wrapped object
-const char * objName = nullptr;
-xdmNode_object* ooth = nullptr;
-zend_object* zend_vobj2;
-bool bVal;
-	switch (Z_TYPE_P(&retval)) {
-            case IS_FALSE:
-		obj= booleanValue(SaxonProcessor::sxn_environ, false);
-                break;
-	    case IS_TRUE:
-                obj= booleanValue(SaxonProcessor::sxn_environ, true);
-                break;
-            
-            case IS_LONG:
-                obj= longValue(SaxonProcessor::sxn_environ, Z_LVAL_P(&retval));
-                break;
-            case IS_STRING:
-                sVal = Z_STRVAL_P(&retval);
-                len = Z_STRLEN_P(&retval);
-		obj = getJavaStringValue(SaxonProcessor::sxn_environ,estrndup(sVal, len));
-                break;
-            break;
-            case IS_NULL:
-                
-            	break;
-            case IS_DOUBLE:
-		obj = doubleValue(SaxonProcessor::sxn_environ, (double)Z_DVAL_P(&retval));
-		 break;
-            
-            case IS_ARRAY:
-            //break;
-            case IS_OBJECT:
-		
-            	objName =ZSTR_VAL(Z_OBJCE_P(&retval)->name);
-      
-
-      		if(strcmp(objName, "Saxon\\XdmNode")==0) {
-		
-			zend_vobj2 =  Z_OBJ_P(&retval);
-			ooth = (xdmNode_object *)((char *)zend_vobj2 - XtOffsetOf(xdmNode_object, std));
-
-        		if(ooth != nullptr) {
-            			obj = ooth->xdmNode->getUnderlyingValue();
-        		}
-      		}
-		break;
-            default:
-                obj = nullptr;
-                zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Unknown type specified in extension function", 0 TSRMLS_CC);
+                    //MAKE_STD_ZVAL(php_argv[i]._val);
+                    ZVAL_LONG(&params[i], lnumber);
+                    break;
+                case enumDouble:
+                    sresult->xdmvalue = argObj;
+                    dnumber = getDoubleValue(SaxonProcessor::sxn_environ, *sresult, 0);					//MAKE_STD_ZVAL(php_argv[i]._val);
+                    ZVAL_DOUBLE(&params[i], dnumber);
+                    break;
+                case enumFloat:
+                    sresult->xdmvalue = argObj;
+                    fnumber = getFloatValue(SaxonProcessor::sxn_environ, *sresult, 0);
+                    //MAKE_STD_ZVAL(php_argv[i]._val);
+                    ZVAL_DOUBLE(&params[i], fnumber);
+                    break;
+                case enumBool:
+                    sresult->xdmvalue = argObj;
+                    bvalue = getBooleanValue(SaxonProcessor::sxn_environ, *sresult);
+                    //MAKE_STD_ZVAL(php_argv[i]._val);
+                    ZVAL_BOOL(&params[i], bvalue);
+                    break;
+                case enumArrXdmValue:
+                    //TODO - not currently supported
+                    argLength--;
+                    break;
+            }
+            senv->ReleaseStringUTFChars(argType, str);
         }
 
-	//zend_printf("We have %i as type<br>", retval->type);
-	//*return_value = *retval;
-	//zval_copy_ctor(return_value);
-	//zval_ptr_dtor(&retval);
-	/*int cstrlen = Z_STRLEN_P(retval);
-	char * str = estrndup(Z_STRVAL_P(retval), cstrlen);
-	
-	jstring jstrBuf = SaxonProcessor::sxn_environ->env->NewStringUTF(str);*/
-	zval_ptr_dtor(&retval);
-	return obj;
+    }
+
+
+    free(sresult);
+
+
+    zval *argvv = NULL;
+    zval* callOnObj = NULL;
+    //MAKE_STD_ZVAL(function_name);
+    //nativeString[nativeStrLen] = '\0';
+
+    ZVAL_STRING(&function_name, nativeString);
+    if(call_user_function_ex(CG(function_table), (zval*)callOnObj, &function_name, &retval, argLength, params, 0, NULL) != SUCCESS)
+    {
+        zend_error(E_ERROR, "Function call failed");
+    }
+
+    if(Z_TYPE(retval) ==0){
+        zend_error(E_ERROR, "Function returned null");
+    }
+
+    char * sVal = NULL;
+    int len = 0;
+    jobject obj = NULL;
+//TODO handle XdmValue wrapped object
+    const char * objName = NULL;
+    xdmNode_object* ooth = NULL;
+    zend_object* zend_vobj2;
+    bool bVal;
+    switch (Z_TYPE_P(&retval)) {
+        case IS_FALSE:
+		obj= booleanValue(SaxonProcessor::sxn_environ, false);
+                break;
+        case IS_TRUE:
+            obj= booleanValue(SaxonProcessor::sxn_environ, true);
+            break;
+
+        case IS_LONG:
+            obj= longValue(SaxonProcessor::sxn_environ, Z_LVAL_P(&retval));
+            break;
+        case IS_STRING:
+            sVal = Z_STRVAL_P(&retval);
+            len = Z_STRLEN_P(&retval);
+            obj = getJavaStringValue(SaxonProcessor::sxn_environ,estrndup(sVal, len));
+            break;
+            break;
+        case IS_NULL:
+
+            break;
+        case IS_DOUBLE:
+            obj = doubleValue(SaxonProcessor::sxn_environ, (double)Z_DVAL_P(&retval));
+            break;
+
+        case IS_ARRAY:
+            //break;
+        case IS_OBJECT:
+
+            objName =ZSTR_VAL(Z_OBJCE_P(&retval)->name);
+
+
+            if(strcmp(objName, "Saxon\\XdmNode")==0) {
+
+                zend_vobj2 =  Z_OBJ_P(&retval);
+                ooth = (xdmNode_object *)((char *)zend_vobj2 - XtOffsetOf(xdmNode_object, std));
+
+                if(ooth != NULL) {
+                    obj = ooth->xdmNode->getUnderlyingValue();
+                }
+            }
+            break;
+        default:
+            obj = NULL;
+            zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Unknown type specified in extension function", 0 TSRMLS_CC);
+    }
+
+    delete nprocessor;
+    zval_ptr_dtor(&retval);
+    return obj;
 }
 
 
