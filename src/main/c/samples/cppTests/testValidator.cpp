@@ -164,7 +164,7 @@ void testValidator6(SaxonProcessor * processor, SchemaValidator * val){
     }
 }
 
-int main6()
+int main()
 {
 
 	SaxonProcessor * processor = new SaxonProcessor(true);

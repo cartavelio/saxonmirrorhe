@@ -228,7 +228,7 @@ void testXQueryLineNumber(){
 
 }
 
-int main5()
+int main()
 {
 
     SaxonProcessor * processor = new SaxonProcessor(false);

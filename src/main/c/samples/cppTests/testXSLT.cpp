@@ -645,7 +645,7 @@ void testPackage2(XsltProcessor * trans){
 
 
 
-int main2()
+int main()
 {
 SaxonProcessor::jvmCreatedCPP = 1;
 

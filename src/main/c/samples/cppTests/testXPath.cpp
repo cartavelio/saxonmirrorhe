@@ -179,7 +179,7 @@ void testXPathOnFile2(XPathProcessor * xpath, sResultCount *sresult){
 
 }
 
-int main4()
+int main()
 {
 
     SaxonProcessor * processor = new SaxonProcessor(false);
