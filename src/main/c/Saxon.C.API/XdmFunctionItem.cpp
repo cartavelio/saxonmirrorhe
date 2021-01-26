@@ -26,7 +26,7 @@
              				<< " not found\n" << std::endl;
              			return nullptr;
              		} else {
-             			jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallStaticIntMethod(xdmUtilsClass, xmID, value));
+             			jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID, value));
              			if(result) {
                         			const char * stri = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
 
