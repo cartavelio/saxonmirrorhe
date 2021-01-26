@@ -348,9 +348,8 @@ void testTrackingOfValueReference(SaxonProcessor *processor, Xslt30Processor *tr
 
     std::map<std::string, XdmValue *> parMap = trans->getParameters();
     if (parMap.size() > 0) {
-        cout << "Parameter size: " << parMap.size() << endl;
-        cout << "Parameter size: " << parMap.size()
-             << endl;//", Value:"<<trans->getParameters()["value0"]->getHead()->getStringValue()<<endl;
+        //cout << "Parameter size: " << parMap.size() << endl;
+        //cout << "Parameter size: " << parMap.size()<< endl;//", Value:"<<trans->getParameters()["value0"]->getHead()->getStringValue()<<endl;
         ostringstream name1;
         for (int i = 0; i < 10; i++) {
             name1 << "param:value" << i;
@@ -527,9 +526,19 @@ void exampleSimple1Err(Xslt30Processor *proc, sResultCount *sresult) {
 
 void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
     cout << "<b>exampleSimple2:</b><br/>" << endl;
-    //proc->setcwd("");
+    proc->setcwd("/Users/ond1/work/development/git/saxon-dev/saxondev/src/main/c/samples/cppTests");
 
     XsltExecutable * executable = proc->compileFromFile("../php/xsl/foo.xsl");
+    if(executable == NULL) {
+        sresult->failure++;
+        sresult->failureList.push_back("exampleSimple2");
+        cerr << "exampleSimple2 NULL found" << endl;
+        if (executable->exceptionOccurred()) {
+            cerr <<"exampleSimple2 error: "<< proc->getErrorMessage() << endl;
+        }
+        return;
+    }
+    cout << "exampleSimple2 cp0" << endl;
     executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
     const char *filename = "output1.xml";
     executable->setOutputFile(filename);
@@ -1220,8 +1229,8 @@ void testThreads (SaxonProcessor * processor) {
 
 int main() {
 
-
     SaxonProcessor *processor = new SaxonProcessor(true);
+    processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/local/lib/saxon-license.lic");
     cout << "Test: Xslt30Processor with Saxon version=" << processor->version() << endl << endl;
     char cwd[256];
     char buff[FILENAME_MAX]; //create string buffer to hold path

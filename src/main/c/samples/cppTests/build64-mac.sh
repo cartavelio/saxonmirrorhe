@@ -56,8 +56,6 @@ g++ -std=c++14 -m64 -fPIC -I$jdkdir -I$jdkdir/unix  -c ../../Saxon.C.API/XPathPr
 
 g++ -std=c++14 -m64 -fPIC -I$jdkdir  -I$jdkdir/unix -c ../../Saxon.C.API/SchemaValidator.cpp -o bin/SchemaValidator.o $1 $2
 
-g++ -std=c++14 -m64 -fPIC -I$jdkdir  -I$jdkdir/unix -c ../../Saxon.C.API/SaxonApiException.cpp -o bin/SaxonApiException.o $1 $2
-
 g++ -std=c++14  -m64 -fPIC -I$jdkdir  -I$jdkdir/unix bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltProcessor.o bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o testXSLT.cpp -o testXSLT -ldl  -L.  $1 $2
 
 g++ -std=c++14  -m64 -fPIC -I$jdkdir  -I$jdkdir/unix bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltProcessor.o bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o testXSLT30.cpp -o testXSLT30 -ldl  -L.  $1 $2
