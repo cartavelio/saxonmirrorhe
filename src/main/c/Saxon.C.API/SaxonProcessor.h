@@ -398,7 +398,7 @@ public:
      * get saxon resources directory
      * @deprecated - It is no longer required to explicitly specifiy the resource directory
     */
-    const char * getResourcesDirectory(){}
+    const char * getResourcesDirectory();
 
     /**
      * Set a configuration property specific to the processor in use. 

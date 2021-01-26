@@ -14,7 +14,7 @@
 #include "XdmArray.h"
 #include "XdmAtomicValue.h"
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #include <signal.h>
 #endif
@@ -60,6 +60,10 @@ void SaxonProcessor::exceptionClear() {
 SaxonProcessor::SaxonProcessor() {
     licensei = false;
     SaxonProcessor(false);
+}
+
+const char * SaxonProcessor::getResourcesDirectory() {
+    return NULL;
 }
 
 
