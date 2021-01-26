@@ -22,7 +22,7 @@ gcc -m64  -c ../../Saxon.C.API/SaxonCGlue.c -o bin/SaxonCGlue.o -ldl -lc $TURN_E
 
 gcc -m64  -c ../../Saxon.C.API/SaxonCXPath.c -o bin/SaxonCXPath.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
-g++ -std=c++14 -m64   -c cppExentionFunction.cpp -o bin/cppExentionFunction.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
+g++ -std=c++14 -m64   -c cppExensionFunction.cpp -o bin/cppExensionFunction.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
 g++  -std=c++14 -m64  -c ../../Saxon.C.API/XdmValue.cpp -o bin/XdmValue.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
