@@ -1241,7 +1241,7 @@ int main(int argc, char* argv[]) {
 
     const char * cwd = nullptr;
     if(argc > 0) {
-	cwd = argv[0];
+	cwd = argv[1];
     }
 
     SaxonProcessor *processor = new SaxonProcessor(true);
