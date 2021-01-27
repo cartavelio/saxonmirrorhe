@@ -526,7 +526,7 @@ void exampleSimple1Err(Xslt30Processor *proc, sResultCount *sresult) {
 
 void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
     cout << "<b>exampleSimple2:</b><br/>" << endl;
-    proc->setcwd("/Users/ond1/work/development/git/saxon-dev/saxondev/src/main/c/samples/cppTests");
+    //proc->setcwd("/Users/ond1/work/development/git/saxon-dev/saxondev/src/main/c/samples/cppTests");
 
     XsltExecutable * executable = proc->compileFromFile("../php/xsl/foo.xsl");
     if(executable == NULL) {
@@ -565,6 +565,16 @@ void exampleSimple3(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCou
     proc->clearParameters(true);
 
     XsltExecutable * executable = proc->compileFromFile("../php/xsl/foo.xsl");
+
+   if(executable == NULL) {
+	cout << "executable is NULL" <<endl;
+	if(proc->exceptionOccurred()) {
+		cout << proc->getErrorMessage() <<endl;
+		
+	}
+	return;
+
+   }
 
     XdmNode *xdmNode = saxonProc->parseXmlFromString("<doc><b>text value of out</b></doc>");
     if (xdmNode == NULL) {
@@ -1227,7 +1237,13 @@ void testThreads (SaxonProcessor * processor) {
  */
 
 
-int main() {
+int main(int argc, char* argv[]) {
+
+
+    const char * cwd = nullptr;
+    if(argc > 0) {
+	cwd = argv[0];
+    }
 
     SaxonProcessor *processor = new SaxonProcessor(true);
     processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/local/lib/saxon-license.lic");
@@ -1235,7 +1251,9 @@ int main() {
     char cwd[256];
     char buff[FILENAME_MAX]; //create string buffer to hold path
     GetCurrentDir( buff, FILENAME_MAX );
-    processor->setcwd("/Users/ond1/work/development/git/saxon-dev/saxondev/src/main/c/samples/cppTests"); //set to the current working directory
+    if(cwd != nullptr) {
+   	 processor->setcwd(cwd);//"/Users/ond1/work/development/git/saxon-dev/saxondev/src/main/c/samples/cppTests"); //set to the current working directory
+    }
     if (processor->isSchemaAwareProcessor()) {
 
         std::cerr << "Processor is Schema Aware" << std::endl;
