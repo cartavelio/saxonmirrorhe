@@ -587,7 +587,9 @@ const char *SaxonProcessor::version() {
 }
 
 void SaxonProcessor::setcwd(const char *dir) {
-    cwd = std::string(dir);
+    if(dir != nullptr) {
+        cwd = std::string(dir);
+    }
 }
 
 const char *SaxonProcessor::getcwd() {

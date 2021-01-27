@@ -31,10 +31,9 @@ JNINativeMethod cppMethods[] =
 */
 void testApplyTemplatesString1(Xslt30Processor *trans, sResultCount *sresult) {
 
-    cout << endl << "Test: TransformToString1:" << endl;
-    XsltExecutable *executable1 = trans->compileFromFile("test.xsl");
-    executable1->setInitialMatchSelectionAsFile("cat.xml");
-    XsltExecutable *executable = trans->compileFromString("test.xsl");
+    cout << endl << "Test: testApplyTemplatesString1:" << endl;
+    XsltExecutable *executable = trans->compileFromFile("test.xsl");
+    executable->setInitialMatchSelectionAsFile("cat.xml");
 
     const char *output = executable->applyTemplatesReturningString();
     if (output == NULL) {
@@ -1248,7 +1247,7 @@ int main(int argc, char* argv[]) {
     SaxonProcessor *processor = new SaxonProcessor(true);
     processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/local/lib/saxon-license.lic");
     cout << "Test: Xslt30Processor with Saxon version=" << processor->version() << endl << endl;
-    char cwd[256];
+    
     char buff[FILENAME_MAX]; //create string buffer to hold path
     GetCurrentDir( buff, FILENAME_MAX );
     if(cwd != nullptr) {
