@@ -153,6 +153,9 @@ public:
     ~SaxonProcessor();
 
 
+    const char * getErrorMessage();
+
+
     //! Get the Processor object. Method used in Python
     /* SaxonProcessor * getProcessor(){
      return this;

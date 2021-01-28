@@ -1363,6 +1363,14 @@ int main(int argc, char* argv[]) {
 
     sResultCount *sresult = new sResultCount();
     Xslt30Processor *trans = processor->newXslt30Processor();
+
+    if( trans == nullptr) {
+        if(processor->exceptionOccurred()) {
+            cout<< processor->checkAndCreateException()
+
+        }
+
+    }
     //testValidation(trans,sresult);
     std::cerr << "cp0" << std::endl;
     testInitialTemplate(processor, trans, sresult);

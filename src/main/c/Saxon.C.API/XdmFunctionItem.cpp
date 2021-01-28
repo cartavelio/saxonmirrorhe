@@ -34,6 +34,7 @@
                         			fname = std::string(stri);
                         			return stri;
                         }
+                        return nullptr;
              		}
 
           } else {
@@ -51,7 +52,7 @@
              		if (!bfmID) {
              			std::cerr << "Error: SaxonC." << "getArity"
              				<< " not found\n" << std::endl;
-             			return false;
+             			return 0;
              		} else {
              			jint result = (jint)(SaxonProcessor::sxn_environ->env->CallIntMethod(value, bfmID));
              			return (int)result;

@@ -49,6 +49,15 @@ SaxonApiException *SaxonProcessor::checkAndCreateException(jclass cppClass) {
     return nullptr;
 }
 
+const char *SaxonProcessor::getErrorMessage() {
+    if(exception == nullptr) {
+        exception =  SaxonProcessor::checkForExceptionCPP(SaxonProcessor::sxn_environ->env,
+                                                                            saxonCAPIClass,nullptr);
+    }
+    if (exception == nullptr) { return nullptr; }
+    return exception->getMessage();
+}
+
 void SaxonProcessor::exceptionClear() {
     SaxonProcessor::sxn_environ->env->ExceptionClear();
     /* if(exception != nullptr && clearCPPException) {
