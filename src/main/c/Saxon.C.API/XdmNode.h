@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Saxonica Limited.
+// Copyright (c) 2021 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,6 @@
 
 #include "XdmItem.h"
 #include <string.h>
-//#include "XdmValue.h"
 
 typedef enum eXdmNodeKind { DOCUMENT = 9, ELEMENT = 1, ATTRIBUTE = 2, TEXT = 3, COMMENT = 8, PROCESSING_INSTRUCTION = 7, NAMESPACE = 13, UNKNOWN = 0 } XDM_NODE_KIND;
 

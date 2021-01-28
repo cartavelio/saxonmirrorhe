@@ -118,7 +118,6 @@ if (!mID) {
 			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, functionItemClass)           == JNI_TRUE) {
 				xdmItem =  new XdmFunctionItem(resulti);
 			}
-			xdmItem->setProcessor(proc);
 			if(sizex == 1) {
 				value->decrementRefCount();
 				delete value;
@@ -128,7 +127,6 @@ if (!mID) {
 			
 			value->addXdmItem(xdmItem);
 		}
-		value->setProcessor(proc);
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
 		return value;
 	}
@@ -220,7 +218,6 @@ if (!mID) {
 		} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
 			return nullptr;
 		}
-		xdmItem->setProcessor(proc);
 		//SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
 		return xdmItem;
 	} else  {

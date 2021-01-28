@@ -96,7 +96,7 @@
                       std::cerr << "Error in XdmFunctionItem.call.  nullptr arguments found." << std::endl;
                       return nullptr;
           }
-          if(proc != nullptr) {
+
                        jclass xdmFunctionClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
                        static jmethodID xffmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmFunctionClass,"call",
                        "(Lnet/sf/saxon/s9api/Processor;[Lnet/sf/saxon/s9api/XdmValue)Lnet/sf/saxon/s9api/XdmValue");
@@ -122,26 +122,19 @@
 
                                         if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, atomicValueClass)           == JNI_TRUE) {
                                                 xdmItem =  new XdmAtomicValue(result);
-                                                xdmItem->setProcessor(proc);
                                                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                                                 return xdmItem;
 
                                         } else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, nodeClass)           == JNI_TRUE) {
                                                 xdmItem =  new XdmNode(result);
-                                                xdmItem->setProcessor(proc);
                                                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                                                 return xdmItem;
                                         } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
                                                 xdmItem =  new XdmFunctionItem(result);
-                                                xdmItem->setProcessor(proc);
                                                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                                                 return xdmItem;
                                         } else {
                                                 value = new XdmValue(result, true);
-                                                value->setProcessor(proc);
-                                                for(int z=0;z<value->size();z++) {
-                                                	value->itemAt(z)->setProcessor(proc);
-                                                }
                                                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                                                 return value;
                                         }
@@ -152,10 +145,6 @@
                                  }
 
                        }
-      } else {
-         std::cerr << "Error in XdmFunctionItem.call.  Processor not set on the xdmFunctionItem." << std::endl;
-         return nullptr;
-      }
 
     }
 

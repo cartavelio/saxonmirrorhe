@@ -56,7 +56,6 @@ public:
 
   XdmValue(SaxonProcessor * p) {
     initialize();
-    proc = p;
   }
 
 
@@ -163,11 +162,9 @@ public:
 
 	virtual void decrementRefCount();
 
-	void setProcessor(SaxonProcessor *p);
 
-
-	/*const char * getErrorMessage(int i);
-	const char * getErrorCode(int i);
+    /*const char * getErrorMessage(int i);
+    const char * getErrorCode(int i);
 int exceptionCount();*/
 	const char * checkFailures() { return failure; }
 
@@ -185,13 +182,12 @@ int exceptionCount();*/
 protected:
    inline void initialize() noexcept {
     jValues   = nullptr;
-    proc      = nullptr;
-    refCount  = 1;
+       refCount  = 1;
     valueType = nullptr;
     xdmSize   = 0;
   }
-	SaxonProcessor *proc;
-	char* valueType;  /*!< Cached. The type of the XdmValue */
+
+    char* valueType;  /*!< Cached. The type of the XdmValue */
 
 
 	std::vector<XdmItem*> values;

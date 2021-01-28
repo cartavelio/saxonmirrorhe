@@ -556,6 +556,7 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
         sresult->failureList.push_back("exampleSimple2");
     }
     proc->clearParameters(true);
+    executable->clearParameters(true);
 
 }
 
@@ -895,7 +896,7 @@ void testCallFunction(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount
     }
     delete valueArray[0];
     delete valueArray[1];
-    delete valueArray;
+    delete [] valueArray;
 }
 
 void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *sresult) {
@@ -904,6 +905,12 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans, sResultCo
     const char *source = "<?xml version='1.0'?>  <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0'>  <xsl:template match='*'>     <xsl:param name='a' as='xs:double'/>     <xsl:param name='b' as='xs:float'/>     <xsl:sequence select='., $a + $b'/>  </xsl:template>  </xsl:stylesheet>";
     cout << endl << "Test:testInitialTemplate" << endl;
     XsltExecutable * executable = trans->compileFromString(source);
+    if(executable == nullptr) {
+        if(trans->exceptionOccurred()) {
+            cout << "Error: "<< trans->getErrorMessage() << endl;
+        }
+        return;
+    }
     XdmNode *node = proc->parseXmlFromString("<e/>");
 
     executable->setResultAsRawValue(false);
@@ -928,7 +935,14 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *
     XsltExecutable * executable = trans->compileFromString(
             "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:err='http://www.w3.org/2005/xqt-errors'><xsl:template name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri('notice trailing space /out.xml')\"/> <xsl:message select='$uri'/><xsl:result-document href='{$uri}'><out/></xsl:result-document><xsl:catch><xsl:sequence select=\"'$err:code: ' || $err:code  || ', $err:description: ' || $err:description\"/></xsl:catch></xsl:try></xsl:template></xsl:stylesheet>");
 
-
+    if(executable == nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testResolveUri");
+        if(trans->exceptionOccurred()) {
+            cout << "Error: "<< trans->getErrorMessage() << endl;
+        }
+        return;
+    }
     XdmValue *value = executable->callTemplateReturningValue("go");
 
 
@@ -953,6 +967,16 @@ void testContextNotRoot(SaxonProcessor *proc, Xslt30Processor *trans, sResultCou
 
     XsltExecutable * executable = trans->compileFromString(
             "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template match='e'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>");
+
+    if(executable == nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testContextNotRoot");
+        if(trans->exceptionOccurred()) {
+            cout << "Error: "<< trans->getErrorMessage() << endl;
+        }
+        return;
+    }
+
     executable->setGlobalContextItem(node);
     if (node->getChildCount() > 0) {
         XdmNode *eNode = node->getChildren()[0]->getChildren()[0];
@@ -985,6 +1009,16 @@ void testContextNotRootNamedTemplate(SaxonProcessor *proc, Xslt30Processor *tran
 
     XsltExecutable * executable = trans->compileFromString(
             "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>");
+
+    if(executable == nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testContextNotRootNamedTemplate");
+        if(trans->exceptionOccurred()) {
+            cout << "Error: "<< trans->getErrorMessage() << endl;
+        }
+        return;
+    }
+
     executable->setGlobalContextItem(node);
     const char *result = executable->callTemplateReturningString("main");
 
@@ -1013,6 +1047,16 @@ void testContextNotRootNamedTemplateValue(SaxonProcessor *proc, Xslt30Processor 
 
     XsltExecutable * executable = trans->compileFromString(
             "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>");
+
+    if(executable == nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testContentNotRootNamedTemplateValue");
+        if(trans->exceptionOccurred()) {
+            cout << "Error: "<< trans->getErrorMessage() << endl;
+        }
+        return;
+    }
+
     executable->setGlobalContextItem(node);
     XdmValue *result = executable->callTemplateReturningValue("main");
 
@@ -1069,25 +1113,61 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
     Xslt30Processor * trans = proc->newXslt30Processor();
     XsltExecutable * stage1 = trans->compileFromString(
             "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template></xsl:stylesheet>");
+
+    if(stage1 == nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testPipeline");
+        if(trans->exceptionOccurred()) {
+            cout << "stage 1 Error: "<< trans->getErrorMessage() << endl;
+        }
+        return;
+    }
+
     XdmNode *inn = proc->parseXmlFromString("<z/>");
 
     XsltExecutable *stage2 = trans->compileFromString(
             "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template></xsl:stylesheet>");
 
+    if(stage2 == nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testPipeline");
+        if(trans->exceptionOccurred()) {
+            cout << "stage 2 Error: "<< trans->getErrorMessage() << endl;
+        }
+        return;
+    }
     XsltExecutable *stage3 = trans->compileFromString(
             "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template></xsl:stylesheet>");
 
+    if(stage3 == nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testPipeline");
+        if(trans->exceptionOccurred()) {
+            cout << "stage 3 Error: "<< trans->getErrorMessage() << endl;
+        }
+        return;
+    }
     XsltExecutable *stage4 = trans->compileFromString(
             "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template></xsl:stylesheet>");
+
+    if(stage3 == nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testPipeline");
+        if(trans->exceptionOccurred()) {
+            cout << "stage 4 Error: "<< trans->getErrorMessage() << endl;
+        }
+        return;
+    }
 
     XsltExecutable *stage5 = trans->compileFromString(
             "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template></xsl:stylesheet>");
 
-    if (stage2->exceptionOccurred()) {
-        const char *message = stage2->getErrorMessage();
-        cout << "exception-CP0=" << message << endl;
+    if(stage5 == nullptr) {
         sresult->failure++;
         sresult->failureList.push_back("testPipeline");
+        if(trans->exceptionOccurred()) {
+            cout << "stage 5 Error: "<< trans->getErrorMessage() << endl;
+        }
         return;
     }
 
@@ -1096,12 +1176,14 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
 
     XdmValue *d1 = stage1->applyTemplatesReturningValue();
     if (stage1->exceptionOccurred()) {
+        sresult->failure++;
+        sresult->failureList.push_back("testPipeline");
         cout << "Exception message=" << (stage1->getErrorMessage()) << endl;
         return;
     }
 
     if (d1 == nullptr) {
-        cout << "ERROR1" << endl;;
+        cout << "ERROR1 :"<< stage1->getErrorMessage() << endl;;
         sresult->failure++;
         sresult->failureList.push_back("testPipeline-0");
         return;
@@ -1140,6 +1222,10 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
     if(d3 == nullptr){
         sresult->failure++;
         sresult->failureList.push_back("testPipeline-3");
+        if (stage3->exceptionOccurred()) {
+            const char *message = stage3->getErrorMessage();
+            cout << "exception=" << message << endl;
+        }
       }
     stage4->setProperty("!indent", "no");
     stage4->setInitialMatchSelection(d3);
@@ -1147,6 +1233,10 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
     if(d3== nullptr){
         sresult->failure++;
         sresult->failureList.push_back("testPipeline-1");
+        if (stage4->exceptionOccurred()) {
+            const char *message = stage4->getErrorMessage();
+            cout << "exception=" << message << endl;
+        }
         return;
       }
     stage5->setProperty("!indent", "no");
@@ -1155,6 +1245,10 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
     if(sw==NULL){
         sresult->failure++;
         sresult->failureList.push_back("testPipeline-1");
+        if (stage5->exceptionOccurred()) {
+            const char *message = stage5->getErrorMessage();
+            cout << "exception=" << message << endl;
+        }
         return;
       }
     cout<<sw<<endl;
@@ -1174,6 +1268,13 @@ void testCatalog(SaxonProcessor * proc, sResultCount *sresult) {
 
 
     XsltExecutable  * executable = trans->compileFromFile("../php/catalog-test/test1.xsl");
+
+    if(executable == nullptr) {
+        if (trans->exceptionOccurred()) {
+            const char *message = trans->getErrorMessage();
+            cout << "exception=" << message << endl;
+        }
+    }
     //trans->setSourceFromFile("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/example.xml");
     executable->setInitialMatchSelectionAsFile("../php/catalog-test/example.xml");
 //trans->compileFromFile("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/test1.xsl");

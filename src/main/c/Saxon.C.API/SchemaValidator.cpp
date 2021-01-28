@@ -61,7 +61,6 @@ SchemaValidator::SchemaValidator(SaxonProcessor* p, std::string curr){
 		
 		if (result) {
 			XdmNode * node = new XdmNode(result);
-			node->setProcessor(proc);
 			return node;
 		}
 		exception = proc->checkAndCreateException(cppClass);
@@ -404,7 +403,6 @@ if (!mID) {
 	}
 	if (result) {
 		XdmNode * node = new XdmNode(result);
-		node->setProcessor(proc);
 		return node;
 	}
 

@@ -476,7 +476,6 @@ XdmValue * XsltProcessor::transformFileToValue(const char* sourcefile,
 		}
 		if (result) {
 			XdmNode * node = new XdmNode(result);
-			node->setProcessor(proc);
 			XdmValue * value = new XdmValue();
 			value->addXdmItem(node);
 			return value;

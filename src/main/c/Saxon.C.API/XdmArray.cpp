@@ -51,7 +51,7 @@ XdmValue* XdmArray::get(int n){
     } else {
     			jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbmID, n));
     			if(valueObj) {
-    				auto * newValue = new XdmValue((proc == nullptr ? nullptr : proc));
+    				auto * newValue = new XdmValue();
     				newValue->addUnderlyingValue(valueObj);
     				return newValue;
     			}

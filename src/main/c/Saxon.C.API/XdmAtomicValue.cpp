@@ -28,8 +28,7 @@
 	if(!valType.empty()) {
 		return valType.c_str();	
 	}
-	
-	if(proc != nullptr) {
+
 		jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
 		jmethodID xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getPrimitiveTypeName",
 					"(Lnet/sf/saxon/s9api/XdmAtomicValue;)Ljava/lang/String;");
@@ -48,9 +47,7 @@
 			return stri;
 		}
 
-	} 
-	return "Q{http://www.w3.org/2001/XMLSchema}anyAtomicType";	
-	
+	    return "Q{http://www.w3.org/2001/XMLSchema}anyAtomicType";
     }
 
     bool XdmAtomicValue::getBooleanValue(){

@@ -656,7 +656,6 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source) {
                                                                                         source));
     if (xdmNodei) {
         XdmNode *value = new XdmNode(xdmNodei);
-        value->setProcessor(this);
         return value;
     } else if (exceptionOccurred()) {
         exception = checkAndCreateException(saxonCAPIClass);
@@ -726,7 +725,6 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *source) {
     } else {
 
         XdmNode *value = new XdmNode(xdmNodei);
-        value->setProcessor(this);
         return value;
     }
     return nullptr;
@@ -749,7 +747,6 @@ XdmNode *SaxonProcessor::parseXmlFromUri(const char *source) {
         exception = checkAndCreateException(saxonCAPIClass);
     } else {
         XdmNode *value = new XdmNode(xdmNodei);
-        value->setProcessor(this);
         return value;
     }
     return nullptr;
@@ -806,7 +803,6 @@ XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str) {
     }
     jobject obj2 = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mssID_atomic, obj));
     XdmAtomicValue *value = new XdmAtomicValue(obj2, "xs:string");
-    value->setProcessor(this);
     return value;
 }
 
@@ -823,7 +819,6 @@ XdmAtomicValue *SaxonProcessor::makeStringValue(std::string str) {
     }
     jobject obj2 = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, msID_atomic, obj));
     XdmAtomicValue *value = new XdmAtomicValue(obj2, "xs:string");
-    value->setProcessor(this);
     return value;
 }
 
@@ -839,7 +834,6 @@ XdmAtomicValue *SaxonProcessor::makeIntegerValue(int i) {
     }
     jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, miiID_atomic, (jlong) i));
     XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}integer");
-    value->setProcessor(this);
     return value;
 }
 
@@ -851,7 +845,6 @@ XdmAtomicValue *SaxonProcessor::makeDoubleValue(double d) {
     }
     jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mdID_atomic, (jdouble) d));
     XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}double");
-    value->setProcessor(this);
     return value;
 }
 
@@ -863,7 +856,6 @@ XdmAtomicValue *SaxonProcessor::makeFloatValue(float d) {
     }
     jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mfID_atomic, (jfloat) d));
     XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}float");
-    value->setProcessor(this);
     return value;
 }
 
@@ -875,7 +867,6 @@ XdmAtomicValue *SaxonProcessor::makeLongValue(long l) {
     }
     jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mlID_atomic, (jlong) l));
     XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}long");
-    value->setProcessor(this);
     return value;
 }
 
@@ -887,21 +878,18 @@ XdmAtomicValue *SaxonProcessor::makeBooleanValue(bool b) {
     }
     jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mID_atomic, (jboolean) b));
     XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}boolean");
-    value->setProcessor(this);
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeQNameValue(const char *str) {
     jobject val = xdmValueAsObj(SaxonProcessor::sxn_environ, "QName", str);
     XdmAtomicValue *value = new XdmAtomicValue(val, "QName");
-    value->setProcessor(this);
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei, const char *strValue) {
     jobject obj = xdmValueAsObj(SaxonProcessor::sxn_environ, typei, strValue);
     XdmAtomicValue *value = new XdmAtomicValue(obj, typei);
-    value->setProcessor(this);
     return value;
 }
 
@@ -957,7 +945,6 @@ XdmArray *SaxonProcessor::makeArray(short *input, int length) {
         exception = checkAndCreateException(saxonCAPIClass);
     } else {
         XdmArray *value = new XdmArray(xdmArrayi);
-        value->setProcessor(this);
         return value;
     }
     return nullptr;
@@ -1000,7 +987,6 @@ XdmArray *SaxonProcessor::makeArray(int *input, int length) {
         exception = checkAndCreateException(saxonCAPIClass);
     } else {
         XdmArray *value = new XdmArray(xdmArrayi);
-        value->setProcessor(this);
         return value;
     }
     return nullptr;
@@ -1043,7 +1029,6 @@ XdmArray *SaxonProcessor::makeArray(long *input, int length) {
         exception = checkAndCreateException(saxonCAPIClass);
     } else {
         XdmArray *value = new XdmArray(xdmArrayi);
-        value->setProcessor(this);
         return value;
     }
     return nullptr;
@@ -1086,7 +1071,6 @@ XdmArray *SaxonProcessor::makeArray(bool *input, int length) {
         exception = checkAndCreateException(saxonCAPIClass);
     } else {
         XdmArray *value = new XdmArray(xdmArrayi);
-        value->setProcessor(this);
         return value;
     }
     return nullptr;
@@ -1130,14 +1114,13 @@ XdmArray *SaxonProcessor::makeArray(const char **input, int length) {
         checkAndCreateException(saxonCAPIClass);
     } else {
         XdmArray *value = new XdmArray(xdmArrayi);
-        value->setProcessor(this);
         return value;
     }
     return nullptr;
 }
 
 
-XdmMap *makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
+XdmMap *SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
     jobjectArray keyArray = nullptr;
     jobjectArray valueArray = nullptr;
     jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env,
@@ -1175,10 +1158,14 @@ XdmMap *makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
 
         jobject results = (jobject) (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID,
                                                                                               keyArray, valueArray));
-
+        if (exceptionOccurred() || !results) {
+            checkAndCreateException(saxonCAPIClass);
+        } else {
+            return new XdmMap(results);
+        }
     }
 
-
+    return nullptr;
 }
 
 #endif

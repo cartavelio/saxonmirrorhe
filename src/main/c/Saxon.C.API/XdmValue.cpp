@@ -55,10 +55,6 @@ const char * XdmValue::toString() {
 
 }
 
-void XdmValue::setProcessor(SaxonProcessor *p) { 
-		proc = p;
-	}
-
 
 int XdmValue::size() {
 	return xdmSize;
@@ -145,7 +141,7 @@ XdmValue::~XdmValue() {
 		values.clear();
 	}
 	if (valueType != nullptr) { delete valueType; }
-	if (jValues && proc != nullptr) {
+	if (jValues) {
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(jValues);  //TODO check - this maybe should be DeleteGlobalRef  - check where it is created
 	}
 	xdmSize = 0;
@@ -167,7 +163,6 @@ void XdmValue::addXdmItem(XdmItem* val) {
 
 void XdmValue::addUnderlyingValue(jobject val) {
 	XdmItem * valuei = new XdmItem(val);
-	valuei->setProcessor(proc);
 	values.push_back(valuei);
 	xdmSize++;
 	jValues = nullptr; //TODO clear jni array from memory if needed

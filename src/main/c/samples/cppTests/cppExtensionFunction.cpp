@@ -84,9 +84,7 @@ jobject JNICALL cppExtensionFunction::cppNativeCall
 						nprocessor->proc = (jobject)SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmValueForCppClass, procForNodeMID, argObj);
 					}
 					params[i] = new XdmNode(argObj);
-					params[i]->setProcessor(nprocessor);
-					
-					
+
 					break;
 				case enumString:
 					stri = senv->GetStringUTFChars((jstring)argObj, NULL);

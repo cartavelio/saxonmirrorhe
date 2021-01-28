@@ -347,13 +347,11 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
 		if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, atomicValueClass)           == JNI_TRUE) {
 				xdmItem = new XdmAtomicValue(result);
-				xdmItem->setProcessor(proc);
 				SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
 				return xdmItem;
 
 			} else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, nodeClass)           == JNI_TRUE) {
 				xdmItem = new XdmNode(result);
-				xdmItem->setProcessor(proc);
 				SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
 				return xdmItem;
 			
@@ -364,15 +362,9 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
                 return nullptr;// xdmItem;
 			} else {
 				value = new XdmValue(result, true);
-				value->setProcessor(proc);
-				for(int z=0;z<value->size();z++) {
-					value->itemAt(z)->setProcessor(proc);
-				}
 				return value;
 			}
 			value = new XdmValue();
-			value->setProcessor(proc);
-			xdmItem->setProcessor(proc);
 			value->addXdmItem(xdmItem);
 			return value;
      } else {

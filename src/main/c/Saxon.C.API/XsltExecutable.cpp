@@ -324,14 +324,13 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
     static jmethodID atmID = nullptr;
 
     if (atmID == nullptr) {
-        (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
+        atmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
                                                                         "applyTemplatesReturningFile",
                                                                         "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
-
     }
 
     if (!atmID) {
-        std::cerr << "Error: " << getDllname() << "applyTemplatesAsFile" << " not found\n"
+        std::cerr << "Error: " << getDllname() << ".applyTemplatesReturningFile" << " not found\n"
                   << std::endl;
 
     } else {
@@ -364,10 +363,13 @@ const char *XsltExecutable::applyTemplatesReturningString() {
     }
 
 
-    jmethodID atsmID =
-            (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
-                                                                            "applyTemplatesReturningString",
-                                                                            "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/Object;[Ljava/lang/String;[Ljava/lang/Object;)[B");
+    static jmethodID atsmID = nullptr;
+
+    if (atsmID == nullptr) {
+        atsmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
+                                                                             "applyTemplatesReturningString",
+                                                                             "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/Object;[Ljava/lang/String;[Ljava/lang/Object;)[B");
+    }
     if (!atsmID) {
         std::cerr << "Error: " << getDllname() << "applyTemplatesAsString" << " not found\n"
                   << std::endl;
@@ -413,13 +415,13 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
     }
 
 
-    static jmethodID atsmID = nullptr;
-    if (atsmID == nullptr) {
-        atsmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
+    static jmethodID atsvmID = nullptr;
+    if (atsvmID == nullptr) {
+        atsvmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
                                                                                  "applyTemplatesReturningValue",
                                                                                  "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/Object;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmValue;");
     }
-    if (!atsmID) {
+    if (!atsvmID) {
         std::cerr << "Error: " << getDllname() << "applyTemplatesAsValue" << " not found\n"
                   << std::endl;
 
@@ -429,7 +431,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
 
 
         // jstring result = nullptr;
-        jobject result = (jobject) (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, atsmID,
+        jobject result = (jobject) (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, atsvmID,
                                                                                              SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                                      cwdXE.c_str()),
                                                                                              executableObject,
@@ -534,10 +536,13 @@ const char *
 XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue **arguments, int argument_length) {
 
 
-    static jmethodID afsmID =
-            (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
-                                                                            "callFunctionReturningString",
-                                                                            "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+    static jmethodID afsmID = nullptr;
+
+    if(afsmID == nullptr) {
+        (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
+                                                                        "callFunctionReturningString",
+                                                                        "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+    }
     if (!afsmID) {
         std::cerr << "Error: " << getDllname() << "callFunctionReturningString" << " not found\n"
                   << std::endl;
@@ -655,10 +660,13 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
 void XsltExecutable::callTemplateReturningFile(const char *templateName, const char *outfile) {
 
 
-    static jmethodID ctmID =
-            (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
-                                                                            "callTemplateReturningFile",
-                                                                            "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
+    static jmethodID ctmID = nullptr;
+
+    if(ctmID == nullptr) {
+        ctmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
+                                                                        "callTemplateReturningFile",
+                                                                        "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
+    }
     if (!ctmID) {
         std::cerr << "Error: " << getDllname() << "callTemplateReturningFile" << " not found\n"
                   << std::endl;
@@ -691,10 +699,13 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
 const char *XsltExecutable::callTemplateReturningString(const char *templateName) {
 
 
-    jmethodID ctsmID =
-            (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
-                                                                            "callTemplateReturningString",
-                                                                            "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+    jmethodID ctsmID = nullptr;
+
+    if(ctsmID == nullptr) {
+        ctsmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
+                                                                        "callTemplateReturningString",
+                                                                        "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+    }
     if (!ctsmID) {
         std::cerr << "Error: " << getDllname() << "callTemplateReturningString" << " not found\n"
                   << std::endl;
@@ -737,13 +748,13 @@ const char *XsltExecutable::callTemplateReturningString(const char *templateName
 XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 
 
-    static jmethodID ctsmID = nullptr;
-    if (ctsmID == nullptr) {
-        ctsmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
+    static jmethodID ctsvmID = nullptr;
+    if (ctsvmID == nullptr) {
+        ctsvmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
                                                                                  "callTemplateReturningValue",
                                                                                  "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmValue;");
     }
-    if (!ctsmID) {
+    if (!ctsvmID) {
         std::cerr << "Error: " << getDllname() << "callTemplateReturningValue" << " not found\n"
                   << std::endl;
 
@@ -753,7 +764,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 
 
         jstring result = nullptr;
-        jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, ctsmID,
+        jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, ctsvmID,
                                                                                           SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                                   cwdXE.c_str()),
                                                                                           executableObject,
@@ -935,9 +946,12 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
 void XsltExecutable::setupXslMessage(bool create, const char * filename) {
     if (create) {
 
-        static jmethodID messageID =   (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(messageListenerClass,
-                                                                                    "<init>",
-                                                                                    "(Ljava/lang/String;Ljava/lang/String;)V");
+        static jmethodID messageID =   nullptr;
+        if(messageID == nullptr) {
+            messageID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(messageListenerClass,
+                                                                                  "<init>",
+                                                                                  "(Ljava/lang/String;Ljava/lang/String;)V");
+        }
         if (!messageID) {
             std::cerr << "Error: "<<"SaxonCMessageListener" << " in " <<getDllname() << " not found\n"
                       << std::endl;

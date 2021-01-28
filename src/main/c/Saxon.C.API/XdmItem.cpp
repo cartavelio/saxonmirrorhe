@@ -97,7 +97,7 @@ jobject XdmItem::getUnderlyingValue(){
 XdmItem::~XdmItem() {
     //std::cerr<<std::endl<<"XdmItem destructor called, refCount"<<getRefCount()<<std::endl;
     if(getRefCount()<1){
-        if(value !=nullptr && proc != nullptr && SaxonProcessor::jvmCreatedCPP>0) {
+        if(value !=nullptr && SaxonProcessor::jvmCreatedCPP>0) {
             SaxonProcessor::sxn_environ->env->DeleteGlobalRef(value);
         }
         free(value);

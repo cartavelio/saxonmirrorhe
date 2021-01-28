@@ -481,33 +481,25 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
 
           			if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, atomicValueClass)           == JNI_TRUE) {
           				xdmItem = new XdmAtomicValue(SaxonProcessor::sxn_environ->env->NewGlobalRef(result));
-                        xdmItem->setProcessor(proc);
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                         return xdmItem;
 
           			} else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, nodeClass)           == JNI_TRUE) {
           				xdmItem = new XdmNode(SaxonProcessor::sxn_environ->env->NewGlobalRef(result));
-                        xdmItem->setProcessor(proc);
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                         return xdmItem;
 #if CVERSION_API_NO >= 123
           			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
                         xdmItem =  new XdmFunctionItem(SaxonProcessor::sxn_environ->env->NewGlobalRef(result));
-                        xdmItem->setProcessor(proc);
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                         return xdmItem;
 #endif
           			} else {
 					value = new XdmValue(result, true);
-					value->setProcessor(proc);
-					for(int z=0;z<value->size();z++) {
-						value->itemAt(z)->setProcessor(proc);
-					}
 					SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
 					return value;
 				}
 				value = new XdmValue();
-				value->setProcessor(proc);
           	    value->addUnderlyingValue(result);
 
           		SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
