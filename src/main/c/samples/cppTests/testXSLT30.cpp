@@ -1365,11 +1365,12 @@ int main(int argc, char* argv[]) {
     Xslt30Processor *trans = processor->newXslt30Processor();
 
     if( trans == nullptr) {
+        cout<< "Error creating Xslt30Processor"<<endl;
         if(processor->exceptionOccurred()) {
-            cout<< processor->checkAndCreateException()
+            cout<< "Error message: " <<processor->getErrorMessage()<<endl;
 
         }
-
+        return -1;
     }
     //testValidation(trans,sresult);
     std::cerr << "cp0" << std::endl;
