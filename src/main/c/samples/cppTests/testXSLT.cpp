@@ -180,10 +180,10 @@ void testTransformToString4(SaxonProcessor * processor, XsltProcessor * trans){
   cout<<endl<<"Test: TransformToString4:"<<endl;
   trans->clearParameters(true);
   trans->clearProperties();
-    XdmNode * input = processor->parseXmlFromString("<out><person>text1</person><person>text2</person><person>text3</person></out>");
+  XdmNode * input = processor->parseXmlFromString("<out><person>text1</person><person>text2</person><person>text3</person></out>");
 
-   XdmValue * values = new XdmValue(processor);
-   values->addXdmItem((XdmItem*)processor->makeIntegerValue(10));
+  XdmValue * values = new XdmValue();
+  values->addXdmItem((XdmItem*)processor->makeIntegerValue(10));
   values->addXdmItem((XdmItem*)processor->makeIntegerValue(5));
   values->addXdmItem((XdmItem*)processor->makeIntegerValue(6));
   values->addXdmItem((XdmItem*)processor->makeIntegerValue(7));

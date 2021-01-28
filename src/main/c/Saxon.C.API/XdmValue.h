@@ -54,10 +54,6 @@ public:
         initialize();
     }
 
-  XdmValue(SaxonProcessor * p) {
-    initialize();
-  }
-
 
 	/**
 	 * A copy constructor.

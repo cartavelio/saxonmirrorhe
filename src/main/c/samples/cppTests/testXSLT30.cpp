@@ -240,7 +240,7 @@ void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans, s
     XdmNode *input = processor->parseXmlFromString(
             "<out><person>text1</person><person>text2</person><person>text3</person></out>");
 
-    XdmValue *values = new XdmValue(processor);
+    XdmValue *values = new XdmValue();
     values->addXdmItem((XdmItem *) processor->makeIntegerValue(10));
     values->addXdmItem((XdmItem *) processor->makeIntegerValue(5));
     values->addXdmItem((XdmItem *) processor->makeIntegerValue(6));
