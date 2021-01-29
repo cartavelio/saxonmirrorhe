@@ -529,8 +529,12 @@ public abstract class StyleElement extends ElementImpl {
         processDefaultMode();
         staticContext = new ExpressionContext(this, null);
         processAttributes();
-        for (NodeInfo child : children(StyleElement.class::isInstance)) {
-            ((StyleElement) child).processAllAttributes();
+        for (NodeInfo child : children()) {
+            if (child instanceof StyleElement) {
+                ((StyleElement) child).processAllAttributes();
+            } else if (child instanceof TextValueTemplateNode) {
+                ((TextValueTemplateNode)child).parse();
+            }
         };
     }
 
@@ -1741,10 +1745,12 @@ public abstract class StyleElement extends ElementImpl {
     }
 
     /**
-     * Examine a text node in the stylesheet to see if it is a text value template
+     * Examine a text node in the stylesheet to see if it is a text value template;
+     * at the same time, perform type-checking on any contained expressions.
      *
      * @param node the text node
-     * @throws XPathException if the node is is a text value template with variable content
+     * @return true if the node is is a text value template with variable content
+     * @throws XPathException if type checking of a TVT fails.
      */
 
     private boolean examineTextNode(NodeInfo node) throws XPathException {
