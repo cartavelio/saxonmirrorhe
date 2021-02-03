@@ -1310,7 +1310,7 @@ task eejSignJars(
 
 // ============================================================
 
-task hej_releaseSetup(
+task hejRelease(
   type: Copy,
   dependsOn: ["hejJar", "hejJarXqj", "hejJarTests", "hej_notices"],
   description: "Build the HE release for Java"
@@ -1321,23 +1321,10 @@ task hej_releaseSetup(
   include "saxon-he-xqj-${saxonVersion}.jar"
   include "saxon-he-test-${saxonVersion}.jar"
   rename { filename ->
-    if (filename.startsWith("saxon-he-xqj")) {
-      filename = "saxon9-xqj.jar"
-    } else if (filename.startsWith("saxon-he-test")) {
-      filename = "saxon9-test.jar"
-    } else {
-      filename = "saxon9he.jar"
+    if (filename.startsWith("saxon-he-test")) {
+      filename = "saxon-he-test-${saxonVersion}.jar"
     }
   }
-}
-
-task hejRelease(
-  type: Zip,
-  dependsOn: ["hej_releaseSetup"],
-  description: "Make the HE release ZIP file for Java"
-) {
-  from("${buildDir}/releases/hej")
-  archiveFileName = "SaxonHE${version_h}J.zip"
 }
 
 task pejRelease(
