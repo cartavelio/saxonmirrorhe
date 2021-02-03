@@ -384,7 +384,6 @@ const char *XsltExecutable::applyTemplatesReturningString() {
                                                                                         cwdXE.c_str()), executableObject,selection,
                 comboArrays.stringArray, comboArrays.objectArray));
 
-        std::cerr<<"executable cp0"<<std::endl;
         if (obj) {
             result = (jbyteArray) obj;
         }
@@ -395,7 +394,11 @@ const char *XsltExecutable::applyTemplatesReturningString() {
         if (result) {
             jboolean isCopy = false;
             jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
-            const char *str = (char *)b;
+            jsize num_bytes = SaxonProcessor::sxn_environ->env->GetArrayLength(result);
+
+            const char *str = new char[num_bytes];
+            memcpy ((void *) str, b , num_bytes );
+
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
             return str;
         }
@@ -541,7 +544,7 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
     if(afsmID == nullptr) {
         (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
                                                                         "callFunctionReturningString",
-                                                                        "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+                                                                        "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;[Ljava/lang/Object;)[B");
     }
     if (!afsmID) {
         std::cerr << "Error: " << getDllname() << "callFunctionReturningString" << " not found\n"
@@ -552,7 +555,7 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
         jobjectArray argumentJArray = SaxonProcessor::createJArray(arguments, argument_length);
 
-        jstring result = nullptr;
+        jbyteArray result = nullptr;
         jobject obj = (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, afsmID,
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         cwdXE.c_str()), executableObject,
@@ -563,15 +566,20 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
                                                                                 argumentJArray, comboArrays.stringArray,
                                                                                 comboArrays.objectArray));
         if (obj) {
-            result = (jstring) obj;
+            result = (jbyteArray) obj;
         }
         if (comboArrays.stringArray != nullptr) {
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
         }
         if (result) {
-            const char *str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result,
-                                                                                  nullptr);
+            jboolean isCopy = false;
+            jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
+            jsize num_bytes = SaxonProcessor::sxn_environ->env->GetArrayLength(result);
+
+            const char *str = new char[num_bytes];
+            memcpy ((void *) str, b , num_bytes );
+
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
             return str;
         }
@@ -704,7 +712,7 @@ const char *XsltExecutable::callTemplateReturningString(const char *templateName
     if(ctsmID == nullptr) {
         ctsmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
                                                                         "callTemplateReturningString",
-                                                                        "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+                                                                        "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)[B");
     }
     if (!ctsmID) {
         std::cerr << "Error: " << getDllname() << "callTemplateReturningString" << " not found\n"
@@ -715,7 +723,7 @@ const char *XsltExecutable::callTemplateReturningString(const char *templateName
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
 
 
-        jstring result = nullptr;
+        jbyteArray result = nullptr;
         jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, ctsmID,
                                                                                           SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                                   cwdXE.c_str()),
@@ -727,15 +735,20 @@ const char *XsltExecutable::callTemplateReturningString(const char *templateName
                                                                                           comboArrays.stringArray,
                                                                                           comboArrays.objectArray));
         if (obj) {
-            result = (jstring) obj;
+            result = (jbyteArray) obj;
         }
         if (comboArrays.stringArray != nullptr) {
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
         }
         if (result) {
-            const char *str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result,
-                                                                                  nullptr);
+            jboolean isCopy = false;
+            jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
+            jsize num_bytes = SaxonProcessor::sxn_environ->env->GetArrayLength(result);
+
+            const char *str = new char[num_bytes];
+            memcpy ((void *) str, b , num_bytes );
+
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
             return str;
         }

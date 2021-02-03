@@ -607,7 +607,7 @@ const char *SaxonProcessor::getcwd() {
 
 
 void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
-    jclass xmlResolverClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/trans/XmlCatalogResolver;");
+    jclass xmlResolverClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/trans/XmlCatalogResolver");
     static jmethodID catalogMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(xmlResolverClass, "setCatalog",
                                                                                       "(Ljava/lang/String;Lnet/sf/saxon/Configuration;Z)V");
 
@@ -629,14 +629,14 @@ void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
 
 
     if (!proc) {
-        std::cout << "proc is nullptr in SaxonProcessorsetCatalog" << std::endl;
+        std::cout << "proc is null in SaxonProcessor.setCatalog" << std::endl;
         return;
     }
 
     jobject configObj = SaxonProcessor::sxn_environ->env->CallObjectMethod(proc, configMID);
 
     if (!configObj) {
-        std::cout << "proc is nullptr in SaxonProcessor setcatalog - config obj" << std::endl;
+        std::cout << "proc is null in SaxonProcessor setcatalog - config obj" << std::endl;
         return;
     }
     SaxonProcessor::sxn_environ->env->CallStaticVoidMethod(xmlResolverClass, catalogMID,
