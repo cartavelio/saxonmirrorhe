@@ -473,6 +473,7 @@ void testTrackingOfValueReference(SaxonProcessor *processor, Xslt30Processor *tr
                 sresult->failure++;
                 std::cerr << "trackingValueReference ====== FAIL ======" << std::endl;
                 sresult->failureList.push_back("testTrackingOfValueReference");
+                return;
             }
             name1.str("");
         }
@@ -1385,7 +1386,7 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
 
 void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult) {
 
-
+    cout << endl << "Test: testCatalog" << endl;
     bool trace = false;
     proc->setcwd(cwd);
     proc->setCatalog("../php/catalog-test/catalog.xml", trace);
@@ -1400,6 +1401,7 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
             const char *message = trans->getErrorMessage();
             cout << "exception=" << message << endl;
         }
+        return;
     }
     //trans->setSourceFromFile("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/example.xml");
     executable->setInitialMatchSelectionAsFile("../php/catalog-test/example.xml");
