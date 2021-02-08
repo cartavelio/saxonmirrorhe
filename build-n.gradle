@@ -1100,16 +1100,35 @@ task eenProduct(
   into "${buildDir}/n/bin/ee"
 }
 
-task dotNetProducts(
-  dependsOn: ["henProduct", "penProduct", "eenProduct"],
-  description: "Builds all of the .NET products"
-) {
-  // nop
+if (file("${projectDir}/src/main/java/com").exists()) {
+  task dotNetProducts(
+    dependsOn: ["henProduct", "penProduct", "eenProduct"],
+    description: "Builds all of the .NET products"
+  ) {
+    // nop
+  }
+
+  task dotNetInstallers(
+    dependsOn: ["henInstaller", "penInstaller", "eenInstaller"],
+    description: "Builds all of the .NET installers"
+  ) {
+    // nop
+  }
+} else {
+  // Ignore the EEJ and PEJ releases if the sources aren't available
+  task dotNetProducts(
+    dependsOn: ["henProduct"],
+    description: "Builds all of the .NET products"
+  ) {
+    // nop
+  }
+
+  task dotNetInstallers(
+    dependsOn: ["henInstaller"],
+    description: "Builds all of the .NET installers"
+  ) {
+    // nop
+  }
 }
 
-task dotNetInstallers(
-  dependsOn: ["henInstaller", "penInstaller", "eenInstaller"],
-  description: "Builds all of the .NET installers"
-) {
-  // nop
-}
+
