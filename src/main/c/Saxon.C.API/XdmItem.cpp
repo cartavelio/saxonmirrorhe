@@ -16,7 +16,7 @@ XdmItem::XdmItem(): XdmValue(){
 XdmItem::XdmItem(jobject obj){
 	value = obj;
 	xdmSize =1;
-	refCount =1;
+	refCount =0;
 }
 
 bool XdmItem::isAtomic(){
@@ -63,7 +63,7 @@ jobject XdmItem::getUnderlyingValue(){
 	return value;
 }
 
-    const char * XdmItem::getStringValue(){
+    const char * XdmItem:: getStringValue(){
         if(stringValue.empty()) {
     		jclass xdmItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmItem");
     		jmethodID sbmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmItemClass,
@@ -95,12 +95,13 @@ jobject XdmItem::getUnderlyingValue(){
 	}
 
 XdmItem::~XdmItem() {
-    //std::cerr<<std::endl<<"XdmItem destructor called, refCount"<<getRefCount()<<std::endl;
+    decrementRefCount();
+    std::cerr<<std::endl<<"XdmItem destructor called, refCount"<<getRefCount()<<std::endl;
     if(getRefCount()<1){
         if(value !=nullptr && SaxonProcessor::jvmCreatedCPP>0) {
             SaxonProcessor::sxn_environ->env->DeleteGlobalRef(value);
         }
-        free(value);
+
         if(stringValue.empty()) {
             stringValue.clear();
         }

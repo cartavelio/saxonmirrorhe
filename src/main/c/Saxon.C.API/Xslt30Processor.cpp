@@ -132,6 +132,7 @@ void Xslt30Processor::setJustInTimeCompilation(bool jit){
 
 
 void Xslt30Processor::clearParameters(bool delValues) {
+
 	if(delValues){
        		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
 			
@@ -323,7 +324,7 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
 						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
 						node->getUnderlyingValue(), jitCompilation, comboArrays.stringArray, comboArrays.objectArray));
 		if (!executableObject) {
-			proc->checkAndCreateException(cppClass);
+			exception = proc->checkAndCreateException(cppClass);
 			return nullptr;
 		}
 		if (comboArrays.stringArray != nullptr) {
@@ -363,7 +364,7 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
 						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
 						SaxonProcessor::sxn_environ->env->NewStringUTF(source), jitCompilation, comboArrays.stringArray, comboArrays.objectArray));
 		if (!executableObject) {
-			proc->checkAndCreateException(cppClass);
+			exception = proc->checkAndCreateException(cppClass);
      		return nullptr;
 		}
 		if (comboArrays.stringArray != nullptr) {
@@ -407,7 +408,7 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
                                                                            stylesheet), jitCompilation,
                                                                    comboArrays.stringArray, comboArrays.objectArray));
         if (!executableObject) {
-            proc->checkAndCreateException(cppClass);
+            exception = proc->checkAndCreateException(cppClass);
             return nullptr;
 
         }

@@ -17,7 +17,14 @@
     }
 
     XdmAtomicValue::XdmAtomicValue(jobject obj, const char* ty):XdmItem(obj){
-	valType = std::string(ty);
+	    valType = std::string(ty);
+    }
+
+    XdmAtomicValue::~XdmAtomicValue(){
+        std::cerr<<"XdmAtomicValue destructor called"<<std::endl;
+        if(!valType.empty()) {
+            valType.clear();
+        }
     }
 
     void XdmAtomicValue::setType(const char * ty){

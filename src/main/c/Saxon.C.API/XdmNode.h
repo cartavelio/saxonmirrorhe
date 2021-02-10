@@ -36,8 +36,9 @@ public:
 	XdmNode(XdmNode *parent, jobject, XDM_NODE_KIND);
 
 	virtual ~XdmNode() {
+        std::cerr<<"XdmNode destructor called"<<std::endl;
 		if (getRefCount() <1){
-				delete baseURI;
+		    delete baseURI;
 			delete nodeName;
 		}
 

@@ -9,7 +9,7 @@
 XdmValue::XdmValue(const XdmValue &other) {
 	//SaxonProcessor *proc = other.proc; //TODO
 	valueType = other.valueType;
-	refCount = 1;
+	refCount = 0;
 	xdmSize = other.xdmSize;
 	jValues = other.jValues;
 	toStringValue = other.toStringValue;
@@ -62,7 +62,7 @@ int XdmValue::size() {
 
 XdmValue::XdmValue(jobject val) {
 	XdmItem * value = new XdmItem(val);
-	values.resize(0);//TODO memory issue might occur here
+	values.resize(0);//TODO memory issue might occur here. Need to delete XdmItems
 	values.push_back(value);
 	xdmSize++;
 	jValues = nullptr;
@@ -127,9 +127,13 @@ XdmValue::XdmValue(jobject val, bool arr){
 
 XdmValue::~XdmValue() {
 	bool safeToClear = false;
+	std::cout<<"xdmValue destructor size= "<<values.size()<<" ref="<<getRefCount()<<std::endl;
     if(getRefCount()<1){
+        std::cout<<"xdmValue destructor refCount="<<getRefCount()<<" values.size="<<values.size()<<std::endl;
 	//proc->env->ReleaseObject
 	for (size_t i = 0; i < values.size(); i++) {
+	    values[i]->decrementRefCount();
+        std::cout<<"xdmItem (XdmValue destructor) refCount="<<values[i]->getRefCount()<<std::endl;
 		if (values[i] != nullptr && values[i]->getRefCount() < 1) {
 			delete values[i];
 			safeToClear = true;
@@ -142,19 +146,24 @@ XdmValue::~XdmValue() {
 	}
 	if (valueType != nullptr) { delete valueType; }
 	if (jValues) {
+        std::cout<<"xdmValue jni"<<getRefCount()<<std::endl;
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(jValues);  //TODO check - this maybe should be DeleteGlobalRef  - check where it is created
 	}
 	xdmSize = 0;
-	if(!toStringValue.empty()) {
-		toStringValue.clear();
-	}
+
     }
+
+    if(!toStringValue.empty()) {
+        toStringValue.clear();
+    }
+    std::cout<<"end - xdmValue destructor refCount="<<getRefCount()<<std::endl;
 
 }
 
 void XdmValue::addXdmItem(XdmItem* val) {
 	if (val != nullptr) {
 		values.push_back(val);
+        val->incrementRefCount();
 		xdmSize++;
 		jValues = nullptr; //TODO clear jni array from memory if needed
 	}
@@ -163,6 +172,7 @@ void XdmValue::addXdmItem(XdmItem* val) {
 
 void XdmValue::addUnderlyingValue(jobject val) {
 	XdmItem * valuei = new XdmItem(val);
+	valuei->incrementRefCount();
 	values.push_back(valuei);
 	xdmSize++;
 	jValues = nullptr; //TODO clear jni array from memory if needed
@@ -171,13 +181,13 @@ void XdmValue::addUnderlyingValue(jobject val) {
 
 void XdmValue::incrementRefCount() {
 		refCount++;
-		//std::cerr<<"refCount-inc-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
+		std::cerr<<"refCount-inc-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
 	}
 
 void XdmValue::decrementRefCount() {
 		if (refCount > 0)
 			refCount--;
-		//std::cerr<<"refCount-dec-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
+		std::cerr<<"refCount-dec-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
 	}
 
 

@@ -49,6 +49,10 @@ XsltExecutable::~XsltExecutable() {
         if (selectionV->getRefCount() == 0) {
             delete selectionV;
         }
+    } else {
+        if (selection) {
+            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
+        }
     }
     SaxonProcessor::sxn_environ->env->DeleteGlobalRef(executableObject);
 
@@ -129,7 +133,8 @@ void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
 
 void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
     if (filename != nullptr) {
-        selection = SaxonProcessor::sxn_environ->env->NewStringUTF(filename);
+        selection = SaxonProcessor::sxn_environ->env->NewGlobalRef(SaxonProcessor::sxn_environ->env->NewStringUTF(filename));
+
     }
 }
 
@@ -169,6 +174,7 @@ void XsltExecutable::setParameter(const char *name, XdmValue *value) {
 void XsltExecutable::setInitialTemplateParameters(std::map<std::string, XdmValue *> _itparameters, bool _tunnel) {
     for (std::map<std::string, XdmValue *>::iterator itr = _itparameters.begin(); itr != _itparameters.end(); itr++) {
         parameters["itparam:" + std::string(itr->first)] = itr->second;
+        itr->second->incrementRefCount();
     }
     tunnel = _tunnel;
     if (tunnel) {
@@ -246,7 +252,7 @@ void XsltExecutable::clearParameters(bool delValues) {
             }
         }
 
-        SaxonProcessor::sxn_environ->env->DeleteLocalRef(selection);
+        SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
         selection = nullptr;
     } else {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
@@ -1026,17 +1032,17 @@ const char *XsltExecutable::transformFileToString(const char *source) {
     if (tftMID == nullptr) {
         tftMID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
                                                                                  "transformToString",
-                                                                                 "(Ljava/lang/String;Lnet/sf/saxon/option/cpp/Xslt30Processor;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+                                                                                 "(Ljava/lang/String;Lnet/sf/saxon/option/cpp/Xslt30Processor;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)[B");
     }
     if (!tftMID) {
-        std::cerr << "Error: " << getDllname() << "transformFileToString" << " not found\n"
+        std::cerr << "Error: " << getDllname() << "transformToString" << " not found\n"
                   << std::endl;
 
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
 
-        jstring result = nullptr;
+        jbyteArray result = nullptr;
         jobject obj = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, tftMID,
                                                                                SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                        cwdXE.c_str()), nullptr,
@@ -1044,6 +1050,7 @@ const char *XsltExecutable::transformFileToString(const char *source) {
                                                                                (source != nullptr
                                                                                 ? SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                                source) : nullptr),
+                                                                               nullptr,
                                                                                comboArrays.stringArray,
                                                                                comboArrays.objectArray);
         if (comboArrays.stringArray != nullptr) {
@@ -1051,11 +1058,17 @@ const char *XsltExecutable::transformFileToString(const char *source) {
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
         }
         if (obj) {
-            result = (jstring) obj;
+            result = (jbyteArray) obj;
         }
         if (result) {
-            const char *str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result,
-                                                                                  nullptr);
+
+            jboolean isCopy = false;
+            jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
+            jsize num_bytes = SaxonProcessor::sxn_environ->env->GetArrayLength(result);
+
+            const char *str = new char[num_bytes];
+            memcpy ((void *) str, b , num_bytes );
+
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
             return str;
         }

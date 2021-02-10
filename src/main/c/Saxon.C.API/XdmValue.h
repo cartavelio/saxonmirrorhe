@@ -178,7 +178,7 @@ int exceptionCount();*/
 protected:
    inline void initialize() noexcept {
     jValues   = nullptr;
-       refCount  = 1;
+    refCount  = 0;
     valueType = nullptr;
     xdmSize   = 0;
   }
