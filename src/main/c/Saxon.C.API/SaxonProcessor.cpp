@@ -28,8 +28,7 @@ sxnc_environment *SaxonProcessor::sxn_environ = 0;
 int SaxonProcessor::jvmCreatedCPP = 0;
 
 bool SaxonProcessor::exceptionOccurred() {
-    bool found = SaxonProcessor::sxn_environ->env->ExceptionCheck();
-    return found;
+    return SaxonProcessor::sxn_environ->env->ExceptionCheck() || exception != nullptr;
 }
 
 const char *SaxonProcessor::checkException(jobject cpp) {
@@ -39,7 +38,7 @@ const char *SaxonProcessor::checkException(jobject cpp) {
 }
 
 SaxonApiException *SaxonProcessor::checkAndCreateException(jclass cppClass) {
-    if (exceptionOccurred()) {
+    if (SaxonProcessor::sxn_environ->env->ExceptionCheck()) {
         SaxonApiException *exception = checkForExceptionCPP(SaxonProcessor::sxn_environ->env, cppClass, nullptr);
 #ifdef DEBUG
         SaxonProcessor::sxn_environ->env->ExceptionDescribe();
@@ -60,9 +59,7 @@ const char *SaxonProcessor::getErrorMessage() {
 
 void SaxonProcessor::exceptionClear() {
     SaxonProcessor::sxn_environ->env->ExceptionClear();
-    /* if(exception != nullptr && clearCPPException) {
-        delete exception;
-    } */
+
 }
 
 
@@ -629,7 +626,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
 
 
     if (!proc) {
-        std::cout << "proc is null in SaxonProcessor.setCatalog" << std::endl;
+        exception = new SaxonApiException("Processor is null in SaxonProcessor.setCatalog");
         return;
     }
 
@@ -645,6 +642,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
 #ifdef DEBUG
     SaxonProcessor::sxn_environ->env->ExceptionDescribe();
 #endif
+
 }
 
 

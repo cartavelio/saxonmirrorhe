@@ -189,6 +189,7 @@ void testApplyTemplates2a(SaxonProcessor *processor, Xslt30Processor *trans, sRe
 
 
     sresult->failure++;
+    cout << endl << "cpp1" << endl;
     sresult->failureList.push_back("testApplyTemplates2a");
     fflush(stdout);
     delete executable;
@@ -284,7 +285,12 @@ and integer parmater created and supplied
 void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
 
     cout << endl << "Test: testTransformToString4:" << endl;
+    cout << endl << "cpp0-1" << endl;
+    SaxonProcessor::sxn_environ->env->ExceptionDescribe();
+
     trans->clearParameters(true);
+    cout << endl << "cpp0-2" << endl;
+    SaxonProcessor::sxn_environ->env->ExceptionDescribe();
 
     XdmNode *input = processor->parseXmlFromString(
             "<out><person>text1</person><person>text2</person><person>text3</person></out>");
@@ -302,7 +308,7 @@ void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans, s
     values->addXdmItem((XdmItem *) processor->makeIntegerValue(6));
     values->addXdmItem((XdmItem *) processor->makeIntegerValue(7));
 
-
+    SaxonProcessor::sxn_environ->env->ExceptionDescribe();
 
    /* XdmNode *sheet = processor->parseXmlFromFile("test2.xsl");
 
@@ -1390,6 +1396,7 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
 
 void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult) {
 
+
     cout << endl << "Test: testCatalog" << endl;
     bool trace = false;
     proc->setcwd(cwd);
@@ -1397,14 +1404,22 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
 
     Xslt30Processor * trans = proc->newXslt30Processor();
 
-
     XsltExecutable  * executable = trans->compileFromFile("../php/catalog-test/test1.xsl");
 
     if(executable == nullptr) {
+
         if (trans->exceptionOccurred()) {
-            const char *message = trans->getErrorMessage();
-            cout << "exception=" << message << endl;
-        }
+
+            if(trans->getErrorMessage() != nullptr) {
+                const char *message = trans->getErrorMessage();
+                cout << "exception=" << message << endl;
+            } else {
+                const char *message = proc->getErrorMessage();
+                if(message != nullptr) {
+                    cout << "exception=" << message << endl;
+                }
+            }
+            }
         return;
     }
 
@@ -1528,10 +1543,11 @@ int main(int argc, char* argv[]) {
     testApplyTemplates2a(processor, trans, sresult);
 
     testTransformToString4(processor, trans, sresult);
-    processor->release();
-    return 0;
+
 
     testCatalog(cwd, processor,  sresult);
+    processor->release();
+    return 0;
 
     testTransformToString2b(processor, trans, sresult);
 

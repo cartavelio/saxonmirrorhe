@@ -147,7 +147,7 @@ XdmValue::~XdmValue() {
 	if (valueType != nullptr) { delete valueType; }
 	if (jValues) {
         std::cout<<"xdmValue jni"<<getRefCount()<<std::endl;
-		SaxonProcessor::sxn_environ->env->DeleteLocalRef(jValues);  //TODO check - this maybe should be DeleteGlobalRef  - check where it is created
+		SaxonProcessor::sxn_environ->env->DeleteLocalRef(jValues);
 	}
 	xdmSize = 0;
 
@@ -165,7 +165,12 @@ void XdmValue::addXdmItem(XdmItem* val) {
 		values.push_back(val);
         val->incrementRefCount();
 		xdmSize++;
-		jValues = nullptr; //TODO clear jni array from memory if needed
+        if (jValues) {
+            std::cout<<"xdmValue jni"<<getRefCount()<<std::endl;
+            SaxonProcessor::sxn_environ->env->DeleteLocalRef(jValues);  //TODO check - this maybe should be DeleteGlobalRef  - check where it is created
+            jValues = nullptr;
+        }
+
 	}
 }
 
@@ -212,11 +217,13 @@ jobject XdmValue::getUnderlyingValue() {
 		}
 		jclass objectClass = lookForClass(env,
 			"net/sf/saxon/s9api/XdmItem");
-		jValues = (jobjectArray)env->NewObjectArray((jint)count, objectClass, 0);
+		jobjectArray jValuesi = (jobjectArray)env->NewObjectArray((jint)count, objectClass, 0);
+
 
 		for (i = 0; i < count; i++) {
-			env->SetObjectArrayElement(jValues, i, values[i]->getUnderlyingValue());
+			env->SetObjectArrayElement(jValuesi, i, values[i]->getUnderlyingValue());
 		}
+        jValues = (jobjectArray)SaxonProcessor::sxn_environ->env->NewGlobalRef(jValuesi);
 	} 
 	return (jobject)jValues;
 }

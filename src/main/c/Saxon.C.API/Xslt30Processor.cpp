@@ -22,6 +22,9 @@ Xslt30Processor::Xslt30Processor() {
 Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 
 	proc = p;
+    tunnel = false;
+    jitCompilation = false;
+    exception = nullptr;
 
 	/*
 	 * Look for class.
@@ -37,9 +40,10 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 	SaxonProcessor::sxn_environ->env->CallStaticVoidMethod(cppClass, debugMID, (jboolean)true);
     
 #endif
-	tunnel = false;
-	jitCompilation = false;
-	exception = nullptr;
+
+	if(cppXT == nullptr) {
+	    exception = proc->checkAndCreateException(cppClass);
+	}
 
 	if(!(proc->cwd.empty()) && curr.empty()){
 		cwdXT = proc->cwd;
@@ -83,7 +87,7 @@ Xslt30Processor::Xslt30Processor(const Xslt30Processor &other) {
 
 
 bool Xslt30Processor::exceptionOccurred() {
-	return proc->exceptionOccurred();
+	return proc->exceptionOccurred() || exception != nullptr;
 }
 
 const char * Xslt30Processor::getErrorCode() {
@@ -198,11 +202,15 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 					"(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;)V");
 	}
 	if (!cAndSNodemID) {
-		std::cerr << "Error: "<<getDllname() << ".compileFromStringAndSave"
-				<< " not found\n" << std::endl;
+		std::cerr<<"Error: "<<getDllname<<"compileFromStringAndSave funtion not found"<<std::endl;
 
 	} else {
-
+        if(cppXT == nullptr) {
+#if defined(DEBUG)
+            std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
+#endif
+            return;
+        }
 		
 		SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, cAndSNodemID,
 						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
@@ -224,11 +232,15 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 					"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
 	}
 	if (!cAndSStringmID) {
-		std::cerr << "Error: "<<getDllname() << ".compileFromStringAndSave"
-				<< " not found\n" << std::endl;
+		exception = new SaxonApiException("Error: compileFromStringAndSave function not found\n");
 
 	} else {
-
+        if(cppXT == nullptr) {
+#if defined(DEBUG)
+            std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
+#endif
+            return;
+        }
 		
 		SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, cAndSStringmID,
 						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
@@ -251,12 +263,16 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 					"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
 	}
 	if (!cAndFStringmID) {
-		std::cerr << "Error: "<<getDllname() << ".compileFromFileAndSave"
-				<< " not found\n" << std::endl;
+		exception = new SaxonApiException("Error: compileFromFileAndSave function not found");
 
 	} else {
 
-		
+        if(cppXT == nullptr) {
+#if defined(DEBUG)
+            std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
+#endif
+            return;
+        }
 		SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, cAndFStringmID,
 						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
 						SaxonProcessor::sxn_environ->env->NewStringUTF(xslFilename),SaxonProcessor::sxn_environ->env->NewStringUTF(filename));
@@ -276,12 +292,16 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 	}
 					
 	if (cStringmID== nullptr) {
-		std::cerr << "Error: "<<getDllname() << ".compileFromString"
-				<< " not found\n" << std::endl;
+		exception = new SaxonApiException(strcat(getDllname(), ".compileFromString funtion not found"));
 		return nullptr;
 
 	} else {
-
+        if(cppXT == nullptr) {
+#if defined(DEBUG)
+            std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
+#endif
+            return nullptr;
+        }
 		JParameters comboArrays;
 		comboArrays = SaxonProcessor::createParameterJArray2(parameters);
 		jobject executableObject = (jobject)(
@@ -317,6 +337,16 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
 		return nullptr;
 
 	} else {
+	    if(node == nullptr) {
+	        exception = new SaxonApiException("Error in compileFromXdmNode - node argument is NULL");
+	        return nullptr;
+	    }
+        if(cppXT == nullptr) {
+#if defined(DEBUG)
+            std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
+#endif
+            return nullptr;
+        }
 		JParameters comboArrays;
 		comboArrays = SaxonProcessor::createParameterJArray2(parameters);
 		jobject executableObject = (jobject)(
@@ -354,9 +384,15 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
 	} else {
 		
 		if(source == nullptr) {
-			std::cerr << "Error in compileFromFile method - The Stylesheet file is nullptr" <<std::endl;
+			exception = new SaxonApiException("Error in compileFromFile method - The Stylesheet file is NULL");
 			return nullptr;
 		}
+        if(cppXT == nullptr) {
+#if defined(DEBUG)
+            std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
+#endif
+            return nullptr;
+        }
 		JParameters comboArrays;
 		comboArrays = SaxonProcessor::createParameterJArray2(parameters);
 		jobject executableObject = (jobject)(
@@ -387,17 +423,26 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
 					"compileFromFile",
 					"(Ljava/lang/String;Ljava/lang/String;Z[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XsltExecutable;");
 	}
+
 	if (!cFilemID) {
 		std::cerr << "Error: "<<getDllname() << ".compileFromFile"
 				<< " not found\n" << std::endl;
+        std::cerr<<"cp0 -testCatalog"<<std::endl;
 		return nullptr;
 
 	} else {
-
         if (stylesheet == nullptr) {
-            std::cerr << "Error in compileFromFile method - The Stylesheet file is nullptr" << std::endl;
+            exception = new SaxonApiException("Error in compileFromFile method - The Stylesheet file is nullptr");
             return nullptr;
         }
+        if(cppXT == nullptr) {
+#if defined(DEBUG)
+            std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
+#endif
+
+            return nullptr;
+        }
+
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray2(parameters);
         jobject executableObject = (jobject) (
@@ -453,10 +498,15 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
 					"(Ljava/lang/String;Lnet/sf/saxon/option/cpp/Xslt30Processor;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmValue;");
 	}
 	if (!mtvID) {
-		std::cerr << "Error: "<< getDllname() << ".transformtoValue" << " not found\n"
-				<< std::endl;
+        std::cerr<<"Error: "<<getDllname<<".transformtoValue function not found"<<std::endl;
 
 	} else {
+        if(cppXT == nullptr) {
+#if defined(DEBUG)
+            std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
+#endif
+            return nullptr;
+        }
 	    JParameters comboArrays;
 		comboArrays = SaxonProcessor::createParameterJArray2(parameters);
 
@@ -537,10 +587,15 @@ void Xslt30Processor::transformFileToFile(const char* source,
 					"(Ljava/lang/String;Lnet/sf/saxon/option/cpp/Xslt30Processor;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
 	}
 	if (!mtfID) {
-		std::cerr << "Error: "<<getDllname() << "transformToFile" << " not found\n"
-				<< std::endl;
+        std::cerr<<"Error: "<<getDllname<<".transformToFile function not found"<<std::endl;
 
 	} else {
+        if(cppXT == nullptr) {
+#if defined(DEBUG)
+            std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
+#endif
+            return;
+        }
 	    JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray2(parameters);
 
@@ -579,10 +634,15 @@ const char * Xslt30Processor::transformFileToString(const char* source,
 					"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
 	}
 	if (!mtsID) {
-		std::cerr << "Error: "<<getDllname() << "transformFileToString" << " not found\n"
-				<< std::endl;
+        std::cerr<<"Error: "<<getDllname<<".transformFileToString not found"<<std::endl;
 
 	} else {
+        if(cppXT == nullptr) {
+#if defined(DEBUG)
+            std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
+#endif
+            return nullptr;
+        }
     JParameters comboArrays;
     comboArrays = SaxonProcessor::createParameterJArray2(parameters);
 
