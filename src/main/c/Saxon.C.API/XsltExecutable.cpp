@@ -256,8 +256,10 @@ void XsltExecutable::clearParameters(bool delValues) {
             }
         }
 
-        SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
-        selection = nullptr;
+        if(selection) {
+            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
+            selection = nullptr;
+        }
     } else {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
 
@@ -267,8 +269,10 @@ void XsltExecutable::clearParameters(bool delValues) {
             }
 
         }
-
-        selection = nullptr;
+        if(selection) {
+            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
+            selection = nullptr;
+        }
     }
     parameters.clear();
 

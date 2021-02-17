@@ -542,6 +542,10 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
     exception = other.exception;
 }
 
+
+
+void SaxonProcessor::setResourcesDirectory(const char *dir){}
+
 XsltProcessor *SaxonProcessor::newXsltProcessor() {
     return (new XsltProcessor(this, cwd));
 }

@@ -390,7 +390,7 @@ public:
      * set saxon resources directory
      * @deprecated - It is no longer required to explicitly specifiy the resource directory
     */
-    void setResourcesDirectory(const char *dir){}
+    void setResourcesDirectory(const char *dir);
 
     /**
      * set catalog to be used in Saxon
