@@ -36,9 +36,7 @@ bool XdmItem::isFunction(){
 }
 
 
-
-
-   XdmItem * XdmItem::getHead(){ return this;}
+XdmItem * XdmItem::getHead(){ return this;}
 
   XdmItem * XdmItem::itemAt(int n){
 	if (n < 0 || n >= size()) {
@@ -95,20 +93,19 @@ jobject XdmItem::getUnderlyingValue(){
 	}
 
 XdmItem::~XdmItem() {
-    decrementRefCount();
+    //decrementRefCount();
     std::cerr<<std::endl<<"XdmItem destructor called, refCount"<<getRefCount()<<std::endl;
-    std::cout << std::endl << "cpp0-1" << std::endl;
+
     SaxonProcessor::sxn_environ->env->ExceptionDescribe();
 
-    if(getRefCount()<1){
-        if(value !=nullptr && SaxonProcessor::jvmCreatedCPP>0) {
-            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(value);
-        }
-        std::cout << std::endl << "cpp0-1" << std::endl;
-        SaxonProcessor::sxn_environ->env->ExceptionDescribe();
-        if(stringValue.empty()) {
-            stringValue.clear();
-        }
+    if(value !=nullptr && SaxonProcessor::jvmCreatedCPP>0) {
+        std::cout << std::endl << "cpp0-1: DeleteGlobalRef" << std::endl;
+        SaxonProcessor::sxn_environ->env->DeleteGlobalRef(value);
+    }
+    std::cout << std::endl << "cpp0-1" << std::endl;
+    SaxonProcessor::sxn_environ->env->ExceptionDescribe();
+    if(stringValue.empty()) {
+        stringValue.clear();
     }
 }
 

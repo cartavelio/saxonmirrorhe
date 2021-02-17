@@ -107,12 +107,15 @@ void Xslt30Processor::setParameter(const char* name, XdmValue * value) {
             it = parameters.find(skey);
             if (it != parameters.end()) {
                 XdmValue * valuei = it->second;
-                valuei->decrementRefCount();
-                if(valuei != nullptr && valuei->getRefCount() < 1){
-                    delete value;
+                if(valuei != nullptr) {
+                    valuei->decrementRefCount();
+                    if (valuei->getRefCount() < 1) {
+                        delete value;
+                    }
+                    parameters.erase(skey);
+                    parameters[skey] = value;
+                    value->incrementRefCount();
                 }
-                parameters.erase(skey);
-                parameters[skey] = value;
             }
 		}
 	 }
@@ -136,30 +139,45 @@ void Xslt30Processor::setJustInTimeCompilation(bool jit){
 
 
 void Xslt30Processor::clearParameters(bool delValues) {
-
+    std::cout<<"clearParameter" <<std::endl;
 	if(delValues){
-       		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
-			
-			XdmValue * value = itr->second;
-			value->decrementRefCount();
+        for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
+            XdmValue * value = itr->second;
+            std::cout<<"clearParameter cp0" <<"ob ref="<<(value)<<std::endl;
+            if(value != nullptr) {
+                std::cout<<"clearParameter cp0-1" <<std::endl;
+                value->decrementRefCount();
 #ifdef DEBUG
-			std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
+                std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
-			if(value != nullptr && value->getRefCount() < 1){
-	        		delete value;
-			}
-        	}
+                if (value->getRefCount() < 1) {
+                    delete value;
+                }
+            }
+            std::cout<<"clearParameter cp0-2" <<std::endl;
+        }
 
 	} else {
-for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
-		
+        std::cout<<"clearParameter cp1-0" <<std::endl;
+        for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
+
 			XdmValue * value = itr->second;
-			value->decrementRefCount();
+            std::cout<<"clearParameter cp1" <<"ob ref="<<(value)<<std::endl;
+
+            if(value == NULL) {
+                std::cout<<"clearParameter cp1-0 after itr NULL found!!!!!" <<std::endl;
+            }
+			if(value != nullptr) {
+                std::cout<<"clearParameter cp1-1" <<std::endl;
+                value->decrementRefCount();
+            }
 		
         	}
 
 	}
+    std::cout<<"clearParameter cp1" <<std::endl;
 	parameters.clear();
+    std::cout<<"clearParameter cp2" <<std::endl;
 
 	
 }

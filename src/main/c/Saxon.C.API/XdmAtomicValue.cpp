@@ -21,7 +21,7 @@
     }
 
     XdmAtomicValue::~XdmAtomicValue(){
-        std::cerr<<"XdmAtomicValue destructor called"<<std::endl;
+        std::cerr<<"XdmAtomicValue destructor called ref="<<getRefCount()<<std::endl;
         if(!valType.empty()) {
             valType.clear();
         }

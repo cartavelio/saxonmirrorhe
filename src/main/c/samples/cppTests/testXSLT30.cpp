@@ -121,7 +121,7 @@ void testTransformToStringExtensionFunc(SaxonProcessor *processor, Xslt30Process
 void testApplyTemplatesString2(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
 
     cout << endl << "Test: testApplyTemplatesString2:" << endl;
-    trans->clearParameters(true);
+    trans->clearParameters();
 
     XdmNode *input = processor->parseXmlFromFile("cat.xml");
 
@@ -165,7 +165,7 @@ Should be error. Stylesheet file does not exist
 void testApplyTemplates2a(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
 
     cout << endl << "Test: TransformToString2a:" << endl;
-    trans->clearParameters(true);
+    trans->clearParameters();
     XdmNode *input = processor->parseXmlFromFile("cat.xml");
 
     if (input == nullptr) {
@@ -184,6 +184,8 @@ void testApplyTemplates2a(SaxonProcessor *processor, Xslt30Processor *trans, sRe
             cerr <<"testApplyTemplates2a error: "<< trans->getErrorMessage() << endl;
         }
         delete input;
+        cerr<< "testApplyTemplates2a - cp0"<<endl;
+        SaxonProcessor::sxn_environ->env->ExceptionDescribe();
         return;
     }
 
@@ -203,7 +205,7 @@ Should be error. Source file does not exist
 void testTransformToString2b(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
 
     cout << endl << "Test: TransformToString2b:" << endl;
-    trans->clearParameters(true);
+    trans->clearParameters();
 
     const char * result  = trans->transformFileToString("cat-error.xml", "test-error.xsl");
 
@@ -233,20 +235,21 @@ and integer parmater created and supplied
 void testTransformToString3(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
 
     cout << endl << "Test: TransformToString3: param size=" << trans->getParameters().size() << endl;
-    trans->clearParameters(true);
+    trans->clearParameters();
 
     XdmNode *inputi = processor->parseXmlFromString(
             "<out><person>text1</person><person>text2</person><person>text3</person></out>");
 
-    XdmAtomicValue *value1 = processor->makeIntegerValue(10);
-
-    trans->setParameter("numParam", (XdmValue *) value1);
-
     if (inputi== nullptr) {
         cout << "Source document inputi is null. ====== FAIL ====== " << endl;
         sresult->failureList.push_back("testTransformToString3");
+
         return;
     }
+
+    XdmAtomicValue *value1 = processor->makeIntegerValue(10);
+
+
 
     XsltExecutable * executable = trans->compileFromFile("test.xsl");
 
@@ -261,6 +264,12 @@ void testTransformToString3(SaxonProcessor *processor, Xslt30Processor *trans, s
         return;
     }
 
+
+
+    trans->setParameter("numParam", (XdmValue *) value1);
+
+    cerr << "testTransformToString3  test test " << endl;
+
     executable->setInitialMatchSelection((XdmNode *) inputi);
     const char *output = executable->applyTemplatesReturningString();
     if (output == nullptr) {
@@ -273,6 +282,7 @@ void testTransformToString3(SaxonProcessor *processor, Xslt30Processor *trans, s
     }
     fflush(stdout);
 
+    cout<<"value 1 object ref="<<(value1)<<endl;
     delete value1;
     delete executable;
 
@@ -288,7 +298,7 @@ void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans, s
     cout << endl << "cpp0-1" << endl;
     SaxonProcessor::sxn_environ->env->ExceptionDescribe();
 
-    trans->clearParameters(true);
+    trans->clearParameters();
     cout << endl << "cpp0-2" << endl;
     SaxonProcessor::sxn_environ->env->ExceptionDescribe();
 
@@ -346,7 +356,7 @@ void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans, s
 
 void testTransformFromstring(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
     cout << endl << "Test: testTransfromFromstring: param size="<< trans->getParameters().size() << endl;
-    trans->clearParameters(true);
+    trans->clearParameters();
     if(processor == nullptr) {
         cout<<" processor is null"<<endl;
         return;
@@ -355,16 +365,27 @@ void testTransformFromstring(SaxonProcessor *processor, Xslt30Processor *trans, 
     XdmNode *input = processor->parseXmlFromString(
             "<out><person>text1</person><person>text2</person><person>text3</person></out>");
 
-    XsltExecutable * executable = trans->compileFromString(
-            "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>");
-
-    if(executable== nullptr || input == nullptr) {
+    if(input == nullptr) {
         sresult->failure++;
         sresult->failureList.push_back("testTransformFromstring");
         cerr << "testTransformFromstring NULL found" << endl;
         if (trans->exceptionOccurred()) {
             cerr <<"testTransformFromstring error: "<< trans->getErrorMessage() << endl;
         }
+        return;
+    }
+
+    XsltExecutable * executable = trans->compileFromString(
+            "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>");
+
+    if(executable== nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testTransformFromstring");
+        cerr << "testTransformFromstring NULL found" << endl;
+        if (trans->exceptionOccurred()) {
+            cerr <<"testTransformFromstring error: "<< trans->getErrorMessage() << endl;
+        }
+        delete input;
         return;
     }
 
@@ -393,7 +414,7 @@ void testTransformFromstring(SaxonProcessor *processor, Xslt30Processor *trans, 
 //Test case has error in the stylesheet
 void testTransformFromstring2Err(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
     cout << endl << "Test: testTransfromFromstring2-Error:" << endl;
-    trans->clearParameters(true);
+    trans->clearParameters();
 
     XdmNode *input = processor->parseXmlFromString(
             "<out><person>text1</person><person>text2</person><person>text3</person></out>");
@@ -433,7 +454,7 @@ void testTransformFromstring2Err(SaxonProcessor *processor, Xslt30Processor *tra
 }
 
 void testTrackingOfValueReference(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
-    trans->clearParameters(true);
+    trans->clearParameters();
 
     cout << endl << "Test: TrackingOfValueReference:" << endl;
     ostringstream test;
@@ -481,7 +502,7 @@ void testTrackingOfValueReference(SaxonProcessor *processor, Xslt30Processor *tr
 
 /*Test case should be error.*/
 void testTrackingOfValueReferenceError(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
-    trans->clearParameters(true);
+    trans->clearParameters();
 
     cout << endl << "Test: TrackingOfValueReference-Error:" << endl;
     cout << "Parameter Map size: " << (trans->getParameters().size()) << endl;
@@ -533,7 +554,7 @@ void testTrackingOfValueReferenceError(SaxonProcessor *processor, Xslt30Processo
 }
 
 void testValidation(Xslt30Processor *trans, sResultCount *sresult) {
-    trans->clearParameters(true);
+    trans->clearParameters();
 
 
 
@@ -558,7 +579,7 @@ void testValidation(Xslt30Processor *trans, sResultCount *sresult) {
 
 
 void testXdmNodeOutput(Xslt30Processor *trans, sResultCount *sresult) {
-    trans->clearParameters(true);
+    trans->clearParameters();
 
 
     std::cout << "testXdmNodeOutput" << std::endl;
@@ -622,7 +643,7 @@ void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
         cout << "Result is null ====== FAIL ====== " << endl;
         sresult->failure++;
     }
-    proc->clearParameters(true);
+    proc->clearParameters();
     delete executable;
 
 }
@@ -644,7 +665,7 @@ void exampleSimple1Err(Xslt30Processor *proc, sResultCount *sresult) {
 
         delete executable;
     }
-    proc->clearParameters(true);
+    proc->clearParameters();
 
 }
 
@@ -681,24 +702,25 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
         sresult->failure++;
         sresult->failureList.push_back("exampleSimple2");
     }
-    proc->clearParameters(true);
-    executable->clearParameters(true);
+    proc->clearParameters();
+    executable->clearParameters();
     delete executable;
 
 }
 
 void exampleSimple3(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCount *sresult) {
     cout << "<b>exampleSimple3:</b><br/>" << endl;
-    proc->clearParameters(true);
+    proc->clearParameters();
 
     XsltExecutable * executable = proc->compileFromFile("../php/xsl/foo.xsl");
 
-   if(executable== nullptr) {
+   if(executable == nullptr) {
 	cout << "executable is NULL" <<endl;
 	if(proc->exceptionOccurred()) {
 		cout << proc->getErrorMessage() <<endl;
 		
 	}
+
 	return;
 
    }
@@ -712,16 +734,18 @@ void exampleSimple3(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCou
     }
     executable->setInitialMatchSelection((XdmNode *) xdmNode);
     cout << "end of exampleSimple3" << endl;
-    executable->clearParameters(true);
+    executable->clearParameters();
 
     sresult->success++;
     delete executable;
 
+    SaxonProcessor::sxn_environ->env->ExceptionDescribe();
+
 }
 
 void exampleSimple3a(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCount *sresult) {
-    cout << "<b>exampleSimple3:</b><br/>" << endl;
-    proc->clearParameters(true);
+    cout << "<b>exampleSimple3a:</b><br/>" << endl;
+    proc->clearParameters();
 
     XsltExecutable * executable = proc->compileFromFile(nullptr);
 
@@ -730,7 +754,7 @@ void exampleSimple3a(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCo
 
 
         cout << "end of exampleSimple3a" << endl;
-        proc->clearParameters(true);
+        proc->clearParameters();
 
         sresult->success++;
         return;
@@ -892,7 +916,7 @@ void xmarkTest1(Xslt30Processor *proc, sResultCount *sresult) {
             cout << proc->getErrorMessage() << endl;
         }
     }
-    proc->clearParameters(true);
+    proc->clearParameters();
 
 
 }
@@ -914,7 +938,7 @@ void xmarkTest2(Xslt30Processor *proc, sResultCount *sresult) {
             cout << proc->getErrorMessage() << endl;
         }
     }
-    proc->clearParameters(true);
+    proc->clearParameters();
 
 
 }
@@ -935,7 +959,7 @@ void exampleSimple_xmark(Xslt30Processor *proc, sResultCount *sresult) {
             cout << proc->getErrorMessage() << endl;
         }
     }
-    proc->clearParameters(true);
+    proc->clearParameters();
 
 }
 
@@ -946,7 +970,7 @@ void exampleSimple_xmark(Xslt30Processor *proc, sResultCount *sresult) {
 void testPackage1(Xslt30Processor *trans, sResultCount *sresult) {
 
     cout << endl << "Test: Saving and loading Packages:" << endl;
-    trans->clearParameters(true);
+    trans->clearParameters();
 
 
     trans->compileFromFileAndSave("test.xsl", "test1.sef");
@@ -976,7 +1000,7 @@ void testPackage1(Xslt30Processor *trans, sResultCount *sresult) {
 void testPackage2(Xslt30Processor *trans, sResultCount *sresult) {
 
     cout << endl << "Test: Saving and loading Packages2 - Error:" << endl;
-    trans->clearParameters(true);
+    trans->clearParameters();
 
 
     const char *stylesheet = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out><xsl:for-each></output></xsl:template><xsl:stylesheet>";
@@ -1058,7 +1082,7 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans, sResultCo
         sresult->failure++;
     }
 
-    executable->clearParameters(true);
+    executable->clearParameters();
     delete result;
     delete executable;
 
@@ -1546,14 +1570,17 @@ int main(int argc, char* argv[]) {
 
 
     testCatalog(cwd, processor,  sresult);
-    processor->release();
-    return 0;
+
 
     testTransformToString2b(processor, trans, sresult);
 
     testTransformToString3(processor, trans, sresult);
 	
     testTransformFromstring(processor, trans, sresult);
+
+    processor->release();
+    delete processor;
+    return 0;
 
     testTransformFromstring2Err(processor, trans, sresult);
 

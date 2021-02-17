@@ -4,6 +4,8 @@
 #include "XdmNode.h"
 #include "XdmAtomicValue.h"
 #include "XdmFunctionItem.h"
+#include "XdmMap.h"
+#include "XdmArray.h"
 
 XPathProcessor::XPathProcessor() {
 	SaxonProcessor *p = new SaxonProcessor(false);
@@ -101,13 +103,14 @@ if (!mID) {
 		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
 		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
+        jclass mapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
+        jclass arrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmArray");
 
 		XdmValue * value = new XdmValue();
 		XdmItem * xdmItem = nullptr;
 		for (int p=0; p < sizex; ++p) 
 		{
 			jobject resulti = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(results, p);
-			//value->addUnderlyingValue(resulti);
 
 			if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, atomicValueClass)           == JNI_TRUE) {
 				xdmItem = new XdmAtomicValue(resulti);
@@ -117,9 +120,12 @@ if (!mID) {
 
 			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, functionItemClass)           == JNI_TRUE) {
 				xdmItem =  new XdmFunctionItem(resulti);
-			}
-			if(sizex == 1) {
-				value->decrementRefCount();
+			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, mapClass)           == JNI_TRUE) {
+                xdmItem =  new XdmMap(resulti);
+            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, arrayClass)           == JNI_TRUE) {
+                xdmItem =  new XdmArray(resulti);
+            }
+            if(sizex == 1) {
 				delete value;
 				SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
 				return xdmItem;		
@@ -380,12 +386,14 @@ void XPathProcessor::setParameter(const char * name, XdmValue* value) {
             it = parameters.find(skey);
             if (it != parameters.end()) {
                 XdmValue * valuei = it->second;
-                valuei->decrementRefCount();
-                if(valuei != nullptr && valuei->getRefCount() < 1){
-                    delete value;
+                if(valuei != nullptr) {
+                    valuei->decrementRefCount();
+                    if (valuei->getRefCount() < 1) {
+                        delete value;
+                    }
+                    parameters.erase(skey);
+                    parameters[skey] = value;
                 }
-                parameters.erase(skey);
-                parameters[skey] = value;
             }
 		}
 	}
@@ -413,19 +421,22 @@ void XPathProcessor::setProperty(const char * name, const char * value) {
 }
 
 void XPathProcessor::clearParameters(bool delVal) {
-	if(delVal){
-       		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
-			XdmValue * value = itr->second;
-			value->decrementRefCount();
+	if(delVal) {
+        for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
+            XdmValue *value = itr->second;
+            if (value != nullptr) {
+                value->decrementRefCount();
 #ifdef DEBUG
-			std::cerr<<"XPathProc.clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
+                std::cerr<<"XPathProc.clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
-			if(value != nullptr && value->getRefCount() < 1){
-	        		delete value;
-			}
-        	}
-		parameters.clear();
-	}
+                if (value->getRefCount() < 1) {
+                    delete value;
+                }
+            }
+        }
+    }
+	parameters.clear();
+
 }
 
 void XPathProcessor::clearProperties() {

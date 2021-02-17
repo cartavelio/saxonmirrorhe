@@ -130,12 +130,14 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
             it = parameters.find(skey);
             if (it != parameters.end()) {
                 XdmValue * valuei = it->second;
-                valuei->decrementRefCount();
-                if(valuei != nullptr && valuei->getRefCount() < 1){
-                    delete value;
+                if(valuei != nullptr) {
+                    valuei->decrementRefCount();
+                    if (valuei->getRefCount() < 1) {
+                        delete value;
+                    }
+                    parameters.erase(skey);
+                    parameters[skey] = value;
                 }
-                parameters.erase(skey);
-                parameters[skey] = value;
             }
 		}
 	} 
@@ -185,24 +187,27 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
     void XQueryProcessor::clearParameters(bool delVal){
 	if(delVal){
-       		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
-			XdmValue * value = itr->second;
-			value->decrementRefCount();
+       		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
+                XdmValue *value = itr->second;
+                if (value != nullptr) {
+                    value->decrementRefCount();
 #ifdef DEBUG
-			std::cerr<<"XQueryProc.clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
+                    std::cerr<<"XQueryProc.clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
-			if(value != nullptr && value->getRefCount() < 1){
-	        		delete value;
-			}
-        	}
+                    if (value->getRefCount() < 1) {
+                        delete value;
+                    }
+                }
+            }
 		
 	} else {
 
 		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
 			XdmValue * value = itr->second;
-			value->decrementRefCount();
-
-        	}
+			if(value != nullptr) {
+                value->decrementRefCount();
+            }
+		}
 	}
 
 	parameters.clear();

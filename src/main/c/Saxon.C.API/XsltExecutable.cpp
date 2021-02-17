@@ -81,7 +81,7 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
 
         XdmValue *valuei = paramIter->second;
         if (valuei == nullptr) {
-            std::cerr << "Error in XsltExecutable copy constructor" << std::endl;
+            std::cerr << "Error in XsltExecutable copy constructor - parameter value is NULL" << std::endl;
         } else {
             parameters[paramIter->first] = new XdmValue(*(valuei));
         }
@@ -126,7 +126,7 @@ void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
     if (_selection != nullptr) {
         _selection->incrementRefCount();
         selectionV = _selection;
-        selection = _selection->getUnderlyingValue();
+        selection = SaxonProcessor::sxn_environ->env->NewGlobalRef(_selection->getUnderlyingValue());
     }
 }
 
@@ -160,12 +160,14 @@ void XsltExecutable::setParameter(const char *name, XdmValue *value) {
             it = parameters.find(skey);
             if (it != parameters.end()) {
                 XdmValue *valuei = it->second;
-                valuei->decrementRefCount();
-                if (valuei != nullptr && valuei->getRefCount() < 1) {
-                    delete value;
+                if(valuei != nullptr) {
+                    valuei->decrementRefCount();
+                    if (valuei->getRefCount() < 1) {
+                        delete value;
+                    }
+                    parameters.erase(skey);
+                    parameters[skey] = value;
                 }
-                parameters.erase(skey);
-                parameters[skey] = value;
             }
         }
     }
@@ -243,12 +245,14 @@ void XsltExecutable::clearParameters(bool delValues) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
 
             XdmValue *value = itr->second;
-            value->decrementRefCount();
+            if(value != nullptr) {
+                value->decrementRefCount();
 #ifdef DEBUG
-            std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
+                std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
-            if (value != nullptr && value->getRefCount() < 1) {
-                delete value;
+                if (value->getRefCount() < 1) {
+                    delete value;
+                }
             }
         }
 
@@ -258,7 +262,9 @@ void XsltExecutable::clearParameters(bool delValues) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
 
             XdmValue *value = itr->second;
-            value->decrementRefCount();
+            if(value != nullptr) {
+                value->decrementRefCount();
+            }
 
         }
 

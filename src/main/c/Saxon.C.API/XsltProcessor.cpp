@@ -129,12 +129,14 @@ void XsltProcessor::setParameter(const char* name, XdmValue * value) {
             it = parameters.find(skey);
             if (it != parameters.end()) {
                 XdmValue * valuei = it->second;
-                valuei->decrementRefCount();
-                if(valuei != nullptr && valuei->getRefCount() < 1){
-                    delete value;
+                if(valuei != nullptr) {
+                    valuei->decrementRefCount();
+                    if (valuei->getRefCount() < 1) {
+                        delete value;
+                    }
+                    parameters.erase(skey);
+                    parameters[skey] = value;
                 }
-                parameters.erase(skey);
-                parameters[skey] = value;
             }
 		}
 	} 
@@ -183,25 +185,29 @@ const char* XsltProcessor::getProperty(const char* name) {
 
 void XsltProcessor::clearParameters(bool delValues) {
 	if(delValues){
-       		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
-			
-			XdmValue * value = itr->second;
-			value->decrementRefCount();
+       		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
+
+                XdmValue *value = itr->second;
+                if (value != nullptr) {
+                    value->decrementRefCount();
 #ifdef DEBUG
-			std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
+                    std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
-			if(value != nullptr && value->getRefCount() < 1){
-	        		delete value;
-			}
-        	}
+                    if (value->getRefCount() < 1) {
+                        delete value;
+                    }
+                }
+            }
 		
 	} else {
-for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
+        for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
 		
 			XdmValue * value = itr->second;
-			value->decrementRefCount();
+			if(value != nullptr) {
+                value->decrementRefCount();
+            }
 		
-        	}
+        }
 
 	}
 	parameters.clear();
