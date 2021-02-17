@@ -220,7 +220,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 					"(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;)V");
 	}
 	if (!cAndSNodemID) {
-		std::cerr<<"Error: "<<getDllname<<"compileFromStringAndSave funtion not found"<<std::endl;
+		std::cerr<<"Error: "<<getDllname()<<"compileFromStringAndSave funtion not found"<<std::endl;
 
 	} else {
         if(cppXT == nullptr) {
@@ -516,7 +516,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
 					"(Ljava/lang/String;Lnet/sf/saxon/option/cpp/Xslt30Processor;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmValue;");
 	}
 	if (!mtvID) {
-        std::cerr<<"Error: "<<getDllname<<".transformtoValue function not found"<<std::endl;
+        std::cerr<<"Error: "<<getDllname()<<".transformtoValue function not found"<<std::endl;
 
 	} else {
         if(cppXT == nullptr) {
@@ -605,7 +605,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
 					"(Ljava/lang/String;Lnet/sf/saxon/option/cpp/Xslt30Processor;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
 	}
 	if (!mtfID) {
-        std::cerr<<"Error: "<<getDllname<<".transformToFile function not found"<<std::endl;
+        std::cerr<<"Error: "<<getDllname()<<".transformToFile function not found"<<std::endl;
 
 	} else {
         if(cppXT == nullptr) {
@@ -652,7 +652,7 @@ const char * Xslt30Processor::transformFileToString(const char* source,
 					"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
 	}
 	if (!mtsID) {
-        std::cerr<<"Error: "<<getDllname<<".transformFileToString not found"<<std::endl;
+        std::cerr<<"Error: "<<getDllname()<<".transformFileToString not found"<<std::endl;
 
 	} else {
         if(cppXT == nullptr) {
