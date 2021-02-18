@@ -94,15 +94,13 @@ jobject XdmItem::getUnderlyingValue(){
 
 XdmItem::~XdmItem() {
     //decrementRefCount();
-    std::cerr<<std::endl<<"XdmItem destructor called, refCount"<<getRefCount()<<std::endl;
+    //std::cerr<<std::endl<<"XdmItem destructor called, refCount"<<getRefCount()<<std::endl;
 
     SaxonProcessor::sxn_environ->env->ExceptionDescribe();
 
     if(value !=nullptr && SaxonProcessor::jvmCreatedCPP>0) {
-        std::cout << std::endl << "cpp0-1: DeleteGlobalRef" << std::endl;
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(value);
     }
-    std::cout << std::endl << "cpp0-1" << std::endl;
     SaxonProcessor::sxn_environ->env->ExceptionDescribe();
     if(stringValue.empty()) {
         stringValue.clear();

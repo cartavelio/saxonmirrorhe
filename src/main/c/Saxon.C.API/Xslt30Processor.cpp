@@ -139,13 +139,10 @@ void Xslt30Processor::setJustInTimeCompilation(bool jit){
 
 
 void Xslt30Processor::clearParameters(bool delValues) {
-    std::cout<<"clearParameter" <<std::endl;
 	if(delValues){
         for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
             XdmValue * value = itr->second;
-            std::cout<<"clearParameter cp0" <<"ob ref="<<(value)<<std::endl;
             if(value != nullptr) {
-                std::cout<<"clearParameter cp0-1" <<std::endl;
                 value->decrementRefCount();
 #ifdef DEBUG
                 std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
@@ -154,31 +151,17 @@ void Xslt30Processor::clearParameters(bool delValues) {
                     delete value;
                 }
             }
-            std::cout<<"clearParameter cp0-2" <<std::endl;
         }
 
 	} else {
-        std::cout<<"clearParameter cp1-0" <<std::endl;
-        for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
+        	for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
 
-			XdmValue * value = itr->second;
-            std::cout<<"clearParameter cp1" <<"ob ref="<<(value)<<std::endl;
-
-            if(value == NULL) {
-                std::cout<<"clearParameter cp1-0 after itr NULL found!!!!!" <<std::endl;
-            }
-			if(value != nullptr) {
-                std::cout<<"clearParameter cp1-1" <<std::endl;
-                value->decrementRefCount();
-            }
+			parameters.erase(itr);
 		
         	}
 
 	}
-    std::cout<<"clearParameter cp1" <<std::endl;
 	parameters.clear();
-    std::cout<<"clearParameter cp2" <<std::endl;
-
 	
 }
 

@@ -36,14 +36,12 @@ public:
 	XdmNode(XdmNode *parent, jobject, XDM_NODE_KIND);
 
 	virtual ~XdmNode() {
-        std::cerr<<"XdmNode destructor called"<<std::endl;
 		if (getRefCount() <1){
 		    delete baseURI;
 			delete nodeName;
 		}
 
 		//There might be potential issues with children and attribute node not being deleted when the parent node has been deleted
-		//we need to track this kind of problem.
 	}
 
 	virtual bool isAtomic();

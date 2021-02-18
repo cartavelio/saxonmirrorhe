@@ -127,14 +127,12 @@ XdmValue::XdmValue(jobject val, bool arr){
 
 XdmValue::~XdmValue() {
 	//bool safeToClear = false;
-	std::cout<<"xdmValue destructor size= "<<values.size()<<" ref="<<getRefCount()<<std::endl;
+	//std::cout<<"xdmValue destructor size= "<<values.size()<<" ref="<<getRefCount()<<" Pointer = "<<(this)<<std::endl;
     //if(getRefCount()<1){
-    std::cout<<"xdmValue destructor refCount="<<getRefCount()<<" values.size="<<values.size()<<std::endl;
 	//proc->env->ReleaseObject
 	if(values.size() > 0) {
         for (size_t i = 0; i < values.size(); i++) {
             values[i]->decrementRefCount();
-            std::cout << "xdmItem (XdmValue destructor) refCount=" << values[i]->getRefCount() << std::endl;
             if (values[i] != nullptr && values[i]->getRefCount() < 1) {
                 delete values[i];
             }
@@ -143,7 +141,6 @@ XdmValue::~XdmValue() {
     }
 	if (valueType != nullptr) { delete valueType; }
 	if (jValues) {
-        std::cout<<"xdmValue (jValues) jni"<<getRefCount()<<std::endl;
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(jValues);
 	}
 	xdmSize = 0;
@@ -153,7 +150,6 @@ XdmValue::~XdmValue() {
     if(!toStringValue.empty()) {
         toStringValue.clear();
     }
-    std::cout<<"end - xdmValue destructor refCount="<<getRefCount()<<std::endl;
 
 }
 

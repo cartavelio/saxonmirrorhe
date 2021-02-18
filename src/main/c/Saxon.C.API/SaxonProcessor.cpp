@@ -277,7 +277,9 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 
 SaxonProcessor::~SaxonProcessor() {
     clearConfigurationProperties();
-    SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
+    if(proc) {
+    	SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
+    }
     if (versionStr != nullptr) {
         delete versionStr;
     }
@@ -521,7 +523,6 @@ SaxonProcessor &SaxonProcessor::operator=(const SaxonProcessor &other) {
     saxonCAPIClass = other.saxonCAPIClass;
     cwd = other.cwd;
     proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.proc);
-    //SaxonProcessor::sxn_environ= other.environ;
     parameters = other.parameters;
     configProperties = other.configProperties;
     licensei = other.licensei;
@@ -535,7 +536,6 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
     saxonCAPIClass = other.saxonCAPIClass;
     cwd = other.cwd;
     proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.proc);
-    //SaxonProcessor::sxn_environ= other.environ;
     parameters = other.parameters;
     configProperties = other.configProperties;
     licensei = other.licensei;

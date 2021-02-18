@@ -1578,8 +1578,9 @@ int main(int argc, char* argv[]) {
 	
     testTransformFromstring(processor, trans, sresult);
 
-    processor->release();
+    //processor->release();
     delete processor;
+    processor->release();
     return 0;
 
     testTransformFromstring2Err(processor, trans, sresult);
