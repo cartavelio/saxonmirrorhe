@@ -44,16 +44,12 @@ XsltExecutable::XsltExecutable(jobject exObject, std::string curr) {
 XsltExecutable::~XsltExecutable() {
     clearProperties();
     clearParameters();
-    if (selectionV != nullptr) {
-        selectionV->decrementRefCount();
-        if (selectionV->getRefCount() == 0) {
-            delete selectionV;
-        }
-    } else {
-        if (selection) {
-            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
-        }
+
+    if(selection) {
+        SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
+        selection = nullptr;
     }
+
     SaxonProcessor::sxn_environ->env->DeleteGlobalRef(executableObject);
 
 }
@@ -256,10 +252,7 @@ void XsltExecutable::clearParameters(bool delValues) {
             }
         }
 
-        if(selection) {
-            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
-            selection = nullptr;
-        }
+
     } else {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
 
@@ -269,10 +262,7 @@ void XsltExecutable::clearParameters(bool delValues) {
             }
 
         }
-        if(selection) {
-            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
-            selection = nullptr;
-        }
+
     }
     parameters.clear();
 

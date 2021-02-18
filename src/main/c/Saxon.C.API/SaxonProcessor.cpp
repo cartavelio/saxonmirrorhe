@@ -520,7 +520,7 @@ SaxonProcessor &SaxonProcessor::operator=(const SaxonProcessor &other) {
     procClass = other.procClass;
     saxonCAPIClass = other.saxonCAPIClass;
     cwd = other.cwd;
-    proc = other.proc;
+    proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.proc);
     //SaxonProcessor::sxn_environ= other.environ;
     parameters = other.parameters;
     configProperties = other.configProperties;
@@ -534,7 +534,7 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
     procClass = other.procClass;
     saxonCAPIClass = other.saxonCAPIClass;
     cwd = other.cwd;
-    proc = other.proc;
+    proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.proc);
     //SaxonProcessor::sxn_environ= other.environ;
     parameters = other.parameters;
     configProperties = other.configProperties;
