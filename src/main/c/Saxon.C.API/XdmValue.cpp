@@ -128,12 +128,10 @@ XdmValue::XdmValue(jobject val, bool arr){
 XdmValue::~XdmValue() {
 	//bool safeToClear = false;
 	//std::cout<<"xdmValue destructor size= "<<values.size()<<" ref="<<getRefCount()<<" Pointer = "<<(this)<<std::endl;
-    //if(getRefCount()<1){
-	//proc->env->ReleaseObject
 	if(values.size() > 0) {
         for (size_t i = 0; i < values.size(); i++) {
-            values[i]->decrementRefCount();
-            if (values[i] != nullptr && values[i]->getRefCount() < 1) {
+            if (values[i] != nullptr) {
+                //values[i]->decrementRefCount();
                 delete values[i];
             }
         }
@@ -141,11 +139,9 @@ XdmValue::~XdmValue() {
     }
 	if (valueType != nullptr) { delete valueType; }
 	if (jValues) {
-		SaxonProcessor::sxn_environ->env->DeleteLocalRef(jValues);
+		SaxonProcessor::sxn_environ->env->DeleteGlobalRef(jValues);
 	}
 	xdmSize = 0;
-
-    //}
 
     if(!toStringValue.empty()) {
         toStringValue.clear();
@@ -159,8 +155,7 @@ void XdmValue::addXdmItem(XdmItem* val) {
         val->incrementRefCount();
 		xdmSize++;
         if (jValues) {
-            std::cout<<"xdmValue jni"<<getRefCount()<<std::endl;
-            SaxonProcessor::sxn_environ->env->DeleteLocalRef(jValues);  //TODO check - this maybe should be DeleteGlobalRef  - check where it is created
+            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(jValues);
             jValues = nullptr;
         }
 
@@ -222,7 +217,15 @@ jobject XdmValue::getUnderlyingValue() {
 }
 
 void XdmValue::releaseXdmValue() {
+    for (size_t i = 0; i < values.size(); i++) {
+        if (values[i] != nullptr) {
+            delete values[i];
+        }
+    }
 
+    if(jValues) {
+        SaxonProcessor::sxn_environ->env->DeleteGlobalRef(jValues);
+    }
 
 
 }

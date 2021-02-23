@@ -211,7 +211,7 @@ jobject createSaxonProcessor2 (JNIEnv* penv, jclass myClassInDll, const char * a
 /*
  * Callback to check for exceptions. When called it returns the exception as a string 
  */
-const char * checkForException(sxnc_environment *environi, jobject callingObject);
+const char * checkForException(sxnc_environment *environi);
 
 /*
  * Clean up and destroy Java VM to release memory used. 

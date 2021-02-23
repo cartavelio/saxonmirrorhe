@@ -434,28 +434,6 @@ public:
      //! Clear any exception thrown
     void exceptionClear();
 
-     //!Get number of errors reported during execution or evaluate of stylesheet
-    /**
-     * A transformation may have a number of errors reported against it.
-     * @return int - Count of the exceptions recorded against the transformation
-    */
-    //int exceptionCount();
-
-     //! Get the ith error message if there are any error
-    /**
-     * A transformation may have a number of errors reported against it.
-     * @return char* - The message of the i'th exception
-    */
-    const char * getErrorMessage();
-
-     //! Get the ith error code if there are any error
-    /**
-     * A transformation may have a number of errors reported against it.
-     * @return char* - The error code of the i'th exception. The error code are related to the specific specification
-    */
-    const char * getErrorCode();
-
-
 
 
 private:

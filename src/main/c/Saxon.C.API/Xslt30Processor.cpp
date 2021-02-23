@@ -7,6 +7,8 @@
 #include "XdmNode.h"
 #include "XdmAtomicValue.h"
 #include "XdmFunctionItem.h"
+#include "XdmMap.h"
+#include "XdmArray.h"
 #include "XsltExecutable.h"
 #ifdef DEBUG
 #include <typeinfo> //used for testing only
@@ -42,7 +44,7 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 #endif
 
 	if(cppXT == nullptr) {
-	    exception = proc->checkAndCreateException(cppClass);
+        createException();
 	}
 
 	if(!(proc->cwd.empty()) && curr.empty()){
@@ -143,22 +145,13 @@ void Xslt30Processor::clearParameters(bool delValues) {
         for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
             XdmValue * value = itr->second;
             if(value != nullptr) {
-                value->decrementRefCount();
 #ifdef DEBUG
                 std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
-                if (value->getRefCount() < 1) {
                     delete value;
-                }
+
             }
         }
-
-	} else {
-        	for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
-
-			parameters.erase(itr);
-		
-        	}
 
 	}
 	parameters.clear();
@@ -192,6 +185,20 @@ SaxonApiException* Xslt30Processor::getException() {
     return exception;
 }
 
+void Xslt30Processor::createException(const char * message) {
+
+    if(exception != nullptr) {
+        delete exception;
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
+    }
+    if(message == nullptr) {
+        exception = proc->checkAndCreateException(cppClass);
+    } else {
+        exception = new SaxonApiException(message);
+    }
+
+}
+
 
 
 void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* filename) {
@@ -204,7 +211,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 	}
 	if (!cAndSNodemID) {
 		std::cerr<<"Error: "<<getDllname()<<"compileFromStringAndSave funtion not found"<<std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
 	} else {
         if(cppXT == nullptr) {
 #if defined(DEBUG)
@@ -217,7 +224,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
 						node->getUnderlyingValue(), SaxonProcessor::sxn_environ->env->NewStringUTF(filename));
 		
-		exception = proc->checkAndCreateException(cppClass);
+		createException();
 
     }
 
@@ -233,7 +240,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 					"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
 	}
 	if (!cAndSStringmID) {
-		exception = new SaxonApiException("Error: compileFromStringAndSave function not found\n");
+        createException("Error: compileFromStringAndSave function not found\n");
 
 	} else {
         if(cppXT == nullptr) {
@@ -248,7 +255,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 						SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheetStr),
 						SaxonProcessor::sxn_environ->env->NewStringUTF(filename));
 		
-		exception = proc->checkAndCreateException(cppClass);
+		createException();
 
     }
 }
@@ -264,7 +271,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 					"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
 	}
 	if (!cAndFStringmID) {
-		exception = new SaxonApiException("Error: compileFromFileAndSave function not found");
+        createException("Error: compileFromFileAndSave function not found");
 
 	} else {
 
@@ -278,7 +285,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
 						SaxonProcessor::sxn_environ->env->NewStringUTF(xslFilename),SaxonProcessor::sxn_environ->env->NewStringUTF(filename));
 
-		exception = proc->checkAndCreateException(cppClass);
+        createException();
 
 
      }
@@ -293,7 +300,7 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 	}
 					
 	if (cStringmID== nullptr) {
-		exception = new SaxonApiException(strcat(getDllname(), ".compileFromString funtion not found"));
+        createException(strcat(getDllname(), ".compileFromString funtion not found"));
 		return nullptr;
 
 	} else {
@@ -310,7 +317,7 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
 						SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheetStr), jitCompilation, comboArrays.stringArray, comboArrays.objectArray));
 		if (!executableObject) {
-			exception = proc->checkAndCreateException(cppClass);
+            createException();
 			return nullptr;
 		}
 		if (comboArrays.stringArray != nullptr) {
@@ -339,7 +346,7 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
 
 	} else {
 	    if(node == nullptr) {
-	        exception = new SaxonApiException("Error in compileFromXdmNode - node argument is NULL");
+            createException("Error in compileFromXdmNode - node argument is NULL");
 	        return nullptr;
 	    }
         if(cppXT == nullptr) {
@@ -355,7 +362,7 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
 						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
 						node->getUnderlyingValue(), jitCompilation, comboArrays.stringArray, comboArrays.objectArray));
 		if (!executableObject) {
-			exception = proc->checkAndCreateException(cppClass);
+			createException();
 			return nullptr;
 		}
 		if (comboArrays.stringArray != nullptr) {
@@ -380,12 +387,13 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
 	if (!cFilemID) {
 		std::cerr << "Error: "<<getDllname() << ".compileFromAssociatedFile"
 				<< " not found\n" << std::endl;
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
 		return nullptr;
 
 	} else {
 		
 		if(source == nullptr) {
-			exception = new SaxonApiException("Error in compileFromFile method - The Stylesheet file is NULL");
+            createException("Error in compileFromFile method - The Stylesheet file is NULL");
 			return nullptr;
 		}
         if(cppXT == nullptr) {
@@ -401,7 +409,7 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
 						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
 						SaxonProcessor::sxn_environ->env->NewStringUTF(source), jitCompilation, comboArrays.stringArray, comboArrays.objectArray));
 		if (!executableObject) {
-			exception = proc->checkAndCreateException(cppClass);
+			createException();
      		return nullptr;
 		}
 		if (comboArrays.stringArray != nullptr) {
@@ -428,12 +436,12 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
 	if (!cFilemID) {
 		std::cerr << "Error: "<<getDllname() << ".compileFromFile"
 				<< " not found\n" << std::endl;
-        std::cerr<<"cp0 -testCatalog"<<std::endl;
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
 		return nullptr;
 
 	} else {
         if (stylesheet == nullptr) {
-            exception = new SaxonApiException("Error in compileFromFile method - The Stylesheet file is nullptr");
+            createException("The Stylesheet file is NULL");
             return nullptr;
         }
         if(cppXT == nullptr) {
@@ -454,7 +462,7 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
                                                                            stylesheet), jitCompilation,
                                                                    comboArrays.stringArray, comboArrays.objectArray));
         if (!executableObject) {
-            exception = proc->checkAndCreateException(cppClass);
+            createException();
             return nullptr;
 
         }
@@ -482,6 +490,8 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
 	if(exceptionOccurred()) {
 		//Possible error detected in the compile phase. Processor not in a clean state.
 		//Require clearing exception.
+		SaxonProcessor::sxn_environ->env->ExceptionDescribe();
+
 		return nullptr;
 	}
 
@@ -500,53 +510,72 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
 	}
 	if (!mtvID) {
         std::cerr<<"Error: "<<getDllname()<<".transformtoValue function not found"<<std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
 	} else {
         if(cppXT == nullptr) {
-#if defined(DEBUG)
+//#if defined(DEBUG)
             std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
-#endif
+//#endif
             return nullptr;
         }
 	    JParameters comboArrays;
 		comboArrays = SaxonProcessor::createParameterJArray2(parameters);
-
+        jstring jcwd = SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str());
+        jstring jsourcefile = (sourcefile != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(sourcefile) : nullptr);
+        jstring jstylesheetfile = (stylesheetfile != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheetfile) : nullptr);
 		jobject result = (jobject)(
-				SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, mtvID,
-						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()), cppXT, nullptr,
-						(sourcefile != nullptr ?SaxonProcessor::sxn_environ->env->NewStringUTF(sourcefile) : nullptr),
-						(stylesheetfile != nullptr ?
-								SaxonProcessor::sxn_environ->env->NewStringUTF(
-										stylesheetfile) :
-								nullptr), comboArrays.stringArray, comboArrays.objectArray));
+				SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, mtvID,jcwd, cppXT, nullptr, jsourcefile,
+						                            jstylesheetfile, comboArrays.stringArray, comboArrays.objectArray));
 		if (comboArrays.stringArray != nullptr) {
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
 		}
+        if (jcwd != nullptr) {
+            SaxonProcessor::sxn_environ->env->DeleteLocalRef(jcwd);
+        }
+        if (jsourcefile != nullptr) {
+            SaxonProcessor::sxn_environ->env->DeleteLocalRef(jsourcefile);
+        }
+        if (jstylesheetfile != nullptr) {
+            SaxonProcessor::sxn_environ->env->DeleteLocalRef(jstylesheetfile);
+        }
 		if (result) {
+
 			jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
           		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
           		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
-			XdmValue * value = nullptr;
+                jclass mapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
+                jclass arrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmArray");
+			    XdmValue * value = nullptr;
           		XdmItem * xdmItem = nullptr;
 
 
           			if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, atomicValueClass)           == JNI_TRUE) {
-          				xdmItem = new XdmAtomicValue(SaxonProcessor::sxn_environ->env->NewGlobalRef(result));
+          				xdmItem = new XdmAtomicValue(result);
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                         return xdmItem;
 
           			} else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, nodeClass)           == JNI_TRUE) {
-          				xdmItem = new XdmNode(SaxonProcessor::sxn_environ->env->NewGlobalRef(result));
+          				xdmItem = new XdmNode(result);
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                         return xdmItem;
-#if CVERSION_API_NO >= 123
+
           			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
-                        xdmItem =  new XdmFunctionItem(SaxonProcessor::sxn_environ->env->NewGlobalRef(result));
+                        xdmItem =  new XdmFunctionItem(result);
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                         return xdmItem;
-#endif
-          			} else {
+
+          			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapClass)           == JNI_TRUE) {
+                        xdmItem =  new XdmMap(result);
+                        SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                        return xdmItem;
+
+                    } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, arrayClass)           == JNI_TRUE) {
+                        xdmItem =  new XdmArray(result);
+                        SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                        return xdmItem;
+
+                    } else {
 					value = new XdmValue(result, true);
 					SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
 					return value;
@@ -557,9 +586,9 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
           		SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
           		return value;
 		}else {
-	
-			exception = proc->checkAndCreateException(cppClass);
-	   		
+
+			createException();
+
      		}
 	}
 	return nullptr;
@@ -589,7 +618,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
 	}
 	if (!mtfID) {
         std::cerr<<"Error: "<<getDllname()<<".transformToFile function not found"<<std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
 	} else {
         if(cppXT == nullptr) {
 #if defined(DEBUG)
@@ -610,7 +639,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
 		}
 		}
-		exception = proc->checkAndCreateException(cppClass);
+		createException();
 	}
 
 
@@ -632,11 +661,11 @@ const char * Xslt30Processor::transformFileToString(const char* source,
 	if(mtsID == nullptr) {
 			mtsID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
 					"transformToString",
-					"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+					"(Ljava/lang/String;Lnet/sf/saxon/option/cpp/Xslt30Processor;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)[B");
 	}
 	if (!mtsID) {
         std::cerr<<"Error: "<<getDllname()<<".transformFileToString not found"<<std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
 	} else {
         if(cppXT == nullptr) {
 #if defined(DEBUG)
@@ -647,7 +676,7 @@ const char * Xslt30Processor::transformFileToString(const char* source,
     JParameters comboArrays;
     comboArrays = SaxonProcessor::createParameterJArray2(parameters);
 
-	jstring result = nullptr;
+    jbyteArray result = nullptr;
 	jobject obj = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, mtsID,
 								SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()), cppXT, nullptr,
 						(source != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(
@@ -659,18 +688,23 @@ const char * Xslt30Processor::transformFileToString(const char* source,
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
     }
 	if(obj) {
-			result = (jstring)obj;
+			result = (jbyteArray)obj;
 	}
 
 	if (result) {
-			const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result,
-					nullptr);
-			SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
-			return str;
-		} else  {
-			exception =proc->checkAndCreateException(cppClass);
+        jboolean isCopy = false;
+        jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
+        jsize num_bytes = SaxonProcessor::sxn_environ->env->GetArrayLength(result);
+
+        const char *str = new char[num_bytes];
+        memcpy ((void *) str, b , num_bytes );
+
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+        return str;
+	} else  {
+	    createException();
 	   		
-     		}
+	}
 	}
 	return nullptr;
 }

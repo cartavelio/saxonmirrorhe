@@ -314,6 +314,9 @@ public:
 
 
 private:
+
+    void createException(const char * message=nullptr);
+
 	SaxonProcessor* proc;/*! */
 	jclass  cppClass;
 	jobject cppXT;

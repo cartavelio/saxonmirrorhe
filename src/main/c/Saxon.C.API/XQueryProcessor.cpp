@@ -498,7 +498,7 @@ const char* XQueryProcessor::checkException(){
 		proc->exception = proc->checkForException(SaxonProcessor::sxn_environ->env, cppClass, cppXQ);
 	}
         return proc->exception;*/
-	return proc->checkException(cppXQ);
+	return proc->checkException();
 }
 
 

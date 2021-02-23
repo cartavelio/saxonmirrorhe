@@ -490,6 +490,6 @@ const char * XPathProcessor::getErrorMessage(){
 
 
     const char* XPathProcessor::checkException(){
-	return proc->checkException(cppXP);
+	return proc->checkException();
     }
 

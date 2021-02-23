@@ -249,7 +249,7 @@ const char* XsltProcessor::checkException() {
 	 proc->exception = proc->checkForException(environi, cpp);
 	 }
 	 return proc->exception;*/
-	return proc->checkException(cppXT);
+	return proc->checkException();
 }
 
 

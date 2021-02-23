@@ -435,7 +435,7 @@ bool SchemaValidator::exceptionOccurred() {
 }
 
 const char* SchemaValidator::checkException() {
-	return proc->checkException(cppV);
+	return proc->checkException();
 }
 
 /*int SchemaValidator::exceptionCount(){

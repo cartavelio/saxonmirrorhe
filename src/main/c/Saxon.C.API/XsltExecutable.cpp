@@ -49,9 +49,8 @@ XsltExecutable::~XsltExecutable() {
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
         selection = nullptr;
     }
-
     SaxonProcessor::sxn_environ->env->DeleteGlobalRef(executableObject);
-
+    SaxonProcessor::sxn_environ->env->ExceptionClear(); // This is as a precaution to avoid crashing out if JNI gets into an unclean state.
 }
 
 
@@ -95,13 +94,6 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
 
 bool XsltExecutable::exceptionOccurred() {
     return SaxonProcessor::sxn_environ->env->ExceptionCheck();
-}
-
-const char *XsltExecutable::getErrorCode() {
-    SaxonApiException *exception = SaxonProcessor::checkForExceptionCPP(SaxonProcessor::sxn_environ->env, cppClass,
-                                                                        nullptr);
-    if (exception == nullptr) { return nullptr; }
-    return exception->getErrorCode();
 }
 
 
@@ -158,9 +150,6 @@ void XsltExecutable::setParameter(const char *name, XdmValue *value) {
                 XdmValue *valuei = it->second;
                 if(valuei != nullptr) {
                     valuei->decrementRefCount();
-                    if (valuei->getRefCount() < 1) {
-                        delete value;
-                    }
                     parameters.erase(skey);
                     parameters[skey] = value;
                 }
@@ -242,29 +231,14 @@ void XsltExecutable::clearParameters(bool delValues) {
 
             XdmValue *value = itr->second;
             if(value != nullptr) {
-                value->decrementRefCount();
 #ifdef DEBUG
                 std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
-                if (value->getRefCount() < 1) {
                     delete value;
-                }
             }
         }
-
-
-    } else {
-        for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
-            parameters.erase(itr);
-            /*if(value != NULL) {
-                value->decrementRefCount();
-            }*/
-
-        }
-
     }
     parameters.clear();
-
 }
 
 void XsltExecutable::clearProperties() {
@@ -336,7 +310,7 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
     if (!atmID) {
         std::cerr << "Error: " << getDllname() << ".applyTemplatesReturningFile" << " not found\n"
                   << std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -377,7 +351,7 @@ const char *XsltExecutable::applyTemplatesReturningString() {
     if (!atsmID) {
         std::cerr << "Error: " << getDllname() << "applyTemplatesAsString" << " not found\n"
                   << std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -431,7 +405,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
     if (!atsvmID) {
         std::cerr << "Error: " << getDllname() << "applyTemplatesAsValue" << " not found\n"
                   << std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -505,6 +479,7 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName, XdmValu
     if (!afmID) {
         std::cerr << "Error: " << getDllname() << "callFunctionReturningFile" << " not found\n"
                   << std::endl;
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
         return;
     } else {
         JParameters comboArrays;
@@ -553,7 +528,7 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
     if (!afsmID) {
         std::cerr << "Error: " << getDllname() << "callFunctionReturningString" << " not found\n"
                   << std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -605,7 +580,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
     if (!cfvmID) {
         std::cerr << "Error: " << getDllname() << "callFunctionReturningValue" << " not found\n"
                   << std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -682,7 +657,7 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
     if (!ctmID) {
         std::cerr << "Error: " << getDllname() << "callTemplateReturningFile" << " not found\n"
                   << std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -721,7 +696,7 @@ const char *XsltExecutable::callTemplateReturningString(const char *templateName
     if (!ctsmID) {
         std::cerr << "Error: " << getDllname() << "callTemplateReturningString" << " not found\n"
                   << std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -774,7 +749,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
     if (!ctsvmID) {
         std::cerr << "Error: " << getDllname() << "callTemplateReturningValue" << " not found\n"
                   << std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -853,7 +828,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
     if (!tfvMID) {
         std::cerr << "Error: " << getDllname() << ".transformtoValue" << " not found\n"
                   << std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -936,7 +911,7 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
     if (!tffMID) {
         std::cerr << "Error: " << getDllname() << "transformToFile" << " not found\n"
                   << std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -972,7 +947,7 @@ void XsltExecutable::setupXslMessage(bool create, const char * filename) {
         if (!messageID) {
             std::cerr << "Error: "<<"SaxonCMessageListener" << " in " <<getDllname() << " not found\n"
                       << std::endl;
-
+            SaxonProcessor::sxn_environ->env->ExceptionClear();
         }
 
         if (filename == nullptr) {
@@ -999,7 +974,7 @@ XdmValue * XsltExecutable::getXslMessages(){
         if (!getmessageID) {
             std::cerr << "Error: " << getDllname() << ".getXslMessages" << " not found\n"
                       << std::endl;
-
+            SaxonProcessor::sxn_environ->env->ExceptionClear();
         } else {
             jobjectArray results = (jobjectArray) (
                     SaxonProcessor::sxn_environ->env->CallObjectMethod(saxonMessageListenerObj, getmessageID));
@@ -1035,7 +1010,7 @@ const char *XsltExecutable::transformFileToString(const char *source) {
     if (!tftMID) {
         std::cerr << "Error: " << getDllname() << "transformToString" << " not found\n"
                   << std::endl;
-
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -1101,13 +1076,6 @@ void XsltExecutable::transformToFile(XdmNode *source) {
         parameters["node"] = source;
     }
     transformFileToFile(nullptr, nullptr);
-}
-
-const char *XsltExecutable::getErrorMessage() {
-    SaxonApiException *exception = SaxonProcessor::checkForExceptionCPP(SaxonProcessor::sxn_environ->env, cppClass,
-                                                                        nullptr);
-    if (exception == nullptr) { return nullptr; }
-    return exception->getMessage();
 }
 
 

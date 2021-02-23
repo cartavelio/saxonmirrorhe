@@ -282,7 +282,7 @@ sxnc_value * evaluate(sxnc_environment *environi, sxnc_processor ** proc, char *
 	return result;
      }
 
-    checkForException(environi,cpp);
+    checkForException(environi);
     return 0;
 
 }
@@ -344,11 +344,11 @@ bool effectiveBooleanValue(sxnc_environment *environi, sxnc_processor ** proc, c
       (*(environi->env))->DeleteLocalRef(environi->env, objectArray);
       (*(environi->env))->DeleteLocalRef(environi->env, stringArray);
       if(resultObj) {
-	 checkForException(environi, cpp);    
+	 checkForException(environi);
 	return resultObj;
      }
 
-    checkForException(environi, cpp);
+    checkForException(environi);
     return 0; //false
 }
 

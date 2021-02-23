@@ -540,7 +540,7 @@ private:
 
     static jobjectArray createJArray(XdmValue **values, int length);
 
-    static const char *checkException(jobject cpp);
+    static const char *checkException();
 };
 
 //===============================================================================================

@@ -306,7 +306,7 @@ const char * executeQueryToString(sxnc_environment environi, sxnc_processor ** p
 	return str;
      }
 
-    checkForException( *(environi.env), cpp);
+    checkForException( *(environi.env));
     return 0;
 
 }

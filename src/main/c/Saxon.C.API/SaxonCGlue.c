@@ -396,8 +396,7 @@ jobject createSaxonProcessor2(JNIEnv* penv, jclass myClassInDll, const char * ar
 /*
  * Callback to check for exceptions. When called it returns the exception as a string
  */
-const char * checkForException(sxnc_environment *environii, jobject callingObject) {
-	if (callingObject) {} // TODO: Remove the callingObject variable
+const char * checkForException(sxnc_environment *environii) {
 	if ((*(environii->env))->ExceptionCheck(environii->env)) {
 
 		jthrowable exc = (*(environii->env))->ExceptionOccurred(environii->env);
@@ -440,7 +439,7 @@ const char * checkForException(sxnc_environment *environii, jobject callingObjec
 		// }
 		(*(environii->env))->ReleaseStringUTFChars(environii->env, name, utfName);
 	}
-	//(*(environii->env))->ExceptionClear(environii->env);
+
 	return 0;
 }
 

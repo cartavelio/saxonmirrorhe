@@ -31,9 +31,9 @@ bool SaxonProcessor::exceptionOccurred() {
     return SaxonProcessor::sxn_environ->env->ExceptionCheck() || exception != nullptr;
 }
 
-const char *SaxonProcessor::checkException(jobject cpp) {
+const char *SaxonProcessor::checkException() {
     const char *message = nullptr;
-    message = checkForException(sxn_environ, cpp);
+    message = checkForException(sxn_environ);
     return message;
 }
 
@@ -792,9 +792,9 @@ void SaxonProcessor::release() {
         /*clearParameters();
         clearProperties();*/
     } else {
-//#ifdef DEBUG
+#ifdef DEBUG
         std::cerr << "SaxonProc: JVM finalize not called!" << std::endl;
-//#endif
+#endif
     }
 }
 
@@ -814,6 +814,8 @@ XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str) {
     }
     jobject obj2 = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mssID_atomic, obj));
     XdmAtomicValue *value = new XdmAtomicValue(obj2, "xs:string");
+    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj2);
     return value;
 }
 
@@ -830,6 +832,7 @@ XdmAtomicValue *SaxonProcessor::makeStringValue(std::string str) {
     }
     jobject obj2 = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, msID_atomic, obj));
     XdmAtomicValue *value = new XdmAtomicValue(obj2, "xs:string");
+    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
     return value;
 }
 
@@ -845,6 +848,7 @@ XdmAtomicValue *SaxonProcessor::makeIntegerValue(int i) {
     }
     jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, miiID_atomic, (jlong) i));
     XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}integer");
+    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
     return value;
 }
 
@@ -856,6 +860,7 @@ XdmAtomicValue *SaxonProcessor::makeDoubleValue(double d) {
     }
     jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mdID_atomic, (jdouble) d));
     XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}double");
+    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
     return value;
 }
 
@@ -867,6 +872,7 @@ XdmAtomicValue *SaxonProcessor::makeFloatValue(float d) {
     }
     jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mfID_atomic, (jfloat) d));
     XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}float");
+    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
     return value;
 }
 
@@ -878,6 +884,7 @@ XdmAtomicValue *SaxonProcessor::makeLongValue(long l) {
     }
     jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mlID_atomic, (jlong) l));
     XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}long");
+    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
     return value;
 }
 
@@ -889,18 +896,21 @@ XdmAtomicValue *SaxonProcessor::makeBooleanValue(bool b) {
     }
     jobject obj = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mID_atomic, (jboolean) b));
     XdmAtomicValue *value = new XdmAtomicValue(obj, "Q{http://www.w3.org/2001/XMLSchema}boolean");
+    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeQNameValue(const char *str) {
     jobject val = xdmValueAsObj(SaxonProcessor::sxn_environ, "QName", str);
     XdmAtomicValue *value = new XdmAtomicValue(val, "QName");
+    SaxonProcessor::sxn_environ->env->DeleteLocalRef(val);
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei, const char *strValue) {
     jobject obj = xdmValueAsObj(SaxonProcessor::sxn_environ, typei, strValue);
     XdmAtomicValue *value = new XdmAtomicValue(obj, typei);
+    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
     return value;
 }
 
