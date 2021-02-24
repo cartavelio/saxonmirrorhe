@@ -1905,6 +1905,11 @@ int main(int argc, char* argv[]) {
 
     SaxonProcessor *processor2 = new SaxonProcessor(true);
 
+    if(cwd != nullptr) {
+        processor->setcwd(cwd);//"/Users/ond1/work/development/git/saxon-dev/saxondev/src/main/c/samples/cppTests"); //set to the current working directory
+    } else {
+        processor->setcwd(buff);
+    }
     Xslt30Processor *trans2 = processor2->newXslt30Processor();
     testApplyTemplatesString1(trans2, sresult);
     cout<<endl<<"============================================================="<<endl<<endl;
