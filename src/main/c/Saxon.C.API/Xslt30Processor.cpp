@@ -187,10 +187,12 @@ SaxonApiException* Xslt30Processor::getException() {
 
 void Xslt30Processor::createException(const char * message) {
 
+
     if(exception != nullptr) {
         delete exception;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     }
+
     if(message == nullptr) {
         exception = proc->checkAndCreateException(cppClass);
     } else {
@@ -210,7 +212,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 					"(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;)V");
 	}
 	if (!cAndSNodemID) {
-		std::cerr<<"Error: "<<getDllname()<<"compileFromStringAndSave funtion not found"<<std::endl;
+		std::cerr<<"Error: "<<getDllname()<<"compileFromStringAndSave function not found"<<std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
 	} else {
         if(cppXT == nullptr) {
@@ -514,7 +516,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
 	} else {
         if(cppXT == nullptr) {
 //#if defined(DEBUG)
-            std::cerr << "The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown" << std::endl;
+            createException("The Java Xslt30Processor object (i.e. cppXT) is NULL - Possible exception thrown");
 //#endif
             return nullptr;
         }

@@ -529,6 +529,8 @@ protected:
 
 private:
 
+    void createException(const char * message=nullptr);
+
 
     void applyConfigurationProperties();
 

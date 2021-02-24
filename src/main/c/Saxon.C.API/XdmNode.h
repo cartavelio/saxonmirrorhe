@@ -35,14 +35,7 @@ public:
 
 	XdmNode(XdmNode *parent, jobject, XDM_NODE_KIND);
 
-	virtual ~XdmNode() {
-		if (getRefCount() <1){
-		    delete baseURI;
-			delete nodeName;
-		}
-
-		//There might be potential issues with children and attribute node not being deleted when the parent node has been deleted
-	}
+	virtual ~XdmNode();
 
 	virtual bool isAtomic();
 

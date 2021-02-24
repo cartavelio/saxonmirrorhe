@@ -58,7 +58,12 @@ const char *SaxonProcessor::getErrorMessage() {
 }
 
 void SaxonProcessor::exceptionClear() {
-    SaxonProcessor::sxn_environ->env->ExceptionClear();
+    if(exceptionOccurred()) {
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
+    }
+    if (exception != nullptr) {
+        delete exception;
+    }
 
 }
 
@@ -72,8 +77,23 @@ const char * SaxonProcessor::getResourcesDirectory() {
     return NULL;
 }
 
+void SaxonProcessor::createException(const char * message) {
 
-SaxonApiException *SaxonProcessor::checkForExceptionCPP(JNIEnv *env, jclass callingClass, jobject callingObject) {
+    if(exceptionOccurred()) {
+        delete exception;
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
+    }
+
+    if(message == nullptr) {
+        exception = checkAndCreateException(saxonCAPIClass);
+    } else {
+        exception = new SaxonApiException(message);
+    }
+
+}
+
+
+SaxonApiException * SaxonProcessor::checkForExceptionCPP(JNIEnv *env, jclass callingClass, jobject callingObject) {
 
     if (env->ExceptionCheck()) {
         std::string result1 = "";
@@ -283,6 +303,7 @@ SaxonProcessor::~SaxonProcessor() {
     if (versionStr != nullptr) {
         delete versionStr;
     }
+    exceptionClear();
 }
 
 
@@ -334,8 +355,7 @@ void SaxonProcessor::applyConfigurationProperties() {
         SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mIDappConfig, proc, stringArray1,
                                                                  stringArray2);
         if (exceptionOccurred()) {
-            exception = checkAndCreateException(saxonCAPIClass);
-            exceptionClear();
+            createException();
         }
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray1);
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray2);
@@ -630,7 +650,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
 
 
     if (!proc) {
-        exception = new SaxonApiException("Processor is null in SaxonProcessor.setCatalog");
+        createException("Processor is null in SaxonProcessor.setCatalog");
         return;
     }
 
@@ -660,6 +680,11 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source) {
     }
 //TODO SchemaValidator
 
+    if(source == nullptr) {
+        createException("Source string is NULL");
+        return nullptr;
+    }
+
     jobject xdmNodei = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mID,
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         cwd.c_str()), proc, nullptr,
@@ -669,8 +694,7 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source) {
         XdmNode *value = new XdmNode(xdmNodei);
         return value;
     } else if (exceptionOccurred()) {
-        exception = checkAndCreateException(saxonCAPIClass);
-        exceptionClear();
+        createException();
     }
 
 #ifdef DEBUG
@@ -730,8 +754,7 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *source) {
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         source));
     if (exceptionOccurred()) {
-        exception = checkAndCreateException(saxonCAPIClass);
-        exceptionClear();
+        createException();
 
     } else {
 
@@ -755,7 +778,7 @@ XdmNode *SaxonProcessor::parseXmlFromUri(const char *source) {
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         source));
     if (exceptionOccurred()) {
-        exception = checkAndCreateException(saxonCAPIClass);
+        createException();
     } else {
         XdmNode *value = new XdmNode(xdmNodei);
         return value;
@@ -963,7 +986,7 @@ XdmArray *SaxonProcessor::makeArray(short *input, int length) {
     }
 
     if (exceptionOccurred()) {
-        exception = checkAndCreateException(saxonCAPIClass);
+        createException();
     } else {
         XdmArray *value = new XdmArray(xdmArrayi);
         return value;
@@ -1005,7 +1028,7 @@ XdmArray *SaxonProcessor::makeArray(int *input, int length) {
         return nullptr;
     }
     if (exceptionOccurred()) {
-        exception = checkAndCreateException(saxonCAPIClass);
+        createException();
     } else {
         XdmArray *value = new XdmArray(xdmArrayi);
         return value;
@@ -1047,7 +1070,7 @@ XdmArray *SaxonProcessor::makeArray(long *input, int length) {
         return nullptr;
     }
     if (exceptionOccurred()) {
-        exception = checkAndCreateException(saxonCAPIClass);
+        createException();
     } else {
         XdmArray *value = new XdmArray(xdmArrayi);
         return value;
@@ -1089,7 +1112,7 @@ XdmArray *SaxonProcessor::makeArray(bool *input, int length) {
         return nullptr;
     }
     if (exceptionOccurred()) {
-        exception = checkAndCreateException(saxonCAPIClass);
+        createException();
     } else {
         XdmArray *value = new XdmArray(xdmArrayi);
         return value;

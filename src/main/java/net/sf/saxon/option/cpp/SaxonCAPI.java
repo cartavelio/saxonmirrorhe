@@ -543,15 +543,12 @@ public class SaxonCAPI {
      * @return XdmNode
      */
     public XdmNode parseXmlString(SchemaValidator validator, String xml) throws SaxonApiException {
-        try {
-            XdmNode doc = parseXmlString(null, processor, validator, xml);
-            if (debug) {
-                System.err.println("xmlParseString, Processor: " + System.identityHashCode(processor));
-            }
-            return doc;
-        } catch (SaxonApiException ex) {
-            throw ex;
+
+        XdmNode doc = parseXmlString(null, processor, validator, xml);
+        if (debug) {
+            System.err.println("xmlParseString, Processor: " + System.identityHashCode(processor));
         }
+        return doc;
     }
 
 
