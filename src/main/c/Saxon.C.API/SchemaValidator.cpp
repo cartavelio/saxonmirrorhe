@@ -5,6 +5,10 @@
 
 //#define DEBUG
 
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
+
 SchemaValidator::SchemaValidator() {
 	SaxonProcessor *p = new SaxonProcessor(true);
 	SchemaValidator(p, "");

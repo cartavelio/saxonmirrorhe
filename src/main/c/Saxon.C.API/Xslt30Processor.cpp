@@ -14,6 +14,10 @@
 #include <typeinfo> //used for testing only
 #endif
 
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
+
 Xslt30Processor::Xslt30Processor() {
 
 	SaxonProcessor *p = new SaxonProcessor(false);
@@ -58,6 +62,7 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 	    clearParameters();
 	    SaxonProcessor::sxn_environ->env->DeleteLocalRef(cppXT);
 	    cwdXT.erase();
+	    exceptionClear();
     }
 
 
@@ -111,9 +116,10 @@ void Xslt30Processor::setParameter(const char* name, XdmValue * value) {
                 XdmValue * valuei = it->second;
                 if(valuei != nullptr) {
                     valuei->decrementRefCount();
-                    if (valuei->getRefCount() < 1) {
+                    //if (valuei->getRefCount() < 1) {
                         delete value;
-                    }
+                        value = nullptr;
+                    //}
                     parameters.erase(skey);
                     parameters[skey] = value;
                     value->incrementRefCount();
@@ -149,6 +155,7 @@ void Xslt30Processor::clearParameters(bool delValues) {
                 std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
                     delete value;
+                    value = nullptr;
 
             }
         }
@@ -186,13 +193,7 @@ SaxonApiException* Xslt30Processor::getException() {
 }
 
 void Xslt30Processor::createException(const char * message) {
-
-
-    if(exception != nullptr) {
-        delete exception;
-        SaxonProcessor::sxn_environ->env->ExceptionClear();
-    }
-
+    exceptionClear();
     if(message == nullptr) {
         exception = proc->checkAndCreateException(cppClass);
     } else {

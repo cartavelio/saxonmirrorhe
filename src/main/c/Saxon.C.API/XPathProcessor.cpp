@@ -7,6 +7,10 @@
 #include "XdmMap.h"
 #include "XdmArray.h"
 
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
+
 XPathProcessor::XPathProcessor() {
 	SaxonProcessor *p = new SaxonProcessor(false);
 	XPathProcessor(p, "");

@@ -3,19 +3,24 @@
 #include "../../Saxon.C.API/XdmItem.h"
 #include "../../Saxon.C.API/XdmNode.h"
 #include "../../Saxon.C.API/XdmAtomicValue.h"
+#include "../../Saxon.C.API/XdmFunctionItem.h"
+#include "../../Saxon.C.API/XdmMap.h"
+#include "../../Saxon.C.API/XdmArray.h"
 #include "CppTestUtils.h"
 #include <string>
 
 using namespace std;
 
-
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
 
 
 /*
 * Test1: 
 */
-void testxQuery1(SaxonProcessor * processor, XQueryProcessor * queryProc){
- cout<<endl<<"Test testXQuery1:"<<endl;
+void testxQuery1(SaxonProcessor * processor, XQueryProcessor * queryProc, sResultCount *sresult){
+    cout<<endl<<"Test testXQuery1:"<<endl;
 	queryProc->clearProperties();
 	queryProc->clearParameters(true);
    queryProc->setProperty("s", "cat.xml");
@@ -26,12 +31,17 @@ void testxQuery1(SaxonProcessor * processor, XQueryProcessor * queryProc){
     if(result != NULL){
     	cout<<"Result :"<<result<<endl;
     } else {
+        if(queryProc->exceptionOccurred()) {
 
-	queryProc->checkException();
+            SaxonApiException *exception = queryProc->getException();
+            cerr<< "Error: "<<exception->getMessage()<<endl;
+            delete exception;
+        }
+
 	
     }
 
-return;
+
 	queryProc->setcwd(".");
      queryProc->executeQueryToFile(NULL, "catOutput.xml", NULL);
 
@@ -43,7 +53,7 @@ return;
 		}
 }
 
-void testxQueryError(XQueryProcessor * queryProc){
+void testxQueryError(XQueryProcessor * queryProc, sResultCount *sresult){
  cout<<endl<<"Test testXQueryError-Test:"<<endl;
 	queryProc->clearProperties();
 	queryProc->clearParameters(true);
@@ -64,7 +74,7 @@ queryProc->setcwd(".");
 		}
 }
 
-void testxQueryError2(SaxonProcessor * processor, XQueryProcessor * queryProc){
+void testxQueryError2(SaxonProcessor * processor, XQueryProcessor * queryProc, sResultCount *sresult){
  cout<<endl<<"Test testXQueryError-test2:"<<endl;
 	queryProc->clearProperties();
 	queryProc->clearParameters(true);
@@ -88,7 +98,7 @@ void testxQueryError2(SaxonProcessor * processor, XQueryProcessor * queryProc){
 }
 
 
-void testDefaultNamespace(SaxonProcessor * processor, XQueryProcessor * queryProc) {
+void testDefaultNamespace(SaxonProcessor * processor, XQueryProcessor * queryProc, sResultCount *sresult) {
  cout<<endl<<"Test testXQuery2:"<<endl;
 	queryProc->clearProperties();
 	queryProc->clearParameters(true);	
@@ -108,7 +118,7 @@ void testDefaultNamespace(SaxonProcessor * processor, XQueryProcessor * queryPro
 }
 
 // Test that the XQuery compiler can compile two queries without interference
-void testReusability(SaxonProcessor * processor, XQueryProcessor * queryProc){
+void testReusability(SaxonProcessor * processor, XQueryProcessor * queryProc, sResultCount *sresult){
 	cout<<endl<<"Test test XQuery reusability:"<<endl;
 	XQueryProcessor * queryProc2 = processor->newXQueryProcessor();
 
@@ -169,7 +179,7 @@ if (queryProc->exceptionOccurred()) {
 
 
 //Test requirement of license file - Test should fail
-void testXQueryLineNumberError(XQueryProcessor * queryProc){
+void testXQueryLineNumberError(XQueryProcessor * queryProc, sResultCount *sresult){
  cout<<endl<<"Test testXQueryLineNumberError:"<<endl;
 	queryProc->clearProperties();
 	queryProc->clearParameters(true);
@@ -197,7 +207,7 @@ void testXQueryLineNumberError(XQueryProcessor * queryProc){
 }
 
 //Test requirement of license file - Test should succeed
-void testXQueryLineNumber(){
+void testXQueryLineNumber(sResultCount *sresult){
   SaxonProcessor * processor = new SaxonProcessor(true);
   processor->setConfigurationProperty("l", "on");
   XQueryProcessor * queryProc = processor->newXQueryProcessor();
@@ -234,17 +244,52 @@ int main()
     SaxonProcessor * processor = new SaxonProcessor(false);
     cout<<"Test: XQueryProcessor with Saxon version="<<processor->version()<<endl<<endl;
     XQueryProcessor * query = processor->newXQueryProcessor();
-    
 
-    testxQuery1(processor, query);
-    testxQueryError(query);
-    testxQueryError2(processor, query);
-    testDefaultNamespace(processor, query);
-    testReusability(processor, query);
-    testXQueryLineNumberError(query);
-    testXQueryLineNumber();
+    sResultCount *sresult = new sResultCount();
+
+    testxQuery1(processor, query, sresult);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+
+    testxQueryError(query,sresult);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+
+    testxQueryError2(processor, query,sresult);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    testDefaultNamespace(processor, query,sresult);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    testReusability(processor, query,sresult);
+    cout<<endl<<"============================================================="<<endl<<endl;
+    testXQueryLineNumberError(query,sresult);
+    cout<<endl<<"============================================================="<<endl<<endl;
+    testXQueryLineNumber(sresult);
+
 
     delete query;
-     processor->release();
+    processor->release();
+
+
+    cout<<endl<<"======================== Test Results ========================"<<endl<<endl;
+
+    std::cout << "\nTest Results - Number of tests= " << (sresult->success + sresult->failure) << ", Successes = "
+              << sresult->success << ",  Failures= " << sresult->failure << std::endl;
+
+    std::list<std::string>::iterator it;
+    std::cout << "Failed tests:" << std::endl;
+    // Make iterate point to beginning and increment it one by one until it reaches the end of list.
+    for (it = sresult->failureList.begin(); it != sresult->failureList.end(); it++) {
+        //Print the contents
+        std::cout << it->c_str() << std::endl;
+
+    }
+
+    delete sresult;
+
+#ifdef MEM_DEBUG
+    SaxonProcessor::getInfo();
+#endif
     return 0;
 }

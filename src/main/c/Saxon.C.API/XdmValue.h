@@ -19,6 +19,7 @@
 #include "SaxonCXPath.h"
 
 
+
 /*! <code>XdmValue</code>. Value in the XDM data model. A value is a sequence of zero or more items,
  * each item being either an atomic value or a node. This class is a wrapper of the the XdmValue object created in Java.
  * <p/>
@@ -28,6 +29,7 @@ class SaxonProcessor;
 class XdmItem;
 class XdmAtomicValue;
 class XdmNode;
+
 
 
 typedef enum eXdmType { XDM_VALUE = 1, XDM_ITEM = 2, XDM_NODE = 3, XDM_ATOMIC_VALUE = 4, XDM_FUNCTION_ITEM = 5 } XDM_TYPE;
@@ -54,8 +56,17 @@ public:
         initialize();
     }
 
+    /*void * operator new(size_t size)
+    {
 
-	/**
+        void * p = ::new XdmValue();
+        //void * p = malloc(size); will also work fine
+        std::cerr<< "new called on XdmValue size= " << size << " p="<<p<<std::endl;
+        return p;
+    }*/
+
+
+    /**
 	 * A copy constructor.
 	 * @param other - Xdmvalue
 	 */

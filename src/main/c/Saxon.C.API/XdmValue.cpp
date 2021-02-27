@@ -6,6 +6,12 @@
 #include "XdmMap.h"
 #include "XdmArray.h"
 
+
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
+
+
 XdmValue::XdmValue(const XdmValue &other) {
 	//SaxonProcessor *proc = other.proc; //TODO
 	valueType = other.valueType;
@@ -127,7 +133,6 @@ XdmValue::XdmValue(jobject val, bool arr){
 
 XdmValue::~XdmValue() {
 	//bool safeToClear = false;
-	//std::cout<<"xdmValue destructor size= "<<values.size()<<" ref="<<getRefCount()<<" Pointer = "<<(this)<<std::endl;
 	if(values.size() > 0) {
         for (size_t i = 0; i < values.size(); i++) {
             if (values[i] != nullptr) {

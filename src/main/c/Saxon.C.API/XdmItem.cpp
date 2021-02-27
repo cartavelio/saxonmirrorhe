@@ -94,7 +94,6 @@ jobject XdmItem::getUnderlyingValue(){
 
 XdmItem::~XdmItem() {
     //decrementRefCount();
-    //std::cerr<<std::endl<<"XdmItem destructor called, refCount"<<getRefCount()<<std::endl;
 
     SaxonProcessor::sxn_environ->env->ExceptionDescribe();
 

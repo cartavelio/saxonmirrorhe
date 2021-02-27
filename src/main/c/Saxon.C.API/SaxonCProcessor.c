@@ -188,7 +188,7 @@ const char * xsltApplyStylesheet(sxnc_environment environi, sxnc_processor ** pr
 	return str;
      }
 
-    checkForException( *(environi.env), cpp);
+    checkForException( *(environi.env));
     return 0;
 }
 

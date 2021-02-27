@@ -14,6 +14,7 @@
 #include "XdmArray.h"
 #include "XdmAtomicValue.h"
 
+
 //#define DEBUG
 #ifdef DEBUG
 #include <signal.h>
@@ -21,6 +22,47 @@
 
 #include <stdio.h>
 
+
+#if defined MEM_DEBUG
+
+void* newImpl(std::size_t sz,char const* file, int line){
+    static int counter{};
+    void* ptr= std::malloc(sz);
+    std::cerr << "Saxon/C Mem test: "<<file << ": " << line << " " <<  ptr << std::endl;
+    myAlloc.push_back(ptr);
+    return ptr;
+}
+
+void* operator new(std::size_t sz,char const* file, int line){
+return newImpl(sz,file,line);
+}
+
+void* operator new [](std::size_t sz,char const* file, int line){
+return newImpl(sz,file,line);
+}
+
+void operator delete(void* ptr) noexcept{
+    auto ind= std::distance(myAlloc.begin(),std::find(myAlloc.begin(), myAlloc.end(),ptr));
+    myAlloc[ind]= nullptr;
+    std::free(ptr);
+}
+
+#define new new(__FILE__, __LINE__)
+
+void SaxonProcessor::getInfo(){
+
+    std::cout << std::endl;
+
+    std::cout << "Allocation: " << std::endl;
+    for (auto i: myAlloc){
+        if (i != nullptr ) std::cout << " " << i << std::endl;
+    }
+
+    std::cout << std::endl;
+
+}
+
+#endif
 
 //jobject cpp;
 const char *failure;
@@ -36,6 +78,8 @@ const char *SaxonProcessor::checkException() {
     message = checkForException(sxn_environ);
     return message;
 }
+
+
 
 SaxonApiException *SaxonProcessor::checkAndCreateException(jclass cppClass) {
     if (SaxonProcessor::sxn_environ->env->ExceptionCheck()) {
@@ -62,7 +106,9 @@ void SaxonProcessor::exceptionClear() {
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     }
     if (exception != nullptr) {
+        std::cerr<< "saxonProc exception= "<< exception <<std::endl;
         delete exception;
+        exception = nullptr;
     }
 
 }
@@ -79,10 +125,7 @@ const char * SaxonProcessor::getResourcesDirectory() {
 
 void SaxonProcessor::createException(const char * message) {
 
-    if(exceptionOccurred()) {
-        delete exception;
-        SaxonProcessor::sxn_environ->env->ExceptionClear();
-    }
+    exceptionClear();
 
     if(message == nullptr) {
         exception = checkAndCreateException(saxonCAPIClass);
@@ -302,6 +345,7 @@ SaxonProcessor::~SaxonProcessor() {
     }
     if (versionStr != nullptr) {
         delete versionStr;
+        versionStr = nullptr;
     }
     exceptionClear();
 }
@@ -609,7 +653,8 @@ const char *SaxonProcessor::version() {
         int verLen = strlen(tempVersionStr) + 22 + strlen(CVERSION) + 1;
         versionStr = new char[verLen];
         snprintf(versionStr, verLen, "Saxon/C %s %s %s", CVERSION, "running with", tempVersionStr);
-        delete tempVersionStr;
+        SaxonProcessor::sxn_environ->env->ReleaseStringUTFChars(jstr, tempVersionStr);
+
 
     }
 
@@ -691,7 +736,9 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source) {
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         source));
     if (xdmNodei) {
-        XdmNode *value = new XdmNode(xdmNodei);
+        XdmNode *value = nullptr;
+        value = new XdmNode(xdmNodei);
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(xdmNodei);
         return value;
     } else if (exceptionOccurred()) {
         createException();
@@ -811,7 +858,7 @@ void SaxonProcessor::release() {
         //std::cerr<<"SaxonProc: JVM finalized calling !"<<std::endl;
         finalizeJavaRT(SaxonProcessor::sxn_environ->jvm);
 
-        //delete SaxonProcessor::sxn_environ;
+        delete SaxonProcessor::sxn_environ;
         /*clearParameters();
         clearProperties();*/
     } else {

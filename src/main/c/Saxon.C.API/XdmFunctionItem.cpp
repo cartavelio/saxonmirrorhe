@@ -3,6 +3,10 @@
 
 #include "XdmFunctionItem.h"
 
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
+
     XdmFunctionItem::XdmFunctionItem():XdmItem(), arity(-1){}
 
 

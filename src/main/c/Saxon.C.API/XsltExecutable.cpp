@@ -14,6 +14,9 @@
 #include <typeinfo> //used for testing only
 #endif
 
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
 
 XsltExecutable::XsltExecutable(jobject exObject, std::string curr) {
 
@@ -37,7 +40,7 @@ XsltExecutable::XsltExecutable(jobject exObject, std::string curr) {
     selection = nullptr;
     selectionV = nullptr;
     saxonMessageListenerObj = nullptr;
-    executableObject = exObject;
+    executableObject = SaxonProcessor::sxn_environ->env->NewGlobalRef(exObject);
     cwdXE = curr;
 }
 
@@ -235,6 +238,7 @@ void XsltExecutable::clearParameters(bool delValues) {
                 std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
                     delete value;
+                    value = nullptr;
             }
         }
     }
@@ -945,18 +949,24 @@ void XsltExecutable::setupXslMessage(bool create, const char * filename) {
                                                                                   "(Ljava/lang/String;Ljava/lang/String;)V");
         }
         if (!messageID) {
-            std::cerr << "Error: "<<"SaxonCMessageListener" << " in " <<getDllname() << " not found\n"
+            std::cerr << "Error: SaxonCMessageListener" << " in " <<getDllname() << " not found\n"
                       << std::endl;
             SaxonProcessor::sxn_environ->env->ExceptionClear();
         }
 
+        jobject tempListenerObj;
         if (filename == nullptr) {
-            saxonMessageListenerObj = (jobject)SaxonProcessor::sxn_environ->env->NewObject(messageListenerClass, messageID,
+            tempListenerObj = (jobject)SaxonProcessor::sxn_environ->env->NewObject(messageListenerClass, messageID,
                                                                                            SaxonProcessor::sxn_environ->env->NewStringUTF("-:on"));
             //setProperty("m", "on");
         } else {
-            saxonMessageListenerObj = (jobject)SaxonProcessor::sxn_environ->env->NewObject(messageListenerClass, messageID,
+            tempListenerObj = (jobject)SaxonProcessor::sxn_environ->env->NewObject(messageListenerClass, messageID,
                                                                                            SaxonProcessor::sxn_environ->env->NewStringUTF(filename));
+        }
+        if(tempListenerObj) {
+            saxonMessageListenerObj = SaxonProcessor::sxn_environ->env->NewGlobalRef(tempListenerObj);
+        } else {
+            std::cerr << "Error: Failed to create SaxonCMessageListener" <<  std::endl;
         }
     } else {
         setProperty("m", "off");

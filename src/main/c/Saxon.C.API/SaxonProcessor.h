@@ -8,6 +8,7 @@
 #ifndef SAXON_PROCESSOR_H
 #define SAXON_PROCESSOR_H
 
+
 #if defined __linux__ || defined __APPLE__
 
 #include <stdlib.h>
@@ -24,6 +25,9 @@
 //#define DEBUG //remove
 #define CVERSION "1.3.0"
 #define CVERSION_API_NO 130
+
+
+
 
 #include <string>
 #include <iostream>
@@ -43,6 +47,26 @@
 #include "SaxonApiException.h"
 //#include "com_saxonica_functions_extfn_PhpCall.h"
 //#include "com_saxonica_functions_extfn_PhpCall_PhpFunctionCall.h"
+
+#if defined MEM_DEBUG
+
+
+#include <algorithm>
+#include <cstdlib>
+#include <new>
+
+static std::vector<void*> myAlloc;
+
+void* newImpl(std::size_t sz,char const* file, int line);
+
+void* operator new(std::size_t sz,char const* file, int line);
+
+void* operator new [](std::size_t sz,char const* file, int line);
+
+void operator delete(void* ptr) noexcept;
+
+#endif
+
 
 class XsltProcessor;
 
@@ -276,8 +300,6 @@ public:
     */
     XdmAtomicValue *makeAtomicValue(const char *type, const char *value);
 
-#if CVERSION_API_NO >= 123
-
     /**
         * Make an XdmArray whose members are from string representation
         * @param input the input array of booleans
@@ -318,8 +340,6 @@ public:
 
     XdmMap *makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap);
 
-
-#endif
 
     /**
     * Get the string representation of the XdmValue.
@@ -494,6 +514,8 @@ public:
 
 
 
+
+
 //	XPathEngine
 //	XQueryEngine
 //	SchemaManager
@@ -503,6 +525,10 @@ public:
     static sxnc_environment *sxn_environ;
     std::string cwd; /*!< current working directory */
     jobject proc; /*!< Java Processor object */
+
+
+
+    static void getInfo();
 
     /*static JavaVM *jvm;*/
 
@@ -545,6 +571,9 @@ private:
     static const char *checkException();
 };
 
+
 //===============================================================================================
+
+
 
 #endif /* SAXON_PROCESSOR_H */

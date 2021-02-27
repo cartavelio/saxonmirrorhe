@@ -12,6 +12,10 @@
 #include <typeinfo> //used for testing only
 #endif
 
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
+
 XsltProcessor::XsltProcessor() {
 
 	SaxonProcessor *p = new SaxonProcessor(false);

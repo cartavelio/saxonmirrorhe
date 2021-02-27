@@ -4,6 +4,9 @@
 #include "SaxonApiException.h"
 
 
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
 
   const char * SaxonApiException::what () {
         return message.c_str();
