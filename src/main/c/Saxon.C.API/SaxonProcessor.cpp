@@ -105,6 +105,7 @@ void SaxonProcessor::exceptionClear() {
     if(exceptionOccurred()) {
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     }
+    std::cerr<< "saxonProc exceptionClear cp0"<<std::endl;
     if (exception != nullptr) {
         std::cerr<< "saxonProc exception= "<< exception <<std::endl;
         delete exception;
@@ -241,6 +242,7 @@ SaxonProcessor::SaxonProcessor(bool l) {
     cwd = "";
     licensei = l;
     versionStr = nullptr;
+    exception = nullptr;
 
     if (SaxonProcessor::jvmCreatedCPP == 0) {
         SaxonProcessor::jvmCreatedCPP = 1;
@@ -644,6 +646,11 @@ const char *SaxonProcessor::version() {
                                                                                                        "(Lnet/sf/saxon/s9api/Processor;)Ljava/lang/String;");
         if (!MID_version) {
             std::cerr << "\nError: MyClassInDll " << "SaxonCAPI.getProductVersion()" << " not found" << std::endl;
+            return nullptr;
+        }
+
+        if(proc == nullptr) {
+            createException("The Java SaxonProcessor object (i.e. cppXQ) is NULL - Possible exception thrown");
             return nullptr;
         }
 

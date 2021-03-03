@@ -3,27 +3,49 @@
 #include "XdmItem.h"
 #include "XdmNode.h"
 #include "XdmAtomicValue.h"
+#include "XdmFunctionItem.h"
+#include "XdmMap.h"
+#include "XdmArray.h"
+
+
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
 
     XQueryProcessor::XQueryProcessor() {
 	SaxonProcessor *p = new SaxonProcessor(false);
 	XQueryProcessor(p, "");
      }
 
+
+    XQueryProcessor::~XQueryProcessor(){
+        clearProperties();
+        clearParameters();
+        SaxonProcessor::sxn_environ->env->DeleteGlobalRef(cppXQ);
+        cwdXQ.erase();
+        exceptionClear();
+    }
+
     XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
     proc = p;
-
-  
+        exception = nullptr;
      cppClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XQueryEngine");
 
 
-    cppXQ = createSaxonProcessor2 (SaxonProcessor::sxn_environ->env, cppClass, "(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);
+    jobject tempcppXQ = createSaxonProcessor2 (SaxonProcessor::sxn_environ->env, cppClass, "(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);
+    if(tempcppXQ) {
+        cppXQ = SaxonProcessor::sxn_environ->env->NewGlobalRef(tempcppXQ);
+    } else {
+        createException("Error: Failed to create the Xslt30Processor internal object");
+        std::cerr<<"Error in XQueryProcessor XXXXXXX"<<std::endl;
+    }
     
 #ifdef DEBUG
 	jmethodID debugMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass, "setDebugMode", "(Z)V");
 	SaxonProcessor::sxn_environ->env->CallStaticVoidMethod(cppClass, debugMID, (jboolean)true);
 #endif
 
-    exception = nullptr;
+
    // outputfile1 = "";
 	if(!(proc->cwd.empty()) && curr.empty()){
 		cwdXQ = proc->cwd;
@@ -190,26 +212,14 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
        		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
                 XdmValue *value = itr->second;
                 if (value != nullptr) {
-                    value->decrementRefCount();
 #ifdef DEBUG
                     std::cerr<<"XQueryProc.clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
-                    if (value->getRefCount() < 1) {
                         delete value;
-                    }
+                        value = nullptr;
                 }
             }
-		
-	} else {
-
-		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
-			XdmValue * value = itr->second;
-			if(value != nullptr) {
-                value->decrementRefCount();
-            }
-		}
 	}
-
 	parameters.clear();
     }
 
@@ -250,8 +260,15 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
 	jmethodID mID = (jmethodID)SaxonProcessor::sxn_environ->env->GetMethodID (cppClass,"executeQueryToFile", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
  	if (!mID) {
-        std::cerr<<"Error: MyClassInDll."<<"executeQueryToFile"<<" not found\n"<<std::endl;
+        std::cerr<<"Error: "<<getDllname<<".executeQueryToFile"<<" not found\n"<<std::endl;
     } else {
+        if(cppXQ == nullptr) {
+#if defined(DEBUG)
+            std::cerr << "The Java XQueryEngine object (i.e. cppXQ) is NULL - Possible exception thrown" << std::endl;
+#endif
+            createException("The Java XQueryEngine object (i.e. cppXQ) is NULL - Possible exception thrown");
+            return;
+        }
 	jobjectArray stringArray = nullptr;
 	jobjectArray objectArray = nullptr;
 
@@ -261,7 +278,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 	if(size >0) {
 
 	   int i=0;
-           jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env, "java/lang/Object");
+	   jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env, "java/lang/Object");
 	   jclass stringClass = lookForClass(SaxonProcessor::sxn_environ->env, "java/lang/String");
 	   objectArray = SaxonProcessor::sxn_environ->env->NewObjectArray( (jint)size, objectClass, 0 );
 	   stringArray = SaxonProcessor::sxn_environ->env->NewObjectArray( (jint)size, stringClass, 0 );
@@ -287,11 +304,13 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 	   }
 	}
 
-	 SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXQ, mID, SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXQ.c_str()), SaxonProcessor::sxn_environ->env->NewStringUTF(ofilename), stringArray, objectArray );
+	 SaxonProcessor::sxn_environ->env->CallVoidMethod(cppXQ, mID, SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXQ.c_str()), SaxonProcessor::sxn_environ->env->NewStringUTF(ofilename), stringArray, objectArray );
 	  SaxonProcessor::sxn_environ->env->DeleteLocalRef(objectArray);
 	  SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray);
 
-	exception = proc->checkAndCreateException(cppClass);
+	  if(proc->exceptionOccurred()) {
+          createException();
+      }
 	 
   }
 
@@ -305,6 +324,13 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
  if (!mID) {
         std::cerr<<"Error: MyClassInDll."<<"executeQueryToValue"<<" not found\n"<<std::endl;
     } else {
+     if(cppXQ == nullptr) {
+#if defined(DEBUG)
+         std::cerr << "The Java XQueryEngine object (i.e. cppXQ) is NULL - Possible exception thrown" << std::endl;
+#endif
+         createException("The Java XQueryEngine object (i.e. cppXQ) is NULL - Possible exception thrown");
+         return nullptr;
+     }
 	jobjectArray stringArray = nullptr;
 	jobjectArray objectArray = nullptr;
 
@@ -347,6 +373,10 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
 		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
+        jclass mapItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
+                                           "net/sf/saxon/s9api/XdmMap");
+        jclass arrayItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
+                                             "net/sf/saxon/s9api/XdmArray");
 		XdmValue * value = nullptr;
 		XdmItem * xdmItem = nullptr;
 
@@ -361,11 +391,18 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 				return xdmItem;
 			
 			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
-                /*xdmItem =  new XdmFunctionItem(result);
-                xdmItem->setProcessor(proc);
-                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);*/
-                return nullptr;// xdmItem;
-			} else {
+                xdmItem = new XdmFunctionItem(result);
+                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                return xdmItem;
+			 } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapItemClass) == JNI_TRUE) {
+            xdmItem = new XdmMap(result);
+            SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+        return xdmItem;
+        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, arrayItemClass) == JNI_TRUE) {
+        xdmItem = new XdmArray(result);
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+            return xdmItem;
+        } else {
 				value = new XdmValue(result, true);
 				return value;
 			}
@@ -383,10 +420,17 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
     const char * XQueryProcessor::executeQueryToString(const char * infilename, const char * query){
 
- jmethodID mID = (jmethodID)SaxonProcessor::sxn_environ->env->GetMethodID (cppClass,"executeQueryToString", "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+ jmethodID mID = (jmethodID)SaxonProcessor::sxn_environ->env->GetMethodID (cppClass,"executeQueryToString", "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)[B");
  if (!mID) {
         std::cerr<<"Error: MyClassInDll."<<"executeQueryToString"<<" not found\n"<<std::endl;
     } else {
+     if(cppXQ == nullptr) {
+#if defined(DEBUG)
+         std::cerr << "The Java XQueryEngine object (i.e. cppXQ) is NULL - Possible exception thrown" << std::endl;
+#endif
+         createException("The Java XQueryEngine object (i.e. cppXQ) is NULL - Possible exception thrown");
+         return nullptr;
+     }
 	jobjectArray stringArray = nullptr;
 	jobjectArray objectArray = nullptr;
 
@@ -421,16 +465,26 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 	   }
 	}
 
-	  jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXQ, mID, SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXQ.c_str()), stringArray, objectArray ));
+     jbyteArray result = nullptr;
+     jobject obj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXQ, mID, SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXQ.c_str()), stringArray, objectArray ));
 	  SaxonProcessor::sxn_environ->env->DeleteLocalRef(objectArray);
 	  SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray);
 
-	  if(result) {
-             const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
-            //return "result should be ok";            
-	    return str;
-	   } else {
-		    exception = proc->checkAndCreateException(cppClass);
+     if (obj) {
+         result = (jbyteArray) obj;
+     }
+     if (result) {
+         jboolean isCopy = false;
+         jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
+         jsize num_bytes = SaxonProcessor::sxn_environ->env->GetArrayLength(result);
+
+         const char *str = new char[num_bytes];
+         memcpy ((void *) str, b , num_bytes );
+
+         SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+         return str;
+     } else {
+		    createException();
 	   		
      		}
   }
@@ -467,19 +521,20 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
 
 void XQueryProcessor::exceptionClear(){
+    SaxonProcessor::sxn_environ->env->ExceptionClear();
 	if(exception != nullptr) {
 		delete exception;
 		exception = nullptr;
-		SaxonProcessor::sxn_environ->env->ExceptionClear();
+
 	}
+
 
    
  
 }
 
 bool XQueryProcessor::exceptionOccurred(){
-	return proc->exceptionOccurred();
-
+    return proc->exceptionOccurred() || exception != nullptr;
 }
 
 
@@ -505,4 +560,17 @@ const char* XQueryProcessor::checkException(){
 
 SaxonApiException* XQueryProcessor::getException() {
     return exception;
+}
+
+void XQueryProcessor::createException(const char * message) {
+    if(exception != nullptr) {
+        delete exception;
+        exception = nullptr;
+    }
+    if(message == nullptr) {
+        exception = proc->checkAndCreateException(cppClass);
+    } else {
+        exception = new SaxonApiException(message);
+    }
+
 }

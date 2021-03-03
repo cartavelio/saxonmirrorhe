@@ -94,6 +94,8 @@ class XdmMap;
 
 class XsltExecutable;
 
+class SaxonApiException;
+
 
 // The Saxon XSLT interface class
 

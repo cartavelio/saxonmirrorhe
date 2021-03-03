@@ -2175,8 +2175,8 @@ int main(int argc, char* argv[]) {
 
     delete trans;
     delete trans2;
-    processor->release();
     delete processor;
+    processor->release();
 
 
     cout<<endl<<"======================== Test Results ========================"<<endl<<endl;

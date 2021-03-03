@@ -38,8 +38,14 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 	cppClass = lookForClass(SaxonProcessor::sxn_environ->env,
 			"net/sf/saxon/option/cpp/Xslt30Processor");
 
-	cppXT = createSaxonProcessor2(SaxonProcessor::sxn_environ->env, cppClass,
+	jobject tempcppXT = createSaxonProcessor2(SaxonProcessor::sxn_environ->env, cppClass,
 			"(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);
+	if(tempcppXT) {
+        cppXT = SaxonProcessor::sxn_environ->env->NewGlobalRef(tempcppXT);
+    } else {
+	    createException("Error: Failed to create the Xslt30Processor internal object");
+
+	}
 
 #ifdef DEBUG
 	jmethodID debugMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass, "setDebugMode", "(Z)V");
@@ -60,7 +66,7 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 
     Xslt30Processor::~Xslt30Processor(){
 	    clearParameters();
-	    SaxonProcessor::sxn_environ->env->DeleteLocalRef(cppXT);
+	    SaxonProcessor::sxn_environ->env->DeleteGlobalRef(cppXT);
 	    cwdXT.erase();
 	    exceptionClear();
     }
@@ -193,7 +199,10 @@ SaxonApiException* Xslt30Processor::getException() {
 }
 
 void Xslt30Processor::createException(const char * message) {
-    exceptionClear();
+    if(exception != nullptr) {
+        delete exception;
+        exception = nullptr;
+    }
     if(message == nullptr) {
         exception = proc->checkAndCreateException(cppClass);
     } else {
@@ -632,7 +641,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
 	    JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray2(parameters);
 
-		SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, mtfID,
+		SaxonProcessor::sxn_environ->env->CallStaticVoidMethod(cppClass, mtfID,
 								SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()), cppXT, nullptr,
 								(source != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(source) : nullptr),
 								SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet),	(outputfile != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(outputfile) :nullptr),

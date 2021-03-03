@@ -47,10 +47,7 @@ public:
     */
     XQueryProcessor * clone();
 
-    ~XQueryProcessor(){
-	clearProperties();
-	clearParameters();
-    }
+    ~XQueryProcessor();
 
     //!Set the initial context item for the query
     /**
@@ -269,6 +266,9 @@ public:
     
 
 private:
+
+    void createException(const char * message=nullptr);
+
     std::string cwdXQ; /*!< current working directory */
 	SaxonProcessor * proc;
 	jclass  cppClass;
