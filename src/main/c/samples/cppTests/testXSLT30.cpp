@@ -1137,6 +1137,19 @@ void testPackage1a(Xslt30Processor *trans, sResultCount *sresult) {
 
     trans->compileFromFileAndSave("test.xsl", "test1a.sef");
 
+    if(trans->exceptionOccurred()) {
+        const char *message = trans->getErrorMessage();
+        if (message != NULL) {
+            cout << "Error message =" << message << endl;
+        }
+        sresult->failure++;
+        sresult->failureList.push_back("testPackage1a");
+        trans->exceptionClear();
+        return;
+    }
+
+
+
     XsltExecutable * executable = trans->compileFromFile("test1.sef");
     executable->setInitialMatchSelectionAsFile("cat.xml");
     const char * output = executable->applyTemplatesReturningString();
