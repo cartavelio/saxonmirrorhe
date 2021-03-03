@@ -65,6 +65,8 @@ void* operator new [](std::size_t sz,char const* file, int line);
 
 void operator delete(void* ptr) noexcept;
 
+void operator delete(void*, std::size_t) noexcept;
+
 #endif
 
 

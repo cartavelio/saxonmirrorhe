@@ -47,6 +47,13 @@ void operator delete(void* ptr) noexcept{
     std::free(ptr);
 }
 
+void operator delete(void*, std::size_t) noexcept {
+    auto ind= std::distance(myAlloc.begin(),std::find(myAlloc.begin(), myAlloc.end(),ptr));
+    myAlloc[ind]= nullptr;
+    std::free(ptr);
+
+}
+
 #define new new(__FILE__, __LINE__)
 
 void SaxonProcessor::getInfo(){

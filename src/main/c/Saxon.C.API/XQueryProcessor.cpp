@@ -260,7 +260,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
 	jmethodID mID = (jmethodID)SaxonProcessor::sxn_environ->env->GetMethodID (cppClass,"executeQueryToFile", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
  	if (!mID) {
-        std::cerr<<"Error: "<<getDllname<<".executeQueryToFile"<<" not found\n"<<std::endl;
+        std::cerr<<"Error: "<<getDllname()<<".executeQueryToFile"<<" not found\n"<<std::endl;
     } else {
         if(cppXQ == nullptr) {
 #if defined(DEBUG)
