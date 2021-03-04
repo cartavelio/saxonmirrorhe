@@ -33,11 +33,7 @@ public:
     */
     XPathProcessor();
 
-    ~XPathProcessor(){
-	clearProperties();
-	clearParameters(false);
-	//delete contextItem;
-    }
+    ~XPathProcessor();
 
     //! Constructor with the SaxonProcessor supplied.
     /*!
@@ -227,11 +223,6 @@ public:
     */
     const char * getErrorCode();
 
-     //! Check for exception thrown.
-	/**
-	* @return char*. Returns the exception message if thrown otherwise return nullptr
-	*/
-    const char* checkException();
 
     //! Get the SaxonApiException object created when we have an error
     /**
@@ -241,10 +232,11 @@ public:
      */
     SaxonApiException * getException();
 
-
 private:
+
+    void createException(const char * message=nullptr);
+
 	SaxonProcessor * proc;
-	XdmItem * contextItem;
         std::string cwdXP; /*!< current working directory */
 	jclass  cppClass;
 	jobject cppXP;

@@ -644,7 +644,11 @@ void testXdmNodeOutput(Xslt30Processor *trans, sResultCount *sresult) {
 
     XdmValue *rootValue = executable->callTemplateReturningValue("go");
     if (rootValue== nullptr) {
-        cout << "Result is null ====== FAIL ====== " << endl;
+        if (executable->exceptionOccurred()) {
+            SaxonApiException *exception = executable->getException();
+            cerr << "Error: " << exception->getMessage() << endl;
+            delete exception;
+        }
         sresult->failure++;
         sresult->failureList.push_back("testXdmNodeOutput-0.0");
         return;
@@ -1361,7 +1365,11 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *
 
 
     if (value== nullptr) {
-
+        if (executable->exceptionOccurred()) {
+            SaxonApiException *exception = executable->getException();
+            cerr << "Error: " << exception->getMessage() << endl;
+            delete exception;
+        }
         sresult->failure++;
         sresult->failureList.push_back("testResolveUri");
     } else {

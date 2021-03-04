@@ -42,6 +42,8 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 			"(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);
 	if(tempcppXT) {
         cppXT = SaxonProcessor::sxn_environ->env->NewGlobalRef(tempcppXT);
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(tempcppXT);
+
     } else {
 	    createException("Error: Failed to create the Xslt30Processor internal object");
 

@@ -28,8 +28,18 @@ XPathProcessor::XPathProcessor(SaxonProcessor* p, std::string curr) {
 		std::cerr << "Processor is nullptr" << std::endl;
 	}
 
-	cppXP = createSaxonProcessor2(SaxonProcessor::sxn_environ->env, cppClass,
+    jobject tempcppXP = createSaxonProcessor2(SaxonProcessor::sxn_environ->env, cppClass,
 			"(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);
+
+
+    if(tempcppXP) {
+        cppXP = SaxonProcessor::sxn_environ->env->NewGlobalRef(tempcppXP);
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(tempcppXP);
+
+    } else {
+        createException("Error: Failed to create the XPathProcessor internal object");
+
+    }
 
 
 
@@ -45,6 +55,16 @@ XPathProcessor::XPathProcessor(SaxonProcessor* p, std::string curr) {
 		cwdXP = curr;
 	}
 
+}
+
+
+XPathProcessor::~XPathProcessor(){
+    clearProperties();
+    clearParameters();
+
+    SaxonProcessor::sxn_environ->env->DeleteGlobalRef(cppXP);
+    exceptionClear();
+    //delete contextItem;
 }
 
 XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
@@ -241,7 +261,6 @@ return nullptr;
 }
 
 void XPathProcessor::setContextItem(XdmItem * item) {
-	contextItem = item;
     	if(item != nullptr){
      	 parameters["node"] = (XdmValue *)item;
     	}
@@ -429,13 +448,10 @@ void XPathProcessor::clearParameters(bool delVal) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;
             if (value != nullptr) {
-                value->decrementRefCount();
 #ifdef DEBUG
                 std::cerr<<"XPathProc.clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
-                if (value->getRefCount() < 1) {
                     delete value;
-                }
             }
         }
     }
@@ -463,13 +479,12 @@ std::map<std::string,std::string>& XPathProcessor::getProperties(){
 }
 
 void XPathProcessor::exceptionClear(){
-	if(exception != nullptr) {
-		delete proc->exception;
-		exception = nullptr;
-	}
+    if(exception != nullptr) {
+        delete exception;
+        exception = nullptr;
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
+    }
 
-   SaxonProcessor::sxn_environ->env->ExceptionClear();
- 
 }
 
 const char * XPathProcessor::getErrorCode() {
@@ -487,13 +502,22 @@ const char * XPathProcessor::getErrorMessage(){
 
 }
 
-    bool XPathProcessor::exceptionOccurred(){
-	return proc->exceptionOccurred();
+bool XPathProcessor::exceptionOccurred() {
+    return proc->exceptionOccurred() || exception != nullptr;
+}
+
+
+
+void XPathProcessor::createException(const char * message) {
+    if(exception != nullptr) {
+        delete exception;
+        exception = nullptr;
+    }
+    if(message == nullptr) {
+        exception = proc->checkAndCreateException(cppClass);
+    } else {
+        exception = new SaxonApiException(message);
     }
 
-
-
-    const char* XPathProcessor::checkException(){
-	return proc->checkException();
-    }
+}
 
