@@ -69,8 +69,8 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResult
 		cout<<"node name:"<<children0[i]->getNodeName()<<endl;
 	}
 
-    delete []children;
-	delete [] children0;
+    	//delete []children;
+	//delete [] children0;
 
 	xpath->setContextItem((XdmItem *)input);
 	XdmValue * resultValues = xpath->evaluate("//person");
