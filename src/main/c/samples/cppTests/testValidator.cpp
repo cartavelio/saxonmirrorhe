@@ -33,6 +33,16 @@ void testValidator2(){
 
 	 XdmNode * input = processor->parseXmlFromString(doc1.c_str());
 
+	 if(input == nullptr) {
+	     if(val->exceptionOccurred()) {
+	         
+
+	     }
+	     val->exceptionClear();
+	     return;
+
+	 }
+
 	val->setSourceNode(input);
 
 	

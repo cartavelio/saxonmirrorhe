@@ -112,7 +112,6 @@ void SaxonProcessor::exceptionClear() {
     if(exceptionOccurred()) {
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     }
-    std::cerr<< "saxonProc exceptionClear cp0"<<std::endl;
     if (exception != nullptr) {
         std::cerr<< "saxonProc exception= "<< exception <<std::endl;
         delete exception;

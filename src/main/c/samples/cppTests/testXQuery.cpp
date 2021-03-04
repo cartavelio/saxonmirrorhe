@@ -431,9 +431,6 @@ int main(int argc, char* argv[])
     delete processor;
     processor->release();
 
-#ifdef MEM_DEBUG
-    SaxonProcessor::getInfo();
-#endif
 
     cout<<endl<<"======================== Test Results ========================"<<endl<<endl;
 
