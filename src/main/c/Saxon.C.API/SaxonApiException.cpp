@@ -71,10 +71,9 @@ SaxonApiException::SaxonApiException(const char * m){
      * A destructor.
      */
 	SaxonApiException::~SaxonApiException() noexcept {
-	    std::cerr<<"SaxonApiException destructor called"<<std::endl;
-        message.clear();
-        errorCode.clear();
-        systemId.clear();
+          message.clear();
+          errorCode.clear();
+          systemId.clear();
 	}
 
     /**

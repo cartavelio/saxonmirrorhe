@@ -114,15 +114,26 @@ void XsltExecutable::setGlobalContextFromFile(const char *ifile) {
 }
 
 void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
-    if (_selection != nullptr) {
+    if(selection) {
+        SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
+        selection = nullptr;
+    }
+    if(selectionV != nullptr) {
+	selectionV->decrementRefCount();
+    }
+//    if (_selection != nullptr) {
         _selection->incrementRefCount();
         selectionV = _selection;
         selection = SaxonProcessor::sxn_environ->env->NewGlobalRef(_selection->getUnderlyingValue());
-    }
+//    }
 }
 
 
 void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
+    if(selection) {
+        SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
+        selection = nullptr;
+    }
     if (filename != nullptr) {
         selection = SaxonProcessor::sxn_environ->env->NewGlobalRef(SaxonProcessor::sxn_environ->env->NewStringUTF(filename));
 
@@ -744,6 +755,10 @@ const char *XsltExecutable::callTemplateReturningString(const char *templateName
 XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 
 
+    if(templateName == nullptr) {
+	std::cerr<<"template name given as null"<<std::endl;
+	return nullptr;
+    }
     static jmethodID ctsvmID = nullptr;
     if (ctsvmID == nullptr) {
         ctsvmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
@@ -783,6 +798,10 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
             jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
             jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
                                                     "net/sf/saxon/s9api/XdmFunctionItem");
+            jclass mapItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
+                                                    "net/sf/saxon/s9api/XdmMap");
+            jclass arrayItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
+                                               "net/sf/saxon/s9api/XdmArray");
             XdmValue *value = nullptr;
 
             XdmItem *xdmItem = nullptr;
@@ -797,6 +816,15 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
                 return xdmItem;
             } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass) == JNI_TRUE) {
                 xdmItem = new XdmFunctionItem(result);
+                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                return xdmItem;
+
+            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapItemClass) == JNI_TRUE) {
+                xdmItem = new XdmMap(result);
+                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                return xdmItem;
+            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, arrayItemClass) == JNI_TRUE) {
+                xdmItem = new XdmArray(result);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 return xdmItem;
             } else {
@@ -887,7 +915,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 return xdmItem;
             } else {
-                value = new XdmValue(result, true);
+                value = new XdmValue(result);
                 return value;
             }
             value = new XdmValue();

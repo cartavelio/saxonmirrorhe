@@ -1,3 +1,4 @@
+
 #include "../../Saxon.C.API/SaxonProcessor.h"
 #include "../../Saxon.C.API/XdmValue.h"
 #include "../../Saxon.C.API/XdmItem.h"
@@ -68,9 +69,7 @@ void testxQuery1(SaxonProcessor * processor, XQueryProcessor * queryProc, sResul
         cout<<"The file $filename does not exist"<<endl;
 
     }
-    cerr<<"testXQuery1 cp0"<<endl;
     queryProc->clearParameters();
-    cerr<<"testXQuery1 cp0"<<endl;
     queryProc->clearProperties();
 
 }
@@ -378,7 +377,6 @@ void testXQueryLineNumber(SaxonProcessor * processor, sResultCount *sresult){
 		}
 	
     }
-	delete processor;
     delete queryProc;
 
 }
@@ -418,25 +416,19 @@ int main(int argc, char* argv[])
 
     testXQueryError2(processor, query,sresult);
 
-
-#ifdef MEM_DEBUG
-    SaxonProcessor::getInfo();
-#endif
     cout<<endl<<"============================================================="<<endl<<endl;
-    /*testDefaultNamespace(processor, query,sresult);
+    testDefaultNamespace(processor, query,sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
     testReusability(processor, sresult);
     cout<<endl<<"============================================================="<<endl<<endl;
     testXQueryLineNumberError(query,sresult);
     cout<<endl<<"============================================================="<<endl<<endl;
-    testXQueryLineNumber(processor, sresult);*/
-cerr<<"testXquery cp0"<<endl;
+    testXQueryLineNumber(processor, sresult);
+
     delete query;
-    cerr<<"testXquery cp0"<<endl;
 
     delete processor;
-    cerr<<"testXquery cp0"<<endl;
     processor->release();
 
 #ifdef MEM_DEBUG

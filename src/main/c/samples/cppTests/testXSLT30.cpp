@@ -565,9 +565,9 @@ void testTrackingOfValueReferenceError(SaxonProcessor *processor, Xslt30Processo
         try {
 
             XdmValue *valuei = parMap.at(name1.str());
-            if (valuei != NULL) {
+            if (valuei != nullptr) {
                 cout << name1.str();
-                if (valuei->itemAt(0) != NULL)
+                if (valuei->itemAt(0) != nullptr)
                     cout << "= " << valuei->itemAt(0)->getStringValue();
                 cout << endl;
             }
@@ -595,6 +595,19 @@ void testValidation(Xslt30Processor *trans, sResultCount *sresult) {
     XsltExecutable * executable = trans->compileFromString(
             "<?xml version='1.0'?><xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'                 xmlns:xs='http://www.w3.org/2001/XMLSchema' version='3.0' exclude-result-prefixes='#all'>     <xsl:import-schema><xs:schema><xs:element name='x' type='xs:int'/></xs:schema></xsl:import-schema> <xsl:template name='main'>          <xsl:result-document validation='strict'> <x>3</x>   </xsl:result-document>    </xsl:template>    </xsl:stylesheet>");
 
+
+    if(executable== nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testValidation");
+        if (trans->exceptionOccurred()) {
+            cerr <<"Error message: "<< trans->getErrorMessage() << endl;
+        }
+        trans->exceptionClear();
+        return;
+    }
+
+
+
     const char *rootValue = executable->callTemplateReturningString("main");
 
 
@@ -617,6 +630,18 @@ void testXdmNodeOutput(Xslt30Processor *trans, sResultCount *sresult) {
     std::cout << "testXdmNodeOutput" << std::endl;
     XsltExecutable * executable = trans->compileFromString(
             "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template name='go'><a/></xsl:template></xsl:stylesheet>");
+
+
+    if(executable== nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testXdmNodeOutput");
+        if (trans->exceptionOccurred()) {
+            cerr <<"Error message: "<< trans->getErrorMessage() << endl;
+        }
+        trans->exceptionClear();
+        return;
+    }
+
     XdmValue *rootValue = executable->callTemplateReturningValue("go");
     if (rootValue== nullptr) {
         cout << "Result is null ====== FAIL ====== " << endl;
@@ -811,11 +836,12 @@ void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCount
     if(executable == nullptr) {
         cout << "executable is NULL" <<endl;
         if(proc->exceptionOccurred()) {
-            cout << proc->getErrorMessage() <<endl;
+            cout << "Error : " << proc->getErrorMessage() <<endl;
 
         }
         sresult->failure++;
         sresult->failureList.push_back("exampleParam");
+	proc->exceptionClear();
         return;
 
     }
@@ -979,7 +1005,7 @@ void exampleParam2(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCoun
 
     executable->clearProperties();
 
-    if(result2 != NULL) {
+    if(result2 != nullptr) {
         cout<<result2<<endl;
         sresult->success++;
 
@@ -991,7 +1017,7 @@ void exampleParam2(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCoun
     executable->setParameter("a-param", (XdmValue*)xdmValue2);
 
     const char *result3 = executable->applyTemplatesReturningString();
-    if(result3 != NULL) {
+    if(result3 != nullptr) {
         cout<<"Output ="<<result3<<endl;
 
         sresult->success++;
@@ -1010,7 +1036,7 @@ void xmarkTest1(Xslt30Processor *proc, sResultCount *sresult) {
     proc->setJustInTimeCompilation(true);
 
     XdmValue *result = proc->transformFileToValue("xmark100k.xml", "q12.xsl");
-    if (result != NULL) {
+    if (result != nullptr && !proc->exceptionOccurred()) {
         cout << "XdmNode returned" << endl;
         sresult->success++;
         delete result;
@@ -1018,22 +1044,19 @@ void xmarkTest1(Xslt30Processor *proc, sResultCount *sresult) {
         printf("result is null \nCheck For errors:");
         sresult->failure++;
         sresult->failureList.push_back("xmarkTest1");
-        cerr << "xmarkTest1 cp0" << endl;
         if (proc->exceptionOccurred()) {
-            cerr << "xmarkTest1 cp1" << endl;
             const char * message = proc->getErrorMessage();
-            cerr << "xmarkTest1 cp2" << endl;
             if(message != nullptr) {
-                cerr << "xmarkTest1 cp2-1" << endl;
                 cerr << proc->getErrorMessage() << endl;
+		proc->exceptionClear();
             } else {
                 cerr << "Message is nullptr" << endl;
                 SaxonProcessor::sxn_environ->env->ExceptionDescribe();
+		SaxonProcessor::sxn_environ->env->ExceptionClear();
             }
         }
-        cerr << "xmarkTest1 cp3" << endl;
     }
-
+    proc->setJustInTimeCompilation(false);
 
 }
 
@@ -1042,9 +1065,10 @@ void xmarkTest1(Xslt30Processor *proc, sResultCount *sresult) {
 void xmarkTest2(Xslt30Processor *proc, sResultCount *sresult) {
     cout << "Test: xmarkTest2 - XMarkbench mark test q12.xsl (JIT=true):" << endl;
 
+    proc->setJustInTimeCompilation(true);
 
     XdmValue *result = proc->transformFileToValue("xmark100k.xml", "q12.xsl");
-    if (result != NULL) {
+    if (result != nullptr && !proc->exceptionOccurred()) {
         cout << "XdmNode returned" << endl;
         sresult->success++;
         delete result;
@@ -1058,17 +1082,19 @@ void xmarkTest2(Xslt30Processor *proc, sResultCount *sresult) {
             if(exception != nullptr) {
                 const char *message = exception->getMessage();
                 if (message != nullptr) {
-                    cerr << "xmarkTest2 cp2-1" << endl;
                     cerr << message << endl;
+		    proc->exceptionClear();
                 }
                 delete exception;
             } else {
                 cerr << "Exception object is nullptr" << endl;
                 SaxonProcessor::sxn_environ->env->ExceptionDescribe();
+		SaxonProcessor::sxn_environ->env->ExceptionClear();
             }
         }
     }
 
+    proc->setJustInTimeCompilation(false);
 
 }
 
@@ -1079,7 +1105,8 @@ void exampleSimple_xmark(Xslt30Processor *proc, sResultCount *sresult) {
     proc->setJustInTimeCompilation(true);
 
     XdmValue *result = proc->transformFileToValue("xmark100k.xml", "q12.xsl");
-    if (result != NULL) {
+
+    if (result != nullptr && !proc->exceptionOccurred()) {
         cout << "XdmNode returned" << endl;
         sresult->success++;
         delete result;
@@ -1093,6 +1120,7 @@ void exampleSimple_xmark(Xslt30Processor *proc, sResultCount *sresult) {
         proc->exceptionClear();
     }
     proc->clearParameters();
+    proc->setJustInTimeCompilation(false);
 
 }
 
@@ -1139,7 +1167,7 @@ void testPackage1a(Xslt30Processor *trans, sResultCount *sresult) {
 
     if(trans->exceptionOccurred()) {
         const char *message = trans->getErrorMessage();
-        if (message != NULL) {
+        if (message != nullptr) {
             cout << "Error message =" << message << endl;
         }
         sresult->failure++;
@@ -1151,6 +1179,22 @@ void testPackage1a(Xslt30Processor *trans, sResultCount *sresult) {
 
 
     XsltExecutable * executable = trans->compileFromFile("test1.sef");
+
+    if(executable == nullptr) {
+	if(trans->exceptionOccurred()) {
+          const char *message = trans->getErrorMessage();
+          if (message != nullptr) {
+            cout << "Error message =" << message << endl;
+          }
+          sresult->failure++;
+          sresult->failureList.push_back("testPackage1a");
+          trans->exceptionClear();
+    	}
+	return;   
+
+
+    }
+
     executable->setInitialMatchSelectionAsFile("cat.xml");
     const char * output = executable->applyTemplatesReturningString();
     if (output== nullptr) {
@@ -1185,9 +1229,9 @@ void testPackage2_Error(Xslt30Processor *trans, sResultCount *sresult) {
 
     trans->compileFromStringAndSave(stylesheet, "test2.sef");
 
-    if(trans->exceptionOccurred()) {
+    if(trans->exceptionOccurred() || trans->getException() != nullptr) {
         const char *message = trans->getErrorMessage();
-        if (message != NULL) {
+        if (message != nullptr) {
             cout << "Error message =" << message << endl;
         }
         sresult->success++;
@@ -1195,7 +1239,7 @@ void testPackage2_Error(Xslt30Processor *trans, sResultCount *sresult) {
         return;
 
     }
-
+    trans->exceptionClear();
     sresult->failure++;
     sresult->failureList.push_back("testPackage2_Error");
 
