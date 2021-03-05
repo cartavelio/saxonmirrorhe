@@ -183,6 +183,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
             ExpressionTool.allocateSlots(init, 0, stackFrameMap);
             accumulator.setSlotManagerForInitialValueExpression(stackFrameMap);
             checkInitialStreamability(init);
+            accumulator.setInitialValueExpression(init);
             accumulator.addChildExpression(init);
         }
 
