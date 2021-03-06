@@ -926,7 +926,7 @@ public class SimpleMode extends Mode {
 
     private static String showPattern(Pattern p) {
         // Complex patterns can be laid out with lots of whitespace, which looks messy in the error message
-        return Whitespace.collapseWhitespace(p.toString()).toString();
+        return Whitespace.collapseWhitespace(p.toShortString()).toString();
     }
 
     /**
