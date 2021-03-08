@@ -615,9 +615,6 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
 }
 
 
-
-void SaxonProcessor::setResourcesDirectory(const char *dir){}
-
 XsltProcessor *SaxonProcessor::newXsltProcessor() {
     return (new XsltProcessor(this, cwd));
 }

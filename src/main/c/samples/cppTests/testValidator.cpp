@@ -35,7 +35,7 @@ void testValidator2(){
 
 	 if(input == nullptr) {
 	     if(val->exceptionOccurred()) {
-	         
+
 
 	     }
 	     val->exceptionClear();

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2014 Saxonica Limited.
+// Copyright (c) 2021 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,20 +9,21 @@
 #define PHP_SAXON_H
 
 #ifdef __cplusplus
-extern "C" {
+// extern "C" { //remove comment
 #endif
 
-    #include "php.h"
-	#include "php_ini.h"
-	#include "ext/standard/info.h"
-	#include "Zend/zend_exceptions.h"
+    #include "php-src/main/php.h" // "php.h"
+	#include "php-src/main/php_ini.h" // "php_ini.h"
+	#include "php-src/ext/standard/info.h" "ext/standard/info.h""
+	#include "php-src/Zend/zend_exceptions.h" // ""Zend/zend_exceptions.h""
 	
 
 
-#include "zend_interfaces.h"
-#include "zend_ini.h"
-#include "zend_closures.h"
-#include "SAPI.h"
+#include "php-src/Zend/zend_interfaces.h" //"zend_interfaces.h"
+#include "php-src/Zend/zend_ini.h" //"zend_ini.h"
+#include "php-src/Zend/zend_closures.h" //"zend_closures.h"
+#include "php-src/Zend/zend_types.h" //"zend_types.h"
+#include "php-src/main/SAPI.h" //"SAPI.h"
 #ifdef PHP_WIN32
 	#define _ALLOW_KEYWORD_MACROS
 #endif
@@ -40,7 +41,7 @@ extern "C" {
 #include "TSRM.h"
 #endif
 #ifdef __cplusplus
-}
+//} //remove comment
 #endif
 #include "SaxonProcessor.h"
 #include "XdmValue.h"
@@ -96,9 +97,9 @@ struct xsltProcessor_object {
     zend_object std;
 };
 
-struct xslt30Processor_object {
+struct xsltExecutable_object {
 
-    Xslt30Processor *xslt30Processor;
+    XsltExecutable *xsltExecutable;
     zend_object std;
 };
 
@@ -145,7 +146,7 @@ struct xdmAtomicValue_object {
 
 
 #define PHP_SAXON_EXTNAME  "saxonc"
-#define PHP_SAXON_EXTVER   "1.2.0"
+#define PHP_SAXON_EXTVER   "1.3.0"
 
 /*
  * Class:     com_saxonica_functions_extfn_PhpCall_PhpFunctionCall
@@ -165,15 +166,20 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(SaxonProcessor,  __destruct);
 
     PHP_METHOD(SaxonProcessor,  createAtomicValue);
+
+    PHP_METHOD(SaxonProcessor,  createXdmMapValue);
+    PHP_METHOD(SaxonProcessor,  createXdmArrayValue);
+    PHP_METHOD(SaxonProcessor,  createQNameValue);
+
     PHP_METHOD(SaxonProcessor,  parseXmlFromString);
     PHP_METHOD(SaxonProcessor,  parseXmlFromFile);
     PHP_METHOD(SaxonProcessor,  setcwd);
-//    PHP_METHOD(SaxonProcessor,  importDocument);
-    PHP_METHOD(SaxonProcessor,  setResourcesDirectory);
+
     PHP_METHOD(SaxonProcessor,  setCatalog);
     PHP_METHOD(SaxonProcessor,  registerPHPFunctions);
- //   PHP_METHOD(SaxonProcessor,  getXslMessages);
+    PHP_METHOD(SaxonProcessor,  getErrorMessage);
     PHP_METHOD(SaxonProcessor, setConfigurationProperty);
+    PHP_METHOD(SaxonProcessor, clearConfigurationProperty);
     PHP_METHOD(SaxonProcessor, newXsltProcessor);
     PHP_METHOD(SaxonProcessor, newXslt30Processor);
     PHP_METHOD(SaxonProcessor, newXQueryProcessor);
@@ -212,51 +218,59 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltProcessor,  exceptionOccurred);
     PHP_METHOD(XsltProcessor,  getErrorCode);
     PHP_METHOD(XsltProcessor,  getErrorMessage);
-    PHP_METHOD(XsltProcessor,  getExceptionCount);
     PHP_METHOD(XsltProcessor,  setupXslMessage);
 
 
-    PHP_METHOD(Xslt30Processor,  __destruct);
-    PHP_METHOD(Xslt30Processor, callFunctionReturningValue);
-    PHP_METHOD(Xslt30Processor, callFunctionReturningString);
-    PHP_METHOD(Xslt30Processor, callFunctionReturningFile);
-    PHP_METHOD(Xslt30Processor, callTemplateReturningValue);
-    PHP_METHOD(Xslt30Processor, callTemplateReturningString);
-    PHP_METHOD(Xslt30Processor, callTemplateReturningFile);
-    PHP_METHOD(Xslt30Processor, applyTemplatesReturningValue);
-    PHP_METHOD(Xslt30Processor, applyTemplatesReturningString);
-    PHP_METHOD(Xslt30Processor, applyTemplatesReturningFile);
-    PHP_METHOD(Xslt30Processor, setBaseOutputURI);
-    PHP_METHOD(Xslt30Processor, setInitialTemplateParameters);
-    PHP_METHOD(Xslt30Processor, setInitialMatchSelection);
-    PHP_METHOD(Xslt30Processor, setInitialMatchSelectionAsFile);
-    PHP_METHOD(Xslt30Processor, setGlobalContextItem);
-    PHP_METHOD(Xslt30Processor, setGlobalContextFromFile);
-    PHP_METHOD(Xslt30Processor,  transformFileToFile);
-    PHP_METHOD(Xslt30Processor,  transformFileToString);
-    PHP_METHOD(Xslt30Processor,  transformFileToValue);
-    PHP_METHOD(Xslt30Processor,  transformToString);
-    PHP_METHOD(Xslt30Processor,  transformToValue);
-    PHP_METHOD(Xslt30Processor,  transformToFile);
-    PHP_METHOD(Xslt30Processor, compileFromFile);
-    PHP_METHOD(Xslt30Processor, compileFromValue);
-    PHP_METHOD(Xslt30Processor, compileFromString);
-    PHP_METHOD(Xslt30Processor, compileFromStringAndSave);
-    PHP_METHOD(Xslt30Processor, compileFromFileAndSave);
-    PHP_METHOD(Xslt30Processor, compileFromAssociatedFile);
-    PHP_METHOD(Xslt30Processor,  setOutputFile);
-    PHP_METHOD(Xslt30Processor,  setJustInTimeCompilation);
-    PHP_METHOD(Xslt30Processor,  setResultAsRawValue);
-    PHP_METHOD(Xslt30Processor,  setParameter);
-    PHP_METHOD(Xslt30Processor,  setProperty);
-    PHP_METHOD(Xslt30Processor,  clearParameters);
-    PHP_METHOD(Xslt30Processor,  clearProperties);
-    PHP_METHOD(Xslt30Processor,  exceptionClear);
-    PHP_METHOD(Xslt30Processor,  exceptionOccurred);
-    PHP_METHOD(Xslt30Processor,  getErrorCode);
-    PHP_METHOD(Xslt30Processor,  getErrorMessage);
-    PHP_METHOD(Xslt30Processor,  getExceptionCount);
-    PHP_METHOD(Xslt30Processor,  setupXslMessage);
+    PHP_METHOD(XsltExecutable,  __destruct);
+    PHP_METHOD(XsltExecutable, callFunctionReturningValue);
+    PHP_METHOD(XsltExecutable, callFunctionReturningString);
+    PHP_METHOD(XsltExecutable, callFunctionReturningFile);
+    PHP_METHOD(XsltExecutable, callTemplateReturningValue);
+    PHP_METHOD(XsltExecutable, callTemplateReturningString);
+    PHP_METHOD(XsltExecutable, callTemplateReturningFile);
+    PHP_METHOD(XsltExecutable, applyTemplatesReturningValue);
+    PHP_METHOD(XsltExecutable, applyTemplatesReturningString);
+    PHP_METHOD(XsltExecutable, applyTemplatesReturningFile);
+    PHP_METHOD(XsltExecutable,  transformFileToFile);
+    PHP_METHOD(XsltExecutable,  transformFileToString);
+    PHP_METHOD(XsltExecutable,  transformFileToValue);
+    PHP_METHOD(XsltExecutable,  transformToString);
+    PHP_METHOD(XsltExecutable,  transformToValue);
+    PHP_METHOD(XsltExecutable,  transformToFile);
+    PHP_METHOD(XsltExecutable, compileFromFile);
+    PHP_METHOD(XsltExecutable, compileFromValue);
+    PHP_METHOD(XsltExecutable, compileFromString);
+    PHP_METHOD(XsltExecutable, compileFromStringAndSave);
+    PHP_METHOD(XsltExecutable, compileFromFileAndSave);
+    PHP_METHOD(XsltExecutable, compileFromAssociatedFile);
+    PHP_METHOD(XsltExecutable,  setOutputFile);
+    PHP_METHOD(XsltExecutable,  setResultAsRawValue);
+    PHP_METHOD(XsltExecutable,  setParameter);
+    PHP_METHOD(XsltExecutable, setBaseOutputURI);
+    PHP_METHOD(XsltExecutable, setInitialTemplateParameters);
+    PHP_METHOD(XsltExecutable, setInitialMatchSelection);
+    PHP_METHOD(XsltExecutable, setInitialMatchSelectionAsFile);
+    PHP_METHOD(XsltExecutable, setGlobalContextItem);
+    PHP_METHOD(XsltExecutable, setGlobalContextFromFile);
+
+//new
+    PHP_METHOD(XsltExecutable, setcwd);
+
+    PHP_METHOD(XsltExecutable,  setProperty);
+    PHP_METHOD(XsltExecutable,  clearParameters);
+    PHP_METHOD(XsltExecutable,  clearProperties);
+//new
+    PHP_METHOD(XsltExecutable,  exportStylesheet);
+    PHP_METHOD(XsltExecutable,  exceptionClear);
+    PHP_METHOD(XsltExecutable,  exceptionOccurred);
+    PHP_METHOD(XsltExecutable,  getErrorCode);
+    PHP_METHOD(XsltExecutable,  getErrorMessage);
+//new
+    PHP_METHOD(XsltExecutable,  setupXslMessage);
+//new
+    PHP_METHOD(XsltExecutable,  getXslMessages);
+
+
 
 
 
@@ -280,7 +294,6 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XQueryProcessor,  exceptionOccurred);
     PHP_METHOD(XQueryProcessor,  getErrorCode);
     PHP_METHOD(XQueryProcessor,  getErrorMessage);
-    PHP_METHOD(XQueryProcessor,  getExceptionCount);
 
    // PHP_METHOD(XPathProcessor,  __construct);
     PHP_METHOD(XPathProcessor,  __destruct);
@@ -302,7 +315,6 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XPathProcessor,  exceptionOccurred);
     PHP_METHOD(XPathProcessor,  getErrorCode);
     PHP_METHOD(XPathProcessor,  getErrorMessage);
-    PHP_METHOD(XPathProcessor,  getExceptionCount);
 
 
    // PHP_METHOD(SchemaValidator,  __construct);
@@ -323,7 +335,6 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(SchemaValidator,  exceptionOccurred);
     PHP_METHOD(SchemaValidator,  getErrorCode);
     PHP_METHOD(SchemaValidator,  getErrorMessage);
-    PHP_METHOD(SchemaValidator,  getExceptionCount); 
 	
 
 /*     ============== PHP Interface of   XdmValue =============== */

@@ -70,7 +70,9 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
     if (selectionV != nullptr) {
         setInitialMatchSelection(other.selectionV);
     } else {
-        selection = other.selection;
+        if(selection) {
+            selection = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.selection);
+        }
     }
     tunnel = other.tunnel;
 
