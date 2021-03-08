@@ -12,18 +12,18 @@
 // extern "C" { //remove comment
 #endif
 
-    #include "php-src/main/php.h" // "php.h"
-	#include "php-src/main/php_ini.h" // "php_ini.h"
-	#include "php-src/ext/standard/info.h" "ext/standard/info.h""
-	#include "php-src/Zend/zend_exceptions.h" // ""Zend/zend_exceptions.h""
+    #include "php.h"
+	#include "php_ini.h"
+	#include "ext/standard/info.h""
+	#include "Zend/zend_exceptions.h""
 	
 
 
-#include "php-src/Zend/zend_interfaces.h" //"zend_interfaces.h"
-#include "php-src/Zend/zend_ini.h" //"zend_ini.h"
-#include "php-src/Zend/zend_closures.h" //"zend_closures.h"
-#include "php-src/Zend/zend_types.h" //"zend_types.h"
-#include "php-src/main/SAPI.h" //"SAPI.h"
+#include "zend_interfaces.h"
+#include "zend_ini.h"
+#include "zend_closures.h"
+#include "zend_types.h"
+#include "SAPI.h"
 #ifdef PHP_WIN32
 	#define _ALLOW_KEYWORD_MACROS
 #endif
