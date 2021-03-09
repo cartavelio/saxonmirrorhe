@@ -129,58 +129,7 @@ PHP_METHOD(Xslt30Processor, transformFileToValue)
     }
 }
 
-PHP_METHOD(Xslt30Processor, transformToFile)
-{
-    Xslt30Processor *xslt30Processor;
 
-    if (ZEND_NUM_ARGS()>1) {
-        WRONG_PARAM_COUNT;
-    }
-
-
-    zval* oth;
-
-
-    if (ZEND_NUM_ARGS() == 1 && zend_parse_parameters(ZEND_NUM_ARGS() , "z", &oth) == FAILURE) {
-        RETURN_NULL();
-    }
-
-    zend_object* pobj = Z_OBJ_P(getThis());
-    xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
-    xslt30Processor = obj->xslt30Processor;
-
-    if (xslt30Processor != nullptr) {
-        if(!oth) {
-            php_error(E_WARNING, "Error setting source value");
-            return;
-        } else {
-            if(ZEND_NUM_ARGS() == 0) {
-                xslt30Processor->transformToFile();
-            } else {
-                if(Z_TYPE_P(oth) == mIS_NULL){
-                    php_error(E_WARNING,"Error setting source value");
-                    return;
-                }
-
-                const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
-
-                if(strcmp(objName,"Saxon\\XdmNode")==0) {
-                    zend_object *nobj = Z_OBJ_P(oth);
-
-                    xdmNode_object *ooth = (xdmNode_object *) ((char *) nobj -
-                                                               XtOffsetOf(xdmNode_object, std));//(xdmNode_object*)Z_OBJ_P(oth);
-                    if(ooth != nullptr) {
-                        XdmNode *value = ooth->xdmNode;
-                        if(value != nullptr) {
-                            xslt30Processor->transformToFile(value);
-                        }
-                    }
-                }
-
-            }
-        }
-    }
-}
 
 PHP_METHOD(Xslt30Processor, compileFromFile)
 {
@@ -336,7 +285,6 @@ zend_function_entry Xslt30Processor_methods[] = {
         PHP_ME(Xslt30Processor,  transformFileToFile, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  transformFileToString, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  transformFileToValue, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  transformToFile, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor, compileFromFile, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor, compileFromValue, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor, compileFromString, nullptr, ZEND_ACC_PUBLIC)

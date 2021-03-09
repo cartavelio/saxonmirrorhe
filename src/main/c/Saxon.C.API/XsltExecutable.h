@@ -378,8 +378,7 @@ public:
     * @param arguments - Pointer array of XdmValue object - he values of the arguments to be supplied to the function. These
     *                    will be converted if necessary to the type as defined in the function signature, using
     *                    the function conversion rules.
-    * @param argument_length - the Coutn of arguments objects in the array
-    * @param outputfile - The file name where results will be stored,
+    * @param argument_length - the Count of arguments objects in the array
     */
     XdmValue * callFunctionReturningValue(const char* functionName, XdmValue ** arguments, int argument_length);
 
@@ -393,7 +392,7 @@ public:
      * @return char*. Pointer to Array of chars. Result returned as a string.
      *
      */
-    const char * transformToString(XdmNode * source);
+    const char * transformToString(XdmNode * source==nullptr);
 
     //! Execute transformation to Xdm Value. Properties supplied in advance.
     /**
@@ -402,7 +401,7 @@ public:
      * @return as an XdmValue.
      *
      */
-    XdmValue * transformToValue(XdmNode * source);
+    XdmValue * transformToValue(XdmNode * source==nullptr);
 
     //! Execute transformation to file. Properties supplied in advance.
     /**
@@ -413,7 +412,7 @@ public:
      *
 
      */
-    void transformToFile(XdmNode * source);
+    void transformToFile(XdmNode * source==nullptr);
 
     /**
      * Checks for pending exceptions without creating a local reference to the exception object

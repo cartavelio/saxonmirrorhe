@@ -23,7 +23,6 @@ struct xslt30Processor_object {
     PHP_METHOD(Xslt30Processor,  transformFileToFile);
     PHP_METHOD(Xslt30Processor,  transformFileToString);
     PHP_METHOD(Xslt30Processor,  transformFileToValue);
-    PHP_METHOD(Xslt30Processor,  transformToFile);
     PHP_METHOD(Xslt30Processor, compileFromFile);
     PHP_METHOD(Xslt30Processor, compileFromValue);
     PHP_METHOD(Xslt30Processor, compileFromString);

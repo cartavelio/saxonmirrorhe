@@ -97,12 +97,6 @@ struct xsltProcessor_object {
     zend_object std;
 };
 
-struct xsltExecutable_object {
-
-    XsltExecutable *xsltExecutable;
-    zend_object std;
-};
-
 struct xqueryProcessor_object {
     XQueryProcessor *xqueryProcessor;
     zend_object std;

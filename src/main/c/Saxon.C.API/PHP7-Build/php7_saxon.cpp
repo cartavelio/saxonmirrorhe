@@ -21,7 +21,6 @@ JNINativeMethod phpMethods[] =
 
 zend_object_handlers saxonProcessor_object_handlers;
 zend_object_handlers xsltProcessor_object_handlers;
-zend_object_handlers xslt30Processor_object_handlers;
 zend_object_handlers xqueryProcessor_object_handlers;
 zend_object_handlers xpathProcessor_object_handlers;
 zend_object_handlers schemaValidator_object_handlers;
@@ -32,7 +31,6 @@ zend_object_handlers xdmAtomicValue_object_handlers;
 
 zend_class_entry *saxonProcessor_ce;
 zend_class_entry *xsltProcessor_ce;
-zend_class_entry *xslt30Processor_ce;
 zend_class_entry *xqueryProcessor_ce;
 zend_class_entry *xpathProcessor_ce;
 zend_class_entry *schemaValidator_ce;
@@ -1467,7 +1465,7 @@ PHP_METHOD(XsltProcessor, setupXslMessage)
     bool show = false;
     char * filename = nullptr;
     size_t len1;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() , "bs", &show, &filename &len1) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "bs", &show, &filename,  &len1) == FAILURE) {
         RETURN_NULL();
     }
 
@@ -2924,7 +2922,7 @@ PHP_METHOD(SchemaValidator, getErrorMessage)
    schemaValidator_object * obj = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
     schemaValidator = obj->schemaValidator;
     if (schemaValidator != nullptr) {
-        const char * errStr = schemaValidator->getErrorMessage();
+        const char * errStr = schemaValidator->getErrorMessage(index);
         if(errStr != nullptr) {
             //char *str = estrdup(errStr);
             _RETURN_STRING(errStr);
@@ -3956,70 +3954,6 @@ zend_function_entry XsltProcessor_methods[] = {
 
 
 
-zend_function_entry Xslt30Processor_methods[] = {
-        PHP_ME(Xslt30Processor,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
-        PHP_ME(Xslt30Processor,  transformFileToFile, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  transformFileToString, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  transformFileToValue, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  transformToFile, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor, compileFromFile, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor, compileFromValue, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor, compileFromString, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor, compileFromStringAndSave, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor, compileFromFileAndSave, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor, compileFromAssociatedFile, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  setJustInTimeCompilation, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  setParameter, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  clearParameters, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  setupXslMessage, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  exceptionOccurred, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  exceptionClear, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  getErrorCode, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  getErrorMessage, nullptr, ZEND_ACC_PUBLIC)
-        {nullptr, nullptr, nullptr}
-};
-
-
-
-zend_function_entry XsltExecutable_methods[] = {
-    PHP_ME(XsltExecutable,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
-    PHP_ME(XsltExecutable, callFunctionReturningValue, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, callFunctionReturningString, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, callFunctionReturningFile, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, callTemplateReturningValue, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, callTemplateReturningString, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, callTemplateReturningFile, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, applyTemplatesReturningValue, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, applyTemplatesReturningString, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, applyTemplatesReturningFile, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, setInitialTemplateParameters, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, setInitialMatchSelection, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, setInitialMatchSelectionAsFile, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, setGlobalContextItem, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable, setGlobalContextFromFile, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  transformFileToFile, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  transformFileToString, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  transformFileToValue, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  transformToString, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  transformToValue, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  transformToFile, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  setOutputFile, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  setResultAsRawValue, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  setupXslMessage, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  setParameter, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  setProperty, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  setcwd, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  clearParameters, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  clearProperties, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  setupXslMessage, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  exceptionOccurred, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  exceptionClear, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  exportStylesheet, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  getErrorCode, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  getErrorMessage, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  getXslMessages, nullptr, ZEND_ACC_PUBLIC)
-{nullptr, nullptr, nullptr}
-};
 
 zend_function_entry XQueryProcessor_methods[] = {
     PHP_ME(XQueryProcessor,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
