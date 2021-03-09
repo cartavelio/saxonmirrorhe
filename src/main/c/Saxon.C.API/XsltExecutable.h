@@ -392,7 +392,7 @@ public:
      * @return char*. Pointer to Array of chars. Result returned as a string.
      *
      */
-    const char * transformToString(XdmNode * source==nullptr);
+    const char * transformToString(XdmNode * source=nullptr);
 
     //! Execute transformation to Xdm Value. Properties supplied in advance.
     /**
@@ -401,7 +401,7 @@ public:
      * @return as an XdmValue.
      *
      */
-    XdmValue * transformToValue(XdmNode * source==nullptr);
+    XdmValue * transformToValue(XdmNode * source=nullptr);
 
     //! Execute transformation to file. Properties supplied in advance.
     /**
@@ -412,7 +412,7 @@ public:
      *
 
      */
-    void transformToFile(XdmNode * source==nullptr);
+    void transformToFile(XdmNode * source=nullptr);
 
     /**
      * Checks for pending exceptions without creating a local reference to the exception object

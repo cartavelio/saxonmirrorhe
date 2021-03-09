@@ -173,7 +173,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(SaxonProcessor,  registerPHPFunctions);
     PHP_METHOD(SaxonProcessor,  getErrorMessage);
     PHP_METHOD(SaxonProcessor, setConfigurationProperty);
-    PHP_METHOD(SaxonProcessor, clearConfigurationProperty);
+    PHP_METHOD(SaxonProcessor, clearConfigurationProperties);
     PHP_METHOD(SaxonProcessor, newXsltProcessor);
     PHP_METHOD(SaxonProcessor, newXslt30Processor);
     PHP_METHOD(SaxonProcessor, newXQueryProcessor);

@@ -1,11 +1,5 @@
 #include "php_XsltExecutable.h"
 
-#ifdef COMPILE_DL_SAXON
-extern "C" {
-        ZEND_GET_MODULE(saxon)
-    }
-#endif
-
 zend_object_handlers xsltExecutable_object_handlers;
 
 zend_class_entry *xsltExecutable_ce;
@@ -115,7 +109,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue)
 
     if (xsltExecutable != nullptr) {
       ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-        if(Z_TYPE_P(val) != nullptr) {
+        if(Z_TYPE_P(val) != NULL) {
 	        const char * objName =ZSTR_VAL(Z_OBJCE_P(val)->name);
 
         if(strcmp(objName, "Saxon\\XdmNode")==0) {
@@ -204,7 +198,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
 
     if (xsltExecutable != nullptr) {
       ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-        if(Z_TYPE_P(val) != nullptr) {
+        if(Z_TYPE_P(val) != NULL) {
 	const char * objName =ZSTR_VAL(Z_OBJCE_P(val)->name);
       /*std::cerr<<"test type:"<<(Z_OBJCE_P(val)->name)<<std::endl;
 	php_printf("num_key %d =>", num_key);
@@ -284,7 +278,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
 
     if (xsltExecutable != nullptr) {
       ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-        if(Z_TYPE_P(val) != nullptr) {
+        if(Z_TYPE_P(val) != NULL) {
 	const char * objName =ZSTR_VAL(Z_OBJCE_P(val)->name);
       /*std::cerr<<"test type:"<<(Z_OBJCE_P(val)->name)<<std::endl;
 	php_printf("num_key %d =>", num_key);
@@ -417,7 +411,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
     char * filename = nullptr;
     size_t len2;
 
-    if (ZEND_NUM_ARGS()>1 {
+    if (ZEND_NUM_ARGS()>1) {
         WRONG_PARAM_COUNT;
     }
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &templateName, &len2) == FAILURE) {
@@ -611,7 +605,7 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningFile){
     std::map<std::string,XdmValue*> parameters;
     if (xsltExecutable != nullptr) {
       ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-        if(Z_TYPE_P(val) != nullptr) {
+        if(Z_TYPE_P(val) != NULL) {
 	const char * objName =ZSTR_VAL(Z_OBJCE_P(val)->name);
       /*std::cerr<<"test type:"<<(Z_OBJCE_P(val)->name)<<std::endl;
 	php_printf("num_key %d =>", num_key);
@@ -836,7 +830,7 @@ PHP_METHOD(XsltExecutable, transformFileToFile)
     char * infilename = nullptr;
     size_t len1;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() , "ss", &infilename, &len1, &outfileName, &len2) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "ss", &infilename, &len1, &outfileName, &len1) == FAILURE) {
         RETURN_NULL();
     }
 
@@ -1271,7 +1265,7 @@ PHP_METHOD(XsltExecutable, setupXslMessage)
     bool show = false;
     char * filename = nullptr;
     size_t len1;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() , "bs", &show, &filename &len1) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "bs", &show, &filename, &len1) == FAILURE) {
         RETURN_NULL();
     }
 
@@ -1404,14 +1398,3 @@ zend_function_entry XsltExecutable_methods[] = {
     PHP_ME(XsltExecutable,  getXslMessages, nullptr, ZEND_ACC_PUBLIC)
 {nullptr, nullptr, nullptr}
 };
-
-
-
-
-#ifdef COMPILE_DL_SAXONC
-#ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE()
-#endif
-ZEND_GET_MODULE(saxonc)
-#endif
-

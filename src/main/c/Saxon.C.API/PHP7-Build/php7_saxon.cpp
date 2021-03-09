@@ -623,7 +623,7 @@ PHP_METHOD(SaxonProcessor, setConfigurationProperty)
 }
 
 
-PHP_METHOD(SaxonProcessor, clearConfigurationProperty)
+PHP_METHOD(SaxonProcessor, clearConfigurationProperties)
 {
     SaxonProcessor *saxonProcessor;
 
@@ -636,7 +636,7 @@ PHP_METHOD(SaxonProcessor, clearConfigurationProperty)
 
     saxonProcessor = obj->saxonProcessor;
     if (saxonProcessor != nullptr) {
-        saxonProcessor->clearConfigurationProperty();
+        saxonProcessor->clearConfigurationProperties();
     }
 
 }
@@ -892,7 +892,6 @@ jobject JNICALL phpNativeCall
                         break;
                     }
                     node = new XdmNode(argObj);
-                    node->setProcessor(nprocessor);
 
                     //MAKE_STD_ZVAL(php_argv[i]._val);
                     zend_vobj = Z_OBJ_P(&params[i]);
@@ -4018,7 +4017,7 @@ zend_function_entry SchemaValidator_methods[] = {
     PHP_ME(SchemaValidator,  exceptionClear, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  getErrorCode, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  getErrorMessage, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(SchemaValidator,  getExceptionCount, nullptr, ZEND_ACC_PUBLIC)
+//    PHP_ME(SchemaValidator,  getExceptionCount, nullptr, ZEND_ACC_PUBLIC)
 {nullptr, nullptr, nullptr}
 };
 

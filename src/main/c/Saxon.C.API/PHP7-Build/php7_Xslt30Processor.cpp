@@ -1,11 +1,6 @@
 #include "php_Xslt30Processor.h"
 
 
-#ifdef COMPILE_DL_SAXON
-extern "C" {
-        ZEND_GET_MODULE(saxon)
-    }
-#endif
 
 zend_object_handlers xslt30Processor_object_handlers;
 
@@ -251,8 +246,8 @@ PHP_METHOD(Xslt30Processor, setJustInTimeCompilation)
     }
 
     zend_object* pobj = Z_OBJ_P(getThis());
-    xslt30Processor_object *obj = (xsltProcessor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
-    xslt30Processor = obj->xsltProcessor;
+    xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
+    xslt30Processor = obj->xslt30Processor;
     if (xslt30Processor != nullptr) {
         xslt30Processor->setJustInTimeCompilation(jit);
     }
