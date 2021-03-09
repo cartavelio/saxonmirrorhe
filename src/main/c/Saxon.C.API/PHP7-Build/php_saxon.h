@@ -43,11 +43,11 @@
 #ifdef __cplusplus
 //} //remove comment
 #endif
-#include "SaxonProcessor.h"
-#include "XdmValue.h"
-#include "XdmItem.h"
-#include "XdmNode.h"
-#include "XdmAtomicValue.h"
+#include "../SaxonProcessor.h"
+#include "../XdmValue.h"
+#include "../XdmItem.h"
+#include "../XdmNode.h"
+#include "../XdmAtomicValue.h"
 /*class SaxonProcessor;
 class XQueryProcessor;
 class XsltProcessor;

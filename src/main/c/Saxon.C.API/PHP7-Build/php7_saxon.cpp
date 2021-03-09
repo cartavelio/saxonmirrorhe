@@ -41,6 +41,10 @@ zend_class_entry *xdmItem_ce;
 zend_class_entry *xdmNode_ce;
 zend_class_entry *xdmAtomicValue_ce;
 
+
+#include "php7_Xslt30Processor.cpp"
+#include "php7_XsltExecutable.cpp"
+
 void SaxonProcessor_free_storage(zend_object *object)
 {
 
@@ -1529,7 +1533,7 @@ PHP_METHOD(XsltProcessor, getErrorMessage)
     xsltProcessor_object *obj = (xsltProcessor_object *)((char *)pobj - XtOffsetOf(xsltProcessor_object, std));
     xsltProcessor = obj->xsltProcessor;
     if (xsltProcessor != nullptr) {
-        const char * errStr = xsltProcessor->getErrorMessage((int)index);
+        const char * errStr = xsltProcessor->getErrorMessage();
         if(errStr != nullptr) {
             //char *str = estrdup(errStr);
             _RETURN_STRING(errStr);
@@ -1990,7 +1994,7 @@ PHP_METHOD(XQueryProcessor, getErrorMessage)
     xqueryProcessor_object *obj = (xqueryProcessor_object *)((char *)pobj - XtOffsetOf(xqueryProcessor_object, std));
     xqueryProcessor = obj->xqueryProcessor;
     if (xqueryProcessor != nullptr) {
-        const char * errStr = xqueryProcessor->getErrorMessage((int)index);
+        const char * errStr = xqueryProcessor->getErrorMessage();
         if(errStr != nullptr) {
             //char *str = estrdup(errStr);
             _RETURN_STRING(errStr);
@@ -2266,7 +2270,7 @@ PHP_METHOD(XPathProcessor, evaluate)
 		}
             }
         }
-        xpathProcessor->checkException();//TODO
+       // xpathProcessor->checkException();//TODO
     } 
     RETURN_NULL();
     
@@ -2323,7 +2327,7 @@ PHP_METHOD(XPathProcessor, evaluateSingle)
                 }
             }
         } 
-        xpathProcessor->checkException();//TODO
+       // xpathProcessor->checkException();//TODO
     } 
     RETURN_NULL();
 }
@@ -2515,7 +2519,7 @@ PHP_METHOD(XPathProcessor, getErrorMessage)
     xpathProcessor_object *obj = (xpathProcessor_object *)((char *)pobj - XtOffsetOf(xpathProcessor_object, std));
     xpathProcessor = obj->xpathProcessor;
     if (xpathProcessor != nullptr) {
-        const char * errStr = xpathProcessor->getErrorMessage((int)index);
+        const char * errStr = xpathProcessor->getErrorMessage();
         if(errStr != nullptr) {
             //char *str = estrdup(errStr);
             _RETURN_STRING(errStr);
@@ -2920,7 +2924,7 @@ PHP_METHOD(SchemaValidator, getErrorMessage)
    schemaValidator_object * obj = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
     schemaValidator = obj->schemaValidator;
     if (schemaValidator != nullptr) {
-        const char * errStr = schemaValidator->getErrorMessage((int)index);
+        const char * errStr = schemaValidator->getErrorMessage();
         if(errStr != nullptr) {
             //char *str = estrdup(errStr);
             _RETURN_STRING(errStr);
