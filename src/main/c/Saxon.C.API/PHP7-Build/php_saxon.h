@@ -9,7 +9,7 @@
 #define PHP_SAXON_H
 
 #ifdef __cplusplus
-// extern "C" { //remove comment
+ extern "C" { //remove comment
 #endif
 
     #include "php.h"
@@ -213,57 +213,6 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltProcessor,  getErrorCode);
     PHP_METHOD(XsltProcessor,  getErrorMessage);
     PHP_METHOD(XsltProcessor,  setupXslMessage);
-
-
-    PHP_METHOD(XsltExecutable,  __destruct);
-    PHP_METHOD(XsltExecutable, callFunctionReturningValue);
-    PHP_METHOD(XsltExecutable, callFunctionReturningString);
-    PHP_METHOD(XsltExecutable, callFunctionReturningFile);
-    PHP_METHOD(XsltExecutable, callTemplateReturningValue);
-    PHP_METHOD(XsltExecutable, callTemplateReturningString);
-    PHP_METHOD(XsltExecutable, callTemplateReturningFile);
-    PHP_METHOD(XsltExecutable, applyTemplatesReturningValue);
-    PHP_METHOD(XsltExecutable, applyTemplatesReturningString);
-    PHP_METHOD(XsltExecutable, applyTemplatesReturningFile);
-    PHP_METHOD(XsltExecutable,  transformFileToFile);
-    PHP_METHOD(XsltExecutable,  transformFileToString);
-    PHP_METHOD(XsltExecutable,  transformFileToValue);
-    PHP_METHOD(XsltExecutable,  transformToString);
-    PHP_METHOD(XsltExecutable,  transformToValue);
-    PHP_METHOD(XsltExecutable,  transformToFile);
-    PHP_METHOD(XsltExecutable, compileFromFile);
-    PHP_METHOD(XsltExecutable, compileFromValue);
-    PHP_METHOD(XsltExecutable, compileFromString);
-    PHP_METHOD(XsltExecutable, compileFromStringAndSave);
-    PHP_METHOD(XsltExecutable, compileFromFileAndSave);
-    PHP_METHOD(XsltExecutable, compileFromAssociatedFile);
-    PHP_METHOD(XsltExecutable,  setOutputFile);
-    PHP_METHOD(XsltExecutable,  setResultAsRawValue);
-    PHP_METHOD(XsltExecutable,  setParameter);
-    PHP_METHOD(XsltExecutable, setBaseOutputURI);
-    PHP_METHOD(XsltExecutable, setInitialTemplateParameters);
-    PHP_METHOD(XsltExecutable, setInitialMatchSelection);
-    PHP_METHOD(XsltExecutable, setInitialMatchSelectionAsFile);
-    PHP_METHOD(XsltExecutable, setGlobalContextItem);
-    PHP_METHOD(XsltExecutable, setGlobalContextFromFile);
-
-//new
-    PHP_METHOD(XsltExecutable, setcwd);
-
-    PHP_METHOD(XsltExecutable,  setProperty);
-    PHP_METHOD(XsltExecutable,  clearParameters);
-    PHP_METHOD(XsltExecutable,  clearProperties);
-//new
-    PHP_METHOD(XsltExecutable,  exportStylesheet);
-    PHP_METHOD(XsltExecutable,  exceptionClear);
-    PHP_METHOD(XsltExecutable,  exceptionOccurred);
-    PHP_METHOD(XsltExecutable,  getErrorCode);
-    PHP_METHOD(XsltExecutable,  getErrorMessage);
-//new
-    PHP_METHOD(XsltExecutable,  setupXslMessage);
-//new
-    PHP_METHOD(XsltExecutable,  getXslMessages);
-
 
 
 

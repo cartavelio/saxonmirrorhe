@@ -4108,7 +4108,14 @@ PHP_MINIT_FUNCTION(saxon)
     xslt30Processor_object_handlers.offset = XtOffsetOf(xslt30Processor_object, std);
     xslt30Processor_object_handlers.free_obj = Xslt30Processor_free_storage;
     xslt30Processor_object_handlers.dtor_obj = Xslt30Processor_destroy_storage;
-    //xslt30Processor_object_handlers.clone_obj = nullptr;
+
+    INIT_CLASS_ENTRY(ce, "Saxon\\XSLTExecutable", XsltExecutable_methods);
+    xsltExecutable_object = zend_register_internal_class(&ce);
+    xsltExecutable_ce->create_object = xslt30Processor_create_handler;
+    memcpy(&xsltExecutable_object_handlers, zend_get_std_object_handlers(), sizeof(xsltExecutable_object_handlers));
+    xsltExecutable_object_handlers.offset = XtOffsetOf(xsltExecutable_object, std);
+    xsltExecutable_object_handlers.free_obj = XsltExcutable_free_storage;
+    xsltExecutable_object_handlers.dtor_obj = XsltExcutable_destroy_storage;
 
     INIT_CLASS_ENTRY(ce, "Saxon\\XQueryProcessor", XQueryProcessor_methods);
     xqueryProcessor_ce = zend_register_internal_class(&ce);
