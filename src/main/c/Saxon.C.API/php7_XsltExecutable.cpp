@@ -1,4 +1,4 @@
-#include "php_XsltExecutable.h"
+//#include "php_XsltExecutable.h"
 
 zend_object_handlers xsltExecutable_object_handlers;
 
@@ -47,6 +47,89 @@ PHP_METHOD(XsltExecutable, __destruct)
     if(xsltExecutable != nullptr){
     	delete xsltExecutable;
      }
+}
+
+
+PHP_METHOD(XsltExecutable, getXslMessages)
+{
+    XsltExecutable *xsltExecutable;
+
+    if (ZEND_NUM_ARGS()>0) {
+        WRONG_PARAM_COUNT;
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
+    xsltExecutable = obj->xsltExecutable;
+
+    if (xsltExecutable != NULL) {
+
+        XdmValue * values = xsltExecutable->getXslMessages();
+        if(values != NULL) {
+            if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
+                RETURN_NULL();
+            } else {
+                //struct xdmValue_object* vobj = (struct xdmValue_object *)Z_OBJ_P(return_value);
+                zend_object *vvobj =  Z_OBJ_P(return_value);
+                xdmValue_object* vobj  = (xdmValue_object *)((char *)vvobj - XtOffsetOf(xdmValue_object, std));
+
+                assert (vobj != NULL);
+                vobj->xdmValue = values;
+            }
+        } else if(xsltExecutable->exceptionOccurred()){
+            // TODO throw PHP exception
+            RETURN_NULL();
+        }
+    } else {
+        RETURN_NULL();
+    }
+}
+
+
+
+PHP_METHOD(XsltExecutable, exportStylesheet)
+{
+    XsltExecutable *xsltExecutable;
+    char * stylesheet;
+    size_t len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &stylesheet, &len) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xsltExecutable_object * obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
+    xsltExecutable = obj->xsltExecutable;
+    if (xsltExecutable != nullptr) {
+
+        if(stylesheet != nullptr) {
+            xsltExecutable->exportStylesheet(stylesheet);
+        }
+    }
+}
+
+
+
+
+PHP_METHOD(XsltExecutable, setcwd)
+{
+    XsltExecutable *xsltExecutable;
+    char * cwdStr;
+    size_t len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &cwdStr, &len) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xsltExecutable_object * obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
+    xsltExecutable = obj->xsltExecutable;
+    if (xsltExecutable != nullptr) {
+
+        if(cwdStr != nullptr) {
+            xsltExecutable->setcwd(cwdStr);
+        }
+    }
 }
 
 
@@ -1383,7 +1466,6 @@ zend_function_entry XsltExecutable_methods[] = {
     PHP_ME(XsltExecutable,  transformToFile, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  setOutputFile, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  setResultAsRawValue, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  setupXslMessage, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  setParameter, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  setProperty, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  setcwd, nullptr, ZEND_ACC_PUBLIC)
@@ -1398,3 +1480,4 @@ zend_function_entry XsltExecutable_methods[] = {
     PHP_ME(XsltExecutable,  getXslMessages, nullptr, ZEND_ACC_PUBLIC)
 {nullptr, nullptr, nullptr}
 };
+

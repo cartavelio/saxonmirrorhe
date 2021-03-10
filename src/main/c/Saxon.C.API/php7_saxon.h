@@ -41,13 +41,13 @@
 #include "TSRM.h"
 #endif
 #ifdef __cplusplus
-//} //remove comment
+} //remove comment
 #endif
-#include "../SaxonProcessor.h"
-#include "../XdmValue.h"
-#include "../XdmItem.h"
-#include "../XdmNode.h"
-#include "../XdmAtomicValue.h"
+#include "SaxonProcessor.h"
+#include "XdmValue.h"
+#include "XdmItem.h"
+#include "XdmNode.h"
+#include "XdmAtomicValue.h"
 /*class SaxonProcessor;
 class XQueryProcessor;
 class XsltProcessor;
@@ -138,6 +138,12 @@ struct xdmAtomicValue_object {
     zend_object std;
 };
 
+struct xslt30Processor_object {
+
+    Xslt30Processor *xslt30Processor;
+    zend_object std;
+};
+
 
 #define PHP_SAXON_EXTNAME  "saxonc"
 #define PHP_SAXON_EXTVER   "1.3.0"
@@ -216,8 +222,91 @@ PHP_RINIT_FUNCTION(saxon);
 
 
 
+PHP_METHOD(Xslt30Processor,  __destruct);
+PHP_METHOD(Xslt30Processor,  transformFileToFile);
+PHP_METHOD(Xslt30Processor,  transformFileToString);
+PHP_METHOD(Xslt30Processor,  transformFileToValue);
+PHP_METHOD(Xslt30Processor, compileFromFile);
+PHP_METHOD(Xslt30Processor, compileFromValue);
+PHP_METHOD(Xslt30Processor, compileFromString);
+PHP_METHOD(Xslt30Processor, compileFromStringAndSave);
+PHP_METHOD(Xslt30Processor, compileFromFileAndSave);
+PHP_METHOD(Xslt30Processor, compileFromAssociatedFile);
+PHP_METHOD(Xslt30Processor,  setJustInTimeCompilation);
+PHP_METHOD(Xslt30Processor,  setParameter);
+PHP_METHOD(Xslt30Processor,  clearParameters);
+PHP_METHOD(Xslt30Processor,  exceptionClear);
+PHP_METHOD(Xslt30Processor,  exceptionOccurred);
+PHP_METHOD(Xslt30Processor,  getErrorCode);
+PHP_METHOD(Xslt30Processor,  getErrorMessage);
+PHP_METHOD(Xslt30Processor,  setupXslMessage);
+PHP_METHOD(Xslt30Processor,  setcwd);
 
-   // PHP_METHOD(XQueryProcesor,  __construct);
+
+
+struct xsltExecutable_object {
+
+    XsltExecutable *xsltExecutable;
+    zend_object std;
+};
+
+
+
+PHP_METHOD(XsltExecutable,  __destruct);
+PHP_METHOD(XsltExecutable, callFunctionReturningValue);
+PHP_METHOD(XsltExecutable, callFunctionReturningString);
+PHP_METHOD(XsltExecutable, callFunctionReturningFile);
+PHP_METHOD(XsltExecutable, callTemplateReturningValue);
+PHP_METHOD(XsltExecutable, callTemplateReturningString);
+PHP_METHOD(XsltExecutable, callTemplateReturningFile);
+PHP_METHOD(XsltExecutable, applyTemplatesReturningValue);
+PHP_METHOD(XsltExecutable, applyTemplatesReturningString);
+PHP_METHOD(XsltExecutable, applyTemplatesReturningFile);
+PHP_METHOD(XsltExecutable,  transformFileToFile);
+PHP_METHOD(XsltExecutable,  transformFileToString);
+PHP_METHOD(XsltExecutable,  transformFileToValue);
+PHP_METHOD(XsltExecutable,  transformToString);
+PHP_METHOD(XsltExecutable,  transformToValue);
+PHP_METHOD(XsltExecutable,  transformToFile);
+PHP_METHOD(XsltExecutable, compileFromFile);
+PHP_METHOD(XsltExecutable, compileFromValue);
+PHP_METHOD(XsltExecutable, compileFromString);
+PHP_METHOD(XsltExecutable, compileFromStringAndSave);
+PHP_METHOD(XsltExecutable, compileFromFileAndSave);
+PHP_METHOD(XsltExecutable, compileFromAssociatedFile);
+PHP_METHOD(XsltExecutable,  setOutputFile);
+PHP_METHOD(XsltExecutable,  setResultAsRawValue);
+PHP_METHOD(XsltExecutable,  setParameter);
+PHP_METHOD(XsltExecutable, setBaseOutputURI);
+PHP_METHOD(XsltExecutable, setInitialTemplateParameters);
+PHP_METHOD(XsltExecutable, setInitialMatchSelection);
+PHP_METHOD(XsltExecutable, setInitialMatchSelectionAsFile);
+PHP_METHOD(XsltExecutable, setGlobalContextItem);
+PHP_METHOD(XsltExecutable, setGlobalContextFromFile);
+
+//new
+PHP_METHOD(XsltExecutable, setcwd);
+
+PHP_METHOD(XsltExecutable,  setProperty);
+PHP_METHOD(XsltExecutable,  clearParameters);
+PHP_METHOD(XsltExecutable,  clearProperties);
+//new
+PHP_METHOD(XsltExecutable,  exportStylesheet);
+PHP_METHOD(XsltExecutable,  exceptionClear);
+PHP_METHOD(XsltExecutable,  exceptionOccurred);
+PHP_METHOD(XsltExecutable,  getErrorCode);
+PHP_METHOD(XsltExecutable,  getErrorMessage);
+//new
+PHP_METHOD(XsltExecutable,  setupXslMessage);
+//new
+PHP_METHOD(XsltExecutable,  getXslMessages);
+
+
+
+
+
+
+// PHP_METHOD(XQueryProcesor,  __construct);
     PHP_METHOD(XQueryProcesor,  __destruct);
     PHP_METHOD(XQueryProcessor,  setQueryContent);
     PHP_METHOD(XQueryProcessor,  setContextItem);
@@ -334,6 +423,7 @@ PHP_RINIT_FUNCTION(saxon);
 
 
 #endif /* PHP_SAXON_H */
+
 
 
 

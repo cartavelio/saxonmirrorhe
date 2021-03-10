@@ -9,7 +9,7 @@
 #include "XdmFunctionItem.h"
 #include "XdmMap.h"
 #include "XdmArray.h"
-#include "XsltExecutable.h"
+//#include "XsltExecutable.h"
 #ifdef DEBUG
 #include <typeinfo> //used for testing only
 #endif

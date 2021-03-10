@@ -18,9 +18,9 @@ export TURN_ERRORS_TO_WARNINGS="-Wno-error=sizeof-pointer-memaccess -Wno-error=u
 
 mkdir -p bin
 
-gcc -m64  -c ../../Saxon.C.API/SaxonCGlue.c -o bin/SaxonCGlue.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
+gcc -m64  -fPIC -c ../../Saxon.C.API/SaxonCGlue.c -o bin/SaxonCGlue.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
-gcc -m64  -c ../../Saxon.C.API/SaxonCXPath.c -o bin/SaxonCXPath.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
+gcc -m64 -fPIC  -c ../../Saxon.C.API/SaxonCXPath.c -o bin/SaxonCXPath.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
 g++  -std=c++14 -fPIC -m64 -c cppExtensionFunction.cpp -o bin/cppExtensionFunction.o $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
