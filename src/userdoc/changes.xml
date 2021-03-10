@@ -51,7 +51,7 @@
       <cat name="applet" title="Using Saxon as a Java applet"/>
    </categories>
    
-   <xi:include href="changes/changes-10.0.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   <xi:include href="changes/changes-10.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
    
    <xi:include href="changes/changes-9.9.1.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
    
