@@ -437,13 +437,12 @@
 
       <aside>When a stylesheet or query uses integrated extension functions and is run from the
         command line, the classes that implement these extension functions must be registered with
-        the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>. On Saxon-PE and
-        Saxon-EE this can conveniently be done by declaring them in a <a class="bodylink"
+        the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>. This can
+        conveniently be done by declaring them in a <a class="bodylink"
           href="/configuration/configuration-file">configuration file</a>. It can also be achieved
-        (on all editions including Saxon-HE) by subclassing <a class="javalink"
-          href="net.sf.saxon.Transform">net.sf.saxon.Transform</a> or <a class="javalink"
-          href="net.sf.saxon.Query">net.sf.saxon.Query</a>, overriding the method
-          <code>applyLocalOptions()</code> so that it makes the appropriate calls on
+        by subclassing <a class="javalink" href="net.sf.saxon.Transform">net.sf.saxon.Transform</a>
+        or <a class="javalink" href="net.sf.saxon.Query">net.sf.saxon.Query</a>, overriding the
+        method <code>applyLocalOptions()</code> so that it makes the appropriate calls on
           <code>config.registerExtensionFunction()</code>; or it can be done in a user-defined class
         that implements the interface <a class="javalink" href="net.sf.saxon.lib.Initializer"
           >net.sf.saxon.Initializer</a>, and that is nominated on the command line using the
