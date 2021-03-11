@@ -63,7 +63,7 @@ PHP_METHOD(XsltExecutable, getXslMessages)
     xsltExecutable = obj->xsltExecutable;
 
     if (xsltExecutable != NULL) {
-
+        xsltExecutable->exceptionClear();
         XdmValue * values = xsltExecutable->getXslMessages();
         if(values != NULL) {
             if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
@@ -77,9 +77,13 @@ PHP_METHOD(XsltExecutable, getXslMessages)
                 vobj->xdmValue = values;
             }
         } else if(xsltExecutable->exceptionOccurred()){
-            // TODO throw PHP exception
-            RETURN_NULL();
+            SaxonApiException * exception = xsltExecutable->getException();
+            if(exception != nullptr) {
+                zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                delete exception;
+            }
         }
+        RETURN_NULL();
     } else {
         RETURN_NULL();
     }
@@ -103,7 +107,15 @@ PHP_METHOD(XsltExecutable, exportStylesheet)
     if (xsltExecutable != nullptr) {
 
         if(stylesheet != nullptr) {
+            xsltExecutable->exceptionClear();
             xsltExecutable->exportStylesheet(stylesheet);
+            if(xsltExecutable->exceptionOccurred()){
+                SaxonApiException * exception = xsltExecutable->getException();
+                if(exception != nullptr) {
+                    zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                    delete exception;
+                }
+            }
         }
     }
 }
@@ -224,7 +236,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue)
       } ZEND_HASH_FOREACH_END();
 
 
-	//php_printf(" argument_length= %d",argument_length);
+	    xsltExecutable->exceptionClear();
         XdmValue * result = xsltExecutable->callFunctionReturningValue(functionName, arguments, argument_length);
 	if(result != nullptr) {
             if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
@@ -1395,11 +1407,12 @@ PHP_METHOD(XsltExecutable, getErrorCode)
     xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
     xsltExecutable = obj->xsltExecutable;
     if (xsltExecutable != nullptr) {
-        SaxonApiException * exception = xsltExecutable->getException();
-        const char * errCode = exception->getErrorCode();
-        if(errCode != nullptr) {
-            //char *str = estrdup(errCode);
-            _RETURN_STRING(errCode);
+        if(xsltExecutable->exceptionOccurred()){
+            SaxonApiException * exception = xsltExecutable->getException();
+            if(exception != nullptr) {
+                zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                delete exception;
+            }
         }
     }
     RETURN_NULL();
@@ -1415,12 +1428,12 @@ PHP_METHOD(XsltExecutable, getErrorMessage)
     xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
     xsltExecutable = obj->xsltExecutable;
     if (xsltExecutable != nullptr) {
-        SaxonApiException * exception = xsltExecutable->getException();
-        const char * errStr = exception->getMessage();
-        if(errStr != nullptr) {
-            //char *str = estrdup(errStr);
-            _RETURN_STRING(errStr);
-            //TODO free exception variable?
+        if(xsltExecutable->exceptionOccurred()){
+            SaxonApiException * exception = xsltExecutable->getException();
+            if(exception != nullptr) {
+                zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+                delete exception;
+            }
         }
     }
     RETURN_NULL();

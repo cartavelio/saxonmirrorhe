@@ -20,21 +20,21 @@ JNINativeMethod phpMethods[] =
 };
 
 zend_object_handlers saxonProcessor_object_handlers;
-zend_object_handlers xsltProcessor_object_handlers;
+
 zend_object_handlers xdmValue_object_handlers;
 zend_object_handlers xdmItem_object_handlers;
 zend_object_handlers xdmNode_object_handlers;
 zend_object_handlers xdmAtomicValue_object_handlers;
 
 zend_class_entry *saxonProcessor_ce;
-zend_class_entry *xsltProcessor_ce;
+
 
 zend_class_entry *xdmValue_ce;
 zend_class_entry *xdmItem_ce;
 zend_class_entry *xdmNode_ce;
 zend_class_entry *xdmAtomicValue_ce;
 
-
+#include "php7_XsltProcessor.cpp"
 #include "php7_Xslt30Processor.cpp"
 #include "php7_XsltExecutable.cpp"
 #include "php7_XPathProcessor.cpp"
