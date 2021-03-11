@@ -40,6 +40,9 @@
       T:Saxon.Api.Feature`1 -->
     <!-- Generic method e.g. SetProperty<T> corresponding apiclass name is 
       M:Saxon.Api.Processor.SetProperty``1(Saxon.Api.Feature{``0},``0) -->
+    <!-- Generic method on generic class (interface) e.g. Or<T> method of IPredicate<T>
+      corresponding apiclass name is 
+      M:Saxon.Api.IPredicate`1.Or``1(Saxon.Api.IPredicate{``0}) -->
     
     <xsl:variable name="shortname" select="@name"/>
     <xsl:variable name="apiclass" select="$api-doc//member[starts-with(@name, 'T:') and
@@ -74,8 +77,9 @@
           select="@name"/></xsl:message>
     </xsl:if>
     
-    <xsl:variable name="constructor-count" select="count($api-doc//member[starts-with(@name, concat('M:Saxon.Api.',
-      $nestedname, '.')) and contains(@name, '.#ctor')])"/>
+    <xsl:variable name="constructor-count" select="count($api-doc//member[(starts-with(@name, concat('M:Saxon.Api.',
+      $nestedname, '.')) or starts-with(@name, concat('M:Saxon.Api.', $nestedname, '`'))) 
+      and contains(@name, '.#ctor')])"/>
     <xsl:if test="count(constructor[@public ne 'false']) - $constructor-count gt 0">
       <xsl:message>Missing <xsl:value-of 
         select="count(constructor[@public ne 'false']) - $constructor-count"/> constructor comments in <xsl:value-of 
@@ -278,8 +282,13 @@
     <xsl:copy>
       <xsl:copy-of select="@* except @type"/>
       <xsl:variable name="position" select="count(preceding-sibling::constructor[@public='true'])+1"/>
-      <xsl:variable name="apimember" select="$api-doc//member[starts-with(@name, 'M:Saxon.Api.') and
-        contains(@name, concat(current()/@name,'.#ctor'))][$position]"/>
+      <xsl:variable name="apimember" select="$api-doc//member[starts-with(@name,'M:Saxon.Api.') and 
+        (
+        ends-with(functx:substring-before-if-contains(@name, '('), concat(current()/@name,'.#ctor')) or 
+        (contains(functx:substring-before-if-contains(@name, '('), concat(current()/@name, '`')) and
+        ends-with(functx:substring-before-if-contains(@name, '('), '.#ctor'))
+        )][$position]"/>
+      
       <!--<xsl:message>position <xsl:value-of select="$position"/></xsl:message>
       <xsl:message>apimember <xsl:value-of select="$apimember/@name"/> : with param <xsl:value-of
         select="param/@name"/></xsl:message>-->
@@ -404,7 +413,9 @@
         (contains(functx:substring-before-if-contains(@name, '('), concat(current()/../@name, '`')) and
         ends-with(functx:substring-before-if-contains(@name, '('), concat('.', current()/@name))) or
         contains(functx:substring-before-if-contains(@name, '('), concat(current()/../@name,  '.',
-        current()/@name, '`'))
+        current()/@name, '`')) or 
+        (contains(functx:substring-before-if-contains(@name, '('), concat(current()/../@name, '`')) and
+        contains(functx:substring-before-if-contains(@name, '('), concat('.', current()/@name, '`')))
         )][$position]"/>
       
       <xsl:if test="empty($apimember)">
@@ -497,6 +508,7 @@
       <xsl:if test="@type">
         <xsl:attribute name="type" select="f:getKnownFullType(@type)"/>
       </xsl:if>
+      <xsl:apply-templates select="type"/><!-- for parameters which are generic types -->
     </xsl:copy>
   </xsl:template>
   
@@ -593,6 +605,7 @@
     'Decimal':'System.Decimal',
     'Double':'System.Double',
     'Exception':'System.Exception',
+    'Func':'System.Func',
     'Object':'System.Object',
     'String':'System.String',
     'Uri':'System.Uri',

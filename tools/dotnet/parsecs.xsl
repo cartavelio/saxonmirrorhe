@@ -108,11 +108,16 @@
               <xsl:variable name="line-pre-base" select="if ($has-explicit-base) then substring-before($line, ':') else $line"/>
               
               <xsl:variable name="is-generic-type" select="(not($is-method or $is-initializer) and contains($line-pre-base, '&lt;')) or 
-                ($is-method and (substring-before($line, '(') => tokenize('\s'))[last()-1] => contains('&gt;')) or 
+                ($is-method and (substring-before($line, '(') => tokenize('\s')) => reverse() =>
+                tail() => reverse() => string-join(' ') => contains('&gt;')) or 
                 ($is-initializer and substring-before($line, '=') => contains('&lt;'))"/>
               
               <xsl:variable name="is-generic-method" select="$is-method and
                 ends-with(normalize-space(substring-before($line, '(')), '&gt;')"/>
+              
+              <xsl:variable name="is-method-on-generic-interface-impl" select="$is-method and
+                substring-before($line, '(') => tokenize('\s') => reverse() => head() =>
+                contains('&gt;.')"/>
               
               <xsl:variable name="method-input" select="if ($is-method) then
                 (normalize-space(substring-before(substring-after($line, '('),')'))) else ''"/>
@@ -121,13 +126,24 @@
                 This is wrong when some argument has generic type with more than one type parameter. -->
               <xsl:variable name="method-args" as="xs:string*">
                 <xsl:choose>
-                  <xsl:when test="$has-args and matches($method-input, '^.*&lt;.*,.*&gt;')">
+                  <xsl:when test="$has-args and matches($method-input,
+                    '(&lt;[^&gt;]*,)|(&lt;[^&gt;]*&lt;[^&gt;&lt;]*&gt;,)')">
                     <!-- Method has some arg with generic type with more than one type parameter.
                       e.g. public void SetInitialTemplateParameters(Dictionary<QName, XdmValue> parameters, bool tunnel) 
+                      public static Step<XdmNode, XdmNode> PathFromList(List<Step<XdmNode, XdmNode>> steps)
+                      Predicates.Every  (Step<TInput, TResult> step, IPredicate<TResult> condition)
                       First collapse spaces between &lt; and &gt; before tokenizing on ', '. -->
+                    <!-- This also allows for handling nested generic types
+                      e.g. public Step(Func<TInput, IEnumerable<TResult>> f)
+                      handling if the nested generic is the first type param or not. -->
+                    <!-- And should not catch the case when there is more than one arg with generic type arg
+                    e.g. public static IEnumerable<TInput> Concat<TInput>(IEnumerable<TInput> first, IEnumerable<TInput> second) -->
+                    <!--<xsl:message expand-text="yes">generic+ arg $method-input {$method-input}</xsl:message>-->
                     <xsl:variable name="collapse-space-seq" as="xs:string*">
-                      <xsl:analyze-string select="$method-input" regex="{'&lt;.*,.*&gt;'}">
+                      <xsl:analyze-string select="$method-input"
+                        regex="{'&lt;([^&gt;]*|([^&gt;]*&lt;[^&gt;]*&gt;[^&gt;&lt;]*)),([^&lt;]*|([^&gt;]*&lt;[^&gt;]*&gt;[^&gt;&lt;]*))&gt;'}">
                         <xsl:matching-substring>
+                          <!--<xsl:message expand-text="yes">matching-substring {.}</xsl:message>-->
                           <xsl:value-of select="translate(., ' ', '')"/>
                         </xsl:matching-substring>
                         <xsl:non-matching-substring>
@@ -135,7 +151,9 @@
                         </xsl:non-matching-substring>
                       </xsl:analyze-string>
                     </xsl:variable>
-                    <xsl:sequence select="tokenize(string-join($collapse-space-seq), ', ')"/>
+                    <xsl:variable name="tokens" select="tokenize(string-join($collapse-space-seq), ', ')"/>
+                    <!--<xsl:message expand-text="yes">$method-args {$tokens}</xsl:message>-->
+                    <xsl:sequence select="$tokens"/>
                   </xsl:when>
                   <xsl:when test="$has-args">
                     <xsl:sequence select="tokenize($method-input, ',')"/>
@@ -159,8 +177,15 @@
                       </xsl:otherwise>
                     </xsl:choose>
                   </xsl:when>
+                  <xsl:when test="$is-method-on-generic-interface-impl">
+                    <!-- e.g. IPredicate<T1> IPredicate<T>.And<T1>(IPredicate<T1> other)
+                              IPredicate<T> IPredicate<T>.Negate() -->
+                    <xsl:sequence select="substring-before($line, '(') => tokenize('\s') =>
+                      reverse() => head() =>
+                      replace('^.*\.([A-Za-z0-9_]+)(&lt;([A-Za-z0-9_,\s]+)&gt;)?\s*$', '$1')"/>
+                  </xsl:when>
                   <xsl:when test="$is-generic-method">
-                    <xsl:sequence select="replace($line, '^.*\s([A-Za-z0-9_]+)&lt;([A-Za-z0-9_&gt;]+)\s*\(.*', '$1')"/>
+                    <xsl:sequence select="replace($line, '^.*\s([A-Za-z0-9_]+)&lt;([A-Za-z0-9_,\s]+)&gt;\s*\(.*', '$1')"/>
                   </xsl:when>
                   <xsl:when test="$is-method">
                     <xsl:sequence select="replace($line, '^.*\s([A-Za-z0-9_]+)\s*\(.*', '$1')"/>
@@ -193,7 +218,10 @@
                 So we handle this case specially.  -->
               <!-- Note that for constructors, $line is just something like "public A()"; then $type will be ''. -->
               <!-- Also need a special case if the type is a generic type with more than one type parameter
-                e.g. Dictionary<QName, ParameterDetails> -->
+                e.g. Dictionary<QName, ParameterDetails> 
+                  or when processing a method of a class implementing a generic interface 
+                  (so type is not directly before method name)
+                  e.g. IPredicate<T1> IPredicate<T>.And<T1>(IPredicate<T1> other) -->
               <xsl:variable name="type-is-name" select="count($tokens[translate(., ';', '') eq $name]) gt 1"/>
               <xsl:variable name="type">
                 <xsl:choose>
@@ -206,6 +234,12 @@
                     <xsl:variable name="string" select="if (ends-with($line-pre-base, '{')) then
                       substring-before($line-pre-base, '{') else $line-pre-base" />
                     <xsl:value-of select="concat($name, substring-after($string, $name))" />
+                  </xsl:when>
+                  <xsl:when test="$is-method-on-generic-interface-impl">
+                    <!-- e.g. IPredicate<T1> IPredicate<T>.And<T1>(IPredicate<T1> other)
+                              IPredicate<T> IPredicate<T>.Negate() -->
+                    <xsl:sequence select="substring-before($line, $name) => tokenize('\s') =>
+                      reverse() => tail() => head()"/>
                   </xsl:when>
                   <xsl:otherwise>
                     <!-- Note could still be wrong if we had something like "public Uri<T> Uri" i.e. name is part of type -->
@@ -282,8 +316,14 @@
                       </paramtypes>
                     </xsl:if>
                     <xsl:if test="$has-args">
+                      <!--<xsl:if test="$has-args and matches($method-input, '^.*&lt;.*,.*&gt;')">
+                        <xsl:message expand-text="true">method args for: {$name}</xsl:message>
+                      </xsl:if>-->
                       <xsl:for-each select="$method-args">
                         <xsl:variable name="arg-type" select="substring-before(normalize-space(.),' ')"/>
+                        <!--<xsl:if test="$has-args and matches($method-input, '^.*&lt;.*,.*&gt;')">
+                          <xsl:message expand-text="true">method arg: {$arg-type}</xsl:message>
+                        </xsl:if>-->
                         <xsl:choose>
                           <xsl:when test="contains($arg-type, '&lt;')">
                             <param type="{substring-before($arg-type, '&lt;')}" name="{substring-after(normalize-space(.),' ')}">
@@ -361,24 +401,139 @@
   </xsl:function>
   
   <xsl:function name="f:getTypeParamTypes" as="element(type)*">
-    <xsl:param name="genericType" as="xs:string"/>
-    <!-- This may be a full generic type string, or just the part of the string with the type parameters -->
+    <xsl:param name="genericType" as="xs:string"/><!-- A single generic type -->
+    <!--<xsl:message expand-text="yes">f:getTypeParamTypes {$genericType}</xsl:message>-->
+    <!-- Should only return the types of the type parameters, not the main type -->
     <!-- Also handles covariant|contravariant types, i.e. keywords out|in, e.g. IXdmEnumerator<out XdmItem> -->
-    <xsl:variable name="typeParams"  as="xs:string*"
-      select="substring-after($genericType, '&lt;') => substring-before('&gt;') => tokenize(',', 'q')"/>
-    <xsl:for-each select="$typeParams">
-      <xsl:choose>
-        <xsl:when test="starts-with(., 'out ')">
-          <type type="{substring-after(., 'out ')}" extendby="out"/>
-        </xsl:when>
-        <xsl:when test="starts-with(., 'in ')">
-          <type type="{substring-after(., 'in ')}" super="in"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <type type="{.}"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:for-each>
+    <!-- Also handles nested generic type parameters
+      e.g. Func<TInput,IEnumerable<TResult>> 
+        for public Step(Func<TInput, IEnumerable<TResult>> f)
+      e.g. List<Step<XdmNode,XdmNode>> 
+        for public static Step<XdmNode, XdmNode> PathFromList(List<Step<XdmNode, XdmNode>> steps) -->
+    <xsl:variable name="typeParamString" as="xs:string?">
+      <xsl:analyze-string select="$genericType" regex="[^&lt;]*&lt;([A-Za-z0-9_,\.&lt;&gt;\s]+)&gt;">
+        <xsl:matching-substring><xsl:sequence select="regex-group(1)"/></xsl:matching-substring>
+        <xsl:non-matching-substring></xsl:non-matching-substring>
+      </xsl:analyze-string>
+    </xsl:variable>
+    <xsl:choose>
+      <xsl:when test="contains($typeParamString, '&lt;')">
+        <!-- Contains nested generic type params -->
+        <xsl:choose>
+          <xsl:when test="contains($typeParamString, ',')">
+            <!-- Contains multiple type params at this level, or nested -->
+            <!--<xsl:message expand-text="yes">*** multiple type params {$typeParamString}</xsl:message>-->
+            <!-- We want to split the list of types (e.g. TInput,IEnumerable<TResult>), by tokenizing on ','
+                 but need to be careful not to split nested generic types with more than one type parameter
+                 (e.g. Step<XdmNode,XdmNode> for XdmNode.Select) -->
+            <!-- The approach we take here is to:
+                  1. tokenize on ','; and then 
+                  2. check through the sequence, and if we have '<' without '>' then join the tokens
+                  back together. -->
+            <xsl:variable name="param-split" as="xs:string*">
+              <xsl:iterate select="tokenize($typeParamString, ',')">
+                <xsl:param name="tokens" select="()" as="xs:string*"/>
+                <xsl:param name="generic" select="''" as="xs:string"/>
+                <xsl:on-completion>
+                  <xsl:sequence select="$tokens"/>
+                </xsl:on-completion>
+                <xsl:variable name="token" select="." as="xs:string"/>
+                <!--<xsl:message expand-text="yes">$token {$token}</xsl:message>-->
+                <xsl:variable name="newTokens" as="xs:string*">
+                  <xsl:choose>
+                    <xsl:when test="$generic ne ''">
+                      <xsl:sequence select="if (contains($token, '&gt;') and not(contains($token,
+                        '&lt;'))) then ($tokens, $generic||','||$token) else $tokens"/>
+                    </xsl:when>
+                    <xsl:when test="contains($token, '&lt;') and not(contains($token, '&gt;'))">
+                      <xsl:sequence select="$tokens"/>
+                    </xsl:when>
+                    <xsl:when test="contains($token, '&gt;') and not(contains($token, '&lt;'))">
+                      <xsl:message expand-text="yes">*** WARNING problem in param-split at token: {$token}</xsl:message>
+                      <xsl:message expand-text="yes">    tokens: {$tokens}</xsl:message>
+                      <xsl:message expand-text="yes">    generic: {$generic}</xsl:message>
+                      <xsl:sequence select="$tokens"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <xsl:sequence select="$tokens, $token"/>
+                    </xsl:otherwise>
+                  </xsl:choose>
+                </xsl:variable>
+                <xsl:variable name="newGeneric" as="xs:string">
+                  <xsl:choose>
+                    <xsl:when test="$generic ne ''">
+                      <xsl:sequence select="if (contains($token, '&gt;') and not(contains($token,
+                        '&lt;'))) then '' else $generic||','||$token"/>
+                    </xsl:when>
+                    <xsl:when test="contains($token, '&lt;') and not(contains($token, '&gt;'))">
+                      <xsl:sequence select="$token"/>
+                    </xsl:when>
+                    <xsl:when test="contains($token, '&gt;') and not(contains($token, '&lt;'))">
+                      <!--<xsl:message expand-text="yes">*** WARNING problem in param-split at token: {$token}</xsl:message>-->
+                      <xsl:sequence select="$generic"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <xsl:sequence select="$generic"/>
+                    </xsl:otherwise>
+                  </xsl:choose>
+                </xsl:variable>
+                <!--<xsl:message expand-text="yes">$newTokens {$newTokens}</xsl:message>
+                <xsl:message expand-text="yes">$newGeneric {$newGeneric}</xsl:message>-->
+                <xsl:next-iteration>
+                  <xsl:with-param name="tokens" select="$newTokens"/>
+                  <xsl:with-param name="generic" select="$newGeneric"/>
+                </xsl:next-iteration>
+              </xsl:iterate>
+            </xsl:variable>
+            <!--<xsl:message expand-text="yes">** $param-split {$param-split}</xsl:message>-->
+            
+            <xsl:for-each select="$param-split">
+              <xsl:choose>
+                <xsl:when test="contains(., '&lt;')">
+                  <type type="{substring-before(., '&lt;')}">
+                    <xsl:sequence select="f:getTypeParamTypes(.)"/>
+                  </type>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:sequence select="f:getSingleTypeParamType(.)"/>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:for-each>
+          </xsl:when>
+          
+          <xsl:otherwise>
+            <!-- Only one type param -->
+            <type type="{substring-before($typeParamString, '&lt;')}">
+              <xsl:sequence select="f:getTypeParamTypes($typeParamString)"/>
+            </type>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+      
+      <xsl:otherwise>
+        <!-- No nested generic type params, so can just tokenize on ',' directly -->
+        <xsl:variable name="typeParams" as="xs:string*" select="tokenize($typeParamString, ',', 'q')"/>
+        <xsl:for-each select="$typeParams">
+          <xsl:sequence select="f:getSingleTypeParamType(.)"/>
+        </xsl:for-each>
+      </xsl:otherwise>
+    </xsl:choose>
+    
+  </xsl:function>
+  
+  <xsl:function name="f:getSingleTypeParamType" as="element(type)">
+    <xsl:param name="typeParam" as="xs:string"/><!-- The non-generic type of a single type parameter -->
+    <xsl:choose>
+      <xsl:when test="starts-with($typeParam, 'out ')">
+        <type type="{substring-after($typeParam, 'out ')}" extendby="out"/>
+      </xsl:when>
+      <xsl:when test="starts-with($typeParam, 'in ')">
+        <type type="{substring-after($typeParam, 'in ')}" super="in"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <type type="{$typeParam}"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:function>
 
   <xsl:template match="*" mode="refine">

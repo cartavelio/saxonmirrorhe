@@ -265,6 +265,7 @@
         <type fulltype="{f:fullName(@type)}" type="{f:shortName(@type)}">
             <xsl:copy-of select="@extendby"/>
             <xsl:copy-of select="@super"/>
+            <xsl:apply-templates select="type"/>
         </type>
     </xsl:template>
     
@@ -401,7 +402,7 @@
                 <xsl:value-of select="concat('Saxon.Api.', $class/@name)"/>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:if test="not($shortName = ('void', 'T')) and not(starts-with($shortName, 'java.') or
+                <xsl:if test="not($shortName = ('void', '', 'T', 'TInput', 'TResult', 'T1')) and not(starts-with($shortName, 'java.') or
                     starts-with($shortName, 'javax.'))">
                     <xsl:message>Unresolved name <xsl:value-of select="$shortName"/></xsl:message>
                     <!-- Note some irrelevant unresolved System or Java types may appear in @base on class or interface. -->

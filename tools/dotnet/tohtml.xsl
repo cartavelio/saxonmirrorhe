@@ -534,7 +534,7 @@
               class="apilink"><xsl:value-of select="concat($class/@name, $end)"/></a>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:if test="exists($in) and not($in = ('void', '', 'T')) and not(starts-with($in, 'java.') or starts-with($in, 'javax.'))">
+            <xsl:if test="exists($in) and not($in = ('void', '', 'T', 'TInput', 'TResult', 'T1')) and not(starts-with($in, 'java.') or starts-with($in, 'javax.'))">
               <xsl:message>type not recognised <xsl:value-of select="$in"/></xsl:message>
             </xsl:if>
             <xsl:value-of select="$in"/>
