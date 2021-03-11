@@ -46,6 +46,6 @@ add_executable(Saxon_C_API
         XsltExecutable.cpp
         XsltExecutable.h
         XsltProcessor.cpp
-        XsltProcessor.h SaxoncNewDebug.h SaxoncNewDebug.cpp SaxoncNewDebug.cpp)
+        XsltProcessor.h)
 
 target_link_libraries(Saxon_C_API ${CMAKE_DL_LIBS})

@@ -233,7 +233,16 @@ PHP_METHOD(Xslt30Processor, compileFromFile)
     xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
     xslt30Processor = obj->xslt30Processor;
     if (xslt30Processor != nullptr) {
-        xslt30Processor->compileFromFile(name);
+        XsltExecutable * executable = xslt30Processor->compileFromFile(name);
+        if(executable != nullptr) {
+            zend_object *ooth =  Z_OBJ_P(return_value);
+            xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
+            assert (vobj != nullptr);
+            vobj->xsltExecutable = executable;
+
+        } else {
+            //TODO - check for errors
+        }
     }
 }
 
@@ -249,8 +258,17 @@ PHP_METHOD(Xslt30Processor, compileFromAssociatedFile)
     zend_object* pobj = Z_OBJ_P(getThis());
     xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
     xslt30Processor = obj->xslt30Processor;
+
     if (xslt30Processor != nullptr) {
-        xslt30Processor->compileFromAssociatedFile(name);
+        XsltExecutable * executable = xslt30Processor->compileFromAssociatedFile(name);
+        if(executable != nullptr) {
+            zend_object *ooth =  Z_OBJ_P(return_value);
+            xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
+            assert (vobj != nullptr);
+            vobj->xsltExecutable = executable;
+        } else {
+            //TODO - check for errors
+        }
     }
 }
 
@@ -267,7 +285,15 @@ PHP_METHOD(Xslt30Processor, compileFromString)
     xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
     xslt30Processor = obj->xslt30Processor;
     if (xslt30Processor != nullptr) {
-        xslt30Processor->compileFromString(stylesheetStr);
+        XsltExecutable * executable = xslt30Processor->compileFromString(stylesheetStr);
+        if(executable != nullptr) {
+            zend_object *ooth =  Z_OBJ_P(return_value);
+            xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
+            assert (vobj != nullptr);
+            vobj->xsltExecutable = executable;
+        } else {
+            //TODO - check for errors
+        }
     }
 }
 
@@ -324,7 +350,15 @@ PHP_METHOD(Xslt30Processor, compileFromValue)
         if(ooth != nullptr) {
             XdmValue * value = ooth->xdmValue;
             if(value != nullptr && value->size() == 1 && (value->getHead())->getType() == 3) {
-                xslt30Processor->compileFromXdmNode((XdmNode*)(value->getHead()));
+                XsltExecutable * executable = xslt30Processor->compileFromXdmNode((XdmNode*)(value->getHead()));
+                if(executable != nullptr) {
+                    zend_object *ooth =  Z_OBJ_P(return_value);
+                    xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
+                    assert (vobj != nullptr);
+                    vobj->xsltExecutable = executable;
+                } else {
+                    //TODO - check for errors
+                }
             }
         }
     }

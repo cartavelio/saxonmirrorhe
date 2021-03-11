@@ -3,6 +3,7 @@ PHP_ARG_ENABLE(saxon,
     [  --enable-saxon      Enable "saxon" extension support])
 
 if test $PHP_SAXON != "no"; then
+    CXXFLAGS="-std=c++14"
     PHP_REQUIRE_CXX()
     PHP_ADD_INCLUDE(jni)
     PHP_SUBST(SAXON_SHARED_LIBADD)
