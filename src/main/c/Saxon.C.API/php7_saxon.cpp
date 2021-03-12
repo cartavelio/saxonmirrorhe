@@ -968,10 +968,10 @@ PHP_METHOD(XdmValue, __destruct)
     xdmValue_object* obj = (xdmValue_object *)((char *)oobj - XtOffsetOf(xdmValue_object, std));
     XdmValue * xdmValue= obj->xdmValue;
    if(xdmValue != nullptr) {
-    	xdmValue->decrementRefCount();
-    	if(xdmValue!= nullptr && xdmValue->getRefCount()< 1){
+    	//xdmValue->decrementRefCount();
+    	//if(xdmValue!= nullptr && xdmValue->getRefCount()< 1){
     		delete xdmValue;
-   	 } 
+   	        //}
     }
 }
 
@@ -1181,8 +1181,8 @@ PHP_METHOD(XdmItem, __destruct)
     xdmItem_object * obj = (xdmItem_object *)((char *)zobj - XtOffsetOf(xdmItem_object, std));
 
     XdmItem * xdmItem= obj->xdmItem;
-    xdmItem->decrementRefCount();
-    if(xdmItem != nullptr && xdmItem->getRefCount()< 1){
+    //xdmItem->decrementRefCount();
+    if(xdmItem != nullptr /*&& xdmItem->getRefCount()< 1*/){
     	delete xdmItem;
     }
     
@@ -1356,10 +1356,10 @@ PHP_METHOD(XdmNode, __destruct)
     if(obj != nullptr) {
     XdmNode * xdmNode= obj->xdmNode;
     if(xdmNode != nullptr) {
-    	xdmNode->decrementRefCount();
-    	if(xdmNode->getRefCount()< 1){
+    	//xdmNode->decrementRefCount();
+    	//if(xdmNode->getRefCount()< 1){
     		delete xdmNode;
-    	} 
+    	//}
     }
     }
 }
@@ -1690,8 +1690,8 @@ PHP_METHOD(XdmAtomicValue, __destruct)
     xdmAtomicValue_object * obj = (xdmAtomicValue_object *)((char *)zobj - XtOffsetOf(xdmAtomicValue_object, std));
 
     XdmAtomicValue * xdmValue= obj->xdmAtomicValue;
-    if(xdmValue!= nullptr && xdmValue->getRefCount()< 1){
-	xdmValue->decrementRefCount();
+    if(xdmValue!= nullptr /*&& xdmValue->getRefCount()< 1*/){
+	//xdmValue->decrementRefCount();
     	delete xdmValue;
     }
     
