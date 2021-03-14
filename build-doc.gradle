@@ -145,9 +145,17 @@ task dotnet_doc_merge(
     "api-doc-file=${buildDir}/n/saxon-ee-api-${saxonVersion}.xml"
 }
 
+task dotnet_doc_css(
+  type: Copy,
+  description: "Copies the CSS for dotnet docs"
+) {
+  into "${buildDir}/dotnetdoc-html"
+  from "${projectDir}/tools/dotnet/saxon-dotnetdoc.css"
+}
+
 task dotnet_doc_html(
   type: JavaExec,
-  dependsOn: ["dotnet_doc_merge"],
+  dependsOn: ["dotnet_doc_merge", "dotnet_doc_css"],
   description: "Create HTML output for dotnet docs"
 ) {
   inputs.file "${buildDir}/dotnetdoc/merged.xml"
