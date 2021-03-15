@@ -192,7 +192,7 @@ namespace Saxon.Api
             set
             {
                 xmlResolver = value;
-                xsltCompiler.getUnderlyingCompilerInfo().setURIResolver(new JDotNetURIResolver(xmlResolver));
+                xsltCompiler.setURIResolver(new JDotNetURIResolver(xmlResolver));
             }
         }
 
