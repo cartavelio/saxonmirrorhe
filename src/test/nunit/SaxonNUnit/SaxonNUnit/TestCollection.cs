@@ -4,13 +4,16 @@ using System.Linq;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Diagnostics;
+using System.Xml;
+using System.Net;
+using System.IO;
 
 namespace SaxonNUnit
 {
     class TestCollection
     {
         [Test]
-    public void TestDirectoryNoRecurse()
+        public void TestDirectoryNoRecurse()
         {
             try
             {
@@ -29,7 +32,7 @@ namespace SaxonNUnit
         }
 
         [Test]
-    public void TestDirectoryMatch()
+        public void TestDirectoryMatch()
         {
             try
             {
@@ -44,14 +47,15 @@ namespace SaxonNUnit
                 eval.SetVariable(new QName("b"), new XdmAtomicValue("[A-Za-z]+\\.xml"));
                 XdmValue val = eval.Evaluate();
                 Assert.AreEqual(5, val.Count);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Assert.Fail(e.Message);
             }
         }
 
         [Test]
-    public void TestDirectoryNoRecurse30()
+        public void TestDirectoryNoRecurse30()
         {
             try
             {
@@ -71,7 +75,7 @@ namespace SaxonNUnit
         }
 
         [Test]
-    public void TestDirectoryRecurse()
+        public void TestDirectoryRecurse()
         {
             try
             {
@@ -90,7 +94,7 @@ namespace SaxonNUnit
         }
 
         [Test]
-    public void TestDirectoryWithContentType()
+        public void TestDirectoryWithContentType()
         {
             try
             {
@@ -110,7 +114,7 @@ namespace SaxonNUnit
         }
 
         [Test]
-    public void TestDirectoryUriNoRecurse()
+        public void TestDirectoryUriNoRecurse()
         {
             try
             {
@@ -129,7 +133,7 @@ namespace SaxonNUnit
         }
 
         [Test]
-    public void TestDirectoryUriRecurse()
+        public void TestDirectoryUriRecurse()
         {
             try
             {
@@ -148,7 +152,7 @@ namespace SaxonNUnit
         }
 
         [Test]
-    public void TestParallelSpeed()
+        public void TestParallelSpeed()
         {
             try
             {
@@ -184,123 +188,122 @@ namespace SaxonNUnit
             TimeSpan apiTime = stopwatch.Elapsed;
             Console.WriteLine("Found " + val + " nodes");
             return apiTime;
-    }
+        }
 
-    [Test]
-    public void TestStable()
-    {
-        try
+        [Test]
+        public void TestStable()
         {
-            Processor p = new Processor(true);
-            XPathCompiler c = p.NewXPathCompiler();
-            XPathExecutable exec = c.Compile("count(collection(.)//* | collection(.)//*)");
-            XPathSelector eval = exec.Load();
-            eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "collection/?select=*.xml;recurse=yes;stable=yes"));
-            XdmValue val = eval.Evaluate();
-            Assert.AreEqual(10680, ((XdmAtomicValue)val).GetLongValue());
-        }
-        catch (Exception e)
-        {
-            Assert.Fail(e.Message);
-        }
-    }
-
-    [Test]
-    public void TestUnstable()
-    {
-        try
-        {
-            Processor p = new Processor(true);
-            XPathCompiler c = p.NewXPathCompiler();
-            XPathExecutable exec = c.Compile("count(collection(.)//* | collection(.)//*)");
-            XPathSelector eval = exec.Load();
-            eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "collection/?select=*.xml;recurse=yes;stable=no"));
-            XdmValue val = eval.Evaluate();
-            Assert.AreEqual(21360, ((XdmAtomicValue)val).GetLongValue());
-        }
-        catch (Exception e)
-        {
-            Assert.Fail(e.Message);
-        }
-    }
-
-    [Test]
-    public void TestStrictValidation()
-    {
-        try
-        {
-            Processor p = new Processor(true);
-            XPathCompiler c = p.NewXPathCompiler();
-            XPathExecutable exec = c.Compile("collection(.)/* instance of element(*, xs:untyped)");
-            XPathSelector eval = exec.Load();
-            eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "?select=books.xml;recurse=no;validation=strict"));
-            XdmValue val = eval.Evaluate();
-            Assert.AreEqual(false, ((XdmAtomicValue)val).GetBooleanValue());
-        }
-        catch (Exception e)
-        {
-            Assert.Fail(e.Message);
-        }
-    }
-
-    [Test]
-    public void TestNoValidation()
-    {
-        try
-        {
-            Processor p = new Processor(true);
-            XPathCompiler c = p.NewXPathCompiler();
-            XPathExecutable exec = c.Compile("collection(.)/* instance of element(*, xs:untyped)");
-            XPathSelector eval = exec.Load();
-            eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "?select=books.xml;recurse=no;validation=skip"));
-            XdmValue val = eval.Evaluate();
-            Assert.AreEqual(true, ((XdmAtomicValue)val).GetBooleanValue());
-        }
-        catch (Exception e)
-        {
-            Assert.Fail(e.Message);
-        }
-    }
-
-    [Test]
-    public void TestJSONCollection()
-    {
-        try
-        {
-            Processor p = new Processor(true);
-            p.SetProperty(Feature<bool>.ALLOW_MULTITHREADING,false);
-            XPathCompiler c = p.NewXPathCompiler();
-            c.XPathLanguageVersion = "3.1";
-            XPathExecutable exec = c.Compile("for $X in (collection(.))" +
-                "return (if ($X instance of node()) then name($X/*) else $X('id'))");
-            XPathSelector eval = exec.Load();
-            eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "collection.xml"));
-            XdmValue val = eval.Evaluate();
-            Assert.AreEqual("1.0e0\n\"BOOKLIST\"", val.ToString());
-        }
-        catch (Exception e)
-        {
-           
-            Assert.Fail(e.Message);
-        }
-    }
-
-        public class ResourceFactory: IResourceFactory
-        {
-            
-            public Resource MakeResource(Processor proc, AbstractResourceCollection.InputDetails details) {
-                return new JSONResource(details);
+            try
+            {
+                Processor p = new Processor(true);
+                XPathCompiler c = p.NewXPathCompiler();
+                XPathExecutable exec = c.Compile("count(collection(.)//* | collection(.)//*)");
+                XPathSelector eval = exec.Load();
+                eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "collection/?select=*.xml;recurse=yes;stable=yes"));
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual(10680, ((XdmAtomicValue)val).GetLongValue());
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
             }
         }
 
         [Test]
+        public void TestUnstable()
+        {
+            try
+            {
+                Processor p = new Processor(true);
+                XPathCompiler c = p.NewXPathCompiler();
+                XPathExecutable exec = c.Compile("count(collection(.)//* | collection(.)//*)");
+                XPathSelector eval = exec.Load();
+                eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "collection/?select=*.xml;recurse=yes;stable=no"));
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual(21360, ((XdmAtomicValue)val).GetLongValue());
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [Test]
+        public void TestStrictValidation()
+        {
+            try
+            {
+                Processor p = new Processor(true);
+                XPathCompiler c = p.NewXPathCompiler();
+                XPathExecutable exec = c.Compile("collection(.)/* instance of element(*, xs:untyped)");
+                XPathSelector eval = exec.Load();
+                eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "?select=books.xml;recurse=no;validation=strict"));
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual(false, ((XdmAtomicValue)val).GetBooleanValue());
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [Test]
+        public void TestNoValidation()
+        {
+            try
+            {
+                Processor p = new Processor(true);
+                XPathCompiler c = p.NewXPathCompiler();
+                XPathExecutable exec = c.Compile("collection(.)/* instance of element(*, xs:untyped)");
+                XPathSelector eval = exec.Load();
+                eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "?select=books.xml;recurse=no;validation=skip"));
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual(true, ((XdmAtomicValue)val).GetBooleanValue());
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [Test]
+        public void TestJSONCollection()
+        {
+            try
+            {
+                Processor p = new Processor(true);
+                p.SetProperty(Feature<bool>.ALLOW_MULTITHREADING, false);
+                XPathCompiler c = p.NewXPathCompiler();
+                c.XPathLanguageVersion = "3.1";
+                XPathExecutable exec = c.Compile("for $X in (collection(.))" +
+                    "return (if ($X instance of node()) then name($X/*) else $X('id'))");
+                XPathSelector eval = exec.Load();
+                eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "collection.xml"));
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual("1.0e0\n\"BOOKLIST\"", val.ToString());
+            }
+            catch (Exception e)
+            {
+
+                Assert.Fail(e.Message);
+            }
+        }
+
+        /*
+    [Test]
     public void TestCustomMediaType()
     {
         try
         {
             Processor p = new Processor(true);
-            p.RegisterFileExtension("json", "personal/plain");
-            p.RgisterMediaType("personal/plain", new ResourceFactory());
+            Configuration config = p.Implementation;
+            config.registerFileExtension("json", "personal/plain");
+            config.registerMediaType("personal/plain", new ResourceFactory()
+            {
+                public Resource makeResource(Configuration config, AbstractResourceCollection.InputDetails details) throws XPathException {
+                return new JSONResource(details);
+            }
+        });
         XPathCompiler c = p.NewXPathCompiler();
         c.XPathLanguageVersion = "3.1";
         XPathExecutable exec = c.Compile("for $X in (collection(.))" +
@@ -314,7 +317,7 @@ namespace SaxonNUnit
             Assert.Fail(e.Message);
 }
     }
-    
+    */
 
         /*  [Test]
           public void TestMixedCollection()
@@ -608,11 +611,12 @@ namespace SaxonNUnit
         {
 
             Processor proc;
-            public MyCollectionFinder(Processor proc) {
+            public MyCollectionFinder(Processor proc)
+            {
                 this.proc = proc;
             }
-            public IResourceCollection FindCollection(DynamicContext context, String collectionURI) {
-                
+            public IResourceCollection FindCollection(DynamicContext context, String collectionURI)
+            {
                 return new DirectoryCollection(proc, "http://example.com/collection", ConfigTest.DATA_DIR + "trax/", new URIQueryParameters("select=*.xml;recurse=yes", proc));
             }
 
@@ -621,174 +625,282 @@ namespace SaxonNUnit
                 return true;
             }
         }
-        
+
+        class MyCollection : IResourceCollection
+        {
+            public string CollectionURI()
+            {
+                throw new NotImplementedException();
+            }
+
+            public List<IResource> GetResources(DynamicContext context)
+            {
+                throw new NotImplementedException();
+            }
+
+            public List<string> GetResourceURIs(DynamicContext context)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+
+        class MyCollectionFinder2 : ICollectionFinder
+        {
+
+            Processor proc;
+            public MyCollectionFinder2(Processor proc)
+            {
+                this.proc = proc;
+            }
+            public IResourceCollection FindCollection(DynamicContext context, String collectionURI)
+            {
+
+
+                
+                return new DirectoryCollection(proc, "http://example.com/collection", ConfigTest.DATA_DIR + "collection2/", new URIQueryParameters("select=*.xml;recurse=yes", proc));
+            }
+
+            public bool IsStable()
+            {
+                return true;
+            }
+        }
+
+
 
         [Test]
-    public void TestCollectionFinder()
-{
-    try
-    {
-        Processor p = new Processor(true);
-        p.CollectionFinder = new MyCollectionFinder(p);
-    XQueryCompiler c = p.NewXQueryCompiler();
-    XQueryExecutable exec = c.Compile("for $x in collection(.) return " +
-        "if($x instance of node()) then true() else false()");
-    XQueryEvaluator eval = exec.Load();
-    eval.ContextItem = (new XdmAtomicValue("http://example.com/collection"));
-    XdmValue val = eval.Evaluate();
-    Assert.AreEqual(7, val.Count);
-} catch (Exception e) {
-            Assert.Fail(e.Message);
-        }
-    }
-
-
-/*
-
-    [Test]
-    public void TestRegisterMediaType()
-{
-    try
-    {
-        Processor p = new Processor(true);
-        final Configuration config = p.Implementation;
-        config.registerFileExtension("java", "text/plain");
-        config.registerFileExtension("xq", "text/plain");
-        XQueryCompiler c = p.newXQueryCompiler();
-        XQueryExecutable exec = c.Compile("for $x in collection(.) return " +
-                                                  "if($x instance of xs:string) then true() else false()");
-        XQueryEvaluator eval = exec.Load();
-        eval.ContextItem = (new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "ganta"));
-        XdmValue val = eval.Evaluate();
-        Assert.AreEqual(6, val.Count);
-        for (XdmItem item : val)
+        public void TestCollectionFinder()
         {
-            Assert.True(((XdmAtomicValue)item).GetBooleanValue(), "isText");
+            try
+            {
+                Processor p = new Processor(true);
+                p.CollectionFinder = new StandardCollectionFinder();//new MyCollectionFinder(p);
+                XQueryCompiler c = p.NewXQueryCompiler();
+                XQueryExecutable exec = c.Compile("for $x in collection(.) return " +
+                    "if($x instance of node()) then true() else false()");
+                XQueryEvaluator eval = exec.Load();
+                eval.ContextItem = (new XdmAtomicValue("http://example.com/collection"));
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual(7, val.Count);
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
         }
-    }
-    catch (Exception e)
-    {
-        Assert.Fail(e.Message);
-    }
-}
 
-[Test]
-    public void TestMediaTypeConfigFile()
-{
-    try
-    {
-        String cf = "<configuration xmlns='http://saxon.sf.net/ns/configuration'\n" +
-                "               edition='EE'\n" +
-                "               label='Some label'>\n" +
-                "          <resources>\n" +
-                "            <fileExtension extension='xq' mediaType='text/plain'/>" +
-                "            <fileExtension extension='java' mediaType='text/plain'/>" +
-                "          </resources></configuration>";
-        Processor p = new Processor(new StreamSource(new StringReader(cf)));
-        XQueryCompiler c = p.newXQueryCompiler();
-        XQueryExecutable exec = c.Compile("for $x in collection(.) return " +
-                                                  "if($x instance of xs:string) then true() else false()");
-        XQueryEvaluator eval = exec.Load();
-        eval.ContextItem = (new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "ganta"));
-        XdmValue val = eval.Evaluate();
-        Assert.AreEqual(6, val.Count);
-        for (XdmItem item : val)
+
+        public class DtdIgnoringResolver : XmlResolver
         {
-            Assert.True(((XdmAtomicValue)item).GetBooleanValue(), "isText");
-        }
-    }
-    catch (Exception e)
-    {
-        Assert.Fail(e.Message);
-    }
-}
+            private readonly XmlResolver _innerResolver;
 
-[Test]
-    public void TestRegisteredCollection()
-{
-    try
-    {
-        Processor p = new Processor(true);
-        Configuration config = p.Implementation;
-        List<File> contents = new ArrayList<>();
-        contents.add(new File(ConfigTest.DATA_DIR + "trax/xml/cities.xml"));
-        contents.add(new File(ConfigTest.DATA_DIR + "trax/xml/baz.xml"));
-        config.registerCollection("ftp://myCollection", new AbstractResourceCollection(config) {
+            public DtdIgnoringResolver(XmlResolver innerResolver)
+            {
+                _innerResolver = innerResolver ?? throw new ArgumentNullException(nameof(innerResolver));
+            }
+
+            public override ICredentials Credentials
+            {
+                set { _innerResolver.Credentials = value; }
+            }
+
+            public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
+            {
+                if (!string.IsNullOrEmpty(absoluteUri?.OriginalString) && IsDtdOrSchema(absoluteUri.OriginalString))
+                    return Stream.Null;
+                return _innerResolver.GetEntity(absoluteUri, role, ofObjectToReturn);
+            }
+
+            private static bool IsDtdOrSchema(string filePath)
+            {
+                return
+                    filePath.EndsWith(".dtd", StringComparison.InvariantCultureIgnoreCase) ||
+                    filePath.EndsWith(".xsd", StringComparison.InvariantCultureIgnoreCase);
+            }
+        }
+
+
+        [Test]
+        public void TestCollectionFinder2()
+        {
+            try
+            {
+                Processor p = new Processor(true);
+                XsltCompiler compiler = p.NewXsltCompiler();
+                var builder = p.NewDocumentBuilder();
+                compiler.XmlResolver = new DtdIgnoringResolver(builder.XmlResolver);
+               // p.CollectionFinder = new MyCollectionFinder2(p);
+
+                Xslt30Transformer transformer = compiler.Compile(
+                   new Uri(ConfigTest.DATA_DIR + "collection4.xsl")).Load30();
+                
+                //fails to work with a XmlTextReader
+                // Create a serializer
+                StringWriter sw = new StringWriter();
+                Serializer serializer = p.NewSerializer(sw);
+                //transformer.InitialTemplate = new QName("main");
+
+                transformer.InputXmlResolver = new DtdIgnoringResolver(builder.XmlResolver); ;
+                transformer.CallTemplate(new QName("main"), serializer);
+                //transformer.Run(serializer);
+
+                Console.WriteLine(sw.ToString());
+                Assert.True(true);
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+
+        /*
+
+            [Test]
+            public void TestRegisterMediaType()
+        {
+            try
+            {
+                Processor p = new Processor(true);
+                final Configuration config = p.Implementation;
+                config.registerFileExtension("java", "text/plain");
+                config.registerFileExtension("xq", "text/plain");
+                XQueryCompiler c = p.newXQueryCompiler();
+                XQueryExecutable exec = c.Compile("for $x in collection(.) return " +
+                                                          "if($x instance of xs:string) then true() else false()");
+                XQueryEvaluator eval = exec.Load();
+                eval.ContextItem = (new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "ganta"));
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual(6, val.Count);
+                for (XdmItem item : val)
+                {
+                    Assert.True(((XdmAtomicValue)item).GetBooleanValue(), "isText");
+                }
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [Test]
+            public void TestMediaTypeConfigFile()
+        {
+            try
+            {
+                String cf = "<configuration xmlns='http://saxon.sf.net/ns/configuration'\n" +
+                        "               edition='EE'\n" +
+                        "               label='Some label'>\n" +
+                        "          <resources>\n" +
+                        "            <fileExtension extension='xq' mediaType='text/plain'/>" +
+                        "            <fileExtension extension='java' mediaType='text/plain'/>" +
+                        "          </resources></configuration>";
+                Processor p = new Processor(new StreamSource(new StringReader(cf)));
+                XQueryCompiler c = p.newXQueryCompiler();
+                XQueryExecutable exec = c.Compile("for $x in collection(.) return " +
+                                                          "if($x instance of xs:string) then true() else false()");
+                XQueryEvaluator eval = exec.Load();
+                eval.ContextItem = (new XdmAtomicValue("file://" + ConfigTest.DATA_DIR + "ganta"));
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual(6, val.Count);
+                for (XdmItem item : val)
+                {
+                    Assert.True(((XdmAtomicValue)item).GetBooleanValue(), "isText");
+                }
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [Test]
+            public void TestRegisteredCollection()
+        {
+            try
+            {
+                Processor p = new Processor(true);
+                Configuration config = p.Implementation;
+                List<File> contents = new ArrayList<>();
+                contents.add(new File(ConfigTest.DATA_DIR + "trax/xml/cities.xml"));
+                contents.add(new File(ConfigTest.DATA_DIR + "trax/xml/baz.xml"));
+                config.registerCollection("ftp://myCollection", new AbstractResourceCollection(config) {
+                        @Override
+                        public Iterator<String> getResourceURIs(XPathContext context) throws XPathException {
+                    return contents.stream().map(File::toURI).map(URI::toString).iterator();
+                }
+
                 @Override
-                public Iterator<String> getResourceURIs(XPathContext context) throws XPathException {
-            return contents.stream().map(File::toURI).map(URI::toString).iterator();
-        }
-
-        @Override
-                public Iterator<? extends Resource> getResources(XPathContext context) throws XPathException {
-            return contents.stream().map(file-> {
-                try
-                {
-                    StreamSource ss = new StreamSource(file);
-                    NodeInfo doc = config.buildDocumentTree(ss).getRootNode();
-                    return new XmlResource(config, doc);
+                        public Iterator<? extends Resource> getResources(XPathContext context) throws XPathException {
+                    return contents.stream().map(file-> {
+                        try
+                        {
+                            StreamSource ss = new StreamSource(file);
+                            NodeInfo doc = config.buildDocumentTree(ss).getRootNode();
+                            return new XmlResource(config, doc);
+                        }
+                        catch (XPathException e)
+                        {
+                            throw new UncheckedXPathException(e);
+                        }
+                    }).iterator();
                 }
-                catch (XPathException e)
-                {
-                    throw new UncheckedXPathException(e);
+            });
+            XPathCompiler c = p.NewXPathCompiler();
+            c.XPathLanguageVersion = "3.1";
+            XPathExecutable exec = c.Compile("count(uri-collection(.))");
+            XPathSelector eval = exec.Load();
+            eval.ContextItem = (new XdmAtomicValue("ftp://myCollection"));
+            XdmValue val = eval.Evaluate();
+            Assert.AreEqual(2, Integer.parseInt(val.ToString()));
+            exec = c.Compile("collection(.)/* ! name()");
+            eval = exec.Load();
+            eval.ContextItem = (new XdmAtomicValue("ftp://myCollection"));
+            val = eval.Evaluate();
+            Assert.AreEqual("cities", val.itemAt(0).getStringValue(), "one");
+            Assert.AreEqual("foo:document", val.itemAt(1).getStringValue(), "two");
+        } catch (Exception e) {
+                    Assert.Fail(e.Message);
                 }
-            }).iterator();
-        }
-    });
-    XPathCompiler c = p.NewXPathCompiler();
-    c.XPathLanguageVersion = "3.1";
-    XPathExecutable exec = c.Compile("count(uri-collection(.))");
-    XPathSelector eval = exec.Load();
-    eval.ContextItem = (new XdmAtomicValue("ftp://myCollection"));
-    XdmValue val = eval.Evaluate();
-    Assert.AreEqual(2, Integer.parseInt(val.ToString()));
-    exec = c.Compile("collection(.)/* ! name()");
-    eval = exec.Load();
-    eval.ContextItem = (new XdmAtomicValue("ftp://myCollection"));
-    val = eval.Evaluate();
-    Assert.AreEqual("cities", val.itemAt(0).getStringValue(), "one");
-    Assert.AreEqual("foo:document", val.itemAt(1).getStringValue(), "two");
-} catch (Exception e) {
-            Assert.Fail(e.Message);
-        }
-    }
+            }
 
-    public static class Finder implements CollectionFinder
-{
-    @Override
-        public ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException
-{
-            if (collectionURI.equals("http://example.com/collection")) {
-        File dir = new File(ConfigTest.DATA_DIR + "collection");
-        URIQueryParameters params = new URIQueryParameters("select=*.xml", context.getConfiguration());
-        return new DirectoryCollection(context.getConfiguration(), collectionURI, dir, params);
-    } else {
-        throw new XPathException("Collection " + collectionURI + " not found");
-    }
-}
-    }
+            public static class Finder implements CollectionFinder
+        {
+            @Override
+                public ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException
+        {
+                    if (collectionURI.equals("http://example.com/collection")) {
+                File dir = new File(ConfigTest.DATA_DIR + "collection");
+                URIQueryParameters params = new URIQueryParameters("select=*.xml", context.getConfiguration());
+                return new DirectoryCollection(context.getConfiguration(), collectionURI, dir, params);
+            } else {
+                throw new XPathException("Collection " + collectionURI + " not found");
+            }
+        }
+            }
 
-    [Test]
-    public void TestCollectionFinderConfigFile()
-{
-    try
-    {
-        String cf = "<configuration xmlns='http://saxon.sf.net/ns/configuration'\n" +
-                "               edition='EE'\n" +
-                "               label='Some label'>\n" +
-                "          <global collectionFinder='s9apitest.TestCollections$Finder'/>\n" +
-                "    </configuration>";
-        Processor p = new Processor(new StreamSource(new StringReader(cf)));
-        XQueryCompiler c = p.newXQueryCompiler();
-        XQueryExecutable exec = c.Compile("distinct-values(collection(\"http://example.com/collection\")!node-name(*))");
-        XQueryEvaluator eval = exec.Load();
-        XdmValue val = eval.Evaluate();
-        Assert.AreEqual(39, val.Count);
+            [Test]
+            public void TestCollectionFinderConfigFile()
+        {
+            try
+            {
+                String cf = "<configuration xmlns='http://saxon.sf.net/ns/configuration'\n" +
+                        "               edition='EE'\n" +
+                        "               label='Some label'>\n" +
+                        "          <global collectionFinder='s9apitest.TestCollections$Finder'/>\n" +
+                        "    </configuration>";
+                Processor p = new Processor(new StreamSource(new StringReader(cf)));
+                XQueryCompiler c = p.newXQueryCompiler();
+                XQueryExecutable exec = c.Compile("distinct-values(collection(\"http://example.com/collection\")!node-name(*))");
+                XQueryEvaluator eval = exec.Load();
+                XdmValue val = eval.Evaluate();
+                Assert.AreEqual(39, val.Count);
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }*/
     }
-    catch (Exception e)
-    {
-        Assert.Fail(e.Message);
-    }*/
-}
 
 }
