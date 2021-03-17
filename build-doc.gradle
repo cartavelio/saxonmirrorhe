@@ -15,7 +15,7 @@ clone_expath_cg.onlyIf {
 
 task documentation(
   dependsOn: ["update_documentation",
-              "gen_contents_page", "gen_contents_page_static", 
+              "gen_contents_page", "gen_contents_page_static",
               "gen_documentation_main",
               "gen_documentation_main_html"],
   description: "Build the website"
@@ -84,12 +84,12 @@ task product_xsljavadoc(
   description: "Convert javadoc XML into format for documentation"
 ) {
   inputs.files fileTree(dir: "${buildDir}/jeljavadoc")
-  inputs.file "${projectDir}/tools/chunk-javadoc.xsl"
+  inputs.file "${projectDir}/tools/docs/javadoc/chunk-javadoc.xsl"
   outputs.files fileTree(dir: "${buildDir}/javadoc-xml")
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-s:${buildDir}/jeljavadoc/jeldoclet-out.xml",
-    "-xsl:${projectDir}/tools/chunk-javadoc.xsl",
+    "-xsl:${projectDir}/tools/docs/javadoc/chunk-javadoc.xsl",
     "-o:${buildDir}/javadoc-xml/out",
     "base-output=${buildDir}/javadoc-xml/"
 }
@@ -100,12 +100,12 @@ task javadoc_linkchecker(
   description: "Generate report of links"
 ) {
   inputs.files fileTree(dir: "${buildDir}/javadoc-xml")
-  inputs.file "${projectDir}/tools/check-tag-links.xsl"
+  inputs.file "${projectDir}/tools/docs/javadoc/check-tag-links.xsl"
   outputs.file "${buildDir}/javadoc-tag-check.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-s:${buildDir}/javadoc-xml/javadoc-types.xml",
-    "-xsl:${projectDir}/tools/check-tag-links.xsl",
+    "-xsl:${projectDir}/tools/docs/javadoc/check-tag-links.xsl",
     "-o:${buildDir}/javadoc-tag-check.xml"
 }
 
@@ -115,13 +115,13 @@ task dotnet_doc_parsecs(
   description: "Parse dotnet cs files for docs"
 ) {
   inputs.files fileTree(dir: "${buildDir}/n/csharp/api/Saxon.Api")
-  inputs.file "${projectDir}/tools/dotnet/parsecs.xsl"
+  inputs.file "${projectDir}/tools/docs/dotnet/parsecs.xsl"
   outputs.file "${buildDir}/dotnetdoc/names.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-it:main",
-    "-s:${projectDir}/tools/dotnet/parsecs.xsl",
-    "-xsl:${projectDir}/tools/dotnet/parsecs.xsl",
+    "-s:${projectDir}/tools/docs/dotnet/parsecs.xsl",
+    "-xsl:${projectDir}/tools/docs/dotnet/parsecs.xsl",
     "-o:${buildDir}/dotnetdoc/names.xml",
     "inputdir=${buildDir}/n/csharp/api/Saxon.Api"
 }
@@ -133,13 +133,13 @@ task dotnet_doc_merge(
 ) {
   inputs.file "${buildDir}/dotnetdoc/names.xml"
   inputs.file "${buildDir}/n/saxon-ee-api-${saxonVersion}.xml"
-  inputs.file "${projectDir}/tools/dotnet/merge.xsl"
+  inputs.file "${projectDir}/tools/docs/dotnet/merge.xsl"
   outputs.file "${buildDir}/dotnetdoc/merged.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-it:main",
     "-s:${buildDir}/dotnetdoc/names.xml",
-    "-xsl:${projectDir}/tools/dotnet/merge.xsl",
+    "-xsl:${projectDir}/tools/docs/dotnet/merge.xsl",
     "-o:${buildDir}/dotnetdoc/merged.xml",
     "names-file=${buildDir}/dotnetdoc/names.xml",
     "api-doc-file=${buildDir}/n/saxon-ee-api-${saxonVersion}.xml"
@@ -150,7 +150,7 @@ task dotnet_doc_css(
   description: "Copies the CSS for dotnet docs"
 ) {
   into "${buildDir}/dotnetdoc-html"
-  from "${projectDir}/tools/dotnet/saxon-dotnetdoc.css"
+  from "${projectDir}/tools/docs/dotnet/saxon-dotnetdoc.css"
 }
 
 task dotnet_doc_html(
@@ -159,12 +159,12 @@ task dotnet_doc_html(
   description: "Create HTML output for dotnet docs"
 ) {
   inputs.file "${buildDir}/dotnetdoc/merged.xml"
-  inputs.file "${projectDir}/tools/dotnet/tohtml.xsl"
+  inputs.file "${projectDir}/tools/docs/dotnet/tohtml.xsl"
   outputs.file "${buildDir}/dotnetdoc-html/index.html"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-s:${buildDir}/dotnetdoc/merged.xml",
-    "-xsl:${projectDir}/tools/dotnet/tohtml.xsl",
+    "-xsl:${projectDir}/tools/docs/dotnet/tohtml.xsl",
     "-o:${buildDir}/dotnetdoc-html/index.html"
 }
 
@@ -174,12 +174,12 @@ task dotnet_doc_jel(
   description: "Create HTML output for dotnet docs"
 ) {
   inputs.file "${buildDir}/dotnetdoc/merged.xml"
-  inputs.file "${projectDir}/tools/dotnet/convert-to-jel-package.xsl"
+  inputs.file "${projectDir}/tools/docs/dotnet/convert-to-jel-package.xsl"
   outputs.file "${buildDir}/dotnetdoc-xml/packages/Saxon.Api.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-s:${buildDir}/dotnetdoc/merged.xml",
-    "-xsl:${projectDir}/tools/dotnet/convert-to-jel-package.xsl",
+    "-xsl:${projectDir}/tools/docs/dotnet/convert-to-jel-package.xsl",
     "-o:${buildDir}/dotnetdoc-xml/packages/Saxon.Api.xml"
 }
 
@@ -214,7 +214,7 @@ task resources_dotnetdoc_css(
   description: "Copy the dotnet CSS into the resources folder"
 ) {
   into "${buildDir}/resources/doc/dotnetdoc"
-  from ("${projectDir}/tools/dotnet") {
+  from ("${projectDir}/tools/docs/dotnet") {
     include "saxon-dotnetdoc.css"
   }
 }
@@ -296,13 +296,13 @@ task gen_doc_icu_uca(
   description: "Generate the ICU/UCA documentation"
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/userdoc")
-  inputs.files fileTree(dir: "${projectDir}/tools")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
   outputs.files fileTree(dir: "${buildDir}/userdoc/src/extensibility")
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-it:go",
     "-s:${projectDir}/src/userdoc/catalog.xml",
-    "-xsl:${projectDir}/tools/document-ICU.xsl",
+    "-xsl:${projectDir}/tools/docs/userdoc/document-ICU.xsl",
     "output=${buildDir}/userdoc/src/extensibility/"
 }
 
@@ -312,13 +312,13 @@ task gen_xslt_element_reference_preprocess(
   description: "Preprocess input for the XSLT Element reference documentation"
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/userdoc/elements")
-  inputs.files fileTree(dir: "${projectDir}/tools")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
   outputs.file "${buildDir}/userdoc/tmp/xsl-elements-expanded.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-s:${projectDir}/src/userdoc/elements/xsl-elements.xml",
     "-o:${buildDir}/userdoc/tmp/xsl-elements-expanded.xml",
-    "-xsl:tools/genElementDoc.xsl"
+    "-xsl:${projectDir}/tools/docs/userdoc/genElementDoc.xsl"
 }
 
 task gen_xslt_element_reference(
@@ -327,12 +327,12 @@ task gen_xslt_element_reference(
   description: "Generate the XSLT Element reference documentation"
 ) {
   inputs.file "${buildDir}/userdoc/tmp/xsl-elements-expanded.xml" 
-  inputs.files fileTree(dir: "${projectDir}/tools")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
   outputs.file "${buildDir}/userdoc/src/xsl-elements.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-s:${buildDir}/userdoc/tmp/xsl-elements-expanded.xml",
-    "-xsl:${projectDir}/tools/elements-body.xsl",
+    "-xsl:${projectDir}/tools/docs/userdoc/elements-body.xsl",
     "-o:${buildDir}/userdoc/src/xsl-elements.xml"
 }
 
@@ -346,12 +346,12 @@ task element_doc() {
     description: "Expand element documentation for ${target}"
   ) {
     inputs.file "${projectDir}/src/userdoc/extensions/${target}.xml"
-    inputs.files fileTree(dir: "${projectDir}/tools")
+    inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
     outputs.file file("${buildDir}/userdoc/src/extensions/${target}.xml")
     classpath = configurations.documentation
     main = "com.saxonica.Transform"
     args "-s:${projectDir}/src/userdoc/extensions/${target}.xml",
-      "-xsl:tools/elements-body.xsl",
+      "-xsl:${projectDir}/tools/docs/userdoc/elements-body.xsl",
       "-o:${buildDir}/userdoc/src/extensions/${target}.xml"
   }
   element_doc.dependsOn t
@@ -364,12 +364,12 @@ task element_doc() {
     description: "Expand element documentation for ${target}"
   ) {
     inputs.file "${projectDir}/src/userdoc/extensions/${target}.xml"
-    inputs.files fileTree(dir: "${projectDir}/tools")
+    inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
     outputs.file "${buildDir}/userdoc/src/${target}.xml"
     classpath = configurations.documentation
     main = "com.saxonica.Transform"
     args "-s:${projectDir}/src/userdoc/extensions/${target}.xml",
-      "-xsl:tools/elements-body.xsl",
+      "-xsl:${projectDir}/tools/docs/userdoc/elements-body.xsl",
       "-o:${buildDir}/userdoc/src/${target}.xml"
   }
   element_doc.dependsOn t
@@ -385,13 +385,13 @@ task expath_doc() {
     description: "Expand EXPath documentation for ${target}"
   ) {
     inputs.file "${projectDir}/src/userdoc/functions/EXPath/functions-${target}.xml"
-    inputs.files fileTree(dir: "${projectDir}/tools")
+    inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
     outputs.file "${buildDir}/userdoc/src/functions/EXPath/functions-${target}.xml"
     classpath = configurations.documentation
     main = "com.saxonica.Transform"
     args "-xi:on",
       "-s:${projectDir}/src/userdoc/functions/EXPath/functions-${target}.xml",
-      "-xsl:${projectDir}/tools/genFunctionDoc.xsl",
+      "-xsl:${projectDir}/tools/docs/userdoc/genFunctionDoc.xsl",
       "-o:${buildDir}/userdoc/src/functions/EXPath/functions-${target}.xml",
       "GitHub=${projectDir}/build"
   }
@@ -404,13 +404,13 @@ task gen_expand_doc_sections_for_app(
   description: "Expand documentation sections from inclusions for app"
 ) {
   inputs.file "${buildDir}/userdoc/src/catalog.xml"
-  inputs.files fileTree(dir: "${projectDir}/tools")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
   outputs.file "${buildDir}/userdoc/expanded/catalog.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-xi:on",
     "-s:${buildDir}/userdoc/src/catalog.xml",
-    "-xsl:${projectDir}/tools/doc-include.xsl",
+    "-xsl:${projectDir}/tools/docs/userdoc/doc-include.xsl",
     "-o:${buildDir}/userdoc/expanded/catalog.xml",
     "output-uri=${buildDir}/userdoc/expanded/"
 }
@@ -432,12 +432,12 @@ task userdoc_changes(
   description: "Preprocess the changes.xml file to turn it into a standard article"
 ) {
   inputs.file "${buildDir}/userdoc/expanded/changes.xml"
-  inputs.files fileTree(dir: "${projectDir}/tools/to-static")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/to-static")
   outputs.file "${buildDir}/userdoc/expanded/changes-article.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-s:${buildDir}/userdoc/expanded/changes.xml",
-    "-xsl:${projectDir}/tools/to-static/c-changes.xsl",
+    "-xsl:${projectDir}/tools/docs/to-static/c-changes.xsl",
     "-o:${buildDir}/userdoc/expanded/changes-article.xml"
 }
 
@@ -447,12 +447,12 @@ task userdoc_functions(
   description: "Preprocess the functions.xml file to turn it into a standard article"
 ) {
   inputs.file "${buildDir}/userdoc/expanded/functions.xml"
-  inputs.files fileTree(dir: "${projectDir}/tools/to-static")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/to-static")
   outputs.file "${buildDir}/userdoc/expanded/functions-article.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-s:${buildDir}/userdoc/expanded/functions.xml",
-    "-xsl:${projectDir}/tools/to-static/c-functions.xsl",
+    "-xsl:${projectDir}/tools/docs/to-static/c-functions.xsl",
     "-o:${buildDir}/userdoc/expanded/functions-article.xml"
 }
 
@@ -489,12 +489,12 @@ task userdoc_articles(
   description: "Process all the articles"
 ) {
   inputs.files fileTree(dir: "${buildDir}/userdoc/expanded")
-  inputs.files fileTree(dir: "${projectDir}/tools/to-static")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/to-static")
   outputs.files fileTree(dir: "${buildDir}/userdoc/html")
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-s:${buildDir}/userdoc/expanded/catalog.xml",
-    "-xsl:${projectDir}/tools/to-static/s-viewer_app.xsl",
+    "-xsl:${projectDir}/tools/docs/to-static/s-viewer_app.xsl",
     "-o:${buildDir}/userdoc/html/dummy.xml",
     "changes-article=${buildDir}/userdoc/expanded/changes-article.xml",
     "functions-article=${buildDir}/userdoc/expanded/functions-article.xml",
@@ -549,8 +549,11 @@ task userdoc_publish_html_style(
   description: "Copy viewer_appJS CSS to the html output directory"
 ) {
   into "${buildDir}/userdoc/html"
-  from ("${projectDir}/src/viewer_appJS") {
-    include "viewer_app.css"
+  from "${projectDir}/src/viewer_appJS/viewer_app.css"
+  filter { line ->
+    line.contains("url('saxon-base.css')")
+            ? line.replace("saxon-base.css", "../../saxon-base.css")
+            : line
   }
 }
 
@@ -600,12 +603,12 @@ task gen_contents_ref(
   description: "Creates the contents reference file for the user documentation"
 ) {
   inputs.file "${buildDir}/website/documentation/doc/catalog.xml"
-  inputs.file "${projectDir}/tools/contents-builder.xsl"
+  inputs.file "${projectDir}/tools/docs/website/contents-builder.xsl"
   outputs.file "${buildDir}/website/documentation/contents.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "${buildDir}/website/documentation/doc/catalog.xml",
-    "-xsl:${projectDir}/tools/contents-builder.xsl",
+    "-xsl:${projectDir}/tools/docs/website/contents-builder.xsl",
     "-o:${buildDir}/website/documentation/contents.xml",
     "version-number=${saxonMajorVersion}"
 }
@@ -616,12 +619,12 @@ task gen_contents_page(
   description: "Builds the contents pages"
 ) {
   inputs.file "${buildDir}/website/documentation/contents.xml"
-  inputs.file "${projectDir}/tools/contentsDoc.xsl"
+  inputs.file "${projectDir}/tools/docs/website/contentsDoc.xsl"
   outputs.file "${buildDir}/website/documentation/contents-page.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "${buildDir}/website/documentation/contents.xml",
-    "-xsl:${projectDir}/tools/contentsDoc.xsl",
+    "-xsl:${projectDir}/tools/docs/website/contentsDoc.xsl",
     "-o:${buildDir}/website/documentation/contents-page.xml",
     "base-uri=${buildDir}/website/documentation/",
     "version-number=${saxonMajorVersion}",
@@ -634,12 +637,12 @@ task gen_contents_page_static(
   description: "Builds the static contents page"
 ) {
   inputs.file "${buildDir}/contents-page-static.html"
-  inputs.file "${projectDir}/tools/make-menu_change-links.xsl"
+  inputs.file "${projectDir}/tools/docs/website/make-menu_change-links.xsl"
   outputs.file "${buildDir}/website/html/documentation/contents-page.html"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "${buildDir}/contents-page-static.html",
-    "-xsl:${projectDir}/tools/make-menu_change-links.xsl",
+    "-xsl:${projectDir}/tools/docs/website/make-menu_change-links.xsl",
     "-o:${buildDir}/website/html/documentation/contents-page.html"
 }
 
@@ -649,13 +652,13 @@ task gen_documentation_main(
   description: "Build the documentation main pages for the current release"
 ) {
   inputs.file "${buildDir}/website/documentation/contents.xml"
-  inputs.file "${projectDir}/src/userdoc/doc-ref.xml"
-  inputs.files fileTree("${projectDir}/tools")
+  inputs.file "${projectDir}/tools/docs/website/doc-ref.xml"
+  inputs.files fileTree("${projectDir}/tools/docs/website")
   outputs.file "${buildDir}/website/documentation/documentation.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
-  args "${projectDir}/src/userdoc/doc-ref.xml",
-    "-xsl:${projectDir}/tools/doc-page.xsl",
+  args "${projectDir}/tools/docs/website/doc-ref.xml",
+    "-xsl:${projectDir}/tools/docs/website/doc-page.xsl",
     "-o:${buildDir}/website/documentation/documentation.xml",
     "method=dynamic",
     "version-number=${saxonMajorVersion}",
@@ -668,13 +671,13 @@ task gen_documentation_main_static(
   description: "Build the documentation main pages for the current release"
 ) {
   inputs.file "${buildDir}/website/documentation/contents.xml"
-  inputs.file "${projectDir}/src/userdoc/doc-ref.xml"
-  inputs.files fileTree("${projectDir}/tools")
+  inputs.file "${projectDir}/tools/docs/website/doc-ref.xml"
+  inputs.files fileTree("${projectDir}/tools/docs/website")
   outputs.file "${buildDir}/static-doc/documentation.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
-  args "${projectDir}/src/userdoc/doc-ref.xml",
-    "-xsl:${projectDir}/tools/doc-page.xsl",
+  args "${projectDir}/tools/docs/website/doc-ref.xml",
+    "-xsl:${projectDir}/tools/docs/website/doc-page.xsl",
     "-o:${buildDir}/static-doc/documentation.xml",
     "method=static",
     "version-number=${saxonMajorVersion}",
@@ -687,11 +690,11 @@ task gen_documentation_main_html(
   description: "Build the HTML documentation main pages for the current release"
 ) {
   inputs.file "${buildDir}/static-doc/documentation.xml"
-  inputs.file "${projectDir}/tools/make-menu_change-links.xsl"
+  inputs.file "${projectDir}/tools/docs/website/make-menu_change-links.xsl"
   outputs.file "${buildDir}/website/html/documentation/documentation.html"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "${buildDir}/static-doc/documentation.xml",
-    "-xsl:${projectDir}/tools/make-menu_change-links.xsl",
+    "-xsl:${projectDir}/tools/docs/website/make-menu_change-links.xsl",
     "-o:${buildDir}/website/html/documentation/documentation.html"
 }

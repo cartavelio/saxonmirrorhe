@@ -56,7 +56,7 @@
                     </p>
                 </td>
             </tr>
-            <xsl:for-each select="document(concat('../build/website/',$contents-doc))/*/section">
+            <xsl:for-each select="document(concat('../../../build/website/',$contents-doc))/*/section">
                 <tr>
                     <td>
                         <p>

@@ -5,9 +5,9 @@
 
      <xsl:output method="html"/>
 
-     <xsl:variable name="javadoc-types" select="doc('../../build/userdoc/viewer_appJS/javadoc-xml/javadoc-types.xml')"/>
+     <xsl:variable name="javadoc-types" select="doc('../../../build/userdoc/viewer_appJS/javadoc-xml/javadoc-types.xml')"/>
      
-     <xsl:variable name="dotnetdoc-types" select="doc('../../build/userdoc/viewer_appJS/dotnetdoc-xml/types.xml')"/>
+     <xsl:variable name="dotnetdoc-types" select="doc('../../../build/userdoc/viewer_appJS/dotnetdoc-xml/types.xml')"/>
 
      <xsl:key name="jd-types" match="j" use="string-join(ancestor-or-self::j/@id, '.')"/>
 

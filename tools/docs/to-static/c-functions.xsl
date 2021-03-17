@@ -4,7 +4,7 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     exclude-result-prefixes="xs fc xi">
 
-    <xsl:import href="../../src/viewer_appJS/xsl/functions-body.xsl"/>
+    <xsl:import href="../../../src/viewer_appJS/xsl/functions-body.xsl"/>
     
     <xsl:variable name="implement-path" select="'../doc/implement.xml'"/>
     

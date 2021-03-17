@@ -4,7 +4,7 @@
 
   <xsl:variable name="homepage" select="'../welcome/welcome.xml'"/>
   
-  <xsl:variable name="contents-doc" select="document('../src/userdoc/contents.xml')"/>
+  <xsl:variable name="contents-doc" select="document('contents.xml')"/>
 
   <xsl:template match="*">
     <xsl:copy>
@@ -15,7 +15,7 @@
 
   <!-- Used to insert Saxon version information - e.g. current-maintenance-release on download_page -->
   <xsl:template match="insert">
-    <xsl:value-of select="document('../src/userdoc/contents.xml')
+    <xsl:value-of select="$contents-doc
                             //constant[@name=current()/@name]/@value"/>
   </xsl:template>
 
@@ -172,7 +172,7 @@
           <xsl:apply-templates mode="page-content" select="./div[@id='section']"/>
           <xsl:apply-templates mode="aside-content" select="./div[@id='aside']"/>
           <div id="footer">
-            <p>&#169; 2020 Saxonica</p>
+            <p>&#169; 2021 Saxonica</p>
           </div>
         </div>
 

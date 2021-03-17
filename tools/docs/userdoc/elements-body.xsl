@@ -8,12 +8,12 @@
     <xsl:output indent="yes"/>
 
     <!-- Designed to transform src/elements/xsl-elements-expanded.xml; also used for:
-        src/extensions/instructions-src.xml (contains saxon-element elements)
-        src/extensions/serialization-params-src.xml (contains element-syntax elements)
-        src/extensions/sql-extension-src.xml (contains saxon-element elements) -->
+        src/userdoc/extensions/instructions.xml (contains saxon-element elements)
+        src/userdoc/extensions/serialization-params.xml (contains element-syntax elements)
+        src/userdoc/extensions/sql-extension.xml (contains saxon-element elements) -->
 
     <xsl:variable name="implementation-doc"
-                  select="doc('../src/viewer_appJS/doc/implement.xml')"
+                  select="doc('../../../src/viewer_appJS/doc/implement.xml')"
                   as="document-node()"/>
     <xsl:variable name="id" select="article/@id|section[1]/@id"/>
 
@@ -21,10 +21,10 @@
         <xsl:copy>
             <xsl:sequence select="@id|@title"/>
             <xsl:comment>Generated - <xsl:value-of select="current-dateTime()"/> 
-                <xsl:if test="$id='xsl-elements'"> from src/elements/xsl-elements-expanded.xml, which is itself generated from src/elements/xsl-elements-src.xml (the editable version)</xsl:if>
-                <xsl:if test="$id='instructions'"> from src/extensions/instructions-src.xml (the editable version)</xsl:if>    
-                <xsl:if test="$id='serialization-parameters'"> from src/extensions/serialization-params-src.xml (the editable version)</xsl:if> 
-                <xsl:if test="$id='sql-extension'"> from src/extensions/sql-extension-src.xml (the editable version)</xsl:if>
+                <xsl:if test="$id='xsl-elements'"> from src/elements/xsl-elements-expanded.xml, which is itself generated from src/userdoc/elements/xsl-elements.xml (the editable version)</xsl:if>
+                <xsl:if test="$id='instructions'"> from src/userdoc/extensions/instructions.xml (the editable version)</xsl:if>    
+                <xsl:if test="$id='serialization-parameters'"> from src/userdoc/extensions/serialization-params.xml (the editable version)</xsl:if> 
+                <xsl:if test="$id='sql-extension'"> from src/userdoc/extensions/sql-extension.xml (the editable version)</xsl:if>
             </xsl:comment>
             <xsl:apply-templates select="*" mode="#current"/>
         </xsl:copy>

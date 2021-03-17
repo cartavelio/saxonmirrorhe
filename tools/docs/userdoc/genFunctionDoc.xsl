@@ -23,7 +23,7 @@
 
   <xsl:variable name="defaults" select="section/defaults"
     doc:doc="Default values for parts of the descriptions of each function"/>
-  <xsl:variable name="implementation-doc" select="doc('../src/viewer_appJS/doc/implement.xml')"
+  <xsl:variable name="implementation-doc" select="doc('../../../src/viewer_appJS/doc/implement.xml')"
     as="document-node()" doc:doc="Document containing implementation status descriptions"/>
   <xsl:variable name="implementation" select="$implementation-doc/implement"
     doc:doc="Defaults for the implementation status descriptions"/>
