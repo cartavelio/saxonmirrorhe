@@ -15,9 +15,7 @@ clone_expath_cg.onlyIf {
 
 task documentation(
   dependsOn: ["update_documentation",
-              "gen_contents_page", "gen_contents_page_static",
-              "gen_documentation_main",
-              "gen_documentation_main_html"],
+              "gen_contents_ref"],
   description: "Build the website"
 ) {
   // Just a place to hang dependencies
@@ -603,98 +601,13 @@ task gen_contents_ref(
   description: "Creates the contents reference file for the user documentation"
 ) {
   inputs.file "${buildDir}/website/documentation/doc/catalog.xml"
-  inputs.file "${projectDir}/tools/docs/website/contents-builder.xsl"
+  inputs.file "${projectDir}/tools/docs/userdoc/contents-builder.xsl"
   outputs.file "${buildDir}/website/documentation/contents.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "${buildDir}/website/documentation/doc/catalog.xml",
-    "-xsl:${projectDir}/tools/docs/website/contents-builder.xsl",
+    "-xsl:${projectDir}/tools/docs/userdoc/contents-builder.xsl",
     "-o:${buildDir}/website/documentation/contents.xml",
     "version-number=${saxonMajorVersion}"
 }
 
-task gen_contents_page(
-  type: JavaExec,
-  dependsOn: ["gen_contents_ref"],
-  description: "Builds the contents pages"
-) {
-  inputs.file "${buildDir}/website/documentation/contents.xml"
-  inputs.file "${projectDir}/tools/docs/website/contentsDoc.xsl"
-  outputs.file "${buildDir}/website/documentation/contents-page.xml"
-  classpath = configurations.documentation
-  main = "com.saxonica.Transform"
-  args "${buildDir}/website/documentation/contents.xml",
-    "-xsl:${projectDir}/tools/docs/website/contentsDoc.xsl",
-    "-o:${buildDir}/website/documentation/contents-page.xml",
-    "base-uri=${buildDir}/website/documentation/",
-    "version-number=${saxonMajorVersion}",
-    "major-version=${saxonMajorVersion}"
-}
-
-task gen_contents_page_static(
-  type: JavaExec,
-  dependsOn: ["gen_contents_page"],
-  description: "Builds the static contents page"
-) {
-  inputs.file "${buildDir}/contents-page-static.html"
-  inputs.file "${projectDir}/tools/docs/website/make-menu_change-links.xsl"
-  outputs.file "${buildDir}/website/html/documentation/contents-page.html"
-  classpath = configurations.documentation
-  main = "com.saxonica.Transform"
-  args "${buildDir}/contents-page-static.html",
-    "-xsl:${projectDir}/tools/docs/website/make-menu_change-links.xsl",
-    "-o:${buildDir}/website/html/documentation/contents-page.html"
-}
-
-task gen_documentation_main(
-  type: JavaExec,
-  dependsOn: ["gen_contents_ref"],
-  description: "Build the documentation main pages for the current release"
-) {
-  inputs.file "${buildDir}/website/documentation/contents.xml"
-  inputs.file "${projectDir}/tools/docs/website/doc-ref.xml"
-  inputs.files fileTree("${projectDir}/tools/docs/website")
-  outputs.file "${buildDir}/website/documentation/documentation.xml"
-  classpath = configurations.documentation
-  main = "com.saxonica.Transform"
-  args "${projectDir}/tools/docs/website/doc-ref.xml",
-    "-xsl:${projectDir}/tools/docs/website/doc-page.xsl",
-    "-o:${buildDir}/website/documentation/documentation.xml",
-    "method=dynamic",
-    "version-number=${saxonMajorVersion}",
-    "major-version=${saxonMajorVersion}"
-}
-
-task gen_documentation_main_static(
-  type: JavaExec,
-  dependsOn: ["gen_contents_ref"],
-  description: "Build the documentation main pages for the current release"
-) {
-  inputs.file "${buildDir}/website/documentation/contents.xml"
-  inputs.file "${projectDir}/tools/docs/website/doc-ref.xml"
-  inputs.files fileTree("${projectDir}/tools/docs/website")
-  outputs.file "${buildDir}/static-doc/documentation.xml"
-  classpath = configurations.documentation
-  main = "com.saxonica.Transform"
-  args "${projectDir}/tools/docs/website/doc-ref.xml",
-    "-xsl:${projectDir}/tools/docs/website/doc-page.xsl",
-    "-o:${buildDir}/static-doc/documentation.xml",
-    "method=static",
-    "version-number=${saxonMajorVersion}",
-    "major-version=${saxonMajorVersion}"
-}
-
-task gen_documentation_main_html(
-  type: JavaExec,
-  dependsOn: ["gen_documentation_main_static"],
-  description: "Build the HTML documentation main pages for the current release"
-) {
-  inputs.file "${buildDir}/static-doc/documentation.xml"
-  inputs.file "${projectDir}/tools/docs/website/make-menu_change-links.xsl"
-  outputs.file "${buildDir}/website/html/documentation/documentation.html"
-  classpath = configurations.documentation
-  main = "com.saxonica.Transform"
-  args "${buildDir}/static-doc/documentation.xml",
-    "-xsl:${projectDir}/tools/docs/website/make-menu_change-links.xsl",
-    "-o:${buildDir}/website/html/documentation/documentation.html"
-}
