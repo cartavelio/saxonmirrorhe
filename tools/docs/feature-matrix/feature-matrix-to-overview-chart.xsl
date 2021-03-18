@@ -12,7 +12,7 @@
         <xsl:variable name="page" select="concat('feature-matrix-',replace($version,'\.','-'))"/>
         <html>
             <head>
-                <this-is section="products" page="feature-matrix-X" subpage="{$page}"/>
+                <this-is section="products" page="@@feature-matrix-X@@" subpage="{$page}"/>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <meta name="description" content="the full range of Saxon products and features implementing four W3C defined languages on four technology platforms such as Java, .NET, Native, JavaScript" />
                 <meta name="keywords" content="XSLT, XQuery, XSD, XPath, Java, .NET, Native, JavaScript" />
