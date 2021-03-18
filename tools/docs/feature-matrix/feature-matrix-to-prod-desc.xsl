@@ -2,13 +2,11 @@
     xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:local="http://local-functions/"
     exclude-result-prefixes="xs local" version="2.0">
     
-    <!-- Use this stylesheet to generate the output website/feature-matrix/prod-desc_9-x.xml
+    <!-- Use this stylesheet to generate the output prod-desc.xml
         (the source document for the product descriptions), 
-        from the input website/feature-matrix/feature-matrix-src-9-x.xml-->
+        from the input tools/docs/feature-matrix/feature-matrix.xml-->
 
     <xsl:output method="xml" indent="yes"/>
-
-    <xsl:param name="major-version"/>
     
     <xsl:variable name="edition" as="xs:string*" select="('HE', 'PE', 'EE', 'EE-T', 'EE-Q', 'EE-V')"/>
     <xsl:variable name="version" select="featureMatrix/@version"/>
@@ -18,8 +16,8 @@
         <doc version="Version {$version} released {$release-date}">
             <xsl:text>&#xa;</xsl:text>
             <xsl:comment>Generated - <xsl:value-of select="current-dateTime()"/> from
-                website/feature-matrix/feature-matrix-src-9-x.xml,
-             using stylesheet website/feature-matrix/feature-matrix-to-prod-desc.xsl</xsl:comment>
+                tools/docs/feature-matrix/feature-matrix.xml,
+             using stylesheet tools/docs/feature-matrix/feature-matrix-to-prod-desc.xsl</xsl:comment>
             <xsl:text>&#xa;</xsl:text>
             <xsl:call-template name="header-section"/>
             <xsl:call-template name="doc-desc"/>
@@ -138,9 +136,7 @@
                     <p>For more details see: <xsl:for-each select="$details">
                         <xsl:variable name="ext" select="if (./@subpages='has-subpages') then
                             '/index.html' else '.html'"/>
-                        <xsl:variable name="documentation" select="if ($major-version=$version) then
-                            'documentation' else concat('documentation',$version)"/>
-                            <a href="http://www.saxonica.com/html/{$documentation}/{./@link}{$ext}"
+                            <a href="https://www.saxonica.com/html/documentation{$version}/{./@link}{$ext}"
                                 class="bodylink"><xsl:value-of select="./@name"/></a>
                             <xsl:if test="not(position() = last())">
                                 <xsl:text>, </xsl:text>
@@ -188,9 +184,7 @@
             <p>For more details see: <xsl:for-each select="$details">
                 <xsl:variable name="ext" select="if (./@subpages='has-subpages') then
                     '/index.html' else '.html'"/>
-                <xsl:variable name="documentation" select="if ($major-version=$version) then
-                    'documentation' else concat('documentation',$version)"/>
-                <a href="http://www.saxonica.com/html/{$documentation}/{./@link}{$ext}"
+                <a href="https://www.saxonica.com/html/documentation{$version}/{./@link}{$ext}"
                     class="bodylink"><xsl:value-of select="./@name"/></a>
                 <xsl:if test="not(position() = last())">
                     <xsl:text>, </xsl:text>

@@ -623,7 +623,39 @@ task gen_feature_matrix(
   main = "com.saxonica.Transform"
   args "${projectDir}/tools/docs/feature-matrix/feature-matrix.xml",
           "-xsl:${projectDir}/tools/docs/feature-matrix/feature-matrix-to-overview-chart.xsl",
-          "-o:${buildDir}/website/products/feature-matrix-${saxonMajorVersion}.xml",
-          "major-version=10"
+          "-o:${buildDir}/website/products/feature-matrix-${saxonMajorVersion}.xml"
 }
 
+task gen_prod_desc(
+        type: JavaExec,
+        description: "Creates the base product description file"
+) {
+  inputs.file "${projectDir}/tools/docs/feature-matrix/feature-matrix.xml"
+  inputs.file "${projectDir}/tools/docs/feature-matrix/feature-matrix-to-prod-desc.xsl"
+  outputs.file "${buildDir}/proddesc/prod-desc.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "${projectDir}/tools/docs/feature-matrix/feature-matrix.xml",
+          "-xsl:${projectDir}/tools/docs/feature-matrix/feature-matrix-to-prod-desc.xsl",
+          "-o:${buildDir}/proddesc/prod-desc.xml"
+}
+
+task gen_prod_desc_fo(
+        type: JavaExec,
+        dependsOn: ["gen_prod_desc"],
+        description: "Creates the FO and HTML versions of the product descriptions"
+) {
+  inputs.file "${buildDir}/proddesc/prod-desc.xml"
+  inputs.file "${projectDir}/tools/docs/feature-matrix/PD/prod-desc-to-fo.xsl"
+  outputs.file "${buildDir}/proddesc/PD/dummy.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "${buildDir}/proddesc/prod-desc.xml",
+          "-xsl:${projectDir}/tools/docs/feature-matrix/PD/prod-desc-to-fo.xsl",
+          "-o:${buildDir}/proddesc/PD/dummy.xml"
+}
+
+// TODO Next step to generate the PDFs never worked in Ant, we had to do it manually.
+// Open each build/proddesc/PD/fo/*.fo document in Oxygen and run from there:
+// run Apply Configuration Scenario FO PDF (default)
+// The generated PDFs should then be copied to build/website/products/PD${saxonMajorVersion}/
