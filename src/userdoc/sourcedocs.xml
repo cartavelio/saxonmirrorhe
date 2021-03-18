@@ -82,9 +82,10 @@
 
 
     <aside>
-      <p>To recognize additional kinds of ZIP file, for example Open Office documents, write a
-        subclass of <code>StandardCollectionFinder</code> that overrides the method
-          <code>isJarFileURI()</code>.</p>
+      <p>To recognize additional kinds of ZIP file, for example Open Office documents, set the
+      configuration property <code>ZIP_URI_PATTERN</code>. The value is a regular
+        expression, for example you could set it to <code>"\.(zip|jar|docx)$"</code> to recognize
+        URIs with file extensions ".zip", ".jar", or ".docx".</p>
     </aside>
 
 
@@ -528,7 +529,6 @@
       This will commonly be an <code>XdmDestination</code> to build an in-memory <code>XdmNode</code>,
       or a <code>Serializer</code> to create lexical XML,
       but it could also be, for example, an <code>XsltTransformer</code> or a <code>SchemaValidator</code>.</p>
-    
     
     <p>Conventional event-based APIs such as the SAX <code>ContentHandler</code> and StAX <code>XMLStreamWriter</code>
     and <code>XMLEventWriter</code> rely on the application to issue a properly-nested
