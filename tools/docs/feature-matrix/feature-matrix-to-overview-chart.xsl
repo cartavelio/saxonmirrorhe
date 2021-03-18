@@ -4,33 +4,21 @@
 
     <xsl:output method="xhtml" indent="yes"/>
     
-    <xsl:param name="major-version"/>
     <xsl:variable name="version" select="featureMatrix/@version"/>
 
     <xsl:template match="featureMatrix">
         <xsl:processing-instruction name="xml-stylesheet">href="../make-menu.xsl" type="text/xsl"</xsl:processing-instruction>
-        <xsl:variable name="documentation-version">
-            <xsl:choose>
-                <xsl:when test="$version = $major-version">                    
-                    <xsl:value-of select="'documentation'"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:value-of select="concat('documentation',$version)"/>
-                </xsl:otherwise>
-            </xsl:choose>
-        </xsl:variable>
+        <xsl:variable name="documentation-version" select="concat('documentation',$version)"/>
         <xsl:variable name="page" select="concat('feature-matrix-',replace($version,'\.','-'))"/>
         <html>
             <head>
-                <xsl:choose>
-                    <xsl:when test="$version = $major-version">
-                        <this-is section="products" page="{$page}" subpage=""/>                        
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <this-is section="products" page="{concat('feature-matrix-',replace($major-version,'\.','-'))}" subpage="{$page}"/>
-                    </xsl:otherwise>
-                </xsl:choose>
-                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+                <this-is section="products" page="feature-matrix-X" subpage="{$page}"/>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                <meta name="description" content="the full range of Saxon products and features implementing four W3C defined languages on four technology platforms such as Java, .NET, Native, JavaScript" />
+                <meta name="keywords" content="XSLT, XQuery, XSD, XPath, Java, .NET, Native, JavaScript" />
+                <meta name="coverage" content="Worldwide" />
+                <meta name="copyright" content="Copyright Saxonica Ltd" />
+                <meta name="robots" content="follow" />
                 <title>Saxonica: Saxon Product/Feature Matrix</title>
             </head>
             <body class="main">

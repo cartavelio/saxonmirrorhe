@@ -14,9 +14,8 @@ clone_expath_cg.onlyIf {
 // ============================================================
 
 task documentation(
-  dependsOn: ["update_documentation",
-              "gen_contents_ref"],
-  description: "Build the website"
+  dependsOn: ["update_documentation", "gen_contents_ref", "gen_feature_matrix"],
+  description: "Build the documentation and pages for website"
 ) {
   // Just a place to hang dependencies
 }
@@ -181,7 +180,7 @@ task dotnet_doc_jel(
     "-o:${buildDir}/dotnetdoc-xml/packages/Saxon.Api.xml"
 }
 
-task app_javadoc(
+task app_dotnetdoc(
   type: Copy,
   dependsOn: ["dotnet_doc_jel"],
   description: "Copy the XML dotnet docs to the viewer app"
@@ -190,7 +189,7 @@ task app_javadoc(
   from "${buildDir}/dotnetdoc-xml"
 }
 
-task app_dotnetdoc(
+task app_javadoc(
   type: Copy,
   dependsOn: ["product_xsljavadoc"],
   description: "Copy the XML javadoc docs to the viewer app"
@@ -595,10 +594,12 @@ task copy_html_documentation(
   from "${buildDir}/userdoc/html"
 }
 
+// ============================================================
+
 task gen_contents_ref(
   type: JavaExec,
   dependsOn: ["copy_xml_documentation"],
-  description: "Creates the contents reference file for the user documentation"
+  description: "Creates the contents reference file for the user documentation (used for website pages)"
 ) {
   inputs.file "${buildDir}/website/documentation/doc/catalog.xml"
   inputs.file "${projectDir}/tools/docs/userdoc/contents-builder.xsl"
@@ -609,5 +610,20 @@ task gen_contents_ref(
     "-xsl:${projectDir}/tools/docs/userdoc/contents-builder.xsl",
     "-o:${buildDir}/website/documentation/contents.xml",
     "version-number=${saxonMajorVersion}"
+}
+
+task gen_feature_matrix(
+        type: JavaExec,
+        description: "Creates the base feature matrix file for the website"
+) {
+  inputs.file "${projectDir}/tools/docs/feature-matrix/feature-matrix.xml"
+  inputs.file "${projectDir}/tools/docs/feature-matrix/feature-matrix-to-overview-chart.xsl"
+  outputs.file "${buildDir}/website/products/feature-matrix-${saxonMajorVersion}.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "${projectDir}/tools/docs/feature-matrix/feature-matrix.xml",
+          "-xsl:${projectDir}/tools/docs/feature-matrix/feature-matrix-to-overview-chart.xsl",
+          "-o:${buildDir}/website/products/feature-matrix-${saxonMajorVersion}.xml",
+          "major-version=10"
 }
 
