@@ -25,9 +25,7 @@ using JDestination = net.sf.saxon.s9api.Destination;
 using JAbstractDestination = net.sf.saxon.s9api.AbstractDestination;
 using JAction = net.sf.saxon.s9api.Action;
 using java.net;
-using net.sf.saxon.@event;
 using net.sf.saxon.s9api;
-using net.sf.saxon.serialize;
 
 namespace Saxon.Api
 {
@@ -894,43 +892,6 @@ namespace Saxon.Api
             return this;
         }
     }
-
-    /*
-    /// <summary>
-    /// A completely general functional interface for functions that take
-    /// no argument, return void, and potentially throw a Exception
-    /// </summary>
-    public interface IAction {
-
-        /// <summary>
-        /// Perform the requested action
-        /// </summary>
-        void Act();
-
-    } */
-
-    /*internal class ActionImpl: net.sf.saxon.s9api.Action {
-
-        private IAction action;
-        public ActionImpl(IAction actioni) {
-            action = actioni;
-        }
-
-        public void act()
-        {
-            try
-            {
-                action.Act();
-
-            }
-            catch (net.sf.saxon.s9api.SaxonApiException ex) {
-
-                throw new DynamicError(ex);
-            }
-
-        }
-
-    }*/
 
 
     internal class AbstractDestination : XmlDestination

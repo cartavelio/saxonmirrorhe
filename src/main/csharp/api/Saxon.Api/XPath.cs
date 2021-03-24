@@ -904,6 +904,10 @@ namespace Saxon.Api
 
     }
 
+	/// <summary>
+	/// A set of query parameters on a URI passed to the <c>collection()</c> or <c>document()</c> function.
+	/// </summary>
+
     public class URIQueryParameters
     {
 
@@ -914,27 +918,34 @@ namespace Saxon.Api
         public const int ON_ERROR_WARNING = 2;
         public const int ON_ERROR_IGNORE = 3;
 
+		/// <summary>
+		/// Create an object representing the query part of a URI
+		/// </summary>
+		/// <param name="query">the part of the URI after the "?" symbol</param>
+		/// <param name="value">the Saxon Processor</param>
+
         public URIQueryParameters(String query, Processor proc)
         {
             uriQueryParameters = new net.sf.saxon.functions.URIQueryParameters(query, proc.Implementation);
 
         }
 
-        internal net.sf.saxon.functions.URIQueryParameters Implementation() {
+        internal net.sf.saxon.functions.URIQueryParameters Implementation() 
+		{
             return uriQueryParameters;
         } 
 
-        /*
-        public static FileNameFilter MakeGlobFilter(String value) {
+        /* public static FileNameFilter MakeGlobFilter(String value) 
+        {
             return new FileNameFilter(net.sf.saxon.functions.URIQueryParameters.makeGlobFilter(value));
         } */
 
-        public int ValidationMode() {
+        public int ValidationMode() 
+		{
             return uriQueryParameters.getValidationMode().intValue();
         }
 
-        /*
-        public FileNameFilter FileNameFilter
+        /* public FileNameFilter FileNameFilter
         {
             get {
                 return new FileNameFilter(uriQueryParameters.getFilenameFilter());
@@ -942,11 +953,13 @@ namespace Saxon.Api
             
         }*/
 
-        public bool GetRecurse() {
+        public bool GetRecurse() 
+		{
             return uriQueryParameters.getRecurse().booleanValue();
         }
 
-        public int GetOnError() {
+        public int GetOnError() 
+		{
             return uriQueryParameters.getOnError().intValue();
         }
 

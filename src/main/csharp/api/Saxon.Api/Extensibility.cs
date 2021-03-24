@@ -16,11 +16,10 @@ using JXdmSequenceType = net.sf.saxon.s9api.SequenceType;
 using JItem = net.sf.saxon.om.Item;
 using JResource = net.sf.saxon.lib.Resource;
 using JResourceCollection = net.sf.saxon.lib.ResourceCollection;
+using JResourceFactory = net.sf.saxon.lib.ResourceFactory;
 using JStandardCollectionFinder = net.sf.saxon.resource.StandardCollectionFinder;
 using JCollectionFinder = net.sf.saxon.lib.CollectionFinder;
 using System.Collections.Generic;
-using net.sf.saxon.expr;
-using net.sf.saxon.lib;
 using net.sf.saxon.om;
 using java.util;
 using net.sf.saxon;
@@ -425,7 +424,7 @@ namespace Saxon.Api
         /// supplied to the fn:collection or fn:uri-collection against the staticbase URI</param>
         /// <returns>a ResourceCollection object representing the resources in the collection identified
         ///  by this collection URI. Result should not be null.</returns>
-        IResourceCollection FindCollection(DynamicContext context, String collectionURI);
+		/**public**/ IResourceCollection FindCollection(DynamicContext context, String collectionURI);
 
 
     }
@@ -446,7 +445,7 @@ namespace Saxon.Api
         /// If the collection() or uri-collection() function
         /// was called with no arguments(to get the "default collection") this
         /// will be the URI of the default collection registered with the Configuration.</returns>
-        String CollectionURI();
+		/**public**/ String CollectionURI();
 
         /// <summary>
         /// Get the URIs of the resources in the collection. This supports the fn:uri-collection()
@@ -460,7 +459,7 @@ namespace Saxon.Api
         /// <param name="context">context the XPath evaluation context</param>
         /// <returns>an iterator over the URIs of the resources in the collection. The URIs are represented
         /// as Strings.They should preferably be absolute URIs.</returns>
-        List<String> GetResourceURIs(DynamicContext context);
+		/**public**/ List<String> GetResourceURIs(DynamicContext context);
 
         /// <summary>
         /// Get the resources in the collection. This supports the fn:collection() function. It is not
@@ -471,7 +470,7 @@ namespace Saxon.Api
         /// <param name="context">the XPath evaluation context</param>
         /// <returns>a List over the resources in the collection. This returns objects of class
         /// <c>Riesource</c>.</returns>
-        List<IResource> GetResources(DynamicContext context);
+		/**public**/ List<IResource> GetResources(DynamicContext context);
 
 
     }
@@ -506,6 +505,13 @@ namespace Saxon.Api
     public class JarCollection : ResourceCollection
     {
 
+		/// <summary>
+		/// Create a JarCollection
+		/// </summary>
+		/// <param name="context">The XPath dynamic context</param>
+		/// <param name="collectionURI">the collection URI used to identify this collection 
+		/// (typically but not necessarily the location of the JAR file)</param>
+		/// <param name="parameters">URI query parameters appearing on the collection URI</param>
         public JarCollection(DynamicContext context, String collectionURI, URIQueryParameters parameters)
         {
             resourceCollection = new net.sf.saxon.resource.JarCollection(context.context, collectionURI, parameters.Implementation());
@@ -514,6 +520,9 @@ namespace Saxon.Api
 
     }
 
+	/// <summary>
+	/// CatalogCollection
+	/// </summary>
     public class CatalogCollection : ResourceCollection
     {
 
@@ -644,7 +653,7 @@ namespace Saxon.Api
         /// Get a URI that identifies this resource
         /// </summary>
         /// <returns>a URI identifying the resource</returns>
-        String GetResourceURI();
+		/**public**/ String GetResourceURI();
 
         /// <summary>
         /// Get an XDM Item holding the contents of this resource.
@@ -655,25 +664,28 @@ namespace Saxon.Api
         /// for text resources, a map or array for JSON resources, a base64Binary value
         /// for binary resource.May also return null if the resource cannot be materialized
         /// and this is not to be treated as an error.</returns>
-        XdmItem GetXdmItem(DynamicContext context);
+		/**public**/ XdmItem GetXdmItem(DynamicContext context);
 
         /// <summary> 
         /// Get the media type (MIME type) of the resource if known
         /// </summary>
         /// <returns>the media type if known; otherwise null</returns>
-        String GetContentType();
+		/**public**/ String GetContentType();
     }
 
+	/// <summary>
+	/// ResourceCollection
+	/// </summary>
     public class ResourceCollection : IResourceCollection
     {
-        protected net.sf.saxon.lib.ResourceCollection resourceCollection;
+		protected JResourceCollection resourceCollection;
 
         internal ResourceCollection()
         {
         }
 
 
-        internal ResourceCollection(net.sf.saxon.lib.ResourceCollection rc) {
+		internal ResourceCollection(JResourceCollection rc) {
             resourceCollection = rc;
         }
 
@@ -726,11 +738,11 @@ namespace Saxon.Api
         /// </summary>
         /// <param name="proc">the Saxon Processor</param>
         /// <returns>the resource</returns>
-        IResource MakeResource(Processor proc);
+		/**public**/ IResource MakeResource(Processor proc);
 
     }
 
-    internal class ResourceFactoryWrapper : net.sf.saxon.lib.ResourceFactory
+    internal class ResourceFactoryWrapper : JResourceFactory
     {
         private IResourceFactory resourceFactory;
         private Processor proc;
@@ -752,9 +764,13 @@ namespace Saxon.Api
     {
         internal JResource resource = null;
 
-        public Resource() { resource = null; }
+        public Resource() 
+		{ 
+			resource = null; 
+		}
 
-        public Resource(JResource rc) {
+        public Resource(JResource rc) 
+		{
             resource = rc;
         }
 
@@ -774,10 +790,13 @@ namespace Saxon.Api
         }
     }
 
+	/// <summary>
+	/// BinaryResource
+	/// </summary>
     public class BinaryResource : Resource {
 
 
-        public BinaryResource(String href, String contentType, byte [] content) {
+        public BinaryResource(String href, String contentType, byte[] content) {
             resource = new net.sf.saxon.resource.BinaryResource(href, contentType, content); 
         }
 
@@ -785,7 +804,7 @@ namespace Saxon.Api
     }
 
 
-    internal class ResourceWrapper : net.sf.saxon.lib.Resource
+    internal class ResourceWrapper : JResource
     {
 
         IResource resource;
@@ -810,7 +829,7 @@ namespace Saxon.Api
     }
     
 
-    internal class CollectionFinderWrapper : net.sf.saxon.lib.CollectionFinder
+    internal class CollectionFinderWrapper : JCollectionFinder
     {
 
         ICollectionFinder collectionFinder;

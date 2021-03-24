@@ -263,7 +263,10 @@ namespace Saxon.Api
             get { return reporter; }
         }
 
-
+		/// <summary>
+		/// This method is called internally in Saxon to report an error by adding it to the error list.
+		/// </summary>
+		/// <param name="xpe">details of the error to be reported</param>
         public void report(JXmlProcessingError xpe)
         {
             reporter.report(new XmlProcessingError(xpe));
@@ -301,7 +304,7 @@ namespace Saxon.Api
         /// <summary>
         /// This method is called internally in Saxon to report an error by adding it to the error list.
         /// </summary>
-        /// <param name="xpe"></param>
+		/// <param name="xpe">details of the error to be reported</param>
         public void report(JXmlProcessingError xpe)
         {
             errorList.Add(new XmlProcessingError(xpe));
@@ -332,7 +335,10 @@ namespace Saxon.Api
             get { return errorList; }
         }
 
-
+		/// <summary>
+		/// This method is called internally in Saxon to report an error by adding it to the error list.
+		/// </summary>
+		/// <param name="xpe">details of the error to be reported</param>
         public void report(JXmlProcessingError xpe)
         {
             errorList.Add(new StaticError(net.sf.saxon.trans.XPathException.fromXmlProcessingError(xpe)));

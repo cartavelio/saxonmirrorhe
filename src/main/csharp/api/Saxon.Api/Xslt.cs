@@ -2054,7 +2054,6 @@ namespace Saxon.Api
 
     /// <summary>An <code>Xslt30Transformer</code> represents a compiled and loaded stylesheet ready for execution.
     /// The <code>Xslt30Transformer</code> holds details of the dynamic evaluation context for the stylesheet.</summary>
-
     /// <remarks><para>The <code>Xslt30Transformer</code> differs from <see cref="XsltTransformer"/> 
     /// in supporting new options
     /// for invoking a stylesheet, corresponding to facilities defined in the XSLT 3.0 specification. However,
@@ -2065,14 +2064,11 @@ namespace Saxon.Api
     /// It is safe, however, to reuse the object within a single thread to run the same
     /// stylesheet several times. Running the stylesheet does not change the context
     /// that has been established.</para>
-
     /// <para>An <code>Xslt30Transformer</code> is always constructed by running the <code>Load30</code>
     /// method of an <see cref="XsltExecutable"/>.</para>
-
     /// <para>Unlike <code>XsltTransformer</code>, an <code>Xslt30Transformer</code> is not a <code>Destination</code>.
     /// To pipe the results of one transformation into another, the target should be an <code>XsltTransfomer</code>
     /// rather than an <code>Xslt30Transformer</code>.</para>
-
     /// <para>Evaluation of an Xslt30Transformer proceeds in a number of phases:</para>
     /// <list type="number">
     /// <item>First, values may be supplied for stylesheet parameters and for the global context item. The

@@ -150,7 +150,8 @@ namespace Saxon.Api
             processor = new JProcessor(config);
         }
 
-        public ICollectionFinder CollectionFinder{  
+        public ICollectionFinder CollectionFinder
+		{  
             set {
                 if (value != null)
                 {
@@ -176,6 +177,11 @@ namespace Saxon.Api
 
         }
 
+		/// <summary>
+		/// Register a specific URI and bind it to a specific <c>ResourceCollection</c>
+		/// </summary>
+		/// <param name="collectionURI">the collection URI to be registered. Must not be null.</param>
+		/// <param name="collection">the ResourceCollection to be associated with this URI. Must not be null.</param>
         public void RegisterCollection(String collectionURI, IResourceCollection collection) {
             StandardCollectionFinder.RegisterCollection(collectionURI, collection);
             if (CollectionFinder is StandardCollectionFinder && collectionFinder != standardCollectionFinder) {
