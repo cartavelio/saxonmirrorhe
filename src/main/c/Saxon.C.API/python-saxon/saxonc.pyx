@@ -118,18 +118,6 @@ cdef class PySaxonProcessor:
          cdef char * c_str_ = py_value_string if cwd is not None else ""
          self.thisptr.setcwd(c_str_)
 
-
-    def set_resources_directory(self, dir_):
-        """
-        Property to set or get resources directory
-
-        :str: A string of the resources directory which Saxon will use
-
-        """
-
-    @property
-    def resources_directory(self):
-        return NULL
     
     def set_configuration_property(self, name, value):
         """
@@ -651,16 +639,20 @@ cdef class PyXsltProcessor:
 
         self.thisxptr.clearProperties()
 
-     def setup_xsl_message(self, show, file_name = None):
+     def setup_xsl_message(self, bool show, file_name = None):
         """
         setup_xsl_message(self, **kwds)
         gives users the option to switch on or off the <code>xsl:message</code> feature. It is also possible
         to send the <code>xsl:message</code> outputs to file given by file name.
 
         """
+        cdef char * c_file_name
         py_name_string = file_name.encode('UTF-8') if file_name is not None else None
-        cdef char * c_file_name = py_name_string if file_name is not None else NULL
-        self.thisxptr.getXslMessages(bool(show), c_file_name)
+        if file_name is not None:
+            c_file_name = py_name_string
+            self.thisxptr.setupXslMessage(show, c_file_name)
+        else:
+            self.thisxptr.setupXslMessage(show)
 
 
      def transform_to_string(self, **kwds):
@@ -1299,8 +1291,11 @@ cdef class PyXslt30Processor:
 
         """
         py_name_string = file_name.encode('UTF-8') if file_name is not None else None
-        cdef char * c_file_name = py_name_string if file_name is not None else NULL
-        self.thisxptr.getXslMessages(show, c_file_name)
+        if file_name is not None:
+            c_file_name = py_name_string
+            self.thisxptr.setupXslMessage(show, c_file_name)
+        else:
+            self.thisxptr.setupXslMessage(show)
 
      def transform_to_string(self, **kwds):
         """
@@ -3335,7 +3330,6 @@ cdef class PyXdmValue:
         
 
         """
-        cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
         cdef PyXdmItem val = None
@@ -3402,18 +3396,18 @@ cdef class PyXdmValue:
 cdef class PyXdmValueIterator:
      ''' Iterator class for the PyXdmValue '''
      def __init__(self, value):
-     # PyXdmValue object reference
+        # PyXdmValue object reference
         self._value = value
         # member variable to keep track of current index
-       self._index = 0
-   def __next__(self):
-       ''''Returns the next value from PyXdmValue object's lists '''
-       if self._index < self._value.size :
-           result = value.item_at(self._index)
-           self._index +=1
-           return result
-       # End of Iteration
-       raise StopIteration
+        self._index = 0
+     def __next__(self):
+        ''''Returns the next value from PyXdmValue object's lists '''
+        if self._index < self._value.size :
+            result = value.item_at(self._index)
+            self._index +=1
+            return result
+        # End of Iteration
+        raise StopIteration
 
 
 

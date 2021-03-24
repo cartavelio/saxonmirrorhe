@@ -126,9 +126,6 @@ SaxonProcessor::SaxonProcessor() {
     SaxonProcessor(false);
 }
 
-const char * SaxonProcessor::getResourcesDirectory() {
-    return NULL;
-}
 
 void SaxonProcessor::createException(const char * message) {
 

@@ -18,12 +18,6 @@ cdef extern from "../SaxonProcessor.h":
 
         #SaxonProcessor * getProcessor()
 
-        #set saxon resources directory
-        void setResourcesDirectory(const char* dir)
-        
-        #get saxon resources directory
-        const char * getResourcesDirectory()
-
         #Set a configuration property specific to the processor in use. 
         #Properties specified here are common across all the processors.
         void setConfigurationProperty(char * name, char * value)

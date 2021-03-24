@@ -587,7 +587,10 @@ void XsltProcessor::transformFileToFile(const char* source,
 										SaxonProcessor::sxn_environ->env->NewStringUTF(
 												source) :
 										nullptr),
-								SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet),nullptr,
+								SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet),(outputfile != nullptr ?
+                                                                                            SaxonProcessor::sxn_environ->env->NewStringUTF(
+                                                                                                    outputfile) :
+                                                                                            nullptr),
 								stringArray, objectArray);
 		if (size > 0) {
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray);
