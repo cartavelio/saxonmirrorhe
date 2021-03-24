@@ -151,7 +151,7 @@ public class Feature<T> {
 
     <xsl:template match="desc" mode="#all">
         <xsl:text>&#xa;    /// &lt;summary&gt;</xsl:text>
-        <xsl:apply-templates select="p[1]" mode="#current"/>
+        <xsl:apply-templates select="p[1]/node()" mode="#current"/>
         <xsl:text>&#xa;    /// &lt;/summary&gt;</xsl:text>
         <xsl:if test="count(child::*) gt 1">
             <xsl:text>&#xa;    /// &lt;remarks&gt;</xsl:text>
