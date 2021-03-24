@@ -155,6 +155,7 @@ PHP_METHOD(SaxonProcessor, __construct)
 
           }
 #endif
+	  delete cwdi;
 
     } else {
         saxonProc->setcwd(cwdi);
@@ -964,6 +965,7 @@ PHP_METHOD(XdmValue, __construct)
 PHP_METHOD(XdmValue, __destruct)
 {
 
+std::cerr<<"php_xdmValue  destruct"<<std::endl;
      zend_object *oobj = Z_OBJ_P(getThis());
     xdmValue_object* obj = (xdmValue_object *)((char *)oobj - XtOffsetOf(xdmValue_object, std));
     XdmValue * xdmValue= obj->xdmValue;
@@ -971,6 +973,7 @@ PHP_METHOD(XdmValue, __destruct)
     	//xdmValue->decrementRefCount();
     	//if(xdmValue!= nullptr && xdmValue->getRefCount()< 1){
     		delete xdmValue;
+		xdmValue = nullptr;
    	        //}
     }
 }
@@ -1175,6 +1178,7 @@ void XdmItem_destroy_storage(zend_object *object)
 
 PHP_METHOD(XdmItem, __destruct)
 {
+std::cerr<<"php_item  destruct"<<std::endl;
      zval *object = getThis();
      zend_object * zobj = Z_OBJ_P(object);
 
@@ -1184,6 +1188,7 @@ PHP_METHOD(XdmItem, __destruct)
     //xdmItem->decrementRefCount();
     if(xdmItem != nullptr /*&& xdmItem->getRefCount()< 1*/){
     	delete xdmItem;
+	xdmItem = nullptr;
     }
     
 }
@@ -1348,6 +1353,7 @@ void XdmNode_destroy_storage(zend_object *object)
 
 PHP_METHOD(XdmNode, __destruct)
 {
+std::cerr<<"php_node  destruct"<<std::endl;
     zval *object = getThis();
      zend_object * zobj = Z_OBJ_P(object);
 
@@ -1359,6 +1365,7 @@ PHP_METHOD(XdmNode, __destruct)
     	//xdmNode->decrementRefCount();
     	//if(xdmNode->getRefCount()< 1){
     		delete xdmNode;
+		xdmNode = nullptr;
     	//}
     }
     }
@@ -1693,6 +1700,7 @@ PHP_METHOD(XdmAtomicValue, __destruct)
     if(xdmValue!= nullptr /*&& xdmValue->getRefCount()< 1*/){
 	//xdmValue->decrementRefCount();
     	delete xdmValue;
+	xdmValue = nullptr;
     }
     
 }

@@ -375,7 +375,7 @@ PHP_METHOD(XQueryProcessor, clearParameters)
     xqueryProcessor_object *obj = (xqueryProcessor_object *)((char *)pobj - XtOffsetOf(xqueryProcessor_object, std));
     xqueryProcessor = obj->xqueryProcessor;
     if (xqueryProcessor != nullptr) {
-        xqueryProcessor->clearParameters(true);
+        xqueryProcessor->clearParameters();
     }
 }
 

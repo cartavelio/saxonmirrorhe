@@ -54,6 +54,7 @@ bool XdmNode::isAtomic() {
     }
 
     XdmNode::~XdmNode() {
+std::cerr<<"XdmNode desructor"<<std::endl;
         delete baseURI;
         delete nodeName;
         if(children != nullptr) {

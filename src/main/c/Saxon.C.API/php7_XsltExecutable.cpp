@@ -1334,7 +1334,7 @@ PHP_METHOD(XsltExecutable, clearParameters)
     xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
     xsltExecutable = obj->xsltExecutable;
     if (xsltExecutable != nullptr) {
-        xsltExecutable->clearParameters(true);
+        xsltExecutable->clearParameters();
     }
 }
 

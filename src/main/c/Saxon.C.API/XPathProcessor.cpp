@@ -59,6 +59,7 @@ XPathProcessor::XPathProcessor(SaxonProcessor* p, std::string curr) {
 
 
 XPathProcessor::~XPathProcessor(){
+    std::cerr<<"XPath desructor"<<std::endl;
     clearProperties();
     clearParameters();
 
@@ -234,6 +235,7 @@ if (!mID) {
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(objectArray);
 	}
 	if (result) {
+	 std::cerr<<"evaluateSingle C++ cp0"<<std::endl;
 		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
 		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
@@ -242,26 +244,28 @@ if (!mID) {
 			xdmItem = new XdmAtomicValue(result);
 
 		} else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, nodeClass)           == JNI_TRUE) {
-			
+
 			xdmItem = new XdmNode(result);
 
 		} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
 			return nullptr;
 		}
-		//SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+		SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+		std::cerr<<"evaluateSingle C++ cp1"<<std::endl;
 		return xdmItem;
 	} else  {
 			exception = proc->checkAndCreateException(cppClass);
 	   		
      		}
 }
-
+ std::cerr<<"evaluateSingle C++ cp2"<<std::endl;
 return nullptr;
 
 }
 
 void XPathProcessor::setContextItem(XdmItem * item) {
     	if(item != nullptr){
+	std::cerr<<" setContextItem item pointer ="<<(item)<<std::endl;
      	 parameters["node"] = (XdmValue *)item;
     	}
 }
@@ -444,6 +448,7 @@ void XPathProcessor::setProperty(const char * name, const char * value) {
 }
 
 void XPathProcessor::clearParameters(bool delVal) {
+std::cerr<<"XPath clearParameter"<<std::endl;
 	if(delVal) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;

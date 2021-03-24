@@ -95,12 +95,9 @@ jobject XdmItem::getUnderlyingValue(){
 XdmItem::~XdmItem() {
     //decrementRefCount();
 
-    SaxonProcessor::sxn_environ->env->ExceptionDescribe();
-
-    if(value !=nullptr && SaxonProcessor::jvmCreatedCPP>0) {
+    if(value !=nullptr) {
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(value);
     }
-    SaxonProcessor::sxn_environ->env->ExceptionDescribe();
     if(stringValue.empty()) {
         stringValue.clear();
     }

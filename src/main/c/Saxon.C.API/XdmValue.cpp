@@ -132,6 +132,7 @@ XdmValue::XdmValue(jobject val, bool arr){
 
 
 XdmValue::~XdmValue() {
+	std::cerr<<"XdmValue destructor pointer = "<<(this)<<std::endl;
 	//bool safeToClear = false;
 	if(values.size() > 0) {
         for (size_t i = 0; i < values.size(); i++) {

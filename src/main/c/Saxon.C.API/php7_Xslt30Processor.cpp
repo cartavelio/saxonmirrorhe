@@ -64,7 +64,7 @@ PHP_METHOD(Xslt30Processor, clearParameters)
     xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
     xslt30Processor = obj->xslt30Processor;
     if (xslt30Processor != NULL) {
-        xslt30Processor->clearParameters(true);
+        xslt30Processor->clearParameters();
     }
 }
 

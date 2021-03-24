@@ -562,7 +562,7 @@ PHP_METHOD(XsltProcessor, clearParameters)
     xsltProcessor_object *obj = (xsltProcessor_object *)((char *)pobj - XtOffsetOf(xsltProcessor_object, std));
     xsltProcessor = obj->xsltProcessor;
     if (xsltProcessor != nullptr) {
-        xsltProcessor->clearParameters(true);
+        xsltProcessor->clearParameters();
     }
 }
 
