@@ -21,10 +21,14 @@ def csharpCompiler = null
   }
 }
 
+// Only the mono version of the C# compiler produces the correct
+// documentation XML. ¯\_(ツ)_/¯
+def monoCSharpCompiler = csharpCompiler
 def ikvmExecutable = ["${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe"]
 if (mono != null) {
   ikvmExecutable = [mono, "${ikvmDir}/ikvm-${ikvmVersion}/bin/ikvmc.exe"]
   csharpCompiler = [mono, "${monoFramework}/lib/mono/4.5/csc.exe"]
+  monoCSharpCompiler = [mono, "${monoFramework}/lib/mono/4.5/mcs.exe"]
 }
 
 def additionalIkvmOptions = []
@@ -190,7 +194,7 @@ task een_setupPreprocess(
 
 task hen_preprocess(
   type: JavaExec,
-  dependsOn: ["hen_setupPreprocess"],
+  dependsOn: ["hen_setupPreprocess", "record_branch"],
   description: "Preprocess HE sources"
 ) {
   inputs.files fileTree(dir: "${buildDir}/filtered/hen")
@@ -208,7 +212,7 @@ task hen_preprocess(
 
 task pen_preprocess(
   type: JavaExec,
-  dependsOn: ["pen_setupPreprocess"],
+  dependsOn: ["pen_setupPreprocess", "record_branch"],
   description: "Preprocess PE sources"
 ) {
   inputs.files fileTree(dir: "${buildDir}/filtered/pen")
@@ -226,7 +230,7 @@ task pen_preprocess(
 
 task een_preprocess(
   type: JavaExec,
-  dependsOn: ["een_setupPreprocess"],
+  dependsOn: ["een_setupPreprocess", "record_branch"],
   description: "Preprocess EE sources"
 ) {
   inputs.files fileTree(dir: "${buildDir}/filtered/een")
@@ -531,6 +535,7 @@ task "n_notices"(
     from "${ikvmDir}/ikvm-${ikvmVersion}/bin"
     into "${buildDir}/n/bin/${release}"
     include "IKVM.OpenJDK.Core.dll"
+    include "IKVM.OpenJDK.Localedata.dll"
     include "IKVM.OpenJDK.Charsets.dll"
     include "IKVM.OpenJDK.Text.dll"
     include "IKVM.OpenJDK.Util.dll"
@@ -962,31 +967,77 @@ if (csharpCompiler == null) {
     }
   }
 
-  task een_csharpApi(
-    dependsOn: ["eenDll"],
-    description: "Compile Saxon.Api for EE"
-  ) {
-    inputs.files("${buildDir}/n/build/dll/ee")
-    inputs.files("${buildDir}/n/csharp/api")
-    outputs.file("${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
+  if (csharpCompiler == monoCSharpCompiler) {
+    task een_csharpApi(
+      dependsOn: ["eenDll"],
+      description: "Compile Saxon.Api for EE"
+    ) {
+      inputs.files("${buildDir}/n/build/dll/ee")
+      inputs.files("${buildDir}/n/csharp/api")
+      outputs.file("${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
-    doLast {
-      def args = csharpCompiler \
-      + ["-out:${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
-         "-target:library",
-         "-doc:${buildDir}/n/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
-         "-keyfile:${ikvmDir}/saxondotnet.snk"]
-      fileTree(dir: "${buildDir}/n/bin/ee",
-               include: "*.dll").each { dll ->
-        args += ["-reference:${dll}"]
-      }
-      fileTree(dir: "${buildDir}/n/csharp/api/Saxon.Api",
-               include: "**/*.cs").each { cs ->
-        args += [cs]
+      doFirst {
+        println("********************************************************************")
+        println("Warning: this task will not generate useful documentation API XML.")
+        println("You must use the Mono/mcs compiler to get useful documentation.")
+        println("********************************************************************")
       }
 
-      exec {
-        commandLine args
+      doLast {
+        def args = csharpCompiler \
+        + ["-out:${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+           "-target:library",
+           "-doc:${buildDir}/n/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
+           "-keyfile:${ikvmDir}/saxondotnet.snk"]
+        fileTree(dir: "${buildDir}/n/bin/ee",
+                 include: "*.dll").each { dll ->
+          args += ["-reference:${dll}"]
+        }
+        fileTree(dir: "${buildDir}/n/csharp/api/Saxon.Api",
+                 include: "**/*.cs").each { cs ->
+          args += [cs]
+        }
+        
+        exec {
+          commandLine args
+        }
+      }
+    }
+  } else {
+    task een_csharpApi(
+      dependsOn: ["eenDll", "hen_ApiAssemblyInfo"],
+      description: "Compile Saxon.Api for EE"
+    ) {
+      inputs.files("${buildDir}/n/build/dll/ee")
+      inputs.files("${buildDir}/n/csharp/api")
+      outputs.file("${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll")
+
+      doLast {
+        def args = monoCSharpCompiler \
+        + ["/nologo",
+           "/debug+",
+           "-keyfile:${ikvmDir}/saxondotnet.snk",
+           "/optimize-",
+           "-out:${buildDir}/n/bin/ee/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.dll",
+           "/target:library",
+           "/nostdlib-",
+           "/warn:3",
+           "/doc:${buildDir}/n/saxon-ee-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
+           "/fullpaths"]
+        fileTree(dir: "${buildDir}/n/bin/ee",
+                 include: "*.dll").each { dll ->
+          if (!dll.toString().contains("saxon-ee-api")) {
+            args += ["-reference:${dll}"]
+          }
+        }
+        fileTree(dir: "${buildDir}/n/csharp/api/Saxon.Api",
+                 include: "**/*.cs").each { cs ->
+          args += [cs]
+        }
+
+        exec {
+          commandLine args
+        }
       }
     }
   }
