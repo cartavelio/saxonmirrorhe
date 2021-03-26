@@ -12,7 +12,7 @@ apply plugin: 'java'
 repositories {
   mavenLocal()
   mavenCentral()
-  maven { url = "https://org.apache.maven" }
+  maven { url = "https://maven.apache.org" }
   maven { url "https://dev.saxonica.com/maven" }
 }
 
@@ -62,6 +62,7 @@ dependencies {
     files(saxonLicenseDir)
   )
   implementation (
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom', version: '1.2.15'],
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.2.15'],
     [group: 'xom', name: 'xom', version: '1.3.5'],
     [group: 'org.jdom', name: 'jdom', version: '1.1.3'],
@@ -1397,5 +1398,10 @@ runXslt30TestSuiteDriver.dependsOn "${saxonEdition}j_runXslt30TestSuiteDriver"
 task helloWorld() {
   doLast {
     println("Hello, world.")
+    /*
+    configurations.documentation.resolve().each { path ->
+      println(path)
+    }
+     */
   }
 }

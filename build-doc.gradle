@@ -30,6 +30,7 @@ task product_javadoc(
   inputs.files fileTree(dir: "${projectDir}/src/eej")
   outputs.files fileTree(dir: "${buildDir}/javadoc")
 
+  classpath = configurations.documentation
   source = new File("${buildDir}/src/eej")
   destinationDir= new File("${buildDir}/javadoc")
   // noindex="false" notree="false"
@@ -55,6 +56,7 @@ task product_jeljavadoc(
   inputs.file "${projectDir}/lib/jeldoc.jar"
   outputs.files fileTree(dir: "${buildDir}/jeljavadoc")
 
+  classpath = configurations.documentation
   source = new File("${buildDir}/src/eej")
   destinationDir= new File("${buildDir}/jeljavadoc")
   options.doclet = "com.jeldoclet.JELDoclet"
