@@ -6,14 +6,17 @@ import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.jaxp.TransformerImpl;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.stax.XMLStreamWriterDestination;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -21,10 +24,16 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * JUnit tests for the s9api XQueryCompiler
@@ -452,6 +461,38 @@ public class TestSerializer {
             assertTrue(out.endsWith("</root>"), "noFinalNewline");
         } catch (SaxonApiException err) {
             fail();
+        }
+    }
+
+    @Test
+    public void testXmlStreamWriter() {    // Bug 4929
+        try {
+            String xsl = "<xsl:stylesheet \n"
+                    + "  xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n"
+                    + "  exclude-result-prefixes=\"#all\"\n"
+                    + "  version=\"3.0\">\n"
+                    + "  \n"
+                    + "  <xsl:mode on-no-match=\"shallow-copy\"/>\n"
+                    + "  \n"
+                    + "</xsl:stylesheet>";
+            Processor processor = new Processor(false);
+            XdmNode inputDoc = processor.newDocumentBuilder().build(new File(ConfigTest.DATA_DIR + "renvooi.xml"));
+            StringWriter sw = new StringWriter();
+            Serializer serializer = processor.newSerializer(sw);
+            XMLStreamWriter xsw = serializer.getXMLStreamWriter();
+            XsltExecutable executable = processor.newXsltCompiler().compile(new StreamSource(new StringReader(xsl)));
+            executable.load30().applyTemplates(inputDoc, new XMLStreamWriterDestination(xsw));
+
+            XdmNode result = processor.newDocumentBuilder().build(new StreamSource(new StringReader(sw.toString())));
+            XdmFunctionItem deepEq = XdmFunctionItem.getSystemFunction(
+                    processor, new QName(NamespaceConstant.FN, "deep-equal"), 2);
+            assert deepEq != null;
+            XdmValue compare = deepEq.call(processor, inputDoc, result);
+            assertTrue(compare instanceof XdmAtomicValue);
+            assertTrue(((XdmAtomicValue)compare).getBooleanValue());
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
         }
     }
 
