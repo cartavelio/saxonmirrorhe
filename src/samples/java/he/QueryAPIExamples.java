@@ -270,7 +270,7 @@ public class QueryAPIExamples {
 
         final DynamicQueryContext dynamicContext = new DynamicQueryContext(config);
         final SequenceIterator iter = exp.iterator(dynamicContext);
-        final DocumentInfo doc = QueryResult.wrap(iter, config);
+        final NodeInfo doc = QueryResult.wrap(iter, config);
         QueryResult.serialize(doc, new StreamResult(System.out), props);
     }
 

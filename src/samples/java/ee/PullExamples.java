@@ -32,6 +32,8 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Properties;
 
+import static net.sf.saxon.pull.PullProvider.Event.START_ELEMENT;
+
 /**
  * This class contains some examples of how to use the Pull interfaces
  * in Saxon.
@@ -171,7 +173,7 @@ public class PullExamples {
     public void removePriceElements(PullProvider in, OutputStream out) throws XPathException {
         final NodeName priceElement = new NoNamespaceName("PRICE");
         PullFilter filter = new PullFilter(in) {
-            public int next() throws XPathException {
+            public Event next() throws XPathException {
                 currentEvent = super.next();
                 if (currentEvent == START_ELEMENT && getNodeName().equals(priceElement)) {
                     super.skipToMatchingEnd();
@@ -193,11 +195,11 @@ public class PullExamples {
         double total = 0;
         int count = 0;
         while (true) {
-            int event = in.next();
-            if (event == PullProvider.END_OF_INPUT) {
+            PullProvider.Event event = in.next();
+            if (event == PullProvider.Event.END_OF_INPUT) {
                 break;
             }
-            if (event == PullProvider.START_ELEMENT && in.getNodeName().equals(priceElement)) {
+            if (event == PullProvider.Event.START_ELEMENT && in.getNodeName().equals(priceElement)) {
                 double value = config.getConversionRules().getStringToDoubleConverter().stringToNumber(in.getStringValue());
                 total += value;
                 count++;

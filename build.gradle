@@ -31,6 +31,7 @@ configurations {
   asmDotNet.extendsFrom(implementation)
   documentation.extendsFrom(implementation)
   jeldoclet.extendsFrom(implementation)
+  samples.extendsFrom(implementation)
 }
 
 // Set saxonLicenseDir in gradle.properties, or from the
@@ -123,6 +124,9 @@ dependencies {
     files("lib/jeldoc.jar"),
     // I don't really understand why this has to be done explicitly...
     files("${System.getProperty('java.home')}/../lib/tools.jar")
+  )
+  samples (
+    [group: 'javax.servlet', name: 'servlet-api', version: '2.5']
   )
 }
 
@@ -274,6 +278,7 @@ configurations.compileClasspath.each { cp ->
 apply from: "build-n.gradle"
 apply from: "build-c.gradle"
 apply from: "build-doc.gradle"
+apply from: "test-suites.gradle"
 
 def pathExists(pathname) {
   // Returns true iff pathame is an existing file or directory
@@ -576,28 +581,8 @@ task eejJarTests(
 
 // ============================================================
 
-task hej_sampleConfig(
-  type: JavaExec,
-  description: "Construct the configuration file XSD"
-) {
-  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
-  inputs.files "${projectDir}/src/samples/config/config-raw.xsd"
-  outputs.file "${projectDir}/src/samples/config/config.xsd"
-  classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
-  args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
-    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToSchema.xsl",
-    "-o:${projectDir}/src/samples/config/config.xsd",
-    "FeatureKeys=FeatureKeys.xml",
-    "AdditionalFeatures=AdditionalFeatures.xml",
-    "ConfigSchema=${projectDir}/src/samples/config/config-raw.xsd"
-}
-
-// There's no real dependency here, but I'm not sure how the
-// samples directory should be integrated into the build.
 task hej_featureKeys(
   type: JavaExec,
-  dependsOn: ["hej_sampleConfig"],
   description: "Construct the feature keys for HE"
 ) {
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
