@@ -56,6 +56,7 @@ public class DotNetPlatform implements Platform {
      * loading.
      */
 
+    // Need to comment this out to avoid compile errors with JDK 9+
     private static final CharsetProvider provider = new sun.nio.cs.ext.ExtendedCharsets();
 
     public DotNetPlatform() {
