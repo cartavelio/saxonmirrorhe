@@ -3,21 +3,24 @@ package commands;
 import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Transform;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.Initializer;
+import net.sf.saxon.lib.Logger;
+import net.sf.saxon.lib.SystemLogger;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * JUnit tests on Transform CommandLine options
@@ -26,7 +29,7 @@ public class TransformTests {
 
     private static class RetentiveLogger extends Logger {
 
-        private List<String> output = new ArrayList<>();
+        private final List<String> output = new ArrayList<>();
 
         @Override
         public void println(String message, int severity) {
@@ -39,12 +42,27 @@ public class TransformTests {
 
     }
 
-    private class VerifyingTransform extends Transform {
+    private static class VerifyingTransform extends Transform {
 
-        private RetentiveLogger logger;
+        private final RetentiveLogger logger;
 
         public VerifyingTransform() {
             this.logger = new RetentiveLogger();
+        }
+
+        public String transform(String[] args) {
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                // Capture System.out
+                System.setOut(new PrintStream(baos));
+                super.doTransform(args, "transform");
+                // Revert change to System.out
+                System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+                return baos.toString("utf-8");
+            } catch (Exception e) {
+                fail();
+                return "failure";
+            }
         }
 
         @Override
@@ -83,13 +101,14 @@ public class TransformTests {
                 "dir=" + ConfigTest.DATA_DIR + "samples/output"};
         try {
             VerifyingTransform vt = new VerifyingTransform();
-            vt.doTransform(args, "");
-            assertTrue(vt.outputMatches(s -> s.startsWith("Saxon-EE 11")), "SaxonVersion");
-            assertTrue(vt.outputMatches(s -> s.startsWith("Java version")), "JavaVersion");
+            String result = vt.transform(args);
+            //assertTrue(vt.outputMatches(s -> s.startsWith("Saxon-EE 10")), "SaxonVersion");
+            //assertTrue(vt.outputMatches(s -> s.startsWith("Java version")), "JavaVersion");
             assertTrue(vt.outputMatches(s -> s.startsWith("Using license serial number")), "License");
-            assertTrue(vt.outputMatches(s -> s.matches("Processing.*othello.xml")), "SourceFile");
+            //assertTrue(vt.outputMatches(s -> s.matches("Processing.*othello.xml")), "SourceFile");
             assertTrue(vt.outputMatches(s -> s.startsWith("Tree built in")), "BuildTime");
-            assertTrue(vt.outputMatches(s -> s.startsWith("Execution time")), "ExecutionTime");
+            //assertTrue(vt.outputMatches(s -> s.startsWith("Execution time")), "ExecutionTime");
+            assertTrue(result.startsWith("The Tragedy of Othello, the Moor of Venice"));
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -121,11 +140,10 @@ public class TransformTests {
                 "-xsl:" + ConfigTest.DATA_DIR + "books.xsl"
         };
         try {
+            VerifyingTransform vt = new VerifyingTransform();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             System.setOut(new PrintStream(baos));   // redirect System.out
-            Transform.main(args);
-            System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out))); // revert change to System.out
-            String strResult = baos.toString();
+            String strResult = vt.transform(args);
             assertTrue(strResult.toLowerCase().startsWith("<!doctype html><html>"), "html");
             assertTrue(strResult.contains("<head><meta"), "head-meta");
         } catch (Exception e) {
@@ -143,11 +161,8 @@ public class TransformTests {
                 "!indent=yes"
         };
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            System.setOut(new PrintStream(baos));   // redirect System.out
-            Transform.main(args);
-            System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out))); // revert change to System.out
-            String result = baos.toString();
+            VerifyingTransform vt = new VerifyingTransform();
+            String result = vt.transform(args);
             assertTrue(result.toLowerCase().startsWith("<!doctype html><html>"), "html");
             assertFalse(result.contains("<head><meta"), "head-meta");
         } catch (Exception e) {
@@ -165,12 +180,69 @@ public class TransformTests {
                 "!method=xml"
         };
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            System.setOut(new PrintStream(baos));   // redirect System.out
-            Transform.main(args);
-            System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out))); // revert change to System.out
-            String result = baos.toString();
+            VerifyingTransform vt = new VerifyingTransform();
+            String result = vt.transform(args);
             assertTrue(result.startsWith("<?xml"));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Test saxon:line-number on different documents
+     */
+
+    @Test
+    public void testLineNumberPrincipal() {
+        String[] args = {
+                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-xsl:" + ConfigTest.DATA_DIR + "line-numbering.xsl",
+                "-it:a",
+                "-l",
+                "!method=xml"
+        };
+        try {
+            VerifyingTransform vt = new VerifyingTransform();
+            String result = vt.transform(args);
+            System.err.println(result);
+            assertTrue(result.contains("<a>4</a>"));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testLineNumberParam() {
+        String[] args = {
+                 "-xsl:" + ConfigTest.DATA_DIR + "line-numbering.xsl",
+                "-it:b",
+                "-l:on",
+                "+doc=" + ConfigTest.DATA_DIR + "books.xml",
+                "!method=xml"
+        };
+        try {
+            VerifyingTransform vt = new VerifyingTransform();
+            String result = vt.transform(args);
+            System.err.println(result);
+            assertTrue(result.contains("<b>4</b>"));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testLineNumberDoc() {
+        String[] args = {
+                "-xsl:" + ConfigTest.DATA_DIR + "line-numbering.xsl",
+                "-it:c",
+                "-l",
+                "!method=xml"
+        };
+        try {
+            VerifyingTransform vt = new VerifyingTransform();
+            String result = vt.transform(args);
+            System.err.println(result);
+            assertTrue(result.contains("<c>4</c>"));
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -220,7 +292,10 @@ public class TransformTests {
                 "s=s-actual",
                 "d=d-actual"};
         try {
-            Transform.main(args);
+            VerifyingTransform vt = new VerifyingTransform();
+            String result = vt.transform(args);
+            assertTrue(result.contains("s=\"s-actual\""));
+            assertTrue(result.contains("d=\"d-actual\""));
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -273,12 +348,15 @@ public class TransformTests {
     public void testJsonMethod() {
         String[] args = {
                 "-ext:off",
-                "-o:" + ConfigTest.DATA_DIR + "temp/books.json",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
                 "-xsl:" + ConfigTest.DATA_DIR + "books-to-json.xsl"
         };
         try {
-            Transform.main(args);
+            VerifyingTransform vt = new VerifyingTransform();
+            String result = vt.transform(args);
+            System.err.println(result);
+            assertTrue(result.contains("\"author\":\"Jane Austen\""));
+            assertTrue(result.contains("\"dimensions\":[8.3,5.7,1.1]"));
         } catch (Exception e) {
             fail();
         }
@@ -289,15 +367,18 @@ public class TransformTests {
      */
     @Test
     public void testPackages001() {
+        // TODO: what is this test trying to achieve?
         String[] args = {
                 "-t",
-                "-o:" + ConfigTest.DATA_DIR + "temp/packs-out.xml",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
                 "-lib:" + ConfigTest.DATA_DIR + "packages/pack-002.xsl",
                 "-xsl:" + ConfigTest.DATA_DIR + "packages/pack-001.xsl"
         };
         try {
-            Transform.main(args);
+            VerifyingTransform vt = new VerifyingTransform();
+            String result = vt.transform(args);
+            System.err.println(result);
+            assertTrue(result.contains("Jasper Fforde"));
         } catch (Exception e) {
             fail();
         }
@@ -310,13 +391,15 @@ public class TransformTests {
     public void testPackages002() {
         String[] args = {
                 "-t",
-                "-o:" + ConfigTest.DATA_DIR + "temp/packs-out.xml",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
                 "-lib:" + ConfigTest.DATA_DIR + "packages/pack-001.xsl",
                 "-xsl:" + ConfigTest.DATA_DIR + "packages/pack-002.xsl"
         };
         try {
-            Transform.main(args);
+            VerifyingTransform vt = new VerifyingTransform();
+            String result = vt.transform(args);
+            System.err.println(result);
+            assertTrue(result.contains("DANGGGG"));
         } catch (Exception e) {
             fail();
         }
@@ -329,12 +412,14 @@ public class TransformTests {
     public void testNextInChain() {
         String[] args = {
                 "-t",
-                "-o:" + ConfigTest.DATA_DIR + "temp/chain-out.xml",
                 "-s:" + ConfigTest.DATA_DIR + "next-in-chain/test.xml",
                 "-xsl:" + ConfigTest.DATA_DIR + "next-in-chain/main.xsl"
         };
         try {
-            Transform.main(args);
+            VerifyingTransform vt = new VerifyingTransform();
+            String result = vt.transform(args);
+            System.err.println(result);
+            assertTrue(result.contains("<second>principal</second>"));
         } catch (Exception e) {
             fail();
         }
@@ -343,7 +428,9 @@ public class TransformTests {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void testDirectory() {
-
+        if (!new File(ConfigTest.DATA_DIR + "welch-ser/out").exists()) {
+            new File(ConfigTest.DATA_DIR + "welch-ser/out").mkdir();
+        }
         if (new File(ConfigTest.DATA_DIR + "welch-ser/out/A.xsl.xml").exists()) {
             new File(ConfigTest.DATA_DIR + "welch-ser/out/A.xsl.xml").delete();
         }
@@ -362,20 +449,20 @@ public class TransformTests {
             assertTrue(new File(ConfigTest.DATA_DIR + "welch-ser/out/B.xsl.xml").exists(), "B exists");
         } catch (Exception e) {
             fail();
+        } finally {
+            new File(ConfigTest.DATA_DIR + "welch-ser/out").delete();
         }
     }
 
+    @SuppressWarnings("unused")
     public static class RequireStreaming implements Initializer {
         @Override
-        public void initialize(Configuration config) throws TransformerException {
-            config.setSourceResolver(new SourceResolver() {
-                @Override
-                public Source resolveSource(Source source, Configuration config) throws XPathException {
-                    if (source instanceof NodeInfo && source.getSystemId().endsWith("caffo/Input.xml")) {
-                        fail("Source tree for caffo/Input.xml has been built in memory");
-                    }
-                    return config.resolveSource(source, config);
+        public void initialize(Configuration config) {
+            config.setSourceResolver((source, config1) -> {
+                if (source instanceof NodeInfo && source.getSystemId().endsWith("caffo/Input.xml")) {
+                    fail("Source tree for caffo/Input.xml has been built in memory");
                 }
+                return config1.resolveSource(source, config1);
             });
         }
     }
