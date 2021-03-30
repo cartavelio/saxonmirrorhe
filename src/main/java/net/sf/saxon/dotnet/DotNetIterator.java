@@ -24,29 +24,34 @@ public class DotNetIterator<T extends Object> implements Iterator<T> {
 
     private final IEnumerator enumerator;
     private Mapper<T> mapper;
+    private boolean moreToCome;
 
 
     public DotNetIterator() {
         this.enumerator = null;
+        moreToCome = false;
     }
 
     public DotNetIterator(IEnumerator enumerator) {
         this.enumerator = enumerator;
+        this.moreToCome = enumerator.MoveNext();
     }
 
     public DotNetIterator(IEnumerator enumerator, Mapper<T> mapper) {
         this.enumerator = enumerator;
         this.mapper = mapper;
+        this.moreToCome = enumerator.MoveNext();
     }
 
     @Override
     public boolean hasNext() {
-        return enumerator.MoveNext();
+        return moreToCome;
     }
 
     @Override
     public T next() {
         Object o = enumerator.get_Current();
+        this.moreToCome = enumerator.MoveNext();
         if (mapper != null) {
             return mapper.convert(o);
         } else {
