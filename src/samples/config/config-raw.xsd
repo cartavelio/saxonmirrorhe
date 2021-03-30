@@ -36,6 +36,13 @@
             information into the execution.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="targetEdition" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>The target edition if export SEF files are to be used, for example
+            targetEdition="JS". Specifically, this affects the recognition of extension namespaces
+            (such as the IXSL namespace) when packages in the packageLibrary are compiled.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
   
@@ -44,6 +51,7 @@
       <xs:documentation> Defines properties of the global configuration. </xs:documentation>
     </xs:annotation>
     <xs:complexType>
+      <xs:attribute name="allowedProtocols" use="optional" type="xs:string"/>  
       <xs:attribute name="allowExternalFunctions" use="optional" type="xs:boolean"/>
       <xs:attribute name="allowMultiThreading" use="optional" type="xs:boolean"/>
       <xs:attribute name="allowOldJavaUriFormat" use="optional" type="xs:boolean"/>
@@ -55,7 +63,6 @@
       <xs:attribute name="allowSyntaxExtensions" use="optional" type="xs:boolean"/>    
       <xs:attribute name="collationUriResolver" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="collectionFinder" use="optional" type="c:javaClassNameType"/>
-      <xs:attribute name="collectionUriResolver" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="compileWithTracing" use="optional" type="xs:boolean"/>
       <xs:attribute name="debugByteCode" use="optional" type="xs:boolean"/>
       <xs:attribute name="debugByteCodeDirectory" use="optional" type="c:fileNameType"/>
@@ -83,6 +90,7 @@
       <xs:attribute name="preferJaxpParser" use="optional" type="xs:boolean"/>
       <xs:attribute name="recognizeUriQueryParameters" use="optional" type="xs:boolean"/>
       <xs:attribute name="regexBacktrackingLimit" use="optional" type="xs:integer"/>
+      <xs:attribute name="retainNodeForDiagnostics" use="optional" type="xs:boolean"/>
       <xs:attribute name="schemaValidation" use="optional" type="c:schemaValidationType"/>
       <xs:attribute name="serializerFactory" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="sourceResolver" use="optional" type="c:javaClassNameType"/>
@@ -237,6 +245,7 @@
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
+      <xs:attribute name="allowUnresolvedSchemaComponents" use="optional" type="xs:boolean"/>
       <xs:attribute name="assertionsCanSeeComments" use="optional" type="xs:boolean"/>
       <xs:attribute name="implicitSchemaImports" use="optional" type="xs:boolean"/>
       <xs:attribute name="multipleSchemaImports" use="optional" type="xs:boolean"/>

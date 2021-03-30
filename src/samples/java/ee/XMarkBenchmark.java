@@ -121,13 +121,8 @@ public class XMarkBenchmark {
             Configuration config = (saproduct ? new EnterpriseConfiguration() : new Configuration());
             if (satests) {
                 config.setSchemaValidationMode(Validation.STRICT);
-                /* ndw
                 config.addSchemaSource(new StreamSource(new File(dir + "schema.xsd")),
-                        config.getErrorListener());
-
-                 */
-                config.addSchemaSource(new StreamSource(new File(dir + "schema.xsd")));
-                /* /ndw */
+                        config.makeErrorReporter());
                 config.setConfigurationProperty(Feature.USE_TYPED_VALUE_CACHE, false);
             }
             if (val) {

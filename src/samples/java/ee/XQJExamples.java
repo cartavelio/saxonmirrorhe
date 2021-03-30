@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -28,7 +28,9 @@ import java.util.*;
 
 
 /**
- * Some examples to show how the Saxon XQuery API should be used
+ * Some examples to illustrate the use of the XQJ XQuery API.
+ * The tests should be run with the samples directory (in the saxon-resources download) as the
+ * current directory.
  */
 public class XQJExamples {
 
@@ -41,7 +43,7 @@ public class XQJExamples {
     /**
      * Method main
      */
-    public static void main(String argv[]) {
+    public static void main(String[] argv) {
 
         List<Test> tests = new ArrayList<>();
         tests.add(new TestA());

@@ -29,66 +29,74 @@ namespace TestRunner
 {
     public class TestOutcome
     {
-        
-    /**
-     * The outcome of a test is either an XDM value or an exception. The object also has the ability to
-     * hold the serialized result (needed for serialization tests)
-     */
-    
-    public class SingleResultDoc {
-        public XdmValue value;
-        public string serialization;
-        public SingleResultDoc(){}
-        public SingleResultDoc(XdmValue value, string serialization) {
-            this.value = value;
-            this.serialization = serialization;
+
+        /**
+         * The outcome of a test is either an XDM value or an exception. The object also has the ability to
+         * hold the serialized result (needed for serialization tests)
+         */
+
+        public class SingleResultDoc {
+            public XdmValue value;
+            public string serialization;
+            public Processor proc;
+            public SingleResultDoc() { }
+            public SingleResultDoc(XdmValue value, string serialization, Processor proci) {
+                this.value = value;
+                this.serialization = serialization;
+                proc = proci;
+            }
         }
-    }
 
-    private TestDriver driver;
-    private SingleResultDoc principalResult = new SingleResultDoc();
-    private HashSet<QName> errorsReported;
-    private Exception exception;
-    private string comment;
-    private HashSet<XdmNode> xslMessages = new HashSet<XdmNode>();
-    private Dictionary<Uri, SingleResultDoc> xslResultDocuments = new Dictionary<Uri, SingleResultDoc>();
-    private string wrongError;
-	private bool warningsReported;
+        private TestDriver driver;
+        private SingleResultDoc principalResult = new SingleResultDoc();
+        private HashSet<QName> errorsReported;
+        private Exception exception;
+        private string comment;
+        private HashSet<XdmNode> xslMessages = new HashSet<XdmNode>();
+        private Dictionary<Uri, SingleResultDoc> xslResultDocuments = new Dictionary<Uri, SingleResultDoc>();
+        private string wrongError;
+        private bool warningsReported;
+        private Uri baseOutputUri;
+        private string resultVar = "result";
 
-    public TestOutcome(TestDriver driver) {
-        this.driver = driver;
-        errorsReported = new HashSet<QName>();
-    }
+        public TestOutcome(TestDriver driver) {
+            this.driver = driver;
+            errorsReported = new HashSet<QName>();
+        }
 
-    public void SetException(Exception ex)
-    {
-        this.exception = ex;
-
-        if (ex is DynamicError)
+        public void SetException(Exception ex)
         {
-            try
+            this.exception = ex;
+
+            if (ex is DynamicError)
             {
-                errorsReported.Add(((DynamicError)ex).ErrorCode);
-            }catch(Exception){
+                try
+                {
+                    errorsReported.Add(((DynamicError)ex).ErrorCode);
+                } catch (Exception) {
+                    errorsReported.Add(new QName("ZZZZZZ999999"));
+                }
+            }
+            else if (ex is StaticError && ((StaticError)ex).ErrorCode != null)
+            {
+                try
+                {
+                    errorsReported.Add(((StaticError)ex).ErrorCode);
+                }
+                catch (Exception)
+                {
+                    errorsReported.Add(new QName("ZZZZZZ999999"));
+                }
+            }
+            else {
+
                 errorsReported.Add(new QName("ZZZZZZ999999"));
             }
         }
-			else if (ex is StaticError && ((StaticError)ex).ErrorCode != null)
-        {
-            try
-            {
-                errorsReported.Add(((StaticError)ex).ErrorCode);
-            }
-            catch (Exception)
-            {
-                errorsReported.Add(new QName("ZZZZZZ999999"));
-            }
-        }
-        else {
 
-            errorsReported.Add(new QName("ZZZZZZ999999"));
+        public string ResultVar {
+            set { resultVar = value; }
         }
-    }
 
 	public bool SetWarningsReported(bool warnings) {
 		return warningsReported = warnings;
@@ -146,14 +154,14 @@ namespace TestRunner
         return principalResult;
     }
 
-    public void SetSecondaryResult(Uri uri, XdmNode value, string serialization) {
+    public void SetSecondaryResult(Uri uri, XdmNode value, string serialization, Processor proc) {
         SingleResultDoc result = null;
         try
         {
             result = xslResultDocuments[uri];
         }catch(Exception){}
         if (result == null) {
-            result = new SingleResultDoc(value, serialization);
+            result = new SingleResultDoc(value, serialization, proc);
             this.xslResultDocuments.Add(uri,result);
         } else {
             if (value != null) {
@@ -171,22 +179,33 @@ namespace TestRunner
     
     public SingleResultDoc GetSecondaryResult(Uri uri) {
             SingleResultDoc doc = xslResultDocuments[uri];
+            Processor proc = doc.proc;
             if (doc.serialization.Equals("")) {
-                Processor proc = new Processor(false);
+           
                 doc.value = proc.NewXPathCompiler().Compile("doc('"+uri+"')").Load().EvaluateSingle();
                 
             }
         return doc;
     }
 
-	public void SetErrorsReported(IList<StaticError> errors) {
-        foreach(StaticError err in errors){
-            if (err.ErrorCode != null)
+        public void SetErrorsReported(IList<XmlProcessingError> errors)
+        {
+            if (errors != null)
             {
-                errorsReported.Add(err.ErrorCode);
+                foreach (StaticError err in errors)
+                {
+                    if (err.ErrorCode != null)
+                    {
+                        errorsReported.Add(err.ErrorCode);
+                    }
+                }
+            }
+            else {
+                Console.WriteLine("seterrorsReported: errors is null");
+
             }
         }
-    }
+    
 
         public void SetErrorQNameReported(IList<QName> errors)
         {
@@ -356,11 +375,11 @@ namespace TestRunner
         return sw.ToString().Trim();
     }
 
-    public bool TestAssertion(XdmNode assertion, SingleResultDoc result,XPathCompiler assertXpc, XPathCompiler catalogXpc, bool debug)
+    public bool TestAssertion(TestOutcome outcome, XdmNode assertion, SingleResultDoc result,XPathCompiler assertXpc, XPathCompiler catalogXpc, bool debug)
             {
         try {
             string tag = assertion.NodeName.LocalName;
-            bool success = TestAssertion2(assertion, result, assertXpc, catalogXpc, debug);
+            bool success = TestAssertion2(outcome, assertion, result, assertXpc, catalogXpc, debug);
             if (debug && !("all-of".Equals(tag)) && !("any-of".Equals(tag))) {
                 driver.println("Assertion " + tag + " (" + assertion.StringValue + ") " + (success ? " succeeded" : " failed"));
                 if (tag.Equals("error")) {
@@ -396,7 +415,7 @@ namespace TestRunner
         }
     }
 
-    private bool TestAssertion2(XdmNode assertion, SingleResultDoc result,XPathCompiler assertXpc, XPathCompiler catalogXpc, bool debug)  {
+    private bool TestAssertion2(TestOutcome outcome, XdmNode assertion, SingleResultDoc result,XPathCompiler assertXpc, XPathCompiler catalogXpc, bool debug)  {
         string tag = assertion.NodeName.LocalName;
 
         if (tag.Equals("assert-eq")) {
@@ -427,7 +446,7 @@ namespace TestRunner
             return AssertXPath(assertion, result, assertXpc, debug);
 
         } else if (tag.Equals("assert-string-value")) {
-            return AssertstringValue(assertion, result, debug);
+            return AssertStringValue(assertion, result, debug);
 
         } else if (tag.Equals("assert-serialization")) {
             return AssertSerialization(assertion, result, catalogXpc, debug);
@@ -447,7 +466,7 @@ namespace TestRunner
 			} else if (tag.Equals("assert-message")) {
             XdmNode subAssertion = (XdmNode)catalogXpc.EvaluateSingle("*", assertion);
             foreach (XdmNode message in xslMessages) {
-                if (TestAssertion2(subAssertion, new SingleResultDoc(message, ""), assertXpc, catalogXpc, debug)) {
+                if (TestAssertion2(outcome, subAssertion, new SingleResultDoc(message, "", assertXpc.Processor), assertXpc, catalogXpc, debug)) {
                     return true;
                 }
             }
@@ -456,14 +475,22 @@ namespace TestRunner
         } else if (tag.Equals("assert-result-document")) {
             XdmNode subAssertion = (XdmNode)catalogXpc.EvaluateSingle("*", assertion);
             XmlUrlResolver res = new XmlUrlResolver();
-            Uri uri =  new Uri(driver.getResultsDir() + "/results/output.xml");
-            uri = res.ResolveUri(uri, assertion.GetAttributeValue(new QName("uri")));
+                // Uri uri =  new Uri(outcome.BaseOutputUri + "/results/output.xml");
+                Uri uri = null;
+                try
+                {
+                    uri = res.ResolveUri(outcome.BaseOutputUri, assertion.GetAttributeValue(new QName("uri")));
+                }
+                catch (Exception ex) {
+                    System.Console.WriteLine("**** Invalid output uri " + outcome.BaseOutputUri.AbsolutePath);
+                    return false;
+                }
             SingleResultDoc doc = GetSecondaryResult(uri);
             if (doc == null) {
                 System.Console.WriteLine("**** No output document found for " + uri);
                 return false;
             }
-            bool ok = TestAssertion2(subAssertion, doc, assertXpc, catalogXpc, debug);
+            bool ok = TestAssertion2(outcome, subAssertion, doc, assertXpc, catalogXpc, debug);
             if (!ok) {
                 System.Console.WriteLine("**** Assertion failed for result-document " + uri);
             }
@@ -530,7 +557,7 @@ namespace TestRunner
 
         } else if (tag.Equals("all-of")) {
             foreach (XdmItem child in catalogXpc.Evaluate("*", assertion)) {
-                if (!TestAssertion((XdmNode) child, result, assertXpc, catalogXpc, debug)) {
+                if (!TestAssertion(outcome, (XdmNode) child, result, assertXpc, catalogXpc, debug)) {
                     return false;
                 }
             }
@@ -539,7 +566,7 @@ namespace TestRunner
         } else if (tag.Equals("any-of")) {
             bool partialSuccess = false;
             foreach (XdmItem child in catalogXpc.Evaluate("*", assertion)) {
-                if (TestAssertion((XdmNode) child, result, assertXpc, catalogXpc, debug)) {
+                if (TestAssertion(outcome, (XdmNode) child, result, assertXpc, catalogXpc, debug)) {
                     if (wrongError != null) {
                         partialSuccess = true;
                         continue;
@@ -551,12 +578,19 @@ namespace TestRunner
 
         } else if (tag.Equals("not")) {
             XdmNode subAssertion = (XdmNode)catalogXpc.EvaluateSingle("*", assertion);
-            return !TestAssertion(subAssertion, result, assertXpc, catalogXpc, debug);
+            return !TestAssertion(outcome, subAssertion, result, assertXpc, catalogXpc, debug);
         }
         throw new Exception("Unknown assertion element " + tag);
     }
 
-    private bool AssertFalse(SingleResultDoc result) {
+        internal Uri BaseOutputUri
+        {
+            set { baseOutputUri = value; }
+            get { return baseOutputUri; }
+            
+        }
+
+        private bool AssertFalse(SingleResultDoc result) {
         if (IsException()) {
             return false;
         } else {
@@ -588,7 +622,7 @@ namespace TestRunner
         }
     }
 
-    private bool AssertstringValue(XdmNode assertion, SingleResultDoc result,bool debug) {
+    private bool AssertStringValue(XdmNode assertion, SingleResultDoc result,bool debug) {
         if (IsException()) {
             return false;
         } else {
@@ -598,14 +632,15 @@ namespace TestRunner
                 resultstring = ((XdmItem) result.value).GetStringValue();
             } else {
                 bool first = true;
-                net.sf.saxon.tree.util.FastStringBuffer fsb = new net.sf.saxon.tree.util.FastStringBuffer(256);
+                //net.sf.saxon.tree.util.FastStringBuffer fsb = new net.sf.saxon.tree.util.FastStringBuffer(256);
+                    StringBuilder fsb = new StringBuilder(256);
                 foreach (XdmItem item in result.value) {
                     if (first) {
                         first = false;
                     } else {
-                        fsb.append(' ');
+                        fsb.Append(' ');
                     }
-                    fsb.append(item.Simplify.ToString());
+                    fsb.Append(item.GetStringValue());
                 }
                 resultstring = fsb.ToString();
             }
@@ -722,17 +757,16 @@ namespace TestRunner
                 }
             }
 
+            QName resultVarName = new QName(resultVar);
+                assertXpc.DeclareVariable(resultVarName);
             XPathExecutable exp = assertXpc.Compile(assertion.StringValue);
             XPathSelector s = exp.Load();
-            QName resultVar = new QName("result");
-            
-             if (exp.GetRequiredCardinalityForVariable(resultVar) == '0') {
+
+                s.SetVariable(resultVarName, result.value);
                 if (result.value is XdmItem) { // this path used in XSLT tests
-                    s.ContextItem = ((XdmItem)result.value);
+                    s.ContextItem = (XdmItem)result.value;
                 }
-            } else {
-                s.SetVariable(resultVar, result.value);
-            }
+            
             
             bool b = s.EffectiveBooleanValue();
             if (!b && debug) {
@@ -744,12 +778,12 @@ namespace TestRunner
                         ass = ass.Substring(0, eq);
                         exp = assertXpc.Compile(ass);
                         s = exp.Load();
-                        if (exp.GetRequiredCardinalityForVariable(resultVar) == null) {
+                        if (exp.GetRequiredCardinalityForVariable(resultVarName) == null) {
                             if (result.value is XdmItem) { // this path used in XSLT tests
                                 s.ContextItem = ((XdmItem)result.value);
                             }
                         } else {
-                            s.SetVariable(resultVar, result.value);
+                            s.SetVariable(resultVarName, result.value);
                         }
                         XdmValue val = s.Evaluate();
                         driver.println("Actual result of " + ass + ": " + val.ToString());

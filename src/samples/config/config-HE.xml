@@ -18,7 +18,6 @@
           preferJaxpParser="true"
           sourceResolver=""
           uriResolver="net.sf.saxon.lib.StandardURIResolver"
-          collectionUriResolver="net.sf.saxon.lib.StandardCollectionURIResolver"
           defaultCollection="file:///e:/temp"
           recognizeUriQueryParameters="true"
           useTypedValueCache="false"

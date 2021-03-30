@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,9 +7,6 @@
 
 
 package he;
-import net.sf.saxon.option.dom4j.DOM4JObjectModel;
-import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
-import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
 import org.w3c.dom.Document;
 import org.xml.sax.Attributes;
@@ -79,9 +76,6 @@ public class S9APIExamples {
         tests.add(new S9APIExamples.XPathB());
         tests.add(new S9APIExamples.XPathC());
         tests.add(new S9APIExamples.XPathDOM());
-        tests.add(new S9APIExamples.XPathJDOM());
-        tests.add(new S9APIExamples.XPathXOM());
-        tests.add(new S9APIExamples.XPathDOM4J());
         tests.add(new S9APIExamples.SerializeA());
         tests.add(new S9APIExamples.SerializeB());
         tests.add(new S9APIExamples.SerializeC());
@@ -512,7 +506,7 @@ public class S9APIExamples {
 
     /**
      * Show a stylesheet being compiled once and then executed several times with different
-     * source documents. The Xslt30Transformer object is serially reusable, but not thread-safe.
+     * source documents. The XsltTransformer object is serially reusable, but not thread-safe.
      * The Serializer object is also serially reusable.
      */
 
@@ -930,6 +924,8 @@ public class S9APIExamples {
 
     /**
      * Demonstrate use of an XPath expression against a DOM source document.
+     *
+     * For examples using alternate object models (JDOM2, XOM, and DOM4J), see S9APIExamplesOM.java
      */
 
     private static class XPathDOM implements S9APIExamples.Test {
@@ -971,127 +967,6 @@ public class S9APIExamples {
                 XdmNode node = (XdmNode) item;
                 org.w3c.dom.Node element = (org.w3c.dom.Node) node.getExternalNode();
                 System.out.println(element.getTextContent());
-            }
-        }
-
-    }
-
-
-    /**
-     * Demonstrate use of an XPath expression against a JDOM2 source document.
-     */
-
-    private static class XPathJDOM implements S9APIExamples.Test {
-        public String name() {
-            return "XPathJDOM";
-        }
-
-        public boolean needsSaxonEE() {
-            return false;
-        }
-
-        public void run() throws SaxonApiException {
-            // Build the JDOM document
-            org.jdom2.input.SAXBuilder jdomBuilder = new org.jdom2.input.SAXBuilder();
-            File file = new File("data/books.xml");
-            org.jdom2.Document doc;
-            try {
-                doc = jdomBuilder.build(file);
-            } catch (org.jdom2.JDOMException | IOException e) {
-                throw new SaxonApiException(e);
-            }
-            Processor processor = new Processor(false);
-            processor.getUnderlyingConfiguration().registerExternalObjectModel(new JDOM2ObjectModel());
-            DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode xdmDoc = builder.wrap(doc);
-            XPathCompiler xpath = processor.newXPathCompiler();
-            XPathExecutable xx = xpath.compile("//ITEM/TITLE");
-            XPathSelector selector = xx.load();
-            selector.setContextItem(xdmDoc);
-            for (XdmItem item : selector) {
-                XdmNode node = (XdmNode) item;
-                org.jdom2.Element element = (org.jdom2.Element) node.getExternalNode();
-                System.out.println(element.getValue());
-            }
-        }
-
-    }
-
-    /**
-     * Demonstrate use of an XPath expression against a XOM source document.
-     */
-
-    private static class XPathXOM implements S9APIExamples.Test {
-        public String name() {
-            return "XPathXOM";
-        }
-
-        public boolean needsSaxonEE() {
-            return false;
-        }
-
-        public void run() throws SaxonApiException {
-            // Build the XOM document
-            nu.xom.Builder xomBuilder = new nu.xom.Builder();
-            File file = new File("data/books.xml");
-            nu.xom.Document doc;
-            try {
-                doc = xomBuilder.build(file);
-            } catch (nu.xom.ParsingException | IOException e) {
-                throw new SaxonApiException(e);
-            }
-            Processor processor = new Processor(false);
-            processor.getUnderlyingConfiguration().registerExternalObjectModel(new XOMObjectModel());
-            DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode xdmDoc = builder.wrap(doc);
-            XPathCompiler xpath = processor.newXPathCompiler();
-            XPathExecutable xx = xpath.compile("//ITEM/TITLE");
-            XPathSelector selector = xx.load();
-            selector.setContextItem(xdmDoc);
-            for (XdmItem item : selector) {
-                XdmNode node = (XdmNode) item;
-                nu.xom.Element element = (nu.xom.Element) node.getExternalNode();
-                System.out.println(element.toXML());
-            }
-        }
-
-    }
-
-    /**
-     * Demonstrate use of an XPath expression against a DOM4J source document.
-     */
-
-    private static class XPathDOM4J implements S9APIExamples.Test {
-        public String name() {
-            return "XPathDOM4J";
-        }
-
-        public boolean needsSaxonEE() {
-            return false;
-        }
-
-        public void run() throws SaxonApiException {
-            // Build the DOM4J document
-            org.dom4j.io.SAXReader dom4jBuilder = new org.dom4j.io.SAXReader();
-            File file = new File("data/books.xml");
-            org.dom4j.Document doc;
-            try {
-                doc = dom4jBuilder.read(file);
-            } catch (org.dom4j.DocumentException e) {
-                throw new SaxonApiException(e);
-            }
-            Processor processor = new Processor(false);
-            processor.getUnderlyingConfiguration().registerExternalObjectModel(new DOM4JObjectModel());
-            DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode xdmDoc = builder.wrap(doc);
-            XPathCompiler xpath = processor.newXPathCompiler();
-            XPathExecutable xx = xpath.compile("//ITEM/TITLE");
-            XPathSelector selector = xx.load();
-            selector.setContextItem(xdmDoc);
-            for (XdmItem item : selector) {
-                XdmNode node = (XdmNode) item;
-                org.dom4j.Element element = (org.dom4j.Element) node.getExternalNode();
-                System.out.println(element.asXML());
             }
         }
 

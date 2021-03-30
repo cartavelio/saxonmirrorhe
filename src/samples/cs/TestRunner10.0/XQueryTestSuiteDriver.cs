@@ -174,7 +174,7 @@ public class XQueryTestSuiteDriver
         QName roleAtt = new QName("", "role");
 
         DocumentBuilder builder = processor.NewDocumentBuilder();
-        XdmNode exceptionsDoc = builder.Build(new Uri(saxonResultsDir + "/exceptions-n.xml"));
+        XdmNode exceptionsDoc = builder.Build(new Uri(saxonResultsDir + "/exceptions.xml"));
 
         // The exceptions.xml file contains details of tests that aren't to be run, for example
         // because they have known bugs or require special configuration

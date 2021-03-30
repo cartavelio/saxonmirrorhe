@@ -14,6 +14,8 @@ using TestRunner;
 using JFeatureKeys = net.sf.saxon.lib.FeatureKeys;
 using JConfiguration = net.sf.saxon.Configuration;
 using JVersion = net.sf.saxon.Version;
+using System.Linq;
+using java.util;
 
 namespace TestRunner
 {
@@ -80,6 +82,7 @@ namespace TestRunner
 
 
         //C:/work/repositories/hg/qt3-testsuite/ C:/work/repositories/hg/qt3-testsuite/results/saxon/ -lang:XQ31
+        //file:////C:/work/repositories/hg/qt3tests/ C:/work/repositories/hg/qt3tests/results/saxon/ -lang:XQ30
         public static void Main(string[] args)
         {
 
@@ -105,7 +108,7 @@ namespace TestRunner
                 defaultEnv = localEnvironments["default"];
             }
             catch (Exception) { }
-            foreach (XdmItem env in xpc.Evaluate("//environment", catalog))
+            foreach (XdmNode env in catalog.Select(Steps.Descendant("environment")))
             {
                 environment = Environment.processEnvironment(
                         this, xpc, env, globalEnvironments, defaultEnv);
@@ -122,7 +125,7 @@ namespace TestRunner
          * @return true if the environment satisfies the dependency, else false
          */
         
-        public override bool dependencyIsSatisfied(XdmNode dependency, Environment env)
+        public override bool EnsureDependencySatisfied(XdmNode dependency, Environment env)
         {
             string type = dependency.GetAttributeValue(new QName("type"));
             string value = dependency.GetAttributeValue(new QName("value"));
@@ -320,9 +323,12 @@ namespace TestRunner
                 } else if ("fn-format-integer-CLDR".Equals(value)) {
                     String edition = env.processor.Edition;
                     return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
-                } else if ("unicode-version".Equals(value)) {
-                    return true;
-                } else
+                } else if ("simple-uca-fallback".Equals(value)) {
+                     return !inverse;
+                } else if ("advanced-uca-fallback".Equals(value))  {
+                    String edition = env.processor.Edition;
+                    return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
+                }  else
                 {
                     println("**** feature = " + value + "  ????");
                     return false;
@@ -354,15 +360,21 @@ namespace TestRunner
             XPathCompiler xpath = driverProc.NewXPathCompiler();
             string testCaseName = testCase.GetAttributeValue(new QName("name"));
             string testSetName = testCase.Parent.GetAttributeValue(new QName("name"));
-            bool needSerializedResult = ((XdmAtomicValue)xpc.EvaluateSingle(
-                    "exists(./result//assert-serialization-error) or exists(./result//serialization-matches)", testCase)).GetBooleanValue();
+
+            XdmNode resultElement = testCase.Select(Steps.Child("result")).FirstOrDefault(); ;
+            bool needSerializedResult = resultElement.Select(Steps.Descendant("assert-serialization-error")).Count() > 0
+                    || resultElement.Select(Steps.Descendant("serialization-matches")).Count() > 0;
             bool needResultValue = true;
             if (needSerializedResult)
             {
-                needResultValue = ((XdmAtomicValue)xpc.EvaluateSingle(
-                        "exists(./result//*[not(self::serialization-matches or self::assert-serialization-error or self::any-of or self::all-of)])", testCase)).GetBooleanValue();
+                needResultValue = resultElement.Select(Steps.Descendant(Predicates.IsElement()).Where(Predicates.Not(
+                        Predicates.HasLocalName("serialization-matches")
+                                .Or(Predicates.HasLocalName("assert-serialization-error"))
+                                .Or(Predicates.HasLocalName("any-of"))
+                                .Or(Predicates.HasLocalName("all-of"))))).Count() > 0;
             }
 
+            
             XdmNode alternativeResult = null;
             XdmNode optimization = null;
 
@@ -381,20 +393,22 @@ namespace TestRunner
             env.processor.XmlVersion = (decimal)1.0;
 
 
-			//test
-			/*bool icuColCheck = net.sf.saxon.Version.platform.hasICUCollator ();
+            //test
+            /*bool icuColCheck = net.sf.saxon.Version.platform.hasICUCollator ();
 			bool icuNumCheck = net.sf.saxon.Version.platform.hasICUNumberer();
 			Console.WriteLine ("ICUCol: " + (icuColCheck ? "true" : "false"));
 			Console.WriteLine ("ICUNum: " + (icuNumCheck ? "true" : "false"));*/
-			//end of test
-            foreach (XdmItem dependency in xpc.Evaluate("/*/dependency, ./dependency", testCase))
+            //end of test
+            IList<XdmNode> dependencies = new List<XdmNode>(testCase.Select(Steps.Child("dependency")));
+            dependencies.Concat(testCase.Select(Steps.Child("dependency")));
+            foreach (XdmNode dependency in dependencies)
             {
-                string type = ((XdmNode)dependency).GetAttributeValue(new QName("type"));
+                string type = (dependency).GetAttributeValue(new QName("type"));
                 if (type == null)
                 {
                     // throw new IllegalStateException("dependency/@type is missing"); //TODO
                 }
-                string value = ((XdmNode)dependency).GetAttributeValue(new QName("value"));
+                string value = (dependency).GetAttributeValue(new QName("value"));
                 if (value == null)
                 {
                     //throw new IllegalStateException("dependency/@value is missing"); //TODO
@@ -426,31 +440,10 @@ namespace TestRunner
                         return;
                     }
                 }
-                if (langVersion.Equals("3.0"))
+                if (langVersion.Equals("3.0") || langVersion.Equals("3.1"))
                 {
-                    /* EnvironmentVariableResolver resolver = new EnvironmentVariableResolver() {
-                         public Set<string> getAvailableEnvironmentVariables() {
-                             Set<string> strings = new HashSet<string>();
-                             strings.add("QTTEST");
-                             strings.add("QTTEST2");
-                             strings.add("QTTESTEMPTY");
-                             return strings;
-                         }
-
-                         public string getEnvironmentVariable(string name) {
-                             if (name.Equals("QTTEST")) {
-                                 return "42";
-                             } else if (name.Equals("QTTEST2")) {
-                                 return "other";
-                             } else if (name.Equals("QTTESTEMPTY")) {
-                                 return "";
-                             } else {
-                                 return null;
-                             }
-                         }
-                     }; */
-                    //TODO
-                    //env.processor.SetProperty(JFeatureKeys.ENVIRONMENT_VARIABLE_RESOLVER, resolver);
+                  
+                    env.processor.Implementation.setConfigurationProperty(JFeatureKeys.ENVIRONMENT_VARIABLE_RESOLVER, new EnvironmentVariableResolver());
                 }
                 /*if (type.Equals("feature") && value.Equals("xpath-1.0-compatibility"))
                 {
@@ -466,7 +459,7 @@ namespace TestRunner
                     xpDependency = true;
                     specOpt = Spec.XP30;
                 }*/
-                if (!dependencyIsSatisfied((XdmNode)dependency, env))
+                if (!EnsureDependencySatisfied((XdmNode)dependency, env))
                 {
                     println("*** Dependency not satisfied: " + ((XdmNode)dependency).GetAttributeValue(new QName("type")));
                     writeTestcaseElement(testCaseName, "n/a", "Dependency not satisfied", spec);
@@ -478,12 +471,9 @@ namespace TestRunner
 
             XdmNode exceptionElement;
             
-            try{
-                exceptionElement = exceptionsMap[testCaseName];
+            exceptionsMap.TryGetValue(testCaseName, out exceptionElement);
 
-            } catch(Exception) {
-                exceptionElement = null;
-            }
+            
             if (exceptionElement != null)
             {
                 XdmItem config = xpath.EvaluateSingle("configuration", exceptionElement);
@@ -546,7 +536,7 @@ namespace TestRunner
                         {
                             XPathSelector selector = testXpc.Compile(exp).Load();
                             
-foreach (QName varName in env.params1.Keys)
+                        foreach (QName varName in env.params1.Keys)
                             {
                                 selector.SetVariable(varName, env.params1[varName]);
                             }
@@ -612,7 +602,7 @@ foreach (QName varName in env.params1.Keys)
                          ModuleResolver mr = new ModuleResolver(xpc);
                          mr.setTestCase(testCase);
                           testXqc.QueryResolver = mr;// .setModuleURIResolver(mr); //TODO
-						testXqc.QueryResolver = mr;
+						//testXqc.QueryResolver = mr;
                         try
                         {
                             XQueryExecutable q = testXqc.Compile(exp);
@@ -667,16 +657,36 @@ foreach (QName varName in env.params1.Keys)
                             }
                             if (needResultValue)
                             {
-                                XdmValue result = selector.Evaluate();
-                                outcome.SetPrincipalResult(result);
-                            }
+                                try
+                                {
+                                    XdmValue result = selector.Evaluate();
+
+                                    outcome.SetPrincipalResult(result);
+                                }
+                                catch (StackOverflowException err)
+                                {
+
+                                    println("in TestSet " + testSetName + err.StackTrace);
+                                    println(err.Message);
+                                    outcome.SetException(err);
+                                }
+                                }
+                        }
+                        catch(StackOverflowException err)
+                        {
+
+                            println("in TestSet " + testSetName + err.StackTrace);
+                            println(err.Message);
+                            outcome.SetException(err);
+
+
                         }
                         catch (Exception err)
                         {
 							println("in TestSet " + testSetName + err.StackTrace);
                             println(err.Message);
                             outcome.SetException(err);
-							outcome.SetErrorsReported(testXqc.ErrorList);
+						//	outcome.SetErrorsReported(testXqc.ErrorList); //TODO
                         }
                     }
                     else
@@ -687,9 +697,9 @@ foreach (QName varName in env.params1.Keys)
                     }
                 }
 
-                if (env.resetAction != null)
+                if (env.resetActions != null)
                 {
-                    env.resetAction.reset(env);
+                    env.resetActions.Clear();
                 }
                 XdmNode assertion;
                 if (alternativeResult != null)
@@ -717,7 +727,7 @@ foreach (QName varName in env.params1.Keys)
                 assertXpc.DeclareNamespace("j", "http://www.w3.org/2005/xpath-functions");
                 assertXpc.DeclareVariable(new QName("result"));
 
-                bool b = outcome.TestAssertion(assertion, outcome.GetPrincipalResultDoc(), assertXpc, xpc, debug);
+                bool b = outcome.TestAssertion(outcome, assertion, outcome.GetPrincipalResultDoc(), assertXpc, xpc, debug);
                 if (b)
                 {
                     //println("OK");
@@ -890,6 +900,43 @@ foreach (QName varName in env.params1.Keys)
             }*/
         }
 
+        public class EnvironmentVariableResolver : net.sf.saxon.lib.EnvironmentVariableResolver
+        {
+
+            public EnvironmentVariableResolver() { }
+            
+            public Set getAvailableEnvironmentVariables()
+            {
+                Set strings = new HashSet();
+                strings.add("QTTEST");
+                strings.add("QTTEST2");
+                strings.add("QTTESTEMPTY");
+                return strings;
+            }
+
+            public string getEnvironmentVariable(string name)
+            {
+                if (name.Equals("QTTEST"))
+                {
+                    return "42";
+                }
+                else if (name.Equals("QTTEST2"))
+                {
+                    return "other";
+                }
+                else if (name.Equals("QTTESTEMPTY"))
+                {
+                    return "";
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            
+        }
+
         public class TestUriResolver : XmlUrlResolver
         {
             Environment env1;
@@ -971,7 +1018,7 @@ foreach (QName varName in env.params1.Keys)
                 XdmNode node = (XdmNode)item;
                 string type = node.GetAttributeValue(new QName("type"));
                 string value = node.GetAttributeValue(new QName("value"));
-                addDependency(type, value, dependencyIsSatisfied(node, env));
+                addDependency(type, value, EnsureDependencySatisfied(node, env));
             }
 
 

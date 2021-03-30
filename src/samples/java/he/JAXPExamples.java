@@ -1,4 +1,6 @@
 package he;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.jaxp.TransformerImpl;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
@@ -1198,7 +1200,7 @@ public class JAXPExamples {
         DocumentBuilder docBuilder = dfactory.newDocumentBuilder();
         Node doc =
                 docBuilder.parse(new InputSource(sourceID));
-        TransformerFactory tfactory = TransformerFactory.newInstance();
+        TransformerFactory tfactory = new TransformerFactoryImpl(new Configuration());// TransformerFactory.newInstance();
 
         // This creates a transformer that does a simple identity transform,
         // and thus can be used for all intents and purposes as a serializer.

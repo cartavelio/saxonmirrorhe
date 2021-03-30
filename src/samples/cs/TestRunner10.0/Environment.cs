@@ -68,10 +68,11 @@ namespace TestRunner
         public JFastStringBuffer paramDeclarations = new JFastStringBuffer(256);
         public JFastStringBuffer paramDecimalDeclarations = new JFastStringBuffer(256);
         public JUnparsedTextURIResolver unparsedTextResolver;
-        public ResetAction resetAction = null;
+        public IList<ResetAction> resetActions = new List<ResetAction>();
         public bool outputTree = true;
         public bool outputSerialize = false;
         public String streamedInputValidation = "skip";
+        internal bool failedToBuild = false;
 
 
         /**
@@ -82,6 +83,7 @@ namespace TestRunner
         {
             Environment environment = new Environment();
             environment.processor = new Processor(true);
+          
             environment.processor.Implementation.setLogger(new TestDriver.MyLogger());
             //AutoActivate.activate(environment.processor);
             if (generateByteCode == 1)
@@ -142,10 +144,10 @@ namespace TestRunner
          */
 
         public static Environment processEnvironment(TestRunner.TestDriver driver,
-                XPathCompiler xpc, XdmItem env, Dictionary<string, Environment> environments, Environment defaultEnvironment)
+                XPathCompiler xpc, XdmNode env, Dictionary<string, Environment> environments, Environment defaultEnvironment)
         {
             Environment environment = new Environment();
-            String name = ((XdmNode)env).GetAttributeValue(new QName("name"));
+            String name = env.GetAttributeValue(new QName("name"));
             if (name != null)
             {
                 System.Console.WriteLine("Loading environment " + name);
@@ -199,7 +201,7 @@ namespace TestRunner
             }
             foreach (XdmItem dependency in xpc.Evaluate("dependency", env))
             {
-                if (!driver.dependencyIsSatisfied((XdmNode)dependency, environment))
+                if (!driver.EnsureDependencySatisfied((XdmNode)dependency, environment))
                 {
                     environment.usable = false;
                 }
@@ -211,7 +213,7 @@ namespace TestRunner
 
             // set any requested collations
 
-            RegisterCollations(xpc, env, environment);
+            RegisterCollations(xpc, (XdmNode)env, environment);
 
             // declare the requested namespaces
 
@@ -220,7 +222,7 @@ namespace TestRunner
             // load the requested schema documents
 
             SchemaManager manager = environment.processor.SchemaManager;
-            bool validateSources = LoadSchemaDocuments(xpc, env, manager);
+            bool validateSources = LoadSchemaDocuments(driver, xpc, env, environment, manager);
 
             // load the requested source documents
 
@@ -266,6 +268,8 @@ namespace TestRunner
                 }
                 catch (Exception e)
                 {
+                    environment.failedToBuild = true;
+                    environment.usable = false;
                     driver.println("**** failure while compiling environment-defined stylesheet " + fileName);
                 }
             }
@@ -294,6 +298,7 @@ namespace TestRunner
                     driver.println("**** failure while compiling environment-defined stylesheet package " + fileName);
                     driver.println("****Failure " + e.Message + " in compiling environment " + name);
                     environment.usable = false;
+                    environment.failedToBuild = true;
                 }
             }
 
@@ -325,31 +330,39 @@ namespace TestRunner
             }
         }
 
-        private static void RegisterCollations(XPathCompiler xpc, XdmItem env, Environment environment)
+        private static void RegisterCollations(XPathCompiler xpc, XdmNode env, Environment environment)
         {
-            CompareInfo info = CultureInfo.CurrentCulture.CompareInfo;
-            CompareOptions options = CompareOptions.IgnoreCase;
-            foreach (XdmItem basei in xpc.Evaluate("collation", env))
+            //CompareInfo info = CultureInfo.CurrentCulture.CompareInfo;
+            //CompareOptions options = CompareOptions.IgnoreCase;
+            foreach (XdmNode basei in env.Children("collation"))
             {
-                string uri = ((XdmNode)basei).GetAttributeValue(new QName("uri"));
-                String defaultAtt = ((XdmNode)basei).GetAttributeValue(new QName("default"));
-                bool isDefault = defaultAtt != null && (defaultAtt.Trim().Equals("true") || defaultAtt.Trim().Equals("1"));
+                string uri = basei.GetAttributeValue("uri");
                 if (uri.Equals("http://www.w3.org/2010/09/qt-fots-catalog/collation/caseblind") ||
                         uri.Equals("http://www.w3.org/xslts/collation/caseblind"))
                 {
-                    JConfiguration config = xpc.Processor.Implementation;
-                    JStringCollator collator = config.getCollationURIResolver().resolve("http://saxon.sf.net/collation?ignore-case=yes", config);
-
-                    environment.xpathCompiler.DeclareCollation(new Uri(uri), info, options, isDefault);//(Collator) ((SimpleCollation) collator.).getCollation());
-                    environment.xqueryCompiler.DeclareCollation(new Uri(uri), info, options, isDefault);
-                    if (environment.xsltCompiler != null)
+                    try
                     {
-                        environment.xsltCompiler.DeclareCollation(new Uri(uri), info, options, isDefault);
+
+                        JConfiguration config = xpc.Processor.Implementation;
+                        JStringCollator collator = config.getCollationURIResolver().resolve("http://saxon.sf.net/collation?ignore-case=yes", config);
+                        
+                        environment.processor.DeclareCollation(new Uri(uri), CultureInfo.CurrentCulture.CompareInfo, CompareOptions.IgnoreCase);
                     }
+                    catch (Exception e)
+                    {
+                        throw new Exception(e.Message);
+                    }
+                }
+                string defaultAtt = basei.GetAttributeValue("default");
+                if (defaultAtt != null && (defaultAtt.Trim().Equals("true") || defaultAtt.Trim().Equals("1")))
+                {
+                    environment.xpathCompiler.DeclareDefaultCollation(uri);
+                    //environment.xqueryCompiler.DeclareCollation(uri, true);
+                    environment.xsltCompiler.DefaultCollationName = uri;
                 }
             }
         }
-
+            
         private static void DeclareNamespaces(XPathCompiler xpc, XdmItem env, Environment environment)
         {
             foreach (XdmItem nsElement in xpc.Evaluate("namespace", env))
@@ -377,14 +390,19 @@ namespace TestRunner
             }
         }
 
-        private static bool LoadSchemaDocuments(XPathCompiler xpc, XdmItem env, SchemaManager manager)
+        private static bool LoadSchemaDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, SchemaManager manager)
         {
             bool validateSources = false;
             XmlUrlResolver res = new XmlUrlResolver();
-            foreach (XdmItem schema in xpc.Evaluate("schema", env))
+            foreach (XdmNode schema in env.Children("schema"))
             {
-                String role = ((XdmNode)schema).GetAttributeValue(new QName("role"));
-                String xsdVersion = ((XdmNode)schema).GetAttributeValue(new QName("xsd-version"));
+                String role = schema.GetAttributeValue(new QName("role"));
+                String xsdVersion =  schema.GetAttributeValue(new QName("xsd-version"));
+                if (manager == null) {
+                    driver.println("** Processor is not schema aware **");
+                    environment.usable = false;
+                    return false;
+                }
                 if (xsdVersion != null)
                 {
                     manager.XsdVersion = xsdVersion;
@@ -392,20 +410,41 @@ namespace TestRunner
                 if (!"secondary".Equals(role))
                 {
                     String href = ((XdmNode)schema).GetAttributeValue(new QName("file"));
-                    Uri uri = res.ResolveUri(((XdmNode)env).BaseUri, href);
-                    FileStream file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
-                    try
+                    String ns = schema.GetAttributeValue("uri");
+                    if (href == null)
                     {
-                        manager.Compile(file, uri);
+                        Uri uri = res.ResolveUri(null, ns);
+                        FileStream file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                        try
+                        {
+                            manager.Compile(file, uri);
+                        }
+                        catch (Exception err)
+                        {
+                            System.Console.WriteLine("*** Failed to load schema: " + err.Message + ", Trace:" + err.StackTrace);
+                        }
                     }
-                    catch (Exception err)
-                    {
-                        System.Console.WriteLine("*** Failed to load schema: " + err.Message + ", Trace:" + err.StackTrace);
-                    }
+                    else {
+                        Uri uri = res.ResolveUri(((XdmNode)env).BaseUri, href);
+                        FileStream file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                        try
+                        {
+                            manager.Compile(file, uri);
+                        }
+                        catch (Exception err)
+                        {
+                            System.Console.WriteLine("*** Failed to load schema: " + err.Message + ", Trace:" + err.StackTrace);
+                        }
 
+                    }
+                    xpc.ImportSchemaNamespace(ns);
+                    environment.xpathCompiler.ImportSchemaNamespace(ns);
                     if ("source-reference".Equals(role))
                     {
                         validateSources = true;
+                    }
+                    if ("stylesheet-import".Equals(role)) {
+                        environment.xsltCompiler.SchemaAware = true;
                     }
                 }
             }
@@ -438,6 +477,7 @@ namespace TestRunner
                     String select = ((XdmNode)param).GetAttributeValue(new QName("select"));
                     value = xpc.Evaluate(select, null);
                 }
+                bool isStatic = Xslt30TestSuiteDriver.IsTrue("static").Invoke((XdmNode)param);
                 QName varQName;
                 int colon = varName.IndexOf(':');
                 if (colon >= 0)
@@ -449,7 +489,7 @@ namespace TestRunner
                     varQName = new QName(varName);
                 }
 
-                environment.params1.Add(varQName, value);
+                
                 environment.xpathCompiler.DeclareVariable(varQName);
                 String declared = ((XdmNode)param).GetAttributeValue(new QName("declared"));
                 if (declared != null && "true".Equals(declared) || "1".Equals(declared))
@@ -459,6 +499,14 @@ namespace TestRunner
                 else
                 {
                     environment.paramDeclarations.append("declare variable $" + varName + " external; ");
+                }
+                if (isStatic)
+                {
+                    environment.xsltCompiler.SetParameter(varQName, value);
+                }
+                else {
+                    environment.params1.Add(varQName, value);
+
                 }
             }
         }
@@ -514,6 +562,7 @@ namespace TestRunner
                 String uri = ((XdmNode)resource).GetAttributeValue(new QName("uri"));
                 String href = ((XdmNode)resource).GetAttributeValue(new QName("file"));
                 String encoding = ((XdmNode)resource).GetAttributeValue(new QName("encoding"));
+                String mediaType = ((XdmNode)resource).GetAttributeValue(new QName("media-type"));
                 if (href != null)
                 {
                     Object obj = null;
@@ -538,11 +587,18 @@ namespace TestRunner
                         encodings.Add(new Uri(uri), encoding);
                         Uri abs = res.ResolveUri(((XdmNode)resource).BaseUri, uri);
                         resources.Add(abs, obj);
-                        encodings.Add(abs, encoding);
+                        if (encoding == null)
+                        {
+                            encodings.Add(abs, encoding);
+                        }
+                       // environment.catalogResources.Add();
                     }
                     catch (Exception e)
                     {
                         driver.println("** Invalid URI in environment: " + e.Message);
+                    }
+                    if (mediaType != null && mediaType.EndsWith("xquery")) {
+                        driver.RegisterXQueryModule(new Uri(uri), res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath);
                     }
                 }
             }
@@ -621,14 +677,18 @@ namespace TestRunner
 
     }
 
-    private static void CreateCollectionUriResolver(TestDriver driver, XPathCompiler xpc, XdmItem env, Environment environment, DocumentBuilder builder) {
+    private static void CreateCollectionUriResolver(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, DocumentBuilder builder) {
         Dictionary<Uri, ResourceCollection> collections = new Dictionary<Uri, ResourceCollection>();
             JAbstractResourceCollection collectioni = null;
             Configuration config = environment.processor.Implementation;
             XmlUrlResolver res = new XmlUrlResolver();
-        foreach (XdmItem coll in xpc.Evaluate("collection", env)) {
+
+            if (!environment.usable) {
+                return;
+            }
+        foreach (XdmNode coll in env.Children("collection")) {
                 List<Resource> resourcesi = new List<Resource>();
-            String collectionURI = ((XdmNode) coll).GetAttributeValue(new QName("uri"));
+            String collectionURI = coll.GetAttributeValue(new QName("uri"));
             if (collectionURI == null) {
                 collectionURI = "";
             }
@@ -650,8 +710,8 @@ namespace TestRunner
 
                 
             
-            foreach (XdmItem source in xpc.Evaluate("source", coll)) {
-                String href = ((XdmNode) source).GetAttributeValue(new QName("file"));
+            foreach (XdmNode source in coll.Children("source")) {
+                String href =  source.GetAttributeValue(new QName("file"));
                 String frag = null;
                 int hash = href.IndexOf('#');
                 if (hash > 0) {
@@ -659,11 +719,38 @@ namespace TestRunner
                     href = href.Substring(0, hash);
                 }
                 FileStream file = new FileStream(res.ResolveUri(((XdmNode) env).BaseUri, href).AbsolutePath, FileMode.Open, FileAccess.Read);
+                    
                // String id = ((XdmNode) source).GetAttributeValue(new QName(JNamespaceConstant.XML, "id"));
 					String uriStr = res.ResolveUri (((XdmNode)env).BaseUri, href).AbsoluteUri;
 				builder.BaseUri = new Uri(uriStr);
                 XdmNode doc = builder.Build(file);
-                if (frag != null) {
+                    String xinc = source.GetAttributeValue("xinclude");
+
+                    XdmNode doci;
+                  /*  if ("true".Equals(xinc)) {
+
+                        XmlReader asource = XmlReader.Create(uriStr);
+                        
+                        doc = builder.Build(asource);
+                       
+
+                        Stream asourceii = new FileStream(uriStr, FileMode.Open);
+                        net.sf.saxon.dotnet.DotNetInputStream stream = new net.sf.saxon.dotnet.DotNetInputStream(asourceii);
+
+                        javax.xml.transform.Source sourcei = new javax.xml.transform.stream.StreamSource(stream);
+
+
+                          AugmentedSource asourcei = net.sf.saxon.lib.AugmentedSource.makeAugmentedSource(sourcei);
+                        asourcei.setXIncludeAware(true);
+                        
+                        asourcei.setSystemId(uriStr);
+                        builder.Build();
+
+                    }*/
+
+
+
+                    if (frag != null) {
                     XdmNode selected = (XdmNode)environment.xpathCompiler.EvaluateSingle("id('" + frag + "')", doc);
                     if (selected == null) {
                         driver.println("**** Fragment not found: " + frag);
@@ -684,6 +771,7 @@ namespace TestRunner
                     net.sf.saxon.resource.AbstractResourceCollection.InputDetails details = new net.sf.saxon.resource.AbstractResourceCollection.InputDetails();
                     details.encoding = encoding;
                     details.contentType = media;
+                    FileStream file = null;
                     if (href != null)
                     {
                         if (href.StartsWith("http"))
@@ -696,7 +784,7 @@ namespace TestRunner
                                 {
                                     details.contentType = connection.getContentType();
                                 }
-                                details.inputStream = connection.getInputStream();
+                                details.contentType = connection.getContentType();
                             }
                             catch (Exception e)
                             {
@@ -709,8 +797,7 @@ namespace TestRunner
                             
                             
                             try
-                            {
-                                FileStream file = new FileStream(res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath, FileMode.Open, FileAccess.Read);
+                            {   file = new FileStream(res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath, FileMode.Open, FileAccess.Read);
                                 Resource resourcej = collectioni.MakeResource(config, details, res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath);
                                 if (resourcej != null)
                                 {
@@ -729,7 +816,7 @@ namespace TestRunner
                            
                             if (media != null && href.EndsWith("xquery"))
                             {
-                               // driver.RegisterXQueryModule(uri, file);
+                                driver.RegisterXQueryModule(res.ResolveUri(((XdmNode)env).BaseUri, href), res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath);
                             }
                         }
 
@@ -1028,7 +1115,7 @@ namespace TestRunner
                 if (factory == null) {
                     factory = BinaryResource.FACTORY;
                 }
-                return factory.makeResource(config, absolutePath, contentType, details);
+                return factory.makeResource(config, details);
             }
         }
 
@@ -1052,7 +1139,7 @@ namespace TestRunner
 
 
 
-        public class CollectionResolver: net.sf.saxon.lib.CollectionURIResolver {
+        public class CollectionResolver /*:net.sf.saxon.lib.CollectionURIResolver */{
             System.Collections.Hashtable collections;
             public CollectionResolver(System.Collections.Hashtable collections)
             { 
@@ -1091,65 +1178,66 @@ namespace TestRunner
                             }
                         }
 
-    /**
-     * The environment acts as a URIResolver
-     */
+        /**
+         * The environment acts as a URIResolver
+         */
 
-    /*public Source resolve(string href, string base) throws TransformerException {
-        XdmNode node = sourceDocs.get(href);
-        if (node == null) {
-            string uri;
-            try {
-                uri = new URI(base).resolve(href).tostring();
-            } catch (URISyntaxException e) {
-                uri = href;
-            } catch (IllegalArgumentException e) {
-                uri = href;
-            }
-            string val = streamedSecondaryDocs.get(uri);
-            if (val != null) {
-                Source source = new StreamSource(uri);
-                if (!val.Equals("skip")) {
-                    source = AugmentedSource.makeAugmentedSource(source);
-                    ((AugmentedSource)source).setSchemaValidationMode(Validation.getCode(val));
-                }
-                return source;
-            } else {
-                return null;
-            }
-        } else {
-            return node.asSource();
-        }
-    }*/
-
-
-   /* private class LazyLiteralInjector: JCodeInjector {
-        public JExpression inject(JExpression exp, StaticContext env, int construct, JStructuredQName qName) {
-            if (exp is net.sf.saxon.expr.Literal) {
-                JStructuredQName name = new JStructuredQName("saxon", JNamespaceConstant.SAXON, "lazy-literal");
-                com.saxonica.expr.JavaExtensionFunctionCall wrapper = new com.saxonica.expr.JavaExtensionFunctionCall();
+        /*public Source resolve(string href, string base) throws TransformerException {
+            XdmNode node = sourceDocs.get(href);
+            if (node == null) {
+                string uri;
                 try {
-                    wrapper.init(name, FOTestSuiteDriver.class,
-                            FOTestSuiteDriver.class.getMethod("lazyLiteral", Sequence.class),
-                            env.getConfiguration());
-                    wrapper.setArguments(new Expression[]{exp});
-                } catch (NoSuchMethodException e) {
-                    throw new IllegalStateException(e);
+                    uri = new URI(base).resolve(href).tostring();
+                } catch (URISyntaxException e) {
+                    uri = href;
+                } catch (IllegalArgumentException e) {
+                    uri = href;
                 }
-                return wrapper;
+                string val = streamedSecondaryDocs.get(uri);
+                if (val != null) {
+                    Source source = new StreamSource(uri);
+                    if (!val.Equals("skip")) {
+                        source = AugmentedSource.makeAugmentedSource(source);
+                        ((AugmentedSource)source).setSchemaValidationMode(Validation.getCode(val));
+                    }
+                    return source;
+                } else {
+                    return null;
+                }
             } else {
-                return exp;
+                return node.asSource();
             }
-        }
+        }*/
 
-        public Clause injectClause(Clause target, StaticContext env, Container container) {
-            return null;
-        }
-    } */
 
-    public abstract class ResetAction {
-        public abstract void reset(Environment env);
-    }
+        /* private class LazyLiteralInjector: JCodeInjector {
+             public JExpression inject(JExpression exp, StaticContext env, int construct, JStructuredQName qName) {
+                 if (exp is net.sf.saxon.expr.Literal) {
+                     JStructuredQName name = new JStructuredQName("saxon", JNamespaceConstant.SAXON, "lazy-literal");
+                     com.saxonica.expr.JavaExtensionFunctionCall wrapper = new com.saxonica.expr.JavaExtensionFunctionCall();
+                     try {
+                         wrapper.init(name, FOTestSuiteDriver.class,
+                                 FOTestSuiteDriver.class.getMethod("lazyLiteral", Sequence.class),
+                                 env.getConfiguration());
+                         wrapper.setArguments(new Expression[]{exp});
+                     } catch (NoSuchMethodException e) {
+                         throw new IllegalStateException(e);
+                     }
+                     return wrapper;
+                 } else {
+                     return exp;
+                 }
+             }
+
+             public Clause injectClause(Clause target, StaticContext env, Container container) {
+                 return null;
+             }
+         } */
+
+        public delegate void ResetAction(Environment env);
+       
+
+        
 
 
 }

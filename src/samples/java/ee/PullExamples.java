@@ -3,7 +3,6 @@ package ee;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.xqj.pull.PullFromIterator;
 import com.saxonica.xqj.pull.PullNamespaceReducer;
-import com.saxonica.xqj.pull.PullTracer;
 import com.saxonica.xqj.pull.TreeWalker;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
@@ -32,11 +31,10 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Properties;
 
-import static net.sf.saxon.pull.PullProvider.Event.START_ELEMENT;
-
 /**
  * This class contains some examples of how to use the Pull interfaces
- * in Saxon.
+ * in Saxon.  The tests should be run with the samples directory (in the saxon-resources download) as the
+ * current directory.
  */
 
 public class PullExamples {
@@ -116,10 +114,10 @@ public class PullExamples {
     }
 
     /**
-     * Build a Saxon "standard" tree from input supplied via the pull interface
+     * Build a Saxon "linked" tree from input supplied via the pull interface
      */
 
-    public NodeInfo buildStandardTree(PullProvider in) throws XPathException {
+    public NodeInfo buildLinkedTree(PullProvider in) throws XPathException {
         PipelineConfiguration pipe = in.getPipelineConfiguration();
         LinkedTreeBuilder builder = new LinkedTreeBuilder(pipe);
         builder.open();
@@ -173,9 +171,9 @@ public class PullExamples {
     public void removePriceElements(PullProvider in, OutputStream out) throws XPathException {
         final NodeName priceElement = new NoNamespaceName("PRICE");
         PullFilter filter = new PullFilter(in) {
-            public Event next() throws XPathException {
+            public PullProvider.Event next() throws XPathException {
                 currentEvent = super.next();
-                if (currentEvent == START_ELEMENT && getNodeName().equals(priceElement)) {
+                if (currentEvent == Event.START_ELEMENT && getNodeName().equals(priceElement)) {
                     super.skipToMatchingEnd();
                     currentEvent = next();
                 }
@@ -342,7 +340,7 @@ public class PullExamples {
                                                                 "local:f()"
 
                     );
-                    o.serialize(new PullTracer(p), output);
+                    o.serialize(p, output);
                     break;
                 }
                 case 'h': {
@@ -350,7 +348,7 @@ public class PullExamples {
 
                     PullProvider p1 = o.getParser(input);
                     p1.setPipelineConfiguration(pipe);
-                    NodeInfo node = o.buildStandardTree(p1);
+                    NodeInfo node = o.buildLinkedTree(p1);
                     PullProvider p2 = o.pullQueryResults(node,
                                                          "//CATEGORIES"
                     );
