@@ -41,7 +41,6 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
 import java.io.Reader;
-import java.nio.charset.spi.CharsetProvider;
 import java.util.List;
 import java.util.Properties;
 
@@ -57,7 +56,7 @@ public class DotNetPlatform implements Platform {
      */
 
     // Need to comment this out to avoid compile errors with JDK 9+
-    private static final CharsetProvider provider = new sun.nio.cs.ext.ExtendedCharsets();
+    //private static final CharsetProvider provider = new sun.nio.cs.ext.ExtendedCharsets();
 
     public DotNetPlatform() {
     }
