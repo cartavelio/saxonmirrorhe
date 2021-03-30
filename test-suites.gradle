@@ -65,9 +65,9 @@ task config_sample(
   outputs.file "${buildDir}/output/he/resources/samples/config/config.xsd"
   classpath = configurations.preprocessor
   main = "net.sf.saxon.Transform"
-  args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
-    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToSchema.xsl",
+  args "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToSchema.xsl",
     "-o:${buildDir}/output/he/resources/samples/config/config.xsd",
+    "-it:main",
     "FeatureKeys=FeatureKeys.xml",
     "AdditionalFeatures=AdditionalFeatures.xml",
     "ConfigSchema=${projectDir}/src/samples/config/config-raw.xsd"
