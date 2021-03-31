@@ -250,6 +250,7 @@ task copy_userdoc_sources(
   from ("${projectDir}/src/userdoc") {
     // Excluded files are transformed by other tasks into "src" for the docbuild
     exclude "extensions/**"
+    exclude "elements/**"
   }
 }
 
@@ -397,12 +398,13 @@ task expath_doc() {
   expath_doc.dependsOn t
 }
 
-task gen_expand_doc_sections_for_app(
+task expand_userdoc_sections(
   type: JavaExec,
-  dependsOn: ["gen_doc", "copy_changes_dir"],
+  dependsOn: ["gen_doc"],
   description: "Expand documentation sections from inclusions for app"
 ) {
   inputs.file "${buildDir}/userdoc/src/catalog.xml"
+  inputs.files fileTree(dir: "${buildDir}/userdoc/src")
   inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
   outputs.file "${buildDir}/userdoc/expanded/catalog.xml"
   classpath = configurations.documentation
@@ -414,20 +416,9 @@ task gen_expand_doc_sections_for_app(
     "output-uri=${buildDir}/userdoc/expanded/"
 }
 
-task copy_changes_dir(
-  type: Copy,
-  description: "Copy the change logs to build hierarchy"
-) {
-  into "${buildDir}/userdoc/src/changes"
-  from "${projectDir}/src/userdoc/changes"
-  doFirst {
-    mkdir "${buildDir}/userdoc/src/changes"
-  }
-}
-
 task userdoc_changes(
   type: JavaExec,
-  dependsOn: ["gen_expand_doc_sections_for_app"],
+  dependsOn: ["expand_userdoc_sections"],
   description: "Preprocess the changes.xml file to turn it into a standard article"
 ) {
   inputs.file "${buildDir}/userdoc/expanded/changes.xml"
@@ -442,7 +433,7 @@ task userdoc_changes(
 
 task userdoc_functions(
   type: JavaExec,
-  dependsOn: ["gen_expand_doc_sections_for_app"],
+  dependsOn: ["expand_userdoc_sections"],
   description: "Preprocess the functions.xml file to turn it into a standard article"
 ) {
   inputs.file "${buildDir}/userdoc/expanded/functions.xml"
@@ -483,7 +474,7 @@ task userdoc_html(
 
 task userdoc_articles(
   type: JavaExec,
-  dependsOn: ["gen_expand_doc_sections_for_app", "app_javadoc", "app_dotnetdoc",
+  dependsOn: ["expand_userdoc_sections", "app_javadoc", "app_dotnetdoc",
               "userdoc_changes", "userdoc_functions"],
   description: "Process all the articles"
 ) {
