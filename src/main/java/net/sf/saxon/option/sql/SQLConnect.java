@@ -69,12 +69,16 @@ public class SQLConnect extends ExtensionInstruction {
             if (dbName.length() > 9 && dbName.substring(0, 9).equals("jdbc:odbc")) {
                 dbDriverName = "sun.jdbc.odbc.JdbcOdbcDriver";
             } else {
-                reportAbsence("driver");
+                //reportAbsence("driver");
             }
         } else {
             dbDriverName = dbDriver.getValue();
         }
-        driver = makeAttributeValueTemplate(dbDriverName, dbDriver);
+        if (dbDriverName != null) {
+            driver = makeAttributeValueTemplate(dbDriverName, dbDriver);
+        } else {
+            driver = Literal.makeEmptySequence();
+        }
 
 
         // Get and expand user attribute, which defaults to empty string
@@ -178,16 +182,16 @@ public class SQLConnect extends ExtensionInstruction {
             String pwdString = str(arguments[PASSWORD]);
             String autoCommitString = str(arguments[AUTOCOMMIT]);
 
-            try {
-                // the following hack is necessary to load JDBC drivers
-                Class.forName(dbDriverString);
-            } catch (ClassNotFoundException e) {
-                XPathException err = new XPathException("Failed to load JDBC driver " + dbDriverString, e);
-                err.setXPathContext(context);
-                err.setErrorCode(SaxonErrorCode.SXSQ0003);
-                err.setLocation(getLocation());
-                throw err;
-            }
+//            try {
+//                // the following hack is necessary to load JDBC drivers
+//                Class.forName(dbDriverString);
+//            } catch (ClassNotFoundException e) {
+//                XPathException err = new XPathException("Failed to load JDBC driver " + dbDriverString, e);
+//                err.setXPathContext(context);
+//                err.setErrorCode(SaxonErrorCode.SXSQ0003);
+//                err.setLocation(getLocation());
+//                throw err;
+//            }
             try {
                 if (context.getConfiguration().isTiming()) {
                     DriverManager.setLogWriter(new PrintWriter(System.err));

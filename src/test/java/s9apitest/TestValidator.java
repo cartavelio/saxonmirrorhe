@@ -11,10 +11,12 @@ import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.ValidationException;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.ErrorHandler;
@@ -1407,6 +1409,43 @@ public class TestValidator {
     @Test
     public void testByteCodeJaxpOff() {
         testByteCodeJaxp(false);
+    }
+
+    @Ignore
+    public void testBug4507() {
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.load(new StreamSource(
+                    new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/schema.xsd")));
+            SchemaValidator val = sm.newSchemaValidator();
+            val.validate(new StreamSource(
+                    new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/data.xml")));
+            Instrumentation.report();
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Ignore
+    @Tag("bytecode")
+    public void testBug4507bytecode() {
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.load(new StreamSource(
+                    new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/schema.xsd")));
+            SchemaValidator val = sm.newSchemaValidator();
+            val.validate(new StreamSource(
+                    new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/data.xml")));
+            Instrumentation.report();
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 
 

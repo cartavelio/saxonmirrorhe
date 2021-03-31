@@ -220,42 +220,42 @@ public class TestIdentityTransformer {
         }
     }
 
-    @Test
-    public void testIdentityTransformFromDomPerformance() {
-        try {
-            ((com.sun.management.ThreadMXBean) ManagementFactory.getThreadMXBean()).setThreadAllocatedMemoryEnabled(true);
-
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            DocumentBuilder db = factory.newDocumentBuilder();
-            Document doc = db.parse(new FileInputStream(ConfigTest.XMARK_DIR + "xmark1.xml"));
-
-            Transformer saxon = new TransformerFactoryImpl().newTransformer();
-            Transformer xalan = new com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl().newTransformer();
-
-            for (int i=0; i<10; i++) {
-                saxon.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
-                //xalan.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
-            }
-
-            for (int i = 0; i < 10; i++) {
-                long used = getUsedMemory();
-                long start = System.nanoTime();
-                saxon.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
-                System.out.println("Saxon: " + (System.nanoTime() - start) / 1000000 + "ms in " + (getUsedMemory()-used) + "bytes");
-
-                used = getUsedMemory();
-                start = System.nanoTime();
-                xalan.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
-                System.out.println("           Xalan: " + (System.nanoTime() - start) / 1000000 + "ms in " + (getUsedMemory() - used) + "bytes");
-            }
-
-        } catch (ParserConfigurationException | TransformerException | SAXException | IOException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-
-    }
+//    @Test
+//    public void testIdentityTransformFromDomPerformance() {
+//        try {
+//            ((com.sun.management.ThreadMXBean) ManagementFactory.getThreadMXBean()).setThreadAllocatedMemoryEnabled(true);
+//
+//            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+//            factory.setNamespaceAware(true);
+//            DocumentBuilder db = factory.newDocumentBuilder();
+//            Document doc = db.parse(new FileInputStream(ConfigTest.XMARK_DIR + "xmark1.xml"));
+//
+//            Transformer saxon = new TransformerFactoryImpl().newTransformer();
+//            Transformer xalan = new com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl().newTransformer();
+//
+//            for (int i=0; i<10; i++) {
+//                saxon.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
+//                //xalan.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
+//            }
+//
+//            for (int i = 0; i < 10; i++) {
+//                long used = getUsedMemory();
+//                long start = System.nanoTime();
+//                saxon.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
+//                System.out.println("Saxon: " + (System.nanoTime() - start) / 1000000 + "ms in " + (getUsedMemory()-used) + "bytes");
+//
+//                used = getUsedMemory();
+//                start = System.nanoTime();
+//                xalan.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
+//                System.out.println("           Xalan: " + (System.nanoTime() - start) / 1000000 + "ms in " + (getUsedMemory() - used) + "bytes");
+//            }
+//
+//        } catch (ParserConfigurationException | TransformerException | SAXException | IOException e) {
+//            e.printStackTrace();
+//            fail(e.getMessage());
+//        }
+//
+//    }
 
     private static long getUsedMemory() {
         return ((com.sun.management.ThreadMXBean) ManagementFactory.getThreadMXBean()).getThreadAllocatedBytes(Thread.currentThread().getId());

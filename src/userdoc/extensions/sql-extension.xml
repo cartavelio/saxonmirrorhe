@@ -86,26 +86,27 @@
             <name namespace="http://saxon.sf.net/sql">connect</name>
             <element-syntax name="connect">
                <attribute name="driver" required="yes">
-                  <desc> The name of the JDBC driver class to be used.</desc>
+                  <desc> The name of the JDBC driver class to be used. From Saxon 10.5 this is
+                  no longer needed, and is ignored if specified.</desc>
                   <attribute-value-template>
                      <data-type name="eqname"/>
                   </attribute-value-template>
                </attribute>
                <attribute name="database" required="yes">
-                  <desc> The name of the database. Must be a name that JDBC can associate with an
-                     actual database.</desc>
+                  <desc> The name (URL) of the database. Must be a name that JDBC can associate with an
+                     actual database. An example might be <code>jdbc:derby:codejava/webdb;create=true</code>.</desc>
                   <attribute-value-template>
                      <data-type name="eqname"/>
                   </attribute-value-template>
                </attribute>
                <attribute name="user" required="no">
-                  <desc/>
+                  <desc>The user name if required for connection (and if not included in the database URL).</desc>
                   <attribute-value-template>
                      <data-type name="expression"/>
                   </attribute-value-template>
                </attribute>
                <attribute name="password" required="no">
-                  <desc/>
+                  <desc>The password if required for connection (and if not included in the database URL).</desc>
                   <attribute-value-template>
                      <data-type name="expression"/>
                   </attribute-value-template>

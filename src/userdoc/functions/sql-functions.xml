@@ -20,7 +20,8 @@
          <p>Introduced in Saxon 9.9. Designed to supersede the extension instruction <a class="bodylink code"
             href="/sql-extension/instructions/connect">sql:connect</a>. The <code>saxon-sql-10.#.jar</code> file,
             distributed alongside the main JAR file, must be added to the classpath when these SQL extension functions
-            are used.</p>
+            are used. Changed in 10.5 to allow the JDBC driver name to be omitted, and to allow a DataSource
+            name to be provided.</p>
       </status>
       <xpath>3.1</xpath>
       <saxon-edition>9.9 PE/EE J</saxon-edition>
@@ -41,22 +42,33 @@
                <tr>
                   <td>driver</td>
                   <td><code>xs:string</code></td>
-                  <td>The Java class name of the JDBC driver to be used, for example <code>sun.jdbc.odbc.JdbcOdbcDriver</code></td>
+                  <td>The Java class name of the JDBC driver to be used, for example <code>sun.jdbc.odbc.JdbcOdbcDriver</code>.
+                  No longer needed (and ignored if specified) from Saxon 10.5.</td>
+               </tr>
+               <tr>
+                  <td>dataSource</td>
+                  <td><code>xs:string</code></td>
+                  <td>The name of a registered DataSource known to the Java naming service. If supplied, the database
+                     URL is ignored. NOTE: since the use of a DataSource typically depends on an execution framework
+                  such as an application server, Saxonica has performed only very limited testing of this feature,
+                  and user feedback about its functioning in different application environments is welcomed.</td>
                </tr>
                <tr>
                   <td>database</td>
                   <td><code>xs:string</code></td>
-                  <td>The name of the database: naming conventions depend on the driver in use</td>
+                  <td>The name (URL) of the database: naming conventions depend on the driver in use. An example
+                     for the Derby database might be <code>jdbc:derby:jar:webdb</code>. For MySQL, it might
+                     be <code>jdbc:mysql://localhost:3306/test?user=root&amp;password=secret</code></td>
                </tr>
                <tr>
                   <td>user</td>
                   <td><code>xs:string</code></td>
-                  <td>Username to be used for authentication</td>
+                  <td>Username to be used for authentication. Not needed if included in the database URL.</td>
                </tr>
                <tr>
                   <td>password</td>
                   <td><code>xs:string</code></td>
-                  <td>Password to be used for authentication</td>
+                  <td>Password to be used for authentication. Not needed if included in the database URL.</td>
                </tr>
                <tr>
                   <td>autoCommit</td>
