@@ -54,9 +54,6 @@ if (!hasProperty("w3cXslt30TestSuiteDir")) {
 if (!hasProperty("w3cXsdTestSuiteDir")) {
   ext.w3cXsdTestSuiteDir = System.getenv("W3C_XSD_TEST_SUITE_DIR")
 }
-if (!hasProperty("saxonQT3ExtraTestSuiteDir")) {
-  ext.saxonQT3ExtraTestSuiteDir = System.getenv("SAXON_QT3EXTRA_TEST_SUITE_DIR")
-}
 
 dependencies {
   preprocessor (
@@ -388,142 +385,10 @@ task cloneXslt30TestSuite() {
   }
 }
 
-task cloneQT3ExtraTestSuite() {
-  doLast {
-    if (saxonQT3ExtraTestSuiteDir == null) {
-      throw new GradleException("The location of the QT3 extra test suite is unknown.")
-    }
-  }
-}
-
 task cloneXsdTestSuite() {
   doLast {
     if (w3cXsdTestSuiteDir == null) {
       throw new GradleException("The location of the XSD test suite is unknown.")
-    }
-  }
-}
-
-// ============================================================
-
-task compileTestDrivers() {
-  // Just a container to hang dependencies on
-}
-
-task runQT3TestDriver() {
-  // Just a container to hang dependencies on
-}
-
-task runXslt30TestSuiteDriver() {
-  // Just a container to hang dependencies on
-}
-
-["h", "p", "e"].each { initial ->
-  def release = initial + "e"
-  def RELEASE = release.toUpperCase()
-  def jpackage = "com.saxonica.testdriver"
-  if (release == "he") {
-    jpackage = "net.sf.saxon.testdriver"
-  }
-
-  task "${release}j_compileTestDrivers"(
-    type: JavaCompile,
-    dependsOn: ["${release}j_copyTestDrivers", "${release}jCompile"],
-    description: "Compile the test classes for ${RELEASE}"
-  ) {
-    classpath = configurations.testDrivers + files("${buildDir}/classes/${release}j")
-    source = "${buildDir}/src/testdrivers/${release}j"
-    destinationDirectory = new File("${buildDir}/testdriver_classes/${release}j")
-  }
-
-  fileTree(dir: "src/test/exceptions").each { fn ->
-    def pos = fn.toString().lastIndexOf(pathSeparator)
-    def base = fn.toString().substring(pos+1)
-    base = base.substring(0, base.length() - 4)
-    task "${release}j_setup_${base}_TestResults"(
-      type: Copy,
-      description: "Sets up the test results directory the ${base} tests for ${RELEASE}"
-    ) {
-      into "${buildDir}/test-results/${release}j/${base}"
-      from "src/test/exceptions/${base}.xml"
-      rename { "exceptions.xml" }
-    }
-  }
-
-  task "${release}j_runQT3TestDriver"(
-    type: JavaExec,
-    dependsOn: ["${release}j_compileTestDrivers", "${release}j_setup_qt3_TestResults",
-                "cloneQT3TestSuite"],
-    description: "Run the QT3 test suite driver for ${RELEASE}"
-  ) {
-    classpath = configurations.testDrivers \
-                + files("${buildDir}/classes/${release}j") \
-                + files("${buildDir}/testdriver_classes/${release}j")
-    main = "${jpackage}.QT3TestDriver${RELEASE}"
-    def testargs = ["${w3cQT3TestSuiteDir}",
-                    "catalog.xml",
-                    "-o:${buildDir}/test-results/${release}j/qt3",
-                    "-lang:XQ31",
-                    "-qt30:on",
-                    testBytecode]
-    if (testJit != "") {
-      testargs = testargs + [ testJit ]
-    }
-    if (release == "ee" && testUnfolded != "") {
-      testargs = testargs + [ testUnfolded ]
-    }
-    args testargs
-  }
-
-  task "${release}j_runXslt30TestSuiteDriver"(
-    type: JavaExec,
-    dependsOn: ["${release}j_compileTestDrivers", "${release}j_setup_xslt30_TestResults",
-                "cloneXslt30TestSuite"],
-    description: "Run the XSLT 3.0 test suite driver for ${RELEASE}"
-  ) {
-    classpath = configurations.testDrivers \
-                + files("${buildDir}/classes/${release}j") \
-                + files("${buildDir}/testdriver_classes/${release}j")
-    main = "${jpackage}.Xslt30TestSuiteDriver${RELEASE}"
-    def testargs = ["${w3cXslt30TestSuiteDir}",
-                    "catalog.xml",
-                    "-o:${buildDir}/test-results/${release}j/xslt30",
-                    "-lang:XT30",
-                    "-qt30:on",
-                    testBytecode]
-    if (testJit != "") {
-      testargs = testargs + [ testJit ]
-    }
-    if (testExport != "") {
-      testargs = testargs + [ testExport ]
-    }
-    args testargs
-  }
-
-  if (release == "pe" || release == "ee") {
-    task "${release}j_runQT3ExtraTestDriver"(
-      type: JavaExec,
-      dependsOn: ["${release}j_compileTestDrivers", "${release}j_setup_qt3extra_TestResults",
-                  "cloneQT3ExtraTestSuite"],
-      description: "Run the QT3 extra test suite driver for ${RELEASE}"
-    ) {
-      classpath = configurations.testDrivers \
-                  + files("${buildDir}/classes/${release}j") \
-                  + files("${buildDir}/testdriver_classes/${release}j")
-      main = "${jpackage}.QT3TestDriver${RELEASE}"
-      def testargs = ["${saxonQT3ExtraTestSuiteDir}",
-                      "catalog.xml",
-                      "-o:${buildDir}/test-results/${release}j/qt3extra",
-                      "-lang:XQ31",
-                      "-qt30:on",
-                      testBytecode]
-      if (testJit != "") {
-        testargs = testargs + [ testJit ]
-      }
-      if (release == "ee" && testUnfolded != "") {
-        testargs = testargs + [ testUnfolded ]
-      }
-      args testargs
     }
   }
 }
@@ -1423,17 +1288,10 @@ if (file("${projectDir}/src/main/java/com").exists()) {
 
 // ============================================================
 
-compileTestDrivers.dependsOn "${saxonEdition}j_compileTestDrivers"
-runQT3TestDriver.dependsOn "${saxonEdition}j_runQT3TestDriver"
-runXslt30TestSuiteDriver.dependsOn "${saxonEdition}j_runXslt30TestSuiteDriver"
-
-// ============================================================
-
 // Testing task for various Gradle debugging efforts
 task helloWorld() {
   doLast {
     println("Hello, world.")
-    println(testJit == "")
     /*
     configurations.documentation.resolve().each { path ->
       println(path)

@@ -1,3 +1,532 @@
+// ============================================================
+// Run the whole shebang!
+task testSuitesJava(
+  dependsOn: ["hejTestSuitesJava", "pejTestSuitesJava", "eejTestSuitesJava"]
+) {
+  // Just somewhere to hang dependencies
+}
+
+task hejTestSuitesJava() {
+  // Just somewhere to hang dependencies
+}
+
+task pejTestSuitesJava() {
+  // Just somewhere to hang dependencies
+}
+
+task eejTestSuitesJava() {
+  // Just somewhere to hang dependencies
+}
+
+// ============================================================
+
+def langCodeMap = ["XP20": "XPath2.0",
+                   "XP30": "XPath3.0",
+                   "XP31": "XPath3.1",
+                   "XQ20": "XQuery2.0",
+                   "XQ30": "XQuery3.0",
+                   "XQ31": "XQuery3.1"]
+
+// N.B. These tasks cannot be run in parallel because the
+// test suite drivers write to filenames that are not distinct
+// based on the options used to run them (e.g, whether or not
+// the bytecode option is enabled doesn't change the output
+// filename).
+//
+// ============================================================
+// Tasks to build the test drivers and setup the test suite results directories
+
+["he", "pe", "ee"].each { release ->
+  def RELEASE = release.toUpperCase()
+  fileTree(dir: "src/test/exceptions").each { fn ->
+    def pos = fn.toString().lastIndexOf(pathSeparator)
+    def base = fn.toString().substring(pos+1)
+    base = base.substring(0, base.length() - 4)
+    task "${release}j_setup_${base}_TestResults"(
+      type: Copy,
+      description: "Sets up the test results directory the ${base} tests for ${RELEASE}"
+    ) {
+      into "${buildDir}/test-results/${release}j/${base}/${DSTAMP}"
+      from "src/test/exceptions/${base}.xml"
+      rename { "exceptions.xml" }
+    }
+  }
+
+  task "${release}j_compileTestDrivers"(
+    type: JavaCompile,
+    dependsOn: ["${release}j_copyTestDrivers", "${release}jCompile"],
+    description: "Compile the test classes for ${RELEASE}"
+  ) {
+    classpath = configurations.testDrivers + files("${buildDir}/classes/${release}j")
+    source = "${buildDir}/src/testdrivers/${release}j"
+    destinationDirectory = new File("${buildDir}/testdriver_classes/${release}j")
+  }
+}
+
+task eej_setup_xsd_transformations(
+  type: Copy,
+  description: "Copy the transformations used by the XSD test driver"
+) {
+  into "${buildDir}/test-results/eej/xsd/${DSTAMP}"
+  from "src/test/extra/tools"
+}
+tasks.findByName("eej_setup_xsd_TestResults").dependsOn "eej_setup_xsd_transformations"
+
+task eej_setup_xsd_extra_transformations(
+  type: Copy,
+  description: "Copy the transformations used by the XSD test driver"
+) {
+  into "${buildDir}/test-results/eej/xsd-extra/${DSTAMP}"
+  from "src/test/extra/tools"
+}
+tasks.findByName("eej_setup_xsd-extra_TestResults").dependsOn "eej_setup_xsd_extra_transformations"
+
+// ============================================================
+// Tasks to run QT3 test driver with a variety of options
+
+task qt3TestsJava() {
+  // Just somewhere to hang dependencies
+}
+
+["he", "pe", "ee"].each { release ->
+  def RELEASE = release.toUpperCase()
+  def jpackage = "com.saxonica.testdriver"
+  if (release == "he") {
+    jpackage = "net.sf.saxon.testdriver"
+  }
+
+  def resdir = "${buildDir}/test-results/${release}j/qt3/${DSTAMP}"
+
+  def languages = ["XP20", "XP31", "XQ30", "XQ31"]
+  if (release == "ee") {
+    languages = ["XP20", "XP30", "XP31", "XQ10", "XQ30", "XQ31"]
+  }
+
+  def bytecodes = [""]
+  if (release == "ee") {
+    bytecodes = ["off", "on"]
+  }
+
+  languages.each { language ->
+    bytecodes.each { bytecode ->
+
+      def unfolded = [""]
+      if (release == "ee" && (language == "XQ30" || language == "XQ31")) {
+        unfolded = ["", "yes"]
+      }
+
+      unfolded.each { uoption ->
+        def taskname = "${release}_runQT3TestSuite_${language}"
+        if (bytecode != "") {
+          taskname = "${taskname}_bc${bytecode}"
+        }
+        if (uoption != "") {
+          taskname = "${taskname}_un"
+        }
+
+        if (bytecode == "off" && uoption != "") {
+          // ignore this combination
+        } else {
+          task "run_${taskname}"(
+            type: JavaExec,
+            dependsOn: ["${release}j_compileTestDrivers", "${release}j_setup_qt3_TestResults",
+                        "cloneQT3TestSuite"],
+            description: "Run the QT3 test suite driver for ${RELEASE}/${language}/${bytecode}/${uoption}"
+          ) {
+            inputs.files fileTree(dir: "src")
+            outputs.file "${resdir}/results_${langCodeMap[language]}_${saxonVersion}.xml"
+
+            classpath = configurations.testDrivers \
+            + files("${buildDir}/classes/${release}j") \
+            + files("${buildDir}/testdriver_classes/${release}j")
+
+            main = "${jpackage}.QT3TestDriver${RELEASE}"
+            def testargs = [w3cQT3TestSuiteDir,
+                            "catalog.xml",
+                            "-o:${resdir}",
+                            "-lang:${language}"]
+            if (bytecode != "") {
+              testargs += [ "-bytecode:${bytecode}" ]
+            }
+            if (uoption != "") {
+              testargs += [ "-unfolded:${uoption}" ]
+            }
+
+            args testargs
+          }
+
+          task "${taskname}"(
+            type: Copy,
+            dependsOn: "run_${taskname}"
+          ) {
+            def bflag = ""
+            if (bytecode != "") {
+              bflag = "-${bytecode}"
+            }
+            def uflag = ""
+            if (uoption != "") {
+              uflag = "-unfolded"
+            }
+            into "${resdir}/results"
+            from resdir
+            include "results_${langCodeMap[language]}_${saxonVersion}.xml"
+            rename { filename ->
+              "saxon-${saxonVersion}-${language}${bflag}${uflag}.xml"
+            }
+          }
+          qt3TestsJava.dependsOn taskname
+          tasks.findByName("${release}jTestSuitesJava").dependsOn taskname
+        }
+      }
+    }
+  }
+}
+
+// ============================================================
+// Tasks to run QT3 extra test driver with a variety of options
+
+task qt3ExtraTestsJava() {
+  // Just somewhere to hang dependencies
+}
+
+// These tests are not run for "he".
+["pe", "ee"].each { release ->
+  def RELEASE = release.toUpperCase()
+  def jpackage = "com.saxonica.testdriver"
+  if (release == "he") {
+    jpackage = "net.sf.saxon.testdriver"
+  }
+
+  def resdir = "${buildDir}/test-results/${release}j/qt3extra/${DSTAMP}"
+
+  def languages = ["XP20", "XP31", "XQ30", "XQ31"]
+  if (release == "ee") {
+    languages = ["XP20", "XP30", "XP31", "XQ10", "XQ30", "XQ31"]
+  }
+
+  def bytecodes = [""]
+  if (release == "ee") {
+    bytecodes = ["off", "on"]
+  }
+
+  languages.each { language ->
+    bytecodes.each { bytecode ->
+      def taskname = "${release}_runQT3ExtraTestSuite_${language}"
+      if (bytecode != "") {
+        taskname = "${taskname}_bc${bytecode}"
+      }
+
+      task "run_${taskname}"(
+        type: JavaExec,
+        dependsOn: ["${release}j_compileTestDrivers", "${release}j_setup_qt3extra_TestResults"],
+        description: "Run the QT3 extra test suite driver for ${RELEASE}/${language}/${bytecode}"
+      ) {
+        inputs.files fileTree(dir: "src")
+        outputs.file "${resdir}/results_${langCodeMap[language]}_${saxonVersion}.xml"
+
+        classpath = configurations.testDrivers \
+        + files("${buildDir}/classes/${release}j") \
+        + files("${buildDir}/testdriver_classes/${release}j")
+
+        main = "${jpackage}.QT3TestDriver${RELEASE}"
+        def testargs = ["${projectDir}/src/test/extra/qt3",
+                        "catalog.xml",
+                        "-o:${resdir}",
+                        "-lang:${language}"]
+        if (bytecode != "") {
+          testargs += [ "-bytecode:${bytecode}" ]
+        }
+
+        args testargs
+      }
+
+      task "${taskname}"(
+        type: Copy,
+        dependsOn: "run_${taskname}"
+      ) {
+        def bflag = ""
+        if (bytecode != "") {
+          bflag = "-${bytecode}"
+        }
+        into "${resdir}/results"
+        from resdir
+        include "results_${langCodeMap[language]}_${saxonVersion}.xml"
+        rename { filename ->
+          "saxon-${saxonVersion}-${language}${bflag}.xml"
+        }
+      }
+      qt3ExtraTestsJava.dependsOn taskname
+      tasks.findByName("${release}jTestSuitesJava").dependsOn taskname
+    }
+  }
+}
+
+// ============================================================
+// Tasks to run XSLT3.0 test driver with a variety of options
+
+task xslt30TestsJava() {
+  // Just somewhere to hang dependencies
+}
+
+["he", "pe", "ee"].each { release ->
+  def RELEASE = release.toUpperCase()
+  def jpackage = "com.saxonica.testdriver"
+  if (release == "he") {
+    jpackage = "net.sf.saxon.testdriver"
+  }
+
+  def resdir = "${buildDir}/test-results/${release}j/xslt30/${DSTAMP}"
+
+  def languages = ["XT30"]
+  def bytecodes = [""]
+  def exports = [""]
+  def jits = [""]
+  if (release == "ee") {
+    bytecodes = ["off", "on"]
+    exports = ["", "-export"]
+    jits = ["", "-jit"]
+  }
+
+  languages.each { language ->
+    bytecodes.each { bytecode ->
+      exports.each { export ->
+        jits.each { jit ->
+
+          def skipThisCombo = ((export == "-export" && bytecode == "on")
+                               || (jit == "-jit" && bytecode == "off"))
+
+          if (!skipThisCombo) {
+            def taskname = "${release}_runXslt30TestSuite_${language}"
+            if (bytecode != "") {
+              taskname = "${taskname}_bc${bytecode}"
+            }
+            if (export != "") {
+              taskname = "${taskname}_export"
+            }
+            if (jit != "") {
+              taskname = "${taskname}_jit"
+            }
+
+            task "run_${taskname}"(
+              type: JavaExec,
+              dependsOn: ["${release}j_compileTestDrivers",
+                          "${release}j_setup_xslt30_TestResults",
+                          "cloneXslt30TestSuite"],
+              description: "Run the XSLT 3.0 test suite driver for ${RELEASE}/${language}/${bytecode}/${export}/${jit}"
+            ) {
+              inputs.files fileTree(dir: "src")
+              outputs.file "${resdir}/results_XSLT3.0_${saxonVersion}.xml"
+
+              classpath = configurations.testDrivers \
+              + files("${buildDir}/classes/${release}j") \
+              + files("${buildDir}/testdriver_classes/${release}j")
+
+              main = "${jpackage}.Xslt30TestSuiteDriver${RELEASE}"
+              def testargs = [w3cXslt30TestSuiteDir,
+                              "catalog.xml",
+                              "-o:${resdir}",
+                              "-lang:${language}",
+                              "-ps:off"]
+              if (testSuiteDebug != "") {
+                testargs += [ testSuiteDebug ]
+              }
+              if (bytecode != "") {
+                testargs += [ "-bytecode:${bytecode}" ]
+              }
+              if (export != "") {
+                testargs += [ export ]
+              }
+              if (jit != "") {
+                testargs += [ jit ]
+              }
+
+              args testargs
+            }
+
+            task "${taskname}"(
+              type: Copy,
+              dependsOn: "run_${taskname}"
+            ) {
+              def bflag = ""
+              if (bytecode != "") {
+                bflag = "-${bytecode}"
+              }
+              into "${resdir}/results"
+              from resdir
+              include "results_XSLT3.0_${saxonVersion}.xml"
+              rename { filename ->
+                "saxon-${saxonVersion}-${language}${bflag}${export}${jit}.xml"
+              }
+            }
+            xslt30TestsJava.dependsOn taskname
+            tasks.findByName("${release}jTestSuitesJava").dependsOn taskname
+          }
+        }
+      }
+    }
+  }
+}
+
+// ============================================================
+// Tasks to run XSLT3.0 extra test driver with a variety of options
+
+task xslt30ExtraTestsJava() {
+  // Just somewhere to hang dependencies
+}
+
+["he", "pe", "ee"].each { release ->
+  def RELEASE = release.toUpperCase()
+  def jpackage = "com.saxonica.testdriver"
+  if (release == "he") {
+    jpackage = "net.sf.saxon.testdriver"
+  }
+
+  def resdir = "${buildDir}/test-results/${release}j/xslt30extra/${DSTAMP}"
+
+  def languages = ["XT30"]
+  def bytecodes = [""]
+  if (release == "ee") {
+    bytecodes = ["off", "on"]
+  }
+
+  languages.each { language ->
+    bytecodes.each { bytecode ->
+      def taskname = "${release}_runXslt30ExtraTestSuite_${language}"
+      if (bytecode != "") {
+        taskname = "${taskname}_bc${bytecode}"
+      }
+
+      task "run_${taskname}"(
+        type: JavaExec,
+        dependsOn: ["${release}j_compileTestDrivers",
+                    "${release}j_setup_xslt30extra_TestResults"],
+        description: "Run the XSLT 3.0 extra test suite driver for ${RELEASE}/${language}/${bytecode}"
+      ) {
+        inputs.files fileTree(dir: "src")
+        outputs.file "${resdir}/results_XSLT3.0_${saxonVersion}.xml"
+
+        classpath = configurations.testDrivers \
+        + files("${buildDir}/classes/${release}j") \
+        + files("${buildDir}/testdriver_classes/${release}j")
+
+        main = "${jpackage}.Xslt30TestSuiteDriver${RELEASE}"
+        def testargs = ["${projectDir}/src/test/extra/xslt30",
+                        "catalog.xml",
+                        "-o:${resdir}",
+                        "-lang:${language}",
+                        "-ps:off"]
+        if (testSuiteDebug != "") {
+          testargs += [ testSuiteDebug ]
+        }
+        if (bytecode != "") {
+          testargs += [ "-bytecode:${bytecode}" ]
+        }
+
+        args testargs
+      }
+
+      task "${taskname}"(
+        type: Copy,
+        dependsOn: "run_${taskname}"
+      ) {
+        def bflag = ""
+        if (bytecode != "") {
+          bflag = "-${bytecode}"
+        }
+        into "${resdir}/results"
+        from resdir
+        include "results_XSLT3.0_${saxonVersion}.xml"
+        rename { filename ->
+          "saxon-${saxonVersion}-${language}${bflag}.xml"
+        }
+      }
+      xslt30ExtraTestsJava.dependsOn taskname
+      tasks.findByName("${release}jTestSuitesJava").dependsOn taskname
+    }
+  }
+}
+
+// ============================================================
+// Tasks to run XSD test driver with a variety of options
+
+task xsdTestsJava() {
+  // Just somewhere to hang dependencies
+}
+
+// Only applies to EE
+["ee"].each { release ->
+  def RELEASE = release.toUpperCase()
+  def jpackage = "com.saxonica.testdriver.ee"
+
+  def resdir = "${buildDir}/test-results/${release}j/xsd/${DSTAMP}"
+
+  def languages = ["1.0", "1.1"]
+  def bytecodes = ["off", "on"]
+
+  languages.each { language ->
+    bytecodes.each { bytecode ->
+      def taskname = "${release}_runXsdTestSuite_${language}_bc${bytecode}"
+
+      task "run_${taskname}"(
+        type: JavaExec,
+        dependsOn: ["${release}j_compileTestDrivers", "${release}j_setup_xsd_TestResults",
+                    "cloneXsdTestSuite"],
+        description: "Run the XSD test suite driver for ${RELEASE}/${language}/${bytecode}"
+      ) {
+        inputs.files fileTree(dir: "src")
+        outputs.file "${resdir}/results_XSLT3.0_${saxonVersion}.xml"
+
+        classpath = configurations.testDrivers \
+        + files("${buildDir}/classes/${release}j") \
+        + files("${buildDir}/testdriver_classes/${release}j")
+
+        main = "${jpackage}.SchemaTestSuiteDriver"
+        def testargs = [w3cXsdTestSuiteDir,
+                        "catalog.xml",
+                        "-v:${language}",
+                        "-local:${resdir}",
+                        "-lang:${language}"]
+        if (bytecode != "") {
+          testargs += [ "-bytecode:${bytecode}" ]
+        }
+
+        args testargs
+      }
+
+      task "${taskname}"(
+        type: Copy,
+        dependsOn: "run_${taskname}"
+      ) {
+        def bflag = ""
+        if (bytecode != "off") {
+          bflag = "-${bytecode}"
+        }
+        into "${resdir}/results"
+        from resdir
+        include "SaxonResults${saxonVersion}-${language}.xml"
+        rename { filename ->
+          "saxon-${saxonVersion}-XSD${language}${bflag}.xml"
+        }
+      }
+      xsdTestsJava.dependsOn taskname
+      tasks.findByName("${release}jTestSuitesJava").dependsOn taskname
+    }
+  }
+}
+
+// ============================================================
+// Tasks to run XSD extra test driver with a variety of options
+
+task xsdExtraTestsJava() {
+  // Just somewhere to hang dependencies
+}
+
+// Not currently enabled.
+
+// ============================================================
+
+// ============================================================
+
 ["h", "p", "e"].each { initial ->
   def release = initial + "e"
   def RELEASE = release.toUpperCase()
@@ -50,7 +579,7 @@
   task "${release}_samples_cs"(
     type: Copy
   ) {
-    into "${buildDir}/output/{$release}/resources/samples/cs"
+    into "${buildDir}/output/${release}/resources/samples/cs"
     from "${projectDir}/src/samples/cs"
   }
 }
@@ -138,20 +667,20 @@ task eej_samples(
 // ============================================================
 
 task he_samples_JAXPExamples(
-  type: JavaExec,
+  type: Exec,
+  dependsOn: ["hej_samples", "hejJar"],
   description: "Run test of JAXPExamples for he"
 ) {
-  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
-  inputs.files "${projectDir}/src/samples/config/config-raw.xsd"
-  outputs.file "${buildDir}/output/he/resources/samples/config/config.xsd"
-  classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
-  args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
-    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToSchema.xsl",
-    "-o:${buildDir}/output/he/resources/samples/config/config.xsd",
-    "FeatureKeys=FeatureKeys.xml",
-    "AdditionalFeatures=AdditionalFeatures.xml",
-    "ConfigSchema=${projectDir}/src/samples/config/config-raw.xsd"
+  inputs.files fileTree(dir: "${buildDir}/output/he/resources/samples/java/classes/he")
+  inputs.files "${projectDir}/src/samples/java/he"
+  workingDir = "${buildDir}/output/he/resources/samples"
+
+  def args = ["java",
+              "-cp",
+              "${buildDir}/libs/saxon-he-${saxonVersion}.jar:${buildDir}/output/he/resources/samples/java/classes",
+              "he/JAXPExamples", "all"]
+
+  commandLine args
 }
 
 /*
