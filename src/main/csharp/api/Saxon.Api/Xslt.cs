@@ -1614,6 +1614,12 @@ namespace Saxon.Api
             transformer.setParameter(net.sf.saxon.s9api.QName.fromEQName(name.EQName), net.sf.saxon.s9api.XdmValue.wrap(value.value));
         }
 
+		public JDestination GetUnderlyingDestination() 
+		{
+			return transformer;
+		}
+
+
         /// <summary>
         /// Get the underlying Java (s9api) XsltTransformer object which provides the underlying
         /// functionality of this object.
