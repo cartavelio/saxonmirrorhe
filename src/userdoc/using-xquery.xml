@@ -275,9 +275,9 @@
                 It cannot be used in conjunction with the <code>-r</code> option, and it
                 automatically switches on the <code>-u</code> and <code>-sa</code> options. The
                 effect is that Saxon-specific query parameters are recognized in a URI. One query
-                parameter that is recognized is <code>val</code>. This may take the values
+                parameter that is recognized is <code>validation</code>. This may take the values
                 <code>strict</code>, <code>lax</code>, or <code>strip</code>. For example,
-                <code>source.xml?val=strict</code> loads a document with strict schema
+                <code>source.xml?validation=strict</code> loads a document with strict schema
                 validation. </p>
             </td>
          </tr>
