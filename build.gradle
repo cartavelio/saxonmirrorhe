@@ -101,7 +101,6 @@ dependencies {
     [group: 'junit', name: 'junit', version: '4.12'],
     [group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.2'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
-    files("${buildDir}/classes/${saxonEdition}j"),
     files("src/main/resources"),
     files("lib/Tidy.jar"),
     files(saxonLicenseDir),
