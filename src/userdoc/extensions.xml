@@ -480,6 +480,34 @@ saxon:evaluate($expression)
         
       </ul>
     </section>
+    
+    <section id="dtd-validation" title="saxon:dtd-validation">
+      <h1>saxon:dtd-validation</h1>
+      
+      <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 10.</aside>
+      
+      <p>This attribute may be set on the <a class="bodylink code"
+        href="/xsl-elements/source-document">xsl:source-document</a> instruction to specify whether
+        DTD validation takes place. The permitted values are: <code>yes|true|1</code> or
+        <code>no|false|0</code>.</p>
+      
+      <p>XInclude processing can also be enabled using the configuration option <a class="bodylink
+        code" href="/configuration/config-features">Feature.DTD_VALIDATION</a> or the command-line option
+        <code>-dtd</code>.</p>
+      
+    </section>
+    
+    <section id="expand-attribute-defaults" title="saxon:expand-attribute-defaults">
+      <h1>saxon:expand-attribute-defaults</h1>
+      
+      <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 10.</aside>
+      
+      <p>This attribute may be set on the <a class="bodylink code"
+        href="/xsl-elements/source-document">xsl:source-document</a> instruction to specify whether
+        attribute defaults defined in the schema or DTD are expanded. The permitted values are:
+        <code>yes|true|1</code> or <code>no|false|0</code>. The default is "yes".</p>
+      
+    </section>
 
     <section id="explain" title="saxon:explain">
       <h1>saxon:explain</h1>
@@ -710,6 +738,25 @@ saxon:evaluate($expression)
         href="/xsl-elements/mode">xsl:mode</a> element. It causes tracing (messages output to the
         Configuration's Logger) of all template rules executed in the mode, showing the nodes selected by
         <code>xsl:apply-templates</code> and the rules used to process them.</p>
+    </section>
+    
+    <section id="xinclude" title="saxon:xinclude">
+      <h1>saxon:xinclude</h1>
+      
+      <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 10.</aside>
+      
+      <p>This attribute may be set on the <a class="bodylink code"
+        href="/xsl-elements/source-document">xsl:source-document</a> instruction to specify whether
+        XInclude processing takes place. The permitted values are: <code>yes|true|1</code> or
+        <code>no|false|0</code>.</p>
+      
+      <p>XInclude processing can also be enabled using the configuration option <a class="bodylink
+        code" href="/configuration/config-features">Feature.XINCLUDE</a> or the command-line option
+        <code>-xi</code>. For more information, see <a class="bodylink code"
+          href="/sourcedocs/XInclude">XInclude processing</a>.</p>
+      
+      <p></p>
+      
     </section>
   </section>
   <section id="syntax-extensions" title="XPath and XQuery Syntax Extensions">
