@@ -28,7 +28,8 @@ task filter_sources_for_javadoc(
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/main/java")
   outputs.files fileTree(dir: "${buildDir}/javadoc_src")
-
+  
+  // N.B. these exclusions are also applied in the tasks below.
   into "${buildDir}/javadoc_src"
   from ("${projectDir}/src/main/java") {
     include "net/**"
@@ -74,9 +75,17 @@ task product_javadoc(
   def packages = [:]
   fileTree(dir: "${projectDir}/src/main/java",
            include: ["net/**", "com/**", "javax/**"],
-           exclude: ["com/saxonica/testdriver/**",
+           exclude: ["**/dotnet/**",
+                     "net/sf/saxon/option/cpp/**",
                      "net/sf/saxon/testdriver/**",
-                     "**/dotnet/**"]).each { pkg ->
+                     "com/saxonica/functions/extfn/cpp/**",
+                     "com/saxonica/js/**",
+                     "com/saxonica/testdriver/**",
+                     "com/saxonica/config/DotNetExtensionFunctionFactory.java",
+                     "com/saxonica/config/DotNetExtensionLibrary.java",
+                     "com/saxonica/config/DotNetPlatformPE.java",
+                     "com/saxonica/config/JavaPlatformC.java",
+                     "com/saxonica/expr/DotNetExtensionFunctionCall.java"]).each { pkg ->
     def fn = pkg.toString()
     fn = fn.substring("{$projectDir}/src/main/java".length()-1)
     def pos = fn.lastIndexOf("/")
@@ -131,9 +140,17 @@ task product_jeljavadoc(
   def packages = [:]
   fileTree(dir: "${projectDir}/src/main/java",
            include: ["net/**", "com/**", "javax/**"],
-           exclude: ["com/saxonica/testdriver/**",
+           exclude: ["**/dotnet/**",
+                     "net/sf/saxon/option/cpp/**",
                      "net/sf/saxon/testdriver/**",
-                     "**/dotnet/**"]).each { pkg ->
+                     "com/saxonica/functions/extfn/cpp/**",
+                     "com/saxonica/js/**",
+                     "com/saxonica/testdriver/**",
+                     "com/saxonica/config/DotNetExtensionFunctionFactory.java",
+                     "com/saxonica/config/DotNetExtensionLibrary.java",
+                     "com/saxonica/config/DotNetPlatformPE.java",
+                     "com/saxonica/config/JavaPlatformC.java",
+                     "com/saxonica/expr/DotNetExtensionFunctionCall.java"]).each { pkg ->
     def fn = pkg.toString()
     fn = fn.substring("{$projectDir}/src/main/java".length()-1)
     def pos = fn.lastIndexOf("/")
