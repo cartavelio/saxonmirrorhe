@@ -102,7 +102,7 @@ task product_javadoc(
                  "-bottom", "Copyright (c) 2004-2021 Saxonica Limited. All rights reserved.",
                  "-doctitle", "Saxon ${saxonVersion} Java API Documentation",
                  "-group", "s9api Interface", "net.sf.saxon.s9api",
-                 "-group", "Other Interfaces", "net.sf.saxon:net.sf.saxon.lib:net.sf.saxon.om:net.sf.saxon.query:net.sf.saxon.sxpath:net.sf.saxon.value:net.sf.saxon.type:net.sf.saxon.xpath:net.sf.saxon.xqj",
+                 "-group", "Other Interfaces", "com.saxonica.config:net.sf.saxon:net.sf.saxon.lib:net.sf.saxon.om:net.sf.saxon.query:net.sf.saxon.sxpath:net.sf.saxon.value:net.sf.saxon.type:net.sf.saxon.xpath:net.sf.saxon.xqj",
                  "-group", "External Interfaces", "javax.xml.xquery",
                  "-source", "1.8"] + packages.keySet()
 
