@@ -34,10 +34,17 @@ task filter_sources_for_javadoc(
     include "net/**"
     include "com/**"
     include "javax/**"
-    exclude "com/saxonica/testdriver/**"
-    exclude "net/sf/saxon/testdriver/**"
     exclude "**/dotnet/**"
-    exclude "**/DotNetVerifier.java"
+    exclude "net/sf/saxon/option/cpp/**"
+    exclude "net/sf/saxon/testdriver/**"
+    exclude "com/saxonica/functions/extfn/cpp/**"
+    exclude "com/saxonica/js/**"
+    exclude "com/saxonica/testdriver/**"
+    exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
+    exclude "com/saxonica/config/DotNetExtensionLibrary.java"
+    exclude "com/saxonica/config/DotNetPlatformPE.java"
+    exclude "com/saxonica/config/JavaPlatformC.java"
+    exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
   }
 }
 
@@ -83,7 +90,7 @@ task product_javadoc(
                  "-d", "${buildDir}/javadoc",
                  "-package",
                  "-classpath", cp,
-                 "-bottom", "Copyright (c) 2004-2021 Saxonica Limited.",
+                 "-bottom", "Copyright (c) 2004-2021 Saxonica Limited. All rights reserved.",
                  "-doctitle", "Saxon ${saxonVersion} Java API Documentation",
                  "-group", "s9api Interface", "net.sf.saxon.s9api",
                  "-group", "Other Interfaces", "net.sf.saxon:net.sf.saxon.lib:net.sf.saxon.om:net.sf.saxon.query:net.sf.saxon.sxpath:net.sf.saxon.value:net.sf.saxon.type:net.sf.saxon.xpath:net.sf.saxon.xqj",
@@ -526,14 +533,14 @@ task userdoc_functions(
 
 task viewer_app_sef(
   type: JavaExec,
-  description: "Compile the viewer_app"
+  description: "Compile the viewer_app stylesheet"
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/viewer_appJS/xsl")
-  outputs.file "${buildDir}/viewer_app/xsl/viewer_app.sef.json"
+  outputs.file "${buildDir}/userdoc/viewer_appJS/xsl/viewer_app.sef.json"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-xsl:${projectDir}/src/viewer_appJS/xsl/viewer_app.xsl",
-    "-export:${buildDir}/viewer_app/xsl/viewer_app.sef.json",
+    "-export:${buildDir}/userdoc/viewer_appJS/xsl/viewer_app.sef.json",
     "-target:JS", "-nogo", "-relocate:on", "-ns:##html5",
     "--generateByteCode:off",
     "SEFbuildDate=${DSTAMP}"
@@ -579,7 +586,7 @@ task userdoc_publish_viewer_appJS(
 
 task userdoc_viewer_appJS(
   type: Copy,
-  dependsOn: ["userdoc_articles", "userdoc_publish_viewer_appJS"],
+  dependsOn: ["userdoc_articles", "userdoc_publish_viewer_appJS", "viewer_app_sef"],
   description: "Copy transformed articles to app docs"
 ) {
   into "${buildDir}/userdoc/viewer_appJS/doc"
