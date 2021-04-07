@@ -137,6 +137,7 @@
                         else if ($i eq 2) then $p2
                         else if ($i eq 3) then $p3
                         else $p4)]">
+                        <xsl:sort select="@id"/>
                         <tr>
                             <td>
                                 <span class="javalink" data-href="{@id}">
