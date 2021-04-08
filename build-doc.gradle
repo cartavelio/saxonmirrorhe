@@ -72,6 +72,7 @@ task product_javadoc(
   // not the one created by filter_sources_for_javadoc because this
   // calculation runs during the Gradle configuration phase when
   // that directory might not yet exist. FIXME: do this better
+  def filesep = System.getProperty("file.separator")
   def packages = [:]
   fileTree(dir: "${projectDir}/src/main/java",
            include: ["net/**", "com/**", "javax/**"],
@@ -88,8 +89,8 @@ task product_javadoc(
                      "com/saxonica/expr/DotNetExtensionFunctionCall.java"]).each { pkg ->
     def fn = pkg.toString()
     fn = fn.substring("{$projectDir}/src/main/java".length()-1)
-    def pos = fn.lastIndexOf("/")
-    fn = fn.substring(0, pos).replaceAll("/", ".")
+    def pos = fn.lastIndexOf(filesep)
+    fn = fn.substring(0, pos).replaceAll(filesep, ".")
     packages[fn] = 1
   }
 
@@ -137,6 +138,7 @@ task product_jeljavadoc(
   // not the one created by filter_sources_for_javadoc because this
   // calculation runs during the Gradle configuration phase when
   // that directory might not yet exist. FIXME: do this better
+  def filesep = System.getProperty("file.separator")
   def packages = [:]
   fileTree(dir: "${projectDir}/src/main/java",
            include: ["net/**", "com/**", "javax/**"],
@@ -153,8 +155,8 @@ task product_jeljavadoc(
                      "com/saxonica/expr/DotNetExtensionFunctionCall.java"]).each { pkg ->
     def fn = pkg.toString()
     fn = fn.substring("{$projectDir}/src/main/java".length()-1)
-    def pos = fn.lastIndexOf("/")
-    fn = fn.substring(0, pos).replaceAll("/", ".")
+    def pos = fn.lastIndexOf(filesep)
+    fn = fn.substring(0, pos).replaceAll(filesep, ".")
     packages[fn] = 1
   }
 
