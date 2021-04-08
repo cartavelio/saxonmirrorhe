@@ -544,6 +544,9 @@ namespace Saxon.Api
 
         JStandardCollectionFinder collectionFinder;
 
+        /// <summary>
+        /// Default constructor to create a wrapped Java StandardCollectionFinder
+        /// </summary>
         public StandardCollectionFinder() {
             collectionFinder = new JStandardCollectionFinder();
         }
@@ -674,7 +677,9 @@ namespace Saxon.Api
     }
 
 	/// <summary>
-	/// ResourceCollection
+	/// ResourceCollection class implements the IResourcecollection interface.
+    /// This class is used to map the URI of collection into a sequence of Resource objects.
+    /// It is usedto support the fn:collection() and fn:uri-collection() functions.
 	/// </summary>
     public class ResourceCollection : IResourceCollection
     {
@@ -689,11 +694,25 @@ namespace Saxon.Api
             resourceCollection = rc;
         }
 
+        /// <summary>
+        /// Get the URI of the collection
+        /// </summary>
+        /// <returns>The URI as passed to the fn:collection() or fn:uri-collection() function, resolved if it is relative
+        /// against the static base URI. If the collection() or uri-collection() function was called with no argument (to get the 
+        /// 'default collection') this will be the URI of the default collection registered with the Configuration</returns>
         public string CollectionURI()
         {
             return resourceCollection.getCollectionURI();
         }
 
+        /// <summary>
+        /// Get the URIs of the resources in the collection.  It is
+        /// not required that all collections expose a list of URIs in this way, or that the URIs bear any particular
+        /// relationship to the resources returned by the getResources() method for the same collection URI.
+        /// </summary>
+        /// <param name="context">the XPath evaluation context</param>
+        /// <returns>List over the URIs of the resources in the collection. The URIs are represented as strings.
+        /// They should preferably be absolute URIs.</returns>
         public List<string> GetResourceURIs(DynamicContext context)
         {
             List<string> list = new List<string>();
@@ -706,6 +725,14 @@ namespace Saxon.Api
             return list;
         }
 
+        /// <summary>
+        /// Get the resources in the collection. This supports the fn:collection() function. It is not
+        /// required that all collections expose a set of resources in this way, or that the resources
+        /// returned bear any particular relationship to the URIs returned by the getResourceURIs() method
+        /// for the same collection URI.
+        /// </summary>
+        /// <param name="context">context the XPath evaluation context</param>
+        /// <returns>a list over the resources in the collection. This returns objects of implementations of the interface <code>IResource</code></returns>
         public List<IResource> GetResources(DynamicContext context)
         {
             List<IResource> list = new List<IResource>();
@@ -764,21 +791,34 @@ namespace Saxon.Api
     {
         internal JResource resource = null;
 
+        //Default constructor
         public Resource() 
 		{ 
 			resource = null; 
 		}
 
+        /// <summary>
+        /// Constructor to  wrap a Java Resource
+        /// </summary>
+        /// <param name="rc">Java Resource object</param>
         public Resource(JResource rc) 
 		{
             resource = rc;
         }
 
+        /// <summary>
+        /// Get the media type (MIME type) of the resource if known
+        /// </summary>
+        /// <returns>the media type if known; otherwise null</returns>
         public string GetContentType()
         {
             return resource.getContentType();
         }
 
+        /// <summary>
+        /// Get a URI that identifies this resource
+        /// </summary>
+        /// <returns>a URI identifying this resource</returns>
         public string GetResourceURI()
         {
             return resource.getResourceURI();
