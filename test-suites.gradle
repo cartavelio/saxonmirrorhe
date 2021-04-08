@@ -18,6 +18,59 @@ task eejTestSuitesJava() {
   // Just somewhere to hang dependencies
 }
 
+// This task will generate the test suite report from
+// whatever results are lying around
+task testSuiteReportsJava(
+  type: JavaExec
+) {
+  def rundate = project.findProperty('rundate')
+
+  inputs.files fileTree(dir: "${buildDir}/test-results")
+  inputs.file "${projectDir}/tools/test-suites/report.xsl"
+  outputs.file "${buildDir}/report.xml"
+  outputs.file "${buildDir}/report.html"
+  classpath = configurations.preprocessor
+  workingDir = buildDir
+  main = "net.sf.saxon.Transform"
+
+  def arglist = ["-it:main",
+                 "-xsl:${projectDir}/tools/test-suites/report.xsl",
+                 "-ns:##any"]
+
+  if (rundate != null) {
+    arglist += ["rundate=${rundate}"]
+  }
+  
+  args arglist
+}
+
+// This task *runs all the tests* and then generates the
+// test suite report from the results
+task runTestSuiteReportsJava(
+  type: JavaExec,
+  dependsOn: ["testSuitesJava"]
+) {
+  def rundate = project.findProperty('rundate')
+
+  inputs.files fileTree(dir: "${buildDir}/test-results")
+  inputs.file "${projectDir}/tools/test-suites/report.xsl"
+  outputs.file "${buildDir}/report.xml"
+  outputs.file "${buildDir}/report.html"
+  classpath = configurations.preprocessor
+  workingDir = buildDir
+  main = "net.sf.saxon.Transform"
+
+  def arglist = ["-it:main",
+                 "-xsl:${projectDir}/tools/test-suites/report.xsl",
+                 "-ns:##any"]
+
+  if (rundate != null) {
+    arglist += ["rundate=${rundate}"]
+  }
+  
+  args arglist
+}
+
 // ============================================================
 
 def langCodeMap = ["XP20": "XPath2.0",
@@ -42,13 +95,36 @@ def langCodeMap = ["XP20": "XPath2.0",
     def pos = fn.toString().lastIndexOf(pathSeparator)
     def base = fn.toString().substring(pos+1)
     base = base.substring(0, base.length() - 4)
-    task "${release}j_setup_${base}_TestResults"(
-      type: Copy,
-      description: "Sets up the test results directory the ${base} tests for ${RELEASE}"
-    ) {
-      into "${buildDir}/test-results/${release}j/${base}/${DSTAMP}"
-      from "src/test/exceptions/${base}.xml"
-      rename { "exceptions.xml" }
+
+    def schema11 = (base == "xsd11" || base == "xsd-extra11")
+    def schema = schema11 || (base == "xsd" || base == "xsd-extra")
+    if (schema11 && release == "ee") {
+      // These are a special case, they need to be renamed 'exceptions11.xml'
+      // in the corresponding base directory. See "dependsOn" below this loop.
+      def bdir = "xsd"
+      if (base == "xsd-extra11") {
+        bdir = "xsd-extra"
+      }
+      task "${release}j_setup_${base}_TestResults"(
+        type: Copy,
+        description: "Sets up the test results directory the ${base} tests for ${RELEASE}"
+      ) {
+        into "${buildDir}/test-results/${release}j/${bdir}/${DSTAMP}"
+        from "src/test/exceptions/${base}.xml"
+        rename { "exceptions11.xml" }
+      }
+    } else {
+      // The schema tests only run on EE
+      if (!schema || release == "ee") {
+        task "${release}j_setup_${base}_TestResults"(
+          type: Copy,
+          description: "Sets up the test results directory the ${base} tests for ${RELEASE}"
+        ) {
+          into "${buildDir}/test-results/${release}j/${base}/${DSTAMP}"
+          from "src/test/exceptions/${base}.xml"
+          rename { "exceptions.xml" }
+        }
+      }
     }
   }
 
@@ -62,6 +138,9 @@ def langCodeMap = ["XP20": "XPath2.0",
     destinationDirectory = new File("${buildDir}/testdriver_classes/${release}j")
   }
 }
+
+tasks.findByName("eej_setup_xsd_TestResults").dependsOn "eej_setup_xsd11_TestResults"
+tasks.findByName("eej_setup_xsd-extra_TestResults").dependsOn "eej_setup_xsd-extra11_TestResults"
 
 task eej_setup_xsd_transformations(
   type: Copy,
@@ -474,7 +553,8 @@ task xsdTestsJava() {
         description: "Run the XSD test suite driver for ${RELEASE}/${language}/${bytecode}"
       ) {
         inputs.files fileTree(dir: "src")
-        outputs.file "${resdir}/results_XSLT3.0_${saxonVersion}.xml"
+        outputs.file "${resdir}/SaxonFailures${saxonVersion}.xml"
+        outputs.file "${resdir}/SaxonResults${saxonVersion}-${language}.xml"
 
         classpath = configurations.testDrivers \
         + files("${buildDir}/classes/${release}j") \
@@ -482,10 +562,8 @@ task xsdTestsJava() {
 
         main = "${jpackage}.SchemaTestSuiteDriver"
         def testargs = [w3cXsdTestSuiteDir,
-                        "catalog.xml",
-                        "-v:${language}",
                         "-local:${resdir}",
-                        "-lang:${language}"]
+                        "-v:${language}"]
         if (bytecode != "") {
           testargs += [ "-bytecode:${bytecode}" ]
         }

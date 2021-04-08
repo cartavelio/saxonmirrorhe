@@ -1,0 +1,12 @@
+<exception>
+
+
+
+  <testcase set="MS-Particles2006-07-15" group="particlesV002">
+    <comment>Saxon runs out of memory. Still true in Saxon 9.1.</comment>
+  </testcase>
+  
+
+
+</exception>
+
