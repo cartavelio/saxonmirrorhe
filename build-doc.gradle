@@ -73,6 +73,8 @@ task product_javadoc(
   // calculation runs during the Gradle configuration phase when
   // that directory might not yet exist. FIXME: do this better
   def filesep = System.getProperty("file.separator")
+  // If there are back slashes in the filesep, make sure they're escaped!
+  def fsre = filesep.replaceAll("\\\\", "\\\\\\\\")
   def packages = [:]
   fileTree(dir: "${projectDir}/src/main/java",
            include: ["net/**", "com/**", "javax/**"],
@@ -90,7 +92,7 @@ task product_javadoc(
     def fn = pkg.toString()
     fn = fn.substring("{$projectDir}/src/main/java".length()-1)
     def pos = fn.lastIndexOf(filesep)
-    fn = fn.substring(0, pos).replaceAll(filesep, ".")
+    fn = fn.substring(0, pos).replaceAll(fsre, ".")
     packages[fn] = 1
   }
 
@@ -139,6 +141,8 @@ task product_jeljavadoc(
   // calculation runs during the Gradle configuration phase when
   // that directory might not yet exist. FIXME: do this better
   def filesep = System.getProperty("file.separator")
+  // If there are back slashes in the filesep, make sure they're escaped!
+  def fsre = filesep.replaceAll("\\\\", "\\\\\\\\")
   def packages = [:]
   fileTree(dir: "${projectDir}/src/main/java",
            include: ["net/**", "com/**", "javax/**"],
@@ -156,7 +160,7 @@ task product_jeljavadoc(
     def fn = pkg.toString()
     fn = fn.substring("{$projectDir}/src/main/java".length()-1)
     def pos = fn.lastIndexOf(filesep)
-    fn = fn.substring(0, pos).replaceAll(filesep, ".")
+    fn = fn.substring(0, pos).replaceAll(fsre, ".")
     packages[fn] = 1
   }
 
