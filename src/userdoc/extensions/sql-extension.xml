@@ -85,7 +85,7 @@
          <saxon-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name namespace="http://saxon.sf.net/sql">connect</name>
             <element-syntax name="connect">
-               <attribute name="driver" required="yes">
+               <attribute name="driver" required="no">
                   <desc> The name of the JDBC driver class to be used. From Saxon 10.5 this is
                   no longer needed, and is ignored if specified.</desc>
                   <attribute-value-template>
@@ -132,7 +132,6 @@
                as="java:java.sql.Connection" 
                xmlns:java="http://saxon.sf.net/java-type">
   <sql:connect database="jdbc:odbc:testdb" 
-               driver="sun.jdbc.odbc.JdbcOdbcDriver" 
                xsl:extension-element-prefixes="sql"/>
 </xsl:variable>
 ]]></samp>
