@@ -922,7 +922,7 @@ namespace Saxon.Api
 		/// Create an object representing the query part of a URI
 		/// </summary>
 		/// <param name="query">the part of the URI after the "?" symbol</param>
-		/// <param name="value">the Saxon Processor</param>
+		/// <param name="proc">the Saxon Processor</param>
 
         public URIQueryParameters(String query, Processor proc)
         {
