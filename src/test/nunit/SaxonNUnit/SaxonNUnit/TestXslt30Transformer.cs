@@ -154,6 +154,7 @@ namespace SaxonNUnit
                 Console.Error.WriteLine("reader is XmlReader !!!!!");
             }
             XdmNode node = builder.Build(reader);
+            
             int line;// = ((net.sf.saxon.om.NodeInfo)node.Unwrap()).getLineNumber();
             int col;// = ((net.sf.saxon.om.NodeInfo)node.Unwrap()).getColumnNumber();
             //XmlNode _node = node.Unwrap()
@@ -937,10 +938,50 @@ namespace SaxonNUnit
 
         }
 
-		/**
+        /**
      * Build a document from a non-root element of a DOMSource
      */
-		[Test]
+        [Test]
+        public void TestPullParserStreamSource()
+        {
+            try
+            {
+                Processor proc = new Processor(false);
+                proc.SetProperty(Feature<bool>.PREFER_JAXP_PARSER, false);
+                XsltCompiler comp = proc.NewXsltCompiler();
+                String sr = "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                    "<xsl:output omit-xml-declaration='yes'/>" +
+                    "<xsl:template match='/'><xsl:value-of select=\"id('b')/@id\"/></xsl:template>" +
+                    "</xsl:stylesheet>";
+                XmlTextReader xmlReaderOfStylesheet = new XmlTextReader(new MemoryStream(Encoding.ASCII.GetBytes(sr)));
+                comp.BaseUri = new Uri("http://www.example.com/xsl");
+                XsltExecutable exec = comp.Compile(xmlReaderOfStylesheet);
+                Xslt30Transformer xsl = exec.Load30();
+                String source = "<!DOCTYPE doc [ <!ELEMENT doc (a*)> <!ELEMENT a (b*)><!ELEMENT b EMPTY><!ELEMENT dummy EMPTY><!ATTLIST dummy xmlns:xxx CDATA #REQUIRED> <!ATTLIST b id ID #REQUIRED>]><doc><dummy xml:xxx='http://example.com'/><a xml:xxx='http://example.com'><b id='b'/></a></doc>";
+
+                // Read an XML file to a DOM
+                XmlTextReader xmlReader = new XmlTextReader(new MemoryStream(Encoding.ASCII.GetBytes(source)));
+                DocumentBuilder builder = proc.NewDocumentBuilder();
+                XdmNode node = builder.Build(xmlReader);
+
+                StringWriter writer = new StringWriter();
+                Serializer serializer = proc.NewSerializer(writer);
+                xsl.ApplyTemplates(new MemoryStream(Encoding.ASCII.GetBytes(source)), serializer);
+
+                Assert.True(writer.ToString().Equals("b"), writer.ToString());
+            }
+            catch (javax.xml.transform.TransformerException e)
+            {
+                //e.printStackTrace();
+                Assert.Fail(e.getMessage());
+            }
+
+        }
+
+        /**
+     * Build a document from a non-root element of a DOMSource
+     */
+        [Test]
 		public void TestNonRootDomSource() {
 			try {
 				Processor proc = new Processor(false);
