@@ -278,7 +278,7 @@ namespace SaxonNUnit
                 XPathExecutable exec = c.Compile("for $X in (collection(.))" +
                     "return (if ($X instance of node()) then name($X/*) else $X('id'))");
                 XPathSelector eval = exec.Load();
-                eval.ContextItem = (new XdmAtomicValue("file:///" + ConfigTest.DATA_DIR + "collection.xml"));
+                eval.ContextItem = (new XdmAtomicValue(ConfigTest.DATA_DIR2 + "collection.xml"));
                 XdmValue val = eval.Evaluate();
                 Assert.AreEqual("1.0e0\n\"BOOKLIST\"", val.ToString());
             }
@@ -675,7 +675,7 @@ namespace SaxonNUnit
             try
             {
                 Processor p = new Processor(true);
-                p.CollectionFinder = new StandardCollectionFinder();//new MyCollectionFinder(p);
+                p.CollectionFinder = new MyCollectionFinder(p);
                 XQueryCompiler c = p.NewXQueryCompiler();
                 XQueryExecutable exec = c.Compile("for $x in collection(.) return " +
                     "if($x instance of node()) then true() else false()");
@@ -730,7 +730,7 @@ namespace SaxonNUnit
                 XsltCompiler compiler = p.NewXsltCompiler();
                 var builder = p.NewDocumentBuilder();
                 compiler.XmlResolver = new DtdIgnoringResolver(builder.XmlResolver);
-               // p.CollectionFinder = new MyCollectionFinder2(p);
+                p.CollectionFinder = new MyCollectionFinder2(p);
 
                 Xslt30Transformer transformer = compiler.Compile(
                    new Uri(ConfigTest.DATA_DIR + "collection4.xsl")).Load30();
