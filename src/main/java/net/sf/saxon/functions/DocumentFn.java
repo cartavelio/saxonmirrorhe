@@ -176,7 +176,7 @@ public class DocumentFn extends SystemFunction implements Callable {
         String fragmentId = null;
         if (hash >= 0) {
             if (hash == href.length() - 1) {
-                // # sign at end - just ignore it
+                // hash sign at end - just ignore it
                 href = href.substring(0, hash);
             } else {
                 fragmentId = href.substring(hash + 1);
