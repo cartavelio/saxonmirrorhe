@@ -526,6 +526,11 @@ namespace Saxon.Api
     public class CatalogCollection : ResourceCollection
     {
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="proc">Saxon Processor object</param>
+        /// <param name="collectionURI">The URI for the collection</param>
         public CatalogCollection(Processor proc, String collectionURI)
         {
             resourceCollection = new net.sf.saxon.resource.CatalogCollection(proc.Implementation, collectionURI);
@@ -836,8 +841,35 @@ namespace Saxon.Api
     public class BinaryResource : Resource {
 
 
+        /// <summary>
+        /// Create a binary resource
+        /// </summary>
+        /// <param name="href">href of the resource</param>
+        /// <param name="contentType">The MIME  type for the Binary resource</param>
+        /// <param name="content">content given as byte array</param>
         public BinaryResource(String href, String contentType, byte[] content) {
             resource = new net.sf.saxon.resource.BinaryResource(href, contentType, content); 
+        }
+
+
+    }
+
+
+    /// <summary>
+    /// The class is an implementation of the generic Resource object (typically an item in a collection)
+    /// representing an XML document
+    /// </summary>
+    public class XmlResource : Resource
+    {
+
+
+        /// <summary>
+        /// Constructor to create an  Xml resource using a specific node
+        /// </summary>
+        /// <param name="doc">the node in question (usually but not necessarily a document node)</param>
+        public XmlResource(XdmNode doc)
+        {
+            resource = new net.sf.saxon.resource.XmlResource(doc.Implementation);
         }
 
 
