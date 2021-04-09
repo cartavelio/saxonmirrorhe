@@ -121,8 +121,8 @@ public class Serialize extends SystemFunction implements Callable {
     }
 
     private String[] paramNamesSaxon = new String[]{
-            "attribute-order", "character-representation", "double-space", "indent-spaces", "line-length",
-            /*"next-in-chain",*/ "property-order", "recognize-binary", "require-well-formed", "single-quotes",
+            "attribute-order", "canonical", "character-representation", "double-space", "indent-spaces", "line-length",
+            /*"next-in-chain",*/ "newline", "property-order", "recognize-binary", "require-well-formed", "single-quotes",
             "supply-source-locator", "suppress-indentation"
     };
 
@@ -171,12 +171,14 @@ public class Serialize extends SystemFunction implements Callable {
 
     static {
         requiredTypesSaxon.put("attribute-order", BuiltInAtomicType.QNAME.zeroOrMore());
+        requiredTypesSaxon.put("canonical", SequenceType.SINGLE_BOOLEAN);
         //eqnames
         requiredTypesSaxon.put("character-representation", SequenceType.SINGLE_STRING); //string
         requiredTypesSaxon.put("double-space", BuiltInAtomicType.QNAME.zeroOrMore());
         //eqnames
         requiredTypesSaxon.put("indent-spaces", SequenceType.SINGLE_INTEGER); //integer
         requiredTypesSaxon.put("line-length", SequenceType.SINGLE_INTEGER); //integer
+        requiredTypesSaxon.put("newline", SequenceType.SINGLE_STRING); //integer
         //requiredTypes.put("next-in-chain", SequenceType.SINGLE_STRING); //uri
         requiredTypesSaxon.put("recognize-binary", SequenceType.SINGLE_BOOLEAN); //boolean
         requiredTypesSaxon.put("require-well-formed", SequenceType.SINGLE_BOOLEAN); //boolean
@@ -449,6 +451,9 @@ public class Serialize extends SystemFunction implements Callable {
         }
         if ((seqVal = map.get(sx("line-length"))) != null) {
             props.setProperty(SaxonOutputKeys.LINE_LENGTH, seqVal.head().getStringValue());
+        }
+        if ((seqVal = map.get(sx("newline"))) != null) {
+            props.setProperty(SaxonOutputKeys.NEWLINE, seqVal.head().getStringValue());
         }
         if ((seqVal = map.get(sx("property-order"))) != null) {
             props.setProperty(SaxonOutputKeys.PROPERTY_ORDER, toSpaceSeparatedString(seqVal));
