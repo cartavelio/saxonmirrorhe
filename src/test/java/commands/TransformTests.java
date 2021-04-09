@@ -10,6 +10,7 @@ import net.sf.saxon.lib.SystemLogger;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
@@ -192,7 +193,7 @@ public class TransformTests {
      * Test saxon:line-number on different documents
      */
 
-    @Test
+    @Disabled
     public void testLineNumberPrincipal() {
         String[] args = {
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
@@ -211,7 +212,7 @@ public class TransformTests {
         }
     }
 
-    @Test
+    @Disabled
     public void testLineNumberParam() {
         String[] args = {
                  "-xsl:" + ConfigTest.DATA_DIR + "line-numbering.xsl",
@@ -230,7 +231,7 @@ public class TransformTests {
         }
     }
 
-    @Test
+    @Disabled
     public void testLineNumberDoc() {
         String[] args = {
                 "-xsl:" + ConfigTest.DATA_DIR + "line-numbering.xsl",
