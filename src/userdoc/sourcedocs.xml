@@ -73,20 +73,13 @@
         corresponds to a directory name, then a directory-based collection is used: the collection contains
       selected files from the named directory.</p></li>
       <li><p>If the collection URI identifies a
-        ZIP or JAR file (more specifically, if it uses the <code>jar</code> URI scheme, or has a file extension of
-        ".zip" or ".jar") then a zip-based collection is used.</p></li>
+        ZIP or JAR file (for details see below) then a zip-based collection is used.</p>
+        
+      </li>
       <li><p>Otherwise, the collection URI must be
         the URI of an XML file which acts as a catalog, that is, it contains a list of the resources
         in the collection.</p></li>
     </ul>
-
-
-    <aside>
-      <p>To recognize additional kinds of ZIP file, for example Open Office documents, set the
-      configuration property <code>ZIP_URI_PATTERN</code>. The value is a regular
-        expression, for example you could set it to <code>"\.(zip|jar|docx)$"</code> to recognize
-        URIs with file extensions ".zip", ".jar", or ".docx".</p>
-    </aside>
 
 
     <p>Saxon by default recognizes four kids of resource: XML documents,
@@ -114,17 +107,20 @@
       in XML format that lists the documents comprising the collection. Here is an example of such a
       catalog file:</p>
     <samp><![CDATA[<collection stable="true">
+  <doc href="dir/contents.json"/>
   <doc href="dir/chap1.xml"/>
   <doc href="dir/chap2.xml"/>
   <doc href="dir/chap3.xml"/>
   <doc href="dir/chap4.xml"/>
+  <doc href="dir/index.json"/>
 </collection>]]></samp>
-
+    
     <p>The <code>stable</code> attribute indicates whether the collection is stable or not. The
       default value is <code>true</code>. If a collection is stable, then the URIs listed in the
         <code>doc</code> elements are treated like URIs passed to the <code>doc()</code> function.
       Each URI is first looked up in the document pool to see if it is already loaded; if it is,
-      then the document node is returned. Otherwise the URI is passed to the registered
+      then the corresponding value is returned (a document node in the case of XML resources). 
+      Otherwise the URI is passed to the registered
         <code>URIResolver</code>, and the resulting document is added to the document pool. The
       effect of this process is firstly, that two calls on the <code>collection()</code> function
       passing the same collection URI will return the same nodes each time, and secondly, that these
@@ -361,8 +357,17 @@
       way as a directory. URI query parameters can be used in the same way, and have much the same
       effect.</p>
 
-    <p>A URI is recognized as a ZIP or JAR file URI if the scheme name is "jar", or if the file
-      extension is "zip" or "jar".</p>
+    <p>A URI is recognized as a ZIP or JAR file URI if any of the following conditions applies:</p>
+    
+    <ul>
+      <li>The standard collection finder is used and either (a) the URI uses the (non-standard)
+      "jar" URI scheme, or (b) the collection URI ends with <code>.zip</code>, <code>.jar</code>,
+      or <code>.docx</code>;</li>
+      <li>A custom collection finder is used and the method <code>isJarfileURI(collectionURI)</code>
+      returns true;</li>
+      <li>A regular expression is supplied as the value of the configuration property
+      <code>ZIP_URI_PATTERN</code>, and the collection URI matches this regular expression.</li>
+    </ul>
 
     <p>The value of the <code>recurse</code> option is ignored in this case, and
         <code>recurse=yes</code> is assumed.</p>
@@ -375,10 +380,22 @@
     
     <h2 class="subtitle">Registered Collections</h2>
     
-    <p>On the .NET product there is another way to use a collection URI (provided that you use the
-      API rather than the command line): you can register a collection using the
-      <code>Processor.RegisterCollection</code> method on the <a class="javalink"
-        href="Saxon.Api.Processor">Saxon.Api.Processor</a> class.</p>
+    <p>It is possible to register a collection explicitly with the Saxon <code>Configuration</code>.</p>
+    
+    <p>With the Java product, this is done using the method <code>Configuration.registerCollection()</code>;
+      the equivalent on .NET is <code>Processor.RegisterCollection()</code>. In both cases this works
+      only if you use the standard collection finder, or a custom collection finder that inherits the relevant
+      functionality.</p>
+    
+    <p>The argument supplied to <code>Configuration.registerCollection()</code> is an object of type
+      <a class="javalink" href="net.sf.saxon.lib.ResourceCollection">ResourceCollection</a>, and
+      you can either use one of the standard collection types (<code>CatalogCollection</code>,
+      <code>DirectoryCollection</code>, <code>JarCollection</code>, etc), or you can implement
+      your own.</p>
+    
+    <p>Similarly, on .NET, <code>Processor.RegisterCollection()</code> accepts on object of type
+      <code>Saxon.Api.IResourceCollection</code>, which can either use one of the standard collection
+      types, or a custom implementation.</p>
     
     <section id="user-collections" title="Writing your own Collection Finder">
       <h1>Writing your own Collection Finder</h1>
