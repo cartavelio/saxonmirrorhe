@@ -10,7 +10,6 @@ import net.sf.saxon.lib.SystemLogger;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
