@@ -26,6 +26,7 @@ configurations {
   preprocessor.extendsFrom(runtimeOnly)
   jarjarAsm.extendsFrom(implementation)
   testDrivers.extendsFrom(testImplementation)
+  productTests.extendsFrom(testImplementation)
   ikvm.extendsFrom(implementation)
   compileDotNet.extendsFrom(implementation)
   asmDotNet.extendsFrom(implementation)
@@ -100,6 +101,7 @@ dependencies {
   testImplementation (
     [group: 'junit', name: 'junit', version: '4.12'],
     [group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.2'],
+    [group: 'org.junit.platform', name: 'junit-platform-console-standalone', version: '1.7.1'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
     files("src/main/resources"),
     files("lib/Tidy.jar"),
@@ -1211,6 +1213,41 @@ task eejSignJars(
       tasks.findByName("${rel}jSignJars").dependsOn t
     }
   }    
+}
+
+// ============================================================
+
+task eej_compile_junit_tests(
+  type: JavaCompile,
+  dependsOn: ["eejCompile"],
+  description: "Compile JUnit tests for Saxon-EE Java"
+) {
+  classpath = configurations.productTests + files("${buildDir}/classes/eej")
+  source fileTree(dir: "${projectDir}/src/test/java",
+                  include: ["jaxptest/*.java",
+                            "millicom/*.java",
+                            "commands/*.java",
+                            // "failing/*.java",  // Known to fail?
+                            "internaltests/*.java",
+                            "jstests/*.java",
+                            "nativetests/*.java",
+                            "performance/*.java",
+                            "pulltests/*.java",
+                            "regextests/*.java",
+                            "s9apitest/*.java",
+                            "sorttests/*.java",
+                            // "tools/*.java",    // Not tests
+                            "xqjtests/*.java"])
+  destinationDirectory = new File("${buildDir}/test_classes/eej")
+}
+
+task eejTests(
+  type: JavaExec,
+  dependsOn: ["eej_compile_junit_tests"]
+) {
+  classpath = configurations.productTests + files("${buildDir}/classes/eej") + files("${buildDir}/test_classes/eej")
+  main = "org.junit.platform.console.ConsoleLauncher"
+  args "--scan-class-path"
 }
 
 // ============================================================
