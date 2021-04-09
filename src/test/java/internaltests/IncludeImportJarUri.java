@@ -1,5 +1,6 @@
 package internaltests;
 
+import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.s9api.Processor;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class IncludeImportJarUri {
-    public static final String TESTROOT = System.getProperty("junitTestData") + "jaruri/";
+    public static final String TESTROOT = ConfigTest.DATA_DIR + "jaruri/";
 
     @Test
     public void testJarImport() {
