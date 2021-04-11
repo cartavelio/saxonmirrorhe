@@ -91,6 +91,9 @@ public class QT3TestDriverHE extends TestDriver {
                 throw new IllegalArgumentException("The specific language must be one of the following: XP20, XP30, XP31, XQ10, XQ30, XQ31, XT30");
         }
         resultsDoc = new QT3TestReport(this, spec);
+        if (reportFileName != null) {
+            resultsDoc.setReportFilename(reportFileName);
+        }
     }
 
     public static void main(String[] args) throws Exception {

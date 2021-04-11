@@ -76,6 +76,9 @@ task runTestSuiteReportsJava(
 def langCodeMap = ["XP20": "XPath2.0",
                    "XP30": "XPath3.0",
                    "XP31": "XPath3.1",
+                   "XT30": "XSLT3.0",
+                   "XT40": "XSLT4.0",
+                   "XP31": "XPath3.1",
                    "XQ20": "XQuery2.0",
                    "XQ30": "XQuery3.0",
                    "XQ31": "XQuery3.1"]
@@ -195,12 +198,15 @@ task qt3TestsJava() {
       }
 
       unfolded.each { uoption ->
+        def reportFilename = "report_${langCodeMap[language]}_${saxonVersion}"
         def taskname = "${release}_runQT3TestSuite_${language}"
         if (bytecode != "") {
           taskname = "${taskname}_bc${bytecode}"
+          reportFilename = reportFilename + "_bc${bytecode}"
         }
         if (uoption != "") {
           taskname = "${taskname}_un"
+          reportFilename = reportFilename + "_un"
         }
 
         if (bytecode == "off" && uoption != "") {
@@ -208,8 +214,7 @@ task qt3TestsJava() {
         } else {
           task "run_${taskname}"(
             type: JavaExec,
-            dependsOn: ["${release}j_compileTestDrivers", "${release}j_setup_qt3_TestResults",
-                        "cloneQT3TestSuite"],
+            dependsOn: ["${release}jCompile", "${release}j_compileTestDrivers", "cloneQT3TestSuite"],
             description: "Run the QT3 test suite driver for ${RELEASE}/${language}/${bytecode}/${uoption}"
           ) {
             inputs.files fileTree(dir: "src")
@@ -222,6 +227,8 @@ task qt3TestsJava() {
             main = "${jpackage}.QT3TestDriver${RELEASE}"
             def testargs = [w3cQT3TestSuiteDir,
                             "catalog.xml",
+                            "-exceptions:${projectDir}/src/test/exceptions/qt3.xml",
+                            "-reportfilename:${reportFilename}.xml",
                             "-o:${resdir}",
                             "-lang:${language}"]
             if (bytecode != "") {
@@ -248,7 +255,7 @@ task qt3TestsJava() {
             }
             into "${resdir}/results"
             from resdir
-            include "results_${langCodeMap[language]}_${saxonVersion}.xml"
+            include "${reportFilename}.xml"
             rename { filename ->
               "saxon-${saxonVersion}-${language}${bflag}${uflag}.xml"
             }
@@ -291,13 +298,17 @@ task qt3ExtraTestsJava() {
   languages.each { language ->
     bytecodes.each { bytecode ->
       def taskname = "${release}_runQT3ExtraTestSuite_${language}"
+      def reportFilename = "results_${langCodeMap[language]}_${saxonVersion}"
+
       if (bytecode != "") {
         taskname = "${taskname}_bc${bytecode}"
+        reportFilename = "${reportFilename}_bc${bytecode}"
       }
 
       task "run_${taskname}"(
         type: JavaExec,
-        dependsOn: ["${release}j_compileTestDrivers", "${release}j_setup_qt3extra_TestResults"],
+        dependsOn: ["${release}jCompile",
+                    "${release}j_compileTestDrivers"],
         description: "Run the QT3 extra test suite driver for ${RELEASE}/${language}/${bytecode}"
       ) {
         inputs.files fileTree(dir: "src")
@@ -310,6 +321,8 @@ task qt3ExtraTestsJava() {
         main = "${jpackage}.QT3TestDriver${RELEASE}"
         def testargs = ["${projectDir}/src/test/extra/qt3",
                         "catalog.xml",
+                        "-exceptions:${projectDir}/src/test/exceptions/qt3extra.xml",
+                        "-reportfilename:${reportFilename}.xml",
                         "-o:${resdir}",
                         "-lang:${language}"]
         if (bytecode != "") {
@@ -329,7 +342,7 @@ task qt3ExtraTestsJava() {
         }
         into "${resdir}/results"
         from resdir
-        include "results_${langCodeMap[language]}_${saxonVersion}.xml"
+        include "${reportFilename}.xml"
         rename { filename ->
           "saxon-${saxonVersion}-${language}${bflag}.xml"
         }
@@ -376,20 +389,25 @@ task xslt30TestsJava() {
 
           if (!skipThisCombo) {
             def taskname = "${release}_runXslt30TestSuite_${language}"
+            def reportFilename = "results_${langCodeMap[language]}_${saxonVersion}"
+
             if (bytecode != "") {
               taskname = "${taskname}_bc${bytecode}"
+              reportFilename = "${reportFilename}_bc${bytecode}"
             }
             if (export != "") {
               taskname = "${taskname}_export"
+              reportFilename = "${reportFilename}_export"
             }
             if (jit != "") {
               taskname = "${taskname}_jit"
+              reportFilename = "${reportFilename}_jit"
             }
 
             task "run_${taskname}"(
               type: JavaExec,
-              dependsOn: ["${release}j_compileTestDrivers",
-                          "${release}j_setup_xslt30_TestResults",
+              dependsOn: ["${release}jCompile",
+                          "${release}j_compileTestDrivers",
                           "cloneXslt30TestSuite"],
               description: "Run the XSLT 3.0 test suite driver for ${RELEASE}/${language}/${bytecode}/${export}/${jit}"
             ) {
@@ -403,6 +421,8 @@ task xslt30TestsJava() {
               main = "${jpackage}.Xslt30TestSuiteDriver${RELEASE}"
               def testargs = [w3cXslt30TestSuiteDir,
                               "catalog.xml",
+                              "-exceptions:${projectDir}/src/test/exceptions/xslt30.xml",
+                              "-reportfilename:${reportFilename}.xml",
                               "-o:${resdir}",
                               "-lang:${language}",
                               "-ps:off"]
@@ -432,7 +452,7 @@ task xslt30TestsJava() {
               }
               into "${resdir}/results"
               from resdir
-              include "results_XSLT3.0_${saxonVersion}.xml"
+              include "${reportFilename}.xml"
               rename { filename ->
                 "saxon-${saxonVersion}-${language}${bflag}${export}${jit}.xml"
               }
@@ -471,14 +491,17 @@ task xslt30ExtraTestsJava() {
   languages.each { language ->
     bytecodes.each { bytecode ->
       def taskname = "${release}_runXslt30ExtraTestSuite_${language}"
+      def reportFilename = "results_${langCodeMap[language]}_${saxonVersion}"
+
       if (bytecode != "") {
         taskname = "${taskname}_bc${bytecode}"
+        reportFilename = "${reportFilename}_bc${bytecode}"
       }
 
       task "run_${taskname}"(
         type: JavaExec,
-        dependsOn: ["${release}j_compileTestDrivers",
-                    "${release}j_setup_xslt30extra_TestResults"],
+        dependsOn: ["${release}jCompile",
+                    "${release}j_compileTestDrivers"],
         description: "Run the XSLT 3.0 extra test suite driver for ${RELEASE}/${language}/${bytecode}"
       ) {
         inputs.files fileTree(dir: "src")
@@ -491,6 +514,8 @@ task xslt30ExtraTestsJava() {
         main = "${jpackage}.Xslt30TestSuiteDriver${RELEASE}"
         def testargs = ["${projectDir}/src/test/extra/xslt30",
                         "catalog.xml",
+                        "-exceptions:${projectDir}/src/test/exceptions/xslt30extra.xml",
+                        "-reportfilename:${reportFilename}.xml",
                         "-o:${resdir}",
                         "-lang:${language}",
                         "-ps:off"]
@@ -514,7 +539,7 @@ task xslt30ExtraTestsJava() {
         }
         into "${resdir}/results"
         from resdir
-        include "results_XSLT3.0_${saxonVersion}.xml"
+        include "${reportFilename}.xml"
         rename { filename ->
           "saxon-${saxonVersion}-${language}${bflag}.xml"
         }
@@ -545,10 +570,17 @@ task xsdTestsJava() {
   languages.each { language ->
     bytecodes.each { bytecode ->
       def taskname = "${release}_runXsdTestSuite_${language}_bc${bytecode}"
+      def reportFilename = "SaxonResults${saxonVersion}-${language}_bc${bytecode}"
+      def errorFilename = "SaxonFailures${saxonVersion}-${language}_bc${bytecode}"
+      def exceptions = "${projectDir}/src/test/exceptions/xsd.xml"
+      if (language == "1.1") {
+        exceptions = "${projectDir}/src/test/exceptions/xsd11.xml"
+      }
 
       task "run_${taskname}"(
         type: JavaExec,
-        dependsOn: ["${release}j_compileTestDrivers", "${release}j_setup_xsd_TestResults",
+        dependsOn: ["${release}jCompile",
+                    "${release}j_compileTestDrivers",
                     "cloneXsdTestSuite"],
         description: "Run the XSD test suite driver for ${RELEASE}/${language}/${bytecode}"
       ) {
@@ -562,6 +594,10 @@ task xsdTestsJava() {
 
         main = "${jpackage}.SchemaTestSuiteDriver"
         def testargs = [w3cXsdTestSuiteDir,
+                        "-exceptions:${exceptions}",
+                        "-reportfilename:${reportFilename}.xml",
+                        "-errorfilename:${errorFilename}.xml",
+                        "-summarizeresults:${projectDir}/src/test/extra/tools/summarize-results.xsl",
                         "-local:${resdir}",
                         "-v:${language}"]
         if (bytecode != "") {
@@ -581,7 +617,7 @@ task xsdTestsJava() {
         }
         into "${resdir}/results"
         from resdir
-        include "SaxonResults${saxonVersion}-${language}.xml"
+        include "${reportFilename}.xml"
         rename { filename ->
           "saxon-${saxonVersion}-XSD${language}${bflag}.xml"
         }

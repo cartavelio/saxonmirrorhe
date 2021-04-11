@@ -83,6 +83,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 throw new IllegalArgumentException("Unknown spec " + specStr);
         }
         resultsDoc = new Xslt30TestReport(this, spec);
+        if (reportFileName != null) {
+            resultsDoc.setReportFilename(reportFileName);
+        }
     }
 
     @Override

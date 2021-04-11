@@ -35,6 +35,7 @@ public abstract class TestDriver {
     protected String catalogFileName;
     private XdmNode catalogNode;
     protected String exceptionsFileName = "exceptions.xml";
+    protected String reportFileName = null; // if null, use the default
     protected String resultsDir = null;
     protected TestReport resultsDoc;
     protected int successes = 0;
@@ -163,6 +164,9 @@ public abstract class TestDriver {
             }
             if (args[i].startsWith("-exceptions:")) {
                 exceptionsFileName = argValue;
+            }
+            if (args[i].startsWith("-reportfilename:")) {
+                reportFileName = argValue;
             }
             if (args[i].equals("-T")) {
                 tracing = true;
