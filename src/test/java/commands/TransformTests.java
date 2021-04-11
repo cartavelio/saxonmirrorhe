@@ -193,7 +193,7 @@ public class TransformTests {
      * Test saxon:line-number on different documents
      */
 
-    @Disabled
+    @Test
     public void testLineNumberPrincipal() {
         String[] args = {
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
@@ -212,7 +212,7 @@ public class TransformTests {
         }
     }
 
-    @Disabled
+    @Test
     public void testLineNumberParam() {
         String[] args = {
                  "-xsl:" + ConfigTest.DATA_DIR + "line-numbering.xsl",
@@ -231,7 +231,7 @@ public class TransformTests {
         }
     }
 
-    @Disabled
+    @Test
     public void testLineNumberDoc() {
         String[] args = {
                 "-xsl:" + ConfigTest.DATA_DIR + "line-numbering.xsl",
