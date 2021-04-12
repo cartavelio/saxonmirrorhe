@@ -49,3 +49,32 @@ All of the task outputs are written to files and directories under the
 safe to completely delete the build directory before executing a task.
 This ensures that _everything_ necessary to execute the task will be
 rebuilt from the current sources.
+
+## Running JUnit tests
+
+The main entry point for running the JUnit tests is the `eejTests`
+task. By default, this task runs all of the JUnit tests. You can
+select packages, classes, methods, and tags with Gradle properties:
+
+* `testPackage` specifies a package to test. 
+* `testClass` specifies a class to test.
+* `testMethod` specifies a method to test.
+* `testTag` specifies tags to test.
+
+Each of these properties can be a comma-separated list of values. If
+the value begins with a hyphen, it acts as an exclude rather than an
+include. In other words, `-PtestTag=a,b,c` runs all tests tagged “a”,
+“b”, or “c” whereas `-PtestTag=-b` runs all of the tests *except*
+those tagged with “b”.
+
+If a list of classes is given, any unqualified class name will be
+assumed to be in the same package as the previous class. So
+`-PtestClass=package.Test1,Test2` is exactly the same as
+`-PtestClass=package.Test1,package.Test2`.
+
+Similarly, if a list of methods is given, any method name that doesn’t
+include a “#” will be assumed to be in the same class as the previous
+method. So `-PtestMethod=package.class#one,two` is the same as
+`-PtestMethod=package.class#one,package.class#two`.
+
+

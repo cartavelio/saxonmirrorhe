@@ -1212,7 +1212,7 @@ task eejSignJars(
       }
       tasks.findByName("${rel}jSignJars").dependsOn t
     }
-  }    
+  }
 }
 
 // ============================================================
@@ -1245,9 +1245,126 @@ task eejTests(
   type: JavaExec,
   dependsOn: ["eej_compile_junit_tests"]
 ) {
+  // By default, run all the tests
+  def largs = ["--scan-class-path"]
+
+  // See if -PtestPackage, -PtestClass, or -PtestMethod was specified
+  def packages = project.findProperty("testPackage")
+  def classes = project.findProperty("testClass")
+  def methods = project.findProperty("testMethod")
+
+  def lpargs = []
+  def lcargs = []
+  def lmargs = []
+
+  if (packages != null || classes != null || methods != null) {
+    if (packages == null) {
+      packages = []
+    } else {
+      if (packages.contains(",")) {
+        packages = packages.split(",")
+      } else {
+        packages = [packages]
+      }
+    }
+
+    if (classes == null) {
+      classes = []
+    } else {
+      if (classes.contains(",")) {
+        classes = classes.split(",")
+      } else {
+        classes = [classes]
+      }
+    }
+
+    if (methods == null) {
+      methods = []
+    } else {
+      if (methods.contains(",")) {
+        methods = methods.split(",")
+      } else {
+        methods = [methods]
+      }
+    }
+
+    def exclude = false
+    largs = []
+
+    packages.each { pkg ->
+      if (pkg.startsWith("-")) {
+        exclude = true
+        largs = largs + ["--exclude-package", pkg.substring(1)]
+      } else {
+        largs = largs + ["--select-package", pkg]
+      }
+    }
+
+    def lastpkg = null
+    classes.each { klass ->
+      def minus = klass.startsWith("-")
+      if (minus) {
+        exclude = true
+        klass = klass.substring(1)
+      }
+      if (klass.contains(".")) {
+        def pos = klass.lastIndexOf(".")
+        lastpkg = klass.substring(0,pos+1)
+      } else {
+        if (lastpkg != null) {
+          klass = lastpkg + klass
+        }
+      }
+      if (minus) {
+        largs = largs + ["--exclude-class", klass]
+      } else {
+        largs = largs + ["--select-class", klass]
+      }
+    }
+
+    def lastmeth = null
+    methods.each { meth ->
+      if (meth.contains("#")) {
+        def pos = meth.indexOf("#") // there should be only one
+        lastmeth = meth.substring(0, pos+1)
+      } else {
+        if (lastmeth != null) {
+          meth = lastmeth + meth
+        }
+      }
+      largs = largs + ["--select-method", meth]
+    }
+
+    if (exclude) {
+      // Put scanning back in if we excluded things
+      largs = ["--scan-class-path"] + largs
+    }
+  }
+
+  // See if -PtestTag was specified
+  def tags = project.findProperty("testTag")
+  if (tags == null) {
+    tags = []
+  } else {
+    if (tags.contains(",")) {
+      tags = tags.split(",")
+    } else {
+      tags = [tags]
+    }
+  }
+
+  tags.each { tag ->
+    if (tag.startsWith("-")) {
+      largs = largs + ["--exclude-tag", tag.substring(1)]
+    } else {
+      largs = largs + ["--include-tag", tag]
+    }
+  }
+
   classpath = configurations.productTests + files("${buildDir}/classes/eej") + files("${buildDir}/test_classes/eej")
   main = "org.junit.platform.console.ConsoleLauncher"
-  args "--scan-class-path"
+
+  args largs
 }
 
 // ============================================================
@@ -1330,6 +1447,7 @@ if (file("${projectDir}/src/main/java/com").exists()) {
 task helloWorld() {
   doLast {
     println("Hello, world.")
+
     /*
     configurations.documentation.resolve().each { path ->
       println(path)
