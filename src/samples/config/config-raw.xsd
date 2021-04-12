@@ -122,6 +122,7 @@
       <xs:attribute name="xInclude" use="optional" type="xs:boolean"/>
       <xs:attribute name="xpathVersionForXsd" use="optional" type="xs:integer"/>
       <xs:attribute name="xpathVersionForXslt" use="optional" type="xs:integer"/>
+      <xs:attribute name="zipUriPattern" use="optional" type="xs:string"/>
     </xs:complexType>
   </xs:element>
 
