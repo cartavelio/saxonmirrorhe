@@ -128,9 +128,35 @@ public class TestSharedAppend {
             assertTrue(last < 100, "performance");
             // Saxon 9.6 with new Chain implementation takes 76ms regardless of the subscript
             // Saxon 9.7: 52-56ms
+            // Saxon 10.5: 48ms
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
+
+    @Test
+    public void testMapMerge() {  // See bug 4865. Takes about 1.5s in 10.5
+        try {
+            Processor p = new Processor(false);
+            XQueryCompiler c = p.newXQueryCompiler();
+            String query = "declare namespace map =\n"
+                    + "    \"http://www.w3.org/2005/xpath-functions/map\";\n"
+                    + "let $seq := (1, 1 to 500000, 1, 2)\n"
+                    + "let $counts := fold-left($seq, map { }, function($sofar, $this) {\n"
+                    + "  map:put($sofar, $this, head(($sofar($this) + 1, 1)))\n"
+                    + "}) return\n"
+                    + "  map:for-each($counts, function($key, $count) {\n"
+                    + "    $key[$count > 1]\n"
+                    + "  })" ;
+            XQueryExecutable exec = c.compile(query);
+            XQueryEvaluator qe = exec.load();
+            XdmValue result = qe.evaluate();
+            assertEquals(2, result.size());
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+
 }
 
