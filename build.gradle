@@ -55,6 +55,12 @@ if (!hasProperty("w3cXslt30TestSuiteDir")) {
 if (!hasProperty("w3cXsdTestSuiteDir")) {
   ext.w3cXsdTestSuiteDir = System.getenv("W3C_XSD_TEST_SUITE_DIR")
 }
+if (!hasProperty("w3cQT4TestSuiteDir")) {
+  ext.w3cQT4TestSuiteDir = System.getenv("W3C_QT4_TEST_SUITE_DIR")
+}
+if (!hasProperty("w3cXslt40TestSuiteDir")) {
+  ext.w3cXslt40TestSuiteDir = System.getenv("W3C_XSLT40_TEST_SUITE_DIR")
+}
 
 dependencies {
   preprocessor (
@@ -66,6 +72,7 @@ dependencies {
   implementation (
     [group: 'org.apache.ws.commons.axiom', name: 'axiom', version: '1.2.15'],
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.2.15'],
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.2.15'],
     [group: 'xom', name: 'xom', version: '1.3.5'],
     [group: 'org.jdom', name: 'jdom', version: '1.1.3'],
     [group: 'org.jdom', name: 'jdom2', version: '2.0.6'],
@@ -392,6 +399,22 @@ task cloneXsdTestSuite() {
   doLast {
     if (w3cXsdTestSuiteDir == null) {
       throw new GradleException("The location of the XSD test suite is unknown.")
+    }
+  }
+}
+
+task cloneQT4TestSuite() {
+  doLast {
+    if (w3cQT4TestSuiteDir == null) {
+      throw new GradleException("The location of the QT4 test suite is unknown.")
+    }
+  }
+}
+
+task cloneXslt40TestSuite() {
+  doLast {
+    if (w3cXslt40TestSuiteDir == null) {
+      throw new GradleException("The location of the XSLT 4.0 test suite is unknown.")
     }
   }
 }
