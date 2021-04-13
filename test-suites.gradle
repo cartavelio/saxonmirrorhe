@@ -747,7 +747,6 @@ task xsdExtraTestsJava() {
     from ("${projectDir}/src/samples") {
       include "config/config.xml"
       include "config/config-HE.xml"
-      include "config/config.xsd"
       include "config/saxon-attributes.xsd"
       include "data/books.xml"
       include "data/books-invalid.xml"
