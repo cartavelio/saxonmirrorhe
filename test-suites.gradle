@@ -164,11 +164,55 @@ task eej_setup_xsd_extra_transformations(
 tasks.findByName("eej_setup_xsd-extra_TestResults").dependsOn "eej_setup_xsd_extra_transformations"
 
 // ============================================================
+// Utility functions
+
+def getAbsoluteReportFilename(computedName) {
+  def reportFilename = computedName
+  if (project.findProperty("tdOutput") != null) {
+    def reportFile = file(project.findProperty("tdOutput"))
+    reportFilename = reportFile.getAbsolutePath()
+  }
+  if (reportFilename.endsWith(".xml")) {
+    reportFilename = reportFilename.substring(0, reportFilename.length() - 4)
+  }
+
+  return reportFilename
+}
+
+def getReportFilename(reportFilename) {
+  pathSeparator = System.getProperty("file.separator")
+  if (reportFilename.contains(pathSeparator)) {
+    def pos = reportFilename.lastIndexOf(pathSeparator)
+    return reportFilename.substring(pos + 1)
+  } else {
+    // This should never happen, the reportFilename should always be
+    // absolute when this function is called.
+    reportFilename
+  }
+}
+
+def getReportDirectory(reportFilename) {
+  pathSeparator = System.getProperty("file.separator")
+  if (reportFilename.contains(pathSeparator)) {
+    def pos = reportFilename.lastIndexOf(pathSeparator)
+    return reportFilename.substring(0, pos)
+  } else {
+    // This should never happen, the reportFilename should always be
+    // absolute when this function is called.
+    return System.getProperty("user.dir")
+  }
+}
+
+// ============================================================
 // Tasks to run QT3 test driver with a variety of options
 
 task qt3TestsJava() {
   // Just somewhere to hang dependencies
 }
+
+def qt3OptionMap = ["tdTree": "-tree:",
+                    "tdTestSet": "-s:",
+                    "tdTestName": "-t:"]
 
 ["he", "pe", "ee"].each { release ->
   def RELEASE = release.toUpperCase()
@@ -176,8 +220,6 @@ task qt3TestsJava() {
   if (release == "he") {
     jpackage = "net.sf.saxon.testdriver"
   }
-
-  def resdir = "${buildDir}/test-results/${release}j/qt3/${DSTAMP}"
 
   def languages = ["XP20", "XP31", "XQ30", "XQ31"]
   if (release == "ee") {
@@ -198,7 +240,9 @@ task qt3TestsJava() {
       }
 
       unfolded.each { uoption ->
-        def reportFilename = "report_${langCodeMap[language]}_${saxonVersion}"
+        def reportFilename = "${buildDir}/test-results/${release}j/qt3/${DSTAMP}"
+        reportFilename = "${reportFilename}/report_${langCodeMap[language]}_${saxonVersion}"
+
         def taskname = "${release}_runQT3TestSuite_${language}"
         if (bytecode != "") {
           taskname = "${taskname}_bc${bytecode}"
@@ -209,16 +253,19 @@ task qt3TestsJava() {
           reportFilename = reportFilename + "_un"
         }
 
+        // The -PtdOutput option can override these defaults
+        reportFilename = getAbsoluteReportFilename(reportFilename)
+
         if (bytecode == "off" && uoption != "") {
           // ignore this combination
         } else {
-          task "run_${taskname}"(
+          task "${taskname}"(
             type: JavaExec,
             dependsOn: ["${release}jCompile", "${release}j_compileTestDrivers", "cloneQT3TestSuite"],
             description: "Run the QT3 test suite driver for ${RELEASE}/${language}/${bytecode}/${uoption}"
           ) {
             inputs.files fileTree(dir: "src")
-            outputs.file "${resdir}/results_${langCodeMap[language]}_${saxonVersion}.xml"
+            outputs.file "${reportFilename}.xml"
 
             classpath = configurations.testDrivers \
             + files("${buildDir}/classes/${release}j") \
@@ -228,8 +275,8 @@ task qt3TestsJava() {
             def testargs = [w3cQT3TestSuiteDir,
                             "catalog.xml",
                             "-exceptions:${projectDir}/src/test/exceptions/qt3.xml",
-                            "-reportfilename:${reportFilename}.xml",
-                            "-o:${resdir}",
+                            "-reportfilename:${getReportFilename(reportFilename)}.xml",
+                            "-o:${getReportDirectory(reportFilename)}",
                             "-lang:${language}"]
             if (bytecode != "") {
               testargs += [ "-bytecode:${bytecode}" ]
@@ -238,9 +285,17 @@ task qt3TestsJava() {
               testargs += [ "-unfolded:${uoption}" ]
             }
 
+            qt3OptionMap.keySet().each { key ->
+              def opt = project.findProperty(key)
+              if (opt != null) {
+                testargs += [ "${qt3OptionMap[key]}:${opt}" ]
+              }
+            }
+
             args testargs
           }
 
+/*
           task "${taskname}"(
             type: Copy,
             dependsOn: "run_${taskname}"
@@ -260,6 +315,7 @@ task qt3TestsJava() {
               "saxon-${saxonVersion}-${language}${bflag}${uflag}.xml"
             }
           }
+*/
           qt3TestsJava.dependsOn taskname
           tasks.findByName("${release}jTestSuitesJava").dependsOn taskname
         }
@@ -283,8 +339,6 @@ task qt3ExtraTestsJava() {
     jpackage = "net.sf.saxon.testdriver"
   }
 
-  def resdir = "${buildDir}/test-results/${release}j/qt3extra/${DSTAMP}"
-
   def languages = ["XP20", "XP31", "XQ30", "XQ31"]
   if (release == "ee") {
     languages = ["XP20", "XP30", "XP31", "XQ10", "XQ30", "XQ31"]
@@ -297,22 +351,26 @@ task qt3ExtraTestsJava() {
 
   languages.each { language ->
     bytecodes.each { bytecode ->
-      def taskname = "${release}_runQT3ExtraTestSuite_${language}"
-      def reportFilename = "results_${langCodeMap[language]}_${saxonVersion}"
+      def reportFilename = "${buildDir}/test-results/${release}j/qt3extra/${DSTAMP}"
+      reportFilename = "${reportFilename}/results_${langCodeMap[language]}_${saxonVersion}"
 
+      def taskname = "${release}_runQT3ExtraTestSuite_${language}"
       if (bytecode != "") {
         taskname = "${taskname}_bc${bytecode}"
         reportFilename = "${reportFilename}_bc${bytecode}"
       }
 
-      task "run_${taskname}"(
+      // The -PtdOutput option can override these defaults
+      reportFilename = getAbsoluteReportFilename(reportFilename)
+
+      task "${taskname}"(
         type: JavaExec,
         dependsOn: ["${release}jCompile",
                     "${release}j_compileTestDrivers"],
         description: "Run the QT3 extra test suite driver for ${RELEASE}/${language}/${bytecode}"
       ) {
         inputs.files fileTree(dir: "src")
-        outputs.file "${resdir}/results_${langCodeMap[language]}_${saxonVersion}.xml"
+        outputs.file "${reportFilename}.xml"
 
         classpath = configurations.testDrivers \
         + files("${buildDir}/classes/${release}j") \
@@ -322,16 +380,24 @@ task qt3ExtraTestsJava() {
         def testargs = ["${projectDir}/src/test/extra/qt3",
                         "catalog.xml",
                         "-exceptions:${projectDir}/src/test/exceptions/qt3extra.xml",
-                        "-reportfilename:${reportFilename}.xml",
-                        "-o:${resdir}",
+                        "-reportfilename:${getReportFilename(reportFilename)}.xml",
+                        "-o:${getReportDirectory(reportFilename)}",
                         "-lang:${language}"]
         if (bytecode != "") {
           testargs += [ "-bytecode:${bytecode}" ]
         }
 
+        qt3OptionMap.keySet().each { key ->
+          def opt = project.findProperty(key)
+          if (opt != null) {
+            testargs += [ "${qt3OptionMap[key]}:${opt}" ]
+          }
+        }
+
         args testargs
       }
 
+/*
       task "${taskname}"(
         type: Copy,
         dependsOn: "run_${taskname}"
@@ -347,6 +413,7 @@ task qt3ExtraTestsJava() {
           "saxon-${saxonVersion}-${language}${bflag}.xml"
         }
       }
+*/
       qt3ExtraTestsJava.dependsOn taskname
       tasks.findByName("${release}jTestSuitesJava").dependsOn taskname
     }
@@ -367,8 +434,6 @@ task xslt30TestsJava() {
     jpackage = "net.sf.saxon.testdriver"
   }
 
-  def resdir = "${buildDir}/test-results/${release}j/xslt30/${DSTAMP}"
-
   def languages = ["XT30"]
   def bytecodes = [""]
   def exports = [""]
@@ -383,14 +448,14 @@ task xslt30TestsJava() {
     bytecodes.each { bytecode ->
       exports.each { export ->
         jits.each { jit ->
-
           def skipThisCombo = ((export == "-export" && bytecode == "on")
                                || (jit == "-jit" && bytecode == "off"))
 
           if (!skipThisCombo) {
-            def taskname = "${release}_runXslt30TestSuite_${language}"
-            def reportFilename = "results_${langCodeMap[language]}_${saxonVersion}"
+            def reportFilename = "${buildDir}/test-results/${release}j/xslt30/${DSTAMP}"
+            reportFilename = "${reportFilename}/results_${langCodeMap[language]}_${saxonVersion}"
 
+            def taskname = "${release}_runXslt30TestSuite_${language}"
             if (bytecode != "") {
               taskname = "${taskname}_bc${bytecode}"
               reportFilename = "${reportFilename}_bc${bytecode}"
@@ -404,7 +469,10 @@ task xslt30TestsJava() {
               reportFilename = "${reportFilename}_jit"
             }
 
-            task "run_${taskname}"(
+            // The -PtdOutput option can override these defaults
+            reportFilename = getAbsoluteReportFilename(reportFilename)
+
+            task "${taskname}"(
               type: JavaExec,
               dependsOn: ["${release}jCompile",
                           "${release}j_compileTestDrivers",
@@ -412,7 +480,7 @@ task xslt30TestsJava() {
               description: "Run the XSLT 3.0 test suite driver for ${RELEASE}/${language}/${bytecode}/${export}/${jit}"
             ) {
               inputs.files fileTree(dir: "src")
-              outputs.file "${resdir}/results_XSLT3.0_${saxonVersion}.xml"
+              outputs.file "${reportFilename}.xml"
 
               classpath = configurations.testDrivers \
               + files("${buildDir}/classes/${release}j") \
@@ -422,8 +490,8 @@ task xslt30TestsJava() {
               def testargs = [w3cXslt30TestSuiteDir,
                               "catalog.xml",
                               "-exceptions:${projectDir}/src/test/exceptions/xslt30.xml",
-                              "-reportfilename:${reportFilename}.xml",
-                              "-o:${resdir}",
+                              "-reportfilename:${getReportFilename(reportFilename)}.xml",
+                              "-o:${getReportDirectory(reportFilename)}",
                               "-lang:${language}",
                               "-ps:off"]
               if (testSuiteDebug != "") {
@@ -439,9 +507,17 @@ task xslt30TestsJava() {
                 testargs += [ jit ]
               }
 
+              qt3OptionMap.keySet().each { key ->
+                def opt = project.findProperty(key)
+                if (opt != null) {
+                  testargs += [ "${qt3OptionMap[key]}:${opt}" ]
+                }
+              }
+
               args testargs
             }
 
+/*
             task "${taskname}"(
               type: Copy,
               dependsOn: "run_${taskname}"
@@ -457,6 +533,7 @@ task xslt30TestsJava() {
                 "saxon-${saxonVersion}-${language}${bflag}${export}${jit}.xml"
               }
             }
+*/
             xslt30TestsJava.dependsOn taskname
             tasks.findByName("${release}jTestSuitesJava").dependsOn taskname
           }
@@ -480,8 +557,6 @@ task xslt30ExtraTestsJava() {
     jpackage = "net.sf.saxon.testdriver"
   }
 
-  def resdir = "${buildDir}/test-results/${release}j/xslt30extra/${DSTAMP}"
-
   def languages = ["XT30"]
   def bytecodes = [""]
   if (release == "ee") {
@@ -490,22 +565,23 @@ task xslt30ExtraTestsJava() {
 
   languages.each { language ->
     bytecodes.each { bytecode ->
-      def taskname = "${release}_runXslt30ExtraTestSuite_${language}"
-      def reportFilename = "results_${langCodeMap[language]}_${saxonVersion}"
+      def reportFilename = "${buildDir}/test-results/${release}j/xslt30extra/${DSTAMP}"
+      reportFilename = "${reportFilename}/results_${langCodeMap[language]}_${saxonVersion}"
 
+      def taskname = "${release}_runXslt30ExtraTestSuite_${language}"
       if (bytecode != "") {
         taskname = "${taskname}_bc${bytecode}"
         reportFilename = "${reportFilename}_bc${bytecode}"
       }
 
-      task "run_${taskname}"(
+      task "${taskname}"(
         type: JavaExec,
         dependsOn: ["${release}jCompile",
                     "${release}j_compileTestDrivers"],
         description: "Run the XSLT 3.0 extra test suite driver for ${RELEASE}/${language}/${bytecode}"
       ) {
         inputs.files fileTree(dir: "src")
-        outputs.file "${resdir}/results_XSLT3.0_${saxonVersion}.xml"
+        outputs.file "${reportFilename}.xml"
 
         classpath = configurations.testDrivers \
         + files("${buildDir}/classes/${release}j") \
@@ -515,8 +591,8 @@ task xslt30ExtraTestsJava() {
         def testargs = ["${projectDir}/src/test/extra/xslt30",
                         "catalog.xml",
                         "-exceptions:${projectDir}/src/test/exceptions/xslt30extra.xml",
-                        "-reportfilename:${reportFilename}.xml",
-                        "-o:${resdir}",
+                        "-reportfilename:${getReportFilename(reportFilename)}.xml",
+                        "-o:${getReportDirectory(reportFilename)}",
                         "-lang:${language}",
                         "-ps:off"]
         if (testSuiteDebug != "") {
@@ -526,76 +602,17 @@ task xslt30ExtraTestsJava() {
           testargs += [ "-bytecode:${bytecode}" ]
         }
 
-    languages.each { language ->
-        bytecodes.each { bytecode ->
-            exports.each { export ->
-                jits.each { jit ->
-                    def skipThisCombo = ((export == "-export" && bytecode == "on")
-                            || (jit == "-jit" && bytecode == "off"))
+        qt3OptionMap.keySet().each { key ->
+          def opt = project.findProperty(key)
+          if (opt != null) {
+            testargs += [ "${qt3OptionMap[key]}:${opt}" ]
+          }
+        }
 
-                    if (!skipThisCombo) {
-                        def reportFilename = "${buildDir}/test-results/${release}j/xslt30extra/${DSTAMP}"
-                        reportFilename = "${reportFilename}/results_${langCodeMap[language]}_${saxonVersion}"
+        args testargs
+      }
 
-                        def taskname = "${release}_runXslt30ExtraTestSuite_${language}"
-                        if (bytecode != "") {
-                            taskname = "${taskname}_bc${bytecode}"
-                            reportFilename = "${reportFilename}_bc${bytecode}"
-                        }
-                        if (export != "") {
-                          taskname = "${taskname}_export"
-                          reportFilename = "${reportFilename}_export"
-                        }
-                        if (jit != "") {
-                          taskname = "${taskname}_jit"
-                          reportFilename = "${reportFilename}_jit"
-                        }
-
-                        task "${taskname}"(
-                                type: JavaExec,
-                                dependsOn: ["${release}jCompile",
-                                            "${release}j_compileTestDrivers"],
-                                description: "Run the XSLT 3.0 extra test suite driver for ${RELEASE}/${language}/${bytecode}"
-                        ) {
-                            inputs.files fileTree(dir: "src")
-                            outputs.file "${reportFilename}.xml"
-
-                            classpath = configurations.testDrivers \
-         + files("${buildDir}/classes/${release}j") \
-         + files("${buildDir}/testdriver_classes/${release}j")
-
-                            main = "${jpackage}.Xslt30TestSuiteDriver${RELEASE}"
-                            def testargs = ["${projectDir}/src/test/extra/xslt30",
-                                            "catalog.xml",
-                                            "-exceptions:${projectDir}/src/test/exceptions/xslt30extra.xml",
-                                            "-reportfilename:${getReportFilename(reportFilename)}.xml",
-                                            "-o:${getReportDirectory(reportFilename)}",
-                                            "-lang:${language}",
-                                            "-ps:off"]
-                            if (testSuiteDebug != "") {
-                                testargs += [testSuiteDebug]
-                            }
-                            if (bytecode != "") {
-                                testargs += ["-bytecode:${bytecode}"]
-                            }
-
-                            if (export != "") {
-                                testargs += [export]
-                            }
-                            if (jit != "") {
-                                testargs += [jit]
-                            }
-
-                            qt3OptionMap.keySet().each { key ->
-                                def opt = project.findProperty(key)
-                                if (opt != null) {
-                                    testargs += ["${qt3OptionMap[key]}:${opt}"]
-                                }
-                            }
-
-                            args testargs
-                        }
-
+/*
       task "${taskname}"(
         type: Copy,
         dependsOn: "run_${taskname}"
@@ -611,6 +628,7 @@ task xslt30ExtraTestsJava() {
           "saxon-${saxonVersion}-${language}${bflag}.xml"
         }
       }
+*/
       xslt30ExtraTestsJava.dependsOn taskname
       tasks.findByName("${release}jTestSuitesJava").dependsOn taskname
     }
@@ -629,22 +647,22 @@ task xsdTestsJava() {
   def RELEASE = release.toUpperCase()
   def jpackage = "com.saxonica.testdriver.ee"
 
-  def resdir = "${buildDir}/test-results/${release}j/xsd/${DSTAMP}"
-
   def languages = ["1.0", "1.1"]
   def bytecodes = ["off", "on"]
 
   languages.each { language ->
     bytecodes.each { bytecode ->
-      def taskname = "${release}_runXsdTestSuite_${language}_bc${bytecode}"
-      def reportFilename = "SaxonResults${saxonVersion}-${language}_bc${bytecode}"
-      def errorFilename = "SaxonFailures${saxonVersion}-${language}_bc${bytecode}"
+      def resdir = "${buildDir}/test-results/${release}j/xsd/${DSTAMP}"
+      def reportFilename = "${resdir}/SaxonResults${saxonVersion}-${language}_bc${bytecode}"
+      def errorFilename = "${resdir}/SaxonFailures${saxonVersion}-${language}_bc${bytecode}"
       def exceptions = "${projectDir}/src/test/exceptions/xsd.xml"
       if (language == "1.1") {
         exceptions = "${projectDir}/src/test/exceptions/xsd11.xml"
       }
 
-      task "run_${taskname}"(
+      def taskname = "${release}_runXsdTestSuite_${language}_bc${bytecode}"
+
+      task "${taskname}"(
         type: JavaExec,
         dependsOn: ["${release}jCompile",
                     "${release}j_compileTestDrivers",
@@ -652,8 +670,8 @@ task xsdTestsJava() {
         description: "Run the XSD test suite driver for ${RELEASE}/${language}/${bytecode}"
       ) {
         inputs.files fileTree(dir: "src")
-        outputs.file "${resdir}/SaxonFailures${saxonVersion}.xml"
-        outputs.file "${resdir}/SaxonResults${saxonVersion}-${language}.xml"
+        outputs.file "${reportFilename}.xml"
+        outputs.file "${errorFilename}.xml"
 
         classpath = configurations.testDrivers \
         + files("${buildDir}/classes/${release}j") \
@@ -662,10 +680,10 @@ task xsdTestsJava() {
         main = "${jpackage}.SchemaTestSuiteDriver"
         def testargs = [w3cXsdTestSuiteDir,
                         "-exceptions:${exceptions}",
-                        "-reportfilename:${reportFilename}.xml",
-                        "-errorfilename:${errorFilename}.xml",
+                        "-reportfilename:${getReportFilename(reportFilename)}.xml",
+                        "-errorfilename:${getReportFilename(errorFilename)}.xml",
+                        "-local:${getReportDirectory(reportFilename)}",
                         "-summarizeresults:${projectDir}/src/test/extra/tools/summarize-results.xsl",
-                        "-local:${resdir}",
                         "-v:${language}"]
         if (bytecode != "") {
           testargs += [ "-bytecode:${bytecode}" ]
@@ -674,6 +692,7 @@ task xsdTestsJava() {
         args testargs
       }
 
+/*
       task "${taskname}"(
         type: Copy,
         dependsOn: "run_${taskname}"
@@ -689,6 +708,7 @@ task xsdTestsJava() {
           "saxon-${saxonVersion}-XSD${language}${bflag}.xml"
         }
       }
+*/
       xsdTestsJava.dependsOn taskname
       tasks.findByName("${release}jTestSuitesJava").dependsOn taskname
     }
