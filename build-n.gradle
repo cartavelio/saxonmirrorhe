@@ -58,7 +58,6 @@ task hen_setupPreprocess(
   from "${projectDir}/src/main/java"
   into "${buildDir}/filtered/hen"
   include "net/sf/saxon/**/*.java"
-  include "net/sf/saxon/data/**"
   exclude "net/sf/saxon/option/cpp/**"
   exclude "net/sf/saxon/jetonnet/**"
   exclude "net/sf/saxon/Gizmo.java"
@@ -90,7 +89,6 @@ task pen_setupPreprocess(
   from "${projectDir}/src/main/java"
   into "${buildDir}/filtered/pen"
   include "net/sf/saxon/**/*.java"
-  include "net/sf/saxon/data/**"
   exclude "net/sf/saxon/option/cpp/**"
   exclude "net/sf/saxon/jetonnet/**"
   exclude "net/sf/saxon/Gizmo.java"
@@ -153,7 +151,6 @@ task een_setupPreprocess(
   from "${projectDir}/src/main/java"
   into "${buildDir}/filtered/een"
   include "net/sf/saxon/**/*.java"
-  include "net/sf/saxon/data/**"
   exclude "net/sf/saxon/TransformerFactoryImpl.java"
   exclude "net/sf/saxon/BasicTransformerFactory.java"
   exclude "net/sf/saxon/option/cpp/**"
@@ -462,7 +459,7 @@ task pen_jar(
     exclude "com/saxonica/config/StandardSchemaResolver.class"
     exclude "com/saxonica/expr/ee/*.class"
   }
-  from ("src/main/java") {
+  from ("src/main/resources") {
     include "net/sf/saxon/data/**"
   }
   doFirst {
@@ -484,7 +481,7 @@ task een_jar(
     exclude "com/saxonica/config/EnterpriseTransformerFactory.class"
     exclude "com/saxonica/config/EnterpriseXPathFactory.class"
   }
-  from ("src/main/java") {
+  from ("src/main/resources") {
     include "net/sf/saxon/data/**"
   }
   doFirst {
