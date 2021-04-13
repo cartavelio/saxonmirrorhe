@@ -307,35 +307,6 @@ task app_javadoc(
   from "${buildDir}/javadoc-xml"
 }
 
-task resources_dotnetdoc(
-  dependsOn: ["resources_dotnetdoc_css", "resources_dotnetdoc_apidoc"],
-  description: "Copy dotnet files into the resources folder"
-) {
-  // nop
-}
-
-task resources_dotnetdoc_css(
-  type: Copy,
-  dependsOn: ["dotnet_doc_jel"],
-  description: "Copy the dotnet CSS into the resources folder"
-) {
-  into "${buildDir}/resources/doc/dotnetdoc"
-  from ("${projectDir}/tools/docs/dotnet") {
-    include "saxon-dotnetdoc.css"
-  }
-}
-
-task resources_dotnetdoc_apidoc(
-  type: Copy,
-  dependsOn: ["dotnet_doc_jel"],
-  description: "Copy the dotnet API docs into the resources folder"
-) {
-  into "${buildDir}/resources/doc/dotnetdoc"
-  from ("${buildDir}/n") {
-    include "saxon-ee-api-${saxonVersion}.xml"
-    rename("saxon-ee-api-${saxonVersion}.xml", "apidoc.xml")
-  }
-}
 
 // ============================================================
 
@@ -624,7 +595,7 @@ task userdoc_viewer_appJS(
 task userdoc_publish_javadoc_html(
   type: Copy,
   dependsOn: ["userdoc_html", "product_javadoc"],
-  description: "Copy dotnet docs into HTML output"
+  description: "Copy javadoc docs into HTML output"
 ) {
   into "${buildDir}/userdoc/html/javadoc"
   from "build/javadoc"

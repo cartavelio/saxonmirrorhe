@@ -292,6 +292,7 @@ apply from: "build-n.gradle"
 apply from: "build-c.gradle"
 apply from: "build-doc.gradle"
 apply from: "test-suites.gradle"
+apply from: "build-resources.gradle"
 
 def pathExists(pathname) {
   // Returns true iff pathame is an existing file or directory
