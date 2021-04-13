@@ -341,34 +341,86 @@ def pathExists(pathname) {
     libs.dependsOn icu4j
   }
 
-  task "${release}j_notices"(
-    type: Copy,
-    description: "Copy the notices into the ${RELEASE} release directory"
-  ) {
-    into "${buildDir}/releases/${release}j"
-    from ("src/docs") {
-      exclude "saxon9"
-      exclude "tools"
-      exclude "saxonc-doc"
-      exclude "welcome"
-      exclude "notices/APACHE-ANT.txt"
-      exclude "notices/APACHE-RESOLVER.txt"
-      exclude "notices/APACHE-TAGSOUP.txt"
-      exclude "notices/APACHE-XERCES.txt"
-      exclude "notices/ASM.txt"
-      exclude "notices/FRIJTERS.txt"
-      exclude "notices/GPL+CLASSPATH.txt"
-      exclude "notices/ICU-J.txt"
-      exclude "notices/LEGAL.txt"
-    }
-  }
-
   task "${release}j_copyTestDrivers"(
     dependsOn: ["${release}j_copyTestDriverSources",
                 "${release}j_copyTestDriverResources"],
     description: "Copy test driver sources and resources for ${RELEASE}"
   ) {
     // Just a container to hang dependencies on
+  }
+
+  task "${release}jZip"(
+    type: Zip,
+    dependsOn: ["${release}jRelease"]
+  ) {
+    from "${buildDir}/releases/${release}j"
+    archiveFileName = "Saxon${RELEASE}${saxonVersion.replace('.', '-')}J.zip"
+  }
+}
+
+task "hej_notices"(
+  type: Copy,
+  description: "Copy the notices into the HEJ release directory"
+) {
+  into "${buildDir}/releases/hej"
+  from ("src/docs") {
+    exclude "saxonc-doc"
+    exclude "welcome"
+    exclude "resources"
+    exclude "notices/APACHE-ANT.txt"
+    exclude "notices/APACHE-RESOLVER.txt"
+    exclude "notices/APACHE-TAGSOUP.txt"
+    exclude "notices/APACHE-XERCES.txt"
+    exclude "notices/ASM.txt"
+    exclude "notices/FRIJTERS.txt"
+    exclude "notices/GPL+CLASSPATH.txt"
+    exclude "notices/ICU-J.txt"
+    exclude "notices/LEGAL.txt"
+    exclude "notices/CERN.txt"
+    exclude "notices/HRLDCPR.txt"
+  }
+}
+
+task "pej_notices"(
+  type: Copy,
+  description: "Copy the notices into the PEJ release directory"
+) {
+  into "${buildDir}/releases/pej"
+  from ("src/docs") {
+    exclude "saxonc-doc"
+    exclude "welcome"
+    exclude "resources"
+    exclude "notices/APACHE-ANT.txt"
+    exclude "notices/APACHE-RESOLVER.txt"
+    exclude "notices/APACHE-TAGSOUP.txt"
+    exclude "notices/APACHE-XERCES.txt"
+    exclude "notices/ASM.txt"
+    exclude "notices/FRIJTERS.txt"
+    exclude "notices/GPL+CLASSPATH.txt"
+    exclude "notices/LEGAL.txt"
+    exclude "notices/CERN.txt"
+    exclude "notices/HRLDCPR.txt"
+  }
+}
+
+task "eej_notices"(
+  type: Copy,
+  description: "Copy the notices into the EEJ release directory"
+) {
+  into "${buildDir}/releases/eej"
+  from ("src/docs") {
+    exclude "saxonc-doc"
+    exclude "welcome"
+    exclude "resources"
+    exclude "notices/APACHE-ANT.txt"
+    exclude "notices/APACHE-RESOLVER.txt"
+    exclude "notices/APACHE-TAGSOUP.txt"
+    exclude "notices/APACHE-XERCES.txt"
+    exclude "notices/FRIJTERS.txt"
+    exclude "notices/GPL+CLASSPATH.txt"
+    exclude "notices/LEGAL.txt"
+    exclude "notices/CERN.txt"
+    exclude "notices/HRLDCPR.txt"
   }
 }
 
@@ -1406,6 +1458,9 @@ task hejRelease(
     if (filename.startsWith("saxon-he-test")) {
       filename = "saxon-he-test-${saxonVersion}.jar"
     }
+    if (filename.startsWith("saxon-he-xqj")) {
+      filename = "saxon-xqj-${saxonVersion}.jar"
+    }
   }
 }
 
@@ -1454,11 +1509,23 @@ if (file("${projectDir}/src/main/java/com").exists()) {
   ) {
     // Just a container to hang dependencies on
   }
+  task javaZips(
+    dependsOn: ["hejZip", "pejZip", "eejZip"],
+    description: "Build all of the Java release ZIP files"
+  ) {
+    // Just a container to hang dependencies on
+  }
 } else {
   // Ignore the EEJ and PEJ releases if the sources aren't available
   task javaReleases(
     dependsOn: ["hejRelease"],
     description: "Build all of the Java releases"
+  ) {
+    // Just a container to hang dependencies on
+  }
+  task javaZips(
+    dependsOn: ["hejZip"],
+    description: "Build all of the Java release ZIP files"
   ) {
     // Just a container to hang dependencies on
   }
