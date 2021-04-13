@@ -28,7 +28,7 @@
    <p>This documentation covers three Saxon editions: home, professional, and enterprise (HE, PE,
       and EE). The Home Edition remains open source (under the Mozilla Public License 2.0). An
       outline of what is present in each edition can be found in the <a class="bodylink"
-         href="http://www.saxonica.com/products/feature-matrix-9-9.xml">feature matrix</a>. Broadly
+         href="http://www.saxonica.com/products/feature-matrix-10.xml">feature matrix</a>. Broadly
       speaking:</p>
   <ul>
     <li>Saxon-HE includes support for published W3C recommendations at the minimum
@@ -378,7 +378,7 @@
       </ul>
 
       <p>For a full table showing the features available in each edition and licensing variant, see
-         the <a href="http://www.saxonica.com/products/feature-matrix-9-9.xml" class="bodylink"
+         the <a href="http://www.saxonica.com/products/feature-matrix-10.xml" class="bodylink"
             >feature matrix</a>.</p>
 
       <p>For information on obtaining and setting up a license key, see the <a class="bodylink"
