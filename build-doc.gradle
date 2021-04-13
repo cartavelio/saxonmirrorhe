@@ -726,6 +726,13 @@ task gen_feature_matrix(
 }
 
 task gen_prod_desc(
+  dependsOn: ["gen_prod_desc_fo", "gen_prod_desc_pdf"],
+  description: "Creates the HTML and PDF versions of the product descriptions"
+) {
+  // Just a place to hang dependencies
+}
+
+task gen_prod_desc_xml(
         type: JavaExec,
         description: "Creates the base product description file"
 ) {
@@ -741,7 +748,7 @@ task gen_prod_desc(
 
 task gen_prod_desc_fo(
         type: JavaExec,
-        dependsOn: ["gen_prod_desc"],
+        dependsOn: ["gen_prod_desc_xml"],
         description: "Creates the FO and HTML versions of the product descriptions"
 ) {
   inputs.file "${buildDir}/proddesc/prod-desc.xml"
@@ -754,7 +761,32 @@ task gen_prod_desc_fo(
           "-o:${buildDir}/proddesc/PD/dummy.xml"
 }
 
-// TODO Next step to generate the PDFs never worked in Ant, we had to do it manually.
-// Open each build/proddesc/PD/fo/*.fo document in Oxygen and run from there:
-// run Apply Configuration Scenario FO PDF (default)
-// The generated PDFs should then be copied to build/website/products/PD${saxonMajorVersion}/
+task setup_fop(
+  type: Copy
+) {
+  into "${buildDir}/proddesc"
+  from ("${projectDir}/src/docs/doc/img") {
+    include "saxonica_logo.gif"
+  }
+}
+
+task gen_prod_desc_pdf(
+  description: "Creates the PDF versions of the product descriptions"
+) {
+  // Just a place to hang dependencies
+}
+
+["EE-Q", "EE-T", "EE-V", "EE", "PE", "HE"].each { ds ->
+  Task t = task "gen_${ds}_desc_pdf"(
+    type: JavaExec,
+    dependsOn: ["setup_fop", "gen_prod_desc_fo"],
+    description: "Creates the PDF version of the ${ds} product description"
+  ) {
+    inputs.file "${buildDir}/proddesc/PD/fo/${ds}.fo"
+    outputs.file "${buildDir}/proddesc/PD/pdf/${ds}.pdf"
+    classpath = configurations.documentation
+    main = "org.apache.fop.cli.Main"
+    args "-q", "${buildDir}/proddesc/PD/fo/${ds}.fo", "-pdf", "${buildDir}/proddesc/PD/pdf/${ds}.pdf"
+  }
+  gen_prod_desc_pdf.dependsOn t
+}
