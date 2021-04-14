@@ -50,6 +50,16 @@ safe to completely delete the build directory before executing a task.
 This ensures that _everything_ necessary to execute the task will be
 rebuilt from the current sources.
 
+## Signing jars
+
+If your environment is configured to sign jars, running the release
+and zip tasks with the Gradle property `signJars` set to `true` will
+create signed jars. For example,
+
+```
+./gradlew -PsignJars=true javaZips
+```
+
 ## Running JUnit tests
 
 The main entry point for running the JUnit tests is the `eejTests`
