@@ -1526,6 +1526,29 @@ if (makeSignedJars) {
 
 // ============================================================
 
+task javaArchiveHE(
+  type: Zip,
+  description: "Archive the HE sources"
+) {
+  archiveFileName = "saxon${saxonVersion.replace('.', '-')}source.zip"
+  from ("${buildDir}/preprocess/hej") {
+    include "net/**/*.java"
+  }
+  from "${projectDir}/src/main/resources"
+}
+
+task javaArchiveEE(
+  type: Zip,
+  description: "Archive the EE sources"
+) {
+  archiveFileName = "saxonee${saxonVersion.replace('.', '-')}source.zip"
+  from ("${projectDir}/src/main/java") {
+    include "com/saxonica/**/*.java"
+  }
+}
+
+// ============================================================
+
 // Testing task for various Gradle debugging efforts
 task helloWorld() {
   doLast {
