@@ -1081,25 +1081,45 @@ task hejJar(
 // Because the XQJ files are not open source, don't attempt to build
 // the jar unless the EE sources are available.
 if (file("${projectDir}/src/main/java/com/saxonica/xqj").exists()) {
-  task hejJarXqj(
-    type: Jar,
-    dependsOn: ["eejCompile"],
-    description: "Build the XQJ jar file for HE"
-  ) {
-    archiveBaseName = "saxon-he-xqj-${saxonVersion}"
-    from ("${buildDir}/classes/eej") {
-      include "com/saxonica/xqj/**/*.class"
-      include "javax/xml/xquery/**/*.class"
-    }
-  }
+ task eejJarXqj(
+   type: Jar,
+   dependsOn: ["eejCompile"],
+   description: "Build the XQJ jar file for EE"
+ ) {
+   archiveBaseName = "saxon-ee-xqj-${saxonVersion}"
+   from ("${buildDir}/classes/eej") {
+     include "com/saxonica/xqj/**/*.class"
+     include "javax/xml/xquery/**/*.class"
+   }
+ }
+
+ task pejJarXqj(
+   type: Jar,
+   dependsOn: ["pejCompile"],
+   description: "Build the XQJ jar file for PE"
+ ) {
+   archiveBaseName = "saxon-pe-xqj-${saxonVersion}"
+   from ("${buildDir}/classes/pej") {
+     include "com/saxonica/xqj/**/*.class"
+     include "javax/xml/xquery/**/*.class"
+   }
+ }
 } else {
-  task hejJarXqj(
-    description: "Ignore the XQJ file; the sources are unavailable"
-  ) {
-    doLast {
-      println("Ignoring XQJ jar file task; the sources are unavailable")
-    }
-  }
+ task eejJarXqj(
+   description: "Ignore the XQJ file; the sources are unavailable"
+ ) {
+   doLast {
+     println("Ignoring XQJ jar file task; the sources are unavailable")
+   }
+ }
+
+ task pejJarXqj(
+   description: "Ignore the XQJ file; the sources are unavailable"
+ ) {
+   doLast {
+     println("Ignoring XQJ jar file task; the sources are unavailable")
+   }
+ }
 }
 
 task pejJar(
@@ -1477,7 +1497,7 @@ task eejTests(
 
 task hejRelease(
   type: Copy,
-  dependsOn: ["hejJar", "hejJarXqj", "hejJarTests", "hej_notices", "hej_extrajars"],
+  dependsOn: ["hejJar", "hejJarTests", "hej_notices", "hej_extrajars"],
   description: "Build the HE release for Java"
 ) {
   from "${buildDir}/libs"
