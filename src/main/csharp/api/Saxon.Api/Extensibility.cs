@@ -613,10 +613,13 @@ namespace Saxon.Api
         public Iterator getResources(JXPathContext xpc)
         {
             java.util.List iter = new java.util.ArrayList();
-            List<IResource> list = resourceCollection.GetResources(new DynamicContext(xpc));
-            foreach (IResource src in list)
+            if (resourceCollection != null)
             {
-                iter.add(new ResourceWrapper(src));
+                List<IResource> list = resourceCollection.GetResources(new DynamicContext(xpc));
+                foreach (IResource src in list)
+                {
+                    iter.add(new ResourceWrapper(src));
+                }
             }
 
             return iter.iterator();
@@ -626,10 +629,13 @@ namespace Saxon.Api
         public Iterator getResourceURIs(JXPathContext xpc)
         {
             java.util.List iter = new java.util.ArrayList();
-            List<string> list = resourceCollection.GetResourceURIs(new DynamicContext(xpc));
-            foreach (string src in list)
+            if (resourceCollection != null)
             {
-                iter.add(src);
+                List<string> list = resourceCollection.GetResourceURIs(new DynamicContext(xpc));
+                foreach (string src in list)
+                {
+                    iter.add(src);
+                }
             }
 
             return iter.iterator();
@@ -682,9 +688,9 @@ namespace Saxon.Api
     }
 
 	/// <summary>
-	/// ResourceCollection class implements the IResourcecollection interface.
+	/// ResourceCollection class that implements the IResourcecollection interface.
     /// This class is used to map the URI of collection into a sequence of Resource objects.
-    /// It is usedto support the fn:collection() and fn:uri-collection() functions.
+    /// It is used to support the fn:collection() and fn:uri-collection() functions.
 	/// </summary>
     public class ResourceCollection : IResourceCollection
     {
@@ -721,11 +727,15 @@ namespace Saxon.Api
         public List<string> GetResourceURIs(DynamicContext context)
         {
             List<string> list = new List<string>();
-            var jIter = resourceCollection.getResourceURIs(context.context);
-            while(jIter.hasNext()) {
+            if (resourceCollection != null)
+            {
+                var jIter = resourceCollection.getResourceURIs(context.context);
+                while (jIter.hasNext())
+                {
 
-                string uri = (string)jIter.next();
-                list.Add(uri);
+                    string uri = (string)jIter.next();
+                    list.Add(uri);
+                }
             }
             return list;
         }
@@ -741,12 +751,15 @@ namespace Saxon.Api
         public List<IResource> GetResources(DynamicContext context)
         {
             List<IResource> list = new List<IResource>();
-            var jIter = resourceCollection.getResources(context.context);
-            while (jIter.hasNext())
+            if (resourceCollection != null)
             {
+                var jIter = resourceCollection.getResources(context.context);
+                while (jIter.hasNext())
+                {
 
-                JResource jresource = (JResource)jIter.next();
-                list.Add(new Resource(jresource));
+                    JResource jresource = (JResource)jIter.next();
+                    list.Add(new Resource(jresource));
+                }
             }
             return list;
         }
