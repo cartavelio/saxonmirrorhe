@@ -261,6 +261,11 @@ if (OperatingSystem.current().isWindows()) {
                  "-providerArg", eToken]
 }
 
+if (project.findProperty("testSignJars") == "true") {
+  canSignJars = true
+  signjarArgs = ["echo", "TESTSIGN"]
+}
+
 // ============================================================
 // Find jar files that need to be part of the build or release
 //
@@ -1081,45 +1086,37 @@ task hejJar(
 // Because the XQJ files are not open source, don't attempt to build
 // the jar unless the EE sources are available.
 if (file("${projectDir}/src/main/java/com/saxonica/xqj").exists()) {
- task eejJarXqj(
-   type: Jar,
-   dependsOn: ["eejCompile"],
-   description: "Build the XQJ jar file for EE"
- ) {
-   archiveBaseName = "saxon-ee-xqj-${saxonVersion}"
-   from ("${buildDir}/classes/eej") {
-     include "com/saxonica/xqj/**/*.class"
-     include "javax/xml/xquery/**/*.class"
-   }
- }
-
- task pejJarXqj(
-   type: Jar,
-   dependsOn: ["pejCompile"],
-   description: "Build the XQJ jar file for PE"
- ) {
-   archiveBaseName = "saxon-pe-xqj-${saxonVersion}"
-   from ("${buildDir}/classes/pej") {
-     include "com/saxonica/xqj/**/*.class"
-     include "javax/xml/xquery/**/*.class"
-   }
- }
+  task hejJarXqj(
+    type: Jar,
+    dependsOn: ["eejCompile"],
+    description: "Build the XQJ jar file for HE"
+  ) {
+    archiveBaseName = "saxon-xqj-${saxonVersion}"
+    from ("${buildDir}/classes/eej") {
+      include "com/saxonica/xqj/**/*.class"
+      include "javax/xml/xquery/**/*.class"
+    }
+  }
+  task pejJarXqj() {
+    // nop
+  }
+  task eejJarXqj() {
+    // nop
+  }
 } else {
- task eejJarXqj(
-   description: "Ignore the XQJ file; the sources are unavailable"
- ) {
-   doLast {
-     println("Ignoring XQJ jar file task; the sources are unavailable")
-   }
- }
-
- task pejJarXqj(
-   description: "Ignore the XQJ file; the sources are unavailable"
- ) {
-   doLast {
-     println("Ignoring XQJ jar file task; the sources are unavailable")
-   }
- }
+  task hejJarXqj(
+    description: "Ignore the XQJ file; the sources are unavailable"
+  ) {
+    doLast {
+      println("Ignoring XQJ jar file task; the sources are unavailable")
+    }
+  }
+  task pejJarXqj() {
+    // nop
+  }
+  task eejJarXqj() {
+    // nop
+  }
 }
 
 task pejJar(
@@ -1271,21 +1268,24 @@ task eejSignJars(
     }
     tasks.findByName("${rel}jSignJars").dependsOn t
 
-    t = task "${rel}j_JarSignXqj"(
-      type: Exec,
-      dependsOn: ["${rel}jJarXqj"],
-      description: "Sign the ${rel.toUpperCase()}J XQJ jar file"
-    ) {
-      inputs.file "${buildDir}/libs/saxon-${rel}-xqj-${saxonVersion}.jar"
-      def args = signjarArgs +
-        ["${buildDir}/libs/saxon-${rel}-xqj-${saxonVersion}.jar",
-         signkeyNewAlias,
-         "-storepass", signkeyPassword]
-      commandLine args
-    }
-    tasks.findByName("${rel}jSignJars").dependsOn t
-
-    if (rel != 'he') {
+    if (rel == 'he') {
+      t = task "${rel}j_JarSignXqj"(
+        type: Exec,
+        dependsOn: ["${rel}jJarXqj"],
+        description: "Sign the ${rel.toUpperCase()}J XQJ jar file"
+      ) {
+        // N.B. For historical reasons, there's no "he" in the jar filename.
+        // It's *only* in HE because the XQJ classes are part of the regular
+        // jar file for PE and EE.
+        inputs.file "${buildDir}/libs/saxon-xqj-${saxonVersion}.jar"
+        def args = signjarArgs +
+          ["${buildDir}/libs/saxon-xqj-${saxonVersion}.jar",
+           signkeyNewAlias,
+           "-storepass", signkeyPassword]
+        commandLine args
+      }
+      tasks.findByName("${rel}jSignJars").dependsOn t
+    } else {
       t = task "${rel}j_JarSignSql"(
         type: Exec,
         dependsOn: ["${rel}jJarSql"],
@@ -1503,14 +1503,11 @@ task hejRelease(
   from "${buildDir}/libs"
   into "${buildDir}/releases/hej"
   include "saxon-he-${saxonVersion}.jar"
-  include "saxon-he-xqj-${saxonVersion}.jar"
+  include "saxon-xqj-${saxonVersion}.jar"
   include "saxon-he-test-${saxonVersion}.jar"
   rename { filename ->
     if (filename.startsWith("saxon-he-test")) {
       filename = "saxon-he-test-${saxonVersion}.jar"
-    }
-    if (filename.startsWith("saxon-he-xqj")) {
-      filename = "saxon-xqj-${saxonVersion}.jar"
     }
   }
 }
