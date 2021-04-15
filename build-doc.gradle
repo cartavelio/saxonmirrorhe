@@ -652,7 +652,7 @@ task copy_xml_documentation(
   dependsOn: ["userdoc_viewer_appJS"],
   description: "Update XML version of documentation from viewer app"
 ) {
-  into "${buildDir}/website/documentation"
+  into "${buildDir}/website/documentation${saxonMajorVersion}"
   from "${buildDir}/userdoc/viewer_appJS"
 }
 
@@ -661,7 +661,7 @@ task copy_html_documentation(
   dependsOn: ["userdoc_publish_html"],
   description: "Update HTML version of user documentation"
 ) {
-  into "${buildDir}/website/html/documentation"
+  into "${buildDir}/website/html/documentation${saxonMajorVersion}"
   from "${buildDir}/userdoc/html"
 }
 
@@ -672,14 +672,14 @@ task gen_contents_ref(
   dependsOn: ["copy_xml_documentation"],
   description: "Creates the contents reference file for the user documentation (used for website pages)"
 ) {
-  inputs.file "${buildDir}/website/documentation/doc/catalog.xml"
+  inputs.file "${buildDir}/website/documentation${saxonMajorVersion}/doc/catalog.xml"
   inputs.file "${projectDir}/tools/docs/userdoc/contents-builder.xsl"
-  outputs.file "${buildDir}/website/documentation/contents.xml"
+  outputs.file "${buildDir}/website/documentation${saxonMajorVersion}/contents.xml"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
-  args "${buildDir}/website/documentation/doc/catalog.xml",
+  args "${buildDir}/website/documentation${saxonMajorVersion}/doc/catalog.xml",
     "-xsl:${projectDir}/tools/docs/userdoc/contents-builder.xsl",
-    "-o:${buildDir}/website/documentation/contents.xml",
+    "-o:${buildDir}/website/documentation${saxonMajorVersion}/contents.xml",
     "version-number=${saxonMajorVersion}"
 }
 
@@ -768,6 +768,6 @@ task copy_prod_desc_pdf(
   dependsOn: ["gen_prod_desc_pdf"],
   description: "Copy the generated product descriptions to the website"
 ) {
-  into("${buildDir}/website/products/PD10")
+  into("${buildDir}/website/products/PD${saxonMajorVersion}")
   from("${buildDir}/proddesc/PD/pdf")
 }
