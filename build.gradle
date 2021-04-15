@@ -8,6 +8,8 @@ plugins {
 import org.gradle.internal.os.OperatingSystem;
 
 apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 repositories {
   mavenLocal()
@@ -43,23 +45,6 @@ if (!hasProperty("saxonLicenseDir")) {
   } else {
     ext.saxonLicenseDir=System.getenv('HOME') + "/java"
   }
-}
-
-// Set the locations of the W3C test suites
-if (!hasProperty("w3cQT3TestSuiteDir")) {
-  ext.w3cQT3TestSuiteDir = System.getenv("W3C_QT3_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cXslt30TestSuiteDir")) {
-  ext.w3cXslt30TestSuiteDir = System.getenv("W3C_XSLT30_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cXsdTestSuiteDir")) {
-  ext.w3cXsdTestSuiteDir = System.getenv("W3C_XSD_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cQT4TestSuiteDir")) {
-  ext.w3cQT4TestSuiteDir = System.getenv("W3C_QT4_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cXslt40TestSuiteDir")) {
-  ext.w3cXslt40TestSuiteDir = System.getenv("W3C_XSLT40_TEST_SUITE_DIR")
 }
 
 dependencies {
@@ -162,6 +147,31 @@ talaiot {
   }
 }
 */
+
+// Set the locations of the W3C test suites
+if (!hasProperty("w3cQT3TestSuiteDir")) {
+  ext.w3cQT3TestSuiteDir = System.getenv("W3C_QT3_TEST_SUITE_DIR")
+}
+if (!hasProperty("w3cXslt30TestSuiteDir")) {
+  ext.w3cXslt30TestSuiteDir = System.getenv("W3C_XSLT30_TEST_SUITE_DIR")
+}
+if (!hasProperty("w3cXsdTestSuiteDir")) {
+  ext.w3cXsdTestSuiteDir = System.getenv("W3C_XSD_TEST_SUITE_DIR")
+}
+if (!hasProperty("w3cQT4TestSuiteDir")) {
+  ext.w3cQT4TestSuiteDir = System.getenv("W3C_QT4_TEST_SUITE_DIR")
+}
+if (!hasProperty("w3cXslt40TestSuiteDir")) {
+  ext.w3cXslt40TestSuiteDir = System.getenv("W3C_XSLT40_TEST_SUITE_DIR")
+}
+
+if (!hasProperty("sonatypeUsername")) {
+  ext.sonatypeUsername=""
+}
+
+if (!hasProperty("sonatypePassword")) {
+  ext.sonatypePassword=""
+}
 
 ext {
   systemOs = OperatingSystem.current()
@@ -1549,6 +1559,139 @@ task javaArchiveEE(
   archiveFileName = "saxonee${saxonVersion.replace('.', '-')}source.zip"
   from ("${projectDir}/src/main/java") {
     include "com/saxonica/**/*.java"
+  }
+}
+
+// ============================================================
+
+task javadocJar(type: Jar, dependsOn: product_javadoc) {
+  classifier = 'javadoc'
+  archiveVersion = saxonVersion
+  from "${buildDir}/javadoc"
+}
+
+task hejmavenJar(type: Jar, dependsOn: hejJar) {
+  archiveVersion = saxonVersion
+  manifest {
+    attributes "Project-Name": "Saxon-HE"
+    attributes "Main-Class": "net.sf.saxon.Transform"
+  }
+  from ("${buildDir}/services/saxon-he") {
+    include "META-INF/**"
+  }
+  from ("${buildDir}/classes/hej") {
+    include "net/**/*.class"
+    exclude "net/sf/saxon/option/**"
+  }
+  from ("src/main/resources") {
+    include "net/sf/saxon/data/**"
+  }
+}
+
+signing {
+  sign publishing.publications
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      pom {
+        name = 'Saxon-HE'
+        packaging = 'jar'
+        description = 'The XSLT and XQuery Processor'
+        url = 'http://www.saxonica.com/'
+        inceptionYear = '1999'
+
+        organization {
+          name = 'Saxonica'
+          url = 'https://www.saxonica.com/'
+        }
+
+        scm {
+          url = 'https://dev.saxonica.com/repos/archive/opensource/'
+          connection = 'scm:svn:https://dev.saxonica.com/repos/archive/opensource/'
+          developerConnection = 'scm:svn:https://dev.saxonica.com/repos/archive/opensource/'
+        }
+
+        licenses {
+          license {
+            name = 'Mozilla Public License Version 2.0'
+            url = 'http://www.mozilla.org/MPL/2.0/'
+            distribution = 'repo'
+          }
+        }
+
+        developers {
+          developer {
+            id = 'mike'
+            name = 'Michael Kay'
+            email = 'mike@saxonica.com'
+          }
+          developer {
+            id = 'ond1'
+            name = 'O’Neil Delpratt'
+            email = 'oneil@saxonica.com'
+          }
+          developer {
+            id = 'debbie'
+            name = 'Debbie Lockett'
+            email = 'debbie@saxonica.com'
+          }
+          developer {
+            id = 'john'
+            name = 'John Lumley'
+            email = 'john@saxonica.com'
+          }
+          developer {
+            id = 'norm'
+            name = 'Norman Walsh'
+            email = 'norm@saxonica.com'
+          }
+        }
+
+        issueManagement {
+          system = "Saxon Community"
+          url = 'https://saxonica.plan.io/projects/saxon'
+        }
+
+        mailingLists {
+          mailingList {
+            name = 'User List'
+            post = 'saxon-help@lists.sourceforge.net'
+            archive = 'http://sourceforge.net/mailarchive/forum.php?forum_name=saxon-help'
+          }
+        }
+
+        withXml {
+          def prop = asNode().appendNode('properties')
+          prop.appendNode('skipTests', 'false')
+          prop.appendNode('maven.build.timestamp.format', "yyyy-MM-dd'T'HH:mm:ss")
+          prop.appendNode('project.build.sourceEncoding', 'UTF-8')
+          prop.appendNode('maven.javadoc.skip', true)
+          prop.appendNode('maven.javadoc.failOnError', false)
+          prop.appendNode('maven.compiler.source', '1.8')
+          prop.appendNode('maven.compiler.target', '1.8')
+        }
+      }
+
+      groupId = "net.sf.saxon"
+      artifactId = "Saxon-HE"
+      version = saxonVersion
+      artifact hejmavenJar
+      // Omitting javadocJar because it, perhaps misleadingly for the
+      // Saxon-HE artifact, includes the docs for PE and EE too.
+      // artifact javadocJar
+    }
+  }
+
+  repositories {
+    maven {
+      url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+      credentials {
+        username = sonatypeUsername
+        password = sonatypePassword
+      }
+    }
   }
 }
 
