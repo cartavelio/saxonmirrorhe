@@ -181,8 +181,14 @@ ext {
   resolverJar = null
   jlineJar = null
   version_h = saxonVersion.replace(".", "-")
-  pathSeparator = System.getProperty("file.separator")
+  fileSeparator = System.getProperty("file.separator")
   DSTAMP=new Date().format("yyyyMMdd")
+  // Jar signing parameters 
+  eToken = "THIS-IS-NOT-THE-ETOKEN"
+  signkeyNewAlias = "THIS-IS-NOT-THE-ALIAS"
+  signkeyPassword = "THIS-IS-NOT-THE-PASSWORD"
+  signJarArgs = null
+  makeSignedJars = false
 }
 
 public class DeleteFilesRecursively {
@@ -241,47 +247,56 @@ def eToken = "THIS-IS-NOT-THE-ETOKEN"
   }
 }
 
-def signkeyNewAlias = "THIS-IS-NOT-THE-ALIAS"
 if (System.getenv("SAXON_SIGN_ALIAS") != null) {
-  signkeyNewAlias = System.getenv("SAXON_SIGN_ALIAS")
+  ext.signkeyNewAlias = System.getenv("SAXON_SIGN_ALIAS")
 }
 
-def signkeyPassword = "THIS-IS-NOT-THE-PASSWORD"
 if (System.getenv("SAXON_SIGN_PASSWORD") != null) {
-  signkeyPassword = System.getenv("SAXON_SIGN_PASSWORD")
+  ext.signkeyPassword = System.getenv("SAXON_SIGN_PASSWORD")
 }
 
 def canSignJars = (!eToken.startsWith("THIS-IS-NOT")
                    && !signkeyNewAlias.startsWith("THIS-IS-NOT")
                    && !signkeyPassword.startsWith("THIS-IS-NOT"))
 
-def signjarArgs = null
 if (OperatingSystem.current().isWindows()) {
-  signjarArgs = ["jarsigner",
-                 "-keystore", "NONE",
-                 "-storetype", "PKCS11",
-                 "-tsa", "http://rfc3161timestamp.globalsign.com/advanced",
-                 "-providerClass", "sun.security.pkcs11.SunPKCS11",
-                 "-providerArg", eToken]
+  ext.signjarArgs = ["jarsigner",
+                     "-keystore", "NONE",
+                     "-storetype", "PKCS11",
+                     "-tsa", "http://rfc3161timestamp.globalsign.com/advanced",
+                     "-providerClass", "sun.security.pkcs11.SunPKCS11",
+                     "-providerArg", eToken]
 } else {
-  signjarArgs = ["jarsigner",
-                 "-tsa", "http://rfc3161timestamp.globalsign.com/advanced",
-                 "-storetype", "PKCS11",
-                 "-providerClass", "sun.security.pkcs11.SunPKCS11",
-                 "-providerArg", eToken]
+  ext.signjarArgs = ["jarsigner",
+                     "-tsa", "http://rfc3161timestamp.globalsign.com/advanced",
+                     "-storetype", "PKCS11",
+                     "-providerClass", "sun.security.pkcs11.SunPKCS11",
+                     "-providerArg", eToken]
 }
 
 if (project.findProperty("testSignJars") == "true") {
   canSignJars = true
-  signjarArgs = ["echo", "TESTSIGN"]
+  ext.signjarArgs = ["echo", "JARSIGNER"]
 }
 
-def makeSignedJars = false
 if (project.findProperty("signJars") == "true") {
   if (!canSignJars) {
     raise GradleException("Build is not configured to sign jars.")
   }
-  makeSignedJars = true
+  ext.makeSignedJars = true
+}
+
+def signJar(String jarfile) {
+  if (ext.makeSignedJars) {
+    def args = ext.signjarArgs +
+      [jarfile,
+       ext.signkeyNewAlias,
+       "-storepass",
+       ext.signkeyPassword]
+    exec {
+      commandLine args
+    }
+  }
 }
 
 // ============================================================
@@ -1099,6 +1114,9 @@ task hejJar(
   from ("src/main/resources") {
     include "net/sf/saxon/data/**"
   }
+  doLast {
+    signJar("${buildDir}/libs/saxon-he-${saxonVersion}.jar")
+  }
 }
 
 // Because the XQJ files are not open source, don't attempt to build
@@ -1113,6 +1131,9 @@ if (file("${projectDir}/src/main/java/com/saxonica/xqj").exists()) {
     from ("${buildDir}/classes/eej") {
       include "com/saxonica/xqj/**/*.class"
       include "javax/xml/xquery/**/*.class"
+    }
+    doLast {
+      signJar("${buildDir}/libs/saxon-xqj-${saxonVersion}.jar")
     }
   }
   task pejJarXqj() {
@@ -1174,6 +1195,9 @@ task pejJar(
   from ("src/main/resources") {
     include "net/sf/saxon/data/**"
   }
+  doLast {
+    signJar("${buildDir}/libs/saxon-pe-${saxonVersion}.jar")
+  }
 }
 
 task pejJarSql(
@@ -1185,6 +1209,9 @@ task pejJarSql(
   from ("${buildDir}/classes/pej") {
     include "net/sf/saxon/option/sql/*.class"
     include "com/saxonica/functions/sql/*.class"
+  }
+  doLast {
+    signJar("${buildDir}/libs/saxon-pe-sql-${saxonVersion}.jar")
   }
 }
 
@@ -1214,6 +1241,9 @@ task eejJar(
   from ("src/main/resources") {
     include "net/sf/saxon/data/**"
   }
+  doLast {
+    signJar("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
+  }
 }
 
 task eejJarSql(
@@ -1225,6 +1255,9 @@ task eejJarSql(
   from ("${buildDir}/classes/eej") {
     include "net/sf/saxon/option/sql/*.class"
     include "com/saxonica/functions/sql/*.class"
+  }
+  doLast {
+    signJar("${buildDir}/libs/saxon-ee-sql-${saxonVersion}.jar")
   }
 }
 
@@ -1468,74 +1501,6 @@ if (file("${projectDir}/src/main/java/com").exists()) {
 
 // ============================================================
 
-// Create tasks for signing jars...
-if (makeSignedJars) {
-  ["he", "pe", "ee"].each { rel ->
-    Task t = task "${rel}_jJarSignJar"(
-      type: Exec,
-      dependsOn: ["${rel}jJar"],
-      description: "Sign the ${rel.toUpperCase()}J jar file"
-    ) {
-      inputs.file "${buildDir}/libs/saxon-${rel}-${saxonVersion}.jar"
-      def args = signjarArgs +
-        ["${buildDir}/libs/saxon-${rel}-${saxonVersion}.jar",
-         signkeyNewAlias,
-         "-storepass", signkeyPassword]
-      commandLine args
-    }
-    tasks.findByName("${rel}jRelease").dependsOn t
-
-    t = task "${rel}j_JarSignTests"(
-      type: Exec,
-      dependsOn: ["${rel}jJarTests"],
-      description: "Sign the ${rel.toUpperCase()}J test jar file"
-    ) {
-      inputs.file "${buildDir}/libs/saxon-${rel}-test-${saxonVersion}.jar"
-      def args = signjarArgs +
-        ["${buildDir}/libs/saxon-${rel}-test-${saxonVersion}.jar",
-         signkeyNewAlias,
-         "-storepass", signkeyPassword]
-      commandLine args
-    }
-    tasks.findByName("${rel}jRelease").dependsOn t
-
-    if (rel == 'he') {
-      t = task "${rel}j_JarSignXqj"(
-        type: Exec,
-        dependsOn: ["${rel}jJarXqj"],
-        description: "Sign the ${rel.toUpperCase()}J XQJ jar file"
-      ) {
-        // N.B. For historical reasons, there's no "he" in the jar filename.
-        // It's *only* in HE because the XQJ classes are part of the regular
-        // jar file for PE and EE.
-        inputs.file "${buildDir}/libs/saxon-xqj-${saxonVersion}.jar"
-        def args = signjarArgs +
-          ["${buildDir}/libs/saxon-xqj-${saxonVersion}.jar",
-           signkeyNewAlias,
-           "-storepass", signkeyPassword]
-        commandLine args
-      }
-      tasks.findByName("${rel}jRelease").dependsOn t
-    } else {
-      t = task "${rel}j_JarSignSql"(
-        type: Exec,
-        dependsOn: ["${rel}jJarSql"],
-        description: "Sign the ${rel.toUpperCase()} jar file"
-      ) {
-        inputs.file "${buildDir}/libs/saxon-${rel}-sql-${saxonVersion}.jar"
-        def args = signjarArgs +
-          ["${buildDir}/libs/saxon-${rel}-sql-${saxonVersion}.jar",
-           signkeyNewAlias,
-           "-storepass", signkeyPassword]
-        commandLine args
-      }
-      tasks.findByName("${rel}jRelease").dependsOn t
-    }
-  }
-}
-
-// ============================================================
-
 task javaArchiveHE(
   type: Zip,
   dependsOn: ["hen_copyDevelopmentSources", "hej_preprocess"],
@@ -1563,14 +1528,26 @@ task javaArchiveEE(
 }
 
 // ============================================================
+// The following tasks exist to build jar files that will be
+// published on Maven. The archiveBaseName "MavenHE" distinguishes
+// them from jar files built by other targets. The Maven publish
+// step will make sure they have the correct names on Maven.
 
-task javadocJar(type: Jar, dependsOn: product_javadoc) {
-  classifier = 'javadoc'
+task mavenHeJavadocJar(
+  type: Jar,
+  dependsOn: ["he_javadoc"]
+) {
+  archiveBaseName = "MavenHE"
   archiveVersion = saxonVersion
-  from "${buildDir}/javadoc"
+  classifier = 'javadoc'
+  from "${buildDir}/he_javadoc"
+  doLast {
+    signJar("${buildDir}/libs/MavenHE-${saxonVersion}-javadoc.jar")
+  }
 }
 
-task hejmavenJar(type: Jar, dependsOn: hejJar) {
+task mavenHeSaxonJar(type: Jar, dependsOn: hejJar) {
+  archiveBaseName = "MavenHE"
   archiveVersion = saxonVersion
   manifest {
     attributes "Project-Name": "Saxon-HE"
@@ -1585,6 +1562,41 @@ task hejmavenJar(type: Jar, dependsOn: hejJar) {
   }
   from ("src/main/resources") {
     include "net/sf/saxon/data/**"
+  }
+  doLast {
+    signJar("${buildDir}/libs/MavenHE-${saxonVersion}.jar")
+  }
+}
+
+task mavenHeSourceJar(type: Jar, dependsOn: ["hej_preprocess", "eej_preprocess"]) {
+  archiveBaseName = "MavenHE"
+  classifier = 'sources'
+  archiveVersion = saxonVersion
+  from ("${buildDir}/preprocess/hej") {
+    include "net/**/*.java"
+  }
+  from ("${buildDir}/preprocess/eej") {
+    include "com/saxonica/xqj/**/*.java"
+    include "javax/**/*.java"
+  }
+  from ("src/main/resources") {
+    include "net/sf/saxon/data/**"
+  }
+  doLast {
+    signJar("${buildDir}/libs/MavenHE-${saxonVersion}-sources.jar")
+  }
+}
+
+task mavenHeXqjJar(type: Jar, dependsOn: ["eejCompile"]) {
+  archiveBaseName = "MavenHE"
+  classifier = 'xqj'
+  archiveVersion = saxonVersion
+  from ("${buildDir}/classes/eej") {
+    include "com/saxonica/xqj/**/*.class"
+    include "javax/xml/xquery/**/*.class"
+  }
+  doLast {
+    signJar("${buildDir}/libs/MavenHE-${saxonVersion}-xqj.jar")
   }
 }
 
@@ -1677,10 +1689,10 @@ publishing {
       groupId = "net.sf.saxon"
       artifactId = "Saxon-HE"
       version = saxonVersion
-      artifact hejmavenJar
-      // Omitting javadocJar because it, perhaps misleadingly for the
-      // Saxon-HE artifact, includes the docs for PE and EE too.
-      // artifact javadocJar
+      artifact mavenHeSaxonJar
+      artifact mavenHeJavadocJar
+      artifact mavenHeSourceJar
+      artifact mavenHeXqjJar
     }
   }
 

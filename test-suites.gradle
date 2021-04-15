@@ -95,7 +95,7 @@ def langCodeMap = ["XP20": "XPath2.0",
 ["he", "pe", "ee"].each { release ->
     def RELEASE = release.toUpperCase()
     fileTree(dir: "src/test/exceptions").each { fn ->
-        def pos = fn.toString().lastIndexOf(pathSeparator)
+        def pos = fn.toString().lastIndexOf(fileSeparator)
         def base = fn.toString().substring(pos + 1)
         base = base.substring(0, base.length() - 4)
 
@@ -180,9 +180,8 @@ def getAbsoluteReportFilename(computedName) {
 }
 
 def getReportFilename(reportFilename) {
-    pathSeparator = System.getProperty("file.separator")
-    if (reportFilename.contains(pathSeparator)) {
-        def pos = reportFilename.lastIndexOf(pathSeparator)
+    if (reportFilename.contains(ext.fileSeparator)) {
+        def pos = reportFilename.lastIndexOf(ext.fileSeparator)
         return reportFilename.substring(pos + 1)
     } else {
         // This should never happen, the reportFilename should always be
@@ -192,9 +191,8 @@ def getReportFilename(reportFilename) {
 }
 
 def getReportDirectory(reportFilename) {
-    pathSeparator = System.getProperty("file.separator")
-    if (reportFilename.contains(pathSeparator)) {
-        def pos = reportFilename.lastIndexOf(pathSeparator)
+    if (reportFilename.contains(ext.fileSeparator)) {
+        def pos = reportFilename.lastIndexOf(ext.fileSeparator)
         return reportFilename.substring(0, pos)
     } else {
         // This should never happen, the reportFilename should always be
