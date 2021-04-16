@@ -53,6 +53,7 @@ public class S9APIExamples {
      *             name of a test, or "all" to run all tests, or "nonschema" to run all the tests that are not schema-aware.
      */
     public static void main(String[] argv) {
+        Processor processor = new Processor(false);
 
         List<Test> tests = new ArrayList<>();
         tests.add(new S9APIExamples.QueryA());
@@ -60,9 +61,14 @@ public class S9APIExamples {
         tests.add(new S9APIExamples.QueryC());
         tests.add(new S9APIExamples.QueryD());
         tests.add(new S9APIExamples.QueryE());
-        tests.add(new S9APIExamples.QueryF());
-        tests.add(new S9APIExamples.QueryG());
-        tests.add(new S9APIExamples.QueryUpdateA());
+
+        if (!"HE".equals(processor.getUnderlyingConfiguration().getEditionCode())) {
+            // These tests will work on PE or EE but not HE
+            tests.add(new S9APIExamples.QueryF());
+            tests.add(new S9APIExamples.QueryG());
+            tests.add(new S9APIExamples.QueryUpdateA());
+        }
+
         tests.add(new S9APIExamples.TransformA());
         tests.add(new S9APIExamples.TransformB());
         tests.add(new S9APIExamples.TransformC());
@@ -1074,7 +1080,10 @@ public class S9APIExamples {
             Serializer out = processor.newSerializer(sw);
             out.setOutputProperty(Serializer.Property.METHOD, "xml");
             out.setOutputProperty(Serializer.Property.INDENT, "yes");
-            out.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "1");
+            // HE doesn't support indent spaces
+            if (!"HE".equals(processor.getUnderlyingConfiguration().getEditionCode())) {
+                out.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "1");
+            }
             out.setOutputProperty(Serializer.Property.CDATA_SECTION_ELEMENTS, "{http://example.com/out}script");
             XMLStreamWriter writer = out.getXMLStreamWriter();
             try {

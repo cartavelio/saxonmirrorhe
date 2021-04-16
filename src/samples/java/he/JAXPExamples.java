@@ -2,6 +2,7 @@ package he;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.jaxp.TransformerImpl;
+import net.sf.saxon.jaxp.SaxonTransformerFactory;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
 import org.w3c.dom.Document;
@@ -75,6 +76,8 @@ public class JAXPExamples {
      *             which runs all tests.
      */
     public static void main(String[] argv) {
+        SaxonTransformerFactory tfactory = (SaxonTransformerFactory) TransformerFactory.newInstance();
+        System.out.println("Saxon edition: " + tfactory.getConfiguration().getEditionCode());
 
         if (!new File("data/books.xml").exists()) {
             throw new IllegalStateException("These tests must be run with the samples folder as the current directory");
@@ -1200,7 +1203,8 @@ public class JAXPExamples {
         DocumentBuilder docBuilder = dfactory.newDocumentBuilder();
         Node doc =
                 docBuilder.parse(new InputSource(sourceID));
-        TransformerFactory tfactory = new TransformerFactoryImpl(new Configuration());// TransformerFactory.newInstance();
+        Configuration config = new Configuration();
+        TransformerFactory tfactory = new TransformerFactoryImpl();// TransformerFactory.newInstance();
 
         // This creates a transformer that does a simple identity transform,
         // and thus can be used for all intents and purposes as a serializer.
@@ -1209,8 +1213,10 @@ public class JAXPExamples {
 
         oprops.setProperty("method", "html");
 
-        // The following property setting should be ignored in Saxon-HE
-        oprops.setProperty("{http://saxon.sf.net/}indent-spaces", "2");
+        if (!config.getEditionCode().equals("HE")) {
+            // The indent-spaces property is not available in Saxon-HE
+            oprops.setProperty("{http://saxon.sf.net/}indent-spaces", "2");
+        }
 
         serializer.setOutputProperties(oprops);
         serializer.transform(new DOMSource(doc),
