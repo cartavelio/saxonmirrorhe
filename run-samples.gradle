@@ -1,0 +1,375 @@
+// ============================================================
+
+["h", "p", "e"].each { initial ->
+  def release = initial + "e"
+  def RELEASE = release.toUpperCase()
+
+  task "${release}_samples_common"(
+    type: Copy,
+    dependsOn: ["${release}_samples_setup", "${release}_samples_cs"]
+  ) {
+    into "${buildDir}/output/${release}/resources/use-cases"
+    from "${projectDir}/src/use-cases"
+  }
+
+  task "${release}_samples_setup"(
+    type: Copy
+  ) {
+    into "${buildDir}/output/${release}/resources/samples"
+    from ("${projectDir}/src/samples") {
+      include "config/config.xml"
+      include "config/config-HE.xml"
+      include "config/saxon-attributes.xsd"
+      include "data/books.xml"
+      include "data/books-invalid.xml"
+      include "data/more-books.xml"
+      include "data/othello.xml"
+      include "data/books.xsd"
+      include "data/books.dtd"
+      include "data/play.dtd"
+      include "query/tour.xq"
+      include "query/books.xq"
+      include "query/books-to-html.xq"
+      include "scm/scmschema.*"
+      include "schemas/validation-reports.xsd"
+      include "styles/add-ids.xsl"
+      include "styles/bible.xsl"
+      include "styles/books.xsl"
+      include "styles/books.txt"
+      include "styles/play.xsl"
+      include "styles/identity.xsl"
+      include "styles/books-csv.xsl"
+      include "styles/books-sql.xsl"
+      include "styles/rename-to-lowercase.xsl"
+      include "styles/total.xsl"
+      include "styles/tour.xsl"
+      include "styles/summarize.xsl"
+    }
+  }
+
+  // TODO reinstate to include CS samples when releasing for .NET
+  task "${release}_samples_cs"(
+    type: Copy
+  ) {
+    into "${buildDir}/output/${release}/resources/samples/cs"
+    from "${projectDir}/src/samples/cs"
+  }
+}
+
+task config_sample(
+  type: JavaExec,
+  dependsOn: ["hej_featureKeys"],
+  description: "Construct the configuration file XSD"
+) {
+  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
+  inputs.files "${projectDir}/src/samples/config/config-raw.xsd"
+  outputs.file "${buildDir}/samples/he/config/config.xsd"
+  classpath = configurations.preprocessor
+  main = "net.sf.saxon.Transform"
+  args "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToSchema.xsl",
+    "-o:${buildDir}/samples/he/config/config.xsd",
+    "-it:main",
+    "FeatureKeys=FeatureKeys.xml",
+    "AdditionalFeatures=AdditionalFeatures.xml",
+    "ConfigSchema=${projectDir}/src/samples/config/config-raw.xsd"
+}
+
+task hej_setup_samples(
+  type: Copy,
+  dependsOn: ["config_sample", "he_samples_common"]
+) {
+  into "${buildDir}/samples/java/he"
+  from ("${projectDir}/src/samples/java/he") {
+    include "ApplyXPathJAXP.java"
+    include "ExampleContentHandler.java"
+    include "QueryAPIExamples.java"
+    include "S9APIExamples.java"
+    include "S9APIExamplesOM.java"
+    include "SaxonServlet.java"
+    include "JAXPExamples.java"
+    include "XPathExample.java"
+    include "XPathExampleDOM.java"
+    include "XPathExampleServlet.java"
+  }
+}
+
+task hej_samples_he(
+  type: JavaCompile,
+  dependsOn: ["hej_setup_samples", "hejCompile"]
+) {
+  classpath = configurations.samples + files("${buildDir}/classes/hej")
+  source = "${buildDir}/samples/java/he"
+  destinationDirectory = new File("${buildDir}/samples/java/he/classes")
+  doFirst {
+    mkdir "${buildDir}/samples/java/he/classes"
+  }
+}
+
+task pej_samples_he(
+  type: JavaCompile,
+  dependsOn: ["hej_setup_samples", "pejCompile"]
+) {
+  classpath = configurations.samples + files("${buildDir}/classes/pej")
+  source = "${buildDir}/samples/java/he"
+  destinationDirectory = new File("${buildDir}/samples/java/pe/classes")
+  doFirst {
+    mkdir "${buildDir}/samples/java/pe/classes"
+  }
+}
+
+task eej_samples_he(
+  type: JavaCompile,
+  dependsOn: ["hej_setup_samples", "eejCompile"]
+) {
+  classpath = configurations.samples + files("${buildDir}/classes/eej")
+  source = "${buildDir}/samples/java/he"
+  destinationDirectory = new File("${buildDir}/samples/java/ee/classes")
+  doFirst {
+    mkdir "${buildDir}/samples/java/ee/classes"
+  }
+}
+
+task eej_setup_samples(
+  type: Copy,
+  dependsOn: ["config_sample", "ee_samples_common"]
+) {
+  into "${buildDir}/samples/java/ee"
+  from ("${projectDir}/src/samples/java/ee") {
+    include "JDOM2Example.java"
+    include "PullExamples.java"
+    include "QuickValidator.java"
+    include "SaxonSAServlet.java"
+    include "SchemaValidatorExample.java"
+    include "SchemaValidatorHandlerExample.java"
+    include "XMarkBenchmark.java"
+    include "XPathExampleSA.java"
+    include "XQJExamples.java"
+  }
+}
+
+task eej_samples_ee(
+  type: JavaCompile,
+  dependsOn: ["eej_setup_samples", "eejCompile", "eej_samples_he"]
+) {
+  classpath = configurations.samples + (files("${buildDir}/classes/eej")
+              + files("${buildDir}/samples/java/ee/classes"))
+  source = "${buildDir}/samples/java/ee"
+  destinationDirectory = new File("${buildDir}/samples/java/ee/classes")
+  doFirst {
+    mkdir "${buildDir}/samples/java/ee/classes"
+  }
+}
+
+// ============================================================
+
+task he_samples(dependsOn: ["he_samples_he", "he_samples_pe", "he_samples_ee"]) {}
+task he_samples_he() {}
+task he_samples_pe() {}
+task he_samples_ee() {}
+
+def heSampleConfigurations = ["JAXPExamples",
+                              "ExampleContentHandler",
+                              "ApplyXPathJAXP_saxon",
+                              "ApplyXPathJAXP_dom",
+                              "QueryAPIExamples",
+                              "S9APIExamples_he",
+                              "S9APIExamples_pe",
+                              "S9APIExamples_ee",
+                              // "S9APIExamplesOM_he" requires extra configuration,
+                              "S9APIExamplesOM_pe",
+                              "S9APIExamplesOM_ee"]
+
+// FIXME: Automate testing of SaxonServlet and XPathExample* classes
+
+// Only necessary if the configuration key is not the class name
+def heSampleMainClass = ["ApplyXPathJAXP_saxon": "ApplyXPathJAXP",
+                         "ApplyXPathJAXP_dom": "ApplyXPathJAXP",
+                         "S9APIExamples_he": "S9APIExamples",
+                         "S9APIExamples_pe": "S9APIExamples",
+                         "S9APIExamples_ee": "S9APIExamples",
+                         "S9APIExamplesOM_pe": "S9APIExamplesOM",
+                         "S9APIExamplesOM_ee": "S9APIExamplesOM"]
+
+def heSampleArgs = ["JAXPExamples": ["all"],
+                    "ExampleContentHandler": ["data/books.xml"],
+                    "ApplyXPathJAXP_saxon": ["data/books.xml",
+                                             "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "saxon"],
+                    "ApplyXPathJAXP_dom": ["data/books.xml",
+                                           "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "dom"],
+                    "QueryAPIExamples": ["all"],
+                    "S9APIExamples_he": ["nonschema"],
+                    "S9APIExamples_pe": ["nonschema"],
+                    "S9APIExamples_ee": ["all"],
+                    "S9APIExamplesOM_pe": ["nonschema"],
+                    "S9APIExamplesOM_ee": ["all"],
+                    "XPathExample": ["data/books.xml",
+                                           "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "dom"],
+]
+
+heSampleConfigurations.each { sample ->
+  ["he", "pe", "ee"].each { edition ->
+
+    def ignoreThisCombination = (
+      (edition == "he" && (sample.endsWith("_pe") || sample.endsWith("_ee")))
+      || (edition == "pe" && (sample.endsWith("_he") || sample.endsWith("_ee")))
+      || (edition == "ee" && (sample.endsWith("_he") || sample.endsWith("_pe")))
+    )
+
+    if (!ignoreThisCombination) {
+      def sampleClass = "he.${sample}"
+      if (heSampleMainClass.containsKey(sample)) {
+        sampleClass = "he.${heSampleMainClass[sample]}"
+      }
+      def sampleArgs = heSampleArgs[sample]
+
+      task "run_he_samples_${sample}_${edition}"(
+        type: JavaExec,
+        dependsOn: ["${edition}j_samples_he", "${edition}jJar"],
+        description: "Run test of HE ${sample} with ${edition}"
+      ) {
+        def resdir = "${buildDir}/samples/results/he"
+
+        inputs.files fileTree(dir: "${buildDir}/samples/java/${edition}/classes")
+        inputs.files "${projectDir}/src/samples/java/he"
+        outputs.file "${resdir}/${sample}_${edition}.txt"
+        workingDir = "${buildDir}/output/he/resources/samples"
+
+        doFirst {
+          mkdir resdir
+          standardOutput = new FileOutputStream(new File("${resdir}/${sample}_${edition}.txt"))
+        }
+
+        classpath = configurations.samples \
+        + files("${buildDir}/samples/java/${edition}/classes") \
+        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
+        + files(saxonLicenseDir)
+
+        systemProperties = ["javax.xml.transform.TransformerFactory": "net.sf.saxon.TransformerFactoryImpl"]
+
+        main = sampleClass
+        args sampleArgs
+      }
+
+      Task t = task "check_he_samples_${sample}_${edition}"(
+        type: Exec,
+        dependsOn: ["run_he_samples_${sample}_${edition}"],
+        description: "Check the results of run_he_samples_${sample}_${edition}"
+      ) {
+        workingDir "${buildDir}/samples/results/he"
+        commandLine "python3", "${projectDir}/tools/sample-check.py", "--sample", sample, "--edition", edition, "${sample}_${edition}.txt"
+      }
+
+      tasks.findByName("he_samples_${edition}").dependsOn t
+    }
+  }
+}
+
+// ============================================================
+
+task ee_samples {}
+
+def eeSampleConfigurations = ["JDOM2Example",
+                              "PullExamples",
+                              "QuickValidator",
+                              "SchemaValidatorExample_1",
+                              "SchemaValidatorExample_2",
+                              "SchemaValidatorHandlerExample_1",
+                              "SchemaValidatorHandlerExample_2",
+                              "XPathExampleSA",
+                              "XQJExamples"]
+
+// The XMarkBenchmark runs slowly, so only add it on request
+if (project.findProperty("xmark") == "true") {
+  eeSampleConfigurations += ["XMarkBenchmark_1"]
+}
+
+// FIXME: Automate testing of SaxonSAServlet
+
+// Only necessary if the configuration key is not the class name
+def eeSampleMainClass = ["SchemaValidatorExample_1": "SchemaValidatorExample",
+                         "SchemaValidatorExample_2": "SchemaValidatorExample",
+                         "SchemaValidatorHandlerExample_1": "SchemaValidatorHandlerExample",
+                         "SchemaValidatorHandlerExample_2": "SchemaValidatorHandlerExample",
+                         "XMarkBenchmark_1": "XMarkBenchmark"]
+
+def eeSampleArgs = ["JDOM2Example": ["data/books.xml", "styles/books.xsl"],
+                    "PullExamples": [],
+                    "QuickValidator": ["data/books.xml", "data/books.xsd"],
+                    "SchemaValidatorExample_1": ["data/books.xsd", "data/books.xml"],
+                    "SchemaValidatorExample_2": ["--", "data/books.xml"],
+                    "SchemaValidatorHandlerExample_1": ["data/books.xsd", "data/books.xml"],
+                    "SchemaValidatorHandlerExample_2": ["--", "data/books.xml"],
+                    "XMarkBenchmark_1": ["-dir:${projectDir}/src/test/xmark/"],
+                    "XPathExampleSA": ["data/books.xml", "data/books.xsd"],
+                    "XQJExamples": ["all"]]
+
+eeSampleConfigurations.each { sample ->
+  def sampleClass = "ee.${sample}"
+  if (eeSampleMainClass.containsKey(sample)) {
+        sampleClass = "ee.${eeSampleMainClass[sample]}"
+      }
+  def sampleArgs = eeSampleArgs[sample]
+
+  task "run_ee_samples_${sample}"(
+    type: JavaExec,
+    dependsOn: ["eej_samples_ee", "eej_samples_he", "eejJar"],
+    description: "Run test of EE ${sample}"
+  ) {
+    def resdir = "${buildDir}/samples/results/ee"
+
+    inputs.files fileTree(dir: "${buildDir}/samples/java/ee/classes")
+    inputs.files "${projectDir}/src/samples/java/ee"
+    outputs.file "${resdir}/${sample}.txt"
+    workingDir = "${buildDir}/output/ee/resources/samples"
+
+    doFirst {
+      mkdir resdir
+      standardOutput = new FileOutputStream(new File("${resdir}/${sample}.txt"))
+    }
+
+    classpath = configurations.samples \
+    + files("${buildDir}/samples/java/ee/classes") \
+    + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar") \
+    + files(saxonLicenseDir)
+
+    systemProperties = ["javax.xml.transform.TransformerFactory": "net.sf.saxon.TransformerFactoryImpl"]
+
+    main = sampleClass
+    args sampleArgs
+  }
+
+  Task t = task "check_ee_samples_${sample}"(
+    type: Exec,
+    dependsOn: ["run_ee_samples_${sample}"],
+    description: "Check the results of run_ee_samples_${sample}"
+  ) {
+    workingDir "${buildDir}/samples/results/ee"
+    commandLine "python3", "${projectDir}/tools/sample-check.py",
+      "--sample", sample, "--edition", "ee", "${sample}.txt"
+  }
+  tasks.findByName("ee_samples").dependsOn t
+}
+
+/*
+
+/*
+}
+
+    <!-- S9APIExamples sample tests -->
+    <macrodef name="samples-s9api"
+        description="Run test of s9api samples">
+        <attribute name="version"
+        <attribute name="target"
+        <sequential>
+            <exec executable="java"
+                dir="${build-resources.dir}/samples"
+                failonerror="true">
+                <arg line="-cp ${basedir}/${build-resources.dir}/samples/java/classes${Z}${basedir}/${build-@{version}j.dir}/saxon-@{version}-${major.version}.jar${Z}${license.dir}"
+                <arg line="he/S9APIExamples"
+                <arg line="@{target}"
+            </exec>
+        </sequential>
+    </macrodef>
+
+        <samples-s9api version="he" target="QueryA"
+*/
