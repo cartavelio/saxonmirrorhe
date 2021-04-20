@@ -68,12 +68,13 @@
   </xsl:template>
 
   <xsl:template name="ToXml" as="element()*">
-      <xsl:for-each select="$input-docs-uri[contains(., '/' || $reportdate || '/')]">
+      <xsl:for-each select="$input-docs-uri[contains(., '/' || $reportdate || '/')]">        
         <xsl:variable name="input-docs" select="doc(.)"/>
         <xsl:variable name="test-cases"
                       select="$input-docs/test-suite-result/test-set/test-case"/>
         <xsl:variable name="failures" select="$test-cases[@result='fail']"/>
         <xsl:variable name="product" as="element(product)">
+          
           <xsl:element name="product">
             <xsl:choose>
               <xsl:when test="exists($input-docs//product)">
@@ -109,7 +110,11 @@
                 <xsl:attribute name="version" select="$input-docs//implementation/@version" />
                 <xsl:attribute name="bytecode" select="$input-docs//implementation/configuration/@bytecode" />
                 <xsl:attribute name="language" select="$input-docs//implementation/configuration/@lang" />
-                <xsl:attribute name="jit" select="$input-docs//implementation/configuration/@jit" />
+                <xsl:if test="exists($input-docs//implementation/configuration/@export)">
+                  <xsl:attribute name="export" select="$input-docs//implementation/configuration/@export" />                    
+                </xsl:if>
+                
+                <xsl:attribute name="jit" select="$input-docs//implementation/configuration/@jit" />                
                 <xsl:attribute name="date-run" select="$input-docs//test-run/@dateRun"/>
 
               </xsl:when>
@@ -128,6 +133,9 @@
                  lang="{$product/@language}" version="{$product/@version}">
           <xsl:if test="exists($product/@jit)">
             <xsl:attribute name="jit" select="$product/@jit"/>
+          </xsl:if>
+          <xsl:if test="exists($product/@export)">
+            <xsl:attribute name="export" select="$product/@export"/>
           </xsl:if>
           <xsl:if test="contains(., 'unfolded')">
             <xsl:attribute name="unfolded" select="'yes'"/>

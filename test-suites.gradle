@@ -526,8 +526,75 @@ task xslt30ExtraTestsJava() {
           testargs += [ "-bytecode:${bytecode}" ]
         }
 
-        args testargs
-      }
+    languages.each { language ->
+        bytecodes.each { bytecode ->
+            exports.each { export ->
+                jits.each { jit ->
+                    def skipThisCombo = ((export == "-export" && bytecode == "on")
+                            || (jit == "-jit" && bytecode == "off"))
+
+                    if (!skipThisCombo) {
+                        def reportFilename = "${buildDir}/test-results/${release}j/xslt30extra/${DSTAMP}"
+                        reportFilename = "${reportFilename}/results_${langCodeMap[language]}_${saxonVersion}"
+
+                        def taskname = "${release}_runXslt30ExtraTestSuite_${language}"
+                        if (bytecode != "") {
+                            taskname = "${taskname}_bc${bytecode}"
+                            reportFilename = "${reportFilename}_bc${bytecode}"
+                        }
+                        if (export != "") {
+                          taskname = "${taskname}_export"
+                          reportFilename = "${reportFilename}_export"
+                        }
+                        if (jit != "") {
+                          taskname = "${taskname}_jit"
+                          reportFilename = "${reportFilename}_jit"
+                        }
+
+                        task "${taskname}"(
+                                type: JavaExec,
+                                dependsOn: ["${release}jCompile",
+                                            "${release}j_compileTestDrivers"],
+                                description: "Run the XSLT 3.0 extra test suite driver for ${RELEASE}/${language}/${bytecode}"
+                        ) {
+                            inputs.files fileTree(dir: "src")
+                            outputs.file "${reportFilename}.xml"
+
+                            classpath = configurations.testDrivers \
+         + files("${buildDir}/classes/${release}j") \
+         + files("${buildDir}/testdriver_classes/${release}j")
+
+                            main = "${jpackage}.Xslt30TestSuiteDriver${RELEASE}"
+                            def testargs = ["${projectDir}/src/test/extra/xslt30",
+                                            "catalog.xml",
+                                            "-exceptions:${projectDir}/src/test/exceptions/xslt30extra.xml",
+                                            "-reportfilename:${getReportFilename(reportFilename)}.xml",
+                                            "-o:${getReportDirectory(reportFilename)}",
+                                            "-lang:${language}",
+                                            "-ps:off"]
+                            if (testSuiteDebug != "") {
+                                testargs += [testSuiteDebug]
+                            }
+                            if (bytecode != "") {
+                                testargs += ["-bytecode:${bytecode}"]
+                            }
+
+                            if (export != "") {
+                                testargs += [export]
+                            }
+                            if (jit != "") {
+                                testargs += [jit]
+                            }
+
+                            qt3OptionMap.keySet().each { key ->
+                                def opt = project.findProperty(key)
+                                if (opt != null) {
+                                    testargs += ["${qt3OptionMap[key]}:${opt}"]
+                                }
+                            }
+
+                            args testargs
+                        }
 
       task "${taskname}"(
         type: Copy,
