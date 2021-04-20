@@ -24,34 +24,30 @@ See below for details of the download contents.
 Directories
 -----------
 
-1. build
---------
-Contains the ANT build files used to build Saxon products and the resources.
-
-2. doc
+1. doc
 ------
 Contains the Saxon documentation. Open index.html in a browser as a starting point.
 
-3. drivers
+2. drivers
 ----------
 Drivers for the W3C test suites.
 
-4. notices
+3. notices
 ----------
 Notices for components redistributed with Saxon. 
 
-5. samples
+4. samples
 ----------
 Sample applications relevant for all Saxon editions (Saxon-HE, Saxon-PE and Saxon-EE), and both
 platforms (Java and .NET). See the "Sample Saxon Applications" section of the Saxon documentation
 for details.
 
-6. use-cases
+5. use-cases
 ------------
 W3C XQuery Use Cases - queries (some of which have been corrected from those published by W3C),
 together with batch scripts for running them.
 
-7. source-userdoc
+6. source-userdoc
 -----------------
 Provided as a zip. Unzip to access the main Saxon documentation.
 
