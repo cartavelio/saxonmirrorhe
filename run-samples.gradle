@@ -167,6 +167,8 @@ task he_samples_he() {}
 task he_samples_pe() {}
 task he_samples_ee() {}
 
+task pe_samples(dependsOn: ["he_samples_pe"]) {}
+
 def heSampleConfigurations = ["JAXPExamples",
                               "ExampleContentHandler",
                               "ApplyXPathJAXP_saxon",
