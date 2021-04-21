@@ -132,14 +132,15 @@ XdmValue::XdmValue(jobject val, bool arr){
 
 
 XdmValue::~XdmValue() {
-	std::cerr<<"XdmValue destructor pointer = "<<(this)<<std::endl;
+	std::cerr<<"XdmValue destructor pointer = "<<(this)<< " ref="<<getRefCount()<<std::endl;
 	//bool safeToClear = false;
 	if(values.size() > 0) {
         for (size_t i = 0; i < values.size(); i++) {
-            if (values[i] != nullptr) {
-                //values[i]->decrementRefCount();
+            if (values[i] != nullptr && values[i]->getRefCount()<1) {
                 delete values[i];
-            }
+            }/* else {
+                values[i]->decrementRefCount();
+            }*/
         }
         values.clear();
     }

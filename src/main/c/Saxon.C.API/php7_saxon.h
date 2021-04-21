@@ -48,6 +48,7 @@
 #include "XdmItem.h"
 #include "XdmNode.h"
 #include "XdmAtomicValue.h"
+#include "XdmFunctionItem.h"
 /*class SaxonProcessor;
 class XQueryProcessor;
 class XsltProcessor;

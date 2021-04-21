@@ -33,6 +33,7 @@ zend_class_entry *xdmValue_ce;
 zend_class_entry *xdmItem_ce;
 zend_class_entry *xdmNode_ce;
 zend_class_entry *xdmAtomicValue_ce;
+zend_class_entry *xsltExecutable_ce;
 
 #include "php7_XsltProcessor.cpp"
 #include "php7_Xslt30Processor.cpp"
@@ -119,7 +120,7 @@ PHP_METHOD(SaxonProcessor, __construct)
 
     saxonProcessor_object * obj = (saxonProcessor_object *)((char *)zobj - XtOffsetOf(saxonProcessor_object, std));
 
-	saxonProc = new SaxonProcessor(license); //TODO: add license flag to PHP function argument
+	saxonProc = new SaxonProcessor(license);
 		
     
 	obj->saxonProcessor = saxonProc;
@@ -971,10 +972,12 @@ std::cerr<<"php_xdmValue  destruct"<<std::endl;
     XdmValue * xdmValue= obj->xdmValue;
    if(xdmValue != nullptr) {
     	//xdmValue->decrementRefCount();
-    	//if(xdmValue!= nullptr && xdmValue->getRefCount()< 1){
+    	if(xdmValue->getRefCount()< 1){
     		delete xdmValue;
-		xdmValue = nullptr;
-   	        //}
+		    xdmValue = nullptr;
+    	}  else {
+            xdmValue->decrementRefCount();
+        }
     }
 }
 
@@ -1185,10 +1188,15 @@ std::cerr<<"php_item  destruct"<<std::endl;
     xdmItem_object * obj = (xdmItem_object *)((char *)zobj - XtOffsetOf(xdmItem_object, std));
 
     XdmItem * xdmItem= obj->xdmItem;
-    //xdmItem->decrementRefCount();
-    if(xdmItem != nullptr /*&& xdmItem->getRefCount()< 1*/){
-    	delete xdmItem;
-	xdmItem = nullptr;
+
+    if(xdmItem != nullptr) {
+       // xdmItem->decrementRefCount();
+        if(xdmItem->getRefCount()< 1){
+            delete xdmItem;
+            xdmItem = nullptr;
+        }  else {
+            xdmItem->decrementRefCount();
+        }
     }
     
 }
@@ -1362,11 +1370,13 @@ std::cerr<<"php_node  destruct"<<std::endl;
     if(obj != nullptr) {
     XdmNode * xdmNode= obj->xdmNode;
     if(xdmNode != nullptr) {
-    	//xdmNode->decrementRefCount();
-    	//if(xdmNode->getRefCount()< 1){
+
+    	if(xdmNode->getRefCount()< 1){
     		delete xdmNode;
-		xdmNode = nullptr;
-    	//}
+		    xdmNode = nullptr;
+    	} else {
+            xdmNode->decrementRefCount();
+            }
     }
     }
 }
@@ -1691,16 +1701,21 @@ PHP_METHOD(XdmAtomicValue, __construct)
 
 PHP_METHOD(XdmAtomicValue, __destruct)
 {
+std::cerr<<"php_atomicValue  destruct"<<std::endl;
      zval *object = getThis();
      zend_object * zobj = Z_OBJ_P(object);
 
     xdmAtomicValue_object * obj = (xdmAtomicValue_object *)((char *)zobj - XtOffsetOf(xdmAtomicValue_object, std));
 
     XdmAtomicValue * xdmValue= obj->xdmAtomicValue;
-    if(xdmValue!= nullptr /*&& xdmValue->getRefCount()< 1*/){
-	//xdmValue->decrementRefCount();
-    	delete xdmValue;
-	xdmValue = nullptr;
+    if(xdmValue!= nullptr){
+        //xdmValue->decrementRefCount();
+        if(xdmValue->getRefCount()< 1){
+            delete xdmValue;
+            xdmValue = nullptr;
+        }  else {
+        xdmValue->decrementRefCount();
+        }
     }
     
 }

@@ -46,13 +46,13 @@
   /* simple example to show xpath singleton evaluation and conversion to a XdmNode. */
        function exampleSimple3($proc, $xpathEngine){
 		 echo '<b>Simple Example - 3 </b><br/>';
-		// $sourceNode = $proc->parseXmlFromString("<out attr='valuex'><person attr1='value1' attr2='value2'>text1</person><person>text2</person><person1>text3</person1></out>");
+		 $sourceNode = $proc->parseXmlFromString("<out attr='valuex'><person attr1='value1' attr2='value2'>text1</person><person>text2</person><person1>text3</person1></out>");
 		if($sourceNode == NULL) {
 			echo "SourceNode is NULL<br />";
 		}
-                //$xpathEngine->setContextItem($sourceNode);
+                $xpathEngine->setContextItem($sourceNode);
 
-		$xpathEngine->setContextFile("tempdoc.xml");
+		//$xpathEngine->setContextFile("tempdoc.xml");
                 $resultValue = $xpathEngine->evaluateSingle("(//person)[1]");      
                             
 		if($resultValue != null) {               
@@ -208,9 +208,9 @@
             $proc = new Saxon\SaxonProcessor(true);
 	    $xpath = $proc->newXPathProcessor();
 		
-            //$version = $proc->version();
+            $version = $proc->version();
    	    echo '<b>PHP XPath Examples</b><br/>';
-            //echo 'Saxon Processor version: '.$version;
+            echo 'Saxon Processor version: '.$version;
             echo '<br/>';        
            // exampleSimple1($proc, $xpath, $books_xml);
             echo '<br/>';

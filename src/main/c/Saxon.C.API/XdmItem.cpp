@@ -93,11 +93,13 @@ jobject XdmItem::getUnderlyingValue(){
 	}
 
 XdmItem::~XdmItem() {
-    //decrementRefCount();
+    std::cerr<< " ref="<<getRefCount()<<std::endl;
 
-    if(value !=nullptr) {
+    if(value !=nullptr /* && getRefCount() <=1*/) {
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(value);
-    }
+    } /*else {
+        decrementRefCount();
+    }*/
     if(stringValue.empty()) {
         stringValue.clear();
     }
@@ -105,7 +107,7 @@ XdmItem::~XdmItem() {
 
 void XdmItem::incrementRefCount() {
     refCount++;
-    //std::cerr<<"refCount-inc-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
+    std::cerr<<"refCount-inc-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
 }
 
 void XdmItem::decrementRefCount() {

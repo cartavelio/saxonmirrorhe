@@ -21,8 +21,10 @@
     }
 
     XdmAtomicValue::~XdmAtomicValue(){
-        if(!valType.empty()) {
-            valType.clear();
+        if(getRefCount() < 1) {
+            if (!valType.empty()) {
+                valType.clear();
+            }
         }
     }
 

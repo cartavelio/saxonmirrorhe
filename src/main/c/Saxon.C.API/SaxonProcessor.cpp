@@ -246,7 +246,7 @@ SaxonProcessor::SaxonProcessor(bool l) {
     licensei = l;
     versionStr = nullptr;
     exception = nullptr;
-
+    proc = nullptr;
     if (SaxonProcessor::jvmCreatedCPP == 0) {
         SaxonProcessor::jvmCreatedCPP = 1;
         SaxonProcessor::sxn_environ = new sxnc_environment;//(sxnc_environment *)malloc(sizeof(sxnc_environment));
@@ -292,7 +292,7 @@ SaxonProcessor::SaxonProcessor(bool l) {
 SaxonProcessor::SaxonProcessor(const char *configFile) {
     cwd = "";
     versionStr = nullptr;
-
+    proc = nullptr;
     if (SaxonProcessor::jvmCreatedCPP == 0) {
         SaxonProcessor::jvmCreatedCPP = 1;
         //SaxonProcessor::sxn_environ= new sxnc_environment;
@@ -329,7 +329,7 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
                                                                              SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                      configFile));
     proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(proci);
-    if (!proc) {
+    if (proc==nullptr) {
         checkAndCreateException(saxonCAPIClass);
         std::cerr << "Error: " << getDllname() << ". processor is nullptr in constructor(configFile)" << std::endl;
         return;
@@ -345,8 +345,9 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 
 SaxonProcessor::~SaxonProcessor() {
     clearConfigurationProperties();
-    if(proc) {
+    if(proc != nullptr) {
     	SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
+	proc = nullptr;
     }
     if (versionStr != nullptr) {
         delete versionStr;

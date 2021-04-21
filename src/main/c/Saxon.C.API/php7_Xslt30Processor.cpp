@@ -229,7 +229,7 @@ PHP_METHOD(Xslt30Processor, setParameter){
 
 PHP_METHOD(Xslt30Processor, compileFromFile)
 {
-    Xslt30Processor *xslt30Processor;
+    Xslt30Processor *xslt30Processor = nullptr;
     char * name = nullptr;
     size_t len1;
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &len1) == FAILURE) {
@@ -242,10 +242,15 @@ PHP_METHOD(Xslt30Processor, compileFromFile)
         xslt30Processor->exceptionClear();
         XsltExecutable * executable = xslt30Processor->compileFromFile(name);
         if(executable != nullptr) {
-            zend_object *ooth =  Z_OBJ_P(return_value);
-            xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
-            assert (vobj != nullptr);
-            vobj->xsltExecutable = executable;
+            if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
+                RETURN_NULL();
+            } else {
+                std::cerr<<"php cp0: executable not null"<<std::endl;
+                zend_object *ooth = Z_OBJ_P(return_value);
+                xsltExecutable_object *vobj = (xsltExecutable_object * )((char *) ooth - XtOffsetOf(xsltExecutable_object, std));
+                assert (vobj!= nullptr);
+                vobj->xsltExecutable = executable;
+            }
 
         } else if(xslt30Processor->exceptionOccurred()){
             SaxonApiException * exception = xslt30Processor->getException();

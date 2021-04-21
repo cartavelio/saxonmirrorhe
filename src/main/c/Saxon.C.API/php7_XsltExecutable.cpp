@@ -2,8 +2,6 @@
 
 zend_object_handlers xsltExecutable_object_handlers;
 
-zend_class_entry *xsltExecutable_ce;
-
 
 
 /*     ============== XSLT30: PHP Interface of  XsltExecutable class =============== */
@@ -45,6 +43,13 @@ PHP_METHOD(XsltExecutable, __destruct)
 
     XsltExecutable * xsltExecutable= obj->xsltExecutable;
     if(xsltExecutable != nullptr){
+        std::map<std::string, XdmValue *> parameters = xsltExecutable->getParameters();
+        for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
+            XdmValue *value = itr->second;
+            if(value != nullptr) {
+                value->decrementRefCount();
+            }
+        }
     	delete xsltExecutable;
      }
 }
@@ -442,8 +447,10 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
 
 	//php_printf(" argument_length= %d",argument_length);
         XdmValue * result = xsltExecutable->callTemplateReturningValue(templateName);
-	if(result != nullptr) {
 
+	if(result != nullptr) {
+	    result->incrementRefCount();
+        std::cerr<<"php callTemplateReturningValue result ptr="<< result<<std::endl;
             if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
                RETURN_NULL();
             } else {
@@ -455,6 +462,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
 
             }
         } else {
+            std::cerr<<"php callTemplateReturningValue result is null"<<std::endl;
             if(obj->xsltExecutable->exceptionOccurred()){
   		//TODO
 	    }
@@ -911,6 +919,7 @@ PHP_METHOD(XsltExecutable, setInitialMatchSelectionAsFile)
     xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
     xsltExecutable = obj->xsltExecutable;
     if (xsltExecutable != nullptr && inFilename != nullptr) {
+        std::cerr<<"setInitialMatchSelectionAsFile called, file="<<inFilename<<std::endl;
 	 xsltExecutable->setInitialMatchSelectionAsFile(inFilename);
 
 
@@ -1289,8 +1298,8 @@ PHP_METHOD(XsltExecutable, setParameter)
         if(nobj != nullptr) {
             XdmNode * value = nobj->xdmNode;
             if(value != nullptr) {
-	        xsltExecutable->setParameter(name, (XdmValue *)value);
-
+               // value->incrementRefCount();
+	            xsltExecutable->setParameter(name, (XdmValue *)value);
             }
         }
       } else if(strcmp(objName, "Saxon\\XdmValue")==0){
@@ -1299,7 +1308,7 @@ PHP_METHOD(XsltExecutable, setParameter)
         if(vobj != nullptr) {
             XdmValue * value = vobj->xdmValue;
             if(value != nullptr) {
-
+               // value->incrementRefCount();
                 xsltExecutable->setParameter(name, value);
             }
         }
@@ -1312,6 +1321,7 @@ PHP_METHOD(XsltExecutable, setParameter)
         if(aobj != nullptr) {
             XdmAtomicValue * value = aobj->xdmAtomicValue;
             if(value != nullptr) {
+                //value->incrementRefCount();
                 xsltExecutable->setParameter(name, (XdmValue *)value);
             }
         }
@@ -1334,7 +1344,14 @@ PHP_METHOD(XsltExecutable, clearParameters)
     xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
     xsltExecutable = obj->xsltExecutable;
     if (xsltExecutable != nullptr) {
-        xsltExecutable->clearParameters();
+        std::map<std::string, XdmValue *> parameters = xsltExecutable->getParameters();
+        for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
+            XdmValue *value = itr->second;
+            if(value != nullptr) {
+                value->decrementRefCount();
+            }
+        }
+        xsltExecutable->clearParameters(true);
     }
 }
 

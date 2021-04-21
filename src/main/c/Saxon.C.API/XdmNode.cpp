@@ -54,26 +54,27 @@ bool XdmNode::isAtomic() {
     }
 
     XdmNode::~XdmNode() {
-std::cerr<<"XdmNode desructor"<<std::endl;
-        delete baseURI;
-        delete nodeName;
-        if(children != nullptr) {
-            for (int p=0; p < childCount; ++p) {
-                delete children[p];
+       // if(getRefCount() <= 1) {
+            std::cerr << "XdmNode desructor" << std::endl;
+            delete baseURI;
+            delete nodeName;
+            if (children != nullptr) {
+                for (int p = 0; p < childCount; ++p) {
+                    delete children[p];
 
+                }
+                delete[] children;
             }
-            delete [] children;
-        }
 
-        if(attrCount > 0) {
-            for (int p=0; p < attrCount; ++p) {
-                delete attrValues[p];
+            if (attrCount > 0) {
+                for (int p = 0; p < attrCount; ++p) {
+                    delete attrValues[p];
 
+                }
+                delete[] attrValues;
             }
-            delete [] attrValues;
-        }
 
-
+        //}
     }
 
     const char * XdmNode::getNodeName(){
