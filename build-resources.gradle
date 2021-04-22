@@ -103,7 +103,7 @@ task resources_userdoc_xml(
 
 task resources_drivers_src(
         type: Copy,
-        dependsOn: ["hej_compileTestDrivers", "pej_compileTestDrivers", "eej_compileTestDrivers"],
+        dependsOn: ["eej_compileTestDrivers"],
         description: "Copy test drivers into the resources folder"
 ) {
     into "${buildDir}/resources/drivers/java"
