@@ -281,6 +281,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString)
                 zend_object* vobj = Z_OBJ_P(return_value);
  		xdmNode_object * xdmNObj = (xdmNode_object *)((char *)vobj - XtOffsetOf(xdmNode_object, std));
                 assert (xdmNObj != nullptr);
+                node->incrementRefCount();
                 xdmNObj->xdmNode = node;
             }
         } else {
@@ -318,6 +319,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromFile)
             xdmNode_object * vobj = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
                 
                 assert (vobj != nullptr);
+                node->incrementRefCount();
                 vobj->xdmNode = node;
             }
         } else {
@@ -387,7 +389,7 @@ PHP_METHOD(SaxonProcessor, createAtomicValue)
                 zend_throw_exception(zend_exception_get_default(TSRMLS_C), "unknown type specified in XdmValue", 0 TSRMLS_CC); 
                 RETURN_NULL();
         }
-//std::cerr<<"createAtomicValue cp0"<<std::endl;
+    //std::cerr<<"createAtomicValue cp0 -========================="<<std::endl;
         if(xdmValue == nullptr) {
             RETURN_NULL();
         }
@@ -398,6 +400,7 @@ PHP_METHOD(SaxonProcessor, createAtomicValue)
  	    zend_object* vvobj = Z_OBJ_P(return_value);
 	   xdmAtomicValue_object * vobj = (xdmAtomicValue_object *)((char *)vvobj - XtOffsetOf(xdmAtomicValue_object, std));
             assert (vobj != nullptr);
+            xdmValue->incrementRefCount();
             vobj->xdmAtomicValue = xdmValue;
         }
     } else {
@@ -1709,12 +1712,12 @@ std::cerr<<"php_atomicValue  destruct"<<std::endl;
 
     XdmAtomicValue * xdmValue= obj->xdmAtomicValue;
     if(xdmValue!= nullptr){
-        //xdmValue->decrementRefCount();
+        xdmValue->decrementRefCount();
         if(xdmValue->getRefCount()< 1){
             delete xdmValue;
             xdmValue = nullptr;
         }  else {
-        xdmValue->decrementRefCount();
+        //xdmValue->decrementRefCount();
         }
     }
     

@@ -124,13 +124,13 @@ void Xslt30Processor::setParameter(const char* name, XdmValue * value) {
                 XdmValue * valuei = it->second;
                 if(valuei != nullptr) {
                     valuei->decrementRefCount();
-                    //if (valuei->getRefCount() < 1) {
+                    if (valuei->getRefCount() < 1) {
                         delete value;
                         value = nullptr;
-                    //}
+                    }
                     parameters.erase(skey);
                     parameters[skey] = value;
-                    value->incrementRefCount();
+                    //value->incrementRefCount();
                 }
             }
 		}

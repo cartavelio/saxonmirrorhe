@@ -719,6 +719,7 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningFile){
 		xdmNode_object * nobj = (xdmNode_object *)((char *)ooth - XtOffsetOf(xdmNode_object, std));
         	if(nobj != nullptr) {
             		XdmValue * value = (XdmValue *) nobj->xdmNode;
+            		value->incrementRefCount();
             		parameters[ZSTR_VAL(key)] = value;
         	}
 	}
@@ -727,6 +728,7 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningFile){
 		xdmAtomicValue_object * nobj = (xdmAtomicValue_object *)((char *)ooth - XtOffsetOf(xdmAtomicValue_object, std));
         	if(nobj != nullptr) {
             		XdmValue * value = (XdmValue *) nobj->xdmAtomicValue;
+            		value->incrementRefCount();
             		parameters[ZSTR_VAL(key)] = value;
         	}
 	}
@@ -735,6 +737,8 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningFile){
 		xdmValue_object * nobj = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
         	if(nobj != nullptr) {
             		XdmValue * value = nobj->xdmValue;
+            		value->incrementRefCount();
+            		parameters[ZSTR_VAL(key)] = value;
             		parameters[ZSTR_VAL(key)] = value;
         	}
 	}
@@ -1069,6 +1073,7 @@ PHP_METHOD(XsltExecutable, transformToString)
                 XdmNode * value = ooth->xdmNode;
                 if(value != nullptr) {
         	        const char * result = xsltExecutable->transformToString(value);
+        	        value->incrementRefCount();
                     if(result != nullptr) {
                         _RETURN_STRING(result);
                     }
@@ -1298,7 +1303,7 @@ PHP_METHOD(XsltExecutable, setParameter)
         if(nobj != nullptr) {
             XdmNode * value = nobj->xdmNode;
             if(value != nullptr) {
-               // value->incrementRefCount();
+                value->incrementRefCount();
 	            xsltExecutable->setParameter(name, (XdmValue *)value);
             }
         }
@@ -1308,7 +1313,7 @@ PHP_METHOD(XsltExecutable, setParameter)
         if(vobj != nullptr) {
             XdmValue * value = vobj->xdmValue;
             if(value != nullptr) {
-               // value->incrementRefCount();
+                value->incrementRefCount();
                 xsltExecutable->setParameter(name, value);
             }
         }
@@ -1321,7 +1326,7 @@ PHP_METHOD(XsltExecutable, setParameter)
         if(aobj != nullptr) {
             XdmAtomicValue * value = aobj->xdmAtomicValue;
             if(value != nullptr) {
-                //value->incrementRefCount();
+                value->incrementRefCount();
                 xsltExecutable->setParameter(name, (XdmValue *)value);
             }
         }
@@ -1349,9 +1354,14 @@ PHP_METHOD(XsltExecutable, clearParameters)
             XdmValue *value = itr->second;
             if(value != nullptr) {
                 value->decrementRefCount();
+                if(value->getRefCount() < 1) {
+                    delete value;
+                    value = nullptr;
+                }
             }
         }
-        xsltExecutable->clearParameters(true);
+        xsltExecutable->clearParameters();
+
     }
 }
 

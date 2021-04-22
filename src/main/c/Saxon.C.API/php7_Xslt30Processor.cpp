@@ -174,7 +174,7 @@ PHP_METHOD(Xslt30Processor, transformFileToValue)
 
 
 PHP_METHOD(Xslt30Processor, setParameter){
-
+std::cerr<<"setPara called ======"<<std::endl;
    Xslt30Processor *xslt30Processor;
    char * name;
    zval* oth;
@@ -191,7 +191,7 @@ PHP_METHOD(Xslt30Processor, setParameter){
                 return;
         }
       const char * objName =ZSTR_VAL(Z_OBJCE_P(oth)->name);
-
+      std::cerr<<"setPara before ======"<<std::endl;
       if(strcmp(objName, "Saxon\\XdmNode")==0) {
         zend_object* ooth = Z_OBJ_P(oth);
         xdmNode_object * nobj = (xdmNode_object *)((char *)ooth - XtOffsetOf(xdmNode_object, std));
@@ -199,7 +199,7 @@ PHP_METHOD(Xslt30Processor, setParameter){
             XdmNode * value = nobj->xdmNode;
             if(value != NULL) {
                 xslt30Processor->setParameter(name, (XdmValue *)value);
-
+                value->incrementRefCount();
             }
         }
       } else if(strcmp(objName, "Saxon\\XdmValue")==0){
@@ -210,6 +210,7 @@ PHP_METHOD(Xslt30Processor, setParameter){
             if(value != NULL) {
 
                 xslt30Processor->setParameter(name, value);
+                value->incrementRefCount();
             }
         }
 
@@ -219,10 +220,13 @@ PHP_METHOD(Xslt30Processor, setParameter){
         if(aobj != NULL) {
             XdmAtomicValue * value = aobj->xdmAtomicValue;
             if(value != NULL) {
+                std::cerr<<"setPara xdmAtomicValue"<<std::endl;
                 xslt30Processor->setParameter(name, (XdmValue *)value);
+                value->incrementRefCount();
             }
         }
       }
+
     }
 }
 

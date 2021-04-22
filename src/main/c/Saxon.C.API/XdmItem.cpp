@@ -107,11 +107,11 @@ XdmItem::~XdmItem() {
 
 void XdmItem::incrementRefCount() {
     refCount++;
-    std::cerr<<"refCount-inc-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
+    std::cerr<<"after refCount-inc-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
 }
 
 void XdmItem::decrementRefCount() {
     if (refCount > 0)
         refCount--;
-    //std::cerr<<"refCount-dec-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
+    std::cerr<<"after refCount-dec-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
 }

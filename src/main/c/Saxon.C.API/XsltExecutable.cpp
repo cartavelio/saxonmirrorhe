@@ -124,7 +124,7 @@ void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
 	selectionV->decrementRefCount();
     }
 //    if (_selection != nullptr) {
-        _selection->incrementRefCount();
+        //_selection->incrementRefCount();
         selectionV = _selection;
         selection = SaxonProcessor::sxn_environ->env->NewGlobalRef(_selection->getUnderlyingValue());
 //    }
@@ -155,7 +155,7 @@ void XsltExecutable::setBaseOutputURI(const char *baseURI) {
 
 void XsltExecutable::setParameter(const char *name, XdmValue *value) {
     if (value != nullptr && name != nullptr) {
-        value->incrementRefCount();
+        //value->incrementRefCount();
         int s = parameters.size();
         std::string skey = "param:" + std::string(name);
         parameters[skey] = value;
@@ -1093,7 +1093,7 @@ const char *XsltExecutable::transformFileToString(const char *source) {
 const char *XsltExecutable::transformToString(XdmNode *source) {
 
     if (source != nullptr) {
-        source->incrementRefCount();
+        //source->incrementRefCount();
         parameters["node"] = source;
     }
     return transformFileToString(nullptr);
@@ -1103,7 +1103,7 @@ const char *XsltExecutable::transformToString(XdmNode *source) {
 XdmValue *XsltExecutable::transformToValue(XdmNode *source) {
 
     if (source != nullptr) {
-        source->incrementRefCount();
+        //source->incrementRefCount();
         parameters["node"] = source;
     }
     return transformFileToValue(nullptr);
@@ -1112,7 +1112,7 @@ XdmValue *XsltExecutable::transformToValue(XdmNode *source) {
 void XsltExecutable::transformToFile(XdmNode *source) {
 
     if (source != nullptr) {
-        source->incrementRefCount();
+        //source->incrementRefCount();
         parameters["node"] = source;
     }
     transformFileToFile(nullptr, nullptr);

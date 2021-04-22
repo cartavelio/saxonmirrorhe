@@ -72,21 +72,37 @@ function userFunctionExample($saxon, $proc, $xmlfile, $xslFile)
 }
 
 /* simple example to show transforming to string */
-function exampleSimple1($proc, $xmlfile, $xslFile)
+function exampleSimple1($saxonproc, $proc, $xmlfile, $xslFile)
 {
     echo '<b>exampleSimple1:</b><br/>';
 
     $executable = $proc->compileFromFile($xslFile);
-    $executable->setInitialMatchSelectionAsFile($xmlfile);
-    $result = $executable->transformToString();
-    if ($result != null) {
+    if($executable != null) {
+        $inputNode = $saxonproc->parseXmlFromFile($xmlfile);
+        if($inputNode != null) {
+            $result = $executable->transformToString($inputNode);
+            if ($result != null) {
 
-        echo 'Output:' . $result;
+                echo 'Output:' . $result;
+            } else {
+                echo "Result is null";
+                if ($executable->exceptionOccurred()) {
+                    $executable->getErrorMessage();
+                }
+            }
+           // $executable->clearParameters();
+            $executable->clearProperties();
+        } else {
+            if ($proc->exceptionOccurred()) {
+                $proc->getErrorMessage();
+            }
+        }
     } else {
-        echo "Result is null";
-    }
-    $executable->clearParameters();
-    $executable->clearProperties();
+        if ($proc->exceptionOccurred()) {
+            $proc->getErrorMessage();
+        }
+
+    }   
 }
 
 /* simple example to show transforming to file */
@@ -95,10 +111,9 @@ function exampleSimple2($proc, $xmlFile, $xslFile)
     echo '<b>exampleSimple2:</b><br/>';
 
     $executable = $proc->compileFromFile($xslFile);
-    $executable->setInitialMatchSelectionAsFile($xmlFile);
     $filename = "/home/ond1/temp/output1.xml";
     $executable->setOutputFile($filename);
-    $executable->transformToFile();
+    $executable->transformFileToFile($xmlFile);
 
     if (file_exists($filename)) {
         echo "The file $filename exists";
@@ -182,8 +197,8 @@ function exampleLoopVar($saxonProc, $proc, $xml, $xslt)
         }
     }
 
-   //$executable->clearParameters();
-    //$executable->clearProperties();
+   $executable->clearParameters();
+    $executable->clearProperties();
 }
 
 
@@ -461,8 +476,8 @@ function testCallTemplate1($proc, $trans)
             echo "example: cp 7-1 ";
             $item = $v->getHead();
             if ($item != NULL) {
-                echo "example: cp 7-2 ";
-                if ($item->isAtomic() && ($item->getAtomicValue()->getLongValue() == 5)) {
+                echo "example: cp 7-2";
+                if ($item->isNode() && ($item->getStringValue() == 5)) {  //($item->getAtomicValue()->getLongValue() == 5)) {
                     echo "Result is true";
                 }
 
@@ -483,7 +498,7 @@ function testCallTemplate1($proc, $trans)
                 $executable->exceptionClear();
             }
         }
-        echo "example: cp 8";
+        $executable->clearParameters();
     } else {
 
         echo "Error found in stylesheet";
@@ -537,10 +552,10 @@ function testPerformance()
  $proc = $saxonProc->newXslt30Processor();   
 echo '<br/>';
  //testCallFunction($saxonProc, $proc);
-  /*   testCallTemplate1($saxonProc, $proc);
-     exampleSimple1($proc, $foo_xml, $foo_xsl);
+     testCallTemplate1($saxonProc, $proc);
+     exampleSimple1($saxonProc, $proc, $foo_xml, $foo_xsl);
       echo '<br/>';
-       exampleSimple2($proc, "xml/foo.xml", $foo_xsl);
+       /*exampleSimple2($proc, "xml/foo.xml", $foo_xsl);
       echo '<br/>';
       exampleSimple3($saxonProc, $proc);*/
       echo '<br/>';
