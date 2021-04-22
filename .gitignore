@@ -1,10 +1,11 @@
 /.gradle/
 /build/
+/buildSrc/build/
+/buildSrc/.gradle/
 /out/
 java_*.hprof
 /.idea/
 /src/test/testdata/temp/
-/src/test/testdata/sandpit/
 /src/test/testdata/sandpit/
 /src/test/extra/qt3/expath/file/sandpit/temp/
 .DS_Store

@@ -194,11 +194,11 @@ task samples_j_src(
 
 task samples_j(
         type: Copy,
-        dependsOn: ["samples_j_src", "eej_samples_ee"],
+        dependsOn: ["samples_j_src", "run_eej_samples_ee"],
         description: "Copy compiled Java samples into the resources folder"
 ) {
     into "${buildDir}/resources/samples/java/classes"
-    from "${buildDir}/samples/java/ee/classes"
+    from "${buildDir}/samples/classes/java"
 }
 
 task samples_n(

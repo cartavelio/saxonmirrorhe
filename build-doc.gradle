@@ -24,29 +24,43 @@ task documentation(
 // ============================================================
 
 task filter_sources_for_javadoc(
-  type: Copy,
   description: "Copy the Java source files for making JavaDoc (excludes some classes)"
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/main/java")
   outputs.files fileTree(dir: "${buildDir}/javadoc_src")
-  
-  // N.B. these exclusions are also applied in the tasks below.
-  into "${buildDir}/javadoc_src"
-  from ("${projectDir}/src/main/java") {
-    include "net/**"
-    include "com/**"
-    include "javax/**"
-    exclude "**/dotnet/**"
-    exclude "net/sf/saxon/option/cpp/**"
-    exclude "net/sf/saxon/testdriver/**"
-    exclude "com/saxonica/functions/extfn/cpp/**"
-    exclude "com/saxonica/js/**"
-    exclude "com/saxonica/testdriver/**"
-    exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
-    exclude "com/saxonica/config/DotNetExtensionLibrary.java"
-    exclude "com/saxonica/config/DotNetPlatformPE.java"
-    exclude "com/saxonica/config/JavaPlatformC.java"
-    exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+
+  doLast {
+    copy {
+      into "${buildDir}/javadoc_src"
+      from ("${projectDir}/src/main/java") {
+        include "net/**"
+        include "com/**"
+        include "javax/**"
+        exclude "**/dotnet/**"
+        exclude "net/sf/saxon/option/cpp/**"
+        exclude "net/sf/saxon/testdriver/**"
+        exclude "com/saxonica/functions/extfn/cpp/**"
+        exclude "com/saxonica/js/**"
+        exclude "com/saxonica/testdriver/**"
+        exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
+        exclude "com/saxonica/config/DotNetExtensionLibrary.java"
+        exclude "com/saxonica/config/DotNetPlatformPE.java"
+        exclude "com/saxonica/config/JavaPlatformC.java"
+        exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+      }
+    }
+  }
+
+  doLast {
+    // Whoops, we want NativePlatform even though the rest of option/cpp is excluded.
+    // (If you don't include this, there's at least one broken reference to it. But
+    // maybe that reference should be excluded instead? TBD.)
+    copy {
+      into "${buildDir}/javadoc_src"
+      from ("${projectDir}/src/main/java") {
+        include "net/sf/saxon/option/cpp/NativePlatform.java"
+      }
+    }
   }
 }
 

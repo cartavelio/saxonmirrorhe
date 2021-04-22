@@ -93,42 +93,6 @@ task hej_setup_samples(
   }
 }
 
-task hej_samples_he(
-  type: JavaCompile,
-  dependsOn: ["hej_setup_samples", "hejCompile"]
-) {
-  classpath = configurations.samples + files("${buildDir}/classes/hej")
-  source = "${buildDir}/samples/java/he"
-  destinationDirectory = new File("${buildDir}/samples/java/he/classes")
-  doFirst {
-    mkdir "${buildDir}/samples/java/he/classes"
-  }
-}
-
-task pej_samples_he(
-  type: JavaCompile,
-  dependsOn: ["hej_setup_samples", "pejCompile"]
-) {
-  classpath = configurations.samples + files("${buildDir}/classes/pej")
-  source = "${buildDir}/samples/java/he"
-  destinationDirectory = new File("${buildDir}/samples/java/pe/classes")
-  doFirst {
-    mkdir "${buildDir}/samples/java/pe/classes"
-  }
-}
-
-task eej_samples_he(
-  type: JavaCompile,
-  dependsOn: ["hej_setup_samples", "eejCompile"]
-) {
-  classpath = configurations.samples + files("${buildDir}/classes/eej")
-  source = "${buildDir}/samples/java/he"
-  destinationDirectory = new File("${buildDir}/samples/java/ee/classes")
-  doFirst {
-    mkdir "${buildDir}/samples/java/ee/classes"
-  }
-}
-
 task eej_setup_samples(
   type: Copy,
   dependsOn: ["config_sample", "ee_samples_common"]
@@ -144,19 +108,6 @@ task eej_setup_samples(
     include "XMarkBenchmark.java"
     include "XPathExampleSA.java"
     include "XQJExamples.java"
-  }
-}
-
-task eej_samples_ee(
-  type: JavaCompile,
-  dependsOn: ["eej_setup_samples", "eejCompile", "eej_samples_he"]
-) {
-  classpath = configurations.samples + (files("${buildDir}/classes/eej")
-              + files("${buildDir}/samples/java/ee/classes"))
-  source = "${buildDir}/samples/java/ee"
-  destinationDirectory = new File("${buildDir}/samples/java/ee/classes")
-  doFirst {
-    mkdir "${buildDir}/samples/java/ee/classes"
   }
 }
 
@@ -208,60 +159,106 @@ def heSampleArgs = ["JAXPExamples": ["all"],
                                            "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "dom"],
 ]
 
-heSampleConfigurations.each { sample ->
+["run", "debug"].each { tver ->
   ["he", "pe", "ee"].each { edition ->
-
-    def ignoreThisCombination = (
-      (edition == "he" && (sample.endsWith("_pe") || sample.endsWith("_ee")))
-      || (edition == "pe" && (sample.endsWith("_he") || sample.endsWith("_ee")))
-      || (edition == "ee" && (sample.endsWith("_he") || sample.endsWith("_pe")))
-    )
-
-    if (!ignoreThisCombination) {
-      def sampleClass = "he.${sample}"
-      if (heSampleMainClass.containsKey(sample)) {
-        sampleClass = "he.${heSampleMainClass[sample]}"
+    task "${tver}_${edition}j_samples_he"(
+      type: JavaCompile,
+    ) {
+      description "Compile the HE samples with ${edition} for ${tver} testing"
+      if (tver == "run") {
+        dependsOn "hej_setup_samples", "${edition}jCompile"
+        classpath = configurations.samples + files("${buildDir}/classes/${edition}j")
+      } else {
+        dependsOn "hej_setup_samples", "compileJava"
+        classpath = configurations.samples \
+        + project.files("${buildDir}/classes/java/main") \
+        + files("${projectDir}/src/main/resources") \
       }
-      def sampleArgs = heSampleArgs[sample]
+      
+      source = "${buildDir}/samples/java/he"
+      destinationDirectory = new File("${buildDir}/samples/classes/${tver}/${edition}")
+      doFirst {
+        mkdir "${buildDir}/samples/classes/${tver}/${edition}"
+      }
+    }
 
-      task "run_he_samples_${sample}_${edition}"(
-        type: JavaExec,
-        dependsOn: ["${edition}j_samples_he", "${edition}jJar"],
-        description: "Run test of HE ${sample} with ${edition}"
-      ) {
-        def resdir = "${buildDir}/samples/results/he"
+    heSampleConfigurations.each { sample ->
+      def ignoreThisCombination = (
+        (edition == "he" && (sample.endsWith("_pe") || sample.endsWith("_ee")))
+        || (edition == "pe" && (sample.endsWith("_he") || sample.endsWith("_ee")))
+        || (edition == "ee" && (sample.endsWith("_he") || sample.endsWith("_pe")))
+      )
 
-        inputs.files fileTree(dir: "${buildDir}/samples/java/${edition}/classes")
-        inputs.files "${projectDir}/src/samples/java/he"
-        outputs.file "${resdir}/${sample}_${edition}.txt"
-        workingDir = "${buildDir}/output/he/resources/samples"
+      if (!ignoreThisCombination) {
+        def sampleClass = "he.${sample}"
+        if (heSampleMainClass.containsKey(sample)) {
+          sampleClass = "he.${heSampleMainClass[sample]}"
+        }
+        def sampleArgs = heSampleArgs[sample]
 
-        doFirst {
-          mkdir resdir
-          standardOutput = new FileOutputStream(new File("${resdir}/${sample}_${edition}.txt"))
+        task "${tver}_he_samples_${sample}_${edition}"(
+          type: JavaExec,
+        ) {
+          def resdir = "${buildDir}/samples/results/he"
+
+          if (tver == "run") {
+            dependsOn "${tver}_${edition}j_samples_he", "${edition}jJar"
+            description "Run test of HE ${sample} with ${edition}"
+            outputs.file "${resdir}/${sample}_${edition}.txt"
+
+            classpath = configurations.samples \
+            + files("${buildDir}/samples/classes/${tver}/${edition}") \
+            + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
+            + files(saxonLicenseDir)
+          } else {
+            dependsOn "${tver}_${edition}j_samples_he", "compileJava"
+            description "Debug test of HE ${sample} with ${edition}"
+
+            classpath = configurations.samples \
+            + files("${buildDir}/samples/classes/${tver}/${edition}") \
+            + project.files("${buildDir}/classes/java/main") \
+            + files("${projectDir}/src/main/resources") \
+            + files(saxonLicenseDir)
+          }
+
+          inputs.files fileTree(dir: "${buildDir}/samples/classes/${tver}/${edition}")
+          inputs.files "${projectDir}/src/samples/java/he"
+          workingDir = "${buildDir}/output/he/resources/samples"
+
+          doFirst {
+            if (tver == "run") {
+              mkdir resdir
+              standardOutput = new FileOutputStream(new File("${resdir}/${sample}_${edition}.txt"))
+            }
+          }
+
+          systemProperties = ["javax.xml.transform.TransformerFactory": "net.sf.saxon.TransformerFactoryImpl"]
+
+          main = sampleClass
+          args sampleArgs
         }
 
-        classpath = configurations.samples \
-        + files("${buildDir}/samples/java/${edition}/classes") \
-        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
-        + files(saxonLicenseDir)
+        if (tver == "run") {
+          Task t = task "check_he_samples_${sample}_${edition}"(
+            type: Exec,
+            dependsOn: ["run_he_samples_${sample}_${edition}"],
+            description: "Check the results of run_he_samples_${sample}_${edition}"
+          ) {
+            workingDir "${buildDir}/samples/results/he"
 
-        systemProperties = ["javax.xml.transform.TransformerFactory": "net.sf.saxon.TransformerFactoryImpl"]
+            def args = ["python3", "${projectDir}/tools/sample-check.py",
+                        "--sample", sample, "--edition", edition]
+            if (project.findProperty("ignoreSampleErrors") != null) {
+              args.add("--ignore-errors")
+            }
+            args.add("${sample}_${edition}.txt")
 
-        main = sampleClass
-        args sampleArgs
+            commandLine args
+          }
+
+          tasks.findByName("he_samples_${edition}").dependsOn t
+        }
       }
-
-      Task t = task "check_he_samples_${sample}_${edition}"(
-        type: Exec,
-        dependsOn: ["run_he_samples_${sample}_${edition}"],
-        description: "Check the results of run_he_samples_${sample}_${edition}"
-      ) {
-        workingDir "${buildDir}/samples/results/he"
-        commandLine "python3", "${projectDir}/tools/sample-check.py", "--sample", sample, "--edition", edition, "${sample}_${edition}.txt"
-      }
-
-      tasks.findByName("he_samples_${edition}").dependsOn t
     }
   }
 }
@@ -305,73 +302,98 @@ def eeSampleArgs = ["JDOM2Example": ["data/books.xml", "styles/books.xsl"],
                     "XPathExampleSA": ["data/books.xml", "data/books.xsd"],
                     "XQJExamples": ["all"]]
 
-eeSampleConfigurations.each { sample ->
-  def sampleClass = "ee.${sample}"
-  if (eeSampleMainClass.containsKey(sample)) {
-        sampleClass = "ee.${eeSampleMainClass[sample]}"
-      }
-  def sampleArgs = eeSampleArgs[sample]
-
-  task "run_ee_samples_${sample}"(
-    type: JavaExec,
-    dependsOn: ["eej_samples_ee", "eej_samples_he", "eejJar"],
-    description: "Run test of EE ${sample}"
+["run", "debug"].each { tver ->
+  task "${tver}_eej_samples_ee"(
+    type: JavaCompile,
   ) {
-    def resdir = "${buildDir}/samples/results/ee"
-
-    inputs.files fileTree(dir: "${buildDir}/samples/java/ee/classes")
-    inputs.files "${projectDir}/src/samples/java/ee"
-    outputs.file "${resdir}/${sample}.txt"
-    workingDir = "${buildDir}/output/ee/resources/samples"
-
-    doFirst {
-      mkdir resdir
-      standardOutput = new FileOutputStream(new File("${resdir}/${sample}.txt"))
+    description "Compile the HE samples with EE for ${tver} testing"
+    if (tver == "run") {
+      dependsOn "eej_setup_samples", "eejCompile", "${tver}_eej_samples_he"
+      classpath = configurations.samples \
+      + files("${buildDir}/samples/classes/${tver}/ee") \
+      + files("${buildDir}/classes/eej")
+    } else {
+      dependsOn "eej_setup_samples", "compileJava", "${tver}_eej_samples_he"
+      classpath = configurations.samples \
+      + files("${buildDir}/samples/classes/${tver}/ee") \
+      + project.files("${buildDir}/classes/java/main") \
+      + files("${projectDir}/src/main/resources") \
     }
 
-    classpath = configurations.samples \
-    + files("${buildDir}/samples/java/ee/classes") \
-    + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar") \
-    + files(saxonLicenseDir)
-
-    systemProperties = ["javax.xml.transform.TransformerFactory": "net.sf.saxon.TransformerFactoryImpl"]
-
-    main = sampleClass
-    args sampleArgs
+    source = "${buildDir}/samples/java/ee"
+    destinationDirectory = new File("${buildDir}/samples/classes/${tver}/ee")
+    doFirst {
+      mkdir "${buildDir}/samples/classes/${tver}/ee"
+    }
   }
 
-  Task t = task "check_ee_samples_${sample}"(
-    type: Exec,
-    dependsOn: ["run_ee_samples_${sample}"],
-    description: "Check the results of run_ee_samples_${sample}"
-  ) {
-    workingDir "${buildDir}/samples/results/ee"
-    commandLine "python3", "${projectDir}/tools/sample-check.py",
-      "--sample", sample, "--edition", "ee", "${sample}.txt"
+  eeSampleConfigurations.each { sample ->
+    def sampleClass = "ee.${sample}"
+    if (eeSampleMainClass.containsKey(sample)) {
+      sampleClass = "ee.${eeSampleMainClass[sample]}"
+    }
+    def sampleArgs = eeSampleArgs[sample]
+
+    task "${tver}_ee_samples_${sample}"(
+      type: JavaExec,
+    ) {
+      def resdir = "${buildDir}/samples/results/ee"
+
+      if (tver == "run") {
+        dependsOn "${tver}_eej_samples_ee", "${tver}_eej_samples_he", "eejJar"
+        description "Run test of EE ${sample} with EE"
+        outputs.file "${resdir}/${sample}.txt"
+
+        classpath = configurations.samples \
+        + files("${buildDir}/samples/classes/${tver}/ee") \
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar") \
+        + files(saxonLicenseDir)
+      } else {
+        dependsOn "${tver}_eej_samples_ee", "${tver}_eej_samples_he", "compileJava"
+        description "Debug test of EE ${sample} with EE"
+
+        classpath = configurations.samples \
+        + files("${buildDir}/samples/classes/${tver}/ee") \
+        + project.files("${buildDir}/classes/java/main") \
+        + files("${projectDir}/src/main/resources") \
+        + files(saxonLicenseDir)
+      }
+
+      inputs.files fileTree(dir: "${buildDir}/samples/java/ee/classes")
+      inputs.files "${projectDir}/src/samples/java/ee"
+      workingDir = "${buildDir}/output/ee/resources/samples"
+
+      doFirst {
+        if (tver == "run") {
+          mkdir resdir
+          standardOutput = new FileOutputStream(new File("${resdir}/${sample}.txt"))
+        }
+      }
+
+      systemProperties = ["javax.xml.transform.TransformerFactory": "net.sf.saxon.TransformerFactoryImpl"]
+
+      main = sampleClass
+      args sampleArgs
+    }
+
+    if (tver == "run") {
+      Task t = task "check_ee_samples_${sample}"(
+        type: Exec,
+        dependsOn: ["run_ee_samples_${sample}"],
+        description: "Check the results of run_ee_samples_${sample}"
+      ) {
+        workingDir "${buildDir}/samples/results/ee"
+
+        def args = ["python3", "${projectDir}/tools/sample-check.py",
+                    "--sample", sample, "--edition", "ee"]
+        if (project.findProperty("ignoreSampleErrors") != null) {
+          args.add("--ignore-errors")
+        }
+        args.add("${sample}.txt")
+
+        commandLine args
+      }
+      tasks.findByName("ee_samples").dependsOn t
+    }
   }
-  tasks.findByName("ee_samples").dependsOn t
 }
-
-/*
-
-/*
-}
-
-    <!-- S9APIExamples sample tests -->
-    <macrodef name="samples-s9api"
-        description="Run test of s9api samples">
-        <attribute name="version"
-        <attribute name="target"
-        <sequential>
-            <exec executable="java"
-                dir="${build-resources.dir}/samples"
-                failonerror="true">
-                <arg line="-cp ${basedir}/${build-resources.dir}/samples/java/classes${Z}${basedir}/${build-@{version}j.dir}/saxon-@{version}-${major.version}.jar${Z}${license.dir}"
-                <arg line="he/S9APIExamples"
-                <arg line="@{target}"
-            </exec>
-        </sequential>
-    </macrodef>
-
-        <samples-s9api version="he" target="QueryA"
-*/

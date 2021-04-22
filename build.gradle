@@ -1,15 +1,33 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    // I'll move this to somewhere "real" in the short term
+    maven { url "https://nwalsh.com/maven" }
+  }
+  dependencies {
+    classpath 'com.nwalsh:gradle-docker-container-plugin:0.9.5'
+  }
+}
+
 plugins {
   id "java"
   id "maven-publish"
   id "signing"
-//  id "com.cdsap.talaiot" version "1.3.5"
 }
-
-import org.gradle.internal.os.OperatingSystem;
 
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+
+// These plugins are in buildSrc
+apply plugin: JarSignPlugin
+apply plugin: ManageBranchesPlugin
+apply plugin: ManageTestSuitesPlugin
+
+import org.gradle.internal.os.OperatingSystem;
+import com.nwalsh.DockerContainer
+
+project.extensions.create("testSuite", TestSuite, project)
 
 repositories {
   mavenLocal()
@@ -37,6 +55,14 @@ configurations {
   samples.extendsFrom(implementation)
 }
 
+sourceSets {
+  main
+  samples {
+    runtimeClasspath += configurations.samples + main.output
+    compileClasspath += configurations.samples + main.output
+  }
+}
+
 // Set saxonLicenseDir in gradle.properties, or from the
 // command line if you have a license in some other place.
 if (!hasProperty("saxonLicenseDir")) {
@@ -46,6 +72,9 @@ if (!hasProperty("saxonLicenseDir")) {
     ext.saxonLicenseDir=System.getenv('HOME') + "/java"
   }
 }
+
+println("Building with Java version ${System.getProperty('java.version')}")
+println("Expecting Saxon license file to be in ${saxonLicenseDir}")
 
 dependencies {
   preprocessor (
@@ -73,7 +102,8 @@ dependencies {
     fileTree(dir: "extra/MyDotNet/classpath"),
     fileTree(dir: "extra/MyDotNet/stubs"),
     fileTree(dir: "lib/asm-${asmVersion}"),
-    files("lib/Tidy.jar"),
+    files(saxonLicenseDir),
+    files("lib/Tidy.jar")
   )
   jarjarAsm (
     fileTree(dir: "${buildDir}/lib/asm")
@@ -95,7 +125,7 @@ dependencies {
     [group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.2'],
     [group: 'org.junit.platform', name: 'junit-platform-console-standalone', version: '1.7.1'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
-    [group: 'org.apache.derby', name: 'derby', version: '10.15.2.0'],
+    [group: sqlDriverGroup, name: sqlDriverName, version: sqlDriverVersion],
     files("src/main/resources"),
     files("lib/Tidy.jar"),
     files(saxonLicenseDir),
@@ -120,7 +150,8 @@ dependencies {
     files("${System.getProperty('java.home')}/../lib/tools.jar")
   )
   samples (
-    [group: 'javax.servlet', name: 'servlet-api', version: '2.5']
+    [group: 'javax.servlet', name: 'servlet-api', version: '2.5'],
+    [group: sqlDriverGroup, name: sqlDriverName, version: sqlDriverVersion]
   )
 }
 
@@ -134,46 +165,6 @@ test {
   }
 }
 
-/*
-talaiot {
-  metrics {
-    performanceMetrics = false
-  }
-  publishers {
-    taskDependencyGraphPublisher {
-      gexf = false
-      dot = true
-      html = false
-    }
-  }
-}
-*/
-
-// Set the locations of the W3C test suites
-if (!hasProperty("w3cQT3TestSuiteDir")) {
-  ext.w3cQT3TestSuiteDir = System.getenv("W3C_QT3_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cXslt30TestSuiteDir")) {
-  ext.w3cXslt30TestSuiteDir = System.getenv("W3C_XSLT30_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cXsdTestSuiteDir")) {
-  ext.w3cXsdTestSuiteDir = System.getenv("W3C_XSD_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cQT4TestSuiteDir")) {
-  ext.w3cQT4TestSuiteDir = System.getenv("W3C_QT4_TEST_SUITE_DIR")
-}
-if (!hasProperty("w3cXslt40TestSuiteDir")) {
-  ext.w3cXslt40TestSuiteDir = System.getenv("W3C_XSLT40_TEST_SUITE_DIR")
-}
-
-if (!hasProperty("sonatypeUsername")) {
-  ext.sonatypeUsername=""
-}
-
-if (!hasProperty("sonatypePassword")) {
-  ext.sonatypePassword=""
-}
-
 ext {
   systemOs = OperatingSystem.current()
   icu4jJar = null
@@ -184,158 +175,12 @@ ext {
   version_h = saxonVersion.replace(".", "-")
   fileSeparator = System.getProperty("file.separator")
   DSTAMP=new Date().format("yyyyMMdd")
-  // Jar signing parameters 
-  eToken = "THIS-IS-NOT-THE-ETOKEN"
-  signkeyNewAlias = "THIS-IS-NOT-THE-ALIAS"
-  signkeyPassword = "THIS-IS-NOT-THE-PASSWORD"
-  signJarArgs = null
-  makeSignedJars = false
   // Docker containers
-  containers = [:]
   c_sqlserver = "sqlserver"
 }
 
-public class DeleteFilesRecursively {
-  static void delete(File file){
-    for (File fspec : file.listFiles()) {
-      if (fspec.isDirectory()) {
-        delete(fspec);
-      } else {
-        fspec.delete();
-      }
-    }
-    file.delete();
-  }
-}
-
 // ============================================================
-// Have you switched branches?
-def branch = new ByteArrayOutputStream()
-def result = exec {
-  commandLine "git", "rev-parse", "--abbrev-ref", "HEAD"
-  standardOutput = branch;
-}
-def currentBranch = branch.toString().trim()
-
-def builtBranch = "none";
-try {
-  def xbranch = new BufferedReader(new FileReader(new File("build/built-branch")))
-  builtBranch = "${xbranch.readLine().trim()}"
-} catch (FileNotFoundException foe) {
-  // nop
-}
-
-if (currentBranch != builtBranch
-    && (file("${buildDir}/src").exists()
-        || file("${buildDir}/preprocess").exists()
-        || file("${buildDir}/filtered").exists()
-        || file("${buildDir}/classes").exists())) {
-  println("You appear to have switched to the '${currentBranch}' branch.")
-  println("Deleting stale build sources...")
-  DeleteFilesRecursively.delete(new File("${buildDir}/src"))
-  DeleteFilesRecursively.delete(new File("${buildDir}/preprocess"))
-  DeleteFilesRecursively.delete(new File("${buildDir}/filtered"))
-  DeleteFilesRecursively.delete(new File("${buildDir}/classes"))
-}
-
-// ============================================================
-// Private options required for signing jars. (Can't be
-// checked into the repository because they're sekrit.)
-def eToken = "THIS-IS-NOT-THE-ETOKEN"
-["${System.getenv("SAXON_SIGN_ETOKEN")}",
- "${projectDir}/../../private/eToken/macos/eToken.cfg",
- "z:/some/other/token/path"].each { path ->
-  if (eToken == "THIS-IS-NOT-THE-ETOKEN"
-      && new File(path).exists()) {
-    eToken = path
-  }
-}
-
-if (System.getenv("SAXON_SIGN_ALIAS") != null) {
-  ext.signkeyNewAlias = System.getenv("SAXON_SIGN_ALIAS")
-}
-
-if (System.getenv("SAXON_SIGN_PASSWORD") != null) {
-  ext.signkeyPassword = System.getenv("SAXON_SIGN_PASSWORD")
-}
-
-def canSignJars = (!eToken.startsWith("THIS-IS-NOT")
-                   && !signkeyNewAlias.startsWith("THIS-IS-NOT")
-                   && !signkeyPassword.startsWith("THIS-IS-NOT"))
-
-if (OperatingSystem.current().isWindows()) {
-  ext.signjarArgs = ["jarsigner",
-                     "-keystore", "NONE",
-                     "-storetype", "PKCS11",
-                     "-tsa", "http://rfc3161timestamp.globalsign.com/advanced",
-                     "-providerClass", "sun.security.pkcs11.SunPKCS11",
-                     "-providerArg", eToken]
-} else {
-  ext.signjarArgs = ["jarsigner",
-                     "-tsa", "http://rfc3161timestamp.globalsign.com/advanced",
-                     "-storetype", "PKCS11",
-                     "-providerClass", "sun.security.pkcs11.SunPKCS11",
-                     "-providerArg", eToken]
-}
-
-if (project.findProperty("testSignJars") == "true") {
-  canSignJars = true
-  ext.signjarArgs = ["echo", "JARSIGNER"]
-}
-
-if (project.findProperty("signJars") == "true") {
-  if (!canSignJars) {
-    raise GradleException("Build is not configured to sign jars.")
-  }
-  ext.makeSignedJars = true
-}
-
-def signJar(String jarfile) {
-  if (ext.makeSignedJars) {
-    def args = ext.signjarArgs +
-      [jarfile,
-       ext.signkeyNewAlias,
-       "-storepass",
-       ext.signkeyPassword]
-    exec {
-      commandLine args
-    }
-  }
-}
-
-// ============================================================
-// Find jar files that need to be part of the build or release
-//
-def filesep = System.getProperty("file.separator")
-icu4jJar = "${filesep}icu4j-${icu4jVersion}.jar"
-tagsoupJar = "${filesep}tagsoup-${tagsoupVersion}.jar"
-mailJar = "${filesep}javax.mail-${mailVersion}.jar"
-jlineJar = "${filesep}jline-${jlineVersion}.jar"
-resolverJar = "${filesep}xml-resolver-1.2.jar"
-configurations.compileClasspath.each { cp ->
-  if (cp.toString().endsWith(icu4jJar)) {
-    icu4jJar = cp.toString()
-  }
-  if (cp.toString().endsWith(tagsoupJar)) {
-    tagsoupJar = cp.toString()
-  }
-  if (cp.toString().endsWith(mailJar)) {
-    mailJar = cp.toString()
-  }
-  if (cp.toString().endsWith(resolverJar)) {
-    resolverJar = cp.toString()
-  }
-  if (cp.toString().endsWith(jlineJar)) {
-    jlineJar = cp.toString()
-  }
-}
-
-apply from: "build-n.gradle"
-apply from: "build-c.gradle"
-apply from: "build-doc.gradle"
-apply from: "test-suites.gradle"
-apply from: "build-resources.gradle"
-apply from: "run-samples.gradle"
+// Some utility functions
 
 def pathExists(pathname) {
   // Returns true iff pathame is an existing file or directory
@@ -362,6 +207,64 @@ def pathExists(pathname) {
   return false
 }
 
+def copySourceName(File src, String targetDir) {
+  // There are lots of preprocessing steps that copy files from
+  // src directories to directories under build. This function
+  // handles the renaming. Given
+  // ${projectDir}/src/main/java/blah/blah/file.ext and out/hej,
+  // this function returns
+  // ${buildDir}/out/hej/blah/blah/file.ext
+  int srcLength = "${projectDir}/src/main/java/".length()
+  String base = src.getAbsolutePath().substring(srcLength)
+  if (targetDir.endsWith("/")) {
+    return new File("${buildDir}/${targetDir}${base}")
+  } else {
+    return new File("${buildDir}/${targetDir}/${base}")
+  }
+}
+
+def signJar(String jarfile) {
+  // It's convenient to leave this in build.gradle because of the exec closure.
+  if (jarsigner.makeSignedJars) {
+    exec {
+      commandLine jarsigner.signJarCommand(jarfile)
+    }
+  }
+}
+
+// ============================================================
+// Find jar files that need to be part of the build or release
+//
+icu4jJar = "${fileSeparator}icu4j-${icu4jVersion}.jar"
+tagsoupJar = "${fileSeparator}tagsoup-${tagsoupVersion}.jar"
+mailJar = "${fileSeparator}javax.mail-${mailVersion}.jar"
+jlineJar = "${fileSeparator}jline-${jlineVersion}.jar"
+resolverJar = "${fileSeparator}xml-resolver-1.2.jar"
+configurations.compileClasspath.each { cp ->
+  if (cp.toString().endsWith(icu4jJar)) {
+    icu4jJar = cp.toString()
+  }
+  if (cp.toString().endsWith(tagsoupJar)) {
+    tagsoupJar = cp.toString()
+  }
+  if (cp.toString().endsWith(mailJar)) {
+    mailJar = cp.toString()
+  }
+  if (cp.toString().endsWith(resolverJar)) {
+    resolverJar = cp.toString()
+  }
+  if (cp.toString().endsWith(jlineJar)) {
+    jlineJar = cp.toString()
+  }
+}
+
+apply from: "build-n.gradle"
+apply from: "build-c.gradle"
+apply from: "build-doc.gradle"
+apply from: "test-suites.gradle"
+apply from: "build-resources.gradle"
+apply from: "run-samples.gradle"
+
 // ============================================================
 // One of the features of Gradle is that you can construct tasks
 // dynamically during the "configure" phase. This is a feature because
@@ -374,29 +277,62 @@ def pathExists(pathname) {
   def Release = initial.toUpperCase() + "e"
   def RELEASE = release.toUpperCase()
 
-  if (release != "he") {
-    Task libs = task "${release}j_libs"(
-      description: "Dependency to make sure library files are copie for ${RELEASE}"
-    ) {
-      // Just a container to hang dependencies on
-    }
-
-    Task icu4j = task "${release}j_icu4j"(
-      type: Copy,
-      description: "Copy the ICU4J jar into the ${RELEASE} release directory"
-    ) {
-      from "${icu4jJar}"
-      into "${buildDir}/releases/${release}j"
-    }
-    libs.dependsOn icu4j
-  }
-
-  task "${release}j_copyTestDrivers"(
-    dependsOn: ["${release}j_copyTestDriverSources",
-                "${release}j_copyTestDriverResources"],
-    description: "Copy test driver sources and resources for ${RELEASE}"
+  Task libs = task "${release}j_extras"(
+    description: "Copy extra files for the ${RELEASE} release"
   ) {
-    // Just a container to hang dependencies on
+    doLast {
+      copy {
+        into "${buildDir}/releases/${release}j"
+        from jlineJar
+      }
+    }
+    doLast {
+      copy {
+        into "${buildDir}/releases/${release}j/doc"
+        from "${projectDir}/src/docs/doc"
+      }
+    }
+    doLast {
+      copy {
+        into "${buildDir}/releases/${release}j/doc"
+        from "${projectDir}/src/docs/doc"
+      }
+    }
+    doLast {
+      copy {
+        into "${buildDir}/releases/${release}j/notices"
+        from "${projectDir}/src/docs/notices"
+        include "JAMESCLARK.txt"
+        include "JLINE2.txt"
+        include "LICENSE.txt"
+        include "THAI.txt"
+        include "UNICODE.txt"
+      }
+    }
+    if (release == "pe" || release == "ee") {
+      doLast {
+        copy {
+          into "${buildDir}/releases/${release}j/notices"
+          from "${projectDir}/src/docs/notices"
+          include "ICU-J.txt"
+        }
+      }
+      doLast {
+        copy {
+          from "${icu4jJar}"
+          into "${buildDir}/releases/${release}j"
+        }
+      }
+    }
+    if (release == "ee") {
+      doLast {
+        copy {
+          into "${buildDir}/releases/${release}j/notices"
+          from "${projectDir}/src/docs/notices"
+          include "ASM.txt"
+        }
+      }
+    }
   }
 
   task "${release}jZip"(
@@ -405,143 +341,6 @@ def pathExists(pathname) {
   ) {
     from "${buildDir}/releases/${release}j"
     archiveFileName = "Saxon${RELEASE}${saxonVersion.replace('.', '-')}J.zip"
-  }
-}
-
-task hej_notices(
-  type: Copy,
-  description: "Copy the notices into the HEJ release directory"
-) {
-  into "${buildDir}/releases/hej"
-  from ("src/docs") {
-    exclude "saxonc-doc"
-    exclude "welcome"
-    exclude "resources"
-    exclude "notices/APACHE-ANT.txt"
-    exclude "notices/APACHE-RESOLVER.txt"
-    exclude "notices/APACHE-TAGSOUP.txt"
-    exclude "notices/APACHE-XERCES.txt"
-    exclude "notices/ASM.txt"
-    exclude "notices/FRIJTERS.txt"
-    exclude "notices/GPL+CLASSPATH.txt"
-    exclude "notices/ICU-J.txt"
-    exclude "notices/LEGAL.txt"
-    exclude "notices/CERN.txt"
-    exclude "notices/HRLDCPR.txt"
-  }
-}
-
-task hej_extrajars(
-  type: Copy,
-  description: "Copy extra jars for the HE release"
-) {
-  into "${buildDir}/releases/hej"
-  from jlineJar
-}
-
-task pej_notices(
-  type: Copy,
-  description: "Copy the notices into the PEJ release directory"
-) {
-  into "${buildDir}/releases/pej"
-  from ("src/docs") {
-    exclude "saxonc-doc"
-    exclude "welcome"
-    exclude "resources"
-    exclude "notices/APACHE-ANT.txt"
-    exclude "notices/APACHE-RESOLVER.txt"
-    exclude "notices/APACHE-TAGSOUP.txt"
-    exclude "notices/APACHE-XERCES.txt"
-    exclude "notices/ASM.txt"
-    exclude "notices/FRIJTERS.txt"
-    exclude "notices/GPL+CLASSPATH.txt"
-    exclude "notices/LEGAL.txt"
-    exclude "notices/CERN.txt"
-    exclude "notices/HRLDCPR.txt"
-  }
-}
-
-task pej_extrajars(
-  type: Copy,
-  description: "Copy extra jars for the PE release"
-) {
-  into "${buildDir}/releases/pej"
-  from jlineJar
-}
-
-task eej_notices(
-  type: Copy,
-  description: "Copy the notices into the EEJ release directory"
-) {
-  into "${buildDir}/releases/eej"
-  from ("src/docs") {
-    exclude "saxonc-doc"
-    exclude "welcome"
-    exclude "resources"
-    exclude "notices/APACHE-ANT.txt"
-    exclude "notices/APACHE-RESOLVER.txt"
-    exclude "notices/APACHE-TAGSOUP.txt"
-    exclude "notices/APACHE-XERCES.txt"
-    exclude "notices/FRIJTERS.txt"
-    exclude "notices/GPL+CLASSPATH.txt"
-    exclude "notices/LEGAL.txt"
-    exclude "notices/CERN.txt"
-    exclude "notices/HRLDCPR.txt"
-  }
-}
-
-task eej_extrajars(
-  type: Copy,
-  description: "Copy extra jars for the EE release"
-) {
-  into "${buildDir}/releases/eej"
-  from jlineJar
-}
-
-// ============================================================
-// In an ideal world, I'd make the build process more standalone
-// by automatically cloning the repositories if they weren't
-// available. But the QT3 test suite in particular is huge and
-// takes a long time to clone. So for now, just force users to
-// tell us where they've cloned them.
-
-task cloneQT3TestSuite() {
-  doLast {
-    if (w3cQT3TestSuiteDir == null) {
-      throw new GradleException("The location of the QT3 test suite is unknown.")
-    }
-  }
-}
-
-task cloneXslt30TestSuite() {
-  doLast {
-    if (w3cXslt30TestSuiteDir == null) {
-      throw new GradleException("The location of the XSLT 3.0 test suite is unknown.")
-    }
-  }
-}
-
-task cloneXsdTestSuite() {
-  doLast {
-    if (w3cXsdTestSuiteDir == null) {
-      throw new GradleException("The location of the XSD test suite is unknown.")
-    }
-  }
-}
-
-task cloneQT4TestSuite() {
-  doLast {
-    if (w3cQT4TestSuiteDir == null) {
-      throw new GradleException("The location of the QT4 test suite is unknown.")
-    }
-  }
-}
-
-task cloneXslt40TestSuite() {
-  doLast {
-    if (w3cXslt40TestSuiteDir == null) {
-      throw new GradleException("The location of the XSLT 4.0 test suite is unknown.")
-    }
   }
 }
 
@@ -605,6 +404,7 @@ task hej_featureKeys(
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
   outputs.file "${projectDir}/src/main/java/net/sf/saxon/lib/Feature.java"
   outputs.file "${projectDir}/src/main/java/net/sf/saxon/lib/FeatureCode.java"
+  outputs.file "${projectDir}/src/main/java/net/sf/saxon/lib/FeatureData.java"
   outputs.file "${projectDir}/src/main/java/net/sf/saxon/lib/FeatureKeys.java"
   classpath = configurations.preprocessor
   main = "net.sf.saxon.Transform"
@@ -614,233 +414,213 @@ task hej_featureKeys(
 }
 
 // Make sure we create feature keys before compiling Java
-compileJava.dependsOn hej_featureKeys
+compileJava.dependsOn "hej_featureKeys"
+compileJava.dependsOn "record_branch"
 
-task hej_setupPreprocess(
-  type: Copy,
+task "hej_preprocess"(
   dependsOn: ["hej_featureKeys", "record_branch"],
-  description: "Copy HE sources for preprocessing HE"
+  description: "Preprocess HE sources for a production build"
 ) {
-  from "${projectDir}/src/main/java"
-  into "${buildDir}/filtered/hej"
-  include "net/sf/saxon/**/*.java"
-  include "net/sf/saxon/**/package.html"
-  //include "net/sf/saxon/data/**"
-  exclude "javax/xml/xquery/*.java"
-  exclude "**/dotnet/**"
-  exclude "net/sf/saxon/testdriver/**"
-  exclude "net/sf/saxon/option/sql/**"
-  exclude "net/sf/saxon/option/cpp/**"
-  exclude "net/sf/saxon/jetonnet/**"
-}
+  int baselen = "${projectDir}/src/main/java/".length()
+  def allInputs = files("src/main/java")
+    .asFileTree
+    .matching {
+      include "net/sf/saxon/**/*.java"
+      include "net/sf/saxon/**/package.html"
+      exclude "javax/xml/xquery/*.java"
+      exclude "**/dotnet/**"
+      exclude "net/sf/saxon/testdriver/**"
+      exclude "net/sf/saxon/option/sql/**"
+      exclude "net/sf/saxon/option/cpp/**"
+      exclude "net/sf/saxon/jetonnet/**"
+    }
+    .files
 
-task hej_setupPreprocessForPej(
-  type: Copy,
-  dependsOn: ["hej_featureKeys"],
-  description: "Copy HE sources for preprocessing PE"
-) {
-  from "${projectDir}/src/main/java"
-  into "${buildDir}/filtered/pej"
-  include "net/sf/saxon/**/*.java"
-  include "javax/xml/xquery/*.java"
-  exclude "**/dotnet/**"
-  include "net/sf/saxon/**/package.html"
-  exclude "net/sf/saxon/testdriver/**"
-  exclude "net/sf/saxon/option/cpp/**"
-  exclude "net/sf/saxon/jetonnet/**"
-  //include "net/sf/saxon/data/**"
-}
+  allInputs += hej_featureKeys.outputs.files
 
-task eej_setupPreprocessForPej(
-  type: Copy,
-  description: "Copy EE sources for preprocessing PE"
-) {
-  from "${projectDir}/src/main/java"
-  into "${buildDir}/filtered/pej"
-  include "com/saxonica/**/*.java"
-  exclude "com/saxonica/functions/extfn/cpp/*.java"
-  exclude "com/saxonica/testdriver/**"
-  exclude "com/saxonica/testdriver/ee/**/*.java"
-  exclude "com/saxonica/testdriver/old/**/*.java"
-  exclude "com/saxonica/ee/**"
-  exclude "com/saxonica/config/EnterpriseConfiguration.java"
-  exclude "com/saxonica/expr/CastToUnion.java"
-  exclude "com/saxonica/expr/CastableToUnion.java"
-  exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
-  exclude "com/saxonica/config/ee/**"
-  exclude "com/saxonica/js/**"
-  exclude "com/saxonica/config/DotNetExtensionLibrary.java"
-  exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
-  exclude "com/saxonica/config/DotNetPlatformPE.java"
-  exclude "com/saxonica/config/JavaPlatformEE.java"
-  exclude "com/saxonica/config/NativePlatformPE.java"
-  exclude "com/saxonica/Validate.java"
-  exclude "com/saxonica/config/EnterpriseTransformerFactory.java"
-  exclude "com/saxonica/config/StreamingTransformerFactory.java"
-  exclude "com/saxonica/config/EnterpriseXPathFactory.java"
-  exclude "com/saxonica/config/DynamicLoaderEE.java"
-  exclude "com/saxonica/config/StandardSchemaResolver.java"
-  exclude "com/saxonica/jaxp/SchemaFactoryImpl11.java"
-  exclude "com/saxonica/functions/extfn/NativeCall.java"
-}
-
-task pej_setupPreprocess(
-  dependsOn: ["hej_setupPreprocessForPej", "eej_setupPreprocessForPej", "record_branch"],
-  description: "Copy sources for preprocessing PE"
-) {
-  // Just a container to hang dependencies on
-}
-
-task hej_setupPreprocessForEej(
-  type: Copy,
-  dependsOn: ["hej_featureKeys", "record_branch"],
-  description: "Copy HE sources for EE build"
-) {
-  from "${projectDir}/src/main/java"
-  into "${buildDir}/filtered/eej"
-  include "net/sf/saxon/**/*.java"
-  include "javax/xml/xquery/*.java"
-  exclude "**/dotnet/**"
-  include "net/sf/saxon/**/package.html"
-  exclude "net/sf/saxon/testdriver/**"
-  exclude "net/sf/saxon/option/cpp/**"
-  exclude "net/sf/saxon/jetonnet/**"
-  exclude "net/sf/saxon/jetonnet/**"
-  //include "net/sf/saxon/data/**"
-}
-
-// Rename org.objectweb to com.saxonica.objectweb in the bytecode sources
-task eej_setupPreprocessBytecode(
-  type: Copy,
-  description: "Copy bytecode sources and fix imports"
-) {
-  from "${projectDir}/src/main/java"
-  into "${buildDir}/filtered/eej"
-  include "com/saxonica/ee/bytecode/**/*.java"
-  filter { line ->
-    line.contains("org.objectweb")
-      ? line.replaceAll("org.objectweb", "com.saxonica.objectweb")
-      : line
+  inputs.files allInputs
+  outputs.files allInputs.collect { source ->
+    String rootfn = source.getAbsolutePath().substring(baselen)
+    "${buildDir}/src/hej/${rootfn}"
   }
-}
 
-// N.B. bytecode is explicitly excluded, see eej_setupPreprocessBytecode
-task eej_setupPreprocess(
-  type: Copy,
-  dependsOn: ["hej_setupPreprocessForEej", "eej_setupPreprocessBytecode", "record_branch"],
-  description: "Copy sources for preprocessing EE"
-) {
-  from "${projectDir}/src/main/java"
-  into "${buildDir}/filtered/eej"
-  include "com/saxonica/**/*.java"
-  exclude "com/saxonica/ee/bytecode/**/*.java"
-  exclude "com/saxonica/functions/extfn/cpp/*.java"
-  exclude "com/saxonica/testdriver/**/*.java"
-  exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
-  exclude "com/saxonica/config/DotNetExtensionLibrary.java"
-  exclude "com/saxonica/config/DotNetPlatformPE.java"
-  exclude "com/saxonica/config/NativePlatformPE.java"
-  exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
-  exclude "com/saxonica/functions/extfn/NativeCall.java"
-  include "com/saxonica/**/package.html"
-  exclude "com/saxonica/js/**"
-}
+  doLast {
+    allInputs.each { source ->
+      copy {
+        from source
+        into copySourceName(source, "filtered/hej").getParent()
+        filter { line ->
+          line.contains("import com.saxonica") ? null : line.replaceFirst(/\s+$/, "")
+        }
+      }
+    }
+  }
 
-// ============================================================
-
-task hej_preprocess(
-  type: JavaExec,
-  dependsOn: ["hej_setupPreprocess"],
-  description: "Preprocess HE sources"
-) {
-  inputs.files fileTree(dir: "${buildDir}/filtered/hej")
-  outputs.files fileTree(dir: "${buildDir}/preprocess/hej")
-  classpath = configurations.preprocessor
-  main = "com.igormaznitsa.jcp.JcpPreprocessor"
-  args "/c",
-    "/i:${buildDir}/filtered/hej", "/o:${buildDir}/preprocess/hej",
-    "/p:EE=false", "/p:PE=false", "/p:DOTNET=false",
-    "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false"
   doFirst {
-    mkdir "${buildDir}/preprocess/hej"
+    mkdir "${buildDir}/src/hej"
   }
-}
 
-task pej_preprocess(
-  type: JavaExec,
-  dependsOn: ["pej_setupPreprocess"],
-  description: "Preprocess HE sources"
-) {
-  inputs.files fileTree(dir: "${buildDir}/filtered/pej")
-  outputs.files fileTree(dir: "${buildDir}/preprocess/pej")
-  classpath = configurations.preprocessor
-  main = "com.igormaznitsa.jcp.JcpPreprocessor"
-  args "/c",
-    "/i:${buildDir}/filtered/pej", "/o:${buildDir}/preprocess/pej",
-    "/p:EE=false", "/p:PE=true", "/p:DOTNET=false", "/p:HOF=true",
-    "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false"
-  doFirst {
-    mkdir "${buildDir}/preprocess/pej"
-  }
-}
-
-task eej_preprocess(
-  type: JavaExec,
-  dependsOn: ["eej_setupPreprocess", "asm_jarjar"],
-  description: "Preprocess EE sources"
-) {
-  inputs.files fileTree(dir: "${buildDir}/filtered/eej")
-  outputs.files fileTree(dir: "${buildDir}/preprocess/eej")
-  classpath = configurations.preprocessor
-  main = "com.igormaznitsa.jcp.JcpPreprocessor"
-  args "/c",
-    "/i:${buildDir}/filtered/eej", "/o:${buildDir}/preprocess/eej",
-    "/p:EE=true", "/p:PE=false", "/p:DOTNET=false", "/p:HOF=true",
-    "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=true",
-    "/p:STREAM=true", "/p:PACKAGES=true", "/p:SCHEMA=true"
-  doFirst {
-    mkdir "${buildDir}/preprocess/eej"
-  }
-}
-
-// ============================================================
-
-task hej_sources(
-  type: Copy,
-  dependsOn: ["hej_preprocess"],
-  description: "Collect the preprocessed HE sources for compilation"
-) {
-  from "${buildDir}/preprocess/hej"
-  into "${buildDir}/src/hej"
-  filter { line ->
-    line.contains("import com.saxonica") ? null : line.replaceFirst("\\s++\$", "")
-  }
-}
-
-task pej_sources(
-  type: Copy,
-  dependsOn: ["pej_preprocess"],
-  description: "Collect the preprocessed PE sources for compilation"
-) {
-  from "${buildDir}/preprocess/pej"
-  into "${buildDir}/src/pej"
-  filter { line ->
-    if (line.contains("import com.saxonica.ee")
-        || line.contains("import com.saxonica.config.ee")) {
-      null
-    } else {
-      line.replaceFirst("\\s++\$", "")
+  doLast {
+    javaexec {
+      classpath = configurations.preprocessor
+      main = "com.igormaznitsa.jcp.JcpPreprocessor"
+      args "/c",
+        "/i:${buildDir}/filtered/hej", "/o:${buildDir}/src/hej",
+        "/p:EE=false", "/p:PE=false", "/p:DOTNET=false",
+        "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
 }
 
-task eej_sources(
-  type: Copy,
-  dependsOn: ["eej_preprocess"],
-  description: "Collect the preprocessed EE sources for compilation"
+task "pej_preprocess"(
+  dependsOn: ["hej_featureKeys", "record_branch"],
+  description: "Preprocess PE sources for a production build"
 ) {
-  from "${buildDir}/preprocess/eej"
-  into "${buildDir}/src/eej"
+  int baselen = "${projectDir}/src/main/java/".length()
+  def allInputs = files("src/main/java")
+    .asFileTree
+    .matching {
+      include "net/sf/saxon/**/*.java"
+      include "javax/xml/xquery/*.java"
+      exclude "**/dotnet/**"
+      include "net/sf/saxon/**/package.html"
+      exclude "net/sf/saxon/testdriver/**"
+      exclude "net/sf/saxon/option/cpp/**"
+      exclude "net/sf/saxon/jetonnet/**"
+      include "com/saxonica/**/*.java"
+      exclude "com/saxonica/functions/extfn/cpp/*.java"
+      exclude "com/saxonica/testdriver/**"
+      exclude "com/saxonica/testdriver/ee/**/*.java"
+      exclude "com/saxonica/ee/**"
+      exclude "com/saxonica/config/EnterpriseConfiguration.java"
+      exclude "com/saxonica/expr/CastToUnion.java"
+      exclude "com/saxonica/expr/CastableToUnion.java"
+      exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+      exclude "com/saxonica/config/ee/**"
+      exclude "com/saxonica/js/**"
+      exclude "com/saxonica/config/DotNetExtensionLibrary.java"
+      exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
+      exclude "com/saxonica/config/DotNetPlatformPE.java"
+      exclude "com/saxonica/config/JavaPlatformEE.java"
+      exclude "com/saxonica/config/NativePlatformPE.java"
+      exclude "com/saxonica/Validate.java"
+      exclude "com/saxonica/config/EnterpriseTransformerFactory.java"
+      exclude "com/saxonica/config/StreamingTransformerFactory.java"
+      exclude "com/saxonica/config/EnterpriseXPathFactory.java"
+      exclude "com/saxonica/config/DynamicLoaderEE.java"
+      exclude "com/saxonica/config/StandardSchemaResolver.java"
+      exclude "com/saxonica/jaxp/SchemaFactoryImpl11.java"
+      exclude "com/saxonica/functions/extfn/NativeCall.java"
+    }
+    .files
+
+  allInputs += hej_featureKeys.outputs.files
+
+  inputs.files allInputs
+  outputs.files allInputs.collect { source ->
+    String rootfn = source.getAbsolutePath().substring(baselen)
+    "${buildDir}/src/pej/${rootfn}"
+  }
+
+  doLast {
+    allInputs.each { source ->
+      copy {
+        from source
+        into copySourceName(source, "filtered/pej").getParent()
+        filter { line ->
+          if (line.contains("import com.saxonica.ee")
+              || line.contains("import com.saxonica.config.ee")) {
+            null
+          } else {
+            line.replaceFirst(/\s+$/, "")
+          }
+        }
+      }
+    }
+  }
+
+  doFirst {
+    mkdir "${buildDir}/src/pej"
+  }
+
+  doLast {
+    javaexec {
+      classpath = configurations.preprocessor
+      main = "com.igormaznitsa.jcp.JcpPreprocessor"
+      args "/c",
+        "/i:${buildDir}/filtered/pej", "/o:${buildDir}/src/pej",
+        "/p:EE=false", "/p:PE=false", "/p:DOTNET=false",
+        "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
+    }
+  }
+}
+
+task "eej_preprocess"(
+  dependsOn: ["hej_featureKeys", "record_branch", "asm_jarjar"],
+  description: "Preprocess PE sources for a production build"
+) {
+  int baselen = "${projectDir}/src/main/java/".length()
+  def allInputs = files("src/main/java")
+    .asFileTree
+    .matching {
+      include "net/sf/saxon/**/*.java"
+      include "javax/xml/xquery/*.java"
+      exclude "**/dotnet/**"
+      include "net/sf/saxon/**/package.html"
+      exclude "net/sf/saxon/testdriver/**"
+      exclude "net/sf/saxon/option/cpp/**"
+      exclude "net/sf/saxon/jetonnet/**"
+      exclude "net/sf/saxon/jetonnet/**"
+      include "com/saxonica/**/*.java"
+      exclude "com/saxonica/functions/extfn/cpp/*.java"
+      exclude "com/saxonica/testdriver/**/*.java"
+      exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
+      exclude "com/saxonica/config/DotNetExtensionLibrary.java"
+      exclude "com/saxonica/config/DotNetPlatformPE.java"
+      exclude "com/saxonica/config/NativePlatformPE.java"
+      exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+      exclude "com/saxonica/functions/extfn/NativeCall.java"
+      include "com/saxonica/**/package.html"
+      exclude "com/saxonica/js/**"
+    }
+    .files
+
+  allInputs += hej_featureKeys.outputs.files
+
+  outputs.files allInputs.collect { source ->
+    String rootfn = source.getAbsolutePath().substring(baselen)
+    "${buildDir}/src/eej/${rootfn}"
+  }
+
+  doLast {
+    allInputs.each { source ->
+      copy {
+        from source
+        into copySourceName(source, "filtered/eej").getParent()
+        filter { line ->
+          line.contains("org.objectweb")
+          ? line.replaceAll("org.objectweb", "com.saxonica.objectweb")
+          : line.replaceFirst(/\s+$/, "")
+        }
+      }
+    }
+  }
+
+  doFirst {
+    mkdir "${buildDir}/src/eej"
+  }
+
+  doLast {
+    javaexec {
+      classpath = configurations.preprocessor
+      main = "com.igormaznitsa.jcp.JcpPreprocessor"
+      args "/c",
+        "/i:${buildDir}/filtered/eej", "/o:${buildDir}/src/eej",
+        "/p:EE=true", "/p:PE=false", "/p:DOTNET=false", "/p:HOF=true",
+        "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=true",
+        "/p:STREAM=true", "/p:PACKAGES=true", "/p:SCHEMA=true", "/p:CSHARP=false"
+    }
+  }
 }
 
 // ============================================================
@@ -858,110 +638,141 @@ task record_branch(
     output.close()
   }
   doFirst {
-    mkdir(buildDir)
+    mkdir buildDir
   }
 }
 
 task hejCompile(
   type: JavaCompile,
-  dependsOn: ["hej_sources"],
-  description: "Compile HE for Saxon/Java"
+  dependsOn: ["hej_preprocess"],
+  description: "Compile HE for production"
 ) {
   classpath = configurations.compileClasspath
-  source "${buildDir}/src/hej"
+  source hej_preprocess.outputs
   destinationDirectory = new File("${buildDir}/classes/hej")
 }
 
 task pejCompile(
   type: JavaCompile,
-  dependsOn: ["pej_sources"],
-  description: "Compile PE for Saxon/Java"
+  dependsOn: ["pej_preprocess"],
+  description: "Compile PE for production"
 ) {
   classpath = configurations.compileClasspath
-  source "${buildDir}/src/pej"
+  source pej_preprocess.outputs
   destinationDirectory = new File("${buildDir}/classes/pej")
 }
 
 task eejCompile(
   type: JavaCompile,
-  dependsOn: ["eej_sources"],
+  dependsOn: ["eej_preprocess"],
   description: "Compile EE for Saxon/Java"
 ) {
   classpath = configurations.compileClasspath + configurations.jarjarAsm
-  source "${buildDir}/src/eej"
+  source eej_preprocess.outputs
   destinationDirectory = new File("${buildDir}/classes/eej")
 }
 
 // ============================================================
 
-task hej_copyTestDriverSources(
-  type: Copy,
-  description: "Copy test drivers sources for HE"
+task hej_copyTestDrivers(
+  description: "Copy test driver sources and resources for HE"
 ) {
-  from "src/main/java"
-  into "${buildDir}/src/testdrivers/hej"
-  include "net/sf/saxon/testdriver/*.java"
+  // This is a little complicated because I want to get the inputs and
+  // outputs exactly correct. Starting in Gradle 7.0, if the output is
+  // a directory, then any file that is read from that directory is
+  // implicitly dependent on this step. That's not always what we want
+  // so I'm trying to be careful. I wonder if there's a better way?
+  def fileMap = [:]
+  files("${projectDir}/src/main/java")
+    .asFileTree
+    .matching { include "net/sf/saxon/testdriver/*.java" }
+    .files
+    .each { fileMap[it] = copySourceName(it, 'src/testdrivers/hej') }
+
+  inputs.files fileMap.keySet()
+  outputs.files fileMap.values()
+
+  doLast {
+    fileMap.keySet().each { source ->
+      copy {
+        from source
+        into fileMap[source].getParent()
+      }
+    }
+  }
 }
 
-task pej_copyTestDriverSources(
-  type: Copy,
-  description: "Copy test drivers sources for PE"
+task pej_copyTestDrivers(
+  description: "Copy test driver sources and resources for PE"
 ) {
-  from "src/main/java"
-  into "${buildDir}/src/testdrivers/pej"
-  include "com/saxonica/testdriver/QT3TestDriverPE.java"
-  include "com/saxonica/testdriver/Xslt30TestSuiteDriverPE.java"
-  include "com/saxonica/testdriver/Licensor.java"
-  include "net/sf/saxon/testdriver/*.java"
+  // See comment in hej_copyTestDrivers
+  def fileMap = [:]
+  files("${projectDir}/src/main/java")
+    .asFileTree
+    .matching { 
+      include "com/saxonica/testdriver/QT3TestDriverPE.java"
+      include "com/saxonica/testdriver/Xslt30TestSuiteDriverPE.java"
+      include "com/saxonica/testdriver/Licensor.java"
+      include "net/sf/saxon/testdriver/*.java"
+    }
+    .files
+    .each { fileMap[it] = copySourceName(it, 'src/testdrivers/pej') }
+
+  files("${projectDir}/src/main/java")
+    .asFileTree
+    .matching { 
+      include "com/saxonica/testdriver/gui/images/*"
+    }
+    .files
+    .each { fileMap[it] = copySourceName(it, 'testdriver_classes/pej') }
+
+  inputs.files fileMap.keySet()
+  outputs.files fileMap.values()
+
+  doLast {
+    fileMap.keySet().each { source ->
+      copy {
+        from source
+        into fileMap[source].getParent()
+      }
+    }
+  }
 }
 
-task eej_copyTestDriverSources(
-  type: Copy,
-  description: "Copy test drivers sources for EE"
+task eej_copyTestDrivers(
+  description: "Copy test driver sources and resources for EE"
 ) {
-  from "src/main/java"
-  into "${buildDir}/src/testdrivers/eej"
-  include "com/saxonica/testdriver/**/*.java"
-  include "com/saxonica/js/*.java"
-  include "net/sf/saxon/testdriver/*.java"
-}
+  // See comment in hej_copyTestDrivers
+  def fileMap = [:]
+  files("${projectDir}/src/main/java")
+    .asFileTree
+    .matching { 
+      include "com/saxonica/testdriver/**/*.java"
+      include "com/saxonica/js/*.java"
+      include "net/sf/saxon/testdriver/*.java"
+    }
+    .files
+    .each { fileMap[it] = copySourceName(it, 'src/testdrivers/eej') }
 
-task hej_copyTestDriverResources(
-  type: Copy,
-  description: "Copy test drivers resources for HE"
-) {
-  from "src/main/java"
-  into "${buildDir}/testdriver_classes/hej"
-  include "net/sf/saxon/testdriver/**"
-  exclude "net/sf/saxon/testdriver/**/*.java"
-}
+  files("${projectDir}/src/main/java")
+    .asFileTree
+    .matching { 
+      include "com/saxonica/testdriver/gui/images/*"
+    }
+    .files
+    .each { fileMap[it] = copySourceName(it, 'testdriver_classes/eej') }
 
-task pej_copyTestDriverResources(
-  type: Copy,
-  description: "Copy test drivers resources for PE"
-) {
-  from "src/main/java"
-  into "${buildDir}/testdriver_classes/pej"
-  include "net/sf/saxon/testdriver/**"
-  include "com/saxonica/testdriver/**"
-  exclude "net/sf/saxon/testdriver/**/*.java"
-  exclude "com/saxonica/testdriver/**/*.java"
-  exclude "com/saxonica/testdriver/old/**"
-  exclude "com/saxonica/testdriver/gui/cache.xml"
-}
+  inputs.files fileMap.keySet()
+  outputs.files fileMap.values()
 
-task eej_copyTestDriverResources(
-  type: Copy,
-  description: "Copy test drivers resources for EE"
-) {
-  from "src/main/java"
-  into "${buildDir}/testdriver_classes/eej"
-  include "net/sf/saxon/testdriver/**"
-  include "com/saxonica/testdriver/**"
-  exclude "net/sf/saxon/testdriver/**/*.java"
-  exclude "com/saxonica/testdriver/**/*.java"
-  exclude "com/saxonica/testdriver/old/**"
-  exclude "com/saxonica/testdriver/gui/cache.xml"
+  doLast {
+    fileMap.keySet().each { source ->
+      copy {
+        from source
+        into fileMap[source].getParent()
+      }
+    }
+  }
 }
 
 // ============================================================
@@ -970,68 +781,60 @@ task eej_copyTestDriverResources(
 // problem where a different version of the ASM libraries is used in
 // the application that is using Saxon.
 
-task asm_createRules(
-  description: "Create the jarjar rules file for the ASM libraries"
+task asm_jarjar(
+  description: "Rejar the asm classes for EE"
 ) {
-  outputs.file("${buildDir}/jarjar-asm.rules")
+  def jars = ["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"]
+  jars.each { asm ->
+    inputs.file "lib/asm-${asmVersion}/${asm}-${asmVersion}.jar"
+    outputs.file "${buildDir}/lib/asm/${asm}-${asmVersion}.jar"
+  }
+
+  doFirst {
+    mkdir "${buildDir}/lib/asm"
+  }
+
   doLast {
     new File("${buildDir}/jarjar-asm.rules")
       .withWriter("utf-8") { writer ->
         writer.writeLine("rule org.objectweb.** com.saxonica.objectweb.@1")
       }
   }
-  doFirst {
-    mkdir "${buildDir}"
-  }
-}
-
-task asm_jarjar(
-  description: "Placeholder for the ASM jarjar dependencies"
-) {
-  // just a task to hang dependencies on
-}
-
-task asm_unzip(
-  type: Copy,
-  description: "Extract classes from the asm-xml-${asmVersion} jar"
-) {
-  // This one is from the original ASM
-  def zipFile = file("lib/asm-${asmVersion}/asm-xml-${asmVersion}.jar")
-  def outputDir = "${buildDir}/classes/eej"
-  from zipTree(zipFile)
-  into outputDir
-}
-
-["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"].each { asm ->
-  Task t = task "asm_${asm}"(
-    type: JavaExec,
-    dependsOn: ["asm_createRules"],
-    description: "Run jarjar on ${asm}-${asmVersion} classes"
-) {
-    inputs.file "lib/asm-${asmVersion}/${asm}-${asmVersion}.jar"
-    outputs.file "${buildDir}/lib/asm/${asm}-${asmVersion}.jar"
-    classpath = configurations.preprocessor
-    main = "com.tonicsystems.jarjar.Main"
-    args "--rules", "${buildDir}/jarjar-asm.rules",
-      "lib/asm-${asmVersion}/${asm}-${asmVersion}.jar",
-      "${buildDir}/lib/asm/${asm}-${asmVersion}.jar"
-    doFirst {
-      mkdir "${buildDir}/lib/asm"
+  
+  doLast {
+    jars.each { asm ->
+      javaexec {
+        classpath = configurations.preprocessor
+        main = "com.tonicsystems.jarjar.Main"
+        args "--rules", "${buildDir}/jarjar-asm.rules",
+          "lib/asm-${asmVersion}/${asm}-${asmVersion}.jar",
+          "${buildDir}/lib/asm/${asm}-${asmVersion}.jar"
+      }
     }
   }
-  asm_jarjar.dependsOn t
+}
 
-  t = task "asm_unzip${asm}"(
-    type: Copy,
-    dependsOn: ["asm_jarjar"],
-    description: "Extract the classes from the ${asm}-${asmVersion} jar"
-  ) {
-    def zipFile = file("${buildDir}/lib/asm/${asm}-${asmVersion}.jar")
-    def outputDir = "${buildDir}/classes/eej"
-    from zipTree(zipFile)
-    into outputDir
+task asm_unzip(dependsOn: ["asm_jarjar"]) {
+  doLast {
+    copy {
+      // This one is from the original ASM
+      def zipFile = file("lib/asm-${asmVersion}/asm-xml-${asmVersion}.jar")
+      def outputDir = "${buildDir}/classes/eej"
+      from zipTree(zipFile)
+      into outputDir
+    }
   }
-  asm_unzip.dependsOn t
+  
+  doLast {
+    ["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"].each { asm ->
+      copy {
+        def zipFile = file("${buildDir}/lib/asm/${asm}-${asmVersion}.jar")
+        def outputDir = "${buildDir}/classes/eej"
+        from zipTree(zipFile)
+        into outputDir
+      }
+    }
+  }
 }
 
 // ============================================================
@@ -1237,7 +1040,7 @@ task eejJar(
     include "net/**/*.class"
     include "com/saxonica/**/*.class"
     include "javax/xml/xquery/*.class"
-    exclude "org/objectweb/**/*.class"
+    include "org/objectweb/asm/xml/*.class"
     exclude "**/sql/**/*.class"
     exclude "com/saxonica/StatsTransform*.class"
     exclude "com/saxonica/functions/sql/**"
@@ -1422,7 +1225,7 @@ task eejTests(
 
 task hejRelease(
   type: Copy,
-  dependsOn: ["hejJar", "hejJarTests", "hej_notices", "hej_extrajars"],
+  dependsOn: ["hejJar", "hejJarTests", "hej_extras"],
   description: "Build the HE release for Java"
 ) {
   from "${buildDir}/libs"
@@ -1439,7 +1242,7 @@ task hejRelease(
 
 task pejRelease(
   type: Copy,
-  dependsOn: ["pejJar", "pejJarSql", "pejJarTests", "pej_libs", "pej_notices", "pej_extrajars"],
+  dependsOn: ["pejJar", "pejJarSql", "pejJarTests", "pej_extras"],
   description: "Build the PE release for Java"
 ) {
   from "${buildDir}/libs"
@@ -1458,7 +1261,7 @@ task pejRelease(
 
 task eejRelease(
   type: Copy,
-  dependsOn: ["eejJar", "eejJarSql", "eejJarTests", "eej_libs", "eej_notices", "eej_extrajars"],
+  dependsOn: ["eejJar", "eejJarSql", "eejJarTests", "eej_extras"],
   description: "Build the EE release for Java"
 ) {
   from "${buildDir}/libs"
@@ -1503,8 +1306,6 @@ if (file("${projectDir}/src/main/java/com").exists()) {
     // Just a container to hang dependencies on
   }
 }
-
-// ============================================================
 
 task javaArchiveHE(
   type: Zip,
@@ -1705,8 +1506,8 @@ publishing {
     maven {
       url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
       credentials {
-        username = sonatypeUsername
-        password = sonatypePassword
+        username = project.findProperty("sonatypeUsername") ?: "NOUSER"
+        password = project.findProperty("sonatypePassword") ?: "NOPASS"
       }
     }
   }
@@ -1715,108 +1516,97 @@ publishing {
 // ============================================================
 // Docker tasks related to running an SQL server
 
-def dockerExec = null
-// Laboriously construct a search path that includes some default locations
-// plus the users actual path.
-def spath = ["/usr/local/bin"]
-System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
-  spath += [dir]
-}
-spath.each { dir ->
-  if (dockerExec == null) {
-    def fn = new File(dir + "/docker")
-    if (fn.exists() && fn.canExecute()) {
-      dockerExec = fn.toString()
-    } else {
-      fn = new File(dir + "/docker.exe")
-      if (fn.exists() && fn.canExecute()) {
-        dockerExec = fn.toString()
-      }
-    }
+task dockerup() {
+  doLast {
+    DockerContainer.assertRunning(c_sqlserver)
   }
 }
 
-if (dockerExec == null) {
-  // No docker for you
-  task sqlServerStart() {
-    doLast {
-      println("Docker is not available, ignoring attempt to start server!")
+task dockerdown() {
+  doLast {
+    DockerContainer.assertNotRunning(c_sqlserver)
+  }
+}
+
+task sqlServerStart(dependsOn: ["dockerdown"]) {
+  doFirst {
+    DockerContainer.assertDockerAvailable()
+    DockerContainer.assertDockerComposeAvailable()
+    mkdir "${buildDir}/sql/data"
+  }
+
+  doLast {
+    exec {
+      workingDir "tools/docker"
+      commandLine DockerContainer.dockerCompose(), "up", "-d"
+    }
+    exec {
+      def id = DockerContainer.containerid(c_sqlserver)
+      commandLine "${projectDir}/tools/docker/wait-for-postgresql", id
+    }
+    exec {
+      def id = DockerContainer.containerid(c_sqlserver)
+      commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
+        id, "psql", "-f", "/app/sql/setup.sql"
+    }
+    exec {
+      def id = DockerContainer.containerid(c_sqlserver)
+      commandLine DockerContainer.docker(), "exec", "-i", id,
+        "psql", "-d", "sample", "-U", "testeditor", "-f", "/app/sql/fruits.sql"
+    }
+    exec {
+      commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
     }
   }
+}
 
-  task sqlServerLogs() {
-    doLast {
-      println("Docker is not available, ignoring attempt to view logs!")
+task sqlServerSetup(dependsOn: ["dockerup"]) {
+  def id = "NA"
+  doFirst {
+    id = DockerContainer.containerid(c_sqlserver)
+  }
+  doLast {
+    exec {
+      commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
+        id, "psql", "-f", "/app/sql/setup.sql"
+    }
+    exec {
+      commandLine DockerContainer.docker(), "exec", "-i", id,
+       "psql", "-d", "sample", "-U", "testeditor", "-f", "/app/sql/fruits.sql"
     }
   }
+}
 
-  task sqlServerStop() {
-    doLast {
-      println("Docker is not available, ignoring attempt to stop server!")
+task sqlServerLogs(dependsOn: ["dockerup"]) {
+  def id = "NA"
+  doFirst {
+    id = DockerContainer.containerid(c_sqlserver)
+  }
+  doLast {
+    exec {
+      commandLine DockerContainer.docker(), "logs", id
     }
   }
-} else {
-  def docker_stdout = new ByteArrayOutputStream()
-  exec {
-    commandLine dockerExec, "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
-    standardOutput = docker_stdout;
+}
+
+task sqlServerWatch(dependsOn: ["dockerup"]) {
+  def id = "NA"
+  doFirst {
+    id = DockerContainer.containerid(c_sqlserver)
   }
-  docker_stdout.toString().split("\n").each { line ->
-    def parts = line.split(" ")
-    if (parts.length > 2) {
-      def id = parts[0]
-      def name = parts[1]
-      def status = parts[2]
-
-      if (name.contains(":")) {
-        name = name.split(":")[0];
-      }
-
-      if (!status.startsWith("Exited")) {
-        containers[name] = id
-      }
+  doLast {
+    exec {
+      commandLine DockerContainer.docker(), "logs", id, "-f"
     }
   }
+}
 
-  task dockerup() {
-    doLast {
-      if (!containers.containsKey(c_sqlserver)) {
-        throw new GradleException("Docker containers are not available")
-      }
+task sqlServerStop(dependsOn: ["dockerup"]) {
+  doLast {
+    exec {
+      workingDir "tools/docker"
+      commandLine DockerContainer.dockerCompose(), "down"
     }
-  }
-
-  task dockerdown() {
-    doLast {
-      if (containers.containsKey(c_sqlserver)) {
-        throw new GradleException("Docker containers already running?")
-      }
-    }
-  }
-
-  task sqlServerStart(type: Exec, dependsOn: ["dockerdown", "do_start_derby"]) {
-    commandLine dockerExec, "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
-  }
-
-  task do_start_derby(type: Exec) {
-    workingDir "docker"
-    commandLine "docker-compose", "up", "-d"
-    doFirst {
-      mkdir "${buildDir}/derby/data"
-    }
-  }
-
-  task sqlServerLogs(type: Exec, dependsOn: ["dockerup"]) {
-    def id = "NA"
-    if (containers[c_sqlserver] != null) {
-      id = containers[c_sqlserver]
-    }
-    commandLine dockerExec, "logs", id, "-f"
-  }
-
-  task sqlServerStop(type: Exec, dependsOn: ["dockerup"]) {
-    workingDir "docker"
-    commandLine "docker-compose", "down"
   }
 }
 
