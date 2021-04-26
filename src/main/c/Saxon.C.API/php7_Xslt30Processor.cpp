@@ -249,7 +249,6 @@ PHP_METHOD(Xslt30Processor, compileFromFile)
             if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
                 RETURN_NULL();
             } else {
-                std::cerr<<"php cp0: executable not null"<<std::endl;
                 zend_object *ooth = Z_OBJ_P(return_value);
                 xsltExecutable_object *vobj = (xsltExecutable_object * )((char *) ooth - XtOffsetOf(xsltExecutable_object, std));
                 assert (vobj!= nullptr);
@@ -305,22 +304,34 @@ PHP_METHOD(Xslt30Processor, compileFromString)
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &stylesheetStr, &len1) == FAILURE) {
         RETURN_NULL();
     }
+
     zend_object* pobj = Z_OBJ_P(getThis());
     xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
     xslt30Processor = obj->xslt30Processor;
     if (xslt30Processor != nullptr) {
+        xslt30Processor->exceptionClear();
+
         XsltExecutable * executable = xslt30Processor->compileFromString(stylesheetStr);
         if(executable != nullptr) {
-            zend_object *ooth =  Z_OBJ_P(return_value);
-            xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
-            assert (vobj != nullptr);
-            vobj->xsltExecutable = executable;
+            if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
+                RETURN_NULL();
+            } else {
+
+                zend_object *ooth =  Z_OBJ_P(return_value);
+                xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
+
+                assert (vobj != nullptr);
+
+                vobj->xsltExecutable = executable;
+
+            }
         } else if(xslt30Processor->exceptionOccurred()){
             SaxonApiException * exception = xslt30Processor->getException();
             if(exception != nullptr) {
                 zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
             }
         }
+
     }
 }
 
@@ -360,6 +371,7 @@ PHP_METHOD(Xslt30Processor, compileFromFileAndSave)
     xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
     xslt30Processor = obj->xslt30Processor;
     if (xslt30Processor != nullptr) {
+        xslt30Processor->exceptionClear();
         xslt30Processor->compileFromStringAndSave(stylesheetFilename, filename);
         if(xslt30Processor->exceptionOccurred()){
             SaxonApiException * exception = xslt30Processor->getException();
@@ -389,12 +401,17 @@ PHP_METHOD(Xslt30Processor, compileFromValue)
         if(ooth != nullptr) {
             XdmValue * value = ooth->xdmValue;
             if(value != nullptr && value->size() == 1 && (value->getHead())->getType() == 3) {
+                xslt30Processor->exceptionClear();
                 XsltExecutable * executable = xslt30Processor->compileFromXdmNode((XdmNode*)(value->getHead()));
                 if(executable != nullptr) {
-                    zend_object *ooth =  Z_OBJ_P(return_value);
-                    xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
-                    assert (vobj != nullptr);
-                    vobj->xsltExecutable = executable;
+                    if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
+                        RETURN_NULL();
+                    } else {
+                        zend_object *ooth =  Z_OBJ_P(return_value);
+                        xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
+                        assert (vobj != nullptr);
+                        vobj->xsltExecutable = executable;
+                    }
                 } else if(xslt30Processor->exceptionOccurred()){
                     SaxonApiException * exception = xslt30Processor->getException();
                     if(exception != nullptr) {

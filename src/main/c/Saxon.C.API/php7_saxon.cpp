@@ -974,13 +974,13 @@ std::cerr<<"php_xdmValue  destruct"<<std::endl;
     xdmValue_object* obj = (xdmValue_object *)((char *)oobj - XtOffsetOf(xdmValue_object, std));
     XdmValue * xdmValue= obj->xdmValue;
    if(xdmValue != nullptr) {
-    	//xdmValue->decrementRefCount();
+    	xdmValue->decrementRefCount();
     	if(xdmValue->getRefCount()< 1){
     		delete xdmValue;
 		    xdmValue = nullptr;
-    	}  else {
+    	}  /*else {
             xdmValue->decrementRefCount();
-        }
+        }    */
     }
 }
 
@@ -1193,13 +1193,13 @@ std::cerr<<"php_item  destruct"<<std::endl;
     XdmItem * xdmItem= obj->xdmItem;
 
     if(xdmItem != nullptr) {
-       // xdmItem->decrementRefCount();
+        xdmItem->decrementRefCount();
         if(xdmItem->getRefCount()< 1){
             delete xdmItem;
             xdmItem = nullptr;
-        }  else {
+        }  /*else {
             xdmItem->decrementRefCount();
-        }
+        }   */
     }
     
 }
@@ -1373,13 +1373,13 @@ std::cerr<<"php_node  destruct"<<std::endl;
     if(obj != nullptr) {
     XdmNode * xdmNode= obj->xdmNode;
     if(xdmNode != nullptr) {
-
+        xdmNode->decrementRefCount();
     	if(xdmNode->getRefCount()< 1){
     		delete xdmNode;
 		    xdmNode = nullptr;
-    	} else {
+    	} /*else {
             xdmNode->decrementRefCount();
-            }
+            }*/
     }
     }
 }

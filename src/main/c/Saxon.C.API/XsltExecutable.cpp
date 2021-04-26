@@ -48,10 +48,6 @@ XsltExecutable::~XsltExecutable() {
     clearProperties();
     clearParameters();
 
-    if(selection) {
-        SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
-        selection = nullptr;
-    }
     SaxonProcessor::sxn_environ->env->DeleteGlobalRef(executableObject);
     SaxonProcessor::sxn_environ->env->ExceptionClear(); // This is as a precaution to avoid crashing out if JNI gets into an unclean state.
 }
@@ -126,19 +122,23 @@ void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
 //    if (_selection != nullptr) {
         //_selection->incrementRefCount();
         selectionV = _selection;
-        selection = SaxonProcessor::sxn_environ->env->NewGlobalRef(_selection->getUnderlyingValue());
+        if(_selection != nullptr) {
+            selection = SaxonProcessor::sxn_environ->env->NewGlobalRef(_selection->getUnderlyingValue());
+        }
 //    }
 }
 
 
 void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
-    if(selection) {
+    if(selection != nullptr) {
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
         selection = nullptr;
     }
     if (filename != nullptr) {
         selection = SaxonProcessor::sxn_environ->env->NewGlobalRef(SaxonProcessor::sxn_environ->env->NewStringUTF(filename));
 
+    }   else {
+       selection = nullptr;
     }
 }
 
@@ -260,6 +260,10 @@ void XsltExecutable::clearParameters(bool delValues) {
 
 void XsltExecutable::clearProperties() {
     properties.clear();
+    if(selection != nullptr) {
+            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
+            selection = nullptr;
+    }
 
 }
 
