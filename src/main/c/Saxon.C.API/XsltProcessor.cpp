@@ -356,7 +356,7 @@ void XsltProcessor::compileFromString(const char* stylesheetStr) {
 void XsltProcessor::compileFromXdmNode(XdmNode * node) {
 	static jmethodID cNodemID =
 			(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass,
-					"createStylesheetFromFile",
+					"createStylesheetFromXdmNode",
 					"(Ljava/lang/String;Lnet/sf/saxon/s9api/XdmNode;)Lnet/sf/saxon/s9api/XsltExecutable;");
 	if (!cNodemID) {
 		std::cerr << "Error: "<< getDllname() << "createStylesheetFromXdmNode"
