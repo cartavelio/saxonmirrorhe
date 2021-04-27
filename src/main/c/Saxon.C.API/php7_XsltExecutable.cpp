@@ -1440,7 +1440,7 @@ PHP_METHOD(XsltExecutable, getErrorCode)
     RETURN_NULL();
 }
 
-PHP_METHOD(XsltExecutable, getErrorMessage)
+PHP_METHOD(XsltExecutable, checkForException)
 {
     XsltExecutable *xsltExecutable;
     if (ZEND_NUM_ARGS()>0) {
@@ -1460,6 +1460,29 @@ PHP_METHOD(XsltExecutable, getErrorMessage)
     }
     RETURN_NULL();
 }
+
+PHP_METHOD(XsltExecutable, getErrorMessage)
+{
+    XsltExecutable *xsltExecutable;
+    if (ZEND_NUM_ARGS()>0) {
+        WRONG_PARAM_COUNT;
+    }
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
+    xsltExecutable = obj->xsltExecutable;
+    if (xsltExecutable != nullptr) {
+        if(xsltExecutable->exceptionOccurred()){
+            SaxonApiException * exception = xsltExecutable->getException();
+                    const char * errStr = exception->getMessage();
+                    if(errStr != NULL) {
+                        //char *str = estrdup(errStr);
+                        _RETURN_STRING(errStr);
+                    }
+        }
+    }
+    RETURN_NULL();
+}
+
 PHP_METHOD(XsltExecutable, exceptionClear)
 {
     XsltExecutable *xsltExecutable;
@@ -1511,6 +1534,7 @@ zend_function_entry XsltExecutable_methods[] = {
     PHP_ME(XsltExecutable,  exceptionClear, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  exportStylesheet, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  getErrorCode, nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(XsltExecutable,  checkForException, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  getErrorMessage, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  getXslMessages, nullptr, ZEND_ACC_PUBLIC)
 {nullptr, nullptr, nullptr}

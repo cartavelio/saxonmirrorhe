@@ -16,52 +16,23 @@ echo 'SITE_URL'.    'http://'.$_SERVER['HTTP_HOST'].'/'.BASE_FOLDER;
 echo '<br/>';
 
 
- $saved = getenv("LD_LIBRARY_PATH");        // save old value
- $newld = "/usr/local/jet9.0-pro-x86/lib/x86/shared";  // extra paths to add
- if ($saved) { $newld .= ":$saved"; }           // append old paths if any
- putenv("LD_LIBRARY_PATH=$newld");        // set new value
-
-                        // mycommand is loaded using
-                        // libs in the new path list
- putenv("LD_LIBRARY_PATH=$saved");  
-
- $saved = getenv("PATH");        // save old value
- $newld = "/usr/local/jet9.0-pro-x86/bin:/usr/local/jet9.0-pro-x86/profile1.7.0_40/jre";  // extra paths to add
- if ($saved) { $newld .= ":$saved"; }           // append old paths if any
-putenv("PATH=$newld");        // set new value
- 
-                        // mycommand is loaded using
-                        // libs in the new path list
- //putenv("PATH=$saved"); 
-//phpinfo();
 
 
 
-$path = "xslt30-test/";
+//$path = "/media/ond1/c8f4c380-ed5d-4791-b60d-90df7fd39798/work/git/xslt30-test/";
+$path = __DIR__."/xslt30-test/";
 $catalog = $path."catalog.xml";
 $saxon_version = "";
 
-$proc = new SaxonProcessor();
-$start = microtime(true);
+$proc = new Saxon\SaxonProcessor();
+$xsltproc = $proc->newXslt30Processor();
+/*$start = microtime(true);
               $proc->setSourceFile("cat.xml");
                 $proc->importStylesheetFile("test.xsl");
                 $result = $proc->transformToValue();
- $end = microtime(true);
+ $end = microtime(true); */
 
 
-    echo "Time : " . ($end-$start) . "s\n";
-if($result == NULL) {
-                      $errCount = $proc->getExceptionCount();
-       echo $errCount;    
-if($errCount>0){ 
-                      echo 'Error: '.$proc->getErrorMessage(0)." code:".$proc->getErrorCode(0);        
-                           }
-    
-   } else {
-echo $result;
-}
-//$proc->clear();
-//$proc->close();
 
 
 function test_set_files ($catalog){ 
@@ -151,9 +122,10 @@ echo "</table>";
 
 function run_test_case($testcase, $env, $path){
 	global $proc;
+	global $xsltproc;
 	$errorTest = FALSE;
 	$t_env = $testcase->{'environment'};
-	$testDirValue = new XdmValue(strval($path));
+	$testDirValue = $proc->createAtomicValue(strval($path));
 	$t_env_ref = $t_env->attributes()->ref;
 	$checkDependency = check_dependency($testcase->dependencies);
 	if($checkDependency){
@@ -164,35 +136,33 @@ function run_test_case($testcase, $env, $path){
 				try{
 					if($t_env) {
 					if($env[$t_env_ref.""]){
-						$proc->clear();
+						$result = NULL;
 						//error_log("before apply source:".$env[$t_env_ref.""]);
 						//error_log("before apply stylesheet:".$test);
+						$executable = $xsltproc->compileFromFile($test);
 						$init_template = $testcase->{'test'}->{'initial-template'};
-						if($init_template){
-							$proc->setProperty('it', strval($testcase->{'test'}->{'initial-template'}->attributes()->{'name'}));
+						if($executable == NULL) {
+							error_log("Executable is null on the following file: ".$test);
 						}
-						$result = $proc->xsltApplyStylesheet($env[$t_env_ref.""], $test);
+						if($init_template){
+							//$proc->setProperty('it', strval($testcase->{'test'}->{'initial-template'}->attributes()->{'name'}));
+							$executable->setInitialMatchSelectionAsFile($env[$t_env_ref.""]);
+							$result = $executable->callTemplateReturningString(strval($testcase->{'test'}->{'initial-template'}->attributes()->{'name'}));
+						}   else {
+							$result = $executable->applyTemplatesReturningString($env[$t_env_ref.""], $test);
+							
+						}
+						
 						if($result == NULL) {
-							echo 'Error: '.$proc->getErrorMessage(0)." code:".$proc->getErrorCode(0);		
-							$errCount = $proc->getExceptionCount();
+							
+							echo 'Error: '.$executable->getErrorMessage()." code:".$proc->getErrorCode();
 							$result= "";
-							if($errCount > 0 ){
-							$result= "<out>";
-							  for ($i = 0; $i < $errCount; $i++) {
- 							    $errC = $proc->getErrorCode(intval(i));
-							     if($errC != NULL) {
-							       $result = $result.$errC." ";	
-							     }
-							  $result= $result."</out>";
-						    	  $errorTest = TRUE;
-							  }
-							}
 
 													
 						}
 
 						$asserts= $testcase->{'result'};
-						$xdmValue = $proc->parseString(strval($asserts->asXML()));
+						$xdmValue = $proc->parseXmlFromString(strval($asserts->asXML()));
 						/*if($testcase->attributes()->{'name'}=='import-0502b'){
 						 	echo "result:".$result;
 						 	echo "assert:".($asserts->asXML());
@@ -200,45 +170,34 @@ function run_test_case($testcase, $env, $path){
 						}*/
 						if($xdmValue == NULL){
 							error_log("NULL FOUND IN ASSERT");
-							if($proc->getExceptionCount() > 0){
-								error_log(" assert exception: ".$proc->getErrorMessage(0));
+							if($proc->exceptionOccurred()){
+								error_log(" assert exception: ".$proc->getErrorMessage());
 								return "NO ASSERTION".($asserts->asXML());
 							}
 
 						}
-						$proc->setParameter('', 'assertion', $xdmValue);
+
 						error_log("before result : ");
-						$resulti  = $proc->parseString(''.$result);
+						$resulti  = $proc->parseXmlFromString(''.$result);
 						if($resulti== NULL) {	
-							error_log(" assert exception: ".$proc->getErrorMessage(0));
+							error_log(" assert exception: ".$proc->getErrorMessage());
 							return "NULL result";
 						}									
-						$proc->setParameter('', 'result', $resulti);
-						$proc->setParameter('', 'testDir', $testDirValue);
-						$proc->setProperty('it', 'main');
-						$proc->exceptionClear();
-						$outcome = $proc->xsltApplyStylesheet1("TestOutcome.xsl");
-						$proc->clear();
+
+						$outcomeExecutable = $xsltproc->compileFromFile("TestOutcome.xsl");
+						$outcomeExecutable->setParameter( 'assertion', $xdmValue);
+						$outcomeExecutable->setParameter( 'result', $resulti);
+						$outcomeExecutable->setParameter( 'testDir', $testDirValue);
+						$outcome = $outcomeExecutable->callTemplateReturningString('main');
+
 						if($outcome==NULL){
 							error_log("Assert:".($asserts->asXML()));
 							echo "Assert:".($asserts->asXML());
 							echo "Assert:".($result);
-							$errCount = $proc->getExceptionCount();
-							error_log("Error Count".$errCount);
-							if($errCount > 0 ){
 
-							$result= "<out>";
-							  for ($i = 0; $i < $errCount; $i++) {
- 							    $errC = $proc->getErrorMessage(intval(i));
-							     if($errC != NULL) {
-							       $result = $result.$errC." ";	
-							     }
-						    	  $errorTest = TRUE;
-							  $result= $result."</out>";
-							  }
+							error_log("Error Message".$outcomeExecutable->getErrorMessage());
+							echo "<out>$outcomeExecutable->getErrorMessage()</out>";
 
-							echo "Error count: ".$errCount.", ". ($result);
-							}
 							return "false";						
 						}
 						if($errorTest){
@@ -249,8 +208,7 @@ function run_test_case($testcase, $env, $path){
 					}else {
 						return 	$t_env_ref." not found";				
 					}
-					} else { 
-						$proc->clear();
+					} else {
 						$proc->exceptionClear();
 						$init_template = $testcase->{'test'}->{'initial-template'};
 						if($init_template){
@@ -338,7 +296,7 @@ function run_test_case($testcase, $env, $path){
 $saxon_version = $proc->version();
 echo "<a name='top'></a>";
 echo "<h1>W3 XSLT 3.0 Test Suite</h1>
-<h4>(PHP Test Harness. Version: 1.0. Saxon c++ plugin, Saxon product version: $saxon_version)</h4>
+<h4>(PHP Test Harness. Version: 2.0. Saxon/C PHP Extension, Saxon product version: $saxon_version)</h4>
 <br/>";
 $testFiles = test_set_files($catalog);
 echo "<b>Test sets: ".count($testFiles)."<b/>";
@@ -350,7 +308,7 @@ echo "<table border='1'>
 </tr>";
 
 foreach ($testFiles as $key => $test_set) {
- $testSet_xml = simplexml_load_file("xslt30-test/".$test_set);
+ $testSet_xml = simplexml_load_file($path.$test_set);
 echo "<tr>";
 	echo "<td><a href='#".$key."'>".$key . "</a></td>";
 	echo "<td>".$test_set."</td>";
@@ -367,12 +325,10 @@ echo "<div style='width:70%'><h4><a name='".$key."'>".$key . "</a></h4></div><di
 echo "<br/>";
 //$test1 = $proc->xsltApplyStylesheet("cat.xml","test.xsl");
 
-//$proc->xsltSaveResultToFile("cat.xml", "test.xsl", "output/output.html");
-                $proc->setSourceFile("cat.xml");
-                $proc->importStylesheetFile("test.xsl");
-echo $proc->transformToString();
+
+//echo $proc->transformToString();
 echo "This link is using Html: ";
 
-$proc->close();
+
 
 ?>

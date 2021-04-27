@@ -600,6 +600,23 @@ PHP_METHOD(SaxonProcessor, version)
     RETURN_NULL();
 }
 
+PHP_METHOD(SaxonProcessor, exceptionOccurred)
+{
+    SaxonProcessor *saxonProcessor;
+    zend_object* pobj = Z_OBJ_P(getThis());
+    saxonProcessor_object *obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+    if (ZEND_NUM_ARGS()>0) {
+        WRONG_PARAM_COUNT;
+    }
+
+    saxonProcessor = obj->saxonProcessor;
+    if (saxonProcessor != NULL) {
+        bool result = saxonProcessor->exceptionOccurred();
+        RETURN_BOOL(result);
+    }
+    RETURN_BOOL(false);
+}
+
 
 
 PHP_METHOD(SaxonProcessor, setConfigurationProperty)
@@ -1885,6 +1902,7 @@ zend_function_entry SaxonProcessor_methods[] = {
     PHP_ME(SaxonProcessor,  registerPHPFunctions,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  version,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  isSchemaAware,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor,  exceptionOccurred,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  release,      nullptr, ZEND_ACC_PUBLIC)
     {nullptr, nullptr, nullptr}
 };
