@@ -7,6 +7,8 @@
 
 package net.sf.saxon;
 
+import com.saxonica.config.NativePlatformPE;
+
 /**
  * The Version class holds the SAXON version information.
  */
@@ -160,14 +162,17 @@ public final class Version {
             platform = new net.sf.saxon.dotnet.DotNetPlatform();
         //#endif
 //#else
-            platform = new net.sf.saxon.java.JavaPlatform();
-
-        //#if PE==true && DOTNET != true && SAXONC == true
-                platform = new com.saxonica.config.JavaPlatformC();
-        //#endif
-        //#if EE==true && DOTNET != true && SAXONC==true
-                platform = new com.saxonica.config.JavaPlatformC();
-        //#endif
+        //#if PE!=true && EE!=true && DOTNET != true && SAXONC == true
+              platform = new net.sf.saxon.option.cpp.NativePlatform();
+         //#else
+              platform = new net.sf.saxon.java.JavaPlatform();
+          //#endif
+          //#if PE==true && DOTNET != true && SAXONC == true
+                  platform = new com.saxonica.config.NativePlatformPE();
+          //#endif
+          //#if EE==true && DOTNET != true && SAXONC==true
+                  platform = new com.saxonica.config.NativePlatformPE();
+          //#endif
         //#if PE==true && SAXONC != true
             platform = new com.saxonica.config.JavaPlatformPE();
         //#endif
