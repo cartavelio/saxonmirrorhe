@@ -223,6 +223,20 @@ public class XdmUtils {
         return children.toArray(new XdmNode[0]);
     }
 
+
+
+    public static XdmNode getChild(XdmNode node, int i) {
+        XdmSequenceIterator iter = node.axisIterator(Axis.CHILD);
+        int pos = 0;
+        while (iter.hasNext()) {
+            if(pos == i) {
+                 return (XdmNode) iter.next();
+            }
+            pos++ ;
+        }
+        return null;
+    }
+
     public static int getChildCount(XdmNode node) {
         int num = 0;
         XdmSequenceIterator iter = node.axisIterator(Axis.CHILD);
