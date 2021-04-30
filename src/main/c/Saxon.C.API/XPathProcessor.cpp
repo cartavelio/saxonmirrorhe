@@ -7,6 +7,10 @@
 #include "XdmMap.h"
 #include "XdmArray.h"
 
+#include <iostream>
+#include <fstream>
+
+
 #ifdef MEM_DEBUG
 #define new new(__FILE__, __LINE__)
 #endif
@@ -69,7 +73,10 @@ XPathProcessor::~XPathProcessor(){
 }
 
 XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
-	if (xpathStr == nullptr) {
+std::cout<<"evaluate method called"<<std::endl;
+std::ofstream myfile;
+  myfile.open ("/media/ond1/c8f4c380-ed5d-4791-b60d-90df7fd39798/work/git/saxondev/src/main/c/samples/php/saxon_error_log.txt");
+  	if (xpathStr == nullptr) {
 		std::cerr << "Error:: XPath string cannot be empty or nullptr" << std::endl;
 	return nullptr;
 }
@@ -115,15 +122,25 @@ if (!mID) {
 					SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXP.c_str()),
 					SaxonProcessor::sxn_environ->env->NewStringUTF(xpathStr), stringArray, objectArray));
 	if(!results) {
+	
+
+
+	myfile<<"evaluate method: results is null\n";
+	myfile.close();
 		exception = proc->checkAndCreateException(cppClass);
+		if(exception != nullptr) {
+		    std::cout<<exception->getMessage();
+		}
 		return nullptr;
 	}
-	
+	myfile<<"evaluate method: results good\n";
+	myfile.close();
 	int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
 	if (size > 0) {
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray);
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(objectArray);
 	}
+
 	if (sizex>0) {
 		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");

@@ -40,11 +40,13 @@
 		}
 		$xpathEngine->exceptionClear();
 		$xpathEngine->clearParameters();
-		$xpathEngine->clearProperties();            
+		$xpathEngine->clearProperties();
             }
 
   /* simple example to show xpath singleton evaluation and conversion to a XdmNode. */
        function exampleSimple3($proc, $xpathEngine){
+           $xpathEngine->clearParameters();
+           		$xpathEngine->clearProperties();
 		 echo '<b>Simple Example - 3 </b><br/>';
 		 $sourceNode = $proc->parseXmlFromString("<out attr='valuex'><person attr1='value1' attr2='value2'>text1</person><person>text2</person><person1>text3</person1></out>");
 		if($sourceNode == NULL) {
@@ -53,15 +55,15 @@
                 $xpathEngine->setContextItem($sourceNode);
 
 		//$xpathEngine->setContextFile("tempdoc.xml");
-                $resultValue = $xpathEngine->evaluateSingle("(//person)[1]");      
+        $resultValue = $xpathEngine->evaluateSingle("(//person)[1]");
                             
-		if($resultValue != null) {               
+		if($resultValue != null) {
 			if($resultValue->isNode()) {
 				echo "Result is a node <br/>";
-				/*$nodeValue = $resultValue->getNodeValue();
+				$nodeValue = $resultValue->getNodeValue();
 				$nodeKind = $nodeValue->getNodeKind();
 				$nodeName = $nodeValue->getNodeName();
-				echo "NodeKind : ".$nodeKind." nodeName=".$nodeName;*/
+				echo "NodeKind : ".$nodeKind." nodeName=".$nodeName;
 			} else if($resultValue->isAtomic()) {
 				echo "Error: Result is an atomic <br/>";
 			}
@@ -70,8 +72,8 @@
 			echo "Result is null";
 		}
 		$xpathEngine->clearParameters();
-		$xpathEngine->clearProperties();            
-            }
+		$xpathEngine->clearProperties();
+       }
 
        /* simple example to show xpath singleton evaluation. Here we test the API on Attributes */
        function exampleSimple4($proc, $xpathEngine){
@@ -118,7 +120,9 @@
 			echo "SourceNode is NULL<br />";
 		}
                 $xpathEngine->setContextItem($sourceNode);
-                $resultValue = $xpathEngine->evaluateSingle("(/out)");      
+		echo "before evalSingle\n";
+                $resultValue = $xpathEngine->evaluateSingle("(/out)");
+          echo "after evalSingle\n";
                             
 		if($resultValue != null) {               
 			if($resultValue->isNode()) {
@@ -129,11 +133,13 @@
 
 				$childCount = $nodeValue->getChildCount();
 				for($i = 0; $i < $childCount; $i++) {
-					$nodei = $nodeValue->getChildNode($i);
-					$namei = $nodei->getNodeName();
-					echo ' Node name='.$namei;
+					/*$nodei = $nodeValue->getChildNode($i);
+					if($nodei != null) {
+                        $namei = $nodei->getNodeName();
+                        echo ' Node name=' . $namei;
+                    }*/
 
-				}
+				}  
 			} else if($resultValue->isAtomic()) {
 				echo "Error: Result is an atomic <br/>";
 			}
@@ -212,18 +218,18 @@
    	    echo '<b>PHP XPath Examples</b><br/>';
             echo 'Saxon Processor version: '.$version;
             echo '<br/>';        
-           // exampleSimple1($proc, $xpath, $books_xml);
+            exampleSimple1($proc, $xpath, $books_xml);
             echo '<br/>';
-           // exampleSimple2($proc, $xpath, $books_xml);
+            exampleSimple2($proc, $xpath, $books_xml);
            echo '<br/>';
 	   exampleSimple3($proc, $xpath);
-            echo '<br/>';         
-/*	   exampleSimple4($proc, $xpath);
+            echo '<br/>';
+	   exampleSimple4($proc, $xpath);
             echo '<br/>';
 	   exampleSimple5($proc, $xpath);
             echo '<br/>';
-	    exampleSimple6($proc, $xpath);
-            echo '<br/>';*/
+	    exampleSimple6($proc, $xpath); 
+            echo '<br/>';
       
 
 //	    $proc->close();

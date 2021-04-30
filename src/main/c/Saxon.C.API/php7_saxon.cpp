@@ -278,10 +278,11 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString)
             if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
                 RETURN_NULL();
             } else {
+                node->incrementRefCount();
                 zend_object* vobj = Z_OBJ_P(return_value);
  		xdmNode_object * xdmNObj = (xdmNode_object *)((char *)vobj - XtOffsetOf(xdmNode_object, std));
                 assert (xdmNObj != nullptr);
-                node->incrementRefCount();
+
                 xdmNObj->xdmNode = node;
             }
         } else {
@@ -1332,11 +1333,12 @@ PHP_METHOD(XdmItem, getNodeValue)
                 return;
             } else {
                 //struct xdmNode_object* vobj = (struct xdmNode_object *)Z_OBJ_P(return_value TSRMLS_CC);
-   		zend_object * zobj = Z_OBJ_P(return_value);
+                xdmItem->incrementRefCount();
+   		    zend_object * zobj = Z_OBJ_P(return_value);
     		xdmNode_object * vobj = (xdmNode_object *)((char *)zobj - XtOffsetOf(xdmNode_object, std));
                 assert (vobj != nullptr);
                 vobj->xdmNode = (XdmNode *)xdmItem;
-		vobj->xdmNode->incrementRefCount();
+
 
                 return;
             }
@@ -1546,7 +1548,7 @@ PHP_METHOD(XdmNode,  getAttributeCount){
 } 
 
 PHP_METHOD(XdmNode,  getChildNode){
-    long indexi;	
+    long indexi;
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "l",&indexi) == FAILURE) {
        RETURN_NULL();
     }
@@ -1568,12 +1570,9 @@ PHP_METHOD(XdmNode,  getChildNode){
             } else {
 		
 		if(indexi>=0 && indexi < count) {
-			XdmNode ** childNodes = xdmNode->getChildren();
-			if(childNodes == nullptr) {
-				RETURN_NULL();
-				return;
-			}
-			XdmNode * childNode = childNodes[indexi];
+			XdmNode * childNode = xdmNode->getChild(indexi);
+
+
 			if(childNode != nullptr) {
 				childNode->incrementRefCount();
 				zend_object * zobj = Z_OBJ_P(return_value);

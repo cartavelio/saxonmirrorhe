@@ -89,6 +89,7 @@ PHP_METHOD(XPathProcessor, setParameter)
         xdmNode_object * ooth = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
         if(ooth != nullptr) {
             XdmNode * value = ooth->xdmNode;
+            value->incrementRefCount();
             if(value != nullptr) {
 	        xpathProcessor->setParameter(name, (XdmValue *)value);
 
@@ -100,6 +101,7 @@ PHP_METHOD(XPathProcessor, setParameter)
         xdmValue_object * ooth = (xdmValue_object *)((char *)vvobj - XtOffsetOf(xdmValue_object, std));
         if(ooth != nullptr) {
             XdmValue * value = ooth->xdmValue;
+            value->incrementRefCount();
             if(value != nullptr) {
 
                 xpathProcessor->setParameter(name, value);
@@ -114,6 +116,7 @@ PHP_METHOD(XPathProcessor, setParameter)
         xdmAtomicValue_object * ooth = (xdmAtomicValue_object *)((char *)vvobj - XtOffsetOf(xdmAtomicValue_object, std));
         if(ooth != nullptr) {
             XdmAtomicValue * value = ooth->xdmAtomicValue;
+            value->incrementRefCount();
             if(value != nullptr) {
 
                 xpathProcessor->setParameter(name, (XdmValue *)value);
@@ -236,6 +239,7 @@ PHP_METHOD(XPathProcessor, evaluate)
 
         XdmValue * node = xpathProcessor->evaluate(xpathStr);
 	if(node != nullptr) {
+	        node->incrementRefCount();
             if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
                 RETURN_NULL();
                 return;
@@ -293,14 +297,14 @@ PHP_METHOD(XPathProcessor, evaluateSingle)
         XdmItem * node = xpathProcessor->evaluateSingle(xpathStr);
 	
 	if( node != nullptr) {
-		std::cerr<<"evaluateSingle created node ptr="<<(node)<<std::endl;
-		zend_object* vvobj = Z_OBJ_P(return_value);
+		node->incrementRefCount();
+
 
 		if (object_init_ex(return_value, xdmItem_ce) != SUCCESS) {
-			std::cerr<<"evaluateSingle: xdmItem not created!!!!! "<<std::endl;
         	        RETURN_NULL();
                 	return;
-        	} else { 
+        	} else {
+        	zend_object* vvobj = Z_OBJ_P(return_value);
 			 std::cerr<<"evaluateSingle: xdmItem created!!!!! "<<std::endl;
        			xdmItem_object * vobj = (xdmItem_object *)((char *)vvobj - XtOffsetOf(xdmItem_object, std));
                 	assert (vobj != nullptr);
@@ -311,7 +315,7 @@ if(vobj == NULL) {
 }
                		vobj->xdmItem = node;
 
- std::cerr<<"evaluateSingle: cp1!!!!! "<<std::endl;
+
                		return; 
     		}
 	}    
@@ -349,7 +353,7 @@ PHP_METHOD(XPathProcessor, setContextItem)
             XdmNode * value = ooth->xdmNode;
             if(value != nullptr) {
 	        xpathProcessor->setContextItem((XdmItem *)value);
-		//value->incrementRefCount();
+		    value->incrementRefCount();
 
             }
         }
@@ -361,7 +365,7 @@ PHP_METHOD(XPathProcessor, setContextItem)
             if(value != nullptr) {
 
                 xpathProcessor->setContextItem((XdmItem *)value);
-	//	value->incrementRefCount();
+	    	value->incrementRefCount();
             }
         }
      }   else if(strcmp(objName, "Saxon\\XdmItem")==0){
@@ -372,7 +376,7 @@ PHP_METHOD(XPathProcessor, setContextItem)
             if(value != nullptr) {
 
                 xpathProcessor->setContextItem(value);
-	//	value->incrementRefCount();
+	    	    value->incrementRefCount();
             }
         }
 

@@ -84,7 +84,7 @@ public:
 
 	int getAttributeCount();
 
-	XdmNode** getAttributeNodes();
+	XdmNode** getAttributeNodes(bool cache=false);
 
 	jobject getUnderlyingValue() {
 
@@ -103,7 +103,24 @@ public:
 
 
 
-	XdmNode** getChildren();
+    /**
+    * Get all the child nodes from the current parent node
+    * @return pointer array of XdmNode objects
+    */
+
+	XdmNode** getChildren(bool cache = false);
+
+
+
+    /**
+    * Get the ith child nodes from the current parent node
+    * @return a pointer to the ith child node
+    */
+
+    XdmNode* getChild(int i, bool cache = false);
+
+
+
 
 	int getChildCount();
 
