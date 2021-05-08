@@ -1,7 +1,7 @@
 <?php
 /*error_reporting(E_ALL|E_STRICT);
 ini_set('display_errors', 'on');*/
-ini_set('max_execution_time', 300);
+/*ini_set('max_execution_time', 300);
 $root = pathinfo($_SERVER['SCRIPT_FILENAME']);
 define('BASE_FOLDER', basename($root['dirname']));
 define('SITE_ROOT', realpath(dirname(__FILE__)));
@@ -14,9 +14,11 @@ echo 'SITE_ROOT' . realpath(dirname(__FILE__));
 echo '<br/>';
 echo 'SITE_URL' . 'http://' . $_SERVER['HTTP_HOST'] . '/' . BASE_FOLDER;
 echo '<br/>';
+*/
 
+//$path1 = "/media/ond1/c8f4c380-ed5d-4791-b60d-90df7fd39798/work/git/xslt30-test/";
+//$path = "/media/ond1/c8f4c380-ed5d-4791-b60d-90df7fd39798/work/git/";
 
-//$path = "/media/ond1/c8f4c380-ed5d-4791-b60d-90df7fd39798/work/git/xslt30-test/";
 $path = __DIR__ . "/xslt30-test/";
 $catalog = $path . "catalog.xml";
 $saxon_version = "";
@@ -24,10 +26,12 @@ $saxon_version = "";
 $proc = new Saxon\SaxonProcessor();
 $proc->setcwd("");
 $xsltproc = $proc->newXslt30Processor();
+
 $xpathProcForEnv = $proc->newXPathProcessor();
+$xpathProcForEnv->declareNamespace("", "http://www.w3.org/2012/10/xslt-test-catalog");
 
 /*$start = microtime(true);
-              $proc->setSourceFile("cat.xml");
+              $proc->setSourceFile("cat.xml");                                              d
                 $proc->importStylesheetFile("test.xsl");
                 $result = $proc->transformToValue();
  $end = microtime(true); */
@@ -42,19 +46,19 @@ function test_set_files($catalog)
     $attFile;
     error_log("checkpoint 0, ".$catalog);
     if (file_exists($catalog)) {
-        $xmlV = $proc->parseXmlFromFile($catalog);//simplexml_load_file($catalog);
-        $xpathProcForEnv->setContextItem($xmlV);
-        //$xpathProcForEnv->setContextFile($catalog);
-		error_log("checkpoint 0-1");
+        //$xmlV = $proc->parseXmlFromFile($catalog);//simplexml_load_file($catalog);
+        //$xpathProcForEnv->setContextItem($xmlV);
+        $xpathProcForEnv->setContextFile($catalog);
+
         $xml = $xpathProcForEnv->evaluate("//*:test-set");
-		error_log("checkpoint 0-2");
+
         if ($xml != NULL) {
 			error_log("checkpoint 0-3");
             //foreach ($xml->{'test-set'} as $value) {
-            for ($i = 1; $i <= $xml->size(); $i++) {
+            for ($i = 0; $i < $xml->size(); $i++) {
                 $value = $xml->itemAt($i);
 //	echo "________________".$value->attributes()->name."_________".$value->attributes()->file;
-                echo "itemAt";
+                
                 if ($value != NULL && $value->isNode()) {
                     $node = $value->getNodeValue();
 
@@ -84,15 +88,19 @@ function test_set_files($catalog)
 
 function check_dependency($xml)
 {
-    foreach ($xml->children() as $child) {
-        $var1 = $child->getName();
-        switch ($var1) {
-            case "feature":
-                return false;
-            case "spec":
-                if (strpos($child->attributes()->{'value'}, "XSLT30") !== false) {
+    $count = $xml->getChildCount();
+    for ($i = 0; $i < $count; $i++){
+        $child = $xml->getChildNode($i);
+        if($child->getNodeKind() == 1) {
+            $var1 = $child->getNodeName();
+            switch ($var1) {
+                case "feature":
                     return false;
-                }
+                case "spec":
+                    if (strpos($child->attributes()->{'value'}, "XSLT30") !== false) {
+                        return false;
+                    }
+            }
         }
     }
     return true;
@@ -100,14 +108,76 @@ function check_dependency($xml)
 
 function parse_environment($xml, $path)
 {
+    global $proc;
+    global $xpathProcForEnv;
     $array = array();
-    foreach ($xml->{'environment'} as $value) {
-        $envName = $value->attributes()->name;
-        $source = $value->{'source'}[1];
-        if ($source->attributes()->file and !($source->attributes()->validation)) {
-            //  echo $path.$source->attributes()->file." ";
-            $array["" . $envName] = $path . $source->attributes()->file;
+    if($xpathProcForEnv == null) {
+        return $array;
+    }
+    
+    $xpathProcForEnv->setContextItem($xml);
+    $envValues = $xpathProcForEnv->evaluate("//environment");
+
+    if($envValues == null) {
+        return $array;
+    }
+
+    $count = $envValues->size();
+    for ($i = 0; $i < $count; $i++) {
+        $value = $envValues->itemAt($i);
+        if( $value->isNode()) {
+            $node = $value->getNodeValue();
+            if ($node == null) {
+                echo "environment node is null";
+                continue;
+
+
+            }
+
+            $envName = $node->getAttributeValue("name");
+            $array["" . $envName] = array();
+            $xpathProcForEnv->clearParameters();
+            $xpathProcForEnv->clearProperties();
+            $xpathProcForEnv->setContextItem($node);
+            $sources = $xpathProcForEnv->evaluate("//*:source");
+            $scount = $sources->size();
+            $array["" . $envName]["sources"] = array();
+            for ($j = 0; $j < $count; $j++) {
+                $valuej = $sources->itemAt($j);
+                if ($valuej == null) {
+
+                    continue;
+
+                }
+                if($valuej->isNode()) {
+                    $nodej = $valuej->getNodeValue();
+
+                    $role = $nodej->getAttributeValue("uri");
+                    $rawuri = $nodej->getAttributeValue("role");
+                    if ($rawuri != null) {
+                        $array["" . $envName]["sources"][$rawuri] = $path . $rawuri;
+
+                    } elseif ("." == $role) {
+                        $href = $nodej->getAttributeValue("file");
+                        if ($href == null) {
+                            $xpathProcForEnv->clearParameters();
+                            $xpathProcForEnv->clearProperties();
+                            $xpathProcForEnv->setContextItem($nodej);
+                            $sourceContent = $xpathProcForEnv->evaluate("string(content)");
+                            $array["" . $envName]["sources"][".content"] = $sourceContent->getStringValue();
+
+
+                        } else {
+                            $array["" . $envName]["sources"][".file"] = $path . $href;
+
+                        }
+
+                    }
+
+                }
+            }
         }
+        
     }
     echo "<br/>";
     echo "<br/>";
@@ -116,15 +186,24 @@ function parse_environment($xml, $path)
 
 function test_case($test_set)
 {
-    $env;
+    global $proc;
+    global $xpathProcForEnv;
+    $env = null;
     $xml;
-	error_log("checkpoint 3");
     $test_path = pathinfo($test_set)['dirname'] . "/";
-    echo $test_path. "\n";
-    return;
+    echo "Check:    ".$test_set. "\n";
+
     if (file_exists($test_set)) {
-        $xml = simplexml_load_file($test_set);
-        $env = parse_environment($xml, $test_path);
+        $xml = $proc->parseXmlFromFile($test_set);
+        printf("checkpoint 0");
+        if($xml == null) {
+            echo "Cannot find test ". $test_set;
+            return;
+        }  else {
+            printf("checkpoint 1");
+            $env = parse_environment($xml, $test_path);
+        }
+        printf("checkpoint 2");
 		error_log("checkpoint 4");
         echo "<table border='1' style='width:60%'>
 <tr>
@@ -132,17 +211,26 @@ function test_case($test_set)
   <th style='width:80%'>Result </th>
 </tr>";
 
-        $check = check_dependency($xml->dependencies);
-        if ($check) {
-            foreach ($xml->{'test-case'} as $value) {
-                $testCaseName = $value->attributes()->name;
-                echo "<tr><td>$testCaseName</td>";
-                $result = "test";//run_test_case($value, $env, $test_path);
-                echo "<td>" . $result . "</td>";
-                echo "</tr>";
-                //$test = $value->{'test'}->{'stylesheet'};
-                //echo "____test:".$test_path."tests".$test->attributes()->file;
+        $check = check_dependency($xml);
+        $testCases = $xpathProcForEnv->evaluate("//test-case");
+        if ($check or $testCases != null) {
+
+
+            $countTC = $testCases->size();
+            for ($x = 0; $x < $countTC; $x++) {
+                $value = $testCases->itemAt($x);
+                if($value->isNode()) {
+                    $nodex = $value->getNodeValue();
+                    $testCaseName = $nodex->getAttributeValue("name");
+                    echo "<tr><td>$testCaseName</td>";
+                    $result = run_test_case($nodex, $env, $test_path);
+                    echo "<td>" . var_dump($result) . "<br/></td>";
+                    echo "</tr>";
+                    //$test = $value->{'test'}->{'stylesheet'};
+                    //echo "____test:".$test_path."tests".$test->attributes()->file;
+                }
             }
+
         } else {
             echo "<tr><td>No tests run</td><td></td></tr>";
         }
@@ -165,7 +253,7 @@ function run_test_case($testcase, $env, $path)
     if ($checkDependency) {
 
         $test = $path . $testcase->{'test'}->{'stylesheet'}->attributes()->file;
-        //echo $test;
+        echo "Test case=".$test;
         if (file_exists($test)) {
             try {
                 if ($t_env) {
@@ -195,7 +283,7 @@ function run_test_case($testcase, $env, $path)
 
                         if ($result == NULL) {
 
-                            echo 'Error: ' . $executable->getErrorMessage() . " code:" . $proc->getErrorCode();
+                            echo 'Error: ' . $executable->getErrorMessage() . " code:" . $executable->getErrorCode();
                             $result = "";
 
 
@@ -249,26 +337,31 @@ function run_test_case($testcase, $env, $path)
                         return $t_env_ref . " not found";
                     }
                 } else {
-                    $proc->exceptionClear();
+                    $xsltproc->exceptionClear();
                     $init_template = $testcase->{'test'}->{'initial-template'};
-                    if ($init_template) {
-                        $proc->setProperty('it', strval($testcase->{'test'}->{'initial-template'}->attributes()->{'name'}));
+                    echo "Test data=".$test;
+                    $executable = $xsltproc->compileFromFile($test);
+                    if($executable == null) {
+                        return "executable is NULL";
                     }
-                    $result = $proc->transformToString($test);
+                    if ($init_template) {
+                        $executable->setProperty('it', strval($testcase->{'test'}->{'initial-template'}->attributes()->{'name'}));
+                    }
+                    $result = $executable->transformToString();
                     if ($result == NULL) {
 
-                        $errCount = $proc->getExceptionCount();
+
                         $result = "";
-                        if ($errCount > 0) {
-                            $result = "<out>";
-                            for ($i = 0; $i < $errCount; $i++) {
-                                $errC = $proc->getErrorCode(intval(i));
-                                if ($errC != NULL) {
-                                    $result = $result . $errC . " ";
-                                }
-                                $result = $result . "</out>";
-                            }
+
+                        $result = "<out>";
+
+                        $errC = $executable->getErrorCode();
+                        if ($errC != NULL) {
+                            $result = $result . $errC . " ";
                         }
+                        $result = $result . "</out>";
+                    }
+
 
 
                     }
@@ -288,26 +381,26 @@ function run_test_case($testcase, $env, $path)
                     if ($resulti == NULL) {
                         return "NULL result";
                     }
-                    $proc->setParameter('', 'result', $resulti);
-                    $proc->setParameter('', 'testDir', $testDirValue);
-                    $proc->setProperty('it', 'main');
-                    $outcome = $proc->transformToString("TestOutcome.xsl");
+                    $outcomeExecutable = $xsltproc->compileFromFile("TestOutcome.xsl");
+                    $outcomeExecutable->setParameter('', 'result', $resulti);
+                    $outcomeExecutable->setParameter('', 'testDir', $testDirValue);
+                    //$outcomeExecutable->setProperty('it', 'main');
+                    $outcome = $outcomeExecutable->callTemplateReturningString("main");
                     $proc->clear();
                     if ($outcome == NULL) {
                         echo "Assert:" . ($asserts->asXML());
-                        $errCount = $proc->getExceptionCount();
-                        if ($errCount > 0) {
-                            $result = "<out>";
-                            for ($i = 0; $i < $errCount; $i++) {
-                                $errC = $proc->getErrorMessage(intval(i));
-                                if ($errC != NULL) {
-                                    $result = $result . $errC . " ";
-                                }
-                                $result = $result . "</out>";
-                            }
 
-                            echo "Error count: " . $errCount . ", " . ($result);
-                        }
+                            $result = "<out>";
+
+                            $errC = $proc->getErrorMessage();
+                            if ($errC != NULL) {
+                                $result = $result . $errC . " ";
+                            }
+                            $result = $result . "</out>";
+
+
+                            echo "Error count: "  . ($result);
+
                         return "false";
                     }
                     $proc->clear();
@@ -318,7 +411,7 @@ function run_test_case($testcase, $env, $path)
 
                     return $outcome . '';
 
-                }
+                
             } catch (Exception $ex) {
                 return "Fail - error: " . $ex->getMessage();
             }
@@ -360,7 +453,7 @@ echo "</table>";
 foreach ($testFiles as $key => $test_set) {
     echo "<div style='width:70%'><h4><a name='" . $key . "'>" . $key . "</a></h4></div><div style='width:30%;float:right'><a href='#top'>Back to top</a></div>";
 //if($key == 'copy-of'){
-    //test_case("xslt30-test/" . $test_set);
+    test_case($path. $test_set);
 }
 //}
 echo "<br/>";

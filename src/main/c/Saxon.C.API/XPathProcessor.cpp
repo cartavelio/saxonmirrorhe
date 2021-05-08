@@ -188,7 +188,9 @@ XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
 		std::cerr << "Error:: XPath string cannot be empty or nullptr" << std::endl;
 	     return nullptr;
         }
-
+        std::ofstream myfile;
+          myfile.open ("/media/ond1/c8f4c380-ed5d-4791-b60d-90df7fd39798/work/git/saxondev/src/main/c/samples/php/saxon_error_log1.txt");
+          myfile<<"evaluateSingle method: start of evaluateSingle\n";
 jmethodID mID =
 		(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass, "evaluateSingle",
 				"(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmItem;");
@@ -243,6 +245,7 @@ if (!mID) {
 					SaxonProcessor::sxn_environ->env->NewStringUTF((iter->second).c_str()));
 		}
 	}
+	myfile<<"evaluateSingle method: cp0 CallObjectMethod\n";
 	jobject result = (jobject)(
 			SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXP, mID,
 					SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXP.c_str()),
@@ -252,7 +255,7 @@ if (!mID) {
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(objectArray);
 	}
 	if (result) {
-	 std::cerr<<"evaluateSingle C++ cp0"<<std::endl;
+	 myfile<<"evaluateSingle C++ cp0"<<std::endl;
 		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
 		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
@@ -268,14 +271,17 @@ if (!mID) {
 			return nullptr;
 		}
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-		std::cerr<<"evaluateSingle C++ cp1"<<std::endl;
+		myfile<<"evaluateSingle C++ cp1"<<std::endl;
+			myfile.close();
 		return xdmItem;
 	} else  {
+	myfile<<"evaluateSingle C++ cp2-1"<<std::endl;
 			exception = proc->checkAndCreateException(cppClass);
 	   		
      		}
 }
- std::cerr<<"evaluateSingle C++ cp2"<<std::endl;
+ myfile<<"evaluateSingle C++ cp2"<<std::endl;
+ myfile.close();
 return nullptr;
 
 }
@@ -295,20 +301,24 @@ void XPathProcessor::setContextFile(const char * filename) {
 
 
 void XPathProcessor::declareNamespace(const char *prefix, const char * uri){
+
         if (prefix == nullptr || uri == nullptr) {
 		return;
         }
-	jmethodID mID =
+	jmethodID dnspID =
 		(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass, "declareNamespace",
 				"(Ljava/lang/String;Ljava/lang/String;)V");
-	if (!mID) {
+				std::cerr<<"C++ declarenamespace cp2"<<std::endl;
+	if (!dnspID) {
 	std::cerr << "Error: "<<getDllname() << ".declareNameSpace" << " not found\n"
 			<< std::endl;
 
 	} else {
-		SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXP, mID,
-				SaxonProcessor::sxn_environ->env->NewStringUTF(prefix),
-				SaxonProcessor::sxn_environ->env->NewStringUTF(uri));
+
+		SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXP, dnspID,
+				(prefix== nullptr? SaxonProcessor::sxn_environ->env->NewStringUTF("") :SaxonProcessor::sxn_environ->env->NewStringUTF(prefix)),
+				(uri== nullptr? SaxonProcessor::sxn_environ->env->NewStringUTF("") :SaxonProcessor::sxn_environ->env->NewStringUTF(uri)));
+
 		//proc->checkAndCreateException(cppClass);
 	}
 

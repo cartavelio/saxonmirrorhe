@@ -1,4 +1,5 @@
-
+   #include <iostream>
+   #include <fstream>
 
 /*     ============== PHP Interface of XPath2.0/3.0  XPathProcessor =============== */
 
@@ -132,19 +133,23 @@ PHP_METHOD(XPathProcessor, setParameter)
 
 PHP_METHOD(XPathProcessor, declareNamespace)
 {
-   char * prefix;
-   char * ns;
+
+   char * prefix = nullptr;
+   char * ns = nullptr;
    int len1, len2;
-   XPathProcessor *xpathProcessor;
+   XPathProcessor *xpathProcessor = nullptr;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "ss", &prefix, &len1, &ns, &len2) == FAILURE) {
         RETURN_NULL();
     }
+
     if(prefix != nullptr && ns != nullptr) {
     	zend_object* pobj = Z_OBJ_P(getThis());
         xpathProcessor_object *obj = (xpathProcessor_object *)((char *)pobj - XtOffsetOf(xpathProcessor_object, std));
+
     	xpathProcessor = obj->xpathProcessor;
-    	xpathProcessor->declareNamespace(prefix, ns);
+
+    	xpathProcessor->declareNamespace((len1 == 0 ? "" : prefix), (len2 == 0 ? "" : ns));
     }
 
 }
@@ -210,14 +215,14 @@ PHP_METHOD(XPathProcessor, effectiveBooleanValue)
    zval* oth;
    size_t len1, myint;
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &xpathStr, &len1) == FAILURE) {
-        RETURN_NULL();
+        RETURN_BOOL(false);
     }
     zend_object* pobj = Z_OBJ_P(getThis());
     xpathProcessor_object *obj = (xpathProcessor_object *)((char *)pobj - XtOffsetOf(xpathProcessor_object, std));
     xpathProcessor = obj->xpathProcessor;
     if (xpathProcessor != nullptr && xpathStr != nullptr) {
 
-                bool result = xpathProcessor->effectiveBooleanValue(xpathStr);
+        bool result = xpathProcessor->effectiveBooleanValue(xpathStr);
 		RETURN_BOOL(result);
     }
 }
@@ -274,7 +279,13 @@ PHP_METHOD(XPathProcessor, evaluate)
 
 PHP_METHOD(XPathProcessor, evaluateSingle)
 {
-
+     php_error(E_WARNING, "called evaluateSingle");
+     std::cerr<<"called evaluateSingle x1"<<std::endl;
+     std::cout<<"called evaluateSingle x2"<<std::endl;
+      std::ofstream myfile;
+               myfile.open ("/media/ond1/c8f4c380-ed5d-4791-b60d-90df7fd39798/work/git/saxondev/src/main/c/samples/php/saxon_error_log1.txt");
+               myfile<<"evaluateSingle method: start of evaluateSingle\n";
+               myfile.close();
    XPathProcessor *xpathProcessor;
    char * xpathStr;
    zval* oth;
@@ -291,11 +302,11 @@ PHP_METHOD(XPathProcessor, evaluateSingle)
 	return;
     }
 
-
+          php_error(E_WARNING, "called evaluateSingle cp0");
     if (xpathProcessor != nullptr) {
-
+          php_error(E_WARNING, "called evaluateSingle cp1");
         XdmItem * node = xpathProcessor->evaluateSingle(xpathStr);
-	
+	     php_error(E_WARNING, "called evaluateSingle cp2");
 	if( node != nullptr) {
 		node->incrementRefCount();
 
@@ -328,9 +339,9 @@ if(vobj == NULL) {
 PHP_METHOD(XPathProcessor, setContextItem)
 {
 
-   XPathProcessor *xpathProcessor;
+   XPathProcessor *xpathProcessor = nullptr;
 
-   zval* oth;
+   zval* oth = nullptr;
 	//TODO this should be relaxed to accept item/atomic/node as well as Value
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "z", &oth) == FAILURE) {
@@ -340,10 +351,11 @@ PHP_METHOD(XPathProcessor, setContextItem)
     xpathProcessor_object *obj = (xpathProcessor_object *)((char *)pobj - XtOffsetOf(xpathProcessor_object, std));
     xpathProcessor = obj->xpathProcessor;
     if (xpathProcessor != nullptr) {
-	if(!oth) {
-		php_error(E_WARNING, "Error setting source value");
-		return;
-         }
+     if(Z_TYPE_P(oth) ==IS_NULL){
+      php_error(E_WARNING, "Error setting source value - value is null");
+      return;
+       }
+
         const char * objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
 
        if(strcmp(objName, "Saxon\\XdmNode")==0) {
@@ -412,7 +424,6 @@ PHP_METHOD(XPathProcessor, setContextFile)
 {
 
    XPathProcessor *xpathProcessor;
-
    char * name;
    size_t len1;
 

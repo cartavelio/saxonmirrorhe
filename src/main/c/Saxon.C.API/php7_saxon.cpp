@@ -322,15 +322,12 @@ PHP_METHOD(SaxonProcessor, parseXmlFromFile)
                 assert (vobj != nullptr);
                 node->incrementRefCount();
                 vobj->xdmNode = node;
+                return;
             }
-        } else {
-           // obj->xsltProcessor->checkException();//TODO
         }
-    } else {
-  //  std::cerr<<"parseXmlFromFile cp2"<<std::endl;
-        RETURN_NULL();
     }
-   // std::cerr<<"parseXmlFromFile cp3"<<std::endl;
+        RETURN_NULL();
+
 }
 
 
@@ -413,7 +410,7 @@ PHP_METHOD(SaxonProcessor, createAtomicValue)
 
 PHP_METHOD(SaxonProcessor, newXPathProcessor)
 {
-   
+    printf("newXPAthProcessor");
     if (ZEND_NUM_ARGS()>0) {
         WRONG_PARAM_COUNT;
     }
@@ -665,7 +662,7 @@ PHP_METHOD(SaxonProcessor, clearConfigurationProperties)
 PHP_METHOD(SaxonProcessor, registerPHPFunctions)
 {
     SaxonProcessor *saxonProcessor;
-    char * libName;
+    char * libName = nullptr;
     size_t len1;
  //std::cerr<<"checkpoint in registerPHPFunction start"<<std::endl;
     if (ZEND_NUM_ARGS()!= 1) {
@@ -1097,8 +1094,8 @@ PHP_METHOD(XdmValue,  size){
 
 
 PHP_METHOD(XdmValue, addXdmItem){
-    XdmValue *xdmValue;
-    zval* oth;
+    XdmValue *xdmValue = nullptr;
+    zval* oth = nullptr ;
    	
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "z", &oth) == FAILURE) {
         RETURN_NULL();

@@ -6,8 +6,9 @@
 <body>
 <?php
 
+
 /* simple example to show xpath singleton evaluation */
-function exampleSimple1($proc, $xpathEngine, $xmlfile)
+function exampleSimple1($xpathEngine, $xmlfile)
 {
     echo '<b>Simple Example - 1 </b><br/>';
     $xpathEngine->setContextFile($xmlfile);
@@ -21,7 +22,7 @@ function exampleSimple1($proc, $xpathEngine, $xmlfile)
     }
     $xpathEngine->exceptionClear();
     $xpathEngine->clearParameters();
-    $xpathEngine->clearProperties();
+    $xpathEngine->clearProperties();    
 }
 
 /* simple example to show xpath singleton evaluation */
@@ -232,7 +233,10 @@ $version = $proc->version();
 echo '<b>PHP XPath Examples</b><br/>';
 echo 'Saxon Processor version: ' . $version;
 echo '<br/>';
-exampleSimple1($proc, $xpath, $books_xml);
+if($xpath == null) {
+  echo "xpath is null";
+}
+exampleSimple1($xpath, $books_xml);
 echo '<br/>';
 exampleSimple2($proc, $xpath, $books_xml);
 echo '<br/>';
