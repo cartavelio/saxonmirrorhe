@@ -38,6 +38,7 @@ if (hasProperty("ikvmDebug")) {
 
 task hen_featureKeys(
   type: JavaExec,
+  dependsOn: ["hej_featureKeys"],
   description: "Construct the feature keys for HE"
 ) {
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
@@ -138,6 +139,7 @@ task pen_setupPreprocess(
   exclude "com/saxonica/config/StreamingTransformerFactory.java"
   exclude "com/saxonica/config/EnterpriseXPathFactory.java"
   exclude "com/saxonica/config/DynamicLoaderEE.java"
+  exclude "com/saxonica/config/NativePlatformPE.java"
   exclude "com/saxonica/config/StandardSchemaResolver.java"
   exclude "com/saxonica/functions/extfn/NativeCall.java"
   exclude "**/xqj/**"
