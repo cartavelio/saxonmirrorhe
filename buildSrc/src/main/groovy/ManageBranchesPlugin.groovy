@@ -14,7 +14,7 @@ public class ManageBranchesPlugin implements Plugin<Project> {
         } else {
           fn = new File(dir + "\\git.exe")
           if (fn.exists() && fn.canExecute()) {
-            dotnet = fn.toString()
+            git = fn.toString()
           }
         }
       }
