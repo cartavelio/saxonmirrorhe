@@ -2075,10 +2075,7 @@ public abstract class StyleElement extends ElementImpl {
                         if (snode.changesRetainedStaticContext()) {
                             child.setRetainedStaticContext(snode.makeRetainedStaticContext());
                         }
-                        if ((includeParams || !(node instanceof XSLLocalParam))
-                                && getCompilation().getCompilerInfo().isCompileWithTracing()) {
-                            child = makeTraceInstruction(snode, child);
-                        }
+                        setInstructionLocation(snode, child);
                     }
                 }
                 if (child != null) {
@@ -2121,33 +2118,14 @@ public abstract class StyleElement extends ElementImpl {
 
 
     /**
-     * Create a trace instruction to wrap a real instruction
+     * Set location information on a compiled instruction
      *
      * @param source the parent element
      * @param child  the compiled expression tree for the instruction to be traced
-     * @return a wrapper instruction that performs the tracing (if activated at run-time)
      */
 
-    static Expression makeTraceInstruction(StyleElement source, Expression child) {
-        if (child instanceof TraceExpression && !(source instanceof StylesheetComponent)) {
-            return child;
-            // this can happen, for example, after optimizing a compile-time xsl:if
-        }
-        if (source instanceof XSLOnEmpty || source instanceof XSLOnNonEmpty) {
-            // Cannot wrap these in a trace instruction because this changes the scope of the "emptiness" test
-            return child;
-        }
-//        CodeInjector injector = source.getCompilation().getCompilerInfo().getCodeInjector();
-//        if (injector != null) {
-//            int construct = source.getFingerprint();
-//            if (source instanceof LiteralResultElement) {
-//                construct = LocationKind.LITERAL_RESULT_ELEMENT;
-//            }
-//            Expression tracer = injector.inject(child);
-//            tracer.setLocation(source.allocateLocation());
-//            return tracer;
-//        }
-        return child;
+    static void setInstructionLocation(StyleElement source, Expression child) {
+        child.setLocation(source.allocateLocation());
     }
 
     /**

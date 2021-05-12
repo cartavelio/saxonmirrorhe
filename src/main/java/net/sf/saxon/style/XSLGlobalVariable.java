@@ -337,8 +337,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
                 compileError(err);
             }
 
-            // Add trace wrapper code if required
-            exp2 = makeTraceInstruction(this, exp2);
+            setInstructionLocation(this, exp2);
 
             allocateLocalSlots(exp2);
         }
