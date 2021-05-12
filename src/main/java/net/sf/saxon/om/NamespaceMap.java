@@ -186,6 +186,9 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
      */
 
     public NamespaceMap put(String prefix, String uri) {
+        if (uri == null) {
+            uri = "";
+        }
         if (isPointlessMapping(prefix, uri)) {
             return this;
         }
@@ -199,11 +202,11 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
                 // Delete the entry for the prefix
                 NamespaceMap n2 = newInstance();
                 n2.prefixes = new String[prefixes.length - 1];
-                System.arraycopy(prefixes, 0, n2.prefixes, 0,position);
-                System.arraycopy(prefixes, position+1, n2.prefixes, position, prefixes.length - position - 1);
+                System.arraycopy(prefixes, 0, n2.prefixes, 0, position);
+                System.arraycopy(prefixes, position + 1, n2.prefixes, position, prefixes.length - position - 1);
                 n2.uris = new String[uris.length - 1];
                 System.arraycopy(uris, 0, n2.uris, 0, position);
-                System.arraycopy(uris, position + 1, n2.uris, position, uris.length - position - 1);
+                System.arraycopy(prefixes, position + 1, n2.uris, position, uris.length - position - 1);
                 return n2;
             } else {
                 // Replace the entry for the prefix

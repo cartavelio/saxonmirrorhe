@@ -42,6 +42,27 @@ public class NamespaceMapTest {
         }
     }
 
+
+    @Test
+    public void testIncrementalRemove() {
+        try {
+            NamespaceMap map = NamespaceMap.emptyMap();
+            map = map.put("xsl", NamespaceConstant.XSLT);
+            map = map.put("xml", NamespaceConstant.XML);
+            map = map.put("saxon", NamespaceConstant.SAXON);
+            assertEquals(NamespaceConstant.SAXON, map.getURI("saxon"));
+            assertEquals(NamespaceConstant.XSLT, map.getURI("xsl"));
+            map = map.put("xsl", "");
+            assertNull(map.getURI("xsl"));
+            assertEquals(NamespaceConstant.SAXON, map.getURI("saxon"));
+            map = map.put("saxon", null);
+            assertNull(map.getURI("saxon"));
+        } catch (Exception err) {
+            err.printStackTrace();
+            fail(err.getMessage());
+        }
+    }
+
     @Test
     public void testMerge() {
         NamespaceMap map1 = NamespaceMap.emptyMap();
