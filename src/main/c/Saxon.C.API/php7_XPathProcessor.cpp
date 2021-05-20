@@ -302,11 +302,8 @@ PHP_METHOD(XPathProcessor, evaluateSingle)
 	return;
     }
 
-          php_error(E_WARNING, "called evaluateSingle cp0");
     if (xpathProcessor != nullptr) {
-          php_error(E_WARNING, "called evaluateSingle cp1");
         XdmItem * node = xpathProcessor->evaluateSingle(xpathStr);
-	     php_error(E_WARNING, "called evaluateSingle cp2");
 	if( node != nullptr) {
 		node->incrementRefCount();
 
@@ -315,13 +312,11 @@ PHP_METHOD(XPathProcessor, evaluateSingle)
         	        RETURN_NULL();
                 	return;
         	} else {
-        	zend_object* vvobj = Z_OBJ_P(return_value);
-			 std::cerr<<"evaluateSingle: xdmItem created!!!!! "<<std::endl;
+        	    zend_object* vvobj = Z_OBJ_P(return_value);
        			xdmItem_object * vobj = (xdmItem_object *)((char *)vvobj - XtOffsetOf(xdmItem_object, std));
-                	assert (vobj != nullptr);
- std::cerr<<"evaluateSingle: cp0!!!!! "<<std::endl;
-std::cerr<<"cp0-1 content:"<< node->getStringValue()<<std::endl;
-if(vobj == NULL) {
+               	assert (vobj != nullptr);
+                std::cerr<<"cp0-1 content:"<< node->getStringValue()<<std::endl;
+                if(vobj == NULL) {
  std::cerr<<"vobj is null"<<std::endl;
 }
                		vobj->xdmItem = node;

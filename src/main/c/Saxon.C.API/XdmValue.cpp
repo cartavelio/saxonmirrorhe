@@ -132,7 +132,7 @@ XdmValue::XdmValue(jobject val, bool arr){
 
 
 XdmValue::~XdmValue() {
-	std::cerr<<"XdmValue destructor pointer = "<<(this)<< " ref="<<getRefCount()<<std::endl;
+	//std::cerr<<"XdmValue destructor pointer = "<<(this)<< " ref="<<getRefCount()<<std::endl;
 	//bool safeToClear = false;
 	if(values.size() > 0) {
         for (size_t i = 0; i < values.size(); i++) {
@@ -181,13 +181,13 @@ void XdmValue::addUnderlyingValue(jobject val) {
 
 void XdmValue::incrementRefCount() {
 		refCount++;
-		std::cerr<<"refCount-inc-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
+		//std::cerr<<"refCount-inc-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
 	}
 
 void XdmValue::decrementRefCount() {
 		if (refCount > 0)
 			refCount--;
-		std::cerr<<"refCount-dec-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
+		//std::cerr<<"refCount-dec-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
 	}
 
 

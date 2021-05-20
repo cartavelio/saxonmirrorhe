@@ -324,6 +324,8 @@ PHP_METHOD(SaxonProcessor, parseXmlFromFile)
                 vobj->xdmNode = node;
                 return;
             }
+        }  else {
+
         }
     }
         RETURN_NULL();
@@ -755,7 +757,7 @@ jobject JNICALL phpNativeCall
             switch (it->second)
             {
                 case enumNode:
-                    std::cerr<<"enumNode path - cp0 - phpNtiveCall"<<std::endl;
+                    //std::cerr<<"enumNode path - cp0 - phpNtiveCall"<<std::endl;
                     if(!nprocessor->proc){
                         nprocessor->proc = (jobject)SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmValueForCppClass, procForNodeMID, argObj);
                     }
@@ -984,7 +986,7 @@ PHP_METHOD(XdmValue, __construct)
 PHP_METHOD(XdmValue, __destruct)
 {
 
-std::cerr<<"php_xdmValue  destruct"<<std::endl;
+//std::cerr<<"php_xdmValue  destruct"<<std::endl;
      zend_object *oobj = Z_OBJ_P(getThis());
     xdmValue_object* obj = (xdmValue_object *)((char *)oobj - XtOffsetOf(xdmValue_object, std));
     XdmValue * xdmValue= obj->xdmValue;
@@ -1199,7 +1201,7 @@ void XdmItem_destroy_storage(zend_object *object)
 
 PHP_METHOD(XdmItem, __destruct)
 {
-std::cerr<<"php_item  destruct"<<std::endl;
+//std::cerr<<"php_item  destruct"<<std::endl;
      zval *object = getThis();
      zend_object * zobj = Z_OBJ_P(object);
 
@@ -1380,7 +1382,7 @@ void XdmNode_destroy_storage(zend_object *object)
 
 PHP_METHOD(XdmNode, __destruct)
 {
-std::cerr<<"php_node  destruct"<<std::endl;
+//std::cerr<<"php_node  destruct"<<std::endl;
     zval *object = getThis();
      zend_object * zobj = Z_OBJ_P(object);
 
@@ -1717,7 +1719,7 @@ PHP_METHOD(XdmAtomicValue, __construct)
 
 PHP_METHOD(XdmAtomicValue, __destruct)
 {
-std::cerr<<"php_atomicValue  destruct"<<std::endl;
+//std::cerr<<"php_atomicValue  destruct"<<std::endl;
      zval *object = getThis();
      zend_object * zobj = Z_OBJ_P(object);
 

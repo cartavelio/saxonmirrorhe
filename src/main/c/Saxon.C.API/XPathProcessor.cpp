@@ -73,9 +73,7 @@ XPathProcessor::~XPathProcessor(){
 }
 
 XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
-std::cout<<"evaluate method called"<<std::endl;
-std::ofstream myfile;
-  myfile.open ("/media/ond1/c8f4c380-ed5d-4791-b60d-90df7fd39798/work/git/saxondev/src/main/c/samples/php/saxon_error_log.txt");
+
   	if (xpathStr == nullptr) {
 		std::cerr << "Error:: XPath string cannot be empty or nullptr" << std::endl;
 	return nullptr;
@@ -122,19 +120,14 @@ if (!mID) {
 					SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXP.c_str()),
 					SaxonProcessor::sxn_environ->env->NewStringUTF(xpathStr), stringArray, objectArray));
 	if(!results) {
-	
 
-
-	myfile<<"evaluate method: results is null\n";
-	myfile.close();
 		exception = proc->checkAndCreateException(cppClass);
 		if(exception != nullptr) {
 		    std::cout<<exception->getMessage();
 		}
 		return nullptr;
 	}
-	myfile<<"evaluate method: results good\n";
-	myfile.close();
+
 	int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
 	if (size > 0) {
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray);
@@ -188,9 +181,9 @@ XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
 		std::cerr << "Error:: XPath string cannot be empty or nullptr" << std::endl;
 	     return nullptr;
         }
-        std::ofstream myfile;
-          myfile.open ("/media/ond1/c8f4c380-ed5d-4791-b60d-90df7fd39798/work/git/saxondev/src/main/c/samples/php/saxon_error_log1.txt");
-          myfile<<"evaluateSingle method: start of evaluateSingle\n";
+        /*std::ofstream myfile;
+          myfile.open ("saxon_error_log1.txt");
+          myfile<<"evaluateSingle method: start of evaluateSingle\n";*/
 jmethodID mID =
 		(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass, "evaluateSingle",
 				"(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmItem;");
@@ -245,7 +238,7 @@ if (!mID) {
 					SaxonProcessor::sxn_environ->env->NewStringUTF((iter->second).c_str()));
 		}
 	}
-	myfile<<"evaluateSingle method: cp0 CallObjectMethod\n";
+
 	jobject result = (jobject)(
 			SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXP, mID,
 					SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXP.c_str()),
@@ -255,7 +248,6 @@ if (!mID) {
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(objectArray);
 	}
 	if (result) {
-	 myfile<<"evaluateSingle C++ cp0"<<std::endl;
 		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
 		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
@@ -271,17 +263,15 @@ if (!mID) {
 			return nullptr;
 		}
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-		myfile<<"evaluateSingle C++ cp1"<<std::endl;
-			myfile.close();
+
 		return xdmItem;
 	} else  {
-	myfile<<"evaluateSingle C++ cp2-1"<<std::endl;
+
 			exception = proc->checkAndCreateException(cppClass);
 	   		
      		}
 }
- myfile<<"evaluateSingle C++ cp2"<<std::endl;
- myfile.close();
+
 return nullptr;
 
 }
@@ -552,4 +542,6 @@ void XPathProcessor::createException(const char * message) {
     }
 
 }
+
+
 

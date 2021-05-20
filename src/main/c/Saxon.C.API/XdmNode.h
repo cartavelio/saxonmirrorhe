@@ -50,6 +50,16 @@ public:
 	 */
 	const char * getNodeName();
 
+
+
+	/**
+	 * Get the local name of the node
+	 *
+	 * @return the name of the node. In the case of unnamed nodes (for example, text and comment nodes)
+	 *         return nullptr.
+	 */
+	const char * getLocalName();
+
 	/**
 	 * Get the typed value of this node, as defined in XDM
 	 *
@@ -138,6 +148,7 @@ public:
 private:
 	const char * baseURI;
 	const char * nodeName;
+	const char * localName;
 	XdmNode ** children; //caches child nodes when getChildren method is first called;
 	int childCount;
 	XdmNode * parent;

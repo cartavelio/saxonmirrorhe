@@ -93,7 +93,7 @@ jobject XdmItem::getUnderlyingValue(){
 	}
 
 XdmItem::~XdmItem() {
-    std::cerr<< " ref="<<getRefCount()<<std::endl;
+   // std::cerr<< " ref="<<getRefCount()<<std::endl;
 
     if(value !=nullptr /* && getRefCount() <=1*/) {
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(value);
@@ -107,11 +107,11 @@ XdmItem::~XdmItem() {
 
 void XdmItem::incrementRefCount() {
     refCount++;
-    std::cerr<<"after refCount-inc-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
+   // std::cerr<<"after refCount-inc-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
 }
 
 void XdmItem::decrementRefCount() {
     if (refCount > 0)
         refCount--;
-    std::cerr<<"after refCount-dec-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
+   // std::cerr<<"after refCount-dec-xdmItem="<<refCount<<" ob ref="<<(this)<<std::endl;
 }
