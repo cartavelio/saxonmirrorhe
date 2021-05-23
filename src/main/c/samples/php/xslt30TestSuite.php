@@ -29,8 +29,8 @@ $proc->setcwd("");
 $xsltproc = $proc->newXslt30Processor();
 
 $xpathProcForEnv = $proc->newXPathProcessor();
+
 $xpathProcForEnv->declareNamespace("", "http://www.w3.org/2012/10/xslt-test-catalog");
-$xpathProcForEnv->declareNamespace("p", "http://one.com/");
 //$xpathProcForEnv->setBaseURI($path);
 /*$start = microtime(true);
               $proc->setSourceFile("cat.xml");                                              d
@@ -207,7 +207,7 @@ function test_case($test_set)
     global $run_test;
     global $run_test_case;
     $env = null;
-    $xml;
+    $xml = null;
     $test_path = pathinfo($test_set)['dirname'] . "/";
 
     if (file_exists($test_set)) {
@@ -286,11 +286,20 @@ function getNodeFromXPath($node, $xpath) {
 
 
 function testAssertion($asserts, $result) {
-    global $xpathProcForEnv;
+    //global $xpathProcForAssertions;
     global $pass;
     global $fail;
-    $xpathProcForEnv->clearParameters();
-    $xpathProcForEnv->clearProperties();
+    global $proc;
+
+    $xpathProcForAssertions = $proc->newXPathProcessor();
+    
+    $xpathProcForAssertions->declareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
+    $xpathProcForAssertions->declareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
+    $xpathProcForAssertions->declareNamespace("math", "http://www.w3.org/2005/xpath-functions/math");
+    $xpathProcForAssertions->declareNamespace("map", "http://www.w3.org/2005/xpath-functions/map");
+    $xpathProcForAssertions->declareNamespace("array", "http://www.w3.org/2005/xpath-functions/array");
+    $xpathProcForAssertions->declareNamespace("j", "http://www.w3.org/2005/xpath-functions");
+    //$xpathProcForAssertions->declareNamespace("", "http://www.w3.org/2012/10/xslt-test-catalog");
    $aSize = $asserts->size();
    for($i=0; $i < $aSize; $i++) {
 
@@ -303,10 +312,10 @@ function testAssertion($asserts, $result) {
            error_log("assertxx=".$assert->getStringValue());
         if($assertName == "assert-xml") {
             $file = $assert->getAttributeValue("file");
-            $xpathProcForEnv->setContextItem($assert);
+            $xpathProcForAssertions->setContextItem($assert);
 
-            $comparandNode = $xpathProcForEnv->evaluateSingle("if (@file) then unparsed-text(resolve-uri(@file, base-uri(.))) else string(.)");
-            $message = $xpathProcForEnv->getErrorMessage();
+            $comparandNode = $xpathProcForAssertions->evaluateSingle("if (@file) then unparsed-text(resolve-uri(@file, base-uri(.))) else string(.)");
+            $message = $xpathProcForAssertions->getErrorMessage();
             if($message != null || $comparandNode == null) {
                 error_log("ERRORXXX=" . $message);
                 return "FAIL - ASSERTION";
@@ -335,43 +344,35 @@ function testAssertion($asserts, $result) {
             }
 
         } elseif ($assertName == "assert")  {
-            $xpathProcForEnv->clearParameters();
-            $xpathProcForEnv->clearProperties();
+            $xpathProcForAssertions->clearParameters();
+            $xpathProcForAssertions->clearProperties();
             if($result != null && $result->size()==1) {
                 
-                
-                /*
-                 * 
-                 *             XdmSequenceIterator<XdmNode> iter = assertion.axisIterator(Axis.NAMESPACE);
-                             while (iter.hasNext()) {
-                                 XdmNode namespace = iter.next();
-                                 if (namespace.getNodeName() != null) {
-                                     assertXpc.declareNamespace(namespace.getNodeName().getLocalName(), namespace.getStringValue());
-                                 }
-                             }
-                 * 
-                 * 
-                 */
-                $item = $result->itemAt(0);
-                error_log("itemYYYYYY= ".$item->getNodeValue());
-                $xpathProcForEnv->setContextItem($item);
-                $namespaceValues = $xpathProcForEnv->evaluate("for \$i in 1 to count(//namespace::*) return if (empty(index-of((//namespace::*)[position() = (1 to (\$i - 1))][name() = name((//namespace::*)[\$i])], (//namespace::*)[\$i]))) then (//namespace::*)[\$i] else ()");
 
-                $xpathProcForEnv->clearParameters();
-                $xpathProcForEnv->clearProperties();
+                $item = $result->itemAt(0);
+                //error_log("itemYYYYYY= ".$item->getNodeValue());
+                $xpathProcForAssertions2 = $proc->newXPathProcessor();
+                $xpathProcForAssertions2->setContextItem($item);
+
+                $namespaceValues = $xpathProcForAssertions2->evaluate("for \$i in 1 to count(//namespace::*) return if (empty(index-of((//namespace::*)[position() = (1 to (\$i - 1))][name() = name((//namespace::*)[\$i])], (//namespace::*)[\$i]))) then (//namespace::*)[\$i] else ()");
+
+                $xpathProcForAssertions->clearParameters();
+                $xpathProcForAssertions->clearProperties();
 
                 if($namespaceValues!= null && $namespaceValues->size() > 0 ) {
                     for($j=0; $j < $namespaceValues->size(); $j++) {
-                        $nsNode = $namespaceValues->itemAt($j)->getNodeValue();
-                        if($nsNode != null) {
-                            error_log("Namespace=" . $nsNode->getNodeName()." = ".$nsNode->getStringValue());
-                            $nsName = $nsNode->getNodeName();
-                            if($nsNode->getNodeName() == null) {
-                                $nsName = "";
-                            }
-                            if ($nsName != "xml") {
-                                $xpathProcForEnv->declareNamespace("", $nsNode->getStringValue());
-                            }
+                        $item = $namespaceValues->itemAt($j);
+                        if($item->isNode())  {
+                            $nsNode = $item->getNodeValue();
+                            if($nsNode != null) {
+                                $nsName = $nsNode->getNodeName();
+                                error_log("Namespace=" . $nsName . " = " . $nsNode->getStringValue());
+
+                                if ($nsName != null) {
+                                    $xpathProcForAssertions->declareNamespace($nsName, $nsNode->getStringValue());
+                                }
+
+                        }
 
                         }
                     }
@@ -380,15 +381,17 @@ function testAssertion($asserts, $result) {
 
                 }
 
-                $xpathProcForEnv->setContextItem($item->getNodeValue());
+                $xpathProcForAssertions->setContextItem($result->itemAt(0));
                 $xpath = $assert->getChildNode(0)->getStringValue();
-                error_log("xpath=".$xpath. ", XXXXXX result=" . $item);
-                $check = $xpathProcForEnv->effectiveBooleanValue($xpath);
-                $testResult = $xpathProcForEnv->evaluateSingle("count(//*:out)");
-                error_log("testResult= ".$testResult);
+                error_log("xpath=".$xpath. ", XXXXXX result=" . $result->itemAt(0));
+                $check = $xpathProcForAssertions->effectiveBooleanValue($xpath);
+                $testResult = $xpathProcForAssertions->evaluateSingle("count(/out/*:subelem)");
+
+                error_log(", XXXXXX testResult=" . $testResult);
+                
                 if($check == false) {
                     $fail++;
-                    return "assert: " . $xpath . "\n Outcome:" . $result;
+                    return "assert: " . $xpath . "\n OutcomeXXY:" . $result->itemAt(0);
                 }
                 $pass++;
                 return "PASS";

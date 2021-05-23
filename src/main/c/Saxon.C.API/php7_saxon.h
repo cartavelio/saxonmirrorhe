@@ -390,6 +390,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XdmNode,  __toString);
     PHP_METHOD(XdmNode,  getStringValue);
     PHP_METHOD(XdmNode, getNodeKind);
+    PHP_METHOD(XdmNode, getLocalName);
     PHP_METHOD(XdmNode, getNodeName);
     PHP_METHOD(XdmNode,  isAtomic);
     PHP_METHOD(XdmNode,  getChildCount);

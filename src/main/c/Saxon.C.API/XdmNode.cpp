@@ -55,11 +55,22 @@ bool XdmNode::isAtomic() {
 
     XdmNode::~XdmNode() {
        // if(getRefCount() <= 1) {
-            delete baseURI;
-            delete nodeName;
-            delete localName;
+       if(baseURI != nullptr) {
+        delete baseURI;
+        baseURI = nullptr;
+       }
 
-            if (children != nullptr) {
+       if(nodeName != nullptr) {
+         delete nodeName;
+         nodeName = nullptr;
+       }
+
+       if(localName != nullptr) {
+         delete localName;
+         localName = nullptr;
+       }
+
+           /* if (children != nullptr) {
 
                 for (int p = 0; p < childCount; ++p) {
                     delete children[p];
@@ -73,7 +84,7 @@ bool XdmNode::isAtomic() {
 
                 }
                 delete[] attrValues;
-            }
+            }     */
 
         //}
     }
@@ -85,7 +96,7 @@ bool XdmNode::isAtomic() {
 	}
 	XDM_NODE_KIND kind = getNodeKind();
  	jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
-	jmethodID xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getLocalName",
+	jmethodID xlnmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getLocalName",
 					"(Lnet/sf/saxon/s9api/XdmNode;)Ljava/lang/String;");
 	switch (kind) {
             case DOCUMENT:
@@ -97,16 +108,17 @@ bool XdmNode::isAtomic() {
             case ELEMENT:
             case ATTRIBUTE:
 
-		if (!xmID) {
+		if (!xlnmID) {
 			std::cerr << "Error: MyClassInDll." << "getLocalName"<< " not found\n" << std::endl;
 			return nullptr;
 		} else {
-			jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID, value));
+			jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xlnmID, value));
 			if(!result) {
 				return nullptr;
 			} else {
-				nodeName = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
-				return nodeName;
+				localName = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
+                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                return nodeName;
 			}
 		}
             default:
@@ -124,7 +136,7 @@ bool XdmNode::isAtomic() {
 	}
 	XDM_NODE_KIND kind = getNodeKind();
  	jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
-	jmethodID xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getNodeName",
+	jmethodID xnnmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getNodeName",
 					"(Lnet/sf/saxon/s9api/XdmNode;)Ljava/lang/String;");
 	switch (kind) {
             case DOCUMENT:
@@ -136,15 +148,17 @@ bool XdmNode::isAtomic() {
             case ELEMENT:
             case ATTRIBUTE:
                
-		if (!xmID) {
+		if (!xnnmID) {
 			std::cerr << "Error: MyClassInDll." << "getNodeName"<< " not found\n" << std::endl;
 			return nullptr;
 		} else {
-			jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID, value));
+			jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xnnmID, value));
 			if(!result) {
 				return nullptr;
 			} else {
-				nodeName = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
+			jboolean isCopy = JNI_TRUE;
+				nodeName = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result,  &isCopy);
+				SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
 				return nodeName;
 			} 
 		}

@@ -191,7 +191,6 @@ std::cerr<<"setPara called ======"<<std::endl;
                 return;
         }
       const char * objName =ZSTR_VAL(Z_OBJCE_P(oth)->name);
-      std::cerr<<"setPara before ======"<<std::endl;
       if(strcmp(objName, "Saxon\\XdmNode")==0) {
         zend_object* ooth = Z_OBJ_P(oth);
         xdmNode_object * nobj = (xdmNode_object *)((char *)ooth - XtOffsetOf(xdmNode_object, std));
@@ -220,7 +219,7 @@ std::cerr<<"setPara called ======"<<std::endl;
         if(aobj != NULL) {
             XdmAtomicValue * value = aobj->xdmAtomicValue;
             if(value != NULL) {
-                std::cerr<<"setPara xdmAtomicValue"<<std::endl;
+
                 xslt30Processor->setParameter(name, (XdmValue *)value);
                 value->incrementRefCount();
             }

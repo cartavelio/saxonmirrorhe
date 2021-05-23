@@ -292,27 +292,47 @@ void XPathProcessor::setContextFile(const char * filename) {
 
 void XPathProcessor::declareNamespace(const char *prefix, const char * uri){
 
-        if (prefix == nullptr || uri == nullptr) {
+        if (uri == nullptr) {
 		return;
         }
 	jmethodID dnspID =
 		(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass, "declareNamespace",
 				"(Ljava/lang/String;Ljava/lang/String;)V");
-				std::cerr<<"C++ declarenamespace cp2"<<std::endl;
 	if (!dnspID) {
-	std::cerr << "Error: "<<getDllname() << ".declareNameSpace" << " not found\n"
+	    std::cerr << "Error: "<<getDllname() << ".declareNameSpace" << " not found\n"
 			<< std::endl;
 
 	} else {
-
 		SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXP, dnspID,
 				(prefix== nullptr? SaxonProcessor::sxn_environ->env->NewStringUTF("") :SaxonProcessor::sxn_environ->env->NewStringUTF(prefix)),
 				(uri== nullptr? SaxonProcessor::sxn_environ->env->NewStringUTF("") :SaxonProcessor::sxn_environ->env->NewStringUTF(uri)));
 
-		//proc->checkAndCreateException(cppClass);
+		proc->checkAndCreateException(cppClass);
 	}
 
 }
+
+
+void XPathProcessor::declareVariable(const char * name){
+
+    if (name == nullptr) {
+		return;
+    }
+	jmethodID dnspID =
+		(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass, "declareVariable",
+				"(Ljava/lang/String;)V");
+	if (!dnspID) {
+	    std::cerr << "Error: "<<getDllname() << ".declareVariable" << " not found\n"
+			<< std::endl;
+
+	} else {
+		SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXP, dnspID,SaxonProcessor::sxn_environ->env->NewStringUTF(name));
+
+		proc->checkAndCreateException(cppClass);
+	}
+
+}
+
 
 #if CVERSION_API_NO >= 121
 

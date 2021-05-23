@@ -122,6 +122,10 @@ public:
      */
     void declareNamespace(const char *prefix, const char * uri);
 
+
+
+    void declareVariable(const char * name);
+
 #if CVERSION_API_NO >= 121
 
 

@@ -119,7 +119,6 @@ PHP_METHOD(XPathProcessor, setParameter)
             XdmAtomicValue * value = ooth->xdmAtomicValue;
             value->incrementRefCount();
             if(value != nullptr) {
-
                 xpathProcessor->setParameter(name, (XdmValue *)value);
             }
         }
@@ -134,22 +133,29 @@ PHP_METHOD(XPathProcessor, setParameter)
 PHP_METHOD(XPathProcessor, declareNamespace)
 {
 
-   char * prefix = nullptr;
-   char * ns = nullptr;
-   int len1, len2;
+   const char * prefixi = NULL;
+   const char * ns = NULL;
+   size_t len1, len2;
    XPathProcessor *xpathProcessor = nullptr;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() , "ss", &prefix, &len1, &ns, &len2) == FAILURE) {
+  if (ZEND_NUM_ARGS()!= 2) {
+       WRONG_PARAM_COUNT;
+  }
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "ss", &prefixi, &len1, &ns, &len2) == FAILURE) {
         RETURN_NULL();
     }
 
-    if(prefix != nullptr && ns != nullptr) {
+    if(prefixi != NULL && ns != NULL) {
     	zend_object* pobj = Z_OBJ_P(getThis());
         xpathProcessor_object *obj = (xpathProcessor_object *)((char *)pobj - XtOffsetOf(xpathProcessor_object, std));
 
     	xpathProcessor = obj->xpathProcessor;
-
-    	xpathProcessor->declareNamespace((len1 == 0 ? "" : prefix), (len2 == 0 ? "" : ns));
+    	if (xpathProcessor != nullptr) {
+    	std::cerr<<"PHPXPATHPROCXX len1="<< len1<< ", len2="<<len2 <<std::endl;
+             std::cerr<<"PHPXPATHPROC prefix="<<(len1 == 0 ? "" : prefixi)<< ", ns="<<(len2 == 0 ? "" : ns)<<std::endl;
+    	    xpathProcessor->declareNamespace((len1 == 0 ? "" : nullptr), (len2 == 0 ? "" : ns));
+    	}
     }
 
 }
@@ -193,7 +199,7 @@ PHP_METHOD(XPathProcessor, setCaching){
 
 PHP_METHOD(XPathProcessor, importSchemaNamespace){
       char * name;
-      int len1;
+      size_t len1;
       XPathProcessor *xpathProcessor;
 
        if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &name, &len1) == FAILURE) {
@@ -281,7 +287,6 @@ PHP_METHOD(XPathProcessor, evaluateSingle)
 {
      php_error(E_WARNING, "called evaluateSingle");
      std::cerr<<"called evaluateSingle x1"<<std::endl;
-     std::cout<<"called evaluateSingle x2"<<std::endl;
       std::ofstream myfile;
                myfile.open ("/media/ond1/c8f4c380-ed5d-4791-b60d-90df7fd39798/work/git/saxondev/src/main/c/samples/php/saxon_error_log1.txt");
                myfile<<"evaluateSingle method: start of evaluateSingle\n";
@@ -317,12 +322,10 @@ PHP_METHOD(XPathProcessor, evaluateSingle)
                	assert (vobj != nullptr);
                 std::cerr<<"cp0-1 content:"<< node->getStringValue()<<std::endl;
                 if(vobj == NULL) {
- std::cerr<<"vobj is null"<<std::endl;
-}
-               		vobj->xdmItem = node;
-
-
-               		return; 
+                    std::cerr<<"vobj is null"<<std::endl;
+                }
+               	vobj->xdmItem = node;
+               	return;
     		}
 	}    
    		// xpathProcessor->checkException();//TODO
