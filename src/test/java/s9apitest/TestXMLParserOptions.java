@@ -1,20 +1,19 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -315,4 +314,112 @@ public class TestXMLParserOptions {
         }
 
     }
+
+    @Test
+    public void testDefaultedXsdAttributeWithNamespaceXercesSuppress() {
+        runDefaultedXsdAttributeWithNamespaceXerces(true);
+    }
+
+    @Test
+    public void testDefaultedXsdAttributeWithNamespaceXercesNoSuppress() {
+        // Bug 4966
+        runDefaultedXsdAttributeWithNamespaceXerces(false);
+    }
+
+    private void runDefaultedXsdAttributeWithNamespaceXerces(boolean suppress) {
+        // Read XML file via Xerces parser and Xerces schema validator expanding attribute defaults
+        try {
+            Processor proc = new Processor(false);
+            if (suppress) {
+                proc.setConfigurationProperty(Feature.EXPAND_ATTRIBUTE_DEFAULTS, false);
+            }
+            XsltCompiler comp = proc.newXsltCompiler();
+            SAXParserFactory spf;
+            spf = SAXParserFactory.newInstance();
+            spf.setNamespaceAware(true);
+            XMLReader xmr = spf.newSAXParser().getXMLReader();
+            xmr.setFeature("http://apache.org/xml/features/validation/schema", true);
+
+            XsltExecutable exp = comp.compile(new StreamSource(new File(ConfigTest.junitBugsDirectory() + "/4996/test.xsl")));
+
+            StringWriter sw = new StringWriter();
+            Serializer out = proc.newSerializer(sw);
+
+            File dataFile = new File(ConfigTest.junitBugsDirectory() + "/4996/xmlSchemaDefaultAttributeA.xml");
+            InputSource inputSource = new InputSource(dataFile.toURI().toString());
+            SAXSource source1 = new SAXSource(xmr, inputSource);
+
+            XsltTransformer trans = exp.load();
+            trans.setSource(source1);
+            trans.setDestination(out);
+            trans.transform();
+            //System.err.println(sw);
+            if (suppress) {
+                assertFalse(sw.toString().contains("=\"http://com.deltaxml.test/namespace\""), "no namespace declaration");
+                assertFalse(sw.toString().contains("test=\"yes\""), "no attribute");
+            } else {
+                assertTrue(sw.toString().contains("=\"http://com.deltaxml.test/namespace\""), "contains namespace declaration");
+                assertTrue(sw.toString().contains(":test=\"yes\""), "attribute is prefixed");
+            }
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testDefaultedXsdAttributeWithNamespaceSaxonSuppress() {
+        testDefaultedXsdAttributeWithNamespaceSaxon(true);
+    }
+
+    @Test
+    public void testDefaultedXsdAttributeWithNamespaceSaxonNoSuppress() {
+        testDefaultedXsdAttributeWithNamespaceSaxon(false);
+    }
+
+    private void testDefaultedXsdAttributeWithNamespaceSaxon(boolean suppress) {
+        // Read XML file via Xerces parser and Saxon schema validator expanding attribute defaults
+        try {
+            Processor proc = new Processor(true);
+            if (suppress) {
+                proc.setConfigurationProperty(Feature.EXPAND_ATTRIBUTE_DEFAULTS, false);
+            }
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setSchemaAware(true);
+            SAXParserFactory spf;
+            spf = SAXParserFactory.newInstance();
+            spf.setNamespaceAware(true);
+            XMLReader xmr = spf.newSAXParser().getXMLReader();
+            xmr.setFeature("http://apache.org/xml/features/validation/schema", false);
+
+            XsltExecutable exp = comp.compile(new StreamSource(new File(ConfigTest.junitBugsDirectory() + "/4996/test.xsl")));
+
+            StringWriter sw = new StringWriter();
+            Serializer out = proc.newSerializer(sw);
+
+            File dataFile = new File(ConfigTest.junitBugsDirectory() + "/4996/xmlSchemaDefaultAttributeA.xml");
+            InputSource inputSource = new InputSource(dataFile.toURI().toString());
+            SAXSource source1 = new SAXSource(xmr, inputSource);
+            ParseOptions options = new ParseOptions();
+            options.setSchemaValidationMode(Validation.STRICT);
+            options.setUseXsiSchemaLocation(true);
+            AugmentedSource as = new AugmentedSource(source1, options);
+            XsltTransformer trans = exp.load();
+            trans.setSource(as);
+            trans.setDestination(out);
+            trans.transform();
+            if (suppress) {
+                assertFalse(sw.toString().contains("=\"http://com.deltaxml.test/namespace\""), "no namespace declaration");
+                assertFalse(sw.toString().contains("test=\"yes\""), "no attribute");
+            } else {
+                assertTrue(sw.toString().contains("=\"http://com.deltaxml.test/namespace\""), "contains namespace declaration");
+                assertTrue(sw.toString().contains(":test=\"yes\""), "attribute is prefixed");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+
 }
+
