@@ -163,6 +163,16 @@ public class XdmUtils {
         }
     }
 
+
+
+    public static String getLocalName(XdmNode node) {
+        QName qname = node.getNodeName();
+        if (qname == null) {
+            return null;
+        }
+        return qname.getLocalName();
+    }
+
     /**
      * Get the name of the node, as a EQName
      *
@@ -178,6 +188,10 @@ public class XdmUtils {
         return XdmUtils.getEQName(qname);
 
     }
+
+
+
+
 
 
     /**
