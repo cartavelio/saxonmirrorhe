@@ -206,7 +206,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
                 System.arraycopy(prefixes, position + 1, n2.prefixes, position, prefixes.length - position - 1);
                 n2.uris = new String[uris.length - 1];
                 System.arraycopy(uris, 0, n2.uris, 0, position);
-                System.arraycopy(prefixes, position + 1, n2.uris, position, uris.length - position - 1);
+                System.arraycopy(uris, position + 1, n2.uris, position, uris.length - position - 1);
                 return n2;
             } else {
                 // Replace the entry for the prefix
