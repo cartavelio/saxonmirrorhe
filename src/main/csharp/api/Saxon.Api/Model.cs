@@ -2453,7 +2453,8 @@ namespace Saxon.Api
 
         public IEnumerable<XdmNode> Children(String uri, String localName)
         {
-            return Children().SelectMany(Steps.Child(uri, localName).Func);
+            Step<XdmNode, XdmNode> nameUriStep = Steps.Child(uri, localName);
+            return nameUriStep.Invoke(this);
         }
 
         /// <summary>
