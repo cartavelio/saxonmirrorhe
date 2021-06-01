@@ -1,0 +1,293 @@
+package s9apitest;
+
+import com.saxonica.config.EnterpriseConfiguration;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.FeatureKeys;
+import org.w3c.dom.ls.LSInput;
+import org.w3c.dom.ls.LSResourceResolver;
+import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+/**
+ * Tests for the s9api schema validation interface
+ */
+public class TestBug4982 {
+
+
+    /**
+     * A demo program for TESB-4972. In the end the Saxonica's implementation didn't have a bug, but
+     * Apache's implementation is more robust. Saxonica's schema load seems to be over five times slower
+     * than Apache's. Consider adding rather quickly evicting cache to zip content fetch.
+     *
+     * @author ext-jarttpet
+     */
+
+
+    //private static final Logger LOG = LoggerFactory.getLogger(SchemaValidatorImpl.class);
+
+    private static byte[] schemasInZip;
+
+    static {
+        File schemaZip = new File(
+                "/Users/mike/bugs/2021/4982-Vanhala/SchemaValidatorImplTest_zipped_schemas.zip");
+        try {
+            schemasInZip = Files.readAllBytes(schemaZip.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void main(String args[]) {
+        TestBug4982 application = new TestBug4982();
+        long startTime = System.currentTimeMillis();
+//        System.err.println("Loading schemas from zip with Apache's implementation...");
+//        application.run(getApacheSchemaFactory());
+//        System.err.println(String.format("Took {} milliseconds.", System.currentTimeMillis() - startTime));
+
+        startTime = System.currentTimeMillis();
+        System.err.println("Loading schemas from zip with Saxonica's implementation...");
+        application.run(getSaxonSchemaFactory());
+        System.err.println(String.format("Took %d milliseconds.", System.currentTimeMillis() - startTime));
+    }
+
+    private void run(SchemaFactory schemaFactory) {
+        List<Source> sources = new ArrayList<>();
+        try {
+            addZippedSchemas(sources);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        schemaFactory.setResourceResolver(resourceResolver);
+
+        try {
+            schemaFactory.newSchema(sources.toArray(new Source[0]));
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Resolve an external resource. Sources have system identifiers of the xsd files indicating
+     * where files are found as follows: "zip:/path/to/file.xsd".
+     * <p>
+     * Schema factory calls <code>resolveResource</code> method with systemId of the source file in
+     * baseURI parameter, and the imported xsd that needs to be resolved in systemId parameter.
+     */
+    private static LSResourceResolver resourceResolver = new LSResourceResolver() {
+        @Override
+        public LSInput resolveResource(String type, String namespaceURI, String publicId, String systemId,
+                                       String baseURI) {
+
+            System.err.println(String.format(
+                    "Resolver called with parameters type %s, "
+                            + "namespaceURI %s, publicId %s, systemId %s, baseURI %s",
+                    type, namespaceURI, publicId, systemId, baseURI));
+
+            String searchedSchemaFile = null;
+
+            if (baseURI != null && baseURI.startsWith("zip:")) {
+                String[] splittedBaseURI = baseURI.split(":");
+                if (splittedBaseURI[1].startsWith("/external")) {
+                    return new LSInputImpl("file:///Users/mike/bugs/2021/4982-Vanhala" + splittedBaseURI[1]);
+                }
+                Path baseFileFolder = Paths.get(splittedBaseURI[1]).getParent();
+                searchedSchemaFile = baseFileFolder.resolve(systemId).normalize().toString();
+            } else {
+                String errorLine = String.format(
+                        "The baseURI is lost! Unable to determine where to find xsd file %s as baseURI is now %s",
+                        systemId, baseURI);
+                throw new RuntimeException(errorLine);
+            }
+
+            byte[] uncompressedSchema = getZippedSchema(searchedSchemaFile);
+            if (uncompressedSchema == null) {
+                String errorLine = String.format(
+                        "Schema file %s is supposed to be inside %s, but it was not found!",
+                        searchedSchemaFile);
+                throw new RuntimeException(errorLine);
+            }
+
+            systemId = "zip:" + searchedSchemaFile;
+            baseURI = null;
+
+            InputStream stream = new ByteArrayInputStream(uncompressedSchema);
+            LSInputImpl input = new LSInputImpl(systemId);
+            input.setPublicId(publicId);
+            input.setSystemId(systemId);
+            input.setBaseURI(baseURI);
+            input.setCharacterStream(new InputStreamReader(stream));
+
+            //LOG.info("Resolved xsd file content: publicId {} systemId {} baseURI {}", publicId, systemId, baseURI);
+
+            return input;
+        }
+    };
+
+    private static SchemaFactory getSaxonSchemaFactory() {
+        EnterpriseConfiguration conf = new EnterpriseConfiguration();
+        conf.setConfigurationProperty(FeatureKeys.LICENSE_FILE_LOCATION, "/Users/mike/active-license/saxon-license.lic");
+        conf.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, Boolean.TRUE);
+        return new com.saxonica.ee.jaxp.SchemaFactoryImpl(conf);
+    }
+
+    private static SchemaFactory getApacheSchemaFactory() {
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI,
+                                                                "org.apache.xerces.jaxp.validation.XMLSchemaFactory", TestBug4982.class.getClassLoader());
+        return schemaFactory;
+    }
+
+    /**
+     * Search a xsd file from the zip. Return an uncompressed byte array of the file content.
+     */
+    private static byte[] getZippedSchema(String searchedSchemaFile) {
+        try (ZipInputStream zi = new ZipInputStream(new ByteArrayInputStream(schemasInZip))) {
+            ZipEntry zipEntry = null;
+            while ((zipEntry = zi.getNextEntry()) != null) {
+                if (!zipEntry.isDirectory()) {
+                    String normalizedName = Paths.get("/", zipEntry.getName()).normalize().toString();
+                    if (normalizedName.equals(searchedSchemaFile)) {
+                        ByteArrayOutputStream os = new ByteArrayOutputStream();
+                        int b = zi.read();
+                        while (b >= 0) {
+                            os.write(b);
+                            b = zi.read();
+                        }
+                        os.flush();
+
+                        return os.toByteArray();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    /**
+     * Read through the zip file and make <code>Source</code> entries from every xsd-file. Generate
+     * a systemId of the xsd file indicating where the file is found as follows:
+     * "zip:/path/to/file.xsd"
+     */
+    private static void addZippedSchemas(List<Source> sources) throws IOException {
+        try (ZipInputStream zi = new ZipInputStream(new ByteArrayInputStream(schemasInZip))) {
+            ZipEntry zipEntry = null;
+            while ((zipEntry = zi.getNextEntry()) != null) {
+                if (!zipEntry.isDirectory() && zipEntry.getName().toLowerCase().endsWith(".xsd")) {
+                    String normalizedName = Paths.get("/", zipEntry.getName()).normalize().toString();
+
+                    try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                        int b = zi.read();
+                        while (b >= 0) {
+                            os.write(b);
+                            b = zi.read();
+                        }
+                        os.flush();
+
+                        byte[] schemaDoc = os.toByteArray();
+                        String systemId = String.format("zip:%s", normalizedName);
+                        sources.add(new StreamSource(new ByteArrayInputStream(schemaDoc), systemId));
+                        System.err.println(String.format("Found %s from the zip. Added source with systemId %s", normalizedName, systemId));
+                    }
+                }
+            }
+        }
+    }
+
+    static class LSInputImpl implements LSInput {
+
+        private String systemId;
+
+        public LSInputImpl(String systemId) {
+            this.systemId = systemId;
+        }
+
+        @Override
+        public Reader getCharacterStream() {
+            return null;
+        }
+
+        @Override
+        public void setCharacterStream(Reader characterStream) {
+        }
+
+        @Override
+        public InputStream getByteStream() {
+            return null;
+        }
+
+        @Override
+        public void setByteStream(InputStream byteStream) {
+        }
+
+        @Override
+        public String getStringData() {
+            return null;
+        }
+
+        @Override
+        public void setStringData(String stringData) {
+        }
+
+        @Override
+        public String getSystemId() {
+            return systemId;
+        }
+
+        @Override
+        public void setSystemId(String systemId) {
+            this.systemId = systemId;
+        }
+
+        @Override
+        public String getPublicId() {
+            return null;
+        }
+
+        @Override
+        public void setPublicId(String publicId) {
+        }
+
+        @Override
+        public String getBaseURI() {
+            return null;
+        }
+
+        @Override
+        public void setBaseURI(String baseURI) {
+        }
+
+        @Override
+        public String getEncoding() {
+            return null;
+        }
+
+        @Override
+        public void setEncoding(String encoding) {
+        }
+
+        @Override
+        public boolean getCertifiedText() {
+            return false;
+        }
+
+        @Override
+        public void setCertifiedText(boolean certifiedText) {
+        }
+    }
+
+}
+

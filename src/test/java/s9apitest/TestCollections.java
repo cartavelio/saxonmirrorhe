@@ -537,6 +537,52 @@ public class TestCollections {
         }
     }
 
+    @Test
+    public void testCollectionFinderUri() {
+        try {
+            Processor p = new Processor(true);
+            final Configuration config = p.getUnderlyingConfiguration();
+            config.setCollectionFinder((context, collectionUri) ->
+                    new DirectoryCollection(config, "http://example.com/collection", new File(ConfigTest.DATA_DIR + "trax/"),
+                                                   new URIQueryParameters("select=*.xml;recurse=yes", context.getConfiguration())));
+
+            XQueryCompiler c = p.newXQueryCompiler();
+            XQueryExecutable exec = c.compile("distinct-values(uri-collection(.))");
+            XQueryEvaluator eval = exec.load();
+            eval.setContextItem(new XdmAtomicValue("http://example.com/collection"));
+            XdmValue val = eval.evaluate();
+            assertEquals(7, val.size());
+            assertTrue(val.stream().filter(a -> a.getStringValue().endsWith("cities.xml")).exists());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+
+    @Test
+    public void testCollectionFinderLocally() {
+        try {
+            Processor p = new Processor(true);
+            XPathCompiler c = p.newXPathCompiler();
+            XPathExecutable exec = c.compile("distinct-values(uri-collection(.))");
+            XPathSelector eval = exec.load();
+            eval.getUnderlyingXPathContext().setCollectionFinder(
+                    (context, collectionUri) ->
+                        new DirectoryCollection(p.getUnderlyingConfiguration(),
+                                                "http://example.com/collection",
+                                                new File(ConfigTest.DATA_DIR + "trax/"),
+                                    new URIQueryParameters("select=*.xml;recurse=yes",
+                                                           context.getConfiguration())));
+
+            eval.setContextItem(new XdmAtomicValue("http://example.com/collection"));
+            XdmValue val = eval.evaluate();
+            assertEquals(7, val.size());
+            assertTrue(val.stream().filter(a -> a.getStringValue().endsWith("cities.xml")).exists());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
 
 
 
