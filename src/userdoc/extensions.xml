@@ -479,6 +479,10 @@ saxon:evaluate($expression)
         them to the <code>id</code> anchors of the containing sections.</li>
         
       </ul>
+      
+      <p>Note: the snapshot captured as a result of the use of <code>saxon:capture</code> differs
+        from the result of the <code>fn:snapshot()</code> function in that accumulator values associated with the copied
+        nodes are not retained in the snapshot.</p>
     </section>
     
     <section id="dtd-validation" title="saxon:dtd-validation">
