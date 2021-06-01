@@ -240,6 +240,8 @@ private:
 
     void createException(const char * message=nullptr);
 
+    void setParameter(const char * name, XdmValue*value, bool withParam);
+
 	SaxonProcessor * proc;
         std::string cwdXP; /*!< current working directory */
 	jclass  cppClass;

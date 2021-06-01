@@ -285,12 +285,6 @@ PHP_METHOD(XPathProcessor, evaluate)
 
 PHP_METHOD(XPathProcessor, evaluateSingle)
 {
-     php_error(E_WARNING, "called evaluateSingle");
-     std::cerr<<"called evaluateSingle x1"<<std::endl;
-      std::ofstream myfile;
-               myfile.open ("/media/ond1/c8f4c380-ed5d-4791-b60d-90df7fd39798/work/git/saxondev/src/main/c/samples/php/saxon_error_log1.txt");
-               myfile<<"evaluateSingle method: start of evaluateSingle\n";
-               myfile.close();
    XPathProcessor *xpathProcessor;
    char * xpathStr;
    zval* oth;

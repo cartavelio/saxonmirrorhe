@@ -135,6 +135,7 @@ if (!mID) {
 	}
 
 	if (sizex>0) {
+	    std::cerr<<"evaluate size GGGG="<<sizex<<std::endl;
 		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
 		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
@@ -277,14 +278,14 @@ return nullptr;
 }
 
 void XPathProcessor::setContextItem(XdmItem * item) {
-    	if(item != nullptr){
-	std::cerr<<" setContextItem item pointer ="<<(item)<<std::endl;
-     	 parameters["node"] = (XdmValue *)item;
-    	}
+    std::cerr<<"setParameter found key="<<"node"<<", deleted first"<<std::endl;
+    setParameter("node", item, false);
 }
 
 void XPathProcessor::setContextFile(const char * filename) {
+
 	if (filename != nullptr) {
+	std::cerr<<"setContextFile="<<filename<<std::endl;
 		setProperty("s", filename);
 	}
 }
@@ -439,11 +440,12 @@ if (!mID) {
 return false;
 }
 
-void XPathProcessor::setParameter(const char * name, XdmValue* value) {
+
+void XPathProcessor::setParameter(const char * name, XdmValue*value, bool withParam) {
 	if(value != nullptr){
-		value->incrementRefCount();
+		//value->incrementRefCount();
 		int s = parameters.size();
-		std::string skey = "param:"+std::string(name);
+		std::string skey = (withParam ? "param:" : "")+std::string(name);
 		parameters[skey] = value;
 		if(s == parameters.size()) {
             std::map<std::string, XdmValue*>::iterator it;
@@ -452,6 +454,7 @@ void XPathProcessor::setParameter(const char * name, XdmValue* value) {
                 XdmValue * valuei = it->second;
                 if(valuei != nullptr) {
                     valuei->decrementRefCount();
+                    std::cerr<<"setParameter found key="<<skey<<", deleted first"<<std::endl;
                     if (valuei->getRefCount() < 1) {
                         delete value;
                     }
@@ -461,6 +464,13 @@ void XPathProcessor::setParameter(const char * name, XdmValue* value) {
             }
 		}
 	}
+
+}
+
+
+
+void XPathProcessor::setParameter(const char * name, XdmValue* value) {
+    setParameter(name, value, true);
 }
 
 bool XPathProcessor::removeParameter(const char * name) {
@@ -485,7 +495,7 @@ void XPathProcessor::setProperty(const char * name, const char * value) {
 }
 
 void XPathProcessor::clearParameters(bool delVal) {
-std::cerr<<"XPath clearParameter"<<std::endl;
+//std::cerr<<"XPath clearParameter"<<std::endl;
 	if(delVal) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;

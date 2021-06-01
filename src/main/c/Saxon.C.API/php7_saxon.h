@@ -388,6 +388,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XdmNode,  __construct);
     PHP_METHOD(XdmNode,  __destruct);
     PHP_METHOD(XdmNode,  __toString);
+    PHP_METHOD(XdmNode,  getBaseURI);
     PHP_METHOD(XdmNode,  getStringValue);
     PHP_METHOD(XdmNode, getNodeKind);
     PHP_METHOD(XdmNode, getLocalName);

@@ -116,9 +116,10 @@ bool XdmNode::isAtomic() {
 			if(!result) {
 				return nullptr;
 			} else {
-				localName = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
+			jboolean isCopy = JNI_TRUE;
+				localName = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result,  &isCopy);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                return nodeName;
+                return localName;
 			}
 		}
             default:
@@ -413,6 +414,10 @@ bool XdmNode::isAtomic() {
 		}
 		jobjectArray results = (jobjectArray)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID, 
 		value));
+		/*std::cerr<<"xdmNode c++ - cp1"<<std::endl;
+		if(!results) {
+		            std::cerr<<"xdmNode c++ - cp2 - null found"<<std::endl;
+		}  */
 		int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
 		childCount = sizex;	
 		childreni =  new XdmNode*[sizex];
@@ -437,12 +442,14 @@ bool XdmNode::isAtomic() {
        if (cached ) {
 
             if(children == nullptr) {
+                //std::cerr<<"xdmNode c++ - cp0"<<std::endl;
                 getChildren(cached);
 
 
             }
 
             if(i < childCount && children[i] != nullptr) {
+                //std::cerr<<"xdmNode c++ - cp0-1"<<std::endl;
                 return children[i];
 
 

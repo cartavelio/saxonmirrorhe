@@ -1061,6 +1061,7 @@ PHP_METHOD(XdmValue,  itemAt){
     xdmValue = obj->xdmValue;
     if (xdmValue != nullptr) {
 	XdmItem * item = xdmValue->itemAt((unsigned int)index);
+	item->incrementRefCount();
 	if(item != nullptr) {
             if (object_init_ex(return_value, xdmItem_ce) != SUCCESS) {
                 RETURN_NULL();
@@ -1201,7 +1202,7 @@ void XdmItem_destroy_storage(zend_object *object)
 
 PHP_METHOD(XdmItem, __destruct)
 {
-//std::cerr<<"php_item  destruct"<<std::endl;
+    //std::cerr<<"php_item  destruct"<<std::endl;
      zval *object = getThis();
      zend_object * zobj = Z_OBJ_P(object);
 
@@ -1382,7 +1383,7 @@ void XdmNode_destroy_storage(zend_object *object)
 
 PHP_METHOD(XdmNode, __destruct)
 {
-//std::cerr<<"php_node  destruct"<<std::endl;
+    //std::cerr<<"php_node  destruct"<<std::endl;
     zval *object = getThis();
      zend_object * zobj = Z_OBJ_P(object);
 
@@ -1507,6 +1508,25 @@ PHP_METHOD(XdmNode, getLocalName)
         if(valueStr != nullptr) {
             //char *str = estrdup(valueStr);
             _RETURN_STRING(valueStr);
+            return;
+        }
+    }
+    RETURN_NULL();
+}
+
+
+PHP_METHOD(XdmNode, getBaseURI)
+{
+    XdmNode *xdmNode;
+    zend_object * zobj = Z_OBJ_P(getThis());
+    xdmNode_object * obj = (xdmNode_object *)((char *)zobj - XtOffsetOf(xdmNode_object, std));
+    xdmNode = obj->xdmNode;
+
+    if (xdmNode != nullptr) {
+        const char * valueStr = xdmNode->getBaseUri();
+        if(valueStr != nullptr) {
+            //char *str = estrdup(valueStr);
+            _RETURN_STRING(valueStr);
         }
     }
     RETURN_NULL();
@@ -1586,12 +1606,15 @@ PHP_METHOD(XdmNode,  getChildNode){
                RETURN_NULL();
                 return;
             } else {
-		
+
 		if(indexi>=0 && indexi < count) {
-			XdmNode * childNode = xdmNode->getChild(indexi);
+
+			XdmNode * childNode = xdmNode->getChild(indexi, true);
 
 
 			if(childNode != nullptr) {
+			//std::cerr<<"getChildNode i="<<indexi<<"  Kind="<<childNode->getNodeKind()<<" pointer="<<(childNode)<<std::endl;
+			//std::cerr<<"getChildNode str="<<(childNode->getStringValue())<<std::endl;
 				childNode->incrementRefCount();
 				zend_object * zobj = Z_OBJ_P(return_value);
     				xdmNode_object * vobj = (xdmNode_object *)((char *)zobj - XtOffsetOf(xdmNode_object, std));
@@ -1954,6 +1977,7 @@ zend_function_entry xdmNode_methods[] = {
     PHP_ME(XdmNode,  __construct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
     PHP_ME(XdmNode,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
     PHP_ME(XdmNode,  __toString,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(XdmNode,  getBaseURI,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmNode,  getStringValue,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmNode,  getNodeKind,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmNode,  getNodeName,      nullptr, ZEND_ACC_PUBLIC)
