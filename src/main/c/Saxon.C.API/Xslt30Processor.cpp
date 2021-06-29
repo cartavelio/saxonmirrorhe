@@ -113,7 +113,7 @@ const char * Xslt30Processor::getErrorCode() {
 
 void Xslt30Processor::setParameter(const char* name, XdmValue * value) {
 	if(value != nullptr && name != nullptr){
-		value->incrementRefCount();
+		//value->incrementRefCount();
 		int s = parameters.size();
 		std::string skey = ("sparam:"+std::string(name));
 		parameters[skey] = value;
@@ -124,10 +124,10 @@ void Xslt30Processor::setParameter(const char* name, XdmValue * value) {
                 XdmValue * valuei = it->second;
                 if(valuei != nullptr) {
                     valuei->decrementRefCount();
-                    if (valuei->getRefCount() < 1) {
+                    /*if (valuei->getRefCount() < 1) {
                         delete value;
                         value = nullptr;
-                    }
+                    }   */
                     parameters.erase(skey);
                     parameters[skey] = value;
                     //value->incrementRefCount();

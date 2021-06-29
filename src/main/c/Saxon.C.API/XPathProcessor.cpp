@@ -135,7 +135,6 @@ if (!mID) {
 	}
 
 	if (sizex>0) {
-	    std::cerr<<"evaluate size GGGG="<<sizex<<std::endl;
 		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
 		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
@@ -162,11 +161,14 @@ if (!mID) {
                 xdmItem =  new XdmArray(resulti);
             }
             if(sizex == 1) {
+
 				delete value;
+				//SaxonProcessor::sxn_environ->env->DeleteLocalRef(resultsi);
 				SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
-				return xdmItem;		
+
+				return xdmItem;
 			}
-			
+
 			value->addXdmItem(xdmItem);
 		}
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
@@ -278,15 +280,27 @@ return nullptr;
 }
 
 void XPathProcessor::setContextItem(XdmItem * item) {
-    std::cerr<<"setParameter found key="<<"node"<<", deleted first"<<std::endl;
-    setParameter("node", item, false);
+    if(item == nullptr) {
+       std::map<std::string, XdmValue*>::iterator it;
+       it = parameters.find("node");
+       if (it != parameters.end()) {
+            XdmValue * valuei = it->second;
+            if(valuei != nullptr) {
+                valuei->decrementRefCount();
+                parameters.erase("node");
+            }
+       }
+    } else {
+        setParameter("node", item, false);
+    }
 }
 
 void XPathProcessor::setContextFile(const char * filename) {
 
 	if (filename != nullptr) {
-	std::cerr<<"setContextFile="<<filename<<std::endl;
 		setProperty("s", filename);
+	}  else {
+	    properties.erase("s");
 	}
 }
 
@@ -454,10 +468,10 @@ void XPathProcessor::setParameter(const char * name, XdmValue*value, bool withPa
                 XdmValue * valuei = it->second;
                 if(valuei != nullptr) {
                     valuei->decrementRefCount();
-                    std::cerr<<"setParameter found key="<<skey<<", deleted first"<<std::endl;
+                    /*std::cerr<<"setParameter found key="<<skey<<", deleted first"<<std::endl;
                     if (valuei->getRefCount() < 1) {
                         delete value;
-                    }
+                    } */
                     parameters.erase(skey);
                     parameters[skey] = value;
                 }

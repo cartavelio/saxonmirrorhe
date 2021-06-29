@@ -113,7 +113,6 @@ void SaxonProcessor::exceptionClear() {
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     }
     if (exception != nullptr) {
-        std::cerr<< "saxonProc exception= "<< exception <<std::endl;
         delete exception;
         exception = nullptr;
     }
@@ -176,35 +175,36 @@ SaxonApiException * SaxonProcessor::checkForExceptionCPP(JNIEnv *env, jclass cal
 
             env->ReleaseStringUTFChars(message, utfMessage);
 
-            if (callingObject != nullptr && result1.compare(0, 43, "net.sf.saxon.s9api.SaxonApiException", 43) == 0) {
-
+            std::string prefix = "net.sf.saxon.s9api.SaxonApiException";
+            //std::cerr<<"checkForExceptionCPP =======:: message = "<<result1<<" prefix length = "<<prefix.length()<<std::endl;
+            if (result1.compare(0, prefix.length(), "net.sf.saxon.s9api.SaxonApiException") == 0) {
+                  //std::cerr<<"checkForExceptionCPP SaxonApiException found!"<<std::endl;
                 jclass saxonApiExceptionClass(env->FindClass("net/sf/saxon/s9api/SaxonApiException"));
                 static jmethodID lineNumID = nullptr;
-                if (lineNumID == nullptr) {
-                    lineNumID = env->GetMethodID(saxonApiExceptionClass, "getLinenumber", "()I");
-                }
+                lineNumID = env->GetMethodID(saxonApiExceptionClass, "getLineNumber", "()I");
                 static jmethodID ecID = nullptr;
-                if (ecID == nullptr) {
-                    ecID = env->GetMethodID(saxonApiExceptionClass, "getErrorCode", "()Ljnet/sf/saxon/s9api/QName;");
-                }
-                static jmethodID esysID = nullptr;
-                if (esysID == nullptr) {
-                    esysID = env->GetMethodID(saxonApiExceptionClass, "getSystemId", "()Ljava/lang/String;");
-                }
+                ecID = env->GetMethodID(saxonApiExceptionClass, "getErrorCode", "()Lnet/sf/saxon/s9api/QName;");
 
+                static jmethodID esysID = nullptr;
+                esysID = env->GetMethodID(saxonApiExceptionClass, "getSystemId", "()Ljava/lang/String;");
 
                 jobject errCodeQName = (jobject) (env->CallObjectMethod(exc, ecID));
+
                 jstring errSystemID = (jstring) (env->CallObjectMethod(exc, esysID));
+
                 int linenum = env->CallIntMethod(exc, lineNumID);
 
                 jclass qnameClass(env->FindClass("net/sf/saxon/s9api/QName"));
                 static jmethodID qnameStrID = nullptr;
-                if (qnameStrID == nullptr) {
-                    qnameStrID = env->GetMethodID(qnameClass, "toString", "()Ljava/lang/String;");
-                }
+                qnameStrID = env->GetMethodID(qnameClass, "toString", "()Ljava/lang/String;");
 
-                jstring qnameStr = (jstring) (env->CallObjectMethod(errCodeQName, qnameStrID));
+                jstring qnameStr = nullptr;
 
+                if(errCodeQName) {
+                    qnameStr = (jstring) (env->CallObjectMethod(errCodeQName, qnameStrID));
+                }   /*else {
+                  std::cerr<<"checkForExceptionCPP errorCodeQName is null"<<std::endl;
+                }    */
 
                 SaxonApiException *saxonExceptions = new SaxonApiException(result1.c_str(),
                                                                            (qnameStr ? env->GetStringUTFChars(qnameStr,
@@ -549,6 +549,9 @@ JParameters SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValu
 #ifdef DEBUG
             std::cerr<<"map 1"<<std::endl;
             std::cerr<<"iter->first"<<(iter->first).c_str()<<std::endl;
+
+
+
 #endif
             SaxonProcessor::sxn_environ->env->SetObjectArrayElement(comboArrays.stringArray, i,
                                                                     SaxonProcessor::sxn_environ->env->NewStringUTF(
@@ -646,7 +649,7 @@ const char *SaxonProcessor::version() {
                                                                                                        "getProductVersion",
                                                                                                        "(Lnet/sf/saxon/s9api/Processor;)Ljava/lang/String;");
         if (!MID_version) {
-            std::cerr << "\nError: MyClassInDll " << "SaxonCAPI.getProductVersion()" << " not found" << std::endl;
+            std::cerr << "\nError: Saxonc. " << "getProductVersion()" << " not found" << std::endl;
             return nullptr;
         }
 

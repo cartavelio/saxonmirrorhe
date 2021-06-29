@@ -53,8 +53,10 @@ SaxonApiException::SaxonApiException(const char * m){
 
         if (ec != nullptr) {
             errorCode = std::string(ec);
+            //std::cerr<<"SaxonApiException =======: errorCode = "<<errorCode<<std::endl;
         } else {
             errorCode = "";
+            //std::cerr<<"SaxonApiException =======: errorCode is empty string "<<std::endl;
         }
 
         if(sysId != nullptr) {

@@ -54,7 +54,7 @@ XdmItem * XdmItem::getHead(){ return this;}
 jobject XdmItem::getUnderlyingValue(){
 #ifdef DEBUG
 	std::cerr<<std::endl<<"XdmItem-getUnderlyingValue:"<<std::endl; 
-#endif 
+#endif
 	if(value == nullptr) {
 		return nullptr;	
 	}

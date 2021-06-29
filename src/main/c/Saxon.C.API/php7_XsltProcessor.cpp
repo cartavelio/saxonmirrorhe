@@ -503,19 +503,31 @@ PHP_METHOD(XsltProcessor, setParameter)
     xsltProcessor_object *obj = (xsltProcessor_object *)((char *)pobj - XtOffsetOf(xsltProcessor_object, std));
     xsltProcessor = obj->xsltProcessor;
     if (xsltProcessor != nullptr) {
-	if(Z_TYPE_P(oth) ==IS_NULL){
-		php_error(E_WARNING, "Error setting source value - value is nullptr");
-		return;
-	}
+
+      if(!oth) {
+    	php_error(E_WARNING, "Error in setParameter - value is nullptr");
+    	return;
+        } else {
+
+        if(Z_TYPE_P(oth) ==IS_NULL){
+		    php_error(E_WARNING, "Error in setParameter - value is nullptr");
+		    return;
+	    }
 
       const char * objName =ZSTR_VAL(Z_OBJCE_P(oth)->name);
       //std::cout<<"test type:"<<(Z_OBJCE_P(oth)->name)<<std::endl;
+      if(objName == nullptr) {
+        php_error(E_WARNING, "Error in setParameter value is not the right type");
+        return;
+      }
+
 
       if(strcmp(objName, "Saxon\\XdmNode")==0) {
 	zend_object* ooth = Z_OBJ_P(oth);
 	xdmNode_object * nobj = (xdmNode_object *)((char *)ooth - XtOffsetOf(xdmNode_object, std));
         if(nobj != nullptr) {
             XdmNode * value = nobj->xdmNode;
+            value->incrementRefCount();
             if(value != nullptr) {
 	        xsltProcessor->setParameter(name, (XdmValue *)value);
 
@@ -526,6 +538,7 @@ PHP_METHOD(XsltProcessor, setParameter)
 	xdmValue_object * vobj = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
         if(vobj != nullptr) {
             XdmValue * value = vobj->xdmValue;
+            value->incrementRefCount();
             if(value != nullptr) {
 
                 xsltProcessor->setParameter(name, value);
@@ -539,6 +552,7 @@ PHP_METHOD(XsltProcessor, setParameter)
 	xdmAtomicValue_object * aobj = (xdmAtomicValue_object *)((char *)ooth - XtOffsetOf(xdmAtomicValue_object, std));
         if(aobj != nullptr) {
             XdmAtomicValue * value = aobj->xdmAtomicValue;
+            value->incrementRefCount();
             if(value != nullptr) {
                 xsltProcessor->setParameter(name, (XdmValue *)value);
             }
@@ -548,6 +562,7 @@ PHP_METHOD(XsltProcessor, setParameter)
 
       }
 
+    }
     }
 }
 

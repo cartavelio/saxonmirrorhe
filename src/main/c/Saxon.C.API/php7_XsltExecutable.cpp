@@ -869,7 +869,7 @@ PHP_METHOD(XsltExecutable, setGlobalContextItem)
             if(value != nullptr) {
 		XdmItem  *valueX = (XdmItem*)value;
 	        xsltExecutable->setGlobalContextItem(valueX);
-
+            value->incrementRefCount();
             }
         }
       } else if(strcmp(objName, "Saxon\\XdmAtomicValue")==0) {
@@ -879,6 +879,7 @@ PHP_METHOD(XsltExecutable, setGlobalContextItem)
             XdmAtomicValue * value = ooth->xdmAtomicValue;
             if(value != nullptr) {
 	        xsltExecutable->setGlobalContextItem((XdmItem*)value);
+	        value->incrementRefCount();
             }
         }
       } else {
@@ -905,6 +906,28 @@ PHP_METHOD(XsltExecutable, setGlobalContextFromFile)
     xsltExecutable = obj->xsltExecutable;
     if (xsltExecutable != nullptr && inFilename != nullptr) {
 	 xsltExecutable->setGlobalContextFromFile(inFilename);
+
+
+    }
+}
+
+
+
+
+PHP_METHOD(XsltExecutable, setInitialMode)
+{
+    XsltExecutable *xsltExecutable;
+    char * modeName = nullptr;
+    size_t len1;
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &modeName, &len1) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
+    xsltExecutable = obj->xsltExecutable;
+    if (xsltExecutable != nullptr && modeName != nullptr) {
+	 xsltExecutable->setInitialMode(modeName);
 
 
     }
@@ -1516,6 +1539,7 @@ zend_function_entry XsltExecutable_methods[] = {
     PHP_ME(XsltExecutable, setInitialMatchSelectionAsFile, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable, setGlobalContextItem, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable, setGlobalContextFromFile, nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(XsltExecutable, setInitialMode, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  transformFileToFile, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  transformFileToString, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  transformFileToValue, nullptr, ZEND_ACC_PUBLIC)

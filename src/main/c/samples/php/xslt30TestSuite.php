@@ -42,8 +42,8 @@ $pass = 0;
 $fail = 0;
 $error =0;
 $notrun = 0;
-$run_test = null;//"as";
-$run_test_case = null;//"as-0112b";//"copy-of-010";
+$run_test = null;
+$run_test_case = null;//"as-0119";//"copy-of-010";
 
 
 function test_set_files($catalog)
@@ -168,7 +168,7 @@ function parse_environment($xml, $path)
             $envName = $nodeii->getAttributeValue("name");
             $newarray = array();
             $newarray["" . $envName] = array();
-            if($envName == "as-29") {
+            if($envName == "as-16") {
             error_log("env node=".$nodeii.",   \nenvName BBBB1= ".$envName);
             }
 
@@ -193,7 +193,7 @@ function parse_environment($xml, $path)
                     }
                     if ($valuej->isNode()) {
                         $nodej = $valuej->getNodeValue();
-                        if($envName == "as-29") {
+                        if($envName == "as-16") {
                             error_log("size=".$scount.", sources for env node=" . $envName . ",   \nenvName CCCCC1= " . $nodej. "size = ".$scount);
                         }
                         $rawuri = $nodej->getAttributeValue("uri");
@@ -226,11 +226,11 @@ function parse_environment($xml, $path)
 
 
             }
-            if($envName == "as-01b") {
+           // if($envName == "as-01b") {
                 error_log("Create env for " . $envName . " dump=" . print_r($newarray, TRUE));
                 $array["" . $envName] = $newarray;
                 error_log(" Whole dump=" . print_r($array, TRUE));
-            }
+           // }
         }
        unset($nodeii);
     }
@@ -326,19 +326,33 @@ function getNodeFromXPath($node, $xpath) {
     global $xpathProcForEnv;
     $xpathProcForEnv->clearParameters();
     $xpathProcForEnv->clearProperties();
-      $xpathProcForEnv->setContextItem($node);
-
+    if($node != null) {
+        $xpathProcForEnv->setContextItem($node);
+    }
       $result = $xpathProcForEnv->evaluate($xpath);
       return $result;
 
 }
 
 
+function getSingleNodeFromXPath($node, $xpath) {
+    global $xpathProcForEnv;
+    $xpathProcForEnv->clearParameters();
+    $xpathProcForEnv->clearProperties();
+    if($node != null) {
+        $xpathProcForEnv->setContextItem($node);
+    }
 
-function testAssertion($assert, $result) {
+      $result = $xpathProcForEnv->evaluateSingle($xpath);
+      return $result;
+
+}
+
+
+
+function testAssertion($assert, $result, $errorCode) {
     //global $xpathProcForAssertions;
-    global $pass;
-    global $fail;
+
     global $proc;
 
     $xpathProcForAssertions = $proc->newXPathProcessor();
@@ -362,7 +376,24 @@ function testAssertion($assert, $result) {
 
        $assertName = $assert->getLocalName(); // substr($assert->getNodeName(), strpos($assert->getNodeName(), "}")+1);
            error_log("localName=".$assertName.", assertxx=".$assert);
-        if($assertName == "assert-xml") {
+    if ($assertName == "error") {
+            if($errorCode == null) {
+                $errorCode = "";
+            }
+            $aErrorCode = $assert->getAttributeValue("code");
+            if ($aErrorCode == $errorCode) {
+                return true;
+            } else {
+                error_log("Test failed but not with the correct error code, assert=".$aErrorCode . "Actual error code=".$errorCode);
+                 return true;
+            }
+
+        } elseif($result == null) {
+        return true; //TODO fixup
+
+    }
+
+        elseif($assertName == "assert-xml") {
             $file = $assert->getAttributeValue("file");
             $xpathProcForAssertions->setContextItem($assert);
 
@@ -388,10 +419,8 @@ function testAssertion($assert, $result) {
             error_log("XXXXXX comparand=" . $comparand . ", result = " . $resultStr);
 
             if ($comparand == $resultStr) {
-                $pass++;
                 return true;
             } else {
-                $fail++;
                 error_log("assert-xml: " . $comparand . "\n Outcome:" . $result);
                 return false;
             }
@@ -444,15 +473,12 @@ function testAssertion($assert, $result) {
                 error_log(", XXXXXX testResult=" . $testResult);
                 
                 if($check == false) {
-                    $fail++;
                     return "assert: " . $xpath . "\n OutcomeXXY:" . $result->itemAt(0);
                 }
-                $pass++;
                 return true;
 
 
             }  else {
-                $fail++;
                 error_log("FAIL - assertion with multipl results not handled yet");
                 return false;
 
@@ -462,9 +488,8 @@ function testAssertion($assert, $result) {
             $jasserts = getNodeFromXPath($assert, "*");
             //$jNode = $jasserts->itemAt(0)->getNodeValue();
             $jSize = $jasserts->size();
-            error_log("SIZEEEEE = ".$jSize);
             for ($j = 0 ; $j < $jSize; $j++) {
-                if(!testAssertion($jasserts->itemAt($j)->getNodeValue(), $result)) {
+                if(!testAssertion($jasserts->itemAt($j)->getNodeValue(), $result, $errorCode)) {
                     false;
 
                 }
@@ -480,7 +505,6 @@ function testAssertion($assert, $result) {
        
   // }
    error_log("testAssertion is false");
-   $fail++;
    return false;
     
 }
@@ -491,30 +515,34 @@ function run_test_case($testcase, $env, $path)
     global $proc;
     global $xsltproc;
     global $xpathProcForEnv;
-
+    global $pass;
+    global $fail;
+    global $notrun;
+    $errorCode  = null;
+    $xsltproc->clearParameters();
+    
     $errorTest = FALSE;
     $t_env = getNodeFromXPath($testcase, "./environment");
 
     $testDirValue = $proc->createAtomicValue(strval($path));
-
+    $t_env_ref = null;
     if($t_env != null) {
 
         $t_env_ref = $t_env->itemAt(0)->getNodeValue()->getAttributeValue("ref");
-
+         error_log("TEST CASE t_env_ref = ".$t_env_ref);
     }
     $t_dep = getNodeFromXPath($testcase, "./dependencies");
-    error_log("MESSAGE: getting tests cp1");
 
     $checkDependency = check_dependency($t_dep);//check_dependency($testcase->dependencies);
     if ($checkDependency) {
-        $testElem = getNodeFromXPath($testcase, "./test");
+        $testElem = getSingleNodeFromXPath($testcase, "./test");
 
          error_log("TEST ELEMENT :".$testElem);
         if ($testElem != null) {                
-            $testStylesheet = getNodeFromXPath($testElem->itemAt(0)->getNodeValue(), "./stylesheet");
+            $testStylesheet = getSingleNodeFromXPath($testElem->getNodeValue(), "./stylesheet");
 
             if ($testStylesheet != null) {
-                $test = $path . $testStylesheet->itemAt(0)->getNodeValue()->getAttributeValue("file");
+                $test = $path . $testStylesheet->getNodeValue()->getAttributeValue("file");
                 
                 echo "Test case=" . $test;
                 if (file_exists($test)) {
@@ -522,7 +550,32 @@ function run_test_case($testcase, $env, $path)
                         //if ($t_env != null) {
 
                                 $result = NULL;
-                                
+                                $paramVar = getNodeFromXPath($testElem->getNodeValue(), "./param");
+
+                                if($paramVar != null) {
+                                    $paramCount = $paramVar->size();
+                                    for($p = 0; $p < $paramCount;$p++) {
+                                        $paramNode =  $paramVar->itemAt($p)->getNodeValue();
+                                        $pValue = $paramNode->getAttributeValue("select");
+                                        $pStatic = $paramNode->getAttributeValue("static");
+                                        $pName = $paramNode->getAttributeValue("name");
+
+                                        error_log("YYYYY  static parameters=". $pName. ", pValue=".$pValue);
+
+                                        if($pStatic == "yes" and $pValue != null and $pValue != null) {
+                                            $rValue = getNodeFromXPath(null, $pValue);
+                                            error_log("rValue=". $rValue);
+                                            if($rValue != null) {
+                                                $xsltproc->setParameter($pName, $rValue);
+                                            } else {
+                                                error_log("Error: Could not set static parameter - cp0");
+                                            }
+                                        } else {
+                                            error_log("Error: Could not set static parameter");
+                                        }
+                                    }
+                                    
+                                }
 
                                 //error_log("before apply stylesheet:".$test);
                                 $executable = $xsltproc->compileFromFile($test);
@@ -530,42 +583,126 @@ function run_test_case($testcase, $env, $path)
                                 if ($executable == NULL) {
                                     error_log("Executable is null on the following file: " . $test);
                                     $result = NULL;
-                                    return "FAIL Error:".$xsltproc->getErrorMessage();
+                                    $errorCode = $xsltproc->getErrorCode();
+                                    //return "FAIL Error:".$xsltproc->getErrorMessage();
                                 } else {
 
-                                    $init_template = getNodeFromXPath($testElem->itemAt(0)->getNodeValue(), "./initial-template");
+                                    $init_template = getSingleNodeFromXPath($testElem->getNodeValue(), "./initial-template");
+                                    
+                                    $init_mode = getSingleNodeFromXPath($testElem->getNodeValue(), "./initial-mode");
+                                    
+                                    $nit_function = getSingleNodeFromXPath($testElem->getNodeValue(), "./initial-function");
+
+
+
+
+
+                                    
+                                    
+
+                                    /*
+                                     *
+                                     *
+                                     *         Optional<XdmNode> initialMode = testInput.select(child("initial-mode")).asOptionalNode();
+                                             Optional<XdmNode> initialFunction = testInput.select(child("initial-function")).asOptionalNode();
+                                             Optional<XdmNode> initialTemplate = testInput.select(child("initial-template")).asOptionalNode();
+
+                                            
+                                QName initialFunctionName = getQNameAttribute(xpath, testInput, path("initial-function", "@name"));
+
+                                    TODO check for output@ file
+                                     * 
+                                     */
 
 
                                     if ($init_template != null ) {
-                                        //$proc->setProperty('it', strval($testcase->{'test'}->{'initial-template'}->attributes()->{'name'}));
 
-                                        $executable->setInitialMatchSelectionAsFile($env[$t_env_ref . ""]);
+                                        if($t_env_ref != null) {
+                                            $input = $path. $env[$t_env_ref . ""]["sources"][".file"];
+                                            error_log("file:". $input);
+                                            if($input != null) {
+                                                error_log("input file: ".$input);
+                                                $executable->setGlobalContextFromFile($input);
+                                            }
+                                            
 
-                                        $result = $executable->callTemplateReturningValue(strval($init_template->itemAt(0)->getNodeValue()->getAttributeValue("name")));
-                                    } else {
-                                         error_log("envvvalue:". print_r($env, TRUE));
-                                        error_log("env[t_env_ref] value:". print_r($env[$t_env_ref . ""], TRUE));
-                                        error_log("t_env_ref value:". $t_env_ref);
-                                         error_log("Running applyTemplatesReturningValue");
-                                        $input = $path. $env[$t_env_ref . ""]["sources"][".file"];
-                                        error_log("file:". $input);
-                                        if($input == null) {
-                                            return FAIL;
+
+
                                         }
-                                        $executable->setInitialMatchSelectionAsFile($input);
+                                        $init_node = $init_template->getNodeValue();
+
+                                        error_log("init_node: ".$init_node->getAttributeValue("name"));
+                                        $init_name = $init_node->getAttributeValue("name");
+
+                                        if($init_name == "xsl:initial-template") {
+                                            $init_name =  "{http://www.w3.org/1999/XSL/Transform}initial-template";
+                                        }
+
+                                        $result = $executable->callTemplateReturningValue($init_name);
+                                    } elseif ($init_mode != null) {
+
+                                        $initialModeName = $init_template->getNodeValue()->getAttributeValue("name");
+                                        $modeSelect = $init_template->getNodeValue()->getAttributeValue("select");
+                                        if ($modeSelect != null) {
+                                            $initialMatchSelection = getNodeFromXPath($modeSelect."", null);
+
+                                        }
+                                    
+                                        
+                                        
+                                    }else {
+                                         error_log("envvvalue:". print_r($env, TRUE));
+                                         error_log("t_env_ref = ".$t_env_ref);
+                                         $input = null;
+                                         if($env[$t_env_ref . ""] != null) {
+                                             error_log("env[t_env_ref] value:" . print_r($env[$t_env_ref . ""], TRUE));
+                                             if(array_key_exists("sources", $env[$t_env_ref . ""])) {
+                                                 if(array_key_exists(".file", $env[$t_env_ref . ""]["sources"])) {
+                                                     $input = $path. $env[$t_env_ref . ""]["sources"][".file"];
+                                                     $executable->setInitialMatchSelectionAsFile($input);
+                                                     $executable->setGlobalContextFromFile($input);
+
+
+                                                 } elseif (array_key_exists(".content", $env[$t_env_ref . ""]["sources"])) {
+                                                     $input = $path. $env[$t_env_ref . ""]["sources"][".content"];
+                                                     $cNode = $proc->parseXmlFromString($input);
+
+                                                     if($cNode != null) {
+                                                         $executable->setInitialMatchSelection($input);
+                                                         $executable->setGlobalContextItem($input);
+
+                                                     }
+
+                                                 }
+
+
+                                             }
+
+
+                                         }
+
+                                         error_log("Running applyTemplatesReturningValue");
+
+
+                                        if($input == null) {
+                                            $fail++;
+                                            return FAIL;
+                                        }  else {
+
+                                        }
                                         $result = $executable->applyTemplatesReturningValue();
 
                                     }
                                 }
 
-                                if ($result == NULL) {
+                                /*if ($result == NULL) {
 
                                     error_log('Error: ' . $executable->getErrorMessage() . " code:" . $executable->getErrorCode());
                                     $result = "";
-
+                                     $fail++;
                                     return "FAIL";
-                                }
-                                error_log("Result:". $result->size());
+                                }  */
+                                //error_log("Result:". $result->size());
                                 //error_log("Result-node value:". $result->itemAt(0)->getNodeValue());
                                 $asserts = getNodeFromXPath($testcase, "./result/child::*");
 
@@ -581,11 +718,12 @@ function run_test_case($testcase, $env, $path)
                                         error_log(" assert exception: " . $proc->getErrorMessage());
 
                                     }
+                                    $fail++;
 
                                     return "FAIL ASSERT";
                                 }
 
-                                $outcome = testAssertion($asserts->itemAt(0)->getNodeValue(), $result);
+                                $outcome = testAssertion($asserts->itemAt(0)->getNodeValue(), $result, $errorCode);
 
 
                                 if (!$outcome) {
@@ -597,7 +735,7 @@ function run_test_case($testcase, $env, $path)
                                     return "FAIL";
                                 }
 
-
+                                $pass++;
                                 return "PASS";
 
 
@@ -672,10 +810,19 @@ function run_test_case($testcase, $env, $path)
                             */
 
                     } catch (Exception $ex) {
-                        return "Fail - error: " . $ex->getMessage();
+                        $asserts = getNodeFromXPath($testcase, "./result/child::*");
+                        $outcome = testAssertion($asserts->itemAt(0)->getNodeValue(), $result, $errorCode);
+                        if (!$outcome) {
+                            $fail++;
+                            return "Fail - error: " . $ex->getMessage();
+                        } else {
+                            $pass++;
+                            return "PASS";
+                        }
                     }
-                    return "Fail";
+
                 } else {
+                    $fail++;
                     return $test . " not found";
                 }
 
@@ -685,7 +832,7 @@ function run_test_case($testcase, $env, $path)
         }
 
     }
-
+    $notrun++;
     return "Not Run";
 }
 

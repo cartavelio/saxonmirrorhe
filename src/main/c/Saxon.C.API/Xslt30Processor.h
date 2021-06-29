@@ -93,9 +93,6 @@ public:
      *
      * @param name  the name of the stylesheet parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name"
      * @param value the value of the stylesheet parameter, or nullptr to clear a previously set value
-     * @param _static For static (compile-time) parameters we set this flag to true, which means the parameter is
-     * must be set on the XsltCompiler object, prior to stylesheet compilation. The default is false. Non-static parameters
-     * may also be provided.
      */
     void setParameter(const char* name, XdmValue*value);
 

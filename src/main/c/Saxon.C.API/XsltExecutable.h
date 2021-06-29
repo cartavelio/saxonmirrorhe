@@ -85,6 +85,19 @@ public:
     XsltExecutable *clone();
 
 
+    //!Set the initial mode for the transformation
+    /**
+     *
+     * @param modeName the EQName of the initial mode. Two special values are recognized, in the
+     *                 reserved XSLT namespace:
+     *                 xsl:unnamed to indicate the mode with no name, and xsl:default to indicate the
+     *                 mode defined in the stylesheet header as the default mode.
+     *                 The value null also indicates the default mode (which defaults to the unnamed
+     *                 mode, but can be set differently in an XSLT 3.0 stylesheet).
+     */
+    void setInitialMode(const char * modeName);
+
+
     //!The initial value to which templates are to be applied (equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>)
     /**
     *  @param selection - The value to which the templates are to be applied

@@ -152,6 +152,13 @@ void XsltExecutable::setBaseOutputURI(const char *baseURI) {
     }
 }
 
+void XsltExecutable::setInitialMode(const char * modeName){
+    if(modeName != nullptr) {
+        setProperty("im", modeName);
+    }
+
+}
+
 
 void XsltExecutable::setParameter(const char *name, XdmValue *value) {
     if (value != nullptr && name != nullptr) {

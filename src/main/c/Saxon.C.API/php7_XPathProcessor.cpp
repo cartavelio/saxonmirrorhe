@@ -344,7 +344,7 @@ PHP_METHOD(XPathProcessor, setContextItem)
     xpathProcessor = obj->xpathProcessor;
     if (xpathProcessor != nullptr) {
      if(Z_TYPE_P(oth) ==IS_NULL){
-      php_error(E_WARNING, "Error setting source value - value is null");
+      xpathProcessor->setContextItem(nullptr);
       return;
        }
 
@@ -508,8 +508,8 @@ PHP_METHOD(XPathProcessor, getErrorMessage)
 {
     XPathProcessor *xpathProcessor;
     long index;
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-        RETURN_NULL();
+    if (ZEND_NUM_ARGS()>0) {
+        WRONG_PARAM_COUNT;
     }
     zend_object* pobj = Z_OBJ_P(getThis());
     xpathProcessor_object *obj = (xpathProcessor_object *)((char *)pobj - XtOffsetOf(xpathProcessor_object, std));

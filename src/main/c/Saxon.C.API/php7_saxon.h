@@ -279,6 +279,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltExecutable,  setResultAsRawValue);
     PHP_METHOD(XsltExecutable,  setParameter);
     PHP_METHOD(XsltExecutable, setBaseOutputURI);
+    PHP_METHOD(XsltExecutable, setInitialMode);
     PHP_METHOD(XsltExecutable, setInitialTemplateParameters);
     PHP_METHOD(XsltExecutable, setInitialMatchSelection);
     PHP_METHOD(XsltExecutable, setInitialMatchSelectionAsFile);
