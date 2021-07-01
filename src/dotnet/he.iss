@@ -25,6 +25,7 @@ Source: "IKVM.OpenJDK.Charsets.dll"; DestDir: "{app}\bin"; Flags: gacinstall; St
 Source: "IKVM.OpenJDK.Util.dll"; DestDir: "{app}\bin" ; Flags: gacinstall; StrongAssemblyName: "IKVM.OpenJDK.Util, @@IKVM_STRONGNAME@@"
 Source: "IKVM.OpenJDK.Text.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "IKVM.OpenJDK.Text, @@IKVM_STRONGNAME@@"
 Source: "IKVM.OpenJDK.XML.API.dll"; DestDir: "{app}\bin"; Flags: gacinstall ; StrongAssemblyName: "IKVM.OpenJDK.XML.API, @@IKVM_STRONGNAME@@"
+Source: "IKVM.OpenJDK.Localedata.dll"; DestDir: "{app}\bin"; Flags: gacinstall ; StrongAssemblyName: "IKVM.OpenJDK.Localedata, @@IKVM_STRONGNAME@@"
 Source: "saxon-he-@@MAJOR_VERSION@@.@@MINOR_VERSION@@.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "saxon10he, ${saxon.strongname}"
 Source: "saxon-he-api-@@MAJOR_VERSION@@.@@MINOR_VERSION@@.dll"; DestDir: "{app}\bin"; Flags: gacinstall; StrongAssemblyName: "saxon10he-api, ${saxon.strongname}"
 Source: "saxon-he-api-@@MAJOR_VERSION@@.@@MINOR_VERSION@@.xml"; DestDir: "{app}\bin"
