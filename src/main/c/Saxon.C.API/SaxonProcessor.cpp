@@ -146,9 +146,9 @@ SaxonApiException * SaxonProcessor::checkForExceptionCPP(JNIEnv *env, jclass cal
         std::string errorCode = "";
         jthrowable exc = env->ExceptionOccurred();
 
-#ifdef DEBUG
+//#ifdef DEBUG
         env->ExceptionDescribe();
-#endif
+//#endif
         jclass exccls(env->GetObjectClass(exc));
         jclass clscls(env->FindClass("java/lang/Class"));
 

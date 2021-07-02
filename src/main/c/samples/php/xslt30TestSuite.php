@@ -42,8 +42,9 @@ $pass = 0;
 $fail = 0;
 $error =0;
 $notrun = 0;
-$run_test = "avt";
-$run_test_case = "avt-0801";//"as-0119";//"copy-of-010";
+$run_test = NULL;
+$run_test_case = NULL;//"as-0119";//"copy-of-010";
+$total_tests = 0;
 
 
 function test_set_files($catalog)
@@ -259,6 +260,7 @@ function test_case($test_set)
     global $xpathProcForEnv;
     global $run_test;
     global $run_test_case;
+    global $total_tests;
     $env = null;
     $xml = null;
     $test_path = pathinfo($test_set)['dirname'] . "/";
@@ -294,6 +296,7 @@ function test_case($test_set)
         if ($check &&   $testCases != null) {
 
             $countTC = $testCases->size();
+            $total_tests += $countTC;
             for ($x = 0; $x < $countTC; $x++) {
                 $value = $testCases->itemAt($x);
                 if($value->isNode()) {
@@ -567,7 +570,7 @@ function run_test_case($testcase, $env, $path)
             if ($testStylesheet != null) {
                 $test = $path . $testStylesheet->getNodeValue()->getAttributeValue("file");
                 
-                echo "Test case=" . $test;
+                //echo "Test case=" . $test;
                 if (file_exists($test)) {
                     try {
                         //if ($t_env != null) {
@@ -583,7 +586,7 @@ function run_test_case($testcase, $env, $path)
                                         $pStatic = $paramNode->getAttributeValue("static");
                                         $pName = $paramNode->getAttributeValue("name");
 
-                                        error_log("YYYYY  static parameters=". $pName. ", pValue=".$pValue);
+                                        error_log("static parameters=". $pName. ", pValue=".$pValue);
 
                                         if($pStatic == "yes" and $pValue != null and $pValue != null) {
                                             $rValue = getNodeFromXPath(null, $pValue);
@@ -602,15 +605,19 @@ function run_test_case($testcase, $env, $path)
 
                                 //error_log("before apply stylesheet:".$test);
                                 $executable = $xsltproc->compileFromFile($test);
+                                if($executable == NULL) {
+                                    return "FAIL - executable is NULL";
+                                }
 
-                        echo "checkpoint-XX 0";
+                        
                        //error_log("envvvalue:". print_r($env, TRUE));
                        // error_log("t_env_ref = ".$t_env_ref);
                         $input = null;
                         if($t_env_ref!= NULL && array_key_exists($t_env_ref , $env)) {
-                            //error_log("env[t_env_ref] value:" . print_r($env[$t_env_ref . ""], TRUE));
+                            error_log("env[t_env_ref] value:" . print_r($env[$t_env_ref . ""], TRUE));
                             if(array_key_exists("sources", $env[$t_env_ref . ""])) {
                                 if(array_key_exists(".file", $env[$t_env_ref . ""]["sources"])) {
+
                                     $input = $path. $env[$t_env_ref . ""]["sources"][".file"];
                                     $executable->setInitialMatchSelectionAsFile($input);
                                     $executable->setGlobalContextFromFile($input);
@@ -633,11 +640,11 @@ function run_test_case($testcase, $env, $path)
 
 
                         } elseif ($env_embedded_file != NULL) {
-                            echo "checkpoint-XX 1";
+
                               $executable->setGlobalContextFromFile($env_embedded_file);
                         }
 
-                        echo "checkpoint-XX 2";
+
                                 //$init_templateV = getNodeFromXPath($testElem->getNodeValue(), "./initial-template");
                                 if ($executable == NULL) {
                                     error_log("Executable is null on the following file: " . $test);
@@ -699,7 +706,7 @@ function run_test_case($testcase, $env, $path)
 
                                         $result = $executable->callTemplateReturningValue($init_name);
                                     } elseif ($init_mode != null) {
-                                        echo "checkpoint-XX 3";
+
                                         $initialModeName = $init_mode->getNodeValue()->getAttributeValue("name");
                                         $modeSelect = $init_mode->getNodeValue()->getAttributeValue("select");
                                         $executable->setInitialMode($initialModeName);
@@ -707,8 +714,6 @@ function run_test_case($testcase, $env, $path)
                                             $initialMatchSelection = getNodeFromXPath(null, $modeSelect."");
                                             $result = $executable->setInitialMatchSelection($initialMatchSelection);
                                         }
-
-                                        echo "checkpoint-XX 4";
 
                                         $result = $executable->transformToValue();
 
@@ -728,6 +733,11 @@ function run_test_case($testcase, $env, $path)
                                     }
                                 }
 
+                                if ($result == NULL ) {
+                                    $executable->checkForException();
+
+                                }
+
                                 if ($result == NULL && $executable->getErrorMessage() != NULL) {
                                     //$executable->checkForException();
                                     error_log('Error: ' . $executable->getErrorMessage() );
@@ -735,12 +745,7 @@ function run_test_case($testcase, $env, $path)
                                      $fail++;
                                     return "FAIL";                                                */
                                 }
-                                if($result == NULL) {
-                                    echo "checkpoint-YY 0";
-                                } else {
 
-                                    echo "checkpoint-YY 1";
-                                }
                                 //error_log("Result:". $result->size());
                                 //error_log("Result-node value:". $result->itemAt(0)->getNodeValue());
                                 $asserts = getNodeFromXPath($testcase, "./result/child::*");
@@ -915,6 +920,7 @@ echo "<br/>";
 echo "<a name='results'>";
 echo "<b>Results</b><br/>";
 echo "# Success:".$pass. " #Failures: ".$fail." Not run: ". $notrun;
+
 
 
 ?>
