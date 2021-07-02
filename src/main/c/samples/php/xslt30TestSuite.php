@@ -33,7 +33,7 @@ $xpathProcForEnv = $proc->newXPathProcessor();
 $xpathProcForEnv->declareNamespace("", "http://www.w3.org/2012/10/xslt-test-catalog");
 //$xpathProcForEnv->setBaseURI($path);
 /*$start = microtime(true);
-              $proc->setSourceFile("cat.xml");                                              d
+              $proc->setSourceFile("cat.xml");
                 $proc->importStylesheetFile("test.xsl");
                 $result = $proc->transformToValue();
  $end = microtime(true); */
@@ -42,8 +42,8 @@ $pass = 0;
 $fail = 0;
 $error =0;
 $notrun = 0;
-$run_test = null;
-$run_test_case = null;//"as-0119";//"copy-of-010";
+$run_test = "avt";
+$run_test_case = "avt-0801";//"as-0119";//"copy-of-010";
 
 
 function test_set_files($catalog)
@@ -168,12 +168,15 @@ function parse_environment($xml, $path)
             $envName = $nodeii->getAttributeValue("name");
             $newarray = array();
             $newarray["" . $envName] = array();
-            if($envName == "as-16") {
+            /*if($envName == "as-16") {
             error_log("env node=".$nodeii.",   \nenvName BBBB1= ".$envName);
-            }
+            }  */
 
             //$array["" . $envName] = array();
             $xpathProcForEnv2 = $proc->newXPathProcessor();
+            if($xpathProcForEnv == null) {
+                return $array;
+            }
             $xpathProcForEnv2->clearParameters();
             $xpathProcForEnv2->clearProperties();
             $xpathProcForEnv2->setContextItem($nodeii);
@@ -193,9 +196,9 @@ function parse_environment($xml, $path)
                     }
                     if ($valuej->isNode()) {
                         $nodej = $valuej->getNodeValue();
-                        if($envName == "as-16") {
+                        /*if($envName == "as-16") {
                             error_log("size=".$scount.", sources for env node=" . $envName . ",   \nenvName CCCCC1= " . $nodej. "size = ".$scount);
-                        }
+                        }     */
                         $rawuri = $nodej->getAttributeValue("uri");
                         $role = $nodej->getAttributeValue("role");
                         //$file = $nodej->getAttributeValue("file");
@@ -227,9 +230,9 @@ function parse_environment($xml, $path)
 
             }
            // if($envName == "as-01b") {
-                error_log("Create env for " . $envName . " dump=" . print_r($newarray, TRUE));
+                //error_log("Create env for " . $envName . " dump=" . print_r($newarray, TRUE));
                 $array["" . $envName] = $newarray;
-                error_log(" Whole dump=" . print_r($array, TRUE));
+               // error_log(" Whole dump=" . print_r($array, TRUE));
            // }
         }
        unset($nodeii);
@@ -239,12 +242,12 @@ function parse_environment($xml, $path)
      //Test
 
     //$testArraySize = count($array);
-    error_log("TEST ARRAY ITEMS YYYYYY1");
+    /*error_log("TEST ARRAY ITEMS YYYYYY1");
     foreach ( $array as $var ) {
         error_log("Array item".print_r($var, TRUE)."\n");
         error_log("\n");
         error_log("\n");
-    }
+    }   */
 
 
     return $array;
@@ -324,6 +327,9 @@ function test_case($test_set)
 
 function getNodeFromXPath($node, $xpath) {
     global $xpathProcForEnv;
+    if($xpathProcForEnv == NULL) {
+        return NULL;
+    }
     $xpathProcForEnv->clearParameters();
     $xpathProcForEnv->clearProperties();
     if($node != null) {
@@ -337,6 +343,9 @@ function getNodeFromXPath($node, $xpath) {
 
 function getSingleNodeFromXPath($node, $xpath) {
     global $xpathProcForEnv;
+    if($xpathProcForEnv == NULL) {
+        return NULL;
+    }
     $xpathProcForEnv->clearParameters();
     $xpathProcForEnv->clearProperties();
     if($node != null) {
@@ -356,6 +365,11 @@ function testAssertion($assert, $result, $errorCode) {
     global $proc;
 
     $xpathProcForAssertions = $proc->newXPathProcessor();
+    if($xpathProcForAssertions == NULL) {
+        error_log("XPathProc not created");
+        return false;
+    }
+
     
     /*$xpathProcForAssertions->declareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
     $xpathProcForAssertions->declareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
@@ -365,6 +379,10 @@ function testAssertion($assert, $result, $errorCode) {
     $xpathProcForAssertions->declareNamespace("j", "http://www.w3.org/2005/xpath-functions");*/
 
     $xpathProcForAssertions2 = $proc->newXPathProcessor();
+    if($xpathProcForAssertions2 == NULL) {
+        error_log("XPathProc2 not created");
+        return false;
+    }
    //$aSize = $asserts->size();
    //for($i=0; $i < $aSize; $i++) {
 
@@ -394,6 +412,7 @@ function testAssertion($assert, $result, $errorCode) {
     }
 
         elseif($assertName == "assert-xml") {
+            error_log("Entered assert-xml");
             $file = $assert->getAttributeValue("file");
             $xpathProcForAssertions->setContextItem($assert);
 
@@ -465,7 +484,7 @@ function testAssertion($assert, $result, $errorCode) {
 
                 $xpathProcForAssertions->setContextItem($result->itemAt(0));
                 $xpath = $assert->getChildNode(0)->getStringValue();
-                error_log("cp0 - assertLLL");
+
                 error_log("xpath=".$xpath. ", XXXXXX result=" . $result->itemAt(0));
                 $check = $xpathProcForAssertions->effectiveBooleanValue($xpath);
                 $testResult = $xpathProcForAssertions->evaluateSingle("/out");
@@ -525,11 +544,15 @@ function run_test_case($testcase, $env, $path)
     $t_env = getNodeFromXPath($testcase, "./environment");
 
     $testDirValue = $proc->createAtomicValue(strval($path));
+    $env_embedded_file = NULL;
     $t_env_ref = null;
     if($t_env != null) {
 
         $t_env_ref = $t_env->itemAt(0)->getNodeValue()->getAttributeValue("ref");
-         error_log("TEST CASE t_env_ref = ".$t_env_ref);
+        if($t_env_ref == NULL) {
+           $env_embedded_file = getSingleNodeFromXPath($t_env->itemAt(0)->getNodeValue(), "./source[@role='.']/@file");
+        }
+       //  error_log("TEST CASE t_env_ref = ".$t_env_ref);
     }
     $t_dep = getNodeFromXPath($testcase, "./dependencies");
 
@@ -537,7 +560,7 @@ function run_test_case($testcase, $env, $path)
     if ($checkDependency) {
         $testElem = getSingleNodeFromXPath($testcase, "./test");
 
-         error_log("TEST ELEMENT :".$testElem);
+         error_log("TEST ELEMENT :".$testcase);
         if ($testElem != null) {                
             $testStylesheet = getSingleNodeFromXPath($testElem->getNodeValue(), "./stylesheet");
 
@@ -579,6 +602,42 @@ function run_test_case($testcase, $env, $path)
 
                                 //error_log("before apply stylesheet:".$test);
                                 $executable = $xsltproc->compileFromFile($test);
+
+                        echo "checkpoint-XX 0";
+                       //error_log("envvvalue:". print_r($env, TRUE));
+                       // error_log("t_env_ref = ".$t_env_ref);
+                        $input = null;
+                        if($t_env_ref!= NULL && array_key_exists($t_env_ref , $env)) {
+                            //error_log("env[t_env_ref] value:" . print_r($env[$t_env_ref . ""], TRUE));
+                            if(array_key_exists("sources", $env[$t_env_ref . ""])) {
+                                if(array_key_exists(".file", $env[$t_env_ref . ""]["sources"])) {
+                                    $input = $path. $env[$t_env_ref . ""]["sources"][".file"];
+                                    $executable->setInitialMatchSelectionAsFile($input);
+                                    $executable->setGlobalContextFromFile($input);
+
+
+                                } elseif (array_key_exists(".content", $env[$t_env_ref . ""]["sources"])) {
+                                    $input = $path. $env[$t_env_ref . ""]["sources"][".content"];
+                                    $cNode = $proc->parseXmlFromString($input);
+
+                                    if($cNode != null) {
+                                        $executable->setInitialMatchSelection($cNode);
+                                        $executable->setGlobalContextItem($cNode);
+
+                                    }
+
+                                }
+
+
+                            }
+
+
+                        } elseif ($env_embedded_file != NULL) {
+                            echo "checkpoint-XX 1";
+                              $executable->setGlobalContextFromFile($env_embedded_file);
+                        }
+
+                        echo "checkpoint-XX 2";
                                 //$init_templateV = getNodeFromXPath($testElem->getNodeValue(), "./initial-template");
                                 if ($executable == NULL) {
                                     error_log("Executable is null on the following file: " . $test);
@@ -640,68 +699,48 @@ function run_test_case($testcase, $env, $path)
 
                                         $result = $executable->callTemplateReturningValue($init_name);
                                     } elseif ($init_mode != null) {
-
-                                        $initialModeName = $init_template->getNodeValue()->getAttributeValue("name");
-                                        $modeSelect = $init_template->getNodeValue()->getAttributeValue("select");
+                                        echo "checkpoint-XX 3";
+                                        $initialModeName = $init_mode->getNodeValue()->getAttributeValue("name");
+                                        $modeSelect = $init_mode->getNodeValue()->getAttributeValue("select");
+                                        $executable->setInitialMode($initialModeName);
                                         if ($modeSelect != null) {
-                                            $initialMatchSelection = getNodeFromXPath($modeSelect."", null);
-
+                                            $initialMatchSelection = getNodeFromXPath(null, $modeSelect."");
+                                            $result = $executable->setInitialMatchSelection($initialMatchSelection);
                                         }
-                                    
-                                        
-                                        
+
+                                        echo "checkpoint-XX 4";
+
+                                        $result = $executable->transformToValue();
+
+
                                     }else {
-                                         error_log("envvvalue:". print_r($env, TRUE));
-                                         error_log("t_env_ref = ".$t_env_ref);
-                                         $input = null;
-                                         if($env[$t_env_ref . ""] != null) {
-                                             error_log("env[t_env_ref] value:" . print_r($env[$t_env_ref . ""], TRUE));
-                                             if(array_key_exists("sources", $env[$t_env_ref . ""])) {
-                                                 if(array_key_exists(".file", $env[$t_env_ref . ""]["sources"])) {
-                                                     $input = $path. $env[$t_env_ref . ""]["sources"][".file"];
-                                                     $executable->setInitialMatchSelectionAsFile($input);
-                                                     $executable->setGlobalContextFromFile($input);
 
-
-                                                 } elseif (array_key_exists(".content", $env[$t_env_ref . ""]["sources"])) {
-                                                     $input = $path. $env[$t_env_ref . ""]["sources"][".content"];
-                                                     $cNode = $proc->parseXmlFromString($input);
-
-                                                     if($cNode != null) {
-                                                         $executable->setInitialMatchSelection($input);
-                                                         $executable->setGlobalContextItem($input);
-
-                                                     }
-
-                                                 }
-
-
-                                             }
-
-
-                                         }
 
                                          error_log("Running applyTemplatesReturningValue");
 
 
-                                        if($input == null) {
+                                        /*if($input == null) {
                                             $fail++;
                                             return FAIL;
-                                        }  else {
-
-                                        }
+                                        } */
                                         $result = $executable->applyTemplatesReturningValue();
 
                                     }
                                 }
 
-                                /*if ($result == NULL) {
-
-                                    error_log('Error: ' . $executable->getErrorMessage() . " code:" . $executable->getErrorCode());
-                                    $result = "";
+                                if ($result == NULL && $executable->getErrorMessage() != NULL) {
+                                    //$executable->checkForException();
+                                    error_log('Error: ' . $executable->getErrorMessage() );
+                                    /*$result = "";
                                      $fail++;
-                                    return "FAIL";
-                                }  */
+                                    return "FAIL";                                                */
+                                }
+                                if($result == NULL) {
+                                    echo "checkpoint-YY 0";
+                                } else {
+
+                                    echo "checkpoint-YY 1";
+                                }
                                 //error_log("Result:". $result->size());
                                 //error_log("Result-node value:". $result->itemAt(0)->getNodeValue());
                                 $asserts = getNodeFromXPath($testcase, "./result/child::*");

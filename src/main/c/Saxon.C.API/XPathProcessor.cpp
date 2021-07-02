@@ -41,8 +41,9 @@ XPathProcessor::XPathProcessor(SaxonProcessor* p, std::string curr) {
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(tempcppXP);
 
     } else {
-        createException("Error: Failed to create the XPathProcessor internal object");
-
+        std::cerr<<"Error: Failed to create the XPathProcessor internal object"<<std::endl;
+        SaxonProcessor::sxn_environ->env->ExceptionClear();
+        return;
     }
 
 
@@ -63,7 +64,6 @@ XPathProcessor::XPathProcessor(SaxonProcessor* p, std::string curr) {
 
 
 XPathProcessor::~XPathProcessor(){
-    std::cerr<<"XPath desructor"<<std::endl;
     clearProperties();
     clearParameters();
 
@@ -122,6 +122,7 @@ if (!mID) {
 	if(!results) {
 
 		exception = proc->checkAndCreateException(cppClass);
+		//SaxonProcessor::sxn_environ->env->ExceptionClear();
 		if(exception != nullptr) {
 		    std::cout<<exception->getMessage();
 		}
@@ -322,7 +323,8 @@ void XPathProcessor::declareNamespace(const char *prefix, const char * uri){
 				(prefix== nullptr? SaxonProcessor::sxn_environ->env->NewStringUTF("") :SaxonProcessor::sxn_environ->env->NewStringUTF(prefix)),
 				(uri== nullptr? SaxonProcessor::sxn_environ->env->NewStringUTF("") :SaxonProcessor::sxn_environ->env->NewStringUTF(uri)));
 
-		proc->checkAndCreateException(cppClass);
+		exception = proc->checkAndCreateException(cppClass);
+
 	}
 
 }
@@ -343,7 +345,7 @@ void XPathProcessor::declareVariable(const char * name){
 	} else {
 		SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXP, dnspID,SaxonProcessor::sxn_environ->env->NewStringUTF(name));
 
-		proc->checkAndCreateException(cppClass);
+		exception = proc->checkAndCreateException(cppClass);
 	}
 
 }
@@ -545,10 +547,11 @@ std::map<std::string,std::string>& XPathProcessor::getProperties(){
 }
 
 void XPathProcessor::exceptionClear(){
+    SaxonProcessor::sxn_environ->env->ExceptionClear();
     if(exception != nullptr) {
         delete exception;
         exception = nullptr;
-        SaxonProcessor::sxn_environ->env->ExceptionClear();
+
     }
 
 }

@@ -412,7 +412,6 @@ PHP_METHOD(SaxonProcessor, createAtomicValue)
 
 PHP_METHOD(SaxonProcessor, newXPathProcessor)
 {
-    printf("newXPAthProcessor");
     if (ZEND_NUM_ARGS()>0) {
         WRONG_PARAM_COUNT;
     }
@@ -434,6 +433,9 @@ if (object_init_ex(return_value, xpathProcessor_ce) != SUCCESS) {
 	   xpathProcessor_object * vobj = (xpathProcessor_object *)((char *)vvobj - XtOffsetOf(xpathProcessor_object, std));
             assert (vobj != nullptr);
 	    xpathProcessor = proc->newXPathProcessor();
+	    if(xpathProcessor == nullptr) {
+	        RETURN_NULL();
+	    }
             vobj->xpathProcessor = xpathProcessor;
 	}
     } else {
@@ -465,6 +467,9 @@ PHP_METHOD(SaxonProcessor, newXsltProcessor)
             RETURN_NULL();
         } else {
 	xsltProcessor = proc->newXsltProcessor();
+		    if(xsltProcessor == nullptr) {
+    	        RETURN_NULL();
+    	    }
 	   zend_object* vobj = Z_OBJ_P(return_value);
 	   xsltProcessor_object * xproc_object = (xsltProcessor_object *)((char *)vobj - XtOffsetOf(xsltProcessor_object, std));
             assert (vobj != nullptr);
@@ -501,7 +506,10 @@ PHP_METHOD(SaxonProcessor, newXslt30Processor)
     if (object_init_ex(return_value, xslt30Processor_ce) != SUCCESS) {
             RETURN_NULL();
         } else {
-	xslt30Processor = proc->newXslt30Processor();	
+	xslt30Processor = proc->newXslt30Processor();
+	   		    if(xslt30Processor == nullptr) {
+           	        RETURN_NULL();
+           	    }
 	   zend_object* vobj = Z_OBJ_P(return_value);
 	   xslt30Processor_object * xproc_object = (xslt30Processor_object *)((char *)vobj - XtOffsetOf(xslt30Processor_object, std));
             assert (vobj != nullptr);

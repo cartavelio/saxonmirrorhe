@@ -1496,11 +1496,13 @@ PHP_METHOD(XsltExecutable, getErrorMessage)
     if (xsltExecutable != nullptr) {
         if(xsltExecutable->exceptionOccurred()){
             SaxonApiException * exception = xsltExecutable->getException();
+            if(exception != nullptr) {
                     const char * errStr = exception->getMessage();
                     if(errStr != NULL) {
                         //char *str = estrdup(errStr);
                         _RETURN_STRING(errStr);
                     }
+        }
         }
     }
     RETURN_NULL();
