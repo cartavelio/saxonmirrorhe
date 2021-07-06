@@ -8,6 +8,7 @@
 -ignoreclassduplication+
 -ignorememberabsence+
 -inline+
+-jetcpenablemanualsettings+
 -pgo+
 -splashgetfrommanifest-
 
@@ -16,18 +17,26 @@
 -compilerheap=1744830464
 -inlinelimit=100
 -inlinetolimit=500
--javacommandline:=java -cp ./saxon9ee.jar net.sf.saxon.Transform
 -jetcplastpage:=PageCompile
 -jetrt=Server
 -jetvmprop=-Djet.jit.disable.resolution -Djet.gc.heaplimit:0 -Djet.stack.trace
--jpiiproject=/home/ond1/work/Jet-Projects/libsaxoneec.jpn
 -jprofile=./libsaxoneec.jprof
 -outputdir=../c/eec
 -outputname=libsaxoneec
 -stacklimit=134217728
 
+
+
+
 !classpathentry ../c/jars/eec/saxon9ee.jar
   -pack=noncompiled
-  -protect=all
+  -protect=nomatter
   -optimize=all
 !end
+!classpathentry ../c/eec/saxon-data
+  -pack=none
+  -protect=nomatter
+  -optimize=autodetect
+!end
+
+
