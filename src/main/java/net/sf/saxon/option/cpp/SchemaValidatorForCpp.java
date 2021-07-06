@@ -63,7 +63,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      *   throw SaxonApiException if processor not licensed
     **/
     public SchemaValidatorForCpp(Processor proc) throws SaxonApiException {
-        processor = proc;
+        super(proc);
         schemaManager = processor.getSchemaManager();
         if (!processor.isSchemaAware()) {
             SaxonApiException ex = new SaxonApiException("Processor is not licensed for schema processing!");
@@ -748,6 +748,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
 
     public static void main(String[] args) throws SaxonApiException {
+        SaxonCAPI.debug = true;
         Processor processor = new Processor(true);
         SchemaValidatorForCpp validatorForCpp = new SchemaValidatorForCpp(processor);
 

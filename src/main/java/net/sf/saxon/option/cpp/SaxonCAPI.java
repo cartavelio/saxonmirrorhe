@@ -48,8 +48,8 @@ public class SaxonCAPI {
 
     //Properties props = new Properties();
     protected Processor processor = null;
-    //protected List<SaxonCException> saxonExceptions = new ArrayList<SaxonCException>();
-    //protected List<SaxonCException> saxonWarnings = new ArrayList<SaxonCException>();
+    //protected List<SaxonApiException> saxonExceptions = new ArrayList<SaxonApiException>();
+    //protected List<SaxonApiException> saxonWarnings = new ArrayList<SaxonApiException>();
     public static boolean debug = false;
     protected boolean schemaAware = false;
     //public static String RESOURCES_DIR = null;
@@ -150,7 +150,7 @@ public class SaxonCAPI {
                 // do nothing
                 return;
             }
-            saxonExceptions.add(new SaxonCException(exception));
+            saxonExceptions.add(new SaxonApiException(exception));
             try {
                 super.error(exception);
             } catch (Exception ex) {
@@ -163,7 +163,7 @@ public class SaxonCAPI {
                 // don't report the same error twice
                 return;
             }
-            saxonExceptions.add(new SaxonCException(exception));
+            saxonExceptions.add(new SaxonApiException(exception));
             try {
                 super.fatalError(exception);
             } catch (Exception ex) {
