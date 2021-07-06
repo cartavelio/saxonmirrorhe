@@ -120,7 +120,7 @@ PHP_METHOD(SaxonProcessor, __construct)
 
     saxonProcessor_object * obj = (saxonProcessor_object *)((char *)zobj - XtOffsetOf(saxonProcessor_object, std));
 
-	saxonProc = new SaxonProcessor(license);
+	saxonProc = new SaxonProcessor(true);
 		
     
 	obj->saxonProcessor = saxonProc;
@@ -262,25 +262,42 @@ PHP_METHOD(SaxonProcessor, setcwd)
 PHP_METHOD(SaxonProcessor, parseXmlFromString)
 {
     SaxonProcessor * saxonProcessor;
+    SchemaValidator * validator = nullptr;
+    zval* oth;
     char * source;
     size_t len1;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &source, &len1) == FAILURE) {
+    if (ZEND_NUM_ARGS()==1 && zend_parse_parameters(ZEND_NUM_ARGS() , "s", &source, &len1) == FAILURE) {
+        RETURN_NULL();
+    } else if (ZEND_NUM_ARGS()==2 && zend_parse_parameters(ZEND_NUM_ARGS() , "sz", &source, &len1, &oth) == FAILURE) {
         RETURN_NULL();
     }
+
     zend_object* pobj = Z_OBJ_P(getThis()); 
     saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
     assert (obj != nullptr);
     saxonProcessor = obj->saxonProcessor;
     if (saxonProcessor != nullptr) {
-        XdmNode* node = saxonProcessor->parseXmlFromString(source);
+        if(Z_TYPE_P(oth) !=IS_NULL){
+             zend_object* vvobj = Z_OBJ_P(oth);
+
+             schemaValidator_object * ooth = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
+             if(ooth != nullptr) {
+                    validator = ooth->schemaValidator;
+
+             }
+        }
+
+
+
+        XdmNode* node = saxonProcessor->parseXmlFromString(source, validator);
         if(node != nullptr) {
             if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
                 RETURN_NULL();
             } else {
                 node->incrementRefCount();
                 zend_object* vobj = Z_OBJ_P(return_value);
- 		xdmNode_object * xdmNObj = (xdmNode_object *)((char *)vobj - XtOffsetOf(xdmNode_object, std));
+ 		        xdmNode_object * xdmNObj = (xdmNode_object *)((char *)vobj - XtOffsetOf(xdmNode_object, std));
                 assert (xdmNObj != nullptr);
 
                 xdmNObj->xdmNode = node;
@@ -298,18 +315,32 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString)
 PHP_METHOD(SaxonProcessor, parseXmlFromFile)
 {
     SaxonProcessor * saxonProcessor;
+    SchemaValidator * validator = nullptr;
+    zval* oth;
     char * source;
     size_t len1;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &source, &len1) == FAILURE) {
+    if (ZEND_NUM_ARGS()==1 && zend_parse_parameters(ZEND_NUM_ARGS() , "s", &source, &len1) == FAILURE) {
+        RETURN_NULL();
+    } else if (ZEND_NUM_ARGS()==2 && zend_parse_parameters(ZEND_NUM_ARGS() , "sz", &source, &len1, &oth) == FAILURE) {
         RETURN_NULL();
     }
+
     zend_object* pobj = Z_OBJ_P(getThis()); 
     saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
     assert (obj != nullptr);
     saxonProcessor = obj->saxonProcessor;
     if (saxonProcessor != nullptr) {
-        XdmNode* node = saxonProcessor->parseXmlFromFile(source);//TODO this needs to be XdmNode object
+        if(Z_TYPE_P(oth) !=IS_NULL){
+             zend_object* vvobj = Z_OBJ_P(oth);
+
+             schemaValidator_object * ooth = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
+             if(ooth != nullptr) {
+                    validator = ooth->schemaValidator;
+
+             }
+        }
+        XdmNode* node = saxonProcessor->parseXmlFromFile(source, validator);
         if(node != nullptr) {
       
             if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
@@ -319,6 +350,60 @@ PHP_METHOD(SaxonProcessor, parseXmlFromFile)
             zend_object* vvobj = Z_OBJ_P(return_value);
             xdmNode_object * vobj = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
                 
+                assert (vobj != nullptr);
+                node->incrementRefCount();
+                vobj->xdmNode = node;
+                return;
+            }
+        }  else {
+
+        }
+    }
+        RETURN_NULL();
+
+}
+
+
+
+
+PHP_METHOD(SaxonProcessor, parseXmlFromUri)
+{
+    SaxonProcessor * saxonProcessor;
+    SchemaValidator * validator = nullptr;
+    zval* oth;
+    char * source;
+    size_t len1;
+
+    if (ZEND_NUM_ARGS()==1 && zend_parse_parameters(ZEND_NUM_ARGS() , "s", &source, &len1) == FAILURE) {
+        RETURN_NULL();
+    } else if (ZEND_NUM_ARGS()==2 && zend_parse_parameters(ZEND_NUM_ARGS() , "sz", &source, &len1, &oth) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+    assert (obj != nullptr);
+    saxonProcessor = obj->saxonProcessor;
+    if (saxonProcessor != nullptr) {
+        if(Z_TYPE_P(oth) !=IS_NULL){
+             zend_object* vvobj = Z_OBJ_P(oth);
+
+             schemaValidator_object * ooth = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
+             if(ooth != nullptr) {
+                    validator = ooth->schemaValidator;
+
+             }
+        }
+        XdmNode* node = saxonProcessor->parseXmlFromUri(source, validator);
+        if(node != nullptr) {
+
+            if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
+                RETURN_NULL();
+            } else {
+
+            zend_object* vvobj = Z_OBJ_P(return_value);
+            xdmNode_object * vobj = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
+
                 assert (vobj != nullptr);
                 node->incrementRefCount();
                 vobj->xdmNode = node;
@@ -1939,6 +2024,7 @@ zend_function_entry SaxonProcessor_methods[] = {
     PHP_ME(SaxonProcessor,  createAtomicValue,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  parseXmlFromString,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  parseXmlFromFile,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor,  parseXmlFromUri,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  setcwd,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  newXPathProcessor,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  newXsltProcessor,     nullptr, ZEND_ACC_PUBLIC)

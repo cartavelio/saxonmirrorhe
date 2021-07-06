@@ -25,6 +25,20 @@ SchemaValidator::SchemaValidator(SaxonProcessor* p, std::string curr){
 		std::cerr << "Processor is nullptr" << std::endl;
 	}
 
+	    jobject tempcppV = createSaxonProcessor2(SaxonProcessor::sxn_environ->env, cppClass,
+    			"(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);
+
+
+        if(tempcppV) {
+            cppV = SaxonProcessor::sxn_environ->env->NewGlobalRef(tempcppV);
+            SaxonProcessor::sxn_environ->env->DeleteLocalRef(tempcppV);
+
+        } else {
+            std::cerr<<"Error: Failed to create the XPathProcessor internal object"<<std::endl;
+            SaxonProcessor::sxn_environ->env->ExceptionClear();
+            return;
+        }
+
 	cppV = createSaxonProcessor2(SaxonProcessor::sxn_environ->env, cppClass,
 			"(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);
 

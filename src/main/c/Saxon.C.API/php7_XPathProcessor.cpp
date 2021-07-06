@@ -183,7 +183,6 @@ PHP_METHOD(XPathProcessor, setBackwardsCompatible){
 PHP_METHOD(XPathProcessor, setCaching){
     XPathProcessor *xpathProcessor;
     bool isCaching = false;
-    size_t len1;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "b", &isCaching) == FAILURE) {
         RETURN_NULL();

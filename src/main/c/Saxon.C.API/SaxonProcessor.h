@@ -354,17 +354,17 @@ public:
     /**
      * Parse a lexical representation of the source document and return it as an XdmNode
     */
-    XdmNode *parseXmlFromString(const char *source);
+    XdmNode *parseXmlFromString(const char *source, SchemaValidator * validator = nullptr);
 
     /**
      * Parse a source document file and return it as an XdmNode.
     */
-    XdmNode *parseXmlFromFile(const char *source);
+    XdmNode *parseXmlFromFile(const char *source, SchemaValidator * validator = nullptr);
 
     /**
      * Parse a source document available by URI and return it as an XdmNode.
     */
-    XdmNode *parseXmlFromUri(const char *source);
+    XdmNode *parseXmlFromUri(const char *source, SchemaValidator * validator = nullptr);
 
     int getNodeKind(jobject);
 

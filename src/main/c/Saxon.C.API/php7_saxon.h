@@ -181,6 +181,7 @@ PHP_RINIT_FUNCTION(saxon);
 
     PHP_METHOD(SaxonProcessor,  parseXmlFromString);
     PHP_METHOD(SaxonProcessor,  parseXmlFromFile);
+    PHP_METHOD(SaxonProcessor,  parseXmlFromUri);     //new
     PHP_METHOD(SaxonProcessor,  setcwd);
 
     PHP_METHOD(SaxonProcessor,  setCatalog);
@@ -331,7 +332,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XPathProcessor, declareNamespace);
     PHP_METHOD(XPathProcessor, setBackwardsCompatible);
     PHP_METHOD(XPathProcessor, setCaching);
-    PHP_METHOD(XPathProcessor, importSchemaNamespace);
+    PHP_METHOD(XPathProcessor, importSchemaNamespace);      //new
     PHP_METHOD(XPathProcessor,  setParameter);
     PHP_METHOD(XPathProcessor,  setProperty);
     PHP_METHOD(XPathProcessor,  clearParameters);
@@ -352,6 +353,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(SchemaValidator, validate); 
     PHP_METHOD(SchemaValidator, validateToNode);
     PHP_METHOD(SchemaValidator, getValidationReport);
+    PHP_METHOD(SchemaValidator, setLax); // new
     PHP_METHOD(SchemaValidator,  setParameter);
     PHP_METHOD(SchemaValidator,  setProperty);
     PHP_METHOD(SchemaValidator,  clearParameters);

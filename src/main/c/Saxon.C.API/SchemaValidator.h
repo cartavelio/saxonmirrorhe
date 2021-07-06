@@ -195,6 +195,12 @@ public:
     }
 
 
+    //! Get the underlying java object of the C++ schema validator
+    jobject getUnderlyingValidator() {
+        return cppV;
+    }
+
+
 private:
     bool lax;
 	SaxonProcessor * proc;

@@ -133,6 +133,33 @@ PHP_METHOD(SchemaValidator, validateToNode)
 }
 
 
+
+PHP_METHOD(SchemaValidator, setLax)
+{
+
+    SchemaValidator *schemaValidator;
+
+    bool isLax = false;
+
+    if (ZEND_NUM_ARGS()>1) {
+        WRONG_PARAM_COUNT;
+    }
+
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "b", &isLax) == FAILURE) {
+        RETURN_NULL();
+    }
+
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+   schemaValidator_object * obj = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
+    schemaValidator = obj->schemaValidator;
+    if (schemaValidator != nullptr) {
+        schemaValidator->setLax(isLax);
+    }
+}
+
+
 PHP_METHOD(SchemaValidator, getValidationReport)
 {
 
@@ -419,6 +446,7 @@ zend_function_entry SchemaValidator_methods[] = {
     PHP_ME(SchemaValidator,  registerSchemaFromFile,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  registerSchemaFromString,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  getValidationReport,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(SchemaValidator,  setLax,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  setParameter,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  setProperty,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  clearParameters,      nullptr, ZEND_ACC_PUBLIC)

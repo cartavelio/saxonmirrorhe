@@ -1,7 +1,7 @@
 <?php
 /*error_reporting(E_ALL|E_STRICT);
 ini_set('display_errors', 'on');*/
-ini_set('max_execution_time', 1200);
+ini_set('max_execution_time', 300);
 /*$root = pathinfo($_SERVER['SCRIPT_FILENAME']);
 define('BASE_FOLDER', basename($root['dirname']));
 define('SITE_ROOT', realpath(dirname(__FILE__)));
@@ -23,12 +23,20 @@ $path = __DIR__ . "/xslt30-test/";
 $catalog = $path . "catalog.xml";
 $saxon_version = "";
 
-$proc = new Saxon\SaxonProcessor(True);
+$proc = new Saxon\SaxonProcessor(true);
 $proc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");
 $proc->setcwd("");
 $xsltproc = $proc->newXslt30Processor();
 
+error_log("checkpoint 1");
+
 $xpathProcForEnv = $proc->newXPathProcessor();
+
+error_log("checkpoint 2");
+
+$schemaValdiator = $proc->newSchemaValidator();
+
+error_log("checkpoint 3");
 
 $xpathProcForEnv->declareNamespace("", "http://www.w3.org/2012/10/xslt-test-catalog");
 //$xpathProcForEnv->setBaseURI($path);
@@ -42,8 +50,8 @@ $pass = 0;
 $fail = 0;
 $error =0;
 $notrun = 0;
-$run_test = NULL;
-$run_test_case = NULL;//"as-0119";//"copy-of-010";
+$run_test = null;
+$run_test_case = null;//"as-0119";//"copy-of-010";
 $total_tests = 0;
 
 
@@ -113,12 +121,16 @@ function check_dependency($xml)
                 error_log("check_depend var1=".$var1. " value=".$child->getAttributeValue('value')."feature result=".($child->getAttributeValue('value')=="schema_aware"));
                 switch ($var1) {
                     case "year_component_values":
+                        if($child->getAttributeValue('value') == "support negative year")  {
+                            return true;
+                            
+                        }
                         //if value = 'support year zero' then set schema_aware and return true
                         return false;
 
                     case "feature":
                         if ($child->getAttributeValue('value')== "schema_aware") {
-                            return false;
+                            return true;
                         }   
                     case "spec":
                         if ($child->getAttributeValue('value')== "XSLT30" or $child->getAttributeValue('value')== "XSLT20+" or $child->getAttributeValue('value')== "XSLT30+" or $child->getAttributeValue('value')== "XSLT10+") {
@@ -126,6 +138,7 @@ function check_dependency($xml)
                         } else {
                             return false;
                         }
+                    
 
                 }
             }
@@ -139,6 +152,8 @@ function parse_environment($xml, $path)
 {
     global $proc;
     global $xpathProcForEnv;
+    global $schemaValidator;
+    $validateSources = false;
     $array = array();
     if($xpathProcForEnv == null) {
         return $array;
@@ -181,6 +196,61 @@ function parse_environment($xml, $path)
             $xpathProcForEnv2->clearParameters();
             $xpathProcForEnv2->clearProperties();
             $xpathProcForEnv2->setContextItem($nodeii);
+
+            $schemas = $xpathProcForEnv2->evaluate("./*:schema");
+
+            if($schemas != null) {
+                $sscount = $schemas->size();
+                for ($j = 0; $j < $sscount; $j++) {
+                    $valuej = $schemas->itemAt($j);
+                    if ($valuej == null) {
+                        continue;
+                    }
+
+                    if ($valuej->isNode()) {
+                        $nodej = $valuej->getNodeValue();
+                        /*if($envName == "as-16") {
+                            error_log("size=".$scount.", sources for env node=" . $envName . ",   \nenvName CCCCC1= " . $nodej. "size = ".$scount);
+                        }     */
+
+                        $role = $nodej->getAttributeValue("role");
+
+                        if ($role != "secondary") {
+                            $href = $nodej->getAttributeValue("file");
+                            $ns = $nodej->getAttributeValue("uri");
+
+                            if ($href == null) {
+
+
+                            } else {
+                                error_log("registering_schema=" . $path . $href);
+                                $schemaValidator->registerSchemaFromFile($path . $href);
+
+
+                            }
+                            if ($ns == null) {
+                                $ns = "";
+                            }
+                            $xpathProcForEnv->importSchemaNamespace($ns);
+
+                        }
+                    }
+
+                    if ($role == "source-reference") {
+                        $validateSources = true;
+                    }
+                    if ($role == "stylesheet-import") {
+                        //environment.xsltCompiler.setSchemaAware(true);
+                    }
+
+
+                }
+
+
+            }
+
+
+
             $sources = $xpathProcForEnv2->evaluate("./*:source");
             $scount = 0;
             if($sources != null) {
@@ -202,6 +272,10 @@ function parse_environment($xml, $path)
                         }     */
                         $rawuri = $nodej->getAttributeValue("uri");
                         $role = $nodej->getAttributeValue("role");
+                        $validation = $nodej->getAttributeValue("validation");
+                        if ($validation == null) {
+                              $validation = "skip";
+                        }
                         //$file = $nodej->getAttributeValue("file");
                         if ("." == $role) {
                             $href = $nodej->getAttributeValue("file");
@@ -223,6 +297,9 @@ function parse_environment($xml, $path)
                         }  elseif ($rawuri != null) {
                             //$array["" . $envName]["sources"][$rawuri] = $rawuri;
                             $newarray["sources"][".file"] = $rawuri;
+                        } elseif($validateSources == true) {
+                            $newarray["sources"]["validation"] = $validation;
+
                         }
 
                     }
@@ -230,6 +307,8 @@ function parse_environment($xml, $path)
 
 
             }
+
+
            // if($envName == "as-01b") {
                 //error_log("Create env for " . $envName . " dump=" . print_r($newarray, TRUE));
                 $array["" . $envName] = $newarray;
@@ -386,6 +465,7 @@ function testAssertion($assert, $result, $errorCode) {
         error_log("XPathProc2 not created");
         return false;
     }
+
    //$aSize = $asserts->size();
    //for($i=0; $i < $aSize; $i++) {
 
@@ -397,7 +477,9 @@ function testAssertion($assert, $result, $errorCode) {
 
        $assertName = $assert->getLocalName(); // substr($assert->getNodeName(), strpos($assert->getNodeName(), "}")+1);
            error_log("localName=".$assertName.", assertxx=".$assert);
+
     if ($assertName == "error") {
+        error_log("error check!!!! ");
             if($errorCode == null) {
                 $errorCode = "";
             }
@@ -414,7 +496,12 @@ function testAssertion($assert, $result, $errorCode) {
 
     }
 
-        elseif($assertName == "assert-xml") {
+    if($result == NULL) {
+        error_log("Result is NULL");
+        return false;
+    }
+
+    if($assertName == "assert-xml") {
             error_log("Entered assert-xml");
             $file = $assert->getAttributeValue("file");
             $xpathProcForAssertions->setContextItem($assert);
@@ -441,6 +528,7 @@ function testAssertion($assert, $result, $errorCode) {
             error_log("XXXXXX comparand=" . $comparand . ", result = " . $resultStr);
 
             if ($comparand == $resultStr) {
+                error_log("assert-xml-1: " . $comparand . "\n Outcome:" . $result);
                 return true;
             } else {
                 error_log("assert-xml: " . $comparand . "\n Outcome:" . $result);
@@ -501,7 +589,7 @@ function testAssertion($assert, $result, $errorCode) {
 
 
             }  else {
-                error_log("FAIL - assertion with multipl results not handled yet");
+                error_log("FAIL - assertion with multiple results not handled yet");
                 return false;
 
             }
@@ -537,6 +625,7 @@ function run_test_case($testcase, $env, $path)
     global $proc;
     global $xsltproc;
     global $xpathProcForEnv;
+    global $schemaValidator;
     global $pass;
     global $fail;
     global $notrun;
@@ -606,7 +695,13 @@ function run_test_case($testcase, $env, $path)
                                 //error_log("before apply stylesheet:".$test);
                                 $executable = $xsltproc->compileFromFile($test);
                                 if($executable == NULL) {
-                                    return "FAIL - executable is NULL";
+                                    $fail++;
+                                    if($xsltproc->getErrorMessage() == NULL) {
+                                        return "FAIL - executable is NULL";
+                                    } else {
+                                        return "FAIL - ".$xsltproc->getErrorMessage();
+
+                                    }
                                 }
 
                         
@@ -619,13 +714,40 @@ function run_test_case($testcase, $env, $path)
                                 if(array_key_exists(".file", $env[$t_env_ref . ""]["sources"])) {
 
                                     $input = $path. $env[$t_env_ref . ""]["sources"][".file"];
-                                    $executable->setInitialMatchSelectionAsFile($input);
-                                    $executable->setGlobalContextFromFile($input);
+                                    $cNode = null;
+                                    if(array_key_exists("validation", $env[$t_env_ref . ""]["sources"])) {
+                                         $validation = $env[$t_env_ref . ""]["sources"]["validation"];
+                                         if($schemaValidator != null && $validation != "skip") {
+                                             error_log("using schemaValidator in parseXml!!");
+                                             $schemaValidator->
+                                             $cNode = $proc->parseXmlFromFile($input, $schemaValidator);
+
+                                         }
+
+                                    }
+                                    if($cNode == null) {
+                                        $cNode = $proc->parseXmlFromFile($input);
+                                    }
+                                    $executable->setInitialMatchSelection($cNode);
+                                    $executable->setGlobalContext($cNode);
 
 
                                 } elseif (array_key_exists(".content", $env[$t_env_ref . ""]["sources"])) {
-                                    $input = $path. $env[$t_env_ref . ""]["sources"][".content"];
-                                    $cNode = $proc->parseXmlFromString($input);
+                                    $input = $env[$t_env_ref . ""]["sources"][".content"];
+                                    error_log(".content = ".$input);
+                                    $cNode = null;
+                                    if(array_key_exists("validation", $env[$t_env_ref . ""]["sources"])) {
+                                         $validation = $env[$t_env_ref . ""]["sources"]["validation"];
+                                         if($schemaValidator != null && $validation != "skip") {
+                                             error_log("using schemaValidator in parseXml!!");
+                                             $cNode = $proc->parseXmlFromString($input, $schemaValidator);
+
+                                         }
+
+                                    }
+                                    if($cNode == null) {
+                                        $cNode = $proc->parseXmlFromString($input);
+                                    }
 
                                     if($cNode != null) {
                                         $executable->setInitialMatchSelection($cNode);
@@ -775,7 +897,7 @@ function run_test_case($testcase, $env, $path)
                                     error_log("Assert:" . ($asserts));
                                     error_log( "OutCome:" . ($result));
 
-
+                                    $fail++;
                                     return "FAIL";
                                 }
 
@@ -921,6 +1043,6 @@ echo "<a name='results'>";
 echo "<b>Results</b><br/>";
 echo "# Success:".$pass. " #Failures: ".$fail." Not run: ". $notrun;
 
-
+//$proc->release();
 
 ?>
