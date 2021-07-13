@@ -291,7 +291,10 @@ public class Configuration implements SourceResolver, NotationSet {
 //#endif
 //#if SAXONC == true
         if(SaxonCAPI.RESOURCES_DIR != null) {
-            filename = SaxonCAPI.RESOURCES_DIR + filename;
+            filename = SaxonCAPI.RESOURCES_DIR + "/"+filename;
+            if(SaxonCAPI.debug) {
+                System.err.println("DEBUG SAXONC: Config data filename="+filename);
+            }
         } 
 //#endif
 
