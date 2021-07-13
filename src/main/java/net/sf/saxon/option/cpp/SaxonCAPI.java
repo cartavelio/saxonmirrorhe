@@ -52,7 +52,7 @@ public class SaxonCAPI {
     //protected List<SaxonApiException> saxonWarnings = new ArrayList<SaxonApiException>();
     public static boolean debug = false;
     protected boolean schemaAware = false;
-    //public static String RESOURCES_DIR = null;
+    public static String RESOURCES_DIR = null;
 
 
 
@@ -373,7 +373,22 @@ public class SaxonCAPI {
                         System.err.println("Error Java property option found but Java Property object is null: Probably XPathProcessor in use");
                     }
                 }
-            }  else if (initialTemplateParameters != null && params[i].startsWith("itparam:")) {
+            }  else if (params[i].equals("resources")) {
+                char separatorChar = '/';
+                if (SaxonCAPI.RESOURCES_DIR == null && values[i] instanceof String) {
+                    String dir1 = (String) values[i];
+                    if (!dir1.endsWith("/")) {
+                        dir1 = dir1.concat("/");
+                    }
+                    if (File.separatorChar != '/') {
+                        dir1.replace(separatorChar, File.separatorChar);
+                        separatorChar = '\\';
+                        dir1.replace('/', '\\');
+                    }
+                    SaxonCAPI.RESOURCES_DIR = dir1;
+                }
+
+            }else if (initialTemplateParameters != null && params[i].startsWith("itparam:")) {
                 //initial template parameters
                 String paramName = params[i].substring(8);
                 Object value = values[i];

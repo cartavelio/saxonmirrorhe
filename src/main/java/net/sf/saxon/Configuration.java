@@ -24,6 +24,7 @@ import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.option.cpp.SaxonCAPI;
 import net.sf.saxon.pattern.PatternParser30;
 import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.query.QueryModule;
@@ -284,7 +285,16 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /*@Nullable*/
     public static InputStream locateResource(String filename, List<String> messages, List<ClassLoader> loaders) {
+
+//#if SAXONC != true
         filename = "net/sf/saxon/data/" + filename;
+//#endif
+//#if SAXONC == true
+        if(SaxonCAPI.RESOURCES_DIR != null) {
+            filename = SaxonCAPI.RESOURCES_DIR + filename;
+        } 
+//#endif
+
         ClassLoader loader = null;
         try {
             loader = Thread.currentThread().getContextClassLoader();
