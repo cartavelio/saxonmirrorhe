@@ -263,7 +263,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString)
 {
     SaxonProcessor * saxonProcessor;
     SchemaValidator * validator = nullptr;
-    zval* oth;
+    zval* oth = nullptr;
     char * source;
     size_t len1;
 
@@ -278,7 +278,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString)
     assert (obj != nullptr);
     saxonProcessor = obj->saxonProcessor;
     if (saxonProcessor != nullptr) {
-        if(Z_TYPE_P(oth) !=IS_NULL){
+        if(oth != nullptr && Z_TYPE_P(oth) !=IS_NULL){
              zend_object* vvobj = Z_OBJ_P(oth);
 
              schemaValidator_object * ooth = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
@@ -316,7 +316,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromFile)
 {
     SaxonProcessor * saxonProcessor;
     SchemaValidator * validator = nullptr;
-    zval* oth;
+    zval* oth = nullptr;
     char * source;
     size_t len1;
 
@@ -331,7 +331,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromFile)
     assert (obj != nullptr);
     saxonProcessor = obj->saxonProcessor;
     if (saxonProcessor != nullptr) {
-        if(Z_TYPE_P(oth) !=IS_NULL){
+        if(oth != nullptr && Z_TYPE_P(oth) !=IS_NULL){
              zend_object* vvobj = Z_OBJ_P(oth);
 
              schemaValidator_object * ooth = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
@@ -370,7 +370,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromUri)
 {
     SaxonProcessor * saxonProcessor;
     SchemaValidator * validator = nullptr;
-    zval* oth;
+    zval* oth = nullptr;
     char * source;
     size_t len1;
 
@@ -385,7 +385,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromUri)
     assert (obj != nullptr);
     saxonProcessor = obj->saxonProcessor;
     if (saxonProcessor != nullptr) {
-        if(Z_TYPE_P(oth) !=IS_NULL){
+        if(oth != nullptr && Z_TYPE_P(oth) !=IS_NULL){
              zend_object* vvobj = Z_OBJ_P(oth);
 
              schemaValidator_object * ooth = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
@@ -659,11 +659,11 @@ PHP_METHOD(SaxonProcessor, newSchemaValidator)
 	   //struct schemaValidator_object* vobj = (struct schemaValidator_object *)Z_OBJ_P(return_value TSRMLS_CC);
 	   zend_object* vvobj = Z_OBJ_P(return_value);
 	   schemaValidator_object * vobj = (schemaValidator_object *)((char *)vvobj - XtOffsetOf(schemaValidator_object, std));
-            assert (vobj != nullptr);
-	    schemaValidator = proc->newSchemaValidator();
-	    if(schemaValidator == nullptr){
+       assert (vobj != nullptr);
+	   schemaValidator = proc->newSchemaValidator();
+	   if(schemaValidator == nullptr){
 		RETURN_NULL();
-	    }
+	  }
             vobj->schemaValidator = schemaValidator;
 	}
     } else {
@@ -708,6 +708,42 @@ PHP_METHOD(SaxonProcessor, exceptionOccurred)
         RETURN_BOOL(result);
     }
     RETURN_BOOL(false);
+}
+
+
+
+PHP_METHOD(SaxonProcessor, getErrorMessage)
+{
+    SaxonProcessor *saxonProcessor;
+
+
+    if (ZEND_NUM_ARGS()>0) {
+        WRONG_PARAM_COUNT;
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    saxonProcessor_object *obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+    saxonProcessor = obj->saxonProcessor;
+    if (saxonProcessor != NULL) {
+        const char * errStr = saxonProcessor->getErrorMessage();
+        if(errStr != NULL) {
+            //char *str = estrdup(errStr);
+            _RETURN_STRING(errStr);
+        }
+    }
+    RETURN_NULL();
+}
+
+
+PHP_METHOD(SaxonProcessor, exceptionClear)
+{
+    SaxonProcessor *saxonProcessor;
+    zend_object* pobj = Z_OBJ_P(getThis());
+    saxonProcessor_object *obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+    saxonProcessor = obj->saxonProcessor;
+    if (saxonProcessor != nullptr) {
+        saxonProcessor->exceptionClear();
+    }
 }
 
 
@@ -2037,6 +2073,8 @@ zend_function_entry SaxonProcessor_methods[] = {
     PHP_ME(SaxonProcessor,  version,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  isSchemaAware,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  exceptionOccurred,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor,  getErrorMessage,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor,  exceptionClear,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  release,      nullptr, ZEND_ACC_PUBLIC)
     {nullptr, nullptr, nullptr}
 };

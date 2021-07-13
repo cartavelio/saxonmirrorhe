@@ -18,7 +18,7 @@
 #define new new(__FILE__, __LINE__)
 #endif
 
-XsltExecutable::XsltExecutable(jobject exObject, std::string curr) {
+XsltExecutable::XsltExecutable(jobject exObject, std::string curr, std::string resources) {
 
 
 
@@ -42,6 +42,7 @@ XsltExecutable::XsltExecutable(jobject exObject, std::string curr) {
     saxonMessageListenerObj = nullptr;
     executableObject = SaxonProcessor::sxn_environ->env->NewGlobalRef(exObject);
     cwdXE = curr;
+    resources_dir = resources;
 }
 
 XsltExecutable::~XsltExecutable() {
@@ -62,7 +63,9 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
                             "net/sf/saxon/option/cpp/Xslt30Processor");
 
     executableObject = other.executableObject;
-    selectionV = other.selectionV;
+    selectionV = other.selectionV; 
+    cwdXE = other.cwdXE;
+    resources_dir = other.resources_dir;
     if (selectionV != nullptr) {
         setInitialMatchSelection(other.selectionV);
     } else {
@@ -340,6 +343,7 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
         SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, atmID,
@@ -381,6 +385,7 @@ const char *XsltExecutable::applyTemplatesReturningString() {
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
 
@@ -435,6 +440,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
 
@@ -510,6 +516,7 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName, XdmValu
         SaxonProcessor::sxn_environ->env->ExceptionClear();
         return;
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
 
@@ -558,6 +565,7 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
         jobjectArray argumentJArray = SaxonProcessor::createJArray(arguments, argument_length);
@@ -610,6 +618,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
         jobjectArray argumentJArray = SaxonProcessor::createJArray(arguments, argument_length);
@@ -687,6 +696,7 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
         SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, ctmID,
@@ -726,6 +736,7 @@ const char *XsltExecutable::callTemplateReturningString(const char *templateName
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
 
@@ -783,6 +794,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
 
@@ -875,6 +887,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
 
@@ -958,6 +971,7 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
 
@@ -1063,6 +1077,7 @@ const char *XsltExecutable::transformFileToString(const char *source) {
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
+    	setProperty("resources", resources_dir.c_str());
         JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray(parameters, properties);
 

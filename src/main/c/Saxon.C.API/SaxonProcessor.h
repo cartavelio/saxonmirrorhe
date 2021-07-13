@@ -409,6 +409,18 @@ public:
     */
     const char *getcwd();
 
+
+    /**
+     * get saxon resources directory
+    */
+   const char * getResourcesDirectory();
+
+
+    /**
+     * set saxon resources directory
+    */
+   void setResourcesDirectory(const char* dir);
+
     /**
      * set catalog to be used in Saxon
     */

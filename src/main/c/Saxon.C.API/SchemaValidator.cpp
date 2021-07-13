@@ -34,13 +34,11 @@ SchemaValidator::SchemaValidator(SaxonProcessor* p, std::string curr){
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(tempcppV);
 
         } else {
-            std::cerr<<"Error: Failed to create the XPathProcessor internal object"<<std::endl;
+            std::cerr<<"Error: Failed to create the internal object for the SchemaValidator"<<std::endl;
+            exception = proc->checkAndCreateException(cppClass);
             SaxonProcessor::sxn_environ->env->ExceptionClear();
             return;
         }
-
-	cppV = createSaxonProcessor2(SaxonProcessor::sxn_environ->env, cppClass,
-			"(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);
 
 #ifdef DEBUG
 	jmethodID debugMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass, "setDebugMode", "(Z)V");
@@ -87,6 +85,7 @@ SchemaValidator::SchemaValidator(SaxonProcessor* p, std::string curr){
 }
 
   void SchemaValidator::registerSchemaFromFile(const char * sourceFile){
+  	setProperty("resources", proc->getResourcesDirectory());
 	if (sourceFile == nullptr) {
 		std::cerr << "Error:: sourceFile string cannot be empty or nullptr" << std::endl;
 	     return;
@@ -189,7 +188,7 @@ SchemaValidator::SchemaValidator(SaxonProcessor* p, std::string curr){
 
   void SchemaValidator::registerSchemaFromString(const char * sourceStr){
 
-	
+	 	setProperty("resources", proc->getResourcesDirectory());
 	if (sourceStr == nullptr) {
 		std::cerr << "Error:: Schema string cannot be empty or nullptr" << std::endl;
 	     return;
@@ -270,7 +269,7 @@ SchemaValidator::SchemaValidator(SaxonProcessor* p, std::string curr){
 		std::cerr << "Error:: sourceFile string cannot be empty or nullptr" << std::endl;
 	     return;
         }*/
-
+    	setProperty("resources", proc->getResourcesDirectory());
 jmethodID mID =
 		(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass, "validate",
 				"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
@@ -356,7 +355,7 @@ XdmNode * SchemaValidator::validateToNode(const char * sourceFile){
 		std::cerr << "Error:: source file string cannot be empty or nullptr" << std::endl;
 	     return nullptr;
         }*/
-
+ 	setProperty("resources", proc->getResourcesDirectory());
 jmethodID mID =
 		(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass, "validateToNode",
 				"(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmNode;");

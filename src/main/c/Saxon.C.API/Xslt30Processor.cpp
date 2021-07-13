@@ -340,7 +340,7 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 		}
 
 		jobject obj = SaxonProcessor::sxn_environ->env->NewGlobalRef(executableObject);
-        XsltExecutable * executable = new XsltExecutable(obj, cwdXT);
+        XsltExecutable * executable = new XsltExecutable(obj, cwdXT, proc->getResourcesDirectory());
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(executableObject);
 		return executable;
 	}
@@ -384,7 +384,7 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
 		}
 
-        XsltExecutable * executable = new XsltExecutable(SaxonProcessor::sxn_environ->env->NewGlobalRef(executableObject));
+        XsltExecutable * executable = new XsltExecutable(SaxonProcessor::sxn_environ->env->NewGlobalRef(executableObject), cwdXT, proc->getResourcesDirectory());
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(executableObject);
 		return executable;
 	}
@@ -431,7 +431,7 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
 		}
 
-        XsltExecutable * executable = new XsltExecutable(SaxonProcessor::sxn_environ->env->NewGlobalRef(executableObject));
+        XsltExecutable * executable = new XsltExecutable(SaxonProcessor::sxn_environ->env->NewGlobalRef(executableObject), cwdXT, proc->getResourcesDirectory());
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(executableObject);
 		return executable;
 	}
@@ -486,7 +486,7 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
         }
 
         XsltExecutable *executable;
-        executable = new XsltExecutable(SaxonProcessor::sxn_environ->env->NewGlobalRef(executableObject), cwdXT);
+        executable = new XsltExecutable(SaxonProcessor::sxn_environ->env->NewGlobalRef(executableObject), cwdXT, proc->getResourcesDirectory());
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(executableObject);
 
         return executable;
@@ -640,6 +640,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
 #endif
             return;
         }
+
 	    JParameters comboArrays;
         comboArrays = SaxonProcessor::createParameterJArray2(parameters);
 

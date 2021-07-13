@@ -295,6 +295,14 @@ public class Configuration implements SourceResolver, NotationSet {
             if(SaxonCAPI.debug) {
                 System.err.println("DEBUG SAXONC: Config data filename="+filename);
             }
+		try {
+			FileInputStream fis = new FileInputStream(filename);
+			return fis;
+		} catch(Exception err) {
+			messages.add("DEBUG SAXONC: failed to load file with FileInputStream");
+		}	
+	
+		
         } 
 //#endif
 

@@ -87,6 +87,7 @@ if (!mID) {
 			<< std::endl;
 
 } else {
+	setProperty("resources", proc->getResourcesDirectory());
 	jobjectArray stringArray = nullptr;
 	jobjectArray objectArray = nullptr;
 	jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env, "java/lang/Object");
@@ -181,6 +182,7 @@ return nullptr;
 }
 
 XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
+
 	if (xpathStr == nullptr) {
 		std::cerr << "Error:: XPath string cannot be empty or nullptr" << std::endl;
 	     return nullptr;
@@ -196,6 +198,7 @@ if (!mID) {
 			<< std::endl;
 
 } else {
+	setProperty("resources", proc->getResourcesDirectory());
 	jobjectArray stringArray = nullptr;
 	jobjectArray objectArray = nullptr;
 	jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env, "java/lang/Object");
@@ -415,6 +418,7 @@ if (!mID) {
 	std::cerr << "Error: MyClassInDll." << "effectiveBooleanValue" << " not found\n"<< std::endl;
 
 } else {
+	setProperty("resources", proc->getResourcesDirectory());
 	jobjectArray stringArray = nullptr;
 	jobjectArray objectArray = nullptr;
 	jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env, "java/lang/Object");

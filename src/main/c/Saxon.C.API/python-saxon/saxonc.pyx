@@ -4,12 +4,16 @@ Saxon/C is a cross-compiled variant of Saxon from the Java platform to the C/C++
 Saxon/C provides processing in XSLT 3.0, XQuery 3.0/3.1 and XPath 2.0/3.0/3.1, and Schema validation 1.0/1.1.
 Main classes in Saxon/C Python API: PySaxonProcessor, PyXsltProcessor, PyXslt30Processor, PyXQueryProcessor, PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmNode and PyXdmAtomicValue."""
 # distutils: language = c++
+# distutils: sources = SaxonProcessor.cpp
+# cython: language_level = 3
+
 cimport saxoncClasses
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.map cimport map
 from nodekind import *
 from os.path import isfile
+
 cdef const char * make_c_str(str str_value):
     if str_value is None:
         return NULL
@@ -2758,7 +2762,7 @@ cdef class PyXdmValue:
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
-        cdef PyXdmItem val = None
+        cdef PyXdmItem ival = None
         cdef type_ = None
         cdef saxoncClasses.XdmItem * xdmItem = NULL
         xdmItem = self.thisvptr.itemAt(index)
@@ -2776,9 +2780,9 @@ cdef class PyXdmValue:
                 nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmItem
                 return nval
             else:
-                val = PyXdmItem()
-                val.thisvptr = xdmItem
-                return val
+                ival = PyXdmItem()
+                ival.thisvptr = xdmItem
+                return ival
      @property
      def size(self):
         """
@@ -2817,8 +2821,8 @@ cdef class PyXdmValueIterator:
      # PyXdmValue object reference
         self._value = value
         # member variable to keep track of current index
-       self._index = 0
-   def __next__(self):
+        self._index = 0
+     def __next__(self):
        ''''Returns the next value from PyXdmValue object's lists '''
        if self._index < self._value.size :
            result = value.item_at(self._index)
@@ -3133,8 +3137,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         Returns:
             str: String of the primitive type name
         """
-        cdef const char* c_string = self.derivedaptr.getPrimitiveTypeName()
-        ustring = c_string.decode('UTF-8')
+        ustring = make_py_str(self.derivedaptr.getPrimitiveTypeName())
         return ustring
      @property
      def boolean_value(self):
@@ -3179,8 +3182,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         Returns:
             str: String value of the Xdm object
         """
-        cdef const char* c_string = self.derivedaptr.getStringValue()
-        ustring = c_string.decode('UTF-8')
+        ustring = make_py_str(self.derivedaptr.getStringValue())
         return ustring
      def __str__(self):
         """
@@ -3189,13 +3191,11 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         Returns:
             str: String value of this node
         """
-        cdef const char* c_string = self.derivedaptr.getStringValue()
-        ustring = c_string.decode('UTF-8')
+        ustring = make_py_str(self.derivedaptr.getStringValue())
         return ustring
      def __repr__(self):
         """
         ___repr__
         """
-        cdef const char* c_string = self.derivedaptr.getStringValue()
-        ustring = c_string.decode('UTF-8')
+        ustring = make_py_str(self.derivedaptr.getStringValue())
         return ustring

@@ -26,17 +26,16 @@ $saxon_version = "";
 $proc = new Saxon\SaxonProcessor(true);
 $proc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");
 $proc->setcwd("");
-$xsltproc = $proc->newXslt30Processor();
 
-error_log("checkpoint 1");
+$xsltproc = $proc->newXslt30Processor();
 
 $xpathProcForEnv = $proc->newXPathProcessor();
 
-error_log("checkpoint 2");
 
-$schemaValdiator = $proc->newSchemaValidator();
 
-error_log("checkpoint 3");
+$schemaValidator = $proc->newSchemaValidator();
+
+
 
 $xpathProcForEnv->declareNamespace("", "http://www.w3.org/2012/10/xslt-test-catalog");
 //$xpathProcForEnv->setBaseURI($path);
@@ -50,8 +49,8 @@ $pass = 0;
 $fail = 0;
 $error =0;
 $notrun = 0;
-$run_test = null;
-$run_test_case = null;//"as-0119";//"copy-of-010";
+$run_test = "as";
+$run_test_case = "as-3102a";//"copy-of-010";
 $total_tests = 0;
 
 
@@ -122,19 +121,22 @@ function check_dependency($xml)
                 switch ($var1) {
                     case "year_component_values":
                         if($child->getAttributeValue('value') == "support negative year")  {
-                            return true;
-                            
+                            //return true;
+                            break;
+                        }  else {
+                            //if value = 'support year zero' then set schema_aware and return true
+                            return false;
                         }
-                        //if value = 'support year zero' then set schema_aware and return true
-                        return false;
 
                     case "feature":
                         if ($child->getAttributeValue('value')== "schema_aware") {
-                            return true;
+                            //return true;
+                            break;
                         }   
                     case "spec":
                         if ($child->getAttributeValue('value')== "XSLT30" or $child->getAttributeValue('value')== "XSLT20+" or $child->getAttributeValue('value')== "XSLT30+" or $child->getAttributeValue('value')== "XSLT10+") {
                            //true
+                            break;
                         } else {
                             return false;
                         }
@@ -224,6 +226,10 @@ function parse_environment($xml, $path)
 
                             } else {
                                 error_log("registering_schema=" . $path . $href);
+                                if($schemaValidator == null) {
+                                    error_log("schemavalidator null cp0");
+
+                                }
                                 $schemaValidator->registerSchemaFromFile($path . $href);
 
 
@@ -252,6 +258,7 @@ function parse_environment($xml, $path)
 
 
             $sources = $xpathProcForEnv2->evaluate("./*:source");
+            $envStylesheets = $xpathProcForEnv2->evaluateSingle("./*:stylesheet");
             $scount = 0;
             if($sources != null) {
                 $scount = $sources->size();
@@ -309,6 +316,14 @@ function parse_environment($xml, $path)
             }
 
 
+            if($envStylesheets != null) {
+                $envStylesheet = $envStylesheets->getNodeValue();
+                if($envStylesheet != null) {
+                    $newarray["stylesheet"] = $envStylesheet->getAttributeValue("file");
+                }
+
+            }
+
            // if($envName == "as-01b") {
                 //error_log("Create env for " . $envName . " dump=" . print_r($newarray, TRUE));
                 $array["" . $envName] = $newarray;
@@ -344,23 +359,25 @@ function test_case($test_set)
     $xml = null;
     $test_path = pathinfo($test_set)['dirname'] . "/";
 
+
     if (file_exists($test_set)) {
         $xml = $proc->parseXmlFromFile($test_set);
+
+        if($xml == null) {
+            echo "Cannot find test " . $test_set . "\n";
+            if ($proc->exceptionOccurred() && $proc->getErrorMessage() != null) {
+                echo " error: " . $proc->getErrorMessage();
+            }
+            return;
+        }
         $test_set_name = $xml->getChildNode(0)->getAttributeValue("name");
         if($run_test != null && $test_set_name != $run_test) {
             return;
         }
          
-        if($xml == null) {
-            echo "Cannot find test ". $test_set. "\n";
-            if ($proc->exceptionOccurred() && $proc->getErrorMessage() != null) {
-                echo " error: " . $proc->getErrorMessage();
-            }
-            return;
-        }  else {
-            $env = parse_environment($xml, $test_path);
-        //    print_r($env);
-        }
+
+        $env = parse_environment($xml, $test_path);
+
 
 
         echo "<table border='1' style='width:60%'>
@@ -521,9 +538,9 @@ function testAssertion($assert, $result, $errorCode) {
             }
             $comparand = trim($comparand);
 
-            $comparand =  str_replace(array('.', ' ', "\n", "\t", "\r"), '', $comparand);
+            $comparand =  str_replace(array(' ', "\n", "\t", "\r"), '', $comparand);
             $resultStr =  $result->itemAt(0)->getNodeValue();
-            $resultStr =  str_replace(array('.', ' ', "\n", "\t", "\r"), '', $resultStr);
+            $resultStr =  str_replace(array(' ', "\n", "\t", "\r"), '', $resultStr);
 
             error_log("XXXXXX comparand=" . $comparand . ", result = " . $resultStr);
 
@@ -531,6 +548,8 @@ function testAssertion($assert, $result, $errorCode) {
                 error_log("assert-xml-1: " . $comparand . "\n Outcome:" . $result);
                 return true;
             } else {
+                $comparandNodei = $proc->$proc->parseXmlFromString($comparand);
+                $resultNodei = $proc->$proc->parseXmlFromString($resultStr);
                 error_log("assert-xml: " . $comparand . "\n Outcome:" . $result);
                 return false;
             }
@@ -630,6 +649,7 @@ function run_test_case($testcase, $env, $path)
     global $fail;
     global $notrun;
     $errorCode  = null;
+    $foundStylesheet = false;
     $xsltproc->clearParameters();
     
     $errorTest = FALSE;
@@ -653,14 +673,33 @@ function run_test_case($testcase, $env, $path)
         $testElem = getSingleNodeFromXPath($testcase, "./test");
 
          error_log("TEST ELEMENT :".$testcase);
-        if ($testElem != null) {                
-            $testStylesheet = getSingleNodeFromXPath($testElem->getNodeValue(), "./stylesheet");
+        $testStylesheet = null;
 
-            if ($testStylesheet != null) {
-                $test = $path . $testStylesheet->getNodeValue()->getAttributeValue("file");
+        if ($testElem != null) {
+
+            $test = null;
+            error_log("envvvalue:". print_r($env[$t_env_ref . ""], TRUE));
+            if($t_env_ref!= NULL && array_key_exists($t_env_ref , $env)) {
+                if(array_key_exists("stylesheet", $env[$t_env_ref . ""])) {
+                    error_log("Entered stylesheet!");
+                    $test =  $path. $env[$t_env_ref . ""]["stylesheet"];
+                    $foundStylesheet = true;
+                }
+
+            }
+            if(!$foundStylesheet) {
+                $testStylesheet = getSingleNodeFromXPath($testElem->getNodeValue(), "./stylesheet");
+                if($testStylesheet != null) {
+                    $test = $path . $testStylesheet->getNodeValue()->getAttributeValue("file");
+                    $foundStylesheet = true;
+                }
+            }
+
+            if ($foundStylesheet) {
+
                 
-                //echo "Test case=" . $test;
-                if (file_exists($test)) {
+                echo "Test case=" . $test;
+                if ($test != null && file_exists($test)) {
                     try {
                         //if ($t_env != null) {
 
@@ -729,7 +768,7 @@ function run_test_case($testcase, $env, $path)
                                         $cNode = $proc->parseXmlFromFile($input);
                                     }
                                     $executable->setInitialMatchSelection($cNode);
-                                    $executable->setGlobalContext($cNode);
+                                    $executable->setGlobalContextItem($cNode);
 
 
                                 } elseif (array_key_exists(".content", $env[$t_env_ref . ""]["sources"])) {
@@ -1031,7 +1070,8 @@ echo "</table>";
 foreach ($testFiles as $key => $test_set) {
     echo "<div style='width:70%'><h4><a name='" . $key . "'>" . $key . "</a></h4></div><div style='width:30%;float:right'><a href='#top'>Back to top</a></div>";
     //if ($key == 'as') {   //copy-of
-        test_case($path . $test_set);
+    echo "<b>".$path.$test_set."</b>";
+    test_case($path . $test_set);
    // }
 }
 echo "<br/>";

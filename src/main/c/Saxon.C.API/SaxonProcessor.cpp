@@ -15,7 +15,7 @@
 #include "XdmAtomicValue.h"
 
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #include <signal.h>
 #endif
@@ -685,6 +685,23 @@ const char *SaxonProcessor::getcwd() {
 }
 
 
+const char * SaxonProcessor::getResourcesDirectory(){
+	return _getResourceDirectory();
+}
+
+
+void SaxonProcessor::setResourcesDirectory(const char* dir){
+	//memset(&resources_dir[0], 0, sizeof(resources_dir));
+ #if defined(__linux__) || defined (__APPLE__)
+	strncat(_getResourceDirectory(), dir, strlen(dir));
+ #else
+	int destSize = strlen(dir) + strlen(dir);
+	strncat_s(_getResourceDirectory(), destSize,dir, strlen(dir));
+
+ #endif
+}
+
+
 void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
     jclass xmlResolverClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/trans/XmlCatalogResolver");
     static jmethodID catalogMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(xmlResolverClass, "setCatalog",
@@ -813,13 +830,13 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *source, SchemaValidator * 
                                                                                         cwd.c_str()), (validator != nullptr ? validator->getUnderlyingValidator(): nullptr),
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         source));
-    if (exceptionOccurred()) {
-        createException();
-
-    } else {
-
-        XdmNode *value = new XdmNode(xdmNodei);
+    if (xdmNodei) {
+        XdmNode *value = nullptr;
+        value = new XdmNode(xdmNodei);
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(xdmNodei);
         return value;
+    } else if (exceptionOccurred()) {
+        createException();
     }
     return nullptr;
 }
@@ -837,11 +854,13 @@ XdmNode *SaxonProcessor::parseXmlFromUri(const char *source, SchemaValidator * v
                                                                                         ""),  (validator != nullptr ? validator->getUnderlyingValidator(): nullptr),
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         source));
-    if (exceptionOccurred()) {
-        createException();
-    } else {
-        XdmNode *value = new XdmNode(xdmNodei);
+    if (xdmNodei) {
+        XdmNode *value = nullptr;
+        value = new XdmNode(xdmNodei);
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(xdmNodei);
         return value;
+    } else if (exceptionOccurred()) {
+        createException();
     }
     return nullptr;
 }

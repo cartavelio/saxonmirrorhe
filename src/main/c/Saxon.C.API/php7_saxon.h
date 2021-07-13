@@ -198,6 +198,9 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(SaxonProcessor,  version);
     PHP_METHOD(SaxonProcessor,  isSchemaAware);
     PHP_METHOD(SaxonProcessor,  release);
+    PHP_METHOD(SaxonProcessor,  exceptionClear);
+    PHP_METHOD(SaxonProcessor,  exceptionOccurred);
+    PHP_METHOD(SaxonProcessor,  getErrorMessage);
 
 
 

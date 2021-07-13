@@ -438,6 +438,7 @@ XdmValue * XsltProcessor::transformFileToValue(const char* sourcefile,
 				<< std::endl;
 
 	} else {
+	    setProperty("resources", proc->getResourcesDirectory());
 		jobjectArray stringArray = nullptr;
 		jobjectArray objectArray = nullptr;
 		jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env,
@@ -522,6 +523,7 @@ void XsltProcessor::transformFileToFile(const char* source,
 				<< std::endl;
 
 	} else {
+    	setProperty("resources", proc->getResourcesDirectory());
 		jobjectArray stringArray = nullptr;
 		jobjectArray objectArray = nullptr;
 		jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env,
@@ -637,6 +639,7 @@ const char * XsltProcessor::transformFileToString(const char* source,
 				<< std::endl;
 
 	} else {
+		setProperty("resources", proc->getResourcesDirectory());
 		jobjectArray stringArray = nullptr;
 		jobjectArray objectArray = nullptr;
 		jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env,

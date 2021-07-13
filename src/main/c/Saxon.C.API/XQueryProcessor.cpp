@@ -269,6 +269,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
             createException("The Java XQueryEngine object (i.e. cppXQ) is NULL - Possible exception thrown");
             return;
         }
+	setProperty("resources", proc->getResourcesDirectory());
 	jobjectArray stringArray = nullptr;
 	jobjectArray objectArray = nullptr;
 
@@ -331,6 +332,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
          createException("The Java XQueryEngine object (i.e. cppXQ) is NULL - Possible exception thrown");
          return nullptr;
      }
+	setProperty("resources", proc->getResourcesDirectory());
 	jobjectArray stringArray = nullptr;
 	jobjectArray objectArray = nullptr;
 
@@ -431,6 +433,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
          createException("The Java XQueryEngine object (i.e. cppXQ) is NULL - Possible exception thrown");
          return nullptr;
      }
+	setProperty("resources", proc->getResourcesDirectory());
 	jobjectArray stringArray = nullptr;
 	jobjectArray objectArray = nullptr;
 
