@@ -1,7 +1,7 @@
 <?php
 /*error_reporting(E_ALL|E_STRICT);
 ini_set('display_errors', 'on');*/
-ini_set('max_execution_time', 300);
+ini_set('MAX_EXECUTION_TIME', '-1');
 /*$root = pathinfo($_SERVER['SCRIPT_FILENAME']);
 define('BASE_FOLDER', basename($root['dirname']));
 define('SITE_ROOT', realpath(dirname(__FILE__)));
@@ -31,6 +31,8 @@ $xsltproc = $proc->newXslt30Processor();
 
 $xpathProcForEnv = $proc->newXPathProcessor();
 
+$xpathProcForCompareNodes = $proc->newXPathProcessor();
+$xpathProcForCompareNodes->declareNamespace("fn","http://www.w3.org/2005/xpath-functions");
 
 
 $schemaValidator = $proc->newSchemaValidator();
@@ -49,8 +51,8 @@ $pass = 0;
 $fail = 0;
 $error =0;
 $notrun = 0;
-$run_test = "as";
-$run_test_case = "as-3102a";//"copy-of-010";
+$run_test = null;
+$run_test_case = null;//"copy-of-010";
 $total_tests = 0;
 
 
@@ -122,21 +124,31 @@ function check_dependency($xml)
                     case "year_component_values":
                         if($child->getAttributeValue('value') == "support negative year")  {
                             //return true;
-                            break;
+                            continue;
                         }  else {
                             //if value = 'support year zero' then set schema_aware and return true
                             return false;
                         }
 
                     case "feature":
-                        if ($child->getAttributeValue('value')== "schema_aware") {
+                        $attrStr = $child->getAttributeValue('value');
+                        if ($attrStr == "schema_aware" or $attrStr == "namespace_axis" or $attrStr == "serialization" or $attrStr == "dtd" or $attrStr == "fn-transform-XSLT" or $attrStr == "available_documents" or $attrStr == "XPath_3.1" or
+                        $attrStr == "higher_order_functions" or $attrStr == "HTML4" or $attrStr == "HTML5" or $attrStr == "backwards_compatibility" or $attrStr == "unparsed_text_encoding" or $attrStr == "built_in_derived_types" or 
+                        $attrStr == "assertSerializationMatches" or $attrStr == "default_output_encoding" or $attrStr == "maximum_number_of_decimal_digits" or $attrStr == "supported_calendars_in_date_formatting_functions" or
+                        $attrStr == "default_calendar_in_date_formatting_functions" or $attrStr == "disabling_output_escaping") {
                             //return true;
-                            break;
-                        }   
+                            continue;
+                        } elseif ($attrStr == "streaming") {
+
+                            return false;
+                            //break;
+                        } else {
+                            return false;
+                        }
                     case "spec":
                         if ($child->getAttributeValue('value')== "XSLT30" or $child->getAttributeValue('value')== "XSLT20+" or $child->getAttributeValue('value')== "XSLT30+" or $child->getAttributeValue('value')== "XSLT10+") {
                            //true
-                            break;
+                            continue;
                         } else {
                             return false;
                         }
@@ -355,6 +367,7 @@ function test_case($test_set)
     global $run_test;
     global $run_test_case;
     global $total_tests;
+    global $notrun;
     $env = null;
     $xml = null;
     $test_path = pathinfo($test_set)['dirname'] . "/";
@@ -385,11 +398,12 @@ function test_case($test_set)
   <th>Test Case Name </th>
   <th style='width:80%'>Result </th>
 </tr>";
-        $t_dep = getNodeFromXPath($xml, "./dependencies");
+
+        $t_dep = getNodeFromXPath($xml, "./*:test-set/*:dependencies");
 
         $check = check_dependency($t_dep);
         $testCases = $xpathProcForEnv->evaluate("//test-case");
-        if ($check &&   $testCases != null) {
+        if ($check and   $testCases != null) {
 
             $countTC = $testCases->size();
             $total_tests += $countTC;
@@ -416,6 +430,9 @@ function test_case($test_set)
 
         } else {
             echo "<tr><td>No tests run</td><td></td></tr>";
+            if($testCases != null) {
+                $notrun = $notrun + $testCases->size();
+            }
         }
         echo "</table>";
 
@@ -490,10 +507,10 @@ function testAssertion($assert, $result, $errorCode) {
       // if($asserts->itemAt(0)->isNode())  {
           // $assert =  $asserts->itemAt($i)->getNodeValue();
            $xpathProcForAssertions->setBaseURI($assert->getBaseURI());
-           error_log("chck result=".$assert);
+           //error_log("chck result=".$assert);
 
        $assertName = $assert->getLocalName(); // substr($assert->getNodeName(), strpos($assert->getNodeName(), "}")+1);
-           error_log("localName=".$assertName.", assertxx=".$assert);
+           //error_log("localName=".$assertName.", assertxx=".$assert);
 
     if ($assertName == "error") {
         error_log("error check!!!! ");
@@ -530,7 +547,7 @@ function testAssertion($assert, $result, $errorCode) {
                 return false;
             }
             $comparand = $comparandNode.'';
-            error_log("comparand=".$comparandNode);
+            //error_log("comparand=".$comparandNode);
             if (strpos($comparand, "<?xml") === 0) {
                 $index = strpos($comparand, "?>");
                 error_log("Error=       ".$index);
@@ -538,82 +555,114 @@ function testAssertion($assert, $result, $errorCode) {
             }
             $comparand = trim($comparand);
 
-            $comparand =  str_replace(array(' ', "\n", "\t", "\r"), '', $comparand);
+            $comparand =  str_replace(array("\r\n"), '', $comparand);
+            $comparandi = str_replace(array(' ', "\n", "\t", "\r"), '', $comparand);
             $resultStr =  $result->itemAt(0)->getNodeValue();
-            $resultStr =  str_replace(array(' ', "\n", "\t", "\r"), '', $resultStr);
+            $resultStri =  str_replace(array(' ', "\n", "\t", "\r"), '', $resultStr);
+            
 
-            error_log("XXXXXX comparand=" . $comparand . ", result = " . $resultStr);
+            //error_log("XXXXXX comparand=" . $comparand . ", result = " . $resultStri);
 
-            if ($comparand == $resultStr) {
+            if ($comparandi == $resultStri) {
                 error_log("assert-xml-1: " . $comparand . "\n Outcome:" . $result);
                 return true;
-            } else {
-                $comparandNodei = $proc->$proc->parseXmlFromString($comparand);
-                $resultNodei = $proc->$proc->parseXmlFromString($resultStr);
-                error_log("assert-xml: " . $comparand . "\n Outcome:" . $result);
+            } else if($resultStr == "" or $resultStr == null or $comparand == null or $comparand == ""){
                 return false;
+            } else {
+                error_log("assert-xml with deep-equal cp0 ");
+                $comparandNodei = $proc->parseXmlFromString($comparand);
+                $resultNodei = $proc->parseXmlFromString($resultStr);
+
+                if($comparandNodei == null or $resultNodei == null) {
+                    return false;
+                }
+                error_log("assert-xml with deep-equal: " . $comparandNodei . "\n Outcome:" . $resultNodei);
+                return compareNodes($comparandNodei, $resultNodei);
             }
 
-        } elseif ($assertName == "assert")  {
+        } elseif ($assertName == "assert") {
+        $xpathProcForAssertions->clearParameters();
+        $xpathProcForAssertions->clearProperties();
+        if ($result != null && $result->size() == 1) {
+
+
+            $item = $result->itemAt(0);
+            //error_log("itemYYYYYY= ".$item->getNodeValue());
+
+            $xpathProcForAssertions2->setContextItem($item);
+
+            $namespaceValues = $xpathProcForAssertions2->evaluate("for \$i in 1 to count(//namespace::*) return if (empty(index-of((//namespace::*)[position() = (1 to (\$i - 1))][name() = name((//namespace::*)[\$i])], (//namespace::*)[\$i]))) then (//namespace::*)[\$i] else ()");
+
             $xpathProcForAssertions->clearParameters();
             $xpathProcForAssertions->clearProperties();
-            if($result != null && $result->size()==1) {
-                
 
-                $item = $result->itemAt(0);
-                //error_log("itemYYYYYY= ".$item->getNodeValue());
+            if ($namespaceValues != null && $namespaceValues->size() > 0) {
+                for ($j = 0; $j < $namespaceValues->size(); $j++) {
+                    $item = $namespaceValues->itemAt($j);
+                    if ($item->isNode()) {
+                        $nsNode = $item->getNodeValue();
+                        if ($nsNode != null) {
+                            $nsName = $nsNode->getNodeName();
+                            error_log("Namespace=" . $nsName . " = " . $nsNode->getStringValue());
 
-                $xpathProcForAssertions2->setContextItem($item);
-
-                $namespaceValues = $xpathProcForAssertions2->evaluate("for \$i in 1 to count(//namespace::*) return if (empty(index-of((//namespace::*)[position() = (1 to (\$i - 1))][name() = name((//namespace::*)[\$i])], (//namespace::*)[\$i]))) then (//namespace::*)[\$i] else ()");
-
-                $xpathProcForAssertions->clearParameters();
-                $xpathProcForAssertions->clearProperties();
-
-                if($namespaceValues!= null && $namespaceValues->size() > 0 ) {
-                    for($j=0; $j < $namespaceValues->size(); $j++) {
-                        $item = $namespaceValues->itemAt($j);
-                        if($item->isNode())  {
-                            $nsNode = $item->getNodeValue();
-                            if($nsNode != null) {
-                                $nsName = $nsNode->getNodeName();
-                                error_log("Namespace=" . $nsName . " = " . $nsNode->getStringValue());
-
-                                if ($nsName != null) {
-                                   // $xpathProcForAssertions->declareNamespace($nsName, $nsNode->getStringValue());
-                                }
+                            if ($nsName != null) {
+                                // $xpathProcForAssertions->declareNamespace($nsName, $nsNode->getStringValue());
+                            }
 
                         }
 
-                        }
                     }
-
-
-
                 }
 
-                $xpathProcForAssertions->setContextItem($result->itemAt(0));
-                $xpath = $assert->getChildNode(0)->getStringValue();
-
-                error_log("xpath=".$xpath. ", XXXXXX result=" . $result->itemAt(0));
-                $check = $xpathProcForAssertions->effectiveBooleanValue($xpath);
-                $testResult = $xpathProcForAssertions->evaluateSingle("/out");
-
-                error_log(", XXXXXX testResult=" . $testResult);
-                
-                if($check == false) {
-                    return "assert: " . $xpath . "\n OutcomeXXY:" . $result->itemAt(0);
-                }
-                return true;
-
-
-            }  else {
-                error_log("FAIL - assertion with multiple results not handled yet");
-                return false;
 
             }
 
-        } elseif ($assertName == "all-of") {
+            $xpathProcForAssertions->setContextItem($result->itemAt(0));
+            $xpath = $assert->getChildNode(0)->getStringValue();
+
+            //error_log("xpath=".$xpath. ", XXXXXX result=" . $result->itemAt(0));
+            $check = $xpathProcForAssertions->effectiveBooleanValue($xpath);
+            $testResult = $xpathProcForAssertions->evaluateSingle("/out");
+
+            // error_log(", XXXXXX testResult=" . $testResult);
+
+            if ($check == false) {
+                return "assert: " . $xpath . "\n OutcomeXXY:" . $result->itemAt(0);
+            }
+            return true;
+
+
+        } else {
+            error_log("FAIL - assertion with multiple results not handled yet");
+            return false;
+
+        }
+
+
+    } elseif ($assertName == "assert-true") {
+         //if (isException()) {
+        //            return false;
+        //        } else {
+        //            return result.value.size() == 1 &&
+        //                    result.value.itemAt(0).isAtomicValue() &&
+        //                    ((XdmAtomicValue) result.value.itemAt(0)).getPrimitiveTypeName().equals(QName.XS_BOOLEAN) &&
+        //                    ((XdmAtomicValue) result.value.itemAt(0)).getBooleanValue();
+        //        }
+        if ($result->size() == 1 and $result->itemAt(0)->isAtomic()) {
+            error_log("assert-true = ".  $result->itemAt(0)->getAtomicValue->getPrimitiveTypeName());
+        }
+        return ($result->size() == 1 and $result->itemAt(0)->isAtomic() and $result->itemAt(0)->getAtomicValue->getPrimitiveTypeName() == "XS_BOOLEAN" and $result->itemAt(0)->getAtomicValue->getBooleanValue());
+
+
+    }  elseif ($assertName == "assert-false") {
+        if ($result->size() == 1 and $result->itemAt(0)->isAtomic()) {
+            error_log("assert-false = ".  $result->itemAt(0)->getAtomicValue->getPrimitiveTypeName());
+        }
+        return ($result->size() == 1 and $result->itemAt(0)->isAtomic() and $result->itemAt(0)->getAtomicValue->getPrimitiveTypeName() == "XS_BOOLEAN" and !$result->itemAt(0)->getAtomicValue->getBooleanValue());
+
+
+
+    } elseif ($assertName == "all-of") {
             $jasserts = getNodeFromXPath($assert, "*");
             //$jNode = $jasserts->itemAt(0)->getNodeValue();
             $jSize = $jasserts->size();
@@ -633,9 +682,41 @@ function testAssertion($assert, $result, $errorCode) {
     //    }
        
   // }
-   error_log("testAssertion is false");
+   error_log("testAssertion is false - not found assertion");
    return false;
     
+}
+
+function compareNodes($node1, $node2) {
+    global $proc;
+    global $xpathProcForCompareNodes;
+
+    if($node1 == null or $node2 != null){
+        return false;
+    }
+     if($node1->getChildCount() != $node1->getChildCount() and $node1->getNodeKind() != $node2->getNodeKind() and $node1->getAttributeCount() != $node2->getAttributeCount()) {
+         return false;
+     } else {
+
+         if ($xpathProcForCompareNodes == NULL) {
+             error_log("compareNodes Error: XPAth proc is null");
+             return false;
+         }
+         $xpathProcForCompareNodes->clearParameters();
+         $xpathProcForCompareNodes->clearProperties();
+
+         $xpathProcForCompareNodes->setParameter("node1", $node1);
+         $xpathProcForCompareNodes->setParameter("node2", $node2);
+         $result = $xpathProcForCompareNodes->effectiveBooleanValue('fn:deep-equal($node1, $node2)');
+         $xpathProcForCompareNodes->clearParameters();
+         $xpathProcForCompareNodes->clearProperties();
+         return $result;
+
+     }
+
+
+
+
 }
 
 
@@ -678,8 +759,9 @@ function run_test_case($testcase, $env, $path)
         if ($testElem != null) {
 
             $test = null;
-            error_log("envvvalue:". print_r($env[$t_env_ref . ""], TRUE));
+
             if($t_env_ref!= NULL && array_key_exists($t_env_ref , $env)) {
+                error_log("envvvalue:". print_r($env[$t_env_ref . ""], TRUE));
                 if(array_key_exists("stylesheet", $env[$t_env_ref . ""])) {
                     error_log("Entered stylesheet!");
                     $test =  $path. $env[$t_env_ref . ""]["stylesheet"];
@@ -758,7 +840,7 @@ function run_test_case($testcase, $env, $path)
                                          $validation = $env[$t_env_ref . ""]["sources"]["validation"];
                                          if($schemaValidator != null && $validation != "skip") {
                                              error_log("using schemaValidator in parseXml!!");
-                                             $schemaValidator->
+                                             //$schemaValidator->
                                              $cNode = $proc->parseXmlFromFile($input, $schemaValidator);
 
                                          }
@@ -773,7 +855,7 @@ function run_test_case($testcase, $env, $path)
 
                                 } elseif (array_key_exists(".content", $env[$t_env_ref . ""]["sources"])) {
                                     $input = $env[$t_env_ref . ""]["sources"][".content"];
-                                    error_log(".content = ".$input);
+                                    //error_log(".content = ".$input);
                                     $cNode = null;
                                     if(array_key_exists("validation", $env[$t_env_ref . ""]["sources"])) {
                                          $validation = $env[$t_env_ref . ""]["sources"]["validation"];
@@ -845,16 +927,16 @@ function run_test_case($testcase, $env, $path)
                                     if ($init_template != null ) {
 
                                         if($t_env_ref != null) {
-                                            $input = $path. $env[$t_env_ref . ""]["sources"][".file"];
-                                            error_log("file:". $input);
-                                            if($input != null) {
-                                                error_log("input file: ".$input);
-                                                $executable->setGlobalContextFromFile($input);
+                                            if(array_key_exists("sources", $env[$t_env_ref . ""])) {
+                                                if(array_key_exists(".file", $env[$t_env_ref . ""]["sources"])) {
+                                                    $input = $path . $env[$t_env_ref . ""]["sources"][".file"];    //TODO this needs a array access check
+                                                    error_log("file:" . $input);
+                                                    if ($input != null) {
+                                                        error_log("input file: " . $input);
+                                                        $executable->setGlobalContextFromFile($input);
+                                                    }
+                                                }
                                             }
-                                            
-
-
-
                                         }
                                         $init_node = $init_template->getNodeValue();
 
@@ -934,7 +1016,7 @@ function run_test_case($testcase, $env, $path)
                                 if (!$outcome) {
                                     error_log("Assert:" . $outcome);
                                     error_log("Assert:" . ($asserts));
-                                    error_log( "OutCome:" . ($result));
+                                    //error_log( "OutCome:" . ($result));
 
                                     $fail++;
                                     return "FAIL";
@@ -1056,16 +1138,19 @@ echo "<table border='1'>
   <th>File Name </th>
   <th> #Test cases </th>
 </tr>";
-
+$numberOfTests = 0;
 foreach ($testFiles as $key => $test_set) {
     $testSet_xml = simplexml_load_file($path . $test_set);
     echo "<tr>";
     echo "<td><a href='#" . $key . "'>" . $key . "</a></td>";
     echo "<td>" . $test_set . "</td>";
+    $numberOfTests += count($testSet_xml->{'test-case'});
     echo "<td>" . count($testSet_xml->{'test-case'}) . "</td>";
     echo "</tr>";
 }
 echo "</table>";
+
+echo "<br/><br/><b>Number of tests: ".$numberOfTests."</b><br/>";
 
 foreach ($testFiles as $key => $test_set) {
     echo "<div style='width:70%'><h4><a name='" . $key . "'>" . $key . "</a></h4></div><div style='width:30%;float:right'><a href='#top'>Back to top</a></div>";

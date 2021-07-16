@@ -418,6 +418,7 @@ if (!mID) {
 	std::cerr << "Error: MyClassInDll." << "effectiveBooleanValue" << " not found\n"<< std::endl;
 
 } else {
+std::cerr<<"xpathStr: = "<<xpathStr<<std::endl;
 	setProperty("resources", proc->getResourcesDirectory());
 	jobjectArray stringArray = nullptr;
 	jobjectArray objectArray = nullptr;

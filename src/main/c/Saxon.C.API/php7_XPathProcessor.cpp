@@ -154,7 +154,7 @@ PHP_METHOD(XPathProcessor, declareNamespace)
     	if (xpathProcessor != nullptr) {
     	std::cerr<<"PHPXPATHPROCXX len1="<< len1<< ", len2="<<len2 <<std::endl;
              std::cerr<<"PHPXPATHPROC prefix="<<(len1 == 0 ? "" : prefixi)<< ", ns="<<(len2 == 0 ? "" : ns)<<std::endl;
-    	    xpathProcessor->declareNamespace((len1 == 0 ? "" : nullptr), (len2 == 0 ? "" : ns));
+    	    xpathProcessor->declareNamespace((len1 == 0 ? nullptr : prefixi), (len2 == 0 ? "" : ns));
     	}
     }
 
@@ -313,7 +313,6 @@ PHP_METHOD(XPathProcessor, evaluateSingle)
         	    zend_object* vvobj = Z_OBJ_P(return_value);
        			xdmItem_object * vobj = (xdmItem_object *)((char *)vvobj - XtOffsetOf(xdmItem_object, std));
                	assert (vobj != nullptr);
-                std::cerr<<"cp0-1 content:"<< node->getStringValue()<<std::endl;
                 if(vobj == NULL) {
                     std::cerr<<"vobj is null"<<std::endl;
                 }
