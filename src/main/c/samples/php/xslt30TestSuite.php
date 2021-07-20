@@ -473,9 +473,68 @@ function getSingleNodeFromXPath($node, $xpath) {
 
 }
 
+$C0WHITE = array(
+            false, false, false, false, false, false, false, false,  // 0-7
+            false, true, true, false, false, true, false, false,     // 8-15
+            false, false, false, false, false, false, false, false,  // 16-23
+            false, false, false, false, false, false, false, false,  // 24-31
+            true);                                                    // 32;
+
+function containsWhitespace(string $value) {
+        for ($i = strlen($value) - 1; $i >= 0; ) {
+            $c = value[$i--];
+            if ($c <= 32 && C0WHITE[$c]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+function collapseWhitespace(string $in) {
+    if (!containsWhitespace($in)) {
+        return $in;
+    }
+        $len = strlen($in);
+        $sb = "";
+        $inWhitespace = true;
+        $i = 0;
+        for (; $i < $len; $i++) {
+            $c = $in[$i];
+            switch ($c) {
+                case '\n':
+                case '\r':
+                case '\t':
+                case ' ':
+                    if ($inWhitespace) {
+                        // remove the whitespace
+                    } else {
+                        $sb .= ' ';
+                        $inWhitespace = true;
+                    }
+                    break;
+                default:
+                    $sb .= c;
+                    $inWhitespace = false;
+                    break;
+            }
+        }
+        $nlen = strlen($sb);
+        if ($nlen > 0 && $sb[$nlen - 1] == ' ') {
+            $sb = substr($sb, 0, $nlen - 1);
+        }
+        return $sb;
+    }
+
+    function startsWith($haystack, $needle) {
+        return substr_compare($haystack, $needle, 0, strlen($needle)) === 0;
+    }
+    function endsWith($haystack, $needle) {
+        return substr_compare($haystack, $needle, -strlen($needle)) === 0;
+    }
 
 
-function testAssertion($assert, $result, $errorCode) {
+
+    function testAssertion($assert, $result, $errorCode) {
     //global $xpathProcForAssertions;
 
     global $proc;
@@ -662,13 +721,119 @@ function testAssertion($assert, $result, $errorCode) {
 
 
 
-    } elseif ($assertName == "all-of") {
+    } elseif ($assertName == "assert-string-value") {
+         $resultString = "";
+         $assertionString = $assert->getStringValue();
+         if(is_a($result, "Saxon\XdmItem")) {
+             $resultString = $result->getStringValue();
+         } elseif($result->size() == 1) {
+             $resultString = $result->itemAt(0)->getStringValue();
+         }else{
+             $iSize = $result->size();
+             for($i = 0; $i < $iSize; $i++) {
+                 $resultString .= $result->itemAt(0)->getStringValue();
+             }
+         }
+        $normalizeAtt = true;
+         $normalizeAttStr = $assert->getAttributeValue("normalize-space");
+         if($normalizeAttStr != null) {
+             if($normalizeAttStr == "true" or $normalizeAttStr == "1") {
+                 $assertionString = collapseWhitespace($assertionString);
+                 $resultString = collapseWhitespace($resultString);
+             }
+         }
+        if ($resultString == $assertionString) {
+            return true;
+        } else {
+            return false;
+        }
+
+    } elseif ($assertName == "assert-serialization") {
+        $method = $assert->getAttributeValue("method");
+        if ($method == null) {
+            $method = "xml";
+        }
+        $resultString = "";
+        if(is_a($result, "Saxon\XdmItem")) {
+            $resultString = $result->getStringValue();
+        } elseif($result->size() == 1) {
+            $resultString = $result->itemAt(0)->getStringValue();
+        }else{
+            $iSize = $result->size();
+            for($i = 0; $i < $iSize; $i++) {
+                $resultString .= $result->itemAt(0)->getStringValue();
+            }
+        }
+        $xpathProcForAssertions->clearParameters();
+        $xpathProcForAssertions->clearProperties();
+        $xpathProcForAssertions2->setContextItem($assert);
+
+        $comparand = $xpathProcForAssertions2->evaluate("if (@file) then " .
+                                                "if (@encoding) " .
+                                                "then unparsed-text(resolve-uri(@file, base-uri(.)), @encoding) " .
+                                                "else unparsed-text(resolve-uri(@file, base-uri(.))) " .
+                                                "else string(.)");
+        $comparand =  str_replace(array("\r\n"), "\n", $comparand);
+        if (endsWith($comparand, "\n")) {
+            $comparand = substr($comparand, 0, strlen($comparand) - 1);
+        }
+
+        /*if ($resultString == null) {
+            if (is_a($result, "Saxon\XdmItem")) {
+                $resultString = ((XdmItem) result . value).getStringValue();
+            }
+        }                     */
+
+        $xpathProcForAssertions->clearParameters();
+        $xpathProcForAssertions->clearProperties();
+
+
+        $isHtml = $method == "html" or $method == "xhtml";
+        $normalize = $isHtml;
+        if (!$normalize) {
+            $normalizeAtt = $assert->getAttributeValue("normalize-space");
+            $normalize = $normalizeAtt != null and (trim($normalizeAtt) == "true" or trim($normalizeAtt) == "1");
+        }
+        if ($normalize) {
+            $comparand = collapseWhitespace($comparand);
+            $resultString = collapseWhitespace($resultString);
+        } else if (endsWith($resultString, "\n")) {
+            $resultString = substr($resultString, 0, strlen($resultString) - 1);
+        }
+        if ($isHtml) {
+            // should really do this only for block-level elements
+            $comparand = str_replace(" <", "<", $comparand);
+            $comparand = str_replace("> ", ">", $comparand);
+            $resultString = str_replace(" <", "<", $resultString);
+            $resultString = str_replace("> ", ">", $resultString);
+        }
+        if ($resultString  == $comparand) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }elseif ($assertName == "all-of") {
+        $jasserts = getNodeFromXPath($assert, "*");
+        //$jNode = $jasserts->itemAt(0)->getNodeValue();
+        $jSize = $jasserts->size();
+        for ($j = 0; $j < $jSize; $j++) {
+            if (!testAssertion($jasserts->itemAt($j)->getNodeValue(), $result, $errorCode)) {
+                return false;
+
+            }
+
+        }
+
+        return true;
+
+    }elseif ($assertName == "any-of") {
             $jasserts = getNodeFromXPath($assert, "*");
             //$jNode = $jasserts->itemAt(0)->getNodeValue();
             $jSize = $jasserts->size();
-            for ($j = 0 ; $j < $jSize; $j++) {
-                if(!testAssertion($jasserts->itemAt($j)->getNodeValue(), $result, $errorCode)) {
-                    false;
+            for ($j = 0; $j < $jSize; $j++) {
+                if (testAssertion($jasserts->itemAt($j)->getNodeValue(), $result, $errorCode)) {
+                    return true;
 
                 }
 
@@ -885,6 +1050,7 @@ function run_test_case($testcase, $env, $path)
                         } elseif ($env_embedded_file != NULL) {
 
                               $executable->setGlobalContextFromFile($env_embedded_file);
+                              $executable->setInitialMatchSelectionAsFile($env_embedded_file);
                         }
 
 
