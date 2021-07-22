@@ -14,6 +14,7 @@ import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.xpath.XPathFactoryImpl;
@@ -431,6 +432,37 @@ public class ExtensionTest {
             assertEquals("magic", ((XdmAtomicValue) result).getStringValue());
         } catch (SaxonApiException e) {
             e.printStackTrace();
+            fail();
+        }
+    }
+
+
+    @Test
+    public void testInstanceMethodStaticallyNull() {  // Bug 5044
+        // See the bug entry, we're letting this fail in 10.x
+        try {
+            Processor proc = new Processor(true);
+            proc.getUnderlyingConfiguration().registerExternalObjectModel(new JDOM2ObjectModel());
+            XQueryEvaluator eval = proc.newXQueryCompiler().compile(
+                    "Q{java:java.lang.Object}hash-code(())").load();
+            XdmValue result = eval.evaluate();
+        } catch (SaxonApiException e) {
+            assertEquals("SXJE0001", e.getErrorCode().getLocalName());
+        }
+    }
+
+    @Test
+    public void testInstanceMethodDynamicallyNull() {  // Bug 5044
+        try {
+            Processor proc = new Processor(true);
+            proc.getUnderlyingConfiguration().registerExternalObjectModel(new JDOM2ObjectModel());
+            XQueryEvaluator eval = proc.newXQueryCompiler().compile(
+                    "Q{java:java.lang.Object}hash-code(current-date()[year-from-date(.) lt 2000])").load();
+            XdmValue result = eval.evaluate();
+            assertEquals(1, result.size());
+            assertTrue(result.itemAt(0).isAtomicValue());
+            assertTrue(result.itemAt(0).getUnderlyingValue() instanceof Int64Value);
+        } catch (SaxonApiException e) {
             fail();
         }
     }
