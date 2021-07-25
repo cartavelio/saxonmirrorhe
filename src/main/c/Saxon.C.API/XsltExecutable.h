@@ -136,6 +136,14 @@ public:
     void setParameter(const char* name, XdmValue * value);
 
 
+    /**
+    *   Return the result-documents resulting from the execution of the stylesheet.
+    *   Null is returned if the user has not enabled this feature via the method setupResultDocumentHandler
+    *   @return map of result-document as a document uri, XdmNode value pair.
+    */
+    std::map<std::string,XdmNode*>& getResultDocuments();
+
+
 
     /**
      * Get a parameter value by name
@@ -256,6 +264,14 @@ public:
      *                    filename with location cwd+filename
      */
     void setupXslMessage(bool show, const char* filename=nullptr);
+
+   /*
+     * When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
+     * via a simple std Map objects of the documents in a URI, XdmNode object pair.
+     * @param create - True - Enable the handling and capturing of result-documents. False - deletes any existing result-document handler
+       and switches back to the default behaviour
+    */
+    void setupResultDocumentHandler(bool create);
 
 
 
@@ -470,8 +486,8 @@ private:
 
 
     jclass  cppClass;
-    jclass messageListenerClass;
-	jobject executableObject, selection, saxonMessageListenerObj;
+    jclass messageListenerClass, resultDocumentClass;
+	jobject executableObject, selection, saxonMessageListenerObj, saxonResultDocObj;
 	XdmValue * selectionV;
     std::string cwdXE; /*!< current working directory */
     std::string resources_dir; /*!< current Saxon resources directory */

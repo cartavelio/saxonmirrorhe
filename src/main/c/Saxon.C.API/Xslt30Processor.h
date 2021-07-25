@@ -154,15 +154,6 @@ public:
 	delete [] arr;
     }
 
-    /**
-     * This method gives users the option to switch on or off the <code>xsl:message</code> feature. It is also possible
-     * to send the <code>xsl:message</code> outputs to file given by file name.
-     * @param show - boolean to indicate if xsl:message should be outputted. Default is on.
-     * @param  filename - If the filename argument is present then the xsl:message output is appended to the given
-     *                    filename with location cwd+filename
-     */
-    void setupXslMessage(bool show, const char* filename=nullptr);
-
 
 
       //!Perform a one shot transformation.
@@ -318,7 +309,7 @@ private:
 	jclass  cppClass;
 	jobject cppXT;
     std::string cwdXT; /*!< current working directory */
-	bool tunnel, jitCompilation;
+	bool jitCompilation;
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
     SaxonApiException * exception;
 

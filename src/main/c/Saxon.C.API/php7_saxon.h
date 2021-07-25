@@ -175,9 +175,9 @@ PHP_RINIT_FUNCTION(saxon);
 
     PHP_METHOD(SaxonProcessor,  createAtomicValue);
 
-    PHP_METHOD(SaxonProcessor,  createXdmMapValue);
-    PHP_METHOD(SaxonProcessor,  createXdmArrayValue);
-    PHP_METHOD(SaxonProcessor,  createQNameValue);
+    PHP_METHOD(SaxonProcessor,  createXdmMapValue);  //TODO implement
+    PHP_METHOD(SaxonProcessor,  createXdmArrayValue); //TODO implement
+    PHP_METHOD(SaxonProcessor,  createQNameValue);    //TODO implement
 
     PHP_METHOD(SaxonProcessor,  parseXmlFromString);
     PHP_METHOD(SaxonProcessor,  parseXmlFromFile);
@@ -251,8 +251,6 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(Xslt30Processor,  exceptionClear);
     PHP_METHOD(Xslt30Processor,  exceptionOccurred);
     PHP_METHOD(Xslt30Processor,  getErrorCode);
-    PHP_METHOD(Xslt30Processor,  getErrorMessage);
-    PHP_METHOD(Xslt30Processor,  setupXslMessage);
     PHP_METHOD(Xslt30Processor,  setcwd);
 
 
@@ -300,6 +298,8 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltExecutable,  getErrorCode);
     PHP_METHOD(XsltExecutable,  getErrorMessage);
     PHP_METHOD(XsltExecutable,  setupXslMessage);
+    PHP_METHOD(XsltExecutable,  setupResultDocumentHandler);
+    PHP_METHOD(XsltExecutable,  getResultDocuments);
     PHP_METHOD(XsltExecutable,  getXslMessages);
 
 

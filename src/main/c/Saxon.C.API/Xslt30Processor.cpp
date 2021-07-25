@@ -28,10 +28,8 @@ Xslt30Processor::Xslt30Processor() {
 Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 
 	proc = p;
-    tunnel = false;
     jitCompilation = false;
     exception = nullptr;
-
 	/*
 	 * Look for class.
 	 */
@@ -79,8 +77,6 @@ Xslt30Processor::Xslt30Processor(const Xslt30Processor &other) {
 	cppClass = other.cppClass;
 	cppXT = other.cppXT;
     cwdXT = other.cwdXT;
-	tunnel = other.tunnel;
-
 	std::map<std::string, XdmValue*>::const_iterator paramIter = other.parameters.begin();
     while(paramIter != other.parameters.end())
     {
@@ -314,7 +310,7 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 	}
 					
 	if (cStringmID== nullptr) {
-        createException(strcat(getDllname(), ".compileFromString funtion not found"));
+        createException(strcat(getDllname(), ".compileFromString function not found"));
 		return nullptr;
 
 	} else {
@@ -494,8 +490,6 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
 	}
 
 }
-
-
 
 
 XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,

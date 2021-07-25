@@ -452,7 +452,7 @@ jobjectArray SaxonProcessor::createJArray(XdmValue **values, int length) {
 
 
 JParameters SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> parameters,
-                                                  std::map<std::string, std::string> properties) {
+                                                  std::map<std::string, std::string> properties, int additions) {
     JParameters comboArrays;
     comboArrays.stringArray = nullptr;
     comboArrays.objectArray = nullptr;
@@ -461,7 +461,7 @@ JParameters SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue
     jclass stringClass = lookForClass(SaxonProcessor::sxn_environ->env,
                                       "java/lang/String");
 
-    int size = parameters.size() + properties.size();
+    int size = parameters.size() + properties.size() + additions;
 #ifdef DEBUG
     std::cerr<<"Properties size: "<<properties.size()<<std::endl;
     std::cerr<<"Parameter size: "<<parameters.size()<<std::endl;

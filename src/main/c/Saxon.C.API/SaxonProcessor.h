@@ -566,7 +566,7 @@ private:
 
     // Saxon/C method for internal use
     static JParameters
-    createParameterJArray(std::map<std::string, XdmValue *> parameters, std::map<std::string, std::string> properties);
+    createParameterJArray(std::map<std::string, XdmValue *> parameters, std::map<std::string, std::string> properties, int additions = 0);
 
     static JParameters createParameterJArray2(std::map<std::string, XdmValue *> parameters);
 

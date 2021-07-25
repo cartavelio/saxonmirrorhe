@@ -537,27 +537,6 @@ PHP_METHOD(Xslt30Processor, exceptionClear)
 }
 
 
-PHP_METHOD(Xslt30Processor, setupXslMessage)
-{
-    Xslt30Processor * xslt30Processor;
-    bool show = false;
-    char * filename = nullptr;
-    size_t len1;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() , "bs", &show, &filename, &len1) == FAILURE) {
-        RETURN_NULL();
-    }
-
-    zend_object* pobj = Z_OBJ_P(getThis());
-    xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
-    xslt30Processor = obj->xslt30Processor;
-
-    if (xslt30Processor != nullptr) {
-
-            xslt30Processor->setupXslMessage(show, filename);
-        }
-
-}
-
 zend_function_entry Xslt30Processor_methods[] = {
         PHP_ME(Xslt30Processor,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
         PHP_ME(Xslt30Processor,  transformFileToFile, nullptr, ZEND_ACC_PUBLIC)
@@ -572,7 +551,6 @@ zend_function_entry Xslt30Processor_methods[] = {
         PHP_ME(Xslt30Processor,  setJustInTimeCompilation, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  setParameter, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  clearParameters, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor,  setupXslMessage, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  exceptionOccurred, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  exceptionClear, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(Xslt30Processor,  getErrorCode, nullptr, ZEND_ACC_PUBLIC)

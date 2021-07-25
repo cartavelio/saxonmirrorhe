@@ -51,8 +51,9 @@ $pass = 0;
 $fail = 0;
 $error =0;
 $notrun = 0;
-$run_test = null;
-$run_test_case = null;//"copy-of-010";
+$run_test = "result-document";
+$run_test_case = "result-document-0206";
+$run_assertion = null; //"serialization-matches";
 $total_tests = 0;
 
 
@@ -113,6 +114,10 @@ function check_dependency($xml)
 
         $count = $xmlNode->getChildCount();
         error_log("dependency_child=".$count);
+
+
+        //$inverse = "false".equals(dependency.attribute("satisfied"));
+        //$needed = !"false".equals(dependency.attribute("satisfied"));
 
         for ($i = 0; $i < $count; $i++) {
             $child = $xmlNode->getChildNode($i);
@@ -457,6 +462,44 @@ function getNodeFromXPath($node, $xpath) {
 }
 
 
+
+ function setFlags($inFlags){
+        $flags = 0x01;
+        for ($i = 0; $i < strlen($inFlags); $i++) {
+            $c = $inFlags[$i];
+            switch ($c) {
+                case 'd':
+                    $flags |= 0x01;
+                    break;
+                case 'm':
+                    $flags |= 0x08;
+                    break;
+                case 'i':
+                    $flags |= 0x02;
+                    break;
+                case 's':
+                    $flags |= 0x20;
+                    break;
+                case 'x':
+                    $flags |= 0x04;  // note, this enables comments as well as whitespace
+                    break;
+                case 'u':
+                    $flags |= 0x40;
+                    break;
+                case 'q':
+                    $flags |= 0x10;
+                    break;
+                case 'c':
+                    $flags |= 0x80;
+                    break;
+                default:
+                    throw new Exception("Invalid character '" + c + "' in regular expression flags");
+            }
+        }
+        return $flags;
+    }
+
+
 function getSingleNodeFromXPath($node, $xpath) {
     global $xpathProcForEnv;
     if($xpathProcForEnv == NULL) {
@@ -534,10 +577,11 @@ function collapseWhitespace(string $in) {
 
 
 
-    function testAssertion($assert, $result, $errorCode) {
+    function testAssertion($baseUri, $assert, $result, $errorCode) {
     //global $xpathProcForAssertions;
 
     global $proc;
+    global $xpathProcForCompareNodes;
 
     $xpathProcForAssertions = $proc->newXPathProcessor();
     if($xpathProcForAssertions == NULL) {
@@ -748,7 +792,95 @@ function collapseWhitespace(string $in) {
             return false;
         }
 
-    } elseif ($assertName == "assert-serialization") {
+    } elseif ($assertName == "assert-result-document") {
+  
+        //                 XdmNode subAssertion = (XdmNode) catalogXpc.evaluateSingle("*", assertion);
+        
+        $xpathProcForAssertions->clearParameters();
+        $xpathProcForAssertions->clearProperties();
+        $xpathProcForAssertions->setContextItem($assert);
+        $subAssertion = $xpathProcForAssertions->evaluateSingle("*");
+
+        $uri =  $baseUri.$assert->getAttributeValue("uri");
+        if(!file_exists($uri)) {
+            error_log("**** Invalid output uri ". $uri );
+            return false;
+        }
+        $resultDoc = $proc->parseXmlFromFile($uri);
+        $ok = testAssertion($baseUri, $subAssertion, $resultDoc, $errorCode);
+
+        if(!$ok) {
+          error_log("**** Assertion failed for result-document " . $uri);
+        }
+        unlink($uri);
+        return ok;
+        
+                return ok;
+        
+        
+    }elseif ($assertName == "serialization-matches") {
+
+        //                   String flagsAtt = assertion.attribute("flags");
+        $flagsAtt = $assert->getAttributeValue("flag");
+        if ($flagsAtt == null) {
+            $flagsAtt = "";
+        }
+        //
+        $regex = $assert->getStringValue();
+
+        $resultString = "";
+
+        if(is_a($result, "Saxon\XdmItem")) {
+            $resultString = $result->getStringValue();
+        } elseif($result->size() == 1) {
+            $resultString = $result->itemAt(0)->getStringValue();
+        }else{
+            $iSize = $result->size();
+            for($i = 0; $i < $iSize; $i++) {
+                $resultString .= $result->itemAt(0)->getStringValue();
+            }
+        }
+
+        $assertionRegex = $assert->getStringValue();
+        $flagsAtt = str_replace("!", "", $flagsAtt);
+        $matches = null;
+
+        $xpathProcForCompareNodes->clearParameters();
+        $xpathProcForCompareNodes->clearProperties();
+
+        $ok1 = $xpathProcForCompareNodes->effectiveBooleanValue("fn:matches('".$resultString."', '".$assertionRegex."','".$flagsAtt."')");
+
+
+        //$ok1 = preg_match($assertionRegex,$resultString, $matches, setFlags($flagsAtt));
+        if($ok1) {
+            return true;
+        } else {
+            error_log("serialization-matches error in preg_match");
+
+            return false;
+        }
+
+        //                   List<String> warnings = new ArrayList<>(1);
+        //                   try {
+        //                       String principalSerializedResult = result.serialization;
+        //                       if (principalSerializedResult == null) {
+        //                           driver.println("No serialized result available!");
+        //                           return false;
+        //                       }
+        //                       RegularExpression re = xpath.getProcessor().getUnderlyingConfiguration().compileRegularExpression(
+        //                               regex, flagsAtt, "XP30", warnings);
+        //                       if (re.containsMatch(principalSerializedResult)) {
+        //                           return true;
+        //                       } else {
+        //                           driver.println("Serialized result:");
+        //                           driver.println(principalSerializedResult);
+        //                           return false;
+        //                       }
+
+
+    }elseif ($assertName == "assert-serialization") {
+
+        
         $method = $assert->getAttributeValue("method");
         if ($method == null) {
             $method = "xml";
@@ -764,8 +896,8 @@ function collapseWhitespace(string $in) {
                 $resultString .= $result->itemAt(0)->getStringValue();
             }
         }
-        $xpathProcForAssertions->clearParameters();
-        $xpathProcForAssertions->clearProperties();
+        $xpathProcForAssertions2->clearParameters();
+        $xpathProcForAssertions2->clearProperties();
         $xpathProcForAssertions2->setContextItem($assert);
 
         $comparand = $xpathProcForAssertions2->evaluate("if (@file) then " .
@@ -818,7 +950,7 @@ function collapseWhitespace(string $in) {
         //$jNode = $jasserts->itemAt(0)->getNodeValue();
         $jSize = $jasserts->size();
         for ($j = 0; $j < $jSize; $j++) {
-            if (!testAssertion($jasserts->itemAt($j)->getNodeValue(), $result, $errorCode)) {
+            if (!testAssertion($baseUri, $jasserts->itemAt($j)->getNodeValue(), $result, $errorCode)) {
                 return false;
 
             }
@@ -832,7 +964,7 @@ function collapseWhitespace(string $in) {
             //$jNode = $jasserts->itemAt(0)->getNodeValue();
             $jSize = $jasserts->size();
             for ($j = 0; $j < $jSize; $j++) {
-                if (testAssertion($jasserts->itemAt($j)->getNodeValue(), $result, $errorCode)) {
+                if (testAssertion($baseUri, $jasserts->itemAt($j)->getNodeValue(), $result, $errorCode)) {
                     return true;
 
                 }
@@ -894,6 +1026,7 @@ function run_test_case($testcase, $env, $path)
     global $pass;
     global $fail;
     global $notrun;
+    global $run_assertion;
     $errorCode  = null;
     $foundStylesheet = false;
     $xsltproc->clearParameters();
@@ -1175,8 +1308,12 @@ function run_test_case($testcase, $env, $path)
 
                                     return "FAIL ASSERT";
                                 }
+                                if($run_assertion != null and $asserts->itemAt(0)->getNodeValue()->getLocalName() != $run_assertion) {
+                                    $notrun++;
+                                    return "Not Run";
 
-                                $outcome = testAssertion($asserts->itemAt(0)->getNodeValue(), $result, $errorCode);
+                                }
+                                $outcome = testAssertion($path, $asserts->itemAt(0)->getNodeValue(), $result, $errorCode);
 
 
                                 if (!$outcome) {
@@ -1264,7 +1401,12 @@ function run_test_case($testcase, $env, $path)
 
                     } catch (Exception $ex) {
                         $asserts = getNodeFromXPath($testcase, "./result/child::*");
-                        $outcome = testAssertion($asserts->itemAt(0)->getNodeValue(), $result, $errorCode);
+                        if($run_assertion != null and $asserts->itemAt(0)->getNodeValue()->getLocalName() != $run_assertion) {
+                            $notrun++;
+                            return "Not Run";
+
+                        }
+                        $outcome = testAssertion($path, $asserts->itemAt(0)->getNodeValue(), $result, $errorCode);
                         if (!$outcome) {
                             $fail++;
                             return "Fail - error: " . $ex->getMessage();
