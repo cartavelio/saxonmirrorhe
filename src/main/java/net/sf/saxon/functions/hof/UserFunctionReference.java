@@ -106,8 +106,9 @@ public class UserFunctionReference extends Expression
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         // if this is an inline function, optimize that function now
-        if (nominalTarget.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS) && optimizeCounter++ < 10) {
-            // Prevent recursive optimization: test case -s:misc-HigherOrderFunctions -t:xqhof2
+        if (nominalTarget.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS) && optimizeCounter == 0) {
+            optimizeCounter++;
+            // Prevent recursive optimization: test case -s:misc-HigherOrderFunctions -t:xqhof2 ; see also bug #5054
             Expression o;
             o = nominalTarget.getBody().optimize(visitor, ContextItemStaticInfo.ABSENT);
             nominalTarget.setBody(o);
@@ -117,6 +118,7 @@ public class UserFunctionReference extends Expression
             }
             ExpressionTool.allocateSlots(o, getArity(), slotManager);
             nominalTarget.setStackFrameMap(slotManager);
+            optimizeCounter--;
         }
         return this;
     }
