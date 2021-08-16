@@ -1,8 +1,7 @@
-package s9apitest;
+package commands;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.SAXException;
@@ -20,22 +19,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-/**
- * Tests for the s9api schema validation interface
- */
-public class TestBug4982 {
-
-
-    /**
-     * A demo program for TESB-4972. In the end the Saxonica's implementation didn't have a bug, but
-     * Apache's implementation is more robust. Saxonica's schema load seems to be over five times slower
-     * than Apache's. Consider adding rather quickly evicting cache to zip content fetch.
-     *
-     * @author ext-jarttpet
-     */
-
-
-    //private static final Logger LOG = LoggerFactory.getLogger(SchemaValidatorImpl.class);
+public class Saxon4982 {
 
     private static byte[] schemasInZip;
 
@@ -50,19 +34,24 @@ public class TestBug4982 {
     }
 
     public static void main(String args[]) {
-        TestBug4982 application = new TestBug4982();
-        long startTime = System.currentTimeMillis();
-//        System.err.println("Loading schemas from zip with Apache's implementation...");
-//        application.run(getApacheSchemaFactory());
-//        System.err.println(String.format("Took {} milliseconds.", System.currentTimeMillis() - startTime));
+        Saxon4982 application = new Saxon4982();
+        for (int i = 0; i < 100; i++) {
+            long startTime = System.currentTimeMillis();
+            //System.out.println("Loading schemas from zip with Apache's implementation...");
+            application.run(getApacheSchemaFactory());
+            System.out.println(String.format("Apache took %s milliseconds.", System.currentTimeMillis() - startTime));
 
-        startTime = System.currentTimeMillis();
-        System.err.println("Loading schemas from zip with Saxonica's implementation...");
-        application.run(getSaxonSchemaFactory());
-        System.err.println(String.format("Took %d milliseconds.", System.currentTimeMillis() - startTime));
+
+            startTime = System.currentTimeMillis();
+            //System.out.println("Loading schemas from zip with Saxonica's implementation...");
+            application.run(getSaxonSchemaFactory());
+            System.out.println(String.format("Saxon took %s milliseconds.", System.currentTimeMillis() - startTime));
+        }
     }
 
     private void run(SchemaFactory schemaFactory) {
+        resolverCalls = 0;
+
         List<Source> sources = new ArrayList<>();
         try {
             addZippedSchemas(sources);
@@ -72,12 +61,17 @@ public class TestBug4982 {
 
         schemaFactory.setResourceResolver(resourceResolver);
 
+
         try {
             schemaFactory.newSchema(sources.toArray(new Source[0]));
         } catch (SAXException e) {
             throw new RuntimeException(e);
         }
+
+        System.err.println("Resolver calls: " + resolverCalls);
     }
+
+    private static int resolverCalls = 0;
 
     /**
      * Resolve an external resource. Sources have system identifiers of the xsd files indicating
@@ -90,8 +84,8 @@ public class TestBug4982 {
         @Override
         public LSInput resolveResource(String type, String namespaceURI, String publicId, String systemId,
                                        String baseURI) {
-
-            System.err.println(String.format(
+            resolverCalls++;
+            System.out.println(String.format(
                     "Resolver called with parameters type %s, "
                             + "namespaceURI %s, publicId %s, systemId %s, baseURI %s",
                     type, namespaceURI, publicId, systemId, baseURI));
@@ -100,9 +94,6 @@ public class TestBug4982 {
 
             if (baseURI != null && baseURI.startsWith("zip:")) {
                 String[] splittedBaseURI = baseURI.split(":");
-                if (splittedBaseURI[1].startsWith("/external")) {
-                    return new LSInputImpl("file:///Users/mike/bugs/2021/4982-Vanhala" + splittedBaseURI[1]);
-                }
                 Path baseFileFolder = Paths.get(splittedBaseURI[1]).getParent();
                 searchedSchemaFile = baseFileFolder.resolve(systemId).normalize().toString();
             } else {
@@ -124,13 +115,13 @@ public class TestBug4982 {
             baseURI = null;
 
             InputStream stream = new ByteArrayInputStream(uncompressedSchema);
-            LSInputImpl input = new LSInputImpl(systemId);
+            LSInputImpl input = new LSInputImpl();
             input.setPublicId(publicId);
             input.setSystemId(systemId);
             input.setBaseURI(baseURI);
             input.setCharacterStream(new InputStreamReader(stream));
 
-            //LOG.info("Resolved xsd file content: publicId {} systemId {} baseURI {}", publicId, systemId, baseURI);
+            System.out.println(String.format("Resolved xsd file content: publicId %s systemId %s baseURI %s", publicId, systemId, baseURI));
 
             return input;
         }
@@ -138,14 +129,14 @@ public class TestBug4982 {
 
     private static SchemaFactory getSaxonSchemaFactory() {
         EnterpriseConfiguration conf = new EnterpriseConfiguration();
-        conf.setConfigurationProperty(FeatureKeys.LICENSE_FILE_LOCATION, "/Users/mike/active-license/saxon-license.lic");
-        conf.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, Boolean.TRUE);
+        //conf.setConfigurationProperty(FeatureKeys.LICENSE_FILE_LOCATION, "../saxon-license.lic");
+        conf.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, Boolean.FALSE);
         return new com.saxonica.ee.jaxp.SchemaFactoryImpl(conf);
     }
 
     private static SchemaFactory getApacheSchemaFactory() {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI,
-                                                                "org.apache.xerces.jaxp.validation.XMLSchemaFactory", TestBug4982.class.getClassLoader());
+                                                                "org.apache.xerces.jaxp.validation.XMLSchemaFactory", Saxon4982.class.getClassLoader());
         return schemaFactory;
     }
 
@@ -199,47 +190,64 @@ public class TestBug4982 {
 
                         byte[] schemaDoc = os.toByteArray();
                         String systemId = String.format("zip:%s", normalizedName);
-                        sources.add(new StreamSource(new ByteArrayInputStream(schemaDoc), systemId));
-                        System.err.println(String.format("Found %s from the zip. Added source with systemId %s", normalizedName, systemId));
+                        sources.add(new StreamSource(new MonitoringStream(schemaDoc, systemId), systemId));
+                        System.out.println(String.format("Found %s from the zip. Added source with systemId %s", normalizedName, systemId));
                     }
                 }
             }
         }
     }
 
-    static class LSInputImpl implements LSInput {
-
+    static class MonitoringStream extends ByteArrayInputStream {
         private String systemId;
-
-        public LSInputImpl(String systemId) {
-            this.systemId = systemId;
+        public MonitoringStream(byte[] bytes, String systemId) {
+            super(bytes);
+            this.systemId= systemId;
         }
+        public void close() {
+            System.out.println("Closing " + systemId);
+        }
+
+    }
+
+    static class LSInputImpl implements LSInput {
+        private Reader characterStream;
+        private InputStream byteStream;
+        private String stringData;
+        private String systemId;
+        private String publicId;
+        private String baseURI;
+        private String encoding;
+        private boolean certifiedText;
 
         @Override
         public Reader getCharacterStream() {
-            return null;
+            return characterStream;
         }
 
         @Override
         public void setCharacterStream(Reader characterStream) {
+            this.characterStream = characterStream;
         }
 
         @Override
         public InputStream getByteStream() {
-            return null;
+            return byteStream;
         }
 
         @Override
         public void setByteStream(InputStream byteStream) {
+            this.byteStream = byteStream;
         }
 
         @Override
         public String getStringData() {
-            return null;
+            return stringData;
         }
 
         @Override
         public void setStringData(String stringData) {
+            this.stringData = stringData;
         }
 
         @Override
@@ -254,40 +262,44 @@ public class TestBug4982 {
 
         @Override
         public String getPublicId() {
-            return null;
+            return publicId;
         }
 
         @Override
         public void setPublicId(String publicId) {
+            this.publicId = publicId;
         }
 
         @Override
         public String getBaseURI() {
-            return null;
+            return baseURI;
         }
 
         @Override
         public void setBaseURI(String baseURI) {
+            this.baseURI = baseURI;
         }
 
         @Override
         public String getEncoding() {
-            return null;
+            return encoding;
         }
 
         @Override
         public void setEncoding(String encoding) {
+            this.encoding = encoding;
         }
 
-        @Override
         public boolean getCertifiedText() {
-            return false;
+            return certifiedText;
         }
 
         @Override
         public void setCertifiedText(boolean certifiedText) {
+            this.certifiedText = certifiedText;
         }
     }
+
 
 }
 
