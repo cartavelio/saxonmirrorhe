@@ -76,7 +76,7 @@
 
    <!-- div for namespace functions list, on main page (scrollable section). -->
    
-   <xsl:variable xpath-default-namespace="" name="height"
+   <xsl:variable name="height"
     select="ixsl:get(ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main'], 'offsetHeight') - 140"/>
    <!--<xsl:message>Height is {$height}</xsl:message>-->
 
