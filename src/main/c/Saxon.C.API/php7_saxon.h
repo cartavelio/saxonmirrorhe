@@ -387,7 +387,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XdmItem,  isAtomic);
     PHP_METHOD(XdmItem,  isNode);
     PHP_METHOD(XdmItem,  getAtomicValue);
-    PHP_METHOD(XdmItem,  getNodeValue);	
+    PHP_METHOD(XdmItem,  getNodeValue);
 
 /*     ============== PHP Interface of   XdmNode =============== */
 

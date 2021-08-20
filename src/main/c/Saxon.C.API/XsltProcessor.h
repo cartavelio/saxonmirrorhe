@@ -195,7 +195,7 @@ public:
      * @param  filename - If the filename argument is present then the xsl:message output is appended to the given
      *                    filename with location cwd+filename
      */
-    void setupXslMessage(bool show, const char* filename=nullptr);
+    void setSaveXslMessage(bool show, const char* filename=nullptr);
 
 
       //!Perform a one shot transformation.

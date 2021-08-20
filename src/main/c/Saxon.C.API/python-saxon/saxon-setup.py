@@ -3,11 +3,12 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 from Cython.Build import cythonize
 
+sourcefiles = ["saxonc.pyx", "../SaxonProcessor.cpp", "../SaxonApiException.cpp", "../SaxonCGlue.c", "../SaxonCXPath.c", "../XdmValue.cpp", "../XdmItem.cpp", "../XdmNode.cpp", "../XdmAtomicValue.cpp", "../XdmMap.cpp", "../XdmArray.cpp", "../XdmFunctionItem.cpp", "../XsltProcessor.cpp","../Xslt30Processor.cpp", "../XsltExecutable.cpp", "../XQueryProcessor.cpp","../XPathProcessor.cpp","../SchemaValidator.cpp", "../DocumentBuilder.cpp" ]
 
+extensions = [Extension("saxonc", sourcefiles, language="c++", include_dirs = ['../jni', "../jni/unix"],extra_compile_args=["-std=c++14"])]
 
+setup(ext_modules=cythonize(extensions),
 
-setup(ext_modules=cythonize([Extension("saxonc", ["saxonc.pyx", "../SaxonProcessor.cpp", "../SaxonApiException.cpp", "../SaxonCGlue.c", "../SaxonCXPath.c", "../XdmValue.cpp", "../XdmItem.cpp", "../XdmNode.cpp", "../XdmAtomicValue.cpp", "../XdmMap.cpp", "../XdmArray.cpp", "../XdmFunction.cpp", "../XsltProcessor.cpp","../Xslt30Processor.cpp", "../XsltExecutable.cpp", "../XQueryProcessor.cpp","../XPathProcessor.cpp","../SchemaValidator.cpp"], language="c++14",)]),
-      include_dirs = ['../jni', "../jni/unix"],
 cmdclass = {'build_ext': build_ext},
-      compiler_directives={'language_level' : "3"})
+      compiler_directives={'language_level' : 3})
                                                         

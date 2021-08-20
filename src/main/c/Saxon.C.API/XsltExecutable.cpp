@@ -205,9 +205,10 @@ void XsltExecutable::setInitialTemplateParameters(std::map<std::string, XdmValue
     }
 }
 
-void XsltExecutable::setupResultDocumentHandler(bool create) {
-    if (create) {
-
+void XsltExecutable::setSaveResultDocument(bool flag) {
+    if(flag) {
+        //resultDocumentMap = resultsMap;
+        
         static jmethodID resultDocID =   nullptr;
         if(resultDocID == nullptr) {
             resultDocID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(resultDocumentClass,
@@ -237,6 +238,58 @@ void XsltExecutable::setupResultDocumentHandler(bool create) {
 
 
 }
+
+
+
+std::map<std::string,XdmNode*>& XsltExecutable::getResultDocuments(){
+    std::map<std::string,XdmNode*> resultDocumentMap;
+
+        if(saxonResultDocObj) {
+            static jmethodID getresultID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(resultDocumentClass,
+                                                                                                      "getResultDocuments",
+                                                                                                      "()[Lnet/sf/saxon/s9api/XdmNode;");
+
+            static jmethodID getresult_uriID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(resultDocumentClass,
+                                                                                                      "getResultDocumentURIs",
+                                                                                                      "()[Ljava/lang/String;");
+            if (!getresultID) {
+                std::cerr << "Error: " << getDllname() << ".getResultDocuments" << " not found\n"
+                          << std::endl;
+                SaxonProcessor::sxn_environ->env->ExceptionClear();
+            } else {
+                jobjectArray results = (jobjectArray) (
+                        SaxonProcessor::sxn_environ->env->CallObjectMethod(saxonResultDocObj, getresultID));
+
+                jobjectArray resultUris = (jobjectArray) (
+                        SaxonProcessor::sxn_environ->env->CallObjectMethod(saxonResultDocObj, getresult_uriID));
+                int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
+
+                if (sizex > 0) {
+
+
+                    for (int p = 0; p < sizex; ++p) {
+                        jobject resulti = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(results, p);
+                        jobject resultURIsi = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(resultUris, p);
+                        jstring sresultURI = (jstring)resultURIsi;
+                        const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(sresultURI,
+                                        NULL);
+
+
+
+                        XdmNode *node= new XdmNode(resulti);
+                        resultDocumentMap[str] = node;
+                        SaxonProcessor::sxn_environ->env->DeleteLocalRef(resulti);
+                        SaxonProcessor::sxn_environ->env->DeleteLocalRef(resultURIsi);
+
+                    }
+                    SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
+
+                }
+            }
+        }
+       return resultDocumentMap;
+}
+
 
 XdmValue *XsltExecutable::getParameter(const char *name) {
     std::map<std::string, XdmValue *>::iterator it;
@@ -284,6 +337,12 @@ void XsltExecutable::setProperty(const char *name, const char *value) {
             }
         }
     }
+}
+
+
+
+bool XsltExecutable::removeProperty(const char *name) {
+    return (bool) (properties.erase(std::string(name)));
 }
 
 const char *XsltExecutable::getProperty(const char *name) {
@@ -1224,7 +1283,7 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
 }
 
 
-void XsltExecutable::setupXslMessage(bool create, const char * filename) {
+void XsltExecutable::setSaveXslMessage(bool create, const char * filename) {
     if (create) {
 
         static jmethodID messageID =   nullptr;
@@ -1265,6 +1324,7 @@ void XsltExecutable::setupXslMessage(bool create, const char * filename) {
 
 }
 
+/*
 XdmValue * XsltExecutable::getXslMessages(){
 
     if(saxonMessageListenerObj) {
@@ -1292,11 +1352,11 @@ XdmValue * XsltExecutable::getXslMessages(){
             }
         }
     }
-    return NULL;
+    return nullptr;
 
 
 }
-
+*/
 
 const char *XsltExecutable::transformFileToString(const char *source) {
 

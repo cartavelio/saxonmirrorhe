@@ -618,6 +618,24 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
 }
 
 
+DocumentBuilder * SaxonProcessor::newDocumentBuilder(){
+    static jmethodID docBuilderID = nullptr;
+	if (docBuilderID == nullptr) {
+			docBuilderID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(procClass,
+					"newDocumentBuilder",
+					"()Lnet/sf/saxon/s9api/DocumentBuilder;");
+
+        jobject docBuilderObject = (jobject)(
+    				SaxonProcessor::sxn_environ->env->CallObjectMethod(proc, docBuilderID));
+
+
+        DocumentBuilder * builder = new DocumentBuilder(docBuilderObject, cwd);
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(docBuilderObject);
+
+    }
+}
+
+
 XsltProcessor *SaxonProcessor::newXsltProcessor() {
     return (new XsltProcessor(this, cwd));
 }

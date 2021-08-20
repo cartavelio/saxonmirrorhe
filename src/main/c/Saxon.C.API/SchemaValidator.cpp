@@ -437,15 +437,15 @@ void SchemaValidator::exceptionClear(){
    SaxonProcessor::sxn_environ->env->ExceptionClear();
  }
 
-/*const char * SchemaValidator::getErrorCode(int i) {
+const char * SchemaValidator::getErrorCode(int i) {
 	if(proc->exception == nullptr) {return nullptr;}
-	return proc->exception->getErrorCode(i);
+	return nullptr; // TODO proc->exception->getErrorCode(i);
 }
 
 const char * SchemaValidator::getErrorMessage(int i ){
  if(proc->exception == nullptr) {return nullptr;}
- return proc->exception->getErrorMessage(i);
- } */
+ return nullptr;//TODO fix this up. proc->exception->getErrorMessage(i);
+ }
 
 bool SchemaValidator::exceptionOccurred() {
 	return proc->exceptionOccurred() || exception != nullptr;

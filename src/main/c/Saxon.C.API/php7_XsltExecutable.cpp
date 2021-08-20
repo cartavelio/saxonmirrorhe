@@ -100,6 +100,7 @@ PHP_METHOD(XsltExecutable, getXslMessages)
 PHP_METHOD(XsltExecutable, getResultDocuments)
 {
     XsltExecutable *xsltExecutable;
+    zval * php_resultDocArr;
 
     if (ZEND_NUM_ARGS()>0) {
         WRONG_PARAM_COUNT;
@@ -111,8 +112,12 @@ PHP_METHOD(XsltExecutable, getResultDocuments)
 
     if (xsltExecutable != NULL) {
         xsltExecutable->exceptionClear();
-        ?????? = xsltExecutable->getResultDocuments();
-        if(values != NULL) {
+        std::map<std::string,XdmNode*> cpp_resultDocMap = xsltExecutable->getResultDocuments();
+        if(cpp_resultDocMap.size() == 0) {
+            return NULL;
+        }
+        array_init(return_value);
+        
             if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
                 RETURN_NULL();
             } else {

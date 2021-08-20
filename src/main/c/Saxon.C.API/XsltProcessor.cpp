@@ -604,7 +604,7 @@ void XsltProcessor::transformFileToFile(const char* source,
 	proc->checkAndCreateException(cppClass);
 }
 
-void XsltProcessor::setupXslMessage(bool show, const char* filename) {
+void XsltProcessor::setSaveXslMessage(bool show, const char* filename) {
     if(show) {
         if(filename == nullptr) {
             setProperty("m", "on");

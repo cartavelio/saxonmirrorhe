@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2020 Saxonica Limited.
+// Copyright (c) 2021 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -41,6 +41,7 @@
 #include "XsltProcessor.h"
 #include "Xslt30Processor.h"
 #include "XsltExecutable.h"
+#include "DocumentBuilder.h"
 #include "XQueryProcessor.h"
 #include "XPathProcessor.h"
 #include "SchemaValidator.h"
@@ -96,6 +97,8 @@ class XdmMap;
 
 class XsltExecutable;
 
+class DocumentBuilder;
+
 class SaxonApiException;
 
 
@@ -116,6 +119,8 @@ typedef struct {
 /*! An <code>SaxonProcessor</code> acts as a factory for generating XQuery, XPath, Schema and XSLT compilers
  */
 class SaxonProcessor {
+
+    friend class DocumentBuilder;
 
     friend class XsltProcessor;
 
@@ -183,11 +188,12 @@ public:
 
     const char * getErrorMessage();
 
-
-    //! Get the Processor object. Method used in Python
-    /* SaxonProcessor * getProcessor(){
-     return this;
-     }*/
+    /**
+     * Create a DocumentBuilder. A DocumentBuilder is used to load source XML documents.
+     *
+     * @return a newly created DocumentBuilder
+     */
+    DocumentBuilder * newDocumentBuilder();
 
     /*!
 
@@ -353,16 +359,19 @@ public:
 
     /**
      * Parse a lexical representation of the source document and return it as an XdmNode
+     TODO - parser options need adding. Make validator part of the options.
     */
     XdmNode *parseXmlFromString(const char *source, SchemaValidator * validator = nullptr);
 
     /**
      * Parse a source document file and return it as an XdmNode.
+     TODO - parser options need adding
     */
     XdmNode *parseXmlFromFile(const char *source, SchemaValidator * validator = nullptr);
 
     /**
      * Parse a source document available by URI and return it as an XdmNode.
+     TODO - parser options need adding
     */
     XdmNode *parseXmlFromUri(const char *source, SchemaValidator * validator = nullptr);
 

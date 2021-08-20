@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Saxonica Limited.
+// Copyright (c) 2021 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -77,7 +77,7 @@ public:
     void setGlobalContextFromFile(const char * filename);
 
 
-    //! Create a clone object of this Xslt30Processor object
+    //! Create a clone object of this XsltExecutable object
     /**
      *
      * @return
@@ -160,6 +160,17 @@ public:
      * @return bool - outcome of the romoval
      */
     bool removeParameter(const char* name);
+
+
+
+
+    /**
+     * Remove a property (name, value) pair from the executable
+     *
+     * @param name  the name of the property to be removed
+     * @return bool - outcome of the romoval
+     */
+    bool removeProperty(const char* name);
 
     /**
      * Set a property specific to the processor in use.
@@ -263,23 +274,15 @@ public:
      * @param  filename - If the filename argument is present then the xsl:message output is appended to the given
      *                    filename with location cwd+filename
      */
-    void setupXslMessage(bool show, const char* filename=nullptr);
+    void setSaveXslMessage(bool show, const char* filename=nullptr);
 
    /*
      * When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
-     * via a simple std Map objects of the documents in a URI, XdmNode object pair.
-     * @param create - True - Enable the handling and capturing of result-documents. False - deletes any existing result-document handler
-       and switches back to the default behaviour
+     * via a user defined std::map object where we have the pair document URI and XdmNode object.
+     * @param 
+     * @param resultMap - User defined map object which is used to save the result documents from the transformation
     */
-    void setupResultDocumentHandler(bool create);
-
-
-
-    /**
-    * Get the messages written using the <code>xsl:message</code> instruction
-    * @return XdmValue - Messages returned as a sequence of XdmNode objects within an XdmValue object.
-    */
-    XdmValue * getXslMessages();
+    void setSaveResultDocument(bool flag);
 
 
     /**
@@ -493,7 +496,6 @@ private:
     std::string resources_dir; /*!< current Saxon resources directory */
 	bool tunnel, jitCompilation;
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
-
 	std::map<std::string,std::string> properties; /*!< map of properties used for the transformation as (string, string) pairs */
 
 };
