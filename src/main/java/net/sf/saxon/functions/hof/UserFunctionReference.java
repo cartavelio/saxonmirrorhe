@@ -146,6 +146,10 @@ public class UserFunctionReference extends Expression
         return nominalTarget.getDeclaringComponent();
     }
 
+    public UserFunction getNominalTarget() {
+        return nominalTarget;
+    }
+
     /**
      * Set the binding slot to be used. This is the offset within the binding vector of the containing
      * component where the actual target component is to be found. The target template is not held directly
