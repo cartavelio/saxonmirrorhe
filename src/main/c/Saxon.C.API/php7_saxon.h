@@ -298,7 +298,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltExecutable,  getErrorCode);
     PHP_METHOD(XsltExecutable,  getErrorMessage);
     PHP_METHOD(XsltExecutable,  setupXslMessage);
-    PHP_METHOD(XsltExecutable,  setupResultDocumentHandler);
+    PHP_METHOD(XsltExecutable,  setSaveResultDocument);
     PHP_METHOD(XsltExecutable,  getResultDocuments);
     PHP_METHOD(XsltExecutable,  getXslMessages);
 

@@ -118,15 +118,15 @@ PHP_METHOD(XsltExecutable, getResultDocuments)
         }
         array_init(return_value);
         
-            if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
+            if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
                 RETURN_NULL();
             } else {
                 //struct xdmValue_object* vobj = (struct xdmValue_object *)Z_OBJ_P(return_value);
                 zend_object *vvobj =  Z_OBJ_P(return_value);
-                xdmValue_object* vobj  = (xdmValue_object *)((char *)vvobj - XtOffsetOf(xdmValue_object, std));
+                xdmNode_object* vobj  = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
 
                 assert (vobj != NULL);
-                vobj->xdmValue = values;
+                vobj->xdmNode = values;
             }
         } else if(xsltExecutable->exceptionOccurred()){
             SaxonApiException * exception = xsltExecutable->getException();
@@ -1469,7 +1469,7 @@ PHP_METHOD(XsltExecutable, setupXslMessage)
 
 
 
-PHP_METHOD(XsltExecutable, setupResultDocumentHandler)
+PHP_METHOD(XsltExecutable, setSaveResultDocument)
 {
     XsltExecutable *xsltExecutable;
     bool create = false;
@@ -1484,7 +1484,7 @@ PHP_METHOD(XsltExecutable, setupResultDocumentHandler)
 
     if (xsltExecutable != nullptr) {
 
-	    xsltExecutable->setupResultDocumentHandler(create);
+	    xsltExecutable->setSaveResultDocument(create);
 	}
 
 }

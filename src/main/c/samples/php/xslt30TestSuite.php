@@ -516,6 +516,24 @@ function getSingleNodeFromXPath($node, $xpath) {
 
 }
 
+
+
+function effectiveBooleanValue($node, $xpath) {
+    global $xpathProcForEnv;
+    if($xpathProcForEnv == NULL) {
+        return NULL;
+    }
+    $xpathProcForEnv->clearParameters();
+    $xpathProcForEnv->clearProperties();
+    if($node != null) {
+        $xpathProcForEnv->setContextItem($node);
+    }
+
+      $result = $xpathProcForEnv->effectiveBooleanValue($xpath);
+      return $result;
+
+}
+
 $C0WHITE = array(
             false, false, false, false, false, false, false, false,  // 0-7
             false, true, true, false, false, true, false, false,     // 8-15
@@ -1027,6 +1045,8 @@ function run_test_case($testcase, $env, $path)
     global $fail;
     global $notrun;
     global $run_assertion;
+    $serializationDeclared = false;
+    $assertsSerial = false;
     $errorCode  = null;
     $foundStylesheet = false;
     $xsltproc->clearParameters();
@@ -1044,6 +1064,8 @@ function run_test_case($testcase, $env, $path)
            $env_embedded_file = getSingleNodeFromXPath($t_env->itemAt(0)->getNodeValue(), "./source[@role='.']/@file");
         }
        //  error_log("TEST CASE t_env_ref = ".$t_env_ref);
+
+
     }
     $t_dep = getNodeFromXPath($testcase, "./dependencies");
 
@@ -1057,6 +1079,13 @@ function run_test_case($testcase, $env, $path)
         if ($testElem != null) {
 
             $test = null;
+
+            $asserts = getNodeFromXPath($testcase, "./result/child::*");
+
+            $assertsSerial = effectiveBoolean($asserts, "exists(//descendant-or-self::*[assert-serialization or assert-serialization-error or serialization-matches])");
+
+            //exists(/assert[s or x or p]) or  exists(//assert/child::*/s)
+
 
             if($t_env_ref!= NULL && array_key_exists($t_env_ref , $env)) {
                 error_log("envvvalue:". print_r($env[$t_env_ref . ""], TRUE));
@@ -1075,8 +1104,17 @@ function run_test_case($testcase, $env, $path)
                 }
             }
 
-            if ($foundStylesheet) {
+            $outputElem = getSingleNodeFromXPath($testElem->getNodeValue(), "./output");
+            if($outputElem != null) {
+                $serializeOpt = $path . $outputElem->getNodeValue()->getAttributeValue("serialize");
+                if($serializeOpt == "yes") {
+                    $serializationDeclared = true;
+                    
+                }
+            }
 
+            if ($foundStylesheet) {
+                $resultSerialized = $serializationDeclared or $assertsSerial;
                 
                 echo "Test case=" . $test;
                 if ($test != null && file_exists($test)) {
@@ -1122,6 +1160,10 @@ function run_test_case($testcase, $env, $path)
 
                                     }
                                 }
+                                
+                                if($resultSerialized == True) {
+                                    $executable->setSaveResultDocument(True);
+                                } 
 
                         
                        //error_log("envvvalue:". print_r($env, TRUE));
@@ -1290,7 +1332,7 @@ function run_test_case($testcase, $env, $path)
 
                                 //error_log("Result:". $result->size());
                                 //error_log("Result-node value:". $result->itemAt(0)->getNodeValue());
-                                $asserts = getNodeFromXPath($testcase, "./result/child::*");
+
 
 
                                 /*if($testcase->attributes()->{'name'}=='import-0502b'){
