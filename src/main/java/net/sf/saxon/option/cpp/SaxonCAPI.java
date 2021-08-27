@@ -681,7 +681,7 @@ public class SaxonCAPI {
 
 
     /**
-     * Receies file name of XML document and parse to XdmNode object. It is possible to validate with a SchemaValidator
+     * Receives file name of XML document and parse to XdmNode object. It is possible to validate with a SchemaValidator
      * @param processor
      * @param cwd - The current working directory for parsing the XML file
      * @param validator - Schema Validator
@@ -711,6 +711,10 @@ public class SaxonCAPI {
             throw ex;
         }
     }
+
+
+
+
 
     /**
      * Create a File object given the filename and the cwd used fix-up the location of the file.

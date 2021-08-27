@@ -15,6 +15,8 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.Type;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -271,6 +273,20 @@ public class XdmUtils {
         }
 
         return num;
+    }
+
+
+
+    public static void setDocBuilderBaseURI(DocumentBuilder builder, String baseStr) throws SaxonApiException {
+        URI baseURI = null;
+        try {
+            baseURI = new URI(baseStr);
+        } catch (URISyntaxException e) {
+            throw new SaxonApiException(e.getMessage());
+        }
+        builder.setBaseURI(baseURI);
+
+
     }
 
 }

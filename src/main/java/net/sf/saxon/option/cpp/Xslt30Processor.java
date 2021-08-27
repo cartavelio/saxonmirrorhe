@@ -355,6 +355,12 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
         Map<String, Object> paramsMap = setupConfigurationAndBuildMap(params, values, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        if(executable == null) {
+            if(SaxonCAPI.debug) {
+                System.err.println("Error: executable is null");
+            }
+            throw new SaxonApiException("executable is null");
+        }
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
 
@@ -986,10 +992,25 @@ public class Xslt30Processor extends SaxonCAPI {
             }
 
             if (map.containsKey("m")) {
-                String value = (String) map.get("m");
-                transformer.setMessageListener(new SaxonCMessageListener(cwd, value));
+                Object value = map.get("m");
+                if(value instanceof SaxonCMessageListener) {
+                   transformer.setMessageListener((SaxonCMessageListener)value);
+                } else {
+                    transformer.setMessageListener(new SaxonCMessageListener(cwd, (String)value));
+                }
 
             }
+
+            if (map.containsKey("rd")) {
+                Object value = map.get("rd");
+                if(value instanceof SaxonCResultDocumentHandler) {
+                   transformer.setResultDocumentHandler((SaxonCResultDocumentHandler)value);
+                } else if(SaxonCAPI.debug) {
+                    System.err.println("DEBUG: Not able to set the result-document handler. Please check type of object");
+                }
+
+            }
+
 
 
             if (map.containsKey("tunnel")) {
