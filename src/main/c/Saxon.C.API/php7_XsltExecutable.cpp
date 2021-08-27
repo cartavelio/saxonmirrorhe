@@ -116,7 +116,13 @@ PHP_METHOD(XsltExecutable, getResultDocuments)
         if(cpp_resultDocMap.size() == 0) {
             return NULL;
         }
-        array_init(return_value);
+        //array_init(return_value);
+        XdmValue rValues = new XdmVaue();
+        for (std::map::iterator i = cpp_resultDocMap.begin(); i != cpp_resultDocMap.end(); ++i) {
+                        n = (node_object*) zend_object_store_get_object(node_zval TSRMLS_CC);
+                        n->node = i->second;
+                        add_index_zval(return_value, i->first, node_zval);
+        }
         
             if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
                 RETURN_NULL();
