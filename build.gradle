@@ -75,6 +75,11 @@ if (!hasProperty("saxonLicenseDir")) {
 
 println("Building with Java version ${System.getProperty('java.version')}")
 println("Expecting Saxon license file to be in ${saxonLicenseDir}")
+if (jarsigner.makeSignedJars) {
+  println("Build is configured to sign jar files")
+} else {
+  println("Build is not configured to sign jar files")
+}
 
 dependencies {
   preprocessor (
