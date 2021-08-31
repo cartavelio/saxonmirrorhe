@@ -1,18 +1,8 @@
-buildscript {
-  repositories {
-    mavenLocal()
-    // I'll move this to somewhere "real" in the short term
-    maven { url "https://nwalsh.com/maven" }
-  }
-  dependencies {
-    classpath 'com.nwalsh:gradle-docker-container-plugin:0.9.5'
-  }
-}
-
 plugins {
   id "java"
   id "maven-publish"
   id "signing"
+  id 'com.nwalsh.gradle.docker.container' version '0.0.3'
 }
 
 apply plugin: 'java'
@@ -25,7 +15,7 @@ apply plugin: ManageBranchesPlugin
 apply plugin: ManageTestSuitesPlugin
 
 import org.gradle.internal.os.OperatingSystem;
-import com.nwalsh.DockerContainer
+import com.nwalsh.gradle.docker.DockerContainer
 
 project.extensions.create("testSuite", TestSuite, project)
 
