@@ -24,7 +24,6 @@ import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.option.cpp.SaxonCAPI;
 import net.sf.saxon.pattern.PatternParser30;
 import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.query.QueryModule;
@@ -290,9 +289,9 @@ public class Configuration implements SourceResolver, NotationSet {
         filename = "net/sf/saxon/data/" + filename;
 //#endif
 //#if SAXONC == true
-        if(SaxonCAPI.RESOURCES_DIR != null) {
-            filename = SaxonCAPI.RESOURCES_DIR + "/"+filename;
-            if(SaxonCAPI.debug) {
+        if(net.sf.saxon.option.cpp.SaxonCAPI.RESOURCES_DIR != null) {
+            filename = net.sf.saxon.option.cpp.SaxonCAPI.RESOURCES_DIR + "/"+filename;
+            if(net.sf.saxon.option.cpp.SaxonCAPI.debug) {
                 System.err.println("DEBUG SAXONC: Config data filename="+filename);
             }
 		try {
