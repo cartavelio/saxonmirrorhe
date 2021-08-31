@@ -582,10 +582,12 @@ task "n_notices"(
     type: Exec,
     dependsOn: ["${release}nInstaller"]
   ) {
+    // Speculative change: untested (and will clearly need at least a little work!)
     commandLine "signtool",
-      "sign", "/a",
-      "/tr", "http://rfc3161timestamp.globalsign.com/advanced",
-      "/td", "SHA256",
+      "sign",
+      "/f", "saxonica_certificate.pfx",
+      "/p", "password",
+      "/t", "http://timestamp.digicert.com",
       "${buildDir}/distributions/Saxon${RELEASE}${saxonMajorVersion}-${saxonMinorVersion}N-setup.exe"
   }
 }
