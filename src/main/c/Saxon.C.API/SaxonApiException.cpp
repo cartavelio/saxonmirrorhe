@@ -70,15 +70,6 @@ SaxonApiException::SaxonApiException(const char * m){
 
 
     /**
-     * A destructor.
-     */
-	SaxonApiException::~SaxonApiException() noexcept {
-          message.clear();
-          errorCode.clear();
-          systemId.clear();
-	}
-
-    /**
      * Get the error code associated with the ith exception in the vector, if there is one
      * @param i - ith exception in the vector
      * @return the associated error code, or nullptr if no error code is available

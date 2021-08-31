@@ -67,7 +67,7 @@ private:
 
 
     std::string fname;
-    int arity{};
+    int arity;
 
 };
 

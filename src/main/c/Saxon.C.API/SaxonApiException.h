@@ -60,7 +60,12 @@ public:
     /**
      * A destructor.
      */
-	virtual ~SaxonApiException() throw ();
+	virtual ~SaxonApiException() throw() {
+	          message.clear();
+              errorCode.clear();
+              systemId.clear();
+	
+	}
 
 
 
