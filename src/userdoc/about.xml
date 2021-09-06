@@ -1462,11 +1462,14 @@
       <p><a href="http://sourceforge.net/projects/kernowforsaxon/" class="bodylink">Kernow</a> is a
          graphical front-end for Saxon. This is an open-source product developed by Andrew Welch. It
          provides an effective alternative to the Saxon command line interface for users who prefer
-         a GUI for running ad-hoc transformations.</p>
+         a GUI for running ad-hoc transformations. <i>This tool was last updated in 2015: we would welcome
+         feedback as to whether it still works with current Saxon releases.</i></p>
+      
+      <p>You can experiment with evaluation of XSLT stylesheets under Saxon (and other XSLT processors) at
+         <a href="https://xsltfiddle.liberty-development.net/">https://xsltfiddle.liberty-development.net/</a>.
+      </p>
 
-      <p>On MAC OS/X, Todd Ditchendorf has produced <a href="http://www.ditchnet.org/xslpalette/"
-            class="bodylink">XSLPalette</a>, which is designed to integrate with your own choice of
-         text editor to provide XSLT development and debugging support.</p>
+      
       <h2 class="subtitle">Commercial Editors and Debuggers</h2>
 
       <p>A number of commercial XML IDEs provide support for XML, XSLT, and/or XQuery editing and
@@ -1488,7 +1491,7 @@
          </li>
          <li>
             <p>A budget XML Editor and Debugger for Saxon is <a href="http://www.editix.com/"
-                  class="bodylink">EditiX</a>, with prices starting at $119.</p>
+                  class="bodylink">EditiX</a>.</p>
          </li>
          <li>
             <p>
