@@ -858,6 +858,15 @@
       </result>
    </test-case>
    
+   <test-case name="reflex-059">
+      <description>Bug 5052.</description>
+      <created by="Michael Kay" on="2021-08-11"/>
+      <test><![CDATA[Q{java:java.lang.String}new(array {})]]></test>
+      <result>
+         <error code="jt:java.lang.NullPointerException" xmlns:jt="http://saxon.sf.net/java-type"/>
+      </result>
+   </test-case>
+   
 
 
 </test-set>
