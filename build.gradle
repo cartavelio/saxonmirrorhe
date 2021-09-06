@@ -289,12 +289,6 @@ apply from: "run-samples.gradle"
     }
     doLast {
       copy {
-        into "${buildDir}/releases/${release}j/doc"
-        from "${projectDir}/src/docs/doc"
-      }
-    }
-    doLast {
-      copy {
         into "${buildDir}/releases/${release}j/notices"
         from "${projectDir}/src/docs/notices"
         include "JAMESCLARK.txt"

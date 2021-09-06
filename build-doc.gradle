@@ -335,7 +335,7 @@ task dotnet_doc_html(
 task dotnet_doc_jel(
   type: JavaExec,
   dependsOn: ["dotnet_doc_merge"],
-  description: "Create HTML output for dotnet docs"
+  description: "Create XML version of dotnet docs"
 ) {
   inputs.file "${buildDir}/dotnetdoc/merged.xml"
   inputs.file "${projectDir}/tools/docs/dotnet/convert-to-jel-package.xsl"
