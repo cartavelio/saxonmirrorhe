@@ -1479,7 +1479,7 @@
           <arg name="seq" type="item()*" desc="The input sequence"/>
           <arg name="zero" type="item()*"
             desc="The initial value (the value to be returned if the sequence is empty)"/>
-          <arg name="f" type="function(item(), item()*) as item()*"
+          <arg name="f" type="function(item()*, item()) as item()*"
             desc="The function to be applied to each item in the sequence"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
