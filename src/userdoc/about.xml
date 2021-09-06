@@ -1252,9 +1252,8 @@
          online.</p>
       
       <p>The preprocessed source code for Saxon-HE is issued as a ZIP archive downloadable from the
-         Saxon project site on SourceForge. The raw source is available from the Subversion
-         repository on the <a href="http://dev.saxonica.com/" class="bodylink">dev.saxonica.com</a>
-         site.</p>
+         Saxon project site on SourceForge. The raw source is available from a 
+         <a href="https://saxonica.plan.io/projects/saxonmirrorhe/repository" class="bodylink">GIT repository</a>.</p>
 
       <h2 class="subtitle">Source code</h2>
 
@@ -1431,8 +1430,9 @@
          <p>Saxon-EE and Saxon-PE users are provided with an email address that allows bug reports
             to be sent to Saxonica privately if preferred.</p>
          
-         <p>The open source code of Saxon-HE is maintained in a Subversion repository on the
-            <a href="http://dev.saxonica.com/" class="bodylink">dev.saxonica.com</a> site. This
+         <p>The open source Java code of Saxon-HE is maintained in a 
+            <a href="https://saxonica.plan.io/projects/saxonmirrorhe/repository" class="bodylink">GIT repository</a>. 
+            (Follow the link, and click the button "How to connect?" for instructions.) This repository
             exists solely to provide early access to source patches; it is
             not used to deliver incremental releases of new functionality. Building the
             JAR files is reasonably easy for an experienced Java programmer; an Ant script is
