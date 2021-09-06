@@ -848,8 +848,7 @@
    <section id="installationdotnet" title="Installation: .NET platform">
       <h1>Installation: .NET platform</h1>
      
-     <p><b>This information is provisional. Saxon 10 is not yet available for .NET;
-     the information will be updated when it is released.</b></p>
+
 
 
       <p>This section explains in more detail how to install Saxon on the .NET platform. For a basic
