@@ -140,4 +140,25 @@
          <assert>/out = 'true'</assert>
       </result>
    </test-case>
+   
+   <test-case name="collation-008">
+      <description>Ordering of collation key on alphanumeric collation - bug 5049</description>
+      <created by="Michael Kay" on="2019-04-09"/>
+      <dependencies>
+         <spec value="XSLT30+"/>
+      </dependencies>
+      <test>
+         <stylesheet file="collation-008.xsl"/>
+         <initial-template name="main"/>
+      </test>
+      <result>
+         <all-of>
+            <assert>/out/a = 'true'</assert>
+            <assert>/out/b = 'true'</assert>
+            <assert>/out/c = 'true'</assert>
+            <assert>/out/d = 'true'</assert>
+            <assert>/out/e = 'true'</assert>
+         </all-of>
+      </result>
+   </test-case>
 </test-set>
