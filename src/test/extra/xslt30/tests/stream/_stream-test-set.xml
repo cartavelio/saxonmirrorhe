@@ -467,7 +467,41 @@
       </result>
    </test-case>
    
-
+   <test-case name="capture-205">
+      <description>Test of xsl:accumulator saxon:capture="yes" - Saxon bug 5014</description>
+      <created by="Michael Kay after Martin Honnen" on="2021-06-01"/>
+      <dependencies>
+         <feature value="Saxon-EE"/>
+         <spec value="XSLT30+"/>
+      </dependencies>
+      <environment>
+         <source file="capture-205.xml" role="." streaming="true"/>
+      </environment>
+      <test>
+         <stylesheet file="capture-205.xsl"/>
+      </test>
+      <result>
+         <error code="XTSE3430"/>
+      </result>
+   </test-case>
+   
+   <test-case name="capture-206">
+      <description>Test of xsl:accumulator saxon:capture="yes" - Saxon bug 5013</description>
+      <created by="Michael Kay after Martin Honnen" on="2021-06-01"/>
+      <dependencies>
+         <feature value="Saxon-EE"/>
+         <spec value="XSLT30+"/>
+      </dependencies>
+      <environment>
+         <source file="capture-206.xml" role="." streaming="true"/>
+      </environment>
+      <test>
+         <stylesheet file="capture-206.xsl"/>
+      </test>
+      <result>
+         <assert>count(/out/foo) = 2</assert>
+      </result>
+   </test-case>
 
    <test-case name="stream-901">
       <description>show that dynamic errors are propagated down the pipeline - ill formed URI</description>
