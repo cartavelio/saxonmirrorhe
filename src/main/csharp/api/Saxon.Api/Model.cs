@@ -2428,7 +2428,7 @@ namespace Saxon.Api
 
         public IEnumerable<XdmNode> Children()
         {
-            return new SequenceEnumerable<XdmNode>(JSequenceXdmIterator.ofNodes(((JNodeInfo)value).iterateAxis(GetAxisNumber(XdmAxis.Child))));
+            return new SequenceEnumerable<XdmNode>(() => JSequenceXdmIterator.ofNodes(((JNodeInfo)value).iterateAxis(GetAxisNumber(XdmAxis.Child))));
         }
 
 		/// <summary>
@@ -2471,7 +2471,7 @@ namespace Saxon.Api
 
         public IEnumerable<XdmNode> EnumerableOverAxis(XdmAxis axis)
         {
-            return (new SequenceEnumerable<XdmNode>(JSequenceXdmIterator.ofNodes(((JNodeInfo)value).iterateAxis(GetAxisNumber(axis)))));
+            return (new SequenceEnumerable<XdmNode>(() => JSequenceXdmIterator.ofNodes(((JNodeInfo)value).iterateAxis(GetAxisNumber(axis)))));
         }
 
 
@@ -4653,7 +4653,7 @@ namespace Saxon.Api
             {
                 return new Step<XdmAtomicValue, XdmAtomicValue>(item => {
                     {
-                        var iter = new SequenceEnumerable<XdmAtomicValue>(JSequenceXdmIterator.ofAtomicValues(new net.sf.saxon.value.Whitespace.Tokenizer(item.GetStringValue())));
+                        var iter = new SequenceEnumerable<XdmAtomicValue>(() => JSequenceXdmIterator.ofAtomicValues(new net.sf.saxon.value.Whitespace.Tokenizer(item.GetStringValue())));
 
                         return iter;
 
@@ -4790,21 +4790,22 @@ namespace Saxon.Api
           where T : XdmItem
     {
 
-        private JSequenceXdmIterator iterator;
+        private Func<JSequenceXdmIterator> iteratorFactory;
+        
 
-        internal SequenceEnumerable(JSequenceXdmIterator iterator)
+        internal SequenceEnumerable(Func<JSequenceXdmIterator> iterator)
         {
-            this.iterator = iterator;
+            this.iteratorFactory = iterator;
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            return (IEnumerator<T>)new SequenceEnumerator<XdmNode>(iterator);
+            return (IEnumerator<T>)new SequenceEnumerator<XdmNode>(iteratorFactory.Invoke());
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return (IEnumerator<T>)new SequenceEnumerator<XdmNode>(iterator);
+            return (IEnumerator<T>)new SequenceEnumerator<XdmNode>(iteratorFactory.Invoke());
         }
     }
 
