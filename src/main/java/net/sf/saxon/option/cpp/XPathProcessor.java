@@ -426,7 +426,7 @@ public class XPathProcessor extends SaxonCAPI {
                 "    <person1>text3</person1>\n" +
                 "</out>");
         xpath.declareNamespace("p", "http://one.com/");
-        XdmNode node2 = xpath.parseXmlFile("/Users/ond1/work/development/svn/test", "books.xml");
+        XdmNode node2 = xpath.parseXmlFile("/Users/ond1/work/development/svn/test", null, "books.xml");
         XdmNode[] children1 = XdmUtils.getChildren(XdmUtils.getChildren(node)[0]);
         // xpath.setContextItem(node);
         Object[] values3 = {node2};

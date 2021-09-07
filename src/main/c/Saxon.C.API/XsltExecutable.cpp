@@ -1166,10 +1166,10 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
         jobject result = (jobject) (
                 SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, tfvMID,
                                                                          SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                                 cwdXE.c_str()), nullptr, executableObject,
+                                                                                 cwdXE.c_str()), NULL, executableObject,
                                                                          (sourcefile != nullptr
                                                                           ? SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                                         sourcefile) : nullptr),
+                                                                                         sourcefile) : NULL),
                                                                          comboArrays.stringArray,
                                                                          comboArrays.objectArray));
         if (comboArrays.stringArray != nullptr) {
@@ -1266,10 +1266,10 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
 
         SaxonProcessor::sxn_environ->env->CallStaticVoidMethod(cppClass, tffMID,
                                                                SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                       cwdXE.c_str()), nullptr, executableObject,
+                                                                       cwdXE.c_str()), NULL, executableObject,
                                                                        (source != nullptr
                                                                         ? SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                                       source) : nullptr), nullptr,
+                                                                                       source) : nullptr), NULL,
                                                                (outputfile != nullptr
                                                                 ? SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                outputfile) : nullptr),
@@ -1396,12 +1396,12 @@ const char *XsltExecutable::transformFileToString(const char *source) {
         jbyteArray result = nullptr;
         jobject obj = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, tftMID,
                                                                                SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                                       cwdXE.c_str()), nullptr,
+                                                                                       cwdXE.c_str()), NULL,
                                                                                executableObject,
                                                                                (source != nullptr
                                                                                 ? SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                                               source) : nullptr),
-                                                                               nullptr,
+                                                                                               source) : NULL),
+                                                                               NULL,
                                                                                comboArrays.stringArray,
                                                                                comboArrays.objectArray);
         if (comboArrays.stringArray != nullptr) {

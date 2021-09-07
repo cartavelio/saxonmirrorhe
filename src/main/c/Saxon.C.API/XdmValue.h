@@ -187,7 +187,7 @@ int exceptionCount();*/
 	virtual XDM_TYPE getType();
 
 protected:
-   inline void initialize() noexcept {
+   inline void initialize() {
     jValues   = nullptr;
     refCount  = 0;
     valueType = nullptr;

@@ -766,7 +766,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
 XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator * validator) {
 
     jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlString",
-                                                                                    "(Ljava/lang/String;Lnet/sf/saxon/s9api/Processor;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
+                                                                                    "(Ljava/lang/String;Lnet/sf/saxon/s9api/Processor;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
     if (!mID) {
         std::cerr << "\nError: Saxonc." << "parseXmlString()" << " not found" << std::endl;
         return nullptr;
@@ -837,7 +837,7 @@ int SaxonProcessor::getNodeKind(jobject obj) {
 XdmNode *SaxonProcessor::parseXmlFromFile(const char *source, SchemaValidator * validator) {
 
     jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlFile",
-                                                                                    "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
+                                                                                    "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
     if (!mID) {
         std::cerr << "\nError: Saxonc.Dll " << "parseXmlFile()" << " not found" << std::endl;
         return nullptr;
@@ -862,7 +862,7 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *source, SchemaValidator * 
 XdmNode *SaxonProcessor::parseXmlFromUri(const char *source, SchemaValidator * validator) {
 
     jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlFile",
-                                                                                    "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
+                                                                                    "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
     if (!mID) {
         std::cerr << "\nError: Saxonc.Dll " << "parseXmlFromUri()" << " not found" << std::endl;
         return nullptr;

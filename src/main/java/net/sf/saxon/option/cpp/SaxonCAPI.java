@@ -24,9 +24,7 @@ import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
 import org.xml.sax.InputSource;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
@@ -512,7 +510,7 @@ public class SaxonCAPI {
      */
     public XdmNode parseXmlFile(String cwd, String filename) throws SaxonApiException {
         try {
-            XdmNode doc = parseXmlFile(processor, cwd, null, filename);
+            XdmNode doc = parseXmlFile(cwd, null, filename);
             return doc;
         } catch (SaxonApiException ex) {
             //saxonExceptions.add(new SaxonCException(ex.getCause()));
@@ -531,7 +529,7 @@ public class SaxonCAPI {
      */
     public XdmNode parseXmlFile(String cwd, SchemaValidator validator, String filename) throws SaxonApiException {
         try {
-            XdmNode doc = parseXmlFile(processor, cwd, validator, filename);
+            XdmNode doc = parseXmlFile(processor, cwd, null, validator, filename);
             return doc;
         } catch (SaxonApiException ex) {
             //saxonExceptions.add(new SaxonCException(ex.getCause()));
@@ -559,7 +557,7 @@ public class SaxonCAPI {
      */
     public XdmNode parseXmlString(SchemaValidator validator, String xml) throws SaxonApiException {
 
-        XdmNode doc = parseXmlString(null, processor, validator, xml);
+        XdmNode doc = parseXmlString(null, processor, null, validator, xml);
         if (debug) {
             System.err.println("xmlParseString, Processor: " + System.identityHashCode(processor));
         }
@@ -626,10 +624,12 @@ public class SaxonCAPI {
         return valueForCpp;
     }
 
-    public static XdmNode parseXmlString(String cwd, Processor processor, SchemaValidator validator, String xml) throws SaxonApiException {
+    public static XdmNode parseXmlString(String cwd, Processor processor, DocumentBuilder builder, SchemaValidator validator, String xml) throws SaxonApiException {
         try {
             StringReader reader = new StringReader(xml);
-            DocumentBuilder builder = processor.newDocumentBuilder();
+            if(builder == null) {
+                builder = processor.newDocumentBuilder();
+            }
             if (validator != null) {
                 builder.setSchemaValidator(validator);
             }
@@ -689,9 +689,11 @@ public class SaxonCAPI {
      * @return  XdmNode object for the XML file
      * @throws SaxonApiException
      */
-    public static XdmNode parseXmlFile(Processor processor, String cwd, SchemaValidator validator, String filename) throws SaxonApiException {
+    public static XdmNode parseXmlFile(Processor processor, String cwd, DocumentBuilder builder, SchemaValidator validator, String filename) throws SaxonApiException {
         try {
-            DocumentBuilder builder = processor.newDocumentBuilder();
+            if(builder == null) {
+                builder = processor.newDocumentBuilder();
+            }
             Source source = null;
             if (cwd != null && cwd.length() > 0) {
                 if (!cwd.endsWith("/")) {

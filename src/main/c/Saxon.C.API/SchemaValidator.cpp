@@ -252,7 +252,7 @@ SchemaValidator::SchemaValidator(SaxonProcessor* p, std::string curr){
 	
 			SaxonProcessor::sxn_environ->env->CallVoidMethod(cppV, mID,
 					SaxonProcessor::sxn_environ->env->NewStringUTF(cwdV.c_str()),
-					(sourceStr != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(sourceStr) : nullptr), nullptr, stringArray, objectArray);
+					(sourceStr != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(sourceStr) : NULL), NULL, stringArray, objectArray);
 
 	if (size > 0) {
 		SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray);

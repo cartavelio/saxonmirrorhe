@@ -133,28 +133,10 @@ class DocumentBuilder {
     /**
      * Load an XML document, to create a tree representation of the document in memory.
      *
-     * @param source A JAXP Source object identifying the source of the document. This can always be
-     *               a {@link javax.xml.transform.stream.StreamSource} or a {@link javax.xml.transform.sax.SAXSource}.
-     *               Some kinds of Source are consumed by this method, and should only be used once.
-     *               <p>If a SAXSource is supplied, the XMLReader held within the SAXSource may be modified (by setting
-     *               features and properties) to reflect the options selected on this DocumentBuilder.</p>
-     *               <p>If the source is an instance of {@link net.sf.saxon.om.NodeInfo} then the subtree rooted at this node
-     *               will be copied (applying schema validation if requested) to create a new tree.</p>
-     *               <p>Saxon also accepts an instance of {@link javax.xml.transform.stax.StAXSource} or
-     *               {@link net.sf.saxon.pull.PullSource}, which can be used to supply a document that is to be parsed
-     *               using a StAX parser.</p>
-     *               <p>(9.8.0.5) This method now (once again) accepts an instance of {@link net.sf.saxon.lib.AugmentedSource}.
-     *               If an {@code AugmentedSource} is supplied, the properties of the {@code AugmentedSource} take
-     *               precedence over any properties set on this {@code DocumentBuilder}, which in turn take precedence
-     *               over properties set at the {@link Processor} or {@link Configuration} level. The concept of
-     *               "taking precedence" is explained more fully at {@link ParseOptions#merge(ParseOptions)}</p>
+     * @param content - the XML doucment as a serialized string
      *
      * @return An <code>XdmNode</code>. This will be
      *         the document node at the root of the tree of the resulting in-memory document.
-     * @throws NullPointerException     if the source argument is null
-     * @throws IllegalArgumentException if the kind of source is not recognized
-     * @throws SaxonApiException        if any other failure occurs building the document, for example
-     *                                  a parsing error
      */
 
     XdmNode* parseXmlFromString(const char * content);
@@ -168,6 +150,8 @@ class DocumentBuilder {
      */
 
    XdmNode* parseXmlFromFile(const char * filename);
+
+   XdmNode * parseXmlFromUri(const char* source)
 
 
     private:
@@ -202,6 +186,7 @@ class DocumentBuilder {
         SchemaValidator * schemaValidator;
         jobject docBuilderObject;
         jclass  docBuilderClass;
+        jclass saxonCAPIClass;
         std::string cwdDB, baseURI; /*!< current working directory */
 } ;
 

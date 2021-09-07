@@ -44,6 +44,8 @@ cdef extern from "../SaxonProcessor.h":
 
         SchemaValidator * newSchemaValidator()
 
+        DocumentBuilder * newDocumentBuilder();
+
         XdmAtomicValue * makeStringValue(const char* str1)
 
         XdmAtomicValue * makeIntegerValue(int i)
@@ -77,6 +79,35 @@ cdef extern from "../SaxonProcessor.h":
         bool exceptionOccurred()
 
         void exceptionClear()
+
+
+    cdef cppclass DocumentBuilder:
+        DocumentBuilder() except +
+
+        void setLineNumbering(bool option);
+
+        bool isLineNumbering();
+
+        void setSchemaValidator(SchemaValidator * validator);
+
+        SchemaValidator * getSchemaValidator();
+
+
+        void setDTDValidation(bool option);
+
+        bool isDTDValidation();
+
+        void setBaseURI(const char* uri);
+
+        const char * getBaseURI();
+
+
+        XdmNode* parseXmlFromString(const char * content);
+
+        XdmNode* parseXmlFromFile(const char * filename);
+
+        XdmNode * parseXmlFromUri(const char* source)
+
 
 
     cdef cppclass XsltProcessor:

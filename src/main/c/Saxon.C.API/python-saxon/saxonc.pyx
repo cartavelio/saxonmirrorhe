@@ -142,6 +142,19 @@ cdef class PySaxonProcessor:
         :bool: Indicate if the processor is schema aware, True or False otherwise
         """
         return self.thisptr.isSchemaAwareProcessor()
+
+    def new_document_builder(self):
+        """
+        new_document_builder(self)
+        Create an PyDocumentBuilder. A PyDocumentBuilder holds properties controlling how a Saxon document tree should be built, and
+        provides methods to invoke the tree construction.
+        Returns:
+            PyDocumentBuilder: a newly created PyDocumentProcessor
+        """
+        cdef PyDocumentBuilder val = PyDocumentBuilder()
+        val.thisdbptr = self.thisptr.newDocumentBuilder()
+        return val
+
     def new_xslt_processor(self):
         """
         new_xslt_processor(self)
@@ -382,6 +395,141 @@ cdef class PySaxonProcessor:
         Clear any exception thrown internally in Saxon/C.
         """
         self.thisptr.exceptionClear()
+
+
+cdef class PyDocumentBuilder:
+    """
+    A PyDocumentBuilder holds properties controlling how a Saxon document tree should be built, and
+     * provides methods to invoke the tree construction.
+     * <p>This class has no public constructor.  To construct a DocumentBuilder,
+     * use the factory method SaxonProcessor.newDocumentBuilder().
+    """
+    cdef saxoncClasses.DocumentBuilder *thisdbptr      # hold a C++ instance which we're wrapping
+    def __cinit__(self):
+       """Default constructor """
+       self.thisdbptr = NULL
+    def __dealloc__(self):
+       if self.thisdbptr != NULL:
+          del self.thisdbptr
+
+    @property
+    def line_numbering(self):
+        """bool: true if line numbering is enabled"""
+        return self.thisdbptr.isLineNumbering()
+
+    @line_numbering.setter
+    def line_numbering(self, value):
+        """bool: option true if line numbers are to be maintained, false otherwise."""
+        cdef bool c_line
+        c_line = value
+        self.thisdbptr.setLineNumbering(c_line)
+
+
+    @property
+    def dtd_validation(self):
+        """bool: Ask whether DTD validation is to be applied to documents loaded using this PyDocumentBuilder"""
+        return self.thisdbptr.isDTDValidation()
+
+    @dtd_validation.setter
+    def dtd_validation(self, value):
+        """bool: Set whether DTD validation should be applied to documents loaded using this PyDocumentBuilder"""
+        cdef bool c_dtd
+        c_dtd = value
+        self.thisdbptr.setDTDValidation(c_dtd)
+
+    def set_schema_validator(self, val):
+       """Set the source document for the transformation.
+       Args:
+           **kwds: Keyword argument can only be one of the following: file_name|xdm_node
+       Raises:
+           Exception: Exception is raised if keyword argument is not one of file_name or node.
+        """
+       cdef PySchemaValidator sVal = None
+       sVal = val
+       self.thisdbptr.setSchemaValidator(sval.thissvptr)
+
+
+    def get_schema_validator(self):
+       """
+       get_schema_validator(self)
+       Get the SchemaValidator used to validate documents loaded using this DocumentBuilder
+       Returns:
+           PySchemaValidator: if one has been set; otherwise None.
+       """
+       py_name_string = name.encode('UTF-8') if name is not None else None
+       cdef char * c_name = py_name_string if name is not None else ""
+       cdef PySchemaValidator val = PySchemaValidator()
+       val.thisvptr = self.thisdbptr.setSchemaValidator()
+       return val
+
+    @property
+    def base_uri(self):
+       """
+       base_uri(self)
+       Base uri Property. Get the Base URI for the node, that is, the URI used for resolving a relative URI contained in the node.
+       This will be the same as the System ID unless xml:base has been used. Where the node does not have a base URI of its own,
+       the base URI of its parent node is returned.
+       Returns:
+           str: String value of the base uri for this node. This may be NULL if the base URI is unknown, including the case
+                where the node has no parent.
+       """
+       return make_py_str(self.thisdbptr.getBaseURI())
+
+    def set_base_uri(self, base_uri):
+       """
+       set_base_uri(self, base_uri)
+       Get the base URI of documents loaded using this PyDocumentBuilder when no other URI is available.
+       Args:
+           base_uri (str): the base output URI
+       """
+       py_uri_string = base_uri.encode('UTF-8') if base_uri is not None else None
+       cdef char * c_uri = py_uri_string if base_uri is not None else ""
+       self.thisdbptr.setBaseURI(c_uri)
+
+    def parse_xml(self, **kwds):
+        """
+        parse_xml(self, **kwds)
+        Parse a lexical representation, source file or uri of the source document and return it as an Xdm Node
+        Args:
+            **kwds : The possible keyword arguments must be one of the follow (xml_file_name|xml_text|xml_uri)
+        Returns:
+            PyXdmNode: The Xdm Node representation of the XML document
+        Raises:
+            Exception: Error if the keyword argument is not one of xml_file_name|xml_text|xml_uri.
+        """
+        py_error_message = "Error: parseXml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
+        if len(kwds) != 1:
+          raise Exception(py_error_message)
+        cdef PyXdmNode val = None
+        cdef py_value = None
+        cdef char * c_xml_string = NULL
+        if "xml_text" in kwds:
+          py_value = kwds["xml_text"]
+          py_xml_text_string = py_value.encode('UTF-8') if py_value is not None else None
+          c_xml_string = py_xml_text_string if py_value is not None else ""
+          val = PyXdmNode()
+          val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromString(c_xml_string)
+          return val
+        elif "xml_file_name" in kwds:
+          py_value = kwds["xml_file_name"]
+          py_filename_string = py_value.encode('UTF-8') if py_value is not None else None
+          if py_filename_string  is None or isfile(py_filename_string) == False:
+            raise Exception("XML file does not exist")
+          c_xml_string = py_filename_string if py_value is not None else ""
+          val = PyXdmNode()
+          val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromFile(c_xml_string)
+          return val
+        elif "xml_uri" in kwds:
+          py_value = kwds["xml_uri"]
+          py_uri_string = py_value.encode('UTF-8') if py_value is not None else None
+          c_xml_string = py_uri_string if py_value is not None else ""
+          val = PyXdmNode()
+          val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromUri(c_xml_string)
+          return val
+        else:
+           raise Exception(py_error_message)
+
+
 cdef class PyXsltProcessor:
      """An PyXsltProcessor represents factory to compile, load and execute a stylesheet.
      It is possible to cache the context and the stylesheet in the PyXsltProcessor """
@@ -3087,6 +3235,7 @@ cdef class PyXdmNode(PyXdmItem):
             val = PyXdmValue()
             val.thisvptr = xdmValue
             return val
+
      @property
      def base_uri(self):
         """
@@ -3099,6 +3248,7 @@ cdef class PyXdmNode(PyXdmItem):
                  where the node has no parent.
         """
         return make_py_str(self.derivednptr.getBaseUri())
+
      @property
      def string_value(self):
         """

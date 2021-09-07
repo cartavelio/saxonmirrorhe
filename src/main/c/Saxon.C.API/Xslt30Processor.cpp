@@ -532,7 +532,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
         jstring jsourcefile = (sourcefile != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(sourcefile) : nullptr);
         jstring jstylesheetfile = (stylesheetfile != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheetfile) : nullptr);
 		jobject result = (jobject)(
-				SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, mtvID,jcwd, cppXT, nullptr, jsourcefile,
+				SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, mtvID,jcwd, cppXT, NULL, jsourcefile,
 						                            jstylesheetfile, comboArrays.stringArray, comboArrays.objectArray));
 		if (comboArrays.stringArray != nullptr) {
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);
@@ -639,9 +639,9 @@ void Xslt30Processor::transformFileToFile(const char* source,
         comboArrays = SaxonProcessor::createParameterJArray2(parameters);
 
 		SaxonProcessor::sxn_environ->env->CallStaticVoidMethod(cppClass, mtfID,
-								SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()), cppXT, nullptr,
-								(source != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(source) : nullptr),
-								SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet),	(outputfile != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(outputfile) :nullptr),
+								SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()), cppXT, NULL,
+								(source != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(source) : NULL),
+								SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet),	(outputfile != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(outputfile) : NULL),
 								comboArrays.stringArray, comboArrays.objectArray);
 		if (comboArrays.stringArray!= nullptr) {
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);
@@ -687,10 +687,10 @@ const char * Xslt30Processor::transformFileToString(const char* source,
 
     jbyteArray result = nullptr;
 	jobject obj = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, mtsID,
-								SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()), cppXT, nullptr,
+								SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()), cppXT, NULL,
 						(source != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(
-												source) : nullptr),
-								(stylesheet != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet) : nullptr),
+												source) : NULL),
+								(stylesheet != nullptr ? SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet) : NULL),
 								comboArrays.stringArray, comboArrays.objectArray);
     if (comboArrays.stringArray!= nullptr) {
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);

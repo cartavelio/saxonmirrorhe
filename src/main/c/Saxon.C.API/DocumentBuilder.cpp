@@ -13,6 +13,7 @@
              */
             docBuilderClass = lookForClass(SaxonProcessor::sxn_environ->env,
                                     "net/sf/saxon/s9api/DocumentBuilder");
+            saxonCAPIClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/SaxonCAPI");
 
 
            docBuilderObject = SaxonProcessor::sxn_environ->env->NewGlobalRef(docObject);
@@ -125,8 +126,89 @@
 
 
 
-    XdmNode* DocumentBuilder::parseXmlFromString(const char * content){ return nullptr;}
+    XdmNode* DocumentBuilder::parseXmlFromString(const char * source){
+    jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlString",
+                                                                                    "(Ljava/lang/String;Lnet/sf/saxon/s9api/Processor;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
+    if (!mID) {
+        std::cerr << "\nError: Saxonc." << "parseXmlString()" << " not found" << std::endl;
+        return nullptr;
+    }
+//TODO SchemaValidator
+
+    if(source == nullptr) {
+        createException("Source string is NULL");
+        return nullptr;
+    }
+
+    jobject xdmNodei = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mID,
+                                                                                SaxonProcessor::sxn_environ->env->NewStringUTF(
+                                                                                        cwd.c_str()), proc, docBuilderObject, (validator != nullptr ? validator->getUnderlyingValidator(): nullptr),
+                                                                                SaxonProcessor::sxn_environ->env->NewStringUTF(
+                                                                                        source));
+    if (xdmNodei) {
+        XdmNode *value = nullptr;
+        value = new XdmNode(xdmNodei);
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(xdmNodei);
+        return value;
+    } else if (exceptionOccurred()) {
+        createException();
+    }
+
+#ifdef DEBUG
+    SaxonProcessor::sxn_environ->env->ExceptionDescribe();
+#endif
+
+    return nullptr;
+
+
+    }
 
 
 
-   XdmNode* parseXmlFromFile(const char * filename){ return nullptr;}
+   XdmNode* parseXmlFromFile(const char * filename){
+    jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlFile",
+                                                                                    "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
+    if (!mID) {
+        std::cerr << "\nError: Saxonc.Dll " << "parseXmlFromFile()" << " not found" << std::endl;
+        return nullptr;
+    }
+    jobject xdmNodei = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mID, proc,
+                                                                                SaxonProcessor::sxn_environ->env->NewStringUTF(
+                                                                                        ""),  docBuilderObject, (validator != nullptr ? validator->getUnderlyingValidator(): nullptr),
+                                                                                SaxonProcessor::sxn_environ->env->NewStringUTF(
+                                                                                        filename));
+    if (xdmNodei) {
+        XdmNode *value = nullptr;
+        value = new XdmNode(xdmNodei);
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(xdmNodei);
+        return value;
+    } else if (exceptionOccurred()) {
+        createException();
+    }
+  }
+
+
+   XdmNode* parseXmlFromUri(const char * uri){
+    jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlFile",
+                                                                                    "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
+    if (!mID) {
+        std::cerr << "\nError: Saxonc.Dll " << "parseXmlFromFile()" << " not found" << std::endl;
+        return nullptr;
+    }
+    jobject xdmNodei = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mID, proc,
+                                                                                SaxonProcessor::sxn_environ->env->NewStringUTF(
+                                                                                        ""),  docBuilderObject, (validator != nullptr ? validator->getUnderlyingValidator(): nullptr),
+                                                                                SaxonProcessor::sxn_environ->env->NewStringUTF(
+                                                                                        uri));
+    if (xdmNodei) {
+        XdmNode *value = nullptr;
+        value = new XdmNode(xdmNodei);
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(xdmNodei);
+        return value;
+    } else if (exceptionOccurred()) {
+        createException();
+    }
+
+
+
+   }
