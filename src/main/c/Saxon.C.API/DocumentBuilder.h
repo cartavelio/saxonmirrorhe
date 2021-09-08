@@ -38,6 +38,8 @@ class DocumentBuilder {
     public:
 
 
+        ~DocumentBuilder();
+
     /**
      * Say whether line and column numbering and is to be enabled for documents constructed using this DocumentBuilder.
      * This has the effect that the line and column number in the original source document is maintained in the constructed
@@ -142,7 +144,7 @@ class DocumentBuilder {
     XdmNode* parseXmlFromString(const char * content);
 
     /**
-     * Build a document from a supplied XML file
+     * Build a document from a supplied XML file   ;
      *
      * @param file the supplied file
      * @return the XdmNode representing the root of the document tree
@@ -151,7 +153,43 @@ class DocumentBuilder {
 
    XdmNode* parseXmlFromFile(const char * filename);
 
-   XdmNode * parseXmlFromUri(const char* source)
+   XdmNode * parseXmlFromUri(const char* source);
+
+
+
+
+    /**
+     * Checks for pending exceptions without creating a local reference to the exception object
+     * @return bool - true when there is a pending exception; otherwise return false
+    */
+    bool exceptionOccurred();
+
+    //! Clear any exception thrown
+    void exceptionClear();
+
+     //! Get the ith error message if there are any error
+    /**
+     * A transformation may have a number of errors reported against it.
+     * @return char* - The message of the exception
+    */
+    const char * getErrorMessage();
+
+
+     //! Get the ith error code if there are any error
+    /**
+     * After the execution of the XPath expression there may be  a number of errors reported against it.
+     * @return char* - The error code of the exception.
+    */
+    const char * getErrorCode();
+
+
+    //! Get the SaxonApiException object created when we have an error
+    /**
+     * After the execution of the processor if there is an error, then a SaxonApiException is created.
+     * NULL returned if there is no error.
+     * @return SaxomApiException object of the exception thrown.
+     */
+    SaxonApiException * getException();
 
 
     private:
@@ -168,12 +206,14 @@ class DocumentBuilder {
 
 
 
+
+
         //! Constructor with the SaxonProcessor supplied.
         /*!
           @param proc - Supplied pointer to the SaxonProcessor object
           cwd - The current working directory
         */
-        DocumentBuilder(jobject docBuilderObject, std::string cwd);
+        DocumentBuilder(SaxonProcessor* p, jobject docBuilderObject, std::string cwd);
 
     	/**
     	 * Xslt30Processor copy constructor.
@@ -181,13 +221,18 @@ class DocumentBuilder {
     	 */
         DocumentBuilder(const DocumentBuilder &other);
 
-        
-        bool lineNumbering, dtdVal;
+
+        void createException(const char * message=nullptr);
+
         SchemaValidator * schemaValidator;
+        SaxonProcessor * proc;
+        SaxonApiException * exception;
+        std::string cwdXP; /*!< current working directory */
         jobject docBuilderObject;
-        jclass  docBuilderClass;
+        jclass  docBuilderClass, procClass;
         jclass saxonCAPIClass;
         std::string cwdDB, baseURI; /*!< current working directory */
+        bool lineNumbering, dtdVal;
 } ;
 
 #endif /* DOCUMENT_BUILDER_H */

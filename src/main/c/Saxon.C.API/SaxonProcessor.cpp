@@ -629,7 +629,7 @@ DocumentBuilder * SaxonProcessor::newDocumentBuilder(){
     				SaxonProcessor::sxn_environ->env->CallObjectMethod(proc, docBuilderID));
 
 
-        DocumentBuilder * builder = new DocumentBuilder(docBuilderObject, cwd);
+        DocumentBuilder * builder = new DocumentBuilder(this, docBuilderObject, cwd);
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(docBuilderObject);
 
     }

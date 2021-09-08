@@ -437,16 +437,14 @@ cdef class PyDocumentBuilder:
         c_dtd = value
         self.thisdbptr.setDTDValidation(c_dtd)
 
-    def set_schema_validator(self, val):
+    def set_schema_validator(self, PySchemaValidator val):
        """Set the source document for the transformation.
        Args:
            **kwds: Keyword argument can only be one of the following: file_name|xdm_node
        Raises:
            Exception: Exception is raised if keyword argument is not one of file_name or node.
         """
-       cdef PySchemaValidator sVal = None
-       sVal = val
-       self.thisdbptr.setSchemaValidator(sval.thissvptr)
+       self.thisdbptr.setSchemaValidator(val.thissvptr)
 
 
     def get_schema_validator(self):
@@ -456,10 +454,10 @@ cdef class PyDocumentBuilder:
        Returns:
            PySchemaValidator: if one has been set; otherwise None.
        """
-       py_name_string = name.encode('UTF-8') if name is not None else None
-       cdef char * c_name = py_name_string if name is not None else ""
        cdef PySchemaValidator val = PySchemaValidator()
-       val.thisvptr = self.thisdbptr.setSchemaValidator()
+       val.thissvptr = self.thisdbptr.getSchemaValidator()
+       if val.thissvptr is NULL:
+           raise Exception("Error: Saxon Processor is not licensed for schema processing!")
        return val
 
     @property
