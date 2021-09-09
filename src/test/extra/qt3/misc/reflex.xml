@@ -794,10 +794,14 @@
    <test-case name="reflex-056">
       <description>Enumerate keys after converting external object to a map.</description>
       <created by="Michael Kay" on="2018-07-05"/>
+      <modified by="Michael Kay" on="2021-09-09" change="ignore the isEmpty() method present in JDK 11+"/>
       <test><![CDATA[
       	declare namespace StreamSource = "java:javax.xml.transform.stream.StreamSource";
       	declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
-      	StreamSource:new() => saxon:object-map() => map:keys() => sort()
+      	StreamSource:new() => saxon:object-map() 
+      	                   => map:keys() 
+      	                   => filter(function($s){not(starts-with($s, 'isEmpty'))}) 
+      	                   => sort()
       ]]></test>
       <result>
          <assert-deep-eq>"equals",
