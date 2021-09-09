@@ -52,7 +52,7 @@
     <description>Evaluation of replace function with pattern = "a(.)" and replacement = "a$1$1" as an example 5 for this function. </description>
     <created by="Michael Kay after Carmelo Montanez" on="2005-10-13"/>
     <environment ref="e"/>
-    <test>saxon:replace-with("abracadabra", "a(.)", function($x){$x!"a"||substring(.,2)||substring(.,2)})</test>
+    <test>saxon:replace-with("abracadabra", "a(.)", function($x){$x!("a"||substring(.,2)||substring(.,2))})</test>
     <result>
       <assert-string-value>abbraccaddabbra</assert-string-value>
     </result>
