@@ -72,9 +72,8 @@ task runTestSuiteReportsJava(
 }
 
 // ============================================================
-
+//removed - "XP30": "XPath3.0",
 def langCodeMap = ["XP20": "XPath2.0",
-                   "XP30": "XPath3.0",
                    "XP31": "XPath3.1",
                    "XT30": "XSLT3.0",
                    "XT40": "XSLT4.0",
@@ -149,10 +148,12 @@ task qt3TestsJava() {
   // Just somewhere to hang dependencies
 }
 
+
 ["he", "pe", "ee"].each { rel ->
   def languages = ["XP20", "XP31", "XQ30", "XQ31"]
   if (rel == "ee") {
-    languages = ["XP20", "XP30", "XP31", "XQ10", "XQ30", "XQ31"]
+    languages = ["XP20", "XP31", "XQ10", "XQ30", "XQ31"]
+    //removed "XP30",
   }
 
   def bytecodes = [""]
@@ -200,7 +201,8 @@ task qt3ExtraTestsJava() {
 ["pe", "ee"].each { rel ->
   def languages = ["XP20", "XP31", "XQ30", "XQ31"]
   if (rel == "ee") {
-    languages = ["XP20", "XP30", "XP31", "XQ10", "XQ30", "XQ31"]
+    languages = ["XP20", "XP31", "XQ10", "XQ30", "XQ31"]
+    //removed "XP30",
   }
 
   def bytecodes = [""]
