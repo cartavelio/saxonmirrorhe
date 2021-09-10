@@ -1,4 +1,4 @@
-<test-set xmlns="http://www.w3.org/2010/09/qt-fots-catalog" name="expath-binary">
+<test-set xmlns="http://www.w3.org/2010/09/qt-fots-catalog" name="expath-binary2">
   <description> Tests for the extension functions in the EXPath "binary" package. Takem from the
     internal BaseX test cases.</description>
   <link type="spec" document="http://expath.org/spec/binary"/>
