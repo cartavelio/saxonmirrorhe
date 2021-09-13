@@ -65,78 +65,26 @@ if (!hasProperty("saxonLicenseDir")) {
 
 println("Building with Java version ${System.getProperty('java.version')}")
 println("Expecting Saxon license file to be in ${saxonLicenseDir}")
-=======
-plugins {
-  id "java"
-  id "maven-publish"
-  id "signing"
-  id 'com.nwalsh.gradle.docker.container' version '0.0.3'
-}
-
-apply plugin: 'java'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
-
-// These plugins are in buildSrc
-apply plugin: JarSignPlugin
-apply plugin: ManageBranchesPlugin
-apply plugin: ManageTestSuitesPlugin
-
-import org.gradle.internal.os.OperatingSystem;
-import com.nwalsh.gradle.docker.DockerContainer
-
-project.extensions.create("testSuite", TestSuite, project)
-
-repositories {
-  mavenLocal()
-  mavenCentral()
-  maven { url = "https://maven.apache.org" }
-  maven { url "https://dev.saxonica.com/maven" }
-}
-
-configurations.all {
-  resolutionStrategy {
-    force 'xml-apis:xml-apis:1.4.01'
-  }
-}
-
-configurations {
-  preprocessor.extendsFrom(runtimeOnly)
-  jarjarAsm.extendsFrom(implementation)
-  testDrivers.extendsFrom(testImplementation)
-  productTests.extendsFrom(testImplementation)
-  ikvm.extendsFrom(implementation)
-  compileDotNet.extendsFrom(implementation)
-  asmDotNet.extendsFrom(implementation)
-  documentation.extendsFrom(implementation)
-  jeldoclet.extendsFrom(implementation)
-  samples.extendsFrom(implementation)
-}
-
-sourceSets {
-  main
-  samples {
-    runtimeClasspath += configurations.samples + main.output
-    compileClasspath += configurations.samples + main.output
-  }
-}
-
-// Set saxonLicenseDir in gradle.properties, or from the
-// command line if you have a license in some other place.
-if (!hasProperty("saxonLicenseDir")) {
-  if (System.getenv("SAXON_LICENSE_DIR") != null) {
-    ext.saxonLicenseDir=System.getenv('SAXON_LICENSE_DIR')
+if (OperatingSystem.current().isWindows()) {
+  if (jarsigner.makeSignedJars && jarsigner.makeSignedInstallers) {
+    println("Build is configured to sign jar files and .NET installers")
   } else {
-    ext.saxonLicenseDir=System.getenv('HOME') + "/java"
+    if (jarsigner.makeSignedJars) {
+      println("Build is configured to sign jar files but not .NET installers")
+    }
+    if (jarsigner.makeSignedInstallers) {
+      println("Build is configured to sign .NET installers but not jar files")
+    }
+    if (!jarsigner.makeSignedJars && !jarsigner.makeSignedInstallers) {
+      println("Build is not configured to sign release artifacts")
+    }
   }
-}
-
-println("Building with Java version ${System.getProperty('java.version')}")
-println("Expecting Saxon license file to be in ${saxonLicenseDir}")
-if (jarsigner.makeSignedJars) {
-  println("Build is configured to sign jar files")
 } else {
-  println("Build is not configured to sign jar files")
+  if (jarsigner.makeSignedJars) {
+    println("Build is configured to sign jar files")
+  } else {
+    println("Build is not configured to sign release artifacts")
+  }
 }
 
 dependencies {
@@ -1681,4 +1629,4 @@ task helloWorld() {
 */
   }
 }
->>>>>>> Stashed changes
+
