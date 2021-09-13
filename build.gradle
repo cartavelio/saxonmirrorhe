@@ -65,10 +65,26 @@ if (!hasProperty("saxonLicenseDir")) {
 
 println("Building with Java version ${System.getProperty('java.version')}")
 println("Expecting Saxon license file to be in ${saxonLicenseDir}")
-if (jarsigner.makeSignedJars) {
-  println("Build is configured to sign jar files")
+if (OperatingSystem.current().isWindows()) {
+  if (jarsigner.makeSignedJars && jarsigner.makeSignedInstallers) {
+    println("Build is configured to sign jar files and .NET installers")
+  } else {
+    if (jarsigner.makeSignedJars) {
+      println("Build is configured to sign jar files but not .NET installers")
+    }
+    if (jarsigner.makeSignedInstallers) {
+      println("Build is configured to sign .NET installers but not jar files")
+    }
+    if (!jarsigner.makeSignedJars && !jarsigner.makeSignedInstallers) {
+      println("Build is not configured to sign release artifacts")
+    }
+  }
 } else {
-  println("Build is not configured to sign jar files")
+  if (jarsigner.makeSignedJars) {
+    println("Build is configured to sign jar files")
+  } else {
+    println("Build is not configured to sign release artifacts")
+  }
 }
 
 dependencies {

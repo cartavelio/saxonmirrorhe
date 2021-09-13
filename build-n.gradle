@@ -579,16 +579,15 @@ task "n_notices"(
   }
 
   task "${release}nSigner"(
-    type: Exec,
     dependsOn: ["${release}nInstaller"]
   ) {
-    // Speculative change: untested (and will clearly need at least a little work!)
-    commandLine "signtool",
-      "sign",
-      "/f", "saxonica_certificate.pfx",
-      "/p", "password",
-      "/t", "http://timestamp.digicert.com",
-      "${buildDir}/distributions/Saxon${RELEASE}${saxonMajorVersion}-${saxonMinorVersion}N-setup.exe"
+    doLast {
+      exec {
+        def exefile = "${buildDir}/distributions/Saxon${RELEASE}${saxonMajorVersion}-${saxonMinorVersion}N-setup.exe"
+        println(jarsigner.signtoolCommand(exefile))
+        commandLine jarsigner.signtoolCommand(exefile)
+      }
+    }
   }
 }
 
@@ -1164,7 +1163,7 @@ if (file("${projectDir}/src/main/java/com").exists()) {
   }
 
   task dotNetInstallers(
-    dependsOn: ["henInstaller", "penInstaller", "eenInstaller"],
+    dependsOn: ["henSigner", "penSigner", "eenSigner"],
     description: "Builds all of the .NET installers"
   ) {
     // nop
