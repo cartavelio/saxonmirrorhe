@@ -6480,6 +6480,9 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></samp>
           <samp><![CDATA[map{"name": QName("http://a.com/", "colour"),
     "params": ("blue", 3)}]]></samp>
           
+          <p>Function annotations are retained (as required by the W3C specification) when a function is 
+            coerced as a result of type-checking. Annotations are also retained when functions are partially applied.</p>
+          
         </div>
       </details>
 
