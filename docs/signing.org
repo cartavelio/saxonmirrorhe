@@ -1,0 +1,68 @@
+#+TITLE: Signing releases
+
+The gradle build scripts can sign both Java releases (with jarsigner) and Windows releases (with signtool).
+
+The javaReleases and dotNetInstaller tasks will build and sign releases.
+
+Some configuration is necessary to enable signing.
+
+* Configuration
+
+There are several ways to configure a build. The easiest is to create
+a gradle.properties file in your ~/.gradle directory. That file should contain the following configuration items:
+
+    saxonSignKeystore=/Users/ndw/java/saxonica_certificate.pfx
+    saxonSignAlias=te-GUID
+    saxonSignPassword=********
+    saxonSignJars=true
+
+Change the keystore property so that it identifies your local copy of
+the certificate. Don’t put the certificate in the repository! Make
+sure that the alias and password are correct. Don’t allow those to get
+cheked in either!
+
+If you don’t want to create a global gradle properties file, you can
+specify the options on the command line when you run gradle:
+
+    ./gradlew -PsaxonSignKeystore=… -PsaxonSignAlias=… etc.
+
+Finally, if you prefer, you can configure the properties with environment variables.
+
+    SAXON_SIGN_KEYSTORE=/Users/ndw/java/saxonica_certificate.pfx
+    SAXON_SIGN_ALIAS=te-GUID
+    SAXON_SIGN_PASSWORD=********
+    SAXON_SIGN_JARS=true
+
+* Signing jar files
+
+Make sure that you’ve setup the configuration and that the jarsigner
+tool is on your path. Then you can run the signing targets.
+
+* Signing Windows installers
+
+For Windows, you need to configure the keystore, alias, and password as described above. Instead
+of the property for signing jars, you need one for signing installers. As a property:
+
+    saxonSignInstallers=true
+
+or with an environment variable:
+
+    SAXON_SIGN_INSTALLERS=true
+
+You also have to tell the build system where to find the signtool
+command. It doesn’t seem to be on the path or in any rational location.
+(On my system it’s in
+
+    C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x86\signtool
+
+of all places! Configure the saxonSignTool property:
+
+    saxonSignTool=C:/Program Files (x86)/Windows Kits/10/bin/10.0.19041.0/x86/signtool
+
+or SAXON_SIGNTOOL environment variable:
+
+    SAXON_SIGNTOOL=C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x86\signtool
+
+Beware that “\” is an escape character in the property file, so you
+should either use forward slashes (which work just fine) or double
+back slashes!
