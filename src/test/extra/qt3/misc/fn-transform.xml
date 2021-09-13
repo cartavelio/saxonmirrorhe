@@ -177,6 +177,7 @@
         <environment name="simple">
             <source role="$xsl" file="transform/copy.xsl"/>
         </environment>
+        <feature value="schema_aware"/>
         <test> transform(map{"stylesheet-node":$xsl, "initial-template":QName('', 'main'), "source-location":"../misc/docs/atomic.xml",
             "vendor-options": map{QName('http://saxon.sf.net/', 'schema-validation'):'strict'} }) </test>
         <result>

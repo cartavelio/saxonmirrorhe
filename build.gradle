@@ -554,7 +554,7 @@ task "pej_preprocess"(
       main = "com.igormaznitsa.jcp.JcpPreprocessor"
       args "/c",
         "/i:${buildDir}/filtered/pej", "/o:${buildDir}/src/pej",
-        "/p:EE=false", "/p:PE=true", "/p:DOTNET=false",
+        "/p:EE=false", "/p:PE=false", "/p:DOTNET=false",
         "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
@@ -1629,4 +1629,3 @@ task helloWorld() {
 */
   }
 }
-

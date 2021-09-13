@@ -790,6 +790,10 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
 
     @Override
     public boolean isExportable() {
+        if (!(getPackageData() instanceof StylesheetPackage)) {
+            // this must be an imported XQuery function
+            return false;
+        }
         return refCount > 0 ||
                 (getDeclaredVisibility() != null && getDeclaredVisibility() != Visibility.PRIVATE) ||
                 ((StylesheetPackage) getPackageData()).isRetainUnusedFunctions();

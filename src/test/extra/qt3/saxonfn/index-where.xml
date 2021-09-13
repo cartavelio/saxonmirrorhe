@@ -53,7 +53,7 @@
           $headings := trace(saxon:index-where($seq, function($x){local-name($x)='h1'}), 'headings')
       return $D($E('result',(
           if (head($headings) != 1) then $E('preface', subsequence($seq, 1, head($headings)-1)) else (),
-          for-each-pair($headings, tail($headings), _{$E('section', subsequence($seq, $1, $2 - $1))}),
+          for-each-pair($headings, tail($headings), function($x1, $x2){$E('section', subsequence($seq, $x1, $x2 - $x1))}),
           $E('section', subsequence($seq, $headings[last()])))))  
       ]]></test>
     <result>

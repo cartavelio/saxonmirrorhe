@@ -24,6 +24,7 @@
    <test-case name="s-type-001">
       <description>Use saxon:type() to get the type annotation of an element node</description>
       <created by="Michael Kay" on="2012-02-05"/>
+      <feature value="schema_aware"/>
       <environment ref="atomic"/>
       <test>let $s := saxon:type(/atomic:root/atomic:duration)
             return ($s('name'), $s('target namespace'))
@@ -36,6 +37,7 @@
    <test-case name="s-type-002">
       <description>Use saxon:type() to get the type annotation of an attribute node</description>
       <created by="Michael Kay" on="2012-02-05"/>
+      <feature value="schema_aware"/>
       <environment ref="atomic"/>
       <test>let $s := saxon:type(/atomic:root/atomic:idrefs/@atomic:attr)
             return ($s('name'), $s('target namespace'), $s('variety'))
