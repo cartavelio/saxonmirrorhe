@@ -16,7 +16,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <assert-xml><![CDATA[<result><z>38</z></result>]]></assert-xml>
+         <any-of>
+            <assert-xml><![CDATA[<result><z>38</z></result>]]></assert-xml>
+            <error code="SXST0070"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -32,7 +35,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <error code="XPST0017"/>
+         <any-of>
+            <error code="XPST0017"/>
+            <error code="SXST0070"/>
+         </any-of>
       </result>
    </test-case>
 
@@ -48,7 +54,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <assert-xml><![CDATA[<result><a><z>2</z></a><a><z>3</z></a><a><z>4</z></a><a><z>5</z></a><a><z>6</z></a></result>]]></assert-xml>
+         <any-of>
+            <assert-xml><![CDATA[<result><a><z>2</z></a><a><z>3</z></a><a><z>4</z></a><a><z>5</z></a><a><z>6</z></a></result>]]></assert-xml>
+            <error code="SXST0070"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -64,7 +73,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <error code="XPST0017"/>
+         <any-of>
+            <error code="XPST0017"/>
+            <error code="SXST0070"/>
+         </any-of>
       </result>
    </test-case>
    
@@ -80,7 +92,10 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <assert-xml><![CDATA[<result><z>38</z></result>]]></assert-xml>
+         <any-of>
+            <assert-xml><![CDATA[<result><z>38</z></result>]]></assert-xml>
+            <error code="SXST0070"/>
+         </any-of>
       </result>
    </test-case>
 
