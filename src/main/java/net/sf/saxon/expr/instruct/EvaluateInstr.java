@@ -59,7 +59,7 @@ public final class EvaluateInstr extends Expression {
     private Operand namespaceContextOp;
     private Operand schemaAwareOp;
     private Operand optionsOp;
-    private Set<String> importedSchemaNamespaces;
+    private Set<String> importedSchemaNamespaces = new HashSet<>();
     private WithParam[] actualParams;
     private Operand dynamicParamsOp;
     private String defaultXPathNamespace = null;
