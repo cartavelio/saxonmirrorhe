@@ -2289,6 +2289,7 @@ public class PackageLoaderHE implements IPackageLoader {
             }
 
             if (e instanceof SystemFunctionCall) {
+                ((SystemFunctionCall) e).allocateArgumentEvaluators(args);
                 final SystemFunction fn = ((SystemFunctionCall) e).getTargetFunction();
                 fn.setRetainedStaticContext(rsc);
                 SequenceIterator iter = element.iterateAxis(AxisInfo.ATTRIBUTE);
@@ -2533,6 +2534,9 @@ public class PackageLoaderHE implements IPackageLoader {
                     ((IntegratedFunctionCall) exp).getFunction().supplyStaticContext(ic, -1, args);
                     ((IntegratedFunctionCall) exp).setResultType(type);
                 }
+            }
+            if (exp instanceof SystemFunctionCall) {
+                ((SystemFunctionCall) exp).allocateArgumentEvaluators(args);
             }
             return exp;
         });
