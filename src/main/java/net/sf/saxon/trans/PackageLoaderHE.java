@@ -3131,12 +3131,13 @@ public class PackageLoaderHE implements IPackageLoader {
                 if (flags.contains("s")) {
                     loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getPackage().getSpaceStrippingRule()));
                 }
+                if (flags.contains("S")) {
+                    options.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+                }
                 if (flags.contains("l")) {
                     options.setLineNumbering(true);
                 }
-                if (flags.contains("a")) {
-                    options.setExpandAttributeDefaults(true);
-                }
+                options.setExpandAttributeDefaults(flags.contains("a"));
                 if (flags.contains("d")) {
                     options.setDTDValidationMode(Validation.STRICT);
                 }
