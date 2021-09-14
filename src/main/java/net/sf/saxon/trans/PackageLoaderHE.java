@@ -2373,12 +2373,17 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("forEach", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
-
+            ForEach forEach;
             Expression threads = loader.getExpressionWithRole(element, "threads");
             if (threads == null) {
-                return new ForEach(lhs, rhs);
+                forEach = new ForEach(lhs, rhs);
+                Expression sep = loader.getExpressionWithRole(element, "separator");
+                if (sep != null) {
+                    forEach.setSeparatorExpression(sep);
+                }
+                return forEach;
             } else {
-                ForEach forEach = new ForEach(lhs, rhs, false, threads);
+                forEach = new ForEach(lhs, rhs, false, threads);
                 Expression sep = loader.getExpressionWithRole(element, "separator");
                 if (sep != null) {
                     forEach.setSeparatorExpression(sep);
