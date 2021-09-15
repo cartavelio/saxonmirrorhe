@@ -367,6 +367,8 @@ public class PackageLoaderHE implements IPackageLoader {
             boolean range = flags != null && flags.contains("r");
             boolean reusable = flags != null && flags.contains("u");
             boolean composite = flags != null && flags.contains("c");
+            boolean convertUntypedToOther = flags != null && flags.contains("v");
+            boolean strictComparison = flags != null && flags.contains("s");
             Pattern match = getFirstChildPattern(keyElement);
             Expression use = getSecondChildExpression(keyElement);
             String collationName = keyElement.getAttributeValue("", "collation");
@@ -391,6 +393,8 @@ public class PackageLoaderHE implements IPackageLoader {
             if (composite) {
                 keyDefinition.setComposite(true);
             }
+            keyDefinition.setConvertUntypedToOther(convertUntypedToOther);
+            keyDefinition.setStrictComparison(strictComparison);
             pack.getKeyManager().addKeyDefinition(keyName, keyDefinition, reusable, pack.getConfiguration());
             //pack.addComponent(keyComponent);
         }

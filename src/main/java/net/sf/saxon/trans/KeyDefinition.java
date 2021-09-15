@@ -319,6 +319,12 @@ public class KeyDefinition extends Actor implements ContextOriginator {
         if (composite) {
             flags += "c";
         }
+        if (convertUntypedToOther) {
+            flags += "v";
+        }
+        if (strictComparison) {
+            flags += "s";
+        }
         if (reusable) {
             flags += "u";
         }
