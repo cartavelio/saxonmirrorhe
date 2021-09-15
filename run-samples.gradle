@@ -171,7 +171,7 @@ task run_cmd_tour_sample_tests(
     def call = test.split("_")[0]
     Task t = task "run_tour_${test}_${edition}"(
             type: JavaExec,
-            dependsOn: "${edition}jJar",
+            dependsOn: ["${edition}jJar", "${edition}_samples_common"],
             description: "Run the cmd knights tour sample with ${edition}, test ${test}"
     ) {
       def resdir = "${buildDir}/samples/results/cmd/${edition}"
@@ -208,7 +208,7 @@ task run_cmd_shakespeare_sample_tests(
 ["he", "pe", "ee"].each { edition ->
   Task t = task "run_shakespeare_Transform_${edition}"(
           type: JavaExec,
-          dependsOn: "${edition}jJar",
+          dependsOn: ["${edition}jJar", "${edition}_samples_common"],
           description: "Run the cmd shakespeare sample transform with ${edition}"
   ) {
     def resdir = "${buildDir}/samples/results/cmd/${edition}"
@@ -234,7 +234,7 @@ task run_cmd_bible_sample_tests(
 ["he", "pe", "ee"].each { edition ->
   Task t = task "run_bible_Transform_${edition}"(
           type: JavaExec,
-          dependsOn: "${edition}jJar",
+          dependsOn: ["${edition}jJar", "${edition}_samples_common"],
           description: "Run the cmd bible sample transform with ${edition}"
   ) {
     def resdir = "${buildDir}/samples/results/cmd/${edition}"
