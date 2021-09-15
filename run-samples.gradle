@@ -114,7 +114,7 @@ task run_cmd_books_sample_tests(
     def call = test.split("_")[0]
     Task t = task "run_books_${test}_${edition}"(
             type: JavaExec,
-            dependsOn: "${edition}jJar",
+            dependsOn: ["${edition}jJar", "${edition}_samples_common"],
             description: "Run the cmd books sample with ${edition}, test ${test}"
     ) {
       def resdir = "${buildDir}/samples/results/cmd/${edition}"
