@@ -16,9 +16,9 @@ public final class Version {
 
     private static final int MAJOR_VERSION = 10;
     private static final int MINOR_VERSION = 6;
-    private static final int BUILD = 90916; //mddhh
+    private static final int BUILD = 91515; //mddhh
     private static final String MAJOR_RELEASE_DATE = "2020-03-16";
-    private static final String MINOR_RELEASE_DATE = "2021-09-09";
+    private static final String MINOR_RELEASE_DATE = "2021-09-15";
 
 
     private Version() {
