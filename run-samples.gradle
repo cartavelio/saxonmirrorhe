@@ -379,6 +379,7 @@ def heSampleArgs = ["JAXPExamples": ["all"],
 
         task "${tver}_he_samples_${sample}_${edition}"(
           type: JavaExec,
+          dependsOn: ["${edition}_samples_common"]
         ) {
           def resdir = "${buildDir}/samples/results/he"
 
