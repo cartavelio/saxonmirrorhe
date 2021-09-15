@@ -8,7 +8,7 @@ exclude-result-prefixes="my saxon">
   
   <xsl:template name="main">
     <out>
-      <xsl:value-of select="saxon:last-modified('http://www.saxonica.com/index.html')"/>
+      <xsl:value-of select="saxon:last-modified('https://www.saxonica.com/index.html')"/>
     </out>
   </xsl:template>
  
