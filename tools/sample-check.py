@@ -53,7 +53,7 @@ def check_jaxpexamples(output):
          "OutputProperties": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*\$14.78"],
          "UseAssociated": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
          "ContentHandlertoDOM": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
-         "AsSerializer": [r"^<\?xml-stylesheet.*DOCTYPE HTML><BOOKLIST", "", r"\s*<BOOKS>"],
+         "AsSerializer": [r"^<\?xml-stylesheet.*<BOOKLIST", "", r"\s*<BOOKS>"],
          "NewDOMSerializer": [r"^<\?xml.*[Uu][Tt][Ff]-8", r"^<x xmlns=.nsx\.uri./>"],
          "UsingURIResolver": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
          "done!": []
