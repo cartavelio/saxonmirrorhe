@@ -1203,7 +1203,7 @@ task eejTests(
   // See if -PtestTag was specified
   def tags = project.findProperty("testTag")
   if (tags == null) {
-    tags = []
+    tags = ["-performance", "-mike", "-bytecode"]
   } else {
     if (tags.contains(",")) {
       tags = tags.split(",")
