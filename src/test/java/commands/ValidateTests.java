@@ -7,6 +7,8 @@ import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XdmAtomicValue;
 import net.sf.saxon.s9api.XdmItem;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.io.File;
 
@@ -20,8 +22,21 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ValidateTests {
     private static String TEMPDIR = ConfigTest.DATA_DIR + "temp/";
 
-    public void setUp() {
+    @BeforeAll
+    public static void setUp() {
         System.err.println("TEMP:" + TEMPDIR);
+
+        String[] args = {
+                "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
+                "-scmout:" + TEMPDIR + "books.scm",
+                "-t"};
+        try {
+            int rc = new Validate().doValidate(args);
+            assertTrue(rc==0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 
     @Test
@@ -45,22 +60,6 @@ public class ValidateTests {
         String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-t"};
-        try {
-            int rc = new Validate().doValidate(args);
-            assertTrue(rc==0);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
-
-    @Test
-    public void testExportSCM() {
-
-        String[] args = {
-                "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
-                "-scmout:" + TEMPDIR + "books.scm",
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
