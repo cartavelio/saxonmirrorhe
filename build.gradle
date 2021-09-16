@@ -172,7 +172,7 @@ javadoc {
 
 test {
   useJUnitPlatform {
-    excludeTags 'bytecode'
+    excludeTags 'bytecode', 'performance', 'mike'
   }
 }
 

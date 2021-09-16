@@ -12,6 +12,7 @@ import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.ErrorListener;
@@ -59,6 +60,7 @@ public class ConfigurationTest {
     }
 
     @Test
+    @Tag("mike")
     public void testBug4650() {
         try {
             Configuration configuration = Configuration.readConfiguration(new StreamSource(new File("/Users/mike/bugs/2020/4650-Nadolu/SaxonTest-2/resources/saxonEEConfig.xml")));

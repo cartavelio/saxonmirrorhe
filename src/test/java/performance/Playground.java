@@ -5,6 +5,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.UntypedAtomicValue;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class Playground extends PerformanceTestCase {
     // Some experiments to study different ways of testing item types. Results show they're all much the same
 
     @Test
+    @Tag("performance")
     public void testInstanceOf() {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i=0; i<5000000; i++) {
@@ -45,6 +47,7 @@ public class Playground extends PerformanceTestCase {
     }
 
     @Test
+    @Tag("performance")
     public void testPrimitiveType() {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 5000000; i++) {
@@ -75,6 +78,7 @@ public class Playground extends PerformanceTestCase {
     }
 
     @Test
+    @Tag("performance")
     public void testActualType() {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 5000000; i++) {
@@ -105,6 +109,7 @@ public class Playground extends PerformanceTestCase {
     }
 
     @Test
+    @Tag("performance")
     public void testFingerprint() {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 5000000; i++) {
