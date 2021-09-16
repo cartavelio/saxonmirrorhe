@@ -26,6 +26,7 @@
       <created by="Michael Kay" on="2012-02-05"/>
       <feature value="schema_aware"/>
       <environment ref="atomic"/>
+      <feature value="schema_aware"/>
       <test>let $s := saxon:type(/atomic:root/atomic:duration)
             return ($s('name'), $s('target namespace'))
              </test>
@@ -39,6 +40,7 @@
       <created by="Michael Kay" on="2012-02-05"/>
       <feature value="schema_aware"/>
       <environment ref="atomic"/>
+      <feature value="schema_aware"/>
       <test>let $s := saxon:type(/atomic:root/atomic:idrefs/@atomic:attr)
             return ($s('name'), $s('target namespace'), $s('variety'))
              </test>
