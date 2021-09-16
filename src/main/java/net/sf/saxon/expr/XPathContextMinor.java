@@ -245,7 +245,9 @@ public class XPathContextMinor implements XPathContext {
         if (last.value >= 0) {
             return last.value;
         }
-        return currentIterator.getLength();
+        int length = currentIterator.getLength();
+        last = new LastValue(length);
+        return length;
     }
 
     /**
@@ -567,7 +569,7 @@ public class XPathContextMinor implements XPathContext {
      */
 
     protected static class LastValue {
-        public int value = 0;
+        public final int value;
 
         public LastValue(int count) {
             value = count;
