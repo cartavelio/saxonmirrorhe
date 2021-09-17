@@ -418,7 +418,8 @@ class TestSuite {
         msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
       }
       description msg
-      dependsOn "${testRelease}jCompile", "${testRelease}j_compileTestDrivers"
+      dependsOn "${testRelease}jCompile", "${testRelease}j_compileTestDrivers",
+        "sendriaServerStart"
       classpath = project.configurations.testDrivers \
       + project.files("${project.buildDir}/classes/${testRelease}j") \
       + project.files("${project.buildDir}/testdriver_classes/${testRelease}j")
@@ -453,7 +454,7 @@ class TestSuite {
         msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
       }
       description msg
-      dependsOn "compileJava",
+      dependsOn "compileJava", "sendriaServerStart"
       classpath = project.configurations.testDrivers \
       + project.files("${project.buildDir}/classes/java/main")
 

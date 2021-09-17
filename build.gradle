@@ -188,6 +188,7 @@ ext {
   DSTAMP=new Date().format("yyyyMMdd")
   // Docker containers
   c_sqlserver = "sqlserver"
+  c_sendria = "sendriasmtp"
 }
 
 // ============================================================
@@ -1521,19 +1522,19 @@ publishing {
 // ============================================================
 // Docker tasks related to running an SQL server
 
-task dockerup() {
+task "docker-sql-up"() {
   doLast {
     DockerContainer.assertRunning(c_sqlserver)
   }
 }
 
-task dockerdown() {
+task "docker-sql-down"() {
   doLast {
     DockerContainer.assertNotRunning(c_sqlserver)
   }
 }
 
-task sqlServerStart(dependsOn: ["dockerdown"]) {
+task sqlServerStart(dependsOn: ["docker-sql-down"]) {
   doFirst {
     DockerContainer.assertDockerAvailable()
     DockerContainer.assertDockerComposeAvailable()
@@ -1543,19 +1544,23 @@ task sqlServerStart(dependsOn: ["dockerdown"]) {
   doLast {
     exec {
       workingDir "tools/docker"
-      commandLine DockerContainer.dockerCompose(), "up", "-d"
+      if (DockerContainer.dockerCompose() == "docker") {
+        commandLine DockerContainer.docker(), "compose", "up", "sqlserver", "-d"
+      } else {
+        commandLine DockerContainer.dockerCompose(), "up", "sqlserver", "-d"
+      }
     }
     exec {
-      def id = DockerContainer.containerid(c_sqlserver)
+      def id = DockerContainer.id(c_sqlserver)
       commandLine "${projectDir}/tools/docker/wait-for-postgresql", id
     }
     exec {
-      def id = DockerContainer.containerid(c_sqlserver)
+      def id = DockerContainer.id(c_sqlserver)
       commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
         id, "psql", "-f", "/app/sql/setup.sql"
     }
     exec {
-      def id = DockerContainer.containerid(c_sqlserver)
+      def id = DockerContainer.id(c_sqlserver)
       commandLine DockerContainer.docker(), "exec", "-i", id,
         "psql", "-d", "sample", "-U", "testeditor", "-f", "/app/sql/fruits.sql"
     }
@@ -1565,10 +1570,10 @@ task sqlServerStart(dependsOn: ["dockerdown"]) {
   }
 }
 
-task sqlServerSetup(dependsOn: ["dockerup"]) {
+task sqlServerSetup(dependsOn: ["docker-sql-up"]) {
   def id = "NA"
   doFirst {
-    id = DockerContainer.containerid(c_sqlserver)
+    id = DockerContainer.id(c_sqlserver)
   }
   doLast {
     exec {
@@ -1582,10 +1587,10 @@ task sqlServerSetup(dependsOn: ["dockerup"]) {
   }
 }
 
-task sqlServerLogs(dependsOn: ["dockerup"]) {
+task sqlServerLogs(dependsOn: ["docker-sql-up"]) {
   def id = "NA"
   doFirst {
-    id = DockerContainer.containerid(c_sqlserver)
+    id = DockerContainer.id(c_sqlserver)
   }
   doLast {
     exec {
@@ -1594,10 +1599,10 @@ task sqlServerLogs(dependsOn: ["dockerup"]) {
   }
 }
 
-task sqlServerWatch(dependsOn: ["dockerup"]) {
+task sqlServerWatch(dependsOn: ["docker-sql-up"]) {
   def id = "NA"
   doFirst {
-    id = DockerContainer.containerid(c_sqlserver)
+    id = DockerContainer.id(c_sqlserver)
   }
   doLast {
     exec {
@@ -1606,11 +1611,124 @@ task sqlServerWatch(dependsOn: ["dockerup"]) {
   }
 }
 
-task sqlServerStop(dependsOn: ["dockerup"]) {
+task sqlServerStop(dependsOn: ["docker-sql-up"]) {
   doLast {
     exec {
       workingDir "tools/docker"
-      commandLine DockerContainer.dockerCompose(), "down"
+      if (DockerContainer.dockerCompose() == "docker") {
+        commandLine DockerContainer.docker(), "compose", "stop", "sqlserver"
+      } else {
+        commandLine DockerContainer.dockerCompose(), "stop", "sqlserver"
+      }
+    }
+  }
+}
+
+// ============================================================
+
+task "docker-sendria-up"() {
+  doLast {
+    DockerContainer.assertRunning(c_sendria)
+  }
+}
+
+task "docker-sendria-down"() {
+  doLast {
+    DockerContainer.assertNotRunning(c_sendria)
+  }
+}
+
+task sendriaServerStart() {
+  def dockerOk = true
+
+  doFirst {
+    try {
+      DockerContainer.assertDockerAvailable()
+      DockerContainer.assertDockerComposeAvailable()
+    } catch (Exception e) {
+      dockerOk = false
+    }
+  }
+
+  doLast {
+    if (dockerOk) {
+      if (!DockerContainer.running(c_sendria)) {
+        try {
+          exec {
+            workingDir "tools/docker"
+            if (DockerContainer.dockerCompose() == "docker") {
+              commandLine DockerContainer.docker(), "compose", "up", "-d", "sendriasmtp"
+            } else {
+              commandLine DockerContainer.dockerCompose(), "up", "-d", "sendriasmtp"
+            }
+          }
+        } catch (Exception e) {
+          println("***************************************************************")
+          println("Failed to start sendriaserver; saxon:send-mail tests will fail.")
+          println("***************************************************************")
+        }
+      }
+      try {
+        exec {
+          commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
+        }
+      } catch (Exception e) {
+        // nop
+      }
+    } else {
+      println("****************************************************")
+      println("Docker unavailable; saxon:send-mail tests will fail.")
+      println("***************************************************")
+    }      
+  }
+}
+
+task sendriaServerLogs(dependsOn: ["docker-sendria-up"]) {
+  def id = "NA"
+  doFirst {
+    id = DockerContainer.id(c_sendria)
+  }
+  doLast {
+    exec {
+      commandLine DockerContainer.docker(), "logs", id
+    }
+  }
+}
+
+task sendriaServerWatch(dependsOn: ["docker-sendria-up"]) {
+  def id = "NA"
+  doFirst {
+    id = DockerContainer.id(c_sendria)
+  }
+  doLast {
+    exec {
+      commandLine DockerContainer.docker(), "logs", id, "-f"
+    }
+  }
+}
+
+task sendriaServerStop(dependsOn: ["docker-sendria-up"]) {
+  doLast {
+    exec {
+      workingDir "tools/docker"
+      if (DockerContainer.dockerCompose() == "docker") {
+        commandLine DockerContainer.docker(), "compose", "stop", "sendriasmtp"
+      } else {
+        commandLine DockerContainer.dockerCompose(), "stop", "sendriasmtp"
+      }
+    }
+  }
+}
+
+task dockerDown() {
+  doLast {
+    exec {
+      workingDir "tools/docker"
+      if (DockerContainer.dockerCompose() == "docker") {
+        commandLine DockerContainer.docker(), "compose", "down"
+      } else {
+        commandLine DockerContainer.dockerCompose(), "down"
+      }
     }
   }
 }

@@ -1,15 +1,24 @@
-version: '3.8'
+version: '3.3'
 
 services:
-#    sqlserver:
-#      image: az82/docker-derby
-#      container_name: sqlserver
-#      ports:
-#        - 1527:1527
-#      volumes:
-#        - ../../build/sql/data:/dbs
-#      networks:
-#        - external_net
+    sendriasmtp:
+      image: ghcr.io/saxonica/sendriasmtp:latest
+      container_name: sendriasmtp
+      ports:
+        - 1025:1025
+        - 1080:1080
+      stdin_open: true
+      tty: true
+      environment:
+        - MAIL_DRIVER=smtp
+        - MAIL_HOST=127.0.0.1
+        - MAIL_PORT=1025
+        - MAIL_USERNAME=username
+        - MAIL_PASSWORD=password
+        - MAIL_ENCRYPTION=tcp
+        - MAIL_FROM_ADDRESS=qt3extra@saxonica.com
+      networks:
+        - saxonica_net
 
     sqlserver:
       image: postgres:13.2-alpine
@@ -22,7 +31,7 @@ services:
       environment:
         POSTGRES_PASSWORD: admin
       networks:
-        - external_net
+        - saxonica_net
 
 networks:
-  external_net: {}
+  saxonica_net: {}
