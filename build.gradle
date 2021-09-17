@@ -1511,8 +1511,8 @@ publishing {
     maven {
       url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
       credentials {
-        username = project.findProperty("sonatypeUsername") ?: "NOUSER"
-        password = project.findProperty("sonatypePassword") ?: "NOPASS"
+        username = project.findProperty("saxonicaSonatypeUsername") ?: "NOUSER"
+        password = project.findProperty("saxonicaSonatypePassword") ?: "NOPASS"
       }
     }
   }
