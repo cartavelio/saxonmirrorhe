@@ -1060,7 +1060,7 @@ public class ExpressionTool {
                 compileWithTracing = ((ExpressionContext) env).getStyleElement().getCompilation().getCompilerInfo().isCompileWithTracing();
             }
         }
-        if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS) && !compileWithTracing) {
+        if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS) /*&& !compileWithTracing*/) {
             ExpressionTool.resetPropertiesWithinSubtree(body);
             if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
                 body = body.optimize(visitor, cisi);

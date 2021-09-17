@@ -1383,7 +1383,7 @@ public class Controller implements ContextOriginator {
     public void preEvaluateGlobals(XPathContext context) throws XPathException {
         for (PackageData pack : getExecutable().getPackages()) {
             for (GlobalVariable var : pack.getGlobalVariableList()) {
-                if (!var.isUnused()) {
+                if (!var.isUnused() && var.getDeclaredVisibility() != Visibility.ABSTRACT) {
                     try {
                         var.evaluateVariable(context, var.getDeclaringComponent());
                     } catch (XPathException err) {

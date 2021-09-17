@@ -138,7 +138,7 @@ public class Executable {
      * @return a list of packages
      */
 
-    public Iterable<PackageData> getPackages() {
+    public Collection<PackageData> getPackages() {
         return packages;
     }
 
