@@ -1289,6 +1289,25 @@ public class TestValidator {
 
     }
 
+    @Test
+    public void testIgnoreSchemaLocationHints() {
+        try {
+            Processor processor = new Processor(true);
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            XdmNode source = builder.build(new File(ConfigTest.DATA_DIR + "xsdhints/document.xml"));
+
+            SchemaManager manager = processor.getSchemaManager();
+            SchemaValidator validator = manager.newSchemaValidator();
+
+            validator.setUseXsiSchemaLocation(false);
+
+            validator.validate(source.asSource());
+
+            fail("Document should not have validated");
+        } catch (Exception ex) {
+            assert(ex.getCause() instanceof ValidationException);
+        }
+    }
 
     @Test
     public void testValidateTransformationOutput() {
