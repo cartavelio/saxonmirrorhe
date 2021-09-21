@@ -26,7 +26,7 @@ task test_jetHome(
 
   task "${release}c_copyJet"(
     type: Copy,
-    dependsOn: ["${release}c_jar"],
+    dependsOn: ["${release}c_jar", "${release}c_copyAncillary"],
     description: "Copy the JET project file for ${RELEASE}"
   ) {
     from "${projectDir}/src/jet/libsaxon${release}c.prj"
