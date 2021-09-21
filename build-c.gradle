@@ -280,6 +280,7 @@ task test_jetHome(
 
 task hec_setupPreprocess(
   type: Copy,
+  dependsOn: ["hej_featureKeys"],
   description: "Copy HE sources for preprocessing HE"
 ) {
   into "${buildDir}/filtered/hec"
@@ -302,6 +303,7 @@ task hec_setupPreprocess(
 
 task pec_setupPreprocess(
   type: Copy,
+  dependsOn: ["hej_featureKeys"],
   description: "Copy PE sources for preprocessing PE"
 ) {
   into "${buildDir}/filtered/pec"
@@ -346,6 +348,7 @@ task pec_setupPreprocess(
 
 task eec_setupPreprocess(
   type: Copy,
+  dependsOn: ["hej_featureKeys"],
   description: "Copy EE sources for preprocessing EE"
 ) {
   into "${buildDir}/filtered/eec"
