@@ -56,7 +56,6 @@ task test_jetHome(
   }
 
   task "${release}c_jet"(
-    type: Exec,
     dependsOn: ["${release}c_setupJet", "${release}c_copyLibs", "test_jetHome"],
     description: "Run JET on ${RELEASE}"
   ) {
@@ -64,15 +63,25 @@ task test_jetHome(
     inputs.file("${buildDir}/jet/libsaxon${release}c.jprof")
     inputs.files("${buildDir}/c/jars/${release}c")
     outputs.file("${buildDir}/c/${release}c/libsaxon${release}c.so")
-    workingDir = "${buildDir}/jet"
-    commandLine "${excelsiorJetHome}/bin/jc",
-      "=p", "libsaxon${release}c"
+
+    doLast {
+      println("Excelsior jet:")
+      println("${excelsiorJetHome}/bin/jc =p libsaxon${release}c")
+      println("${buildDir}/jet")
+    }
+
+    doLast {
+      exec {
+        workingDir = "${buildDir}/jet"
+        commandLine "${excelsiorJetHome}/bin/jc", "=p", "libsaxon${release}c"
     /*
     commandLine "docker", "run",
       "-e", "PROJECT=libsaxon${release}c",
       "-v", "${projectDir}:/saxonica",
       "${dockerBuildContainer}:latest"
     */
+      }
+    }
   }
 
   if (systemOs.isWindows()) {
