@@ -4,7 +4,7 @@ def excelsiorJetHome = null
  "/opt/jet15.3-ent-amd64",
  "/usr/local/jet15.3-ent-amd64",
  "c:/jet15.3-ent-amd64"].each { jet ->
-  if (excelsiorJetHome == null && pathExists(jet)) {
+  if (excelsiorJetHome == null && jet != "" && pathExists(jet)) {
     excelsiorJetHome = jet
   }
 }
@@ -12,9 +12,23 @@ def excelsiorJetHome = null
 task test_jetHome(
   description: "Test that excelsiorJetHome is configured"
 ) {
+  def images = new ByteArrayOutputStream()
   doLast {
-    if (excelsiorJetHome == null) {
-      throw new GradleException("Cannot build Saxon/C, excelsiorJetHome undefined")
+    exec {
+      commandLine "docker", "images", "-q", "--filter=reference=jet:${excelsiorJetVersion}",
+                  "--format", "{{.Repository}}:{{.Tag}}"
+      standardOutput = images
+    }
+  }
+  doLast {
+    if (images.toString("utf-8") != "") {
+      println("Running ExcelsiorJet ${excelsiorJetVersion} from Docker container")
+    } else {
+      if (excelsiorJetHome == null) {
+        throw new GradleException("Cannot build Saxon/C, no Docker container and excelsiorJetHome undefined")
+      } else {
+        println("Running ExcelsiorJet from ${excelsiorJetHome}")
+      }
     }
   }
 }
@@ -65,21 +79,19 @@ task test_jetHome(
     outputs.file("${buildDir}/c/${release}c/libsaxon${release}c.so")
 
     doLast {
-      println("Excelsior jet:")
-      println("${excelsiorJetHome}/bin/jc =p libsaxon${release}c")
-      println("${buildDir}/jet")
-    }
-
-    doLast {
-      exec {
-        workingDir = "${buildDir}/jet"
-        commandLine "${excelsiorJetHome}/bin/jc", "=p", "libsaxon${release}c"
-    /*
-    commandLine "docker", "run",
-      "-e", "PROJECT=libsaxon${release}c",
-      "-v", "${projectDir}:/saxonica",
-      "${dockerBuildContainer}:latest"
-    */
+      try {
+        exec {
+	    commandLine "docker", "run", "--rm", "-v", "${buildDir}:/src", "-i",
+                        "jet:${excelsiorJetVersion}",
+	                "sh", "-c", "cd /src/jet && /usr/local/jet/bin/jc =p libsaxon${release}c"
+	}
+      } catch (Exception ex) {
+        println("Attempt to run jet:${excelsiorJetVersion} in Docker failed; attempting local build...")
+        exec {
+	  workingDir "${buildDir}/jet"
+          commandLine "${excelsiorJetHome}/bin/jc",
+            "=p", "libsaxon${release}c"
+	}
       }
     }
   }
