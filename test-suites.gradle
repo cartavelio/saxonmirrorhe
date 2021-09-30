@@ -279,6 +279,9 @@ testSuiteMatrix.keySet().findAll { it.startsWith("_") }.each { prop ->
 
 project.task("all_test_suites") {
   description "Runs all the test suites"
+  doLast {
+    testSuite.checkAccumulatedFailures()
+  }
 }
 
 testSuiteMatrix.keySet().findAll { !it.startsWith("_") }.each { product ->
@@ -290,6 +293,9 @@ testSuiteMatrix.keySet().findAll { !it.startsWith("_") }.each { product ->
 
   project.task("all_${product}_test_suites") {
     description "Runs all the test suites for ${product}"
+    doLast {
+      testSuite.checkAccumulatedFailures()
+    }
   }
 
   suites.keySet().findAll { !it.startsWith("_") }.each { suite ->
@@ -301,6 +307,9 @@ testSuiteMatrix.keySet().findAll { !it.startsWith("_") }.each { product ->
 
     project.task("all_${product}_${suite}_test_suites") {
       description "Runs all the ${suite} test suites for ${product}"
+      doLast {
+        testSuite.checkAccumulatedFailures()
+      }
     }
 
     languages.keySet().findAll { !it.startsWith("_") }.each { lang ->
