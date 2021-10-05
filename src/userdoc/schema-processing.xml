@@ -1097,14 +1097,6 @@
          list type in the schema, the typed value of the node will appear in the stylesheet as a
          sequence rather than as a single string value.</p>
 
-      <p>The Enterprise Edition of Saxon also allows you to validate result documents (both final
-         result documents and intermediate results). By default, elements constructed by the query
-         are validated in lax mode, which means that they are validated if a schema declaration is
-         available, and are not validated otherwise. You can set a different initial validation mode
-         either using the <code>declare validation</code> declaration in the Query Prolog, or by
-         issuing a call such as <code>staticQueryContext.pushValidationMode(Validation.SKIP)</code>
-         in the calling API.</p>
-
       <p>The <code>-outval:recover</code> option on the command line causes validation errors encountered in
          processing a final result tree to be treated as warnings, allowing processing to continue.
          This allows more than one error to be reported in a single run. The result document is
