@@ -3483,7 +3483,7 @@ public class XPathParser {
      */
 
     protected AnnotationList parseAnnotationsList() throws XPathException {
-        grumble("Inline functions are not allowed in Saxon-HE");
+        grumble("Function annotations are not allowed in XPath");
         return null;
     }
 
