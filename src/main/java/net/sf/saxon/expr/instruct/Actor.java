@@ -214,7 +214,7 @@ public abstract class Actor implements ExpressionOwner, Location {
     }
 
     public void setColumnNumber(int columnNumber) {
-        this.columnNumber = lineNumber;
+        this.columnNumber = columnNumber;
     }
 
     public void setSystemId(String systemId) {
