@@ -51,10 +51,7 @@ public:
     XsltProcessor * clone();
 
 
-     ~XsltProcessor(){
-	clearProperties();
-	clearParameters();
-     }
+     ~XsltProcessor();
 
 	//! Get the SaxonProcessor object
 	/**

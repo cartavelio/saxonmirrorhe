@@ -624,11 +624,21 @@ public class SaxonCAPI {
         return valueForCpp;
     }
 
-    public static XdmNode parseXmlString(String cwd, Processor processor, DocumentBuilder builder, SchemaValidator validator, String xml) throws SaxonApiException {
+    public static XdmNode parseXmlString(String cwd, Processor proci, DocumentBuilder builder, SchemaValidator validator, String xml) throws SaxonApiException {
         try {
+            if(proci == null) {
+                return null;
+            }
             StringReader reader = new StringReader(xml);
             if(builder == null) {
-                builder = processor.newDocumentBuilder();
+                builder = proci.newDocumentBuilder();
+                if (debug) {
+
+                    System.err.println("New documentBuilder obj: " + System.identityHashCode(builder));
+                }
+            } else if (debug) {
+
+                System.err.println("documentBuilder obj passed as argument: " + System.identityHashCode(builder));
             }
             if (validator != null) {
                 builder.setSchemaValidator(validator);
@@ -643,10 +653,13 @@ public class SaxonCAPI {
             
             XdmNode doc = builder.build(source);
             if (debug) {
-                System.err.println("xmlParseString, Processor: " + System.identityHashCode(processor));
-                System.err.println("XdmNode: " + System.identityHashCode(doc));
-                net.sf.saxon.type.ItemType suppliedItemType = SequenceTool.getItemType(doc.getUnderlyingValue(), processor.getUnderlyingConfiguration().getTypeHierarchy());
-                System.err.println("xmlParserString, ItemType: " + suppliedItemType.toString());
+                System.err.println("xmlParseString, Processor: " + System.identityHashCode(proci));
+                System.err.println("documentBuilder obj: " + System.identityHashCode(builder));
+                if(doc != null) {
+                    System.err.println("XdmNode: " + System.identityHashCode(doc));
+                    net.sf.saxon.type.ItemType suppliedItemType = SequenceTool.getItemType(doc.getUnderlyingValue(), proci.getUnderlyingConfiguration().getTypeHierarchy());
+                    System.err.println("xmlParserString, ItemType: " + suppliedItemType.toString());
+                }
             }
             return doc;
         } catch (SaxonApiException ex) {
@@ -682,17 +695,17 @@ public class SaxonCAPI {
 
     /**
      * Receives file name of XML document and parse to XdmNode object. It is possible to validate with a SchemaValidator
-     * @param processor
+     * @param proci   Processor object
      * @param cwd - The current working directory for parsing the XML file
      * @param validator - Schema Validator
      * @param filename
      * @return  XdmNode object for the XML file
      * @throws SaxonApiException
      */
-    public static XdmNode parseXmlFile(Processor processor, String cwd, DocumentBuilder builder, SchemaValidator validator, String filename) throws SaxonApiException {
+    public static XdmNode parseXmlFile(Processor proci, String cwd, DocumentBuilder builder, SchemaValidator validator, String filename) throws SaxonApiException {
         try {
             if(builder == null) {
-                builder = processor.newDocumentBuilder();
+                builder = proci.newDocumentBuilder();
             }
             Source source = null;
             if (cwd != null && cwd.length() > 0) {

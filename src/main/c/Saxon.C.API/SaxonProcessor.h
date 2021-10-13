@@ -496,7 +496,7 @@ public:
                 gMethods = new JNINativeMethod[nativeMethodVect.size()];
             }
             return registerNativeMethods(sxn_environ->env, "com/saxonica/functions/extfn/CppCall$PhpFunctionCall",
-                                         gMethods, sizeof(gMethods) / sizeof(gMethods[0]));
+                                         gMethods, nativeMethodVect.size());
 
 
         }

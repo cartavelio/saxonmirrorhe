@@ -220,7 +220,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 					"(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;)V");
 	}
 	if (!cAndSNodemID) {
-		std::cerr<<"Error: "<<getDllname()<<"compileFromStringAndSave function not found"<<std::endl;
+		std::cerr<<"Error: "<<getDllname()<<"compileFromXdmNodeAndSave function not found"<<std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
 	} else {
         if(cppXT == nullptr) {
@@ -244,6 +244,11 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 
     void Xslt30Processor::compileFromStringAndSave(const char* stylesheetStr, const char* filename){
 	static jmethodID cAndSStringmID = nullptr;
+	std::cerr<<"x30proc cp0"<<std::endl;
+	if(stylesheetStr == nullptr || filename == nullptr) {
+        createException("Error in compileFromStringAndSave - Found null value - check stylesheet or filename string");
+	    return;
+	}
 	if(cAndSStringmID == nullptr) {
 	   cAndSStringmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass,
 					"compileFromStringAndSave",
@@ -259,14 +264,14 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 #endif
             return;
         }
-		
+        std::cerr<<"x30proc cp1"<<std::endl;
 		SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, cAndSStringmID,
-						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
+						(cwdXT.empty() ? nullptr : SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str())),
 						SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheetStr),
 						SaxonProcessor::sxn_environ->env->NewStringUTF(filename));
-		
+        std::cerr<<"x30proc cp2"<<std::endl;
 		createException();
-
+        std::cerr<<"x30proc cp3"<<std::endl;
     }
 }
 
@@ -472,9 +477,12 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
                                                                            stylesheet), jitCompilation,
                                                                    comboArrays.stringArray, comboArrays.objectArray));
         if (!executableObject) {
+            std::cerr<<"compileFromFile cp0 - execObj is null"<<std::endl;
             createException();
             return nullptr;
 
+        } {
+            std::cerr<<"compileFromFile cp0 - execObj ok"<<std::endl;
         }
         if (comboArrays.stringArray != nullptr) {
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);
@@ -498,6 +506,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
 	if(exceptionOccurred()) {
 		//Possible error detected in the compile phase. Processor not in a clean state.
 		//Require clearing exception.
+		std::cerr<<"Error: Xslt30Processor not in a clean state. - Exception found"<<std::endl;
 		SaxonProcessor::sxn_environ->env->ExceptionDescribe();
 
 		return nullptr;
@@ -610,6 +619,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
 	if(exceptionOccurred()) {
 		//Possible error detected in the compile phase. Processor not in a clean state.
 		//Require clearing exception.
+        std::cerr<<"Error: Xslt30Processor not in a clean state. - Exception found"<<std::endl;
 		return;	
 	}
 	if(stylesheet==nullptr){
@@ -658,6 +668,7 @@ const char * Xslt30Processor::transformFileToString(const char* source,
 	if(exceptionOccurred()) {
 		//Possible error detected in the compile phase. Processor not in a clean state.
 		//Require clearing exception.
+        std::cerr<<"Error: Xslt30Processor not in a clean state. - Exception found"<<std::endl;
 		return nullptr;
 	}
 	if(source == nullptr && stylesheet == nullptr){

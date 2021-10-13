@@ -140,10 +140,28 @@ public class Xslt30Processor extends SaxonCAPI {
      */
     public void compileFromStringAndSave(String cwd, String str, String filename) throws SaxonApiException {
 
+        if (processor == null || str == null || filename == null) {
+            if (SaxonCAPI.debug) {
+                System.err.println("DEBUG: compileFromStringAndSave str is null");
+            }
+            return;
+        }
         XsltCompiler compiler = processor.newXsltCompiler();
-        XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(str)));
-        File file = absoluteFile(cwd, filename);
-        pack.save(file);
+        XsltPackage pack = null;
+        try {
+            StreamSource stream = new StreamSource(sr);
+            pack = compiler.compilePackage(new StreamSource(new StringReader(str)));
+        } catch(Exception ex) {
+            throw new SaxonApiException(ex.getMessage());
+        }
+        if (pack != null) {
+
+            File file = absoluteFile(cwd, filename);
+
+            pack.save(file);
+        }
+
+
     }
 
     /**
@@ -155,6 +173,9 @@ public class Xslt30Processor extends SaxonCAPI {
      */
     public void compileFromXdmNodeAndSave(String cwd, Object obj, String filename) throws SaxonApiException {
 
+        if(processor == null) {
+            return;
+        }
         XsltCompiler compiler = processor.newXsltCompiler();
         XdmNode node;
         if (obj instanceof XdmNode) {
@@ -165,8 +186,10 @@ public class Xslt30Processor extends SaxonCAPI {
         }
 
         XsltPackage pack = compiler.compilePackage(node.asSource());
-        File file = new File(filename);
-        pack.save(file);
+        if(pack != null) {
+            File file = new File(filename);
+            pack.save(file);
+        }
 
     }
 

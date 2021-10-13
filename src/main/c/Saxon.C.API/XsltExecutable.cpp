@@ -242,7 +242,7 @@ void XsltExecutable::setSaveResultDocument(bool flag) {
 
 
 std::map<std::string,XdmNode*>& XsltExecutable::getResultDocuments(){
-    std::map<std::string,XdmNode*> resultDocumentMap;
+
 
         if(saxonResultDocObj) {
             static jmethodID getresultID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(resultDocumentClass,

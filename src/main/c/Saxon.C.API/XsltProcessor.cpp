@@ -82,6 +82,13 @@ XsltProcessor::XsltProcessor(const XsltProcessor &other) {
 }
 
 
+
+~XsltProcessor(){
+    clearProperties();
+    clearParameters();
+}
+
+
 XsltProcessor * XsltProcessor::clone() {
      XsltProcessor * proc = new XsltProcessor(*this);
      return proc;
@@ -633,9 +640,9 @@ const char * XsltProcessor::transformFileToString(const char* source,
 	jmethodID mID =
 			(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass,
 					"transformToString",
-					"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+					"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)[B");
 	if (!mID) {
-		std::cerr << "Error: "<<getDllname() << "transformFileToString" << " not found\n"
+		std::cerr << "Error: "<<getDllname() << ".transformFileToString" << " not found\n"
 				<< std::endl;
 
 	} else {
@@ -702,10 +709,8 @@ const char * XsltProcessor::transformFileToString(const char* source,
 			}
 		}
 
-	jstring result = nullptr;
-	jobject obj =
-				(
-						SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, mID,
+    jbyteArray result = nullptr;
+	jobject obj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, mID,
 								SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
 								(source != nullptr ?
 										SaxonProcessor::sxn_environ->env->NewStringUTF(
@@ -713,22 +718,28 @@ const char * XsltProcessor::transformFileToString(const char* source,
 										nullptr),
 								SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet),
 								stringArray, objectArray));
-		if(obj) {
-			result = (jstring)obj;
-		}		
+        if(obj) {
+            result = (jbyteArray)obj;
+        }
 		if (size > 0) {
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray);
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(objectArray);
 		}
-		if (result) {
-			const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result,
-					nullptr);
-			SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
-			return str;
-		} else  {
-			exception = proc->checkAndCreateException(cppClass);
-	   		
-     		}
+        if (result) {
+            jboolean isCopy = false;
+            jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
+            jsize num_bytes = SaxonProcessor::sxn_environ->env->GetArrayLength(result);
+
+            const char *str = new char[num_bytes];
+            memcpy ((void *) str, b , num_bytes );
+
+            SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+            return str;
+        } else  {
+            exception = proc->checkAndCreateException(cppClass);
+
+        }
+
 	}
 	return nullptr;
 }

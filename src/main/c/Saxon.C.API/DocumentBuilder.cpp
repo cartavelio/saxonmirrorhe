@@ -8,7 +8,6 @@
     DocumentBuilder::DocumentBuilder(){
 	    SaxonProcessor *p = new SaxonProcessor(false);
 	    procClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/Processor");
-        saxonCAPIClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/SaxonCAPI");
         static jmethodID xdocBuilderID = nullptr;
         if (xdocBuilderID == nullptr) {
          			xdocBuilderID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(procClass,
@@ -38,24 +37,30 @@
            dtdVal = false;
            schemaValidator = nullptr;
            cwdDB = cwd;
+           proc = p;
+           exception = nullptr;
 
     }
 
 
     DocumentBuilder::DocumentBuilder(const DocumentBuilder &other) {
-            docBuilderClass = lookForClass(SaxonProcessor::sxn_environ->env,
+
+        docBuilderClass = lookForClass(SaxonProcessor::sxn_environ->env,
                                     "net/sf/saxon/s9api/DocumentBuilder");
 
 
-
+        saxonCAPIClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/SaxonCAPI");
         docBuilderObject = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.docBuilderObject);
         lineNumbering = other.lineNumbering;
         schemaValidator = other.schemaValidator;
         dtdVal = other.dtdVal;
+        cwdDB = other.cwdDB;
+        proc = other.proc;
     }
 
     DocumentBuilder::~DocumentBuilder(){
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(docBuilderObject);
+        cwdDB.erase();
         exceptionClear();
         //delete contextItem;
     }
@@ -116,8 +121,6 @@
         SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_dtdID, dtdVal);
 
 
-
-
     }
 
 
@@ -129,7 +132,7 @@
 
 
 
-    void DocumentBuilder::setBaseURI(const char* uri) {
+    void DocumentBuilder::setBaseUri(const char* uri) {
         static jmethodID db_dtdID = nullptr;
 	    if (!db_dtdID ) {
 
@@ -145,28 +148,27 @@
 
 
 
-    const char * DocumentBuilder::getBaseURI(){ return baseURI.c_str();}
+    const char * DocumentBuilder::getBaseUri(){ return baseURI.c_str();}
 
 
 
 
     XdmNode* DocumentBuilder::parseXmlFromString(const char * source){
-    jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlString",
+
+    jmethodID mdpID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlString",
                                                                                     "(Ljava/lang/String;Lnet/sf/saxon/s9api/Processor;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
-    if (!mID) {
+    if (!mdpID) {
         std::cerr << "\nError: Saxonc." << "parseXmlString()" << " not found" << std::endl;
         return nullptr;
     }
 //TODO SchemaValidator
-
     if(source == nullptr) {
         createException("Source string is NULL");
         return nullptr;
     }
-
-    jobject xdmNodei = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mID,
+    jobject xdmNodei = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mdpID,
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                                        cwdDB.c_str()), proc, docBuilderObject, (schemaValidator != nullptr ? schemaValidator->getUnderlyingValidator(): nullptr),
+                                                                                        cwdDB.c_str()), proc->proc, docBuilderObject, (schemaValidator != nullptr ? schemaValidator->getUnderlyingValidator(): nullptr),
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         source));
     if (xdmNodei) {
@@ -177,10 +179,6 @@
     } else if (exceptionOccurred()) {
         createException();
     }
-
-#ifdef DEBUG
-    SaxonProcessor::sxn_environ->env->ExceptionDescribe();
-#endif
 
     return nullptr;
 

@@ -121,7 +121,7 @@ class DocumentBuilder {
      * @throws IllegalArgumentException if the baseURI supplied is not an absolute URI
      */
 
-    void setBaseURI(const char* uri);
+    void setBaseUri(const char* uri);
 
     /**
      * Get the base URI of documents loaded using this DocumentBuilder when no other URI is available.
@@ -129,7 +129,7 @@ class DocumentBuilder {
      * @return the base URI to be used, or null if no value has been set.
      */
 
-    const char * getBaseURI();
+    const char * getBaseUri();
 
 
     /**

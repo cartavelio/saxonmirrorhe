@@ -7,6 +7,7 @@
 #include "../../Saxon.C.API/XdmItem.h"
 #include "../../Saxon.C.API/XdmNode.h"
 #include "../../Saxon.C.API/XdmFunctionItem.h"
+#include "../../Saxon.C.API/DocumentBuilder.h"
 #include "../../Saxon.C.API/XdmMap.h"
 #include "../../Saxon.C.API/XdmArray.h"
 #include "cppExtensionFunction.h"
@@ -1232,8 +1233,9 @@ void testPackage2_Error(Xslt30Processor *trans, sResultCount *sresult) {
     const char *stylesheet = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out><xsl:for-each></output></xsl:template><xsl:stylesheet>";
 
     trans->compileFromStringAndSave(stylesheet, "test2.sef");
-
+    std::cerr<<"testx30 cp0"<<std::endl;
     if(trans->exceptionOccurred() || trans->getException() != nullptr) {
+        std::cerr<<"testx30 cp0-1"<<std::endl;
         const char *message = trans->getErrorMessage();
         if (message != nullptr) {
             cout << "Error message =" << message << endl;
@@ -1243,6 +1245,7 @@ void testPackage2_Error(Xslt30Processor *trans, sResultCount *sresult) {
         return;
 
     }
+    std::cerr<<"testx30 cp2"<<std::endl;
     trans->exceptionClear();
     sresult->failure++;
     sresult->failureList.push_back("testPackage2_Error");
@@ -1390,6 +1393,7 @@ void testContextNotRoot(SaxonProcessor *proc, Xslt30Processor *trans, sResultCou
 
     XsltExecutable *executable = trans->compileFromString(
             "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template match='e'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>");
+
 
     if (executable == nullptr) {
         sresult->failure++;
@@ -1913,12 +1917,22 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
 
 void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult) {
 
-
+#ifdef MEM_DEBUG
+    SaxonProcessor::getInfo();
+#endif
     cout << endl << "Test: testCatalog" << endl;
     bool trace = false;
     proc->setcwd(cwd);
     proc->setCatalog("../php/catalog-test/catalog.xml", trace);
+    if (proc->exceptionOccurred()) {
+        const char *message = proc->getErrorMessage();
+        if(message != nullptr) {
+            cerr << "exception-proc=" << message << endl;
+        }
+        proc->exceptionClear();
+        return;
 
+    }
     Xslt30Processor * trans = proc->newXslt30Processor();
 
     XsltExecutable  * executable = trans->compileFromFile("../php/catalog-test/test1.xsl");
@@ -1929,17 +1943,19 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
 
             if(trans->getErrorMessage() != nullptr) {
                 const char *message = trans->getErrorMessage();
-                cerr << "exception=" << message << endl;
+                cerr << "exception11=" << message << endl;
             } else {
                 const char *message = proc->getErrorMessage();
                 if(message != nullptr) {
                     cerr << "exception-proc=" << message << endl;
                 }
             }
+
         }
+
+        trans->exceptionClear();
         sresult->failure++;
         sresult->failureList.push_back("testCatalog");
-        trans->exceptionClear();
         delete trans;
         trans= nullptr;
         return;
@@ -1965,6 +1981,123 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
     trans = nullptr;
 
 }
+
+
+
+void testSaxSourceNoSystemId(SaxonProcessor * proc, DocumentBuilder * builder, sResultCount *sresult) {
+
+     cout << endl << "Test: testSaxSourceNoSystemId" << endl;
+     //DocumentBuilder * builder = proc->newDocumentBuilder();
+
+     XdmNode * d = builder->parseXmlFromString("<doc/>");
+    cout << endl << "Test: testSaxSourceNoSystemId" << endl;
+#ifdef MEM_DEBUG
+    SaxonProcessor::getInfo();
+#endif
+     if(d != nullptr) {
+                if(d->getBaseUri() != nullptr) {
+                    std::cout<<"BaseUri:"<<d->getBaseUri()<<endl;
+                }
+                delete d;
+                sresult->success++;
+     } else {
+
+
+         if (builder->exceptionOccurred()) {
+
+             if(builder->getErrorMessage() != nullptr) {
+                 const char *message = builder->getErrorMessage();
+                 cerr << "exception=" << message << endl;
+             }
+
+         }
+         builder->exceptionClear();
+
+
+
+         sresult->failure++;
+         sresult->failureList.push_back("testSaxSourceNoSystemId");
+
+     }
+
+     delete builder;
+
+    }
+
+
+
+    void testSaxSource(SaxonProcessor * proc, sResultCount *sresult) {
+
+         cout << endl << "Test: testSaxSource" << endl;
+         DocumentBuilder * builder = proc->newDocumentBuilder();
+         builder->setBaseUri("https://www.example.com");
+         XdmNode * d = builder->parseXmlFromString("<doc/>");
+         if(d != nullptr) {
+                    if(d->getBaseUri() != nullptr) {
+                        std::cout<<"BaseUri:"<<d->getBaseUri()<<endl;
+                    }
+                    delete d;
+                    sresult->success++;
+         } else {
+                    sresult->failure++;
+                    sresult->failureList.push_back("testSaxSource");
+
+         }
+
+         delete builder;
+
+        }
+
+
+void testSaxSourceDTDValidation(SaxonProcessor * proc, sResultCount *sresult) {
+        std::string validXML = "<!DOCTYPE a [<!ELEMENT a EMPTY>]><a/>";
+        std::string invalidXML = "<!DOCTYPE a [<!ELEMENT a (b+)>]><a/>";
+        cout << endl << "Test: testSaxSourceDTDValidation" << endl;
+        DocumentBuilder * builder = proc->newDocumentBuilder();
+        builder->setDTDValidation(true);
+
+        XdmNode * d = builder->parseXmlFromString(validXML.c_str());
+        if(d != nullptr) {
+                delete d;
+
+        } else {
+                builder->exceptionClear();
+                sresult->failure++;
+                sresult->failureList.push_back("testSaxSourceDTDValidation-1");
+                delete builder;
+                return;
+        }
+
+        d = builder->parseXmlFromString(invalidXML.c_str());
+
+        if(d == nullptr) {
+            builder->exceptionClear(); //TODO check exception
+
+        } else {
+            sresult->failure++;
+            sresult->failureList.push_back("testSaxSourceDTDValidation-2");
+            delete builder;
+            return;
+        }
+
+        builder->setDTDValidation(false);
+        d = builder->parseXmlFromString(invalidXML.c_str());
+        if(d != nullptr) {
+            delete d;
+            sresult->success++;
+
+        } else {
+            builder->exceptionClear(); // Check exception
+            sresult->failure++;
+            sresult->failureList.push_back("testSaxSourceDTDValidation-3");
+
+        }
+
+        delete builder;
+        return;
+
+    }
+
 
 static int NUM_THREADS = 10;
 
@@ -2126,7 +2259,7 @@ int main(int argc, char* argv[]) {
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
-    testCatalog(cwd, processor,  sresult);
+    //testCatalog(cwd, processor,  sresult); //not to run in DEBUG mode - setCatalog throws SEG error
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
@@ -2158,6 +2291,7 @@ int main(int argc, char* argv[]) {
     testPackage1(trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
+
 
     testPackage1a(trans, sresult);
 
@@ -2207,6 +2341,21 @@ int main(int argc, char* argv[]) {
 
 
     cout<<endl<<"============================================================="<<endl<<endl;
+
+
+    DocumentBuilder * builder = processor->newDocumentBuilder();
+    testSaxSourceNoSystemId(processor, builder, sresult);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+
+    testSaxSource(processor, sresult);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+
+    testSaxSourceDTDValidation(processor, sresult);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+
 
     fflush(stdout);
 

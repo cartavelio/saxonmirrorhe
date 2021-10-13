@@ -97,9 +97,9 @@ cdef extern from "../SaxonProcessor.h":
 
         bool isDTDValidation();
 
-        void setBaseURI(const char* uri);
+        void setBaseUri(const char* uri);
 
-        const char * getBaseURI();
+        const char * getBaseUri();
 
 
         XdmNode* parseXmlFromString(const char * content);

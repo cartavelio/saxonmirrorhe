@@ -471,7 +471,7 @@ cdef class PyDocumentBuilder:
            str: String value of the base uri for this node. This may be NULL if the base URI is unknown, including the case
                 where the node has no parent.
        """
-       return make_py_str(self.thisdbptr.getBaseURI())
+       return make_py_str(self.thisdbptr.getBaseUri())
 
     def set_base_uri(self, base_uri):
        """
@@ -482,7 +482,7 @@ cdef class PyDocumentBuilder:
        """
        py_uri_string = base_uri.encode('UTF-8') if base_uri is not None else None
        cdef char * c_uri = py_uri_string if base_uri is not None else ""
-       self.thisdbptr.setBaseURI(c_uri)
+       self.thisdbptr.setBaseUri(c_uri)
 
     def parse_xml(self, **kwds):
         """
@@ -948,10 +948,8 @@ cdef class PyXsltProcessor:
 
      def get_error_message(self):
         """
-        get_error_message(self, index)
+        get_error_message(self)
         A transformation may have a number of errors reported against it. Get the ith error message if there are any errors
-        Args:
-            index (int): The i'th exception
 
         Returns:
             str: The message of the i'th exception. Return None if the i'th exception does not exist.
