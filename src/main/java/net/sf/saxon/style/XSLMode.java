@@ -39,12 +39,7 @@ public class XSLMode extends StyleElement {
     private SimpleMode mode;
     private Set<? extends Accumulator> accumulators;
     private boolean prepared = false;
-    private boolean streamable = false;
-    private boolean failOnMultipleMatch = false;
-    private boolean warningOnNoMatch = false;
-    private boolean warningOnMultipleMatch = true;
     private boolean traceMatching = false;
-    private BuiltInRuleSet defaultRules = TextOnlyCopyRuleSet.getInstance();
 
     /**
      * Ask whether this node is a declaration, that is, a permitted child of xsl:stylesheet
@@ -141,13 +136,13 @@ public class XSLMode extends StyleElement {
 
         Visibility visibility = Visibility.PRIVATE;
 
-        for(AttributeInfo att : attributes()){
+        for (AttributeInfo att : attributes()){
             NodeName attName = att.getNodeName();
             String f = attName.getDisplayName();
             String value = att.getValue();
             switch (f) {
                 case "streamable":
-                    streamable = processStreamableAtt(value);
+                    boolean streamable = processStreamableAtt(value);
                     break;
                 case "name":
                     nameAtt = Whitespace.trim(value);
@@ -163,7 +158,7 @@ public class XSLMode extends StyleElement {
                 case "on-multiple-match": {
                     switch (Whitespace.trim(value)) {
                         case "fail":
-                            failOnMultipleMatch = true;
+                            boolean failOnMultipleMatch = true;
                             break;
                         case "use-last":
                             failOnMultipleMatch = false;
@@ -180,7 +175,7 @@ public class XSLMode extends StyleElement {
                             // no action, this is the default
                             break;
                         case "shallow-copy":
-                            defaultRules = ShallowCopyRuleSet.getInstance();
+                            BuiltInRuleSet defaultRules = ShallowCopyRuleSet.getInstance();
                             break;
                         case "deep-copy":
                             defaultRules = DeepCopyRuleSet.getInstance();
@@ -200,11 +195,11 @@ public class XSLMode extends StyleElement {
                     }
                     break;
                 case "warning-on-multiple-match": {
-                    warningOnMultipleMatch = processBooleanAttribute("warning-on-multiple-match", value);
+                    boolean warningOnMultipleMatch = processBooleanAttribute("warning-on-multiple-match", value);
                     break;
                 }
                 case "warning-on-no-match": {
-                    warningOnNoMatch = processBooleanAttribute("warning-on-no-match", value);
+                    boolean warningOnNoMatch = processBooleanAttribute("warning-on-no-match", value);
                     break;
                 }
                 case "typed": {
@@ -253,29 +248,12 @@ public class XSLMode extends StyleElement {
             }
         }
 
-        mode.setStreamable(streamable);
-        if (streamable) {
-            Mode omniMode = manager.obtainMode(Mode.OMNI_MODE, true);
-            omniMode.setStreamable(true);
-        }
-        if (warningOnNoMatch) {
-            defaultRules = new RuleSetWithWarnings(defaultRules);
-        }
-        mode.setBuiltInRuleSet(defaultRules);
 
-        RecoveryPolicy recoveryPolicy;
-        if (failOnMultipleMatch) {
-            recoveryPolicy = RecoveryPolicy.DO_NOT_RECOVER;
-        } else if (warningOnMultipleMatch) {
-            recoveryPolicy = RecoveryPolicy.RECOVER_WITH_WARNINGS;
-        } else {
-            recoveryPolicy = RecoveryPolicy.RECOVER_SILENTLY;
-        }
-        mode.setRecoveryPolicy(recoveryPolicy);
-        mode.obtainDeclaringComponent(this);
-        mode.setModeTracing(traceMatching);
 
-        if (extraAsAtt != null) {
+        mode.obtainDeclaringComponent(this);    // TODO: how does this work with multiple mode declarations?
+        mode.setModeTracing(traceMatching);     // Saxon extension; ignore the complications of multiple xsl:mode declarations for now
+
+        if (extraAsAtt != null) {               // Saxon extension; ignore the complications of multiple xsl:mode declarations for now
             SequenceType extraResultType = null;
             try {
                 extraResultType = makeExtendedSequenceType(extraAsAtt);
@@ -297,7 +275,8 @@ public class XSLMode extends StyleElement {
             String f = attName.getDisplayName();
             String attValue = att.getValue();
             if (f.equals("streamable") || f.equals("on-multiple-match") || f.equals("on-no-match") ||
-                    f.equals("warning-on-multiple-match") || f.equals("warning-on-no-match") || f.equals("typed")) {
+                    f.equals("warning-on-multiple-match") || f.equals("warning-on-no-match") ||
+                    f.equals("typed") || f.equals("visibility")) {
                 String trimmed = Whitespace.trim(attValue);
                 String normalizedAtt;
                 if ("true".equals(trimmed)||"1".equals(trimmed)){
@@ -318,8 +297,17 @@ public class XSLMode extends StyleElement {
                     names[i++] = acc.getAccumulatorName().getEQName();
                 }
                 Arrays.sort(names);
-                String allNames = Arrays.toString(names);
-                mode.getActivePart().setExplicitProperty(f, allNames, decl.getPrecedence());
+                StringBuilder allNames = new StringBuilder();
+                boolean first = true;
+                for (String name : names) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        allNames.append(" ");
+                    }
+                    allNames.append(name);
+                }
+                mode.getActivePart().setExplicitProperty(f, allNames.toString(), decl.getPrecedence());
             }
         }
         checkEmpty();
@@ -333,9 +321,10 @@ public class XSLMode extends StyleElement {
         if (c == null) {
             throw new AssertionError();
         }
-        if (accumulators != null) {
-            mode.setAccumulators(accumulators);
-        }
+    }
+
+    public SimpleMode getMode() {
+        return mode;
     }
 
 
