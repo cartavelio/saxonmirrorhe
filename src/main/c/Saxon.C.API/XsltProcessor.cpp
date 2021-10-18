@@ -83,7 +83,7 @@ XsltProcessor::XsltProcessor(const XsltProcessor &other) {
 
 
 
-~XsltProcessor(){
+XsltProcessor::~XsltProcessor(){
     clearProperties();
     clearParameters();
 }

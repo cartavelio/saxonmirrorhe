@@ -148,12 +148,7 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         XsltCompiler compiler = processor.newXsltCompiler();
         XsltPackage pack = null;
-        try {
-            StreamSource stream = new StreamSource(sr);
-            pack = compiler.compilePackage(new StreamSource(new StringReader(str)));
-        } catch(Exception ex) {
-            throw new SaxonApiException(ex.getMessage());
-        }
+        pack = compiler.compilePackage(new StreamSource(new StringReader(str)));
         if (pack != null) {
 
             File file = absoluteFile(cwd, filename);
