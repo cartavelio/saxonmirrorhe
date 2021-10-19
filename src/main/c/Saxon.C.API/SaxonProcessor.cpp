@@ -282,7 +282,7 @@ SaxonProcessor::SaxonProcessor(bool l) {
 
     jobject proci = createSaxonProcessor(SaxonProcessor::sxn_environ->env, procClass, "(Z)V", nullptr, licensei);
     proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(proci);
-    if (!proc) {
+    if (proc == nullptr) {
         std::cout << "proc is nullptr in SaxonProcessor constructor" << std::endl;
     }
 
@@ -348,6 +348,7 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 }
 
 SaxonProcessor::~SaxonProcessor() {
+ std::cerr<<"SaxonProc: destructor called !"<<std::endl;
     clearConfigurationProperties();
     if(proc != nullptr) {
     	SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
@@ -595,11 +596,14 @@ JParameters SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValu
 
 
 SaxonProcessor &SaxonProcessor::operator=(const SaxonProcessor &other) {
+std::cerr<<"created new = SaxonProcessor"<<std::endl;
     versionClass = other.versionClass;
     procClass = other.procClass;
     saxonCAPIClass = other.saxonCAPIClass;
     cwd = other.cwd;
-    proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.proc);
+    if(other.proc != nullptr) {
+        proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.proc);
+    }
     parameters = other.parameters;
     configProperties = other.configProperties;
     licensei = other.licensei;
@@ -612,7 +616,9 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
     procClass = other.procClass;
     saxonCAPIClass = other.saxonCAPIClass;
     cwd = other.cwd;
-    proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.proc);
+    if(other.proc != nullptr) {
+        proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.proc);
+    }
     parameters = other.parameters;
     configProperties = other.configProperties;
     licensei = other.licensei;
@@ -922,14 +928,16 @@ void SaxonProcessor::clearConfigurationProperties() {
 void SaxonProcessor::release() {
     if (SaxonProcessor::jvmCreatedCPP != 0) {
         SaxonProcessor::jvmCreatedCPP = 0;
-        //std::cerr<<"SaxonProc: JVM finalized calling !"<<std::endl;
+#ifdef DEBUG
+        std::cerr<<"SaxonProc: JVM finalized calling !"<<std::endl;
+#endif
         finalizeJavaRT(SaxonProcessor::sxn_environ->jvm);
 
         delete SaxonProcessor::sxn_environ;
         /*clearParameters();
         clearProperties();*/
     } else {
-#ifdef DEBUG
+#ifdef DEBUG                                           s
         std::cerr << "SaxonProc: JVM finalize not called!" << std::endl;
 #endif
     }

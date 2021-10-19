@@ -36,11 +36,12 @@ cdef class PySaxonProcessor:
              xslt30proc = proc.new_xslt30_processor()
     """
     cdef saxoncClasses.SaxonProcessor *thisptr      # hold a C++ instance which we're wrapping
+    cdef bool _release  #  flag to indicate if this PySaxonProcessor should call release
     ##
     # The Constructor
     # @param license Flag that a license is to be used
     # @contextlib.contextmanager
-    def __cinit__(self, config_file= None, license=False):
+    def __cinit__(self, config_file= None, license=False, releasei=False):
         """
         __cinit__(self, config_file=None, license=False)
         The constructor.
@@ -51,6 +52,7 @@ cdef class PySaxonProcessor:
         """
         cdef const char * c_str = NULL
         cdef bool l = license
+        self._release = releasei
         if config_file is not None:
             c_str = make_c_str(config_file)
             if c_str is not NULL:
@@ -62,15 +64,26 @@ cdef class PySaxonProcessor:
 
     def __dealloc__(self):
         """The destructor."""
-        del self.thisptr
+        if self.thisptr is not NULL:
+          del self.thisptr
+          self.thisptr = NULL
+        if self._release is True:
+            self.thisptr.release()
     def __enter__(self):
       """enter method for use with the keyword 'with' context"""
       return self
+    
     def __exit__(self, exception_type, exception_value, traceback):
         """The exit method for the context PySaxonProcessor. Here we release the Jet VM resources.
         If we have more than one live PySaxonProcessor object the release() method has no effect.
         """
-        self.thisptr.release()
+        
+        ''' if self.thisptr is not NULL:
+          del self.thisptr
+          self.thisptr = NULL        
+        self.thisptr.release()'''
+
+
     property version:
         """
         Get the Saxon Version.
@@ -81,11 +94,7 @@ cdef class PySaxonProcessor:
             cdef const char* c_string = self.thisptr.version()
             ustring = c_string.decode('UTF-8')
             return ustring
-    def release(self):
-        """
-        release(self)
-        Clean up and destroy Java VM to release memory used."""
-        self.thisptr.release()
+
     @property
     def cwd(self):
         """
@@ -3366,6 +3375,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
             else:
                 self.derivedaptr.decrementRefCount()
 
+
      @property
      def primitive_type_name(self):
         """
@@ -3436,3 +3446,5 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         """
         ustring = make_py_str(self.derivedaptr.getStringValue())
         return ustring
+     
+_o=PySaxonProcessor(None, False, True)       #  This is important to prevent Jet calling release until all Saxon objects have been garbage collected!

@@ -48,7 +48,7 @@
 #include "SaxonApiException.h"
 //#include "com_saxonica_functions_extfn_PhpCall.h"
 //#include "com_saxonica_functions_extfn_PhpCall_PhpFunctionCall.h"
-#define MEM_DEBUG
+//#define MEM_DEBUG
 #if defined MEM_DEBUG
 
 

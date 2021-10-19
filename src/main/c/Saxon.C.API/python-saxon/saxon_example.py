@@ -29,7 +29,7 @@ with saxonc.PySaxonProcessor(license=False) as proc:
         <person>text2</person>
         <person>text3</person>
     </out>"""
-   xp = proc.new_xpath_processor()
+''' xp = proc.new_xpath_processor()
     
    node = proc.parse_xml(xml_text=xml)
    print('test 1\n node='+node.string_value)
@@ -61,7 +61,7 @@ with saxonc.PySaxonProcessor(license=False) as proc:
    print(*children, sep= ', ')
    attrs = children[1].attributes
    if len(attrs) == 2:
-       print(attrs[1].string_value)
+       print(attrs[1].string_value)       '''
 
 
 
