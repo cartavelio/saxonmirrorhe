@@ -476,6 +476,7 @@ public class FLWORExpression extends Expression {
             final ExpressionVisitor visitor,
             final ContextItemStaticInfo contextItemType) throws XPathException {
 
+        Optimizer opt = visitor.obtainOptimizer();
         //verifyParentPointers();
         // Optimize all the subexpressions
         for (Clause c : clauses) {
@@ -525,6 +526,7 @@ public class FLWORExpression extends Expression {
                         if (oneRef || simpleSeq) {
                             ExpressionTool.replaceVariableReferences(this, lc.getRangeVariable(), lc.getSequence(), true);
                             clauses.remove(c);
+                            opt.trace("Inlined let $" + lc.getRangeVariable().getVariableQName().getDisplayName(), this);
                             if (clauses.isEmpty()) {
                                 return getReturnClause();
                             }

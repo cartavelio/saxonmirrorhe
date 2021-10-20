@@ -1306,7 +1306,7 @@ public class ExpressionTool {
                 o.setChildExpression(e2);
                 replaced = true;
             } else {
-                replaced = replaceSelectedSubexpressions(child, selector, replacement, mustCopy);
+                replaced |= replaceSelectedSubexpressions(child, selector, replacement, mustCopy);
             }
         }
         return replaced;
@@ -1324,7 +1324,10 @@ public class ExpressionTool {
     public static void replaceVariableReferences(Expression exp, final Binding binding, Expression replacement, boolean mustCopy) {
         ExpressionSelector selector =
                 child -> child instanceof VariableReference && ((VariableReference) child).getBinding() == binding;
-        replaceSelectedSubexpressions(exp, selector, replacement, mustCopy);
+        boolean changed = replaceSelectedSubexpressions(exp, selector, replacement, mustCopy);
+        if (changed) {
+            resetPropertiesWithinSubtree(exp);
+        }
     }
 
     /**
