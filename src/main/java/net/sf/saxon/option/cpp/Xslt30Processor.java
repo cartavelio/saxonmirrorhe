@@ -147,7 +147,6 @@ public class Xslt30Processor extends SaxonCAPI {
             return;
         }
         XsltCompiler compiler = processor.newXsltCompiler();
-<<<<<<< Updated upstream
         XsltPackage pack = null;
         try {
             //StreamSource stream = new StreamSource(sr);
@@ -162,14 +161,6 @@ public class Xslt30Processor extends SaxonCAPI {
             pack.save(file);
         }
 
-
-=======
-        XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(str)));
-        if(pack != null) {
-            File file = absoluteFile(cwd, filename);
-            pack.save(file);
-        }
->>>>>>> Stashed changes
     }
 
     /**
