@@ -3,6 +3,8 @@ import pytest
 from saxonc import *
 import os
 from os.path import isfile
+
+
 @pytest.fixture
 def saxonproc():
     return PySaxonProcessor()
@@ -267,7 +269,8 @@ def testXdmDestination(saxonproc):
     assert node.node_kind == 9
 def testXdmDestinationWithItemSeparator(saxonproc):
     trans = saxonproc.new_xslt30_processor()
-    trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template name='go'><xsl:comment>A</xsl:comment><out/><xsl:comment>Z</xsl:comment></xsl:template><xsl:output method='xml' item-separator='§'/></xsl:stylesheet>")
+    stylesheetStr = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template name='go'><xsl:comment>A</xsl:comment><out/><xsl:comment>Z</xsl:comment></xsl:template><xsl:output method='xml' item-separator='§'/></xsl:stylesheet>".encode('latin-1')
+    trans.compile_stylesheet(stylesheet_text=stylesheetStr)
     root = trans.call_template_returning_value("go")
     node  = root
 

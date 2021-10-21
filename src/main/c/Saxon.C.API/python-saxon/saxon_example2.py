@@ -17,5 +17,4 @@ with PySaxonProcessor(license=False) as proc:
 
     output2 = xsltproc.transform_to_string()
     print(output2)
-    proc.release()
 

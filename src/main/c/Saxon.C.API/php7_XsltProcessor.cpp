@@ -598,7 +598,7 @@ PHP_METHOD(XsltProcessor, clearProperties)
 
 
 
-PHP_METHOD(XsltProcessor, setupXslMessage)
+PHP_METHOD(XsltProcessor, setSaveXslMessage)
 {
     XsltProcessor *xsltProcessor;
     bool show = false;
@@ -614,7 +614,7 @@ PHP_METHOD(XsltProcessor, setupXslMessage)
 
     if (xsltProcessor != nullptr) {
 
-	    xsltProcessor->setupXslMessage(show, filename);
+	    xsltProcessor->setSaveXslMessage(show, filename);
 	}
 
 }
@@ -711,7 +711,7 @@ zend_function_entry XsltProcessor_methods[] = {
         PHP_ME(XsltProcessor,  setProperty, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(XsltProcessor,  clearParameters, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(XsltProcessor,  clearProperties, nullptr, ZEND_ACC_PUBLIC)
-        PHP_ME(XsltProcessor,  setupXslMessage, nullptr, ZEND_ACC_PUBLIC)
+        PHP_ME(XsltProcessor,  setSaveXslMessage, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(XsltProcessor,  exceptionOccurred, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(XsltProcessor,  exceptionClear, nullptr, ZEND_ACC_PUBLIC)
         PHP_ME(XsltProcessor,  getErrorCode, nullptr, ZEND_ACC_PUBLIC)

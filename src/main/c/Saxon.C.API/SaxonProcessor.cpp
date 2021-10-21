@@ -348,7 +348,6 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 }
 
 SaxonProcessor::~SaxonProcessor() {
- std::cerr<<"SaxonProc: destructor called !"<<std::endl;
     clearConfigurationProperties();
     if(proc != nullptr) {
     	SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);

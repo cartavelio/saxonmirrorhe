@@ -231,7 +231,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltProcessor,  exceptionOccurred);
     PHP_METHOD(XsltProcessor,  getErrorCode);
     PHP_METHOD(XsltProcessor,  getErrorMessage);
-    PHP_METHOD(XsltProcessor,  setupXslMessage);
+    PHP_METHOD(XsltProcessor,  setSaveXslMessage);
 
 
 
@@ -297,10 +297,9 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltExecutable,  checkForException);
     PHP_METHOD(XsltExecutable,  getErrorCode);
     PHP_METHOD(XsltExecutable,  getErrorMessage);
-    PHP_METHOD(XsltExecutable,  setupXslMessage);
+    PHP_METHOD(XsltExecutable,  setSaveXslMessage);
     PHP_METHOD(XsltExecutable,  setSaveResultDocument);
     PHP_METHOD(XsltExecutable,  getResultDocuments);
-    PHP_METHOD(XsltExecutable,  getXslMessages);
 
 
 // PHP_METHOD(XQueryProcesor,  __construct);

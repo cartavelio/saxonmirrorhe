@@ -54,7 +54,7 @@ PHP_METHOD(XsltExecutable, __destruct)
      }
 }
 
-
+/*
 PHP_METHOD(XsltExecutable, getXslMessages)
 {
     XsltExecutable *xsltExecutable;
@@ -92,7 +92,7 @@ PHP_METHOD(XsltExecutable, getXslMessages)
     } else {
         RETURN_NULL();
     }
-}
+}    */
 
 
 
@@ -114,37 +114,31 @@ PHP_METHOD(XsltExecutable, getResultDocuments)
         xsltExecutable->exceptionClear();
         std::map<std::string,XdmNode*> cpp_resultDocMap = xsltExecutable->getResultDocuments();
         if(cpp_resultDocMap.size() == 0) {
-            return NULL;
+            RETURN_NULL();
         }
         //array_init(return_value);
-        XdmValue rValues = new XdmVaue();
-        for (std::map::iterator i = cpp_resultDocMap.begin(); i != cpp_resultDocMap.end(); ++i) {
-                        n = (node_object*) zend_object_store_get_object(node_zval TSRMLS_CC);
-                        n->node = i->second;
-                        add_index_zval(return_value, i->first, node_zval);
-        }
-        
-            if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
-                RETURN_NULL();
-            } else {
-                //struct xdmValue_object* vobj = (struct xdmValue_object *)Z_OBJ_P(return_value);
-                zend_object *vvobj =  Z_OBJ_P(return_value);
-                xdmNode_object* vobj  = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
+        //XdmMap rValues = new XdmMap();
+        /*for (std::map::iterator i = cpp_resultDocMap.begin(); i != cpp_resultDocMap.end(); ++i) {
+                        zval * nodei_Val;
+                        struct xdmNode_object* nodei_obj = (struct xdmNode_object *)Z_OBJ_P(nodei_Val);
+                        zend_object *vvobj =  Z_OBJ_P(nodei_Val);
+                        xdmNode_object* vobj  = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
 
-                assert (vobj != NULL);
-                vobj->xdmNode = values;
-            }
+                        n = (node_object*) zend_object_store_get_object(php_resultDocArr TSRMLS_CC);
+                        n->node = i->second;
+                        add_index_zval(return_value, i->first, php_resultDocArr);
+        }  */
+        
+
         } else if(xsltExecutable->exceptionOccurred()){
             SaxonApiException * exception = xsltExecutable->getException();
             if(exception != nullptr) {
                 zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
                 delete exception;
             }
+            RETURN_NULL();
         }
         RETURN_NULL();
-    } else {
-        RETURN_NULL();
-    }
 }
 
 
@@ -1451,7 +1445,7 @@ PHP_METHOD(XsltExecutable, clearProperties)
 }
 
 
-PHP_METHOD(XsltExecutable, setupXslMessage)
+PHP_METHOD(XsltExecutable, setSaveXslMessage)
 {
     XsltExecutable *xsltExecutable;
     bool show = false;
@@ -1467,7 +1461,7 @@ PHP_METHOD(XsltExecutable, setupXslMessage)
 
     if (xsltExecutable != nullptr) {
 
-	    xsltExecutable->setupXslMessage(show, filename);
+	    xsltExecutable->setSaveXslMessage(show, filename);
 	}
 
 }
@@ -1630,15 +1624,13 @@ zend_function_entry XsltExecutable_methods[] = {
     PHP_ME(XsltExecutable,  setcwd, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  clearParameters, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  clearProperties, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  setupXslMessage, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  setupResultDocumentHandler, nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(XsltExecutable,  setSaveXslMessage, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  exceptionOccurred, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  exceptionClear, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  exportStylesheet, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  getErrorCode, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  checkForException, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  getErrorMessage, nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XsltExecutable,  getXslMessages, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  getResultDocuments, nullptr, ZEND_ACC_PUBLIC)
 {nullptr, nullptr, nullptr}
 };
