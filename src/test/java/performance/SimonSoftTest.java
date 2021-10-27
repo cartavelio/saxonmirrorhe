@@ -109,7 +109,8 @@ public class SimonSoftTest {
 
         XdmNode xdmDoc = db.build(new StreamSource(xml));
 
-        StringWriter bulkWriter = new StringWriter();
+        //StringWriter bulkWriter = new StringWriter();
+        ByteArrayOutputStream bulkWriter = new ByteArrayOutputStream();
         Destination destination = processor.newSerializer(bulkWriter);
         transformer.setDestination(destination);
 
