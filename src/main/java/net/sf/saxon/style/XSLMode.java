@@ -40,6 +40,7 @@ public class XSLMode extends StyleElement {
     private Set<? extends Accumulator> accumulators;
     private boolean prepared = false;
     private boolean traceMatching = false;
+    private boolean streamable = false;
 
     /**
      * Ask whether this node is a declaration, that is, a permitted child of xsl:stylesheet
@@ -142,7 +143,7 @@ public class XSLMode extends StyleElement {
             String value = att.getValue();
             switch (f) {
                 case "streamable":
-                    boolean streamable = processStreamableAtt(value);
+                    streamable = processStreamableAtt(value);
                     break;
                 case "name":
                     nameAtt = Whitespace.trim(value);
@@ -285,6 +286,10 @@ public class XSLMode extends StyleElement {
                     normalizedAtt = "no";
                 } else {
                     normalizedAtt = trimmed;
+                }
+                if (f.equals("streamable") && !streamable) {
+                    // we've decided earlier to fall back to non-streaming
+                    normalizedAtt = "no";
                 }
                 mode.getActivePart().setExplicitProperty(f, normalizedAtt, decl.getPrecedence());
                 if (mode.isMustBeTyped() && getContainingPackage().getTargetEdition().matches("JS\\d?")) {

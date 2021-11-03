@@ -668,7 +668,6 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      *
      * @return an object that accepts xs:string values via a sequence of append() calls
      * @param asTextNode set to true if the concatenated string values are to be treated
-     *      *                   as a text node item rather than a string
      */
 
     @Override

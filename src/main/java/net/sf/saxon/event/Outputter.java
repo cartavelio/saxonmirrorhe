@@ -348,13 +348,12 @@ public abstract class Outputter implements Receiver {
      * the entire string on completion.
      * @return an object that accepts xs:string values via a sequence of append() calls
      * @param asTextNode set to true if the concatenated string values are to be treated
-     *                   as a text node item rather than a string
      */
 
     public CharSequenceConsumer getStringReceiver(boolean asTextNode) {
         return new CharSequenceConsumer() {
 
-            FastStringBuffer buffer = new FastStringBuffer(256);
+            private final FastStringBuffer buffer = new FastStringBuffer(256);
             @Override
             public CharSequenceConsumer cat(CharSequence chars) {
                 return buffer.cat(chars);
@@ -370,7 +369,7 @@ public abstract class Outputter implements Receiver {
                 if (asTextNode) {
                     Outputter.this.characters(buffer, Loc.NONE, ReceiverOption.NONE);
                 } else {
-                    Outputter.this.append(new StringValue(buffer.condense()));
+                    Outputter.this.append(new StringValue(buffer.condense()), Loc.NONE, ReceiverOption.ALL_NAMESPACES);
                 }
             }
         };
