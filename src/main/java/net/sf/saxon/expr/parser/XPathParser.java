@@ -3128,9 +3128,9 @@ public class XPathParser {
             default:
                 Expression[] entriesArray = new Expression[entries.size()];
                 Block block = new Block(entries.toArray(entriesArray));
-                DictionaryMap options = new DictionaryMap();
-                options.initialPut("duplicates", new StringValue("reject"));
-                options.initialPut("duplicates-error-code", new StringValue("XQDY0137"));
+                HashTrieMap options = new HashTrieMap();
+                options.initialPut(new StringValue("duplicates"), new StringValue("reject"));
+                options.initialPut(new QNameValue("", NamespaceConstant.SAXON, "duplicates-error-code"), new StringValue("XQDY0137"));
                 result = MapFunctionSet.getInstance().makeFunction("merge", 2).makeFunctionCall(block, Literal.makeLiteral(options));
                 break;
         }
