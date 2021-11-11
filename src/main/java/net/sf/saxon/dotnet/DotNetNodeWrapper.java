@@ -506,18 +506,18 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
                 if (attName.equals("xmlns")) {
                     String prefix = "";
                     String uri = att.get_Value();
-                    codes.put(prefix, uri);
+                    codes = codes.put(prefix, uri);
                 } else if (attName.startsWith("xmlns:")) {
                     String prefix = attName.substring(6);
                     String uri = att.get_Value();
-                    codes.put(prefix, uri);
+                    codes = codes.put(prefix, uri);
                 } else if (att.get_NamespaceURI().length() != 0) {
-                    codes.put(att.get_Prefix(), att.get_NamespaceURI());
+                    codes = codes.put(att.get_Prefix(), att.get_NamespaceURI());
                 }
             }
 
             if (elem.get_NamespaceURI().length() != 0) {
-                codes.put(elem.get_Prefix(), elem.get_NamespaceURI());
+                codes = codes.put(elem.get_Prefix(), elem.get_NamespaceURI());
             }
             /*int count = codes.size();
             NamespaceMap result = new NamespaceBinding[count];
