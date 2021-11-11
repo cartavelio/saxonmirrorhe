@@ -543,21 +543,11 @@ namespace Saxon.Api
 
     }
 
-    /// <summary>
-	/// A <c>DomDestination</c> represents an <c>XmlDocument</c> that is constructed to hold the
-    /// output of a query or transformation.
-    /// </summary>
-    /// <remarks>
-    /// No data needs to be supplied to the <c>DomDestination</c> object. The query or transformation
-    /// populates an <c>XmlDocument</c>, which may then be retrieved as the value of the <c>XmlDocument</c>
-    /// property.
-    /// </remarks>
-
-    public class DomDestination : XmlDestination
+     public class DomDestination : XmlDestination
     {
 
         internal JDotNetDomBuilder builder;
-        internal net.sf.saxon.dotnet.DotNetDomDestination destination;
+        internal net.sf.saxon.s9api.Destination destination;
 
         /// <summary>Construct a <c>DomDestination</c>.</summary>
         /// <remarks>With this constructor, the system will create a new DOM Document
@@ -580,6 +570,7 @@ namespace Saxon.Api
         {
             builder = new JDotNetDomBuilder();
             builder.setAttachmentPoint(attachmentPoint);
+            destination = new DomDestinationImpl(builder);
         }
 
         /// <summary>Construct a <c>DomDestination</c> based on an existing document fragment node.</summary>
@@ -591,6 +582,7 @@ namespace Saxon.Api
         {
             builder = new JDotNetDomBuilder();
             builder.setAttachmentPoint(attachmentPoint);
+            destination = new DomDestinationImpl(builder);
         }
 
         /// <summary>Construct a <c>DomDestination</c> based on an existing element node.</summary>
@@ -602,6 +594,7 @@ namespace Saxon.Api
         {
             builder = new JDotNetDomBuilder();
             builder.setAttachmentPoint(attachmentPoint);
+            destination = new DomDestinationImpl(builder);
         }
 
         /// <summary>After construction, retrieve the constructed document node.</summary>
@@ -651,6 +644,26 @@ namespace Saxon.Api
 
 	}
 
+    internal class DomDestinationImpl : net.sf.saxon.s9api.AbstractDestination
+    {
+        private readonly JDotNetDomBuilder builder;
+
+        public DomDestinationImpl(JDotNetDomBuilder builder)
+        {
+            this.builder = builder;
+        }
+
+        public override net.sf.saxon.@event.Receiver getReceiver(net.sf.saxon.@event.PipelineConfiguration pipe, net.sf.saxon.serialize.SerializationProperties properties)
+        {
+            builder.setPipelineConfiguration(pipe);
+            return properties.makeSequenceNormalizer(builder);
+        }
+
+        public override void close()
+        {
+           // no action
+        }
+    }
 	/// <summary>
 	/// A <c>RawDestination</c> is an <c>Destination</c> that accepts a sequence output
 	/// by a stylesheet or query and returns it directly as an <c>XdmValue</c>, without
