@@ -259,7 +259,14 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 
     @Override
     public String getLocalPart() {
-        return node.get_LocalName();
+        switch (nodeKind) {
+            case Type.ELEMENT:
+            case Type.ATTRIBUTE:
+            case Type.PROCESSING_INSTRUCTION:
+                return node.get_LocalName();
+            default:
+                return "";
+        }
     }
 
     /**
@@ -294,7 +301,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
         // we can use the values.
 
         String uri = node.get_NamespaceURI();
-        if (uri != null) {
+        if (uri != null && uri.length() > 0) {
             return uri;
         }
 
