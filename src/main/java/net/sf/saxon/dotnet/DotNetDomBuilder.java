@@ -181,6 +181,9 @@ public class DotNetDomBuilder implements Receiver {
     @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         try {
+            if (currentNode == document && net.sf.saxon.value.Whitespace.isWhite(chars)) {
+                return;
+            }
             XmlText text = document.CreateTextNode(chars.toString());
             currentNode.AppendChild(text);
         } catch (Exception err) {
