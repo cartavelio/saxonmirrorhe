@@ -645,6 +645,12 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
         }
     }
 
+    private boolean isTextNode(XmlNode node) {
+        XmlNodeType type = node.get_NodeType();
+        int code = type.Value;
+        return code == XmlNodeType.Text || code == XmlNodeType.CDATA;
+    }
+
     @Override
     public DotNetNodeWrapper getNextSibling() {
         XmlNode currNode = node;
@@ -655,7 +661,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
             XmlNodeType type = currNode.get_NodeType();
             if (type.Value == XmlNodeType.DocumentType) {
                 currNode = currNode.get_NextSibling();
-            } else if (type.Value == XmlNodeType.Text || type.Value == XmlNodeType.CDATA){
+            } else if (isTextNode(currNode)){
                 return spannedWrapper(currNode);
             }
             return makeWrapper(currNode, docWrapper);
@@ -668,7 +674,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
         int thisSpan = 1;
         while (true) {
             currText = currText.get_NextSibling();
-            if (currText != null && currText.get_NodeType().Value == XmlNodeType.Text || currText.get_NodeType().Value == XmlNodeType.CDATA) {
+            if (currText != null && isTextNode(currText)) {
                 thisSpan++;
             } else{
                 break;
@@ -686,7 +692,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
                 currNode = currNode.get_NextSibling();
             }
 
-            if (currNode.get_NodeType().Value == XmlNodeType.Text || currNode.get_NodeType().Value ==XmlNodeType.CDATA){
+            if (isTextNode(currNode)){
                 return spannedWrapper(currNode);
             }
             return makeWrapper(currNode, docWrapper);
@@ -700,11 +706,11 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
             XmlNodeType type = currNode.get_NodeType();
             if (type.Value == XmlNodeType.DocumentType) {
                 return null;
-            } else if (type.Value == XmlNodeType.Text || type.Value == XmlNodeType.CDATA){
+            } else if (isTextNode(currNode)){
                 int span = 1;
                 while (true) {
                     XmlNode prev = currNode.get_PreviousSibling();
-                    if (prev != null && prev.get_NodeType().Value == XmlNodeType.Text || prev.get_NodeType().Value == XmlNodeType.CDATA){
+                    if (prev != null && isTextNode(prev)){
                         span++;
                         currNode = prev;
                     } else{
