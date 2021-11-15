@@ -647,29 +647,77 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 
     @Override
     public DotNetNodeWrapper getNextSibling() {
-        XmlNode currNode = node.get_NextSibling();
+        XmlNode currNode = node;
+        for (int i = 0; i < span; i++) {
+            currNode = currNode.get_NextSibling();
+        }
         if (currNode != null) {
+            XmlNodeType type = currNode.get_NodeType();
+            if (type.Value == XmlNodeType.DocumentType) {
+                currNode = currNode.get_NextSibling();
+            } else if (type.Value == XmlNodeType.Text || type.Value == XmlNodeType.CDATA){
+                return spannedWrapper(currNode);
+            }
             return makeWrapper(currNode, docWrapper);
         }
         return null;
     }
 
+    private DotNetNodeWrapper spannedWrapper(XmlNode currNode) {
+        XmlNode currText = currNode;
+        int thisSpan = 1;
+        while (true) {
+            currText = currText.get_NextSibling();
+            if (currText != null && currText.get_NodeType().Value == XmlNodeType.Text || currText.get_NodeType().Value == XmlNodeType.CDATA) {
+                thisSpan++;
+            } else{
+                break;
+            }
+        }
+        DotNetNodeWrapper spannedText = makeWrapper(currNode, docWrapper);
+        spannedText.span = thisSpan;
+        return spannedText;
+    }
 
-    @Override
     public DotNetNodeWrapper getFirstChild() {
         XmlNode currNode = node.get_FirstChild();
         if (currNode != null) {
+            if (currNode.get_NodeType().Value == XmlNodeType.DocumentType) {
+                currNode = currNode.get_NextSibling();
+            }
+
+            if (currNode.get_NodeType().Value == XmlNodeType.Text || currNode.get_NodeType().Value ==XmlNodeType.CDATA){
+                return spannedWrapper(currNode);
+            }
             return makeWrapper(currNode, docWrapper);
         }
         return null;
     }
 
-    @Override
     public DotNetNodeWrapper getPreviousSibling() {
         XmlNode currNode = node.get_PreviousSibling();
         if (currNode != null) {
+            XmlNodeType type = currNode.get_NodeType();
+            if (type.Value == XmlNodeType.DocumentType) {
+                return null;
+            } else if (type.Value == XmlNodeType.Text || type.Value == XmlNodeType.CDATA){
+                int span = 1;
+                while (true) {
+                    XmlNode prev = currNode.get_PreviousSibling();
+                    if (prev != null && prev.get_NodeType().Value == XmlNodeType.Text || prev.get_NodeType().Value == XmlNodeType.CDATA){
+                        span++;
+                        currNode = prev;
+                    } else{
+                        break;
+                    }
+                }
+                DotNetNodeWrapper wrapper = makeWrapper(currNode, docWrapper);
+                wrapper.span = span;
+                return wrapper;
+            }
             return makeWrapper(currNode, docWrapper);
         }
+
         return null;
     }
 
