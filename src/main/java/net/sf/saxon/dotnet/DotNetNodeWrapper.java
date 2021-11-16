@@ -26,10 +26,7 @@ import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.Type;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 
@@ -468,7 +465,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 
     @Override
     protected AxisIterator iterateChildren(Predicate<? super NodeInfo> nodeTest) {
-        AxisIterator iter = new ChildEnumeration(this, true, true);
+        AxisIterator iter = new ChildEnumeration(docWrapper, this, true, true);
         if (nodeTest != AnyNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
         }
@@ -477,7 +474,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 
     @Override
     protected AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards) {
-        AxisIterator iter = new ChildEnumeration(this, false, forwards);
+        AxisIterator iter = new ChildEnumeration(docWrapper, this, false, forwards);
         if (nodeTest != AnyNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
         }
@@ -645,7 +642,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
         }
     }
 
-    private boolean isTextNode(XmlNode node) {
+    private static boolean isTextNode(XmlNode node) {
         XmlNodeType type = node.get_NodeType();
         int code = type.Value;
         return code == XmlNodeType.Text || code == XmlNodeType.CDATA;
@@ -713,7 +710,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
                     if (prev != null && isTextNode(prev)){
                         span++;
                         currNode = prev;
-                    } else{
+                    } else {
                         break;
                     }
                 }
@@ -835,166 +832,326 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
      * preceding and preceding-or-ancestor axes (the latter being used by xsl:number)
      */
 
-    private final class ChildEnumeration implements AxisIterator, LookaheadIterator {
+    private static class ChildEnumeration  implements AxisIterator, LookaheadIterator {
+        private DotNetDocumentWrapper _docTree;
+        private DotNetNodeWrapper start;
+        private DotNetNodeWrapper commonParent;
 
-        private final DotNetNodeWrapper start;
-        private final ArrayList<DotNetNodeWrapper> items = new ArrayList<DotNetNodeWrapper>(20);
+        private List<DotNetNodeWrapper> items = new ArrayList<>(20);
+
         private int ix;
         private int position;
-        private boolean downwards;  // iterate children of start node (not siblings)
-        private boolean forwards;   // iterate in document order (not reverse order)
+        private boolean downwards;
+        private boolean forwards;
+        private boolean elementOnly;
+        private int currentSpan; // number of DOM nodes mapping to the current XPath node
+        private XmlNodeList childNodes;
+        private int childNodesLength;
 
-        public ChildEnumeration(DotNetNodeWrapper start,
-                                boolean downwards, boolean forwards) {
+        public ChildEnumeration(DotNetDocumentWrapper docTree, DotNetNodeWrapper start,
+                         boolean downwards, boolean forwards)
+        {
+            this._docTree = docTree;
             this.start = start;
             this.downwards = downwards;
             this.forwards = forwards;
+            this.elementOnly = false; // fast path for elements is not used
             position = 0;
-
-            DotNetNodeWrapper commonParent;
+            currentSpan = 1;
             if (downwards) {
                 commonParent = start;
             } else {
-                commonParent = start.getParent();
+                commonParent = ((DotNetNodeWrapper) start.getParent());
             }
 
-            XmlNodeList childNodes = commonParent.node.get_ChildNodes();
+            childNodes = commonParent.node.get_ChildNodes();
+            childNodesLength = childNodes.get_Count();
             if (downwards) {
-                if (!forwards) {
-                    // backwards enumeration: go to the end
-                    ix = childNodes.get_Count() - 1;
+                currentSpan = 1;
+                if (forwards) {
+                    ix = -1; // just before first
+                } else {
+                    ix = childNodesLength; // just after last
                 }
             } else {
-                ix = start.getSiblingPosition() + (forwards ? span : -1);
+                ix = start.getSiblingPosition(); // at current node
+                currentSpan = start.span;
             }
 
+
+        }
+
+        // Starting with ix positioned at a node, which is the last in a span, calculate the length
+        // of the span, that is the number of DOM nodes mapped to this XPath node.
+        // @return the number of nodes spanned
+
+        private int skipPrecedingTextNodes () {
+            int count = 0;
+            while (ix >= count) {
+                XmlNode node = childNodes.Item(ix - count);
+                if (isTextNode(node)) {
+                    count++;
+                } else{
+                    break;
+                }
+            }
+            return count == 0 ? 1 : count;
+        }
+
+        //  Starting with ix positioned at a node, which is the first in a span, calculate the length
+        //  of the span, that is the number of DOM nodes mapped to this XPath node.
+        //  @return the number of nodes spanned
+
+        private int skipFollowingTextNodes () {
+            int count = 0;
+            int pos = ix;
+            int len = childNodesLength;
+            while (pos < len) {
+                XmlNode node = childNodes.Item(pos);
+                if (isTextNode(node)){
+                    pos++;
+                    count++;
+                } else{
+                    break;
+                }
+            }
+            return count == 0 ? 1 : count;
+        }
+
+        public boolean supportsHasNext () {
+            return true;
+        }
+
+        public boolean hasNext () {
             if (forwards) {
-                boolean previousText = false;
-                for (int i = ix; i < childNodes.get_Count(); i++) {
-                    boolean thisText = false;
-                    XmlNode node = childNodes.Item(i);
-                    switch (node.get_NodeType().Value) {
-                        case XmlNodeType.DocumentType:
-                        case XmlNodeType.XmlDeclaration:
-                            break;
-                        case XmlNodeType.EntityReference:
-//                            System.err.println("Found an entity reference node:");
-//                            System.err.println("Name: " + node.get_Name());
-//                            System.err.println("InnerText: " + node.get_InnerText());
-//                            System.err.println("Previous: " + node.get_PreviousSibling());
-//                            System.err.println("Previous.InnerText: " + (node.get_PreviousSibling()==null ? "null" : node.get_PreviousSibling().get_InnerText()));
-//                            System.err.println("Next: " + node.get_NextSibling());
-//                            System.err.println("Next.InnerText: " + (node.get_NextSibling()==null ? "null" : node.get_NextSibling().get_InnerText()));
-//                            break;
-                        case XmlNodeType.Text:
-                        case XmlNodeType.CDATA:
-                        case XmlNodeType.Whitespace:
-                        case XmlNodeType.SignificantWhitespace:
-                            thisText = true;
-                            if (previousText) {
-//                                if (isAtomizing()) {
-//                                    UntypedAtomicValue old = (UntypedAtomicValue)(items.get(items.size()-1));
-//                                    String newval = old.getStringValue() + getStringValue(node, node.get_NodeType().Value);
-//                                    items.set(items.size()-1, new UntypedAtomicValue(newval));
-//                                } else {
-                                DotNetNodeWrapper old = items.get(items.size() - 1);
-                                old.span++;
-//                                }
-                                break;
-                            }
-                            // otherwise fall through to default case
-                        default:
-                            previousText = thisText;
-//                            if (isAtomizing()) {
-//                                items.add(new UntypedAtomicValue(
-//                                        getStringValue(node, node.get_NodeType().Value)));
-//                            } else {
-                            items.add(makeWrapper(node, docWrapper, commonParent, i));
-//                            }
-                    }
-                }
+                return ix + currentSpan < childNodesLength;
             } else {
-                boolean previousText = false;
-                for (int i = ix; i >= 0; i--) {
-                    boolean thisText = false;
-                    XmlNode node = childNodes.Item(i);
-                    switch (node.get_NodeType().Value) {
-                        case XmlNodeType.DocumentType:
-                        case XmlNodeType.XmlDeclaration:
-                            break;
-                        case XmlNodeType.EntityReference:
-//                            System.err.println("Found an entity reference node:");
-//                            System.err.println("Name: " + node.get_Name());
-//                            System.err.println("InnerText: " + node.get_InnerText());
-//                            System.err.println("Previous: " + node.get_PreviousSibling());
-//                            System.err.println("Previous.InnerText: " + (node.get_PreviousSibling()==null ? "null" : node.get_PreviousSibling().get_InnerText()));
-//                            System.err.println("Next: " + node.get_NextSibling());
-//                            System.err.println("Next.InnerText: " + (node.get_NextSibling()==null ? "null" : node.get_NextSibling().get_InnerText()));
-//                            break;
-                        case XmlNodeType.Text:
-                        case XmlNodeType.CDATA:
-                        case XmlNodeType.Whitespace:
-                        case XmlNodeType.SignificantWhitespace:
-                            thisText = true;
-                            if (previousText) {
-//                                if (isAtomizing()) {
-//                                    UntypedAtomicValue old = (UntypedAtomicValue)(items.get(items.size()-1));
-//                                    String newval = old.getStringValue() + getStringValue(node, node.get_NodeType().Value);
-//                                    items.set(items.size()-1, new UntypedAtomicValue(newval));
-//                                } else {
-                                DotNetNodeWrapper old = items.get(items.size() - 1);
-                                old.node = node;
-                                old.span++;
-//                                }
+                return ix > 0;
+            }
+        }
+
+        public NodeInfo next () {
+            while (true) {
+                if (forwards) {
+                    ix += currentSpan;
+                    if (ix >= childNodesLength) {
+                        return null;
+                    } else {
+                        currentSpan = skipFollowingTextNodes();
+                        XmlNode currentDomNode = childNodes.Item(ix);
+                        switch (currentDomNode.get_NodeType().Value) {
+                            case XmlNodeType.DocumentType:
+                                continue;
+                            case XmlNodeType.XmlDeclaration:
+                                continue;
+                            case XmlNodeType.Element:
                                 break;
-                            }
-                            // otherwise fall through to default case
-                        default:
-                            previousText = thisText;
-//                            if (isAtomizing()) {
-//                                items.add(new UntypedAtomicValue(
-//                                        getStringValue(node, node.get_NodeType().Value)));
-//                            } else {
-                            items.add(makeWrapper(node, docWrapper, commonParent, i));
-//                            }
+                            default:
+                                if (elementOnly) {
+                                    continue;
+                                } else {
+                                    break;
+                                }
+
+                        }
+
+                        DotNetNodeWrapper wrapper = makeWrapper(currentDomNode, _docTree, commonParent, ix);
+                        wrapper.span = currentSpan;
+                        return wrapper;
+                    }
+                } else {
+                    ix--;
+                    if (ix < 0) {
+                        return null;
+                    } else {
+                        currentSpan = skipPrecedingTextNodes();
+                        ix -= currentSpan - 1;
+                        XmlNode currentDomNode = childNodes.Item(ix);
+                        switch (currentDomNode.get_NodeType().Value) {
+                            case XmlNodeType.DocumentType:
+                                continue;
+                            case XmlNodeType.Element:
+                                break;
+                            default:
+                                if (elementOnly) {
+                                    continue;
+                                } else {
+                                    break;
+                                }
+                        }
+
+                        DotNetNodeWrapper wrapper = makeWrapper(currentDomNode, _docTree, commonParent, ix);
+                        wrapper.span = currentSpan;
+                        return wrapper;
                     }
                 }
             }
         }
 
-        @Override
-        public boolean hasNext() {
-            return position < items.size();
+        public void close () {
         }
+    }
 
-        /*@Nullable*/
-        @Override
-        public NodeInfo next() {
-            if (position > -1 && position < items.size()) {
-                return items.get(position++);
-            } else {
-                position = -1;
-                return null;
-            }
-        }
-
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED},
-         *         {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
-         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         *         It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        @Override
-        public EnumSet<Property> getProperties() {
-            return EnumSet.of(Property.LOOKAHEAD);
-        }
-
-    } // end of class ChildEnumeration
+//    private final class ChildEnumeration implements AxisIterator, LookaheadIterator {
+//
+//        private final DotNetNodeWrapper start;
+//        private final ArrayList<DotNetNodeWrapper> items = new ArrayList<DotNetNodeWrapper>(20);
+//        private int ix;
+//        private int position;
+//        private boolean downwards;  // iterate children of start node (not siblings)
+//        private boolean forwards;   // iterate in document order (not reverse order)
+//
+//        public ChildEnumeration(DotNetNodeWrapper start,
+//                                boolean downwards, boolean forwards) {
+//            this.start = start;
+//            this.downwards = downwards;
+//            this.forwards = forwards;
+//            position = 0;
+//
+//            DotNetNodeWrapper commonParent;
+//            if (downwards) {
+//                commonParent = start;
+//            } else {
+//                commonParent = start.getParent();
+//            }
+//
+//            XmlNodeList childNodes = commonParent.node.get_ChildNodes();
+//            if (downwards) {
+//                if (!forwards) {
+//                    // backwards enumeration: go to the end
+//                    ix = childNodes.get_Count() - 1;
+//                }
+//            } else {
+//                ix = start.getSiblingPosition() + (forwards ? span : -1);
+//            }
+//
+//            if (forwards) {
+//                boolean previousText = false;
+//                for (int i = ix; i < childNodes.get_Count(); i++) {
+//                    boolean thisText = false;
+//                    XmlNode node = childNodes.Item(i);
+//                    switch (node.get_NodeType().Value) {
+//                        case XmlNodeType.DocumentType:
+//                        case XmlNodeType.XmlDeclaration:
+//                            break;
+//                        case XmlNodeType.EntityReference:
+////                            System.err.println("Found an entity reference node:");
+////                            System.err.println("Name: " + node.get_Name());
+////                            System.err.println("InnerText: " + node.get_InnerText());
+////                            System.err.println("Previous: " + node.get_PreviousSibling());
+////                            System.err.println("Previous.InnerText: " + (node.get_PreviousSibling()==null ? "null" : node.get_PreviousSibling().get_InnerText()));
+////                            System.err.println("Next: " + node.get_NextSibling());
+////                            System.err.println("Next.InnerText: " + (node.get_NextSibling()==null ? "null" : node.get_NextSibling().get_InnerText()));
+////                            break;
+//                        case XmlNodeType.Text:
+//                        case XmlNodeType.CDATA:
+//                        case XmlNodeType.Whitespace:
+//                        case XmlNodeType.SignificantWhitespace:
+//                            thisText = true;
+//                            if (previousText) {
+////                                if (isAtomizing()) {
+////                                    UntypedAtomicValue old = (UntypedAtomicValue)(items.get(items.size()-1));
+////                                    String newval = old.getStringValue() + getStringValue(node, node.get_NodeType().Value);
+////                                    items.set(items.size()-1, new UntypedAtomicValue(newval));
+////                                } else {
+//                                DotNetNodeWrapper old = items.get(items.size() - 1);
+//                                old.span++;
+////                                }
+//                                break;
+//                            }
+//                            // otherwise fall through to default case
+//                        default:
+//                            previousText = thisText;
+////                            if (isAtomizing()) {
+////                                items.add(new UntypedAtomicValue(
+////                                        getStringValue(node, node.get_NodeType().Value)));
+////                            } else {
+//                            items.add(makeWrapper(node, docWrapper, commonParent, i));
+////                            }
+//                    }
+//                }
+//            } else {
+//                boolean previousText = false;
+//                for (int i = ix; i >= 0; i--) {
+//                    boolean thisText = false;
+//                    XmlNode node = childNodes.Item(i);
+//                    switch (node.get_NodeType().Value) {
+//                        case XmlNodeType.DocumentType:
+//                        case XmlNodeType.XmlDeclaration:
+//                            break;
+//                        case XmlNodeType.EntityReference:
+////                            System.err.println("Found an entity reference node:");
+////                            System.err.println("Name: " + node.get_Name());
+////                            System.err.println("InnerText: " + node.get_InnerText());
+////                            System.err.println("Previous: " + node.get_PreviousSibling());
+////                            System.err.println("Previous.InnerText: " + (node.get_PreviousSibling()==null ? "null" : node.get_PreviousSibling().get_InnerText()));
+////                            System.err.println("Next: " + node.get_NextSibling());
+////                            System.err.println("Next.InnerText: " + (node.get_NextSibling()==null ? "null" : node.get_NextSibling().get_InnerText()));
+////                            break;
+//                        case XmlNodeType.Text:
+//                        case XmlNodeType.CDATA:
+//                        case XmlNodeType.Whitespace:
+//                        case XmlNodeType.SignificantWhitespace:
+//                            thisText = true;
+//                            if (previousText) {
+////                                if (isAtomizing()) {
+////                                    UntypedAtomicValue old = (UntypedAtomicValue)(items.get(items.size()-1));
+////                                    String newval = old.getStringValue() + getStringValue(node, node.get_NodeType().Value);
+////                                    items.set(items.size()-1, new UntypedAtomicValue(newval));
+////                                } else {
+//                                DotNetNodeWrapper old = items.get(items.size() - 1);
+//                                old.node = node;
+//                                old.span++;
+////                                }
+//                                break;
+//                            }
+//                            // otherwise fall through to default case
+//                        default:
+//                            previousText = thisText;
+////                            if (isAtomizing()) {
+////                                items.add(new UntypedAtomicValue(
+////                                        getStringValue(node, node.get_NodeType().Value)));
+////                            } else {
+//                            items.add(makeWrapper(node, docWrapper, commonParent, i));
+////                            }
+//                    }
+//                }
+//            }
+//        }
+//
+//        @Override
+//        public boolean hasNext() {
+//            return position < items.size();
+//        }
+//
+//        /*@Nullable*/
+//        @Override
+//        public NodeInfo next() {
+//            if (position > -1 && position < items.size()) {
+//                return items.get(position++);
+//            } else {
+//                position = -1;
+//                return null;
+//            }
+//        }
+//
+//        /**
+//         * Get properties of this iterator, as a bit-significant integer.
+//         *
+//         * @return the properties of this iterator. This will be some combination of
+//         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED},
+//         *         {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+//         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
+//         *         acceptable to return the value zero, indicating that there are no known special properties.
+//         *         It is acceptable for the properties of the iterator to change depending on its state.
+//         */
+//
+//        @Override
+//        public EnumSet<Property> getProperties() {
+//            return EnumSet.of(Property.LOOKAHEAD);
+//        }
+//
+//    } // end of class ChildEnumeration
 
 
 }
