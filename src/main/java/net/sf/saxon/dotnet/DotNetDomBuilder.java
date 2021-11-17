@@ -139,8 +139,8 @@ public class DotNetDomBuilder implements Receiver {
                 String nsprefix = ns.getPrefix();
                 String nsuri = ns.getURI();
                 if (!nsuri.equals(NamespaceConstant.XML)) {
-                    if (prefix.isEmpty()) {
-                        element.SetAttribute("xmlns", uri);
+                    if (nsprefix.isEmpty()) {
+                        element.SetAttribute("xmlns", nsuri);
                     } else {
                         // an odd way to do it, but using SetAttribute hits problems
                         XmlAttribute decl = document.CreateAttribute("xmlns", nsprefix, "http://www.w3.org/2000/xmlns/");
@@ -151,7 +151,7 @@ public class DotNetDomBuilder implements Receiver {
             }
 
             for (AttributeInfo att : attributes) {
-                NodeName attName = att.getNodeName();
+                NodeName attName = att.getNodeName();  
                 XmlAttribute attr = document.CreateAttribute(
                         attName.getPrefix(), attName.getLocalPart(), attName.getURI());
                 attr.set_Value(att.getValue());
