@@ -73,7 +73,7 @@ public class StaticQueryContext {
     private boolean preserveSpace = false;
     private boolean defaultEmptyLeast = true;
     /*@Nullable*/ private ModuleURIResolver moduleURIResolver;
-    private ErrorReporter errorReporter = new StandardErrorReporter();
+    private ErrorReporter errorReporter;
     /*@Nullable*/ private CodeInjector codeInjector;
     private boolean isUpdating = false;
     private String defaultCollationName;
@@ -118,6 +118,7 @@ public class StaticQueryContext {
     public StaticQueryContext(Configuration config, boolean initialize) {
         this.config = config;
         this.namePool = config.getNamePool();
+        this.errorReporter = config.makeErrorReporter();
         if (initialize) {
             copyFrom(config.getDefaultStaticQueryContext());
         } else {
@@ -190,7 +191,7 @@ public class StaticQueryContext {
 
     public void reset() {
         userDeclaredNamespaces = new HashMap<>(10);
-        errorReporter = new StandardErrorReporter();
+        errorReporter = config.makeErrorReporter();
         constructionMode = getConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY) ?
                 Validation.PRESERVE : Validation.STRIP;
         preserveSpace = false;
