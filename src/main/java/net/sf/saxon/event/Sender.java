@@ -117,7 +117,7 @@ public abstract class Sender {
         if (source instanceof NodeInfo) {
             NodeInfo ns = (NodeInfo) source;
             String baseURI = ns.getBaseURI();
-            if (schemaValidation != Validation.PRESERVE) {
+            if (schemaValidation != Validation.PRESERVE && pipe.getComponent(DocumentValidator.class.getName()) == null) {
                 next = config.getDocumentValidator(next, baseURI, options, null);
             }
 
