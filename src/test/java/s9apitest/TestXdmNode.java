@@ -10,7 +10,9 @@ import org.xml.sax.InputSource;
 import javax.xml.transform.sax.SAXSource;
 import java.io.StringReader;
 
-import static net.sf.saxon.s9api.streams.Steps.*;
+import static net.sf.saxon.s9api.streams.Steps.attribute;
+import static net.sf.saxon.s9api.streams.Steps.child;
+import static net.sf.saxon.s9api.streams.Steps.followingSibling;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
