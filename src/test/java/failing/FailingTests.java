@@ -12,6 +12,9 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.StringReader;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -180,6 +183,43 @@ public class FailingTests {
             e.printStackTrace();
             fail();
         }
+    }
+
+    @Test  // bug 5148
+    public void testParallelCompilation() {
+
+        for (int runs=0; runs<20; runs++) {
+            Processor processor = new Processor(true);
+            try {
+                ExecutorService executor = Executors.newFixedThreadPool(20);
+                for (int i = 0; i < 100; i++) {
+                    final int run = i;
+                    executor.execute(() -> {
+                        try {
+                            XsltCompiler compiler = processor.newXsltCompiler();
+                            XsltExecutable top = compiler.compile(
+                                    new StreamSource(new File("/Users/mike/bugs/2021/5148-Filatenko/SaxonFailureDemo/TestData/WS_Single_Invoice-20210921.3.0.0/WS_Single_Invoice_xaml/INV_DocMaster.dmast")));
+                            Xslt30Transformer trans = top.load30();
+                            System.err.println("Done compilation " + run);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            fail();
+                        }
+                    });
+                }
+                ;
+                executor.shutdown();
+                executor.awaitTermination(300, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+//            for (int i = 0; i < 100; i++) {
+//                task.run();
+//                System.err.println("Done compilation " + i);
+//            }
+            System.err.println("Done run " + runs);
+        }
+
     }
 
 
