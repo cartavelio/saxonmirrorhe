@@ -7,7 +7,10 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.Builder;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.SequenceNormalizer;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.serialize.SerializationProperties;
@@ -63,6 +66,12 @@ public class XdmDestination extends AbstractDestination {
             throw new IllegalArgumentException("Supplied base URI must be absolute");
         }
         setDestinationBaseURI(baseURI);
+    }
+
+    @Override
+    public void setDestinationBaseURI(URI baseURI) {
+        super.setDestinationBaseURI(baseURI);
+        builder.setBaseURI(baseURI.toString());
     }
 
     /**

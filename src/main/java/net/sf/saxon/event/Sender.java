@@ -241,7 +241,7 @@ public abstract class Sender {
             // namecodes as necessary
             receiver = new NamePoolConverter(receiver, top.getConfiguration().getNamePool(), targetNamePool);
         }
-        LocationCopier copier = new LocationCopier(top.getNodeKind() == Type.DOCUMENT);
+        LocationCopier copier = new LocationCopier(top.getNodeKind() == Type.DOCUMENT, location.getSystemId());
         pipe.setComponent(CopyInformee.class.getName(), copier);
 
         // start event stream
