@@ -1350,7 +1350,7 @@
                      expected to be a single item, with a given context item. The expression is
                      supplied as a character string, and the result returned as an <a
                         class="bodylink code" href="../saxon_c_php_xdmitem">XdmItem</a>.
-                     Return NULL if the expression returns an empty sequence. If the expression
+                     Returns null if the expression returns an empty sequence. If the expression
                      returns a sequence of more than one item, any items after the first are ignored.</div>
                </td>
             </tr>
