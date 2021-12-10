@@ -7,7 +7,7 @@ using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
-using net.sf.saxon.tree.wrapper;
+
 
 namespace SaxonNUnit
 {
@@ -179,10 +179,10 @@ namespace SaxonNUnit
             // Load a schema
 
             Processor processor = new Processor(true);
-        processor.SetProperty("http://saxon.sf.net/feature/timing", "true");
+            processor.SetProperty("http://saxon.sf.net/feature/timing", "true");
             processor.SetProperty("http://saxon.sf.net/feature/validation-warnings", "false"); //Set to true to suppress the exception
             SchemaManager manager = processor.SchemaManager;
-        manager.XsdVersion = "1.1";
+            manager.XsdVersion = "1.1";
             manager.ErrorList = new List<StaticError>();
 
             UriBuilder ub = new UriBuilder();
@@ -191,7 +191,7 @@ namespace SaxonNUnit
             ub.Path = @"C:\work\repositories\AHSAMedicalAgreements-v0030z\";
             Uri baseUri = ub.Uri;
 
-            
+
             Uri schemaUri = new Uri(baseUri, "AHSAMedicalAgreements-v0030z.xsd");
 
             try
@@ -241,9 +241,29 @@ namespace SaxonNUnit
                 Assert.Fail();
             }
 
-
-
-
         }
+
+        [Test]
+        public void SchemaCatalog()
+        {
+            // Load a schema
+
+            Processor processor = new Processor(true);
+            processor.SetProperty("http://saxon.sf.net/feature/timing", "true");
+            processor.SetProperty("http://saxon.sf.net/feature/validation-warnings", "false"); //Set to true to suppress the exception
+            SchemaManager manager = processor.SchemaManager;
+            manager.XsdVersion = "1.1";
+            manager.Catalog = ConfigTest.DATA_DIR + "catalog.xml";
+            
+            try
+            {
+                manager.Compile(new Uri(ConfigTest.DATA_DIR + "books.xsd"));
+            } catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+
     }
 }

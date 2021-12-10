@@ -70,6 +70,20 @@ namespace Saxon9.NUnit
             }
         }
 
+        static IPredicate<XdmNode> ExpandedNamePredicate(String ns, String local)
+        {
+            return new Saxon.Api.Predicate<XdmNode>(node =>
+            {
+                Console.WriteLine("node uri="+node.NodeName.Uri);
+                Console.WriteLine("node localname=" + node.NodeName.LocalName);
+                if (!(node is XdmNode)) return false;
+                return node.NodeKind == XmlNodeType.Element
+                        && node.NodeName.LocalName.Equals(local) && node.NodeName.Uri.Equals(ns);
+            });
+
+        }
+
+
         [Test]
         public void TestSimpleDelegates()
         {
@@ -93,6 +107,19 @@ namespace Saxon9.NUnit
                 bool moved2 = iter2.MoveNext();
                 XdmNode foo2 = iter2.Current;
                 value = value.Append(foo2);
+
+                var doc3 = b.Build(new StringReader("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
+"<recordSeries xmlns='uri:rs' xmlns:xi='http://www.w3.org/2001/XInclude'><record number='R0001'>" +
+      "<xi:include href='r0001.xml'/></record></recordSeries>"));
+
+                var record = doc3.Select(Steps.Descendant("record")).First();
+
+                
+                var include = record.Children("http://www.w3.org/2001/XInclude", "include").First();
+                string hrefStr = include.GetAttributeValue("href");
+
+
+                Console.WriteLine(hrefStr);
 
 
                 // test 1

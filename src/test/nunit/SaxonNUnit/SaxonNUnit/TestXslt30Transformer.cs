@@ -141,8 +141,8 @@ namespace SaxonNUnit
             Processor _processor = new Processor(false);
             // _processor.SetProperty("http://saxon.sf.net/feature/debugByteCode", "true");
             // _processor.SetProperty("http://saxon.sf.net/feature/generateByteCode", "true");
-            string sourcePath = Path.GetFullPath("C:\\work\\misc\\xmark\\xmark10.xml");
-            string stylesheetPath = Path.GetFullPath("C:\\work\\misc\\xmark\\q12.xsl");
+            string sourcePath = Path.GetFullPath(ConfigTest.XMARK_DIR + "xmark10.xml");
+            string stylesheetPath = Path.GetFullPath(ConfigTest.XMARK_DIR + "q12.xsl");
             string outputPath = Path.ChangeExtension(sourcePath, ".out.xml");
 
             DocumentBuilder builder = _processor.NewDocumentBuilder();

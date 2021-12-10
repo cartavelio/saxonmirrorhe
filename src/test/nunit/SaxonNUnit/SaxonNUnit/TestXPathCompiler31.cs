@@ -275,6 +275,28 @@ namespace Saxon9.NUnit
         }
 
         [Test]
+        public void TestChildrenRepeatable()
+        {
+            // Children() returns an Enumerable so we need to be able to process it more than once...
+            Processor proc = new Processor();
+            DocumentBuilder builder = proc.NewDocumentBuilder();
+            XdmNode doc = builder.Build(new StringReader("<in><foo/><foo/><foo/></in>"));
+            XdmNode element = doc.Children().First();
+            IEnumerable<XdmNode> grandkids = element.Children();
+            int counter = 0;
+            foreach (XdmNode grandkid in grandkids)
+            {
+                counter++;
+            }
+            Assert.AreEqual(3, counter);
+            foreach (XdmNode grandkid in grandkids)
+            {
+                counter++;
+            }
+            Assert.AreEqual(6, counter);
+        }
+
+        [Test]
         public void TestBug4081()
         {
             String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
