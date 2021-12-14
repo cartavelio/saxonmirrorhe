@@ -172,7 +172,7 @@ javadoc {
 
 test {
   useJUnitPlatform {
-    excludeTags 'bytecode', 'performance', 'mike'
+    excludeTags 'missingfiles', 'mike', 'bytecode', 'expectedtofail', 'performance'
   }
 }
 
