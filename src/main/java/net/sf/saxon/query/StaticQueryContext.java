@@ -22,6 +22,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.TraceCodeInjector;
+import net.sf.saxon.trace.XQueryTraceCodeInjector;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
@@ -384,7 +385,7 @@ public class StaticQueryContext {
 
     public void setCompileWithTracing(boolean trace) {
         if (trace) {
-            codeInjector = new TraceCodeInjector();
+            codeInjector = new XQueryTraceCodeInjector();
         } else {
             codeInjector = null;
         }

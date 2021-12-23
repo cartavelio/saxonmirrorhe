@@ -2250,6 +2250,7 @@ public class XQueryParser extends XPathParser {
                 nextToken();
                 Expression condition = parseExprSingle();
                 WhereClause clause = new WhereClause(flwor, condition);
+                setLocation(clause, t.currentTokenStartOffset);
                 clause.setRepeated(containsLoopingClause(clauseList));
                 clauseList.add(clause);
             } else if (isKeyword("stable") || isKeyword("order")) {

@@ -2054,7 +2054,7 @@ namespace Saxon.Api
         public void message(net.sf.saxon.s9api.XdmNode xn, net.sf.saxon.s9api.QName qn, bool b, SourceLocator sl)
         {
             IXmlLocation location = new XmlLocation();
-            location.BaseUri = sl.getSystemId() == null ? null : new Uri(sl.getSystemId());
+            location.BaseUri = (sl.getSystemId() == null || sl.getSystemId() == "") ? null : new Uri(sl.getSystemId());
             location.LineNumber = sl.getLineNumber();
             listener.Message((XdmNode)XdmValue.Wrap(xn.getUnderlyingValue()), new QName(qn),b, location);
         }
