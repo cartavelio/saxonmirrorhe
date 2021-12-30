@@ -42,31 +42,17 @@ public class VennExpression extends BinaryExpression {
      */
 
     public VennExpression(final Expression p1, final int op, final Expression p2) {
-        super(p1, op, p2);
-    }
-
-    /**
-     * Simplify an expression. This performs any static optimization (by rewriting the expression
-     * as a different expression). The default implementation simplifies its operands.
-     *
-     * @return the simplified expression (or the original if unchanged, or if modified in-situ)
-     * @throws net.sf.saxon.trans.XPathException if an error is discovered during expression
-     *                                           rewriting
-     */
-    @Override
-    public Expression simplify() throws XPathException {
         // Force both operands to be sorted in document order. If this turns out to be unnecessary, it will
         // get optimized away
+        super(p1, op, p2);
         if (!(getLhsExpression() instanceof DocumentSorter)) {
             setLhsExpression(new DocumentSorter(getLhsExpression()));
         }
         if (!(getRhsExpression() instanceof DocumentSorter)) {
             setRhsExpression(new DocumentSorter(getRhsExpression()));
         }
-        super.simplify();
-        return this;
     }
-
+    
     /**
      * Get a name identifying the kind of expression, in terms meaningful to a user.
      *
