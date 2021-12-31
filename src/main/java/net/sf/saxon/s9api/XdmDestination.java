@@ -71,7 +71,9 @@ public class XdmDestination extends AbstractDestination {
     @Override
     public void setDestinationBaseURI(URI baseURI) {
         super.setDestinationBaseURI(baseURI);
-        builder.setBaseURI(baseURI.toString());
+        if (builder != null && baseURI != null) {
+            builder.setBaseURI(baseURI.toString());
+        }
     }
 
     /**
