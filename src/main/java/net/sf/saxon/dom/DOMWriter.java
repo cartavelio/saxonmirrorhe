@@ -377,7 +377,7 @@ public class DOMWriter extends Builder {
                     }
                 }
                 Node parent = elem.getParentNode();
-                if (parent.getNodeType() != Type.ELEMENT) {
+                if (parent == null || parent.getNodeType() != Type.ELEMENT) {
                     return nsMap;
                 }
                 elem = (Element)parent;
