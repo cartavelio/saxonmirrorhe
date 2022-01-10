@@ -120,6 +120,8 @@ public class SimpleMode extends Mode {
      */
 
     public void checkForConflictingProperties(RuleManager manager) throws XPathException {
+        boolean failOnMultipleMatch = false;
+        boolean warningOnMultipleMatch = true;
         for (Map.Entry<String, String> entry : getActivePart().explicitPropertyValues.entrySet()) {
             String prop = entry.getKey();
             String value = entry.getValue();
@@ -130,6 +132,7 @@ public class SimpleMode extends Mode {
                                 prop +
                                 " at the same import precedence", "XTSE0545");
             }
+
             switch (prop) {
                 case "streamable":
                     boolean streamable = "yes".equals(value);
@@ -163,7 +166,6 @@ public class SimpleMode extends Mode {
                             break;
                         case "fail":
                             base = FailRuleSet.getInstance();
-                            setRecoveryPolicy(RecoveryPolicy.DO_NOT_RECOVER);
                             break;
                         default:
                             // already validated
@@ -176,13 +178,11 @@ public class SimpleMode extends Mode {
                     break;
                 case "on-multiple-match":
                     if (value.equals("fail")) {
-                        setRecoveryPolicy(RecoveryPolicy.DO_NOT_RECOVER);
+                        failOnMultipleMatch = true;
                     }
                     break;
                 case "warning-on-multiple-match":
-                    if (value.equals("yes")) {
-                        setRecoveryPolicy(RecoveryPolicy.RECOVER_WITH_WARNINGS);
-                    }
+                    warningOnMultipleMatch = "yes".equals(value);
                     break;
                 case "use-accumulators":
                     AccumulatorRegistry registry = manager.getStylesheetPackage().getAccumulatorRegistry();
@@ -197,6 +197,13 @@ public class SimpleMode extends Mode {
                     setAccumulators(accumulators);
                     break;
             }
+        }
+        if (failOnMultipleMatch) {
+            setRecoveryPolicy(RecoveryPolicy.DO_NOT_RECOVER);
+        } else if (warningOnMultipleMatch) {
+            setRecoveryPolicy(RecoveryPolicy.RECOVER_WITH_WARNINGS);
+        } else {
+            setRecoveryPolicy(RecoveryPolicy.RECOVER_SILENTLY);
         }
     }
 
