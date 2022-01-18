@@ -2402,6 +2402,111 @@ public class TestXslt30Transformer {
         }
     }
 
+    @Test
+    public void testIllFormedInput() {
+        try {
+
+            String inputXSLT = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+                    + "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n"
+                    + "  version=\"3.0\"\n"
+                    + "  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n"
+                    + "  exclude-result-prefixes=\"#all\"\n"
+                    + "  xmlns:my=\"http://example.com/my-functions\"\n"
+                    + "  expand-text=\"yes\">\n"
+                    + "  \n"
+                    + "<xsl:variable name=\"vPop\" as=\"element()*\">\n"
+                    + "<item path=\"/header/txCtry\">Test</item>\n"
+                    + "<item path=\"/data/txSttlmInf/instgRmbrsmntAgt/BICFI\">nijith</item>\n"
+                    + "<item path=\"/data/txCityCd\">33</item>\n"
+                    + " </xsl:variable>\n"
+                    + " \n"
+                    + " <xsl:variable name=\"new-nodes\">\n"
+                    + "   <xsl:sequence select=\"my:subTree($vPop/@path/concat(.,'/',string(..)))\"/>\n"
+                    + " </xsl:variable>\n"
+                    + "\n"
+                    + "  <xsl:output method=\"xml\" indent=\"yes\"/>\n"
+                    + "  <xsl:strip-space elements=\"*\"/>\n"
+                    + "    \n"
+                    + "  <xsl:template match=\"/\" name=\"xsl:initial-template\">\n"
+                    + "    <xsl:sequence select=\"my:merge(*, $new-nodes/*)\"/>\n"
+                    + "  </xsl:template>\n"
+                    + "\n"
+                    + "\n"
+                    + " <xsl:function name=\"my:merge\" as=\"node()*\">\n"
+                    + "   <xsl:param name=\"node1\" as=\"node()*\"/>\n"
+                    + "   <xsl:param name=\"node2\" as=\"node()*\"/>\n"
+                    + "   <xsl:for-each-group select=\"$node1, $node2\" group-by=\"path()\">\n"
+                    + "     <xsl:copy>\n"
+                    + "       <xsl:sequence select=\"my:merge(@*, current-group()[2]/@*)\"/>\n"
+                    + "       <xsl:sequence select=\"my:merge(node(), current-group()[2]/node())\"/>\n"
+                    + "     </xsl:copy>\n"
+                    + "   </xsl:for-each-group>\n"
+                    + " </xsl:function>\n"
+                    + "\n"
+                    + " <xsl:function name=\"my:subTree\" as=\"node()*\">\n"
+                    + "   \n"
+                    + "   \n"
+                    + "  <xsl:param name=\"pPaths\" as=\"xs:string*\"/>\n"
+                    + "\n"
+                    + "  <xsl:for-each-group select=\"$pPaths\"\n"
+                    + "    group-adjacent=\n"
+                    + "        \"substring-before(substring-after(concat(., '/'), '/'), '/')\">\n"
+                    + "    <xsl:if test=\"current-grouping-key()\">\n"
+                    + "     <xsl:choose>\n"
+                    + "       <xsl:when test=\n"
+                    + "          \"substring-after(current-group()[1], current-grouping-key())\">\n"
+                    + "         <xsl:element name=\n"
+                    + "           \"{substring-before(concat(current-grouping-key(), '['), '[')}\">\n"
+                    + "\n"
+                    + "          <xsl:sequence select=\n"
+                    + "            \"my:subTree(for $s in current-group()\n"
+                    + "                         return\n"
+                    + "                            concat('/',substring-after(substring($s, 2),'/'))\n"
+                    + "                             )\n"
+                    + "            \"/>\n"
+                    + "        </xsl:element>\n"
+                    + "       </xsl:when>\n"
+                    + "       <xsl:otherwise>\n"
+                    + "        <xsl:value-of select=\"current-grouping-key()\"/>\n"
+                    + "       </xsl:otherwise>\n"
+                    + "     </xsl:choose>\n"
+                    + "     </xsl:if>\n"
+                    + "  </xsl:for-each-group>\n"
+                    + " </xsl:function>\n"
+                    + "</xsl:stylesheet>";
+            String inputXML = "<create>\n"
+                    + "   <article>\n"
+                    + "      <identifier>Test</identifier>\n"
+                    + "   </article>\n"
+                    + "      <article>\n"
+                    + "      <identifier>Test123</identifier>\n"
+                    + "   </article>\n"
+                    + "</create>\n"
+                    + "<update>\n"
+                    + "   <article>\n"
+                    + "      <identifier>Test</identifier>\n"
+                    + "   </article>\n"
+                    + "</update>";
+
+            Source xslt = new StreamSource(new StringReader(inputXSLT));
+            Source xml = new StreamSource(new StringReader(inputXML));
+            StringWriter transformedXML = new StringWriter();
+
+            Processor processor = new Processor(false);
+            XsltCompiler compiler = processor.newXsltCompiler();
+            XsltExecutable stylesheet = compiler.compile(xslt);
+            Serializer out = processor.newSerializer(transformedXML);
+            out.setOutputProperty(Serializer.Property.METHOD, "xml");
+            out.setOutputProperty(Serializer.Property.INDENT, "yes");
+            Xslt30Transformer transformer = stylesheet.load30();
+
+            transformer.transform(xml, out);
+            String outputXML = transformedXML.toString();
+        } catch (SaxonApiException e) {
+            fail(e);
+        }
+    }
+
 
 }
 
