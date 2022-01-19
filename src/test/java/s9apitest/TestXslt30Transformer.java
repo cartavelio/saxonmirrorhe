@@ -28,6 +28,7 @@ import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.QNameValue;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -2402,6 +2403,7 @@ public class TestXslt30Transformer {
         }
     }
 
+    @Disabled
     @Test
     public void testIllFormedInput() {
         try {
