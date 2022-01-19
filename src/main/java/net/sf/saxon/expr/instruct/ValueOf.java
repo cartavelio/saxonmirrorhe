@@ -334,8 +334,9 @@ public final class ValueOf extends SimpleNodeConstructor {
                 }
 
                 @Override
-                public CharSequenceConsumer getStringReceiver(boolean asTextNode) {
-                    return getNextOutputter().getStringReceiver(true);
+                public CharSequenceConsumer getStringReceiver(boolean asTextNode, Location loc) {
+                    Location location = loc.getLineNumber() == -1 ? instructionLoc : loc;
+                    return getNextOutputter().getStringReceiver(true, location);
                 }
             };
             getSelect().process(toText, context);

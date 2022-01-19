@@ -346,11 +346,12 @@ public abstract class Outputter implements Receiver {
      * output large strings to avoid building the entire string in memory. The default
      * implementation, however, simply assembles the string in a buffer and releases
      * the entire string on completion.
+     * @param asTextNode set to true if the concatenated string values are to be treated as a text node
+     * @param loc the location of the instruction generating the content
      * @return an object that accepts xs:string values via a sequence of append() calls
-     * @param asTextNode set to true if the concatenated string values are to be treated
      */
 
-    public CharSequenceConsumer getStringReceiver(boolean asTextNode) {
+    public CharSequenceConsumer getStringReceiver(boolean asTextNode, Location loc) {
         return new CharSequenceConsumer() {
 
             private final FastStringBuffer buffer = new FastStringBuffer(256);
@@ -367,9 +368,9 @@ public abstract class Outputter implements Receiver {
             @Override
             public void close() throws XPathException {
                 if (asTextNode) {
-                    Outputter.this.characters(buffer, Loc.NONE, ReceiverOption.NONE);
+                    Outputter.this.characters(buffer, loc, ReceiverOption.NONE);
                 } else {
-                    Outputter.this.append(new StringValue(buffer.condense()), Loc.NONE, ReceiverOption.ALL_NAMESPACES);
+                    Outputter.this.append(new StringValue(buffer.condense()), loc, ReceiverOption.ALL_NAMESPACES);
                 }
             }
         };
