@@ -118,10 +118,10 @@ public class Gizmo {
                    "paths -- display all distinct element paths in the document",
                    (cmd) -> list(new StringBuffer("distinct-values(//*!('/'||string-join(ancestor-or-self::*!name(),'/')))")));
         addCommand("precede",
-                   "precede {expression} with {query} -- add result of query before each selected nodes",
+                   "precede {expression} with {query} -- add result of query before each selected node",
                    (cmd) -> update(cmd, "precede"));
         addCommand("prefix",
-                   "prefix {expression} with {query} -- add result of query as first child of each selected nodes",
+                   "prefix {expression} with {query} -- add result of query as first child of each selected node",
                    (cmd) -> update(cmd, "prefix"));
         addCommand("quit",
                    "quit [now] -- stop Gizmo",
@@ -148,7 +148,7 @@ public class Gizmo {
                    "strip -- delete whitespace text nodes",
                    (cmd -> this.delete(new StringBuffer("//text()[not(normalize-space())]"))));
         addCommand("suffix",
-                   "suffix {expression} with {query} -- add result of query as last child of each selected nodes",
+                   "suffix {expression} with {query} -- add result of query as last child of each selected node",
                    (cmd) -> update(cmd, "suffix"));
         addCommand("transform",
                    "transform {filename} -- transform current document using stylesheet in named file",
