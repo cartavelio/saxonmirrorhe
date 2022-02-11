@@ -370,7 +370,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             List<GroundedValue> results = new ArrayList<>();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 Sequence seq = dynamicCall(fn, context, new Sequence[]{pair.key, pair.value});
-                results.add(seq.materialize());
+                GroundedValue val = seq.materialize();
+                //if (val.getLength() > 0) {
+                    results.add(val);
+                //}
             }
             return new Chain(results);
         }
