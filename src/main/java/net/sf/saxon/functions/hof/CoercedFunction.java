@@ -18,6 +18,7 @@ import net.sf.saxon.om.Function;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
@@ -135,6 +136,15 @@ public class CoercedFunction extends AbstractFunction {
     @Override
     public int getArity() {
         return targetFunction.getArity();
+    }
+
+    /**
+     * Get the function annotations. These are the same as the annotations of the base function
+     * @return the annotations of the base function
+     */
+    @Override
+    public AnnotationList getAnnotations() {
+        return targetFunction.getAnnotations();
     }
 
     /**
