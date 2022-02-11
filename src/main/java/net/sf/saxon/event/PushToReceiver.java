@@ -53,6 +53,7 @@ public class PushToReceiver implements Push {
 
         public ContainerImpl(ComplexContentOutputter cco, String defaultNamespace) {
             this.defaultNamespace = defaultNamespace;
+            this.cco = cco;
         }
 
         @Override

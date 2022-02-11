@@ -1295,11 +1295,13 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
                 p == INTEGER;
     }
 
+    //#ifdefined SCHEMA
     @Override
     public Function getComponentAsFunction() {
         // Not supported, because a built-in atomic type is never exported
         throw new UnsupportedOperationException();
     }
+    //#endif
 
 }
 

@@ -7,7 +7,6 @@
 
 package net.sf.saxon.resource;
 
-import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
@@ -251,7 +250,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                 return binaryContent;
             } else if (characterContent != null) {
                 String e = encoding != null ? encoding : "UTF-8";
-                return EXPathBinaryFunctionSet.encode(characterContent, e);
+                return BinaryResource.encode(characterContent, e);
             } else {
                 try (InputStream stream = getInputStream()) {
                     return BinaryResource.readBinaryFromStream(stream, resourceUri);
@@ -273,7 +272,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
             if (characterContent != null) {
                 return characterContent;
             } else if (binaryContent != null && encoding != null) {
-                return EXPathBinaryFunctionSet.decode(binaryContent, encoding);
+                return BinaryResource.decode(binaryContent, encoding);
             } else {
                 try (InputStream stream = getInputStream()) {
                     String enc = encoding;
