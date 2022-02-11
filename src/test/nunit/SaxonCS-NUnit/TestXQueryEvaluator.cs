@@ -70,7 +70,7 @@ namespace SaxonCS_NUnit {
                     XQueryEvaluator evaluator = executable.Load();
 
                     XdmValue evaluations = evaluator.Evaluate();
-                    XdmValue evaluation = evaluations.Simplify;
+                    XdmValue evaluation = evaluations.Simplify();
 
                     Assert.That(evaluation is XdmAtomicValue);
                     Assert.That(((XdmAtomicValue) evaluation).AsBoolean(), "Regex match result");
