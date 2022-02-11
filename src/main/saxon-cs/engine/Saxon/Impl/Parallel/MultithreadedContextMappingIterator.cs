@@ -112,7 +112,7 @@ namespace Saxon.Impl.Parallel {
                 }
                 catch (net.sf.saxon.trans.XPathException err) {
                     close();
-                    throw err;
+                    throw;
                 }
                 catch (net.sf.saxon.trans.UncheckedXPathException err) {
                     close();

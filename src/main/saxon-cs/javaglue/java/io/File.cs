@@ -3,7 +3,6 @@ using SysCollGen = System.Collections.Generic;
 using System.Text;
 using SysUri = System.Uri;
 using SysIO = System.IO;
-using Microsoft.VisualBasic;
 using SysIOFile = System.IO.File;
 using SysIODirectory = System.IO.Directory;
 using SysIOPath = System.IO.Path;
@@ -109,7 +108,7 @@ namespace java.io {
         }
 
         public bool isDirectory() {
-            return SysIOFile.GetAttributes(SysIO.Path.GetFullPath(fileName)).HasFlag(SysIO.FileAttributes.Directory);
+            return exists() && SysIOFile.GetAttributes(SysIO.Path.GetFullPath(fileName)).HasFlag(SysIO.FileAttributes.Directory);
         }
         
         public bool isFile() {
