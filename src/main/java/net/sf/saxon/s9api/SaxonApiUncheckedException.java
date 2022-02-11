@@ -21,13 +21,12 @@ public class SaxonApiUncheckedException extends RuntimeException {
      *
      * @param err the underlying cause
      */
-
-    //@CSharpReplaceBody(code="throw err;")  // TODO: temporary scaffolding
+    
     public SaxonApiUncheckedException(Throwable err) {
         //#if CSHARP==false
         super(err);
         //#endif
-        CSharp.emitCode("throw new AssertionError(err);");
+        CSharp.emitCode("throw new NotImplementedException(err.Message);");
     }
 
 

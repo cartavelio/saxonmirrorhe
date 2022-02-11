@@ -19,7 +19,11 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
-import static net.sf.saxon.type.Affinity.*;
+
+import static net.sf.saxon.type.Affinity.DISJOINT;
+import static net.sf.saxon.type.Affinity.SAME_TYPE;
+import static net.sf.saxon.type.Affinity.SUBSUMED_BY;
+import static net.sf.saxon.type.Affinity.SUBSUMES;
 
 /**
  * This class provides Saxon's type checking capability. It contains a method,

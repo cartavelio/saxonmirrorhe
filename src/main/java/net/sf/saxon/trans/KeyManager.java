@@ -35,7 +35,9 @@ import net.sf.saxon.z.IntHashMap;
 import java.lang.ref.WeakReference;
 import java.util.*;
 
-import static net.sf.saxon.trans.KeyIndex.Status.*;
+import static net.sf.saxon.trans.KeyIndex.Status.BUILT;
+import static net.sf.saxon.trans.KeyIndex.Status.UNDER_CONSTRUCTION;
+import static net.sf.saxon.trans.KeyIndex.Status.FAILED;
 
 
 /**

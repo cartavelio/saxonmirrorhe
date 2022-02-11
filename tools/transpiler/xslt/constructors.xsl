@@ -68,22 +68,34 @@
       <xsl:text>)</xsl:text>
    </xsl:template>
    
-   <xsl:template match="*[type/@RESOLVED_TYPE='java.math.BigDecimal']
-                         [f:expressionType(arguments/argument[1])='java.lang.String']" priority="30">
-      <xsl:text>Singulink.Numerics.BigDecimal.Parse</xsl:text>
-      <xsl:text>(</xsl:text>
-      <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-      <xsl:text>)</xsl:text>
+   <!-- java.lang.BigDecimal -->
+   <xsl:template match="*[type/@RESOLVED_TYPE='java.math.BigDecimal']" priority="30">
+      <xsl:variable name="argType" select="f:expressionType(arguments/argument[1])"/>
+      <xsl:variable name="arity" select="count(arguments/argument)"/>
+      <xsl:choose>
+         <xsl:when test="$argType='java.lang.String' and $arity=1">
+            <xsl:text>Singulink.Numerics.BigDecimal.Parse</xsl:text>
+            <xsl:text>(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:when test="$argType = ('double', 'java.lang.Double') and $arity=1">
+            <xsl:text>Singulink.Numerics.BigDecimal.FromDouble</xsl:text>
+            <xsl:text>(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>, true)</xsl:text>
+         </xsl:when>
+         <xsl:when test="$argType = 'java.math.BigInteger' and $arity=1">
+            <xsl:text>new Singulink.Numerics.BigDecimal(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>, 0)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:template>
    
-   
-   <xsl:template match="*[type/@RESOLVED_TYPE='java.math.BigDecimal']
-      [count(arguments/argument) eq 1]
-      [f:expressionType(arguments/argument[1])='java.math.BigInteger']" priority="30">
-      <xsl:text>new Singulink.Numerics.BigDecimal(</xsl:text>
-      <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-      <xsl:text>, 0)</xsl:text>
-   </xsl:template>
    
    <!-- DateTimeParseException -->
    <xsl:template match="*[type/@RESOLVED_TYPE='java.time.format.DateTimeParseException']

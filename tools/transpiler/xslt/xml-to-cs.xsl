@@ -1145,13 +1145,10 @@
             <xsl:apply-templates select="modifiers/modifier"/>
          </xsl:otherwise>
       </xsl:choose>
-      <!--<xsl:if test="(annotations/annotation/name/@identifier = 'Override' 
-         or (../../name/@identifier = ('equals', 'hashCode', 'toString'))) 
-         and not(f:isInterfaceMember(.))">override </xsl:if>-->
 
-      <xsl:if test="$expandingDefaults">
+      <!--<xsl:if test="$expandingDefaults">
          <xsl:text> /* modifiers = {modifiers/modifier/@keyword}, class modifiers = {ancestor::type[1]/modifiers/modifier/@keyword} */</xsl:text>
-      </xsl:if>
+      </xsl:if>-->
       <xsl:choose>
          <xsl:when test="$digestMethod/@override='1'">override </xsl:when>
          <xsl:when test="($digestMethod[@virtual='1' and not(@abstract='1')] or $expandingDefaults)
@@ -1168,7 +1165,7 @@
    </xsl:template>
    
    <xsl:template match="modifier/@keyword" priority="3">
-      <xsl:text>{lower-case(.)} </xsl:text>
+      <xsl:text>{lower-case(.)} /*1168*/</xsl:text>
    </xsl:template>
    
    <xsl:template match="modifier/@keyword[. = 'PROTECTED']" priority="10">
@@ -1567,6 +1564,10 @@
          <xsl:when test="$outerClass/members/member[@nodeType='MethodDeclaration']/name[@identifier=$identifier]">
             <!-- The name matches an instance method of the containing anonymous class -->
             <xsl:text>outerInstance.{$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:when test="matches($identifier, '^[A-Z]$')">
+            <!-- Single-character name A-Z - assume a type parameter -->
+            <xsl:text>{$identifier}</xsl:text>
          </xsl:when>
          <xsl:otherwise>
             <!-- Name not found, but assume it's inherited from a superclass of the outer class? -->
