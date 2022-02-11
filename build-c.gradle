@@ -163,6 +163,7 @@ task rejar_Xerces(
         from("${projectDir}/src/main/c") {
           include "Saxon.C.API/*.h"
           include "Saxon.C.API/*.cpp"
+          include "Saxon.C.API/jni/**/*.h"
           include "Saxon.C.API/readme.md"
           exclude "Saxon.C.API/config.m4"
           exclude "Saxon.C.API/HEC"
