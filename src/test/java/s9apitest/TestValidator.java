@@ -2,6 +2,7 @@ package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
+import com.saxonica.ee.jaxp.ValidatorImpl;
 import jaxptest.ConfigTest;
 import millicom.MillicomTest;
 import net.sf.saxon.Configuration;
@@ -38,7 +39,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for the s9api schema validation interface
@@ -1359,8 +1363,8 @@ public class TestValidator {
             out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
             Processor proc = new Processor(true);
             SchemaManager sm = proc.getSchemaManager();
-            StreamSource source_xsd = new StreamSource(new File("/Users/mike/bugs/2020/4744-Skorek/UniqueKeyBug.xsd"));
-            StreamSource source_xml = new StreamSource(new File("/Users/mike/bugs/2020/4744-Skorek/UniqueKeyBug.xml"));
+            StreamSource source_xsd = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xsd"));
+            StreamSource source_xml = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xml"));
             ErrorListener listener = new ErrorListener() {
                 @Override
                 public void error(TransformerException exception) {
@@ -1380,6 +1384,66 @@ public class TestValidator {
 
             SchemaValidator sv = sm.newSchemaValidator();
             sv.setErrorListener(listener);
+            sm.load(source_xsd);
+
+
+            Serializer serializer = proc.newSerializer();
+            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            serializer.setOutputStream(out);
+            sv.setDestination(serializer);
+
+
+            sv.validate(source_xml);
+
+            out.close();
+            //fail("Validation errors not detected");
+
+        } catch (SaxonApiException sapie) {
+            try {
+                out.close();
+            } catch (IOException ee) {
+                fail();
+            }
+            assertEquals(1, errorList.size());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testErrorListenerBug4744b() {
+
+        // This validation run should report exactly two validation errors.
+
+
+        final List<SAXParseException> errorList = new ArrayList<>();
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xsd"));
+            StreamSource source_xml = new StreamSource(new File(ConfigTest.DATA_DIR + "../bugs/4744/UniqueKeyBug.xml"));
+            ErrorHandler handler = new ErrorHandler() {
+                @Override
+                public void error(SAXParseException exception) {
+                    errorList.add(exception);
+                }
+
+                @Override
+                public void fatalError(SAXParseException exception) throws SAXParseException {
+                    throw exception;
+                }
+
+                @Override
+                public void warning(SAXParseException exception) {
+                    errorList.add(exception);
+                }
+            };
+
+            SchemaValidator sv = sm.newSchemaValidator();
+            sv.setInvalidityHandler(new ValidatorImpl.InvalidityHandlerWrappingErrorHandler(handler));
             sm.load(source_xsd);
 
 
