@@ -15,7 +15,6 @@ import net.sf.saxon.expr.number.AbstractNumberer;
  * activated for language="fr"
  *
  * @author Luc Rochefort
- * @version 1.0
  */
 
 public class Numberer_fr extends AbstractNumberer {

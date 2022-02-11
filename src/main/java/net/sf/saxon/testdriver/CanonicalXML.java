@@ -26,7 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- * Modifed version of James Clark's XMLTest
+ * Modified version of James Clark's XMLTest
  * This tests an XML parser that has a SAX driver,
  * by generating the canonical XML for one or more XML files.
  * This is not written with performance in mind.
