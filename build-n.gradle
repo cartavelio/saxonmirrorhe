@@ -415,6 +415,9 @@ task hen_jar(
     include "net/**/*.class"
     exclude "net/sf/saxon/option/**/*.class"
   }
+  from ("src/main/resources") {
+    include "net/sf/saxon/data/**"
+  }
   from ("build/src/hen") {
     include "**"
   }
