@@ -50,9 +50,12 @@
       'equals':'Equals',
       'toString':'ToString',    
       'java.lang.System#out' : 'Out',
-      'java.lang.System#in' : 'In' (:,
-      'java.util.Map#get' : 'Get',
-      'java.util.Map#put' : 'Put' :)}"/>
+      'java.lang.System#in' : 'In'}"/>
+   
+   <!-- The following table defines mappings from Java class names to .NET class names. -->
+   <!-- These class names are translated wherever they appear. The fields, methods,
+      and constructors applied to the class are translated according to the rules
+      appearing in the fields.xsl, methods.xsl, and constructors.xsl stylesheet modules. -->
    
    <xsl:variable name="specialTypes" as="map(xs:string, xs:string)" select="map{
       'boolean': 'bool',
@@ -99,10 +102,12 @@
       'java.math.BigDecimal': 'Singulink.Numerics.BigDecimal',
       'java.math.BigInteger': 'System.Numerics.BigInteger',
       'java.net.URI': 'System.Uri',
+      'java.nio.charset.Charset': 'System.Text.Encoding',
       'java.time.format.DateTimeParseException': 'System.FormatException',
       'java.util.ArrayList': 'System.Collections.Generic.List',
       'java.util.Collection': 'System.Collections.Generic.ICollection',
       'java.util.Comparator': 'System.Collections.Generic.Comparer',
+      'java.util.concurrent.ConcurrentHashMap': 'System.Collections.Concurrent.ConcurrentDictionary',
       'java.util.function.Function': 'System.Func',
       'java.util.function.Predicate': 'System.Predicate',
       'java.util.HashMap': 'System.Collections.Generic.Dictionary',
@@ -115,11 +120,25 @@
       'java.util.Map.Entry': 'System.Collections.Generic.KeyValuePair',
       'java.util.Optional': 'System.Nullable',
       'java.util.Set': 'System.Collections.Generic.ISet',
+      'java.util.TreeMap': 'System.Collections.Generic.SortedDictionary',
       'java.util.TreeSet': 'System.Collections.Generic.SortedSet',
+      'java.util.Stack': 'System.Collections.Generic.Stack',
       'net.sf.saxon.expr.sort.LFUCache.EntryWithCounter': 'net.sf.saxon.expr.sort.LFUCache&lt;K,V>.EntryWithCounter',
+      (: 'net.sf.saxon.lib.ExtensionFunctionCall': 'Saxon.Api.ExtensionFunctionCall', :)
+      (: 'net.sf.saxon.lib.ExtensionFunctionDefinition': 'Saxon.Api.ExtensionFunctionDefinition', :)
+      'net.sf.saxon.lib.StandardLogger': 'Saxon.Callbacks.StandardLogger',
+      'net.sf.saxon.lib.StandardModuleURIResolver': 'Saxon.Callbacks.StandardModuleURIResolver',
+      'net.sf.saxon.lib.StandardUnparsedTextResolver': 'Saxon.Callbacks.StandardUnparsedTextResolver',
+      'net.sf.saxon.lib.StandardURIResolver': 'Saxon.Callbacks.StandardURIResolver',
       'net.sf.saxon.ma.arrays.ImmutableArrayItem': 'Saxon.Impl.DataModel.ImmArray',
+      'net.sf.saxon.ma.map.HashTrieMap': 'Saxon.Impl.DataModel.ImmMap',
+      'net.sf.saxon.ma.trie.ImmutableHashTrieMap': 'System.Collections.Immutable.ImmutableDictionary',
+      'net.sf.saxon.s9api.ExtensionFunction': 'Saxon.Api.ExtensionFunction',     
       'net.sf.saxon.s9api.ItemType': 'Saxon.Api.XdmItemType',
+      (: 'net.sf.saxon.s9api.Location': 'Saxon.Api.IXmlLocation', :)
+      'net.sf.saxon.s9api.MessageListener2': 'Saxon.Api.IMessageListener2',
       'net.sf.saxon.s9api.QName': 'Saxon.Api.QName',
+      'net.sf.saxon.s9api.SequenceType': 'Saxon.Api.XdmSequenceType',
       'net.sf.saxon.s9api.WhitespaceStrippingPolicy': 'Saxon.Api.WhitespacePolicy',
       'net.sf.saxon.s9api.XdmArray': 'Saxon.Api.XdmArray',
       'net.sf.saxon.s9api.XdmAtomicValue': 'Saxon.Api.XdmAtomicValue',
@@ -211,6 +230,9 @@
          <xsl:when test="$expr/@nodeType='ArrayCreationExpr'">
             <xsl:sequence select="f:expressionType($expr/elementType) || '[]'"/>
          </xsl:when>
+         <xsl:when test="$expr/@nodeType='CastExpr'">
+            <xsl:sequence select="$expr/type/@RESOLVED_TYPE"/>
+         </xsl:when>
          <xsl:otherwise>
             <xsl:text>java.lang.Object /* unknown type for {$expr/@nodeType} */</xsl:text>
          </xsl:otherwise>        
@@ -233,6 +255,11 @@
    <xsl:function name="f:isIteratorType" as="xs:boolean">
       <xsl:param name="type" as="xs:string"/>
       <xsl:sequence select="f:degenerify($type) = ('java.util.Iterator', 'net.sf.saxon.s9api.XdmSequenceIterator')"/>
+   </xsl:function>
+   
+   <xsl:function name="f:isComparatorType" as="xs:boolean">
+      <xsl:param name="type" as="xs:string"/>
+      <xsl:sequence select="f:degenerify($type) = 'java.util.Comparator'"/>
    </xsl:function>
    
    <!-- Given a class in the digest, determine whether this class implements java.util.Iterator
@@ -287,6 +314,13 @@
             <xsl:text>&gt;</xsl:text>
          </xsl:if>
       </xsl:value-of>
+   </xsl:function>
+   
+   <!-- Get the target type of a method call expression or field access expression -->
+   <xsl:function name="f:targetType" as="xs:string?">
+      <xsl:param name="expr" as="element(*)"/>
+      <xsl:variable name="givenType" select="if ($expr!@RESOLVED_TYPE) then $expr!@RESOLVED_TYPE else $expr!scope!@RETURN"/>
+      <xsl:sequence select="f:degenerifyWithoutEscaping($givenType)"/>
    </xsl:function>
    
    <xsl:function name="f:degenerify" as="xs:string?">
