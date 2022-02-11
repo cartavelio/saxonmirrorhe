@@ -7,6 +7,8 @@
 
 package net.sf.saxon.om;
 
+import net.sf.saxon.transpile.CSharpModifiers;
+
 /**
  * A QNameException represents an error condition whereby a QName (for example a variable
  * name or template name) is malformed
@@ -21,6 +23,7 @@ public class QNameException extends Exception {
     }
 
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public String getMessage() {
         return message;
     }

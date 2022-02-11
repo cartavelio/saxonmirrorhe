@@ -224,12 +224,12 @@ public final class TailCallLoop extends UnaryExpression {
 
     public interface TailCallInfo {}
 
-    protected static class TailCallComponent implements TailCallInfo {
+    public static class TailCallComponent implements TailCallInfo {
         public Component component;
         public UserFunction function;
     }
 
-    protected static class TailCallFunction implements TailCallInfo {
+    public static class TailCallFunction implements TailCallInfo {
         public UserFunction function;
     }
 

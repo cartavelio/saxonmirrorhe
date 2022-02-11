@@ -7,6 +7,7 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.StringToDouble;
 
 /**
@@ -23,11 +24,12 @@ public class StringToDouble11 extends StringToDouble {
      */
 
     /*@NotNull*/
+    @CSharpModifiers(code={"public", "static", "new"})
     public static StringToDouble11 getInstance() {
         return THE_INSTANCE;
     }
 
-    protected StringToDouble11() {
+    private StringToDouble11() {
     }
 
     @Override

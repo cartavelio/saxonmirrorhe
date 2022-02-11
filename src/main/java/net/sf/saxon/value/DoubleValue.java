@@ -327,7 +327,9 @@ public final class DoubleValue extends NumericValue {
         if (Double.isInfinite(d)) {
             // double arithmetic has overflowed - do it in decimal
             BigDecimal dec = BigDecimal.valueOf(value);
+            //#if CSHARP==false
             dec = dec.setScale(scale, RoundingMode.HALF_EVEN);
+            //#endif
             return new DoubleValue(dec.doubleValue());
         }
 

@@ -16,6 +16,7 @@ import net.sf.saxon.om.NodeInfo;
  */
 public interface SteppingNode extends NodeInfo {
 
+    //#if CSHARP==false
     /**
      * Get the parent of this node
      *
@@ -24,6 +25,7 @@ public interface SteppingNode extends NodeInfo {
 
     @Override
     SteppingNode getParent();
+    //#endif
 
     /**
      * Get the next sibling of this node

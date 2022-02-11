@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.value.SequenceType;
@@ -90,6 +91,7 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
     }
 
     private static final boolean DEBUG = false;
+    @CSharpReplaceBody(code="")
     public void detachChild() {
         if (DEBUG) {
             childExpression.setParentExpression(null);

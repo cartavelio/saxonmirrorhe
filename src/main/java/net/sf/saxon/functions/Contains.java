@@ -18,6 +18,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
 
@@ -43,6 +44,7 @@ public class Contains extends CollatingFunctionFixed {
             // Performance fast path: bug 3209
             return new SystemFunctionCall.Optimized(this, arguments) {
                 @Override
+                @CSharpModifiers(code = {"public", "override"})
                 public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
                     UnicodeString s0 = getArg(0).evaluateAsString(context).tidy();
                     UnicodeString s1 = getArg(1).evaluateAsString(context).tidy();
@@ -50,6 +52,7 @@ public class Contains extends CollatingFunctionFixed {
                 }
 
                 @Override
+                @CSharpModifiers(code = {"public", "override"})
                 public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) {
                     return this;
                 }

@@ -623,8 +623,6 @@ public class XsltController extends Controller {
             initialContext.createThreadManager();
             initialContext.setOrigin(this);
 
-            boolean close = false;
-
             Mode mode = getInitialMode();
             if (mode == null) {
                 throw new XPathException("Requested initial mode " +

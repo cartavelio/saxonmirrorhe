@@ -24,6 +24,7 @@ import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.DateTimeValue;
 import org.xml.sax.InputSource;
@@ -1407,8 +1408,10 @@ public class Transform {
                     //#endif
                 }
                 if (Instrumentation.ACTIVE) {
+                    CSharp.emitCode("#pragma warning disable 0162");  // Get rid of "unreachable code" warnings
                     Instrumentation.report();
                     Instrumentation.reset();
+                    CSharp.emitCode("#pragma warning restore 0162");
                 }
             }
             if (repeat == 999999 && totalTime > 60000) {

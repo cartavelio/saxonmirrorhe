@@ -29,6 +29,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.TypeHierarchy;
 
@@ -652,7 +653,7 @@ public class StylesheetPackage extends PackageData {
                     newV = acceptedVisibility;
                 } else {
                     acceptedVisibility = wildcardAcceptedVisibility(name, acceptors);
-                    if (acceptedVisibility != null) {
+                    if (acceptedVisibility != Visibility.UNDEFINED) {
                         if (XSLAccept.isCompatible(oldV, acceptedVisibility)) {
                             newV = acceptedVisibility;
                         }
@@ -786,6 +787,7 @@ public class StylesheetPackage extends PackageData {
         }
     }
 
+    @CSharpReplaceBody(code="")
     private void trace(String message) {
         if (TRACING) {
             System.err.println(message);

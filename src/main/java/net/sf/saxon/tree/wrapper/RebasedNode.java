@@ -113,6 +113,16 @@ public class RebasedNode extends AbstractVirtualNode implements WrappingFunction
     }
 
     /**
+     * The hashCode() method obeys the contract for hashCode(): that is, if two objects are equal
+     * (represent the same node) then they must have the same hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return node.hashCode();
+    }
+
+
+    /**
      * Determine the relative position of this node and another node, in document order.
      * The other node will always be in the same document.
      *

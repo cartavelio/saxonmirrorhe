@@ -42,12 +42,12 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     // the contents of the document
 
-    protected LargeTextBuffer textBuffer;
+    LargeTextBuffer textBuffer;
     /*@Nullable*/
-    protected UnicodeString commentBuffer = null; // created when needed
+    UnicodeString commentBuffer = null; // created when needed
 
 
-    protected int numberOfNodes = 0;    // excluding attributes and namespaces
+    int numberOfNodes = 0;    // excluding attributes and namespaces
 
     // The following arrays contain one entry for each node other than attribute
     // and namespace nodes, arranged in document order.
@@ -56,58 +56,58 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     public byte[] nodeKind;
 
     // depth is the depth of the node in the hierarchy, i.e. the number of ancestors
-    protected short[] depth;
+    short[] depth;
 
     // next is the node number of the next sibling
     // - unless it points backwards, in which case it is the node number of the parent
-    protected int[] next;
+    int[] next;
 
     // alpha holds a value that depends on the node kind. For text nodes, it is the offset
     // into the text buffer. For comments and processing instructions, it is the offset into
     // the comment buffer. For elements, it is the index of the first attribute node, or -1
     // if this element has no attributes.
-    protected int[] alpha;
+    int[] alpha;
 
     // beta holds a value that depends on the node kind. For text nodes, it is the length
     // of the text. For comments and processing instructions, it is the length of the text.
     // For elements, it is the index of the first namespace node, or -1
     // if this element has no namespaces.
-    protected int[] beta;
+    int[] beta;
 
     // nameCode holds the name of the node, as an identifier resolved using the name pool
-    protected int[] nameCode;
+    int[] nameCode;
 
     // the prior array indexes preceding-siblings; it is constructed only when required
     /*@Nullable*/
-    protected int[] prior = null;
+    int[] prior = null;
 
     // the typeCode array holds type codes for element nodes; it is constructed only
     // if at least one element has a type other than untyped, or has an IDREF property.
     // The array holds a reference to the schema type.
     /*@Nullable*/
-    protected SchemaType[] typeArray = null;
+    SchemaType[] typeArray = null;
 
     // the typedValue array holds the typed values of element nodes if the typed value is anything
     // other than string, untypedAtomic, or anyURI. This means it is only used for schema-validated
     // documents. It is created lazily when the typed value of a node is first accessed.
     /*@Nullable*/
-    protected AtomicSequence[] typedValueArray = null;
+    AtomicSequence[] typedValueArray = null;
 
     // idRefElements is a set holding the node numbers of element nodes having the IDREF property
-    protected IntSet idRefElements = null;
+    IntSet idRefElements = null;
 
     // idRefAttributes is a set holding the node numbers of attribute nodes having the IDREF property
-    protected IntSet idRefAttributes = null;
+    IntSet idRefAttributes = null;
 
     // nilledElements is a set holding the node numbers of elements having the NILLED property
-    protected IntSet nilledElements = null;
+    IntSet nilledElements = null;
 
     // defaultedAttribute is a set holding the attribute node numbers of attributes that resulted from expansion of schema defaults
-    protected IntSet defaultedAttributes = null;
+    IntSet defaultedAttributes = null;
 
     // topWithinEntity is a set holding the node numbers of elements that do not have a parent within
     // the same external entity
-    protected IntSet topWithinEntity = null;
+    IntSet topWithinEntity = null;
 
     // boolean switch to disable the typed value caching
     private boolean allowTypedValueCache = true;
@@ -123,30 +123,30 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     // protected int[] parentIndex = null;
 
     // the following arrays have one entry for each attribute.
-    protected int numberOfAttributes = 0;
+    int numberOfAttributes = 0;
 
     // attParent is the index of the parent element node
-    protected int[] attParent;
+    int[] attParent;
 
     // attCode is the nameCode representing the attribute name
-    protected int[] attCode;
+    int[] attCode;
 
     // attValue is the string value of the attribute
-    protected String[] attValue;
+    String[] attValue;
 
     // attTypedValue is the typed vlaue of the attribute, maintained only if the attribute type is
     // something other than string, untypedAtomic, or anyURI. It is maintained lazily on first reference
     // to the typed value
-    protected AtomicSequence[] attTypedValue;
+    AtomicSequence[] attTypedValue;
 
     // attTypeCode holds type annotations. The array is created only if any nodes have a type annotation
 
     /*@Nullable*/
-    protected SimpleType[] attType;
+    SimpleType[] attType;
 
     // The following arrays have one entry for each distinct namespace map
-    protected int numberOfNamespaces = 0;
-    protected NamespaceMap[] namespaceMaps;
+    int numberOfNamespaces = 0;
+    NamespaceMap[] namespaceMaps;
 
     /*@Nullable*/
     private int[] lineNumbers = null;
@@ -156,17 +156,17 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     private SystemIdMap systemIdMap = null;
 
     // a boolean that is set to true if the document declares a namespace other than the XML namespace
-    protected boolean usesNamespaces = false;
+    boolean usesNamespaces = false;
 
-    protected PrefixPool prefixPool = new PrefixPool();
+    PrefixPool prefixPool = new PrefixPool();
 
-    private TinyDocumentImpl root;
+    private TinyDocumentImpl documentRoot;
     private HashMap<String, NodeInfo> idTable;
-    protected HashMap<String, String[]> entityTable;
+    HashMap<String, String[]> entityTable;
 
     private NodeInfo copiedFrom;
 
-    protected IntHashMap<String> knownBaseUris;
+    IntHashMap<String> knownBaseUris;
 
     // uniformBaseUri is set if all nodes in the tree have the same Base URI; otherwise it is null.
     private String uniformBaseUri = null;
@@ -1182,11 +1182,11 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     @Override
     public NodeInfo getRootNode() {
         if (getNodeKind(0) == Type.DOCUMENT) {
-            if (root != null) {
-                return root;
+            if (documentRoot != null) {
+                return documentRoot;
             } else {
-                root = new TinyDocumentImpl(this);
-                return root;
+                documentRoot = new TinyDocumentImpl(this);
+                return documentRoot;
             }
         } else {
             return getNode(0);

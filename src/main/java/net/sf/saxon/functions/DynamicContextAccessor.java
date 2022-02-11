@@ -14,6 +14,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.DateTimeValue;
@@ -57,6 +58,7 @@ public abstract class DynamicContextAccessor extends SystemFunction {
     public Expression makeFunctionCall(Expression[] arguments) {
         return new SystemFunctionCall(this, arguments) {
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public Item evaluateItem(XPathContext context) throws XPathException {
                 // Cut some of the call overhead
                 return evaluate(context);

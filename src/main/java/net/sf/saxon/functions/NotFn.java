@@ -18,6 +18,7 @@ import net.sf.saxon.expr.parser.TypeChecker;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.BooleanValue;
 
@@ -67,6 +68,7 @@ public class NotFn extends SystemFunction {
              */
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public boolean effectiveBooleanValue(XPathContext c) throws XPathException {
                 try {
                     return !this.getArg(0).effectiveBooleanValue(c);

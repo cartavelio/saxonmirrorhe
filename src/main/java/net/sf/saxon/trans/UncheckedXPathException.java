@@ -41,6 +41,7 @@ public class UncheckedXPathException extends RuntimeException {
     }
 
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public String getMessage() {
         return getCause().getMessage();
     }

@@ -185,12 +185,20 @@ public abstract class AtomicValue
      * <p>The hashCode() method is consistent with equals().</p>
      *
      * @param o the other value
-     * @return true if the other operand is an atomic value and the two values are equal as defined
+     * @return true (in a subclass) if the other operand is an atomic value and the two values are equal as defined
      *         by the XPath eq operator
      */
 
     public boolean equals(Object o) {
         throw new UnsupportedOperationException("equals() not implemented");
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException("hashCode() not implemented");
     }
 
     /**

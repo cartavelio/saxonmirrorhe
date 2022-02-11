@@ -557,7 +557,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * @param id The unique ID value
      */
 
-    protected void registerID(NodeInfo e, String id) {
+    void registerID(NodeInfo e, String id) {
         // the XPath spec (5.2.1) says ignore the second ID if it's not unique
         if (idTable == null) {
             idTable = new HashMap<>(256);
@@ -596,7 +596,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * @param id The id value
      */
 
-    protected void deregisterID(String id) {
+    void deregisterID(String id) {
         id = Whitespace.trim(id);
         if (idTable != null) {
             idTable.remove(id);
