@@ -729,7 +729,7 @@ class TestSuite {
     def pver = parts[parts.size() - 4];
 
     parts = options['reportFilename'].split("_")
-    def psuite = parts[parts.size() - 1];
+    def psuite = parts[2];
 
     def reportfn = "${options['reportDirectory']}/SaxonResults${pver}-${psuite}.xml";
 
