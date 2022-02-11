@@ -27,7 +27,7 @@ public class IntRangeToIntMap implements IntToIntMap {
     private int[] values;
 
     // The number of elements of the above two arrays that are actually in use
-    private int used = 0;
+    private int used;
 
     // The number of items in the map
     private int count = 0;
@@ -169,9 +169,9 @@ public class IntRangeToIntMap implements IntToIntMap {
     /**
      * Add an entry to the map. Ranges of entries must be added in ascending numerical order
      *
-     * @param start
-     * @param end
-     * @param value
+     * @param start the start of the range to be added
+     * @param end the end of the range to be added
+     * @param value the value corresponding to this range of integer keys
      */
 
     public void addEntry(int start, int end, int value) {

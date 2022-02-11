@@ -374,6 +374,8 @@ public class XdmMap extends XdmFunctionItem {
      * method. The associated values must be convertible to XDM sequences
      * using the {@link XdmValue#makeValue(Object)} method.
      * @param input the supplied map
+     * @param <K> the type of the keys
+     * @param <V> the type of the values
      * @return the resulting XdmMap
      * @throws IllegalArgumentException if any value in the input map cannot be converted
      * to a corresponding XDM value.

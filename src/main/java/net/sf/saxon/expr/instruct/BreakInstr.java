@@ -54,7 +54,8 @@ public class BreakInstr extends Instruction implements TailCallLoop.TailCallInfo
     /**
      * Ask whether the expression can be lifted out of a loop, assuming it has no dependencies
      * on the controlling variable/focus of the loop
-     * @param forStreaming
+     * @param forStreaming true if we are optimizing for streamed evaluation
+     * @return for a {@code BreakInstr}, always false
      */
 
     @Override

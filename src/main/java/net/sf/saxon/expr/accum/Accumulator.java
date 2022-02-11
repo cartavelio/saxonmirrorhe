@@ -306,7 +306,7 @@ public class Accumulator extends Actor {
      * is written to the supplied outputstream.
      *
      * @param out the expression presenter used to display the structure
-     * @param componentIdMap
+     * @param componentIdMap map from components to component IDs
      * @throws XPathException if any error occurs
      */
 

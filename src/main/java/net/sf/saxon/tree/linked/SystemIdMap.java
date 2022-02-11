@@ -42,7 +42,7 @@ public class SystemIdMap {
      * @param sequence the sequence number (position in document order) of the
      *                 node whose system ID is to be set. This must be one greater
      *                 that the previous system ID.
-     * @param uri
+     * @param uri the system ID to be assigned at this sequence number
      */
 
     public void setSystemId(int sequence, String uri) {

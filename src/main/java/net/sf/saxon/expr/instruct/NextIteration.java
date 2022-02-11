@@ -43,7 +43,8 @@ public class NextIteration extends Instruction implements TailCallLoop.TailCallI
     /**
      * Ask whether the expression can be lifted out of a loop, assuming it has no dependencies
      * on the controlling variable/focus of the loop
-     * @param forStreaming
+     * @param forStreaming true if we're optimising for streamed execution
+     * @return for a next-iteration instruction, always false
      */
 
     @Override

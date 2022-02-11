@@ -21,8 +21,8 @@ import java.util.List;
 
 public class IrregularGroupFormatter extends NumericGroupFormatter {
 
-    /*@Nullable*/ private IntSet groupingPositions = null;
-    private List<Integer> separators = null;
+    private final IntSet groupingPositions;
+    private final List<Integer> separators;
 
     /**
      * Create a formatter for numbers where the grouping separators occur at irregular positions
@@ -30,7 +30,7 @@ public class IrregularGroupFormatter extends NumericGroupFormatter {
      * @param groupingPositions the positions where the separators are to be inserted
      * @param sep               array holding the separators to be inserted, as Unicode codepoints, in order starting
      *                          with the right-most
-     * @param adjustedPicture
+     * @param adjustedPicture   the formatting picture, after expansion and removal of grouping separators
      */
 
     public IrregularGroupFormatter(IntSet groupingPositions, List<Integer> sep, UnicodeString adjustedPicture) {

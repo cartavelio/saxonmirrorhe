@@ -113,7 +113,7 @@ public class InvalidityReportGenerator extends StandardInvalidityHandler {
     /**
      * Create metedata element which contains summary information in the output XML document
      *
-     * @throws XPathException
+     * @throws XPathException if creating the element fails for any reason
      */
 
     public void createMetaData() throws XPathException {
