@@ -102,6 +102,11 @@ public class Query {
         new Query().doQuery(args, "java net.sf.saxon.Query");
     }
 
+    public static void Main(String[] args) {
+        // entry point for C#
+        new Query().doQuery(args, "java net.sf.saxon.Query");
+    }
+
     /**
      * Set the options that are recognized on the command line. This method can be overridden in a subclass
      * to define additional command line options.

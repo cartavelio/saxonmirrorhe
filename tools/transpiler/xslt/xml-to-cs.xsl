@@ -387,6 +387,7 @@
       <xsl:param name="expandingDefaults" select="false()" tunnel="yes" as="xs:boolean"/>
       <xsl:call-template name="indent"/>
       <xsl:variable name="full-name" select="f:full-method-name(.)"/>
+      <xsl:variable name="arity" select="count(parameters/parameter)"/>
       <!--<xsl:message>Method {name/@identifier} = {$full-name}</xsl:message>-->
       <xsl:variable name="digestMethod" select="key('digestMethodKey', $full-name, $digest)[1]"/>
       
@@ -428,9 +429,19 @@
       
       <!-- Method name -->
       
+      <xsl:text> /*432*/ </xsl:text>
       <xsl:choose>
          <xsl:when test="name/@identifier = 'iterator' and f:isIteratorType(string(type/@RESOLVED_TYPE))">
             <xsl:text> GetEnumerator</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'toString' and $arity=0">
+            <xsl:text> ToString</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'equals' and $arity=1">
+            <xsl:text> Equals</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'hashCode' and $arity=0">
+            <xsl:text> GetHashCode</xsl:text>
          </xsl:when>
          <xsl:otherwise>
             <xsl:text> {f:escapeMethodName(name/@identifier)}</xsl:text>
@@ -1150,7 +1161,10 @@
          <xsl:text> /* modifiers = {modifiers/modifier/@keyword}, class modifiers = {ancestor::type[1]/modifiers/modifier/@keyword} */</xsl:text>
       </xsl:if>-->
       <xsl:choose>
-         <xsl:when test="$digestMethod/@override='1'">override </xsl:when>
+         <xsl:when test="$digestMethod!(@override='1' 
+            or (@name='equals' and @sig='Object')
+            or (@name='hashCode' and not(@sig))
+            or (@name='toString' and not(@sig)))">override </xsl:when>
          <xsl:when test="($digestMethod[@virtual='1' and not(@abstract='1')] or $expandingDefaults)
             and not($classIsFinal)">virtual </xsl:when>
       </xsl:choose>
@@ -1165,7 +1179,7 @@
    </xsl:template>
    
    <xsl:template match="modifier/@keyword" priority="3">
-      <xsl:text>{lower-case(.)} /*1168*/</xsl:text>
+      <xsl:text>{lower-case(.)} </xsl:text>
    </xsl:template>
    
    <xsl:template match="modifier/@keyword[. = 'PROTECTED']" priority="10">

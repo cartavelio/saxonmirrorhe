@@ -1,7 +1,7 @@
 namespace java.util {
     public class Locale {
         public static Locale getDefault() {
-            return null;
+            return new Locale();
         }
 
         public string getLanguage() {

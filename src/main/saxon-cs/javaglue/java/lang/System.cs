@@ -9,12 +9,12 @@ namespace java.lang
     {
         public static void arraycopy<T>(T[] from, int fromStart, T[] to, int toStart, int len)
         {
-            throw new Sys.NotImplementedException();
+            Sys.Array.Copy(from, fromStart, to, toStart, len);
         }
         
         public static void exit(int exitCode)
         {
-            throw new Sys.NotImplementedException();
+            Sys.Console.WriteLine("Exiting with code " + exitCode);
         }
 
         public static string getProperty(string name) {

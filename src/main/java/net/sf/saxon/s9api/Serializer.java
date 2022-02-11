@@ -18,6 +18,7 @@ import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -71,12 +72,12 @@ public class Serializer extends AbstractDestination {
 
     private static final Map<String, Property> standardProperties = new HashMap<>();
 
-//    private static void z(Property prop) {
-//        standardProperties.put(prop.name, prop);
-//    }
-
     static {
-        for (Property p : Property.values()) {
+        //#if CSHARP==false
+        final Property[] propertyValues = Property.values();
+        //#endif
+        CSharp.emitCode("var propertyValues = net.sf.saxon.s9api.Serializer.Property.values();");
+        for (Property p : propertyValues) {
             standardProperties.put(p.toString(), p);
         }
     }

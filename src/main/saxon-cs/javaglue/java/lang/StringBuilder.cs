@@ -95,7 +95,7 @@ namespace java.lang {
             return this._builder.Length;
         }
 
-        public string toString() {
+        public string ToString() {
             return _builder.ToString();
         }
 

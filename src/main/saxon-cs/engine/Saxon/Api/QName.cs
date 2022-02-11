@@ -363,7 +363,7 @@ namespace Saxon.Api {
         /// with the <c>Processor</c>.
         /// </remarks>
         public override int GetHashCode() {
-            return sqName.hashCode();
+            return sqName.GetHashCode();
         }
 
         /// <summary>
@@ -378,7 +378,7 @@ namespace Saxon.Api {
                 return false;
             }
 
-            return sqName.equals(((QName) other).sqName);
+            return sqName.Equals(((QName) other).sqName);
         }
 
         /// <summary>
