@@ -1469,7 +1469,7 @@ PHP_METHOD(XsltExecutable, setSaveXslMessage)
 
 
 
-PHP_METHOD(XsltExecutable, setSaveResultDocument)
+PHP_METHOD(XsltExecutable, setCaptureResultDocuments)
 {
     XsltExecutable *xsltExecutable;
     bool create = false;
@@ -1484,7 +1484,7 @@ PHP_METHOD(XsltExecutable, setSaveResultDocument)
 
     if (xsltExecutable != nullptr) {
 
-	    xsltExecutable->setSaveResultDocument(create);
+	    xsltExecutable->setCaptureResultDocuments(create);
 	}
 
 }
