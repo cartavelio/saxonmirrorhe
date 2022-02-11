@@ -521,6 +521,25 @@ public class TransformTests {
     }
 
     @Test
+    public void testResourceCatalog() {
+        String[] args = {
+                "-t",
+                "-catalog:" + ConfigTest.DATA_DIR + "resolvers/catalog.xml",
+                "-s:" + ConfigTest.DATA_DIR + "resolvers/input.xml",
+                "-xsl:" + ConfigTest.DATA_DIR + "resolvers/style.xsl",
+                "-o:" + ConfigTest.DATA_DIR + "sandpit/catalogTestOut.xml"
+        };
+        try {
+            Transform.main(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+        assertTrue(new File(ConfigTest.DATA_DIR + "sandpit/catalogTestOut.xml").exists(), "Test output exists");
+
+    }
+
+    @Test
     public void testMessageToLogger() {
         try {
             String xsl =
