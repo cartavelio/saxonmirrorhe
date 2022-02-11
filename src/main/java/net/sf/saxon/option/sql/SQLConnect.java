@@ -101,6 +101,13 @@ public class SQLConnect extends ExtensionInstruction {
         }
         password = makeAttributeValueTemplate(dbPassword, dbPass);
 
+        // Get auto-commit attribute
+
+        AttributeInfo dbAutoCommit = atts.get("", "auto-commit");
+        if (dbAutoCommit != null) {
+            String dbAuto = dbAutoCommit.getValue();
+            autoCommit =  makeAttributeValueTemplate(dbAuto, dbAutoCommit);
+        }
     }
 
     @Override
