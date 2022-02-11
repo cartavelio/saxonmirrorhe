@@ -1,11 +1,9 @@
 <exceptions>
   
-  function-available-1008
-  
-  <exception test-case="function-available-1008" run="false" report="bug">
+  <!--<exception test-case="function-available-1008" run="false" report="bug">
     <created by="Michael Kay" on="2021-10-01"/>
     <reason>Saxon 11 wrongly accepts concat#0 (and other 4.0 functions?) when 4.0 is not enabled</reason>
-  </exception>
+  </exception>-->
   
   <exception test-case="package-017" run="false" report="disputed">
     <created by="Michael Kay" on="2015-11-02"/>
