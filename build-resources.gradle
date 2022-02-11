@@ -102,14 +102,25 @@ task resources_userdoc_xml(
 }
 
 task resources_drivers_src(
-        type: Copy,
-        dependsOn: ["eej_compileTestDrivers"],
+        dependsOn: ["hej_compileTestDrivers", "pej_compileTestDrivers", "eej_compileTestDrivers"],
         description: "Copy test drivers into the resources folder"
 ) {
-    into "${buildDir}/resources/drivers/java"
-    from ("${buildDir}/src/testdrivers/eej") {
+  doLast {
+    copy {
+      into "${buildDir}/resources/drivers/java"
+      from ("${buildDir}/src/testdrivers/eej") {
         exclude "com/saxonica/js"
+      }
     }
+  }
+  doLast {
+    copy {
+      into "${buildDir}/resources/drivers/java"
+      from ("src/main/java/") {
+        include "com/saxonica/testdriver/gui/images/*"
+      }
+    }
+  }
 }
 
 task resources_drivers(
@@ -198,7 +209,7 @@ task samples_j(
         description: "Copy compiled Java samples into the resources folder"
 ) {
     into "${buildDir}/resources/samples/java/classes"
-    from "${buildDir}/samples/classes/java"
+    from "${buildDir}/samples/classes/run/ee"
 }
 
 task samples_n(
