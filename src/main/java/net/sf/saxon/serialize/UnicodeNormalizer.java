@@ -10,17 +10,20 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.om.*;
-import net.sf.saxon.serialize.codenorm.Normalizer;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.CompressedWhitespace;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-
-import net.sf.saxon.str.CompressedWhitespace;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
+
+import java.text.Normalizer;
 
 /**
  * UnicodeNormalizer: This ProxyReceiver performs unicode normalization on the contents
@@ -30,30 +33,28 @@ import net.sf.saxon.value.Whitespace;
 
 public class UnicodeNormalizer extends ProxyReceiver {
 
-    private final Normalizer normalizer;
+    private final Normalizer.Form normForm;
 
     public UnicodeNormalizer(String form, Receiver next) throws XPathException {
         super(next);
-        byte fb;
         switch (form) {
             case "NFC":
-                fb = Normalizer.C;
+                normForm = Normalizer.Form.NFC;
                 break;
             case "NFD":
-                fb = Normalizer.D;
+                normForm = Normalizer.Form.NFD;
                 break;
             case "NFKC":
-                fb = Normalizer.KC;
+                normForm = Normalizer.Form.NFKC;
                 break;
             case "NFKD":
-                fb = Normalizer.KD;
+                normForm = Normalizer.Form.NFKD;
                 break;
             default:
                 XPathException err = new XPathException("Unknown normalization form " + form);
                 err.setErrorCode("SESU0011");
                 throw err;
         }
-        normalizer = Normalizer.make(fb, getConfiguration());
     }
 
     /**
@@ -61,8 +62,8 @@ public class UnicodeNormalizer extends ProxyReceiver {
      * @return the underlying Normalizer
      */
 
-    public Normalizer getNormalizer() {
-        return normalizer;
+    public Normalizer.Form getNormalizationForm() {
+        return normForm;
     }
 
     /**
@@ -119,7 +120,7 @@ public class UnicodeNormalizer extends ProxyReceiver {
             int start = 0;
             int nextNull = s.indexOf((char)0);
             while (nextNull >= 0) {
-                out.append(normalizer.normalize(s.substring(start, nextNull)));
+                out.append(Normalizer.normalize(s.substring(start, nextNull), normForm));
                 out.append((char) 0);
                 start = nextNull + 1;
                 nextNull = s.indexOf((char) 0, start);
@@ -128,10 +129,10 @@ public class UnicodeNormalizer extends ProxyReceiver {
                 start = nextNull + 1;
                 nextNull = s.indexOf((char) 0, start);
             }
-            out.append(normalizer.normalize(s.substring(start)));
+            out.append(Normalizer.normalize(s.substring(start), normForm));
             return StringView.tidy(out.toString());
         } else {
-            return StringView.tidy(normalizer.normalize(in.toString()));
+            return StringView.tidy(Normalizer.normalize(in.toString(), normForm));
         }
     }
 
