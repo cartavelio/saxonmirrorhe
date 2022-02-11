@@ -975,7 +975,7 @@ namespace Saxon.Api
 		/// <param name="itemType">The item type</param>
 		/// <param name="occurrenceIndicator">The occurrence indicator, one of '?' (zero-or-one), 
 		/// '*' (zero-or-more), '+' (one-or-more), ' ' (a single space) (exactly one),
-		/// or 'º' (masculine ordinal indicator, xBA) (exactly zero). The type <c>empty-sequence()</c>
+		/// or '0' (exactly zero). The type <c>empty-sequence()</c>
 		/// can be represented by an occurrence indicator of 'º' with any item type.</param>
 
 		public XdmSequenceType(XdmItemType itemType, char occurrenceIndicator)
