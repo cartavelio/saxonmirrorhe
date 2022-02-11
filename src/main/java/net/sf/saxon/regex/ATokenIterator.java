@@ -15,12 +15,12 @@ import net.sf.saxon.value.StringItem;
  * A ATokenIterator is an iterator over the strings that result from tokenizing a string using a regular expression
  */
 
-public class ATokenIterator implements AtomicIterator {
+public class ATokenIterator implements AtomicIterator<StringItem> {
 
     private final UnicodeString input;
     private final REMatcher matcher;
     private StringItem current;
-    private int prevEnd = 0;
+    private int prevEnd;
 
 
     /**
