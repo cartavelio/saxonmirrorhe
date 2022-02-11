@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2014-2020 Saxonica Limited
+// Copyright (c) 2014 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,15 +18,15 @@ import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * * This class is to use with Saxon on C++
  */
 public class XdmValueForCpp {
-    private final BuiltInAtomicType type;
-    private final XdmValue value;
-    private static final QName errorCode = null;
+    private BuiltInAtomicType type;
+    private XdmValue value;
+    private static QName errorCode = null;
 
 
     public XdmValueForCpp() {
@@ -50,7 +50,7 @@ public class XdmValueForCpp {
         ConversionRules rules = new ConversionRules();
         Converter converter = rules.getConverter(BuiltInAtomicType.STRING, type);
 
-        value = XdmValue.wrap(converter.convert(new StringItem(valueStr)).asAtomic());
+        value = XdmValue.wrap(converter.convert(new StringValue(valueStr)).asAtomic());
 
 
     }
