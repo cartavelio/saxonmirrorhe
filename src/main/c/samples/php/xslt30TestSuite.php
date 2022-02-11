@@ -1091,7 +1091,7 @@ function run_test_case($testcase, $env, $path)
     if ($checkDependency) {
         $testElem = getSingleNodeFromXPath($testcase, "./test");
 
-         error_log("TEST ELEMENT :".$testcase);
+        // error_log("TEST ELEMENT :".$testcase);
         $testStylesheet = null;
 
         if ($testElem != null) {
