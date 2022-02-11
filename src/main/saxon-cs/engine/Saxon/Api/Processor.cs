@@ -44,8 +44,6 @@ namespace Saxon.Api {
         private TextWriter textWriter = Console.Error;
         private CollectionFinder userCollectionFinder;
 
-        private TextResolver textResolver;
-
         internal Processor(Saxon.Hej.s9api.Processor p) {
             JProcessor = p;
             JProcessor.getUnderlyingConfiguration().setProcessor(this);
@@ -200,24 +198,7 @@ namespace Saxon.Api {
         public void SetCatalogFile(params string[] fileNames) {
             Implementation.getCommonResourceResolver().SetFeature(ResolverFeature.CATALOG_FILES, fileNames.ToList());
         }
-
-        /// <summary>
-        /// An <c>TextResolver</c>, which will be used for resolving URIs passed to calls on
-        /// <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>, <c>unparsed-text-available()</c>,
-        /// and <c>json-doc()</c>. The default is null, which indicates that Saxon will use its
-        /// own internal mechanisms.
-        /// </summary>
-
-        public TextResolver TextResolver {
-            get => textResolver;
-            set {
-                textResolver = value;
-                Implementation.setUnparsedTextURIResolver(Xslt30Transformer.WrapTextResolver(value));
-            }
-        }
-
-
-
+        
         /// <summary>
         /// A <c>TextWriter</c> used as the destination of miscellaneous error, warning, and progress messages.
         /// </summary>

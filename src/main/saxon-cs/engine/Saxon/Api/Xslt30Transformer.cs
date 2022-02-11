@@ -73,7 +73,7 @@ namespace Saxon.Api {
         private TextWriter traceFunctionDestination;
         private Saxon.Hej.s9api.Xslt30Transformer s9Transformer;
         private readonly StandardMessageHandler _standardMessageHandler;
-        private TextResolver textResolver;
+        private ResourceResolver textResolver;
         private ResourceResolver xmlDocumentResolver;
 
         // internal constructor
@@ -247,12 +247,23 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// The <code>TextResolver</code> to be used at run-time to resolve and dereference URIs
+        /// The <c>TextResolver</c> to be used at run-time to resolve and dereference URIs
         /// supplied to the <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>,
         /// <c>unparsed-text-available()</c>, and <c>json-doc()</c> functions.
         /// </summary>
+        /// <remarks>
+        /// <para>If no <c>TextResolver</c> is supplied, or if the supplied <c>TextResolver</c> returns null
+        /// when called, the <c>CommonResourceResolver</c> for the Saxon <c>Configuration</c> is invoked,
+        /// with a <c>ResourceRequest</c> having <c>Nature == ResourceRequest.TEXT_NATURE</c>. If this
+        /// returns null, then the "direct" URI resolution provided by <c>Org.XmlResolver.UriUtils</c> is
+        /// invoked: this is capable of handling regular <c>file:</c>, <c>http:</c>, and <c>https:</c>
+        /// URIs, as well as the <c>data:</c> and <c>pack:</c> schemes.
+        /// </para>
+        /// <para>If the call on <c>unparsed-text()</c> supplies an encoding parameter, this is made
+        /// available in the call to the <c>TextResolver</c>. 
+        /// </remarks>
 
-        public TextResolver TextResolver {
+        public ResourceResolver TextResolver {
             get => textResolver;
             set {
                 textResolver = value;
@@ -696,7 +707,7 @@ namespace Saxon.Api {
         }
         
         
-        protected internal static UnparsedTextURIResolver WrapTextResolver(TextResolver value) {
+        protected internal static UnparsedTextURIResolver WrapTextResolver(ResourceResolver value) {
             return (uri, encoding, config) => {
                 Encoding enc;
                 if (encoding == null) {
@@ -713,8 +724,27 @@ namespace Saxon.Api {
                         throw new Saxon.Hej.trans.XPathException("Unparsed-text encoding problem: " + e.Message, "FOUT1190");
                     }
                 }
-                TextResource resource = value(uri, enc);
-                return new StringReader(resource.Content);
+                ResourceRequest request = new() {
+                    BaseUri = uri,
+                    Uri = uri,
+                    Encoding = enc,
+                    Nature = ResourceRequest.TEXT_NATURE
+                };
+                IResource resource = value(request);
+                if (resource == null) {
+                    IResource fallback = config.getCommonResourceResolver().chain(new DirectResourceResolver()).Resolve(request);
+                    if (fallback is TextResource text) {
+                        return text.TextReader;
+                    }
+                    else {
+                        throw new Saxon.Hej.trans.XPathException("Failed to resolve unparsed-text URI: " + uri, "FOUT1170");
+                    }
+                } else if (resource is TextResource text) {
+                    return text.TextReader;
+                }
+                else {
+                    throw new Saxon.Hej.trans.XPathException("Resolver for unparsed-text URI " + uri + " returned an IResource that is not a TextResource", "FOUT1170");
+                }
             };
         }
         
