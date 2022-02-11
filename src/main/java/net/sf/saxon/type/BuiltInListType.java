@@ -21,7 +21,7 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
 /**
  * <p>This class is used to implement the built-in
@@ -122,7 +122,7 @@ public class BuiltInListType implements ListType {
      * Get the validation status - always valid
      */
     @Override
-    public ValidationStatus getValidationStatus() {
+    public SchemaValidationStatus getValidationStatus() {
         return VALIDATED;
     }
 
@@ -291,7 +291,7 @@ public class BuiltInListType implements ListType {
 
     /**
      * Returns the value of the 'block' attribute for this type, as a bit-signnificant
-     * integer with fields such as {@link SchemaType#DERIVATION_LIST} and {@link SchemaType#DERIVATION_EXTENSION}
+     * integer with fields such as {@link Derivatiion#DERIVATION_LIST} and {@link Derivatiion#DERIVATION_EXTENSION}
      *
      * @return the value of the 'block' attribute for this type
      */
@@ -319,19 +319,19 @@ public class BuiltInListType implements ListType {
      * Gets the integer code of the derivation method used to derive this type from its
      * parent. Returns zero for primitive types.
      *
-     * @return a numeric code representing the derivation method, for example {@link SchemaType#DERIVATION_RESTRICTION}
+     * @return a numeric code representing the derivation method, for example {@link Derivation#DERIVATION_RESTRICTION}
      */
 
     @Override
     public int getDerivationMethod() {
-        return SchemaType.DERIVATION_LIST;
+        return Derivation.DERIVATION_LIST;
     }
 
     /**
      * Determines whether derivation (of a particular kind)
      * from this type is allowed, based on the "final" property
      *
-     * @param derivation the kind of derivation, for example {@link SchemaType#DERIVATION_LIST}
+     * @param derivation the kind of derivation, for example {@link Derivatiion#DERIVATION_LIST}
      * @return true if this kind of derivation is allowed
      */
 
@@ -344,7 +344,7 @@ public class BuiltInListType implements ListType {
      * Get the types of derivation that are not permitted, by virtue of the "final" property.
      *
      * @return the types of derivation that are not permitted, as a bit-significant integer
-     *         containing bits such as {@link net.sf.saxon.type.SchemaType#DERIVATION_EXTENSION}
+     *         containing bits such as {@link net.sf.saxon.type.Derivatiion#DERIVATION_EXTENSION}
      */
     @Override
     public int getFinalProhibitions() {

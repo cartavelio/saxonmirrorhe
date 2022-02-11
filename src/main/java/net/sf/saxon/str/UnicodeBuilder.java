@@ -21,7 +21,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     // to the list of segments
     private List<UnicodeString> segments;
     private List<Integer> looseCodepoints;
-    long length = 0;
+    long _length = 0;
     int mask = 0;
     Consumer<UnicodeString> segmentConsumer = null;
 
@@ -46,7 +46,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
             looseCodepoints = new ArrayList<>();
         }
         looseCodepoints.add(codePoint);
-        length++;
+        _length++;
         mask |= codePoint;
         return this;
     }
@@ -95,7 +95,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
             flushLooseCodepoints();
             UnicodeString t = str.tidy();
             segments.add(t);
-            length += t.length();
+            _length += t.length();
             switch (t.getWidth()) {
                 case 7:
                 case 8:
@@ -116,7 +116,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
         if (looseCodepoints != null) {
             List<Integer> loose = looseCodepoints;
             looseCodepoints = null;
-            length -= loose.size();
+            _length -= loose.size();
             int max = 0;
             for (int i : loose) {
                 max = Math.max(max, i);
@@ -168,7 +168,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return the size in codepoints
      */
     public long length() {
-        return length;
+        return _length;
     }
 
     /**
@@ -176,7 +176,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return true if the size is zero
      */
     public boolean isEmpty() {
-        return length == 0;
+        return _length == 0;
     }
 
     /**
@@ -185,7 +185,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public UnicodeString toUnicodeString() {
-        if (length == 0) {
+        if (_length == 0) {
             return EmptyUniString.getInstance();
         } else if (mask <= 0xff) {
             byte[] target = new byte[(int)length()];
@@ -317,7 +317,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     public void clear() {
         segments = new ArrayList<>();
         looseCodepoints = null;
-        length = 0;
+        _length = 0;
     }
 
     /**

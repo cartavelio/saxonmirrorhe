@@ -10,7 +10,7 @@ package net.sf.saxon.z;
 /**
  * An immutable integer set containing a single integer
  */
-public class IntSingletonSet implements IntSet {
+public class IntSingletonSet extends IntSet {
 
     private final int value;
 

@@ -118,7 +118,9 @@ public class Controller implements ContextOriginator {
     public final static String ANONYMOUS_PRINCIPAL_OUTPUT_URI = "dummy:/anonymous/principal/result";
     private StylesheetCache stylesheetCache = null;
 
-    private Function<SequenceIterator, FocusTrackingIterator> focusTrackerFactory = FocusTrackingIterator::new;
+    private Function<SequenceIterator, FocusTrackingIterator> focusTrackerFactory =
+            //noinspection Convert2MethodRef
+            (iter) -> new FocusTrackingIterator(iter); // Written this way for Java-C# conversion
 
     private Function<SequenceIterator, FocusTrackingIterator> multiThreadedFocusTrackerFactory;
 

@@ -18,7 +18,7 @@ package net.sf.saxon.z;
  * @author Dominique Devienne
  * @author Michael Kay: retrofitted to JDK 1.4, added iterator()
  */
-public class IntHashSet implements IntSet {
+public class IntHashSet extends IntSet {
 
     private static final int NBIT = 30; // MAX_SIZE = 2^NBIT
 
@@ -346,9 +346,9 @@ public class IntHashSet implements IntSet {
         System.err.println("mask: " + _mask);
         System.err.println("Result of iterator:");
         IntIterator iter = iterator();
-        int i = 0;
+        int j = 0;
         while (iter.hasNext()) {
-            if (i++ % 10 == 0) {
+            if (j++ % 10 == 0) {
                 System.err.println(sb.toString());
                 sb.setLength(0);
             }

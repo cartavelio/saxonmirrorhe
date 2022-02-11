@@ -25,7 +25,7 @@ import java.util.*;
  * for example when parsing JSON input, or when creating a fixed map to use in an options argument.
  */
 
-public class DictionaryMap implements MapItem {
+public class DictionaryMap extends MapItem {
 
     private final HashMap<String, GroundedValue> hashMap;
 

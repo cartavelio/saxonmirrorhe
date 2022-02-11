@@ -56,6 +56,21 @@ public class TypeHierarchy {
     }
 
     /**
+     * Get the nearest named type in the type hierarchy, that is, the nearest type that
+     * is not anonymous. (In practice, since types cannot be derived from anonymous types,
+     * this will either the type itself, or its immediate base type).
+     * @return the nearest type, found by following the {@code getBaseType()} relation
+     * recursively, that is not an anonymous type
+     */
+
+    public static SchemaType getNearestNamedType(SchemaType type) {
+        while (type.isAnonymousType()) {
+            type = type.getBaseType();
+        }
+        return type;
+    }
+
+    /**
      * Apply the function conversion rules to a value, given a required type.
      *
      * @param value        a value to be converted
@@ -638,7 +653,7 @@ public class TypeHierarchy {
 
     private static void requireTrueItemType(ItemType t) {
         Objects.requireNonNull(t);
-        if (!t.isTrueItemType()) {
+        if (t instanceof UnionType && !t.isPlainType()) {
             throw new AssertionError(t + " is a non-pure union type");
         }
     }

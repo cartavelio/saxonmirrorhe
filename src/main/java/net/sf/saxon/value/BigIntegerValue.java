@@ -553,11 +553,12 @@ public final class BigIntegerValue extends IntegerValue {
 
     /**
      * Get an object that implements XML Schema comparison semantics
+     * @return
      */
 
     /*@NotNull*/
     @Override
-    public Comparable getSchemaComparable() {
+    public SchemaComparable getSchemaComparable() {
         return new BigIntegerComparable(this);
     }
 
@@ -566,7 +567,7 @@ public final class BigIntegerValue extends IntegerValue {
      * BigInteger values or with other representations of XPath numeric values
      */
 
-    protected static class BigIntegerComparable implements Comparable {
+    protected static class BigIntegerComparable implements SchemaComparable {
 
         protected BigIntegerValue value;
 
@@ -579,7 +580,7 @@ public final class BigIntegerValue extends IntegerValue {
         }
 
         @Override
-        public int compareTo(/*@NotNull*/ Object o) {
+        public int compareTo(SchemaComparable o) {
             if (o instanceof Int64Value.Int64Comparable) {
                 return asBigInteger().compareTo(BigInteger.valueOf(((Int64Value.Int64Comparable) o).asLong()));
             } else if (o instanceof BigIntegerComparable) {
@@ -592,7 +593,7 @@ public final class BigIntegerValue extends IntegerValue {
         }
 
         public boolean equals(/*@NotNull*/ Object o) {
-            return compareTo(o) == 0;
+            return o instanceof SchemaComparable && compareTo((SchemaComparable)o) == 0;
         }
 
         public int hashCode() {

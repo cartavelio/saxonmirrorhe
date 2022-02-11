@@ -9,12 +9,14 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.*;
 import net.sf.saxon.tree.iter.AtomicIterator;
 
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.z.IntIterator;
+import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -369,11 +371,38 @@ public class StringItem extends AtomicValue {
      * Returns null if the value is not comparable according to XML Schema rules. This implementation
      * returns the underlying Java string, which works because strings will only be compared for
      * equality, not for ordering, and the equality rules for strings in XML schema are the same as in Java.
+     * @return
      */
 
     @Override
-    public Comparable getSchemaComparable() {
-        return this.getUnicodeStringValue();
+    public SchemaComparable getSchemaComparable() {
+        return new StringComparable(getUnicodeStringValue());
+    }
+
+    private static class StringComparable implements SchemaComparable {
+        private final UnicodeString value;
+        public StringComparable(UnicodeString value) {
+            this.value = value;
+        }
+
+        @Override
+        public int compareTo(@NotNull SchemaComparable o) {
+            if (o instanceof StringComparable) {
+                return value.compareTo(((StringComparable)o).value);
+            } else {
+                return SequenceTool.INDETERMINATE_ORDERING;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return value.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof StringComparable && value.equals(((StringComparable)obj).value);
+        }
     }
 
     /**

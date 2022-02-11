@@ -26,7 +26,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
 
     private final SpaceStrippingRule strippingRule;
     private final boolean preservesSpace;
-    private final boolean containsAssertions;
+    private final boolean _containsAssertions;
     private final TreeInfo underlyingTree;
 
     /**
@@ -43,7 +43,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
         this.strippingRule = strippingRule;
         this.underlyingTree = doc;
         preservesSpace = findPreserveSpace(doc);
-        containsAssertions = findAssertions(doc);
+        _containsAssertions = findAssertions(doc);
     }
 
     /**
@@ -186,7 +186,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
      */
 
     public boolean containsAssertions() {
-        return containsAssertions;
+        return _containsAssertions;
     }
 
 }

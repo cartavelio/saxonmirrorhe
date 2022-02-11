@@ -27,7 +27,7 @@ import java.util.Iterator;
  * map in its own right.
  */
 
-public class SingleEntryMap implements MapItem {
+public class SingleEntryMap extends MapItem {
     public AtomicValue key;
     public GroundedValue value;
 

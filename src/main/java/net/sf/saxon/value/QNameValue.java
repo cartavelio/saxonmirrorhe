@@ -178,19 +178,26 @@ public class QNameValue extends QualifiedNameValue {
 
     /*@NotNull*/
     @Override
-    public Comparable getSchemaComparable() {
-        return new QNameComparable();
+    public SchemaComparable getSchemaComparable() {
+        return new QNameComparable(this);
     }
 
-    private class QNameComparable implements Comparable {
+    private class QNameComparable implements SchemaComparable {
+
+        private final QNameValue value;
+
+        public QNameComparable(QNameValue value) {
+            this.value = value;
+        }
+
 
         /*@NotNull*/
         public QNameValue getQNameValue() {
-            return QNameValue.this;
+            return value;
         }
 
         @Override
-        public int compareTo(/*@NotNull*/ Object o) {
+        public int compareTo(SchemaComparable o) {
             return equals(o) ? 0 : SequenceTool.INDETERMINATE_ORDERING;
         }
 

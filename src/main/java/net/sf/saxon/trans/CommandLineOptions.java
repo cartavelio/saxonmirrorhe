@@ -282,8 +282,8 @@ public class CommandLineOptions {
             }
         }
 
-        String value = getOptionValue("catalog");
-        if (value != null) {
+        String catalogValue = getOptionValue("catalog");
+        if (catalogValue != null) {
             if (getOptionValue("r") != null) {
                 throw new XPathException("Cannot use -catalog and -r together");
             }
@@ -294,8 +294,8 @@ public class CommandLineOptions {
                 throw new XPathException("Cannot use -catalog and -y together");
             }
             StringBuilder sb = new StringBuilder();
-            if ((getOptionValue("u") != null) || isImplicitURI(value)) {
-                for (String s : value.split(";")) {
+            if ((getOptionValue("u") != null) || isImplicitURI(catalogValue)) {
+                for (String s : catalogValue.split(";")) {
                     Source sourceInput = null;
                     try {
                         sourceInput = config.getURIResolver().resolve(s, null);
@@ -309,7 +309,7 @@ public class CommandLineOptions {
                 }
 
             } else {
-                for (String s : value.split(";")) {
+                for (String s : catalogValue.split(";")) {
                     File catalogFile = new File(s);
                     if (!catalogFile.exists()) {
                         throw new XPathException("Catalog file not found: " + s);
@@ -317,19 +317,19 @@ public class CommandLineOptions {
                     sb.append(catalogFile.toURI().toASCIIString()).append(';');
                 }
             }
-            value = sb.toString();
+            catalogValue = sb.toString();
 
             try {
                 config.getClass("org.apache.xml.resolver.CatalogManager", false, null);
-                XmlCatalogResolver.setCatalog(value, config, getOptionValue("t") != null);
+                XmlCatalogResolver.setCatalog(catalogValue, config, getOptionValue("t") != null);
             } catch (XPathException err) {
                 throw new XPathException("Failed to load Apache catalog resolver library", err);
             }
         }
 
-        value = getOptionValue("dtd");
-        if (value != null) {
-            switch (value) {
+        catalogValue = getOptionValue("dtd");
+        if (catalogValue != null) {
+            switch (catalogValue) {
                 case "on":
                     config.setBooleanProperty(Feature.DTD_VALIDATION, true);
                     config.getParseOptions().setDTDValidationMode(Validation.STRICT);
@@ -346,81 +346,81 @@ public class CommandLineOptions {
             }
         }
 
-        value = getOptionValue("ea");
-        if (value != null) {
-            boolean on = Configuration.requireBoolean("ea", value);
+        catalogValue = getOptionValue("ea");
+        if (catalogValue != null) {
+            boolean on = Configuration.requireBoolean("ea", catalogValue);
             config.getDefaultXsltCompilerInfo().setAssertionsEnabled(on);
         }
 
-        value = getOptionValue("expand");
-        if (value != null) {
-            boolean on = Configuration.requireBoolean("expand", value);
+        catalogValue = getOptionValue("expand");
+        if (catalogValue != null) {
+            boolean on = Configuration.requireBoolean("expand", catalogValue);
             config.getParseOptions().setExpandAttributeDefaults(on);
         }
 
-        value = getOptionValue("ext");
-        if (value != null) {
-            boolean on = Configuration.requireBoolean("ext", value);
+        catalogValue = getOptionValue("ext");
+        if (catalogValue != null) {
+            boolean on = Configuration.requireBoolean("ext", catalogValue);
             config.setBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS, on);
         }
 
-        value = getOptionValue("l");
-        if (value != null) {
-            boolean on = Configuration.requireBoolean("l", value);
+        catalogValue = getOptionValue("l");
+        if (catalogValue != null) {
+            boolean on = Configuration.requireBoolean("l", catalogValue);
             config.setBooleanProperty(Feature.LINE_NUMBERING, on);
         }
 
-        value = getOptionValue("m");
-        if (value != null) {
-            config.setConfigurationProperty(Feature.MESSAGE_EMITTER_CLASS, value);
+        catalogValue = getOptionValue("m");
+        if (catalogValue != null) {
+            config.setConfigurationProperty(Feature.MESSAGE_EMITTER_CLASS, catalogValue);
         }
 
-        value = getOptionValue("opt");
-        if (value != null) {
-            config.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, value);
+        catalogValue = getOptionValue("opt");
+        if (catalogValue != null) {
+            config.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, catalogValue);
         }
 
-        value = getOptionValue("or");
-        if (value != null) {
-            Object resolver = config.getInstance(value, null);
+        catalogValue = getOptionValue("or");
+        if (catalogValue != null) {
+            Object resolver = config.getInstance(catalogValue, null);
             if (resolver instanceof OutputURIResolver) {
                 config.setConfigurationProperty(Feature.OUTPUT_URI_RESOLVER, (OutputURIResolver) resolver);
             } else {
-                throw new XPathException("Class " + value + " is not an OutputURIResolver");
+                throw new XPathException("Class " + catalogValue + " is not an OutputURIResolver");
             }
         }
 
-        value = getOptionValue("outval");
-        if (value != null) {
-            Boolean isRecover = "recover".equals(value);
+        catalogValue = getOptionValue("outval");
+        if (catalogValue != null) {
+            Boolean isRecover = "recover".equals(catalogValue);
             config.setConfigurationProperty(Feature.VALIDATION_WARNINGS, isRecover);
             config.setConfigurationProperty(Feature.VALIDATION_COMMENTS, isRecover);
         }
 
-        value = getOptionValue("r");
-        if (value != null) {
-            config.setURIResolver(config.makeURIResolver(value));
+        catalogValue = getOptionValue("r");
+        if (catalogValue != null) {
+            config.setURIResolver(config.makeURIResolver(catalogValue));
         }
 
-        value = getOptionValue("strip");
-        if (value != null) {
-            config.setConfigurationProperty(Feature.STRIP_WHITESPACE, value);
+        catalogValue = getOptionValue("strip");
+        if (catalogValue != null) {
+            config.setConfigurationProperty(Feature.STRIP_WHITESPACE, catalogValue);
         }
 
-        value = getOptionValue("T");
-        if (value != null) {
+        catalogValue = getOptionValue("T");
+        if (catalogValue != null) {
             config.setCompileWithTracing(true);
         }
 
-        value = getOptionValue("TJ");
-        if (value != null) {
-            boolean on = Configuration.requireBoolean("TJ", value);
+        catalogValue = getOptionValue("TJ");
+        if (catalogValue != null) {
+            boolean on = Configuration.requireBoolean("TJ", catalogValue);
             config.setBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, on);
         }
 
-        value = getOptionValue("tree");
-        if (value != null) {
-            switch (value) {
+        catalogValue = getOptionValue("tree");
+        if (catalogValue != null) {
+            switch (catalogValue) {
                 case "linked":
                     config.setTreeModel(Builder.LINKED_TREE);
                     break;
@@ -433,52 +433,52 @@ public class CommandLineOptions {
             }
         }
 
-        value = getOptionValue("val");
-        if (value != null) {
-            if ("strict".equals(value)) {
+        catalogValue = getOptionValue("val");
+        if (catalogValue != null) {
+            if ("strict".equals(catalogValue)) {
                 processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION, Validation.STRICT);
-            } else if ("lax".equals(value)) {
+            } else if ("lax".equals(catalogValue)) {
                 processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION, Validation.LAX);
             }
         }
 
-        value = getOptionValue("x");
-        if (value != null) {
-            processor.setConfigurationProperty(Feature.SOURCE_PARSER_CLASS, value);
+        catalogValue = getOptionValue("x");
+        if (catalogValue != null) {
+            processor.setConfigurationProperty(Feature.SOURCE_PARSER_CLASS, catalogValue);
         }
 
-        value = getOptionValue("xi");
-        if (value != null) {
-            boolean on = Configuration.requireBoolean("xi", value);
+        catalogValue = getOptionValue("xi");
+        if (catalogValue != null) {
+            boolean on = Configuration.requireBoolean("xi", catalogValue);
             processor.setConfigurationProperty(Feature.XINCLUDE, on);
         }
 
-        value = getOptionValue("xmlversion");
-        if (value != null) {
-            processor.setConfigurationProperty(Feature.XML_VERSION, value);
+        catalogValue = getOptionValue("xmlversion");
+        if (catalogValue != null) {
+            processor.setConfigurationProperty(Feature.XML_VERSION, catalogValue);
         }
 
-        value = getOptionValue("xsdversion");
-        if (value != null) {
-            processor.setConfigurationProperty(Feature.XSD_VERSION, value);
+        catalogValue = getOptionValue("xsdversion");
+        if (catalogValue != null) {
+            processor.setConfigurationProperty(Feature.XSD_VERSION, catalogValue);
         }
 
-        value = getOptionValue("xsiloc");
-        if (value != null) {
-            boolean on = Configuration.requireBoolean("xsiloc", value);
+        catalogValue = getOptionValue("xsiloc");
+        if (catalogValue != null) {
+            boolean on = Configuration.requireBoolean("xsiloc", catalogValue);
             processor.setConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION, on);
         }
 
-        value = getOptionValue("y");
-        if (value != null) {
-            processor.setConfigurationProperty(Feature.STYLE_PARSER_CLASS, value);
+        catalogValue = getOptionValue("y");
+        if (catalogValue != null) {
+            processor.setConfigurationProperty(Feature.STYLE_PARSER_CLASS, catalogValue);
         }
 
         // The init option must be done last
 
-        value = getOptionValue("init");
-        if (value != null) {
-            Initializer initializer = (Initializer) config.getInstance(value, null);
+        catalogValue = getOptionValue("init");
+        if (catalogValue != null) {
+            Initializer initializer = (Initializer) config.getInstance(catalogValue, null);
             initializer.initialize(config);
         }
 

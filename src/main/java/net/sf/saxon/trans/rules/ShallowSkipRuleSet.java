@@ -123,8 +123,10 @@ public class ShallowSkipRuleSet implements BuiltInRuleSet {
      * @return the default action for unmatched nodes: one of DEEP_COPY, APPLY_TEMPLATES, DEEP_SKIP, FAIL
      */
     @Override
-    public int[] getActionForParentNodes(int nodeKind) {
-        return new int[]{APPLY_TEMPLATES_TO_ATTRIBUTES, APPLY_TEMPLATES_TO_CHILDREN};
+    public BuiltInRules[] getActionForParentNodes(int nodeKind) {
+        return new BuiltInRules[]{
+                BuiltInRules.APPLY_TEMPLATES_TO_ATTRIBUTES,
+                BuiltInRules.APPLY_TEMPLATES_TO_CHILDREN};
     }
 }
 

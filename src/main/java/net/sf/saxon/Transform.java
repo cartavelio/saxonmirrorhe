@@ -1233,9 +1233,9 @@ public class Transform {
                 if (initialMode != null) {
                     msg += " initial mode = " + initialMode;
                 }
-                String initialTemplate = options.getOptionValue("it");
-                if (initialTemplate != null) {
-                    msg += " initial template = " + (initialTemplate.isEmpty() ? "xsl:initial-template" : initialTemplate);
+                String initialTemplateOption = options.getOptionValue("it");
+                if (initialTemplateOption != null) {
+                    msg += " initial template = " + (initialTemplateOption.isEmpty() ? "xsl:initial-template" : initialTemplateOption);
                 }
                 getConfiguration().getLogger().info(msg);
             }

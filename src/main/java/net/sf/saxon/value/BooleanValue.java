@@ -186,18 +186,23 @@ public final class BooleanValue extends AtomicValue implements Comparable, Atomi
      */
 
     @Override
-    public Comparable getSchemaComparable() {
-        return new BooleanComparable();
+    public SchemaComparable getSchemaComparable() {
+        return new BooleanComparable(this);
     }
 
-    private class BooleanComparable implements Comparable {
+    private static class BooleanComparable implements SchemaComparable {
+
+        private final BooleanValue value;
+        public BooleanComparable(BooleanValue value) {
+            this.value = value;
+        }
 
         public boolean asBoolean() {
-            return BooleanValue.this.getBooleanValue();
+            return value.getBooleanValue();
         }
 
         @Override
-        public int compareTo(/*@NotNull*/ Object o) {
+        public int compareTo(SchemaComparable o) {
             return equals(o) ? 0 : SequenceTool.INDETERMINATE_ORDERING;
         }
 

@@ -24,7 +24,7 @@ import java.util.Arrays;
  *
  * @author Michael Kay
  */
-public class IntArraySet implements IntSet {
+public class IntArraySet extends IntSet {
 
     public static final int[] EMPTY_INT_ARRAY = new int[0];
 
@@ -241,7 +241,7 @@ public class IntArraySet implements IntSet {
                 }
             }
         } else {
-            return IntSet.super.union(other);
+            return super.union(other);
         }
     }
 

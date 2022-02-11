@@ -38,6 +38,22 @@ public class ProcInstParser {
     private ProcInstParser() {
     }
 
+    private static class AttributeProcessor extends XMLFilterImpl {
+        List<String> result;
+        String name;
+        public AttributeProcessor(String name, List<String> result) {
+            this.name = name;
+            this.result = result;
+        }
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+            String val = atts.getValue(name);
+            if (val != null) {
+                result.add(val);
+            }
+        }
+    }
+
     /**
      * Get a pseudo-attribute. This is useful only if the processing instruction data part
      * uses pseudo-attribute syntax, which it does not have to. This syntax is as described
@@ -51,16 +67,7 @@ public class ProcInstParser {
 
         try {
             List<String> result = new ArrayList<>();
-            XMLFilterImpl filter = new XMLFilterImpl() {
-                @Override
-                public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-                    String val = atts.getValue(name);
-                    if (val != null) {
-                        result.add(val);
-                    }
-                }
-            };
-
+            XMLFilterImpl filter = new AttributeProcessor(name, result);
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setNamespaceAware(false);  // allows attribute names containing colons or unbound prefixes
             SAXParser parser = factory.newSAXParser();

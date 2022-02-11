@@ -225,7 +225,7 @@ public class ContentTypeTest extends NodeTest {
     @Override
     public boolean isAtomizable(TypeHierarchy th) {
         return !(schemaType.isComplexType() &&
-                ((ComplexType) schemaType).getVariety() == ComplexType.VARIETY_ELEMENT_ONLY);
+                ((ComplexType) schemaType).getVariety() == ComplexVariety.ELEMENT_ONLY);
     }
 
     public String toString() {
@@ -245,7 +245,7 @@ public class ContentTypeTest extends NodeTest {
     @Override
     public String toExportString() {
         return (kind == Type.ELEMENT ? "element(*, " : "attribute(*, ") +
-                schemaType.getNearestNamedType().getEQName() + ')';
+                TypeHierarchy.getNearestNamedType(schemaType).getEQName() + ')';
     }
 
     /**

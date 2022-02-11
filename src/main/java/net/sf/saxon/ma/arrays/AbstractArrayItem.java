@@ -27,7 +27,9 @@ import java.util.List;
 /**
  * An abstract implementation of XDM array items, containing methods that can be implemented generically.
  */
-public abstract class AbstractArrayItem implements ArrayItem {
+public abstract class AbstractArrayItem extends ArrayItem {
+
+    // TODO: ArrayItem is itself now an a abstract class, can this be merged?
 
     private SequenceType memberType = null; // computed on demand
 
@@ -39,26 +41,6 @@ public abstract class AbstractArrayItem implements ArrayItem {
     @Override
     public OperandRole[] getOperandRoles() {
         return new OperandRole[]{OperandRole.SINGLE_ATOMIC};
-    }
-
-    /**
-     * Ask whether this function item is an array
-     *
-     * @return true (it is an array)
-     */
-    @Override
-    public boolean isArray() {
-        return true;
-    }
-
-    /**
-     * Ask whether this function item is a map
-     *
-     * @return false (it is not a map)
-     */
-    @Override
-    public boolean isMap() {
-        return false;
     }
 
     /**

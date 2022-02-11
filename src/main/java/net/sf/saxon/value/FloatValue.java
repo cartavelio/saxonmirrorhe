@@ -10,6 +10,7 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
@@ -384,14 +385,46 @@ public final class FloatValue extends NumericValue {
 
     /**
      * Get an object that implements XML Schema comparison semantics
+     * @return
      */
 
     @Override
-    public Comparable getSchemaComparable() {
+    public SchemaComparable getSchemaComparable() {
         // Convert negative to positive zero because Float.compareTo() does the wrong thing
         // Note that for NaN, we return NaN, and rely on the user of the Comparable to use it in a way
         // that ensures NaN != NaN.
-        return value == 0.0f ? 0.0f : value;
+        return new FloatComparable(value == 0.0f ? 0.0f : value);
+    }
+
+    /**
+     * A Comparable that performs comparison of xs:double values either with other
+     * BigInteger values or with other representations of XPath numeric values
+     */
+
+    protected static class FloatComparable implements SchemaComparable {
+
+        protected float value;
+
+        public FloatComparable(float value) {
+            this.value = value;
+        }
+
+        @Override
+        public int compareTo(SchemaComparable o) {
+            if (o instanceof FloatComparable) {
+                return Double.compare(value, ((FloatComparable) o).value);
+            } else {
+                return SequenceTool.INDETERMINATE_ORDERING;
+            }
+        }
+
+        public boolean equals(/*@NotNull*/ Object o) {
+            return o instanceof SchemaComparable && compareTo((SchemaComparable) o) == 0;
+        }
+
+        public int hashCode() {
+            return Float.hashCode(value);
+        }
     }
 
     /**

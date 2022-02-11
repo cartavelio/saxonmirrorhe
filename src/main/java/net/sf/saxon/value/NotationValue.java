@@ -138,28 +138,34 @@ public final class NotationValue extends QualifiedNameValue {
 
     /*@NotNull*/
     @Override
-    public Comparable getSchemaComparable() {
-        return new NotationComparable();
+    public SchemaComparable getSchemaComparable() {
+        return new NotationComparable(this);
     }
 
-    private class NotationComparable implements Comparable {
+    private static class NotationComparable implements SchemaComparable {
+
+        private final NotationValue value;
+        public NotationComparable(NotationValue value) {
+            this.value = value;
+        }
 
         /*@NotNull*/
         public NotationValue getNotationValue() {
-            return NotationValue.this;
+            return value;
         }
 
         @Override
-        public int compareTo(/*@NotNull*/ Object o) {
+        public int compareTo(SchemaComparable o) {
             return equals(o) ? 0 : SequenceTool.INDETERMINATE_ORDERING;
         }
 
         public boolean equals(/*@NotNull*/ Object o) {
-            return (o instanceof NotationComparable && qName.equals(((NotationComparable) o).getNotationValue().qName));
+            return (o instanceof NotationComparable
+                            && value.qName.equals(((NotationComparable) o).getNotationValue().qName));
         }
 
         public int hashCode() {
-            return qName.hashCode();
+            return value.qName.hashCode();
         }
     }
 

@@ -22,23 +22,23 @@ final class FollowingEnumeration extends TreeEnumeration {
         // skip the descendant nodes if any
         int type = node.getNodeKind();
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
-            next = node.getParent().getNextInDocument(root);
+            nextNode = node.getParent().getNextInDocument(root);
         } else {
             do {
-                next = node.getNextSibling();
-                if (next == null) {
+                nextNode = node.getNextSibling();
+                if (nextNode == null) {
                     node = node.getParent();
                 }
-            } while (next == null && node != null);
+            } while (nextNode == null && node != null);
         }
-        while (!conforms(next)) {
+        while (!conforms(nextNode)) {
             step();
         }
     }
 
     @Override
     protected void step() {
-        next = next.getNextInDocument(root);
+        nextNode = nextNode.getNextInDocument(root);
     }
 
 }

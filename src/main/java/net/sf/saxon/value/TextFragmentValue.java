@@ -557,7 +557,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
     /*@Nullable*/
     private TextFragmentTextNode getTextNode() {
         if (textNode == null) {
-            textNode = new TextFragmentTextNode();
+            textNode = new TextFragmentTextNode(this);
         }
         return textNode;
     }
@@ -566,7 +566,12 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
      * Inner class representing the text node; this is created on demand
      */
 
-    private class TextFragmentTextNode implements NodeInfo, SourceLocator {
+    private static class TextFragmentTextNode implements NodeInfo, SourceLocator {
+
+        private final TextFragmentValue fragment;
+        public TextFragmentTextNode(TextFragmentValue fragment) {
+            this.fragment = fragment;
+        }
 
         /**
          * Ask whether this NodeInfo implementation holds a fingerprint identifying the name of the
@@ -592,7 +597,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          */
         @Override
         public TreeInfo getTreeInfo() {
-            return treeInfo;
+            return fragment.treeInfo;
         }
 
         /**
@@ -621,7 +626,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
         @Override
         public UnicodeString getUnicodeStringValue() {
-            return text;
+            return fragment.text;
         }
 
         /**
@@ -642,7 +647,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
         @Override
         public void generateId(/*@NotNull*/ StringBuilder buffer) {
             buffer.append("tt");
-            buffer.append(Long.toString(treeInfo.getDocumentNumber()));
+            buffer.append(fragment.treeInfo.getDocumentNumber());
             buffer.append("t1");
         }
 
@@ -663,7 +668,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
         @Override
         public String getBaseURI() {
-            return baseURI;
+            return fragment.baseURI;
         }
 
         /**
@@ -849,7 +854,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
         /*@NotNull*/
         @Override
         public AtomicSequence atomize() throws XPathException {
-            return new UntypedAtomicValue(text);
+            return new UntypedAtomicValue(fragment.text);
         }
 
         /**
@@ -866,10 +871,10 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
                 case AxisInfo.ANCESTOR:
                 case AxisInfo.PARENT:
                 case AxisInfo.PRECEDING_OR_ANCESTOR:
-                    return SingleNodeIterator.makeIterator(TextFragmentValue.this);
+                    return SingleNodeIterator.makeIterator(fragment);
 
                 case AxisInfo.ANCESTOR_OR_SELF:
-                    NodeInfo[] nodes = {this, TextFragmentValue.this};
+                    NodeInfo[] nodes = {this, fragment};
                     return new ArrayIterator.OfNodes(nodes);
 
                 case AxisInfo.ATTRIBUTE:
@@ -907,16 +912,16 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
                 case AxisInfo.ANCESTOR:
                 case AxisInfo.PARENT:
                 case AxisInfo.PRECEDING_OR_ANCESTOR:
-                    return Navigator.filteredSingleton(TextFragmentValue.this, nodeTest);
+                    return Navigator.filteredSingleton(fragment, nodeTest);
 
                 case AxisInfo.ANCESTOR_OR_SELF:
-                    boolean matchesDoc = nodeTest.test(TextFragmentValue.this);
+                    boolean matchesDoc = nodeTest.test(fragment);
                     boolean matchesText = nodeTest.test(this);
                     if (matchesDoc && matchesText) {
-                        NodeInfo[] nodes = {this, TextFragmentValue.this};
+                        NodeInfo[] nodes = {this, fragment};
                         return new ArrayIterator.OfNodes(nodes);
                     } else if (matchesDoc /* && !matchesText */) {
-                        return SingleNodeIterator.makeIterator(TextFragmentValue.this);
+                        return SingleNodeIterator.makeIterator(fragment);
                     } else if (matchesText /* && !matchesDoc */) {
                         return SingleNodeIterator.makeIterator(this);
                     } else {
@@ -951,7 +956,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
         /*@NotNull*/
         @Override
         public NodeInfo getParent() {
-            return TextFragmentValue.this;
+            return fragment;
         }
 
         /**
@@ -963,7 +968,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
         /*@NotNull*/
         @Override
         public NodeInfo getRoot() {
-            return TextFragmentValue.this;
+            return fragment;
         }
 
         /**
@@ -973,7 +978,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
         @Override
         public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId)
                 throws XPathException {
-            out.characters(text, locationId, ReceiverOption.NONE);
+            out.characters(fragment.text, locationId, ReceiverOption.NONE);
         }
     }
 

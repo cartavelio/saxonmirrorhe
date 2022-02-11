@@ -9,6 +9,7 @@ package net.sf.saxon.dom;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.type.AnyType;
+import net.sf.saxon.type.Derivation;
 import net.sf.saxon.type.SchemaType;
 import org.w3c.dom.TypeInfo;
 
@@ -60,8 +61,8 @@ public class TypeInfoImpl implements TypeInfo {
      *
      * @param typeNamespaceArg the namespace of the "other" type
      * @param typeNameArg      the local name of the "other" type
-     * @param derivationMethod the derivation method: zero or more of {@link SchemaType#DERIVATION_RESTRICTION},
-     *                         {@link SchemaType#DERIVATION_EXTENSION}, {@link SchemaType#DERIVATION_LIST}, or {@link SchemaType#DERIVATION_UNION}.
+     * @param derivationMethod the derivation method: zero or more of {@link Derivation#DERIVATION_RESTRICTION},
+     *                         {@link Derivatiion#DERIVATION_EXTENSION}, {@link Derivation#DERIVATION_LIST}, or {@link Derivation#DERIVATION_UNION}.
      *                         Zero means derived by any possible route.
      */
 

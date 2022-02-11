@@ -12,12 +12,10 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.jiter.PairIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.value.Cardinality;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -51,13 +49,7 @@ public abstract class BinaryExpression extends Expression {
 
     @Override
     final public Iterable<Operand> operands() {
-        // For .NEU - don't use a lambda expression here
-        return new Iterable<Operand>() {
-            @Override
-            public Iterator<Operand> iterator() {
-                return new PairIterator<>(lhs, rhs);
-            }
-        };
+        return operandList(lhs, rhs);
     }
 
 
