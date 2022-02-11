@@ -16,6 +16,7 @@ import net.sf.saxon.lib.InvalidityHandler;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaType;
 
 import javax.xml.transform.ErrorListener;
@@ -41,6 +42,7 @@ import javax.xml.transform.Source;
  * only the subset of the PSVI properties featured in the XDM data model.</p>
  */
 
+@CSharpModifiers(code = {"abstract", "internal"})
 public abstract class SchemaValidator extends AbstractDestination {
 
     /**

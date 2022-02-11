@@ -21,6 +21,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.push.Push;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.SequenceType;
 
@@ -43,6 +44,7 @@ import java.util.Objects;
  * compile the query or stylesheet.</p>
  */
 
+@CSharpModifiers(code={"internal"})
 public class Processor implements Configuration.ApiProvider {
 
     private Configuration config;
@@ -422,8 +424,8 @@ public class Processor implements Configuration.ApiProvider {
      */
 
     @CSharpReplaceBody(code=""
-            + "    if ((feature.code==net.sf.saxon.lib.FeatureCode.CONFIGURATION)) {"
-            + "        config = (net.sf.saxon.Configuration)(object)value;"
+            + "    if ((feature.code==Saxon.Hej.lib.FeatureCode.CONFIGURATION)) {"
+            + "        config = (Saxon.Hej.Configuration)(object)value;"
             + "    } else {\n"
             + "        config.setConfigurationProperty(feature, value);"
             + "    }")
@@ -474,7 +476,7 @@ public class Processor implements Configuration.ApiProvider {
         config.registerCollation(uri, saxonCollation);
     }
 
-    @CSharpReplaceBody(code="return new net.sf.saxon.expr.sort.SimpleCollation(uri, collation);")
+    @CSharpReplaceBody(code="return new Saxon.Hej.expr.sort.SimpleCollation(uri, collation);")
     private static StringCollator makeStringCollator(String uri, Comparator<? super String> collation) {
         if (collation instanceof RuleBasedCollator) {
             return new RuleBasedSubstringMatcher(uri, (RuleBasedCollator) collation);

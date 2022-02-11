@@ -24,6 +24,7 @@ import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.TypeHierarchy;
 
@@ -56,6 +57,7 @@ import java.util.Set;
  * query (the global context item) will therefore always be a single document node. This will always be built
  * as a tree in memory, it will never be streamed.</p>
  */
+@CSharpModifiers(code = {"internal"})
 public class XQueryEvaluator extends AbstractDestination implements Iterable<XdmItem> {
 
     private final Processor processor;

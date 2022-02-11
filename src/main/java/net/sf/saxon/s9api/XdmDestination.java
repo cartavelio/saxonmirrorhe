@@ -11,6 +11,7 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import java.net.URI;
 
@@ -35,6 +36,7 @@ import java.net.URI;
  * use a {@link RawDestination}.
  */
 
+@CSharpModifiers(code = {"internal"})
 public class XdmDestination extends AbstractDestination {
 
     TreeModel treeModel = TreeModel.TINY_TREE;

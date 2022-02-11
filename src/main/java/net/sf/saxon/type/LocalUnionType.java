@@ -326,7 +326,7 @@ public class LocalUnionType implements PlainType, UnionType {
      *         in its transitive membership, in declaration order
      */
     @Override
-    @CSharpReplaceBody(code="return new System.Collections.Generic.List<net.sf.saxon.type.PlainType>(memberTypes);")
+    @CSharpReplaceBody(code="return new System.Collections.Generic.List<Saxon.Hej.type.PlainType>(memberTypes);")
     public List<? extends PlainType> getPlainMemberTypes()  {
         return memberTypes;
     }

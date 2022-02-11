@@ -70,7 +70,7 @@ public class ShallowSkipRuleSet implements BuiltInRuleSet {
                     while (tc != null) {
                         tc = tc.processLeavingTail();
                     }
-                    CSharp.emitCode("goto case net.sf.saxon.type.Type.DOCUMENT;");
+                    CSharp.emitCode("goto case Saxon.Hej.type.Type.DOCUMENT;");
                 }   // fall through!
                 case Type.DOCUMENT: {
                     XPathContextMajor c2 = context.newContext();

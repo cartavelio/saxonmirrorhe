@@ -89,6 +89,7 @@ import java.util.Objects;
  *
  * @since 9.6
  */
+@CSharpModifiers(code = {"internal"})
 public class Xslt30Transformer extends AbstractXsltTransformer {
 
     private GlobalParameterSet globalParameterSet;
@@ -649,7 +650,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * @since 9.9
      */
 
-    @CSharpInnerClass(outer=true, extra={"net.sf.saxon.s9api.Destination finalDestination"})
+    @CSharpInnerClass(outer=true, extra={"Saxon.Hej.s9api.Destination finalDestination"})
     public Destination asDocumentDestination(Destination finalDestination) {
         return new AbstractDestination() {
 

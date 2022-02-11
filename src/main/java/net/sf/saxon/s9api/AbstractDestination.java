@@ -7,14 +7,18 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.transpile.CSharpModifiers;
+
 import java.net.URI;
 import java.util.function.Consumer;
 
 /**
  * An abstract class providing reusable code for implementing the {@link Destination} interface}
  */
+
 abstract public class AbstractDestination implements Destination {
 
+    @CSharpModifiers(code = {"internal"})
     protected DestinationHelper helper;
     private URI baseURI;
 

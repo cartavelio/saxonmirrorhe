@@ -28,7 +28,7 @@ import net.sf.saxon.transpile.CSharpInjectMembers;
  */
 
 @CSharpInjectMembers(code = {
-        "public MappingIterator(net.sf.saxon.om.SequenceIterator first, net.sf.saxon.expr.SequenceMapper.Lambda action) : this(first, net.sf.saxon.expr.SequenceMapper.of(action)) {}",
+        "public MappingIterator(Saxon.Hej.om.SequenceIterator first, Saxon.Hej.expr.SequenceMapper.Lambda action) : this(first, Saxon.Hej.expr.SequenceMapper.of(action)) {}",
 })
 public class MappingIterator implements SequenceIterator {
 

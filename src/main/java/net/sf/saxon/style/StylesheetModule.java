@@ -143,7 +143,7 @@ public class StylesheetModule {
         return options;
     }
 
-    @CSharpReplaceBody(code="net.sf.saxon.@event.Sender.send(styleSource, sourcePipeline, options);")
+    @CSharpReplaceBody(code="Saxon.Hej.@event.Sender.send(styleSource, sourcePipeline, options);")
     private static void sendStylesheetSource(Source styleSource, Configuration config, Receiver sourcePipeline, ParseOptions options) throws XPathException {
         boolean knownParser =
                 options.getXMLReader() != null ||

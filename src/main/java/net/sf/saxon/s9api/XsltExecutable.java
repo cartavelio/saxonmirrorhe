@@ -15,6 +15,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.SequenceType;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.util.Map;
  * <p>An XsltExecutable is created by using one of the <code>compile</code> methods on the
  * {@link XsltCompiler} class.</p>
  */
+@CSharpModifiers(code = {"internal"})
 public class XsltExecutable {
 
     Processor processor;

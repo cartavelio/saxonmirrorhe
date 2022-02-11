@@ -19,6 +19,7 @@ import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -60,6 +61,7 @@ import java.util.Properties;
  * is called, but these are not stored within the {@code Serializer} itself.</i></p>
  */
 @SuppressWarnings({"ForeachStatement"})
+@CSharpModifiers(code = {"internal"})
 public class Serializer extends AbstractDestination {
 
     private Processor processor; // never null

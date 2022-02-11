@@ -11,6 +11,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.Map;
@@ -30,6 +31,7 @@ import java.util.stream.Stream;
  * additional subclasses.</p>
  */
 
+@CSharpModifiers(code = {"abstract", "internal"})
 public abstract class XdmItem extends XdmValue {
 
     // internal protected constructor

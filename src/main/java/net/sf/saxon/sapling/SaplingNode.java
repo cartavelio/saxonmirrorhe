@@ -66,7 +66,7 @@ import javax.xml.transform.Source;
 
 public abstract class SaplingNode {
 
-    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableList<net.sf.saxon.sapling.SaplingNode>.Empty;")
+    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableList<Saxon.Hej.sapling.SaplingNode>.Empty;")
     protected ImmutableList<SaplingNode> emptyNodeList() {
         return ImmutableList.empty();
     }

@@ -29,7 +29,7 @@ import javax.xml.transform.URIResolver;
  * information into its own internal representation.
  */
 //@CSharpInjectMembers(code = {
-//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//        "    public void setErrorReporter(System.Action<Saxon.Hej.s9api.XmlProcessingError> reporter) {"
 //                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
 //                + "    }"
 //})

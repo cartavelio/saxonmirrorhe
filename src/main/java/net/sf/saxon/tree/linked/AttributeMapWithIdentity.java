@@ -29,13 +29,9 @@ import java.util.stream.Collectors;
  */
 
 @CSharpInjectMembers(code={
-                  "        public java.util.Iterator<net.sf.saxon.om.AttributeInfo> iterator() {"
-                + "            return new Saxon.Impl.Helpers.IteratorFromEnumerator<net.sf.saxon.om.AttributeInfo>(GetEnumerator());\n"
-                + "        }"
-                + "        "
-                + "        public System.Collections.Generic.IEnumerator<net.sf.saxon.om.AttributeInfo> GetEnumerator() {"
-                + "            foreach (net.sf.saxon.om.AttributeInfo att in attributes) {"
-                + "                if (!(att is net.sf.saxon.om.AttributeInfo.Deleted)) {"
+                  "        public System.Collections.Generic.IEnumerator<Saxon.Hej.om.AttributeInfo> GetEnumerator() {"
+                + "            foreach (Saxon.Hej.om.AttributeInfo att in attributes) {"
+                + "                if (att is not Saxon.Hej.om.AttributeInfo.Deleted) {"
                 + "                    yield return att;"
                 + "                }"
                 + "            }"

@@ -62,7 +62,7 @@ public class WhitespaceStrippingPolicy {
      *                    text node children of the element are to be stripped, false if they are to be retained.
      */
 
-    @CSharpInnerClass(outer=false, extra="System.Predicate<net.sf.saxon.s9api.QName> elementTest")
+    @CSharpInnerClass(outer=false, extra="System.Predicate<Saxon.Hej.s9api.QName> elementTest")
     public static WhitespaceStrippingPolicy makeCustomPolicy(final Predicate<QName> elementTest) {
         SpaceStrippingRule rule = new SpaceStrippingRule() {
             @Override

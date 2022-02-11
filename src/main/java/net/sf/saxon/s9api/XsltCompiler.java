@@ -25,6 +25,7 @@ import net.sf.saxon.trans.packages.IPackageLoader;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.VersionedPackageName;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.ElementImpl;
@@ -67,11 +68,8 @@ import java.util.Objects;
  * @since 9.0
  */
 
-//@CSharpInjectMembers(code = {
-//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-//                + "    }"
-//})
+
+@CSharpModifiers(code = {"internal"})
 public class XsltCompiler {
 
     private final Processor processor;

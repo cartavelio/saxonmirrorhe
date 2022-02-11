@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.TypeHierarchy;
 
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
  * The class XdmFunctionItem represents a function item
  */
 
+@CSharpModifiers(code = {"internal"})
 public class XdmFunctionItem extends XdmItem {
 
     protected XdmFunctionItem() {}

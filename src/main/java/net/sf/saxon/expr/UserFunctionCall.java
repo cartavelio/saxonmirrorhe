@@ -240,7 +240,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     // appending to the sequence.
                     argumentEvaluators[i] = Evaluator.SharedAppend.INSTANCE;
                 } else {
-                    argumentEvaluators[i] = Evaluator.MemoClosure.INSTANCE;
+                    argumentEvaluators[i] = Evaluator.MemoClosureEvaluator.INSTANCE;
                 }
             }
             i++;

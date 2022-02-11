@@ -316,7 +316,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
         return true;
     }
 
-    @CSharpReplaceMethod(code="    private void checkItemType<T>(net.sf.saxon.type.ItemType type, java.util.function.Supplier<T> itemSupplier, net.sf.saxon.s9api.Location locationId) where T : net.sf.saxon.om.Item {"
+    @CSharpReplaceMethod(code="    private void checkItemType<T>(Saxon.Hej.type.ItemType type, Saxon.Ejava.util.function.Supplier<T> itemSupplier, Saxon.Hej.s9api.Location locationId) where T : Saxon.Hej.om.Item {"
             + "        if (!(typeHierarchy.isSubType(type, itemType))) {"
             + "            throwTypeError(type, itemSupplier(), locationId);"
             + "        }"

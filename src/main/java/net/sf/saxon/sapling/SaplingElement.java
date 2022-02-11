@@ -61,7 +61,7 @@ public class SaplingElement extends SaplingNode {
     private ImmutableMap<StructuredQName, String> attributes = emptyAttributes();
     private NamespaceMap namespaces = NamespaceMap.emptyMap();
 
-    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary<net.sf.saxon.om.StructuredQName, string>.Empty;")
+    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.om.StructuredQName, string>.Empty;")
     private static ImmutableMap<StructuredQName, String> emptyAttributes() {
         return ImmutableHashTrieMap.empty();
     }

@@ -340,7 +340,7 @@ public class StringValue extends AtomicValue {
     }
 
     @Override
-    @CSharpInnerClass(outer=true, extra={"net.sf.saxon.lib.StringCollator collator"})
+    @CSharpInnerClass(outer=true, extra={"Saxon.Hej.lib.StringCollator collator"})
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
         return new XPathComparable() {
             @Override

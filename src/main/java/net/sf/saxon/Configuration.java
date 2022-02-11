@@ -115,7 +115,7 @@ import java.util.function.Predicate;
  */
 
 //@CSharpInjectMembers(code = {
-//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//        "    public void setErrorReporter(System.Action<Saxon.Hej.s9api.XmlProcessingError> reporter) {"
 //                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
 //                + "    }"
 //})
@@ -320,7 +320,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws IllegalAccessException if the class is not accessible
      */
 
-    @CSharpReplaceBody(code="return new com.saxonica.config.EnterpriseConfiguration();")
+    @CSharpReplaceBody(code="return new Saxon.Eej.config.EnterpriseConfiguration();")
     public static Configuration instantiateConfiguration(String className, ClassLoader classLoader) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         Class theClass;
         ClassLoader loader = classLoader;
@@ -3987,7 +3987,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /*@Nullable*/
     @Override
-    @CSharpInnerClass(outer=true, extra={"javax.xml.transform.Source source", "net.sf.saxon.Configuration config"})
+    @CSharpInnerClass(outer=true, extra={"Saxon.Ejavax.xml.transform.Source source", "Saxon.Hej.Configuration config"})
     public ActiveSource resolveSource(Source source, Configuration config) throws XPathException {
         if (source instanceof ActiveSource) {
             return (ActiveSource) source;
