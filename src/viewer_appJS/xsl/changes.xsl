@@ -110,31 +110,57 @@
         <xsl:choose>
             <xsl:when test="$orderedReleases/ch:category[(@name, 'all') = $catName]">             
                 <xsl:for-each select="$orderedReleases">
-                    <h3>Changes <xsl:if test="following-sibling::*">from <xsl:value-of
-                        select="following-sibling::*[1]/@number"/></xsl:if> to <xsl:value-of
-                            select="@number"/></h3>
-                    <xsl:apply-templates select="ch:head"/>
-                    <xsl:choose>
-                        <xsl:when test="'all' = $catName">
-                            <!-- Work from ch:changes/ch:categories/ch:cat to ensure categories
+                    <div class="{@number}">
+                        <h3>Changes <xsl:if test="following-sibling::*">from <xsl:value-of
+                            select="following-sibling::*[1]/@number"/></xsl:if> to <xsl:value-of
+                                select="@number"/></h3>
+                        <xsl:apply-templates select="ch:head"/>
+                        <div class="platform-ch"></div>
+                        <xsl:choose>
+                            <xsl:when test="'all' = $catName">
+                                <!-- Work from ch:changes/ch:categories/ch:cat to ensure categories
                                 appear in the same order (rather than document order which may be
                                 different) -->
-                            <xsl:variable name="release" select="."/>
-                            <xsl:for-each select="$cats">
-                                <xsl:variable name="catNm" select="@name"/>
-                                <xsl:if test="$release/ch:category[@name = $catNm]/*">
-                                    <h3 class="subtitle"><xsl:value-of select="@title"/></h3>
-                                    <xsl:apply-templates select="$release/ch:category[@name = $catNm]/*"/>
-                                </xsl:if>
-                            </xsl:for-each>
-                        </xsl:when>
-                        <xsl:when test="./ch:category[@name = $catName]/*">
-                            <xsl:apply-templates select="./ch:category[@name = $catName]/*"/>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <p>(None.)</p>
-                        </xsl:otherwise>
-                    </xsl:choose>
+                                <xsl:variable name="release" select="."/>
+                                <div class="changeContent">
+                                    <xsl:for-each select="$cats">
+                                        <xsl:variable name="catNm" select="@name"/>
+                                        <xsl:if test="$release/ch:category[@name = $catNm]/*">
+                                            <xsl:choose>
+                                                <xsl:when test="$release/ch:category[@name = $catNm]/@class">
+                                                    <div class="{$release/ch:category[@name = $catNm]/@class}">
+                                                        <h3 class="subtitle"><xsl:value-of select="@title"/></h3>
+                                                        <xsl:apply-templates select="$release/ch:category[@name = $catNm]/*"/>
+                                                    </div>
+                                                </xsl:when>
+                                                <xsl:otherwise>
+                                                    <h3 class="subtitle"><xsl:value-of select="@title"/></h3>
+                                                    <xsl:apply-templates select="$release/ch:category[@name = $catNm]/*"/>
+                                                </xsl:otherwise>
+                                            </xsl:choose>
+                                        </xsl:if>
+                                    </xsl:for-each>
+                                </div>
+                            </xsl:when>
+                            <xsl:when test="./ch:category[@name = $catName]/*">
+                                <div class="changeContent">
+                                    <xsl:choose>
+                                        <xsl:when test="./ch:category[@name = $catName]/@class">
+                                            <div class="{./ch:category[@name = $catName]/@class}">
+                                                <xsl:apply-templates select="./ch:category[@name = $catName]/*"/>
+                                            </div>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:apply-templates select="./ch:category[@name = $catName]/*"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </div>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <p>(None.)</p>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </div>
                 </xsl:for-each> 
             </xsl:when>
             <xsl:otherwise>
