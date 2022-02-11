@@ -15,6 +15,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.SameNameTest;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.transpile.CSharp;
@@ -212,6 +213,8 @@ public class DeepEqual extends CollatingFunctionFixed {
                 }
             } // end while
 
+        } catch (UncheckedXPathException uxe) {
+            throw uxe.getXPathException();
         } catch (ClassCastException err) {
             // this will happen if the sequences contain non-comparable values
             // comparison errors are masked
