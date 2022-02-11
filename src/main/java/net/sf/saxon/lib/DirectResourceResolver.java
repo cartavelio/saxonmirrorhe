@@ -10,14 +10,18 @@ package net.sf.saxon.lib;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.event.IDFilter;
+import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * A <code>DirectResourceResolver</code> is a {@link ResourceResolver} that resolves requests
@@ -75,15 +79,39 @@ public class DirectResourceResolver implements ResourceResolver {
         }
 
         Source ss;
-        //#if CSHARP==false
+
         if (ResourceRequest.XSLT_NATURE.equals(request.nature)) {
-            ss = new SAXSource(config.getStyleParser(), new InputSource(request.uri));
+            InputStream stream;
+            try {
+                stream = ResourceLoader.urlStream(new URL(request.uri));
+            } catch (IOException e) {
+                stream = null; // Carry on, the XML parser might know what to do with it.
+            }
+            InputSource is = new InputSource(request.uri);
+            is.setByteStream(stream);
+            ss = new SAXSource(config.getStyleParser(), is);
+            if (stream != null) {
+                // We created the stream, so we must close it after use
+                ss = AugmentedSource.makeAugmentedSource(ss);
+                ((AugmentedSource) ss).setPleaseCloseAfterUse(true);
+            }
+        } else if (ResourceRequest.XML_NATURE.equals(request.nature) || ResourceRequest.XSD_NATURE.equals(request.nature)) {
+            InputStream stream;
+            try {
+                stream = ResourceLoader.urlStream(new URL(request.uri));
+            } catch (IOException e) {
+                stream = null; // Carry on, the XML parser might know what to do with it.
+            }
+            ss = new StreamSource(stream, request.uri);
+            if (stream != null) {
+                // We created the stream, so we must close it after use
+                ss = AugmentedSource.makeAugmentedSource(ss);
+                ((AugmentedSource) ss).setPleaseCloseAfterUse(true);
+            }
         } else {
-            //#endif
             ss = new StreamSource(request.uri);
-            //#if CSHARP==false
         }
-        //#endif
+
 
         if (id != null) {
             final String idFinal = id;
@@ -95,5 +123,7 @@ public class DirectResourceResolver implements ResourceResolver {
         return ss;
 
     }
+
+
 }
 

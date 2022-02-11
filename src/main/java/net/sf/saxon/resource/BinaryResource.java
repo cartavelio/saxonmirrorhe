@@ -250,7 +250,7 @@ public class BinaryResource implements Resource {
             return new Base64BinaryValue(data);
         } else {
             try {
-                connection = Loader.urlConnection(new URI(href).toURL());
+                connection = ResourceLoader.urlConnection(new URI(href).toURL());
                 data = readBinaryFromConn(connection);
                 return new Base64BinaryValue(data);
             } catch (URISyntaxException | IOException e) {
