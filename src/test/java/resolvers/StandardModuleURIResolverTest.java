@@ -29,13 +29,16 @@ public class StandardModuleURIResolverTest {
     public void noConfigurationOk() {
         StandardModuleURIResolver resolver = new StandardModuleURIResolver();
 
-        // Should work without a configuration
+        // Shouldn't work without a configuration
         try {
             String namespace = "http://irrelevant/";
             String[] loc = new String[] { "src/test/testdata/resolvers/module.xqy" };
             StreamSource[] source = resolver.resolve(namespace, baseURI.toString(), loc);
-            Assert.assertNotNull(source);
+            fail();
+        } catch (NullPointerException nex) {
+            // expected
         } catch (Exception ex) {
+            ex.printStackTrace();
             fail();
         }
     }
