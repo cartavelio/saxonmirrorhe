@@ -78,7 +78,10 @@ public abstract class ArrayItem implements Function {
      * @return true if and only if the size of the array is zero
      */
 
+<<<<<<< HEAD
     @CSharpModifiers(code={"public", "virtual"})
+=======
+>>>>>>> origin/main
     public boolean isEmpty() {
         return arrayLength() == 0;
     }
