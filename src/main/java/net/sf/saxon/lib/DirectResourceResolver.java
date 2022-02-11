@@ -9,6 +9,8 @@ import org.xml.sax.InputSource;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class DirectResourceResolver implements ResourceResolver {
 
@@ -28,7 +30,23 @@ public class DirectResourceResolver implements ResourceResolver {
      */
     @Override
     public Source resolve(ResourceRequest request) throws XPathException {
+
+        ProtocolRestrictor restrictor = config.getProtocolRestrictor();
+        if (!"all".equals(restrictor.toString())) {
+            try {
+                URI u = new URI(request.uri);
+                if (!restrictor.test(u)) {
+                    throw new XPathException("URIs using protocol " + u.getScheme() + " are not permitted");
+                }
+            } catch (URISyntaxException err) {
+                throw new XPathException("Unknown URI scheme requested " + request.uri);
+            }
+        }
+
         String relativeURI = request.relativeUri;
+        if (relativeURI == null) {
+            relativeURI = request.uri;
+        }
         String id = null;
 
         // Extract any fragment identifier. Note, this code is no longer used to

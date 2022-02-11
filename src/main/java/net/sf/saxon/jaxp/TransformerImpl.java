@@ -8,6 +8,7 @@
 package net.sf.saxon.jaxp;
 
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.lib.ResourceResolverWrappingURIResolver;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
@@ -106,7 +107,9 @@ public class TransformerImpl extends AbstractTransformerImpl {
     @Override
     public void setURIResolver(URIResolver resolver) {
         super.setURIResolver(resolver);
-        xsltTransformer.setURIResolver(resolver);
+        if (resolver != null) {
+            xsltTransformer.setResourceResolver(new ResourceResolverWrappingURIResolver(resolver));
+        }
     }
 
 

@@ -5,12 +5,14 @@ import net.sf.saxon.trans.XPathException;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
+import java.util.Objects;
 
 public class ResourceResolverWrappingURIResolver implements ResourceResolver {
 
     private final URIResolver uriResolver;
 
     public ResourceResolverWrappingURIResolver(URIResolver uriResolver) {
+        Objects.requireNonNull(uriResolver);
         this.uriResolver = uriResolver;
     }
 

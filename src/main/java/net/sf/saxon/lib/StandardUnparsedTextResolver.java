@@ -8,16 +8,16 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.resource.*;
+import net.sf.saxon.resource.EncodingDetector;
+import net.sf.saxon.resource.TypedStreamSource;
 import net.sf.saxon.trans.XPathException;
 
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.*;
-import java.util.zip.GZIPInputStream;
 
 /**
  * Default implementation of the UnparsedTextURIResolver, used if no other implementation
@@ -75,154 +75,94 @@ public class StandardUnparsedTextResolver
             throw new XPathException("Resolved URI supplied to unparsed-text() is not absolute: " + absoluteURI.toString(),
                     "FOUT1170");
         }
-//        if (!config.getAllowedUriTest().test(absoluteURI)) {
-//            throw new XPathException("URI scheme '" + absoluteURI.getScheme() + "' has been disallowed");
-//        }
 
-        // Do this early in case it returns a data: or classpath: URI.
-        //TODO reinstate me
-//        try {
-////            Source resolved = config.getResourceResolver().resolve(absoluteURI.toString(), null);
-////            if (resolved != null) {
-////                absoluteURI = new URI(resolved.getSystemId());
-////            }
-//        } catch (TransformerException te) {
-//            // nevermind, we'll just fall through and try the old way
-//        } catch (URISyntaxException mue) {
-//            // let this fall through too; it shouldn't be possible, but if it is,
-//            // try the old way.
-//        }
+        try {
+            ResourceRequest rr = new ResourceRequest();
+            rr.uri = absoluteURI.toString();
+            rr.nature = ResourceRequest.TEXT_NATURE;
+            rr.purpose = "fn:unparsed-text";
+            Source resolved = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+            if (resolved instanceof StreamSource) {
+                InputStream inputStream = ((StreamSource) resolved).getInputStream();
 
-        InputStream inputStream = null;
-        String contentEncoding;
-        boolean isXmlMediaType = false;
-        if (absoluteURI.getScheme().equals("data")) {
-            Resource resource;
-            try {
-                resource = DataURIScheme.decode(absoluteURI);
-            } catch (IllegalArgumentException e) {
-                throw new XPathException("Invalid URI in 'data' scheme: " + e.getMessage(), "FOUT1170");
-            }
-            if (resource instanceof BinaryResource) {
-                byte[] octets = ((BinaryResource) resource).getData();
-                inputStream = new ByteArrayInputStream(octets);
-                contentEncoding = "utf-8";
-
-            } else {
-                assert resource instanceof UnparsedTextResource;
-                return new StringReader(((UnparsedTextResource) resource).getContent());
-            }
-            if (encoding == null) {
-                encoding = contentEncoding;
-            }
-            String mediaType = resource.getContentType();
-            isXmlMediaType = (mediaType.startsWith("application/") || mediaType.startsWith("text/")) &&
-                    (mediaType.endsWith("/xml") || mediaType.endsWith("+xml"));
-        } else if (absoluteURI.getScheme().equals("classpath")) {
-            InputStream is = config.getDynamicLoader().getResourceAsStream(absoluteURI.toString().substring(10));
-            if (is != null) {
-                try {
-                    if (encoding == null) {
-                        encoding = "UTF-8";
+                if (inputStream == null) {
+                    if (((StreamSource) resolved).getReader() != null) {
+                        return ((StreamSource) resolved).getReader();
+                    } else {
+                        String systemId = resolved.getSystemId();
+                        if (systemId != null) {
+                            try {
+                                URL url = new URL(systemId);
+                                inputStream = url.openStream();
+                            } catch (IOException e) {
+                                throw new XPathException("unparsed-text(): cannot read " + systemId, e);
+                            }
+                        } else {
+                            throw new XPathException("unparsed-text(): resolver returned empty StreamSource");
+                        }
                     }
-                    return new InputStreamReader(is, encoding);
-                } catch (UnsupportedEncodingException e) {
-                    throw new AssertionError(e);
                 }
-            }
-        } else {
-            try {
-                absoluteURL = absoluteURI.toURL();
-            } catch (MalformedURLException mue) {
-                XPathException e = new XPathException("Cannot convert absolute URI "
-                                                              + absoluteURI + " to URL", mue);
-                e.setErrorCode("FOUT1170");
-                throw e;
-            }
-            try {
-                URLConnection connection = null;
-                try {
-                    connection = Loader.urlConnection(absoluteURL);
-                } catch (IOException ioe) {
-                    if (debug) {
-                        err.error("unparsed-text(): connection failure on " + absoluteURL
-                                          + ". " + ioe.getMessage());
-                    }
-                    XPathException xpe = new XPathException("Failed to read input file " + absoluteURL, ioe);
-                    xpe.setErrorCode("FOUT1170");
-                    throw xpe;
-                }
+                // The encoding of the external resource is determined as follows:
+                //
+                // * external encoding information is used if available, otherwise
+                // * if the media type of the resource is text/xml or application/xml (see [RFC 2376]),
+                //   or if it matches the conventions text/*+xml or application/*+xml (see [RFC 7303]
+                //   and/or its successors), then the encoding is recognized as specified in
+                //   [Extensible Markup Language (XML) 1.0 (Fifth Edition)], otherwise
+                // * the value of the $encoding argument is used if present, otherwise
+                // * the processor may use ·implementation-defined· heuristics to determine the likely encoding, otherwise
+                // * UTF-8 is assumed.
 
-                inputStream = connection.getInputStream();
-                contentEncoding = connection.getContentEncoding();
-
-                if ("gzip".equals(contentEncoding)) {
-                    inputStream = new GZIPInputStream(inputStream);
+                // Use the contentType from the HTTP header if available
+                String contentType = null;
+                if (resolved instanceof TypedStreamSource) {
+                    contentType = ((TypedStreamSource) resolved).getContentType();
                 }
                 if (debug) {
-                    err.info("unparsed-text(): established connection " +
-                                     ("gzip".equals(contentEncoding) ? " (zipped)" : ""));
+                    err.info("unparsed-text(): content type = " + contentType);
                 }
-
-
-                if (!inputStream.markSupported()) {
-                    inputStream = new BufferedInputStream(inputStream);
-                }
-
-                // Get any external (HTTP) encoding label.
-                isXmlMediaType = false;
-
-                // The file:// URL scheme gives no useful information...
-                if (!"file".equals(connection.getURL().getProtocol())) {
-
-                    // Use the contentType from the HTTP header if available
-                    String contentType = connection.getContentType();
+                boolean isXmlMediaType = false;
+                if (contentType != null) {
+                    String mediaType;
+                    int pos = contentType.indexOf(';');
+                    if (pos >= 0) {
+                        mediaType = contentType.substring(0, pos);
+                    } else {
+                        mediaType = contentType;
+                    }
+                    mediaType = mediaType.trim();
                     if (debug) {
-                        err.info("unparsed-text(): content type = " + contentType);
+                        err.info("unparsed-text(): media type = " + mediaType);
                     }
-                    if (contentType != null) {
-                        String mediaType;
-                        int pos = contentType.indexOf(';');
+                    isXmlMediaType = (mediaType.startsWith("application/") || mediaType.startsWith("text/")) &&
+                            (mediaType.endsWith("/xml") || mediaType.endsWith("+xml"));
+
+                    String charset = "";
+                    pos = contentType.toLowerCase().indexOf("charset");
+                    if (pos >= 0) {
+                        pos = contentType.indexOf('=', pos + 7);
                         if (pos >= 0) {
-                            mediaType = contentType.substring(0, pos);
-                        } else {
-                            mediaType = contentType;
+                            charset = contentType.substring(pos + 1);
                         }
-                        mediaType = mediaType.trim();
+                        if ((pos = charset.indexOf(';')) > 0) {
+                            charset = charset.substring(0, pos);
+                        }
+
+                        // attributes can have comment fields (RFC 822)
+                        if ((pos = charset.indexOf('(')) > 0) {
+                            charset = charset.substring(0, pos);
+                        }
+                        // ... and values may be quoted
+                        if ((pos = charset.indexOf('"')) > 0) {
+                            charset = charset.substring(pos + 1,
+                                                        charset.indexOf('"', pos + 2));
+                        }
                         if (debug) {
-                            err.info("unparsed-text(): media type = " + mediaType);
+                            err.info("unparsed-text(): charset = " + charset.trim());
                         }
-                        isXmlMediaType = (mediaType.startsWith("application/") || mediaType.startsWith("text/")) &&
-                                (mediaType.endsWith("/xml") || mediaType.endsWith("+xml"));
-
-                        String charset = "";
-                        pos = contentType.toLowerCase().indexOf("charset");
-                        if (pos >= 0) {
-                            pos = contentType.indexOf('=', pos + 7);
-                            if (pos >= 0) {
-                                charset = contentType.substring(pos + 1);
-                            }
-                            if ((pos = charset.indexOf(';')) > 0) {
-                                charset = charset.substring(0, pos);
-                            }
-
-                            // attributes can have comment fields (RFC 822)
-                            if ((pos = charset.indexOf('(')) > 0) {
-                                charset = charset.substring(0, pos);
-                            }
-                            // ... and values may be quoted
-                            if ((pos = charset.indexOf('"')) > 0) {
-                                charset = charset.substring(pos + 1,
-                                                            charset.indexOf('"', pos + 2));
-                            }
-                            if (debug) {
-                                err.info("unparsed-text(): charset = " + charset.trim());
-                            }
-                            encoding = charset.trim();
-                        }
+                        encoding = charset.trim();
                     }
                 }
-
 
                 try {
                     if (encoding == null || isXmlMediaType) {
@@ -234,23 +174,22 @@ public class StandardUnparsedTextResolver
                 } catch (IOException e) {
                     encoding = "UTF-8";
                 }
+                // The following is necessary to ensure that encoding errors are not recovered.
+                Charset charset2 = Charset.forName(encoding);
+                CharsetDecoder decoder = charset2.newDecoder()
+                        .onMalformedInput(CodingErrorAction.REPORT)
+                        .onUnmappableCharacter(CodingErrorAction.REPORT);
+                return new BufferedReader(new InputStreamReader(inputStream, decoder));
 
-            } catch (IOException ioe) {
-                throw new XPathException(ioe.getMessage(), "FOUT1170");
-            } catch (IllegalCharsetNameException icne) {
-                throw new XPathException("Invalid encoding name: " + encoding, "FOUT1190");
-            } catch (UnsupportedCharsetException uce) {
-                throw new XPathException("Invalid encoding name: " + encoding, "FOUT1190");
+            } else {
+                throw new XPathException("Resolver for unparsed-text() returned non-StreamSource");
             }
-
+//        } catch (IOException ioe) {
+//            throw new XPathException(ioe.getMessage(), "FOUT1170");
+        } catch (IllegalCharsetNameException | UnsupportedCharsetException icne) {
+            throw new XPathException("Invalid encoding name: " + encoding, "FOUT1190");
         }
 
-        // The following is necessary to ensure that encoding errors are not recovered.
-        Charset charset2 = Charset.forName(encoding);
-        CharsetDecoder decoder = charset2.newDecoder()
-                .onMalformedInput(CodingErrorAction.REPORT)
-                .onUnmappableCharacter(CodingErrorAction.REPORT);
-        return new BufferedReader(new InputStreamReader(inputStream, decoder));
 
     }
 
