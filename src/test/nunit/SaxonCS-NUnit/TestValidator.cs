@@ -340,8 +340,8 @@ namespace SaxonCS_NUnit {
 
             }
             catch (SaxonApiException err) {
+                Console.WriteLine(err.StackTrace);
                 Assert.Fail();
-                //err.printStackTrace();
             }
         }
 
