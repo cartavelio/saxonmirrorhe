@@ -91,8 +91,16 @@ public class JsonParser {
 
     }
 
+    /**
+     * Extract the requested JSON parsing options as a set of flags in a bit-significant integer
+     * @param options the supplied options map
+     * @param allowValidate true if the validate option is permitted
+     * @param isSchemaAware true if the processor is schema-aware (only relevant when allowValidate=true)
+     * @return the options as a sef of flags
+     * @throws XPathException if any options are invalid
+     */
 
-    public static int getFlags(Map<String, Sequence> options, XPathContext context, Boolean allowValidate) throws XPathException {
+    public static int getFlags(Map<String, Sequence> options, boolean allowValidate, boolean isSchemaAware) throws XPathException {
         int flags = 0;
         BooleanValue debug = (BooleanValue) options.get("debug");
         if (debug != null && debug.getBooleanValue()) {
@@ -117,7 +125,7 @@ public class JsonParser {
         if (allowValidate) {
             validate = ((BooleanValue) options.get("validate")).getBooleanValue();
             if (validate) {
-                if (!context.getController().getExecutable().isSchemaAware()) {
+                if (!isSchemaAware) {
                     error("Requiring validation on non-schema-aware processor", ERR_SCHEMA);
                 }
                 flags |= VALIDATE;

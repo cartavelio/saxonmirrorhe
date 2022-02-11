@@ -8,7 +8,6 @@
 package net.sf.saxon.resource;
 
 
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.trans.XPathException;
@@ -41,7 +40,7 @@ public class BinaryResource implements Resource {
      * ResourceFactory suitable for creating a BinaryResource
      */
 
-    public static final ResourceFactory FACTORY = (config, details) -> new BinaryResource(details);
+    public static final ResourceFactory FACTORY = (context, details) -> new BinaryResource(details);
 
     /**
      * Create a binary resource
@@ -235,7 +234,6 @@ public class BinaryResource implements Resource {
     /**
      * Get an XDM Item holding the contents of this resource.
      *
-     * @param context the XPath evaluation context
      * @return an item holding the contents of the resource. For a binary resource
      * the value will always be a {@link Base64BinaryValue}. This does not mean that the
      * content is actually encoded in Base64 internally; rather it means that when converted
@@ -244,7 +242,7 @@ public class BinaryResource implements Resource {
      */
 
     @Override
-    public Base64BinaryValue getItem(XPathContext context) throws XPathException {
+    public Base64BinaryValue getItem() throws XPathException {
         if (data != null) {
             return new Base64BinaryValue(data);
         } else if (connection != null) {

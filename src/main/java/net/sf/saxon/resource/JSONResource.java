@@ -10,9 +10,7 @@ package net.sf.saxon.resource;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
-import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.json.ParseJsonFn;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
@@ -30,33 +28,36 @@ public class JSONResource implements Resource {
     private final String href;
     private String jsonStr;
     private Item item;
+    private final XPathContext context;
     private AbstractResourceCollection.InputDetails details;
 
-    public final static ResourceFactory FACTORY = (config, details) -> new JSONResource(details);
+    public final static ResourceFactory FACTORY = (context, details) -> new JSONResource(context, details);
 
     /**
      * Create the resource
      *
+     * @param context
      * @param details the inputstream holding the JSON content plus details of encoding etc
      */
 
-    public JSONResource(AbstractResourceCollection.InputDetails details) {
+    public JSONResource(XPathContext context, AbstractResourceCollection.InputDetails details) {
         this.href = details.resourceUri;
+        this.context = context;
         if (details.encoding == null) {
             details.encoding = "UTF-8";
         }
         this.details = details;
     }
 
-    public JSONResource(String uri, MapItem map) {
-        this.item = map;
-        this.href = uri;
-    }
-
-    public JSONResource(String uri, ArrayItem array) {
-        this.item = array;
-        this.href = uri;
-    }
+//    public JSONResource(String uri, MapItem map) {
+//        this.item = map;
+//        this.href = uri;
+//    }
+//
+//    public JSONResource(String uri, ArrayItem array) {
+//        this.item = array;
+//        this.href = uri;
+//    }
 
 
     @Override
@@ -65,7 +66,7 @@ public class JSONResource implements Resource {
     }
 
     @Override
-    public Item getItem(XPathContext context) throws XPathException {
+    public Item getItem() throws XPathException {
         if (item != null) {
             return item;
         }

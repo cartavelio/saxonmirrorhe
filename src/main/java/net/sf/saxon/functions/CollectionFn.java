@@ -258,7 +258,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         // Get an iterator over the items representing the resources
         SequenceIterator result = context.getConfiguration()
                 .getMultithreadedItemMappingIterator(sourceSeq,
-                                                     ItemMapper.of(it -> ((ObjectValue<Resource>) it).getObject().getItem(context)));
+                                                     ItemMapper.of(it -> ((ObjectValue<Resource>) it).getObject().getItem()));
 
         // In XSLT, apply space-stripping to document nodes in the collection
         if (whitespaceRule != null) {

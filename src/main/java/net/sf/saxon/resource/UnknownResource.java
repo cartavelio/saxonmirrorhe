@@ -7,7 +7,6 @@
 
 package net.sf.saxon.resource;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.Resource;
@@ -29,14 +28,14 @@ import java.net.URLConnection;
 
 public class UnknownResource implements Resource {
 
-    private final Configuration config;
+    private final XPathContext context;
     private final AbstractResourceCollection.InputDetails details;
 
     @SuppressWarnings("Convert2MethodRef")  // for Java-C# conversion
-    public static final ResourceFactory FACTORY = (config, details) -> new UnknownResource(config, details);
+    public static final ResourceFactory FACTORY = (context, details) -> new UnknownResource(context, details);
 
-    public UnknownResource(Configuration config, AbstractResourceCollection.InputDetails details) {
-        this.config = config;
+    public UnknownResource(XPathContext context, AbstractResourceCollection.InputDetails details) {
+        this.context = context;
         this.details = details;
     }
 
@@ -48,13 +47,12 @@ public class UnknownResource implements Resource {
     /**
      * Get an item representing the resource: in this case a document node for the XML document.
      *
-     * @param context the XPath evaluation context
      * @return the document; or null if there is an error and the error is to be ignored
      * @throws XPathException if (for example) XML parsing fails
      */
 
     @Override
-    public Item getItem(XPathContext context) throws XPathException {
+    public Item getItem() throws XPathException {
         InputStream stream;
         if (details.binaryContent != null) {
             stream = new ByteArrayInputStream(details.binaryContent);
@@ -80,16 +78,16 @@ public class UnknownResource implements Resource {
             mediaType = null;
         }
         if (mediaType == null) {
-            mediaType = config.getMediaTypeForFileExtension("");
+            mediaType = context.getConfiguration().getMediaTypeForFileExtension("");
         }
         if (mediaType == null || mediaType.equals("application/unknown")) {
             mediaType = "application/binary";
         }
         details.contentType = mediaType;
         details.binaryContent = BinaryResource.readBinaryFromStream(stream, details.resourceUri);
-        ResourceFactory delegee = config.getResourceFactoryForMediaType(mediaType);
-        Resource actual = delegee.makeResource(config, details);
-        return actual.getItem(context);
+        ResourceFactory delegee = context.getConfiguration().getResourceFactoryForMediaType(mediaType);
+        Resource actual = delegee.makeResource(context, details);
+        return actual.getItem();
     }
 
     /**

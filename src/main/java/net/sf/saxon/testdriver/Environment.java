@@ -711,6 +711,7 @@ public class Environment implements URIResolver {
         final HashMap<String, ResourceCollection> collections = new HashMap<>();
         AbstractResourceCollection collectioni = null;
         final Configuration config = environment.processor.getUnderlyingConfiguration();
+        final XPathContext context = config.getConversionContext();
         for (XdmNode coll : env.children("collection")) { //  xpc.evaluate("collection", env)) {
             final List<Resource> resourcesi = new ArrayList<>();
 
@@ -794,9 +795,9 @@ public class Environment implements URIResolver {
                         break;
                     }
 
-                    resourcesi.add(new XmlResource(config, selected.getUnderlyingNode()));
+                    resourcesi.add(new XmlResource(context, selected.getUnderlyingNode()));
                 } else {
-                    resourcesi.add(new XmlResource(config, doc.getUnderlyingNode()));
+                    resourcesi.add(new XmlResource(context, doc.getUnderlyingNode()));
                 }
                 environment.sourceDocs.put(href, doc);
             }
@@ -824,7 +825,7 @@ public class Environment implements URIResolver {
                         File file = new File(env.getBaseURI().resolve(href));
                         details.resourceUri = file.toURI().toString();
                         try {
-                            Resource resourcej = collectioni.makeResource(config, details);
+                            Resource resourcej = collectioni.makeResource(context, details);
                             if (resourcej != null) {
                                 resourcesi.add(resourcej);
                             } else {
@@ -854,7 +855,7 @@ public class Environment implements URIResolver {
                         }
 
                         @Override
-                        public Item getItem(XPathContext context) {
+                        public Item getItem() {
                             return itemi.getUnderlyingValue();
                         }
 
@@ -871,7 +872,7 @@ public class Environment implements URIResolver {
 
         if (collections != null) {
             environment.processor.getUnderlyingConfiguration().setCollectionFinder(
-                    (context, collectionURI) -> {
+                    (cxt, collectionURI) -> {
                         if (collectionURI == null) {
                             collectionURI = "";
                         }
@@ -886,12 +887,11 @@ public class Environment implements URIResolver {
                 String uri = entry.getKey();
                 List<String> lexicalContents = new ArrayList<>();
                 ResourceCollection contents = entry.getValue();
-                XPathContext context = environment.processor.getUnderlyingConfiguration().getConversionContext();
                 try {
                     Iterator<? extends Resource> iter = contents.getResources(context);
                     while (iter.hasNext()) {
                         Resource resource = iter.next();
-                        Item item = resource.getItem(context);
+                        Item item = resource.getItem();
                         if (item instanceof NodeInfo) {
                             String lexicalXml = QueryResult.serialize((NodeInfo) item);
                             lexicalContents.add(lexicalXml);
