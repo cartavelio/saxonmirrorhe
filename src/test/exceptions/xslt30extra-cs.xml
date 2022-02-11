@@ -1,0 +1,13 @@
+<exceptions>
+  
+  <!-- Exceptions file for xslt30-extra tests with Saxon-CS -->
+  
+  <exception test-case="evaluate-010 evaluate-027" run="false" report="not-applicable">
+    <created by="Michael Kay" on="2021-08-31"/>
+    <reason>Requires Java reflexive functions</reason>
+  </exception>
+  
+ 
+
+
+</exceptions>

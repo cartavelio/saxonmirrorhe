@@ -79,19 +79,6 @@
         </result>
     </test-case>
     
-    <test-case name="decimal-divide-001">
-        <description>Basic test that the function exists and returns the right type</description>
-        <created by="Debbie Lockett" on="2015-11-10"/>
-        <modified by="Michael Kay" on="2017-05-17" change="correct expected result"/>
-        <test>saxon:decimal-divide(100, 30, 2)</test>
-        <result>
-            <all-of>
-                <assert-type>xs:decimal</assert-type>
-                <assert-string-value>3.33</assert-string-value>
-            </all-of>
-        </result>
-    </test-case>
-    
     <!-- c.f. fn:deep-equal -->
     <test-case name="deep-equal-001">
         <description>Basic test that the function exists and returns the right type</description>

@@ -558,6 +558,10 @@ namespace TestDriver {
                 if (SkipBecauseSlow(testSet)) {
                     return;
                 }
+                
+                if (exceptionsMap.ContainsKey("$" + testSet)) {
+                    return;
+                }
 
                 foreach (XdmNode testCase in testSetDocNode.Select(Steps.Descendant("test-case"))) {
                     string name = testCase.GetAttributeValue("name");

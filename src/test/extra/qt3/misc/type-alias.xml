@@ -31,7 +31,7 @@
       <test><![CDATA[
          declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
          declare namespace _ = "http://local/";
-         declare type entry = tuple(name as xs:string, value as item()*);
+         declare type entry = record(name as xs:string, value as item()*);
       	declare function _:make-map($entries as type(entry)*) as map(*) {
       	   map:merge($entries ! map{ ?name : ?value })
       	};
@@ -50,13 +50,13 @@
    </test-case>
    
    <test-case name="type-alias-003">
-      <description>Tuple types with absent field type</description>
+      <description>record types with absent field type</description>
       <created by="Michael Kay" on="2017-11-12"/>
       <environment ref="type-alias"/>
       <test><![CDATA[
          declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
          declare namespace _ = "http://local/";
-         declare type entry = tuple(name as xs:string, value as item());
+         declare type entry = record(name as xs:string, value as item());
       	declare function _:make-map($entries as type(entry)*) as map(*) {
       	   map:merge($entries ! map{ ?name : ?value })
       	};
@@ -75,14 +75,15 @@
    </test-case>
    
    <test-case name="type-alias-004">
-      <description>Fields in tuple type may be omitted if empty is allowed</description>
+      <description>Fields in record type may be omitted if empty is allowed</description>
       <created by="Michael Kay" on="2017-11-12"/>
       <modified by="Michael Kay" on="2018-08-21" change="The rules have changed"/>
+      <modified by="Michael Kay" on="2021-08-31" change="The rules have changed again"/>
       <environment ref="type-alias"/>
       <test><![CDATA[
          declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
          declare namespace _ = "http://local/";
-         declare type entry = tuple(name as xs:string, value as item()?);
+         declare type entry = record(name as xs:string, value? as item()?);
       	map{"name":"xyz"} instance of type(entry)
       ]]></test>
       <result>
@@ -91,13 +92,13 @@
    </test-case>
    
    <test-case name="type-alias-005">
-      <description>Fields in tuple type may be empty</description>
+      <description>Fields in record type may be empty</description>
       <created by="Michael Kay" on="2017-11-12"/>
       <environment ref="type-alias"/>
       <test><![CDATA[
          declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
          declare namespace _ = "http://local/";
-         declare type entry = tuple(name as xs:string, value as item()?);
+         declare type entry = record(name as xs:string, value as item()?);
       	map{"name":"xyz", "value":()} instance of type(entry)
       ]]></test>
       <result>
@@ -106,14 +107,14 @@
    </test-case>
    
    <test-case name="type-alias-006">
-      <description>Undeclared fields in tuple type may not be present, unless the type is extensible</description>
+      <description>Undeclared fields in record type may not be present, unless the type is extensible</description>
       <created by="Michael Kay" on="2017-11-12"/>
       <modified by="Michael Kay" on="2018-08-21" change="The rules have changed"/>
       <environment ref="type-alias"/>
       <test><![CDATA[
          declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
          declare namespace _ = "http://local/";
-         declare type entry = tuple(name as xs:string, value as item()?);
+         declare type entry = record(name as xs:string, value as item()?);
       	declare function _:f($arg as type(entry)) as xs:boolean {
       	    $arg?extra = 3
       	};
@@ -125,13 +126,13 @@
    </test-case>
    
    <test-case name="type-alias-007">
-      <description>Fields in extensible tuple type may be present even if undeclared</description>
+      <description>Fields in extensible record type may be present even if undeclared</description>
       <created by="Michael Kay" on="2017-11-12"/>
       <environment ref="type-alias"/>
       <test><![CDATA[
          declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
          declare namespace _ = "http://local/";
-         declare type entry = tuple(name as xs:numeric, value as item()?, *);
+         declare type entry = record(name as xs:numeric, value as item()?, *);
       	declare function _:f($arg as type(entry)) as xs:boolean {
       	    $arg("extra") = 3
       	};
@@ -143,14 +144,14 @@
    </test-case>
    
    <test-case name="type-alias-008">
-      <description>Fields in tuple type may not be omitted unless empty is allowed</description>
+      <description>Fields in record type may not be omitted unless empty is allowed</description>
       <created by="Michael Kay" on="2017-11-12"/>
       <modified by="Michael Kay" on="2018-08-21" change="The rules have changed"/>
       <environment ref="type-alias"/>
       <test><![CDATA[
          declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
          declare namespace _ = "http://local/";
-         declare type entry = tuple(name as item()*, value as item()+);
+         declare type entry = record(name as item()*, value as item()+);
       	map{"name":"xyz"} instance of type(entry)
       ]]></test>
       <result>
@@ -159,13 +160,13 @@
    </test-case>
    
    <test-case name="type-alias-009">
-      <description>Fields in non-extensible tuple type may not be present if undeclared</description>
+      <description>Fields in non-extensible record type may not be present if undeclared</description>
       <created by="Michael Kay" on="2017-11-12"/>
       <environment ref="type-alias"/>
       <test><![CDATA[
          declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
          declare namespace _ = "http://local/";
-         declare type entry = tuple(name as xs:string, value as item()*);
+         declare type entry = record(name as xs:string, value as item()*);
       	declare function _:f($arg as type(entry)) as xs:boolean {
       	    $arg("extra") = 3
       	};
@@ -177,14 +178,14 @@
    </test-case>
    
    <test-case name="type-alias-010">
-      <description>Use a named type as a field in a tuple, and in a cast expression</description>
+      <description>Use a named type as a field in a record, and in a cast expression</description>
       <created by="Michael Kay" on="2020-01-18"/>
       <environment ref="type-alias"/>
       <test><![CDATA[
          declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
          declare namespace _ = "http://local/";
          declare type s = xs:nonNegativeInteger;
-         declare type entry = tuple(key as type(s), value as item()*);
+         declare type entry = record(key as type(s), value as item()*);
       	declare function _:f($arg as type(entry)) as xs:boolean {
       	    $arg?key = 3
       	};
