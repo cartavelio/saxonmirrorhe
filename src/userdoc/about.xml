@@ -623,7 +623,7 @@
                      <p><span class="nowrap">saxon-he-11.#.jar</span></p>
                   </td>
                  <td>
-                   <p>5.4Mb</p>
+                   <p>5.1Mb</p>
                  </td>
                   <td>
                      <p>SaxonJ Home Edition. Contains all the software in SaxonJ-HE, except as noted
@@ -649,7 +649,7 @@
                      <p><span class="nowrap">saxon-ee-11.#.jar</span></p>
                   </td>
                  <td>
-                   <p>8.3Mb</p>
+                   <p>8.1Mb</p>
                  </td>
                   <td>
                      <p>SaxonJ Enterprise Edition. Contains all the software in SaxonJ-EE, except as
@@ -658,27 +658,7 @@
                  <td><p>EE</p></td>
                </tr>
 
-               <tr>
-                  <td>
-                     <p><span class="nowrap">icu4j-59_1.jar</span></p>
-                  </td>
-                 <td>
-                   <p>11.9Mb</p>
-                 </td>
-                  <td>
-                     <p>A copy of the open source <a class="bodylink"
-                           href="http://site.icu-project.org">ICU-J</a> localization library, used
-                        to support sorting and date/number formatting in a wide variety of
-                        languages. If this JAR
-                        file is not present on the classpath, this will restrict the collations and
-                        localization options available to those that are found in the Java runtime.</p>
-                     <p>It should be possible to replace this JAR with a later version downloaded from
-                     the ICU project.</p>
-                     <p>(Previous SaxonJ releases used a tailored version of this JAR file. With experience,
-                     we found that this added complexity and delivered no tangible benefits.)</p>
-                  </td>
-                 <td><p>PE, EE</p></td>
-               </tr>
+               
               
               <tr>
                 <td>
@@ -701,7 +681,7 @@
                      <p><span class="nowrap">saxon-sql-11.#.jar</span></p>
                   </td>
                  <td>
-                   <p>61Kb</p>
+                   <p>74Kb</p>
                  </td>
                   <td>
                      <p>Supports XSLT and XPath extensions for accessing and updating a relational database
@@ -759,21 +739,72 @@
                 </td>
                 <td><p>EE</p></td>
               </tr>
+               
+               <tr>
+                  <td>
+                     <p><span class="nowrap">icu4j-59.2.jar</span></p>
+                  </td>
+                  <td>
+                     <p>11.9Mb</p>
+                  </td>
+                  <td>
+                     <p>A copy of the open source <a class="bodylink"
+                        href="http://site.icu-project.org">ICU-J</a> localization library, used
+                        to support sorting and date/number formatting in a wide variety of
+                        languages. If this JAR
+                        file is not present on the classpath, this will restrict the collations and
+                        localization options available to those that are found in the Java runtime.</p>
+                     <p>It should be possible to replace this JAR with a later version downloaded from
+                        the ICU project.</p>
+                     <p>(Previous SaxonJ releases used a tailored version of this JAR file. With experience,
+                        we found that this added complexity and delivered no tangible benefits.)</p>
+                  </td>
+                  <td><p>PE, EE</p></td>
+               </tr>
               
               <tr>
                 <td>
                    <p><span class="nowrap">jline-2.14.6.jar</span></p>
                 </td>
                 <td>
-                  <p>205Kb</p>
+                  <p>269Kb</p>
                 </td>
                 <td>
                   <p>JLine 2: an open source library supporting interactive command-line applications,
-                  including content completion and command history. This is used by the Gizmo utility,
-                  and must be on the classpath when Gizmo is run (it is not needed otherwise).</p>
+                  including content completion and command history. This is used by the Gizmo utility.</p>
                 </td>
                 <td><p>HE, PE, EE</p></td>
               </tr>
+               
+               <tr>
+                  <td>
+                     <p><span class="nowrap">xmlresolver-4.1.2.jar</span></p>
+                  </td>
+                  <td>
+                     <p>147Kb</p>
+                  </td>
+                  <td>
+                     <p>XML Resolver: an open source library supporting the resolution of URIs using
+                     a catalog; it also handles the data and classpath URI schemes, and provides resource
+                     caching.</p>
+                  </td>
+                  <td><p>HE, PE, EE</p></td>
+               </tr>
+               
+               <tr>
+                  <td>
+                     <p><span class="nowrap">xmlresolverdata-x.y.z.jar</span></p>
+                  </td>
+                  <td>
+                     <p>TBA</p>
+                  </td>
+                  <td>
+                     <p>XML Resolver Data: a package of commonly used W3C resources, such as DTDs and
+                        external entities used by XHTML, SVG, and MathML; these will be automatically
+                        picked up by the XML Resolver avoiding a costly fetch from the W3C web site.</p>
+                  </td>
+                  <td><p>HE, PE, EE</p></td>
+               </tr>
                
             </tbody>
          </table>
@@ -782,6 +813,15 @@
             be present on the classpath. The classpath can be set in the form of an environment
             variable, or it can be included in the <code>java</code> command that invokes the
             application.</p>
+         
+         <p>The manifest of the main Saxon JAR file (for example <code>saxon-he-11.1.jar</code>
+            includes a <code>Class-Path</code> entry that automatically brings in the <code>jline</code>
+            and <code>xmlresolver</code> dependencies, so you should not normally need to add these
+            to the classpath manually. In fact these dependencies are present in two forms: a versioned
+            form (such as <code>lib/jline-2.14.6.jar</code>) which picks up the version that is
+            issued with the Saxon product, and an unversioned form (<code>lib/jline.jar</code>) which
+            is designed to make it easy to replace the issued version with a compatible maintenance
+            release should this become necessary.</p>
 
          <p>The classpath is written as a list of filenames. These will either be the names of
             directories (folders) that contain relevant classes, or the names of JAR files
@@ -845,10 +885,10 @@
          
          <samp><![CDATA[- Signed by "EMAILADDRESS=mike@saxonica.com, CN=Saxonica Limited, O=Saxonica Limited, L=Reading, ST=Berkshire, C=GB"
     Digest algorithm: SHA-256
-    Signature algorithm: SHA256withRSA, 2048-bit key
-  Timestamped by "CN=GlobalSign TSA for Advanced - G3 - 003-01, O=GMO GlobalSign K.K., C=JP" on Thu Sep 27 16:58:22 UTC 2018
+    Signature algorithm: SHA256withRSA, 4096-bit key
+  Timestamped by "CN=GlobalSign TSA for Advanced - G4 - 003-01, O=GlobalSign nv-sa, C=BE" on Sat Jan 29 08:59:55 UTC 2022
     Timestamp digest algorithm: SHA-256
-    Timestamp signature algorithm: SHA256withRSA, 2048-bit key]]></samp>
+    Timestamp signature algorithm: SHA256withSHA256withRSA, 3072-bit key]]></samp>
          
          <p>The details will vary from release to release, but will always identify Saxonica as the originator, and give the date
             on which the JAR file was built prior to release.</p>
