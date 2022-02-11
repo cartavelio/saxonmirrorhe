@@ -203,6 +203,8 @@ dependencies {
   samples (
     [group: 'javax.servlet', name: 'servlet-api', version: '2.5'],
     [group: sqlDriverGroup, name: sqlDriverName, version: sqlDriverVersion],
+    [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion],
+    [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion, classifier: 'data']
   )
   /* ??? not working yet
   xqjtck (

@@ -79,17 +79,17 @@ task run_config_samples(
           dependsOn: ["gen_config_schema", "copy_samples", "eejJar"],
           description: "Validate the ${configFile}.xml sample configuration file"
   ) {
-    inputs.files "${buildDir}/resources/samples/config/${configFile}.xml"
-    inputs.files "${buildDir}/resources/samples/config/config.xsd"
-    workingDir = "${buildDir}/resources/samples"
+    inputs.files "${buildDir}/saxon-resources/samples/config/${configFile}.xml"
+    inputs.files "${buildDir}/saxon-resources/samples/config/config.xsd"
+    workingDir = "${buildDir}/saxon-resources/samples"
 
     classpath = configurations.samples \
         + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar") \
         + files(saxonLicenseDir)
     main = "com.saxonica.Validate"
     args "-t",
-            "-s:${buildDir}/resources/samples/config/${configFile}.xml",
-            "-xsd:${buildDir}/resources/samples/config/config.xsd"
+            "-s:${buildDir}/saxon-resources/samples/config/${configFile}.xml",
+            "-xsd:${buildDir}/saxon-resources/samples/config/config.xsd"
   }
   run_config_samples.dependsOn t
 }
@@ -221,7 +221,7 @@ task run_cmd_shakespeare_sample_tests(
         + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
         + files(saxonLicenseDir)
     main = "net.sf.saxon.Transform"
-    args "-s:data/othello.xml", "-xsl:styles/play.xsl", "dir=${resdir}/playhtml"
+    args "-s:data/othello.xml", "-xsl:styles/play.xsl", "dir=file:///${resdir}/playhtml"
 
   }
   run_cmd_shakespeare_sample_tests.dependsOn t
