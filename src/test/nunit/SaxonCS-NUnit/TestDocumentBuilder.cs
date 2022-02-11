@@ -472,22 +472,19 @@ namespace SaxonCS_NUnit {
         public void TestWhitespacePolicyUntyped() {
             try {
                 Processor proc =  new();
-                StringReader sr = new StringReader("<doc> </doc>");
+                StringReader sr = new("<doc> </doc>");
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 builder.BaseUri = new Uri("http://www.example.com");
-                //SAXSource source = new SAXSource(new InputSource(sr));
                 builder.WhitespacePolicy = WhitespacePolicy.StripAll;
-                String s = builder.Build(sr).ToString();
+                string s = builder.Build(sr).ToString();
                 Assert.True(s.Contains("<doc/>"));
 
                 sr = new StringReader("<doc> </doc>");
-                //source = new SAXSource(new InputSource(sr));
                 builder.WhitespacePolicy = WhitespacePolicy.PreserveAll;
                 s = builder.Build(sr).ToString();
                 Assert.True(s.Contains("<doc> </doc"));
 
                 sr = new StringReader("<doc> </doc>");
-                //source = new SAXSource(new InputSource(sr));
                 builder.WhitespacePolicy = WhitespacePolicy.StripIgnorable;
                 s = builder.Build(sr).ToString();
                 Assert.True(s.Contains("<doc> </doc"));
@@ -547,7 +544,7 @@ namespace SaxonCS_NUnit {
             string validXML =
                 "<!DOCTYPE a [<!ELEMENT a ((b|c)*)><!ELEMENT b EMPTY><!ELEMENT c (#PCDATA)>]><a> <b/> <c> </c> </a>";
             Processor proc =  new();
-            DocumentBuilder builder =  new Processor().NewDocumentBuilder();
+            DocumentBuilder builder =  proc.NewDocumentBuilder();
             builder.BaseUri = new Uri("http://example.com");
             builder.WhitespacePolicy = policy;
             builder.DtdValidation = true;
@@ -744,7 +741,7 @@ namespace SaxonCS_NUnit {
                         else {
                             // try to load up the specific parameter type
                             // list is based on http://www.saxonica.com/documentation/#!dotnetdoc/Saxon.Api/XdmAtomicValue
-                            XdmItemType argType = matchingArgDeclaration.Value.DeclaredItemType;
+                            XdmItemType argType = matchingArgDeclaration.Value.DeclaredType.ItemType;
                             var argTypeName = "";
                             if (argType != null &&
                                 argType is XdmAtomicType)
