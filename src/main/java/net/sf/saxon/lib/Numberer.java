@@ -16,8 +16,6 @@ import java.util.Locale;
  * Interface Numberer supports number formatting. There is a separate
  * implementation for each language, e.g. Numberer_en for English.
  * This supports the xsl:number element
- *
- * @author Michael H. Kay
  */
 
 public interface Numberer {

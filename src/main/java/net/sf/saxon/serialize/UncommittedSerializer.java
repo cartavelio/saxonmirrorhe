@@ -27,7 +27,6 @@ import java.util.Properties;
  * element is read. It buffers comments and processing instructions until that happens; then when the first
  * element arrives it creates a real serialization pipeline and uses that for future output.
  *
- * @author Michael H. Kay
  */
 
 public class UncommittedSerializer extends ProxyReceiver {

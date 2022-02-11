@@ -20,10 +20,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringItem;
 
 /**
- * TProcInstImpl is an implementation of ProcInstInfo
- *
- * @author Michael H. Kay
- * @version 16 July 1999
+ * TinyProcInstImpl is a node in the TinyTree representing a processing instruction
  */
 
 

@@ -33,7 +33,6 @@ import javax.xml.xpath.XPathExpressionException;
  * <p>The class also includes some methods retained from Saxon's original XPath API. When these methods
  * are used, the object contains the context node and other state, so it is not thread-safe.</p>
  *
- * @author Michael H. Kay
  */
 
 

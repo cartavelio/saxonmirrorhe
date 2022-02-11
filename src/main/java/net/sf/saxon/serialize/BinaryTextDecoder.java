@@ -26,8 +26,6 @@ import java.util.Properties;
 /**
  * This class generates decodes processing instructions in text output that represent text encoded
  * in base64 binary or hexBinary
- *
- * @author Michael H. Kay
  */
 
 public class BinaryTextDecoder extends ProxyReceiver {

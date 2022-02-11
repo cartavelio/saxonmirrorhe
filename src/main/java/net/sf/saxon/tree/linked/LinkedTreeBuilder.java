@@ -28,7 +28,6 @@ import java.util.Stack;
  * The LinkedTreeBuilder class is responsible for taking a stream of Receiver events and constructing
  * a Document tree using the linked tree implementation.
  *
- * @author Michael H. Kay
  */
 
 public class LinkedTreeBuilder extends Builder

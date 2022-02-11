@@ -25,7 +25,6 @@ import java.util.List;
  * CharacterMapExpander: This ProxyReceiver expands characters occurring in a character map,
  * as specified by the XSLT 2.0 xsl:character-map declaration
  *
- * @author Michael Kay
  */
 
 

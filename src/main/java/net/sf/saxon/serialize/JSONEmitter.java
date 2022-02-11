@@ -32,7 +32,6 @@ import java.util.Stack;
  * as input a sequence of event-based calls such as startArray, endArray, startMap, endMap,
  * and generates the lexical JSON output.
  *
- * @author Michael H. Kay
  */
 
 public class JSONEmitter {

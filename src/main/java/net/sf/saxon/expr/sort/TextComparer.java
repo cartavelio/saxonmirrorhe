@@ -19,8 +19,6 @@ import net.sf.saxon.value.StringItem;
  * A Comparer used for comparing sort keys when data-type="text". The items to be
  * compared are converted to strings, and the strings are then compared using an
  * underlying collator
- *
- * @author Michael H. Kay
  */
 
 public class TextComparer implements AtomicComparer {

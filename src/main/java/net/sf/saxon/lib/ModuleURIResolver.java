@@ -17,8 +17,6 @@ import javax.xml.transform.stream.StreamSource;
  * query modules. It takes as input a URI that identifies the module to be loaded, and a set of
  * location hints, and returns one or more StreamSource objects containing the queries
  * to be imported.
- *
- * @author Michael H. Kay
  */
 
 public interface ModuleURIResolver {

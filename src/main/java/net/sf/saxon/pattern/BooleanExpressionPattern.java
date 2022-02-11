@@ -28,8 +28,6 @@ import net.sf.saxon.type.UType;
  * A BooleanExpressionPattern is a pattern of the form .[ Expr ] introduced in XSLT 3.0. It matches
  * an item if the expression has an effective boolean value of true() when evaluated with that item
  * as the singleton focus.
- *
- * @author Michael H. Kay
  */
 
 public class BooleanExpressionPattern extends Pattern implements PatternWithPredicate {

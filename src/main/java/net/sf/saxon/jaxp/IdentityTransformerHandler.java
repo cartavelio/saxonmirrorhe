@@ -28,8 +28,6 @@ import java.util.Properties;
  * interface. It acts as a ContentHandler and LexicalHandler which receives a stream of
  * SAX events representing an input document, and performs an identity transformation passing
  * these events to a Result
- *
- * @author Michael H. Kay
  */
 
 public class IdentityTransformerHandler extends ReceivingContentHandler implements TransformerHandler {

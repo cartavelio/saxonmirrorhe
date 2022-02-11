@@ -30,7 +30,6 @@ import java.util.List;
  * <p>In Saxon 9.6, the methods that returned Object and did implicit conversion to a native Java object
  * have been removed; all conversions must now be done explicitly.</p>
  *
- * @author Michael H. Kay
  */
 
 

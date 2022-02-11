@@ -16,7 +16,6 @@ import java.util.Arrays;
  * Set of int values. This implementation of IntSet uses a sorted array
  * of integer ranges.
  *
- * @author Michael Kay
  */
 public class IntRangeSet extends IntSet {
 

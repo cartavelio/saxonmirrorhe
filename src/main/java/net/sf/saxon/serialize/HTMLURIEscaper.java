@@ -30,7 +30,6 @@ import java.text.Normalizer;
  * This class is used as a filter on the serialization pipeline; it performs the function
  * of escaping URI-valued attributes in HTML
  *
- * @author Michael H. Kay
  */
 
 public class HTMLURIEscaper extends ProxyReceiver {

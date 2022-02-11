@@ -19,7 +19,6 @@ import net.sf.saxon.value.StringItem;
 /**
  * CommentImpl is an implementation of a Comment node
  *
- * @author Michael H. Kay
  */
 
 

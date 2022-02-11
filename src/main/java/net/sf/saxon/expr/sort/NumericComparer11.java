@@ -15,8 +15,6 @@ import net.sf.saxon.value.StringToDouble11;
  * compare equal to each other, and equal to an empty sequence, but less than anything else.
  * <p>This class is used in XSLT only, so there is no need to handle XQuery's "empty least" vs
  * "empty greatest" options.</p>
- *
- * @author Michael H. Kay
  */
 
 public class NumericComparer11 extends NumericComparer {

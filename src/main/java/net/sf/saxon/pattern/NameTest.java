@@ -23,8 +23,6 @@ import java.util.Optional;
  * name and type. A NameTest matches the node kind and the namespace URI and the local
  * name. Note that unlike the XPath production called NameTest, this is a test for a specific
  * name, and does not include wildcard matches.
- *
- * @author Michael H. Kay
  */
 
 public class NameTest extends NodeTest implements QNameTest {

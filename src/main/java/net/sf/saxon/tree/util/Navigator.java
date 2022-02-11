@@ -43,7 +43,6 @@ import java.util.function.Predicate;
  * The Navigator class provides helper classes for navigating a tree, irrespective
  * of its implementation
  *
- * @author Michael H. Kay
  */
 
 

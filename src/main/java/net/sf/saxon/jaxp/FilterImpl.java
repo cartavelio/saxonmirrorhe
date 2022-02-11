@@ -21,8 +21,6 @@ import java.io.IOException;
 /**
  * <B>FilterImpl</B> is an XMLFilter (a SAX2 filter) that performs a transformation
  * taking a SAX stream as input and producing a SAX stream as output.
- *
- * @author Michael H. Kay
  */
 
 public class FilterImpl extends AbstractXMLFilter {

@@ -20,7 +20,6 @@ import java.util.Map;
  * each query module has its own set of decimal formats, and in XSLT 3.0 decimal formats are local to a package.
  * The DecimalFormatManager to use is therefore linked from the format-number() call on the expression tree.</p>
  *
- * @author Michael H. Kay
  */
 
 public class DecimalFormatManager {

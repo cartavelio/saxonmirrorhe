@@ -16,8 +16,6 @@ import java.io.IOException;
 /**
  * <B>AbstractFilterImpl</B> is skeletal implementation of the SAX XMLFilter interface, used
  * for both streaming and non-streaming filters.
- *
- * @author Michael H. Kay
  */
 
 public abstract class AbstractXMLFilter implements XMLFilter {

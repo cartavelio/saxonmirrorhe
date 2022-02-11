@@ -20,8 +20,6 @@ import net.sf.saxon.z.IntPredicateProxy;
 /**
  * NodeTest is an interface that enables a test of whether a node has a particular
  * name and type. An AnyNodeTest matches any node.
- *
- * @author Michael H. Kay
  */
 
 public final class AnyNodeTest extends NodeTest implements QNameTest {

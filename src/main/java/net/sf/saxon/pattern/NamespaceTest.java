@@ -20,8 +20,6 @@ import java.util.Optional;
 /**
  * NodeTest is an interface that enables a test of whether a node has a particular
  * name and type. A NamespaceTest matches the node type and the namespace URI.
- *
- * @author Michael H. Kay
  */
 
 public final class NamespaceTest extends NodeTest implements QNameTest {

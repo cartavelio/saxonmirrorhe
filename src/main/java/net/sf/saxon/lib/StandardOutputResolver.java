@@ -22,8 +22,6 @@ import java.net.*;
  * This class defines the default OutputURIResolver. This is a counterpart to the JAXP
  * URIResolver, but is used to map the URI of a secondary result document to a Result object
  * which acts as the destination for the new document.
- *
- * @author Michael H. Kay
  */
 
 public class StandardOutputResolver implements OutputURIResolver {
