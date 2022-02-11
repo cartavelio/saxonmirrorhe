@@ -63,6 +63,16 @@ public interface Function extends Item, Callable, GroundedValue {
     int getArity();
 
     /**
+     * Ask whether the function is sequence-variadic (accepts a variable number of
+     * arguments)
+     * @return true if the function is sequence-variadic; default is false
+     */
+
+    default boolean isSequenceVariadic() {
+        return false;
+    }
+
+    /**
      * Get the roles of the arguments, for the purposes of streaming
      * @return an array of OperandRole objects, one for each argument
      */

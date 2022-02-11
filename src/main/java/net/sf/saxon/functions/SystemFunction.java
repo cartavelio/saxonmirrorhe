@@ -8,6 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -24,6 +25,7 @@ import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringItem;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 
@@ -89,6 +91,12 @@ public abstract class SystemFunction extends AbstractFunction {
      */
 
     public Expression makeFunctionCall(Expression... arguments) {
+        if (arguments.length > getArity() && isSequenceVariadic()) {
+            if (getArity() != 1) {
+                throw new UnsupportedOperationException("Not implemented: sequence-variadic function with arity>1");
+            }
+            arguments = new Expression[]{new Block(arguments)};
+        }
         Expression e = new SystemFunctionCall(this, arguments);
         e.setRetainedStaticContext(getRetainedStaticContext());
         return e;
@@ -101,6 +109,11 @@ public abstract class SystemFunction extends AbstractFunction {
 
     public void setArity(int arity) {
         this.arity = arity;
+    }
+
+    @Override
+    public boolean isSequenceVariadic() {
+        return (details.properties & BuiltInFunctionSet.SEQV) != 0;
     }
 
     /**
@@ -253,15 +266,17 @@ public abstract class SystemFunction extends AbstractFunction {
     @Override
     public OperandRole[] getOperandRoles() {
         OperandRole[] roles = new OperandRole[getArity()];
-        OperandUsage[] usages = details.usage;
+        OperandUsage[] usages;
+        if (isSequenceVariadic()) {
+            usages = new OperandUsage[getArity()];
+            Arrays.fill(usages, details.usage[0]);
+        } else {
+            usages = details.usage;
+        }
         try {
             for (int i = 0; i < usages.length; i++) {
                 roles[i] = new OperandRole(0, usages[i], getRequiredType(i));
             }
-//            int last = usages.length - 1;
-//            for (int i = usages.length; i < arity; i++) {
-//                roles[i] = new OperandRole(0, usages[last], getRequiredType(last));
-//            }
         } catch (ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
         }
