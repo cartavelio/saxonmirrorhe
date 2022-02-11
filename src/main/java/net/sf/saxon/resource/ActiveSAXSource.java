@@ -46,7 +46,6 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
         if (source.getXMLReader() == null) {
             throw new IllegalArgumentException("Supplied SAXSource contains no XMLReader");
         }
-        configureParser(source.getXMLReader());
         setInputSource(source.getInputSource());
         setXMLReader((source.getXMLReader()));
         setSystemId(source.getSystemId());
@@ -73,6 +72,9 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
             Logger logger = receiver.getPipelineConfiguration().getConfiguration().getLogger();
             XMLReader parser = getXMLReader();
             //System.err.println("Using parser " + parser.getClass());
+
+            configureParser(parser);  // Bug 5276
+
             ReceivingContentHandler rch = new ReceivingContentHandler();
             rch.setReceiver(receiver);
             rch.setPipelineConfiguration(receiver.getPipelineConfiguration());
