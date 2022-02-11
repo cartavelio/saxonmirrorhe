@@ -15,6 +15,7 @@ namespace Saxon.Callbacks {
             this.config = config;
             this.resolver = new StandardXmlResolver();
         }
+
         public StandardURIResolver(Configuration config, XmlResolver resolver) {
             this.config = config;
             this.resolver = resolver;
@@ -54,6 +55,7 @@ namespace Saxon.Callbacks {
                     xpe.setErrorCode("FODC0005");
                     throw xpe;
                 }
+
                 net.sf.saxon.trans.XPathException de =
                     new net.sf.saxon.trans.XPathException("No base URI available to resolve '" + href + "'");
                 de.setErrorCode("FODC0005");
@@ -94,39 +96,30 @@ namespace Saxon.Callbacks {
                 if (known != null) {
                     return new StreamSource(known.stream, uri);
                 }
-                
+
                 Uri abs = new Uri(uri);
                 System.Object obj = resolver.GetEntity(abs, null, Type.GetType("System.IO.Stream"));
-                if ((obj is Stream)) {
-                    javax.xml.transform.stream.StreamSource source =
-                        new javax.xml.transform.stream.StreamSource(((Stream) obj));
+                if ((obj is Stream stream)) {
+                    javax.xml.transform.stream.StreamSource source = new(stream);
                     source.setSystemId(abs.ToString());
                     net.sf.saxon.lib.AugmentedSource @as = net.sf.saxon.lib.AugmentedSource.makeAugmentedSource(source);
                     @as.setPleaseCloseAfterUse(true);
                     return @as;
                 }
+                else if ((obj is TextReader reader)) {
+                    javax.xml.transform.stream.StreamSource source = new(reader);
+                    source.setSystemId(abs.ToString());
+                    return source;
+                }
+                else if ((obj is javax.xml.transform.Source)) {
+                    return ((javax.xml.transform.Source) obj);
+                }
+                else if ((obj == null)) {
+                    throw new net.sf.saxon.trans.XPathException("XmlResolver returned null");
+                }
                 else {
-                    if ((obj is TextReader)) {
-                        javax.xml.transform.stream.StreamSource source =
-                            new javax.xml.transform.stream.StreamSource(((TextReader) obj));
-                        source.setSystemId(abs.ToString());
-                        return source;
-                    }
-                    else {
-                        if ((obj is javax.xml.transform.Source)) {
-                            return ((javax.xml.transform.Source) obj);
-                        }
-                        else {
-                            if ((obj == null)) {
-                                throw new net.sf.saxon.trans.XPathException( "XmlResolver returned null");
-
-                            }
-                            else {
-                                throw new net.sf.saxon.trans.XPathException(
-                                    ("Unrecognized object returned by XmlResolver (type " + obj.GetType().Name));
-                            }
-                        }
-                    }
+                    throw new net.sf.saxon.trans.XPathException(
+                        ("Unrecognized object returned by XmlResolver (type " + obj.GetType().Name));
                 }
             }
             catch (net.sf.saxon.trans.XPathException e) {
@@ -136,7 +129,5 @@ namespace Saxon.Callbacks {
                 throw new net.sf.saxon.trans.XPathException(e.Message, e);
             }
         }
-        
     }
 }
-

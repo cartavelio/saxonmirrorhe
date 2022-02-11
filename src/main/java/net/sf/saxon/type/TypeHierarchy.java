@@ -548,7 +548,7 @@ public class TypeHierarchy {
 
                         Affinity contentRelationship = computeContentRelationship(t1, t2, on1, on2);
 
-                        // now analyse the three different relationsships
+                        // now analyse the three different relationships
 
                         if (nodeKindRelationship == SAME_TYPE &&
                                 nodeNameRelationship == SAME_TYPE &&
