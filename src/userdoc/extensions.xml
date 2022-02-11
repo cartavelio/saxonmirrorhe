@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="extensions" title="Saxon Extensions">
-  <h1>Saxon Extensions</h1>
+<article id="extensions" title="Saxon extensions">
+  <h1>Saxon extensions</h1>
 
   <p>This section describes the extensions and <dfn>implementation-defined features</dfn> provided
     with the Saxon product.</p>

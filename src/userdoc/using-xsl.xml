@@ -22,8 +22,8 @@
       specification, and about the handling of implementation-defined features of the
       specifications, see <a class="bodylink" href="/conformance">Conformance</a>.</p>
 
-   <section id="commandline" title="From the Command Line">
-      <h1>XSLT from the Command Line</h1>
+   <section id="commandline" title="From the command line">
+      <h1>XSLT from the command line</h1>
 
 
       <p>A command is available to apply a given stylesheet to a given source XML document.</p>
@@ -1002,8 +1002,8 @@
       </section>
    </section>
 
-   <section id="embedding" title="From a Java Application" class="javaonly">
-      <h1>XSLT Transformations from a Java Application</h1>
+   <section id="embedding" title="From a Java application" class="javaonly">
+      <h1>XSLT transformations from a Java application</h1>
 
       <p>Rather than running XSLT transformations from the command line, you may want to invoke
          transformations from your own application, perhaps one that runs within a web-based
@@ -1079,8 +1079,8 @@
 
       
 
-      <section id="s9api-transformation" title="Using s9api for Transformations" class="javaonly">
-         <h1>Using s9api for Transformations</h1>
+      <section id="s9api-transformation" title="Using s9api for transformations" class="javaonly">
+         <h1>Using s9api for transformations</h1>
 
          <p>You can perform a transformation using the s9api interface as follows:</p>
          <ol>
@@ -1207,8 +1207,8 @@
            
       </section>
 
-      <section id="jaxp-transformation" title="Using JAXP for Transformations" class="javaonly">
-         <h1>Using JAXP for Transformations</h1>
+      <section id="jaxp-transformation" title="Using JAXP for transformations" class="javaonly">
+         <h1>Using JAXP for transformations</h1>
 
          <p>This API is described in the documentation provided with JDK 1.5 and later. It is
             available online at <a href="http://download.oracle.com/javase/6/docs/api/"
@@ -1370,8 +1370,8 @@
       </section>
    </section>
    
-   <section id="Saxon-Api-transformation" title="From a C# Application" class="csonly">
-      <h1>XSLT Transformations from C#</h1>
+   <section id="Saxon-Api-transformation" title="From a C# application" class="csonly">
+      <h1>XSLT transformations from C#</h1>
       
       
       <p>You can perform a transformation using the C# <code>Saxon.Api</code> interface as follows
@@ -1573,7 +1573,7 @@
    
    <section id="xsltfromant" title="From Ant" class="javaonly">
 
-      <h1>XSLT Transformations from Ant</h1>
+      <h1>XSLT transformations from Ant</h1>
       
       <p>It is possible to run a Saxon transformation from Ant using the standard <a
          href="http://ant.apache.org/manual/Tasks/style.html" class="bodylink">xslt task</a>, by
@@ -1652,8 +1652,8 @@
    </section>
    
 
-   <section id="compiling" title="Compiling a Stylesheet">
-      <h1>Compiling a Stylesheet</h1>
+   <section id="compiling" title="Compiling a stylesheet">
+      <h1>Compiling a stylesheet</h1>
 
       <p>Generally, the cost of analyzing the XSLT source code in a stylesheet and preparing it for
          execution can be high in relation to the cost of actually running the code to transform an
@@ -1685,9 +1685,9 @@
          <ul/>
       </nav>
       
-      <section id="caching" title="Caching Compiled Stylesheets">
+      <section id="caching" title="Caching compiled stylesheets">
 
-      <h1>Caching Compiled Stylesheets in Memory</h1>
+      <h1>Caching compiled stylesheets in memory</h1>
 
       <p>The JAXP interface represents a compiled stylesheet as a <code>Templates</code> object. The
          object contains the entire stylesheet; all modules must be compiled as a single unit. JAXP
@@ -1758,9 +1758,9 @@
          memory.</p>
       </section>
       
-      <section id="jit-compilation" title="JIT Compilation">
+      <section id="jit-compilation" title="JIT compilation">
       
-      <h1>JIT Compilation of Template Rules</h1>
+      <h1>JIT compilation of template rules</h1>
       
       <p>Sometimes a stylesheet may contain hundreds of template rules to define the processing of elements
       that are rarely used in source documents; many source documents might use a tiny fraction of the
@@ -1786,9 +1786,9 @@
          
       </section>
       
-      <section id="packages" title="Using Packages">
+      <section id="packages" title="Using packages">
 
-      <h1>Using Packages</h1>
+      <h1>Using packages</h1>
 
       <p>A package, once compiled into an <code>XsltPackage</code> object, can be saved as a 
          <i>stylesheet export file</i> (SEF) using the <code>save()</code> (Java) or <code>Save()</code> (C#)
@@ -1894,7 +1894,7 @@
       reconstructed element nodes will not be siblings of each other (they will be parentless).</p>
 
       </section>
-      <section id="bytecode" class="javaonly" title="Bytecode Generation">
+      <section id="bytecode" class="javaonly" title="Bytecode generation">
      <h1>Bytecode generation</h1>
 
       <p>When a stylesheet package is compiled into its in-memory representation, SaxonJ-EE by
@@ -1924,8 +1924,8 @@
     
    </section>
    </section>
-   <section id="stylesheet-output" title="Handling Output">
-      <h1>Handling Stylesheet Output</h1>
+   <section id="stylesheet-output" title="Handling output">
+      <h1>Handling stylesheet output</h1>
       <p>The output produced by a stylesheet comes in three forms:</p>
       
       <ul>
@@ -1967,8 +1967,8 @@
          <ul/>
       </nav>
       
-      <section id="principal-output" title="Principal Output">
-         <h1>Principal Output</h1>
+      <section id="principal-output" title="Principal output">
+         <h1>Principal output</h1>
          <p>When a transformation is run from the command line, the destination of the
          principal output is given by the <code>-o</code> option, and defaults to the standard
          output stream (that is, the console). The output is always serialized; the format
@@ -2028,8 +2028,8 @@
          </ul>
       </section>
       
-      <section id="secondary-output" title="Secondary Output">
-         <h1>Secondary Output</h1>
+      <section id="secondary-output" title="Secondary output">
+         <h1>Secondary output</h1>
          <p>The term <code>secondary output</code> refers to values produced using the
             <a class="bodylink code"
                href="/xsl-elements/result-document">xsl:result-document</a> instruction. 
@@ -2111,8 +2111,8 @@
          building several output files in parallel. This will cause problems if the stylesheet
          uses extension functions that have side-effects.</p>
       </section>
-      <section id="message-output" title="Message Output">
-         <h1>Message Output</h1>
+      <section id="message-output" title="Message output">
+         <h1>Message output</h1>
          <p>XSLT defines the <code>xsl:message</code> instruction to produce output, but leaves
          nearly all details of its behaviour implementation-defined. Although the content of a message
          is often a simple text string, the specification defines it as an XML document fragment.
@@ -2152,11 +2152,11 @@
       </section>
       
    </section>
-   <section id="performanceanalysis" title="Performance Analysis">
-      <h1>Performance Analysis</h1>
+   <section id="performanceanalysis" title="Performance analysis">
+      <h1>Performance analysis</h1>
       <p>This section describes tools designed to assist with performance monitoring and tuning.</p>
       
-      <h2 class="subtitle">Profiling Execution Time</h2>
+      <h2 class="subtitle">Profiling execution time</h2>
       <p>Saxon comes with a simple tool allowing profiling of the execution time in a
          stylesheet.</p>
       <p>To run this tool, first execute the transformation with the <code>-TP:filename</code>
@@ -2181,7 +2181,7 @@
          transformation.</p>
      
      <div class="javaonly">
-      <h2 class="subtitle">Monitoring Bytecode Performance</h2>
+      <h2 class="subtitle">Monitoring bytecode performance</h2>
      
       <p>SaxonJ-EE by default generates bytecode to speed up execution of the most frequently executed
      parts of a stylesheet.</p>
@@ -2227,8 +2227,8 @@
          pattern matching performance, for more information see <a class="bodylink"
             href="statsTransform">Detailed Pattern-Matching Statistics</a>.</aside>
 -->
-      <!--<section id="statsTransform" title="Detailed Pattern-Matching Statistics">
-         <h1>Detailed Pattern-Matching Statistics</h1>
+      <!--<section id="statsTransform" title="Detailed pattern-matching statistics">
+         <h1>Detailed pattern-matching statistics</h1>
          <p><b>Techniques described here are experimental and only available in Saxon-EE</b>.</p>
          <p>Saxon-EE 9.7 has an additional experimental package (supplied in
                <code>saxon9-stats.jar</code>) that analyses template pattern matching performance,
@@ -2248,7 +2248,7 @@
             a locally-relative subdirectory <code>statistics</code>, with a name usually
             substituting html for trailing xml.</p>
 
-         <h3>Statistic Control File</h3>
+         <h3>Statistic control file</h3>
          <p>The (optional) statistics control file has the following generic form</p>
          <samp><![CDATA[  <stats xsl="stylesheet"? s="source"? description="description"?>    
       <group name="group-name"  show="details? time? call? rank?">
@@ -2318,8 +2318,8 @@
       </section>-->
      </div>
    </section>
-   <section id="xslt30" title="XSLT 3.0 Support">
-      <h1>XSLT 3.0 Support</h1>
+   <section id="xslt30" title="XSLT 3.0 support">
+      <h1>XSLT 3.0 support</h1>
 
       
       <p>Saxon 9.8 and later releases implement the <a class="bodylink"

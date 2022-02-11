@@ -21,8 +21,8 @@
    </nav>
 
    
-   <section id="commandline" title="Validation from the Command Line">
-      <h1>Validation from the Command Line</h1>
+   <section id="commandline" title="Validation from the command line">
+      <h1>Validation from the command line</h1>
 
 
       
@@ -536,7 +536,7 @@
       </section>
 
       <section id="schema-jaxp" title="Validation using JAXP" class="javaonly">
-         <h1>Schema Validation using JAXP</h1>
+         <h1>Schema validation using JAXP</h1>
 
 
          <p>Applications can invoke schema processing using the APIs provided in JAXP 1.3. This
@@ -849,8 +849,8 @@
          </tr>
       </table>
    </section>
-   <section id="schema-aware-qt" title="Schema-Aware Queries and Transformations">
-      <h1>Schema-Aware Queries and Transformations</h1>
+   <section id="schema-aware-qt" title="Schema-aware queries and transformations">
+      <h1>Schema-aware queries and transformations</h1>
       <p>Schema-awareness, in both XSLT and XQuery, has three effects:</p>
       
       <ul>
@@ -906,8 +906,8 @@
          usually get an error message that identifies the offending instruction in the query or stylesheet.</p>
       
 
-   <section id="satransformcmd" title="From the Command Line">
-      <h1>Schema-Aware XSLT and XQuery from the Command Line</h1>
+   <section id="satransformcmd" title="From the command line">
+      <h1>Schema-aware XSLT and XQuery from the command line</h1>
 
 
       <p>To run a schema-aware transformation or query from the command line, use appropriate options on the 
@@ -944,7 +944,7 @@
    </section>
    <section id="satransformapi" title="From Java and C#">
 
-      <h1>Schema-Aware XSLT and XQuery from Java and C#</h1>
+      <h1>Schema-aware XSLT and XQuery from Java and C#</h1>
       
       <p>If a query or stylesheet is schema-aware, it will typically expect the principal
       input document to be schema-validated. There are a number of ways this can be achieved:</p>
@@ -1002,8 +1002,8 @@
    
    </section>
    </section>
-   <section id="scm" title="Exporting Schema Component Models">
-      <h1>Exporting Schema Component Models</h1>
+   <section id="scm" title="Exporting schema component models">
+      <h1>Exporting schema component models</h1>
       
       
       <p>Saxon provides the ability to export or import a compiled schema. The export format is an
@@ -1113,8 +1113,8 @@
          <ul/>
       </nav>
 
-      <section id="assertions" title="Assertions on Complex Types">
-         <h1>Assertions on Complex Types</h1>
+      <section id="assertions" title="Assertions on complex types">
+         <h1>Assertions on complex types</h1>
 
 
          <p>XSD 1.1 supports the definition of assertions on both simple and complex types.</p>
@@ -1180,8 +1180,8 @@
             available in the same way for complex types with simple content.</p>
       </section>
 
-      <section id="simpleassert" title="Assertions on Simple Types">
-         <h1>Assertions on Simple Types</h1>
+      <section id="simpleassert" title="Assertions on simple types">
+         <h1>Assertions on simple types</h1>
 
 
          <p>XSD 1.1 allows assertions on simple types to be defined. The mechanism is to define an
@@ -1240,8 +1240,8 @@
             namespaces of the containing <code>xs:assert</code> element.</p>
       </section>
 
-      <section id="cta" title="Conditional Type Assignment">
-         <h1>Conditional Type Assignment</h1>
+      <section id="cta" title="Conditional type assignment">
+         <h1>Conditional type assignment</h1>
 
 
          <p>XSD 1.1 supports Conditional Type Assignment to allow the type of an element to depend
@@ -1254,8 +1254,8 @@
             ancestors of the element.</p>
       </section>
 
-      <section id="allgroups" title="All Model Groups">
-         <h1>All Model Groups</h1>
+      <section id="allgroups" title="All model groups">
+         <h1>All model groups</h1>
 
 
          <p>XSD 1.1 allows arbitrary values of <code>minOccurs</code> and <code>maxOccurs</code> on
@@ -1268,8 +1268,8 @@
             models.</p>
       </section>
 
-      <section id="open-content" title="Open Content">
-         <h1>Open Content</h1>
+      <section id="open-content" title="Open content">
+         <h1>Open content</h1>
 
 
          <p>Open content is an XSD 1.1 feature that allows a schema document to declare that all types
@@ -1290,8 +1290,8 @@
             defined in the schema document.</p>
       </section>
 
-      <section id="misc-xsd11" title="Miscellaneous XSD 1.1 Features">
-         <h1>Miscellaneous XSD 1.1 Features</h1>
+      <section id="misc-xsd11" title="Miscellaneous XSD 1.1 features">
+         <h1>Miscellaneous XSD 1.1 features</h1>
 
 
          <p>The <code>notNamespace</code> and <code>notQName</code> attributes are provided on
@@ -1367,8 +1367,8 @@
          conditions to occur, even with quite modest values of <code>minOccurs</code> and
             <code>maxOccurs</code>.</p>
    </section>
-  <section id="absent-components" title="Handling Absent Components">
-    <h1>Handling Absent Components</h1>
+  <section id="absent-components" title="Handling absent components">
+    <h1>Handling absent components</h1>
     <p>The XSD 1.0 and 1.1 Recommendations both say that a schema should not be treated
     as invalid merely because it contains unresolved references to absent schema components
     (for example an <code>xs:attribute</code> declaration that refers to a named type which
@@ -1423,8 +1423,8 @@
          <ul/>
       </nav>
 
-      <section id="saxon.message" title="saxon:message - Customizing validation messages">
-         <h1>saxon:message - Customizing validation messages</h1>
+      <section id="saxon.message" title="saxon:message - customizing validation messages">
+         <h1>saxon:message - customizing validation messages</h1>
 
 
          <p>In assertions, and on all elements representing facets (for example
@@ -1446,8 +1446,8 @@
 ]]></samp>
       </section>
      
-     <section id="saxon.streamable" title="saxon:streamable - Streamable assertions">
-       <h1>saxon:streamable - Streamable assertions</h1>
+     <section id="saxon.streamable" title="saxon:streamable - streamable assertions">
+       <h1>saxon:streamable - streamable assertions</h1>
        
        
        <p>Saxon (from 10.1) allows the attribute <code>&lt;xs:assert saxon:streamable="true"&gt;</code>
@@ -1500,8 +1500,8 @@
        in-memory tree.</p>
      </section>
       
-      <section id="saxon.order-unique" title="saxon:order - Ordered Uniqueness Constraints">
-         <h1>saxon:order - Ordered Uniqueness Constraints</h1>
+      <section id="saxon.order-unique" title="saxon:order - rrdered uniqueness constraints">
+         <h1>saxon:order - ordered uniqueness constraints</h1>
          
          <p>Saxon allows the additional attribute <code>xs:unique/xs:field/@saxon:order</code>, with the permitted values
             <code>ascending</code> and <code>descending</code>. If the attribute is present on at least one field of a uniqueness
@@ -1527,8 +1527,8 @@
          
       </section>
       
-      <section id="saxon.separator" title="saxon:separator - Defining the separator for list values">
-         <h1>saxon:separator - Defining the separator for list values</h1>
+      <section id="saxon.separator" title="saxon:separator - defining the separator for list values">
+         <h1>saxon:separator - defining the separator for list values</h1>
          
          <p>Normally, in an element or attribute whose type is derived from <code>xs:list</code>,
          the separator between items in the list must be whitespace. The <code>saxon:separator</code>
@@ -1567,8 +1567,8 @@
   </xs:simpleType>]]></samp>
       </section>
       
-      <section id="saxon.flags" title="saxon:flags - Regular expression flags on xs:pattern">
-         <h1>saxon:flags - Regular expression flags on xs:pattern</h1>
+      <section id="saxon.flags" title="saxon:flags - regular expression flags on xs:pattern">
+         <h1>saxon:flags - regular expression flags on xs:pattern</h1>
          
          <p>Saxon provides an additional attribute on the <code>xs:pattern</code> element,
          namely <code>saxon:flags</code>. If present, the attribute is a string containing one or more
@@ -1879,8 +1879,8 @@
       
          
       <section id="xpath-31-in-xsd-11"
-         title="Using XPath 3.1 in Assertions">
-         <h1>Using XPath 3.1 in Assertions</h1>
+         title="Using XPath 3.1 in assertions">
+         <h1>Using XPath 3.1 in assertions</h1>
          
          <p>From Saxon 9.9 the XPath version used can be configured using the configuration 
             property <a class="feature" href="XPATH_VERSION_FOR_XSD"/>.</p>
@@ -1893,8 +1893,8 @@
          <p>The <code>saxon:extensions</code> attribute is a whitespace-separated list of keywords.</p>
       </section>
       
-      <section id="parameterizing-schemas" title="Parameterizing Schemas">
-         <h1>Parameterizing Schemas</h1>
+      <section id="parameterizing-schemas" title="Parameterizing schemas">
+         <h1>Parameterizing schemas</h1>
          
          
          <p>Saxon provides an extension to the standard XSD syntax that allows a schema to be

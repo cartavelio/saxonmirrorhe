@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="expressions" title="Reference: XPath Syntax">
-   <h1>Reference: XPath Syntax</h1>
+<article id="expressions" title="Reference: XPath syntax">
+   <h1>Reference: XPath syntax</h1>
 
 
    <p>This section is an informal guide to the syntax of XPath expressions, which are used in Saxon
@@ -17,7 +17,7 @@
    <aside>Saxon provides further extensions to the XPath expression syntax (these require Saxon-PE
       or higher), for details see <a class="bodylink" href="/v4extensions">Experimental 4.0 Extensions</a>.</aside>
 
-   <h3 class="subtitle">New Features in XPath 3.0 and 3.1</h3>
+   <h3 class="subtitle">New features in XPath 3.0 and 3.1</h3>
 
    <p>There are summaries of <a class="bodylink" href="xpath30new">New Features in XPath 3.0</a>
       (originally published as XPath 2.1) and <a class="bodylink" href="xpath31new">New Features in
@@ -1361,7 +1361,7 @@
 
       </ul>
       
-      <h2 class="subtitle">Arrays: Technical Implementation Details</h2>
+      <h2 class="subtitle">Arrays: technical implementation details</h2>
       
       <p>Internally Saxon (from release 9.9) uses two implementations of arrays.</p>
       

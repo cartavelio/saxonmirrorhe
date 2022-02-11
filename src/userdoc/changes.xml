@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<changes  xmlns="http://www.saxonica.com/ns/doc/changes" id="changes" title="Change History">
+<changes  xmlns="http://www.saxonica.com/ns/doc/changes" id="changes" title="Change history">
    <categories>
       <cat name="all" title="ALL"/>
       <cat name="documentation" title="Documentation changes"/>
