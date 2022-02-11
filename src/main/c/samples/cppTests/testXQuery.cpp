@@ -389,7 +389,7 @@ int main(int argc, char* argv[])
         cwd = argv[1];
     }
 
-    SaxonProcessor * processor = new SaxonProcessor(false);
+    SaxonProcessor * processor = new SaxonProcessor(true);
     cout<<"Test: XQueryProcessor with Saxon version="<<processor->version()<<endl<<endl;
 
     char buff[FILENAME_MAX]; //create string buffer to hold path

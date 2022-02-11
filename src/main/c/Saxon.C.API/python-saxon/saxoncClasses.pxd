@@ -34,8 +34,6 @@ cdef extern from "../SaxonProcessor.h":
 
         void setResourcesDirectory(const char* dir)
 
-        XsltProcessor * newXsltProcessor()
-
         Xslt30Processor * newXslt30Processor()
 
         XQueryProcessor * newXQueryProcessor()
@@ -106,76 +104,8 @@ cdef extern from "../SaxonProcessor.h":
 
         XdmNode* parseXmlFromFile(const char * filename);
 
-        XdmNode * parseXmlFromUri(const char* source)
+        XdmNode * parseXmlFromUri(const char* source);
 
-
-
-    cdef cppclass XsltProcessor:
-        XsltProcessor() except +
-        # set the current working directory
-        void setcwd(const char* cwd)
-
-        # Set the base output URI.
-        void setBaseOutputURI(const char * baseURI)
-
-        #Set the source document from an XdmNode for the transformation.
-        void setSourceFromXdmNode(XdmNode * value)
-
-        #Set the source from file for the transformation.
-        void setSourceFromFile(const char * filename)
-
-        #Set the output file of where the transformation result is sent
-        void setOutputFile(const char* outfile)
-
-        void setJustInTimeCompilation(bool jit)
-
-        void setParameter(const char* name, XdmValue*value)
-
-        XdmValue* getParameter(const char* name)
-
-        bool removeParameter(const char* name)
-
-        void setProperty(const char* name, const char* value)
-
-        void clearParameters()
-
-        void clearProperties()
-
-        void setSaveXslMessage(bool show, const char* filename)
-
-        void transformFileToFile(const char* sourcefile, const char* stylesheetfile, const char* outputfile)
-        
-        char * transformFileToString(const char* sourcefile, const char* stylesheetfile)
-
-        XdmValue * transformFileToValue(const char* sourcefile, const char* stylesheetfile)
-
-        void compileFromFile(const char* stylesheet)
-
-        void compileFromString(const char* stylesheet)
-
-        void compileFromStringAndSave(const char* stylesheet, const char* filename)
-
-        void compileFromFileAndSave(const char* xslFilename, const char* filename)
-
-        void compileFromXdmNodeAndSave(XdmNode * node, const char* outputfile)
-
-        void compileFromXdmNode(XdmNode * node)
-
-        char * transformToString()
-
-        XdmValue * transformToValue()
-
-        void transformToFile()
-
-        bool exceptionOccurred()
-
-        const char* checkException()
-
-        void exceptionClear()
-
-        const char * getErrorMessage()
-
-        const char * getErrorCode()
 
 
 
