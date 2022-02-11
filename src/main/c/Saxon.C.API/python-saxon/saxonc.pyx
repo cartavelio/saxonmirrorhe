@@ -2056,8 +2056,6 @@ cdef class PyXsltExecutable:
               value_ = value;
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         c_templateName = make_c_str(template_name)
-        py_string_string = template_name.encode('utf-8') if template_name is not None else None
-        c_templateName = py_string_string if template_name is not None else ""
         c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
         return make_py_str(c_string)
      
@@ -2107,10 +2105,8 @@ cdef class PyXsltExecutable:
               value_ = value;
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         c_templateName = make_c_str(template_name)
-        py_template_string = template_name.encode('UTF-8') if template_name is not None else None
-        c_templateName = py_template_string if template_name is not None else ""
-
         self.thisxptr.callTemplateReturningFile(c_templateName, c_outputfile)
+
      def call_function_returning_value(self, str function_name, list args, **kwds):
         """
         call_function_returning_value(self, str function_name, list args, **kwds)
