@@ -190,7 +190,7 @@
   <h2 class="subtitle">Redistribution</h2>
 
   <div class="javaonly">
-      <p><b>Redistribution</b> of SaxonJ-HE is freely permitted under the terms of the Mozilla Public
+      <p>Redistribution of SaxonJ-HE is freely permitted under the terms of the Mozilla Public
       License 2.0. Note that this requires inclusion of all the necessary notices. If any source code
       changes are made, the license requires that they be published (or at any rate, made available to
       your users); but you are not required to publish the source of your own application code if it
@@ -208,8 +208,8 @@
     contract will be supplied on request.</p>
 
 
-  <section id="contributors" title="Contributions">
-    <div><h1>Contributions</h1>
+  <section id="contributors" title="Contributions" class="javaonly">
+    <h1>Contributions</h1>
 
 
     <p>This page lists third-party contributors to the <i>Category A</i> source code of SaxonJ-HE, as defined
@@ -556,7 +556,6 @@
         </td>
       </tr>
     </table>
-    </div>
   </section>
   <section id="third-party-components" title="Third Party Source Components">
     <h1>Third Party Source Components</h1>
