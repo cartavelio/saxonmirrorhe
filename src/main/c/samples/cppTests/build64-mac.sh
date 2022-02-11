@@ -40,11 +40,11 @@ g++ -std=c++14 -m64 -fPIC -I$jdkdir   -c ../../Saxon.C.API/XdmFunctionItem.cpp -
 
 g++ -std=c++14 -m64 -fPIC -I$jdkdir   -c ../../Saxon.C.API/XdmAtomicValue.cpp -o bin/XdmAtomicValue.o $1 $2
 
+g++ -std=c++14 -m64 -fPIC -I$jdkdir   -c ../../Saxon.C.API/DocumentBuilder.cpp -o bin/DocumentBuilder.o $1 $2
+
 g++ -std=c++14 -m64 -fPIC -I$jdkdir   -c ../../Saxon.C.API/SaxonProcessor.cpp -o bin/SaxonProcessor.o $1 $2
 
 g++ -std=c++14 -m64 -fPIC -I$jdkdir   -c ../../Saxon.C.API/SaxonApiException.cpp -o bin/SaxonApiException.o $1 $2
-
-g++ -std=c++14 -m64 -fPIC -I$jdkdir   -c ../../Saxon.C.API/XsltProcessor.cpp -o bin/XsltProcessor.o $1 $2
 
 g++ -std=c++14 -m64 -fPIC -I$jdkdir   -c ../../Saxon.C.API/Xslt30Processor.cpp -o bin/Xslt30Processor.o $1 $2
 
@@ -56,16 +56,14 @@ g++ -std=c++14 -m64 -fPIC -I$jdkdir   -c ../../Saxon.C.API/XPathProcessor.cpp -o
 
 g++ -std=c++14 -m64 -fPIC -I$jdkdir   -c ../../Saxon.C.API/SchemaValidator.cpp -o bin/SchemaValidator.o $1 $2
 
-g++ -std=c++14  -m64 -fPIC -I$jdkdir   bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltProcessor.o bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o testXSLT.cpp -o testXSLT -ldl  -L.  $1 $2
+g++ -std=c++14  -m64 -fPIC -pthread -I$jdkdir   bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o  bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o bin/cppExtensionFunction.o testXSLT30.cpp -o testXSLT30 -ldl  -L.  $1 $2
 
-g++ -std=c++14  -m64 -fPIC -pthread -I$jdkdir   bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltProcessor.o bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o bin/cppExtensionFunction.o testXSLT30.cpp -o testXSLT30 -ldl  -L.  $1 $2
-
-g++ -std=c++14   -m64 -fPIC -I$jdkdir   bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltProcessor.o bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmFunctionItem.o bin/XdmMap.o bin/SchemaValidator.o bin/SaxonApiException.o testXQuery.cpp -o testXQuery -ldl  -L.  $1 $2
+g++ -std=c++14   -m64 -fPIC -I$jdkdir   bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o  bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmFunctionItem.o bin/XdmMap.o bin/SchemaValidator.o bin/SaxonApiException.o testXQuery.cpp -o testXQuery -ldl  -L.  $1 $2
 
 
-g++ -std=c++14  -m64 -fPIC -I$jdkdir  bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltProcessor.o bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o testXPath.cpp -o testXPath -ldl  -L.  $1 $2
+g++ -std=c++14  -m64 -fPIC -I$jdkdir  bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o  bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o testXPath.cpp -o testXPath -ldl  -L.  $1 $2
 
-g++ -std=c++14  -m64 -fPIC -I$jdkdir  bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltProcessor.o bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o testValidator.cpp -o testValidator -ldl  -L.  $1 $2
+g++ -std=c++14  -m64 -fPIC -I$jdkdir  bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o  bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o testValidator.cpp -o testValidator -ldl  -L.  $1 $2
 
-g++  -std=c++14 -fPIC -m64 -dynamiclib -o  cppExtensionFunction.dylib bin/cppExtensionFunction.o bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltProcessor.o bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o $1 $2
+g++  -std=c++14 -fPIC -m64 -dynamiclib -o  cppExtensionFunction.dylib bin/cppExtensionFunction.o bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/DocumentBuilder.o bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o $1 $2
 
