@@ -253,6 +253,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltExecutable, applyTemplatesReturningValue);
     PHP_METHOD(XsltExecutable, applyTemplatesReturningString);
     PHP_METHOD(XsltExecutable, applyTemplatesReturningFile);
+    PHP_METHOD(XsltExecutable, clone);
     PHP_METHOD(XsltExecutable,  transformFileToFile);
     PHP_METHOD(XsltExecutable,  transformFileToString);
     PHP_METHOD(XsltExecutable,  transformFileToValue);
