@@ -12,7 +12,7 @@
      <xsl:key name="jd-types" match="j" use="string-join(ancestor-or-self::j/@id, '.')"/>
 
      <xsl:template match="section|article" mode="primary">
-          <xsl:apply-templates mode="secondary"/>
+          <xsl:apply-templates select="." mode="post-primary"/>
      </xsl:template>
 
      <xsl:template match="node()|@*" mode="secondary">
@@ -20,7 +20,17 @@
                <xsl:apply-templates select="node()|@*" mode="secondary"/>
           </xsl:copy>
      </xsl:template>
-
+     
+     <xsl:template match="section[@class]|article[@class]" mode="post-primary">
+          <div class="{@class}">
+               <xsl:apply-templates mode="secondary"/>
+          </div>
+     </xsl:template>
+     
+     <xsl:template match="section|article" mode="post-primary">
+          <xsl:apply-templates mode="secondary"/>
+     </xsl:template>
+     
      <xsl:template match="section|article" mode="secondary"/>
 
      <xsl:template match="dfn" mode="secondary">

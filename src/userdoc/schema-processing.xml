@@ -444,7 +444,7 @@
 
       <p>Parameters on the command line can be used to supply values for any
             <code>saxon:param</code> declarations in the schema. See <a class="bodylink"
-            href="../parameterizing-schemas">Parameterizing Schemas</a> for details. The format of
+            href="../extensions11/parameterizing-schemas">Parameterizing Schemas</a> for details. The format of
          parameters is the same as for the XSLT and XQuery command lines: <code>name=value</code> to
          supply a simple value; <code>+name=filename</code> to supply the contents of an XML
          document as the parameter value; or <code>?name=expression</code> to supply the result of
@@ -453,7 +453,6 @@
    </section>
   
    <section id="validation-api" title="Validation from Java" class="javaonly">
-      <div>
          <h1>Running Validation from Java</h1>
 
 
@@ -465,10 +464,9 @@
       <nav>
          <ul/>
       </nav>
-      </div>
+      
 
-      <section id="schema-s9api" title="Validation using s9api">
-         <div class="javaonly">
+      <section id="schema-s9api" title="Validation using s9api" class="javaonly">
          <h1>Validation using s9api</h1>
 
 
@@ -531,11 +529,10 @@
                <code>Destination</code>, for example an XSLT transformation or an XQuery query. The
             result of validation can also be sent to any <code>Destination</code>, for example an
             XSLT transformer.</p>
-         </div>
+         
       </section>
 
-      <section id="schema-jaxp" title="Validation using JAXP">
-         <div class="javaonly">
+      <section id="schema-jaxp" title="Validation using JAXP" class="javaonly">
          <h1>Schema Validation using JAXP</h1>
 
 
@@ -697,12 +694,11 @@
                >ReceivingContentHandler</a> and <a class="javalink"
                href="net.sf.saxon.event.ContentHandlerProxy">ContentHandlerProxy</a>
             respectively.</p>
-         </div>
+         
       </section>
    </section>
    
-   <section id="schema-dotnet" title="Validation from C#">
-      <div class="csonly">
+   <section id="schema-dotnet" title="Validation from C#" class="csonly">
          <h1>Running Validation from C#</h1>
          
          
@@ -762,7 +758,7 @@
                >Configuration</a>).</p>
          
          
-      </div>
+      
    </section>
    
    
@@ -966,7 +962,7 @@
          <p>Note: building the document this way means that whitespace stripping will not be under the 
          control of <code>xsl:strip-space</code> and <code>xsl:preserve-space</code> declarations in the
          stylesheet.</p></li>
-         <li><p class="javaonly">For any method that expects a <code>Source</code> as input (for example,
+         <li class="javaonly"><p>For any method that expects a <code>Source</code> as input (for example,
          the <code>transform()</code> method in an XSLT transformer), it is possible to supply an
             instance of the class <a
                class="javalink" href="net.sf.saxon.lib.AugmentedSource">AugmentedSource</a> object. An
@@ -1038,11 +1034,11 @@
       
       <ul>
          <li><p>The <code>-xsd</code> option of the command-line <code>Validate</code> command</p></li>
-         <li><p class="javaonly">The <code>load()</code> method of <a class="javalink"
+         <li class="javaonly"><p>The <code>load()</code> method of <a class="javalink"
             href="net.sf.saxon.s9api.SchemaManager">net.sf.saxon.s9api.SchemaManager</a>.</p></li>
-         <li><p class="csonly">The <code>Compile()</code> method of <a class="cslink"
+         <li class="csonly"><p>The <code>Compile()</code> method of <a class="cslink"
             href="Saxon.Api.SchemaManager">Saxon.Api.SchemaManager</a>.</p></li>
-         <li><p class="javaonly">The JAXP <code>SchemaFactory.newSchema()</code> method</p></li>
+         <li class="javaonly"><p>The JAXP <code>SchemaFactory.newSchema()</code> method</p></li>
          <li><p>The <code>xsi:schemaLocation</code> and <code>xsi:noNamespaceSchemaLocation</code> attributes in
             an instance document (the SCM file contains components for multiple namespaces, and it should only be loaded once)</p></li>
          <li><p>An <code>xsl:import-schema</code> declaration in XSLT, or an <code>import schema</code> declaration in XQuery.</p></li>

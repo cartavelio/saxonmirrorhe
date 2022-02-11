@@ -96,7 +96,6 @@
       </nav>
 
       <section id="gettingstartedjava" title="Getting started with Saxon on the Java platform" class="javaonly">
-         <div class="javaonly">
          <h1>Getting started with Saxon on the Java platform</h1>
 
          <p>Saxon doesn't come with a graphical user interface: it's a library designed to be integrated into
@@ -206,11 +205,10 @@
 
          <p>For more details on installing Saxon on the Java platform, see <a class="bodylink"
                href="../../installationjava">Installing (Java)</a>.</p>
-         </div>
+         
       </section>
 
-      <section id="gettingstarteddotnet" title="Getting started with Saxon on the .NET platform">
-         <div  class="csonly">
+      <section id="gettingstarteddotnet" title="Getting started with Saxon on the .NET platform" class="csonly">
          <h1>Getting started with Saxon on the .NET platform</h1>
          
          <p>Saxon-CS is a new product for .NET Core, replacing the older Saxon/.NET product. The older
@@ -288,7 +286,7 @@
 
          <p>For more complete details on installing Saxon on the .NET platform, see <a
                class="bodylink" href="../../installationdotnet">Installing (.NET)</a></p>
-         </div>
+         
       </section>
    </section>
    <section id="whatis" title="What is Saxon?">
@@ -416,8 +414,7 @@
    </section>
 
 
-   <section id="installationjava" title="Installation: Java platform">
-      <div class="javaonly">
+   <section id="installationjava" title="Installation: Java platform" class="javaonly">
       <h1>Installation: Java platform</h1>
 
 
@@ -428,9 +425,8 @@
       <nav>
          <ul/>
       </nav>
-       </div>
-      <section id="prerequisites" title="Prerequisites">
-         <div class="javaonly">
+       
+      <section id="prerequisites" title="Prerequisites" class="javaonly">
          <h1>Prerequisites</h1>
 
          <p>The following software must be installed separately, it is not included with the Saxon
@@ -494,12 +490,11 @@
             However, the support for StAX provides the ability to supply input via a customized pull
             pipeline. Saxon is tested with Woodstox 3.0.0. Saxon's schema validation is available
             only with a SAX2 parser.</p>
-         </div>
+         
       </section>
 
 
-      <section id="installingjava" title="Installing the software">
-         <div class="javaonly">
+      <section id="installingjava" title="Installing the software" class="javaonly">
          <h1>Installing the software</h1>
 
 
@@ -538,11 +533,10 @@
             JAR files via a graphical user interface or a text configuration file, or they might ask
             you to put the JAR files in a well known place (for example <code>WEB-INF/lib</code> in
             the case of tomcat). Follow the instructions for the environment you are using.</p>
-         </div>
+         
       </section>
 
-      <section id="jarfiles" title="JAR files included in the product">
-         <div class="javaonly">
+      <section id="jarfiles" title="JAR files included in the product" class="javaonly">
          <h1>JAR files included in the product</h1>
 
 
@@ -811,10 +805,9 @@
          
          <p>Saxonica signs both the open-source and commercial JAR files. The signature does not prevent the JAR file being unpacked
             and modified, but it means that you can always distinguish a modified JAR file from the original.</p>
-         </div>
+         
       </section>
-      <section id="classloading-and-osgi" title="Class Loading and OSGi">
-         <div class="javaonly">
+      <section id="classloading-and-osgi" title="Class Loading and OSGi" class="javaonly">
          <h1>Class Loading and OSGi</h1>
          <aside>This information is intended for advanced users only.</aside>
          
@@ -876,13 +869,12 @@
          
          <p>See also <a class="bodylink"
             href="/about/license/licensefaq">Troubleshooting license file problems</a>.</p>
-         </div>
+         
       </section>
        
    </section>
 
-   <section id="installationdotnet" title="Installation: .NET platform">
-      <div  class="csonly">
+   <section id="installationdotnet" title="Installation: .NET platform" class="csonly">
       <h1>Installation: .NET platform</h1>
      
  
@@ -957,7 +949,7 @@
                >Samples</a>.</p>
          
 
-      </div>
+      
    </section>
 
    <section id="license" title="Saxon Licenses">
@@ -1006,27 +998,27 @@
                example configuration properties can be specified as attributes to the
                <code>factory</code> element of <dfn>Ant</dfn>'s <code>&lt;xslt&gt;</code> task.</p>
             </li>
-            <li>
-               <p class="javaonly">On the Java platform only, the directory containing the executable Saxon software, that is
+            <li class="javaonly">
+               <p>On the Java platform only, the directory containing the executable Saxon software, that is
                      <code>saxon-ee-11.#.jar</code> or <code>saxon-pe-11.#.jar</code>. This only works if Saxon is able
                   to discover where it was loaded from, which depends on the <code>ClassLoader</code> used to load it;
                   as a result this mechanism fails on some application servers.
                </p>
             </li>
-            <li>
-               <p class="javaonly">On the Java platform only, the directories identified by the environment variable
+            <li class="javaonly">
+               <p>On the Java platform only, the directories identified by the environment variable
                         <code><dfn>SAXON_HOME</dfn></code> and <code>SAXON_HOME/bin</code>.</p>
             </li>
-            <li>
-               <p class="javaonly">All directories on the Java class path. When running from the command line, you
+            <li class="javaonly">
+               <p>All directories on the Java class path. When running from the command line, you
                   can set the classpath using the <code>-cp</code> option on the <code>java</code>
                   command, or via the environment variable <code>CLASSPATH</code>. More complex
                   environments might have other ways of building the classpath. In Tomcat, for
                   example, the license file should be treated in the same way as free-standing
                   (unjarred) classes, and placed in the <code>WEB-INF/classes</code> directory.</p>
             </li>
-            <li>
-               <p class="csonly">On the .NET platform only, the directory identified by the environment variable
+            <li class="csonly">
+               <p>On the .NET platform only, the directory identified by the environment variable
                   <code><dfn>SAXON_LICENSE_DIR</dfn></code>.</p>
             </li>
          </ol>
@@ -1049,8 +1041,7 @@
          </p>
       </section>
 
-      <section id="verifylicense" title="Verifying a license">
-         <div class="javaonly">
+      <section id="verifylicense" title="Verifying a license" class="javaonly">
          <h1>Verifying a license</h1>
 
          <p>For Saxon on the Java platform, to verify your license you can use one of the following
@@ -1061,7 +1052,7 @@
          <kbd>java -cp saxon-pe-11.2.jar com.saxonica.config.Verifier saxon-license.lic </kbd>
          <p>Similarly, for Saxon-EE 11.2:</p>
          <kbd>java -cp saxon-ee-11.2.jar com.saxonica.config.Verifier saxon-license.lic </kbd>
-         </div>
+         
       </section>
       
       <section id="checklicense" title="Checking a license is found">
@@ -1132,25 +1123,24 @@
                   (in the latter case it will usually have produced a message to this effect: but
                   depending on your application, you might not see the message).</p>
                
-               <p class="javaonly">You can check what version of Saxon is on the classpath by calling the static method
+               <div class="javaonly">
+               <p>You can check what version of Saxon is on the classpath by calling the static method
                   <code>net.sf.saxon.Version.getProductTitle()</code> from your Java code.</p>
                
-              
-               
-               <p class="javaonly">If you are using the JAXP API, check that the <code>TransformerFactory</code>
+               <p>If you are using the JAXP API, check that the <code>TransformerFactory</code>
               that is instantiated is an instance of <code>ProfessionalTransformerFactory</code>
               or <code>EnterpriseTransformerFactory</code>. Remember that you don't have to rely
               on the JAXP search mechanism to find a <code>TransformerFactory</code>; you can 
               create an instance directly using (for example) <code>new ProfessionalTransformerFactory()</code>,
               which is not only more reliable, it is also much faster.</p>
                
-               <p class="javaonly">If you are using the s9api API, check that you created a <code>Processor</code>
+               <p>If you are using the s9api API, check that you created a <code>Processor</code>
                object using <code>new Processor(true)</code> rather than <code>new Processor(false)</code>.</p>
                
-               <p class="javaonly">You can check what Saxon edition you are effectively running by finding the <code>Configuration</code>
+               <p>You can check what Saxon edition you are effectively running by finding the <code>Configuration</code>
                   object (for example, by using <code>Processor.getUnderlyingConfiguration()</code>)
                   and calling its <code>getEditionCode()</code> method. </p>
-               
+               </div>
                <p>From an XSLT stylesheet, you can establish what version and variant of Saxon you are running by calling
                <code>system-property('xsl:product-version')</code>.</p>
             </li>

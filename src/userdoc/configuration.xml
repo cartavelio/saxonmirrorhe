@@ -108,9 +108,8 @@
          <ul/>
       </nav>
 
-      <section id="jaxp-configuration" title="JAXP Factory Interfaces">
+      <section id="jaxp-configuration" title="JAXP Factory Interfaces" class="javaonly">
          <h1>JAXP Factory Interfaces</h1>
-        <div class="javaonly">
 
          <p>Saxon implements a number of JAXP interfaces, notably the APIs for transformation, XPath processing, and validation.</p>
          
@@ -177,11 +176,10 @@
                >com.saxonica.ee.jaxp.SchemaFactoryImpl</a>. The interface offers methods <code>getProperty(name)</code> and <code>setProperty(name,
                value)</code> which map to the underlying methods in the Saxon <code>Configuration</code>; again, it is also possible to cast to the Saxon
             implementation class and call configuration-setting methods directly.</p>
-       </div>
+       
       </section>
       <section id="s9api-config" title="Configuration using s9api" class="javaonly">
          <h1>Configuration using s9api (Java)</h1>
-         <div class="javaonly">
 
          <p>In Saxon's s9api interface the root API object is the <a class="javalink" href="net.sf.saxon.s9api.Processor">net.sf.saxon.s9api.Processor</a>
             object. This again is a wrapper around a <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>. All the configuration properties
@@ -202,13 +200,11 @@
         
         <aside>When s9api was introduced, the name stood for "Saxon 9 Application Programming Interface".
           It's a nice snappy name, so we've retained it unchanged for Saxon 10.</aside>
-         </div>
+         
       </section>
 
       <section id="config-dotnet" title="Configuration using Saxon.Api (C#)" class="csonly">
          <h1>Configuration using Saxon.Api (C#)</h1>
-
-         <div class="csonly">
 
          <p>In the Saxon.Api interface in Saxon-CS, the root API object is the <a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a> object.
             This is a wrapper around a <code>Saxon.Hej.Configuration</code> object, which should not normally be used directly (though it's exposed
@@ -234,7 +230,7 @@
          <p>In many cases with the Saxon.Api interface it is more appropriate to set options at a finer level of granularity than the <code>Processor</code>.
             For example, options that affect XSLT stylesheet compilation can be set on the <a class="cslink" href="Saxon.Api.XsltCompiler">XsltCompiler</a>
             object, and options that affect XQuery compilation on the <a class="cslink" href="Saxon.Api.XQueryCompiler">XQueryCompiler</a>.</p>
-         </div>
+         
       </section>
 
       <section id="config-commandline" title="Configuration from the Command Line">
@@ -270,8 +266,7 @@
       <section id="config-xqj" title="Configuration using XQJ" class="javaonly">
          <h1>Configuration using XQJ</h1>
 
-         <div class="javaonly">
-            <p>The root object in the XQJ (XQuery for Java) API is <code>javax.xml.query.XQDataSource</code>, and the Saxon implementation class is <a
+         <p>The root object in the XQJ (XQuery for Java) API is <code>javax.xml.query.XQDataSource</code>, and the Saxon implementation class is <a
                class="javalink" href="com.saxonica.xqj.SaxonXQDataSource">com.saxonica.xqj.SaxonXQDataSource</a>. The <code>XQDataSource</code> provides methods
                <code>getProperty(name)</code> and <code>setProperty(name, value)</code>. In these
             calls, the name is the URI-valued string associated with one of the <a
@@ -300,12 +295,12 @@
                   represented using any of the strings ("yes", "on", "true", or "1"), or ("no", "off", "false", or "0").</p>
             </li>
          </ol>
-         </div>
+         
 
       </section>
       <section id="config-ant" title="Configuration when running Ant" class="javaonly">
          <h1>Configuration when running Ant</h1>
-         <div class="javaonly">
+         
          <p>It is possible to run XSLT transformations from Ant using the <code>xslt</code> task, selecting Saxon as the XSLT processor by setting the
                <code>factory</code> child element to the Saxon implementation class of <code>javax.xml.transform.TransformerFactory</code>; that is one of <a
                class="javalink" href="net.sf.saxon.TransformerFactoryImpl">net.sf.saxon.TransformerFactoryImpl</a>, <a class="javalink"
@@ -342,7 +337,7 @@
          in an <code>attribute</code> child of the <code>factory</code> element overrides this. This can
          give dramatic performance improvements when using Ant to transform documents that contain references
          to these common W3C DTDs and entity files.</p></aside>
-         </div>
+         
       </section>
    </section>
    <section id="configuration-file" title="Saxon configuration file">
