@@ -69,6 +69,7 @@ jobject XdmItem::getUnderlyingValue(){
 
     const char * XdmItem:: getStringValue(){
         if(stringValue.empty()) {
+            std::cerr<<"getStringValue cp0-1"<<std::endl;
     		jclass xdmItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmItem");
     		jmethodID sbmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmItemClass,
     					"getStringValue",
@@ -81,7 +82,12 @@ jobject XdmItem::getUnderlyingValue(){
     			jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallObjectMethod(value, sbmID));
     			if(result) {
     					const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
+
     					stringValue = std::string(str);
+
+    					if(stringValue.length() == 0  || stringValue.empty()) {
+                            return nullptr;
+    					}
                         return stringValue.c_str();
     			}
     			return nullptr;
