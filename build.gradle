@@ -105,7 +105,8 @@ dependencies {
     fileTree(dir: "extra/MyDotNet/stubs"),
     fileTree(dir: "lib/asm-${asmVersion}"),
     files(saxonLicenseDir),
-    files("lib/Tidy.jar")
+    files("lib/Tidy.jar"),
+    fileTree(dir: 'extra/lib/', include: ['*.jar'])
   )
   jarjarAsm (
     fileTree(dir: "${buildDir}/lib/asm")
@@ -1671,15 +1672,15 @@ task sqlServerStop(dependsOn: ["dockerup"]) {
 task helloWorld() {
   doLast {
     println("Hello, world.")
+/*
     project.properties.keySet().each { key ->
       if (key.startsWith("td")) {
         println("${key} = ${project.properties.get(key)}")
       }
     }
-/*
+*/
     configurations.samples.resolve().each { path ->
       println(path)
     }
-*/
   }
 }
