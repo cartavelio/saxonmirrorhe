@@ -8,19 +8,16 @@
 package net.sf.saxon.s9api;
 
 
-import java.util.List;
+import net.sf.saxon.lib.ErrorReporter;
 
 /**
  * The <b>XmlProcessingError</b> class contains information about an error detected during
  * compilation or execution of a stylesheet, query, XPath expression, or schema
- *
- * <p>The interface extends {@link StaticError} so that
- *  the methods {@link XsltCompiler#setErrorList(List)} and {@link XQueryCompiler#setErrorList(List)}
- *  continue to function. It is <b>not</b> the case, however, that every {@code XmlProcessingError}
- *  is a static error.</p>
+ * @since 10.0. In 11.0, the super-interface {@code StaticError} is dropped, as it had
+ * become misleading.
  */
 
-public interface XmlProcessingError extends StaticError {
+public interface XmlProcessingError  {
 
 
     HostLanguage getHostLanguage();
@@ -39,7 +36,6 @@ public interface XmlProcessingError extends StaticError {
      * @return true if this is a type error
      */
 
-    @Override
     boolean isTypeError();
 
     /**
@@ -47,7 +43,6 @@ public interface XmlProcessingError extends StaticError {
      * @return QName
      */
 
-    @Override
     QName getErrorCode();
 
     /**
@@ -56,7 +51,6 @@ public interface XmlProcessingError extends StaticError {
      * @return String the error message
      */
 
-    @Override
     String getMessage();
 
     /**
@@ -65,7 +59,6 @@ public interface XmlProcessingError extends StaticError {
      * be a location with little useful information.
      */
 
-    @Override
     Location getLocation();
 
     /**
@@ -77,7 +70,6 @@ public interface XmlProcessingError extends StaticError {
      * @return the URI identifying the location of the stylesheet module or query module
      */
 
-     @Override
      default String getModuleUri() {
          return getLocation().getSystemId();
      }
@@ -91,7 +83,6 @@ public interface XmlProcessingError extends StaticError {
      * ways
      */
 
-    @Override
     boolean isWarning();
 
     /**
@@ -102,7 +93,6 @@ public interface XmlProcessingError extends StaticError {
      * or null if the information is not available
      */
 
-    @Override
     String getPath();
 
     /**
@@ -121,6 +111,25 @@ public interface XmlProcessingError extends StaticError {
      */
 
     XmlProcessingError asWarning();
+
+    /**
+     * Indicate that this error is to be treated as fatal; that is, execution will be abandoned
+     * after reporting this error. This method may be called by an {@link ErrorReporter}, for example
+     * if the error is considered so severe that further processing is not worthwhile, or if
+     * too many errors have been signalled. There is no absolute guarantee that setting this
+     * property will cause execution to be abandoned. If a dynamic error is marked as fatal, it
+     * will generally not be caught by any try/catch mechanism within the stylesheet or query.
+     */
+
+    void setTerminationMessage(String message);
+
+    /**
+     * Ask whether this error is to be treated as fatal, and return the associated message
+     *
+     * @return a non-null message if the error has been marked as a fatal error.
+     */
+
+    String getTerminationMessage();
 
     /**
      * Ask whether this static error has already been reported

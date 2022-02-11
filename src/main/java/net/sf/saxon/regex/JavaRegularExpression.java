@@ -24,7 +24,10 @@ import java.util.regex.PatternSyntaxException;
 
 /**
  * An implementation of RegularExpression that calls the JDK regular expression library directly.
- * This can be invoked by appending ";j" to the flags attribute/argument
+ * This can be invoked by appending ";j" to the flags attribute/argument.
+ *
+ * @implNote Note that in Saxon-CS, this class is emulated by code that invokes the .NET
+ * regex engine, which has different rules. In this case the ";n" flag activates this option.
  */
 public class JavaRegularExpression implements RegularExpression {
 
@@ -44,8 +47,12 @@ public class JavaRegularExpression implements RegularExpression {
         this.flagBits = setFlags(flags);
         this.javaRegex = javaRegex.toString();
         try {
-            //noinspection MagicConstant
-            pattern = Pattern.compile(this.javaRegex, flagBits & (~(Pattern.COMMENTS)));
+            //#if CSHARP==false
+            // The Java COMMENTS option does more than the XPath "x" option. However,
+            // on .NET, the "x" option can be emulated accurately.
+            flagBits = flagBits & (~(Pattern.COMMENTS));
+            //#endif
+            pattern = Pattern.compile(this.javaRegex, flagBits);
         } catch (PatternSyntaxException e) {
             throw new XPathException("Incorrect syntax for Java regular expression", e);
         }

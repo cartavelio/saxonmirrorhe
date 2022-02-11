@@ -210,7 +210,7 @@ public class XsltCompiler {
      * @since 9.9.
      */
 
-    public void setErrorList(List<? super StaticError> errorList) {
+    public void setErrorList(List<? super XmlProcessingError> errorList) {
         //noinspection Convert2MethodRef
         compilerInfo.setErrorReporter(err -> errorList.add(err));
     }

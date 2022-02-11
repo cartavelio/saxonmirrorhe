@@ -103,7 +103,7 @@ public class StandardResultDocumentResolver implements ResultDocumentResolver {
             throw new XPathException("Cannot open connection to specified URL", err4);
         //#endif
         } catch (Exception err6) {
-            throw new XPathException("Exception thrown by ResultDocumentResolver", err6);
+            throw new XPathException("Standard result document resolver failed", err6);
         }
     }
 

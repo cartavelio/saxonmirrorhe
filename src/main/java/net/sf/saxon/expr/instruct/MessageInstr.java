@@ -265,7 +265,7 @@ public class MessageInstr extends Instruction {
         cco.close();
         builder.close();
         NodeInfo content = builder.getCurrentRoot();
-        Message message = new Message((XdmNode)XdmNode.wrap(content), new QName(errorCode), abort, getLocation());
+        Message message = makeMessage(abort, errorCode, content);
         controller.getMessageHandler().accept(message);
         if (abort) {
             TerminationException te = new TerminationException(
@@ -279,6 +279,11 @@ public class MessageInstr extends Instruction {
         }
         return null;
 
+    }
+
+    @CSharpReplaceBody(code="return new Saxon.Api.Message((Saxon.Api.XdmNode) Saxon.Api.XdmValue.Wrap(content), new Saxon.Api.QName(errorCode), abort, new Saxon.Api.Location(getLocation()));")
+    private Message makeMessage(boolean abort, StructuredQName errorCode, NodeInfo content) {
+        return new Message((XdmNode) XdmNode.wrap(content), new QName(errorCode), abort, getLocation());
     }
 
     @CSharpReplaceBody(code="return new javax.xml.transform.stream.StreamResult(System.Console.Error);")

@@ -123,7 +123,14 @@ public class XmlResource implements Resource {
                     InputStream stream = details.getInputStream();
                     source = new StreamSource(stream, resourceURI);
                 } catch (IOException e) {
-                    throw new XPathException(e);
+                    if (details.onError == URIQueryParameters.ON_ERROR_FAIL) {
+                        throw new XPathException(e);
+                    } else if (details.onError == URIQueryParameters.ON_ERROR_WARNING) {
+                        context.getController().warning("collection(): failed to read XML file " + details.resourceUri + ": " + e.getMessage(), "FODC0005", null);
+                        return null;
+                    } else {
+                        return null;
+                    }
                 }
             }
             try {

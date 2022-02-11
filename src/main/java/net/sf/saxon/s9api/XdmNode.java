@@ -522,10 +522,6 @@ public class XdmNode extends XdmItem {
         }
     }
 
-    public XdmSequenceIterator<XdmNode> nodeIterator() {
-        return XdmSequenceIterator.ofNode(this);
-    }
-
     //#if CSHARP==false
     /**
      * Get a stream comprising the items in this value

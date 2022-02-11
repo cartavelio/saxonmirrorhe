@@ -228,11 +228,11 @@ public class XmlProcessingIncident implements XmlProcessingError {
     }
 
     /**
-     * The coloumn number locating the error within a query or stylesheet module
+     * The column number locating the error within a query or stylesheet module
      *
      * @return int
      */
-    @Override
+
     public int getColumnNumber() {
         Location locator = getLocation();
         if (locator != null) {
@@ -246,7 +246,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
      *
      * @return int
      */
-    @Override
+
     public int getLineNumber() {
         Location locator = getLocation();
         if (locator != null) {
@@ -264,7 +264,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
      * The name will always be in the form of a lexical XML QName, and should match the name used
      * in explain() output displaying the instruction.
      */
-    @Override
+
     public String getInstructionName() {
         return ((NodeInfo) locator).getDisplayName();
     }

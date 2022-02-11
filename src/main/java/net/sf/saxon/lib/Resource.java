@@ -39,7 +39,8 @@ public interface Resource {
      * for text resources, a map or array for JSON resources, a base64Binary value
      * for binary resource. May also return null if the resource cannot be materialized
      * and this is not to be treated as an error.
-     * @throws XPathException if a failure occurs materializing the resource
+     * @throws XPathException if a failure occurs materializing the resource, and errors
+     * are to be treated as fatal
      */
 
     Item getItem(XPathContext context) throws XPathException;

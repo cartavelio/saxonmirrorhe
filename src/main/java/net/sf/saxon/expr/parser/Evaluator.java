@@ -31,6 +31,7 @@ public abstract class Evaluator {
 
     void setCode(int code) {
         this.code = code;
+        Evaluators.index(this, code);
     }
 
     /**
@@ -57,6 +58,11 @@ public abstract class Evaluator {
 
     public final static class EmptySequence extends Evaluator {
         public final static EmptySequence INSTANCE = new EmptySequence();
+
+        private EmptySequence() {
+            setCode(Evaluators.RETURN_EMPTY_SEQUENCE);
+        }
+
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) {
             return net.sf.saxon.value.EmptySequence.getInstance();
@@ -71,6 +77,11 @@ public abstract class Evaluator {
     public final static class Literal extends Evaluator {
 
         public static Literal INSTANCE = new Literal();
+
+        private Literal() {
+            setCode(Evaluators.EVALUATE_LITERAL);
+        }
+
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) {
             return ((net.sf.saxon.expr.Literal)expr).getGroundedValue();
@@ -84,6 +95,10 @@ public abstract class Evaluator {
 
     public final static class Variable extends Evaluator {
         public static Variable INSTANCE = new Variable();
+
+        private Variable() {
+            setCode(Evaluators.EVALUATE_VARIABLE);
+        }
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             try {
@@ -104,6 +119,10 @@ public abstract class Evaluator {
 
     public final static class SuppliedParameter extends Evaluator {
         public final static SuppliedParameter INSTANCE = new SuppliedParameter();
+
+        private SuppliedParameter() {
+            setCode(Evaluators.EVALUATE_SUPPLIED_PARAMETER);
+        }
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             try {
@@ -125,6 +144,10 @@ public abstract class Evaluator {
 
     public final static class SingleItem extends Evaluator {
         public final static SingleItem INSTANCE = new SingleItem();
+
+        private SingleItem() {
+            setCode(Evaluators.CALL_EVALUATE_SINGLE_ITEM);
+        }
         @Override
         public Item evaluate(Expression expr, XPathContext context) throws XPathException {
             return expr.evaluateItem(context);
@@ -139,6 +162,10 @@ public abstract class Evaluator {
 
     public final static class OptionalItem extends Evaluator {
         public final static OptionalItem INSTANCE = new OptionalItem();
+
+        public OptionalItem() {
+            setCode(Evaluators.CALL_EVALUATE_OPTIONAL_ITEM);
+        }
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             Item item = expr.evaluateItem(context);
@@ -161,6 +188,10 @@ public abstract class Evaluator {
 
     public final static class LazySequence extends Evaluator {
         public final static LazySequence INSTANCE = new LazySequence();
+
+        public LazySequence() {
+            setCode(Evaluators.MAKE_CLOSURE);
+        }
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             SequenceIterator iter = expr.iterate(context);
@@ -169,20 +200,25 @@ public abstract class Evaluator {
 
     };
 
-    /**
-     * An evaluator for arguments that in general return a sequence, where the sequence is evaluated
-     * lazily on first use, and where the value might be needed more than once.
-     */
-
-    public final static class MemoSequence extends Evaluator {
-        public final static MemoSequence INSTANCE = new MemoSequence();
-        @Override
-        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
-            SequenceIterator iter = expr.iterate(context);
-            return new net.sf.saxon.om.MemoSequence(iter);
-        }
-
-    };
+//    /**
+//     * An evaluator for arguments that in general return a sequence, where the sequence is evaluated
+//     * lazily on first use, and where the value might be needed more than once.
+//     */
+//
+//    public final static class MemoSequence extends Evaluator {
+//        public final static MemoSequence INSTANCE = new MemoSequence();
+//
+//        public MemoSequence() {
+//            setCode(Evaluators.MAKE_MEMO_S);
+//        }
+//
+//        @Override
+//        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
+//            SequenceIterator iter = expr.iterate(context);
+//            return new net.sf.saxon.om.MemoSequence(iter);
+//        }
+//
+//    };
 
     /**
      * An evaluator for arguments that in general return a sequence, where the sequence is evaluated
@@ -191,6 +227,11 @@ public abstract class Evaluator {
 
     public final static class MemoClosure extends Evaluator {
         public final static MemoClosure INSTANCE = new MemoClosure();
+
+        public MemoClosure() {
+            setCode(Evaluators.MAKE_MEMO_CLOSURE);
+        }
+
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             return new net.sf.saxon.value.MemoClosure(expr, context);
@@ -205,6 +246,11 @@ public abstract class Evaluator {
 
     public final static class SingletonClosure extends Evaluator {
         public final static SingletonClosure INSTANCE = new SingletonClosure();
+
+        public SingletonClosure() {
+            setCode(Evaluators.MAKE_SINGLETON_CLOSURE);
+        }
+
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             return new net.sf.saxon.value.SingletonClosure(expr, context);
@@ -221,6 +267,11 @@ public abstract class Evaluator {
     public final static class EagerSequence extends Evaluator {
 
         public static EagerSequence INSTANCE = new EagerSequence();
+
+        public EagerSequence() {
+            setCode(Evaluators.ITERATE_AND_MATERIALIZE);
+        }
+
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             try {
@@ -240,6 +291,10 @@ public abstract class Evaluator {
 
     public final static class SharedAppend extends Evaluator {
         public final static SharedAppend INSTANCE = new SharedAppend();
+
+        public SharedAppend() {
+            setCode(Evaluators.SHARED_APPEND_EXPRESSION);
+        }
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             try {
@@ -276,6 +331,10 @@ public abstract class Evaluator {
 
     public final static class StreamingArgument extends Evaluator {
         public final static StreamingArgument INSTANCE = new StreamingArgument();
+
+        public StreamingArgument() {
+            setCode(Evaluators.STREAMING_ARGUMENT);
+        }
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             return context.getConfiguration().obtainOptimizer().evaluateStreamingArgument(expr, context);
@@ -289,6 +348,10 @@ public abstract class Evaluator {
 
     public final static class MakeIndexedVariable extends Evaluator {
         public final static MakeIndexedVariable INSTANCE = new MakeIndexedVariable();
+
+        public MakeIndexedVariable() {
+            setCode(Evaluators.MAKE_INDEXED_VARIABLE);
+        }
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             return context.getConfiguration().obtainOptimizer().makeIndexedValue(expr.iterate(context));
@@ -302,6 +365,10 @@ public abstract class Evaluator {
 
     public final static class Process extends Evaluator {
         public final static Process INSTANCE = new Process();
+
+        public Process() {
+            setCode(Evaluators.PROCESS);
+        }
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             Controller controller = context.getController();
@@ -327,6 +394,10 @@ public abstract class Evaluator {
 
     public final static class LazyTail extends Evaluator {
         public final static LazyTail INSTANCE = new LazyTail();
+
+        public LazyTail() {
+            setCode(Evaluators.LAZY_TAIL_EXPRESSION);
+        }
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             TailExpression tail = (TailExpression) expr;
