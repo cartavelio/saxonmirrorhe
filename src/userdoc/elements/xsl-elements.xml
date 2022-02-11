@@ -1567,7 +1567,23 @@
                     <code>xsl:for-each</code> element are applied to each item in the input sequence
                     in turn. The full syntax of expressions is outlined in <a class="bodylink"
                         href="/expressions">XPath Syntax</a>.</attribute>
-                <attribute name="separator" use="optional">Allowed only if syntax extensions are
+                <attribute name="array" use="optional">Experimental addition in XSLT 4.0, 
+                    allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
+                    Defines an array over which
+                    the statement will iterate. The XSLT statements subordinate to the
+                    <code>xsl:for-each</code> element are applied to each member of the input array
+                    in turn; the members are presented as instances of the type <code>record(value)</code>,
+                    which can be converted to a sequence (or in many cases, a single item) using the
+                    expression <code>?value</code>. </attribute>
+                <attribute name="map" use="optional">Experimental addition in XSLT 4.0, 
+                    allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
+                    Defines a map over which the statement will iterate. The XSLT statements subordinate to the
+                    <code>xsl:for-each</code> element are applied to each entry of the input map
+                    in turn (in an undefined order); the entries are presented as instances of the type 
+                    <code>record(key as xs:anyAtomicType, value as item()*)</code>, so the key
+                    can be obtained using <code>?key</code>, and the value using <code>?value</code>.</attribute>
+                <attribute name="separator" use="optional">Experimental addition in XSLT 4.0, 
+                    allowed only if syntax extensions are
                     enabled. The value is an attribute value template. If present, a text node is formed
                     from the effective value of the attribute, and this text node is inserted into the result
                     sequence after processing every item in the (sorted) input sequence other than the last.</attribute>
@@ -1673,6 +1689,24 @@
             <attributes>
                 <attribute name="select" use="mandatory">Expression to select
                     nodes/values.</attribute>
+                <attribute name="array" use="optional">Experimental addition in XSLT 4.0, 
+                    allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
+                    Defines an array over which
+                    the statement will iterate. The XSLT statements subordinate to the
+                    <code>xsl:for-each-group</code> element are applied to each member of the input array
+                    in turn; the members are presented as instances of the type <code>record(value)</code>,
+                    which can be converted to a sequence (or in many cases, a single item) using the
+                    expression <code>?value</code>. </attribute>
+                <attribute name="map" use="optional">Experimental addition in XSLT 4.0, 
+                    allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
+                    Defines a map over which the statement will iterate. The XSLT statements subordinate to the
+                    <code>xsl:for-each-group</code> element are applied to each entry of the input map
+                    in turn (in an undefined order); the entries are presented as instances of the type 
+                    <code>record(key as xs:anyAtomicType, value as item()*)</code>, so the key
+                    can be obtained using <code>?key</code>, and the value using <code>?value</code>.
+                    Because the order of entries is undefined, the only grouping option that makes sense
+                    for maps is <code>group-by</code>.
+                </attribute>
                 <attribute name="group-by" use="optional">Groups together all items having the same
                     value for a grouping key. The grouping key may have multiple values (a sequence
                     of values) in which case the item is added to more than one group.</attribute>
@@ -2113,6 +2147,52 @@
             <see-also name="import" type="xsl-elements"/>
         </xsl-element>
     </section>
+    
+    <section id="item-type" title="xsl:item-type">
+        <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
+            <name>item-type</name>
+            <description>
+                <p>Experimental XSLT 4.0 feature. Used to declare a name (or alias) for an item type.</p>
+            </description>
+            <attributes>
+                <attribute name="name" use="mandatory">
+                    <p>A QName used to identify the item type uniquely within the stylesheet package.</p>                   
+                </attribute>
+                <attribute name="as" use="mandatory">
+                    <p>The definition of the item type.</p>                   
+                </attribute>
+                <attribute name="visibility" use="optional">
+                    <p>The visibility of the item type. Saxon 11 only allows the value "private", which means
+                    the item type name is available only within the containing package.</p>                   
+                </attribute>
+            </attributes>
+            <details>
+                <p>The <code>xsl:item-type</code> element is always used at the top level of the
+                    stylesheet.</p>                
+            </details>
+            <examples>
+                <example>
+                    <p>Declares and uses a named item type as a synonym for a record type:</p>
+                    <samp><![CDATA[<xsl:item-type name="complex" as="record(r as xs:double, i as xs:double)"/>
+<xsl:param name="location" select="0.00" as="type(complex)"/>
+<xsl:variable name="location-real-part" select="$location?r" as="xs:double"/>
+<xsl:variable name="location-imaginary-part" select="$location?i" as="xs:double"/>
+]]></samp>
+                </example>
+            </examples>
+            <in-spec>xslt40</in-spec>
+            <saxon-edition>PE</saxon-edition>
+            <status>
+                <p>In the Saxon 11 implementation item type names must be unique within the stylesheet;
+                    import precedences for multiple declarations are not implemented, and item types
+                    are not visible in other stylesheet packages. The <code>visibility</code> attribute,
+                if present, must have the value <code>"private"</code>.</p>
+                <p>Saxon 11 requires the type name to be referenced in the form <code>as="type(typename)"</code>,
+                whereas the current XPath 4.0 proposal suggests allowing the simpler <code>as="typename"</code>
+                (which requires type alias names to be distinct from the names of atomic and union types).</p>
+            </status>
+        </xsl-element>
+    </section>
 
     <section id="iterate" title="xsl:iterate">
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
@@ -2124,7 +2204,23 @@
             <attributes>
                 <attribute name="select" use="mandatory">Input sequence over which the iteration is
                     processed.</attribute>
+                <attribute name="array" use="optional">Experimental addition in XSLT 4.0, 
+                    allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
+                    Defines an array over which
+                    the statement will iterate. The XSLT statements subordinate to the
+                    <code>xsl:iterate</code> element are applied to each member of the input array
+                    in turn; the members are presented as instances of the type <code>record(value)</code>,
+                    which can be converted to a sequence (or in many cases, a single item) using the
+                    expression <code>?value</code>. </attribute>
+                <attribute name="map" use="optional">Experimental addition in XSLT 4.0, 
+                    allowed only if syntax extensions are enabled: an alternative to the <code>select</code> attribute. 
+                    Defines a map over which the statement will iterate. The XSLT statements subordinate to the
+                    <code>xsl:iterate</code> element are applied to each entry of the input map
+                    in turn (in an undefined order); the entries are presented as instances of the type 
+                    <code>record(key as xs:anyAtomicType, value as item()*)</code>, so the key
+                    can be obtained using <code>?key</code>, and the value using <code>?value</code>.</attribute>
             </attributes>
+            
             <details>
                 <p>The <code>xsl:iterate</code> instruction is new in XSLT 3.0. It is similar to <a
                         class="bodylink code" href="../for-each">xsl:for-each</a>, except that the
@@ -2296,6 +2392,16 @@
             <description>
                 <p>Used to construct a new map.</p>
             </description>
+            <attributes>
+                <attribute name="on-duplicates" use="optional">Experimental XSLT 4.0 addition, available
+                    only if syntax extensions are enabled. An expression which must evaluate to an arity-2 function.
+                    If the attribute is present, then when a duplicate key value is encountered, the function
+                    is called supplying the old and new values for the key, and the old value for the key is
+                    replaced with the result of the function call. For example, if the function is
+                    <code>->($old, $new){$old, $new}</code> then the new value will be the sequence-concatenation
+                    of the duplicate entries.
+                </attribute>
+            </attributes>
             <details>
                 <p>The sequence constructor must evaluate to a sequence of maps. These can be
                     constructed using <a class="bodylink code" href="../map-entry">xsl:map-entry</a>
@@ -2318,12 +2424,15 @@
 ]]></samp>
                     </p>
                 </example>
+                
                 <example>
+                    <p>This XSLT 4.0 example creates a map in which the value for a given product code is the total of the
+                    sales for that product across multiple outlets.</p>
                     <p>
-                        <samp><![CDATA[<xsl:variable name="index" as="map(xs:string, element(employee))">
-    <xsl:map>
-        <xsl:for-each select="//employee">
-            <xsl:map-entry key="@empNr" select="."/>
+                        <samp><![CDATA[<xsl:variable name="total-sales-by-sku" as="map(xs:string, xs:decimal)">
+    <xsl:map on-duplicates="->($old, $new){$old + $new}">
+        <xsl:for-each select="//outlet/product">
+            <xsl:map-entry key="@sku" select="xs:decimal(@sales)"/>
         </xsl:for-each>
     </xsl:map>
 </xsl:variable>
@@ -3369,11 +3478,22 @@
             <description>
                 <p>Used within an <a class="bodylink code" href="../choose">xsl:choose</a> element
                     to indicate the default action to be taken if none of the other choices
-                    matches.</p>
+                    matches. With XSLT 4.0 syntax enabled, it may
+                    also appear within <code>xsl:switch</code>.</p>
             </description>
+            <attributes>
+                <attribute name="select" use="optional">XPath expression. Experimental: available only 
+                    if XSLT 4.0 constructs are enabled. Provides an alternative way of supplying
+                    the return value; if present, the contained sequence
+                    constructor must be empty.</attribute>
+            </attributes>
+            <status>
+                <p>The <code>select</code> attribute is implemented from Saxon 10, provided syntax extensions are enabled.</p>
+            </status>
             <in-spec>xslt10</in-spec>
             <in-spec>xslt20</in-spec>
             <in-spec>xslt30</in-spec>
+            <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
             <status>
                 <p>Provided that syntax extensions are enabled, Saxon (from 10) allows the <code>xsl:when</code> and
@@ -3381,6 +3501,7 @@
                     in place of a contained sequence constructor.</p>
             </status>
             <see-also name="choose" type="xsl-elements"/>
+            <see-also name="switch" type="xsl-elements"/>
             <see-also name="when" type="xsl-elements"/>
         </xsl-element>
     </section>
@@ -4503,6 +4624,54 @@
             <see-also name="package" type="xsl-elements"/>
         </xsl-element>
     </section>
+    
+    <section id="switch" title="xsl:switch">
+        <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
+            <name>switch</name>
+            <description>
+                <p>Proposed XSLT 4.0 instruction. Used to choose one of a number of alternative outputs, based
+                on the value of a supplied expression</p>
+            </description>
+            <attributes>
+                <attribute name="select" use="mandatory">Computes an atomic value that is compared with the
+                values in the <code>test</code> attributes of the <code>xsl:when</code> children.</attribute>
+            </attributes>
+            <details>
+                <p>The <code>select</code> attribute contains an expression which must deliver
+                a single atomic value (it is atomized if necessary). This value is compared with
+                the values of the <code>test</code> conditions in each of the contained <code>xsl:when</code>
+                    elements in turn until the first match is found. If a match is found, that <code>xsl:when</code>
+                element is evaluated; if no match is found, the <code>xsl:otherwise</code> element is evaluated;
+                if there is no <code>xsl:otherwise</code> element, the <code>xsl:switch</code> instruction
+                returns an empty sequence.</p>
+                
+                <p>Unlike <code>xsl:choose</code>, the test condition in the <code>xsl:when</code> element is an expression
+                    that can evaluate to any sequence of atomic values. The comparison is done using the "=" operator, so
+                    the test succeeds if any of the values matches.</p>
+            </details>
+            <examples>
+                <example>
+                    <p>
+                        <samp><![CDATA[<xsl:switch select="@cat">
+    <xsl:when test="'F'">Fiction</xsl:when>
+    <xsl:when test="'C'">Crime</xsl:when>
+    <xsl:when test="'R', 'L'" select="my:f(@cat)"/>
+    <xsl:otherwise>General</xsl:otherwise>
+</xsl:switch>
+]]></samp>
+                    </p>
+                </example>
+            </examples>
+            <in-spec>xslt40</in-spec>
+            <saxon-edition>PE EE</saxon-edition>
+            <status>
+                <p>Implemented experimentally in Saxon 11; syntax extensions must be enabled.</p>
+            </status>
+            <see-also name="when" type="xsl-elements"/>
+            <see-also name="otherwise" type="xsl-elements"/>
+            <see-also name="if" type="xsl-elements"/>
+        </xsl-element>
+    </section>
 
     <section id="template" title="xsl:template">
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
@@ -5163,7 +5332,8 @@
             <name>when</name>
             <description>
                 <p>Used within an <a class="bodylink code" href="../choose">xsl:choose</a> element
-                    to indicate one of a number of choices.</p>
+                    to indicate one of a number of choices. With XSLT 4.0 syntax enabled, it may
+                also appear within <code>xsl:switch</code>.</p>
             </description>
             <attributes>
                 <attribute name="test" use="mandatory">XPath expression. If this is the first
@@ -5171,16 +5341,21 @@
                     whose test condition matches the current element, the content of the
                         <code>xsl:when</code> element is expanded, otherwise it is
                     ignored.</attribute>
+                <attribute name="select" use="optional">XPath expression. Experimental: available only 
+                    if XSLT 4.0 constructs are enabled. Provides an alternative way of supplying
+                the return value when the <code>test</code> condition matches; if present, the contained sequence
+                constructor must be empty.</attribute>
             </attributes>
             <in-spec>xslt10</in-spec>
             <in-spec>xslt20</in-spec>
             <in-spec>xslt30</in-spec>
+            <in-spec>xslt40</in-spec>
             <status>
-                <p>From Saxon 10, provided syntax extensions are enabled, the <code>xsl:when</code>
-                    and <code>xsl:otherwise</code> elements allow a <code>select</code> attribute in place of the contained sequence constructor.</p>
+                <p>The <code>select</code> attribute is implemented from Saxon 10, provided syntax extensions are enabled.</p>
             </status>
 
             <see-also name="choose" type="xsl-elements"/>
+            <see-also name="switch" type="xsl-elements"/>
             <see-also name="otherwise" type="xsl-elements"/>
             <see-also name="if" type="xsl-elements"/>
         </xsl-element>
