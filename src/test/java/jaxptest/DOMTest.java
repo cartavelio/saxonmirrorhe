@@ -31,6 +31,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.xpath.XPathEvaluator;
 import net.sf.saxon.xpath.XPathFactoryImpl;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
@@ -1135,6 +1136,7 @@ public class DOMTest {
     }
 
     @Test
+    @Tag("expectedtofail")
     public void testElementCopyNN() {
         // MHK 2020-03-13: this is failing on 10.0. The call on getNamespaceURI() on the 'foo' element returns
         // "", not the actual namespace http://foo. I think this is OK: we don't actually support a non-namespace-aware

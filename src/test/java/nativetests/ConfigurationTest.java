@@ -12,6 +12,7 @@ import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.ErrorListener;
@@ -57,7 +58,8 @@ public class ConfigurationTest {
         }
     }
 
-    @Disabled
+    @Test
+    @Tag("mikeonly")
     // This test can't succeed for anyone except Mike :-)
     public void testBug4650() {
         try {
