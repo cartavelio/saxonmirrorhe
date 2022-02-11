@@ -56,27 +56,208 @@
   }
 }
 
-task config_sample(
-  type: JavaExec,
-  dependsOn: ["hej_featureKeys"],
-  description: "Construct the configuration file XSD"
-) {
-  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
-  inputs.files "${projectDir}/src/samples/config/config-raw.xsd"
-  outputs.file "${buildDir}/samples/config/config.xsd"
-  classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
-  args "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToSchema.xsl",
-    "-o:${buildDir}/samples/config/config.xsd",
-    "-it:main",
-    "FeatureKeys=FeatureKeys.xml",
-    "AdditionalFeatures=AdditionalFeatures.xml",
-    "ConfigSchema=${projectDir}/src/samples/config/config-raw.xsd"
+// ============================================================
+
+task run_cmd_samples(
+        description: "Run command line samples",
+        dependsOn: ["run_config_samples",
+                    "run_cmd_books_sample_tests",
+                    "run_cmd_tour_sample_tests",
+                    "run_cmd_shakespeare_sample_tests",
+                    "run_cmd_bible_sample_tests"]
+) {}
+
+// TODO still need to check the output of running the command line samples
+
+task run_config_samples(
+        description: "Test validation of the sample configuration files"
+) {}
+
+["config", "config-HE"].each {configFile ->
+  Task t = task "run_${configFile}"(
+          type: JavaExec,
+          dependsOn: ["gen_config_schema", "copy_samples", "eejJar"],
+          description: "Validate the ${configFile}.xml sample configuration file"
+  ) {
+    inputs.files "${buildDir}/resources/samples/config/${configFile}.xml"
+    inputs.files "${buildDir}/resources/samples/config/config.xsd"
+    workingDir = "${buildDir}/resources/samples"
+
+    classpath = configurations.samples \
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar") \
+        + files(saxonLicenseDir)
+    main = "com.saxonica.Validate"
+    args "-t",
+            "-s:${buildDir}/resources/samples/config/${configFile}.xml",
+            "-xsd:${buildDir}/resources/samples/config/config.xsd"
+  }
+  run_config_samples.dependsOn t
 }
+
+def booksTests = ["ee": ["Transform_1", "Transform_2", "Transform_3", "Query_1", "Query_2", "Validate"],
+                  "pe": ["Transform_1", "Transform_2", "Transform_3", "Query_1", "Query_2"],
+                  "he": ["Transform_1", "Transform_2", "Transform_3", "Query_1"]]
+def booksSampleArgs = ["Transform_1": ["-s:data/books.xml", "-xsl:styles/books.xsl", "-t"],
+                       "Transform_2": ["-s:data/books.xml", "-xsl:styles/books.xsl", "top-author=Thomas Hardy"],
+                       "Transform_3": ["-s:data/books.xml", "-xsl:styles/books-csv.xsl"],
+                       "Query_1": ["-s:data/books.xml", "-q:query/books.xq"],
+                       "Query_2": ["-s:data/books.xml", "-qs:saxon:line-number((//*)[last()])", "-l:on"],
+                       "Validate": ["-s:data/books.xml", "-xsd:data/books.xsd"]]
+
+task run_cmd_books_sample_tests(
+        description: "Run the command line books sample tests"
+) {}
+
+["he", "pe", "ee"].each { edition ->
+  def tests = booksTests[edition]
+  tests.each { test ->
+    def call = test.split("_")[0]
+    Task t = task "run_books_${test}_${edition}"(
+            type: JavaExec,
+            dependsOn: "${edition}jJar",
+            description: "Run the cmd books sample with ${edition}, test ${test}"
+    ) {
+      def resdir = "${buildDir}/samples/results/cmd/${edition}"
+      doFirst {
+        mkdir resdir
+        if ((test != "Transform_1") && (test != "Transform_2")) {
+          standardOutput = new FileOutputStream(new File("${resdir}/books_${test}.txt"))
+        }
+      }
+
+      def outputfile = "books_${test}.html"
+      outputs.file "${resdir}/${outputfile}"
+      workingDir = "${buildDir}/output/${edition}/resources/samples"
+
+      def jclass = "net.sf.saxon.Transform"
+      if (call == "Query") {
+        jclass = "net.sf.saxon.Query"
+      } else {
+        if (call == "Validate") {
+          jclass = "com.saxonica.Validate"
+        }
+      }
+
+      classpath = configurations.samples \
+        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
+        + files(saxonLicenseDir)
+      main = jclass
+      def testargs = booksSampleArgs[test]
+      if ((test == "Transform_1") || (test == "Transform_2")) {
+        testargs += ["-o:${resdir}/${outputfile}"]
+      }
+      //println (testargs)
+      args testargs
+
+    }
+    run_cmd_books_sample_tests.dependsOn t
+  }
+}
+
+def tourSampleArgs = ["Transform_1": ["-xsl:styles/tour.xsl", "-it:main"],
+                      "Transform_2": ["-xsl:styles/tour.xsl", "-it:main", "start=a6"],
+                      "Transform_3": ["-xsl:styles/tour.xsl", "-it:main", "start=g2"],
+                      "Query_1": ["-q:query/tour.xq", "start=e5"],
+                      "Query_2": ["-q:query/tour.xq", "start=d2", "end=42"],
+                      "Query_3": ["-q:query/tour.xq", "end=61"]]
+
+task run_cmd_tour_sample_tests(
+        description: "Run the command line knights tour sample tests"
+) {}
+
+["he", "pe", "ee"].each { edition ->
+  def tests = ["Transform_1", "Transform_2", "Transform_3", "Query_1", "Query_2", "Query_3"]
+  tests.each { test ->
+    def call = test.split("_")[0]
+    Task t = task "run_tour_${test}_${edition}"(
+            type: JavaExec,
+            dependsOn: "${edition}jJar",
+            description: "Run the cmd knights tour sample with ${edition}, test ${test}"
+    ) {
+      def resdir = "${buildDir}/samples/results/cmd/${edition}"
+      doFirst {
+        mkdir resdir
+      }
+      def outputfile = "tour_${test}.html"
+      outputs.file "${resdir}/${outputfile}"
+      workingDir = "${buildDir}/output/${edition}/resources/samples"
+
+      def jclass = "net.sf.saxon.Transform"
+      if (call == "Query") {
+        jclass = "net.sf.saxon.Query"
+      }
+
+      classpath = configurations.samples \
+        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
+        + files(saxonLicenseDir)
+      main = jclass
+      def testargs = tourSampleArgs[test]
+      testargs += ["-o:${resdir}/${outputfile}"]
+      //println (testargs)
+      args testargs
+
+    }
+    run_cmd_tour_sample_tests.dependsOn t
+  }
+}
+
+task run_cmd_shakespeare_sample_tests(
+        description: "Run the command line shakespeare sample tests"
+) {}
+
+["he", "pe", "ee"].each { edition ->
+  Task t = task "run_shakespeare_Transform_${edition}"(
+          type: JavaExec,
+          dependsOn: "${edition}jJar",
+          description: "Run the cmd shakespeare sample transform with ${edition}"
+  ) {
+    def resdir = "${buildDir}/samples/results/cmd/${edition}"
+    doFirst {
+      mkdir "${resdir}/playhtml/"
+    }
+    workingDir = "${buildDir}/output/${edition}/resources/samples"
+
+    classpath = configurations.samples \
+        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
+        + files(saxonLicenseDir)
+    main = "net.sf.saxon.Transform"
+    args "-s:data/othello.xml", "-xsl:styles/play.xsl", "dir=${resdir}/playhtml"
+
+  }
+  run_cmd_shakespeare_sample_tests.dependsOn t
+}
+
+task run_cmd_bible_sample_tests(
+        description: "Run the command line bible sample tests"
+) {}
+
+["he", "pe", "ee"].each { edition ->
+  Task t = task "run_bible_Transform_${edition}"(
+          type: JavaExec,
+          dependsOn: "${edition}jJar",
+          description: "Run the cmd bible sample transform with ${edition}"
+  ) {
+    def resdir = "${buildDir}/samples/results/cmd/${edition}"
+    doFirst {
+      mkdir "${resdir}/biblehtml/"
+    }
+    workingDir = "${buildDir}/output/${edition}/resources/samples"
+
+    classpath = configurations.samples \
+        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
+        + files(saxonLicenseDir)
+    main = "net.sf.saxon.Transform"
+    args "-s:${projectDir}/src/test/testdata/bible/nt/nt.xml", "-xsl:styles/bible.xsl", "dir=${resdir}/biblehtml"
+
+  }
+  run_cmd_bible_sample_tests.dependsOn t
+}
+
+// ============================================================
 
 task hej_setup_samples(
   type: Copy,
-  dependsOn: ["config_sample", "he_samples_common"]
+  dependsOn: ["he_samples_common"]
 ) {
   into "${buildDir}/samples/java/he"
   from ("${projectDir}/src/samples/java/he") {
@@ -95,7 +276,7 @@ task hej_setup_samples(
 
 task eej_setup_samples(
   type: Copy,
-  dependsOn: ["config_sample", "ee_samples_common"]
+  dependsOn: ["ee_samples_common"]
 ) {
   into "${buildDir}/samples/java/ee"
   from ("${projectDir}/src/samples/java/ee") {

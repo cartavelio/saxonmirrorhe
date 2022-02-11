@@ -136,7 +136,7 @@ task resources_drivers(
 
 task samples_common(
         type: Copy,
-        dependsOn: ["copy_usecases", "copy_samples", "copy_config"],
+        dependsOn: ["copy_usecases", "copy_samples", "gen_config_schema"],
         description: "Assemble Cross-Platform Samples and Use-Cases"
 ) {
     // Just a place to hang dependencies
@@ -186,13 +186,22 @@ task copy_samples(
     }
 }
 
-task copy_config(
-        type: Copy,
-        dependsOn: ["config_sample", "copy_samples"],
-        description: "Copy generated config.xsd into the resources folder"
+task gen_config_schema(
+        type: JavaExec,
+        dependsOn: ["hej_featureKeys"],
+        description: "Generate the configuration file schema"
 ) {
-    into "${buildDir}/resources/samples/config"
-    from "${buildDir}/samples/config/config.xsd"
+    inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
+    inputs.files "${projectDir}/src/samples/config/config-raw.xsd"
+    outputs.file "${buildDir}/resources/samples/config/config.xsd"
+    classpath = configurations.preprocessor
+    main = "net.sf.saxon.Transform"
+    args "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToSchema.xsl",
+            "-o:${buildDir}/resources/samples/config/config.xsd",
+            "-it:main",
+            "FeatureKeys=FeatureKeys.xml",
+            "AdditionalFeatures=AdditionalFeatures.xml",
+            "ConfigSchema=${projectDir}/src/samples/config/config-raw.xsd"
 }
 
 task samples_j_src(
