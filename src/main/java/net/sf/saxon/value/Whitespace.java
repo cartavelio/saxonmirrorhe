@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,7 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.tree.iter.UnfailingIterator;
+import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.tiny.CharSlice;
 import net.sf.saxon.tree.tiny.CompressedWhitespace;
 import net.sf.saxon.tree.util.FastStringBuffer;
@@ -86,10 +86,10 @@ public class Whitespace {
                         case '\n':
                         case '\r':
                         case '\t':
-                            sb.append(' ');
+                            sb.cat(' ');
                             break;
                         default:
-                            sb.append(c);
+                            sb.cat(c);
                     }
                 }
                 return sb;
@@ -117,7 +117,7 @@ public class Whitespace {
             for (int i = 0; i < value.length(); i++) {
                 char c = value.charAt(i);
                 if (c > 32 || !C0WHITE[c]) {
-                    sb.append(c);
+                    sb.cat(c);
                 }
             }
             return sb;
@@ -237,10 +237,10 @@ public class Whitespace {
                 case '\n':
                 case '\r':
                 case '\t':
-                    sb.append(' ');
+                    sb.cat(' ');
                     break;
                 default:
-                    sb.append(c);
+                    sb.cat(c);
                     break;
             }
         }
@@ -275,12 +275,12 @@ public class Whitespace {
                     if (inWhitespace) {
                         // remove the whitespace
                     } else {
-                        sb.append(' ');
+                        sb.cat(' ');
                         inWhitespace = true;
                     }
                     break;
                 default:
-                    sb.append(c);
+                    sb.cat(c);
                     inWhitespace = false;
                     break;
             }
@@ -351,7 +351,7 @@ public class Whitespace {
      * An iterator that splits a string on whitespace boundaries, corresponding to the XPath 3.1 function tokenize#1
      */
 
-    public static class Tokenizer implements UnfailingIterator<StringValue> {
+    public static class Tokenizer implements AtomicIterator<StringValue> {
 
         private char[] input;
         private int position;
@@ -389,9 +389,5 @@ public class Whitespace {
             // no action
         }
 
-        @Override
-        public int getProperties() {
-            return 0;
-        }
     }
 }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -143,6 +143,7 @@ public class XPathExpressionImpl implements XPathExpression {
      *                                  result cannot be converted to the requested type.
      */
     /*@Nullable*/
+    @Override
     public Object evaluate(/*@Nullable*/ Object node, /*@NotNull*/ QName qName) throws XPathExpressionException {
         Item contextItem;
         if (node instanceof ZeroOrOne) {
@@ -150,9 +151,6 @@ public class XPathExpressionImpl implements XPathExpression {
         }
         if (node instanceof TreeInfo) {
             node = ((TreeInfo)node).getRootNode();
-        }
-        if (node instanceof DocumentInfo) {
-            node = ((DocumentInfo)node).getUnderlyingNode();
         }
         if (node instanceof NodeInfo) {
             if (!((NodeInfo) node).getConfiguration().isCompatible(config)) {
@@ -168,7 +166,7 @@ public class XPathExpressionImpl implements XPathExpression {
             contextItem = (Item) node;
         } else {
             JPConverter converter = JPConverter.allocate(node.getClass(), null, config);
-            Sequence<?> val;
+            Sequence val;
             try {
                 val = converter.convert(node, new EarlyEvaluationContext(config));
             } catch (XPathException e) {
@@ -225,8 +223,8 @@ public class XPathExpressionImpl implements XPathExpression {
                 }
 
             } else if (qName.equals(XPathConstants.NODE)) {
-                SequenceIterator<?> iter = expression.iterate(context);
-                Item<?> first = iter.next();
+                SequenceIterator iter = expression.iterate(context);
+                Item first = iter.next();
                 if (first instanceof VirtualNode) {
                     return ((VirtualNode) first).getRealNode();
                 }
@@ -236,8 +234,8 @@ public class XPathExpressionImpl implements XPathExpression {
                 throw new XPathExpressionException("Expression result is not a node");
             } else if (qName.equals(XPathConstants.NODESET)) {
                 context.openStackFrame(stackFrameMap);
-                SequenceIterator<?> iter = expression.iterate(context);
-                GroundedValue<?> extent = iter.materialize();
+                SequenceIterator iter = expression.iterate(context);
+                GroundedValue extent = iter.materialize();
                 PJConverter converter = PJConverter.allocateNodeListCreator(config, node);
                 return converter.convert(extent, Object.class, context);
             } else {
@@ -262,6 +260,7 @@ public class XPathExpressionImpl implements XPathExpression {
      */
 
     /*@NotNull*/
+    @Override
     public String evaluate(Object node) throws XPathExpressionException {
         return (String) evaluate(node, XPathConstants.STRING);
     }
@@ -283,6 +282,7 @@ public class XPathExpressionImpl implements XPathExpression {
      * @throws XPathExpressionException
      */
     /*@Nullable*/
+    @Override
     public Object evaluate(/*@Nullable*/ InputSource inputSource, /*@Nullable*/ QName qName) throws XPathExpressionException {
         if (qName == null) {
             throw new NullPointerException("qName");
@@ -315,6 +315,7 @@ public class XPathExpressionImpl implements XPathExpression {
      */
 
     /*@NotNull*/
+    @Override
     public String evaluate(/*@Nullable*/ InputSource inputSource) throws XPathExpressionException {
         if (inputSource == null) {
             throw new NullPointerException("inputSource");

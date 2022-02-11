@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,16 +11,18 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 
+import java.util.EnumSet;
+
 
 /**
  * ManualIterator: a pseudo-iterator used while streaming. It has a current node and a current position
  * which are set manually. Calling last() is an error. Calling next() always returns null.
  */
 
-public class ManualIterator<T extends Item<?>> implements FocusIterator<T>, UnfailingIterator<T>,
-        ReversibleIterator<T>, LastPositionFinder, GroundedIterator<T>, LookaheadIterator<T> {
+public class ManualIterator implements FocusIterator, UnfailingIterator,
+        ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
-    private T item;
+    private Item item;
     private int position;
     private LastPositionFinder lastPositionFinder;
 
@@ -41,7 +43,7 @@ public class ManualIterator<T extends Item<?>> implements FocusIterator<T>, Unfa
      * @param position the context position
      */
 
-    public ManualIterator(T value, int position) {
+    public ManualIterator(Item value, int position) {
         this.item = value;
         this.position = position;
     }
@@ -52,13 +54,13 @@ public class ManualIterator<T extends Item<?>> implements FocusIterator<T>, Unfa
      * @param value the context item
      */
 
-    public ManualIterator(T value) {
+    public ManualIterator(Item value) {
         this.item = value;
         this.position = 1;
         this.lastPositionFinder = () -> 1;
     }
 
-    public void setContextItem(T value) {
+    public void setContextItem(Item value) {
         this.item = value;
     }
 
@@ -83,6 +85,7 @@ public class ManualIterator<T extends Item<?>> implements FocusIterator<T>, Unfa
      * @return true if there are more items
      */
 
+    @Override
     public boolean hasNext() {
         try {
             return position() != getLength();
@@ -91,11 +94,13 @@ public class ManualIterator<T extends Item<?>> implements FocusIterator<T>, Unfa
         }
     }
 
-    public T next() {
+    @Override
+    public Item next() {
         return null;
     }
 
-    public T current() {
+    @Override
+    public Item current() {
         return item;
     }
 
@@ -105,10 +110,12 @@ public class ManualIterator<T extends Item<?>> implements FocusIterator<T>, Unfa
      * @return 0 before the first call on next(); 1 before the second call on next(); -1 after the second
      *         call on next().
      */
+    @Override
     public int position() {
         return position;
     }
 
+    @Override
     public int getLength() throws XPathException {
         if (lastPositionFinder == null) {
             throw new XPathException("Saxon streaming restriction: last() cannot be used when consuming a sequence of streamed nodes, even if the items being processed are grounded");
@@ -117,11 +124,9 @@ public class ManualIterator<T extends Item<?>> implements FocusIterator<T>, Unfa
         }
     }
 
-    public void close() {
-    }
-
-    public ManualIterator<T> getReverseIterator() {
-        return new ManualIterator<>(item);
+    @Override
+    public ManualIterator getReverseIterator() {
+        return new ManualIterator(item);
     }
 
     /**
@@ -133,12 +138,13 @@ public class ManualIterator<T extends Item<?>> implements FocusIterator<T>, Unfa
      */
 
     /*@Nullable*/
-    public GroundedValue<T> materialize() {
-        return (GroundedValue<T>)item;
+    @Override
+    public GroundedValue materialize() {
+        return item;
     }
 
     @Override
-    public GroundedValue<T> getResidue() {
+    public GroundedValue getResidue() {
         return materialize();
     }
 
@@ -146,16 +152,17 @@ public class ManualIterator<T extends Item<?>> implements FocusIterator<T>, Unfa
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return GROUNDED | LAST_POSITION_FINDER | LOOKAHEAD;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD, Property.GROUNDED, Property.LAST_POSITION_FINDER);
     }
 
 }
 
-// Copyright (c) 2009 - 2018 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

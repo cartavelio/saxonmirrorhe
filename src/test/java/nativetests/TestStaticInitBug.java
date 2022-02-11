@@ -1,9 +1,9 @@
 package nativetests;
 
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.value.SequenceType;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
@@ -13,11 +13,13 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 // Bug report against 9.0.0.4 from Mike Rutter, 8 May 2007
 // Causes NPE in 9.0.0.4 due to incorrect sequence of static initialization
 // Fixed in 9.1
 
-public class TestStaticInitBug extends TestCase {
+public class TestStaticInitBug {
    private static SequenceType showTheBug = SequenceType.ATOMIC_SEQUENCE;
 
    private static final String xsl =
@@ -27,13 +29,14 @@ public class TestStaticInitBug extends TestCase {
       "<xsl:function name='ssmarc:datafield'>" +
       "  <xsl:param name='ind1' />" +
       "  <xsl:variable name=\"ind1-norm\" select=\"if (string-length($ind1) = 0) then ' ' else $ind1\" />" +
-      "  <xsl:sequence select='$ind1-norm'/>" +        
+      "  <xsl:sequence select='$ind1-norm'/>" +
       "</xsl:function>" +
       "</xsl:stylesheet>";
 
    private static final String xml =
       "<?xml version='1.0' encoding='UTF-8'?><record><datafield ind1=' '></datafield></record>";
 
+   @Test
    public void testStaticInitBug() throws TransformerException {
       TransformerFactory tfactory = new TransformerFactoryImpl(new Configuration());
       StreamSource templateSource = new StreamSource(new StringReader(xsl));

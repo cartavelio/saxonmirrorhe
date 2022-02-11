@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,16 +7,14 @@
 
 package net.sf.saxon.tree.wrapper;
 
+import com.saxonica.ee.validate.SkipValidator;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Stripper;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NameOfNode;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -26,6 +24,8 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.Whitespace;
+
+import java.util.function.Predicate;
 
 
 /**
@@ -85,6 +85,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      */
 
     /*@NotNull*/
+    @Override
     public VirtualNode makeWrapper(NodeInfo node, VirtualNode parent) {
         SpaceStrippedNode wrapper = new SpaceStrippedNode(node, (SpaceStrippedNode) parent);
         wrapper.docWrapper = this.docWrapper;
@@ -162,6 +163,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * @since 8.5
      */
 
+    @Override
     public AtomicSequence atomize() throws XPathException {
         if (getNodeKind() == Type.ELEMENT) {
             return getSchemaType().atomize(this);
@@ -197,6 +199,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      *         return true, and the two nodes will produce the same result for generateId())
      */
 
+    @Override
     public int compareOrder(/*@NotNull*/ NodeInfo other) {
         if (other instanceof SpaceStrippedNode) {
             return node.compareOrder(((SpaceStrippedNode) other).node);
@@ -210,6 +213,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * the version of the method that returns a String.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         // Might not be the same as the string value of the underlying node because of space stripping
         switch (getNodeKind()) {
@@ -222,7 +226,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
                     if (it == null) {
                         break;
                     }
-                    sb.append(it.getStringValueCS());
+                    sb.cat(it.getStringValueCS());
                 }
                 return sb.condense();
             default:
@@ -235,6 +239,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo getParent() {
         if (parent == null) {
             NodeInfo realParent = node.getParent();
@@ -246,8 +251,9 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
     }
 
     @Override
-    public AxisIterator iterateAxis(byte axisNumber, NodeTest nodeTest) {
-        if (nodeTest.getUType().intersection(UType.TEXT) == UType.VOID ||
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
+        if (nodeTest instanceof NodeTest &&
+                ((NodeTest)nodeTest).getUType().intersection(UType.TEXT) == UType.VOID ||
                 axisNumber == AxisInfo.ATTRIBUTE || axisNumber == AxisInfo.NAMESPACE) {
             // iteration does not include text nodes, so no stripping needed
             return new WrappingIterator(node.iterateAxis(axisNumber, nodeTest), this, getParentForAxis(axisNumber));
@@ -264,7 +270,8 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      */
 
     /*@Nullable*/
-    public AxisIterator iterateAxis(byte axisNumber) {
+    @Override
+    public AxisIterator iterateAxis(int axisNumber) {
         switch (axisNumber) {
             case AxisInfo.ATTRIBUTE:
             case AxisInfo.NAMESPACE:
@@ -275,7 +282,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
             case AxisInfo.PRECEDING_SIBLING:
                 SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
                 if (parent == null) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
+                    return EmptyIterator.ofNodes();
                 } else {
                     return new StrippingIterator(node.iterateAxis(axisNumber), parent);
                 }
@@ -284,7 +291,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         }
     }
 
-    private SpaceStrippedNode getParentForAxis(byte axisNumber) {
+    private SpaceStrippedNode getParentForAxis(int axisNumber) {
         switch (axisNumber) {
             case AxisInfo.CHILD:
             case AxisInfo.ATTRIBUTE:
@@ -302,10 +309,20 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Copy this node to a given outputter (deep copy)
      */
 
+    @Override
     public void copy(Receiver out, int copyOptions, Location locationId) throws XPathException {
         // The underlying code does not do whitespace stripping. So we need to interpose
-        // a stripper.
-        Stripper stripper = new Stripper(((SpaceStrippedDocument) docWrapper).getStrippingRule(), out);
+        // a stripper. Moreover, if the node is typed and we are removing type annotations,
+        // then we need to take care that we're not applying space-stripping to the untyped
+        // version of the document (test case strip-space-008)
+        Receiver temp = out;
+        //#if EE==true
+        if (node.getTreeInfo().isTyped() && !CopyOptions.includes(copyOptions,CopyOptions.TYPE_ANNOTATIONS)) {
+            temp = new SkipValidator(out);
+            copyOptions |= CopyOptions.TYPE_ANNOTATIONS;
+        }
+        //#endif
+        Stripper stripper = new Stripper(((SpaceStrippedDocument) docWrapper).getStrippingRule(), temp);
         node.copy(stripper, copyOptions, locationId);
     }
 
@@ -341,6 +358,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
 
 
         /*@Nullable*/
+        @Override
         public NodeInfo next() {
             NodeInfo nextRealNode;
             while (true) {
@@ -368,23 +386,11 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
             return isPreservedNode(nextRealNode, (SpaceStrippedDocument)docWrapper, actualParent);
         }
 
+        @Override
         public void close() {
             base.close();
         }
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-         *         and {@link #LOOKAHEAD}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         *         It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        public int getProperties() {
-            return 0;
-        }
 
     }  // end of class StrippingIterator
 

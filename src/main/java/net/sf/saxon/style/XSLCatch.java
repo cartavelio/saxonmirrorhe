@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -35,6 +35,7 @@ public class XSLCatch extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return false;
     }
@@ -45,6 +46,7 @@ public class XSLCatch extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
@@ -55,26 +57,28 @@ public class XSLCatch extends StyleElement {
      * @return true for all elements except xsl:fallback and saxon:catch
      */
 
+    @Override
     protected boolean seesAvuncularVariables() {
         return false;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         String selectAtt = null;
         String errorAtt = null;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
+                selectAtt = value;
+                select = makeExpression(selectAtt, att);
             } else if (f.equals("errors")) {
-                errorAtt = atts.getValue(a);
+                errorAtt = value;
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -99,10 +103,9 @@ public class XSLCatch extends StyleElement {
      *
      * @param elements the value of the attribute
      * @return the sequence of NameTests
-     * @throws XPathException in the event of a syntax error
      */
 
-    private List<QNameTest> parseNameTests(String elements) throws XPathException {
+    private List<QNameTest> parseNameTests(String elements) {
         List<QNameTest> result = new ArrayList<QNameTest>();
         StringTokenizer st = new StringTokenizer(elements, " \t\n\r", false);
         while (st.hasMoreTokens()) {
@@ -167,6 +170,7 @@ public class XSLCatch extends StyleElement {
         return result;
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         select = typeCheck("select", select);
         if (select != null && hasChildNodes()) {
@@ -178,6 +182,7 @@ public class XSLCatch extends StyleElement {
     }
 
     /*@Nullable*/
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (select == null) {
             select = compileSequenceConstructor(exec, decl, true);

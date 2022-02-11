@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -21,7 +21,7 @@ import net.sf.saxon.expr.number.AbstractNumberer;
  *         at the start of a sentence, hence there is the problem."</p>
  * @see <a href="http://woordenlijst.org/leidraad/6/9/#r6n">http://woordenlijst.org/leidraad/6/9/#r6n</a>
  * @see <a href="http://taaladvies.net/taal/advies/popup.php?id=88">http://taaladvies.net/taal/advies/popup.php?id=88</a>
- * @see <a href="http://www.vlaanderen.be/servlet/Satellite?c=Page&cid=1120536021990&pagename=taaltelefoon%2FPage%2FHomePageMIN">http://www.vlaanderen.be/servlet/Satellite?c=Page&cid=1120536021990&pagename=taaltelefoon%2FPage%2FHomePageMIN</a>
+ * @see <a href="http://www.vlaanderen.be/servlet/Satellite?c=Page&cid=1120536021990&amp;pagename=taaltelefoon%2FPage%2FHomePageMIN">http://www.vlaanderen.be/servlet/Satellite?c=Page&cid=1120536021990&pagename=taaltelefoon%2FPage%2FHomePageMIN</a>
  */
 
 public class Numberer_nl extends AbstractNumberer {
@@ -50,6 +50,7 @@ public class Numberer_nl extends AbstractNumberer {
      * Show an ordinal number as dutch words in a requested case (for example, Twentyfirst)
      */
 
+    @Override
     public String toOrdinalWords(String ordinalParam, long number, int wordCase) {
         String s;
         if (number == 1000000000) {
@@ -101,6 +102,7 @@ public class Numberer_nl extends AbstractNumberer {
         }
     }
 
+    @Override
     public String toWords(long number) {
         if (number >= 1000000000) {
             long rem = number % 1000000000;
@@ -133,6 +135,7 @@ public class Numberer_nl extends AbstractNumberer {
         }
     }
 
+    @Override
     public String toWords(long number, int wordCase) {
         String s;
         if (number == 0) {
@@ -164,6 +167,7 @@ public class Numberer_nl extends AbstractNumberer {
      */
 
     //@Override
+    @Override
     public String monthName(int month, int minWidth, int maxWidth) {
         String name = dutchMonths[month - 1];
         if (maxWidth < 3) {
@@ -186,6 +190,7 @@ public class Numberer_nl extends AbstractNumberer {
      * @param maxWidth The maximum number of characters
      */
 
+    @Override
     public String dayName(int day, int minWidth, int maxWidth) {
         String name = dutchDays[day - 1];
         if (maxWidth < 2) {
@@ -228,6 +233,7 @@ public class Numberer_nl extends AbstractNumberer {
      * @return the AM or PM indicator
      */
 
+    @Override
     public String halfDayName(int minutes, int minWidth, int maxWidth) {
         String s;
         if (minutes < 12 * 60) {
@@ -265,6 +271,7 @@ public class Numberer_nl extends AbstractNumberer {
      */
 
     /*@NotNull*/
+    @Override
     public String getEraName(int year) {
         return (year > 0 ? "n.C." : "v.C.");
     }

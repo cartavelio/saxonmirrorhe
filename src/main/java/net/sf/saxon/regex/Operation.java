@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -29,10 +29,10 @@ import java.util.function.IntPredicate;
  */
 public abstract class Operation {
 
-    public static final int MATCHES_ZLS_AT_START = 1;
-    public static final int MATCHES_ZLS_AT_END = 2;
-    public static final int MATCHES_ZLS_ANYWHERE = 7;
-    public static final int MATCHES_ZLS_NEVER = 1024;
+    static final int MATCHES_ZLS_AT_START = 1;
+    static final int MATCHES_ZLS_AT_END = 2;
+    static final int MATCHES_ZLS_ANYWHERE = 7;
+    static final int MATCHES_ZLS_NEVER = 1024;
 
     /**
      * Get an iterator returning all the matches for this operation
@@ -141,7 +141,7 @@ public abstract class Operation {
 
         List<Operation> branches;
 
-        public OpChoice(List<Operation> branches) {
+        OpChoice(List<Operation> branches) {
             this.branches = branches;
         }
 
@@ -219,6 +219,7 @@ public abstract class Operation {
                 IntIterator currentIter = null;
                 Operation currentOp = null;
 
+                @Override
                 public boolean hasNext() {
                     while (true) {
                         if (currentIter == null) {
@@ -239,6 +240,7 @@ public abstract class Operation {
                     }
                 }
 
+                @Override
                 public int next() {
                     return currentIter.next();
                 }
@@ -261,7 +263,7 @@ public abstract class Operation {
                 if (first) {
                     first = false;
                 } else {
-                    fsb.append('|');
+                    fsb.cat('|');
                 }
                 fsb.append(branch.display());
             }
@@ -277,7 +279,7 @@ public abstract class Operation {
     public static class OpSequence extends Operation {
         private List<Operation> operations;
 
-        public OpSequence(List<Operation> operations) {
+        OpSequence(List<Operation> operations) {
             this.operations = operations;
         }
 
@@ -479,6 +481,7 @@ public abstract class Operation {
                 }
 
 
+                @Override
                 public boolean hasNext() {
                     if (!primed) {
                         iterators.push(operations.get(0).iterateMatches(matcher, position));
@@ -488,6 +491,7 @@ public abstract class Operation {
                     return nextPos >= 0;
                 }
 
+                @Override
                 public int next() {
                     return nextPos;
                 }
@@ -503,7 +507,7 @@ public abstract class Operation {
     public static class OpCharClass extends Operation {
         private IntPredicate predicate;
 
-        public OpCharClass(IntPredicate predicate) {
+        OpCharClass(IntPredicate predicate) {
             this.predicate = predicate;
         }
 
@@ -558,9 +562,9 @@ public abstract class Operation {
                     IntRangeSet irs = (IntRangeSet)s;
                     fsb.append("[");
                     for (int i=0; i<irs.getNumberOfRanges(); i++) {
-                        fsb.append((char)irs.getStartPoints()[1]);
+                        fsb.cat((char)irs.getStartPoints()[1]);
                         fsb.append("-");
-                        fsb.append((char)irs.getEndPoints()[1]);
+                        fsb.cat((char)irs.getEndPoints()[1]);
                     }
                     fsb.append("[");
                     return fsb.toString();
@@ -581,12 +585,12 @@ public abstract class Operation {
         private UnicodeString atom;
         private int len;
 
-        public OpAtom(UnicodeString atom) {
+        OpAtom(UnicodeString atom) {
             this.atom = atom;
             this.len = atom.uLength();
         }
 
-        public UnicodeString getAtom() {
+        UnicodeString getAtom() {
             return atom;
         }
 
@@ -642,6 +646,7 @@ public abstract class Operation {
             return new IntSingletonIterator(position + len);
         }
 
+        @Override
         public String display() {
             return atom.toString();
         }
@@ -655,7 +660,7 @@ public abstract class Operation {
     public static class OpGreedyFixed extends OpRepeat {
         private int len;
 
-        public OpGreedyFixed(Operation op, int min, int max, int len) {
+        OpGreedyFixed(Operation op, int min, int max, int len) {
             super(op, min, max, true);
             this.len = len;
         }
@@ -737,7 +742,7 @@ public abstract class Operation {
 
     public static class OpUnambiguousRepeat extends OpRepeat {
 
-        public OpUnambiguousRepeat(Operation op, int min, int max) {
+        OpUnambiguousRepeat(Operation op, int min, int max) {
             super(op, min, max, true);
         }
 
@@ -797,9 +802,9 @@ public abstract class Operation {
         protected Operation op;
         protected int min;
         protected int max;
-        protected boolean greedy;
+        boolean greedy;
 
-        public OpRepeat(Operation op, int min, int max, boolean greedy) {
+        OpRepeat(Operation op, int min, int max, boolean greedy) {
             this.op = op;
             this.min = min;
             this.max = max;
@@ -811,7 +816,7 @@ public abstract class Operation {
          * @return the child operation
          */
 
-        public Operation getRepeatedOperation() {
+        Operation getRepeatedOperation() {
             return op;
         }
 
@@ -909,6 +914,7 @@ public abstract class Operation {
                         }
                     }
 
+                    @Override
                     public boolean hasNext() {
                         if (primed && iterators.size() >= min) {
                             return !iterators.isEmpty();
@@ -922,6 +928,7 @@ public abstract class Operation {
                         }
                     }
 
+                    @Override
                     public int next() {
                         primed = false;
                         return positions.peek();
@@ -948,6 +955,7 @@ public abstract class Operation {
                             pos = -1;
                         }
                     }
+                    @Override
                     public boolean hasNext() {
                         do {
                             advance();
@@ -955,6 +963,7 @@ public abstract class Operation {
                         return pos >= 0;
                     }
                     
+                    @Override
                     public int next() {
                         return pos;
                     }
@@ -996,7 +1005,7 @@ public abstract class Operation {
     public static class OpReluctantFixed extends OpRepeat {
         private int len;
 
-        public OpReluctantFixed(Operation op, int min, int max, int len) {
+        OpReluctantFixed(Operation op, int min, int max, int len) {
             super(op, min, max, false);
             this.len = len;
         }
@@ -1027,6 +1036,7 @@ public abstract class Operation {
                 private int count = 0;
                 private boolean started = false;
 
+                @Override
                 public boolean hasNext() {
                     if (!started) {
                         started = true;
@@ -1053,6 +1063,7 @@ public abstract class Operation {
                     return false;
                 }
 
+                @Override
                 public int next() {
                     return pos;
                 }
@@ -1155,6 +1166,7 @@ public abstract class Operation {
 
     public static class OpEOL extends Operation {
 
+        @Override
         public int getMatchLength() {
             return 0;
         }
@@ -1203,10 +1215,10 @@ public abstract class Operation {
 
     public static class OpCapture extends Operation {
 
-        public int groupNr;
-        public Operation childOp;
+        int groupNr;
+        Operation childOp;
 
-        public OpCapture(Operation childOp, int group) {
+        OpCapture(Operation childOp, int group) {
             this.childOp = childOp;
             this.groupNr = group;
         }
@@ -1239,10 +1251,12 @@ public abstract class Operation {
             }
             final IntIterator base = childOp.iterateMatches(matcher, position);
             return new IntIterator() {
+                @Override
                 public boolean hasNext() {
                     return base.hasNext();
                 }
 
+                @Override
                 public int next() {
                     int next = base.next();
                     // Increase valid paren count
@@ -1282,9 +1296,9 @@ public abstract class Operation {
 
     public static class OpBackReference extends Operation {
 
-        public int groupNr;
+        int groupNr;
 
-        public OpBackReference(int groupNr) {
+        OpBackReference(int groupNr) {
             this.groupNr = groupNr;
         }
 
@@ -1366,6 +1380,7 @@ public abstract class Operation {
 
     public static class OpNothing extends Operation {
 
+        @Override
         public IntIterator iterateMatches(final REMatcher matcher, final int position) {
             return new IntSingletonIterator(position);
         }
@@ -1401,7 +1416,7 @@ public abstract class Operation {
         private Operation base;
         private static int counter = 0;
 
-        public OpTrace(Operation base) {
+        OpTrace(Operation base) {
             this.base = base;
         }
 
@@ -1416,12 +1431,14 @@ public abstract class Operation {
                                        base.display() + " at position " + position + " returning " +
                                        iterName + " " + iterNr);
             return new IntIterator() {
+                @Override
                 public boolean hasNext() {
                     boolean b = baseIter.hasNext();
                     System.err.println("IntIterator " + iterNr + " hasNext() = " + b);
                     return b;
                 }
 
+                @Override
                 public int next() {
                     int n = baseIter.next();
                     System.err.println("IntIterator " + iterNr + " next() = " + n);
@@ -1471,14 +1488,16 @@ public abstract class Operation {
         int countZeroLength = 0;
         int currentPos = -1;
 
-        public ForceProgressIterator(IntIterator base) {
+        ForceProgressIterator(IntIterator base) {
             this.base = base;
         }
 
+        @Override
         public boolean hasNext() {
             return countZeroLength <= 3 && base.hasNext();
         }
 
+        @Override
         public int next() {
             int p = base.next();
             if (p == currentPos) {

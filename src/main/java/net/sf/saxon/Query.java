@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,10 +17,7 @@ import net.sf.saxon.query.UpdateAgent;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
-import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.TimingCodeInjector;
-import net.sf.saxon.trace.TimingTraceListener;
-import net.sf.saxon.trace.XQueryTraceListener;
+import net.sf.saxon.trace.*;
 import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
@@ -47,7 +44,6 @@ import java.util.Set;
  * This <B>Query</B> class provides a command-line interface to the Saxon XQuery processor.
  * <p>The XQuery syntax supported conforms to the W3C XQuery 1.0 drafts.</p>
  *
- * @author Michael H. Kay
  */
 
 public class Query {
@@ -96,7 +92,7 @@ public class Query {
      * @param args List of arguments supplied on operating system command line
      */
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         // the real work is delegated to another routine so that it can be used in a subclass
         new Query().doQuery(args, "java net.sf.saxon.Query");
     }
@@ -137,7 +133,7 @@ public class Query {
         options.addRecognizedOption("o", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified file for primary output");
         options.addRecognizedOption("opt", CommandLineOptions.TYPE_STRING | CommandLineOptions.VALUE_REQUIRED,
-                                    "Enable/disable optimization options [-]cfgklmsvwx");
+                                    "Enable/disable optimization options [-]cfgklmnsvwx");
         options.addRecognizedOption("outval", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                                     "Action when validation of output file fails");
         options.setPermittedValues("outval", new String[]{"recover", "fatal"}, null);
@@ -227,7 +223,7 @@ public class Query {
      */
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    protected void doQuery(String args[], String command) {
+    protected void doQuery(String[] args, String command) {
 
         CommandLineOptions options = new CommandLineOptions();
         setPermittedOptions(options);
@@ -366,7 +362,7 @@ public class Query {
                 out.setOutputProperty(Serializer.Property.METHOD, "xml");
                 out.setOutputProperty(Serializer.Property.INDENT, "yes");
                 out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-                if (!"HE".equals(processor.getSaxonEdition())) {
+                if (processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
                     out.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "2");
                 }
                 exp.explain(out);
@@ -442,7 +438,8 @@ public class Query {
                     }
                     if (repeat < 100) {
                         System.err.println("Execution time: " + CommandLineOptions.showExecutionTimeNano(endTime - startTime));
-                        System.err.println("Memory used: " + CommandLineOptions.showMemoryUsed());
+                        CommandLineOptions.showMemoryUsed();
+                        Instrumentation.report();
                     } else if (totalTime > 1000000000000L) {
                         // quit after 1000 seconds
                         break;
@@ -630,6 +627,10 @@ public class Query {
             badUsage("");
         }
 
+        if (options.getOptionValue("xsiloc") != null && options.getOptionValue("val") == null) {
+            System.err.println("-xsiloc is ignored when -val is absent");
+        }
+
         // Apply options defined locally in a subclass
 
         applyLocalOptions(options, config);
@@ -712,8 +713,8 @@ public class Query {
             }
         } else if (sourceFileName.equals("-")) {
             // take input from stdin
-            String sysID = new File(System.getProperty("user.dir")).toURI().toASCIIString();
-            sourceInput = new StreamSource(System.in, sysID);
+            String sysId = new File(System.getProperty("user.dir")).toURI().toASCIIString();
+            sourceInput = new StreamSource(System.in, sysId);
         } else {
             File sourceFile = new File(sourceFileName);
             if (!sourceFile.exists()) {
@@ -722,8 +723,6 @@ public class Query {
 
             if (Version.platform.isJava()) {
                 InputSource eis = new InputSource(sourceFile.toURI().toString());
-//                String sysID = new File(System.getProperty("user.dir")).toURI().toASCIIString();
-//                eis.setSystemId(sysID);
                 sourceInput = new SAXSource(eis);
             } else {
                 sourceInput = new StreamSource(sourceFile.toURI().toString());
@@ -736,7 +735,8 @@ public class Query {
      * Compile the query
      *
      * @param compiler      the XQuery compiler
-     * @param queryFileName the filename holding the query (or "-" for the standard input)
+     * @param queryFileName the filename holding the query (or "-" for the standard input,
+     *                      or the actual query text enclosed in curly braces
      * @param useURLs       true if the filename is in the form of a URI
      * @return the compiled query
      * @throws SaxonApiException if query compilation fails
@@ -882,8 +882,8 @@ public class Query {
                 try {
                     XQueryExpression e = exp.getUnderlyingCompiledQuery();
                     SequenceIterator results = e.iterator(evaluator.getUnderlyingQueryContext());
-                    DocumentInfo resultDoc = QueryResult.wrap(results, config);
-                    XdmValue wrappedResultDoc = XdmValue.wrap(resultDoc.getUnderlyingNode());
+                    NodeInfo resultDoc = QueryResult.wrap(results, config);
+                    XdmValue wrappedResultDoc = XdmValue.wrap(resultDoc);
                     processor.writeXdmValue(wrappedResultDoc, destination);
                     destination.closeAndNotify();
                 } catch (XPathException e1) {
@@ -1069,7 +1069,7 @@ public class Query {
         CommandLineOptions options = new CommandLineOptions();
         setPermittedOptions(options);
         System.err.println("Options available:" + options.displayPermittedOptions());
-        System.err.println("Use -XYZ:? for details of option XYZ");
+        System.err.println("Use -XYZ:? for details of option XYZ or --? to list configuration features");
         System.err.println("Params: ");
         System.err.println("  param=value           Set query string parameter");
         System.err.println("  +param=filename       Set query document parameter");
@@ -1098,6 +1098,14 @@ public class Query {
             }
             file.createNewFile();
         }
+    }
+
+    private String getCommandName() {
+        String s = getClass().getName();
+        if (s.equals("cli.Saxon.Cmd.DotNetQuery")) {
+            s = "Query";
+        }
+        return s;
     }
 }
 

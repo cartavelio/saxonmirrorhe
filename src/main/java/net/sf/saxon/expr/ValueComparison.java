@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,15 +10,14 @@ package net.sf.saxon.expr;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.*;
-import net.sf.saxon.functions.*;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.SequenceType;
 
 /**
  * ValueComparison: a boolean expression that compares two atomic values
@@ -52,6 +51,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      *         in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         return "ValueComparison";
     }
@@ -71,6 +71,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      * Note that the comparer is always known at compile time.
      */
 
+    @Override
     public AtomicComparer getAtomicComparer() {
         return comparer;
     }
@@ -80,6 +81,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      * Token.FLE, Token.FGE
      */
 
+    @Override
     public int getSingletonOperator() {
         return operator;
     }
@@ -91,6 +93,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      *         should be converted to strings.
      */
 
+    @Override
     public boolean convertsUntypedToOther() {
         return comparer instanceof UntypedNumericComparer;
     }
@@ -131,6 +134,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         resetLocalStaticProperties();
@@ -164,7 +168,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         PlainType t0 = getLhsExpression().getItemType().getAtomizedItemType();
         PlainType t1 = getRhsExpression().getItemType().getAtomizedItemType();
 
-        if (t0.isExternalType() || t1.isExternalType()) {
+        if (t0.getUType().union(t1.getUType()).overlaps(UType.EXTENSION)) {
             XPathException err = new XPathException("Cannot perform comparisons involving external objects");
             err.setIsTypeError(true);
             err.setErrorCode("XPTY0004");
@@ -261,353 +265,17 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-
-        TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
 
         getLhs().optimize(visitor, contextInfo);
         getRhs().optimize(visitor, contextInfo);
 
-        Sequence<?> value0 = null;
-        Sequence<?> value1 = null;
-
-        if (getLhsExpression() instanceof Literal) {
-            value0 = ((Literal) getLhsExpression()).getValue();
-        }
-
-        if (getRhsExpression() instanceof Literal) {
-            value1 = ((Literal) getRhsExpression()).getValue();
-        }
-
-        // evaluate the expression now if both arguments are constant
-
-        if ((value0 != null) && (value1 != null)) {
-            try {
-                AtomicValue r = evaluateItem(visitor.getStaticContext().makeEarlyEvaluationContext());
-                return Literal.makeLiteral(r == null ? EmptySequence.getInstance() : r, this);
-            } catch (NoDynamicContextException e) {
-                // early evaluation failed, typically because the implicit context isn't available.
-                // Try again at run-time
-                return this;
-            }
-        }
-
-        // optimise count(x) eq N (or gt N, ne N, eq N, etc)
-        // TODO: extend this to cases where N is not a literal
-
-        if (getLhsExpression().isCallOn(Count.class) && Literal.isAtomic(getRhsExpression())) {
-            Expression e2 = optimizeCount(visitor, false);
-            if (e2 != null) {
-                return e2.optimize(visitor, contextInfo);
-            }
-        } else if (getRhsExpression().isCallOn(Count.class) && Literal.isAtomic(getLhsExpression())) {
-            Expression e2 = optimizeCount(visitor, true);
-            if (e2 != null) {
-                return e2.optimize(visitor, contextInfo);
-            }
-        }
-
-
-        // optimise string-length(x) = 0, >0, !=0 etc
-
-        if (getLhsExpression().isCallOn(StringLength_1.class) &&
-                isZero(value1)) {
-            Expression arg = ((SystemFunctionCall) getLhsExpression()).getArg(0);
-            switch (operator) {
-                case Token.FEQ:
-                case Token.FLE:
-                    return SystemFunction.makeCall("not", getRetainedStaticContext(), arg);
-                case Token.FNE:
-                case Token.FGT:
-                    return SystemFunction.makeCall("boolean", getRetainedStaticContext(), arg);
-                case Token.FGE:
-                    return Literal.makeLiteral(BooleanValue.TRUE, this);
-                case Token.FLT:
-                    return Literal.makeLiteral(BooleanValue.FALSE, this);
-            }
-        }
-
-        // optimise (0 = string-length(x)), etc
-
-        if (getRhsExpression().isCallOn(StringLength_1.class) &&
-                isZero(value0)) {
-            Expression arg = ((SystemFunctionCall) getRhsExpression()).getArg(0);
-            switch (operator) {
-                case Token.FEQ:
-                case Token.FGE:
-                    return SystemFunction.makeCall("not", getRetainedStaticContext(), arg);
-                case Token.FNE:
-                case Token.FLT:
-                    return SystemFunction.makeCall("boolean", getRetainedStaticContext(), arg);
-                case Token.FLE:
-                    return Literal.makeLiteral(BooleanValue.TRUE, this);
-                case Token.FGT:
-                    return Literal.makeLiteral(BooleanValue.FALSE, this);
-            }
-        }
-
-        // optimise string="" etc
-        // Note we can change S!="" to boolean(S) for cardinality zero-or-one, but we can only
-        // change S="" to not(S) for cardinality exactly-one.
-
-        int p0 = getLhsExpression().getItemType().getPrimitiveType();
-        if ((p0 == StandardNames.XS_STRING ||
-                p0 == StandardNames.XS_ANY_URI ||
-                p0 == StandardNames.XS_UNTYPED_ATOMIC) &&
-                resultWhenEmpty != BooleanValue.TRUE &&
-                getRhsExpression() instanceof Literal &&
-                ((Literal) getRhsExpression()).getValue() instanceof StringValue &&
-                ((StringValue) ((Literal) getRhsExpression()).getValue()).isZeroLength() &&
-                comparer instanceof CodepointCollatingComparer) {
-
-            switch (operator) {
-                case Token.FNE:
-                case Token.FGT:
-                    return SystemFunction.makeCall("boolean", getRetainedStaticContext(), getLhsExpression());
-                case Token.FEQ:
-                case Token.FLE:
-                    if (getLhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE) {
-                        return SystemFunction.makeCall("not", getRetainedStaticContext(), getLhsExpression());
-                    }
-            }
-        }
-
-        // optimize "" = string etc
-
-        int p1 = getRhsExpression().getItemType().getPrimitiveType();
-        if ((p1 == StandardNames.XS_STRING ||
-                p1 == StandardNames.XS_ANY_URI ||
-                p1 == StandardNames.XS_UNTYPED_ATOMIC) &&
-                resultWhenEmpty != BooleanValue.TRUE &&
-                getLhsExpression() instanceof Literal &&
-                ((Literal) getLhsExpression()).getValue() instanceof StringValue &&
-                ((StringValue) ((Literal) getLhsExpression()).getValue()).isZeroLength() &&
-                comparer instanceof CodepointCollatingComparer) {
-
-            switch (operator) {
-                case Token.FNE:
-                case Token.FLT:
-                    return SystemFunction.makeCall("boolean", getRetainedStaticContext(), getRhsExpression());
-                case Token.FEQ:
-                case Token.FGE:
-                    if (getRhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE) {
-                        return SystemFunction.makeCall("not", getRetainedStaticContext(), getRhsExpression());
-                    }
-            }
-        }
-
-
-        // optimise [position()=last()] etc
-
-        if (getLhsExpression().isCallOn(PositionAndLast.Position.class) &&
-                getRhsExpression().isCallOn(PositionAndLast.Last.class)) {
-            switch (operator) {
-                case Token.FEQ:
-                case Token.FGE:
-                    IsLastExpression iletrue = new IsLastExpression(true);
-                    ExpressionTool.copyLocationInfo(this, iletrue);
-                    return iletrue;
-                case Token.FNE:
-                case Token.FLT:
-                    IsLastExpression ilefalse = new IsLastExpression(false);
-                    ExpressionTool.copyLocationInfo(this, ilefalse);
-                    return ilefalse;
-                case Token.FGT:
-                    return Literal.makeLiteral(BooleanValue.FALSE, this);
-                case Token.FLE:
-                    return Literal.makeLiteral(BooleanValue.TRUE, this);
-            }
-        }
-        if (getLhsExpression().isCallOn(PositionAndLast.Last.class) &&
-                getRhsExpression().isCallOn(PositionAndLast.Position.class)) {
-            switch (operator) {
-                case Token.FEQ:
-                case Token.FLE:
-                    IsLastExpression iletrue = new IsLastExpression(true);
-                    ExpressionTool.copyLocationInfo(this, iletrue);
-                    return iletrue;
-                case Token.FNE:
-                case Token.FGT:
-                    IsLastExpression ilefalse = new IsLastExpression(false);
-                    ExpressionTool.copyLocationInfo(this, ilefalse);
-                    return ilefalse;
-                case Token.FLT:
-                    return Literal.makeLiteral(BooleanValue.FALSE, this);
-                case Token.FGE:
-                    return Literal.makeLiteral(BooleanValue.TRUE, this);
-            }
-        }
-
-        // optimize comparison against an integer constant
-
-        if (value1 instanceof Int64Value &&
-                getLhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE &&
-                th.isSubType(getLhsExpression().getItemType(), NumericType.getInstance())) {
-            return new CompareToIntegerConstant(getLhsExpression(), operator, ((Int64Value) value1).longValue());
-        }
-
-        if (value0 instanceof Int64Value &&
-                getRhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE &&
-                th.isSubType(getRhsExpression().getItemType(), NumericType.getInstance())) {
-            return new CompareToIntegerConstant(getRhsExpression(), Token.inverse(operator), ((Int64Value) value0).longValue());
-        }
-
-        // optimize (boolean expression) == (boolean literal)
-
-        if (p0 == StandardNames.XS_BOOLEAN &&
-                p1 == StandardNames.XS_BOOLEAN &&
-                (operator == Token.FEQ || operator == Token.FNE) &&
-                getLhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE &&
-                getRhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE &&
-                (getLhsExpression() instanceof Literal || getRhsExpression() instanceof Literal)) {
-            Literal literal = (Literal) (getLhsExpression() instanceof Literal ? getLhsExpression() : getRhsExpression());
-            Expression other = getLhsExpression() instanceof Literal ? getRhsExpression() : getLhsExpression();
-            boolean negate = (operator == Token.FEQ) != ((BooleanValue) literal.getValue()).getBooleanValue();
-            if (negate) {
-                Expression fn = SystemFunction.makeCall("not", getRetainedStaticContext(), other);
-                assert fn != null;
-                ExpressionTool.copyLocationInfo(this, fn);
-                return fn.optimize(visitor, contextInfo);
-            } else {
-                return other;
-            }
-        }
-
-
-        // optimize generate-id(X) = generate-id(Y) as "X is Y"
-        // This construct is often used in XSLT 1.0 stylesheets.
-        // Only do this if we know the arguments are singletons, because "is" doesn't
-        // do first-value extraction.
-
-        if (getLhsExpression().isCallOn(GenerateId_1.class) && getRhsExpression().isCallOn(GenerateId_1.class)) {
-            SystemFunctionCall f0 = (SystemFunctionCall) getLhsExpression();
-            SystemFunctionCall f1 = (SystemFunctionCall) getRhsExpression();
-            if (!Cardinality.allowsMany(f0.getArg(0).getCardinality()) &&
-                    !Cardinality.allowsMany(f1.getArg(0).getCardinality()) &&
-                    (operator == Token.FEQ)) {
-                IdentityComparison id =
-                        new IdentityComparison(f0.getArg(0),
-                                Token.IS,
-                                f1.getArg(0));
-                id.setGenerateIdEmulation(true);
-                ExpressionTool.copyLocationInfo(this, id);
-                return id.typeCheck(visitor, contextInfo).optimize(visitor, contextInfo);
-            }
-        }
-
-        return this;
+        return visitor.obtainOptimizer().optimizeValueComparison(this, visitor, contextInfo);
     }
 
-    /**
-     * Optimize comparisons of count(X) to a literal value. The objective here is to count items in the sequence only
-     * until the result of the comparison is deducible; for example to evaluate (count(X)>2) we can stop at the third
-     * item in the sequence.
-     *
-     * @param inverted true if the call to count(X) is the right-hand operand
-     * @return the optimized expression, or null if no optimization is possible
-     * @throws XPathException if an error occurs
-     */
 
-    /*@Nullable*/
-    private Expression optimizeCount(ExpressionVisitor visitor, boolean inverted) throws XPathException {
-        SystemFunctionCall countFn = (SystemFunctionCall) (inverted ? getRhsExpression() : getLhsExpression());
-        Expression sequence = countFn.getArg(0);
-        sequence = sequence.unordered(true, false);
-        Optimizer opt = visitor.obtainOptimizer();
 
-        AtomicValue literalOperand = (AtomicValue) ((Literal) (inverted ? getLhsExpression() : getRhsExpression())).getValue();
-        int op = inverted ? Token.inverse(operator) : operator;
-
-        if (isZero(literalOperand)) {
-            if (op == Token.FEQ || op == Token.FLE) {
-                // rewrite count(x)=0 as empty(x)
-                Expression result = SystemFunction.makeCall("empty", getRetainedStaticContext(), sequence);
-                opt.trace("Rewrite count()=0 as:", result);
-                return result;
-            } else if (op == Token.FNE || op == Token.FGT) {
-                // rewrite count(x)!=0, count(x)>0 as exists(x)
-                Expression result = SystemFunction.makeCall("exists", getRetainedStaticContext(), sequence);
-                opt.trace("Rewrite count()>0 as:", result);
-                return result;
-            } else if (op == Token.FGE) {
-                // rewrite count(x)>=0 as true()
-                return Literal.makeLiteral(BooleanValue.TRUE, this);
-            } else {  // singletonOperator == Token.FLT
-                // rewrite count(x)<0 as false()
-                return Literal.makeLiteral(BooleanValue.FALSE, this);
-            }
-        } else if (literalOperand instanceof NumericValue) {
-            long operand;
-            if (literalOperand instanceof IntegerValue) {
-                operand = ((IntegerValue) literalOperand).longValue();
-            } else if (literalOperand.isNaN()) {
-                return Literal.makeLiteral(BooleanValue.get(op == Token.FNE), this);
-            } else if (((NumericValue) literalOperand).isWholeNumber()) {
-                operand = ((NumericValue) literalOperand).longValue();
-            } else if (op == Token.FEQ) {
-                return Literal.makeLiteral(BooleanValue.FALSE, this);
-            } else if (op == Token.FNE) {
-                return Literal.makeLiteral(BooleanValue.TRUE, this);
-            } else if (op == Token.FGT || op == Token.FGE) {
-                operand = ((NumericValue) literalOperand).ceiling().longValue();
-                op = Token.FGE;
-            } else /*if (op == Token.FLT || op == Token.FLE)*/ {
-                operand = ((NumericValue) literalOperand).floor().longValue();
-                op = Token.FLE;
-            }
-            if (operand < 0) {
-                switch (op) {
-                    case Token.FEQ:
-                    case Token.FLT:
-                    case Token.FLE:
-                        return Literal.makeLiteral(BooleanValue.FALSE, this);
-                    default:
-                        return Literal.makeLiteral(BooleanValue.TRUE, this);
-                }
-            }
-            if (operand > Integer.MAX_VALUE) {
-                switch (op) {
-                    case Token.FEQ:
-                    case Token.FGT:
-                    case Token.FGE:
-                        return Literal.makeLiteral(BooleanValue.FALSE, this);
-                    default:
-                        return Literal.makeLiteral(BooleanValue.TRUE, this);
-                }
-            }
-            if (sequence instanceof TailExpression || sequence.isCallOn(Subsequence_2.class)) {
-                // it's probably the result of a previous optimization
-                return null;
-            }
-            switch (op) {
-                case Token.FEQ:
-                case Token.FNE:
-                case Token.FLE:
-                case Token.FLT:
-                    // rewrite count(E) op N as count(subsequence(E, 1, N+1)) op N
-                    Expression ss = SystemFunction.makeCall("subsequence",
-                        getRetainedStaticContext(), sequence,
-                        Literal.makeLiteral(Int64Value.PLUS_ONE, this),
-                        Literal.makeLiteral(Int64Value.makeIntegerValue(operand + 1), this));
-                    Expression ct = SystemFunction.makeCall("count", getRetainedStaticContext(), ss);
-                    CompareToIntegerConstant ctic = new CompareToIntegerConstant(ct, op, operand);
-                    opt.trace("Rewrite count()~N as:", ctic);
-                    ExpressionTool.copyLocationInfo(this, ctic);
-                    return ctic;
-                case Token.FGE:
-                case Token.FGT:
-                    // rewrite count(x) gt n as exists(x[n+1])
-                    //     and count(x) ge n as exists(x[n])
-                    TailExpression tail = new TailExpression(sequence, (int) (op == Token.FGE ? operand : operand + 1));
-                    ExpressionTool.copyLocationInfo(this, tail);
-                    Expression result = SystemFunction.makeCall("exists", getRetainedStaticContext(), tail);
-                    ExpressionTool.copyLocationInfo(this, result);
-                    opt.trace("Rewrite count()>=N as:", result);
-                    return result;
-            }
-        }
-        return null;
-    }
 
 
     /**
@@ -617,14 +285,15 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      * @param th the type hierarchy
      */
 
+    @Override
     public boolean isNegatable(TypeHierarchy th) {
         // Expression is not negatable if it might involve NaN
         return isNeverNaN(getLhsExpression(), th) && isNeverNaN(getRhsExpression(), th);
     }
 
     private boolean isNeverNaN(Expression exp, TypeHierarchy th) {
-        return th.relationship(exp.getItemType(), BuiltInAtomicType.DOUBLE) == TypeHierarchy.DISJOINT &&
-                th.relationship(exp.getItemType(), BuiltInAtomicType.FLOAT) == TypeHierarchy.DISJOINT;
+        return th.relationship(exp.getItemType(), BuiltInAtomicType.DOUBLE) == Affinity.DISJOINT &&
+                th.relationship(exp.getItemType(), BuiltInAtomicType.FLOAT) == Affinity.DISJOINT;
     }
 
     /**
@@ -635,6 +304,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      * @return the inverted comparison
      */
 
+    @Override
     public Expression negate() {
         ValueComparison vc = new ValueComparison(getLhsExpression(), Token.negate(operator), getRhsExpression());
         vc.comparer = comparer;
@@ -648,16 +318,6 @@ public final class ValueComparison extends BinaryExpression implements Compariso
     }
 
 
-    /**
-     * Test whether an expression is constant zero
-     *
-     * @param v the value to be tested
-     * @return true if the operand is the constant zero (of any numeric data type)
-     */
-
-    private static boolean isZero(Sequence<?> v) {
-        return v instanceof NumericValue && ((NumericValue) v).compareTo(0) == 0;
-    }
 
     @Override
     public boolean equals(Object other) {
@@ -674,6 +334,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ValueComparison vc = new ValueComparison(getLhsExpression().copy(rebindings), operator, getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, vc);
@@ -690,6 +351,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      * @return a boolean representing the result of the comparison of the two operands
      */
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         try {
             AtomicValue v0 = (AtomicValue) getLhsExpression().evaluateItem(context);
@@ -756,6 +418,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         } catch (ComparisonException err) {
             throw err.getCause();
         } catch (ClassCastException err) {
+            err.printStackTrace();
             XPathException e2 = new XPathException("Cannot compare " + Type.displayTypeName(v0) +
                     " to " + Type.displayTypeName(v1));
             e2.setErrorCode("XPTY0004");
@@ -772,6 +435,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      *         or null representing the empty sequence
      */
 
+    @Override
     public BooleanValue evaluateItem(XPathContext context) throws XPathException {
         try {
             AtomicValue v0 = (AtomicValue) getLhsExpression().evaluateItem(context);
@@ -798,6 +462,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return BuiltInAtomicType.BOOLEAN;
     }
@@ -818,6 +483,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      * Determine the static cardinality.
      */
 
+    @Override
     public int computeCardinality() {
         if (resultWhenEmpty != null) {
             return StaticProperty.EXACTLY_ONE;

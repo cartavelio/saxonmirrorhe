@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -38,6 +38,7 @@ public class ListCastableFunction extends ListConstructorFunction {
      *
      * @return the function item's type
      */
+    @Override
     public FunctionItemType getFunctionItemType() {
         return new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
@@ -49,6 +50,7 @@ public class ListCastableFunction extends ListConstructorFunction {
      *
      * @return the function name, or null for an anonymous inline function
      */
+    @Override
     public StructuredQName getFunctionName() {
         return null;
     }
@@ -62,6 +64,7 @@ public class ListCastableFunction extends ListConstructorFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs within the function
      */
+    @Override
     public BooleanValue call(XPathContext context, Sequence[] args) throws XPathException {
         SequenceIterator iter = args[0].iterate();
         AtomicValue val = (AtomicValue) iter.next();

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
@@ -14,6 +15,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.CharSequenceConsumer;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.FunctionItemType;
@@ -28,10 +30,10 @@ import java.util.Arrays;
  */
 
 
-public class Concat extends SystemFunction {
+public class Concat extends SystemFunction implements PushableFunction {
 
     @Override
-    protected Sequence<?> resultIfEmpty(int arg) {
+    protected Sequence resultIfEmpty(int arg) {
         return null;
     }
 
@@ -40,6 +42,7 @@ public class Concat extends SystemFunction {
      *
      * @return an array of OperandRole objects, one for each argument
      */
+    @Override
     public OperandRole[] getOperandRoles() {
         OperandRole[] roles = new OperandRole[getArity()];
         OperandRole operandRole = new OperandRole(0, OperandUsage.ABSORPTION);
@@ -48,8 +51,6 @@ public class Concat extends SystemFunction {
         }
         return roles;
     }
-
-
 
     /**
      * Get the item type of the function item
@@ -91,7 +92,7 @@ public class Concat extends SystemFunction {
                 for (Operand o: operands()) {
                     Item it = o.getChildExpression().evaluateItem(context);
                     if (it != null) {
-                        buffer.append(it.getStringValueCS());
+                        buffer.cat(it.getStringValueCS());
                     }
                 }
                 return buffer;
@@ -110,27 +111,42 @@ public class Concat extends SystemFunction {
     }
 
 
+    @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
-        for (Sequence<?> arg : arguments) {
+        for (Sequence arg : arguments) {
             Item item = arg.head();
             if (item != null) {
-                fsb.append(item.getStringValueCS());
+                fsb.cat(item.getStringValueCS());
             }
         }
         return new StringValue(fsb);
     }
 
+    @Override
+    public void process(Outputter destination, XPathContext context, Sequence[] arguments) throws XPathException {
+        CharSequenceConsumer output = destination.getStringReceiver(false);
+        output.open();
+        for (Sequence arg : arguments) {
+            Item item = arg.head();
+            if (item != null) {
+                output.cat(item.getStringValueCS());
+            }
+        }
+        output.close();
+    }
 
     /**
      * Get the required type of the nth argument
      */
 
+    @Override
     public SequenceType getRequiredType(int arg) {
         return getDetails().argumentTypes[0];
         // concat() is a special case
     }
 
+    @Override
     public String getCompilerName() {
         return "ConcatCompiler";
     }

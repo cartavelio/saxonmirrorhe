@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -113,7 +113,7 @@ public class LoopLifter {
         }
         boolean threaded = multiThreaded || exp.isMultiThreaded(config);
         // Don't loop-lift out of a conditional, because it can lead to type errors,
-        // or outside a try/catch, because it could lead to errors not being caught
+        // or out of a try/catch, because it can lead to errors not being caught
         Expression choose = getContainingConditional(exp);
         if (choose != null) {
             markDependencies(exp, choose);
@@ -231,7 +231,7 @@ public class LoopLifter {
         ExpressionTool.copyLocationInfo(child, let);
         let.setSequence(child);
         let.setNeedsLazyEvaluation(true);
-        let.setEvaluationMode(Cardinality.allowsMany(child.getCardinality()) ? ExpressionTool.MAKE_MEMO_CLOSURE : ExpressionTool.MAKE_SINGLETON_CLOSURE);
+        let.setEvaluationMode(Cardinality.allowsMany(child.getCardinality()) ? EvaluationMode.MAKE_MEMO_CLOSURE : EvaluationMode.MAKE_SINGLETON_CLOSURE);
         let.setAction(newAction);
         let.adoptChildExpression(newAction);
 //        if (indexed) {

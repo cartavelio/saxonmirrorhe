@@ -2,7 +2,6 @@ package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
@@ -11,15 +10,19 @@ import net.sf.saxon.style.PrincipalStylesheetModule;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 
 import static jaxptest.ConfigTest.XMARK_DIR;
 import static net.sf.saxon.s9api.streams.Steps.child;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
-public class TestPackage extends TestCase {
+public class TestPackage {
     public static final String DATA_DIR = ConfigTest.DATA_DIR;
 
     /**
@@ -27,6 +30,7 @@ public class TestPackage extends TestCase {
      * then execute
      */
 
+    @Test
     public void testPackageExport() {
         try {
             Processor proc = new Processor(true);
@@ -51,6 +55,7 @@ public class TestPackage extends TestCase {
     /**
      * Test to check picking up of correct version
      */
+    @Test
     public void testPackageVersion() {
 
         Configuration config = new EnterpriseConfiguration();
@@ -81,7 +86,8 @@ public class TestPackage extends TestCase {
 
     }
 
-    public void testSavePackage01() {
+    @Test
+    public void testSaveAndRestorePackage01() {
         try {
             Processor processor = new Processor(true);
             XsltCompiler compiler = processor.newXsltCompiler();
@@ -108,9 +114,7 @@ public class TestPackage extends TestCase {
             fail();
             e.printStackTrace();
         }
-    }
 
-    public void testRestorePackage01() {
         try {
             Processor processor = new Processor(true);
             XsltCompiler compiler = processor.newXsltCompiler();
@@ -123,14 +127,15 @@ public class TestPackage extends TestCase {
             Serializer ser = processor.newSerializer(out);
             trans.setDestination(ser);
             trans.transform();
-            assertTrue("result", out.toString().contains("<out>25 26 27 28 29</out>"));
+            assertTrue(out.toString().contains("<out>25 26 27 28 29</out>"), "result");
         } catch (SaxonApiException e) {
             fail();
             e.printStackTrace();
         }
     }
 
-    public void testSavePackage02() {
+    @Test
+    public void testSaveAndRestorePackage02() {
         try {
             Processor processor = new Processor(true);
             XsltCompiler compiler = processor.newXsltCompiler();
@@ -155,9 +160,7 @@ public class TestPackage extends TestCase {
             fail();
             e.printStackTrace();
         }
-    }
 
-    public void testRestorePackage02() {
         try {
             Processor processor = new Processor(true);
             XsltCompiler compiler = processor.newXsltCompiler();
@@ -173,13 +176,14 @@ public class TestPackage extends TestCase {
             trans.setDestination(ser);
             trans.transform();
             System.err.println(out.toString());
-            assertTrue("result", out.toString().contains("<out><in>BOOKLIST</in></out>"));
+            assertTrue(out.toString().contains("<out><in>BOOKLIST</in></out>"), "result");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
 
+    @Test
     public void testExportedPackage01() {
         try {
             Processor processor = new Processor(true);
@@ -202,7 +206,7 @@ public class TestPackage extends TestCase {
             Serializer ser = processor.newSerializer(out);
             trans.applyTemplates(root, ser);
             //System.err.println(out.toString());
-            assertTrue("result", out.toString().contains("<root><list><item><bar>foo 1</bar><list><item><bar>foo 2</bar></item></list></item></list></root>"));
+            assertTrue(out.toString().contains("<root><list><item><bar>foo 1</bar><list><item><bar>foo 2</bar></item></list></item></list></root>"), "result");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
@@ -211,16 +215,19 @@ public class TestPackage extends TestCase {
         }
     }
 
+    @Test
     public void testConfig01() {
         // using package declared first in configuration file
         runConfigFileTest("packages/config-100.xml", "http://package-one/", true);
     }
 
+    @Test
     public void testConfig02() {
         // using package declared last in configuration file
         runConfigFileTest("packages/config-101.xml", "http://package-one/", true);
     }
 
+    @Test
     public void testConfig03() {
         // cyclic dependencies in configuration file
         runConfigFileTest("packages/config-103.xml", "http://package-103/", false);
@@ -244,7 +251,7 @@ public class TestPackage extends TestCase {
             trans.transform();
             System.err.println(out.toString());
             if (expectSuccess) {
-                assertTrue("result", out.toString().contains("<out>42</out>"));
+                assertTrue(out.toString().contains("<out>42</out>"), "result");
             } else {
                 fail("Unexpected success");
             }
@@ -256,52 +263,7 @@ public class TestPackage extends TestCase {
         }
     }
 
-    public void testPackageRenaming() {
-        // See bug 4220
-        try {
-            String configFile = DATA_DIR + "packages/config-120.xml";
-            Processor processor = new Processor(new StreamSource(new File(configFile)));
-            XsltCompiler compiler = processor.newXsltCompiler();
-            XsltExecutable top = compiler.compile(
-                    new StreamSource(new File(DATA_DIR + "packages/pack-120-top.xsl")));
-            Xslt30Transformer trans = top.load30();
-            XdmNode result = (XdmNode) trans.callTemplate(null);
-            XPathCompiler xp = processor.newXPathCompiler();
-            String sum = xp.evaluateSingle("/out/add", result).getStringValue();
-            String difference = xp.evaluateSingle("/out/subtract", result).getStringValue();
-            String product = xp.evaluateSingle("/out/multiply", result).getStringValue();
-            assertEquals("12", sum);
-            assertEquals("8", difference);
-            assertEquals("20", product);
-        } catch(SaxonApiException e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
-
-    public void testPackageRenamingExported() {
-        // See bug 4220
-        try {
-            String configFile = DATA_DIR + "packages/config-121.xml";
-            Processor processor = new Processor(new StreamSource(new File(configFile)));
-            XsltCompiler compiler = processor.newXsltCompiler();
-            XsltExecutable top = compiler.compile(
-                    new StreamSource(new File(DATA_DIR + "packages/pack-120-top.xsl")));
-            Xslt30Transformer trans = top.load30();
-            XdmNode result = (XdmNode) trans.callTemplate(null);
-            XPathCompiler xp = processor.newXPathCompiler();
-            String sum = xp.evaluateSingle("/out/add", result).getStringValue();
-            String difference = xp.evaluateSingle("/out/subtract", result).getStringValue();
-            String product = xp.evaluateSingle("/out/multiply", result).getStringValue();
-            assertEquals("12", sum);
-            assertEquals("8", difference);
-            assertEquals("20", product);
-        } catch (SaxonApiException e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
-
+    @Test
     public void testImportingWithoutLicense() {
         try {
             Processor processor1 = new Processor(true);
@@ -323,6 +285,7 @@ public class TestPackage extends TestCase {
         }
     }
 
+    @Test
     public void testImportingWithoutLicenseOptimizedCode() {
         try {
             Processor processor1 = new Processor(true);
@@ -346,12 +309,13 @@ public class TestPackage extends TestCase {
         }
     }
 
-    public void testExportToHEfailing() {
-        // Export should fail because HE does not support higher-order-functions
+    @Test
+    public void testExportToHEworking() {
+        // Export now working in 10.0 because HE does support higher-order-functions
         try {
             Processor processor = new Processor(true);
             XsltCompiler compiler = processor.newXsltCompiler();
-            compiler.setTargetEdition("HE");
+            compiler.setTargetEdition("JS");
             String xsl = "<xsl:package\n" +
                     "    name = \"package-002.xsl\"\n" +
                     "    package-version = \"2.1.0.5\"\n" +
@@ -370,32 +334,65 @@ public class TestPackage extends TestCase {
             XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(xsl)));
             File file = new File(DATA_DIR + "sandpit/" + "package01.xsltpack");
             pack.save(file);
+        } catch (SaxonApiException e) {
+            fail("Unexpected failure");
+        }
+    }
+
+
+    @Test
+    public void testExportToHEfailing() {
+        // Export fails because HE does not support streaming
+        try {
+            Processor processor = new Processor(true);
+            XsltCompiler compiler = processor.newXsltCompiler();
+            compiler.setTargetEdition("JS");
+            String xsl = "<xsl:package\n" +
+                    "    name = \"package-002.xsl\"\n" +
+                    "    package-version = \"2.1.0.5\"\n" +
+                    "    version = \"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
+                    "        <xsl:param name='c' select='2'/>" +
+                    "        <xsl:mode streamable='yes'/>\n" +
+                    "        <xsl:template match='/'>\n" +
+                    "          <xsl:param name='p1'/>\n" +
+                    "          <out><xsl:apply-templates/></out>\n" +
+                    "        </xsl:template>\n" +
+                    "        <xsl:template name='main'>\n" +
+                    "          <xsl:call-template name='go'>\n" +
+                    "          <xsl:with-param name='p1' select='22'/>\n" +
+                    "          </xsl:call-template>\n" +
+                    "        </xsl:template>\n" +
+                    "</xsl:package>";
+            XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(xsl)));
+            File file = new File(DATA_DIR + "sandpit/" + "package01.xsltpack");
+            pack.save(file);
             fail("Unexpected success");
         } catch (SaxonApiException e) {
-            e.printStackTrace();
             // OK
         }
     }
 
 
-    public void testExportWithNodeValuedVariable() {  // Bug 4117
+    @Test
+    public void testBug4117() {
+
+        // Bugs 4035 and 4117 - exporting a package containing node-valued static variables
 
         String p =
          "<xsl:package name='http://www.ctk.cz/keywords/' " +
 
         "  xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' version='3.0' " +
-         "  xmlns:kw='http://www.ctk.cz/keywords/'>" +
-         "  <xsl:variable name='keywords' as='document-node()' static='yes' "
-                 + " select='parse-xml(\"&lt;Keywords&gt;&lt;/Keywords&gt;\")'/>" +
-         "  <xsl:function name='kw:get-keyword-value' as='xs:string?' visibility='final'>" +
-         "     <xsl:param name = 'qcode' as= 'xs:string'/>" +
-         "     <xsl:sequence select='$keywords/Keywords//Keyword[@qcode eq $qcode]/Value'/>" +
-         "  </xsl:function>" +
-         "</xsl:package>";
+        "  xmlns:kw='http://www.ctk.cz/keywords/'>" +
+        "  <xsl:variable name='keywords' as='document-node()' static='yes'"
+                 + " select=\"parse-xml('&lt;Keywords&gt;&lt;/Keywords&gt;')\"/>" +
+        "  <xsl:function name='kw:get-keyword-value' as='xs:string?' visibility='final'>" +
+        "     <xsl:param name = 'qcode' as= 'xs:string'/>" +
+        "     <xsl:sequence select='$keywords/Keywords//Keyword[@qcode eq $qcode]/Value'/>" +
+        "  </xsl:function>" +
+        "</xsl:package>";
 
 
         String s =
-
         "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:kw='http://www.ctk.cz/keywords/'> " +
         "  <xsl:use-package name='http://www.ctk.cz/keywords/'/>" +
         "  <xsl:template name='xsl:initial-template'> " +
@@ -405,24 +402,21 @@ public class TestPackage extends TestCase {
 
         try {
             Processor processor = new Processor(true);
-            processor.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, "-j");
+            //processor.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, "-j");
             XsltCompiler xsltCompiler = processor.newXsltCompiler();
-            StringReader ms = new StringReader(p);
-            XsltPackage pp = xsltCompiler.compilePackage(new StreamSource(ms));
+            XsltPackage pp = xsltCompiler.compilePackage(new StreamSource(new StringReader(p)));
             xsltCompiler.importPackage(pp);
             XsltExecutable exec = xsltCompiler.compile(new StreamSource(new StringReader(s)));
             Xslt30Transformer transf = exec.load30();
-            XdmDestination dest = new XdmDestination();
+            Serializer dest = processor.newSerializer(System.out);
             transf.callTemplate(null, dest);
-            System.err.println(dest.getXdmNode());
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
-
-
     }
 
+    @Test
     public void testDualUse() {  // Bug 4153
 
         // The idea here is to show that a compiled package can be used both as a top-level package
@@ -488,9 +482,87 @@ public class TestPackage extends TestCase {
             e.printStackTrace();
             fail();
         }
-
-
     }
 
+    @Test
+    public void testBug4727a() {
+        String p = "<xsl:package xmlns:xsl='http://www.w3.org/1999/XSL/Transform'\n" +
+                "             xmlns:xs='http://www.w3.org/2001/XMLSchema'\n" +
+                "             xmlns:t='http://example.com/templates'\n" +
+                "             package-version='1.0.0'\n" +
+                "             exclude-result-prefixes='#all'\n" +
+                "             version='3.0'>\n" +
+                "<xsl:template name='t:funcsynopsis' visibility='public'>\n" +
+                "  <irrelevant/>\n" +
+                "</xsl:template>\n" +
+                "</xsl:package>\n";
 
+        String s = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'\n" +
+                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'\n" +
+                "                xmlns:t='http://example.com/templates'\n" +
+                "                exclude-result-prefixes='#all'\n" +
+                "                version='3.0'>\n" +
+                "<xsl:output omit-xml-declaration='yes'/>\n" +
+                "<xsl:use-package name='http://example.com/funcsynopsis'\n" +
+                "                 package-version=\"'1.0.0'\"/>\n" +
+                "<xsl:template match='funcsynopsis'>\n" +
+                "  <xsl:call-template name='t:funcsynopsis'/>\n" +
+                "</xsl:template>\n" +
+                "</xsl:stylesheet>\n";
+
+        try {
+            Processor processor = new Processor(true);
+            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+            XsltPackage pp = xsltCompiler.compilePackage(new StreamSource(new StringReader(p)));
+            xsltCompiler.importPackage(pp);
+            XsltExecutable exec = xsltCompiler.compile(new StreamSource(new StringReader(s)));
+            fail("Package compile should not have succeeded");
+        } catch (SaxonApiException e) {
+            // that's expected
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("Unexpected exception attempting to use unavailable package");
+        }
+    }
+
+    @Test
+    public void testBug4727b() {
+        String p = "<xsl:package xmlns:xsl='http://www.w3.org/1999/XSL/Transform'\n" +
+                "             xmlns:xs='http://www.w3.org/2001/XMLSchema'\n" +
+                "             xmlns:t='http://example.com/templates'\n" +
+                "             package-version='1.0.0'\n" +
+                "             exclude-result-prefixes='#all'\n" +
+                "             version='3.0'>\n" +
+                "<xsl:template name='t:funcsynopsis' visibility='public'>\n" +
+                "  <irrelevant/>\n" +
+                "</xsl:template>\n" +
+                "</xsl:package>\n";
+
+        String s = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'\n" +
+                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'\n" +
+                "                xmlns:t='http://example.com/templates'\n" +
+                "                exclude-result-prefixes='#all'\n" +
+                "                version='3.0'>\n" +
+                "<xsl:output omit-xml-declaration='yes'/>\n" +
+                "<xsl:use-package name='http://example.com/funcsynopsis'\n" +
+                "                 package-version=\"2.0.0\"/>\n" +
+                "<xsl:template match='funcsynopsis'>\n" +
+                "  <xsl:call-template name='t:funcsynopsis'/>\n" +
+                "</xsl:template>\n" +
+                "</xsl:stylesheet>\n";
+
+        try {
+            Processor processor = new Processor(true);
+            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+            XsltPackage pp = xsltCompiler.compilePackage(new StreamSource(new StringReader(p)));
+            xsltCompiler.importPackage(pp);
+            XsltExecutable exec = xsltCompiler.compile(new StreamSource(new StringReader(s)));
+            fail("Package compile should not have succeeded");
+        } catch (SaxonApiException e) {
+            // that's expected
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("Unexpected exception attempting to use unavailable package");
+        }
+    }
 }

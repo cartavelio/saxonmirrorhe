@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,21 +9,22 @@ package net.sf.saxon.pull;
 
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.tree.tiny.CharSlice;
 import net.sf.saxon.tree.tiny.CompressedWhitespace;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Whitespace;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.*;
 import javax.xml.stream.events.EntityDeclaration;
 import java.io.InputStream;
@@ -34,6 +35,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * This class implements the Saxon PullProvider API on top of a standard StAX parser
@@ -43,12 +45,13 @@ import java.util.List;
 public class StaxBridge implements PullProvider {
 
     private XMLStreamReader reader;
-    private StaxAttributes attributes = new StaxAttributes();
+    private AttributeMap attributes;
     private PipelineConfiguration pipe;
     private NamePool namePool;
     private HashMap<String, NodeName> nameCache = new HashMap<>();
+    private Stack<NamespaceMap> namespaceStack = new Stack<>();
     private List unparsedEntities = null;
-    int currentEvent = START_OF_INPUT;
+    Event currentEvent = Event.START_OF_INPUT;
     int depth = 0;
     boolean ignoreIgnorable = false;
     
@@ -57,7 +60,7 @@ public class StaxBridge implements PullProvider {
      */
 
     public StaxBridge() {
-
+        namespaceStack.push(NamespaceMap.emptyMap());
     }
 
     /**
@@ -96,6 +99,7 @@ public class StaxBridge implements PullProvider {
      * have been read.
      */
 
+    @Override
     public void setPipelineConfiguration(PipelineConfiguration pipe) {
         this.pipe = new PipelineConfiguration(pipe);
         this.namePool = pipe.getConfiguration().getNamePool();
@@ -106,6 +110,7 @@ public class StaxBridge implements PullProvider {
      * Get configuration information.
      */
 
+    @Override
     public PipelineConfiguration getPipelineConfiguration() {
         return pipe;
     }
@@ -136,30 +141,60 @@ public class StaxBridge implements PullProvider {
      * Get the next event
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link #END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned at the end of the sequence.
      */
 
-    public int next() throws XPathException {
-        if (currentEvent == START_OF_INPUT) {
+    @Override
+    public Event next() throws XPathException {
+        if (currentEvent == Event.START_OF_INPUT) {
             // StAX isn't reporting START_DOCUMENT so we supply it ourselves
-            currentEvent = START_DOCUMENT;
+            currentEvent = Event.START_DOCUMENT;
             return currentEvent;
         }
-        if (currentEvent == END_OF_INPUT || currentEvent == END_DOCUMENT) {
+        if (currentEvent == Event.END_OF_INPUT || currentEvent == Event.END_DOCUMENT) {
             try {
                 reader.close();
             } catch (XMLStreamException e) {
                 throw new XPathException(e);
             }
-            return END_OF_INPUT;
+            return Event.END_OF_INPUT;
         }
         try {
             if (reader.hasNext()) {
                 int event = reader.next();
                 //System.err.println("Read event " + event);
                 currentEvent = translate(event);
+                if (currentEvent == Event.START_ELEMENT) {
+                    NamespaceMap nsMap = namespaceStack.peek();
+                    int n = reader.getNamespaceCount();
+                    for (int i = 0; i < n; i++) {
+                        String prefix = reader.getNamespacePrefix(i);
+                        String uri = reader.getNamespaceURI(i);
+                        nsMap = nsMap.bind(prefix==null ? "" : prefix, uri==null ? "" : uri);
+                    }
+                    namespaceStack.push(nsMap);
+
+                    int attCount = reader.getAttributeCount();
+                    if (attCount == 0) {
+                        attributes = EmptyAttributeMap.getInstance();
+                    } else {
+                        List<AttributeInfo> attList = new ArrayList<>();
+                        NamePool pool = getNamePool();
+                        for (int i=0; i<attCount; i++) {
+                            QName name = reader.getAttributeName(i);
+                            FingerprintedQName fName = new FingerprintedQName(
+                                    name.getPrefix(), name.getNamespaceURI(), name.getLocalPart(), pool);
+                            String value = reader.getAttributeValue(i);
+                            AttributeInfo att = new AttributeInfo(fName, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, 0);
+                            attList.add(att);
+                        }
+                        attributes = AttributeMap.fromList(attList);
+                    }
+                } else if (currentEvent == Event.END_ELEMENT) {
+                    namespaceStack.pop();
+                }
             } else {
-                currentEvent = END_OF_INPUT;
+                currentEvent = Event.END_OF_INPUT;
             }
         } catch (XMLStreamException e) {
             String message = e.getMessage();
@@ -179,13 +214,13 @@ public class StaxBridge implements PullProvider {
     }
 
 
-    private int translate(int event) throws XPathException {
+    private Event translate(int event) throws XPathException {
         //System.err.println("EVENT " + event);
         switch (event) {
             case XMLStreamConstants.ATTRIBUTE:
-                return ATTRIBUTE;
+                return Event.ATTRIBUTE;
             case XMLStreamConstants.CDATA:
-                return TEXT;
+                return Event.TEXT;
             case XMLStreamConstants.CHARACTERS:
                 if (depth == 0 && reader.isWhiteSpace()) {
                     return next();
@@ -195,28 +230,28 @@ public class StaxBridge implements PullProvider {
 //                        System.err.println("TEXT[" + new String(reader.getTextCharacters(), reader.getTextStart(), reader.getTextLength()) + "]");
 //                        System.err.println("  ARRAY length " + reader.getTextCharacters().length + "[" + new String(reader.getTextCharacters(), 0, reader.getTextStart() + reader.getTextLength()) + "]");
 //                        System.err.println("  START: " + reader.getTextStart() + " LENGTH " + reader.getTextLength());
-                    return TEXT;
+                    return Event.TEXT;
                 }
             case XMLStreamConstants.COMMENT:
-                return COMMENT;
+                return Event.COMMENT;
             case XMLStreamConstants.DTD:
                 unparsedEntities = (List) reader.getProperty("javax.xml.stream.entities");
                 return next();
             case XMLStreamConstants.END_DOCUMENT:
-                return END_DOCUMENT;
+                return Event.END_DOCUMENT;
             case XMLStreamConstants.END_ELEMENT:
                 depth--;
-                return END_ELEMENT;
+                return Event.END_ELEMENT;
             case XMLStreamConstants.ENTITY_DECLARATION:
                 return next();
             case XMLStreamConstants.ENTITY_REFERENCE:
                 return next();
             case XMLStreamConstants.NAMESPACE:
-                return NAMESPACE;
+                return Event.NAMESPACE;
             case XMLStreamConstants.NOTATION_DECLARATION:
                 return next();
             case XMLStreamConstants.PROCESSING_INSTRUCTION:
-                return PROCESSING_INSTRUCTION;
+                return Event.PROCESSING_INSTRUCTION;
             case XMLStreamConstants.SPACE:
                 if (depth == 0) {
                     return next();
@@ -224,14 +259,14 @@ public class StaxBridge implements PullProvider {
                     // (Brave attempt, but Woodstox doesn't seem to report ignorable whitespace)
                     return next();
                 } else {
-                    return TEXT;
+                    return Event.TEXT;
                 }
             case XMLStreamConstants.START_DOCUMENT:
                 return next();  // we supplied the START_DOCUMENT ourselves
             //return START_DOCUMENT;
             case XMLStreamConstants.START_ELEMENT:
                 depth++;
-                return START_ELEMENT;
+                return Event.START_ELEMENT;
             default:
                 throw new IllegalStateException("Unknown StAX event " + event);
 
@@ -247,16 +282,15 @@ public class StaxBridge implements PullProvider {
      * @return the current event
      */
 
-    public int current() {
+    @Override
+    public Event current() {
         return currentEvent;
     }
 
     /**
      * Get the attributes associated with the current element. This method must
      * be called only after a START_ELEMENT event has been notified. The contents
-     * of the returned AttributeCollection are guaranteed to remain unchanged
-     * until the next START_ELEMENT event, but may be modified thereafter. The object
-     * should not be modified by the client.
+     * of the returned AttributeMap are immutable.
      * <p>Attributes may be read before or after reading the namespaces of an element,
      * but must not be read after the first child node has been read, or after calling
      * one of the methods skipToEnd(), getStringValue(), or getTypedValue().</p>
@@ -265,7 +299,8 @@ public class StaxBridge implements PullProvider {
      *         that has just been notified.
      */
 
-    public AttributeCollection getAttributes() {
+    @Override
+    public AttributeMap getAttributes() {
         return attributes;
     }
 
@@ -286,6 +321,7 @@ public class StaxBridge implements PullProvider {
      * one of the methods skipToEnd(), getStringValue(), or getTypedValue().</p>
      */
 
+    @Override
     public NamespaceBinding[] getNamespaceDeclarations() {
         int n = reader.getNamespaceCount();
         if (n == 0) {
@@ -314,10 +350,11 @@ public class StaxBridge implements PullProvider {
      * the event following the END_DOCUMENT or END_ELEMENT.
      */
 
-    public int skipToMatchingEnd() throws XPathException {
+    @Override
+    public Event skipToMatchingEnd() throws XPathException {
         switch (currentEvent) {
             case START_DOCUMENT:
-                currentEvent = END_DOCUMENT;
+                currentEvent = Event.END_DOCUMENT;
                 return currentEvent;
             case START_ELEMENT:
                 try {
@@ -328,7 +365,7 @@ public class StaxBridge implements PullProvider {
                             skipDepth++;
                         } else if (event == XMLStreamConstants.END_ELEMENT) {
                             if (skipDepth-- == 0) {
-                                currentEvent = END_ELEMENT;
+                                currentEvent = Event.END_ELEMENT;
                                 return currentEvent;
                             }
                         }
@@ -347,12 +384,13 @@ public class StaxBridge implements PullProvider {
 
     /**
      * Close the event reader. This indicates that no further events are required.
-     * It is not necessary to close an event reader after {@link #END_OF_INPUT} has
+     * It is not necessary to close an event reader after {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} has
      * been reported, but it is recommended to close it if reading terminates
      * prematurely. Once an event reader has been closed, the effect of further
      * calls on next() is undefined.
      */
 
+    @Override
     public void close() {
         try {
             reader.close();
@@ -363,11 +401,9 @@ public class StaxBridge implements PullProvider {
 
     /**
      * Get the NodeName identifying the name of the current node. This method
-     * can be used after the {@link #START_ELEMENT}, {@link #PROCESSING_INSTRUCTION},
-     * {@link #ATTRIBUTE}, or {@link #NAMESPACE} events. With some PullProvider implementations,
-     * it can also be used after {@link #END_ELEMENT}, but this is not guaranteed: a client who
-     * requires the information at that point (for example, to do serialization) should insert an
-     * {@link com.saxonica.xqj.pull.ElementNameTracker} into the pipeline.
+     * can be used after the {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, {@link net.sf.saxon.pull.PullProvider.Event#PROCESSING_INSTRUCTION},
+     * {@link net.sf.saxon.pull.PullProvider.Event#ATTRIBUTE}, or {@link net.sf.saxon.pull.PullProvider.Event#NAMESPACE} events. With some PullProvider implementations,
+     * it can also be used after {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}, but this is not guaranteed.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
      * If called when the current node is an unnamed namespace node (a node representing the default namespace)
      * the returned value is null.
@@ -375,8 +411,9 @@ public class StaxBridge implements PullProvider {
      * @return the NodeName. The NodeName can be used to obtain the prefix, local name,
      * and namespace URI.
      */
+    @Override
     public NodeName getNodeName() {
-        if (currentEvent == START_ELEMENT || currentEvent == END_ELEMENT) {
+        if (currentEvent == Event.START_ELEMENT || currentEvent == Event.END_ELEMENT) {
             String local = reader.getLocalName();
             String uri = reader.getNamespaceURI();
             // We keep a cache indexed by local name, on the assumption that most of the time, a given
@@ -394,7 +431,7 @@ public class StaxBridge implements PullProvider {
                 nameCache.put(local, cached);
                 return cached;
             }
-        } else if (currentEvent == PROCESSING_INSTRUCTION) {
+        } else if (currentEvent == Event.PROCESSING_INSTRUCTION) {
             String local = reader.getPITarget();
             return new NoNamespaceName(local);
         } else {
@@ -406,15 +443,16 @@ public class StaxBridge implements PullProvider {
      * Get the string value of the current element, text node, processing-instruction,
      * or top-level attribute or namespace node, or atomic value.
      * <p>In other situations the result is undefined and may result in an IllegalStateException.</p>
-     * <p>If the most recent event was a {@link #START_ELEMENT}, this method causes the content
+     * <p>If the most recent event was a {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, this method causes the content
      * of the element to be read. The current event on completion of this method will be the
-     * corresponding {@link #END_ELEMENT}. The next call of next() will return the event following
+     * corresponding {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}. The next call of next() will return the event following
      * the END_ELEMENT event.</p>
      *
      * @return the String Value of the node in question, defined according to the rules in the
      *         XPath data model.
      */
 
+    @Override
     public CharSequence getStringValue() throws XPathException {
         switch (currentEvent) {
             case TEXT:
@@ -446,7 +484,7 @@ public class StaxBridge implements PullProvider {
                             depth++;
                         } else if (event == XMLStreamConstants.END_ELEMENT) {
                             if (depth-- == 0) {
-                                currentEvent = END_ELEMENT;
+                                currentEvent = Event.END_ELEMENT;
                                 if (combinedText != null) {
                                     return combinedText.condense();
                                 } else {
@@ -470,6 +508,7 @@ public class StaxBridge implements PullProvider {
      * a free-standing atomic value; it is never used when reading the content of a node.
      */
 
+    @Override
     public AtomicValue getAtomicValue() {
         throw new IllegalStateException();
     }
@@ -482,10 +521,11 @@ public class StaxBridge implements PullProvider {
      * @return the type annotation.
      */
 
+    @Override
     public SchemaType getSchemaType() {
-        if (currentEvent == START_ELEMENT) {
+        if (currentEvent == Event.START_ELEMENT) {
             return Untyped.getInstance();
-        } else if (currentEvent == ATTRIBUTE) {
+        } else if (currentEvent == Event.ATTRIBUTE) {
             return BuiltInAtomicType.UNTYPED_ATOMIC;
         } else {
             return null;
@@ -500,7 +540,8 @@ public class StaxBridge implements PullProvider {
      * A value of null can be returned if no location information is available.
      */
 
-    public net.sf.saxon.expr.parser.Location getSourceLocator() {
+    @Override
+    public net.sf.saxon.s9api.Location getSourceLocator() {
         return translateLocation(reader.getLocation());
     }
 
@@ -511,262 +552,14 @@ public class StaxBridge implements PullProvider {
      * @return a Saxon/SAX SourceLocator object
      */
 
-    private ExplicitLocation translateLocation(Location location) {
+    private Loc translateLocation(Location location) {
         if (location == null) {
-            return ExplicitLocation.UNKNOWN_LOCATION;
+            return Loc.NONE;
         } else {
-            return new ExplicitLocation(location.getSystemId(), location.getLineNumber(), location.getColumnNumber());
+            return new Loc(location.getSystemId(), location.getLineNumber(), location.getColumnNumber());
         }
     }
-
-    /**
-     * Implement the Saxon AttributeCollection interface over the StAX interface.
-     */
-
-    private class StaxAttributes implements AttributeCollection {
-
-        /**
-         * Return the number of attributes in the list.
-         *
-         * @return The number of attributes in the list.
-         */
-
-        public int getLength() {
-            return reader.getAttributeCount();
-        }
-
-        public int getFingerprint(int index) {
-            String local = reader.getAttributeLocalName(index);
-            String uri = reader.getAttributeNamespace(index);
-            if (uri == null) {
-                uri = "";
-            }
-            return getNamePool().allocateFingerprint(uri, local);
-        }
-
-        /**
-         * Get the node name of an attribute (by position)
-         *
-         * @param index The position of the attribute in the list
-         * @return The node name of the attribute, or null if there is no attribute in that position
-         */
-        public NodeName getNodeName(int index) {
-            String local = reader.getAttributeLocalName(index);
-            String uri = reader.getAttributeNamespace(index);
-            String prefix = reader.getAttributePrefix(index);
-            if (prefix == null) {
-                prefix = "";
-            }
-            if (uri == null) {
-                uri = "";
-            }
-            return new FingerprintedQName(prefix, uri, local);
-        }
-
-        /**
-         * Get the type annotation of an attribute (by position).
-         *
-         * @param index The position of the attribute in the list.
-         * @return The type annotation
-         */
-
-        public SimpleType getTypeAnnotation(int index) {
-            String type = reader.getAttributeType(index);
-            if ("ID".equals(type)) {
-                return BuiltInAtomicType.ID;
-            }
-            return BuiltInAtomicType.UNTYPED_ATOMIC;
-        }
-
-        /**
-         * Get the locationID of an attribute (by position)
-         *
-         * @param index The position of the attribute in the list.
-         * @return The location of the attribute. This can be used to obtain the
-         *         actual system identifier and line number of the relevant location
-         */
-
-        public net.sf.saxon.expr.parser.Location getLocation(int index) {
-            return ExplicitLocation.UNKNOWN_LOCATION;
-        }
-
-        /**
-         * Get the systemId part of the location of an attribute, at a given index.
-         * <p>Attribute location information is not available from a SAX parser, so this method
-         * is not useful for getting the location of an attribute in a source document. However,
-         * in a Saxon result document, the location information represents the location in the
-         * stylesheet of the instruction used to generate this attribute, which is useful for
-         * debugging.</p>
-         *
-         * @param index the required attribute
-         * @return the systemId of the location of the attribute
-         */
-
-        public String getSystemId(int index) {
-            return reader.getLocation().getSystemId();
-        }
-
-        /**
-         * Get the line number part of the location of an attribute, at a given index.
-         * <p>Attribute location information is not available from a SAX parser, so this method
-         * is not useful for getting the location of an attribute in a source document. However,
-         * in a Saxon result document, the location information represents the location in the
-         * stylesheet of the instruction used to generate this attribute, which is useful for
-         * debugging.</p>
-         *
-         * @param index the required attribute
-         * @return the line number of the location of the attribute
-         */
-
-        public int getLineNumber(int index) {
-            return reader.getLocation().getLineNumber();
-        }
-
-        /**
-         * Get the properties of an attribute (by position)
-         *
-         * @param index The position of the attribute in the list.
-         * @return The properties of the attribute. This is a set
-         *         of bit-settings defined in class {@link net.sf.saxon.event.ReceiverOptions}. The
-         *         most interesting of these is {{@link net.sf.saxon.event.ReceiverOptions#DEFAULTED_ATTRIBUTE},
-         *         which indicates an attribute that was added to an element as a result of schema validation.
-         */
-
-        public int getProperties(int index) {
-            int properties = 0;
-            if (!reader.isAttributeSpecified(index)) {
-                properties |= ReceiverOptions.DEFAULTED_ATTRIBUTE;
-            }
-            if (isIdref(index)) {
-                properties |= ReceiverOptions.IS_IDREF | ReceiverOptions.ID_IDREF_CHECKED;
-            }
-            return properties;
-        }
-
-        /**
-         * Get the prefix of the name of an attribute (by position).
-         *
-         * @param index The position of the attribute in the list.
-         * @return The prefix of the attribute name as a string, or null if there
-         *         is no attribute at that position. Returns "" for an attribute that
-         *         has no prefix.
-         */
-
-        public String getPrefix(int index) {
-            return getNodeName(index).getPrefix();
-        }
-
-        /**
-         * Get the lexical QName of an attribute (by position).
-         *
-         * @param index The position of the attribute in the list.
-         * @return The lexical QName of the attribute as a string, or null if there
-         *         is no attribute at that position.
-         */
-
-        public String getQName(int index) {
-            return getNodeName(index).getDisplayName();
-        }
-
-        /**
-         * Get the local name of an attribute (by position).
-         *
-         * @param index The position of the attribute in the list.
-         * @return The local name of the attribute as a string, or null if there
-         *         is no attribute at that position.
-         */
-
-        public String getLocalName(int index) {
-            return reader.getAttributeLocalName(index);
-        }
-
-        /**
-         * Get the namespace URI of an attribute (by position).
-         *
-         * @param index The position of the attribute in the list.
-         * @return The local name of the attribute as a string, or null if there
-         *         is no attribute at that position.
-         */
-
-        public String getURI(int index) {
-            return reader.getAttributeNamespace(index);
-        }
-
-        /**
-         * Get the index of an attribute (by name).
-         *
-         * @param uri       The namespace uri of the attribute.
-         * @param localname The local name of the attribute.
-         * @return The index position of the attribute
-         */
-
-        public int getIndex(String uri, String localname) {
-            for (int i = 0; i < getLength(); i++) {
-                if (getLocalName(i).equals(localname) && getURI(i).equals(uri)) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        /**
-         * Get the index, given the fingerprint
-         */
-
-        public int getIndexByFingerprint(int fingerprint) {
-            return getIndex(getNamePool().getURI(fingerprint), getNamePool().getLocalName(fingerprint));
-        }
-
-        /**
-         * Get the attribute value using its fingerprint
-         */
-
-        public String getValueByFingerprint(int fingerprint) {
-            return getValue(getIndexByFingerprint(fingerprint));
-        }
-
-        /**
-         * Get the value of an attribute (by name).
-         *
-         * @param uri       The namespace uri of the attribute.
-         * @param localname The local name of the attribute.
-         * @return The index position of the attribute
-         */
-
-        public String getValue(String uri, String localname) {
-            return reader.getAttributeValue(uri, localname);
-        }
-
-        /**
-         * Get the value of an attribute (by position).
-         *
-         * @param index The position of the attribute in the list.
-         * @return The attribute value as a string, or null if
-         *         there is no attribute at that position.
-         */
-
-        public String getValue(int index) {
-            return reader.getAttributeValue(index);
-        }
-
-        /**
-         * Determine whether a given attribute has the is-ID property set
-         */
-
-        public boolean isId(int index) {
-            return "ID".equals(reader.getAttributeType(index));
-        }
-
-        /**
-         * Determine whether a given attribute has the is-idref property set
-         */
-
-        public boolean isIdref(int index) {
-            String attributeType = reader.getAttributeType(index);
-            return "IDREF".equals(attributeType) || "IDREFS".equals(attributeType);
-        }
-    }
-
+    
     /**
      * Get a list of unparsed entities.
      *
@@ -775,6 +568,7 @@ public class StaxBridge implements PullProvider {
      *         be an instance of {@link net.sf.saxon.pull.UnparsedEntity}
      */
 
+    @Override
     public List<UnparsedEntity> getUnparsedEntities() {
         if (unparsedEntities == null) {
             return null;
@@ -813,7 +607,7 @@ public class StaxBridge implements PullProvider {
             if (name != null) {
                 if (baseURI != null && systemId != null) {
                     try {
-                        systemId = new URI(baseURI).resolve(systemId).toString();
+                        systemId = ResolveURI.makeAbsolute(systemId, baseURI).toString();
                     } catch (URISyntaxException err) {
                         //
                     }
@@ -835,12 +629,12 @@ public class StaxBridge implements PullProvider {
 
     private class StaxErrorReporter implements XMLReporter {
 
+        @Override
         public void report(String message, String errorType,
                            Object relatedInformation, Location location) {
-            ExplicitLocation loc = translateLocation(location);
-            XPathException err = new XPathException("Error reported by XML parser: " + message + " (" + errorType + ')');
-            err.setLocator(loc);
-            pipe.getErrorListener().error(err);
+            XmlProcessingIncident err = new XmlProcessingIncident("Error reported by XML parser: " + message + " (" + errorType + ')');
+            err.setLocation(translateLocation(location));
+            pipe.getErrorReporter().report(err);
         }
 
     }

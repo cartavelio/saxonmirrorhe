@@ -1,9 +1,9 @@
 package jaxptest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
@@ -15,19 +15,24 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * JUnit tests for the JAXP Transformation API (trax).
  * Adapted by converting the TraxExamples file
  * originally created by Scott Boag, but much evolved since.
  */
-public class URIResolverTest extends TestCase {
+public class URIResolverTest {
 
     private static final String d = ConfigTest.DATA_DIR + "trax/";
 
     private static final String foo_xml = d + "xml/foo.xml";
     private static final String foo_xsl = d + "xsl/foo.xsl";
 
+    @Test
     public void testGetURIResolver() {
 
         try {

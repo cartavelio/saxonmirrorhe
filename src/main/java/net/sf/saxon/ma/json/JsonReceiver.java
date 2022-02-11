@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,26 +9,24 @@ package net.sf.saxon.ma.json;
 
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.StartTagBuffer;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.CharSequenceConsumer;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.StringToDouble11;
 import net.sf.saxon.value.Whitespace;
 
-import java.util.function.IntPredicate;
-
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.IntPredicate;
 
 /**
  * A Receiver which receives a stream of XML events using the vocabulary defined for the XML representation
@@ -39,30 +37,34 @@ import java.util.Stack;
 public class JsonReceiver implements Receiver {
 
     private PipelineConfiguration pipe;
-    private FastStringBuffer output;
+    private CharSequenceConsumer output;
     private FastStringBuffer textBuffer = new FastStringBuffer(128);
-    private Stack<NodeName> stack = new Stack<NodeName>();
+    private Stack<NodeName> stack = new Stack<>();
     private boolean atStart = true;
-    private StartTagBuffer startTagBuffer;
     private boolean indenting = false;
     private boolean escaped = false;
-    private Stack<Set<String>> keyChecker = new Stack<Set<String>>();
+    private Stack<Set<String>> keyChecker = new Stack<>();
 
     private static final String ERR_INPUT = "FOJS0006";
 
-    public JsonReceiver(PipelineConfiguration pipe) {
+    public JsonReceiver(PipelineConfiguration pipe, CharSequenceConsumer output) {
+        Objects.requireNonNull(pipe);
+        Objects.requireNonNull(output);
         setPipelineConfiguration(pipe);
+        this.output = output;
     }
 
+    @Override
     public void setPipelineConfiguration(PipelineConfiguration pipe) {
         this.pipe = pipe;
-        startTagBuffer = (StartTagBuffer) pipe.getComponent(StartTagBuffer.class.getName());
     }
 
+    @Override
     public PipelineConfiguration getPipelineConfiguration() {
         return pipe;
     }
 
+    @Override
     public void setSystemId(String systemId) {
         // no action
     }
@@ -75,57 +77,94 @@ public class JsonReceiver implements Receiver {
         return indenting;
     }
 
+    @Override
     public void open() throws XPathException {
-        output = new FastStringBuffer(2048);
+        output.open();
     }
 
+    @Override
     public void startDocument(int properties) throws XPathException {
-        if (output == null) {
-            output = new FastStringBuffer(2048);
-        }
+//        if (output == null) {
+//            output = new FastStringBuffer(2048);
+//        }
     }
 
+    @Override
     public void endDocument() throws XPathException {
         // no action
     }
 
+    @Override
     public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
         // no action
     }
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         String parent = stack.empty() ? null : stack.peek().getLocalPart();
-        boolean inMap = "map".equals(parent);
+        boolean inMap = "map".equals(parent) || stack.isEmpty();
         stack.push(elemName);
         //started.push(false);
         if (!elemName.hasURI(NamespaceConstant.FN)) {
             throw new XPathException("xml-to-json: element found in wrong namespace: " +
                                              elemName.getStructuredQName().getEQName(), ERR_INPUT);
         }
+
+        String key = null;
+        String escapedAtt = null;
+        String escapedKey = null;
+        for (AttributeInfo att : attributes) {
+            NodeName attName = att.getNodeName();
+            if (attName.hasURI("")) {
+                if (attName.getLocalPart().equals("key")) {
+                    if (!inMap) {
+                        throw new XPathException(
+                                "xml-to-json: The key attribute is allowed only on elements within a map", ERR_INPUT);
+                    }
+                    key = att.getValue();
+                } else if (attName.getLocalPart().equals("escaped-key")) {
+                    if (!inMap) {
+                        throw new XPathException(
+                                "xml-to-json: The escaped-key attribute is allowed only on elements within a map", ERR_INPUT);
+                    }
+                    escapedKey = att.getValue();
+                } else if (attName.getLocalPart().equals("escaped")) {
+                    boolean allowed = stack.size() == 1 || elemName.getLocalPart().equals("string");
+                    // See bugs 29917 and 30077: at the top level, the escaped attribute is ignored
+                    // whatever element it appears on
+                    if (!allowed) {
+                        throw new XPathException(
+                                "xml-to-json: The escaped attribute is allowed only on the <string> element",
+                                ERR_INPUT);
+                    }
+                    escapedAtt = att.getValue();
+                } else {
+                    throw new XPathException("xml-to-json: Disallowed attribute in input: " + attName.getDisplayName(), ERR_INPUT);
+                }
+            } else if (attName.hasURI(NamespaceConstant.FN)) {
+                throw new XPathException("xml-to-json: Disallowed attribute in input: " + attName.getDisplayName(), ERR_INPUT);
+            }
+            // Attributes in other namespaces are ignored
+        }
+
         if (!atStart) {
-            output.append(',');
+            output.cat(",");
             if (indenting) {
                 indent(stack.size());
             }
         }
-        if (inMap) {
-            if (startTagBuffer == null) {
-                startTagBuffer = (StartTagBuffer) pipe.getComponent(StartTagBuffer.class.getName());
-            }
-            if (startTagBuffer == null) {
-                throw new IllegalStateException();
-            }
-            String key = startTagBuffer.getAttribute("", "key");
+        if (inMap && !keyChecker.isEmpty()) {
             if (key == null) {
                 throw new XPathException("xml-to-json: Child elements of <map> must have a key attribute", ERR_INPUT);
             }
-            String keyEscaped = startTagBuffer.getAttribute("", "escaped-key");
             boolean alreadyEscaped = false;
-            if (keyEscaped != null) {
+            if (escapedKey != null) {
                 try {
-                    alreadyEscaped = StringConverter.StringToBoolean.INSTANCE.convertString(keyEscaped).asAtomic().effectiveBooleanValue();
+                    alreadyEscaped = StringConverter.StringToBoolean.INSTANCE.convertString(escapedKey).asAtomic().effectiveBooleanValue();
                 } catch (XPathException e) {
-                    throw new XPathException("xml-to-json: Value of escaped-key attribute '" + Err.wrap(keyEscaped) +
+                    throw new XPathException("xml-to-json: Value of escaped-key attribute '" + Err.wrap(escapedKey) +
                                                      "' is not a valid xs:boolean", ERR_INPUT);
                 }
             }
@@ -137,54 +176,54 @@ public class JsonReceiver implements Receiver {
                 throw new XPathException("xml-to-json: duplicate key value " + Err.wrap(key), ERR_INPUT);
             }
 
-            output.append('"');
-            output.append(key);
-            output.append('"');
-            output.append(indenting ? " : " : ":");
+            output.cat("\"").cat(key).cat("\"").cat(indenting ? " : " : ":");
         }
         String local = elemName.getLocalPart();
-        escaped = false;
-        if (local.equals("array")) {
-            if (indenting) {
-                indent(stack.size());
-                output.append("[ ");
-            } else {
-                output.append('[');
-            }
-            atStart = true;
-        } else if (local.equals("map")) {
-            if (indenting) {
-                indent(stack.size());
-                output.append("{ ");
-            } else {
-                output.append('{');
-            }
-            atStart = true;
-            keyChecker.push(new HashSet<String>());
-        } else if (local.equals("null")) {
-            checkParent(local, parent);
-            output.append("null");
-            atStart = false;
-        } else if (local.equals("string")) {
-            if (startTagBuffer == null) {
-                startTagBuffer = (StartTagBuffer) pipe.getComponent(StartTagBuffer.class.getName());
-            }
-            String escapeAtt = startTagBuffer.getAttribute("", "escaped");
-            if (escapeAtt != null) {
-                try {
-                    escaped = StringConverter.StringToBoolean.INSTANCE.convertString(escapeAtt).asAtomic().effectiveBooleanValue();
-                } catch (XPathException e) {
-                    throw new XPathException("xml-to-json: value of escaped attribute (" +
-                                                     escapeAtt + ") is not a valid xs:boolean", ERR_INPUT);
+        switch (local) {
+            case "array":
+                if (indenting) {
+                    indent(stack.size());
+                    output.cat("[ ");
+                } else {
+                    output.cat("[");
                 }
-            }
-            checkParent(local, parent);
-            atStart = false;
-        } else if (local.equals("boolean") || local.equals("number")) {
-            checkParent(local, parent);
-            atStart = false;
-        } else {
-            throw new XPathException("xml-to-json: unknown element <" + local + ">", ERR_INPUT);
+                atStart = true;
+                break;
+            case "map":
+                if (indenting) {
+                    indent(stack.size());
+                    output.cat("{ ");
+                } else {
+                    output.cat("{");
+                }
+                atStart = true;
+                keyChecker.push(new HashSet<String>());
+                break;
+            case "null":
+                checkParent(local, parent);
+                output.cat("null");
+                atStart = false;
+                break;
+            case "string":
+                if (escapedAtt != null) {
+                    try {
+                        escaped = StringConverter.StringToBoolean.INSTANCE.convertString(escapedAtt)
+                                .asAtomic().effectiveBooleanValue();
+                    } catch (XPathException e) {
+                        throw new XPathException("xml-to-json: value of escaped attribute (" +
+                                                         escaped + ") is not a valid xs:boolean", ERR_INPUT);
+                    }
+                }
+                checkParent(local, parent);
+                atStart = false;
+                break;
+            case "boolean":
+            case "number":
+                checkParent(local, parent);
+                atStart = false;
+                break;
+            default:
+                throw new XPathException("xml-to-json: unknown element <" + local + ">", ERR_INPUT);
         }
         textBuffer.setLength(0);
     }
@@ -196,45 +235,14 @@ public class JsonReceiver implements Receiver {
         }
     }
 
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        // no action
-    }
-
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-        if (attName.hasURI("") && (attName.getLocalPart().equals("key") || attName.getLocalPart().equals("escaped-key"))) {
-            boolean inMap = stack.size() == 1 || stack.get(stack.size() - 2).getLocalPart().equals("map");
-            if (!inMap) {
-                throw new XPathException(
-                        "xml-to-json: The " + attName.getLocalPart() +
-                                " attribute is allowed only on elements within a map", ERR_INPUT);
-            }
-        } else if (attName.hasURI("") && attName.getLocalPart().equals("escaped")) {
-            boolean allowed = stack.size() == 1 ||
-                    (stack.size() > 1 && stack.peek().getLocalPart().equals("string"));
-            // See bugs 29917 and 30077: at the top level, the escaped attribute is ignored
-            // whatever element it appears on
-            if (!allowed) {
-                throw new XPathException(
-                        "xml-to-json: The escaped attribute is allowed only on the <string> element",
-                        ERR_INPUT);
-            }
-        } else if (attName.hasURI("") || attName.hasURI(NamespaceConstant.FN)) {
-            throw new XPathException("xml-to-json: Disallowed attribute in input: " + attName.getDisplayName(), ERR_INPUT);
-        }
-        // Attributes in other namespaces are ignored
-    }
-
-    public void startContent() throws XPathException {
-        // no action
-    }
-
+    @Override
     public void endElement() throws XPathException {
         NodeName name = stack.pop();
         String local = name.getLocalPart();
         if (local.equals("boolean")) {
             try {
                 boolean b = StringConverter.StringToBoolean.INSTANCE.convertString(textBuffer).asAtomic().effectiveBooleanValue();
-                output.append(b ? "true" : "false");
+                output.cat(b ? "true" : "false");
             } catch (XPathException e) {
                 throw new XPathException("xml-to-json: Value of <boolean> element is not a valid xs:boolean", ERR_INPUT);
             }
@@ -244,29 +252,29 @@ public class JsonReceiver implements Receiver {
                 if (Double.isNaN(d) || Double.isInfinite(d)) {
                     throw new XPathException("xml-to-json: Infinity and NaN are not allowed", ERR_INPUT);
                 }
-                output.append(new DoubleValue(d).getStringValueCS());
+                output.cat(new DoubleValue(d).getStringValueCS());
             } catch (NumberFormatException e) {
                 throw new XPathException("xml-to-json: Invalid number: " + textBuffer, ERR_INPUT);
             }
         } else if (local.equals("string")) {
-            output.append('"');
+            output.cat("\"");
             String str = textBuffer.toString();
             if (escaped) {
-                output.append(handleEscapedString(str));
+                output.cat(handleEscapedString(str));
             } else {
-                output.append(escape(str, false, new ControlChar()));
+                output.cat(escape(str, false, new ControlChar()));
             }
-            output.append('"');
+            output.cat("\"");
         } else if (!Whitespace.isWhite(textBuffer)) {
             throw new XPathException("xml-to-json: Element " + name.getDisplayName() + " must have no text content", ERR_INPUT);
         }
         textBuffer.setLength(0);
         escaped = false;
         if (local.equals("array")) {
-            output.append(indenting ? " ]" : "]");
+            output.cat(indenting ? " ]" : "]");
         } else if (local.equals("map")) {
             keyChecker.pop();
-            output.append(indenting ? " }" : "}");
+            output.cat(indenting ? " }" : "}");
         }
         atStart = false;
     }
@@ -311,7 +319,7 @@ public class JsonReceiver implements Receiver {
             } else if (c == '/' && !afterEscapeChar) {
                 out.append("\\/");
             } else {
-                out.append(c);
+                out.cat(c);
             }
             afterEscapeChar = c == '\\' && !afterEscapeChar;
         }
@@ -323,7 +331,7 @@ public class JsonReceiver implements Receiver {
      * Escape a string using backslash escape sequences as defined in JSON
      *
      * @param in         the input string
-     * @param forXml     true if the output is for the json-to-xml functino
+     * @param forXml     true if the output is for the json-to-xml function
      * @param hexEscapes a predicate identifying characters that should be output as hex escapes using \ u XXXX notation.
      * @return the escaped string
      */
@@ -366,7 +374,7 @@ public class JsonReceiver implements Receiver {
                         }
                         out.append(hex);
                     } else {
-                        out.append(c);
+                        out.cat(c);
                     }
             }
         }
@@ -374,31 +382,41 @@ public class JsonReceiver implements Receiver {
     }
 
     private static class ControlChar implements IntPredicate {
+        @Override
         public boolean test(int c) {
             return c < 31 || (c >= 127 && c <= 159);
         }
     }
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        textBuffer.append(chars);
+        textBuffer.cat(chars);
     }
 
+    @Override
     public void processingInstruction(String name, CharSequence data, Location locationId, int properties) throws XPathException {
         // no action
     }
 
+    @Override
     public void comment(CharSequence content, Location locationId, int properties) throws XPathException {
         // no action
     }
 
+    @Override
     public void close() throws XPathException {
-        // no action
+        if (output != null) {
+            output.close();
+            output = null;
+        }
     }
 
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }
 
+    @Override
     public String getSystemId() {
         return null;
     }
@@ -409,9 +427,9 @@ public class JsonReceiver implements Receiver {
      * @return the JSON string representing the supplied XML content.
      */
 
-    public String getJsonString() {
-        return output.toString();
-    }
+    //public String getJsonString() {
+//        return output.toString();
+//    }
 
     /**
      * Add indentation whitespace to the buffer
@@ -419,10 +437,10 @@ public class JsonReceiver implements Receiver {
      * @param depth the level of indentation
      */
 
-    private void indent(int depth) {
-        output.append('\n');
+    private void indent(int depth) throws XPathException {
+        output.cat("\n");
         for (int i = 0; i < depth; i++) {
-            output.append("  ");
+            output.cat("  ");
         }
     }
 
@@ -447,34 +465,34 @@ public class JsonReceiver implements Receiver {
                 }
                 switch (literal.charAt(i)) {
                     case '"':
-                        buffer.append('"');
+                        buffer.cat('"');
                         break;
                     case '\\':
-                        buffer.append('\\');
+                        buffer.cat('\\');
                         break;
                     case '/':
-                        buffer.append('/');
+                        buffer.cat('/');
                         break;
                     case 'b':
-                        buffer.append('\b');
+                        buffer.cat('\b');
                         break;
                     case 'f':
-                        buffer.append('\f');
+                        buffer.cat('\f');
                         break;
                     case 'n':
-                        buffer.append('\n');
+                        buffer.cat('\n');
                         break;
                     case 'r':
-                        buffer.append('\r');
+                        buffer.cat('\r');
                         break;
                     case 't':
-                        buffer.append('\t');
+                        buffer.cat('\t');
                         break;
                     case 'u':
                         try {
                             String hex = literal.substring(i + 1, i + 5);
                             int code = Integer.parseInt(hex, 16);
-                            buffer.append((char) code);
+                            buffer.cat((char) code);
                             i += 4;
                         } catch (Exception e) {
                             throw new XPathException("Invalid hex escape sequence in string '" + Err.wrap(literal) + "'", "FOJS0007");
@@ -486,11 +504,11 @@ public class JsonReceiver implements Receiver {
                         throw new XPathException("Unknown escape sequence \\" + xx, "FOJS0007");
                 }
             } else {
-                buffer.append(c);
+                buffer.cat(c);
             }
         }
         return buffer.toString();
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited. All rights reserved
+// Copyright (c) 2018-2020 Saxonica Limited

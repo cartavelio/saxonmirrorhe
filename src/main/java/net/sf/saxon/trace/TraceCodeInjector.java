@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,14 +8,13 @@
 package net.sf.saxon.trace;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.flwor.Clause;
+import net.sf.saxon.expr.flwor.FLWORExpression;
 import net.sf.saxon.expr.flwor.TraceClause;
+import net.sf.saxon.expr.instruct.ComponentTracer;
 import net.sf.saxon.expr.instruct.TraceExpression;
 import net.sf.saxon.expr.parser.CodeInjector;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.expr.parser.ExpressionTool;
 
 /**
  * A code injector that wraps every expression (other than a literal) in a TraceExpression, which causes
@@ -23,40 +22,37 @@ import net.sf.saxon.om.StructuredQName;
  */
 public class TraceCodeInjector implements CodeInjector {
 
-    /**
-     * If tracing, wrap an expression in a trace instruction
-     *
-     * @param exp       the expression to be wrapped
-     * @param env       the static context
-     * @param construct integer constant identifying the kind of construct
-     * @param qName     the name of the construct (if applicable)
-     * @return the expression that does the tracing
-     */
-
-    public Expression inject(Expression exp, /*@NotNull*/ StaticContext env, int construct, StructuredQName qName) {
-        if (exp instanceof Literal && !(construct == StandardNames.XSL_TEMPLATE || construct == StandardNames.XSL_FUNCTION)) {
+    @Override
+    public Expression inject(Expression exp) {
+        if (!(exp instanceof TraceExpression) && isApplicable(exp)) {
+            return new TraceExpression(exp);
+        } else {
             return exp;
         }
-        TraceExpression trace = new TraceExpression(exp);
-        //ExpressionTool.copyLocationInfo(exp, trace);
-        trace.setNamespaceResolver(env.getNamespaceResolver());
-        trace.setConstructType(construct);
-        trace.setObjectName(qName);
-        //trace.setObjectNameCode(objectNameCode);
-        return trace;
+    }
+
+    protected boolean isApplicable(Expression exp) {
+        return false;
+    }
+
+    @Override
+    public void process(TraceableComponent component) {
+        Expression newBody = ExpressionTool.injectCode(component.getBody(), this);
+        component.setBody(newBody);
+        ComponentTracer trace = new ComponentTracer(component);
+        component.setBody(trace);
     }
 
     /**
-     * If tracing, add a clause to a FLWOR expression that can be used to monitor requests for
-     * tuples to be processed
+     * Insert a tracing or monitoring clause into the pipeline of clauses that evaluates a FLWOR expression
      *
-     * @param target    the clause whose evaluation is to be traced (or otherwise monitored)
-     * @param env       the static context of the containing FLWOR expression
-     * @return the new clause to do the tracing; or null if no tracing is required at this point
+     * @param expression the containing FLWOR expression
+     * @param clause     the clause whose execution is being monitored
      */
 
-    public Clause injectClause(Clause target, StaticContext env) {
-        return new TraceClause(target, env.getNamespaceResolver());
+    @Override
+    public Clause injectClause(FLWORExpression expression, Clause clause) {
+        return new TraceClause(expression, clause);
     }
 }
 

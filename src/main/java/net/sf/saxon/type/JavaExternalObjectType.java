@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -46,6 +46,7 @@ public class JavaExternalObjectType extends ExternalObjectType {
      */
 
     /*@Nullable*/
+    @Override
     public String getName() {
         return javaClass.getName();
     }
@@ -57,6 +58,7 @@ public class JavaExternalObjectType extends ExternalObjectType {
      */
 
     /*@Nullable*/
+    @Override
     public String getTargetNamespace() {
         return NamespaceConstant.JAVA_TYPE;
     }
@@ -69,6 +71,7 @@ public class JavaExternalObjectType extends ExternalObjectType {
      */
 
     /*@Nullable*/
+    @Override
     public StructuredQName getTypeName() {
         return classNameToQName(javaClass.getName());
     }
@@ -81,6 +84,7 @@ public class JavaExternalObjectType extends ExternalObjectType {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getPrimitiveItemType() {
         return config.getJavaExternalObjectType(Object.class);
     }
@@ -90,21 +94,21 @@ public class JavaExternalObjectType extends ExternalObjectType {
      *
      * @param other the other external object type
      * @return the relationship of this external object type to another external object type,
-     *         as one of the constants in class {@link TypeHierarchy}, for example {@link TypeHierarchy#SUBSUMES}
+     *         as one of the constants in class {@link Affinity}, for example {@link Affinity#SUBSUMES}
      */
 
-    public int getRelationship(/*@NotNull*/ JavaExternalObjectType other) {
+    public Affinity getRelationship(/*@NotNull*/ JavaExternalObjectType other) {
         Class<?> j2 = other.javaClass;
         if (javaClass.equals(j2)) {
-            return TypeHierarchy.SAME_TYPE;
+            return Affinity.SAME_TYPE;
         } else if (javaClass.isAssignableFrom(j2)) {
-            return TypeHierarchy.SUBSUMES;
+            return Affinity.SUBSUMES;
         } else if (j2.isAssignableFrom(javaClass)) {
-            return TypeHierarchy.SUBSUMED_BY;
+            return Affinity.SUBSUMED_BY;
         } else if (javaClass.isInterface() || j2.isInterface()) {
-            return TypeHierarchy.OVERLAPS; // there may be an overlap, we play safe
+            return Affinity.OVERLAPS; // there may be an overlap, we play safe
         } else {
-            return TypeHierarchy.DISJOINT;
+            return Affinity.DISJOINT;
         }
     }
 
@@ -124,6 +128,7 @@ public class JavaExternalObjectType extends ExternalObjectType {
      * @param th      The type hierarchy cache
      * @return true if the item is an instance of this type; false otherwise
      */
+    @Override
     public boolean matches(/*@NotNull*/ Item item, /*@NotNull*/TypeHierarchy th) {
         if (item instanceof ObjectValue) {
             Object obj = ((ObjectValue) item).getObject();
@@ -182,14 +187,14 @@ public class JavaExternalObjectType extends ExternalObjectType {
             char c = className.charAt(i);
             if (atStart) {
                 if (c == '_' && i+1 < className.length()  && className.charAt(i+1) == '-') {
-                    fsb.append('[');
+                    fsb.cat('[');
                     i++;
                 } else {
                     atStart = false;
-                    fsb.append(c == '-' ? '$' : c);
+                    fsb.cat(c == '-' ? '$' : c);
                 }
             } else {
-                fsb.append(c == '-' ? '$' : c);
+                fsb.cat(c == '-' ? '$' : c);
             }
         }
         return fsb.toString();

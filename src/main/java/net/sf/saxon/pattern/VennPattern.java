@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,7 +14,6 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.value.SequenceType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -64,6 +63,7 @@ public abstract class VennPattern extends Pattern {
      *
      */
 
+    @Override
     public Pattern simplify() throws XPathException {
         p1 = p1.simplify();
         p2 = p2.simplify();
@@ -77,6 +77,7 @@ public abstract class VennPattern extends Pattern {
      * @return the optimised Pattern
      */
 
+    @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         mustBeNodePattern(p1);
         p1 = p1.typeCheck(visitor, contextItemType);
@@ -126,6 +127,7 @@ public abstract class VennPattern extends Pattern {
      * @param nextFree    the next slot that is free to be allocated @return the next slot that is free to be allocated
      */
 
+    @Override
     public int allocateSlots(SlotManager slotManager, int nextFree) {
         nextFree = p1.allocateSlots(slotManager, nextFree);
         nextFree = p2.allocateSlots(slotManager, nextFree);
@@ -159,6 +161,7 @@ public abstract class VennPattern extends Pattern {
      * @return the dependencies, as a bit-significant mask
      */
 
+    @Override
     public int getDependencies() {
         return p1.getDependencies() | p2.getDependencies();
     }
@@ -218,6 +221,7 @@ public abstract class VennPattern extends Pattern {
      * Hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         return 0x9bd723a6 ^ p1.hashCode() ^ p2.hashCode();
     }
@@ -230,21 +234,17 @@ public abstract class VennPattern extends Pattern {
     protected abstract String getOperatorName();
 
     /**
-     * Get the original pattern text
+     * Get the pattern text for diagnostics
      */
     @Override
-    public String toString() {
+    public String reconstruct() {
         return p1 + " " + getOperatorName() + " " + p2;
     }
 
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException{
-        ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) presenter.getOptions();
         presenter.startElement("p.venn");
         presenter.emitAttribute("op", getOperatorName());
-        if (options.addStaticType) {
-            SequenceType type = SequenceType.makeSequenceType(getItemType(), StaticProperty.ALLOWS_ONE);
-            presenter.emitAttribute("sType", type.toExportString2());
-        }
         p1.export(presenter);
         p2.export(presenter);
         presenter.endElement();

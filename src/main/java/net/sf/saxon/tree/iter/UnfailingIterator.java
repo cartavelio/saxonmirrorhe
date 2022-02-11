@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,16 +7,12 @@
 
 package net.sf.saxon.tree.iter;
 
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 
 /**
@@ -24,7 +20,7 @@ import java.util.function.Predicate;
  * is a SequenceIterator that throws no checked exceptions.
  */
 
-public interface UnfailingIterator<T extends Item<?>> extends SequenceIterator<T> {
+public interface UnfailingIterator extends SequenceIterator {
 
     /**
      * Get the next item in the sequence.
@@ -32,35 +28,32 @@ public interface UnfailingIterator<T extends Item<?>> extends SequenceIterator<T
      * @return the next Item. If there are no more items, return null.
      */
 
-    T next();
+    @Override
+    Item next();
 
-    //@Override
-    default void forEach(Consumer<T> consumer) {
-        T item;
+    /**
+     * Process all the items returned by the iterator, supplying them to a given {@link Consumer}.
+     * Note that this method throws no exceptions. This method consumes the iterator.
+     * @param consumer the function that is to consume each of the (remaining) items returned by
+     *                 the iterator
+     */
+    default void forEach(Consumer<? super Item> consumer) {
+        Item item;
         while ((item = next()) != null) {
             consumer.accept(item);
         }
     }
 
-    default Optional<T> firstWith(Predicate<? super T> condition) {
-        T item;
-        while ((item = next()) != null) {
-            if (condition.test(item)) {
-                close();
-                return Optional.of(item);
-            }
-        }
-        return Optional.empty();
-    }
-
-    default List<T> toList() {
-        List<T> list = new ArrayList<>();
+    /**
+     * Create a list containing all the items returned by the iterator.
+     * This method consumes the iterator.
+     * @return a list containing all the (remaining) items returned by the iterator
+     */
+    default List<Item> toList() {
+        List<Item> list = new ArrayList<>();
         forEach(list::add);
         return list;
     }
 
-    default GroundedValue<T> toGroundedValue() {
-        return SequenceExtent.makeSequenceExtent(toList());
-    }
 }
 

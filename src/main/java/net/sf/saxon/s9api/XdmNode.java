@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -37,6 +37,8 @@ import java.util.stream.Stream;
  * <p>Note that node identity cannot be inferred from object identity. The same node may be represented
  * by different <code>XdmNode</code> instances at different times, or even at the same time. The equals()
  * method on this class can be used to test for node identity.</p>
+ * @see net.sf.saxon.sapling.SaplingDocument#toXdmNode(Processor)
+ * @see net.sf.saxon.sapling.SaplingElement#toXdmNode(Processor)
  *
  * @since 9.0
  */
@@ -454,7 +456,7 @@ public class XdmNode extends XdmItem {
      * <p><i>For more control over serialization, use the {@link Serializer} class.</i></p>
      *
      * @return a simple XML serialization of the node. Under error conditions the method
-     *         may return an error message which will always begin with the label "Error: ".
+     * may return an error message which will always begin with the label "Error: ".
      */
 
     public String toString() {
@@ -529,6 +531,7 @@ public class XdmNode extends XdmItem {
      * @return a Stream over the items in this value
      * @since 9.9
      */
+    @Override
     public XdmStream<XdmNode> stream() {
         return new XdmStream<>(Stream.of(this));
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -81,6 +81,7 @@ public final class UTF8Writer
     }
     */
 
+    @Override
     public void close() throws IOException {
         if (_out != null) {
             _flushBuffer();
@@ -100,15 +101,18 @@ public final class UTF8Writer
         }
     }
 
+    @Override
     public void flush() throws IOException {
         _flushBuffer();
         _out.flush();
     }
 
+    @Override
     public void write(char[] cbuf) throws IOException {
         write(cbuf, 0, cbuf.length);
     }
 
+    @Override
     public void write(char[] cbuf, int off, int len)
             throws IOException {
         if (len < 2) {
@@ -204,6 +208,7 @@ public final class UTF8Writer
         _outPtr = outPtr;
     }
 
+    @Override
     public void write(int c)
             throws IOException {
         // First; do we have a left over surrogate?
@@ -248,11 +253,13 @@ public final class UTF8Writer
         }
     }
 
+    @Override
     public void write(String str)
             throws IOException {
         write(str, 0, str.length());
     }
 
+    @Override
     public void write(String str, int off, int len)
             throws IOException {
         if (len < 2) {

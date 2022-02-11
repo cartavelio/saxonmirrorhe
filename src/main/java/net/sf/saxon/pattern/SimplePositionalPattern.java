@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,9 +13,8 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
-import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.AlphaCode;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 
@@ -66,7 +65,8 @@ public final class SimplePositionalPattern extends Pattern {
      * @return true if the pattern matches, else false
      */
 
-    public boolean matches(Item<?> item, XPathContext context) {
+    @Override
+    public boolean matches(Item item, XPathContext context) {
         return item instanceof NodeInfo && matchesBeneathAnchor((NodeInfo) item, null, context);
     }
 
@@ -87,6 +87,7 @@ public final class SimplePositionalPattern extends Pattern {
      * @return the fingerprint of nodes matched by this pattern.
      */
 
+    @Override
     public int getFingerprint() {
         return nodeTest.getFingerprint();
     }
@@ -95,6 +96,7 @@ public final class SimplePositionalPattern extends Pattern {
      * Get an ItemType that all the nodes matching this pattern must satisfy
      */
 
+    @Override
     public ItemType getItemType() {
         return nodeTest.getPrimitiveItemType();
     }
@@ -118,6 +120,7 @@ public final class SimplePositionalPattern extends Pattern {
      * hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         return nodeTest.hashCode() ^ (position<<3);
     }
@@ -131,6 +134,7 @@ public final class SimplePositionalPattern extends Pattern {
      *         node without changing the position in the streamed input file
      */
 
+    @Override
     public boolean isMotionless() {
         return false;
     }
@@ -146,8 +150,9 @@ public final class SimplePositionalPattern extends Pattern {
      * @return true if the node matches the Pattern, false otherwise
      */
 
+    @Override
     public boolean matchesBeneathAnchor(NodeInfo node, NodeInfo anchor, XPathContext context) {
-        if (!nodeTest.matchesNode(node)) {
+        if (!nodeTest.test(node)) {
             return false;
         }
 
@@ -167,9 +172,11 @@ public final class SimplePositionalPattern extends Pattern {
      */
 
     /*@NotNull*/
+    @Override
     public Pattern copy(RebindingMap rebindings) {
         SimplePositionalPattern n = new SimplePositionalPattern(nodeTest.copy(), position);
         ExpressionTool.copyLocationInfo(this, n);
+        n.setOriginalText(getOriginalText());
         return n;
     }
 
@@ -177,17 +184,14 @@ public final class SimplePositionalPattern extends Pattern {
      * Get the original pattern text
      */
     @Override
-    public String toString() {
+    public String reconstruct() {
         return nodeTest + "[" + position + "]";
     }
 
-    public void export(ExpressionPresenter presenter) throws XPathException {
+    @Override
+    public void export(ExpressionPresenter presenter) {
         presenter.startElement("p.simPos");
-        presenter.emitAttribute("test", nodeTest.toString());
-        if ("JS".equals(((ExpressionPresenter.ExportOptions) presenter.getOptions()).target)) {
-            int targetVersion = ((ExpressionPresenter.ExportOptions) presenter.getOptions()).targetVersion;
-            presenter.emitAttribute("jsTest", nodeTest.generateJavaScriptItemTypeTest(AnyItemType.getInstance(), targetVersion));
-        }
+        presenter.emitAttribute("test", AlphaCode.fromItemType(nodeTest));
         presenter.emitAttribute("pos", position + "");
         presenter.endElement();
     }

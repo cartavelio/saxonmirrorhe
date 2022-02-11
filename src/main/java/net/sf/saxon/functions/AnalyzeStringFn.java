@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,10 +9,10 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
-import net.sf.saxon.event.NamespaceReducer;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
@@ -78,6 +78,7 @@ public class AnalyzeStringFn extends RegexFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
+    @Override
     public NodeInfo call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item inputItem = arguments[0].head();
         CharSequence input;
@@ -93,7 +94,7 @@ public class AnalyzeStringFn extends RegexFunction {
             boolean schemaAware = context.getController().getExecutable().isSchemaAware();
             Configuration config = context.getConfiguration();
             //noinspection SynchronizationOnLocalVariableOrMethodParameter
-            synchronized(config) {
+            synchronized (config) {
                 if (schemaAware && !config.isSchemaAvailable(NamespaceConstant.FN)) {
                     InputStream inputStream = Configuration.locateResource("xpath-functions.scm", new ArrayList<>(), new ArrayList<>());
                     if (inputStream == null) {
@@ -110,36 +111,41 @@ public class AnalyzeStringFn extends RegexFunction {
         }
 
         final Builder builder = context.getController().makeBuilder();
-        final Receiver out = new NamespaceReducer(builder);
+        final ComplexContentOutputter out = new ComplexContentOutputter(builder);
         builder.setBaseURI(getStaticBaseUriString());
         out.open();
-        out.startElement(resultName, resultType, ExplicitLocation.UNKNOWN_LOCATION, 0);
+        out.startElement(resultName, resultType, Loc.NONE, ReceiverOption.NONE);
         out.startContent();
         Item item;
         while ((item = iter.next()) != null) {
             if (iter.isMatching()) {
-                out.startElement(matchName, matchType, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                out.startElement(matchName, matchType, Loc.NONE, ReceiverOption.NONE);
                 out.startContent();
                 iter.processMatchingSubstring(new RegexIterator.MatchHandler() {
+                    @Override
                     public void characters(CharSequence s) throws XPathException {
-                        out.characters(s, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                        out.characters(s, Loc.NONE, ReceiverOption.NONE);
                     }
 
+                    @Override
                     public void onGroupStart(int groupNumber) throws XPathException {
-                        out.startElement(groupName, groupType, ExplicitLocation.UNKNOWN_LOCATION, 0);
-                        out.attribute(groupNrName, groupNrType, "" + groupNumber, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                        out.startElement(groupName, groupType,
+                                         Loc.NONE, ReceiverOption.NONE);
+                        out.attribute(groupNrName, groupNrType, "" + groupNumber,
+                                      Loc.NONE, ReceiverOption.NONE);
                         out.startContent();
                     }
 
+                    @Override
                     public void onGroupEnd(int groupNumber) throws XPathException {
                         out.endElement();
                     }
                 });
                 out.endElement();
             } else {
-                out.startElement(nonMatchName, nonMatchType, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                out.startElement(nonMatchName, nonMatchType, Loc.NONE, ReceiverOption.NONE);
                 out.startContent();
-                out.characters(item.getStringValueCS(), ExplicitLocation.UNKNOWN_LOCATION, 0);
+                out.characters(item.getStringValueCS(), Loc.NONE, ReceiverOption.NONE);
                 out.endElement();
             }
         }
@@ -152,4 +158,4 @@ public class AnalyzeStringFn extends RegexFunction {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

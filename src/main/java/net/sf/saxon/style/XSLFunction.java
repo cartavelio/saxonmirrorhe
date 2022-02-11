@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -20,9 +20,9 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
-import net.sf.saxon.trace.LocationKind;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.*;
-import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
@@ -59,6 +59,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      * Get the corresponding Procedure object that results from the compilation of this
      * StylesheetProcedure
      */
+    @Override
     public UserFunction getActor() {
         return compiledFunction;
     }
@@ -75,14 +76,15 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         if (doneAttributes) {
             return;
         }
         doneAttributes = true;
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
 
         overrideExtensionFunctionAtt = null;
         String visibilityAtt = null;
@@ -90,36 +92,33 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         String newEachTimeAtt = null;
         String streamabilityAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String uri = atts.getURI(a);
-            String local = atts.getLocalName(a);
+        for (AttributeInfo att : atts) {
+            NodeName name = att.getNodeName();
+            String uri = name.getURI();
+            String local = name.getLocalPart();
             if ("".equals(uri)) {
                 switch (local) {
                     case "name":
-                        nameAtt = Whitespace.trim(atts.getValue(a));
+                        nameAtt = Whitespace.trim(att.getValue());
                         assert nameAtt != null;
-                        try {
-                            StructuredQName functionName = makeQName(nameAtt);
-                            if (functionName.hasURI("")) {
-                                functionName = new StructuredQName("saxon", NamespaceConstant.SAXON, functionName.getLocalPart());
-                                compileError("Function name must be in a namespace", "XTSE0740");
-                            }
-                            setObjectName(functionName);
-                        } catch (XPathException err) {
-                            compileError(err);
+                        StructuredQName functionName = makeQName(nameAtt, null, "name");
+                        if (functionName.hasURI("")) {
+                            functionName = new StructuredQName("saxon", NamespaceConstant.SAXON, functionName.getLocalPart());
+                            compileError("Function name must be in a namespace", "XTSE0740");
                         }
+                        setObjectName(functionName);
                         break;
                     case "as":
-                        asAtt = atts.getValue(a);
+                        asAtt = att.getValue();
                         break;
                     case "visibility":
-                        visibilityAtt = Whitespace.trim(atts.getValue(a));
+                        visibilityAtt = Whitespace.trim(att.getValue());
                         break;
                     case "streamability":
-                        streamabilityAtt = Whitespace.trim(atts.getValue(a));
+                        streamabilityAtt = Whitespace.trim(att.getValue());
                         break;
                     case "override":
-                        String overrideAtt = Whitespace.trim(atts.getValue(a));
+                        String overrideAtt = Whitespace.trim(att.getValue());
                         boolean override = processBooleanAttribute("override", overrideAtt);
                         if (overrideExtensionFunctionAtt != null) {
                             if (override != overrideExtensionFunction) {
@@ -132,7 +131,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                         compileWarning("The xsl:function/@override attribute is deprecated; use override-extension-function", SaxonErrorCode.SXWN9014);
                         break;
                     case "override-extension-function":
-                        String overrideExtAtt = Whitespace.trim(atts.getValue(a));
+                        String overrideExtAtt = Whitespace.trim(att.getValue());
                         boolean overrideExt = processBooleanAttribute("override-extension-function", overrideExtAtt);
                         if (overrideExtensionFunctionAtt != null) {
                             if (overrideExt != overrideExtensionFunction) {
@@ -147,25 +146,31 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                         }
                         break;
                     case "cache":
-                        cacheAtt = Whitespace.trim(atts.getValue(a));
+                        cacheAtt = Whitespace.trim(att.getValue());
                         break;
                     case "new-each-time":
-                        newEachTimeAtt = Whitespace.trim(atts.getValue(a));
+                        newEachTimeAtt = Whitespace.trim(att.getValue());
                         break;
                     default:
-                        checkUnknownAttribute(atts.getNodeName(a));
+                        checkUnknownAttribute(name);
                         break;
                 }
             } else if (uri.equals(NamespaceConstant.SAXON)) {
-                if (local.equals("memo-function")) {
-                    memoFunction = processBooleanAttribute("saxon:memo-function", atts.getValue(a));
-                } else if (local.equals("as")) {
-                    extraAsAtt = atts.getValue(a);
-                } else if (local.equals("explain")) {
-                    explaining = isYes(Whitespace.trim(atts.getValue(a)));
+                if (isExtensionAttributeAllowed(att.getNodeName().getDisplayName())) {
+                    if (local.equals("memo-function")) {
+                        compileWarning("saxon:memo-function is deprecated: use cache='yes'", SaxonErrorCode.SXWN9014);
+                        if (getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+                            memoFunction = processBooleanAttribute("saxon:memo-function", att.getValue());
+                        }
+                    } else if (local.equals("as")) {
+                        isExtensionAttributeAllowed(name.getDisplayName());
+                        extraAsAtt = att.getValue();
+                    } else if (local.equals("explain") && isYes(Whitespace.trim(att.getValue()))) {
+                        explaining = true;
+                    }
                 }
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(name);
             }
         }
 
@@ -191,8 +196,8 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                 extraResultType = resultType;
             }
             if (asAtt != null) {
-                int rel = getConfiguration().getTypeHierarchy().sequenceTypeRelationship(extraResultType, resultType);
-                if (rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMED_BY) {
+                Affinity rel = getConfiguration().getTypeHierarchy().sequenceTypeRelationship(extraResultType, resultType);
+                if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY) {
                     resultType = extraResultType;
                 } else {
                     compileErrorInAttribute("When both are present, @saxon:as must be a subtype of @as", "SXER7TBA", "saxon:as");
@@ -239,10 +244,10 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         }
     }
 
-    private FunctionStreamability getStreamabilityValue(String s) throws XPathException {
+    private FunctionStreamability getStreamabilityValue(String s) {
         if (s.contains(":")) {
             // QNames are allowed but not recognized by Saxon
-            makeQName(s);
+            makeQName(s, null, "streamability");
             return FunctionStreamability.UNCLASSIFIED;
         }
         for (FunctionStreamability v : FunctionStreamability.values()) {
@@ -250,7 +255,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                 return v;
             }
         }
-        invalidAttribute("visibility", "unclassified|absorbing|inspection|filter|shallow-descent|deep-descent|ascent");
+        invalidAttribute("streamability", "unclassified|absorbing|inspection|filter|shallow-descent|deep-descent|ascent");
         return null;
     }
 
@@ -261,6 +266,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      */
 
     /*@NotNull*/
+    @Override
     public StructuredQName getObjectName() {
         StructuredQName qn = super.getObjectName();
         if (qn == null) {
@@ -268,12 +274,8 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             if (nameAtt == null) {
                 return new StructuredQName("saxon", NamespaceConstant.SAXON, "badly-named-function" + generateId());
             }
-            try {
-                qn = makeQName(nameAtt);
-                setObjectName(qn);
-            } catch (XPathException err) {
-                return new StructuredQName("saxon", NamespaceConstant.SAXON, "badly-named-function" + generateId());
-            }
+            qn = makeQName(nameAtt, null, "name");
+            setObjectName(qn);
         }
         return qn;
     }
@@ -284,10 +286,12 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      * @return true: yes, it may contain a general template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
+    @Override
     protected boolean mayContainParam() {
         return true;
     }
@@ -296,10 +300,12 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      * Specify that xsl:param is a permitted child
      */
 
+    @Override
     protected boolean isPermittedChild(StyleElement child) {
         return child instanceof XSLLocalParam;
     }
 
+    @Override
     public Visibility getVisibility() {
         if (visibility == null) {
             String vAtt = getAttributeValue("", "visibility");
@@ -308,10 +314,12 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         return visibility;
     }
 
+    @Override
     public SymbolicName.F getSymbolicName() {
         return new SymbolicName.F(getObjectName(), getNumberOfArguments());
     }
 
+    @Override
     public void checkCompatibility(Component component) {
         if (compiledFunction == null) {
             getCompiledFunction();
@@ -354,21 +362,19 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     public boolean isOverrideExtensionFunction() {
         if (overrideExtensionFunctionAtt == null) {
             // this is a forwards reference
-            try {
-                prepareAttributes();
-            } catch (XPathException e) {
-                // no action: error will be caught later
-            }
+            prepareAttributes();
         }
         return overrideExtensionFunction;
     }
 
+    @Override
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) {
         //getSkeletonCompiledFunction();
         getCompiledFunction();
         top.indexFunction(decl);
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
 
         stackFrameMap = getConfiguration().makeSlotManager();
@@ -393,6 +399,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      * @throws XPathException if compilation fails
      */
 
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) throws XPathException {
         Expression exp = compileSequenceConstructor(compilation, decl, false);
         if (exp == null) {
@@ -413,12 +420,8 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         fn.setRetainedStaticContext(makeRetainedStaticContext());
         fn.setOverrideExtensionFunction(overrideExtensionFunction);
 
-        if (determinism == UserFunction.Determinism.DETERMINISTIC && !fn.isMemoFunction()) {
-            compileWarning("Deterministic user functions are not available in Saxon-HE: new-each-time attribute ignored",
-                           SaxonErrorCode.SXWN9011);
-        } else if (memoFunction && !fn.isMemoFunction()) {
-            compileWarning("Memo functions are not available in Saxon-HE: @cache (or @saxon:memo-function) attribute ignored",
-                    SaxonErrorCode.SXWN9011);
+        if (compilation.getCompilerInfo().getCodeInjector() != null) {
+            compilation.getCompilerInfo().getCodeInjector().process(fn);
         }
 
         Component overridden = getOverriddenComponent();
@@ -427,6 +430,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         }
     }
 
+    @Override
     public void optimize(ComponentDeclaration declaration) throws XPathException {
         Expression exp = compiledFunction.getBody();
         ExpressionTool.resetPropertiesWithinSubtree(exp);
@@ -467,7 +471,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
         if (streamability.isStreaming()) {
             compiledFunction.prepareForStreaming();
-        } else if (visitor.getConfiguration().isDeferredByteCode(Configuration.XSLT)) {
+        } else if (visitor.getConfiguration().isDeferredByteCode(HostLanguage.XSLT)) {
             int evaluationModes = Expression.ITERATE_METHOD | Expression.PROCESS_METHOD;
             compiledFunction.setBody(getConfiguration().obtainOptimizer().makeByteCodeCandidate(
                     compiledFunction, compiledFunction.getBody(), nameAtt, evaluationModes));
@@ -484,13 +488,14 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      * @param opt the optimizer
      * @throws net.sf.saxon.trans.XPathException if bytecode generation fails
      */
+    @Override
     public void generateByteCode(Optimizer opt) throws XPathException {
         // Generate byte code if appropriate
 
         if (getCompilation().getCompilerInfo().isGenerateByteCode() &&
                 streamability == FunctionStreamability.UNCLASSIFIED) {
             try {
-                ICompilerService compilerService = getConfiguration().makeCompilerService(Configuration.XSLT);
+                ICompilerService compilerService = getConfiguration().makeCompilerService(HostLanguage.XSLT);
                 Expression cbody = opt.compileToByteCode(compilerService, compiledFunction.getBody(), nameAtt,
                                                          Expression.PROCESS_METHOD | Expression.ITERATE_METHOD);
                 if (cbody != null) {
@@ -512,6 +517,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      * @return the associated SlotManager object
      */
 
+    @Override
     public SlotManager getSlotManager() {
         return stackFrameMap;
     }
@@ -546,9 +552,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     public int getNumberOfArguments() {
         if (numberOfArguments == -1) {
             numberOfArguments = 0;
-            AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-            while (true) {
-                Item child = kids.next();
+            for (NodeInfo child : children()) {
                 if (child instanceof XSLLocalParam) {
                     numberOfArguments++;
                 } else {
@@ -569,9 +573,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         UserFunctionParameter[] params = new UserFunctionParameter[getNumberOfArguments()];
         fn.setParameterDefinitions(params);
         int count = 0;
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo node;
-        while ((node = kids.next()) != null) {
+        for (NodeInfo node : children()) {
             if (node instanceof XSLLocalParam) {
                 UserFunctionParameter param = new UserFunctionParameter();
                 params[count] = param;
@@ -596,16 +598,12 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     private void bindParameterDefinitions(UserFunction fn) {
         UserFunctionParameter[] params = fn.getParameterDefinitions();
         int count = 0;
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo node;
-        while ((node = kids.next()) != null) {
-            if (node instanceof XSLLocalParam) {
-                UserFunctionParameter param = params[count++];
-                param.setRequiredType(((XSLLocalParam) node).getRequiredType());
-                param.setVariableQName(((XSLLocalParam) node).getVariableQName());
-                param.setSlotNumber(((XSLLocalParam) node).getSlotNumber());
-                ((XSLLocalParam) node).getSourceBinding().fixupBinding(param);
-            }
+        for (NodeInfo node : children(XSLLocalParam.class::isInstance)) {
+            UserFunctionParameter param = params[count++];
+            param.setRequiredType(((XSLLocalParam) node).getRequiredType());
+            param.setVariableQName(((XSLLocalParam) node).getVariableQName());
+            param.setSlotNumber(((XSLLocalParam) node).getSlotNumber());
+            ((XSLLocalParam) node).getSourceBinding().fixupBinding(param);
         }
     }
 
@@ -618,12 +616,8 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     public SequenceType[] getArgumentTypes() {
         SequenceType[] types = new SequenceType[getNumberOfArguments()];
         int count = 0;
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo node;
-        while ((node = kids.next()) != null) {
-            if (node instanceof XSLLocalParam) {
-                types[count++] = ((XSLLocalParam) node).getRequiredType();
-            }
+        for (NodeInfo node : children(XSLLocalParam.class::isInstance)) {
+            types[count++] = ((XSLLocalParam) node).getRequiredType();
         }
         return types;
     }
@@ -636,43 +630,29 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
     public UserFunction getCompiledFunction() {
         if (compiledFunction == null) {
-            try {
-                prepareAttributes();
-                UserFunction fn = getConfiguration().newUserFunction(memoFunction, streamability);
-                fn.setPackageData(getCompilation().getPackageData());
-                fn.setFunctionName(getObjectName());
-                setParameterDefinitions(fn);
-                fn.setResultType(getResultType());
-                fn.setLineNumber(getLineNumber());
-                fn.setSystemId(getSystemId());
-                fn.obtainDeclaringComponent(this);
-                fn.setDeclaredVisibility(getDeclaredVisibility());
-                fn.setDeclaredStreamability(streamability);
-                fn.setDeterminism(determinism);
-                List<Annotation> annotations = new ArrayList<>();
-                if (memoFunction) {
-                    annotations.add(new Annotation(new StructuredQName("saxon", NamespaceConstant.SAXON, "memo-function")));
-                }
-                fn.setAnnotations(new AnnotationList(annotations));
-                fn.setOverrideExtensionFunction(overrideExtensionFunction);
-                compiledFunction = fn;
-            } catch (XPathException err) {
-                return null;
+            prepareAttributes();
+            UserFunction fn = getConfiguration().newUserFunction(memoFunction, streamability);
+            fn.setPackageData(getCompilation().getPackageData());
+            fn.setFunctionName(getObjectName());
+            setParameterDefinitions(fn);
+            fn.setResultType(getResultType());
+            fn.setLineNumber(getLineNumber());
+            fn.setSystemId(getSystemId());
+            fn.obtainDeclaringComponent(this);
+            fn.setDeclaredVisibility(getDeclaredVisibility());
+            fn.setDeclaredStreamability(streamability);
+            fn.setDeterminism(determinism);
+            List<Annotation> annotations = new ArrayList<>();
+            if (memoFunction) {
+                annotations.add(new Annotation(new StructuredQName("saxon", NamespaceConstant.SAXON, "memo-function")));
             }
+            fn.setAnnotations(new AnnotationList(annotations));
+            fn.setOverrideExtensionFunction(overrideExtensionFunction);
+            compiledFunction = fn;
         }
         return compiledFunction;
     }
 
-
-    /**
-     * Get the type of construct. This will be a constant in
-     * class {@link LocationKind}. This method is part of the
-     * {@link net.sf.saxon.trace.InstructionInfo} interface
-     */
-
-    public int getConstructType() {
-        return StandardNames.XSL_FUNCTION;
-    }
 
 }
 

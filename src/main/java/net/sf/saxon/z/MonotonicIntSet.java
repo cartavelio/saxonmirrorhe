@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -40,6 +40,7 @@ public class MonotonicIntSet implements IntSet {
         used = 0;
     }
 
+    @Override
     public IntSet copy() {
         MonotonicIntSet i2 = new MonotonicIntSet();
         i2.contents = Arrays.copyOf(contents, used);
@@ -47,10 +48,17 @@ public class MonotonicIntSet implements IntSet {
         return i2;
     }
 
+    @Override
     public IntSet mutableCopy() {
         return copy();
     }
 
+    @Override
+    public boolean isMutable() {
+        return false;
+    }
+
+    @Override
     public void clear() {
         if (contents.length > used + 20) {
             contents = new int[4];
@@ -58,18 +66,22 @@ public class MonotonicIntSet implements IntSet {
         used = 0;
     }
 
+    @Override
     public int size() {
         return used;
     }
 
+    @Override
     public boolean isEmpty() {
         return used == 0;
     }
 
+    @Override
     public boolean contains(int value) {
         return Arrays.binarySearch(contents, 0, used, value) >= 0;
     }
 
+    @Override
     public boolean remove(int value) {
         throw new UnsupportedOperationException();
     }
@@ -84,6 +96,7 @@ public class MonotonicIntSet implements IntSet {
      * than the supplied value
      */
 
+    @Override
     public boolean add(int value) {
         if (used > 0) {
             int last = contents[used - 1];
@@ -106,6 +119,7 @@ public class MonotonicIntSet implements IntSet {
      * @return an iterator over the values, which will be delivered in sorted order
      */
 
+    @Override
     public IntIterator iterator() {
         return new IntArraySet.IntArrayIterator(contents, used);
     }

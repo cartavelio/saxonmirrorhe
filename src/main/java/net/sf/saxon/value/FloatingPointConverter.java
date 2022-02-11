@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -88,94 +88,94 @@ public class FloatingPointConverter {
                 s.append("-2147483648");
                 return s;
             }
-            s.append('-');
+            s.cat('-');
             i = -i;
         }
         int c;
         if (i < 10) {
             //one digit
-            s.append(charForDigit[i]);
+            s.cat(charForDigit[i]);
             return s;
         } else if (i < 100) {
             //two digits
-            s.append(charForDigit[i / 10]);
-            s.append(charForDigit[i % 10]);
+            s.cat(charForDigit[i / 10]);
+            s.cat(charForDigit[i % 10]);
             return s;
         } else if (i < 1000) {
             //three digits
-            s.append(charForDigit[i / 100]);
-            s.append(charForDigit[(c = i % 100) / 10]);
-            s.append(charForDigit[c % 10]);
+            s.cat(charForDigit[i / 100]);
+            s.cat(charForDigit[(c = i % 100) / 10]);
+            s.cat(charForDigit[c % 10]);
             return s;
         } else if (i < 10000) {
             //four digits
-            s.append(charForDigit[i / 1000]);
-            s.append(charForDigit[(c = i % 1000) / 100]);
-            s.append(charForDigit[(c %= 100) / 10]);
-            s.append(charForDigit[c % 10]);
+            s.cat(charForDigit[i / 1000]);
+            s.cat(charForDigit[(c = i % 1000) / 100]);
+            s.cat(charForDigit[(c %= 100) / 10]);
+            s.cat(charForDigit[c % 10]);
             return s;
         } else if (i < 100000) {
             //five digits
-            s.append(charForDigit[i / 10000]);
-            s.append(charForDigit[(c = i % 10000) / 1000]);
-            s.append(charForDigit[(c %= 1000) / 100]);
-            s.append(charForDigit[(c %= 100) / 10]);
-            s.append(charForDigit[c % 10]);
+            s.cat(charForDigit[i / 10000]);
+            s.cat(charForDigit[(c = i % 10000) / 1000]);
+            s.cat(charForDigit[(c %= 1000) / 100]);
+            s.cat(charForDigit[(c %= 100) / 10]);
+            s.cat(charForDigit[c % 10]);
             return s;
         } else if (i < 1000000) {
             //six digits
-            s.append(charForDigit[i / 100000]);
-            s.append(charForDigit[(c = i % 100000) / 10000]);
-            s.append(charForDigit[(c %= 10000) / 1000]);
-            s.append(charForDigit[(c %= 1000) / 100]);
-            s.append(charForDigit[(c %= 100) / 10]);
-            s.append(charForDigit[c % 10]);
+            s.cat(charForDigit[i / 100000]);
+            s.cat(charForDigit[(c = i % 100000) / 10000]);
+            s.cat(charForDigit[(c %= 10000) / 1000]);
+            s.cat(charForDigit[(c %= 1000) / 100]);
+            s.cat(charForDigit[(c %= 100) / 10]);
+            s.cat(charForDigit[c % 10]);
             return s;
         } else if (i < 10000000) {
             //seven digits
-            s.append(charForDigit[i / 1000000]);
-            s.append(charForDigit[(c = i % 1000000) / 100000]);
-            s.append(charForDigit[(c %= 100000) / 10000]);
-            s.append(charForDigit[(c %= 10000) / 1000]);
-            s.append(charForDigit[(c %= 1000) / 100]);
-            s.append(charForDigit[(c %= 100) / 10]);
-            s.append(charForDigit[c % 10]);
+            s.cat(charForDigit[i / 1000000]);
+            s.cat(charForDigit[(c = i % 1000000) / 100000]);
+            s.cat(charForDigit[(c %= 100000) / 10000]);
+            s.cat(charForDigit[(c %= 10000) / 1000]);
+            s.cat(charForDigit[(c %= 1000) / 100]);
+            s.cat(charForDigit[(c %= 100) / 10]);
+            s.cat(charForDigit[c % 10]);
             return s;
         } else if (i < 100000000) {
             //eight digits
-            s.append(charForDigit[i / 10000000]);
-            s.append(charForDigit[(c = i % 10000000) / 1000000]);
-            s.append(charForDigit[(c %= 1000000) / 100000]);
-            s.append(charForDigit[(c %= 100000) / 10000]);
-            s.append(charForDigit[(c %= 10000) / 1000]);
-            s.append(charForDigit[(c %= 1000) / 100]);
-            s.append(charForDigit[(c %= 100) / 10]);
-            s.append(charForDigit[c % 10]);
+            s.cat(charForDigit[i / 10000000]);
+            s.cat(charForDigit[(c = i % 10000000) / 1000000]);
+            s.cat(charForDigit[(c %= 1000000) / 100000]);
+            s.cat(charForDigit[(c %= 100000) / 10000]);
+            s.cat(charForDigit[(c %= 10000) / 1000]);
+            s.cat(charForDigit[(c %= 1000) / 100]);
+            s.cat(charForDigit[(c %= 100) / 10]);
+            s.cat(charForDigit[c % 10]);
             return s;
         } else if (i < 1000000000) {
             //nine digits
-            s.append(charForDigit[i / 100000000]);
-            s.append(charForDigit[(c = i % 100000000) / 10000000]);
-            s.append(charForDigit[(c %= 10000000) / 1000000]);
-            s.append(charForDigit[(c %= 1000000) / 100000]);
-            s.append(charForDigit[(c %= 100000) / 10000]);
-            s.append(charForDigit[(c %= 10000) / 1000]);
-            s.append(charForDigit[(c %= 1000) / 100]);
-            s.append(charForDigit[(c %= 100) / 10]);
-            s.append(charForDigit[c % 10]);
+            s.cat(charForDigit[i / 100000000]);
+            s.cat(charForDigit[(c = i % 100000000) / 10000000]);
+            s.cat(charForDigit[(c %= 10000000) / 1000000]);
+            s.cat(charForDigit[(c %= 1000000) / 100000]);
+            s.cat(charForDigit[(c %= 100000) / 10000]);
+            s.cat(charForDigit[(c %= 10000) / 1000]);
+            s.cat(charForDigit[(c %= 1000) / 100]);
+            s.cat(charForDigit[(c %= 100) / 10]);
+            s.cat(charForDigit[c % 10]);
             return s;
         } else {
             //ten digits
-            s.append(charForDigit[i / 1000000000]);
-            s.append(charForDigit[(c = i % 1000000000) / 100000000]);
-            s.append(charForDigit[(c %= 100000000) / 10000000]);
-            s.append(charForDigit[(c %= 10000000) / 1000000]);
-            s.append(charForDigit[(c %= 1000000) / 100000]);
-            s.append(charForDigit[(c %= 100000) / 10000]);
-            s.append(charForDigit[(c %= 10000) / 1000]);
-            s.append(charForDigit[(c %= 1000) / 100]);
-            s.append(charForDigit[(c %= 100) / 10]);
-            s.append(charForDigit[c % 10]);
+            s.cat(charForDigit[i / 1000000000]);
+            s.cat(charForDigit[(c = i % 1000000000) / 100000000]);
+            s.cat(charForDigit[(c %= 100000000) / 10000000]);
+            s.cat(charForDigit[(c %= 10000000) / 1000000]);
+            s.cat(charForDigit[(c %= 1000000) / 100000]);
+            s.cat(charForDigit[(c %= 100000) / 10000]);
+            s.cat(charForDigit[(c %= 10000) / 1000]);
+            s.cat(charForDigit[(c %= 1000) / 100]);
+            s.cat(charForDigit[(c %= 100) / 10]);
+            s.cat(charForDigit[c % 10]);
             return s;
         }
     }
@@ -224,7 +224,7 @@ public class FloatingPointConverter {
                 sb.append("0.");
             }
             initial = false;
-            sb.append('0');
+            sb.cat('0');
         }
 
         // end simpleFixup
@@ -246,11 +246,11 @@ public class FloatingPointConverter {
             if (low || high) break;
             if (k == -1) {
                 if (initial) {
-                    sb.append('0');
+                    sb.cat('0');
                 }
-                sb.append('.');
+                sb.cat('.');
             }
-            sb.append(charForDigit[U]);
+            sb.cat(charForDigit[U]);
             initial = false;
         }
         if (high && (!low || 2 * R > S)) {
@@ -258,13 +258,13 @@ public class FloatingPointConverter {
         }
         if (k == -1) {
             if (initial) {
-                sb.append('0');
+                sb.cat('0');
             }
-            sb.append('.');
+            sb.cat('.');
         }
-        sb.append(charForDigit[U]);
+        sb.cat(charForDigit[U]);
         for (int z = 0; z < k; z++) {
-            sb.append('0');
+            sb.cat('0');
         }
     }
 
@@ -319,7 +319,7 @@ public class FloatingPointConverter {
                 sb.append("0.");
             }
             initial = false;
-            sb.append('0');
+            sb.cat('0');
         }
 
         // end simpleFixup
@@ -342,11 +342,11 @@ public class FloatingPointConverter {
             if (low || high) break;
             if (k == -1) {
                 if (initial) {
-                    sb.append('0');
+                    sb.cat('0');
                 }
-                sb.append('.');
+                sb.cat('.');
             }
-            sb.append(charForDigit[U]);
+            sb.cat(charForDigit[U]);
             initial = false;
         }
         if (high && (!low || R.shiftLeft(1).compareTo(S) > 0)) {
@@ -354,13 +354,13 @@ public class FloatingPointConverter {
         }
         if (k == -1) {
             if (initial) {
-                sb.append('0');
+                sb.cat('0');
             }
-            sb.append('.');
+            sb.cat('.');
         }
-        sb.append(charForDigit[U]);
+        sb.cat(charForDigit[U]);
         for (int z = 0; z < k; z++) {
-            sb.append('0');
+            sb.cat('0');
         }
     }
 
@@ -431,9 +431,9 @@ public class FloatingPointConverter {
             high = R2.compareTo(S.shiftLeft(1).subtract(Mplus)) > 0;
             if (low || high) break;
 
-            sb.append(charForDigit[U]);
+            sb.cat(charForDigit[U]);
             if (initial) {
-                sb.append('.');
+                sb.cat('.');
                 doneDot = true;
             }
             initial = false;
@@ -441,12 +441,12 @@ public class FloatingPointConverter {
         if (high && (!low || R.shiftLeft(1).compareTo(S) > 0)) {
             U++;
         }
-        sb.append(charForDigit[U]);
+        sb.cat(charForDigit[U]);
 
         if (!doneDot) {
             sb.append(".0");
         }
-        sb.append('E');
+        sb.cat('E');
         appendInt(sb, H);
 
     }
@@ -468,9 +468,9 @@ public class FloatingPointConverter {
             s.append(NaN);
         } else if (d == 0.0) {
             if ((Double.doubleToLongBits(d) & DOUBLE_SIGN_MASK) != 0) {
-                s.append('-');
+                s.cat('-');
             }
-            s.append('0');
+            s.cat('0');
             if (forceExponential) {
                 s.append(".0E0");
             }
@@ -484,7 +484,7 @@ public class FloatingPointConverter {
             s.append("-4.9E-324");
         } else {
             if (d < 0) {
-                s.append('-');
+                s.cat('-');
                 d = -d;
             }
             long bits = Double.doubleToLongBits(d);
@@ -541,9 +541,9 @@ public class FloatingPointConverter {
             s.append(NaN);
         } else if (f == 0.0) {
             if ((Float.floatToIntBits(f) & FLOAT_SIGN_MASK) != 0) {
-                s.append('-');
+                s.cat('-');
             }
-            s.append('0');
+            s.cat('0');
         } else if (f == Float.MAX_VALUE) {
             s.append("3.4028235E38");
         } else if (f == -Float.MAX_VALUE) {
@@ -554,7 +554,7 @@ public class FloatingPointConverter {
             s.append("-1.4E-45");
         } else {
             if (f < 0) {
-                s.append('-');
+                s.cat('-');
                 f = -f;
             }
             int bits = Float.floatToIntBits(f);

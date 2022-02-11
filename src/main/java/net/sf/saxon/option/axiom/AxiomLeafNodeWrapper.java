@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,6 @@ package net.sf.saxon.option.axiom;
 import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -23,6 +22,7 @@ import net.sf.saxon.type.Type;
 import org.apache.axiom.om.*;
 
 import java.util.Iterator;
+import java.util.function.Predicate;
 
 /**
  * A node in the XDM tree. This is the implementation of the NodeInfo interface used as a wrapper for
@@ -89,6 +89,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      * Get the underlying XOM node, to implement the VirtualNode interface
      */
 
+    @Override
     public OMNode getUnderlyingNode() {
         return node;
     }
@@ -99,6 +100,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      * @return one of the values Node.ELEMENT, Node.TEXT, Node.ATTRIBUTE, etc.
      */
 
+    @Override
     public int getNodeKind() {
         return nodeKind;
     }
@@ -116,6 +118,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      * @since 9.4
      */
 
+    @Override
     public SchemaType getSchemaType() {
         return null;
     }
@@ -132,6 +135,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      *         produce the same result for generateId())
      */
 
+    @Override
     public int compareOrder(NodeInfo other) {
         if (other instanceof AxiomDocument) {
             return +1;
@@ -153,6 +157,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      * the version of the method that returns a String.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         switch (nodeKind) {
             case Type.TEXT:
@@ -173,6 +178,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      * @return the local part of the name. For an unnamed node, returns "".
      */
 
+    @Override
     public String getLocalPart() {
         switch (nodeKind) {
             case Type.PROCESSING_INSTRUCTION:
@@ -189,6 +195,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      * @return The prefix of the name of the node.
      */
 
+    @Override
     public String getPrefix() {
         return "";
     }
@@ -201,6 +208,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      *         for a node with an empty prefix, return an empty string.
      */
 
+    @Override
     public String getURI() {
         return "";
     }
@@ -213,6 +221,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      *         empty string.
      */
 
+    @Override
     public String getDisplayName() {
         switch (nodeKind) {
             case Type.PROCESSING_INSTRUCTION:
@@ -226,6 +235,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      * Get the NodeInfo object representing the parent of this node
      */
 
+    @Override
     public AxiomParentNodeWrapper getParent() {
         if (parent == null) {
             OMContainer rawParent = node.getParent();
@@ -242,6 +252,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      * Get the index position of this node among its siblings (starting from 0)
      */
 
+    @Override
     public int getSiblingPosition() {
         if (index != -1) {
             return index;
@@ -259,17 +270,17 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
     }
 
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
-        return EmptyIterator.OfNodes.THE_INSTANCE;
+    protected AxisIterator iterateAttributes(Predicate<?super NodeInfo> nodeTest) {
+        return EmptyIterator.ofNodes();
     }
 
     @Override
-    protected AxisIterator iterateChildren(NodeTest nodeTest) {
-        return EmptyIterator.OfNodes.THE_INSTANCE;
+    protected AxisIterator iterateChildren(Predicate<? super NodeInfo> nodeTest) {
+        return EmptyIterator.ofNodes();
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards) {
         if (forwards) {
             if (nodeTest instanceof AnyNodeTest) {
                 return new AxiomDocument.FollowingSiblingIterator(node, parent, docWrapper);
@@ -288,7 +299,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
     }
 
     @Override
-    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected AxisIterator iterateDescendants(Predicate<? super NodeInfo> nodeTest, boolean includeSelf) {
         throw new UnsupportedOperationException(); // shouldn't be called on this kind of node
     }
 
@@ -299,6 +310,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      *         This will not necessarily be a document node
      */
 
+    @Override
     public NodeInfo getRoot() {
         return getParent().getRoot();
     }
@@ -309,6 +321,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      * <code>getEnumeration(Axis.CHILD, AnyNodeTest.getInstance()).hasNext()</code></p>
      */
 
+    @Override
     public boolean hasChildNodes() {
         return false;
     }
@@ -320,6 +333,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      * @param buffer a buffer to contain a string that uniquely identifies this node, across all documents
      */
 
+    @Override
     public void generateId(FastStringBuffer buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
         //buffer.append(Navigator.getSequentialKey(this));
@@ -340,6 +354,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      *         <p>For a node other than an element, the method returns null.</p>
      */
 
+    @Override
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
         return null;
     }

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
-// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+// Copyright (c) 2018-2020 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -8,7 +8,6 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
@@ -18,24 +17,32 @@ import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trace.InstructionInfo;
+import net.sf.saxon.trace.Traceable;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * JUnit tests for the s9api Xslt30Transformer in streaming mode
  *
  */
-public class TestXslt30Streaming extends TestCase {
+public class TestXslt30Streaming {
 
     /**
      * Simple test
      */
 
+    @Test
     public void testSimple() {
         // Create a Processor instance.
         try {
@@ -73,6 +80,7 @@ public class TestXslt30Streaming extends TestCase {
      * Send output to a Serializer
      */
 
+    @Test
     public void testToSerializer() {
         try {
             Processor proc = new Processor(true);
@@ -91,7 +99,7 @@ public class TestXslt30Streaming extends TestCase {
             Source input = new StreamSource(
                     new File(ConfigTest.DATA_DIR + "caffo/Input.xml"));
             xsl.applyTemplates(input, out);
-            assertEquals("result", "<a count=\"1634\"/>", sw.toString());
+            assertEquals("<a count=\"1634\"/>", sw.toString(), "result");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -103,6 +111,7 @@ public class TestXslt30Streaming extends TestCase {
      * Send output to an XdmDestination with item separators
      */
 
+    @Test
     public void testXdmDestinationWithItemSeparator() {
         try {
             Processor proc = new Processor(true);
@@ -122,7 +131,7 @@ public class TestXslt30Streaming extends TestCase {
             xsl.applyTemplates(input, out);
             XdmNode root = out.getXdmNode();
             assertEquals("<!--A-->§<out/>§<!--Z-->", root.toString());
-            assertSame("result is document node", root.getNodeKind(), XdmNodeKind.DOCUMENT);
+            assertSame(root.getNodeKind(), XdmNodeKind.DOCUMENT, "result is document node");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -134,6 +143,7 @@ public class TestXslt30Streaming extends TestCase {
      * Send output of streamed transformation to a JDOM2 tree
      */
 
+    @Test
     public void testJDOM2Destination() {
         try {
             Processor proc = new Processor(true);
@@ -151,7 +161,7 @@ public class TestXslt30Streaming extends TestCase {
             out.setTreeModel(JDOM2ObjectModel.getInstance());
             xsl.applyTemplates(input, out);
             XdmNode root = out.getXdmNode();
-            assertTrue("result is JDOM2 document node", root.getUnderlyingNode() instanceof net.sf.saxon.option.jdom2.JDOM2NodeWrapper);
+            assertTrue(root.getUnderlyingNode() instanceof net.sf.saxon.option.jdom2.JDOM2NodeWrapper, "result is JDOM2 document node");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -159,6 +169,7 @@ public class TestXslt30Streaming extends TestCase {
 
     }
 
+    @Test
     public void testStreamingWithSchemaAccess() {
         // Create a Processor instance.
         try {
@@ -201,6 +212,7 @@ public class TestXslt30Streaming extends TestCase {
      * s9api streaming transformation pipeline
      */
 
+    @Test
     public void testPipeline() {
         try {
             Processor proc = new Processor(true);
@@ -224,7 +236,7 @@ public class TestXslt30Streaming extends TestCase {
                                                   stage4.asDocumentDestination(
                                                           stage5.asDocumentDestination(out)))));
             System.err.println(sw);
-            assertTrue("output", sw.toString().contains("<a><a><a><a><a><z/></a></a></a></a></a>"));
+            assertTrue(sw.toString().contains("<a><a><a><a><a><z/></a></a></a></a></a>"), "output");
 
         } catch (SaxonApiException err) {
             err.printStackTrace();
@@ -232,6 +244,7 @@ public class TestXslt30Streaming extends TestCase {
         }
     }
 
+    @Test
     public void testPipelineShort() {
         try {
             Processor proc = new Processor(true);
@@ -249,7 +262,7 @@ public class TestXslt30Streaming extends TestCase {
             stage1.applyTemplates(new StreamSource(new StringReader(xml)),
                                   stage2.asDocumentDestination(out));
             System.err.println(sw);
-            assertTrue("output", sw.toString().contains("<a><a><z/></a></a>"));
+            assertTrue(sw.toString().contains("<a><a><z/></a></a>"), "output");
 
         } catch (SaxonApiException err) {
             err.printStackTrace();
@@ -261,6 +274,7 @@ public class TestXslt30Streaming extends TestCase {
      * Test that the base URI of the result document is the base output URI
      */
 
+    @Test
     public void testOutputBaseUri() {
         try {
             Processor processor = new Processor(false);
@@ -284,7 +298,7 @@ public class TestXslt30Streaming extends TestCase {
             transformer.applyTemplates(document, result);
 
             XdmNode xformed = result.getXdmNode();
-            assertEquals("output base uri", "file://tmp/out.xml", xformed.getBaseURI().toString());
+            assertEquals("file://tmp/out.xml", xformed.getBaseURI().toString(), "output base uri");
         } catch (SaxonApiException e) {
             System.err.println(e.getMessage());
             fail();
@@ -299,6 +313,7 @@ public class TestXslt30Streaming extends TestCase {
      *          if the call fails
      */
 
+    @Test
     public void testCallStreamableTemplateWithParams() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -338,6 +353,7 @@ public class TestXslt30Streaming extends TestCase {
      * Test calling a stylesheet with an initial template with parameters
      */
 
+    @Test
     public void testCallStreamableTemplateWithOmittedParams() {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -383,6 +399,7 @@ public class TestXslt30Streaming extends TestCase {
      *          if the call fails
      */
 
+    @Test
     public void testApplyStreamableTemplateWithTunnelParams() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -416,7 +433,7 @@ public class TestXslt30Streaming extends TestCase {
             Serializer se = processor.newSerializer(sw);
             se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
             t.applyTemplates(new StreamSource(new StringReader("<x><y/></x>")), se);
-            assertEquals(sw.toString(), "17");
+            assertEquals("17", sw.toString());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             fail();
@@ -428,10 +445,12 @@ public class TestXslt30Streaming extends TestCase {
      *
      */
 
+    @Test
     public void testApplyTemplatesWithResultValidation() {
         runApplyTemplatesWithResultValidation(true);
     }
 
+    @Test
     public void testApplyTemplatesWithResultValidationFailing() {
         runApplyTemplatesWithResultValidation(false);
     }
@@ -493,6 +512,7 @@ public class TestXslt30Streaming extends TestCase {
      * @throws SaxonApiException if the call fails
      */
 
+    @Test
     public void testApplyTemplatesRaw() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -518,13 +538,13 @@ public class TestXslt30Streaming extends TestCase {
             params.put(new QName("b"), new XdmAtomicValue(5));
             t.setInitialTemplateParameters(params, false);
             XdmValue result = t.applyTemplates(new StreamSource(new StringReader("<e/>")));
-            assertEquals("size", 2, result.size());
+            assertEquals(2, result.size(), "size");
             XdmItem first = result.itemAt(0);
-            assertTrue("t1", first instanceof XdmNode);
-            assertEquals("v1", ((XdmNode) first).getNodeName().getLocalName(), "e");
+            assertTrue(first instanceof XdmNode, "t1");
+            assertEquals("e", ((XdmNode) first).getNodeName().getLocalName(), "v1");
             XdmItem second = result.itemAt(1);
-            assertTrue("t2", second instanceof XdmAtomicValue);
-            assertEquals("v2", ((XdmAtomicValue) second).getDoubleValue(), 17e0);
+            assertTrue(second instanceof XdmAtomicValue, "t2");
+            assertEquals(17e0, ((XdmAtomicValue) second).getDoubleValue(), "v2");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             fail();
@@ -538,6 +558,7 @@ public class TestXslt30Streaming extends TestCase {
      * @throws SaxonApiException if the call fails
      */
 
+    @Test
     public void testApplyTemplatesToSerializer() throws SaxonApiException {
         try {
             Configuration configuration = Configuration.newConfiguration();
@@ -580,6 +601,7 @@ public class TestXslt30Streaming extends TestCase {
      * Test Strip-type-annotations with streaming ApplyTemplates
      */
 
+    @Test
     public void testStripTypeAnnotations() {
         try {
             Processor proc = new Processor(true);
@@ -621,7 +643,7 @@ public class TestXslt30Streaming extends TestCase {
             StringWriter writer = new StringWriter();
             Serializer out = proc.newSerializer(writer);
             xsl.applyTemplates(vDoc, out);
-            assertTrue("strip-type-annotations not working", writer.toString().contains("false"));
+            assertTrue(writer.toString().contains("false"), "strip-type-annotations not working");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -633,6 +655,7 @@ public class TestXslt30Streaming extends TestCase {
      * Test Strip-space with streaming ApplyTemplates
      */
 
+    @Test
     public void testStripSpace() {
         try {
             Processor proc = new Processor(true);
@@ -654,10 +677,10 @@ public class TestXslt30Streaming extends TestCase {
             StringWriter writer = new StringWriter();
             Serializer out = proc.newSerializer(writer);
             xsl.applyTemplates(new StreamSource(new StringReader(in)), out);
-            assertTrue("strip-space not working", writer.toString().contains("<foo/>"));
-            assertTrue("strip-space not working", writer.toString().contains("<my:foo/>"));
-            assertFalse("strip-space not working", writer.toString().contains("<bar/>"));
-            assertFalse("strip-space not working", writer.toString().contains("<my:bar/>"));
+            assertTrue(writer.toString().contains("<foo/>"), "strip-space not working");
+            assertTrue(writer.toString().contains("<my:foo/>"), "strip-space not working");
+            assertFalse(writer.toString().contains("<bar/>"), "strip-space not working");
+            assertFalse(writer.toString().contains("<my:bar/>"), "strip-space not working");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -667,6 +690,7 @@ public class TestXslt30Streaming extends TestCase {
 
 
 
+    @Test
     public void testResultDocument() {
         // bug 2771
         try {
@@ -689,7 +713,7 @@ public class TestXslt30Streaming extends TestCase {
             Xslt30Transformer transformer = compiler.compile(new StreamSource(new StringReader(xsl))).load30();
             StreamSource source = new StreamSource(new StringReader("<a>b</a>"));
             XdmValue xdmValue = transformer.applyTemplates(source);
-            assertEquals("size", 1, xdmValue.size());
+            assertEquals(1, xdmValue.size(), "size");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
@@ -700,6 +724,7 @@ public class TestXslt30Streaming extends TestCase {
      * Test that trace() output goes to TraceListener when streaming (bug 4028)
      */
 
+    @Test
     public void testTraceOutput() {
         try {
 
@@ -733,15 +758,15 @@ public class TestXslt30Streaming extends TestCase {
                 }
 
                 @Override
-                public void enter(InstructionInfo instruction, XPathContext context) {
-                    Object val = instruction.getProperty("label");
+                public void enter(Traceable instruction, Map<String, Object> properties, XPathContext context) {
+                    Object val = properties.get("label");
                     if (val != null) {
                         labels.add(val.toString());
                     }
                 }
 
                 @Override
-                public void leave(InstructionInfo instruction) {
+                public void leave(Traceable instruction) {
 
                 }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -54,6 +54,7 @@ public class ContentHandlerProxyLocator implements Locator {
      * @return null (always)
      */
 
+    @Override
     public String getPublicId() {
         return null;
     }
@@ -64,6 +65,7 @@ public class ContentHandlerProxyLocator implements Locator {
      * @return the system ID giving the location in the query or stylesheet of the most recent event notified
      */
 
+    @Override
     public String getSystemId() {
         return parent.getCurrentLocation().getSystemId();
     }
@@ -74,6 +76,7 @@ public class ContentHandlerProxyLocator implements Locator {
      * @return the line number giving the location of the most recent event notified
      */
 
+    @Override
     public int getLineNumber() {
         return parent.getCurrentLocation().getLineNumber();
     }
@@ -84,6 +87,7 @@ public class ContentHandlerProxyLocator implements Locator {
      * @return -1 (always)
      */
 
+    @Override
     public int getColumnNumber() {
         return parent.getCurrentLocation().getColumnNumber();
     }

@@ -1,6 +1,6 @@
 package jaxptest;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -14,8 +14,10 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DOMPositionTest extends TestCase {
+
+public class DOMPositionTest {
 
   private static final String XSL_1 =
     "<xsl:stylesheet version='1.0' " +
@@ -91,6 +93,7 @@ public class DOMPositionTest extends TestCase {
                                              "</root>"));
   }
 
+    @Test
   public void testTransformation() throws Exception {
     Document doc = transformToDOM();
     String result = secondTransform(doc);

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -52,16 +52,19 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
 
     public static UntypedSequenceConverter makeUntypedSequenceConverter(Configuration config, Expression operand, PlainType requiredItemType)
             throws XPathException {
-        TypeHierarchy th = config.getTypeHierarchy();
         UntypedSequenceConverter atomicSeqConverter =
                 new UntypedSequenceConverter(operand, requiredItemType);
         final ConversionRules rules = config.getConversionRules();
         final Converter untypedConverter;
-        if (((SimpleType) requiredItemType).isNamespaceSensitive()) {
+        if (requiredItemType.isNamespaceSensitive()) {
             throw new XPathException("Cannot convert untyped atomic values to a namespace-sensitive type", "XPTY0117");
         }
         if (requiredItemType.isAtomicType()) {
             untypedConverter = rules.getConverter(BuiltInAtomicType.UNTYPED_ATOMIC, (AtomicType) requiredItemType);
+        } else if (requiredItemType == NumericType.getInstance()) {
+            // converting untyped to numeric is common, and is effectively the same as converting to double
+            untypedConverter = rules.getConverter(BuiltInAtomicType.UNTYPED_ATOMIC, BuiltInAtomicType.DOUBLE);
+            atomicSeqConverter.requiredItemType = BuiltInAtomicType.DOUBLE;
         } else {
             untypedConverter = new StringConverter.StringToUnionConverter(requiredItemType, rules);
         }
@@ -110,6 +113,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
         final ConversionRules rules = config.getConversionRules();
         final Converter untypedConverter = new Converter() {
             // called when an untyped atomic value is encountered
+            @Override
             public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
                 ValidationFailure vf = new ValidationFailure(
                         "Implicit conversion of untypedAtomic value to " + requiredItemType.toString() + " is not allowed");
@@ -133,7 +137,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
         }
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         Expression base = getBaseExpression();
-        if (th.relationship(base.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) == TypeHierarchy.DISJOINT ||
+        if (th.relationship(base.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) == Affinity.DISJOINT ||
                 base.hasSpecialProperty(StaticProperty.NOT_UNTYPED_ATOMIC)) {
             // operand cannot return untyped atomic values, so there's nothing to convert
             return getBaseExpression();
@@ -147,6 +151,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
      * @return {@link net.sf.saxon.expr.StaticProperty#NO_NODES_NEWLY_CREATED}.
      */
 
+    @Override
     public int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         return p | StaticProperty.NO_NODES_NEWLY_CREATED | StaticProperty.NOT_UNTYPED_ATOMIC;
@@ -160,6 +165,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         UntypedSequenceConverter atomicConverter = new UntypedSequenceConverter(getBaseExpression().copy(rebindings), getRequiredItemType());
         ExpressionTool.copyLocationInfo(this, atomicConverter);
@@ -177,6 +183,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (getBaseExpression().getItemType() == BuiltInAtomicType.UNTYPED_ATOMIC) {
             return getRequiredItemType();
@@ -190,6 +197,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
      * Determine the static cardinality of the expression
      */
 
+    @Override
     public int computeCardinality() {
         return getBaseExpression().getCardinality();
     }
@@ -239,9 +247,10 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("cvUntyped", this);
-        destination.emitAttribute("to", getRequiredItemType().toExportString());
+        destination.emitAttribute("to", AlphaCode.fromItemType(getRequiredItemType()));
         if (getRoleDiagnostic() != null) {
             destination.emitAttribute("diag", getRoleDiagnostic().save());
         }

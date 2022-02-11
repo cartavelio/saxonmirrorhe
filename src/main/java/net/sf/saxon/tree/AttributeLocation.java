@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,9 +7,10 @@
 
 package net.sf.saxon.tree;
 
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.tree.util.Navigator;
 
 /**
@@ -31,6 +32,9 @@ public class AttributeLocation implements Location {
         this.columnNumber = element.getColumnNumber();
         this.elementName = Navigator.getNodeName(element);
         this.attributeName = attributeName;
+        if (element.getConfiguration().getBooleanProperty(Feature.RETAIN_NODE_FOR_DIAGNOSTICS)) {
+            this.elementNode = element;
+        }
     }
 
     public AttributeLocation(StructuredQName elementName, StructuredQName attributeName, Location location) {
@@ -86,6 +90,7 @@ public class AttributeLocation implements Location {
      *
      * @return the column number, or -1 if the information is not available.
      */
+    @Override
     public int getColumnNumber() {
         return columnNumber;
     }
@@ -101,6 +106,7 @@ public class AttributeLocation implements Location {
      *
      * @return the system ID, or null if the information is not available.
      */
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -110,6 +116,7 @@ public class AttributeLocation implements Location {
      *
      * @return usually null
      */
+    @Override
     public String getPublicId() {
         return null;
     }
@@ -121,6 +128,7 @@ public class AttributeLocation implements Location {
      *
      * @return the line number, or -1 if the information is not available.
      */
+    @Override
     public int getLineNumber() {
         return lineNumber;
     }
@@ -130,6 +138,7 @@ public class AttributeLocation implements Location {
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
+    @Override
     public Location saveLocation() {
         return this;
     }

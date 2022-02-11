@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.stax;
 
+import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.s9api.AbstractDestination;
@@ -58,11 +59,12 @@ public class XMLStreamWriterDestination extends AbstractDestination {
      *         of events sent to the Receiver represents a well-formed document: in particular the event
      *         stream must include namespace events corresponding exactly to the namespace declarations
      *         that are required. If the calling code cannot guarantee this, it should insert a
-     *         {@link net.sf.saxon.event.NamespaceReducer} into the pipeline in front of the returned
+     *         {@link NamespaceReducer} into the pipeline in front of the returned
      *         Receiver.
      * @throws SaxonApiException if the Receiver cannot be created
      */
 
+    @Override
     public Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) throws SaxonApiException {
         Receiver r = new ReceiverToXMLStreamWriter(writer);
         r.setPipelineConfiguration(pipe);
@@ -80,6 +82,7 @@ public class XMLStreamWriterDestination extends AbstractDestination {
      */
 
 
+    @Override
     public void close() throws SaxonApiException {
         try {
             writer.close();

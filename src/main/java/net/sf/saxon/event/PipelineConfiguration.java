@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,11 +10,11 @@ package net.sf.saxon.event;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SchemaURIResolver;
-import net.sf.saxon.lib.UnfailingErrorListener;
+import net.sf.saxon.s9api.HostLanguage;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ public class PipelineConfiguration {
     private SchemaURIResolver schemaURIResolver;
     private Controller controller;
     private ParseOptions parseOptions;
-    private int hostLanguage = Configuration.XSLT;
+    private HostLanguage hostLanguage = HostLanguage.XSLT;
     private Map<String, Object> components;
     private XPathContext context;
 
@@ -92,16 +92,6 @@ public class PipelineConfiguration {
     }
 
     /**
-     * Get the ErrorListener set as a property of this pipeline
-     *
-     * @return the ErrorListener; null if none has been set.
-     */
-
-    public UnfailingErrorListener getLocalErrorListener() {
-        return parseOptions.getErrorListener();
-    }
-
-    /**
      * Get an ErrorListener for reporting errors in processing this pipeline; this
      * will be the ErrorListener set locally in the PipelineConfiguration if there is one,
      * or the ErrorListener from the Configuration otherwise.
@@ -109,22 +99,22 @@ public class PipelineConfiguration {
      * @return the ErrorListener to be used; never null
      */
 
-    public UnfailingErrorListener getErrorListener() {
-        UnfailingErrorListener listener = parseOptions.getErrorListener();
-        if (listener == null) {
-            listener = config.getErrorListener();
+    public ErrorReporter getErrorReporter() {
+        ErrorReporter reporter = parseOptions.getErrorReporter();
+        if (reporter == null) {
+            reporter = config.makeErrorReporter();
         }
-        return listener;
+        return reporter;
     }
 
     /**
      * Set the ErrorListener used for reporting errors in processing this pipeline
      *
-     * @param errorListener the ErrorListener
+     * @param errorReporter the ErrorListener
      */
 
-    public void setErrorListener(ErrorListener errorListener) {
-        parseOptions.setErrorListener(errorListener);
+    public void setErrorReporter(ErrorReporter errorReporter) {
+        parseOptions.setErrorReporter(errorReporter);
     }
 
     /**
@@ -254,20 +244,29 @@ public class PipelineConfiguration {
     /**
      * Get the host language in use
      *
-     * @return for example {@link Configuration#XSLT} or {@link Configuration#XQUERY}
+     * @return for example {@link HostLanguage#XSLT} or {@link HostLanguage#XQUERY}
      */
 
-    public int getHostLanguage() {
+    public HostLanguage getHostLanguage() {
         return hostLanguage;
+    }
+
+    /**
+     * Ask if the host language is XSLT
+     * @return true if the host language is XSLT
+     */
+
+    public boolean isXSLT() {
+        return hostLanguage == HostLanguage.XSLT;
     }
 
     /**
      * Set the host language in use
      *
-     * @param language for example {@link Configuration#XSLT} or {@link Configuration#XQUERY}
+     * @param language for example {@link HostLanguage#XSLT} or {@link HostLanguage#XQUERY}
      */
 
-    public void setHostLanguage(int language) {
+    public void setHostLanguage(HostLanguage language) {
         hostLanguage = language;
     }
 

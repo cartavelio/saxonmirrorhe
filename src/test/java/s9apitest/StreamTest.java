@@ -1,9 +1,9 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.s9api.streams.Steps;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
@@ -15,13 +15,16 @@ import java.util.function.Predicate;
 import static net.sf.saxon.s9api.streams.Predicates.eq;
 import static net.sf.saxon.s9api.streams.Predicates.isElement;
 import static net.sf.saxon.s9api.streams.Steps.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test stream-based navigation on the XdmValue class.
  *
  * Needs Java 8.
  */
-public class StreamTest extends TestCase {
+public class StreamTest {
 
     private String xml1 = "<doc id='a'><section id='b1'><para id='c1.1'>One</para><para id='c1.2'>Two</para></section>"
             + "<section id='b2'><para id='c2.1'>One</para><para id='c2.2'>Two</para></section></doc>";
@@ -32,9 +35,7 @@ public class StreamTest extends TestCase {
             + "<thing xml:id='t4' contains='t5'>4</thing>"
             + "<thing xml:id='t5' contains=''>5</thing></doc>";
 
-
-
-
+    @Test
     public void test001() {
         try {
             Processor p = new Processor(false);
@@ -52,6 +53,7 @@ public class StreamTest extends TestCase {
         }
     }
 
+    @Test
     public void test002() {
         try {
             Processor p = new Processor(false);
@@ -68,6 +70,7 @@ public class StreamTest extends TestCase {
         }
     }
 
+    @Test
     public void test003() {
         try {
             Processor p = new Processor(false);
@@ -86,6 +89,7 @@ public class StreamTest extends TestCase {
         }
     }
 
+    @Test
     public void test004() {
         try {
             Processor p = new Processor(false);
@@ -102,6 +106,7 @@ public class StreamTest extends TestCase {
         }
     }
 
+    @Test
     public void test005() {
         try {
             Processor p = new Processor(false);
@@ -136,6 +141,7 @@ public class StreamTest extends TestCase {
 //        }
 //    }
 
+    @Test
     public void test007() {
         try {
             Processor p = new Processor(false);
@@ -153,6 +159,7 @@ public class StreamTest extends TestCase {
         }
     }
 
+    @Test
     public void testEarlyExitInclusive() {
         Predicate<XdmItem> over1000 = item -> {
             try {
@@ -167,12 +174,13 @@ public class StreamTest extends TestCase {
             XPathCompiler c = p.newXPathCompiler();
             XPathSelector s = c.compile("1 to 100000000").load();
             XdmAtomicValue last = s.stream().untilFirstInclusive(over1000).last().asAtomic();
-            assertEquals(last.getLongValue(), 1001);
+            assertEquals(1001, last.getLongValue());
         } catch (SaxonApiException err) {
             fail();
         }
     }
 
+    @Test
     public void testEarlyExitExclusive() {
         Predicate<XdmItem> over1000 = item -> {
             try {
@@ -187,12 +195,13 @@ public class StreamTest extends TestCase {
             XPathCompiler c = p.newXPathCompiler();
             XPathSelector s = c.compile("1 to 100000000").load();
             XdmAtomicValue last = s.stream().untilFirstExclusive(over1000).last().asAtomic();
-            assertEquals(last.getLongValue(), 1000);
+            assertEquals(1000, last.getLongValue());
         } catch (SaxonApiException err) {
             fail();
         }
     }
 
+    @Test
     public void testIdStep() {
         try {
             Processor p = new Processor(false);
@@ -209,6 +218,7 @@ public class StreamTest extends TestCase {
         }
     }
 
+    @Test
     public void testXdmFunctionAsStep() {
         try {
             Processor p = new Processor(true);

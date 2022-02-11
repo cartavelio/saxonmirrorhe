@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using XPathException = net.sf.saxon.trans.XPathException;
 using JException = java.lang.Exception;
+using JErrorReporter = net.sf.saxon.lib.ErrorReporter;
 using JInvalidityHandler = net.sf.saxon.lib.InvalidityHandler;
 using JInvalidity = net.sf.saxon.lib.Invalidity;
 using JValidationFailure = net.sf.saxon.type.ValidationFailure;
@@ -10,6 +11,7 @@ using JSequence = net.sf.saxon.om.Sequence;
 using JTransformerException = javax.xml.transform.TransformerException;
 using JSourceLocator = javax.xml.transform.SourceLocator;
 using JSaxonApiException = net.sf.saxon.s9api.SaxonApiException;
+using JXmlProcessingError = net.sf.saxon.s9api.XmlProcessingError;
 
 namespace Saxon.Api
 {
@@ -59,7 +61,7 @@ namespace Saxon.Api
         }
 
         /// <summary>
-        /// Return the message associated with this error
+        /// Return the message associated with this error.
         /// </summary>
 
         public override String Message
@@ -72,7 +74,7 @@ namespace Saxon.Api
 
 
         /// <summary>
-        /// Return the message associated with this error concatenated with the message from the causing exception
+        /// Return the message associated with this error concatenated with the message from the causing exception.
         /// </summary> 
         public String InnerMessage
         {
@@ -217,6 +219,127 @@ namespace Saxon.Api
         }
     }
 
+
+    /// <summary>
+	/// The <c>IErrorReporter</c> is a generic functional interface for reporting errors and warnings.
+    /// </summary>
+    /// <remarks>
+    /// <p>The error or warning is reported in the form of an <c>XmlProcessingError</c> which
+    /// adds the possibility to report errors without expensive construction of an exception object.</p>
+    /// </remarks>
+    public interface IErrorReporter {
+
+
+
+        /// <summary>
+        /// Report an error. This method is called by Saxon when an error needs to be reported to the calling application.
+        /// </summary>
+        /// <param name="error">Details of the error to be reported</param>
+        /**public**/
+        void report(XmlProcessingError error);
+
+    }
+
+
+    /// <summary>
+	/// <c>ErrorReporter</c> wrapper class for internal use in Saxon.
+    /// </summary>
+	public class ErrorReporterWrapper : JErrorReporter
+
+    {
+
+        private IErrorReporter reporter;
+
+        /// <summary>
+		/// Create a standard <c>ErrorReporter</c>
+        /// </summary>
+		/// <param name="reporter">The .NET <c>IErrorReporter</c></param>
+        public ErrorReporterWrapper(IErrorReporter reporter)
+        {
+            this.reporter = reporter;
+        }
+
+        public IErrorReporter ErrorReporter {
+            get { return reporter; }
+        }
+
+
+        public void report(JXmlProcessingError xpe)
+        {
+            reporter.report(new XmlProcessingError(xpe));
+        }
+    }
+
+
+    /// <summary>
+	/// The <c>ErrorReporter</c> is a generic functional class for reporting errors and warnings.
+	/// This class wraps an <c>IList</c> of <c>XmlProcessingError</c> objects.
+    /// It is designed to be used internally by Saxon.
+    /// </summary>
+    [Serializable]
+	public class ErrorReporter : JErrorReporter
+    {
+
+        private IList<XmlProcessingError> errorList;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Saxon.Api.ErrorReporter"/> class.
+        /// </summary>
+        /// <param name="errorList">Error list.</param>
+        public ErrorReporter(IList<XmlProcessingError> errorList)
+        {
+            this.errorList = errorList;
+        }
+
+        /// <summary>
+        /// Get property on the wrapped error list.
+        /// </summary>
+        public IList<XmlProcessingError> ErrorList {
+            get { return errorList; }
+        }
+        
+        /// <summary>
+        /// This method is called internally in Saxon to report an error by adding it to the error list.
+        /// </summary>
+        /// <param name="xpe"></param>
+        public void report(JXmlProcessingError xpe)
+        {
+            errorList.Add(new XmlProcessingError(xpe));
+        }
+    }
+
+    /// <summary>
+	/// <c>ErrorReporter</c> for gathering errors as <c>XmlProcessorError</c> to then
+	/// convert them to a list of <c>StaticError</c>s.
+    /// </summary>
+    [Serializable]
+	public class ErrorReporterToStaticError : JErrorReporter
+    {
+
+        private IList<StaticError> errorList;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Saxon.Api.ErrorReporter"/> class.
+        /// </summary>
+        /// <param name="errorList">Error list.</param>
+        public ErrorReporterToStaticError(IList<StaticError> errorList)
+        {
+            this.errorList = errorList;
+        }
+
+        public IList<StaticError> ErrorList
+        {
+            get { return errorList; }
+        }
+
+
+        public void report(JXmlProcessingError xpe)
+        {
+            errorList.Add(new StaticError(net.sf.saxon.trans.XPathException.fromXmlProcessingError(xpe)));
+        }
+    }
+
+
     /// <summary>
 	/// The <c>DynamicError</c> class contains information about a dynamic error detected during
     /// execution of a stylesheet, query, or XPath expression.
@@ -230,7 +353,7 @@ namespace Saxon.Api
         internal bool isWarning;
 
         /// <summary>
-		/// Create a new <c>DynamicError</c>, specifying the error message
+		/// Create a new <c>DynamicError</c>, specifying the error message.
         /// </summary>
         /// <param name="message">The error message</param>
 
@@ -287,7 +410,7 @@ namespace Saxon.Api
         }
 
         /// <summary>
-        /// Return the message associated with this error
+        /// Return the message associated with this error.
         /// </summary>
 
         public override String Message
@@ -403,15 +526,110 @@ namespace Saxon.Api
 
     }
 
+    /// <summary>
+	/// The <c>XmlProcessorError</c> class contains information about an error detected during
+    /// compilation or execution of a stylesheet, query, XPath expression, or schema.
+    /// </summary>
+    public class XmlProcessingError : StaticError
+    {
+        JXmlProcessingError error;
+        internal XmlProcessingError(JXmlProcessingError err) : base(XPathException.fromXmlProcessingError(err))
+        {
+            this.error = err;
+        }
+
+        /// <summary>
+		/// This get property returns a <c>XmlProcessingError</c> containing the same information, but to be treated as a warning condition.
+        /// </summary>
+        public XmlProcessingError AsWarning {
+            get {
+                XmlProcessingError e2 = new XmlProcessingError(error);
+                e2.IsWarning = true;
+                return e2;
+            }
+        }
+
+        /// <summary>
+        /// Property to get the host language where this error originates from.
+        /// </summary>
+        public HostLanguage HostLanguage {
+
+            get {
+                if (error.getHostLanguage() == net.sf.saxon.s9api.HostLanguage.XSLT)
+                {
+                    return HostLanguage.XSLT;
+                }
+                else {
+                    return HostLanguage.XPATH;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Property to indicate that this error is to be treated as fatal, that is,
+        /// execution will be abandoned after reporting this error. This method may be called
+        /// by <c>ErrorReporter</c>, for example if the error is considered so server that further processing
+        /// is not worthwhile, or if too many errors have been signalled. there is no absolute guarantee that
+        /// setting this property will cause execution to be abandoned.
+        /// It can also be used to ask whether this error is to be treated as fatal, 
+        /// and if so, return the relevant message.
+        /// </summary>
+        public String FatalMessage {
+
+            set {
+                error.setFatal(value);
+            }
+            get {
+                return error.getFatalErrorMessage();
+            }
+        }
+
+        /// <summary>
+        /// Property to check if this error is a <c>StaticError</c>.
+        /// </summary>
+        public bool StaticError {
+            get { return error.isStaticError(); }
+        }
+
+        /// <summary>
+        /// Property which indicates whether this condition is a type error.
+        /// </summary>
+        public bool TypeError {
+            get { return error.isTypeError(); }
+        }
+
+
+        /// <summary>
+        /// Ask whether this static error has already been reported.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsAlreadyReported() {
+            return error.isAlreadyReported();
+        }
+
+
+        /// <summary>
+        /// Say whether this error has already been reported.
+        /// </summary>
+        /// <param name="reported">true if the error has been reported</param>
+        public void SetAlreadyReported(bool reported)
+        {
+            error.setAlreadyReported(reported);
+        }
+
+    }
+
 
     /// <summary>
     /// This exception indicates a failure when validating an instance against a type
     ///  defined in a schema.
-    ///  <p>This class holds the same information as a ValidationException, except that it is not an exception,
-    ///  and does not carry system overheads such as a stack trace.It is used because operations such as "castable",
-    ///  and validation of values in a union, cause validation failures on a success path and it is costly to throw,
-    ///  or even to create, exception objects on a success path.</p>
     /// </summary>
+	/// <remarks>
+	/// This class holds the same information as a <c>ValidationException</c>, except that it is not an exception,
+	///  and does not carry system overheads such as a stack trace. It is used because operations such as "castable",
+	///  and validation of values in a union, cause validation failures on a success path and it is costly to throw,
+	///  or even to create, exception objects on a success path.
+	/// </remarks>
     public class ValidationFailure
     {
         private JValidationFailure failure;
@@ -430,9 +648,9 @@ namespace Saxon.Api
         }
 
         /// <summary>
-        /// Get the constraint clause number
+        /// Get the constraint clause number.
         /// </summary>
-        /// <returns>the section number of the clause containing the constraint that has been violated.
+        /// <returns>The section number of the clause containing the constraint that has been violated.
         /// Generally a decimal number in the form n.n.n; possibly a sequence of such numbers separated
         ///  by semicolons.Or null if the information is not available.</returns>
         public String GetConstraintClauseNumber()
@@ -442,9 +660,9 @@ namespace Saxon.Api
 
 
         /// <summary>
-        /// Get the constraint name
+        /// Get the constraint name.
         /// </summary>
-        /// <returns>the name of the violated constraint, in the form of a fragment identifier within
+        /// <returns>The name of the violated constraint, in the form of a fragment identifier within
         ///  the published XML Schema specification; or null if the information is not available.</returns>
         public String GetConstraintName()
         {
@@ -455,7 +673,7 @@ namespace Saxon.Api
         /// Get the constraint name and clause in the format defined in XML Schema Part C (Outcome Tabulations).
         /// This mandates the format validation-rule-name.clause-number
         /// </summary>
-        /// <returns>the constraint reference, for example "cos-ct-extends.1.2"; or null if the reference
+        /// <returns>The constraint reference, for example "cos-ct-extends.1.2"; or null if the reference
         ///  is not known.</returns>
         public String getConstraintReference()
         {
@@ -465,8 +683,8 @@ namespace Saxon.Api
         /// <summary>
         /// Get additional location text, if any.
         /// </summary>
-        /// <returns>additional information about the location of the error, designed to be output
-        /// as a prefix to the error message if desired</returns>
+        /// <returns>Additional information about the location of the error, designed to be output
+        /// as a prefix to the error message if desired.</returns>
         public String GetContextPath()
         {
             return failure.getContextPath().toString();
@@ -475,11 +693,11 @@ namespace Saxon.Api
 
         /// <summary>
         /// Get the error code associated with the validity error. This is relevant only when validation
-        /// is run from within XSLT or XQuery, which define different error codes for validition errors
+        /// is run from within XSLT or XQuery, which define different error codes for validation errors.
         /// </summary>
-        /// <returns>the error code associated with the error, if any. The error is returned as a simple
-        /// string if it is in the standard error namespace, or as an EQName(that is Q{ uri}
-        /// local) otherwise.</returns>
+        /// <returns>The error code associated with the error, if any. The error is returned as a simple
+        /// string if it is in the standard error namespace, or as an EQName (that is Q{uri}local) 
+		/// otherwise.</returns>
         public String GetErrorCode()
         {
             return failure.getErrorCode();
@@ -495,9 +713,9 @@ namespace Saxon.Api
         }
 
         /// <summary>
-        /// Get the text of a message explaing what is wrong
+        /// Get the text of a message explaining what is wrong.
         /// </summary>
-        /// <returns>a human-readable message explaining the validity error</returns>
+        /// <returns>A human-readable message explaining the validity error.</returns>
         public String GetMessage()
         {
             return failure.getMessage();
@@ -505,9 +723,9 @@ namespace Saxon.Api
 
         /// <summary>
         /// Get a hierarchic path giving the logical position in the instance document where the
-        /// validation error was found
+        /// validation error was found.
         /// </summary>
-        /// <returns>a path to the location in the document</returns>
+        /// <returns>A path to the location in the document.</returns>
         public String GetPath()
         {
             return failure.getPath().toString();
@@ -517,26 +735,26 @@ namespace Saxon.Api
         /// <summary>
         /// Return the public identifier for the current document event.
         /// </summary>
-        /// <returns>A string containing the public identifier, or null if none is available</returns>
+        /// <returns>A string containing the public identifier, or null if none is available.</returns>
         public String GetPublicId()
         {
             return failure.getPublicId();
         }
 
         /// <summary>
-        /// Get the "schema part" component of the constraint reference
+        /// Get the "schema part" component of the constraint reference.
         /// </summary>
         /// <returns>1 or 2 depending on whether the violated constraint is in XML Schema Part 1 or Part 2;
-        /// or -1 if there is no constraint reference</returns>
+        /// or -1 if there is no constraint reference.</returns>
         public int GetSchemaPart()
         {
             return failure.getSchemaPart();
         }
 
         /// <summary>
-        /// Return the system identifier for the current document event
+        /// Return the system identifier for the current document event.
         /// </summary>
-        /// <returns>A string containing the system identifier, or null if none is available</returns>
+        /// <returns>A string containing the system identifier, or null if none is available.</returns>
         public String GetSystemId()
         {
             return failure.getSystemId();
@@ -544,10 +762,11 @@ namespace Saxon.Api
     }
 
     /// <summary>
-    /// Error gatherer. This class is used to provide customized error handling. </summary>
+    /// Error gatherer. This class is used to provide customized error handling. 
+	/// </summary>
     /// <remarks><para>If an application does <em>not</em> register its own custom
     /// <code>ErrorListener</code>, the default <code>ErrorGatherer</code>
-    /// is used which keeps track of all warnings and errors in a list.
+    /// is used which keeps track of all warnings and errors in a list,
     /// and does not throw any <code>Exception</code>s.
     /// Applications are <em>strongly</em> encouraged to register and use
     /// <code>ErrorListener</code>s that insure proper behavior for warnings and
@@ -577,7 +796,7 @@ namespace Saxon.Api
         {
             StaticError se = new StaticError(exception);
             // if(exception)
-            se.isWarning = true;
+            se.IsWarning = true;
             //Console.WriteLine("(Adding warning " + exception.getMessage() + ")");
             errorList.Add(se);
         }
@@ -589,7 +808,7 @@ namespace Saxon.Api
         public void error(JTransformerException error)
         {
             StaticError se = new StaticError(error);
-            se.isWarning = false;
+            se.IsWarning = false;
             //Console.WriteLine("(Adding error " + error.getMessage() + ")");
             errorList.Add(se);
         }
@@ -601,7 +820,7 @@ namespace Saxon.Api
         public void fatalError(JTransformerException error)
         {
             StaticError se = new StaticError(error);
-            se.isWarning = false;
+            se.IsWarning = false;
             errorList.Add(se);
             //Console.WriteLine("(Adding fatal error " + error.getMessage() + ")");
         }
@@ -629,18 +848,18 @@ namespace Saxon.Api
 	public interface IInvalidityHandler {
 
         /// <summary>
-        /// At the start of a validation episode, initialize the handler
+        /// At the start of a validation episode, initialize the handler.
         /// </summary>
-        /// <param name="systemId">optional; may be used to represent the destination of any
-        /// report produced</param>
+        /// <param name="systemId">Optional; may be used to represent the destination of any
+        /// report produced.</param>
 		/**public**/ void startReporting(String systemId);
 
 
 		/// <summary>
 		/// Report a validation error found during validation of an instance document
-		/// against a schema
+		/// against a schema.
 		/// </summary>
-		/// <param name="i">details of the validation error</param>
+		/// <param name="i">Details of the validation error.</param>
 		/**public**/ void reportInvalidity (ValidationFailure i);
 		
 
@@ -672,9 +891,9 @@ namespace Saxon.Api
         private IInvalidityHandler inHandler;
 
         /// <summary>
-        /// Create a standard Invalidity Handler
+        /// Create a standard Invalidity Handler.
         /// </summary>
-		/// <param name="inHandler">The .NET <c>IInvalidityHandler</c></param>
+		/// <param name="inHandler">The .NET <c>IInvalidityHandler</c>.</param>
         public InvalidityHandlerWrapper(IInvalidityHandler inHandler) {
             this.inHandler = inHandler;
         }
@@ -702,7 +921,7 @@ namespace Saxon.Api
         /// <summary>
         /// Receive notification of a validity error.
         /// </summary>
-        /// <param name="i">Information about the nature of the invalidity</param>
+        /// <param name="i">Information about the nature of the invalidity.</param>
         public void reportInvalidity(JInvalidity i)
         {
             if (i is JValidationFailure) { 
@@ -715,9 +934,9 @@ namespace Saxon.Api
 
 
         /// <summary>
-        /// At the start of a validation episode, initialize the handler
+        /// At the start of a validation episode, initialize the handler.
         /// </summary>
-        /// <param name="systemId">optional; may be used to represent the destination of any report produced</param>
+        /// <param name="systemId">Optional; may be used to represent the destination of any report produced.</param>
         public void startReporting(string systemId)
         {
             inHandler.startReporting(systemId);
@@ -734,7 +953,7 @@ namespace Saxon.Api
 	/// <summary>
 	/// <para>If an application does <em>not</em> register its own custom
 	/// <code>InvalidityHandler</code>, the default <code>InvalidityGatherer</code>
-	/// is used which keeps track of all warnings and errors in a list.
+	/// is used which keeps track of all warnings and errors in a list,
 	/// and does not throw any <code>Exception</code>s.
 	/// Applications are <em>strongly</em> encouraged to register and use
 	/// <code>InvalidityHandler</code>s that insure proper behavior for warnings and
@@ -817,7 +1036,7 @@ namespace Saxon.Api
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,10 +7,7 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.ForEachGroup;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.sort.GroupIterator;
@@ -27,7 +24,7 @@ import net.sf.saxon.value.AtomicValue;
 
 public class CurrentGroupCall extends Expression implements Callable {
 
-    private boolean isInLoop = false;
+    private boolean isInHigherOrderOperand = false;
     private ItemType itemType = AnyItemType.getInstance();
     private ForEachGroup controllingInstruction = null; // may be unknown, when current group has dynamic scope
 
@@ -49,16 +46,19 @@ public class CurrentGroupCall extends Expression implements Callable {
 
     /**
      * Set the containing xsl:for-each-group instruction, if there is one
-     * @param instruction the (innermost) containing xsl:for-each-group instruction
-     * @param itemType the statically inferred item type of the grouping population
-     * @param isInLoop true if the current-group() expression is evaluated more than once during
-     * evaluation of the body of the for-each-group instruction
+     *
+     * @param instruction   the (innermost) containing xsl:for-each-group instruction
+     * @param itemType      the statically inferred item type of the grouping population
+     * @param isHigherOrder true typically if the current-group() expression is evaluated more than once during
+     *                      evaluation of the body of the for-each-group instruction; or more generally, if there is an operand on
+     *                      the path between the controlling for-each-group instruction and this current-group()
+     *                      call that is a higher-order operand of its parent instruction.
      */
 
-    public void setControllingInstruction(ForEachGroup instruction, ItemType itemType, boolean isInLoop) {
+    public void setControllingInstruction(ForEachGroup instruction, ItemType itemType, boolean isHigherOrder) {
         resetLocalStaticProperties();
         this.controllingInstruction = instruction;
-        this.isInLoop = isInLoop;
+        this.isInHigherOrderOperand = isHigherOrder;
         this.itemType = itemType;
     }
 
@@ -71,6 +71,7 @@ public class CurrentGroupCall extends Expression implements Callable {
 
     /**
      * Get the innermost containing xsl:for-each-group instruction, if there is one
+     *
      * @return the innermost containing xsl:for-each-group instruction
      */
 
@@ -87,7 +88,7 @@ public class CurrentGroupCall extends Expression implements Callable {
         while (parent != null) {
             if (parent instanceof ForEachGroup &&
                     (child == ((ForEachGroup) parent).getActionExpression() || child == ((ForEachGroup) parent).getSortKeyDefinitionList())) {
-                return (ForEachGroup)parent;
+                return (ForEachGroup) parent;
             }
             child = parent;
             parent = parent.getParentExpression();
@@ -98,27 +99,12 @@ public class CurrentGroupCall extends Expression implements Callable {
     /**
      * Determine whether the current-group() function is executed repeatedly within a single iteration
      * of the containing xsl:for-each-group
+     *
      * @return true if it is evaluated repeatedly
      */
 
-    public boolean isInLoop() {
-        return isInLoop;
-//        if (isInLoop) {
-//            return true;
-//        }
-//        Expression child = this;
-//        Expression parent = getParentExpression();
-//        while (parent != getControllingInstruction()) {
-//            Operand o = ExpressionTool.findOperand(parent, child);
-//            if (o == null) {
-//                return true;  // safety net
-//            }
-//            if (o.isEvaluatedRepeatedly()) {
-//                return true;
-//            }
-//            parent = parent.getParentExpression();
-//        }
-//        return false;
+    public boolean isInHigherOrderOperand() {
+        return isInHigherOrderOperand;
     }
 
     /**
@@ -137,6 +123,7 @@ public class CurrentGroupCall extends Expression implements Callable {
      * Determine the dependencies
      */
 
+    @Override
     public int getIntrinsicDependencies() {
         return StaticProperty.DEPENDS_ON_CURRENT_GROUP;
     }
@@ -196,7 +183,7 @@ public class CurrentGroupCall extends Expression implements Callable {
     @Override
     public Expression copy(RebindingMap rebindings) {
         CurrentGroupCall cg = new CurrentGroupCall();
-        cg.isInLoop = isInLoop;
+        cg.isInHigherOrderOperand = isInHigherOrderOperand;
         cg.itemType = itemType;
         cg.controllingInstruction = controllingInstruction;
         return cg;
@@ -207,7 +194,8 @@ public class CurrentGroupCall extends Expression implements Callable {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext c) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext c) throws XPathException {
         GroupIterator gi = c.getCurrentGroupIterator();
         if (gi == null) {
             XPathException err = new XPathException("There is no current group", "XTDE1061");
@@ -237,7 +225,8 @@ public class CurrentGroupCall extends Expression implements Callable {
      * of the callee to ensure that the type of result conforms to the expected result type.
      * @throws XPathException if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         return SequenceTool.toLazySequence(iterate(context));
     }
 

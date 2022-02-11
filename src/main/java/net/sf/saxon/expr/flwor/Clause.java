@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,8 +8,10 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 
@@ -22,14 +24,7 @@ import java.util.List;
  */
 public abstract class Clause {
 
-    public static final int FOR = 0;
-    public static final int LET = 1;
-    public static final int WINDOW = 2;
-    public static final int GROUPBYCLAUSE = 3;
-    public static final int COUNT = 4;
-    public static final int ORDERBYCLAUSE = 5;
-    public static final int WHERE = 6;
-    public static final int TRACE = 7;
+    public enum ClauseName { FOR, LET, WINDOW, GROUP_BY, COUNT, ORDER_BY, WHERE, TRACE, FOR_MEMBER}
 
     private Location location;
     private PackageData packageData;
@@ -124,12 +119,13 @@ public abstract class Clause {
      * output to another tuple stream
      *
      * @param destination the output tuple stream
+     * @param output the destination for the result
      * @param context     the dynamic evaluation context
      * @return the push tuple stream that implements the functionality of this clause of the FLWOR
      *         expression
      */
 
-    public abstract TuplePush getPushStream(TuplePush destination, XPathContext context);
+    public abstract TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context);
 
     /**
      * Process the subexpressions of this clause
@@ -207,7 +203,7 @@ public abstract class Clause {
      * @return the kind of clause
      */
 
-    public abstract int getClauseKey();
+    public abstract ClauseName getClauseKey();
 
     /**
      * Get a short string representation of the clause

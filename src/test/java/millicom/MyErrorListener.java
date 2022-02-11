@@ -67,6 +67,6 @@ public class MyErrorListener implements ErrorListener, Initializer {
     }
 
     public void initialize(Configuration config) throws TransformerException {
-        config.setErrorListener(this);
+        //config.setErrorListener(this);
     }
 }

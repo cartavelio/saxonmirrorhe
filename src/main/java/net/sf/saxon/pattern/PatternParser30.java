@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -19,9 +19,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.NumericType;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.SequenceType;
@@ -46,10 +44,11 @@ public class PatternParser30 extends XPathParser implements PatternParser {
      */
 
     /*@NotNull*/
+    @Override
     public Pattern parsePattern(String pattern, StaticContext env) throws XPathException {
         this.env = env;
         charChecker = env.getConfiguration().getValidCharacterChecker();
-        language = XSLT_PATTERN;
+        language = ParsedLanguage.XSLT_PATTERN;
         String trimmed = pattern.trim();
         if (trimmed.startsWith("(:")) {
             t = new Tokenizer();
@@ -62,7 +61,9 @@ public class PatternParser30 extends XPathParser implements PatternParser {
         allowSaxonExtensions = env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
         if (isSelectionPattern(trimmed)) {
             Expression e = parse(pattern, 0, Token.EOF, env);
-            if (e instanceof ContextItemExpression) {
+            if (e instanceof Pattern) {
+                return (Pattern)e;
+            } else if (e instanceof ContextItemExpression) {
                 return new UniversalPattern();
             } else if (e instanceof FilterExpression) {
                 Expression predicate = null;
@@ -72,10 +73,10 @@ public class PatternParser30 extends XPathParser implements PatternParser {
                     // Need to consider the possibility of a numeric predicate
                     ItemType filterType = filter.getItemType();
                     TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
-                    int rel = th.relationship(filterType, NumericType.getInstance());
-                    if (rel != TypeHierarchy.DISJOINT) {
+                    Affinity rel = th.relationship(filterType, NumericType.getInstance());
+                    if (rel != Affinity.DISJOINT) {
                         // the predicate may be numeric
-                        if (rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMED_BY) {
+                        if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY) {
                             // the predicate IS numeric: rewrite as N eq 1, since other values don't match
                             filter = new ValueComparison(filter, Token.FEQ, Literal.makeLiteral(Int64Value.PLUS_ONE));
                         } else {
@@ -130,8 +131,9 @@ public class PatternParser30 extends XPathParser implements PatternParser {
             } catch (XPathException e) {
                 pat = PatternMaker.fromExpression(exp.simplify(), env.getConfiguration(), true);
             }
+            pat.setOriginalText(pattern);
             if (exp instanceof FilterExpression && ((FilterExpression)exp).getBase() instanceof ContextItemExpression) {
-                if (allowSaxonExtensions && (pattern.startsWith("tuple") || pattern.startsWith("map") || pattern.startsWith("array"))) {
+                if (allowSaxonExtensions && (pattern.startsWith("tuple") || pattern.startsWith("map") || pattern.startsWith("array") || pattern.startsWith("union"))) {
                     // no action, this is OK
                 } else {
                     grumble("A predicatePattern can appear only at the outermost level (parentheses not allowed)");
@@ -149,12 +151,8 @@ public class PatternParser30 extends XPathParser implements PatternParser {
         if (pattern.startsWith(".")) {
             return true;
         }
-        if (pattern.startsWith("~")) {
-            checkSyntaxExtensions("type alias");
-            return true;
-        }
-        if (pattern.matches("^(tuple|map|array)\\s*\\(.+")) {
-            checkSyntaxExtensions("Patterns matching tuple, array, and map types");
+        if (pattern.matches("^(type|tuple|map|array|union|atomic)\\s*\\(.+")) {
+            checkSyntaxExtensions("Patterns matching " + pattern.replace("\\(.*$", "") + " types");
             return true;
         }
 
@@ -178,6 +176,7 @@ public class PatternParser30 extends XPathParser implements PatternParser {
      * Callback to tailor the tokenizer
      */
 
+    @Override
     protected void customizeTokenizer(Tokenizer t) {
         // no action
     }
@@ -191,16 +190,43 @@ public class PatternParser30 extends XPathParser implements PatternParser {
      */
 
     /*@NotNull*/
+    @Override
     public Expression parseExpression() throws XPathException {
         Tokenizer t = getTokenizer();
         if (inPredicate > 0) {
             return super.parseExpression();
         } else if (allowSaxonExtensions && t.currentToken == Token.NODEKIND &&
-                (t.currentTokenValue.equals("tuple") || t.currentTokenValue.equals("map") || t.currentTokenValue.equals("array"))) {
-            ItemType type = parserExtension.parseExtendedItemType(this);
-            Expression expr = new InstanceOfExpression(
-                    new ContextItemExpression(), SequenceType.makeSequenceType(type, StaticProperty.EXACTLY_ONE));
-            expr = new FilterExpression(new ContextItemExpression(), expr);
+                (t.currentTokenValue.equals("tuple")  || t.currentTokenValue.equals("type") || t.currentTokenValue.equals("map") || t.currentTokenValue.equals("array"))) {
+            //ItemType type = parserExtension.parseExtendedItemType(this);
+            ItemType type = parseItemType();
+            Expression expr = new ItemTypePattern(type);
+            expr.setRetainedStaticContext(env.makeRetainedStaticContext());
+//            Expression expr = new InstanceOfExpression(
+//                    new ContextItemExpression(), SequenceType.makeSequenceType(type, StaticProperty.EXACTLY_ONE));
+//            expr = new FilterExpression(new ContextItemExpression(), expr);
+            setLocation(expr);
+            while (t.currentToken == Token.LSQB) {
+                expr = parsePredicate(expr).toPattern(env.getConfiguration());
+            }
+            return expr;
+        } else if (allowSaxonExtensions && t.currentToken == Token.NODEKIND &&
+                (t.currentTokenValue.equals("atomic"))) {
+            nextToken();
+            expect(Token.NAME);
+            StructuredQName typeName =
+                    makeStructuredQName(t.currentTokenValue,env.getDefaultElementNamespace());
+            nextToken();
+            expect(Token.RPAR);
+            nextToken();
+            SchemaType type = env.getConfiguration().getSchemaType(typeName);
+            if (type == null || !type.isAtomicType()) {
+                grumble("Unknown atomic type " + typeName);
+            }
+            AtomicType at = (AtomicType)type;
+            Expression expr = new ItemTypePattern(at);
+//            Expression expr = new InstanceOfExpression(
+//                    new ContextItemExpression(), SequenceType.makeSequenceType(at, StaticProperty.EXACTLY_ONE));
+//            expr = new FilterExpression(new ContextItemExpression(), expr);
             setLocation(expr);
             while (t.currentToken == Token.LSQB) {
                 expr = parsePredicate(expr);
@@ -222,6 +248,7 @@ public class PatternParser30 extends XPathParser implements PatternParser {
      */
 
     /*@NotNull*/
+    @Override
     protected Expression parseBasicStep(boolean firstInPattern) throws XPathException {
         if (inPredicate > 0) {
             return super.parseBasicStep(firstInPattern);
@@ -252,8 +279,18 @@ public class PatternParser30 extends XPathParser implements PatternParser {
                         grumble("In an XSLT pattern, a function call is allowed only as the first step in a path");
                     }
                     return super.parseBasicStep(firstInPattern);
-                case Token.TILDE:
-                    return parserExtension.parseTildePattern(this);
+                case Token.NODEKIND:
+                    switch (t.currentTokenValue) {
+                        case "type":
+                        case "tuple":
+                        case "union":
+                        case "map":
+                        case "array":
+                        case "atomic":
+                            return parserExtension.parseTypePattern(this);
+                        default:
+                            return super.parseBasicStep(firstInPattern);
+                    }
                 default:
                     return super.parseBasicStep(firstInPattern);
 
@@ -262,7 +299,8 @@ public class PatternParser30 extends XPathParser implements PatternParser {
     }
 
     @Override
-    protected void testPermittedAxis(byte axis, String errorCode) throws XPathException {
+    protected void testPermittedAxis(int axis, String errorCode) throws XPathException {
+        super.testPermittedAxis(axis, errorCode);
         if (inPredicate == 0) {
             if (!AxisInfo.isSubtreeAxis[axis]) {
                 grumble("The " + AxisInfo.axisName[axis] + " is not allowed in a pattern");
@@ -280,6 +318,7 @@ public class PatternParser30 extends XPathParser implements PatternParser {
      */
 
     /*@NotNull*/
+    @Override
     protected Expression parsePredicate() throws XPathException {
         boolean disallow = t.disallowUnionKeyword;
         t.disallowUnionKeyword = false;
@@ -301,6 +340,7 @@ public class PatternParser30 extends XPathParser implements PatternParser {
      */
 
     /*@NotNull*/
+    @Override
     public Expression parseFunctionCall(Expression prefixArgument) throws XPathException {
         Expression fn = super.parseFunctionCall(prefixArgument);
         if (inPredicate <= 0 && !fn.isCallOn(SuperId.class) && !fn.isCallOn(KeyFn.class) &&
@@ -310,6 +350,7 @@ public class PatternParser30 extends XPathParser implements PatternParser {
         return fn;
     }
 
+    @Override
     public Expression parseFunctionArgument() throws XPathException {
         if (inPredicate > 0) {
             return super.parseFunctionArgument();
@@ -331,7 +372,8 @@ public class PatternParser30 extends XPathParser implements PatternParser {
         }
     }
 
-    public Expression makeTracer(int startOffset, Expression exp, int construct, StructuredQName qName) {
+    @Override
+    public Expression makeTracer(Expression exp, StructuredQName qName) {
         // Suppress tracing of pattern evaluation
         return exp;
     }

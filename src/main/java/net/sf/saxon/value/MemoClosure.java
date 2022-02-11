@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,8 +7,10 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 
@@ -46,9 +48,9 @@ import net.sf.saxon.trans.XPathException;
  * is prevented by synchronizing the evaluation methods.</p>
  */
 
-public class MemoClosure extends Closure {
+public class MemoClosure extends Closure implements ContextOriginator {
 
-    private Sequence<?> sequence;
+    private Sequence sequence;
 
     /**
      * Constructor should not be called directly, instances should be made using the make() method.
@@ -63,7 +65,9 @@ public class MemoClosure extends Closure {
 
     public MemoClosure(Expression expr, XPathContext context) throws XPathException {
         setExpression(expr);
-        setSavedXPathContext(context.newContext());
+        XPathContextMajor c2 = context.newContext();
+        c2.setOrigin(this);
+        setSavedXPathContext(c2);
         saveContext(expr, context);
     }
 
@@ -72,9 +76,10 @@ public class MemoClosure extends Closure {
      */
 
     /*@NotNull*/
-    public synchronized SequenceIterator<Item<?>> iterate() throws XPathException {
+    @Override
+    public synchronized SequenceIterator iterate() throws XPathException {
         makeSequence();
-        return (SequenceIterator<Item<?>>)sequence.iterate();
+        return sequence.iterate();
     }
 
     private void makeSequence() throws XPathException {
@@ -113,16 +118,17 @@ public class MemoClosure extends Closure {
      */
 
     /*@Nullable*/
-    public GroundedValue<?> reduce() throws XPathException {
+    @Override
+    public GroundedValue reduce() throws XPathException {
         if (sequence instanceof GroundedValue) {
-            return (GroundedValue<?>)sequence;
+            return (GroundedValue)sequence;
         } else {
             return iterate().materialize();
         }
     }
 
     @Override
-    public Sequence<Item<?>> makeRepeatable() {
+    public Sequence makeRepeatable() {
         return this;
     }
 

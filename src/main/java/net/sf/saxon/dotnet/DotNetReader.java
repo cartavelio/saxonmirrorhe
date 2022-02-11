@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 public class DotNetReader extends java.io.Reader {
 
-    private TextReader reader;
+    private final TextReader reader;
 
     /**
      * Create a Java Reader that wraps a .NET Reader
@@ -45,6 +45,7 @@ public class DotNetReader extends java.io.Reader {
      *
      * @throws java.io.IOException If an I/O error occurs
      */
+    @Override
     public void close() throws IOException {
         reader.Close();
     }
@@ -61,7 +62,8 @@ public class DotNetReader extends java.io.Reader {
      *         stream has been reached
      * @throws java.io.IOException If an I/O error occurs
      */
-    public int read(char cbuf[], int off, int len) throws IOException {
+    @Override
+    public int read(char[] cbuf, int off, int len) throws IOException {
         int n = reader.Read(cbuf, off, len);
         return (n == 0 ? -1 : n);
     }
@@ -77,6 +79,7 @@ public class DotNetReader extends java.io.Reader {
      *         been reached
      * @throws java.io.IOException If an I/O error occurs
      */
+    @Override
     public int read() throws IOException {
         return reader.Read();
     }

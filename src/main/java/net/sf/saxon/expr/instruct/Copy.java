@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -21,7 +21,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.NamespaceIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
@@ -57,7 +56,7 @@ public class Copy extends ElementCreator {
                 SchemaType schemaType,
                 int validation) {
         this.copyNamespaces = copyNamespaces;
-        this.inheritNamespacesToChildren = inheritNamespaces;
+        this.bequeathNamespacesToChildren = inheritNamespaces;
         setValidationAction(validation, schemaType);
         preservingTypes = schemaType == null && validation == Validation.PRESERVE;
     }
@@ -92,6 +91,7 @@ public class Copy extends ElementCreator {
      */
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
         preservingTypes |= !getPackageData().isSchemaAware();
         return super.simplify();
@@ -99,6 +99,7 @@ public class Copy extends ElementCreator {
 
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         typeCheckChildren(visitor, contextInfo);
@@ -144,20 +145,29 @@ public class Copy extends ElementCreator {
     }
 
     /**
-     * Copy an expression. This makes a deep copy.
+     * Copy this expression (don't be confused by the method name). This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables that need to be re-bound
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         Copy copy = new Copy(
-                copyNamespaces, inheritNamespacesToChildren, getSchemaType(), getValidationAction());
+                copyNamespaces, bequeathNamespacesToChildren, getSchemaType(), getValidationAction());
         ExpressionTool.copyLocationInfo(this, copy);
         copy.setContentExpression(getContentExpression().copy(rebindings));
         copy.resultItemType = resultItemType;
         return copy;
+    }
+
+    /**
+     * Set the item type of the input
+     */
+
+    public void setSelectItemType(ItemType type) {
+        selectItemType = type;
     }
 
     /**
@@ -173,6 +183,7 @@ public class Copy extends ElementCreator {
      *         the expression
      */
 
+    @Override
     public int getIntrinsicDependencies() {
         return StaticProperty.DEPENDS_ON_CONTEXT_ITEM;
     }
@@ -181,6 +192,7 @@ public class Copy extends ElementCreator {
      * Get the name of this instruction for diagnostic and tracing purposes
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_COPY;
     }
@@ -206,6 +218,7 @@ public class Copy extends ElementCreator {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (resultItemType != null) {
             return resultItemType;
@@ -227,12 +240,12 @@ public class Copy extends ElementCreator {
         // The rest of the code handles the complications of schema-awareness
         Configuration config = th.getConfiguration();
         if (getSchemaType() != null) {
-            int e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
-            if (e == TypeHierarchy.SAME_TYPE || e == TypeHierarchy.SUBSUMED_BY) {
+            Affinity e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
+            if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
                 return new ContentTypeTest(Type.ELEMENT, getSchemaType(), config, false);
             }
-            int a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
-            if (a == TypeHierarchy.SAME_TYPE || a == TypeHierarchy.SUBSUMED_BY) {
+            Affinity a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
+            if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
                 return new ContentTypeTest(Type.ATTRIBUTE, getSchemaType(), config, false);
             }
             return AnyNodeTest.getInstance();
@@ -241,15 +254,15 @@ public class Copy extends ElementCreator {
                 case Validation.PRESERVE:
                     return selectItemType;
                 case Validation.STRIP: {
-                    int e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
-                    if (e == TypeHierarchy.SAME_TYPE || e == TypeHierarchy.SUBSUMED_BY) {
+                    Affinity e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
+                    if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
                         return new ContentTypeTest(Type.ELEMENT, Untyped.getInstance(), config, false);
                     }
-                    int a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
-                    if (a == TypeHierarchy.SAME_TYPE || a == TypeHierarchy.SUBSUMED_BY) {
+                    Affinity a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
+                    if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
                         return new ContentTypeTest(Type.ATTRIBUTE, BuiltInAtomicType.UNTYPED_ATOMIC, config, false);
                     }
-                    if (e != TypeHierarchy.DISJOINT || a != TypeHierarchy.DISJOINT) {
+                    if (e != Affinity.DISJOINT || a != Affinity.DISJOINT) {
                         // it might be an element or attribute
                         return AnyNodeTest.getInstance();
                     } else {
@@ -262,8 +275,8 @@ public class Copy extends ElementCreator {
                     if (selectItemType instanceof NodeTest) {
                         int fp = ((NodeTest) selectItemType).getFingerprint();
                         if (fp != -1) {
-                            int e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
-                            if (e == TypeHierarchy.SAME_TYPE || e == TypeHierarchy.SUBSUMED_BY) {
+                            Affinity e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
+                            if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
                                 SchemaDeclaration elem = config.getElementDeclaration(fp);
                                 if (elem != null) {
                                     try {
@@ -276,8 +289,8 @@ public class Copy extends ElementCreator {
                                     return new ContentTypeTest(Type.ELEMENT, AnyType.getInstance(), config, false);
                                 }
                             }
-                            int a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
-                            if (a == TypeHierarchy.SAME_TYPE || a == TypeHierarchy.SUBSUMED_BY) {
+                            Affinity a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
+                            if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
                                 SchemaDeclaration attr = config.getElementDeclaration(fp);
                                 if (attr != null) {
                                     try {
@@ -291,12 +304,12 @@ public class Copy extends ElementCreator {
                                 }
                             }
                         } else {
-                            int e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
-                            if (e == TypeHierarchy.SAME_TYPE || e == TypeHierarchy.SUBSUMED_BY) {
+                            Affinity e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
+                            if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
                                 return NodeKindTest.ELEMENT;
                             }
-                            int a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
-                            if (a == TypeHierarchy.SAME_TYPE || a == TypeHierarchy.SUBSUMED_BY) {
+                            Affinity a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
+                            if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
                                 return NodeKindTest.ATTRIBUTE;
                             }
                         }
@@ -313,6 +326,7 @@ public class Copy extends ElementCreator {
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         Expression exp = super.optimize(visitor, contextItemType);
         if (exp == this) {
@@ -324,7 +338,7 @@ public class Copy extends ElementCreator {
                 if (!type.intersection(MultipleNodeKindTest.LEAF.getUType()).equals(UType.VOID)) {
                     // Bug 4346: only do this optimization once
                     Expression p = getParentExpression();
-                    if (p instanceof Choose && ((Choose) p).size() == 2 && ((Choose) p).getAction(1) == this &&
+                    if (p instanceof Choose && ((Choose)p).size() == 2 && ((Choose)p).getAction(1) == this &&
                             ((Choose) p).getAction(0) instanceof CopyOf) {
                         return exp;
                     }
@@ -351,11 +365,11 @@ public class Copy extends ElementCreator {
      *
      * @param context    XPath dynamic evaluation context
      * @param copiedNode the node being copied
-     * @return the namecode of the element to be constructed
-     * @throws XPathException
+     * @return the name of the element to be constructed
      */
 
-    public NodeName getElementName(XPathContext context, NodeInfo copiedNode) throws XPathException {
+    @Override
+    public NodeName getElementName(XPathContext context, NodeInfo copiedNode) {
         return NameOfNode.makeName(copiedNode);
     }
 
@@ -367,6 +381,7 @@ public class Copy extends ElementCreator {
      * @return the base URI
      */
 
+    @Override
     public String getNewBaseURI(XPathContext context, NodeInfo copiedNode) {
         return copiedNode.getBaseURI();
     }
@@ -374,68 +389,51 @@ public class Copy extends ElementCreator {
     /**
      * Callback to output namespace nodes for the new element.
      *
-     * @param context    The execution context
      * @param receiver   the Receiver where the namespace nodes are to be written
      * @param nodeName    the element name
      * @param copiedNode  the node being copied (for xsl:copy), otherwise null
-     * @throws XPathException
+     * @throws XPathException if any error occurs
      */
 
-    public void outputNamespaceNodes(XPathContext context, Receiver receiver, NodeName nodeName, NodeInfo copiedNode)
+    @Override
+    public void outputNamespaceNodes(Outputter receiver, NodeName nodeName, NodeInfo copiedNode)
             throws XPathException {
         if (copyNamespaces) {
-            NamespaceIterator.sendNamespaces(copiedNode, receiver);
+            receiver.namespaces(copiedNode.getAllNamespaces(), ReceiverOption.NAMESPACE_OK);
         } else {
             // Always output the namespace of the element name itself
-            receiver.namespace(nodeName.getNamespaceBinding(), 0);
+            NamespaceBinding ns = nodeName.getNamespaceBinding();
+            if (!ns.isDefaultUndeclaration()) {
+                receiver.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
+            }
         }
     }
 
-    /**
-     * Callback to get a list of the intrinsic namespaces that need to be generated for the element.
-     * The result is an array of namespace codes, the codes either occupy the whole array or are
-     * terminated by a -1 entry. A result of null is equivalent to a zero-length array.
-     */
-
-    public NamespaceBinding[] getActiveNamespaces() throws XPathException {
-        if (copyNamespaces) {
-            // we should have disabled lazy construction, so this shouldn't be called.
-            throw new UnsupportedOperationException();
-        } else {
-            return null;
-        }
-    }
-
-
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter out, XPathContext context) throws XPathException {
         Controller controller = context.getController();
-        Receiver out = context.getReceiver();
-        Item item = context.getContextItem();//select.evaluateItem(context);
+        Item item = context.getContextItem();
         if (item == null) {
             return null;
         }
 
         if (!(item instanceof NodeInfo)) {
-            out.append(item, getLocation(), ReceiverOptions.ALL_NAMESPACES);
+            out.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
             return null;
         }
         NodeInfo source = (NodeInfo) item;
-        //out.getPipelineConfiguration().setBaseURI(source.getBaseURI());
-
-        // Processing depends on the node kind.
-
         switch (source.getNodeKind()) {
 
             case Type.ELEMENT:
                 // use the generic code for creating new elements
-                return super.processLeavingTail(context, (NodeInfo) item);
+                return super.processLeavingTail(out, context, (NodeInfo) item);
 
             case Type.ATTRIBUTE:
                 if (getSchemaType() instanceof ComplexType) {
                     dynamicError("Cannot copy an attribute when the type requested for validation is a complex type", "XTTE1535", context);
                 }
                 try {
-                    CopyOf.copyAttribute(source, (SimpleType) getSchemaType(), getValidationAction(), this, context, false);
+                    CopyOf.copyAttribute(source, (SimpleType) getSchemaType(), getValidationAction(), this, out, context, false);
                 } catch (NoOpenStartTagException err) {
                     err.setXPathContext(context);
                     throw dynamicError(getLocation(), err, context);
@@ -444,57 +442,40 @@ public class Copy extends ElementCreator {
 
             case Type.TEXT:
                 CharSequence tval = source.getStringValueCS();
-                out.characters(tval, getLocation(), 0);
+                out.characters(tval, getLocation(), ReceiverOption.NONE);
                 break;
 
             case Type.PROCESSING_INSTRUCTION:
                 CharSequence pval = source.getStringValueCS();
-                out.processingInstruction(source.getDisplayName(), pval, getLocation(), 0);
+                out.processingInstruction(source.getDisplayName(), pval, getLocation(), ReceiverOption.NONE);
                 break;
 
             case Type.COMMENT:
                 CharSequence cval = source.getStringValueCS();
-                out.comment(cval, getLocation(), 0);
+                out.comment(cval, getLocation(), ReceiverOption.NONE);
                 break;
 
             case Type.NAMESPACE:
-                try {
-                    source.copy(out, 0, getLocation());
-                } catch (NoOpenStartTagException err) {
-                    XPathException e = new XPathException(err.getMessage());
-                    e.setXPathContext(context);
-                    e.setErrorCodeQName(err.getErrorCodeQName());
-                    throw dynamicError(getLocation(), e, context);
-                }
+                out.namespace(
+                        ((NodeInfo) item).getLocalPart(), item.getStringValue(), ReceiverOption.NONE);
                 break;
 
             case Type.DOCUMENT:
-                Receiver saved = out;
-                boolean pop = false;
                 if (!preservingTypes) {
                     ParseOptions options = new ParseOptions(getValidationOptions());
                     options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                     controller.getConfiguration().prepareValidationReporting(context, options);
                     Receiver val = controller.getConfiguration().
                         getDocumentValidator(out, source.getBaseURI(), options, getLocation());
-                    if (val != out) {
-                        SequenceReceiver sr = new TreeReceiver(val);
-                        sr.setPipelineConfiguration(out.getPipelineConfiguration());
-                        context.setReceiver(sr);
-                        pop = true;
-                        out = sr;
-                    }
+                    out = new ComplexContentOutputter(val);
                 }
                 if (out.getSystemId() == null) {
                     out.setSystemId(source.getBaseURI());
                 }
-                out.startDocument(0);
+                out.startDocument(ReceiverOption.NONE);
                 copyUnparsedEntities(source, out);
-                getContentExpression().process(context);
+                getContentExpression().process(out, context);
                 out.endDocument();
-                if (pop) {
-                    context.setReceiver(saved);
-                }
                 break;
 
             default:
@@ -504,7 +485,7 @@ public class Copy extends ElementCreator {
         return null;
     }
 
-    public static void copyUnparsedEntities(NodeInfo source, Receiver out) throws XPathException {
+    public static void copyUnparsedEntities(NodeInfo source, Outputter out) throws XPathException {
         Iterator<String> unparsedEntities = source.getTreeInfo().getUnparsedEntityNames();
         while (unparsedEntities.hasNext()) {
             String n = unparsedEntities.next();
@@ -514,20 +495,16 @@ public class Copy extends ElementCreator {
     }
 
     /**
-     * Evaluate as an expression. We rely on the fact that when these instructions
-     * are generated by XQuery, there will always be a valueExpression to evaluate
-     * the content
+     * Evaluate as an item
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         Controller controller = context.getController();
-        Receiver saved = context.getReceiver();
-        SequenceOutputter seq = controller.allocateSequenceOutputter(1);
+        SequenceCollector seq = controller.allocateSequenceOutputter(1);
         seq.getPipelineConfiguration().setHostLanguage(getPackageData().getHostLanguage());
-        context.setReceiver(seq);
-        process(context);
+        process(new ComplexContentOutputter(seq), context);
         seq.close();
-        context.setReceiver(saved);
         Item item = seq.getFirstItem();
         seq.reset();
         return item;
@@ -549,6 +526,7 @@ public class Copy extends ElementCreator {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("copy", this);
         exportValidationAndType(out);
@@ -556,7 +534,7 @@ public class Copy extends ElementCreator {
         if (copyNamespaces) {
             flags = "c";
         }
-        if (inheritNamespacesToChildren) {
+        if (bequeathNamespacesToChildren) {
             flags += "i";
         }
         if (inheritNamespacesFromParent) {
@@ -566,6 +544,10 @@ public class Copy extends ElementCreator {
             flags += "l";
         }
         out.emitAttribute("flags", flags);
+        String sType = SequenceType.makeSequenceType(selectItemType, getCardinality()).toAlphaCode();
+        if (sType != null) {
+            out.emitAttribute("sit", sType);
+        }
         out.setChildRole("content");
         getContentExpression().export(out);
         out.endElement();

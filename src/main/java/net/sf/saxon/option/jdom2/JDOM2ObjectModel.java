@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -34,7 +34,7 @@ import javax.xml.transform.Source;
 
 public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
 
-    private static JDOM2ObjectModel THE_INSTANCE = new JDOM2ObjectModel();
+    private final static JDOM2ObjectModel THE_INSTANCE = new JDOM2ObjectModel();
 
     public static JDOM2ObjectModel getInstance() {
         return THE_INSTANCE;
@@ -50,6 +50,7 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
      * @return by convention (but not necessarily) the class that implements a document node in the relevant
      * external model
      */
+    @Override
     public String getDocumentClassName() {
         return "org.jdom2.Document";
     }
@@ -59,18 +60,22 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
      * an XPath implementation
      */
 
+    @Override
     public String getIdentifyingURI() {
         return NamespaceConstant.OBJECT_MODEL_JDOM;
     }
 
+    @Override
     public Builder makeBuilder(PipelineConfiguration pipe) {
         return new JDOM2Writer(pipe);
     }
 
+    @Override
     public int getSymbolicValue() {
         return Builder.JDOM2_TREE;
     }
 
+    @Override
     public String getName() {
         return "JDOM2";
     }
@@ -94,10 +99,12 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
     }
 
 
+    @Override
     public PJConverter getPJConverter(Class<?> targetClass) {
         if (isRecognizedNodeClass(targetClass)) {
             return new PJConverter() {
-                public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) {
+                @Override
+                public Object convert(Sequence value, Class<?> targetClass, XPathContext context) {
                     return convertXPathValueToObject(value, targetClass);
                 }
             };
@@ -106,13 +113,16 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
         }
     }
 
+    @Override
     public JPConverter getJPConverter(Class sourceClass, Configuration config) {
         if (isRecognizedNodeClass(sourceClass)) {
             return new JPConverter() {
-                public Sequence<?> convert(Object object, XPathContext context) {
+                @Override
+                public Sequence convert(Object object, XPathContext context) {
                     return convertObjectToXPathValue(object, context.getConfiguration());
                 }
 
+                @Override
                 public ItemType getItemType() {
                     return AnyNodeTest.getInstance();
                 }
@@ -132,6 +142,7 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
      *         returns a collection of nodes in this object model
      */
 
+    @Override
     public PJConverter getNodeListCreator(Object node) {
         return null;
     }
@@ -159,8 +170,10 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
      * Test whether this object model recognizes a particular kind of JAXP Result object,
      * and if it does, return a Receiver that builds an instance of this data model from
      * a sequence of events. If the Result is not recognised, return null.
+     * @return always null
      */
 
+    @Override
     public Receiver getDocumentBuilder(Result result) {
         return null;
     }
@@ -171,6 +184,7 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
      * Otherwise, return false.
      */
 
+    @Override
     public boolean sendSource(Source source, Receiver receiver) {
         return false;
     }
@@ -180,6 +194,7 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
      * source does not belong to this object model, return null
      */
 
+    @Override
     public NodeInfo unravel(Source source, Configuration config) {
         return null;
     }
@@ -197,7 +212,7 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
      */
 
     /*@Nullable*/
-    private Sequence<?> convertObjectToXPathValue(Object object, Configuration config) {
+    private Sequence convertObjectToXPathValue(Object object, Configuration config) {
         if (isRecognizedNode(object)) {
             if (object instanceof Document) {
                 return wrapDocument(object, config).getRootNode();
@@ -224,7 +239,7 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
      */
 
     /*@Nullable*/
-    private Object convertXPathValueToObject(Sequence<?> value, Class<?> target) {
+    private Object convertXPathValueToObject(Sequence value, Class<?> target) {
         if (value instanceof VirtualNode) {
             Object u = ((VirtualNode) value).getRealNode();
             if (target.isAssignableFrom(u.getClass())) {
@@ -298,4 +313,4 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
 }
 
 
-// Original Code is Copyright (c) 2009 Saxonica Limited.
+// Original Code is Copyright (c) 2009-2020 Saxonica Limited

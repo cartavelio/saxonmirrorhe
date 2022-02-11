@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,8 +9,8 @@ package net.sf.saxon.expr.sort;
 
 import com.saxonica.ee.stream.adjunct.MergeInstrAdjunct;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorManager;
@@ -23,6 +23,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
@@ -35,7 +36,6 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceType;
 
@@ -250,6 +250,7 @@ public class MergeInstr extends Instruction {
      * static validation can continue recursively.
      */
 
+    @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         getAction().checkPermittedContents(parentType, false);
     }
@@ -274,12 +275,14 @@ public class MergeInstr extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getAction().getItemType();
     }
 
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         final Configuration config = visitor.getConfiguration();
@@ -419,6 +422,7 @@ public class MergeInstr extends Instruction {
      * (Nodes created by the condition can't contribute to the result).
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         int props = getAction().getSpecialProperties();
         return (props & StaticProperty.NO_NODES_NEWLY_CREATED) == 0;
@@ -426,6 +430,7 @@ public class MergeInstr extends Instruction {
 
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         final Configuration config = visitor.getConfiguration();
         final TypeHierarchy th = config.getTypeHierarchy();
@@ -523,7 +528,8 @@ public class MergeInstr extends Instruction {
 
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
 
         try {
             AtomicComparer[] comps = getComparators(context);
@@ -531,7 +537,7 @@ public class MergeInstr extends Instruction {
             GroupIterator mgi = context.getCurrentMergeGroupIterator();
             final XPathContextMajor c1 = context.newContext();
             c1.setCurrentMergeGroupIterator(mgi);
-            SequenceIterator<?> inputIterator = getMergedInputIterator(context, comps, c1);
+            SequenceIterator inputIterator = getMergedInputIterator(context, comps, c1);
 
             // Now perform the merge into a grouped sequence
             inputIterator = new MergeGroupingIterator(inputIterator, getComparer(mergeSources[0].mergeKeyDefinitions, comps), getLastPositionFinder(context));
@@ -540,7 +546,7 @@ public class MergeInstr extends Instruction {
             c1.setCurrentMergeGroupIterator((GroupIterator) inputIterator);
             XPathContext c3 = c1.newMinorContext();
             c3.trackFocus(inputIterator);
-            return new ContextMappingIterator<>(cxt -> getAction().iterate(cxt), c3);
+            return new ContextMappingIterator(cxt -> getAction().iterate(cxt), c3);
         } catch (XPathException e) {
             e.maybeSetLocation(getLocation());
             throw e;
@@ -557,19 +563,19 @@ public class MergeInstr extends Instruction {
      * @throws XPathException if anything goes wrong
      */
 
-    private SequenceIterator<?> getMergedInputIterator(XPathContext context, AtomicComparer[] comps, final XPathContextMajor c1) throws XPathException {
+    private SequenceIterator getMergedInputIterator(XPathContext context, AtomicComparer[] comps, final XPathContextMajor c1) throws XPathException {
         // Now construct a tree of merge iterators, one for each merge sequence, for each merge source.
 
-        SequenceIterator<?> inputIterator = EmptyIterator.getInstance();
+        SequenceIterator inputIterator = EmptyIterator.getInstance();
         for (final MergeSource ms : mergeSources) {
 
-            SequenceIterator<?> anchorsIter = null;
+            SequenceIterator anchorsIter = null;
 
             if (ms.streamable && ms.getForEachSource() != null) {
 //#ifdefined STREAM
-                List<ContextMappingIterator<ExternalObject<ItemWithMergeKeys>>> msIters =
+                List<ContextMappingIterator> msIters =
                         MergeInstrAdjunct.makeSourceIterators(ms, getPackageData(), c1);
-                for (ContextMappingIterator<ExternalObject<ItemWithMergeKeys>> iter : msIters) {
+                for (ContextMappingIterator iter : msIters) {
                     inputIterator = makeMergeIterator(inputIterator, comps, ms, iter);
                 }
 //#endif
@@ -578,10 +584,10 @@ public class MergeInstr extends Instruction {
                 options.setSchemaValidationMode(ms.validation);
                 options.setTopLevelType(ms.schemaType);
                 options.setApplicableAccumulators(ms.accumulators);
-                SequenceIterator<?> uriIter = ms.getForEachSource().iterate(c1);
+                SequenceIterator uriIter = ms.getForEachSource().iterate(c1);
                 XsltController controller = (XsltController)context.getController();
                 final AccumulatorManager accumulatorManager = controller.getAccumulatorManager();
-                anchorsIter = new ItemMappingIterator<>(uriIter, baseItem -> {
+                anchorsIter = new ItemMappingIterator(uriIter, baseItem -> {
                     String uri = baseItem.getStringValue();
                     NodeInfo node = DocumentFn.makeDoc(uri, getRetainedStaticContext().getStaticBaseUriString(),
                                                        getPackageData(), options, c1, getLocation(), true);
@@ -594,8 +600,8 @@ public class MergeInstr extends Instruction {
                     XPathContext c4 = c2.newMinorContext();
                     FocusIterator rowIntr = c4.trackFocus(ms.getRowSelect().iterate(c2));
                     MergeKeyMappingFunction addMergeKeys = new MergeKeyMappingFunction(c4, ms);
-                    ContextMappingIterator<ExternalObject<ItemWithMergeKeys>> contextMapKeysItr =
-                            new ContextMappingIterator<>(addMergeKeys, c4);
+                    ContextMappingIterator contextMapKeysItr =
+                            new ContextMappingIterator(addMergeKeys, c4);
                     inputIterator = makeMergeIterator(inputIterator, comps, ms, contextMapKeysItr);
                 }
             } else if (ms.getForEachItem() != null) {
@@ -617,10 +623,10 @@ public class MergeInstr extends Instruction {
     private SequenceIterator getInputIterator(AtomicComparer[] comps, SequenceIterator inputIterator, MergeSource ms, XPathContext c2) throws XPathException {
         XPathContext c4 = c2.newMinorContext();
         c4.setTemporaryOutputState(StandardNames.XSL_MERGE_KEY);
-        FocusIterator<?> rowIntr = c4.trackFocus(ms.getRowSelect().iterate(c2));
+        FocusIterator rowIntr = c4.trackFocus(ms.getRowSelect().iterate(c2));
         MergeKeyMappingFunction addMergeKeys = new MergeKeyMappingFunction(c4, ms);
-        ContextMappingIterator<ExternalObject<ItemWithMergeKeys>> contextMapKeysItr =
-                new ContextMappingIterator<>(addMergeKeys, c4);
+        ContextMappingIterator contextMapKeysItr =
+                new ContextMappingIterator(addMergeKeys, c4);
         inputIterator = makeMergeIterator(inputIterator, comps, ms, contextMapKeysItr);
         return inputIterator;
     }
@@ -672,7 +678,7 @@ public class MergeInstr extends Instruction {
 
     private SequenceIterator makeMergeIterator(
             SequenceIterator result, AtomicComparer[] comps, MergeSource ms,
-            ContextMappingIterator<ExternalObject<ItemWithMergeKeys>> contextMapKeysItr) throws XPathException {
+            ContextMappingIterator contextMapKeysItr) throws XPathException {
         if (result == null || result instanceof EmptyIterator) {
             result = contextMapKeysItr;
         } else {
@@ -756,6 +762,7 @@ public class MergeInstr extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         MergeInstr newMerge = new MergeInstr();
         MergeSource[] c2 = new MergeSource[mergeSources.length];
@@ -771,6 +778,7 @@ public class MergeInstr extends Instruction {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("merge", this);
         for (MergeSource mergeSource : mergeSources) {
@@ -821,12 +829,11 @@ public class MergeInstr extends Instruction {
 
     /*@Nullable*/
     @Override
-    public TailCall processLeavingTail(XPathContext context)
+    public TailCall processLeavingTail(Outputter output, XPathContext context)
             throws XPathException {
 
-        Receiver out = context.getReceiver();
-        try (SequenceIterator<?> iter = iterate(context)) {
-            iter.forEachOrFail(it -> out.append(it, getLocation(), ReceiverOptions.ALL_NAMESPACES));
+        try (SequenceIterator iter = iterate(context)) {
+            iter.forEachOrFail(it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES));
         } catch (XPathException e) {
             e.maybeSetLocation(getLocation());
             e.maybeSetContext(context);
@@ -851,25 +858,25 @@ public class MergeInstr extends Instruction {
      * item and its merge keys into a single composite object
      */
 
-    public static class MergeKeyMappingFunction implements ContextMappingFunction<ExternalObject<ItemWithMergeKeys>> {
+    public static class MergeKeyMappingFunction implements ContextMappingFunction {
         private MergeSource ms;
         private XPathContext baseContext;
         private XPathContext keyContext;
-        private ManualIterator<Item<?>> manualIterator;
+        private ManualIterator manualIterator;
 
         public MergeKeyMappingFunction(XPathContext baseContext, MergeSource ms) {
             this.baseContext = baseContext;
             this.ms = ms;
             keyContext = baseContext.newMinorContext();
             keyContext.setTemporaryOutputState(StandardNames.XSL_MERGE_KEY);
-            //keyContext.setCurrentOutputUri(null); // see bug 4160
-            manualIterator = new ManualIterator<>();
+            //keyContext.setCurrentOutputUri(null);   // See bug 4160
+            manualIterator = new ManualIterator();
             manualIterator.setPosition(1);
             keyContext.setCurrentIterator(manualIterator);
         }
-        public SequenceIterator<ExternalObject<ItemWithMergeKeys>> map(XPathContext context)
-                            throws XPathException {
-            Item<?> currentItem = context.getContextItem();
+        @Override
+        public SequenceIterator map(XPathContext context) throws XPathException {
+            Item currentItem = context.getContextItem();
             manualIterator.setContextItem(currentItem);
             ItemWithMergeKeys newItem = new ItemWithMergeKeys(currentItem, ms.mergeKeyDefinitions, ms.sourceName, keyContext);
             return SingletonIterator.makeIterator(new ObjectValue<>(newItem));

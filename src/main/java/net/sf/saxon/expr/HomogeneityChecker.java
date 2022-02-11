@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -14,8 +15,10 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.HomogeneityCheckerIterator;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -31,6 +34,7 @@ public class HomogeneityChecker extends UnaryExpression {
         super(base);
     }
 
+    @Override
     protected OperandRole getOperandRole() {
         return OperandRole.INSPECT;
     }
@@ -51,9 +55,10 @@ public class HomogeneityChecker extends UnaryExpression {
         if (type.equals(ErrorType.getInstance())) {
             return Literal.makeEmptySequence();
         }
-        int rel = th.relationship(type, AnyNodeTest.getInstance());
-        if (rel == TypeHierarchy.DISJOINT) {
+        Affinity rel = th.relationship(type, AnyNodeTest.getInstance());
+        if (rel == Affinity.DISJOINT) {
             // expression cannot return nodes, so this checker is redundant
+              // code deleted by bug 4298
 //            if (getBaseExpression() instanceof SlashExpression && ((SlashExpression) getBaseExpression()).getLeadingSteps() instanceof SlashExpression &&
 //                    (((SlashExpression) getBaseExpression()).getLeadingSteps().getSpecialProperties() & StaticProperty.ORDERED_NODESET) == 0) {
 //                DocumentSorter ds = new DocumentSorter(((SlashExpression) getBaseExpression()).getLeadingSteps());
@@ -63,7 +68,7 @@ public class HomogeneityChecker extends UnaryExpression {
 //            } else {
                 return getBaseExpression();
 //            }
-        } else if (rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMED_BY) {
+        } else if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY) {
             // expression always returns nodes, so replace this expression with a DocumentSorter
             Expression savedBase = getBaseExpression();
             Expression parent = getParentExpression();
@@ -75,6 +80,18 @@ public class HomogeneityChecker extends UnaryExpression {
             return ds;
         }
         return this;
+    }
+
+    /**
+     * Convert this expression to an equivalent XSLT pattern
+     *
+     * @param config the Saxon configuration
+     * @return the equivalent pattern
+     * @throws net.sf.saxon.trans.XPathException if conversion is not possible
+     */
+    @Override
+    public Pattern toPattern(Configuration config) throws XPathException {
+        return getBaseExpression().toPattern(config);
     }
 
     /*@NotNull*/
@@ -120,13 +137,14 @@ public class HomogeneityChecker extends UnaryExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(final XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(final XPathContext context) throws XPathException {
 
         // This class delivers the result of the path expression in unsorted order,
         // without removal of duplicates. If sorting and deduplication are needed,
         // this is achieved by wrapping the path expression in a DocumentSorter
 
-        SequenceIterator<?> base = getBaseExpression().iterate(context);
+        SequenceIterator base = getBaseExpression().iterate(context);
         return new HomogeneityCheckerIterator(base, getLocation());
     }
 

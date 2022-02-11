@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,7 +14,6 @@ import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
 
 /**
@@ -23,10 +22,10 @@ import net.sf.saxon.type.Type;
 public class XSLOverride extends StyleElement {
 
     @Override
-    public void prepareAttributes() throws XPathException {
-        AttributeCollection atts = getAttributeList();
-        for (int a = 0; a < atts.getLength(); a++) {
-            checkUnknownAttribute(atts.getNodeName(a));
+    public void prepareAttributes() {
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            checkUnknownAttribute(attName);
         }
     }
 
@@ -38,7 +37,7 @@ public class XSLOverride extends StyleElement {
 
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
-        iterateAxis(AxisInfo.CHILD).forEachOrFail(curr -> {
+        for (NodeInfo curr : children()) {
             if (curr.getNodeKind() == Type.TEXT) {
                 compileError("Character content is not allowed as a child of xsl:override", "XTSE0010");
             } else if (curr instanceof XSLFunction || curr instanceof XSLTemplate || curr instanceof XSLGlobalVariable
@@ -48,7 +47,7 @@ public class XSLOverride extends StyleElement {
                 ((StyleElement) curr).compileError(
                         "Element " + curr.getDisplayName() + " is not allowed as a child of xsl:override", "XTSE0010");
             }
-        });
+        }
     }
 
     @Override
@@ -56,9 +55,7 @@ public class XSLOverride extends StyleElement {
         XSLUsePackage parent = (XSLUsePackage)getParent();
         assert parent != null;
         if (parent.getUsedPackage() != null) {
-            AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-            NodeInfo curr;
-            while ((curr = kids.next()) != null) {
+            for (NodeInfo curr : children()) {
                 if (curr instanceof XSLFunction || curr instanceof XSLTemplate || curr instanceof XSLGlobalVariable
                         || curr instanceof XSLAttributeSet) {
                     StylesheetComponent procedure = (StylesheetComponent) curr;
@@ -103,8 +100,8 @@ public class XSLOverride extends StyleElement {
                         if (overriddenVis == Visibility.FINAL || overriddenVis == Visibility.PRIVATE) {
                             ((StyleElement) curr).compileError(
                                     "The " + StandardNames.getLocalName(name.getComponentKind()) +
-                                        " named " + name.getShortName() +
-                                            " in the used package cannot be overridden because its visibility is " + overriddenVis.show(),
+                                        " named " + name.getShortName()
+                                            + " in the used package cannot be overridden because its visibility is " + overriddenVis.show(),
                                                                "XTSE3060");
                             return;
                         }

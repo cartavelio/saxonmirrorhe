@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,11 +9,12 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.event.BuilderMonitor;
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -33,6 +34,7 @@ import java.util.List;
  */
 public class SnapshotFn extends SystemFunction {
 
+    @Override
     public int getCardinality(Expression[] arguments) {
         return arguments[0].getCardinality();
     }
@@ -46,13 +48,14 @@ public class SnapshotFn extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Sequence<?> in = arguments.length == 0 ? context.getContextItem() : arguments[0];
-        SequenceIterator<?> iter = snapshotSequence(in.iterate(), context);
-        return new LazySequence<>(iter);
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        Sequence in = arguments.length == 0 ? context.getContextItem() : arguments[0];
+        SequenceIterator iter = snapshotSequence(in.iterate(), context);
+        return new LazySequence(iter);
     }
 
-    public static SequenceIterator<?> snapshotSequence(SequenceIterator<?> nodes, final XPathContext context) {
+    public static SequenceIterator snapshotSequence(SequenceIterator nodes, final XPathContext context) {
         return new ItemMappingIterator(nodes, getMappingFunction());
     }
 
@@ -61,7 +64,7 @@ public class SnapshotFn extends SystemFunction {
      * @return a suitable mapping function
      */
 
-    public static ItemMappingFunction<Item<?>, Item<?>> getMappingFunction() {
+    public static ItemMappingFunction getMappingFunction() {
         return SnapshotFn::snapshotSingle;
     }
 
@@ -87,8 +90,8 @@ public class SnapshotFn extends SystemFunction {
     }
 
     public static List<NodeInfo> makeAncestorList(NodeInfo origin) {
-        List<NodeInfo> ancestors = new ArrayList<NodeInfo>(20);
-        origin.iterateAxis(AxisInfo.ANCESTOR).forEach(ancestors::add);
+        List<NodeInfo> ancestors = new ArrayList<>(20);
+        origin.iterateAxis(AxisInfo.ANCESTOR).forEachNode(ancestors::add);
         return ancestors;
     }
 
@@ -118,24 +121,14 @@ public class SnapshotFn extends SystemFunction {
             switch (kind) {
 
                 case Type.ELEMENT: {
-                    bm.startElement(NameOfNode.makeName(anc), ancestorType, ExplicitLocation.UNKNOWN_LOCATION, 0);
-                    NamespaceBinding[] localDeclarations = anc.getDeclaredNamespaces(null);
-                    for (int n = 0; n < localDeclarations.length; ) {
-                        NamespaceBinding nsCode = localDeclarations[n++];
-                        if (nsCode == null) {
-                            break;
-                        }
-                        bm.namespace(nsCode, 0);
-                    }
-                    anc.iterateAxis(AxisInfo.ATTRIBUTE).forEachOrFail(
-                            att -> att.copy(bm, 0, ExplicitLocation.UNKNOWN_LOCATION)
-                    );
-                    bm.startContent();
+                    bm.startElement(NameOfNode.makeName(anc), ancestorType,
+                                    anc.attributes(), anc.getAllNamespaces(),
+                                    Loc.NONE, ReceiverOption.NONE);
                     break;
                 }
 
                 case Type.DOCUMENT: {
-                    bm.startDocument(0);
+                    bm.startDocument(ReceiverOption.NONE);
                     break;
                 }
                 default: {
@@ -165,6 +158,7 @@ public class SnapshotFn extends SystemFunction {
         bm.close();
     }
 
+    @Override
     public String getStreamerName() {
         return "SnapshotFn";
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,8 +8,8 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -59,19 +59,23 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
      * Set the name of this instruction for diagnostic and tracing purposes
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_NAMESPACE;
     }
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return NodeKindTest.NAMESPACE;
     }
 
+    @Override
     public int getCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 
+    @Override
     public void localTypeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         StaticContext env = visitor.getStaticContext();
         nameOp.typeCheck(visitor, contextItemType);
@@ -100,6 +104,7 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         NamespaceConstructor exp = new NamespaceConstructor(getNameExp().copy(rebindings));
         exp.setSelect(getSelect().copy(rebindings));
@@ -108,6 +113,7 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
     }
 
 
+    @Override
     public NodeName evaluateNodeName(XPathContext context) throws XPathException {
         String prefix = evaluatePrefix(context);
         return new NoNamespaceName(prefix);
@@ -140,14 +146,13 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
         return prefix;
     }
 
-    public void processValue(CharSequence value, XPathContext context) throws XPathException {
+    @Override
+    public void processValue(CharSequence value, Outputter output, XPathContext context) throws XPathException {
         String prefix = evaluatePrefix(context);
         String uri = value.toString();
         checkPrefixAndUri(prefix, uri, context);
 
-        NamespaceBinding nscode = new NamespaceBinding(prefix, uri);
-        Receiver out = context.getReceiver();
-        out.namespace(nscode, ReceiverOptions.REJECT_DUPLICATES);
+        output.namespace(prefix, uri, ReceiverOption.REJECT_DUPLICATES);
     }
 
 
@@ -157,6 +162,7 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
      * the content
      */
 
+    @Override
     public NodeInfo evaluateItem(XPathContext context) throws XPathException {
         NodeInfo node = (NodeInfo) super.evaluateItem(context);
         assert node != null;
@@ -201,6 +207,7 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("namespace", this);
         String flags = "";

@@ -1,0 +1,104 @@
+package internaltests;
+
+import net.sf.saxon.Configuration;
+import net.sf.saxon.Controller;
+import net.sf.saxon.event.*;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.FingerprintedQName;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.XdmDestination;
+import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.type.BuiltInAtomicType;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
+
+/**
+ *  Tests of the NamespaceMap class
+ */
+public class NamespaceMapTest {
+
+    @Test
+    public void testIncrementalAdd() {
+        try {
+            NamespaceMap map = NamespaceMap.emptyMap();
+            map = map.put("xml", NamespaceConstant.XML);
+            map = map.put("xsl", NamespaceConstant.XSLT);
+            map = map.put("saxon", NamespaceConstant.SAXON);
+            assertEquals(NamespaceConstant.SAXON, map.getURI("saxon"));
+            assertEquals(NamespaceConstant.XSLT, map.getURI("xsl"));
+            map = map.put("xsl", NamespaceConstant.MAP_FUNCTIONS);
+            assertEquals(NamespaceConstant.MAP_FUNCTIONS, map.getURI("xsl"));
+        } catch (Exception err) {
+            err.printStackTrace();
+            fail(err.getMessage());
+        }
+    }
+
+    @Test
+    public void testMerge() {
+        NamespaceMap map1 = NamespaceMap.emptyMap();
+        map1 = map1.put("xml", NamespaceConstant.XML);
+        map1 = map1.put("xsl", NamespaceConstant.XSLT);
+        map1 = map1.put("saxon", NamespaceConstant.SAXON);
+
+        NamespaceMap map2 = NamespaceMap.emptyMap();
+        map2 = map2.put("xsl", NamespaceConstant.XSLT);
+        map2 = map2.put("saxon", NamespaceConstant.IXSL);
+        map2 = map2.put("array", NamespaceConstant.ARRAY_FUNCTIONS);
+
+        NamespaceMap map3 = map1.putAll(map2);
+        assertEquals(3, map3.size());
+        assertEquals(NamespaceConstant.XML, map3.getURI("xml"));
+        assertEquals(NamespaceConstant.XSLT, map3.getURI("xsl"));
+        assertEquals(NamespaceConstant.IXSL, map3.getURI("saxon"));
+        assertEquals(NamespaceConstant.ARRAY_FUNCTIONS, map3.getURI("array"));
+        assertNull(map3.getURI(""));
+    }
+
+    @Test
+    public void testNormToveyWalsh() {
+        try {
+            Processor processor = new Processor(false);
+            Configuration config = processor.getUnderlyingConfiguration();
+            Controller controller = new Controller(config);
+
+            XdmDestination destination = new XdmDestination();
+            PipelineConfiguration pipe = controller.makePipelineConfiguration();
+            Receiver receiver = destination.getReceiver(pipe, new SerializationProperties());
+
+            receiver.setPipelineConfiguration(pipe);
+            receiver.setSystemId("http://example.com/");
+
+            receiver = new ComplexContentOutputter(new NamespaceReducer(receiver));
+
+            receiver.open();
+            receiver.startDocument(ReceiverOption.NONE);
+
+            Location location = Loc.NONE;
+
+            FingerprintedQName attrName = new FingerprintedQName("ex", "http://example.com/", "foo");
+            FingerprintedQName elemName = new FingerprintedQName("", "", "doc");
+
+            Outputter out = (Outputter) receiver;
+            out.startElement(elemName, BuiltInAtomicType.UNTYPED_ATOMIC, location, ReceiverOption.NONE);
+            out.attribute(attrName, BuiltInAtomicType.UNTYPED_ATOMIC, "bar", location, ReceiverOption.NONE);
+            out.startContent();
+            out.endElement();
+            out.endDocument();
+
+            XdmNode result = destination.getXdmNode();
+            assertEquals("<doc xmlns:ex=\"http://example.com/\" ex:foo=\"bar\"/>", result.toString());
+            System.out.println(result);
+        } catch (Exception e) {
+            fail();
+        }
+    }
+}

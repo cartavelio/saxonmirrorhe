@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,6 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -15,15 +14,12 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.AlphaCode;
 import net.sf.saxon.type.SchemaDeclaration;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.value.SequenceType;
 
 /**
  * A NodeTestPattern is a pattern that consists simply of a NodeTest
- *
- * @author Michael H. Kay
  */
 
 public class NodeTestPattern extends Pattern {
@@ -51,14 +47,16 @@ public class NodeTestPattern extends Pattern {
      * @return true if the item matches the Pattern, false otherwise
      */
 
-    public boolean matches(Item<?> item, XPathContext context) {
-        return item instanceof NodeInfo && nodeTest.matchesNode((NodeInfo)item);
+    @Override
+    public boolean matches(Item item, XPathContext context) {
+        return item instanceof NodeInfo && nodeTest.test((NodeInfo)item);
     }
 
     /**
      * Get a NodeTest that all the nodes matching this pattern must satisfy
      */
 
+    @Override
     public NodeTest getItemType() {
         return nodeTest;
     }
@@ -80,6 +78,7 @@ public class NodeTestPattern extends Pattern {
      * @return A fingerprint that the nodes must match, or -1 if it can match multiple fingerprints
      */
 
+    @Override
     public int getFingerprint() {
         return nodeTest.getFingerprint();
     }
@@ -88,12 +87,18 @@ public class NodeTestPattern extends Pattern {
      * Display the pattern for diagnostics
      */
 
-    public String toString() {
+    @Override
+    public String reconstruct() {
         return nodeTest.toString();
     }
 
+    @Override
     public String toShortString() {
-        return nodeTest.toShortString();
+        if (getOriginalText() != null) {
+            return getOriginalText();
+        } else {
+            return nodeTest.toShortString();
+        }
     }
 
     /**
@@ -111,6 +116,7 @@ public class NodeTestPattern extends Pattern {
      * Hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         return 0x7aeffea8 ^ nodeTest.hashCode();
     }
@@ -144,23 +150,10 @@ public class NodeTestPattern extends Pattern {
         }
     }
 
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.nodeTest");
-        presenter.emitAttribute("test", nodeTest.toString());
-        ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) presenter.getOptions();
-        if ("JS".equals(options.target)) {
-            int targetVersion = options.targetVersion;
-            try {
-                presenter.emitAttribute("jsTest", nodeTest.generateJavaScriptItemTypeTest(AnyItemType.getInstance(), targetVersion));
-            } catch (XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw e;
-            }
-        }
-        if (options.addStaticType) {
-            SequenceType type = SequenceType.makeSequenceType(nodeTest, StaticProperty.ALLOWS_ONE);
-            presenter.emitAttribute("sType", type.toExportString2());
-        }
+        presenter.emitAttribute("test", AlphaCode.fromItemType(nodeTest));
         presenter.endElement();
     }
 
@@ -172,10 +165,12 @@ public class NodeTestPattern extends Pattern {
      */
 
     /*@NotNull*/
+    @Override
     public Pattern copy(RebindingMap rebindings) {
         NodeTestPattern n = new NodeTestPattern(nodeTest.copy());
         n.setPriority(getDefaultPriority());
         ExpressionTool.copyLocationInfo(this, n);
+        n.setOriginalText(getOriginalText());
         return n;
     }
 

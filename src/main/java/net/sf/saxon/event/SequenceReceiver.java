@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,15 +8,13 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ExternalObject;
@@ -46,10 +44,12 @@ public abstract class SequenceReceiver implements Receiver {
     }
 
     /*@NotNull*/
+    @Override
     public final PipelineConfiguration getPipelineConfiguration() {
         return pipelineConfiguration;
     }
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipelineConfiguration) {
         this.pipelineConfiguration = pipelineConfiguration;
     }
@@ -70,6 +70,7 @@ public abstract class SequenceReceiver implements Receiver {
      * @param systemId the URI used to identify the tree being passed across this interface
      */
 
+    @Override
     public void setSystemId(/*@Nullable*/ String systemId) {
         this.systemId = systemId;
     }
@@ -81,6 +82,7 @@ public abstract class SequenceReceiver implements Receiver {
      */
 
     /*@Nullable*/
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -93,6 +95,7 @@ public abstract class SequenceReceiver implements Receiver {
      * @param publicID The public identifier of the unparsed entity
      */
 
+    @Override
     public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
     }
 
@@ -100,21 +103,20 @@ public abstract class SequenceReceiver implements Receiver {
      * Start the output process
      */
 
+    @Override
     public void open() throws XPathException {
         previousAtomic = false;
     }
 
     /**
      * Append an arbitrary item (node, atomic value, or function) to the output
-     *
      * @param item           the item to be appended
      * @param locationId     the location of the calling instruction, for diagnostics
      * @param properties if the item is an element node, this indicates whether its namespaces
-     *                       need to be copied. Values are {@link ReceiverOptions#ALL_NAMESPACES},
-     *                       {@link ReceiverOptions#LOCAL_NAMESPACES}; the default (0) means
-     *                       no namespaces
+*                       need to be copied. Values are {@link ReceiverOption#ALL_NAMESPACES}; the default (0) means
      */
 
+    @Override
     public abstract void append(Item item, Location locationId, int properties) throws XPathException;
 
     /**
@@ -123,11 +125,12 @@ public abstract class SequenceReceiver implements Receiver {
      * node, it is copied with all namespaces.
      *
      * @param item the item to be appended
-     * @throws net.sf.saxon.trans.XPathException if the operation fails
+     * @throws XPathException if the operation fails
      */
 
+    @Override
     public void append(Item item) throws XPathException {
-        append(item, ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.ALL_NAMESPACES);
+        append(item, Loc.NONE, ReceiverOption.ALL_NAMESPACES);
     }
 
     /**
@@ -141,11 +144,17 @@ public abstract class SequenceReceiver implements Receiver {
     }
 
     /**
-     * Helper method for subclasses to invoke if required: flatten an array
+     * Helper method for subclasses to invoke if required: flatten an array. The effect
+     * is that each item in each member of the array is appended to this {@code SequenceReceiver}
+     * by calling its {@link #append(Item) method}
+     * @param array the array to be flattened
+     * @param locationId the location of the instruction triggering this operation
+     * @param copyNamespaces options for copying namespace nodes
+     * @throws XPathException if things go wrong
      */
 
     protected void flatten(ArrayItem array, Location locationId, int copyNamespaces) throws XPathException {
-        for (Sequence<?> member : array.members()) {
+        for (Sequence member : array.members()) {
             member.iterate().forEachOrFail(it -> append(it, locationId, copyNamespaces));
         }
     }
@@ -154,15 +163,20 @@ public abstract class SequenceReceiver implements Receiver {
      * Helper method for subclasses to invoke if required: decompose an item into a sequence
      * of node events. Note that when this is used, methods such as characters(), comment(),
      * startElement(), and processingInstruction() are responsible for setting previousAtomic to false.
+     * @param item the item to be decomposed (that is, to be delivered to this {@code SequenceReceiver}
+     *             as a sequence of separate events
+     * @param locationId the location of the originating instruction
+     * @param copyNamespaces options for copying namespace nodes
+     * @throws XPathException if things go wrong
      */
 
     protected void decompose(Item item, Location locationId, int copyNamespaces) throws XPathException {
         if (item != null) {
             if (item instanceof AtomicValue || item instanceof ExternalObject) {
                 if (previousAtomic) {
-                    characters(" ", locationId, 0);
+                    characters(" ", locationId, ReceiverOption.NONE);
                 }
-                characters(item.getStringValueCS(), locationId, 0);
+                characters(item.getStringValueCS(), locationId, ReceiverOption.NONE);
                 previousAtomic = true;
             } else if (item instanceof ArrayItem) {
                 flatten((ArrayItem)item, locationId, copyNamespaces);
@@ -176,28 +190,25 @@ public abstract class SequenceReceiver implements Receiver {
                 }
             } else {
                 NodeInfo node = (NodeInfo)item;
+                int kind = node.getNodeKind();
                 if (node instanceof Orphan && ((Orphan) node).isDisableOutputEscaping()) {
                     // see test case doe-0801, -2 -3 - needed for output buffered within try/catch, xsl:fork etc
-                    characters(item.getStringValueCS(), locationId, ReceiverOptions.DISABLE_ESCAPING);
+                    characters(item.getStringValueCS(), locationId, ReceiverOption.DISABLE_ESCAPING);
                     previousAtomic = false;
-                } else if (node.getNodeKind() == Type.DOCUMENT) {
-                    startDocument(0); // needed to ensure that illegal namespaces or attributes in the content are caught
-                    node.iterateAxis(AxisInfo.CHILD).forEachOrFail(
-                            child -> append(child, locationId, copyNamespaces)
-                    );
+                } else if (kind == Type.DOCUMENT) {
+                    startDocument(ReceiverOption.NONE); // needed to ensure that illegal namespaces or attributes in the content are caught
+                    for (NodeInfo child : node.children()) {
+                        append(child, locationId, copyNamespaces);
+                    }
                     previousAtomic = false;
                     endDocument();
+                } else if (kind == Type.ATTRIBUTE || kind == Type.NAMESPACE) {
+                    String thing = kind == Type.ATTRIBUTE ? "an attribute" : "a namespace";
+                    throw new XPathException("Sequence normalization: Cannot process " + thing + " node", "SENR0001", locationId);
+
                 } else {
-                    if (node.getNodeKind() == Type.ATTRIBUTE && ((SimpleType) node.getSchemaType()).isNamespaceSensitive()) {
-                        XPathException err = new XPathException("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): " +
-                                                                        Err.wrap(node.getDisplayName(), Err.ATTRIBUTE));
-                        err.setErrorCode(getPipelineConfiguration().getHostLanguage() == Configuration.XSLT ? "XTTE0950" : "XQTY0086");
-                        throw err;
-                    }
                     int copyOptions = CopyOptions.TYPE_ANNOTATIONS;
-                    if (copyNamespaces == ReceiverOptions.LOCAL_NAMESPACES) {
-                        copyOptions |= CopyOptions.LOCAL_NAMESPACES;
-                    } else if (copyNamespaces == ReceiverOptions.ALL_NAMESPACES) {
+                    if (ReceiverOption.contains(copyNamespaces, ReceiverOption.ALL_NAMESPACES)) {
                         copyOptions |= CopyOptions.ALL_NAMESPACES;
                     }
                     ((NodeInfo) item).copy(this, copyOptions, locationId);
@@ -208,23 +219,22 @@ public abstract class SequenceReceiver implements Receiver {
     }
 
     protected String getErrorCodeForDecomposingFunctionItems() {
-        boolean isXSLT = getPipelineConfiguration().getHostLanguage() == Configuration.XSLT;
-        return isXSLT ? "XTDE0450" : "XQTY0105";
-        // Use SENR0001 when doing sequence normalization as per the Serialization spec.
+        return getPipelineConfiguration().isXSLT() ? "XTDE0450" : "XQTY0105";
     }
 
     /**
-     * Ask whether this Receiver can handle arbitrary items in its {@link #append} and
-     * {@link #append(Item, Location, int)} methods. If it cannot, then calling
+     * Ask whether this Receiver can handle arbitrary items in its {@link Outputter#append} and
+     * {@link Outputter#append(Item, Location, int)} methods. If it cannot, then calling
      * these methods will raise an exception (typically but not necessarily an
      * {@code UnsupportedOperationException}). This implementation returns true.
      *
      * @return true if the Receiver is able to handle items supplied to
-     *      its {@link #append} and {@link #append(Item, Location, int)} methods. A
+     *      its {@link Outputter#append} and {@link Outputter#append(Item, Location, int)} methods. A
      *      receiver that returns true may still reject some kinds of item, for example
      *      it may reject function items.
      */
 
+    @Override
     public boolean handlesAppend() {
         return true;
     }

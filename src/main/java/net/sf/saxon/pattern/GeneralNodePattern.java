@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -20,10 +20,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Type;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 
 /**
  * A GeneralNodePattern represents a pattern which, because of the presence of positional
@@ -72,6 +69,7 @@ public final class GeneralNodePattern extends Pattern {
      * node without changing the position in the streamed input file
      */
 
+    @Override
     public boolean isMotionless() {
         return false;
     }
@@ -84,6 +82,7 @@ public final class GeneralNodePattern extends Pattern {
      * @return the optimised Pattern
      */
 
+    @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         ContextItemStaticInfo cit = visitor.getConfiguration().getDefaultContextItemStaticInfo();
         equivalentExpr = equivalentExpr.typeCheck(visitor, cit);
@@ -130,6 +129,7 @@ public final class GeneralNodePattern extends Pattern {
      * @return the dependencies, as a bit-significant mask
      */
 
+    @Override
     public int getDependencies() {
         return equivalentExpr.getDependencies() &
                 (StaticProperty.DEPENDS_ON_LOCAL_VARIABLES | StaticProperty.DEPENDS_ON_USER_FUNCTIONS);
@@ -156,6 +156,7 @@ public final class GeneralNodePattern extends Pattern {
      * @param nextFree    the next slot that is free to be allocated @return the next slot that is free to be allocated
      */
 
+    @Override
     public int allocateSlots(SlotManager slotManager, int nextFree) {
         return ExpressionTool.allocateSlots(equivalentExpr, nextFree, slotManager);
     }
@@ -167,7 +168,8 @@ public final class GeneralNodePattern extends Pattern {
      * @return true if the pattern matches, else false
      */
 
-    public boolean matches(Item<?> item, XPathContext context) throws XPathException {
+    @Override
+    public boolean matches(Item item, XPathContext context) throws XPathException {
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         if (!itemType.matches(item, th)) {
             return false;
@@ -195,8 +197,9 @@ public final class GeneralNodePattern extends Pattern {
      * @return true if the node matches the Pattern, false otherwise
      */
 
+    @Override
     public boolean matchesBeneathAnchor(NodeInfo node, NodeInfo anchor, XPathContext context) throws XPathException {
-        if (!itemType.matchesNode(node)) {
+        if (!itemType.test(node)) {
             return false;
         }
 
@@ -219,12 +222,12 @@ public final class GeneralNodePattern extends Pattern {
 
         // System.err.println("Testing positional pattern against node " + node.generateId());
         XPathContext c2 = context.newMinorContext();
-        ManualIterator<? extends NodeInfo> iter = new ManualIterator<>(anchor);
+        ManualIterator iter = new ManualIterator(anchor);
         c2.setCurrentIterator(iter);
         try {
-            SequenceIterator<? extends NodeInfo> nsv = (SequenceIterator<? extends NodeInfo>)equivalentExpr.iterate(c2);
+            SequenceIterator nsv = equivalentExpr.iterate(c2);
             while (true) {
-                NodeInfo n = nsv.next();
+                NodeInfo n = (NodeInfo)nsv.next();
                 if (n == null) {
                     return false;
                 }
@@ -232,7 +235,7 @@ public final class GeneralNodePattern extends Pattern {
                     return true;
                 }
             }
-        } catch (XPathException.Circularity |XPathException.StackOverflow e) {
+        } catch (XPathException.Circularity | XPathException.StackOverflow e) {
             throw e;
         } catch (XPathException e) {
             handleDynamicError(e, c2);
@@ -257,6 +260,7 @@ public final class GeneralNodePattern extends Pattern {
      * @return the fingerprint of nodes matched by this pattern.
      */
 
+    @Override
     public int getFingerprint() {
         return itemType.getFingerprint();
     }
@@ -265,6 +269,7 @@ public final class GeneralNodePattern extends Pattern {
      * Get a NodeTest that all the nodes matching this pattern must satisfy
      */
 
+    @Override
     public ItemType getItemType() {
         return itemType;
     }
@@ -291,6 +296,7 @@ public final class GeneralNodePattern extends Pattern {
      * hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         return 83641 ^ equivalentExpr.hashCode();
     }
@@ -303,15 +309,18 @@ public final class GeneralNodePattern extends Pattern {
      */
 
     /*@NotNull*/
+    @Override
     public Pattern copy(RebindingMap rebindings) {
         GeneralNodePattern n = new GeneralNodePattern(equivalentExpr.copy(rebindings), itemType);
         ExpressionTool.copyLocationInfo(this, n);
+        n.setOriginalText(getOriginalText());
         return n;
     }
 
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.genNode");
-        presenter.emitAttribute("type", itemType.toString());
+        presenter.emitAttribute("test", AlphaCode.fromItemType(itemType));
         equivalentExpr.export(presenter);
         presenter.endElement();
     }

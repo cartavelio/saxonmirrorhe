@@ -1,10 +1,10 @@
 package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.Validation;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.*;
@@ -13,7 +13,10 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 
-public class TransformWithValidation extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class TransformWithValidation {
 
     private static int errorCount = 0;
 
@@ -24,7 +27,8 @@ public class TransformWithValidation extends TestCase {
         }
 
         public void fatalError(TransformerException ex) throws TransformerException {
-            if (!ex.getMessage().contains("One validation error was reported")) {
+            errorCount++;
+            if (!ex.getMessage().contains("contravenes the pattern facet")) {
                 System.out.println("Fatal error: " + ex.getMessage());
                 fail("Unexpected fatal error");
             }
@@ -42,6 +46,7 @@ public class TransformWithValidation extends TestCase {
     private static String xmlPath = dir+"samples/validation/bookstore/BookStore.xml";
     private static String outPath = dir+"samples/validation/bookstore/out.xml";
 
+    @Test
     public void testWithInputValidation() {
         try {
             // Create transformer
@@ -57,7 +62,7 @@ public class TransformWithValidation extends TestCase {
             Transformer transformer = transformerFactory.newTransformer(source);
             transformer.setErrorListener(errorListener);
 
-            // Create XML SAX source
+            // Create source
             Source xmlSource = new StreamSource(new File(xmlPath));
 
             // Output stream result
@@ -75,7 +80,7 @@ public class TransformWithValidation extends TestCase {
                 fail("Unexpected success");
             } catch (Exception e) {
                 System.out.println("Failed as expected: " + e);
-                assertEquals("errorCount", 1, errorCount);
+                assertEquals(2, errorCount, "errorCount");
             }
         } catch (TransformerConfigurationException e) {
             fail();

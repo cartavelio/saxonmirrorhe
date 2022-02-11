@@ -1,13 +1,17 @@
 package sorttests;
 
-import junit.framework.TestCase;
 
 import java.text.ParseException;
 import java.text.RuleBasedCollator;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
-public class CzechCollation extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
+public class CzechCollation {
+
+    @Test
     public void testStartsWith() {
         try {
             Processor processor = new Processor(false);
@@ -18,10 +22,10 @@ public class CzechCollation extends TestCase {
                     "starts-with($p, '\u0161', 'http://saxon.sf.net/collation?class=sorttests.CzechCollation$CzechCollationRules;decomposition=full')").load();
             selector.setVariable(p, new XdmAtomicValue("smith"));
             XdmAtomicValue result = (XdmAtomicValue)selector.evaluateSingle();
-            assertTrue("result1", result.getBooleanValue());
+            assertTrue(result.getBooleanValue(), "result1");
             selector.setVariable(p, new XdmAtomicValue("\u0161mith"));
             result = (XdmAtomicValue)selector.evaluateSingle();
-            assertTrue("result2", result.getBooleanValue());
+            assertTrue(result.getBooleanValue(), "result2");
         } catch (SaxonApiException err) {
             err.printStackTrace();
             fail();

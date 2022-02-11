@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.lib;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.SequenceNormalizer;
 import net.sf.saxon.expr.XPathContext;
@@ -23,7 +24,7 @@ import net.sf.saxon.trans.XPathException;
  * Saxon calls this method supplying the dynamic evaluation context, together with the value of the href
  * attribute and the output base URI for the transformation.</p>
  * <p>The result of the callback is an application-supplied instance of the
- * {@link Receiver} interface. Saxon will send events to this {@code Receiver},
+ * {@link Outputter} interface. Saxon will send events to this {@code Receiver},
  * representing the <b>raw</b> results of the {@code xsl:result-document} instruction.
  * If the application wants results in the form of a document node generated using
  * sequence normalization, then it must include a {@link SequenceNormalizer} in the
@@ -35,7 +36,7 @@ import net.sf.saxon.trans.XPathException;
  * may be called in a different thread.</p>
  * <p>If the application wishes to take action when the {@code xsl:result-document} instruction
  * finishes, that is, when the results are available for use, then it should intercept the
- * {@link Receiver#close()} call on the returned {@code Receiver}. This can be done
+ * {@link Outputter#close()} call on the returned {@code Receiver}. This can be done
  * (for example) by adding a {@link net.sf.saxon.event.CloseNotifier} to the output pipeline,
  * or by use of the {@link SequenceNormalizer#onClose} method.</p>
  * <p>This interface supersedes the {@link OutputURIResolver} interface provided in earlier

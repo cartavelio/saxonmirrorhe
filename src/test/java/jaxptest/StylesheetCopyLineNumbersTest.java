@@ -1,7 +1,7 @@
 package jaxptest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.AxisInfo;
@@ -22,11 +22,14 @@ import java.io.FileInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Test that line numbers are reported correctly for dynamic errors, both for interpreted stylesheets
  * and when bytecode is generated.
  */
-public class StylesheetCopyLineNumbersTest extends TestCase {
+public class StylesheetCopyLineNumbersTest {
 
     public static void testStylesheetCopyCompiled() throws Exception {
         testStylesheetCopyTree(true);
@@ -46,7 +49,7 @@ public class StylesheetCopyLineNumbersTest extends TestCase {
         ErrorListener el = new StandardErrorListener() {
             public void fatalError(TransformerException exception) {
                 //System.err.println("error here: " + exception.getLocator().getLineNumber());
-                assertEquals("line number is ", 14, exception.getLocator().getLineNumber());
+                assertEquals(14, exception.getLocator().getLineNumber(), "line number is ");
                 //super.error(exception);
             }
         };
@@ -59,8 +62,8 @@ public class StylesheetCopyLineNumbersTest extends TestCase {
 
         // Show that tree has line numbers.
         TinyNodeImpl rootElement = (TinyNodeImpl)((TinyDocumentImpl)cachedTree).iterateAxis(AxisInfo.CHILD).next();
-        assertEquals("name ok?", rootElement.getDisplayName(), "xsl:stylesheet");
-        assertEquals("line ok?", rootElement.getLineNumber(), 5);
+        assertEquals("xsl:stylesheet",  rootElement.getDisplayName(), "name ok?");
+        assertEquals(5, rootElement.getLineNumber(), "line ok?");
         //System.err.println("Line num: " + rootElement.getLineNumber());
 
 
@@ -92,7 +95,7 @@ public class StylesheetCopyLineNumbersTest extends TestCase {
         ErrorListener el = new StandardErrorListener() {
             public void fatalError(TransformerException exception) {
                 //System.err.println("error here: " + exception.getLocator().getLineNumber());
-                assertEquals("line number is ", 14, exception.getLocator().getLineNumber());
+                assertEquals(14, exception.getLocator().getLineNumber(), "line number is ");
                 //super.error(exception);
             }
         };
@@ -125,7 +128,7 @@ public class StylesheetCopyLineNumbersTest extends TestCase {
             String packageA = "" +
                     "<xsl:package xmlns:xsl='http://www.w3.org/1999/XSL/Transform' name='http://A/' version='3.0' package-version='1.0'>\n" +
                     "  <xsl:use-package name='http://B/' package-version='1.0'/>\n" +
-                    "  <xsl:template name='main'>\n" +
+                    "  <xsl:template name='main' visibility='public'>\n" +
                     "    <out><in/><xsl:call-template name='t'/></out>\n" +
                     "  </xsl:template>\n" +
                     "</xsl:package>";
@@ -140,19 +143,17 @@ public class StylesheetCopyLineNumbersTest extends TestCase {
             XsltExecutable e = c.compile(new StreamSource(new StringReader(packageA), "http://A/"));
             Xslt30Transformer t = e.load30();
 
-            ErrorListener el = new StandardErrorListener() {
-                public void fatalError(TransformerException exception) {
-                    System.err.println("error here, as expected, on line: " + exception.getLocator().getLineNumber());
-                    assertEquals("line number is ", 3, exception.getLocator().getLineNumber());
-                    assertEquals("module is ", "http://B/", exception.getLocator().getSystemId());
-                }
+            ErrorReporter el = err -> {
+                System.err.println("error here, as expected, on line: " + err.getLineNumber());
+                assertEquals(3, err.getLineNumber(), "line number is ");
+                assertEquals("module is ", "http://B/", err.getModuleUri());
             };
-            t.setErrorListener(el);
+            t.setErrorReporter(el);
             XdmValue result = t.callTemplate(new QName("main"));
             fail("Unexpected success");
         } catch (SaxonApiException err) {
             assertEquals("error code", "XTDE0410", err.getErrorCode().getLocalName());
-            assertEquals("line number", 3, err.getLineNumber());
+            assertEquals(3, err.getLineNumber(), "line number");
             assertEquals("uri", "http://B/", err.getSystemId());
         }
     }

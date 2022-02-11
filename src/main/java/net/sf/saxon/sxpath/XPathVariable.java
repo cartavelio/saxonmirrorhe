@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -33,7 +33,7 @@ public final class XPathVariable implements LocalBinding {
 
     private StructuredQName name;
     private SequenceType requiredType = SequenceType.ANY_SEQUENCE;
-    private Sequence<?> defaultValue;
+    private Sequence defaultValue;
     private int slotNumber;
 
     /**
@@ -64,6 +64,7 @@ public final class XPathVariable implements LocalBinding {
      * @return false (always)
      */
 
+    @Override
     public boolean isGlobal() {
         return false;
     }
@@ -76,6 +77,7 @@ public final class XPathVariable implements LocalBinding {
      * @return false (always)
      */
 
+    @Override
     public final boolean isAssignable() {
         return false;
     }
@@ -98,6 +100,7 @@ public final class XPathVariable implements LocalBinding {
      * @return the required type of the variable
      */
 
+    @Override
     public SequenceType getRequiredType() {
         return requiredType;
     }
@@ -107,6 +110,7 @@ public final class XPathVariable implements LocalBinding {
      * Return null if unknown or not applicable
      */
     /*@Nullable*/
+    @Override
     public IntegerValue[] getIntegerBoundsForVariable() {
         return null;
     }
@@ -126,6 +130,7 @@ public final class XPathVariable implements LocalBinding {
      * In other cases, return -1.
      */
 
+    @Override
     public int getLocalSlotNumber() {
         return slotNumber;
     }
@@ -136,6 +141,7 @@ public final class XPathVariable implements LocalBinding {
      * @return the name of the variable, as a QNameValue
      */
 
+    @Override
     public StructuredQName getVariableQName() {
         return name;
     }
@@ -145,6 +151,7 @@ public final class XPathVariable implements LocalBinding {
      * This method should not be called by users of the API.
      */
 
+    @Override
     public void addReference(VariableReference ref, boolean isLoopingReference) {
         // no action
     }
@@ -156,7 +163,7 @@ public final class XPathVariable implements LocalBinding {
      * @param defaultValue the default value for the variable
      */
 
-    public void setDefaultValue(Sequence<?> defaultValue) {
+    public void setDefaultValue(Sequence defaultValue) {
         this.defaultValue = defaultValue;
     }
 
@@ -166,7 +173,7 @@ public final class XPathVariable implements LocalBinding {
      * @return the default value if one has been registered, or null otherwise
      */
 
-    public Sequence<?> getDefaultValue() {
+    public Sequence getDefaultValue() {
         return defaultValue;
     }
 
@@ -179,13 +186,15 @@ public final class XPathVariable implements LocalBinding {
      * @return The value of the variable
      */
 
-    public Sequence<?> evaluateVariable(XPathContext context) {
+    @Override
+    public Sequence evaluateVariable(XPathContext context) {
         return context.evaluateLocalVariable(slotNumber);
     }
 
     /**
      * Say that the bound value has the potential to be indexed
      */
+    @Override
     public void setIndexedVariable() { }
 
     /**
@@ -193,6 +202,7 @@ public final class XPathVariable implements LocalBinding {
      *
      * @return true if the variable value can be indexed
      */
+    @Override
     public boolean isIndexedVariable() {
         return false;
     }

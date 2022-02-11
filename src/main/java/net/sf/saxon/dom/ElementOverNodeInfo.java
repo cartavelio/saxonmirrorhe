@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,6 +7,7 @@
 
 package net.sf.saxon.dom;
 
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.NodeInfo;
@@ -29,10 +30,13 @@ import org.w3c.dom.*;
 
 public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
 
+    private DOMAttributeMap attributeMap = null;
+
     /**
      * The name of the element (DOM interface).
      */
 
+    @Override
     public String getTagName() {
         return node.getDisplayName();
     }
@@ -45,6 +49,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      *             matches all tags.
      * @return A list of matching <code>Element</code> nodes.
      */
+    @Override
     public NodeList getElementsByTagName(String name) {
         return DocumentOverNodeInfo.getElementsByTagName(node, name);
     }
@@ -65,20 +70,39 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      *                                  through the Document does not support XML Namespaces (such as [<a href='http://www.w3.org/TR/1999/REC-html401-19991224/'>HTML 4.01</a>]).
      * @since DOM Level 2
      */
+    @Override
     public NodeList getElementsByTagNameNS(String namespaceURI, String localName) throws DOMException {
         return DocumentOverNodeInfo.getElementsByTagNameNS(node, namespaceURI, localName);
     }
 
     /**
+     * Return a <code>NamedNodeMap</code> containing the attributes of this node (if
+     * it is an <code>Element</code>) or <code>null</code> otherwise. Note that
+     * namespace declarations are treated as attributes.
+     */
+
+    @Override
+    public NamedNodeMap getAttributes() {
+        if (attributeMap == null) {
+            attributeMap = new DOMAttributeMap(node);
+        }
+        return attributeMap;
+    }
+
+    /**
      * Retrieves an attribute value by name.
-     * This implementation does not expose namespace nodes as attributes.
      *
      * @param name The QName of the attribute to retrieve.
      * @return The <code>Attr</code> value as a string, or the empty string if
      *         that attribute does not have a specified or default value.
      */
 
+    @Override
     public String getAttribute(String name) {
+        if (name.startsWith("xmlns")) {
+            Node node = getAttributes().getNamedItem(name);
+            return node == null ? "" : node.getNodeValue();
+        }
         AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
         while (true) {
             NodeInfo att = atts.next();
@@ -97,7 +121,6 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
 
     /**
      * Retrieves an attribute node by name.
-     * This implementation does not expose namespace nodes as attributes.
      * <br> To retrieve an attribute node by qualified name and namespace URI,
      * use the <code>getAttributeNodeNS</code> method.
      *
@@ -108,6 +131,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      *         attribute.
      */
 
+    @Override
     public Attr getAttributeNode(String name) {
         AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
         while (true) {
@@ -127,6 +151,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @throws org.w3c.dom.DOMException NO_MODIFICATION_ALLOWED_ERR: Raised if this node is readonly.
      */
 
+    @Override
     public Attr setAttributeNode(Attr newAttr) throws DOMException {
         disallowUpdate();
         return null;
@@ -138,6 +163,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @throws org.w3c.dom.DOMException NO_MODIFICATION_ALLOWED_ERR: Raised if this node is readonly.
      */
 
+    @Override
     public void removeAttribute(String oldAttr) throws DOMException {
         disallowUpdate();
     }
@@ -148,6 +174,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @throws org.w3c.dom.DOMException NO_MODIFICATION_ALLOWED_ERR: Raised if this node is readonly.
      */
 
+    @Override
     public Attr removeAttributeNode(Attr oldAttr) throws DOMException {
         disallowUpdate();
         return null;
@@ -165,7 +192,12 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @since DOM Level 2
      */
 
+    @Override
     public String getAttributeNS(String namespaceURI, String localName) {
+        if (NamespaceConstant.XMLNS.equals(namespaceURI)) {
+            Node node = getAttributes().getNamedItemNS(namespaceURI, localName);
+            return node == null ? "" : node.getNodeValue();
+        }
         String uri = namespaceURI == null ? "" : namespaceURI;
         String val = node.getAttributeValue(uri, localName);
         if (val == null) {
@@ -184,6 +216,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      *                                  <code>Document.xmlVersion</code> attribute.
      *                                  <br>NO_MODIFICATION_ALLOWED_ERR: Raised if this node is readonly.
      */
+    @Override
     public void setAttribute(String name, String value) throws DOMException {
         disallowUpdate();
     }
@@ -199,6 +232,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @throws org.w3c.dom.DOMException NO_MODIFICATION_ALLOWED_ERR: Raised if this node is readonly.
      */
 
+    @Override
     public void setAttributeNS(String namespaceURI,
                                String qualifiedName,
                                String value)
@@ -213,6 +247,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @since DOM Level 2
      */
 
+    @Override
     public void removeAttributeNS(String namespaceURI,
                                   String localName)
             throws DOMException {
@@ -231,6 +266,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @since DOM Level 2
      */
 
+    @Override
     public Attr getAttributeNodeNS(String namespaceURI, String localName) {
         NamePool pool = node.getConfiguration().getNamePool();
         NameTest test = new NameTest(Type.ATTRIBUTE, namespaceURI, localName, pool);
@@ -250,6 +286,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @since DOM Level 2
      */
 
+    @Override
     public Attr setAttributeNodeNS(Attr newAttr)
             throws DOMException {
         disallowUpdate();
@@ -260,7 +297,6 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * Returns <code>true</code> when an attribute with a given name is
      * specified on this element or has a default value, <code>false</code>
      * otherwise.
-     * This implementation does not expose namespace nodes as attributes.
      *
      * @param name The name of the attribute to look for.
      * @return <code>true</code> if an attribute with the given name is
@@ -269,7 +305,12 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @since DOM Level 2
      */
 
+    @Override
     public boolean hasAttribute(String name) {
+        if (name.startsWith("xmlns")) {
+            Node node = getAttributes().getNamedItem(name);
+            return node != null;
+        }
         AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
         while (true) {
             NodeInfo att = atts.next();
@@ -286,7 +327,6 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * Returns <code>true</code> when an attribute with a given local name
      * and namespace URI is specified on this element or has a default value,
      * <code>false</code> otherwise.
-     * This implementation does not expose namespace nodes as attributes.
      *
      * @param namespaceURI The  namespace URI of the attribute to look for.
      * @param localName    The  local name of the attribute to look for.
@@ -296,7 +336,12 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @since DOM Level 2
      */
 
+    @Override
     public boolean hasAttributeNS(String namespaceURI, String localName) {
+        if (NamespaceConstant.XMLNS.equals(namespaceURI)) {
+            Node node = getAttributes().getNamedItemNS(namespaceURI, localName);
+            return node != null;
+        }
         String uri = namespaceURI == null ? "" : namespaceURI;
         return node.getAttributeValue(uri, localName) != null;
     }
@@ -307,6 +352,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @throws UnsupportedOperationException always
      */
 
+    @Override
     public void setIdAttribute(String name, boolean isId) throws UnsupportedOperationException {
         disallowUpdate();
     }
@@ -317,6 +363,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @throws UnsupportedOperationException always
      */
 
+    @Override
     public void setIdAttributeNS(String namespaceURI, String localName, boolean isId)
             throws UnsupportedOperationException {
         disallowUpdate();
@@ -327,6 +374,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      * @throws UnsupportedOperationException always
      */
 
+    @Override
     public void setIdAttributeNode(Attr idAttr, boolean isId) throws UnsupportedOperationException {
         disallowUpdate();
     }
@@ -339,6 +387,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
      */
 
     /*@Nullable*/
+    @Override
     public TypeInfo getSchemaTypeInfo() {
         SchemaType type = node.getSchemaType();
         if (type == null || Untyped.getInstance().equals(type) || BuiltInAtomicType.UNTYPED_ATOMIC.equals(type)) {

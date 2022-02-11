@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -35,6 +35,7 @@ public class Substring extends SystemFunction implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheckCaller(FunctionCall caller, ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         Expression e2 = super.typeCheckCaller(caller, visitor, contextInfo);
         if (e2 != caller) {
@@ -187,20 +188,22 @@ public class Substring extends SystemFunction implements Callable {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public ZeroOrOne<StringValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue arg0 = (StringValue) arguments[0].head();
         if (arg0 == null) {
             return One.string("");
         }
         NumericValue arg1 = (NumericValue) arguments[1].head();
         if (arguments.length == 2) {
-            return new ZeroOrOne<>(StringValue.makeStringValue(substring(arg0, arg1)));
+            return new ZeroOrOne(StringValue.makeStringValue(substring(arg0, arg1)));
         } else {
             NumericValue arg2 = (NumericValue) arguments[2].head();
-            return new ZeroOrOne<>(StringValue.makeStringValue(substring(arg0, arg1, arg2)));
+            return new ZeroOrOne(StringValue.makeStringValue(substring(arg0, arg1, arg2)));
         }
     }
 
+    @Override
     public String getCompilerName() {
         return "SubstringCompiler";
     }

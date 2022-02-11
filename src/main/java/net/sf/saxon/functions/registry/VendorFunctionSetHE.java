@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -21,7 +21,6 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapCreate;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.MapUntypedContains;
-import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -40,7 +39,7 @@ import javax.xml.transform.SourceLocator;
  */
 public class VendorFunctionSetHE extends BuiltInFunctionSet {
 
-    private static VendorFunctionSetHE THE_INSTANCE = new VendorFunctionSetHE();
+    private final static VendorFunctionSetHE THE_INSTANCE = new VendorFunctionSetHE();
 
     public static VendorFunctionSetHE getInstance() {
         return THE_INSTANCE;
@@ -53,38 +52,38 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
     private void init() {
 
         // Test whether supplied argument is equal to an integer
-        register("is-whole-number", 1, IsWholeNumberFn.class, BuiltInAtomicType.BOOLEAN, ONE, 0, 0)
+        register("is-whole-number", 1, IsWholeNumberFn.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY);
 
         // Evaluate the value of a try-catch variable such as $err:code
-        register("dynamic-error-info", 1, DynamicErrorInfoFn.class, AnyItemType.getInstance(), STAR, 0, FOCUS | LATE | SIDE)
+        register("dynamic-error-info", 1, DynamicErrorInfoFn.class, AnyItemType.getInstance(), STAR, FOCUS | LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
         // saxon:apply is the same as fn:apply, but does not require the HOF feature
-        register("apply", 2, ApplyFn.class, AnyItemType.getInstance(), STAR, 0, LATE)
+        register("apply", 2, ApplyFn.class, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyFunctionType.getInstance(), ONE, null)
                 .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
 
         // Create a map according to the semantics of the XPath map constructor and XSLT xsl:map instruction
-        register("create-map", 1, MapCreate.class, MapType.ANY_MAP_TYPE, ONE, 0, 0)
+        register("create-map", 1, MapCreate.class, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null);
 
         // Variant of the doc() function with an options parameter
-        register("doc", 2, Doc_2.class, NodeKindTest.DOCUMENT, ONE, 0, LATE)
+        register("doc", 2, Doc_2.class, NodeKindTest.DOCUMENT, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
                 .optionDetails(Doc_2.makeOptionsParameter());
 
         // Ask whether the supplied element node has any local namespace declarations
-        register("has-local-namespaces", 1, HasLocalNamespaces.class, BuiltInAtomicType.BOOLEAN, ONE, 0, 0)
+        register("has-local-namespaces", 1, HasLocalNamespaces.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, NodeKindTest.ELEMENT, ONE, null);
 
         // Ask whether the supplied element node has consistent in scope namespaces throughout its subtree
-        register("has-uniform-namespaces", 1, HasUniformNamespaces.class, BuiltInAtomicType.BOOLEAN, ONE, 0, 0)
+        register("has-uniform-namespaces", 1, HasUniformNamespaces.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, NodeKindTest.ELEMENT, ONE, null);
 
         // Function analogous to map:contains except in the way it handles untyped key values
-        register("map-untyped-contains", 2, MapUntypedContains.class, BuiltInAtomicType.BOOLEAN, ONE, 0, 0)
+        register("map-untyped-contains", 2, MapUntypedContains.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE, null);
 
@@ -124,7 +123,8 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
             return null;
         }
 
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             NumericValue val = (NumericValue) arguments[0].head();
             return BooleanValue.get(val != null && val.isWholeNumber());
         }
@@ -146,12 +146,13 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
 
         // TODO: this is experimental and not yet publicly documented
 
+        @Override
         public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-            NodeInfo val = (NodeInfo) arguments[0].head();
-            NodeInfo parent = val.getParent();
+            NodeInfo child = (NodeInfo) arguments[0].head();
+            NodeInfo parent = child.getParent();
             return BooleanValue.get(
                     parent == null || parent.getNodeKind() == Type.DOCUMENT ||
-                    val.getDeclaredNamespaces(NamespaceBinding.EMPTY_ARRAY).length > 0);
+                    child.getAllNamespaces() != parent.getAllNamespaces());
         }
 
     }
@@ -172,6 +173,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
 
         // TODO: this is experimental and not yet publicly documented
 
+        @Override
         public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
             NodeInfo val = (NodeInfo) arguments[0].head();
             if (val instanceof TinyElementImpl) {
@@ -202,7 +204,8 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
             return 0; // treat as creative to avoid loop-lifting: test case try-catch-err-code-variable-14
         }
 
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             String var = arguments[0].head().getStringValue();
             @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
             XPathException error = context.getCurrentException();
@@ -224,7 +227,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     }
                     return new StringValue(s);
                 case "value":
-                    Sequence<?> value = error.getErrorObject();
+                    Sequence value = error.getErrorObject();
                     if (value == null) {
                         return EmptySequence.getInstance();
                     } else {
@@ -250,7 +253,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     if (locator == null) {
                         return EmptySequence.getInstance();
                     } else if (locator instanceof XPathParser.NestedLocation) {
-                        column = ((XPathParser.NestedLocation)locator).getContainingLocation().getColumnNumber();
+                        column = ((XPathParser.NestedLocation) locator).getContainingLocation().getColumnNumber();
                     } else {
                         column = locator.getColumnNumber();
                     }
@@ -270,4 +273,4 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

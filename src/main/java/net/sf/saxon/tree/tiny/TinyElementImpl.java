@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,12 +9,14 @@ package net.sf.saxon.tree.tiny;
 
 import com.saxonica.ee.validate.SkipValidator;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.*;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.CopyInformee;
+import net.sf.saxon.event.CopyNamespaceSensitiveException;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.NamespaceIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -26,8 +28,6 @@ import net.sf.saxon.z.IntHashMap;
  * <p>This class is an implementation of NodeInfo. The object is a wrapper around
  * one entry in the arrays maintained by the TinyTree. Note that the same node
  * might be represented by different TinyElementImpl objects at different times.</p>
- *
- * @author Michael H. Kay
  */
 
 public class TinyElementImpl extends TinyParentNodeImpl {
@@ -50,6 +50,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      * @return Type.ELEMENT
      */
 
+    @Override
     public final int getNodeKind() {
         return Type.ELEMENT;
     }
@@ -59,7 +60,11 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      * xml:base has been used.
      */
 
+    @Override
     public String getBaseURI() {
+        if (tree.getUniformBaseUri() != null) {
+            return tree.getUniformBaseUri();
+        }
         synchronized (tree) {
             if (tree.knownBaseUris == null) {
                 tree.knownBaseUris = new IntHashMap<>();
@@ -98,6 +103,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      *         values.
      */
 
+    @Override
     public AtomicSequence atomize() throws XPathException {
         return tree.getTypedValueOfElement(this);
     }
@@ -116,52 +122,19 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      */
 
     /*@Nullable*/
+    @Override
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
-        return getDeclaredNamespaces(tree, nodeNr, buffer);
+        TinyNodeImpl parent = getParent();
+        if (parent != null && parent.getNodeKind() == Type.ELEMENT) {
+            return getAllNamespaces().getDifferences(parent.getAllNamespaces(), false);
+        } else {
+            return getAllNamespaces().getNamespaceBindings();
+        }
     }
 
-    /**
-     * Static method to get all namespace undeclarations and undeclarations defined on a given element,
-     * without instantiating the node object.
-     *
-     * @param tree   The tree containing the given element node
-     * @param nodeNr The node number of the given element node within the tinyTree
-     * @param buffer If this is non-null, and the result array fits in this buffer, then the result
-     *               may overwrite the contents of this array, to avoid the cost of allocating a new array on the heap.
-     * @return An array of objects representing the namespace declarations and undeclarations present on
-     *         this element. For a node other than an element, return null. Otherwise, the returned array is a
-     *         sequence of namespace binding objects (essentially prefix/uri pairs)
-     *         If the URI is null, then this is a namespace undeclaration rather than a declaration.
-     *         The XML namespace is never included in the list. If the supplied array is larger than required,
-     *         then the first unused entry will be set to null.
-     */
-
-    /*@Nullable*/
-    public static NamespaceBinding[] getDeclaredNamespaces(/*@NotNull*/ TinyTree tree, int nodeNr, /*@Nullable*/ NamespaceBinding[] buffer) {
-        int ns = tree.beta[nodeNr]; // by convention
-        if (ns > 0) {
-            int count = 0;
-            while (ns < tree.numberOfNamespaces &&
-                    tree.namespaceParent[ns] == nodeNr) {
-                count++;
-                ns++;
-            }
-            if (count == 0) {
-                return NamespaceBinding.EMPTY_ARRAY;
-            } else if (buffer != null && count <= buffer.length) {
-                System.arraycopy(tree.namespaceBinding, tree.beta[nodeNr], buffer, 0, count);
-                if (count < buffer.length) {
-                    buffer[count] = null;
-                }
-                return buffer;
-            } else {
-                NamespaceBinding[] array = new NamespaceBinding[count];
-                System.arraycopy(tree.namespaceBinding, tree.beta[nodeNr], array, 0, count);
-                return array;
-            }
-        } else {
-            return NamespaceBinding.EMPTY_ARRAY;
-        }
+    @Override
+    public NamespaceMap getAllNamespaces() {
+        return tree.namespaceMaps[tree.beta[nodeNr]];
     }
 
     /**
@@ -173,26 +146,27 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      */
 
     public boolean hasUniformNamespaces() {
-        int nr = nodeNr;
-        int ns = tree.beta[nr];
-        TinyElementImpl anc = this;
-        while (ns == -1) {
-            TinyNodeImpl parent = anc.getParent();
-            if (parent instanceof TinyDocumentImpl) {
-                return !tree.usesNamespaces;
-            } else {
-                nr = parent.nodeNr;
-                ns = tree.beta[nr];
-                anc = (TinyElementImpl)parent;
-            }
-        }
-        // Find the first namespace binding with a different parent
-        while (ns < tree.numberOfNamespaces && tree.namespaceParent[ns] == nr) {
-            ns++;
-        }
-        // Return true if none is found, or if the element owning this namespace binding
-        // is outside the subtree
-        return ns >= tree.numberOfNamespaces || !isAncestorOrSelf(tree.getNode(tree.namespaceParent[ns]));
+        return false; // TODO: temporarily
+//        int nr = nodeNr;
+//        int ns = tree.beta[nr];
+//        TinyElementImpl anc = this;
+//        while (ns == -1) {
+//            TinyNodeImpl parent = anc.getParent();
+//            if (parent instanceof TinyDocumentImpl) {
+//                return !tree.usesNamespaces;
+//            } else {
+//                nr = parent.nodeNr;
+//                ns = tree.beta[nr];
+//                anc = (TinyElementImpl)parent;
+//            }
+//        }
+//        // Find the first namespace binding with a different parent
+//        while (ns < tree.numberOfNamespaces && tree.namespaceParent[ns] == nr) {
+//            ns++;
+//        }
+//        // Return true if none is found, or if the element owning this namespace binding
+//        // is outside the subtree
+//        return ns >= tree.numberOfNamespaces || !isAncestorOrSelf(tree.getNode(tree.namespaceParent[ns]));
     }
 
 
@@ -262,36 +236,23 @@ public class TinyElementImpl extends TinyParentNodeImpl {
     /**
      * Copy this node to a given receiver
      *
+     * @param receiver the destination of the copy
      * @param copyOptions determines handling of namespaces, etc
      * @param location location information associated with the event
      */
 
+    @Override
     public void copy(/*@NotNull*/ Receiver receiver, int copyOptions, Location location) throws XPathException {
 
         boolean copyTypes = CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS);
 
-        boolean fastCopied = tryBulkCopy(copyOptions, receiver);
-        if (fastCopied) {
-            return;
-        }
-
-//        boolean grafted = tryGraft(copyOptions, receiver);
-//        if (grafted) {
-//            Instrumentation.count("GRAFT");
-//            Instrumentation.count("GRAFT NODES ", Count.count(iterateAxis(AxisInfo.DESCENDANT_OR_SELF, NodeKindTest.ELEMENT)));
-//            return;
-//        }
-//        Instrumentation.count("NON-GRAFT");
-
-
         short level = -1;
         boolean closePending = false;
         short startLevel = tree.depth[nodeNr];
-        boolean first = true;
+
         boolean disallowNamespaceSensitiveContent =
                 ((copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0) &&
-                        ((copyOptions & CopyOptions.SOME_NAMESPACES) == 0);
-        boolean foundElementInDefaultNamespace = false;
+                        ((copyOptions & CopyOptions.ALL_NAMESPACES) == 0);
         Configuration config = tree.getConfiguration();
         NamePool pool = config.getNamePool();
         int next = nodeNr;
@@ -331,8 +292,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                             try {
                                 checkNotNamespaceSensitiveElement(elementType, next);
                             } catch (CopyNamespaceSensitiveException e) {
-                                int lang = receiver.getPipelineConfiguration().getHostLanguage();
-                                e.setErrorCode(lang == Configuration.XSLT ? "XTTE0950" : "XQTY0086");
+                                e.setErrorCode(receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
                                 throw e;
                             }
                         }
@@ -346,66 +306,52 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     int nameCode = tree.nameCode[next];
                     int fp = nameCode & NamePool.FP_MASK;
                     String prefix = tree.getPrefix(next);
-                    int options = !first && (copyOptions & CopyOptions.SOME_NAMESPACES) != 0
-                            ? ReceiverOptions.NAMESPACE_OK
-                            : 0;
-
                     if (location.getLineNumber() < tree.getLineNumber(next)) {
                         String systemId = location.getSystemId() == null ? getSystemId() : location.getSystemId();
-                        location = new ExplicitLocation(systemId, tree.getLineNumber(next), getColumnNumber());
+                        location = new Loc(systemId, tree.getLineNumber(next), getColumnNumber());
                     }
-                    // bug 2209
-                    receiver.startElement(new CodedName(fp, prefix, pool),
-                            elementType, location, options);
+
+                    // decide on namespaces
+                    NamespaceMap namespaces = NamespaceMap.emptyMap();
+                    boolean addAttributeNamespaces = false;
+                    if (tree.usesNamespaces) {
+                        if ((copyOptions & CopyOptions.ALL_NAMESPACES) != 0) {
+                            if (kind == Type.TEXTUAL_ELEMENT) {
+                                int parent = getParentNodeNr(tree, next);
+                                namespaces = tree.namespaceMaps[tree.beta[parent]];
+                            } else {
+                                namespaces = tree.namespaceMaps[tree.beta[next]];
+                            }
+                        } else {
+                            addAttributeNamespaces = true;
+                            String uri = pool.getURI(nameCode);
+                            if (!uri.isEmpty()) {
+                                namespaces = NamespaceMap.of(prefix, uri);
+                            }
+                        }
+                    }
 
                     if (kind == Type.TEXTUAL_ELEMENT) {
                         closePending = false;
-                        receiver.startContent();
+                        receiver.startElement(new CodedName(fp, prefix, pool),
+                                              elementType,
+                                              EmptyAttributeMap.getInstance(),
+                                              namespaces,
+                                              location,
+                                              ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY);
                         // output characters
                         final CharSequence value = TinyTextImpl.getStringValue(tree, next);
-                        receiver.characters(value, location, ReceiverOptions.WHOLE_TEXT_NODE);
+                        receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
                         receiver.endElement();
                     } else {
                         // there is an element to close
                         closePending = true;
 
-                        // output namespaces
-                        if ((copyOptions & CopyOptions.SOME_NAMESPACES) != 0 && tree.usesNamespaces) {
-                            String defaultNS = null;
-                            if (prefix.isEmpty()) {
-                                defaultNS = getNamePool().getURI(fp);
-                                if (!defaultNS.isEmpty()) {
-                                    foundElementInDefaultNamespace = true;
-                                }
-                            }
-                            if (first) {
-                                if ((copyOptions & CopyOptions.LOCAL_NAMESPACES) != 0) {
-                                    NamespaceBinding[] localNamespaces = getDeclaredNamespaces(null);
-                                    for (NamespaceBinding ns : localNamespaces) {
-                                        if (ns == null) {
-                                            break;
-                                        }
-                                        receiver.namespace(ns, 0);
-                                    }
-                                } else if ((copyOptions & CopyOptions.ALL_NAMESPACES) != 0) {
-                                    NamespaceIterator.sendNamespaces(this, receiver);
-                                }
-                            } else {
-                                int ns = tree.beta[next]; // by convention
-                                if (ns > 0) {
-                                    while (ns < tree.numberOfNamespaces &&
-                                            tree.namespaceParent[ns] == next) {
-                                        NamespaceBinding nscode = tree.namespaceBinding[ns];
-                                        receiver.namespace(nscode, 0);
-                                        ns++;
-                                    }
-                                }
-                            }
-                        }
-                        first = false;
+
 
                         // output attributes
 
+                        AttributeMap attributes = EmptyAttributeMap.getInstance();
                         int att = tree.alpha[next];
                         if (att >= 0) {
                             while (att < tree.numberOfAttributes && tree.attParent[att] == next) {
@@ -417,28 +363,39 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                         try {
                                             checkNotNamespaceSensitiveAttribute(attributeType, att);
                                         } catch (CopyNamespaceSensitiveException e) {
-                                            int lang = receiver.getPipelineConfiguration().getHostLanguage();
-                                            e.setErrorCode(lang == Configuration.XSLT ? "XTTE0950" : "XQTY0086");
+                                            e.setErrorCode(receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
                                             throw e;
                                         }
                                     }
                                 }
                                 String attPrefix = tree.prefixPool.getPrefix(attCode >> 20);
-                                receiver.attribute(new CodedName(attfp, attPrefix, pool), attributeType, tree.attValue[att], location, ReceiverOptions.NOT_A_DUPLICATE);
+                                int attProps = ReceiverOption.NOT_A_DUPLICATE;
+                                if (tree.isIdAttribute(att)) {
+                                    attProps |= ReceiverOption.IS_ID;
+                                }
+                                if (tree.isIdrefAttribute(att)) {
+                                    attProps |= ReceiverOption.IS_IDREF;
+                                }
+                                attributes = attributes.put(new AttributeInfo(new CodedName(attfp, attPrefix, pool),
+                                                        attributeType, tree.attValue[att].toString(),
+                                                        location, attProps));
+                                if (addAttributeNamespaces && !attPrefix.isEmpty()) {
+                                    namespaces = namespaces.put(attPrefix,pool.getURI(attCode));
+                                }
                                 att++;
                             }
                         }
 
-                        // start content
-                        receiver.startContent();
+                        // see bug 2209
+                        receiver.startElement(new CodedName(fp, prefix, pool),
+                                              elementType,
+                                              attributes, namespaces,
+                                              location,
+                                              ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY);
+
                     }
                     break;
                 }
-
-                case Type.EXTERNAL_NODE_REFERENCE:
-                    closePending = false;
-                    tree.externalNodes.get(tree.alpha[next]).copy(receiver, copyOptions, location);
-                    break;
 
                 case Type.TEXT: {
 
@@ -447,7 +404,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
 
                     // output characters
                     final CharSequence value = TinyTextImpl.getStringValue(tree, next);
-                    receiver.characters(value, location, ReceiverOptions.WHOLE_TEXT_NODE);
+                    receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
                     break;
                 }
 
@@ -458,7 +415,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
 
                     // output characters
                     final CharSequence value = WhitespaceTextImpl.getStringValueCS(tree, next);
-                    receiver.characters(value, location, ReceiverOptions.WHOLE_TEXT_NODE);
+                    receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
                     break;
                 }
 
@@ -471,9 +428,9 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     int start = tree.alpha[next];
                     int len = tree.beta[next];
                     if (len > 0) {
-                        receiver.comment(tree.commentBuffer.subSequence(start, start + len), location, 0);
+                        receiver.comment(tree.commentBuffer.subSequence(start, start + len), location, ReceiverOption.NONE);
                     } else {
-                        receiver.comment("", ExplicitLocation.UNKNOWN_LOCATION, 0);
+                        receiver.comment("", Loc.NONE, ReceiverOption.NONE);
                     }
                     break;
                 }
@@ -484,7 +441,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
 
                     // output copy of PI
                     NodeInfo pi = tree.getNode(next);
-                    receiver.processingInstruction(pi.getLocalPart(), pi.getStringValue(), location, 0);
+                    receiver.processingInstruction(pi.getLocalPart(), pi.getStringValue(), location, ReceiverOption.NONE);
                     break;
                 }
 
@@ -504,68 +461,6 @@ public class TinyElementImpl extends TinyParentNodeImpl {
         for (; level > startLevel; level--) {
             receiver.endElement();
         }
-    }
-
-    private boolean tryGraft(int copyOptions, Receiver out) throws XPathException {
-        if (subtreeSize() < 100) {
-            return false;
-        }
-        if (TinyTree.useGraft &&
-                (copyOptions & CopyOptions.FOR_UPDATE) == 0 &&
-                (copyOptions & CopyOptions.ALL_NAMESPACES) != 0 &&
-                // don't allow a subtree that already contains external nodes to be grafted to another tree
-                tree.externalNodes == null) {
-            if (isSkipValidator(out)) {
-                return false;
-                // Can't currently use grafting copy with validation="strip" because of the
-                // complications of ID and IDREF attributes (test case copy-5034)
-                //r1 = ((ProxyReceiver) r1).getNextReceiver();
-            }
-            if (tree.isTyped()) {
-                return false;
-            }
-            if (out instanceof SequenceWriter && ((SequenceWriter) out).isReadyForGrafting()) {
-                ((SequenceWriter) out).graftElementNode(this, copyOptions);
-                return true;
-            } else if (out instanceof ComplexContentOutputter) {
-                if (((ComplexContentOutputter) out).isReadyForGrafting()) {
-                    ((ComplexContentOutputter) out).graftElementNode(this, copyOptions);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean tryBulkCopy(int copyOptions, Receiver out) throws XPathException {
-        // Fast path for copying to another TinyTree
-        if (TinyTree.useBulkCopy &&
-                    (copyOptions & CopyOptions.FOR_UPDATE) == 0 &&
-                    (copyOptions & CopyOptions.ALL_NAMESPACES) != 0 &&
-                    // don't allow a subtree that already contains external nodes to be grafted to another tree
-                    tree.externalNodes == null) {
-            if (isSkipValidator(out)) {
-                out = ((ProxyReceiver)out).getNextReceiver();
-            }
-            if (tree.isTyped()) {
-                return false;
-            }
-            if (nodeNr == tree.numberOfNodes - 1) {
-                // Bug 4089
-                // Not sure why this case fails, but it crashes out, and this is the simplest workaround
-                return false;
-            }
-            if (out instanceof SequenceWriter && ((SequenceWriter) out).isReadyForBulkCopy()) {
-                ((SequenceWriter) out).bulkCopyElementNode(this, copyOptions);
-                return true;
-            } else if (out instanceof ComplexContentOutputter) {
-                if (((ComplexContentOutputter) out).isReadyForBulkCopy()) {
-                    ((ComplexContentOutputter) out).bulkCopyElementNode(this, copyOptions);
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -642,35 +537,37 @@ public class TinyElementImpl extends TinyParentNodeImpl {
             return "";
         }
         int ns = tree.beta[nodeNr]; // by convention
-        if (ns > 0) {
-            while (ns < tree.numberOfNamespaces &&
-                    tree.namespaceParent[ns] == nodeNr) {
-                NamespaceBinding nscode = tree.namespaceBinding[ns];
-                if (nscode.getPrefix().equals(prefix)) {
-                    String uri = nscode.getURI();
-                    if (uri.isEmpty()) {
-                        // this is a namespace undeclaration, so the prefix is not in scope
-                        if (prefix.isEmpty()) {
-                            // the namespace xmlns="" is always in scope
-                            return "";
-                        } else {
-                            return null;
-                        }
-                    } else {
-                        return uri;
-                    }
-                }
-                ns++;
-            }
-        }
-
-        // now search the namespaces defined on the ancestor nodes.
-
-        NodeInfo parent = getParent();
-        if (parent instanceof NamespaceResolver) {
-            return ((NamespaceResolver) parent).getURIForPrefix(prefix, useDefault);
-        }
-        return null;
+        NamespaceMap map = tree.namespaceMaps[ns];
+        return map.getURIForPrefix(prefix, useDefault);
+//        if (ns > 0) {
+//            while (ns < tree.numberOfNamespaces &&
+//                    tree.namespaceParent[ns] == nodeNr) {
+//                NamespaceBinding nscode = tree.namespaceBinding[ns];
+//                if (nscode.getPrefix().equals(prefix)) {
+//                    String uri = nscode.getURI();
+//                    if (uri.isEmpty()) {
+//                        // this is a namespace undeclaration, so the prefix is not in scope
+//                        if (prefix.isEmpty()) {
+//                            // the namespace xmlns="" is always in scope
+//                            return "";
+//                        } else {
+//                            return null;
+//                        }
+//                    } else {
+//                        return uri;
+//                    }
+//                }
+//                ns++;
+//            }
+//        }
+//
+//        // now search the namespaces defined on the ancestor nodes.
+//
+//        NodeInfo parent = getParent();
+//        if (parent instanceof NamespaceResolver) {
+//            return ((NamespaceResolver) parent).getURIForPrefix(prefix, useDefault);
+//        }
+//        return null;
     }
 
     /**
@@ -679,6 +576,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      * @return true if the node is an ID
      */
 
+    @Override
     public boolean isId() {
         // this looks very inefficient, but the method isn't actually used...
         return tree.isIdElement(nodeNr);
@@ -690,6 +588,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      * @return true if the node is an IDREF or IDREFS element or attribute
      */
 
+    @Override
     public boolean isIdref() {
         return tree.isIdrefElement(nodeNr);
     }

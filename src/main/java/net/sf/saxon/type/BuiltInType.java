@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -26,13 +26,13 @@ public abstract class BuiltInType {
      * Table of all built in types, indexed by fingerprint
      */
 
-    private static IntHashMap<SchemaType> lookup = new IntHashMap<>(100);
+    private static IntHashMap<SchemaType> lookup = new IntHashMap<SchemaType>(100);
 
     /**
      * Table of all built in types, indexed by local name
      */
 
-    private static Map<String, SchemaType> lookupByLocalName = new HashMap<>(100);
+    private static Map<String, SchemaType> lookupByLocalName = new HashMap<String, SchemaType>(100);
 
     /**
      * Class is never instantiated
@@ -46,7 +46,7 @@ public abstract class BuiltInType {
         register(StandardNames.XS_ANY_TYPE, AnyType.getInstance());
         register(StandardNames.XS_UNTYPED, Untyped.getInstance());
         register(StandardNames.XS_ERROR, ErrorType.getInstance());
-        register(StandardNames.XS_NUMERIC, NumericType.getInstance());
+
     }
 
     /**

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,10 @@ package net.sf.saxon.type;
 
 
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
@@ -23,7 +26,19 @@ import static net.sf.saxon.om.Genre.ATOMIC;
  * currently two, namely ErrorType and NumericType), or a user-defined union type.
  */
 
-public interface UnionType extends SimpleType, ItemType {
+public interface UnionType extends ItemType, CastingTarget {
+
+    /**
+     * Get the name of the type. If the type is unnamed, return an invented
+     * type in the {@link net.sf.saxon.lib.NamespaceConstant#ANONYMOUS} namespace
+     * @return the type name
+     */
+
+    StructuredQName getTypeName();
+
+    default StructuredQName getStructuredQName() {
+        return getTypeName();
+    }
 
     /**
      * Ask whether the union contains a list type among its member types
@@ -40,7 +55,7 @@ public interface UnionType extends SimpleType, ItemType {
      * @return the atomic types and plain union types in the transitive membership of the union type.
      */
 
-    Iterable<PlainType> getPlainMemberTypes() throws MissingComponentException;
+    Iterable<? extends PlainType> getPlainMemberTypes() throws MissingComponentException;
 
     /**
      * Get the result type of a cast operation to this union type, as a sequence type.
@@ -50,6 +65,23 @@ public interface UnionType extends SimpleType, ItemType {
      */
 
     SequenceType getResultTypeOfCast();
+
+    /**
+     * Get the typed value corresponding to a given string value, assuming it is
+     * valid against this type
+     *
+     * @param value    the string value
+     * @param resolver a namespace resolver used to resolve any namespace prefixes appearing
+     *                 in the content of values. Can supply null, in which case any namespace-sensitive content
+     *                 will be rejected.
+     * @param rules    the conversion rules from the configuration
+     * @return the atomic sequence comprising the typed value. The objects
+     * returned by this SequenceIterator will all be of type {@link net.sf.saxon.value.AtomicValue},
+     * @throws ValidationException if the supplied value is not in the lexical space of the data type
+     */
+
+    AtomicSequence getTypedValue(CharSequence value, /*@Nullable*/ NamespaceResolver resolver, ConversionRules rules)
+            throws ValidationException;
 
     /**
      * Validate an atomic value, which is known to be an instance of one of the member types of the
@@ -94,6 +126,14 @@ public interface UnionType extends SimpleType, ItemType {
             return Optional.of(message.toString());
         } else {
             return Optional.empty();
+        }
+    }
+
+    default String getDescription() {
+        if (this instanceof SimpleType) {
+            return ((SimpleType)this).getDescription();
+        } else {
+            return toString();
         }
     }
 }

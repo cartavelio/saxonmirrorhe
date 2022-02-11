@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,9 +7,7 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.trace.LocationKind;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -32,6 +30,7 @@ public abstract class XSLGeneralVariable extends StyleElement {
         return sourceBinding.getVariableQName();
     }
 
+    @Override
     public StructuredQName getObjectName() {
         return sourceBinding.getVariableQName();
     }
@@ -42,6 +41,7 @@ public abstract class XSLGeneralVariable extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
@@ -64,6 +64,7 @@ public abstract class XSLGeneralVariable extends StyleElement {
      *             multiple declarations if it appears in a stylesheet module that is included/imported more than once
      */
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         sourceBinding.validate();
     }
@@ -73,18 +74,9 @@ public abstract class XSLGeneralVariable extends StyleElement {
      * children have been validated.
      */
 
+    @Override
     public void postValidate() throws XPathException {
         sourceBinding.postValidate();
-    }
-
-    /**
-     * Get the type of construct. This will be a constant in
-     * class {@link LocationKind}. This method is part of the
-     * {@link net.sf.saxon.trace.InstructionInfo} interface
-     */
-
-    public int getConstructType() {
-        return StandardNames.XSL_VARIABLE;
     }
 
 

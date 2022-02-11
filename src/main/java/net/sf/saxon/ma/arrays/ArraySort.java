@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -28,8 +28,8 @@ import java.util.List;
 public class ArraySort extends SystemFunction {
 
     private static class MemberToBeSorted{
-        public GroundedValue<?> value;
-        public GroundedValue<?> sortKey;
+        public GroundedValue value;
+        public GroundedValue sortKey;
         int originalPosition;
     }
 
@@ -59,7 +59,7 @@ public class ArraySort extends SystemFunction {
         if (arguments.length == 3){
             key = (Function) arguments[2].head();
         }
-        for (GroundedValue<?> seq: array.members()){
+        for (GroundedValue seq: array.members()){
             MemberToBeSorted member = new MemberToBeSorted();
             member.value = seq;
             member.originalPosition = i++;
@@ -72,30 +72,23 @@ public class ArraySort extends SystemFunction {
         }
         final AtomicComparer atomicComparer =  AtomicSortComparer.makeSortComparer(
                 collation, StandardNames.XS_ANY_ATOMIC_TYPE, context);
-        Sortable sortable = new Sortable() {
-            public int compare(int a, int b) {
-                int result = compareSortKeys(inputList.get(a).sortKey, inputList.get(b).sortKey, atomicComparer);
-                if (result == 0){
-                    return inputList.get(a).originalPosition - inputList.get(b).originalPosition;
+        try {
+            inputList.sort((a, b) -> {
+                int result = compareSortKeys(a.sortKey, b.sortKey, atomicComparer);
+                if (result == 0) {
+                    // TODO: unnecessary, we are now using a stable sort routine
+                    return a.originalPosition - b.originalPosition;
                 } else {
                     return result;
                 }
-            }
-
-            public void swap(int a, int b) {
-                MemberToBeSorted temp = inputList.get(a);
-                inputList.set(a, inputList.get(b));
-                inputList.set(b, temp);
-            }
-        };
-        try {
-            GenericSorter.quickSort(0, array.arrayLength(), sortable);
+            });
+            //GenericSorter.quickSort(0, array.arrayLength(), sortable);
         } catch (ClassCastException e) {
             XPathException err = new XPathException("Non-comparable types found while sorting: " + e.getMessage());
             err.setErrorCode("XPTY0004");
             throw err;
         }
-        List<GroundedValue<?>> outputList = new ArrayList<>(array.arrayLength());
+        List<GroundedValue> outputList = new ArrayList<>(array.arrayLength());
         for (MemberToBeSorted member: inputList){
             outputList.add(member.value);
         }
@@ -134,9 +127,9 @@ public class ArraySort extends SystemFunction {
         }
     }
 
-    private static GroundedValue<? extends AtomicValue> atomize(Sequence<?> input) throws XPathException {
-        SequenceIterator<?> iterator = input.iterate();
-        SequenceIterator<? extends AtomicValue> mapper = Atomizer.getAtomizingIterator(iterator, false);
+    private static GroundedValue atomize(Sequence input) throws XPathException {
+        SequenceIterator iterator = input.iterate();
+        SequenceIterator mapper = Atomizer.getAtomizingIterator(iterator, false);
         return mapper.materialize();
     }
 }

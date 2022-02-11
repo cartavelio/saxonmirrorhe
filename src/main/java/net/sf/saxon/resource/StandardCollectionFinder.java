@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,7 +13,6 @@ import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.CollectionFinder;
 import net.sf.saxon.lib.ResourceCollection;
-import net.sf.saxon.lib.StandardCollectionURIResolver;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 
@@ -65,6 +64,7 @@ public class StandardCollectionFinder implements CollectionFinder {
      * @throws XPathException if the collection URI cannot be resolved to a collection
      */
 
+    @Override
     public ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException {
         checkNotNull(collectionURI, context);
 
@@ -100,9 +100,13 @@ public class StandardCollectionFinder implements CollectionFinder {
             throw new XPathException(e);
         }
 
+        if (!context.getConfiguration().getAllowedUriTest().test(resolvedURI)) {
+            throw new XPathException("URI scheme '" + resolvedURI.getScheme() + "' has been disallowed");
+        }
+
         if ("file".equals(resolvedURI.getScheme())) {
             File file = new File(resolvedURI);
-            StandardCollectionURIResolver.checkFileExists(file, resolvedURI, context);
+            checkFileExists(file, resolvedURI, context);
             if (file.isDirectory()) {
                 return new DirectoryCollection(context.getConfiguration(), collectionURI, file, params);
             }
@@ -148,5 +152,15 @@ public class StandardCollectionFinder implements CollectionFinder {
         return collectionURI.endsWith(".jar") ||
             collectionURI.endsWith(".zip") ||
             collectionURI.startsWith("jar:");
+    }
+
+
+    public static void checkFileExists(File file, URI resolvedURI, XPathContext context) throws XPathException {
+        if (!file.exists()) {
+            XPathException err = new XPathException("The file or directory " + resolvedURI + " does not exist");
+            err.setErrorCode("FODC0002");
+            err.setXPathContext(context);
+            throw err;
+        }
     }
 }

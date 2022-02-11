@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -27,6 +27,7 @@ public class Average extends FoldingFunction {
      * Determine the cardinality of the function.
      */
 
+    @Override
     public int getCardinality(Expression[] arguments) {
         if (!Cardinality.allowsZero(arguments[0].getCardinality())) {
             return StaticProperty.EXACTLY_ONE;
@@ -67,7 +68,8 @@ public class Average extends FoldingFunction {
          * @param item the item to be processed from the input sequence
          * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
          */
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void processItem(Item item) throws XPathException {
             AtomicValue next = (AtomicValue)item;
             if (next instanceof UntypedAtomicValue) {
                 next = toDouble.convert((UntypedAtomicValue)next).asAtomic();
@@ -121,6 +123,7 @@ public class Average extends FoldingFunction {
          * @return true if the result of the function is now available even though not all
          * items in the sequence have been processed
          */
+        @Override
         public boolean isFinished() {
             return data instanceof DoubleValue && data.isNaN();
         }
@@ -132,7 +135,8 @@ public class Average extends FoldingFunction {
          * @throws net.sf.saxon.trans.XPathException
          *          if a dynamic error occurs
          */
-        public Sequence<?> result() throws XPathException {
+        @Override
+        public Sequence result() throws XPathException {
             if (atStart) {
                 return EmptySequence.getInstance();
             } else if (data instanceof NumericValue) {

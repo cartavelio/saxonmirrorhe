@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -41,10 +41,11 @@ public class TailExpression extends UnaryExpression {
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().optimize(visitor, contextInfo);
         if (getBaseExpression() instanceof Literal) {
-            GroundedValue<?> value =
+            GroundedValue value =
                     iterate(visitor.getStaticContext().makeEarlyEvaluationContext()).materialize();
             return Literal.makeLiteral(value, this);
         }
@@ -59,6 +60,7 @@ public class TailExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         TailExpression exp = new TailExpression(getBaseExpression().copy(rebindings), start);
         ExpressionTool.copyLocationInfo(this, exp);
@@ -79,10 +81,12 @@ public class TailExpression extends UnaryExpression {
     }
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getBaseExpression().getItemType();
     }
 
+    @Override
     public int computeCardinality() {
         return getBaseExpression().getCardinality() | StaticProperty.ALLOWS_ZERO;
     }
@@ -115,6 +119,7 @@ public class TailExpression extends UnaryExpression {
                 start == ((TailExpression) other).start;
     }
 
+    @Override
     public int computeHashCode() {
         return super.computeHashCode() ^ start;
     }
@@ -131,8 +136,9 @@ public class TailExpression extends UnaryExpression {
     }
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
-        SequenceIterator<?> baseIter = getBaseExpression().iterate(context);
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
+        SequenceIterator baseIter = getBaseExpression().iterate(context);
         return TailIterator.make(baseIter, start);
     }
 
@@ -155,6 +161,7 @@ public class TailExpression extends UnaryExpression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("tail", this);
         destination.emitAttribute("start", start + "");

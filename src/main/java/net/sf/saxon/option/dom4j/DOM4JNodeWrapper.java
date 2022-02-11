@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,8 +9,8 @@ package net.sf.saxon.option.dom4j;
 
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
@@ -25,6 +25,7 @@ import org.dom4j.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.Predicate;
 
 /**
  * A node in the XML parse tree representing an XML element, character content, or attribute.
@@ -44,6 +45,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     /*@Nullable*/ private DOM4JNodeWrapper parent;     // null means unknown
     // Beware: with dom4j, this is an index over the result of content(), which may contain Namespace nodes
     protected int index;            // -1 means unknown
+    private NamespaceMap inScopeNamespaces;
 
     /**
      * This constructor is protected: nodes should be created using the wrap
@@ -85,7 +87,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     protected static DOM4JNodeWrapper makeWrapper(Node node, DOM4JDocumentWrapper docWrapper,
                                            DOM4JNodeWrapper parent, int index) {
         DOM4JNodeWrapper wrapper;
-        Short nodeType = node.getNodeType();
+        short nodeType = node.getNodeType();
         switch (nodeType) {
             case Node.ELEMENT_NODE:
                 wrapper = new DOM4JNodeWrapper(node, parent, index);
@@ -126,6 +128,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         return wrapper;
     }
 
+    @Override
     public DOM4JDocumentWrapper getTreeInfo() {
         return (DOM4JDocumentWrapper)treeInfo;
     }
@@ -134,6 +137,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * Get the underlying DOM4J node, to implement the VirtualNode interface
      */
 
+    @Override
     public Node getUnderlyingNode() {
         return node;
     }
@@ -144,6 +148,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @return one of the values Node.ELEMENT, Node.TEXT, Node.ATTRIBUTE, etc.
      */
 
+    @Override
     public int getNodeKind() {
         return nodeKind;
     }
@@ -156,10 +161,12 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *         modified by xml:base, but the system ID cannot.
      */
 
+    @Override
     public String getSystemId() {
         return getTreeInfo().getSystemId();
     }
 
+    @Override
     public void setSystemId(String uri) {
         getTreeInfo().setSystemId(uri);
     }
@@ -174,6 +181,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *         return true, and the two nodes will produce the same result for generateId())
      */
 
+    @Override
     public int compareOrder(NodeInfo other) {
         if (other instanceof SiblingCountingNode) {
             return Navigator.compareOrder(this, (SiblingCountingNode) other);
@@ -183,6 +191,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         }
     }
 
+    @Override
     public CharSequence getStringValueCS() {
         return getStringValue(node);
     }
@@ -213,6 +222,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @return the local part of the name. For an unnamed node, returns "".
      */
 
+    @Override
     public String getLocalPart() {
         switch (nodeKind) {
             case Type.ELEMENT:
@@ -238,6 +248,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @return the prefix part of the name. For an unnamed node, return an empty string.
      */
 
+    @Override
     public String getPrefix() {
         switch (nodeKind) {
             case Type.ELEMENT:
@@ -257,6 +268,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *         For a node with an empty prefix, return an empty string.
      */
 
+    @Override
     public String getURI() {
         switch (nodeKind) {
             case Type.ELEMENT:
@@ -277,6 +289,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *         For a node with no name, return an empty string.
      */
 
+    @Override
     public String getDisplayName() {
         switch (nodeKind) {
             case Type.ELEMENT:
@@ -296,6 +309,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * Get the NodeInfo object representing the parent of this node
      */
 
+    @Override
     public DOM4JNodeWrapper getParent() {
         if (parent == null) {
             Branch parenti = getInternalParent(node, (DOM4JNodeWrapper) treeInfo.getRootNode());
@@ -324,6 +338,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     /**
      * Get the index position of this node among its siblings (starting from 0)
      */
+    @Override
     public int getSiblingPosition() {
         if (index == -1) {
             int ix = 0;
@@ -392,7 +407,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //        switch (axisNumber) {
 //            case AxisInfo.ANCESTOR:
 //                if (nodeKind == Type.DOCUMENT) {
-//                    return EmptyIterator.OfNodes.THE_INSTANCE;
+//                    return EmptyIterator.ofNodes();
 //                }
 //                return new Navigator.AxisFilter(
 //                        new Navigator.AncestorEnumeration(this, false),
@@ -408,7 +423,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //
 //            case AxisInfo.ATTRIBUTE:
 //                if (nodeKind != Type.ELEMENT) {
-//                    return EmptyIterator.OfNodes.THE_INSTANCE;
+//                    return EmptyIterator.ofNodes();
 //                }
 //                return new Navigator.AxisFilter(
 //                        new AttributeEnumeration(this),
@@ -420,7 +435,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                            new ChildEnumeration(this, true, true),
 //                            nodeTest);
 //                } else {
-//                    return EmptyIterator.OfNodes.THE_INSTANCE;
+//                    return EmptyIterator.ofNodes();
 //                }
 //
 //            case AxisInfo.DESCENDANT:
@@ -429,7 +444,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                            (new TreeWalker()).newDescendantAxisIterator(this, false, nodeTest),//new Navigator.DescendantEnumeration(this, false, true),
 //                            nodeTest);
 //                } else {
-//                    return EmptyIterator.OfNodes.THE_INSTANCE;
+//                    return EmptyIterator.ofNodes();
 //                }
 //
 //            case AxisInfo.DESCENDANT_OR_SELF:
@@ -447,7 +462,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                    case Type.DOCUMENT:
 //                    case Type.ATTRIBUTE:
 //                    case Type.NAMESPACE:
-//                        return EmptyIterator.OfNodes.THE_INSTANCE;
+//                        return EmptyIterator.ofNodes();
 //                    default:
 //                        return new Navigator.AxisFilter(
 //                                new ChildEnumeration(this, false, true),
@@ -456,7 +471,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //
 //            case AxisInfo.NAMESPACE:
 //                if (nodeKind != Type.ELEMENT) {
-//                    return EmptyIterator.OfNodes.THE_INSTANCE;
+//                    return EmptyIterator.ofNodes();
 //                }
 //                return NamespaceNode.makeIterator(this, nodeTest);
 //
@@ -474,7 +489,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                    case Type.DOCUMENT:
 //                    case Type.ATTRIBUTE:
 //                    case Type.NAMESPACE:
-//                        return EmptyIterator.OfNodes.THE_INSTANCE;
+//                        return EmptyIterator.ofNodes();
 //                    default:
 //                        return new Navigator.AxisFilter(
 //                                new ChildEnumeration(this, false, false),
@@ -494,32 +509,32 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //        }
 //    }
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
+    protected AxisIterator iterateAttributes(Predicate<? super NodeInfo> nodeTest) {
         return new Navigator.AxisFilter(
                 new AttributeEnumeration(this),
                 nodeTest);
     }
 
     @Override
-    protected AxisIterator iterateChildren(NodeTest nodeTest) {
+    protected AxisIterator iterateChildren(Predicate<? super NodeInfo> nodeTest) {
         if (hasChildNodes()) {
             return new Navigator.AxisFilter(
                     new ChildEnumeration(this, true, true),
                     nodeTest);
         } else {
-            return EmptyIterator.OfNodes.THE_INSTANCE;
+            return EmptyIterator.ofNodes();
         }
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards) {
         return new Navigator.AxisFilter(
                 new ChildEnumeration(this, false, forwards),
                 nodeTest);
     }
 
     @Override
-    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected AxisIterator iterateDescendants(Predicate<? super NodeInfo> nodeTest, boolean includeSelf) {
         if (includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator<>(this, true, nodeTest);
 
@@ -527,7 +542,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             if (hasChildNodes()) {
                 return new SteppingNavigator.DescendantAxisIterator<>(this, false, nodeTest);
             } else {
-                return EmptyIterator.OfNodes.THE_INSTANCE;
+                return EmptyIterator.ofNodes();
             }
 
         }
@@ -543,6 +558,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *         if this node is not an element.
      * @since 9.4
      */
+    @Override
     public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
         if (nodeKind == Type.ELEMENT) {
             for (Object o : ((Element) node).attributes()) {
@@ -561,6 +577,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @return the NodeInfo representing the containing document
      */
 
+    @Override
     public NodeInfo getRoot() {
         return treeInfo.getRootNode();
     }
@@ -571,6 +588,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * <code>getEnumeration(Axis.CHILD, AnyNodeTest.getInstance()).hasNext()</code></p>
      */
 
+    @Override
     public boolean hasChildNodes() {
         switch (nodeKind) {
             case Type.DOCUMENT:
@@ -591,11 +609,13 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *               documents
      */
 
+    @Override
     public void generateId(FastStringBuffer buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
         //buffer.append(Navigator.getSequentialKey(this));
     }
 
+    @Override
     public DOM4JNodeWrapper getNextSibling() {
         Branch parenti = (Branch) getParent().node;
         int count = parenti.nodeCount();
@@ -608,6 +628,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
 
+    @Override
     public DOM4JNodeWrapper getPreviousSibling() {
         Branch parenti = (Branch) getParent().node;
         int i = parenti.indexOf(node);
@@ -619,6 +640,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
 
+    @Override
     public DOM4JNodeWrapper getFirstChild() {
         Node nodei = node;
         if (nodei.hasContent()) {
@@ -634,6 +656,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         return null;
     }
 
+    @Override
     public DOM4JNodeWrapper getSuccessorElement(DOM4JNodeWrapper anchor, String uri, String local) {
         Node stop = anchor == null ? null : anchor.node;
         Node next = node;
@@ -702,11 +725,12 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         private int ix = 0;
         private DOM4JNodeWrapper start;
 
-        public AttributeEnumeration(DOM4JNodeWrapper start) {
+        AttributeEnumeration(DOM4JNodeWrapper start) {
             this.start = start;
             atts = ((Element) start.node).attributes().iterator();
         }
 
+        @Override
         public final NodeInfo next() {
             if (atts.hasNext()) {
                 return makeWrapper(atts.next(), getTreeInfo(), start, ix++);
@@ -779,6 +803,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         }
 
 
+        @Override
         public NodeInfo next() {
             if (forwards) {
                 if (children.hasNext()) {
@@ -852,6 +877,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      *         then the first unused entry will be set to -1.
      *         <p>For a node other than an element, the method returns null.</p>
      */
+    @Override
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
         if (node instanceof Element) {
             final Element elem = (Element) node;
@@ -882,5 +908,41 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         }
     }
 
+    /**
+     * Get all the namespace bindings that are in-scope for this element.
+     * <p>For an element return all the prefix-to-uri bindings that are in scope. This may include
+     * a binding to the default namespace (represented by a prefix of ""). It will never include
+     * "undeclarations" - that is, the namespace URI will never be empty; the effect of an undeclaration
+     * is to remove a binding from the in-scope namespaces, not to add anything.</p>
+     * <p>For a node other than an element, returns null.</p>
+     *
+     * @return the in-scope namespaces for an element, or null for any other kind of node.
+     */
+    @Override
+    public NamespaceMap getAllNamespaces() {
+        if (getNodeKind() == Type.ELEMENT) {
+            if (inScopeNamespaces != null) {
+                return inScopeNamespaces;
+            } else {
+                NamespaceMap nsMap = getParent().getNodeKind() == Type.ELEMENT
+                        ? getParent().getAllNamespaces()
+                        : NamespaceMap.emptyMap();
+                Element elem = (Element) node;
+                List<Namespace> addl = elem.declaredNamespaces();
+                Namespace ns = elem.getNamespace();
+                String prefix = ns.getPrefix();
+                String uri = ns.getURI();
+                nsMap = nsMap.bind(prefix, uri);
+                if (!addl.isEmpty()) {
+                    for (Namespace ns2 : addl) {
+                        nsMap = nsMap.bind(ns2.getPrefix(), ns2.getURI());
+                    }
+                }
+                return inScopeNamespaces = nsMap;
+            }
+        } else {
+            return null;
+        }
+    }
 }
 

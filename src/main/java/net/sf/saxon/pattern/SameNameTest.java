@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,11 +8,8 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.util.Navigator;
-import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
@@ -62,6 +59,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return UType.fromTypeCode(origin.getNodeKind());
     }
@@ -94,6 +92,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
         }
     }
 
+    @Override
     public IntPredicate getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         final int[] nameCodeArray = tree.getNameCodeArray();
@@ -120,7 +119,8 @@ public class SameNameTest extends NodeTest implements QNameTest {
      * @param node the node to be matched
      */
 
-    public boolean matchesNode(NodeInfo node) {
+    @Override
+    public boolean test(NodeInfo node) {
         return node == origin ||
             (node.getNodeKind() == origin.getNodeKind() && Navigator.haveSameName(node, origin));
     }
@@ -132,6 +132,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
      * @return true if the name matches
      */
 
+    @Override
     public boolean matches(StructuredQName qname) {
         return NameOfNode.makeName(origin).getStructuredQName().equals(qname);
     }
@@ -140,6 +141,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
+    @Override
     public final double getDefaultPriority() {
         return 0.0;
     }
@@ -148,6 +150,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
      * Get the fingerprint required
      */
 
+    @Override
     public int getFingerprint() {
         if (origin.hasFingerprint()) {
             return origin.getFingerprint();
@@ -164,12 +167,14 @@ public class SameNameTest extends NodeTest implements QNameTest {
      * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
      */
 
+    @Override
     public int getPrimitiveType() {
         return origin.getNodeKind();
     }
 
 
     /*@NotNull*/
+    @Override
     public Optional<IntSet> getRequiredNodeNames() {
         return Optional.of(new IntSingletonSet(getFingerprint()));
     }
@@ -229,7 +234,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
 
     public boolean equals(Object other) {
         return other instanceof SameNameTest &&
-                matchesNode(((SameNameTest) other).origin);
+                test(((SameNameTest) other).origin);
     }
 
     /**
@@ -242,6 +247,19 @@ public class SameNameTest extends NodeTest implements QNameTest {
     }
 
     /**
+     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
+     *
+     * @return a string representation of the QNameTest, suitable for use in export files. The format is
+     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
+     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
+     */
+    @Override
+    public String exportQNameTest() {
+        // Not applicable
+        return "";
+    }
+
+    /**
      * Generate Javascript code to test if a name matches the test.
      *
      * @return JS code as a string. The generated code will be used
@@ -250,25 +268,11 @@ public class SameNameTest extends NodeTest implements QNameTest {
      * uri and local.
      * @param targetVersion the version of Saxon-JS being targeted
      */
+    @Override
     public String generateJavaScriptNameTest(int targetVersion) {
         // Not applicable
         return "false";
     }
 
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @throws XPathException if JS code cannot be generated for this item type, for example because
-     *                        the test is schema-aware.
-     * @param knownToBe an item type that the value is known to conform to
-     * @param targetVersion the version of Saxon-JS being targeted
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        throw new XPathException("Cannot generate JS code for a SameNameTest", SaxonErrorCode.SXJS0001);
-    }
 }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,6 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.lib.CollectionFinder;
@@ -34,7 +33,7 @@ import java.util.Iterator;
 /**
  * Implement the fn:collection() function. This is responsible for calling the
  * registered {@link CollectionFinder}. For the effect of the default
- * system-supplied CollectionURIResolver, see {@link net.sf.saxon.resource.StandardCollectionFinder}
+ * system-supplied CollectionFinder, see {@link net.sf.saxon.resource.StandardCollectionFinder}
  */
 
 public class CollectionFn extends SystemFunction implements Callable {
@@ -57,31 +56,37 @@ public class CollectionFn extends SystemFunction implements Callable {
     private static class EmptyCollection implements ResourceCollection {
         private String collectionUri;
 
-        public EmptyCollection(String cUri) {
+        EmptyCollection(String cUri) {
             collectionUri = cUri;
         }
 
+        @Override
         public String getCollectionURI() {
             return collectionUri;
         }
 
+        @Override
         public Iterator<String> getResourceURIs(XPathContext context) {
             return new ArrayList<String>().iterator();
         }
 
+        @Override
         public Iterator<Resource> getResources(XPathContext context) {
             return new ArrayList<Resource>().iterator();
         }
 
+        @Override
         public boolean isStable(XPathContext context) {
             return true;
         }
 
+        @Override
         public boolean stripWhitespace(SpaceStrippingRule rules) {
             return false;
         }
     }
 
+    @Override
     public int getSpecialProperties(Expression[] arguments) {
         // See redmine bug 1652. We cannot assume that the nodes will be in document order because we can't assume
         // they will all be "new" documents. We can't even assume that they will be distinct.
@@ -110,7 +115,7 @@ public class CollectionFn extends SystemFunction implements Callable {
                 } else {
                     String base = getRetainedStaticContext().getStaticBaseUriString();
                     if (base != null) {
-                        absoluteURI = new URI(base).resolve(href).toString();
+                        absoluteURI = ResolveURI.makeAbsolute(href, base).toString();
                     } else {
                         throw new XPathException("Relative collection URI cannot be resolved: no base URI available", "FODC0002");
                     }
@@ -131,13 +136,14 @@ public class CollectionFn extends SystemFunction implements Callable {
      * @throws XPathException if a dynamic error occurs
      */
 
-    private SequenceIterator<Item<?>> getSequenceIterator(
+    private SequenceIterator getSequenceIterator(
             final ResourceCollection collection, final XPathContext context) throws XPathException {
 
         final Iterator<? extends Resource> sources = collection.getResources(context);
 
-        return new SequenceIterator<Item<?>>() {
+        return new SequenceIterator() {
 
+            @Override
             public Item next() throws XPathException {
                 try {
                     if (sources.hasNext()) {
@@ -150,6 +156,7 @@ public class CollectionFn extends SystemFunction implements Callable {
                 }
             }
 
+            @Override
             public void close() {
                 if (sources instanceof Closeable) {
                     try {
@@ -160,9 +167,6 @@ public class CollectionFn extends SystemFunction implements Callable {
                 }
             }
 
-            public int getProperties() {
-                return 0;
-            }
 
         };
     }
@@ -176,7 +180,8 @@ public class CollectionFn extends SystemFunction implements Callable {
      * @throws XPathException if a dynamic error occurs
      */
 
-    public Sequence<?> call(final XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(final XPathContext context, Sequence[] arguments) throws XPathException {
         String href;
         if (getArity() == 0) {
             // No arguments supplied: this gets the default collection
@@ -201,7 +206,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         PackageData packageData = getRetainedStaticContext().getPackageData();
         SpaceStrippingRule whitespaceRule = NoElementsSpaceStrippingRule.getInstance();
         String collectionKey = absoluteURI;
-        if (packageData.getHostLanguage() == Configuration.XSLT) {
+        if (packageData.isXSLT()) {
             whitespaceRule = ((StylesheetPackage) packageData).getSpaceStrippingRule();
             if (whitespaceRule != NoElementsSpaceStrippingRule.getInstance()) {
                 collectionKey = ((StylesheetPackage) packageData).getPackageName() +
@@ -211,7 +216,7 @@ public class CollectionFn extends SystemFunction implements Callable {
             }
         }
 
-        GroundedValue<?> cachedCollection = (GroundedValue<?>)context.getController().getUserData("saxon:collections", collectionKey);
+        GroundedValue cachedCollection = (GroundedValue)context.getController().getUserData("saxon:collections", collectionKey);
         if (cachedCollection != null) {
             return cachedCollection;
         }
@@ -236,17 +241,17 @@ public class CollectionFn extends SystemFunction implements Callable {
         }
 
         // Get an iterator over the resources in the collection
-        SequenceIterator<?> sourceSeq = getSequenceIterator(collection, context);
+        SequenceIterator sourceSeq = getSequenceIterator(collection, context);
 
         // Get an iterator over the items representing the resources
-        SequenceIterator<?> result = context.getConfiguration()
+        SequenceIterator result = context.getConfiguration()
                 .getMultithreadedItemMappingIterator(sourceSeq,
                                                      item1 -> ((ExternalObject<Resource>)item1).getObject().getItem(context));
 
         // In XSLT, apply space-stripping to document nodes in the collection
         if (whitespaceRule != null) {
             final SpaceStrippingRule rule = whitespaceRule;
-            ItemMappingFunction<Item<? extends Item>, Item<? extends Item>> stripper = item -> {
+            ItemMappingFunction stripper = item -> {
                 if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.DOCUMENT) {
                     TreeInfo treeInfo = ((NodeInfo) item).getTreeInfo();
                     if (treeInfo.getSpaceStrippingRule() != rule) {
@@ -263,12 +268,12 @@ public class CollectionFn extends SystemFunction implements Callable {
             Controller controller = context.getController();
             DocumentPool docPool = controller.getDocumentPool();
             cachedCollection = result.materialize();
-            SequenceIterator<?> iter = cachedCollection.iterate();
+            SequenceIterator iter = cachedCollection.iterate();
             Item item;
             while ((item = iter.next()) != null) {
                 if (item instanceof NodeInfo && ((NodeInfo)item).getNodeKind() == Type.DOCUMENT) {
                     String docUri = ((NodeInfo)item).getSystemId();
-                    DocumentURI docKey = new DocumentURI(docUri);
+                    DocumentKey docKey = new DocumentKey(docUri);
                     TreeInfo info = item instanceof TreeInfo ? (TreeInfo)item : new GenericTreeInfo(controller.getConfiguration(), (NodeInfo)item);
                     docPool.add(info, docKey);
                 }
@@ -277,7 +282,7 @@ public class CollectionFn extends SystemFunction implements Callable {
             return cachedCollection;
         }
 
-        return new LazySequence<>(result);
+        return new LazySequence(result);
     }
 
 }

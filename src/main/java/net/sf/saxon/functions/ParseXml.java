@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -44,9 +44,10 @@ public class ParseXml extends SystemFunction implements Callable {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public ZeroOrOne<NodeInfo> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue input = (StringValue) arguments[0].head();
-        return input == null ? ZeroOrOne.empty() : new ZeroOrOne<>(evalParseXml(input, context));
+        return input == null ? ZeroOrOne.empty() : new ZeroOrOne(evalParseXml(input, context));
     }
 
     private NodeInfo evalParseXml(StringValue inputArg, XPathContext context) throws XPathException {
@@ -66,7 +67,7 @@ public class ParseXml extends SystemFunction implements Callable {
             Source source = new SAXSource(is);
             source.setSystemId(baseURI);
 
-            Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
+            Builder b = controller.makeBuilder();
             Receiver s = b;
             ParseOptions options = new ParseOptions(config.getParseOptions());
             PackageData pd = getRetainedStaticContext().getPackageData();
@@ -103,14 +104,17 @@ public class ParseXml extends SystemFunction implements Callable {
         public List<SAXParseException> errors = new ArrayList<>();
         public boolean failed = false;
 
+        @Override
         public void error(SAXParseException exception) {
             errors.add(exception);
         }
 
+        @Override
         public void warning(SAXParseException exception) {
             // no action
         }
 
+        @Override
         public void fatalError(SAXParseException exception) {
             errors.add(exception);
             failed = true;
@@ -129,4 +133,4 @@ public class ParseXml extends SystemFunction implements Callable {
     }
 }
 
-//Copyright (c) 2010-2016 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

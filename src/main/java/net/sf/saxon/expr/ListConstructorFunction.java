@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -77,6 +77,7 @@ public class ListConstructorFunction extends AbstractFunction {
      *
      * @return the function item's type
      */
+    @Override
     public FunctionItemType getFunctionItemType() {
         AtomicType resultType = BuiltInAtomicType.ANY_ATOMIC;
         if (memberType.isAtomicType()) {
@@ -95,6 +96,7 @@ public class ListConstructorFunction extends AbstractFunction {
      *
      * @return the function name, or null for an anonymous inline function
      */
+    @Override
     public StructuredQName getFunctionName() {
         return targetType.getStructuredQName();
     }
@@ -106,6 +108,7 @@ public class ListConstructorFunction extends AbstractFunction {
      *
      * @return a description of the function for use in error messages
      */
+    @Override
     public String getDescription() {
         return getFunctionName().getDisplayName();
     }
@@ -115,6 +118,7 @@ public class ListConstructorFunction extends AbstractFunction {
      *
      * @return the number of arguments in the function signature
      */
+    @Override
     public int getArity() {
         return 1;
     }
@@ -128,6 +132,7 @@ public class ListConstructorFunction extends AbstractFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs within the function
      */
+    @Override
     public AtomicSequence call(XPathContext context, Sequence[] args) throws XPathException {
         AtomicValue val = (AtomicValue) args[0].head();
         if (val == null) {

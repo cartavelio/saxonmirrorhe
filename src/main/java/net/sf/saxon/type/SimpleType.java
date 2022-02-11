@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -24,6 +24,7 @@ public interface SimpleType extends SchemaType {
      * @return true if this is an atomic type
      */
 
+    @Override
     boolean isAtomicType();
 
     /**
@@ -40,15 +41,6 @@ public interface SimpleType extends SchemaType {
      */
 
     boolean isUnionType();
-
-    /**
-     * Return true if this is an external object type, that is, a Saxon-defined type for external
-     * Java or .NET objects
-     *
-     * @return true if this is an external type
-     */
-
-    boolean isExternalType();
 
     /**
      * Determine whether this is a built-in type or a user-defined type
@@ -76,10 +68,8 @@ public interface SimpleType extends SchemaType {
      *                 in the content of values. Can supply null, in which case any namespace-sensitive content
      *                 will be rejected.
      * @param rules    the conversion rules from the configuration
-     * @return an iterator over the atomic sequence comprising the typed value. The objects
+     * @return the atomic sequence comprising the typed value. The objects
      *         returned by this SequenceIterator will all be of type {@link net.sf.saxon.value.AtomicValue},
-     *         The next() method on the iterator throws no checked exceptions, although it is not actually
-     *         declared as an UnfailingIterator.
      * @throws ValidationException if the supplied value is not in the lexical space of the data type
      */
 

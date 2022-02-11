@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,12 +7,9 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -70,12 +67,15 @@ public class NamespaceReducer extends ProxyReceiver implements NamespaceResolver
      * possibly adds an xmlns="" undeclaration.
      */
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaceMap,
+                             Location location, int properties)
+            throws XPathException {
+        nextReceiver.startElement(elemName, type, attributes, namespaceMap, location, properties);
 
-        nextReceiver.startElement(elemName, typeCode, location, properties);
 
-
-        if ((properties & ReceiverOptions.REFUSE_NAMESPACES) != 0) {
+        if (ReceiverOption.contains(properties, ReceiverOption.REFUSE_NAMESPACES)) {
             // Typically XQuery: the element does not inherit namespaces from its parent
             pendingUndeclarations = Arrays.copyOf(namespaces, namespacesSize);
         } else if (depth > 0 && disinheritStack[depth - 1]) {
@@ -99,42 +99,25 @@ public class NamespaceReducer extends ProxyReceiver implements NamespaceResolver
         // Record the current height of the namespace list so it can be reset at endElement time
 
         countStack[depth] = 0;
-        disinheritStack[depth] = (properties & ReceiverOptions.DISINHERIT_NAMESPACES) != 0;
+        disinheritStack[depth] = ReceiverOption.contains(properties, ReceiverOption.DISINHERIT_NAMESPACES);
         if (++depth >= countStack.length) {
             countStack = Arrays.copyOf(countStack, depth*2);
             disinheritStack = Arrays.copyOf(disinheritStack, depth*2);
         }
 
-        // Ensure that the element namespace is output, unless this is done
-        // automatically by the caller (which is true, for example, for a literal
-        // result element).
-
-        if ((properties & ReceiverOptions.NAMESPACE_OK) == 0) {
-            namespace(elemName.getNamespaceBinding(), 0);
-        }
-
     }
 
-    /**
-     * Output a namespace node (binding)
-     *
-     * @param namespaceBindings the prefix/uri pair to be output
-     * @param properties       the properties of the namespace binding
-     * @throws XPathException if any downstream error occurs
-     */
-
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-
-        // Keep the namespace only if it is actually needed
-
-        for (NamespaceBinding ns : namespaceBindings) {
-            if (isNeeded(ns)) {
-                addToStack(ns);
-                countStack[depth - 1]++;
-                nextReceiver.namespace(ns, properties);
-            }
-        }
-    }
+//    /**
+//     * Output a namespace node (binding)
+//     *
+//     * @param namespaceBindings the prefix/uri pair to be output
+//     * @param properties       the properties of the namespace binding
+//     * @throws XPathException if any downstream error occurs
+//     */
+//
+//    public void namespaces(NamespaceMap namespaceBindings, int properties) throws XPathException {
+//        nextReceiver.namespaces(namespaceBindings, properties);
+//    }
 
     /**
      * Determine whether a namespace declaration is needed
@@ -201,30 +184,22 @@ public class NamespaceReducer extends ProxyReceiver implements NamespaceResolver
         return depth > 0 && disinheritStack[depth-1];
     }
 
-    /**
-     * startContent: Add any namespace undeclarations needed to stop
-     * namespaces being inherited from parent elements
-     */
-
-    public void startContent() throws XPathException {
-
-        if (pendingUndeclarations != null) {
-            for (NamespaceBinding ns : pendingUndeclarations) {
-                if (ns != null) {
-                    namespace(new NamespaceBinding(ns.getPrefix(), ""), 0);
-                    // relies on the namespace() method to prevent duplicate undeclarations
-                }
-            }
-        }
-        pendingUndeclarations = null;
-        nextReceiver.startContent();
-    }
+//    /**
+//     * startContent: Add any namespace undeclarations needed to stop
+//     * namespaces being inherited from parent elements
+//     */
+//
+//    public void startContent() throws XPathException {
+//        pendingUndeclarations = null;
+//        nextReceiver.startContent();
+//    }
 
     /**
      * endElement: Discard the namespaces declared on this element.
      */
 
 
+    @Override
     public void endElement() throws XPathException {
         if (depth-- == 0) {
             throw new IllegalStateException("Attempt to output end tag with no matching start tag");
@@ -247,6 +222,7 @@ public class NamespaceReducer extends ProxyReceiver implements NamespaceResolver
      */
 
     /*@Nullable*/
+    @Override
     public String getURIForPrefix(String prefix, boolean useDefault) {
         if (prefix.isEmpty() && !useDefault) {
             return NamespaceConstant.NULL;
@@ -267,6 +243,7 @@ public class NamespaceReducer extends ProxyReceiver implements NamespaceResolver
      * the default namespace (prefix="") and the XML namespace where appropriate
      */
 
+    @Override
     public Iterator<String> iteratePrefixes() {
         List<String> prefixes = new ArrayList<>(namespacesSize);
         for (int i = namespacesSize - 1; i >= 0; i--) {

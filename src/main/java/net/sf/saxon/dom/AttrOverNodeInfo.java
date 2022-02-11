@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -26,6 +26,7 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
      * Get the name of an attribute node (the lexical QName) (DOM method)
      */
 
+    @Override
     public String getName() {
         if (node.getNodeKind() == Type.NAMESPACE) {
             String local = node.getLocalPart();
@@ -44,6 +45,7 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
      * @return the attribute value
      */
 
+    @Override
     public String getValue() {
         return node.getStringValue();
     }
@@ -54,6 +56,7 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
      * @return <code>true</code>: a DOM Attribute has a text node as a child.
      */
 
+    @Override
     public boolean hasChildNodes() {
         return true;
     }
@@ -65,6 +68,7 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
      *         node as its child.
      */
 
+    @Override
     public Node getFirstChild() {
         return new TextOverAttrInfo(this);
     }
@@ -75,6 +79,7 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
      * @return last child of this node, or null if it has no children
      */
 
+    @Override
     public Node getLastChild() {
         return getFirstChild();
     }
@@ -85,6 +90,7 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
      * nodes.
      */
 
+    @Override
     public NodeList getChildNodes() {
         List<Node> list = new ArrayList<>(1);
         list.add(getFirstChild());
@@ -99,6 +105,7 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
      * @return Always true in this implementation.
      */
 
+    @Override
     public boolean getSpecified() {
         return true;
     }
@@ -106,8 +113,10 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
     /**
      * Set the value of an attribute node. (DOM method).
      * Always fails (because tree is readonly)
+     * @throws org.w3c.dom.DOMException always, to indicate that update is not supported in this DOM implementation
      */
 
+    @Override
     public void setValue(String value) throws DOMException {
         disallowUpdate();
     }
@@ -117,6 +126,7 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
      * in DOM Level 3.
      */
 
+    @Override
     public boolean isId() {
         return node.isId();
     }
@@ -129,6 +139,7 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
      * @since DOM Level 2
      */
 
+    @Override
     public Element getOwnerElement() {
         if (node.getNodeKind() == Type.ATTRIBUTE || node.getNodeKind() == Type.NAMESPACE) {
             return (Element) wrap(node.getParent());
@@ -143,6 +154,7 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
      */
 
     /*@Nullable*/
+    @Override
     public TypeInfo getSchemaTypeInfo() {
         SchemaType type = node.getSchemaType();
         if (type == null || BuiltInAtomicType.UNTYPED_ATOMIC.equals(type)) {

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,12 +12,8 @@ import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.sort.MergeInstr;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
@@ -51,6 +47,7 @@ public class XSLMergeSource extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return false;
     }
@@ -61,6 +58,7 @@ public class XSLMergeSource extends StyleElement {
      * @return false: no, it may not contain a sequence constructor
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
@@ -159,8 +157,7 @@ public class XSLMergeSource extends StyleElement {
     }
 
     @Override
-    protected void prepareAttributes() throws XPathException {
-        AttributeCollection atts = getAttributeList();
+    protected void prepareAttributes() {
 
         String selectAtt = null;
         String forEachItemAtt = null;
@@ -170,26 +167,28 @@ public class XSLMergeSource extends StyleElement {
         String streamableAtt = null;
         String useAccumulatorsAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             switch (f) {
                 case "for-each-item":
-                    forEachItemAtt = atts.getValue(a);
-                    forEachItem = makeExpression(forEachItemAtt, a);
+                    forEachItemAtt = value;
+                    forEachItem = makeExpression(forEachItemAtt, att);
                     break;
                 case "for-each-source":
-                    forEachSourceAtt = atts.getValue(a);
-                    forEachSource = makeExpression(forEachSourceAtt, a);
+                    forEachSourceAtt = value;
+                    forEachSource = makeExpression(forEachSourceAtt, att);
                     break;
                 case "select":
-                    selectAtt = atts.getValue(a);
-                    select = makeExpression(selectAtt, a);
+                    selectAtt = value;
+                    select = makeExpression(selectAtt, att);
                     break;
                 case "sort-before-merge":
-                    sortBeforeMerge = processBooleanAttribute("sort-before-merge", atts.getValue(a));
+                    sortBeforeMerge = processBooleanAttribute("sort-before-merge", value);
                     break;
                 case "name":
-                    String nameAtt = Whitespace.trim(atts.getValue(a));
+                    String nameAtt = Whitespace.trim(value);
                     if (NameChecker.isValidNCName(nameAtt)) {
                         sourceName = nameAtt;
                     } else {
@@ -197,19 +196,19 @@ public class XSLMergeSource extends StyleElement {
                     }
                     break;
                 case "validation":
-                    validationAtt = Whitespace.trim(atts.getValue(a));
+                    validationAtt = Whitespace.trim(value);
                     break;
                 case "type":
-                    typeAtt = Whitespace.trim(atts.getValue(a));
+                    typeAtt = Whitespace.trim(value);
                     break;
                 case "streamable":
-                    streamableAtt = atts.getValue(a);
+                    streamableAtt = value;
                     break;
                 case "use-accumulators":
-                    useAccumulatorsAtt = Whitespace.trim(atts.getValue(a));
+                    useAccumulatorsAtt = Whitespace.trim(value);
                     break;
                 default:
-                    checkUnknownAttribute(atts.getNodeName(a));
+                    checkUnknownAttribute(attName);
                     break;
             }
         }
@@ -267,15 +266,14 @@ public class XSLMergeSource extends StyleElement {
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
 
         forEachItem = typeCheck("for-each-item", forEachItem);
         forEachSource = typeCheck("for-each-source", forEachSource);
         select = typeCheck("select", select);
 
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while ((child = kids.next()) != null) {
+        for (NodeInfo child : children()) {
             if (child instanceof XSLMergeKey) {
                 mergeKeyCount++;
             } else if (child.getNodeKind() == Type.TEXT) {

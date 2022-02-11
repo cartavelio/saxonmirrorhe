@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -105,6 +105,7 @@ public class SlashExpression extends BinaryExpression
      * @return the first operand
      */
 
+    @Override
     public Expression getSelectExpression() {
         return getStart();
     }
@@ -115,6 +116,7 @@ public class SlashExpression extends BinaryExpression
      * @return the second operand
      */
 
+    @Override
     public Expression getActionExpression() {
         return getStep();
     }
@@ -126,6 +128,7 @@ public class SlashExpression extends BinaryExpression
      */
 
     /*@NotNull*/
+    @Override
     public final ItemType getItemType() {
         return getStep().getItemType();
     }
@@ -167,6 +170,7 @@ public class SlashExpression extends BinaryExpression
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         getLhs().typeCheck(visitor, contextInfo);
@@ -282,11 +286,11 @@ public class SlashExpression extends BinaryExpression
 
 
 
-        byte underlyingAxis = ((AxisExpression) underlyingStep).getAxis();
+        int underlyingAxis = ((AxisExpression) underlyingStep).getAxis();
         if (underlyingAxis == AxisInfo.CHILD ||
                 underlyingAxis == AxisInfo.DESCENDANT ||
                 underlyingAxis == AxisInfo.DESCENDANT_OR_SELF) {
-            byte newAxis = underlyingAxis == AxisInfo.DESCENDANT_OR_SELF ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.DESCENDANT;
+            int newAxis = underlyingAxis == AxisInfo.DESCENDANT_OR_SELF ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.DESCENDANT;
             Expression newStep =
                     new AxisExpression(newAxis,
                             ((AxisExpression) underlyingStep).getNodeTest());
@@ -341,6 +345,7 @@ public class SlashExpression extends BinaryExpression
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         Configuration config = visitor.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
@@ -354,6 +359,7 @@ public class SlashExpression extends BinaryExpression
         ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(getStart().getItemType(), false);
         cit.setContextSettingExpression(getStart());
         getRhs().optimize(visitor, cit);
+
         if (Literal.isEmptySequence(getStep())) {
             return Literal.makeEmptySequence();
         }
@@ -497,7 +503,7 @@ public class SlashExpression extends BinaryExpression
      * and we assume that a sequence has length 5. The resulting estimates may be used, for
      * example, to reorder the predicates in a filter expression so cheaper predicates are
      * evaluated first.
-     * @return
+     * @return the cost estimate
      */
     @Override
     public double getCost() {
@@ -605,6 +611,7 @@ public class SlashExpression extends BinaryExpression
      *         expression is the first operand of a path expression or filter expression
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         PathMap.PathMapNodeSet target = getStart().addToPathMap(pathMap, pathMapNodeSet);
         return getStep().addToPathMap(pathMap, target);
@@ -647,6 +654,7 @@ public class SlashExpression extends BinaryExpression
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         Expression exp = ExpressionTool.makePathExpression(getStart().copy(rebindings), getStep().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
@@ -659,6 +667,7 @@ public class SlashExpression extends BinaryExpression
      * property bit is set, it is true, but if it is unset, the value is unknown.
      */
 
+    @Override
     public int computeSpecialProperties() {
 
         int startProperties = getStart().getSpecialProperties();
@@ -810,6 +819,7 @@ public class SlashExpression extends BinaryExpression
      * Determine the static cardinality of the expression
      */
 
+    @Override
     public int computeCardinality() {
         int c1 = getStart().getCardinality();
         int c2 = getStep().getCardinality();
@@ -845,7 +855,7 @@ public class SlashExpression extends BinaryExpression
             return new GeneralNodePattern(this, (NodeTest)tailPattern.getItemType());
         }
 
-        byte axis = AxisInfo.PARENT;
+        int axis = AxisInfo.PARENT;
         Pattern headPattern = null;
         if (head instanceof SlashExpression) {
             SlashExpression start = (SlashExpression) head;
@@ -859,8 +869,18 @@ public class SlashExpression extends BinaryExpression
             }
         }
         if (headPattern == null) {
-            axis = PatternMaker.getAxisForPathStep(tail);
-            headPattern = head.toPattern(config);
+            if (tail instanceof VennExpression) {
+                Expression lhExpansion = new SlashExpression(
+                        head.copy(new RebindingMap()), ((VennExpression)tail).getLhsExpression());
+                Expression rhExpansion = new SlashExpression(
+                        head.copy(new RebindingMap()), ((VennExpression) tail).getRhsExpression());
+                VennExpression topExpansion = new VennExpression(
+                        lhExpansion, ((VennExpression)tail).operator, rhExpansion);
+                return topExpansion.toPattern(config);
+            } else {
+                axis = PatternMaker.getAxisForPathStep(tail);
+                headPattern = head.toPattern(config);
+            }
         }
         return new AncestorQualifiedPattern(tailPattern, headPattern, axis);
     }
@@ -903,6 +923,7 @@ public class SlashExpression extends BinaryExpression
      * get HashCode for comparing two expressions
      */
 
+    @Override
     public int computeHashCode() {
         return "SlashExpression".hashCode() + getStart().hashCode() + getStep().hashCode();
     }
@@ -914,22 +935,24 @@ public class SlashExpression extends BinaryExpression
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(final XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(final XPathContext context) throws XPathException {
 
         // This class delivers the result of the path expression in unsorted order,
         // without removal of duplicates. If sorting and deduplication are needed,
         // this is achieved by wrapping the path expression in a DocumentSorter
 
-        if (contextFree) {
-            return new MappingIterator<>(
+        Expression step = getStep();
+        if (contextFree && step instanceof AxisExpression) {
+            // see bug 4730, the step might have been rewritten since the flag was set
+            return new MappingIterator(
                     getStart().iterate(context),
-                    (MappingFunction<Item<?>, NodeInfo>) item ->
-                            ((AxisExpression) getRhsExpression()).iterate((NodeInfo)item));
+                    item -> ((AxisExpression) step).iterate((NodeInfo)item));
         }
 
         XPathContext context2 = context.newMinorContext();
         context2.trackFocus(getStart().iterate(context));
-        return new ContextMappingIterator<Item<?>>(c1 -> getStep().iterate(c1), context2);
+        return new ContextMappingIterator(step::iterate, context2);
     }
 
 //    /**
@@ -937,7 +960,7 @@ public class SlashExpression extends BinaryExpression
 //     * returned by the child.
 //     */
 //
-//    public SequenceIterator<?> map(XPathContext context) throws XPathException {
+//    public SequenceIterator map(XPathContext context) throws XPathException {
 //        return getStep().iterate(context);
 //    }
 
@@ -946,6 +969,7 @@ public class SlashExpression extends BinaryExpression
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("slash", this);
         if (this instanceof SimpleStepExpression) {

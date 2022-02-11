@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,8 +12,6 @@ import net.sf.saxon.functions.Nilled_1;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
-import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.*;
@@ -58,6 +56,7 @@ public class ContentTypeTest extends NodeTest {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return kind == Type.ELEMENT ? UType.ELEMENT : UType.ATTRIBUTE;
     }
@@ -77,6 +76,7 @@ public class ContentTypeTest extends NodeTest {
      * @return true if the test is nillable
      */
 
+    @Override
     public boolean isNillable() {
         return nillable;
     }
@@ -125,7 +125,8 @@ public class ContentTypeTest extends NodeTest {
      * @param node the node to be matched
      */
 
-    public boolean matchesNode(/*@NotNull*/ NodeInfo node) {
+    @Override
+    public boolean test(/*@NotNull*/ NodeInfo node) {
         return node.getNodeKind() == kind &&
                 matchesAnnotation(node.getSchemaType())
                 && (nillable || !Nilled_1.isNilled(node));
@@ -144,14 +145,15 @@ public class ContentTypeTest extends NodeTest {
         }
 
         // see if the type annotation is a subtype of the required type
-        int r = config.getTypeHierarchy().schemaTypeRelationship(annotation, schemaType);
-        return r == TypeHierarchy.SAME_TYPE || r == TypeHierarchy.SUBSUMED_BY;
+        Affinity r = config.getTypeHierarchy().schemaTypeRelationship(annotation, schemaType);
+        return r == Affinity.SAME_TYPE || r == Affinity.SUBSUMED_BY;
     }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
+    @Override
     public final double getDefaultPriority() {
         return 0;
     }
@@ -162,6 +164,7 @@ public class ContentTypeTest extends NodeTest {
      * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
      */
 
+    @Override
     public int getPrimitiveType() {
         return kind;
     }
@@ -171,6 +174,7 @@ public class ContentTypeTest extends NodeTest {
      * Return AnyType if there are no restrictions. The default implementation returns AnyType.
      */
 
+    @Override
     public SchemaType getContentType() {
         return schemaType;
     }
@@ -181,6 +185,7 @@ public class ContentTypeTest extends NodeTest {
      */
 
     /*@NotNull*/
+    @Override
     public AtomicType getAtomizedItemType() {
         SchemaType type = schemaType;
         try {
@@ -217,6 +222,7 @@ public class ContentTypeTest extends NodeTest {
      * @param th The type hierarchy cache
      */
 
+    @Override
     public boolean isAtomizable(TypeHierarchy th) {
         return !(schemaType.isComplexType() &&
                 ((ComplexType) schemaType).getVariety() == ComplexType.VARIETY_ELEMENT_ONLY);
@@ -258,36 +264,6 @@ public class ContentTypeTest extends NodeTest {
                 ((ContentTypeTest) other).kind == kind &&
                 ((ContentTypeTest) other).schemaType == schemaType &&
                 ((ContentTypeTest) other).nillable == nillable;
-    }
-
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @throws XPathException if JS code cannot be generated for this item type, for example because
-     *                        the test is schema-aware.
-     * @param knownToBe An item type that the supplied item is known to conform to; the generated code
-     *                  can assume that the item is an instance of this type.
-     * @param targetVersion The version of Saxon-JS for which code is being generated. Currently either 1 or 2.
-
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        if (kind == Type.ELEMENT) {
-            if (schemaType == Untyped.getInstance() || schemaType == AnyType.getInstance()) {
-                return NodeKindTest.makeNodeKindTest(getNodeKind()).generateJavaScriptItemTypeTest(AnyItemType.getInstance(), targetVersion);
-            } else if (schemaType == BuiltInAtomicType.UNTYPED_ATOMIC || schemaType == BuiltInAtomicType.ANY_ATOMIC) {
-                return "return false;";
-            }
-        } else if (kind == Type.ATTRIBUTE) {
-            if (schemaType == Untyped.getInstance() || schemaType == AnyType.getInstance()
-                    || schemaType == BuiltInAtomicType.UNTYPED_ATOMIC || schemaType == BuiltInAtomicType.ANY_ATOMIC) {
-                return NodeKindTest.makeNodeKindTest(getNodeKind()).generateJavaScriptItemTypeTest(AnyItemType.getInstance(), targetVersion);
-            }
-        }
-        throw new XPathException("Cannot generate JS code to test type annotations", SaxonErrorCode.SXJS0001);
     }
 
     /**

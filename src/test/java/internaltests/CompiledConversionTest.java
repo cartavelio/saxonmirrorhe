@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
@@ -8,9 +8,12 @@
 package internaltests;
 
 
-import junit.framework.TestCase;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test bytecode generation for conversion of primitive types. See bug 4014. The
@@ -18,7 +21,7 @@ import net.sf.saxon.s9api.*;
  * or drop type information, so the bytecode path doesn't get tested
  */
 
-public class CompiledConversionTest extends TestCase {
+public class CompiledConversionTest {
 
     private void test(XdmAtomicValue from, String query, XdmAtomicValue expected) {
         try {
@@ -44,6 +47,7 @@ public class CompiledConversionTest extends TestCase {
         }
     }
 
+    @Test
     public void testFromBoolean() {
         test(new XdmAtomicValue(true), "xs:string(.)", new XdmAtomicValue("true"));
         test(new XdmAtomicValue(true), "xs:int(.)", new XdmAtomicValue(1));
@@ -53,6 +57,7 @@ public class CompiledConversionTest extends TestCase {
         test(new XdmAtomicValue(true), "xs:untypedAtomic(.)", new XdmAtomicValue("true"));
     }
 
+    @Test
     public void testFromString() {
         test(new XdmAtomicValue("1"), "xs:boolean(.)", new XdmAtomicValue(true));
         test(new XdmAtomicValue("3"), "xs:int(.)", new XdmAtomicValue(3));
@@ -62,6 +67,7 @@ public class CompiledConversionTest extends TestCase {
         test(new XdmAtomicValue("3"), "xs:untypedAtomic(.)", new XdmAtomicValue("3"));
     }
 
+    @Test
     public void testFromInt() {
         test(new XdmAtomicValue(1), "xs:boolean(.)", new XdmAtomicValue(true));
         test(new XdmAtomicValue(3), "xs:int(.)", new XdmAtomicValue(3));
@@ -72,6 +78,7 @@ public class CompiledConversionTest extends TestCase {
         test(new XdmAtomicValue(3), "xs:string(.)", new XdmAtomicValue("3"));
     }
 
+    @Test
     public void testFromDouble() {
         test(new XdmAtomicValue(1.0e0), "xs:boolean(.)", new XdmAtomicValue(true));
         test(new XdmAtomicValue(3.0e0), "xs:int(.)", new XdmAtomicValue(3));
@@ -82,6 +89,7 @@ public class CompiledConversionTest extends TestCase {
         test(new XdmAtomicValue(3.0e0), "xs:string(.)", new XdmAtomicValue("3"));
     }
 
+    @Test
     public void testFromFloat() {
         test(new XdmAtomicValue((float)1.0e0), "xs:boolean(.)", new XdmAtomicValue(true));
         test(new XdmAtomicValue((float)3.0e0), "xs:int(.)", new XdmAtomicValue(3));

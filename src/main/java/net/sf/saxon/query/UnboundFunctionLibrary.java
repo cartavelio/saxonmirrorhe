@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -63,6 +63,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
      */
 
     /*@Nullable*/
+    @Override
     public Expression bind(SymbolicName.F functionName, /*@NotNull*/  Expression[] arguments, StaticContext env, List<String> reasons) {
         if (resolving) {
             return null;
@@ -80,8 +81,6 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
         return ufc;
     }
 
-//#ifdefined HOF
-
     /**
      * Test whether a function with a given name and arity is available; if so, return a function
      * item that can be dynamically called.
@@ -93,6 +92,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
      * @return if a function of this name and arity is available for calling, then a corresponding
      *         function item; or null if the function does not exist
      */
+    @Override
     public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) {
         if (resolving) {
             return null;
@@ -105,8 +105,6 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
         //uc.setFunctionItem(fi);
         return fi;
     }
-//#endif
-
 
     /**
      * Test whether a function with a given name and arity is available
@@ -115,6 +113,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
      * @param functionName the qualified name of the function being called
      * @return true if a function of this name and arity is available for calling
      */
+    @Override
     public boolean isAvailable(SymbolicName.F functionName) {
         return false;  // function-available() is not used in XQuery
     }
@@ -152,7 +151,18 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
                 if (fd != null) {
                     fd.registerReference(ufc);
                     ufc.setStaticType(fd.getResultType());
-                } else {
+                }
+
+//                if (fd == null && importingModule.importsNamespace(q.getURI())) {
+//                    XQueryFunctionBinder global = importingModule.getExecutable().getFunctionLibrary();
+//                    fd = global.getDeclaration(q, arity);
+//                    if (fd != null) {
+//                        fd.registerReference(ufc);
+//                        ufc.setStaticType(fd.getResultType());
+//                    }
+//                }
+
+                if (fd == null) {
                     StringBuilder sb = new StringBuilder("Cannot find a " + arity +
                             "-argument function named " + q.getEQName() + "()");
                     List<String> reasons = correspondingReasons.get(i);
@@ -205,6 +215,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
      */
 
     /*@NotNull*/
+    @Override
     public FunctionLibrary copy() {
         UnboundFunctionLibrary qfl = new UnboundFunctionLibrary();
         qfl.unboundFunctionReferences = new ArrayList<>(unboundFunctionReferences);

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -175,8 +175,7 @@ public final class DateTimeValue extends CalendarValue
 
     /**
      * Factory method: create a dateTime value given a Java {@link Instant}. The {@code java.time.Instant} class
-     * is new in JDK 8. Note that {@code DateTimeValue} only holds microsecond precision, so there will be some
-     * rounding.
+     * is new in JDK 8.
      *
      * @param instant the point in time
      * @return the corresponding xs:dateTime value, which will have timezone Z (UTC)
@@ -194,43 +193,59 @@ public final class DateTimeValue extends CalendarValue
 
     /**
      * Factory method: create a dateTime value given a Java {@link ZonedDateTime}. The {@code java.time.ZonedDateTime} class
-     * is new in JDK 8. Note that {@code DateTimeValue} only holds microsecond precision, so there will be some
-     * rounding.
+     * is new in JDK 8.
      *
      * @param zonedDateTime the supplied zonedDateTime value
      * @return the corresponding xs:dateTime value, which will have the same timezone offset as the supplied ZonedDateTime;
      * the actual (civil) timezone information is lost. The returned value will be an instance of the built-in
      * subtype {@code xs:dateTimeStamp}
-     * @since 9.9
+     * @since 9.9. Changed in 10.0 to retain nanosecond precision.
      */
 
     /*@NotNull*/
     public static DateTimeValue fromZonedDateTime(ZonedDateTime zonedDateTime) {
-        LocalDateTime ldt = zonedDateTime.toLocalDateTime();
-        ZoneOffset zo = zonedDateTime.getOffset();
+        return fromOffsetDateTime(zonedDateTime.toOffsetDateTime());
+    }
+
+    /**
+     * Factory method: create a dateTime value given a Java {@link OffsetDateTime}. The {@code java.time.OffsetDateTime} class
+     * is new in JDK 8.
+     *
+     * @param offsetDateTime the supplied zonedDateTime value
+     * @return the corresponding xs:dateTime value, which will have the same timezone offset as the supplied OffsetDateTime.
+     * The returned value will be an instance of the built-in subtype {@code xs:dateTimeStamp}
+     * @since 10.0.
+     */
+
+    /*@NotNull*/
+    public static DateTimeValue fromOffsetDateTime(OffsetDateTime offsetDateTime) {
+        LocalDateTime ldt = offsetDateTime.toLocalDateTime();
+        ZoneOffset zo = offsetDateTime.getOffset();
         int tz = zo.getTotalSeconds() / 60;
-        DateTimeValue dtv = new DateTimeValue(ldt.getYear(), (byte)ldt.getMonthValue(), (byte)ldt.getDayOfMonth(),
-                                 (byte)ldt.getHour(), (byte)ldt.getMinute(), (byte)ldt.getSecond(),
-                                 ldt.getNano()/1000, tz, false);
+        DateTimeValue dtv = new DateTimeValue(ldt.getYear(), (byte) ldt.getMonthValue(), (byte) ldt.getDayOfMonth(),
+                                              (byte) ldt.getHour(), (byte) ldt.getMinute(), (byte) ldt.getSecond(),
+                                              ldt.getNano(), tz);
         dtv.typeLabel = BuiltInAtomicType.DATE_TIME_STAMP;
+        dtv.hasNoYearZero = false;
         return dtv;
     }
 
     /**
      * Factory method: create a dateTime value given a Java {@link LocalDateTime}. The {@code java.time.LocalDateTime} class
-     * is new in JDK 8. Note that {@code DateTimeValue} only holds microsecond precision, so there will be some
-     * rounding.
+     * is new in JDK 8.
      *
      * @param localDateTime the supplied localDateTime value
      * @return the corresponding xs:dateTime value, which will have no timezone.
-     * @since 9.9
+     * @since 9.9. Changed in 10.0 to retain nanosecond precision.
      */
 
     /*@NotNull*/
     public static DateTimeValue fromLocalDateTime(LocalDateTime localDateTime) {
-        return new DateTimeValue(localDateTime.getYear(), (byte) localDateTime.getMonthValue(), (byte) localDateTime.getDayOfMonth(),
+        DateTimeValue dtv = new DateTimeValue(localDateTime.getYear(), (byte) localDateTime.getMonthValue(), (byte) localDateTime.getDayOfMonth(),
                                  (byte) localDateTime.getHour(), (byte) localDateTime.getMinute(), (byte) localDateTime.getSecond(),
-                                 localDateTime.getNano() / 1000, NO_TIMEZONE, false);
+                                 localDateTime.getNano(), NO_TIMEZONE);
+        dtv.hasNoYearZero = false;
+        return dtv;
     }
 
     /**
@@ -685,6 +700,13 @@ public final class DateTimeValue extends CalendarValue
     }
 
     /**
+     * Create a DateTime value equivalent to this value, except for a possible change to
+     * the {@code hasNoYearZero} property. The internal representation is unchanged (year 0 is the
+     * year before year 1), but if the property {@code hasNoYearZero} is set, then a value
+     * with
+     */
+
+    /**
      * Determine the primitive type of the value. This delivers the same answer as
      * getItemType().getPrimitiveItemType(). The primitive types are
      * the 19 primitive types of XML Schema, plus xs:integer, xs:dayTimeDuration and xs:yearMonthDuration,
@@ -692,6 +714,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     /*@NotNull*/
+    @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.DATE_TIME;
     }
@@ -785,6 +808,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     /*@NotNull*/
+    @Override
     public DateTimeValue toDateTime() {
         return this;
     }
@@ -893,6 +917,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     /*@NotNull*/
+    @Override
     public GregorianCalendar getCalendar() {
         int tz = hasTimezone() ? getTimezoneInMinutes() * 60000 : 0;
         TimeZone zone = new SimpleTimeZone(tz, "LLL");
@@ -945,6 +970,27 @@ public final class DateTimeValue extends CalendarValue
     }
 
     /**
+     * Get a Java 8 {@link OffsetDateTime} corresponding to this date and time. The value will respect the time zone
+     * offset if present, or will assume UTC otherwise.
+     *
+     * @return a {@code OffsetDateTime} representing this date and time, including its timezone if present, or
+     * interpreted as a UTC date/time otherwise.
+     * @since 9.9
+     */
+
+    public OffsetDateTime toOffsetDateTime() {
+        if (hasTimezone()) {
+            return OffsetDateTime.from(this);
+        } else {
+            try {
+                return OffsetDateTime.from(adjustToUTC(0));
+            } catch (NoDynamicContextException e) {
+                throw new AssertionError(e);
+            }
+        }
+    }
+
+    /**
      * Get a Java 8 {@link LocalDateTime} corresponding to this date and time. The value will ignore any timezone
      * offset present in this value.
      * @return a {@code LocalDateTime} equivalent to this date and time, discarding any time zone offset if present.
@@ -966,6 +1012,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     /*@NotNull*/
+    @Override
     public CharSequence getPrimitiveStringValue() {
 
         FastStringBuffer sb = new FastStringBuffer(30);
@@ -973,27 +1020,27 @@ public final class DateTimeValue extends CalendarValue
         if (year <= 0) {
             yr = -yr + (hasNoYearZero ? 1 : 0);    // no year zero in lexical space for XSD 1.0
             if (yr != 0) {
-                sb.append('-');
+                sb.cat('-');
             }
         }
         appendString(sb, yr, yr > 9999 ? (yr + "").length() : 4);
-        sb.append('-');
+        sb.cat('-');
         appendTwoDigits(sb, month);
-        sb.append('-');
+        sb.cat('-');
         appendTwoDigits(sb, day);
-        sb.append('T');
+        sb.cat('T');
         appendTwoDigits(sb, hour);
-        sb.append(':');
+        sb.cat(':');
         appendTwoDigits(sb, minute);
-        sb.append(':');
+        sb.cat(':');
         appendTwoDigits(sb, second);
         if (nanosecond != 0) {
-            sb.append('.');
+            sb.cat('.');
             int ms = nanosecond;
             int div = 100_000_000;
             while (ms > 0) {
                 int d = ms / div;
-                sb.append((char) (d + '0'));
+                sb.cat((char) (d + '0'));
                 ms = ms % div;
                 div /= 10;
             }
@@ -1038,6 +1085,7 @@ public final class DateTimeValue extends CalendarValue
      * @return the canonical lexical representation as defined in XML Schema
      */
 
+    @Override
     public CharSequence getCanonicalLexicalRepresentation() {
         if (hasTimezone() && getTimezoneInMinutes() != 0) {
             return adjustTimezone(0).getStringValueCS();
@@ -1054,6 +1102,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     /*@NotNull*/
+    @Override
     public DateTimeValue copyAsSubType(AtomicType typeLabel) {
         DateTimeValue v = new DateTimeValue(year, month, day,
                 hour, minute, second, nanosecond, getTimezoneInMinutes());
@@ -1072,6 +1121,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     /*@NotNull*/
+    @Override
     public DateTimeValue adjustTimezone(int timezone) {
         if (!hasTimezone()) {
             DateTimeValue in = copyAsSubType(typeLabel);
@@ -1128,6 +1178,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     /*@NotNull*/
+    @Override
     public DateTimeValue add(/*@NotNull*/ DurationValue duration) throws XPathException {
         if (duration instanceof DayTimeDurationValue) {
             BigDecimal seconds = ((DayTimeDurationValue) duration).getTotalSeconds();
@@ -1173,6 +1224,7 @@ public final class DateTimeValue extends CalendarValue
      *          for example if one value is a date and the other is a time
      */
 
+    @Override
     public DayTimeDurationValue subtract(/*@NotNull*/ CalendarValue other, XPathContext context) throws XPathException {
         if (!(other instanceof DateTimeValue)) {
             XPathException err = new XPathException("First operand of '-' is a dateTime, but the second is not");
@@ -1201,6 +1253,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     /*@Nullable*/
+    @Override
     public AtomicValue getComponent(AccessorFn.Component component) throws XPathException {
         switch (component) {
             case YEAR_ALLOWING_ZERO:
@@ -1369,6 +1422,7 @@ public final class DateTimeValue extends CalendarValue
      * @throws NoDynamicContextException if the implicit timezone is needed and is not available
      */
 
+    @Override
     public int compareTo(/*@NotNull*/ CalendarValue other, int implicitTimezone) throws NoDynamicContextException {
         if (!(other instanceof DateTimeValue)) {
             throw new ClassCastException("DateTime values are not comparable to " + other.getClass());
@@ -1413,6 +1467,7 @@ public final class DateTimeValue extends CalendarValue
      *                            no timezone is available)
      */
 
+    @Override
     public int compareTo(Object v2) {
         try {
             return compareTo((DateTimeValue) v2, MISSING_TIMEZONE);
@@ -1422,6 +1477,7 @@ public final class DateTimeValue extends CalendarValue
     }
 
     /*@NotNull*/
+    @Override
     public Comparable getSchemaComparable() {
         return new DateTimeComparable();
     }
@@ -1438,6 +1494,7 @@ public final class DateTimeValue extends CalendarValue
         }
 
         // Rules from XML Schema Part 2
+        @Override
         public int compareTo(/*@NotNull*/ Object o) {
             if (o instanceof DateTimeComparable) {
                 DateTimeValue dt0 = DateTimeValue.this;

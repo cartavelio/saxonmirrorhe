@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -29,12 +29,13 @@ import net.sf.saxon.value.Whitespace;
 
 public class XSLNextIteration extends XSLBreakOrContinue {
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         validatePosition();
         if (xslIterate == null) {
             compileError("xsl:next-iteration must be a descendant of an xsl:iterate instruction");
         }
-        iterateAxis(AxisInfo.CHILD).forEachOrFail(child -> {
+        for (NodeInfo child : children()) {
             if (child instanceof XSLWithParam) {
                 if (((XSLWithParam) child).isTunnelParam()) {
                     compileError("An xsl:with-param element within xsl:iterate must not specify tunnel='yes'", "XTSE0020");
@@ -48,9 +49,10 @@ public class XSLNextIteration extends XSLBreakOrContinue {
                 compileError("Child element " + Err.wrap(child.getDisplayName(), Err.ELEMENT) +
                                      " is not allowed as a child of xsl:next-iteration", "XTSE0010");
             }
-        });
+        };
     }
 
+    @Override
     public void postValidate() throws XPathException {
 
         if (xslIterate == null) {
@@ -59,43 +61,39 @@ public class XSLNextIteration extends XSLBreakOrContinue {
 
         // check that every supplied parameter is declared in the saxon:iterate instruction
 
-        AxisIterator actualParams = iterateAxis(AxisInfo.CHILD);
-        NodeInfo w;
-        while ((w = actualParams.next()) != null) {
-            if (w instanceof XSLWithParam) {
-                XSLWithParam withParam = (XSLWithParam) w;
-                AxisIterator formalParams = xslIterate.iterateAxis(AxisInfo.CHILD);
-                boolean ok = false;
-                NodeInfo param;
-                while ((param = formalParams.next()) != null) {
-                    if (param instanceof XSLLocalParam &&
-                            ((XSLLocalParam) param).getVariableQName().equals(withParam.getVariableQName())) {
-                        ok = true;
-                        SequenceType required = ((XSLLocalParam) param).getRequiredType();
-                        withParam.checkAgainstRequiredType(required);
-                        break;
-                    }
+        for (NodeInfo w : children(XSLWithParam.class::isInstance)) {
+            XSLWithParam withParam = (XSLWithParam) w;
+            AxisIterator formalParams = xslIterate.iterateAxis(AxisInfo.CHILD);
+            boolean ok = false;
+            NodeInfo param;
+            while ((param = formalParams.next()) != null) {
+                if (param instanceof XSLLocalParam &&
+                        ((XSLLocalParam) param).getVariableQName().equals(withParam.getVariableQName())) {
+                    ok = true;
+                    SequenceType required = ((XSLLocalParam) param).getRequiredType();
+                    withParam.checkAgainstRequiredType(required);
+                    break;
                 }
-                if (!ok) {
-                    compileError("Parameter " +
-                            withParam.getVariableQName().getDisplayName() +
-                            " is not declared in the containing xsl:iterate instruction", "XTSE3130");
-                }
+            }
+            if (!ok) {
+                compileError("Parameter " +
+                        withParam.getVariableQName().getDisplayName() +
+                        " is not declared in the containing xsl:iterate instruction", "XTSE3130");
             }
         }
     }
-    
+
     public SequenceType getDeclaredParamType(StructuredQName name) {
-        AxisIterator kids = xslIterate.iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while ((child = kids.next()) != null) {
-            if (child instanceof XSLLocalParam && ((XSLLocalParam) child).getVariableQName().equals(name)) {
-                return ((XSLLocalParam) child).getRequiredType();
+        for (NodeInfo param : xslIterate.children(XSLLocalParam.class::isInstance)) {
+            if (((XSLLocalParam)param).getVariableQName().equals(name)) {
+                return ((XSLLocalParam) param).getRequiredType();
             }
         }
         return null;
     }
 
+
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         NextIteration call = new NextIteration();
         call.setRetainedStaticContext(makeRetainedStaticContext());

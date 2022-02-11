@@ -17,12 +17,16 @@ import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class TreeModelPerformanceDescendantAxis extends PerformanceTestCase {
-    
+
     private static final String INPUT = ConfigTest.XMARK_DIR + "xmark10.xml";
     //private static final String INPUT = "/Users/mike/Desktop/temp/testdata.xml";
 
@@ -77,8 +81,8 @@ public class TreeModelPerformanceDescendantAxis extends PerformanceTestCase {
             }
 
             @Override
-            public int expectedTimeMilliseconds() {
-                return expected;
+            public int expectedTimeMicroseconds() {
+                return expected*1000;
             }
 
             @Override
@@ -89,42 +93,58 @@ public class TreeModelPerformanceDescendantAxis extends PerformanceTestCase {
         measure(task);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeDescendants10Mb() {
         searchXPathDescendants(TreeModel.TINY_TREE, INPUT, 1);
     }
 
+    @Test
+    @Tag("performance")
     public void testTinyTreeCondensedDescendants10Mb() {
         searchXPathDescendants(TreeModel.TINY_TREE_CONDENSED, INPUT, 2);
     }
 
+    @Test
+    @Tag("performance")
     public void testLinkedDescendants10Mb() {
         searchXPathDescendants(TreeModel.LINKED_TREE, INPUT, 25);
     }
 
+    @Test
+    @Tag("performance")
     public void testDOMDescendants10Mb() {
         searchXPathDescendants(DOMObjectModel.getInstance(), INPUT, 15);
     }
 
+    @Test
+    @Tag("performance")
     public void testDominoDescendants10Mb() {
         searchXPathDescendants(DominoTreeModel.getInstance(), INPUT, 2);
     }
 
+    @Test
+    @Tag("performance")
     public void testXOMDescendants10Mb() {
         searchXPathDescendants(XOMObjectModel.getInstance(), INPUT, 50);
     }
 
+    @Test
+    @Tag("performance")
     public void testJDOM2Descendants10Mb() {
         searchXPathDescendants(JDOM2ObjectModel.getInstance(), INPUT, 25);
     }
 
+    @Test
+    @Tag("performance")
     public void testDOM4JDescendants10Mb() {
         searchXPathDescendants(DOM4JObjectModel.getInstance(), INPUT, 150);
     }
 
+    @Test
+    @Tag("performance")
     public void testAxiomDescendants10Mb() {
         searchXPathDescendants(AxiomObjectModel.getInstance(), INPUT, 110);
     }
-
-
 }
 

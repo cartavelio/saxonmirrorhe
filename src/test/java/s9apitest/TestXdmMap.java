@@ -1,16 +1,21 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Test XdmMap class, representing an XPath map item
  */
-public class TestXdmMap extends TestCase {
+public class TestXdmMap {
 
+    @Test
     public void testMapOperations() {
         XdmMap map = new XdmMap();
         map = map.put(new XdmAtomicValue("a"), new XdmAtomicValue(1));
@@ -18,23 +23,24 @@ public class TestXdmMap extends TestCase {
         map = map.put(new XdmAtomicValue("c"), new XdmAtomicValue(3));
         assertEquals(3, map.mapSize());
         try {
-            assertEquals(((XdmAtomicValue) map.get(new XdmAtomicValue("b"))).getLongValue(), 2);
-            assertEquals(((XdmAtomicValue) map.get("b")).getLongValue(), 2);
+            assertEquals(2, ((XdmAtomicValue) map.get(new XdmAtomicValue("b"))).getLongValue());
+            assertEquals(2, ((XdmAtomicValue) map.get("b")).getLongValue());
         } catch (SaxonApiException e) {
             fail();
         }
         map = map.remove(new XdmAtomicValue("c"));
         map = map.remove(new XdmAtomicValue("d"));
         map = map.put(new XdmAtomicValue("a"), new XdmAtomicValue(4));
-        assertEquals(map.mapSize(), 2);
+        assertEquals(2, map.mapSize());
         try {
-            assertEquals(((XdmAtomicValue) map.get(new XdmAtomicValue("a"))).getLongValue(), 4);
-            assertEquals(((XdmAtomicValue) map.get("a")).getLongValue(), 4);
+            assertEquals(4, ((XdmAtomicValue) map.get(new XdmAtomicValue("a"))).getLongValue());
+            assertEquals(4, ((XdmAtomicValue) map.get("a")).getLongValue());
         } catch (SaxonApiException e) {
             fail();
         }
     }
 
+    @Test
     public void testConversionFromJavaMap() {
         Map<XdmAtomicValue, XdmAtomicValue> jam = new HashMap<XdmAtomicValue, XdmAtomicValue>();
         jam.put(new XdmAtomicValue("a"), new XdmAtomicValue(1));
@@ -43,21 +49,22 @@ public class TestXdmMap extends TestCase {
         XdmMap map = new XdmMap(jam);
         assertEquals(3, map.mapSize());
         try {
-            assertEquals(((XdmAtomicValue) map.get(new XdmAtomicValue("b"))).getLongValue(), 2);
+            assertEquals(2, ((XdmAtomicValue) map.get(new XdmAtomicValue("b"))).getLongValue());
         } catch (SaxonApiException e) {
             fail();
         }
         map = map.remove(new XdmAtomicValue("c"));
         map = map.remove(new XdmAtomicValue("d"));
         map = map.put(new XdmAtomicValue("a"), new XdmAtomicValue(4));
-        assertEquals(map.mapSize(), 2);
+        assertEquals(2, map.mapSize());
         try {
-            assertEquals(((XdmAtomicValue) map.get(new XdmAtomicValue("a"))).getLongValue(), 4);
+            assertEquals(4, ((XdmAtomicValue) map.get(new XdmAtomicValue("a"))).getLongValue());
         } catch (SaxonApiException e) {
             fail();
         }
     }
 
+    @Test
     public void testMapAsFunction() {
         XdmMap map = new XdmMap();
         map = map.put(new XdmAtomicValue("a"), new XdmAtomicValue(1));
@@ -74,6 +81,7 @@ public class TestXdmMap extends TestCase {
         }
     }
 
+    @Test
     public void testMapAsQueryParameter() {
         try {
             XdmMap map = new XdmMap();
@@ -96,6 +104,7 @@ public class TestXdmMap extends TestCase {
         }
     }
 
+    @Test
     public void testMapAsQueryResult() {
         try {
             Processor proc = new Processor(true);
@@ -110,6 +119,7 @@ public class TestXdmMap extends TestCase {
         }
     }
 
+    @Test
     public void testConversionToJavaMap() {
         try {
             Processor proc = new Processor(true);
@@ -126,6 +136,7 @@ public class TestXdmMap extends TestCase {
         }
     }
 
+    @Test
     public void testConversionFromJavaMap2() {
         Map<Integer, String> in = new HashMap<Integer, String>();
         in.put(1, "a");

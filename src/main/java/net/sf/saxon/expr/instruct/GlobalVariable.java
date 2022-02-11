@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -19,28 +19,29 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionLibrary;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.InstructionInfo;
-import net.sf.saxon.trace.LocationKind;
+import net.sf.saxon.trace.TraceableComponent;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 /**
  * A compiled global variable in a stylesheet or query. <br>
  */
 
 public class GlobalVariable extends Actor
-    implements Binding, net.sf.saxon.query.Declaration, InstructionInfo, ContextOriginator {
+    implements Binding, net.sf.saxon.query.Declaration, TraceableComponent, ContextOriginator {
 
     protected List<BindingReference> references = new ArrayList<>(10);
     // Note that variableReferences on this list might be dormant;
@@ -48,7 +49,6 @@ public class GlobalVariable extends Actor
     // References are maintained in XQuery but not in XSLT (where they are handled at the level of the
     // XSLSourceBinding object)
 
-    private Expression select;
     private StructuredQName variableQName;
     private SequenceType requiredType;
 
@@ -75,7 +75,6 @@ public class GlobalVariable extends Actor
      */
 
     public void init(Expression select, StructuredQName qName) {
-        this.select = select;
         variableQName = qName;
         setBody(select);
     }
@@ -90,25 +89,21 @@ public class GlobalVariable extends Actor
         return new SymbolicName(StandardNames.XSL_VARIABLE, variableQName);
     }
 
-    /**
-     * Set the expression to which this variable is bound
-     *
-     * @param select the initializing expression. May be null in the case of a global parameter with no initializer.
-     */
-
-    public void setSelectExpression(Expression select) {
-        this.select = select;
-        setBody(select);
+    @Override
+    public String getTracingTag() {
+        return "xsl:variable";
     }
 
     /**
-     * Get the expression to which this variable is bound
+     * Get the properties of this object to be included in trace messages, by supplying
+     * the property values to a supplied consumer function
      *
-     * @return the initializing expression
+     * @param consumer the function to which the properties should be supplied, as (property name,
+     *                 value) pairs.
      */
-
-    public Expression getSelectExpression() {
-        return select;
+    @Override
+    public void gatherProperties(BiConsumer<String, Object> consumer) {
+        consumer.accept("name", getVariableQName());
     }
 
     /**
@@ -145,6 +140,7 @@ public class GlobalVariable extends Actor
      * @return the required type
      */
 
+    @Override
     public SequenceType getRequiredType() {
         return requiredType;
     }
@@ -258,21 +254,11 @@ public class GlobalVariable extends Actor
      * is present.
      */
 
+    @Override
     public final boolean isAssignable() {
         return isAssignable;
     }
 
-
-    /**
-     * Get the type of construct. This will either be the fingerprint of a standard XSLT instruction name
-     * (values in {@link net.sf.saxon.om.StandardNames}: all less than 1024)
-     * or it will be a constant in class {@link LocationKind}.
-     *
-     * @return an integer identifying the kind of construct
-     */
-    public int getConstructType() {
-        return StandardNames.XSL_VARIABLE;
-    }
 
     /**
      * Get a name identifying the object of the expression, for example a function name, template name,
@@ -280,6 +266,7 @@ public class GlobalVariable extends Actor
      *
      * @return the QName of the object declared or manipulated by this instruction or expression
      */
+    @Override
     public StructuredQName getObjectName() {
         return getVariableQName();
     }
@@ -292,6 +279,7 @@ public class GlobalVariable extends Actor
      * @param name The name of the required property
      * @return The value of the requested property, or null if the property is not available
      */
+    @Override
     public Object getProperty(String name) {
         return null;
     }
@@ -304,6 +292,7 @@ public class GlobalVariable extends Actor
      *
      * @return an iterator over the properties.
      */
+    @Override
     public Iterator<String> getProperties() {
         List<String> list = Collections.emptyList();
         return list.iterator();
@@ -312,10 +301,10 @@ public class GlobalVariable extends Actor
     /**
      * Get the host language (XSLT, XQuery, XPath) used to implement the code in this container
      *
-     * @return typically {@link net.sf.saxon.Configuration#XSLT} or {@link net.sf.saxon.Configuration#XQUERY}
+     * @return typically {@link HostLanguage#XSLT} or {@link HostLanguage#XQUERY}
      */
 
-    public int getHostLanguage() {
+    public HostLanguage getHostLanguage() {
         return getPackageData().getHostLanguage();
     }
 
@@ -355,6 +344,7 @@ public class GlobalVariable extends Actor
      * @return true (yes, it is a global variable)
      */
 
+    @Override
     public boolean isGlobal() {
         return true;
     }
@@ -433,20 +423,20 @@ public class GlobalVariable extends Actor
 
         setBinderySlotNumber(slot);
         if (this instanceof GlobalParam) {
-            setRequiredParam(select == null);
+            setRequiredParam(getBody() == null);
         }
         SequenceType type = getRequiredType();
         for (BindingReference ref : references) {
             ref.fixup(this);
-            GroundedValue<?> constantValue = null;
+            GroundedValue constantValue = null;
             int properties = 0;
-            Expression select = getSelectExpression();
+            Expression select = getBody();
             if (select instanceof Literal && !(this instanceof GlobalParam)) {
                 // we can't rely on the constant value because it hasn't yet been type-checked,
                 // which could change it (eg by numeric promotion). Rather than attempt all the type-checking
                 // now, we do a quick check. See test bug64
-                int relation = th.relationship(select.getItemType(), type.getPrimaryType());
-                if (relation == TypeHierarchy.SAME_TYPE || relation == TypeHierarchy.SUBSUMED_BY) {
+                Affinity relation = th.relationship(select.getItemType(), type.getPrimaryType());
+                if (relation == Affinity.SAME_TYPE || relation == Affinity.SUBSUMED_BY) {
                     constantValue = ((Literal) select).getValue();
                     type = SequenceType.makeSequenceType(SequenceTool.getItemType(constantValue, th), SequenceTool.getCardinality(constantValue));
                 }
@@ -473,7 +463,7 @@ public class GlobalVariable extends Actor
      */
 
     public void typeCheck(/*@NotNull*/ ExpressionVisitor visitor) throws XPathException {
-        Expression value = getSelectExpression();
+        Expression value = getBody();
         if (value != null) {
             value.checkForUpdatingSubexpressions();
             if (value.isUpdatingExpression()) {
@@ -487,21 +477,20 @@ public class GlobalVariable extends Actor
                     value.simplify().typeCheck(visitor, cit),
                     getRequiredType(), role, visitor.getStaticContext());
             value2 = value2.optimize(visitor, cit);
-            setSelectExpression(value2);
+            setBody(value2);
             // the value expression may declare local variables
             SlotManager map = getConfiguration().makeSlotManager();
             int slots = ExpressionTool.allocateSlots(value2, 0, map);
             if (slots > 0) {
                 setContainsLocals(map);
             }
-
             if (getRequiredType() == SequenceType.ANY_SEQUENCE && !(this instanceof GlobalParam)) {
                 // no type was declared; try to deduce a type from the value
                 try {
                     final ItemType itemType = value.getItemType();
                     final int cardinality = value.getCardinality();
                     setRequiredType(SequenceType.makeSequenceType(itemType, cardinality));
-                    GroundedValue<?> constantValue = null;
+                    GroundedValue constantValue = null;
                     if (value2 instanceof Literal) {
                         constantValue = ((Literal) value2).getValue();
                     }
@@ -555,7 +544,7 @@ public class GlobalVariable extends Actor
             message += '.';
             XPathException err = new XPathException(message);
             String errorCode;
-            if (getPackageData().getHostLanguage() == Configuration.XSLT) {
+            if (getPackageData().isXSLT()) {
                 errorCode = "XTDE0640";
             } else if (s == 0 && referees.size() == 2) {
                 // Simple self-reference, treated specially in XQuery
@@ -568,6 +557,7 @@ public class GlobalVariable extends Actor
             err.setLocation(getLocation());
             throw err;
         }
+        Expression select = getBody();
         if (select != null) {
             referees.push(this);
             List<Binding> list = new ArrayList<>(10);
@@ -632,7 +622,8 @@ public class GlobalVariable extends Actor
      * @throws XPathException if a dynamic error occurs during evaluation
      */
 
-    public GroundedValue<?> getSelectValue(XPathContext context, Component target) throws XPathException {
+    public GroundedValue getSelectValue(XPathContext context, Component target) throws XPathException {
+        Expression select = getBody();
         if (select == null) {
             throw new AssertionError("*** No select expression for global variable $" +
                     getVariableQName().getDisplayName() + "!!");
@@ -645,13 +636,13 @@ public class GlobalVariable extends Actor
                 Executable exec = controller.getExecutable();
                 boolean hasAccessToGlobalContext = true;
                 if (exec instanceof PreparedStylesheet) {
-                    hasAccessToGlobalContext = target == null || target.getDeclaringPackage() == ((PreparedStylesheet) exec).getTopLevelPackage();
+                    hasAccessToGlobalContext = target == null || target.getDeclaringPackage() == ((PreparedStylesheet)exec).getTopLevelPackage();
                 }
                 XPathContextMajor c2 = context.newCleanContext();
                 c2.setOrigin(this);
                 if (hasAccessToGlobalContext) {
-                    ManualIterator<?> mi =
-                            new ManualIterator<>(context.getController().getGlobalContextItem());
+                    ManualIterator mi =
+                            new ManualIterator(context.getController().getGlobalContextItem());
                     c2.setCurrentIterator(mi);
                 } else {
                     c2.setCurrentIterator(null);
@@ -663,7 +654,7 @@ public class GlobalVariable extends Actor
                 int savedOutputState = c2.getTemporaryOutputState();
                 c2.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
                 c2.setCurrentOutputUri(null);
-                GroundedValue<?> result;
+                GroundedValue result;
                 if (indexed) {
                     result = c2.getConfiguration().makeSequenceExtent(select, FilterExpression.FILTERED, c2);
                 } else {
@@ -684,12 +675,13 @@ public class GlobalVariable extends Actor
      * Evaluate the variable
      */
 
-    public GroundedValue<?> evaluateVariable(XPathContext context) throws XPathException {
+    @Override
+    public GroundedValue evaluateVariable(XPathContext context) throws XPathException {
         final Controller controller = context.getController();
         assert controller != null;
         final Bindery b = controller.getBindery(getPackageData());
 
-        final GroundedValue<?> v = b.getGlobalVariable(getBinderySlotNumber());
+        final GroundedValue v = b.getGlobalVariable(getBinderySlotNumber());
 
         if (v != null) {
             return v;
@@ -732,7 +724,7 @@ public class GlobalVariable extends Actor
      * @throws XPathException if evaluation fails
      */
 
-    protected GroundedValue<?> actuallyEvaluate(XPathContext context, Component target) throws XPathException {
+    protected GroundedValue actuallyEvaluate(XPathContext context, Component target) throws XPathException {
         final Controller controller = context.getController();
         assert controller != null;
         final Bindery b = controller.getBindery(getPackageData());
@@ -750,7 +742,7 @@ public class GlobalVariable extends Actor
                 return b.getGlobalVariable(getBinderySlotNumber());
             }
 
-            GroundedValue<?> value = getSelectValue(context, target);
+            GroundedValue value = getSelectValue(context, target);
             if (indexed) {
                 value = controller.getConfiguration().obtainOptimizer().makeIndexedValue(value.iterate());
             }
@@ -759,13 +751,7 @@ public class GlobalVariable extends Actor
         } catch (XPathException err) {
             b.setNotExecuting(this);
             if (err instanceof XPathException.Circularity) {
-                String errorCode;
-                if (getPackageData().getHostLanguage() == Configuration.XSLT) {
-                    errorCode = "XTDE0640";
-                } else {
-                    errorCode = "XQDY0054";
-                }
-                err.setErrorCode(errorCode);
+                err.setErrorCode(getPackageData().isXSLT() ? "XTDE0640" : "XQDY0054");
                 err.setXPathContext(context);
                 err.setIsGlobalError(true);
                 // Detect it more quickly the next time (in a pattern, the error is recoverable)
@@ -821,8 +807,9 @@ public class GlobalVariable extends Actor
      * @return a pair of integers containing the minimum and maximum values for the integer value;
      *         or null if the value is not an integer or the range is unknown
      */
+    @Override
     public IntegerValue[] getIntegerBoundsForVariable() {
-        return select==null ? null : select.getIntegerBounds();
+        return getBody()==null ? null : getBody().getIntegerBounds();
     }
 
     /**
@@ -850,8 +837,21 @@ public class GlobalVariable extends Actor
      *
      * @return the name of the variable, as a structured QName
      */
+    @Override
     public StructuredQName getVariableQName() {
         return variableQName;
+    }
+
+    /**
+     * Get a description of the variable for use in diagnostics
+     */
+
+    public String getDescription() {
+        if (variableQName.hasURI(NamespaceConstant.SAXON_GENERATED_VARIABLE)) {
+            return "optimizer-generated global variable select=\"" + getBody().toShortString() + '"';
+        } else {
+            return "global variable " + getVariableQName().getDisplayName();
+        }
     }
 
     /**
@@ -861,17 +861,9 @@ public class GlobalVariable extends Actor
      * @param isLoopingReference - true if the reference occurs within a loop, such as the predicate
      *                           of a filter expression
      */
+    @Override
     public void addReference(VariableReference ref, boolean isLoopingReference) {
         // No action
-    }
-
-    /**
-     * Get the kind of component that this represents, using integer constants such as
-     * {@link net.sf.saxon.om.StandardNames#XSL_FUNCTION}
-     */
-    @Override
-    public int getComponentKind() {
-        return StandardNames.XSL_VARIABLE;
     }
 
     /**
@@ -885,11 +877,7 @@ public class GlobalVariable extends Actor
         boolean asParam = this instanceof GlobalParam && !isStatic(); // bug 4035: export static params as variables
         presenter.startElement(asParam ? "globalParam" : "globalVariable");
         presenter.emitAttribute("name", getVariableQName());
-        presenter.emitAttribute("type", getRequiredType().toExportString());
-        ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) presenter.getOptions();
-        if (options.target != null && options.target.equals("JS") && options.targetVersion == 2) {
-            presenter.emitAttribute("typeJ", getRequiredType().toExportString2());
-        }
+        presenter.emitAttribute("as", getRequiredType().toAlphaCode());
         presenter.emitAttribute("line", getLineNumber() + "");
         presenter.emitAttribute("module", getSystemId());
         if (getStackFrameMap() != null) {
@@ -906,14 +894,8 @@ public class GlobalVariable extends Actor
             presenter.emitAttribute("flags", flags);
         }
 
-        if ("JS".equals(((ExpressionPresenter.ExportOptions) presenter.getOptions()).target)) {
-            int targetVersion = ((ExpressionPresenter.ExportOptions) presenter.getOptions()).targetVersion;
-            presenter.emitAttribute("jsAcceptor", getRequiredType().getPrimaryType().generateJavaScriptItemTypeAcceptor("XTTE0590", targetVersion));
-            presenter.emitAttribute("jsCardCheck", Cardinality.generateJavaScriptChecker(getRequiredType().getCardinality()));
-        }
-
-        if (getSelectExpression() != null) {
-            getSelectExpression().export(presenter);
+        if (getBody() != null) {
+            getBody().export(presenter);
         }
         presenter.endElement();
     }
@@ -928,6 +910,9 @@ public class GlobalVariable extends Actor
         }
         if (isRequiredParam) {
             flags += "r";
+        }
+        if (isStatic) {
+            flags += "s";
         }
         return flags;
     }

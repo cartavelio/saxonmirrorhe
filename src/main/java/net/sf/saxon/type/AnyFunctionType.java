@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -44,6 +44,7 @@ public class AnyFunctionType implements FunctionItemType {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return UType.FUNCTION;
     }
@@ -53,6 +54,7 @@ public class AnyFunctionType implements FunctionItemType {
      *
      * @return true if this is ANY_ATOMIC_TYPE or a subtype thereof
      */
+    @Override
     public boolean isAtomicType() {
         return false;
     }
@@ -64,6 +66,7 @@ public class AnyFunctionType implements FunctionItemType {
      * @return true if this is ANY_ATOMIC_TYPE or a subtype thereof
      */
 
+    @Override
     public boolean isPlainType() {
         return false;
     }
@@ -74,6 +77,7 @@ public class AnyFunctionType implements FunctionItemType {
      *
      * @return true if this FunctionItemType is a map type
      */
+    @Override
     public boolean isMapType() {
         return false;
     }
@@ -85,8 +89,18 @@ public class AnyFunctionType implements FunctionItemType {
      * @return true if this FunctionItemType is an array type
      */
 
+    @Override
     public boolean isArrayType() {
         return false;
+    }
+
+    /**
+     * Get the default priority when this ItemType is used as an XSLT pattern
+     * @return the default priority
+     */
+    @Override
+    public double getDefaultPriority() {
+        return -0.5;
     }
 
     /**
@@ -97,7 +111,7 @@ public class AnyFunctionType implements FunctionItemType {
      * @return the alphacode for the nearest containing built-in type
      */
     @Override
-    public String getAlphaCode() {
+    public String getBasicAlphaCode() {
         return "F";
     }
 
@@ -108,6 +122,7 @@ public class AnyFunctionType implements FunctionItemType {
      *         type function(*)
      */
     /*@Nullable*/
+    @Override
     public SequenceType[] getArgumentTypes() {
         return null;
     }
@@ -117,6 +132,7 @@ public class AnyFunctionType implements FunctionItemType {
      * @return the list of annotation assertions, or an empty list if there are none
      */
 
+    @Override
     public AnnotationList getAnnotationAssertions() {
         return AnnotationList.EMPTY;
     }
@@ -130,6 +146,7 @@ public class AnyFunctionType implements FunctionItemType {
      * @param th
      * @return true if the item is an instance of this type; false otherwise
      */
+    @Override
     public boolean matches(Item item, TypeHierarchy th) throws XPathException {
         return item instanceof Function;
     }
@@ -146,6 +163,7 @@ public class AnyFunctionType implements FunctionItemType {
      */
 
     /*@NotNull*/
+    @Override
     public final ItemType getPrimitiveItemType() {
         return ANY_FUNCTION;
     }
@@ -159,6 +177,7 @@ public class AnyFunctionType implements FunctionItemType {
      * except that INTEGER is considered to be a primitive type.
      */
 
+    @Override
     public final int getPrimitiveType() {
         return Type.FUNCTION;
     }
@@ -183,6 +202,7 @@ public class AnyFunctionType implements FunctionItemType {
      */
 
     /*@NotNull*/
+    @Override
     public PlainType getAtomizedItemType() {
         return null;
     }
@@ -195,6 +215,7 @@ public class AnyFunctionType implements FunctionItemType {
      * @param th The type hierarchy cache
      */
 
+    @Override
     public boolean isAtomizable(TypeHierarchy th) {
         return true; // arrays can be atomized
     }
@@ -202,14 +223,15 @@ public class AnyFunctionType implements FunctionItemType {
     /**
      * Determine the relationship of one function item type to another
      *
-     * @return for example {@link TypeHierarchy#SUBSUMES}, {@link TypeHierarchy#SAME_TYPE}
+     * @return for example {@link Affinity#SUBSUMES}, {@link Affinity#SAME_TYPE}
      */
 
-    public int relationship(FunctionItemType other, TypeHierarchy th) {
+    @Override
+    public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
         if (other == this) {
-            return TypeHierarchy.SAME_TYPE;
+            return Affinity.SAME_TYPE;
         } else {
-            return TypeHierarchy.SUBSUMES;
+            return Affinity.SUBSUMES;
         }
     }
 
@@ -222,6 +244,7 @@ public class AnyFunctionType implements FunctionItemType {
      * after checking the parameters
      */
 
+    @Override
     public Expression makeFunctionSequenceCoercer(Expression exp, RoleDiagnostic role)
             throws XPathException {
         return new ItemChecker(exp, this, role);
@@ -233,39 +256,10 @@ public class AnyFunctionType implements FunctionItemType {
      * @return the result type
      */
 
+    @Override
     public SequenceType getResultType() {
         return SequenceType.ANY_SEQUENCE;
     }
 
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @throws XPathException if JS code cannot be generated for this item type, for example because
-     *                        the test is schema-aware.
-     * @param knownToBe
-     * @param targetVersion
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        return "return SaxonJS.U.isMap(item) || SaxonJS.U.isArray(item);";
-    }
-
-    /**
-     * Generate Javascript code to convert a supplied Javascript value to this item type,
-     * if conversion is possible, or throw an error otherwise.
-     *
-     * @param errorCode the error to be thrown if conversion is not possible
-     * @param targetVersion
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns the result of conversion to this type, or throws
-     * an error if conversion is not possible. The variable "val" will hold the supplied Javascript
-     * value.
-     */
-    public String generateJavaScriptItemTypeAcceptor(String errorCode, int targetVersion) throws XPathException {
-        return "if (typeof val == 'object') {return val;} else {throw SaxonJS.XError('Cannot convert supplied JS value to a map or array');}";
-    }
 }
 

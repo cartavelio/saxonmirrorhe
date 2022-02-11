@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
 import net.sf.saxon.om.*;
@@ -28,7 +28,7 @@ import java.util.HashMap;
  */
 
 public class GlobalParameterSet {
-    private HashMap<StructuredQName, GroundedValue<?>> params =
+    private HashMap<StructuredQName, GroundedValue> params =
             new HashMap<>(10);
 
     /**
@@ -54,7 +54,7 @@ public class GlobalParameterSet {
      * @param value The value of the parameter, or null if the parameter is to be removed
      */
 
-    public void put(StructuredQName qName, GroundedValue<?> value) {
+    public void put(StructuredQName qName, GroundedValue value) {
         if (value == null) {
             params.remove(qName);
         } else {
@@ -69,7 +69,7 @@ public class GlobalParameterSet {
      * @return The value of the parameter, or null if not defined
      */
 
-    public GroundedValue<?> get(StructuredQName qName) {
+    public GroundedValue get(StructuredQName qName) {
         return params.get(qName);
     }
 
@@ -90,10 +90,10 @@ public class GlobalParameterSet {
      * @throws XPathException if the value is of the wrong type
      */
 
-    public GroundedValue<?> convertParameterValue(
+    public GroundedValue convertParameterValue(
             StructuredQName qName, SequenceType requiredType, boolean convert, XPathContext context)
             throws XPathException {
-        Sequence<?> val = get(qName);
+        Sequence val = get(qName);
         if (val == null) {
             return null;
         }
@@ -103,7 +103,7 @@ public class GlobalParameterSet {
                 RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, qName.getDisplayName(), -1);
                 Configuration config = context.getConfiguration();
                 val = config.getTypeHierarchy().applyFunctionConversionRules(
-                    val, requiredType, role, ExplicitLocation.UNKNOWN_LOCATION);
+                        val, requiredType, role, Loc.NONE);
             } else {
                 XPathException err = TypeChecker.testConformance(val, requiredType, context);
                 if (err != null) {

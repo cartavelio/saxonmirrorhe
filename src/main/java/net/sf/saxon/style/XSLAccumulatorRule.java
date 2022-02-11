@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,9 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -28,41 +26,48 @@ public class XSLAccumulatorRule extends StyleElement {
     private Expression select;
     private boolean capture;
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         String matchAtt = null;
         String newValueAtt = null;
 
-        AttributeCollection atts = getAttributeList();
-        for (int a = 0; a < atts.getLength(); a++) {
-            if (atts.getURI(a).isEmpty()) {
-                String f = atts.getQName(a);
-                if (f.equals("match")) {
-                    matchAtt = atts.getValue(a);
-                } else if (f.equals("select")) {
-                    newValueAtt = atts.getValue(a);
-                    select = makeExpression(newValueAtt, a);
-                } else if (f.equals("phase")) {
-                    String phaseAtt = Whitespace.trim(atts.getValue(a));
-                    if ("start".equals(phaseAtt)) {
-                        postDescent = false;
-                    } else if ("end".equals(phaseAtt)) {
-                        postDescent = true;
-                    } else {
-                        postDescent = true;
-                        compileError("phase must be 'start' or 'end'", "XTSE0020");
-                    }
-                } else {
-                    checkUnknownAttribute(atts.getNodeName(a));
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String f = attName.getDisplayName();
+            if (attName.getURI().isEmpty()) {
+                switch (f) {
+                    case "match":
+                        matchAtt = value;
+                        break;
+                    case "select":
+                        newValueAtt = value;
+                        select = makeExpression(newValueAtt, att);
+                        break;
+                    case "phase":
+                        String phaseAtt = Whitespace.trim(value);
+                        if ("start".equals(phaseAtt)) {
+                            postDescent = false;
+                        } else if ("end".equals(phaseAtt)) {
+                            postDescent = true;
+                        } else {
+                            postDescent = true;
+                            compileError("phase must be 'start' or 'end'", "XTSE0020");
+                        }
+                        break;
+                    default:
+                        checkUnknownAttribute(attName);
+                        break;
                 }
-            } else if (atts.getURI(a).equals(NamespaceConstant.SAXON)) {
-                if (atts.getLocalName(a).equals("capture")) {
-                    capture = processBooleanAttribute("saxon:capture", atts.getValue(a));
-                } else {
-                    checkUnknownAttribute(atts.getNodeName(a));
+            } else if (attName.hasURI(NamespaceConstant.SAXON)) {
+                if (isExtensionAttributeAllowed(attName.getDisplayName())) {
+                    if (attName.getLocalPart().equals("capture")) {
+                        capture = processBooleanAttribute("saxon:capture", value);
+                    }
                 }
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -80,10 +85,11 @@ public class XSLAccumulatorRule extends StyleElement {
     }
 
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         select = typeCheck("select", select);
         match = typeCheck("match", match);
-        if (select != null && iterateAxis(AxisInfo.CHILD).next() != null) {
+        if (select != null && hasChildNodes()) {
             compileError("If the xsl:accumulator-rule element has a select attribute then it must have no children");
         }
     }
@@ -123,13 +129,14 @@ public class XSLAccumulatorRule extends StyleElement {
         this.select = select;
     }
 
+    @Override
     public SourceBinding hasImplicitBinding(StructuredQName name) {
         if (name.getLocalPart().equals("value") && name.hasURI("")) {
             SourceBinding sb = new SourceBinding(this);
             sb.setVariableQName(new StructuredQName("", "", "value"));
             assert ((XSLAccumulator)getParent()) != null;
             sb.setDeclaredType(((XSLAccumulator)getParent()).getResultType());
-            sb.setProperty(SourceBinding.IMPLICITLY_DECLARED, true);
+            sb.setProperty(SourceBinding.BindingProperty.IMPLICITLY_DECLARED, true);
             return sb;
         } else {
             return null;

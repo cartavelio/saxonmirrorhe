@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,7 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.TypeCheckingFilter;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.*;
@@ -21,7 +21,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +61,7 @@ public final class ItemChecker extends UnaryExpression {
         return requiredItemType;
     }
 
+    @Override
     protected OperandRole getOperandRole() {
         return OperandRole.SAME_FOCUS_ACTION;
     }
@@ -82,6 +82,7 @@ public final class ItemChecker extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
         Expression operand = getBaseExpression().simplify();
         if (requiredItemType instanceof AnyItemType) {
@@ -96,6 +97,7 @@ public final class ItemChecker extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
         Expression operand = getBaseExpression();
@@ -122,10 +124,10 @@ public final class ItemChecker extends UnaryExpression {
             return operand;
         }
         ItemType supplied = operand.getItemType();
-        int relation = th.relationship(requiredItemType, supplied);
-        if (relation == TypeHierarchy.SAME_TYPE || relation == TypeHierarchy.SUBSUMES) {
+        Affinity relation = th.relationship(requiredItemType, supplied);
+        if (relation == Affinity.SAME_TYPE || relation == Affinity.SUBSUMES) {
             return operand;
-        } else if (relation == TypeHierarchy.DISJOINT) {
+        } else if (relation == Affinity.DISJOINT) {
             if (requiredItemType.equals(BuiltInAtomicType.STRING) && th.isSubType(supplied, BuiltInAtomicType.ANY_URI)) {
                 // URI promotion will take care of this at run-time
                 return operand;
@@ -167,8 +169,8 @@ public final class ItemChecker extends UnaryExpression {
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().optimize(visitor, contextInfo);
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-        int rel = th.relationship(requiredItemType, getBaseExpression().getItemType());
-        if (rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMES) {
+        Affinity rel = th.relationship(requiredItemType, getBaseExpression().getItemType());
+        if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMES) {
             return getBaseExpression();
         }
         return this;
@@ -180,6 +182,7 @@ public final class ItemChecker extends UnaryExpression {
      * process() methods natively.
      */
 
+    @Override
     public int getImplementationMethod() {
         int m = ITERATE_METHOD | PROCESS_METHOD | ITEM_FEED_METHOD;
         if (!Cardinality.allowsMany(getCardinality())) {
@@ -223,9 +226,10 @@ public final class ItemChecker extends UnaryExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
-        SequenceIterator<?> base = getBaseExpression().iterate(context);
-        return new ItemMappingIterator<>(base, getMappingFunction(context), true);
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
+        SequenceIterator base = getBaseExpression().iterate(context);
+        return new ItemMappingIterator(base, getMappingFunction(context), true);
     }
 
     /**
@@ -237,7 +241,7 @@ public final class ItemChecker extends UnaryExpression {
      *         as the input sequence, unless the dynamic type checking reveals an error.
      */
 
-    public ItemMappingFunction<Item<?>, Item<?>> getMappingFunction(XPathContext context) {
+    public ItemMappingFunction getMappingFunction(XPathContext context) {
         return new ItemTypeCheckingFunction(requiredItemType, role, getBaseExpression(), context.getConfiguration());
     }
 
@@ -245,6 +249,7 @@ public final class ItemChecker extends UnaryExpression {
      * Evaluate as an Item.
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         final TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         Item item = getBaseExpression().evaluateItem(context);
@@ -271,11 +276,12 @@ public final class ItemChecker extends UnaryExpression {
     /**
      * Process the instruction, without returning any tail calls
      *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
      */
 
-    public void process(XPathContext context) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
         Expression next = getBaseExpression();
         int card = StaticProperty.ALLOWS_ZERO_OR_MORE;
         if (next instanceof CardinalityChecker) {
@@ -283,16 +289,13 @@ public final class ItemChecker extends UnaryExpression {
             next = ((CardinalityChecker) next).getBaseExpression();
         }
         if ((next.getImplementationMethod() & PROCESS_METHOD) != 0 && !(requiredItemType instanceof DocumentNodeTest)) {
-            Receiver out = context.getReceiver();
-            TypeCheckingFilter filter = new TypeCheckingFilter(out);
+            TypeCheckingFilter filter = new TypeCheckingFilter(output);
             filter.setRequiredType(requiredItemType, card, role, getLocation());
-            context.setReceiver(filter);
-            next.process(context);
-            filter.close();
-            context.setReceiver(out);
+            next.process(filter, context);
+            filter.finalCheck();
         } else {
             // Force pull-mode evaluation
-            super.process(context);
+            super.process(output, context);
         }
     }
 
@@ -304,6 +307,7 @@ public final class ItemChecker extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ItemChecker exp = new ItemChecker(getBaseExpression().copy(rebindings), requiredItemType, role);
         ExpressionTool.copyLocationInfo(this, exp);
@@ -316,12 +320,13 @@ public final class ItemChecker extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         ItemType operandType = getBaseExpression().getItemType();
         TypeHierarchy th = getConfiguration().getTypeHierarchy();
-        int relationship = th.relationship(requiredItemType, operandType);
+        Affinity relationship = th.relationship(requiredItemType, operandType);
         switch (relationship) {
-            case TypeHierarchy.OVERLAPS:
+            case OVERLAPS:
                 if (requiredItemType instanceof NodeTest && operandType instanceof NodeTest) {
                     return new CombinedNodeTest((NodeTest) requiredItemType, Token.INTERSECT, (NodeTest) operandType);
                 } else {
@@ -329,11 +334,11 @@ public final class ItemChecker extends UnaryExpression {
                     return requiredItemType;
                 }
 
-            case TypeHierarchy.SUBSUMES:
-            case TypeHierarchy.SAME_TYPE:
+            case SUBSUMES:
+            case SAME_TYPE:
                 // shouldn't happen, but it doesn't matter
                 return operandType;
-            case TypeHierarchy.SUBSUMED_BY:
+            case SUBSUMED_BY:
             default:
                 return requiredItemType;
         }
@@ -376,18 +381,10 @@ public final class ItemChecker extends UnaryExpression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("treat", this);
-        out.emitAttribute("as", requiredItemType.toExportString());
-        ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
-        if ("JS".equals(options.target)) {
-            int targetVersion = options.targetVersion;
-            out.emitAttribute("jsTest", requiredItemType.generateJavaScriptItemTypeTest(getBaseExpression().getItemType(), targetVersion));
-            if (targetVersion == 2) {
-                SequenceType st = SequenceType.makeSequenceType(requiredItemType, StaticProperty.EXACTLY_ONE);
-                out.emitAttribute("asJ", st.toExportString2());
-            }
-        }
+        out.emitAttribute("as", AlphaCode.fromItemType(requiredItemType));
         out.emitAttribute("diag", role.save());
         getBaseExpression().export(out);
         out.endElement();
@@ -401,6 +398,7 @@ public final class ItemChecker extends UnaryExpression {
      *         in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         return "treatAs";
     }

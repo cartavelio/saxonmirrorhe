@@ -1,18 +1,21 @@
 package s9apitest;
 
-import junit.framework.TestCase;
+import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
-import net.sf.saxon.s9api.*;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * JUnit tests for the s9api XPathCompiler used to compile and evaluate XSLT patterns
- * @author Michael Kay
- * @date May 2008
  */
-public class TestPatternCompiler extends TestCase {
+public class TestPatternCompiler {
 
+    @Test
     public void testSimple() {
         try {
             Processor p = new Processor(false);
@@ -31,6 +34,7 @@ public class TestPatternCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testNamespaces() {
         try {
             Processor p = new Processor(false);
@@ -50,6 +54,7 @@ public class TestPatternCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testExternalVariables() {
         try {
             Processor p = new Processor(false);
@@ -71,6 +76,7 @@ public class TestPatternCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testInternalVariables() {
         try {
             Processor p = new Processor(false);
@@ -89,6 +95,7 @@ public class TestPatternCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testStaticSyntaxError() {
         try {
             Processor p = new Processor(false);
@@ -100,6 +107,7 @@ public class TestPatternCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testStaticSemanticError() {
         try {
             Processor p = new Processor(false);
@@ -111,6 +119,7 @@ public class TestPatternCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testDynamicError() {
         try {
             Processor p = new Processor(false);

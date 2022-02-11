@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,12 +7,12 @@
 
 package net.sf.saxon.expr.flwor;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.LocationKind;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.ItemType;
@@ -55,7 +55,8 @@ public class FLWORExpression extends Expression {
     }
 
     public static boolean isLoopingClause(Clause c) {
-        return c.getClauseKey() == Clause.FOR || c.getClauseKey() == Clause.GROUPBYCLAUSE || c.getClauseKey() == Clause.WINDOW;
+        return c.getClauseKey() == Clause.ClauseName.FOR || c.getClauseKey() == Clause.ClauseName.GROUP_BY
+                || c.getClauseKey() == Clause.ClauseName.WINDOW;
     }
 
     /**
@@ -76,6 +77,7 @@ public class FLWORExpression extends Expression {
      * @return true if this binding belongs to one of the clauses of this FLWOR expression
      */
 
+    @Override
     public boolean hasVariableBinding(Binding binding) {
         for (Clause c : clauses) {
             if (clauseHasBinding(c, binding)) {
@@ -183,11 +185,12 @@ public class FLWORExpression extends Expression {
      *         method
      */
 
+    @Override
     public boolean implementsStaticTypeCheck() {
         for (Clause c : clauses) {
             switch (c.getClauseKey()) {
-                case Clause.LET:
-                case Clause.WHERE:
+                case LET:
+                case WHERE:
                     continue;
                 default:
                     return false;
@@ -211,6 +214,7 @@ public class FLWORExpression extends Expression {
      *                        is incompatible with the required type
      */
 
+    @Override
     public Expression staticTypeCheck(SequenceType req,
                                       boolean backwardsCompatible,
                                       RoleDiagnostic role, ExpressionVisitor visitor)
@@ -288,6 +292,7 @@ public class FLWORExpression extends Expression {
      *          if the expression has a non-permitted updateing subexpression
      */
 
+    @Override
     public void checkForUpdatingSubexpressions() throws XPathException {
         OperandProcessor processor = op -> {
             op.getChildExpression().checkForUpdatingSubexpressions();
@@ -346,6 +351,7 @@ public class FLWORExpression extends Expression {
      * expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, /*@Nullable*/ PathMap.PathMapNodeSet pathMapNodeSet) {
         for (Clause c : clauses) {
             c.addToPathMap(pathMap, pathMapNodeSet);
@@ -353,7 +359,29 @@ public class FLWORExpression extends Expression {
         return getReturnClause().addToPathMap(pathMap, pathMapNodeSet);
     }
 
+    /**
+     * Inject tracing (or other monitoring) code for each clause
+     * @param injector the code injector responsible for processing each clause of the FLWOR expression
+     */
 
+    public void injectCode(CodeInjector injector) {
+        if (injector != null) {
+            List<Clause> expandedList = new ArrayList<>(clauses.size() * 2);
+            expandedList.add(clauses.get(0));
+            for (int i = 1; i < clauses.size(); i++) {
+                Clause extra = injector.injectClause(this, clauses.get(i - 1));
+                if (extra != null) {
+                    expandedList.add(extra);
+                }
+                expandedList.add(clauses.get(i));
+            }
+            Clause extra = injector.injectClause(this, clauses.get(clauses.size() - 1));
+            if (extra != null) {
+                expandedList.add(extra);
+            }
+            clauses = expandedList;
+        }
+    }
     /**
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.
@@ -443,6 +471,7 @@ public class FLWORExpression extends Expression {
 
 
     /*@NotNull*/
+    @Override
     public Expression optimize(
             final ExpressionVisitor visitor,
             final ContextItemStaticInfo contextItemType) throws XPathException {
@@ -475,7 +504,7 @@ public class FLWORExpression extends Expression {
         do {
             tryAgain = false;
             for (Clause c : clauses) {
-                if (c.getClauseKey() == Clause.LET) {
+                if (c.getClauseKey() == Clause.ClauseName.LET) {
                     LetClause lc = (LetClause) c;
                     if (!ExpressionTool.dependsOnVariable(this, new Binding[]{lc.getRangeVariable()})) {
                         clauses.remove(c);
@@ -511,7 +540,7 @@ public class FLWORExpression extends Expression {
         // If changed, remove any redundant trace clauses
         if (changed) {
             for (int i = clauses.size() - 1; i >= 1; i--) {
-                if (clauses.get(i).getClauseKey() == Clause.TRACE && clauses.get(i - 1).getClauseKey() == Clause.TRACE) {
+                if (clauses.get(i).getClauseKey() == Clause.ClauseName.TRACE && clauses.get(i - 1).getClauseKey() == Clause.ClauseName.TRACE) {
                     clauses.remove(i);
                 }
             }
@@ -624,7 +653,7 @@ public class FLWORExpression extends Expression {
                     // Find the first clause prior to the where clause that declares variables on which the
                     // term of the where clause depends
 
-                    if (ExpressionTool.dependsOnVariable(term, bindingList) || clause.getClauseKey() == Clause.COUNT) {
+                    if (ExpressionTool.dependsOnVariable(term, bindingList) || clause.getClauseKey() == Clause.ClauseName.COUNT) {
                         // remove this term from the where clause
                         Expression removedExpr = list.remove(i);
                         if (list.isEmpty()) {
@@ -722,9 +751,9 @@ public class FLWORExpression extends Expression {
                 ExpressionTool.rebindVariableReferences(action, forClause.getRangeVariable(), forExpr);
                 action = forExpr;
 
-                if (injector != null) {
-                    action = injector.inject(action, visitor.getStaticContext(), LocationKind.FOR_EXPRESSION, forExpr.getVariableQName());
-                }
+//                if (injector != null) {
+//                    action = injector.inject(action, visitor.getStaticContext(), LocationKind.FOR_EXPRESSION, forExpr.getVariableQName());
+//                }
 
             } else {
                 LetClause letClause = (LetClause) clauses.get(i);
@@ -743,9 +772,9 @@ public class FLWORExpression extends Expression {
                 ExpressionTool.rebindVariableReferences(action, letClause.getRangeVariable(), letExpr);
                 action = letExpr;
 
-                if (injector != null) {
-                    action = injector.inject(action, visitor.getStaticContext(), LocationKind.LET_EXPRESSION, letExpr.getVariableQName());
-                }
+//                if (injector != null) {
+//                    action = injector.inject(action, visitor.getStaticContext(), LocationKind.LET_EXPRESSION, letExpr.getVariableQName());
+//                }
             }
 
         }
@@ -770,7 +799,7 @@ public class FLWORExpression extends Expression {
      */
     /*@NotNull*/
     @Override
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         TuplePull stream = new SingularityPull();
         for (Clause c : clauses) {
             stream = c.getPullStream(stream, context);
@@ -782,16 +811,18 @@ public class FLWORExpression extends Expression {
     /**
      * Process the instruction, without returning any tail calls
      *
+     *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
      *                the current variables, etc.
      * @throws XPathException if a dynamic error occurs
      */
     @Override
-    public void process(XPathContext context) throws XPathException {
-        TuplePush destination = new ReturnClausePush(getReturnClause());
+    public void process(Outputter output, XPathContext context) throws XPathException {
+        TuplePush destination = new ReturnClausePush(output, getReturnClause());
         for (int i = clauses.size() - 1; i >= 0; i--) {
             Clause c = clauses.get(i);
-            destination = c.getPushStream(destination, context);
+            destination = c.getPushStream(destination, output, context);
         }
         destination.processTuple(context);
         destination.close();
@@ -855,7 +886,7 @@ public class FLWORExpression extends Expression {
         FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
         for (Clause c : clauses) {
             sb.append(c.toString());
-            sb.append(' ');
+            sb.cat(' ');
         }
         sb.append(" return ");
         sb.append(getReturnClause().toString());

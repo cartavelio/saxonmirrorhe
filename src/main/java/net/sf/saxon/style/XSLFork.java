@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,11 +10,10 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.Fork;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 
 /**
  * Handler for xsl:fork elements in XSLT 3.0 stylesheet.
@@ -28,6 +27,7 @@ public class XSLFork extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -38,27 +38,27 @@ public class XSLFork extends StyleElement {
      * @return false: no, it may not contain a sequence constructor
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            checkUnknownAttribute(atts.getNodeName(a));
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            checkUnknownAttribute(attName);
         }
     }
 
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
         int foundGroup = 0;
         int foundSequence = 0;
-        while ((child = kids.next()) != null) {
+        for (NodeInfo child : children()) {
             if (child instanceof XSLSequence) {
                 foundSequence++;
             } else if (child instanceof XSLForEachGroup) {
@@ -77,6 +77,7 @@ public class XSLFork extends StyleElement {
         }
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression content = compileSequenceConstructor(exec, decl, true);
         if (content instanceof Block) {

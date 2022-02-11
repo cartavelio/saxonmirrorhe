@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,13 +12,12 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.regex.LatinString;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.tiny.CharSlice;
+import net.sf.saxon.tree.util.CharSequenceConsumer;
 import net.sf.saxon.tree.util.FastStringBuffer;
-
-import java.util.function.IntPredicate;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -26,6 +25,7 @@ import java.net.URI;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.UnmappableCharacterException;
+import java.util.function.IntPredicate;
 
 
 /**
@@ -35,6 +35,7 @@ import java.nio.charset.UnmappableCharacterException;
 
 public abstract class UnparsedTextFunction extends SystemFunction {
 
+    @Override
     public int getSpecialProperties(Expression[] arguments) {
         int p = super.getSpecialProperties(arguments);
         if (getRetainedStaticContext().getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT)) {
@@ -51,12 +52,12 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      * Supporting routine to load one external file given a URI (href) and a baseURI
      * @param absoluteURI the absolutized URI
      * @param encoding the character encoding
+     * @param output the consumer to which the contents of the file will be sent
      * @param context the XPath dynamic context
-     * @return the content of the file
      * @throws XPathException if the file cannot be read
      */
 
-    public static CharSequence readFile(URI absoluteURI, String encoding, XPathContext context)
+    public static void readFile(URI absoluteURI, String encoding, CharSequenceConsumer output, XPathContext context)
             throws XPathException {
 
         final Configuration config = context.getConfiguration();
@@ -72,7 +73,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
             throw err;
         }
         try {
-            return readFile(checker, reader);
+            readFile(checker, reader, output);
         } catch (java.io.UnsupportedEncodingException encErr) {
             XPathException e = new XPathException("Unknown encoding " + Err.wrap(encoding), encErr);
             e.setErrorCode("FOUT1190");
@@ -139,13 +140,38 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      *
      * @param checker predicate for checking whether characters are valid XML characters
      * @param reader  Reader to be used for reading the file
-     * @return a CharSequence representing the contents of the file
+     * @return the contents of the file, as a {@link CharSequence}
      * @throws IOException    if a failure occurs reading the file
      * @throws XPathException if the file contains illegal characters
      */
 
     public static CharSequence readFile(IntPredicate checker, Reader reader) throws IOException, XPathException {
-        FastStringBuffer sb = new FastStringBuffer(2048);
+        FastStringBuffer buffer = new FastStringBuffer(2048);
+        readFile(checker, reader, new CharSequenceConsumer() {
+            @Override
+            public CharSequenceConsumer cat(CharSequence chars) {
+                return buffer.cat(chars);
+            }
+
+            @Override
+            public CharSequenceConsumer cat(char c) {
+                return buffer.cat(c);
+            }
+        });
+        return buffer.condense();
+    }
+
+    /**
+     * Read the contents of an unparsed text file
+     *
+     * @param checker predicate for checking whether characters are valid XML characters
+     * @param reader  Reader to be used for reading the file
+     * @param output a consumer object that is supplied incrementally with the contents of the file
+     * @throws IOException    if a failure occurs reading the file
+     * @throws XPathException if the file contains illegal characters
+     */
+
+    public static void readFile(IntPredicate checker, Reader reader, CharSequenceConsumer output) throws IOException, XPathException {
         char[] buffer = new char[2048];
         boolean first = true;
         int actual;
@@ -193,21 +219,23 @@ public abstract class UnparsedTextFunction extends SystemFunction {
                 first = false;
                 if (buffer[0] == '\ufeff') {
                     // don't include the BOM in the result
-                    sb.append(buffer, 1, actual - 1);
+                    output.cat(new CharSlice(buffer, 1, actual - 1));
                 } else {
-                    sb.append(buffer, 0, actual);
+                    output.cat(new CharSlice(buffer, 0, actual));
                 }
             } else {
-                sb.append(buffer, 0, actual);
+                output.cat(new CharSlice(buffer, 0, actual));
             }
         }
         reader.close();
-        if (latin) {
-            return new LatinString(sb);
-        } else {
-            return sb.condense();
-        }
+//        if (latin) {
+//            return new LatinString(sb);
+//        } else {
+//            return sb.condense();
+//        }
     }
+
+
 
 
 }

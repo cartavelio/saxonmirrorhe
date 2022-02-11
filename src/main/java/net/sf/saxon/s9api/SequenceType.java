@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,6 +14,18 @@ public class SequenceType {
 
     private ItemType itemType;
     private OccurrenceIndicator occurrenceIndicator;
+
+    /**
+     * Constant representing the universal sequence type <code>item()*</code>, which permits any value
+     */
+    public final static SequenceType ANY = new SequenceType(ItemType.ANY_ITEM, OccurrenceIndicator.ZERO_OR_MORE);
+
+    /**
+     * Constant representing the sequence type <code>empty-sequence()</code>, which permits only one
+     * value, namely the empty sequence
+     */
+
+    public final static SequenceType EMPTY = new SequenceType(ItemType.ERROR, OccurrenceIndicator.ZERO);
 
     /**
      * Construct a SequenceType
@@ -90,6 +102,7 @@ public class SequenceType {
      * @return the equivalent instance of {@link net.sf.saxon.value.SequenceType}
      */
 
+    @SuppressWarnings("WeakerAccess")
     public net.sf.saxon.value.SequenceType getUnderlyingSequenceType() {
         return net.sf.saxon.value.SequenceType.makeSequenceType(
                 itemType.getUnderlyingItemType(), occurrenceIndicator.getCardinality());
@@ -97,8 +110,7 @@ public class SequenceType {
 
     /**
      * Factory method to construct a s9api {@code SequenceType} from an underlying
-     * instance of {@link net.sf.saxon.value.SequenceType}
-     *
+     *  instance of {@link net.sf.saxon.value.SequenceType}
      * @since 10.0
      */
 
@@ -109,6 +121,5 @@ public class SequenceType {
         OccurrenceIndicator oc = OccurrenceIndicator.getOccurrenceIndicator(st.getCardinality());
         return makeSequenceType(it, oc);
     }
-
 
 }

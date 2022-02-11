@@ -1,22 +1,25 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
 import nu.xom.Document;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * JUnit tests for the serialization option (new in 9.9) saxon:canonical="yes"
  * <p>
  * The effect is tested by comparing the results with the XOM Canonicalizer.
  */
-public class TestCanonicalSerializer extends TestCase {
+public class TestCanonicalSerializer {
 
     private void compareCanonical(File input) {
         try {
@@ -67,6 +70,7 @@ public class TestCanonicalSerializer extends TestCase {
         }
     }
 
+    @Test
     public void testCanonicalization1() {
         compareCanonical(new File(ConfigTest.DATA_DIR + "bills.xml"));
         compareCanonical(new File(ConfigTest.DATA_DIR + "categories.xml"));
@@ -75,6 +79,7 @@ public class TestCanonicalSerializer extends TestCase {
         compareCanonical(new File(ConfigTest.DATA_DIR + "schema-with-param.xsd"));
     }
 
+    @Test
     public void testCanonicalization2() {
         File dir = new File (ConfigTest.DATA_DIR + "collection");
         for (File file : dir.listFiles()) {
@@ -85,6 +90,7 @@ public class TestCanonicalSerializer extends TestCase {
         }
     }
 
+    @Test
     public void testCanonicalization3() {
         compareCanonical(new File(ConfigTest.DATA_DIR + "collection/axes268.xml"));
     }

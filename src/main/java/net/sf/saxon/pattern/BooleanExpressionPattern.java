@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -89,6 +89,7 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
      * @param nextFree    the next slot that is free to be allocated @return the next slot that is free to be allocated
      */
 
+    @Override
     public int allocateSlots(SlotManager slotManager, int nextFree) {
         return ExpressionTool.allocateSlots(getPredicate(), nextFree, slotManager);
     }
@@ -135,9 +136,10 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
      * @return true if the item matches the Pattern, false otherwise
      */
 
-    public boolean matches(Item<?> item, XPathContext context) {
+    @Override
+    public boolean matches(Item item, XPathContext context) {
         XPathContext c2 = context.newMinorContext();
-        ManualIterator<Item<?>> iter = new ManualIterator<>(item);
+        ManualIterator iter = new ManualIterator(item);
         c2.setCurrentIterator(iter);
         c2.setCurrentOutputUri(null);
         try {
@@ -151,6 +153,7 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
      * Get an Itemtype that all the items matching this pattern must satisfy
      */
 
+    @Override
     public ItemType getItemType() {
         if (getPredicate() instanceof InstanceOfExpression) {
             InstanceOfExpression ioe = (InstanceOfExpression)getPredicate();
@@ -168,6 +171,7 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
      * @return A fingerprint that the nodes must match, or -1 if it can match multiple fingerprints
      */
 
+    @Override
     public int getFingerprint() {
         return -1;
     }
@@ -176,7 +180,8 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
      * Display the pattern for diagnostics
      */
 
-    public String toString() {
+    @Override
+    public String reconstruct() {
         return ".[" + getPredicate() + "]";
     }
 
@@ -195,6 +200,7 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
      * Hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         return 0x7aeffea9 ^ getPredicate().hashCode();
     }
@@ -207,12 +213,15 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
      */
 
     /*@NotNull*/
+    @Override
     public Pattern copy(RebindingMap rebindings) {
         BooleanExpressionPattern n = new BooleanExpressionPattern(getPredicate().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, n);
+        n.setOriginalText(getOriginalText());
         return n;
     }
 
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.booleanExp");
         /*if (comp != null) {

@@ -1,11 +1,11 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
-import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -14,59 +14,74 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URI;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  *
  */
-public class TestXQueryStreaming extends TestCase {
+public class TestXQueryStreaming {
 
     public final static int limit = 100000;
 
+    @Test
     public void test1() throws Exception {
         streaming("for $x in saxon:stream(doc('uri')/*/*) return string($x)");
     }
 
 
+    @Test
     public void test2() throws Exception {
         streaming("for $x in saxon:stream(doc('uri')/*/*) return $x");
     }
 
 
+    @Test
     public void test3() throws Exception {
         streaming("for $x in saxon:stream(doc('uri')/*/*) return $x/*");
     }
 
 
+    @Test
     public void test4() throws Exception {
         streaming("saxon:stream(doc('uri')/*/*)/string()");
     }
 
 
+    @Test
     public void test5() throws Exception {
         streaming("saxon:stream(doc('uri')/*/*)");
     }
 
  // Following test commented out prior to 9.7 release, it is failing because there is a sort involved: the output of
  // xsl:stream/snapshot(.) is not recognized as being in document order.
+    @Test
     public void test6() throws Exception {
         // MHK 2015-11-10: currently failing (never terminates) because it's attempting a sort into document order.
         // See also bugs 2013 and 2546
         streaming("saxon:stream(doc('uri')/*/*)/*");
     }
 
+    @Test
     public void test6a() throws Exception {
         streaming("for $x in saxon:stream(doc('uri')/*/*)/* return $x");
     }
 
+    @Test
     public void test7() throws Exception {
         // Bug 2550
         streaming("for $x in saxon:stream(doc('uri')/*/*)/element {node-name()} {node()} return $x");
     }
 
+    @Test
     public void test8() throws Exception {
         // Bug 2550
         streaming("saxon:stream(doc('uri')/*/*/element {node-name()} {node()})");
     }
 
+    @Test
     public void test9() throws Exception {
         // let $x := saxon:stream(doc('doc.xml')/*/*)[1] return $x
         streaming("let $x := saxon:stream(doc('doc.xml')/*/*)[1] return $x");
@@ -84,7 +99,7 @@ public class TestXQueryStreaming extends TestCase {
 
     private void streaming(String query) throws Exception {
         Processor proc = new Processor(true);
-        proc.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, false);
+        proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
         XQueryCompiler xQueryCompiler = proc.newXQueryCompiler();
         xQueryCompiler.setBaseURI(new URI("http://dummy/"));
         XQueryExecutable xqueryExecutable = xQueryCompiler.compile(query);
@@ -137,6 +152,7 @@ public class TestXQueryStreaming extends TestCase {
         }
     }
 
+    @Test
     public void testClose() {
         try {
             String query = "saxon:stream(doc('uriresolver:resolve')/x/y/z)";
@@ -167,9 +183,9 @@ public class TestXQueryStreaming extends TestCase {
         try {
             Processor proc = new Processor(true);
             if (fallback) {
-                proc.setConfigurationProperty(FeatureKeys.STREAMING_FALLBACK, true);
+                proc.setConfigurationProperty(Feature.STREAMING_FALLBACK, true);
             }
-            proc.setConfigurationProperty(FeatureKeys.TIMING, true);
+            proc.setConfigurationProperty(Feature.TIMING, true);
             XQueryCompiler xQueryCompiler = proc.newXQueryCompiler();
             XQueryExecutable xqueryExecutable = xQueryCompiler.compile(query);
             XQueryEvaluator xqueryEvaluator = xqueryExecutable.load();
@@ -187,16 +203,19 @@ public class TestXQueryStreaming extends TestCase {
         }
     }
 
+    @Test
     public void testConversionFallbackOn() {
         String uri = "file://" + ConfigTest.DATA_DIR + "books.xml";
         assertTrue(runFallback(true, "saxon:stream(doc('" + uri + "')/BOOKLIST/BOOKS/ITEM[last()]/AUTHOR)"));
     }
 
+    @Test
     public void testConversionFallbackOff() {
         String uri = "file://" + ConfigTest.DATA_DIR + "books.xml";
         assertFalse(runFallback(false, "saxon:stream(doc('" + uri + "')/BOOKLIST/BOOKS/ITEM[last()]/AUTHOR)"));
     }
 
+    @Test
     public void testStreamabilityFallbackOn() {
         String uri = "file://" + ConfigTest.DATA_DIR + "books.xml";
         String query = "declare function local:f($element)\n" +
@@ -212,6 +231,7 @@ public class TestXQueryStreaming extends TestCase {
         assertTrue(runFallback(true, query));
     }
 
+    @Test
     public void testStreamabilityFallbackOff() {
         String uri = "file://" + ConfigTest.DATA_DIR + "books.xml";
 
@@ -228,10 +248,10 @@ public class TestXQueryStreaming extends TestCase {
         assertFalse(runFallback(false, query));
     }
 
-
     /**
      * Bug 4128
      */
+    @Test
     public void testMotionlessQuery() {
         try {
             String uri = "file://" + ConfigTest.DATA_DIR + "othello.xml";
@@ -249,6 +269,8 @@ public class TestXQueryStreaming extends TestCase {
         }
     }
 
+
+    @Test
     public void testEarlyExit() {
         try {
             String uri = "file://" + ConfigTest.DATA_DIR + "othello.xml";
@@ -273,28 +295,6 @@ public class TestXQueryStreaming extends TestCase {
 
 
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
 
 
 

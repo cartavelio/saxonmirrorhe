@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,18 +8,18 @@
 package net.sf.saxon.pull;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.event.SequenceReceiver;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 
 import java.util.List;
+import java.util.Stack;
 
 /**
  * PullPushTee is a pass-through filter class that links one PullProvider to another PullProvider
@@ -34,6 +34,7 @@ public class PullPushTee extends PullFilter {
 
     private Receiver branch;
     boolean previousAtomic = false;
+    private Stack<NamespaceMap> nsStack = new Stack<>();
 
     /**
      * Create a PullPushTee
@@ -43,7 +44,7 @@ public class PullPushTee extends PullFilter {
      *               This Receiver must already be open before use
      */
 
-    public PullPushTee(/*@NotNull*/ PullProvider base, Receiver branch) throws XPathException {
+    public PullPushTee(/*@NotNull*/ PullProvider base, Receiver branch) {
         super(base);
         this.branch = branch;
     }
@@ -63,10 +64,11 @@ public class PullPushTee extends PullFilter {
      * copies it to the branch Receiver, and then returns the event to the caller.
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link #END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned at the end of the sequence.
      */
 
-    public int next() throws XPathException {
+    @Override
+    public Event next() throws XPathException {
         currentEvent = super.next();
         copyEvent(currentEvent);
         return currentEvent;
@@ -79,62 +81,59 @@ public class PullPushTee extends PullFilter {
      * @param event the pull event to be copied
      */
 
-    private void copyEvent(int event) throws XPathException {
+    private void copyEvent(Event event) throws XPathException {
         PullProvider in = getUnderlyingProvider();
         Location loc = in.getSourceLocator();
         if (loc == null) {
-            loc = ExplicitLocation.UNKNOWN_LOCATION;
+            loc = Loc.NONE;
         }
         Receiver out = branch;
         switch (event) {
             case START_DOCUMENT:
-                out.startDocument(0);
+                out.startDocument(ReceiverOption.NONE);
                 break;
 
             case START_ELEMENT:
-                out.startElement(in.getNodeName(), in.getSchemaType(), loc, ReceiverOptions.NAMESPACE_OK);
-
-                NamespaceBinding[] decl = in.getNamespaceDeclarations();
-                for (NamespaceBinding aDecl : decl) {
-                    if (aDecl == null) {
+                NamespaceBinding[] bindings = in.getNamespaceDeclarations();
+                NamespaceMap nsMap = nsStack.isEmpty() ? NamespaceMap.emptyMap() : nsStack.peek();
+                for (NamespaceBinding binding : bindings) {
+                    if (binding == null) {
                         break;
                     }
-                    out.namespace(aDecl, 0);
+                    nsMap = nsMap.put(binding.getPrefix(), binding.getURI());
                 }
+                nsStack.push(nsMap);
+                out.startElement(in.getNodeName(), in.getSchemaType(),
+                                 in.getAttributes(), nsMap,
+                                 loc, ReceiverOption.NAMESPACE_OK);
 
-                AttributeCollection atts = in.getAttributes();
-                for (int i = 0; i < atts.getLength(); i++) {
-                    out.attribute(atts.getNodeName(i), atts.getTypeAnnotation(i),
-                            atts.getValue(i), loc, atts.getProperties(i));
-                }
-
-                out.startContent();
                 break;
 
             case TEXT:
 
-                out.characters(in.getStringValue(), loc, ReceiverOptions.WHOLE_TEXT_NODE);
+                out.characters(in.getStringValue(), loc, ReceiverOption.WHOLE_TEXT_NODE);
                 break;
 
             case COMMENT:
 
-                out.comment(in.getStringValue(), loc, 0);
+                out.comment(in.getStringValue(), loc, ReceiverOption.NONE);
                 break;
 
             case PROCESSING_INSTRUCTION:
 
                 out.processingInstruction(
                         in.getNodeName().getLocalPart(),
-                        in.getStringValue(), loc, 0);
+                        in.getStringValue(), loc, ReceiverOption.NONE);
                 break;
 
             case END_ELEMENT:
 
                 out.endElement();
+                nsStack.pop();
                 break;
 
             case END_DOCUMENT:
-                List entities = in.getUnparsedEntities();
+                List<UnparsedEntity> entities = in.getUnparsedEntities();
                 if (entities != null) {
                     for (Object entity : entities) {
                         UnparsedEntity ue = (UnparsedEntity) entity;
@@ -150,16 +149,15 @@ public class PullPushTee extends PullFilter {
 
             case ATOMIC_VALUE:
                 if (out instanceof SequenceReceiver) {
-                    out.append(super.getAtomicValue(), loc, 0);
-                    break;
+                    out.append(super.getAtomicValue(), loc, ReceiverOption.NONE);
                 } else {
                     if (previousAtomic) {
-                        out.characters(" ", loc, 0);
+                        out.characters(" ", loc, ReceiverOption.NONE);
                     }
                     CharSequence chars = in.getStringValue();
-                    out.characters(chars, loc, 0);
-                    break;
+                    out.characters(chars, loc, ReceiverOption.NONE);
                 }
+                break;
 
             case ATTRIBUTE:
                 if (out instanceof SequenceReceiver) {
@@ -167,13 +165,9 @@ public class PullPushTee extends PullFilter {
                     o.setNodeName(getNodeName());
                     o.setNodeKind(Type.ATTRIBUTE);
                     o.setStringValue(getStringValue());
-                    out.append(o, loc, 0);
-                    break;
-                } else {
-                    out.attribute(getNodeName(),
-                            (SimpleType) in.getSchemaType(), getStringValue(), loc, 0);
-                    break;
+                    out.append(o, loc, ReceiverOption.NONE);
                 }
+                break;
 
             case NAMESPACE:
                 if (out instanceof SequenceReceiver) {
@@ -181,18 +175,15 @@ public class PullPushTee extends PullFilter {
                     o.setNodeName(getNodeName());
                     o.setNodeKind(Type.NAMESPACE);
                     o.setStringValue(getStringValue());
-                    out.append(o, loc, 0);
-                    break;
-                } else {
-                    out.namespace(new NamespaceBinding(getNodeName().getPrefix(), getNodeName().getURI()), 0);
-                    break;
+                    out.append(o, loc, ReceiverOption.NONE);
                 }
+                break;
 
             default:
                 throw new UnsupportedOperationException("" + event);
 
         }
-        previousAtomic = event == ATOMIC_VALUE;
+        previousAtomic = event == Event.ATOMIC_VALUE;
     }
 }
 

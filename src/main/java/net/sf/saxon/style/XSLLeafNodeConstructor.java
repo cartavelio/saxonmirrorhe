@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,9 +11,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -36,27 +34,26 @@ public abstract class XSLLeafNodeConstructor extends StyleElement {
      * a name and a select attribute
      *
      * @return the expression defining the name attribute
-     * @throws XPathException if an error is detected
      */
 
-    protected Expression prepareAttributesNameAndSelect() throws XPathException {
+    protected Expression prepareAttributesNameAndSelect()  {
 
         Expression name = null;
         String nameAtt = null;
         String selectAtt = null;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             if (f.equals("name")) {
-                nameAtt = Whitespace.trim(atts.getValue(a));
-                name = makeAttributeValueTemplate(nameAtt, a);
+                nameAtt = Whitespace.trim(value);
+                name = makeAttributeValueTemplate(nameAtt, att);
             } else if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
+                selectAtt = value;
+                select = makeExpression(selectAtt, att);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -73,6 +70,7 @@ public abstract class XSLLeafNodeConstructor extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -83,10 +81,12 @@ public abstract class XSLLeafNodeConstructor extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         if (select != null && hasChildNodes()) {
             String errorCode = getErrorCodeForSelectPlusContent();

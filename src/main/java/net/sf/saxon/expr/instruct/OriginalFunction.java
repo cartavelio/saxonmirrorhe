@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -37,7 +37,8 @@ public class OriginalFunction extends AbstractFunction implements Function, Cont
      * @return the result of invoking the function
      * @throws XPathException if a dynamic error occurs within the function
      */
-    public Sequence<?> call(XPathContext context, Sequence[] args) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
         XPathContextMajor c2 = userFunction.makeNewContext(context, this);
         c2.setCurrentComponent(component);
         return userFunction.call(c2, args);
@@ -48,6 +49,7 @@ public class OriginalFunction extends AbstractFunction implements Function, Cont
      *
      * @return the function item's type
      */
+    @Override
     public FunctionItemType getFunctionItemType() {
         return userFunction.getFunctionItemType();
     }
@@ -57,6 +59,7 @@ public class OriginalFunction extends AbstractFunction implements Function, Cont
      *
      * @return the function name, or null for an anonymous inline function
      */
+    @Override
     public StructuredQName getFunctionName() {
         return userFunction.getFunctionName();
     }
@@ -66,6 +69,7 @@ public class OriginalFunction extends AbstractFunction implements Function, Cont
      *
      * @return the number of arguments in the function signature
      */
+    @Override
     public int getArity() {
         return userFunction.getArity();
     }
@@ -77,6 +81,7 @@ public class OriginalFunction extends AbstractFunction implements Function, Cont
      *
      * @return a description of the function for use in error messages
      */
+    @Override
     public String getDescription() {
         return userFunction.getDescription();
     }

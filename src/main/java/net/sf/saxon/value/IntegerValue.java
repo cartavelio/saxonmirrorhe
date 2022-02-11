@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,7 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.FormatNumber;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.Err;
@@ -342,6 +342,7 @@ public abstract class IntegerValue extends DecimalValue {
      */
 
     /*@NotNull*/
+    @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.INTEGER;
     }
@@ -352,6 +353,7 @@ public abstract class IntegerValue extends DecimalValue {
      * @return a decimal representing this numeric value;
      */
 
+    @Override
     public abstract BigDecimal getDecimalValue();
 
     /**
@@ -361,6 +363,7 @@ public abstract class IntegerValue extends DecimalValue {
      * @return always true for this implementation
      */
 
+    @Override
     public boolean isWholeNumber() {
         return true;
     }
@@ -508,6 +511,7 @@ public abstract class IntegerValue extends DecimalValue {
      * @return true if the two values are identical, false otherwise.
      */
 
+    @Override
     public boolean isIdentical(/*@NotNull*/ AtomicValue v) {
         return (v instanceof IntegerValue) && equals(v);
     }

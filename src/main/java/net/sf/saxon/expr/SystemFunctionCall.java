@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,14 +8,16 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.instruct.AnalyzeString;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.Error;
+import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.MapFunctionSet;
+import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.NodeSetPattern;
 import net.sf.saxon.pattern.Pattern;
@@ -234,7 +236,9 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                 (!forStreaming || !isCallOn(MapFunctionSet.MapEntry.class));
     }
 
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
+        Optimizer opt = visitor.obtainOptimizer();
         Expression sf = super.optimize(visitor, contextInfo);
         if (sf == this) {
             // Give the function an opportunity to regenerate the function call, with more information about
@@ -249,7 +253,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                 return sfo;
             }
         }
-        if (sf instanceof SystemFunctionCall) {
+        if (sf instanceof SystemFunctionCall && opt.isOptionSet(OptimizerOptions.CONSTANT_FOLDING)) {
             // If any arguments are known to be empty, pre-evaluate the result
             BuiltInFunctionSet.Entry details = ((SystemFunctionCall) sf).getTargetFunction().getDetails();
             if ((details.properties & BuiltInFunctionSet.UO) != 0) {
@@ -321,6 +325,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
      * unknown or not applicable.
      */
     //@Override
+    @Override
     public IntegerValue[] getIntegerBounds() {
         SystemFunction fn = getTargetFunction();
         if ((fn.getDetails().properties & BuiltInFunctionSet.FILTER) != 0) {
@@ -335,6 +340,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
      * @param th the TypeHierarchy (in case it's needed)
      * @return true if it is
      */
+    @Override
     public boolean isNegatable(TypeHierarchy th) {
         return isCallOn(NotFn.class) || isCallOn(BooleanFn.class) || isCallOn(Empty.class) || isCallOn(Exists.class);
     }
@@ -345,6 +351,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
      * @return the negated expression
      * @throws UnsupportedOperationException if isNegatable() returns false
      */
+    @Override
     public Expression negate() {
         SystemFunction fn = getTargetFunction();
         if (fn instanceof NotFn) {
@@ -437,6 +444,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         return super.toPattern(config);
     }
 
+    @Override
     public Sequence[] evaluateArguments(XPathContext context) throws XPathException {
         OperandArray operanda = getOperanda();
         int numArgs = operanda.getNumberOfOperands();
@@ -454,6 +462,24 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         if (argumentEvaluators != null) {
             allocateArgumentEvaluators(getArguments());
         } 
+    }
+
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
+        Function target = getTargetFunction();
+        if (target instanceof PushableFunction) {
+            Sequence[] actualArgs = evaluateArguments(context);
+            try {
+                ((PushableFunction)target).process(output, context, actualArgs);
+            } catch (XPathException e) {
+                e.maybeSetLocation(getLocation());
+                e.maybeSetContext(context);
+                e.maybeSetFailingExpression(this);
+                throw e;
+            }
+        } else {
+            super.process(output, context);
+        }
     }
 
     /**
@@ -489,11 +515,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
             // Function was implemented as an IntegratedFunctionCall in 9.7 and we retain the same export format
             out.startElement("ifCall", this);
             out.emitAttribute("name", getFunctionName());
-            out.emitAttribute("type", getTargetFunction().getFunctionItemType().getResultType().toExportString());
-            ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
-            if (options.target != null && options.target.equals("JS") && options.targetVersion == 2) {
-                out.emitAttribute("typeJ", getTargetFunction().getFunctionItemType().getResultType().toExportString2());
-            }
+            out.emitAttribute("type", getTargetFunction().getFunctionItemType().getResultType().toAlphaCode());
             getTargetFunction().exportAttributes(out);
             for (Operand o : operands()) {
                 o.getChildExpression().export(out);

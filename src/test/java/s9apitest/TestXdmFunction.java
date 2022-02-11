@@ -1,23 +1,30 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
-import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.math.BigDecimal;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Test XdmFunctionItem class, representing an XPath function item
  */
-public class TestXdmFunction extends TestCase {
+public class TestXdmFunction {
 
+    @Test
     public void testCallSystemFunction() {
         try {
-            Processor proc = new Processor(true);
+            Processor proc = new Processor(false);
             XdmFunctionItem fi = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.FN, "parse-json"), 1);
             assertNotNull(fi);
             XdmArray result = (XdmArray) fi.call(proc, new XdmAtomicValue("[1,2,3]"));
@@ -28,9 +35,10 @@ public class TestXdmFunction extends TestCase {
         }
     }
 
+    @Test
     public void testCallSystemFunctionMath() {
         try {
-            Processor proc = new Processor(true);
+            Processor proc = new Processor(false);
             XdmFunctionItem fi = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.MATH, "sqrt"), 1);
             assertNotNull(fi);
             XdmAtomicValue result = (XdmAtomicValue) fi.call(proc, new XdmAtomicValue(4));
@@ -41,6 +49,7 @@ public class TestXdmFunction extends TestCase {
         }
     }
 
+    @Test
     public void testCallSystemFunctionArray() {
         try {
             Processor proc = new Processor(true);
@@ -55,6 +64,7 @@ public class TestXdmFunction extends TestCase {
         }
     }
 
+    @Test
     public void testCallSystemFunctionSaxon() {
         try {
             Processor proc = new Processor(true);
@@ -70,6 +80,7 @@ public class TestXdmFunction extends TestCase {
         }
     }
 
+    @Test
     public void testCallSystemFunctionBadArg() {
         try {
             Processor proc = new Processor(true);
@@ -77,21 +88,11 @@ public class TestXdmFunction extends TestCase {
             XdmAtomicValue result = (XdmAtomicValue) fi.call(proc, new XdmAtomicValue("minus one"));
             fail("Unexpected success");
         } catch (SaxonApiException e) {
-            assertEquals(e.getErrorCode().getLocalName(), "XPTY0004");
+            assertEquals("XPTY0004", e.getErrorCode().getLocalName());
         }
     }
 
-    public void testCallSystemFunctionFailIfUnlicensed() {
-        try {
-            Processor proc = new Processor(false);
-            XdmFunctionItem fi = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.FN, "parse-json"), 1);
-            XdmArray result = (XdmArray) fi.call(proc, new XdmAtomicValue("[1,2,3]"));
-            fail("Unexpected success");
-        } catch (SaxonApiException e) {
-            // OK;
-        }
-    }
-
+    @Test
     public void testExtensionFunctionDefinitionAsFunction() {
         try {
             ExtensionFunctionDefinition sqrt = new TestIntegratedFunctions.SqrtFunction();
@@ -110,6 +111,7 @@ public class TestXdmFunction extends TestCase {
 
     }
 
+    @Test
     public void testTransformReturningFunction() {
         try {
             Processor proc = new Processor(true);
@@ -133,6 +135,7 @@ public class TestXdmFunction extends TestCase {
 
     }
 
+    @Test
     public void testTransformReturningFunctionReferencingGlobalVariables() {
         try {
             Processor proc = new Processor(true);
@@ -157,6 +160,7 @@ public class TestXdmFunction extends TestCase {
 
     }
 
+    @Test
     public void testTransformReturningFunctionCallingTemplate() {
         try {
             Processor proc = new Processor(true);
@@ -184,6 +188,7 @@ public class TestXdmFunction extends TestCase {
 
     }
 
+    @Test
     public void testTransformReturningInlineFunctionReferencingGlobalVariables() {
         try {
             Processor proc = new Processor(true);
@@ -207,9 +212,10 @@ public class TestXdmFunction extends TestCase {
 
     }
 
+    @Test
     public void testFunctionReturnedByFunctionLookup() {
         try {
-            Processor proc = new Processor(true);
+            Processor proc = new Processor(false);
             XPathCompiler comp = proc.newXPathCompiler();
             XdmItem value = comp.evaluateSingle("function-lookup(QName('http://www.w3.org/2005/xpath-functions', 'round'), 2)", null);
             XdmValue result = ((XdmFunctionItem) value).call(proc,
@@ -224,6 +230,7 @@ public class TestXdmFunction extends TestCase {
 
     }
 
+    @Test
     public void testUserFunctionReturnedByFunctionLookup() {
         try {
             Processor proc = new Processor(true);
@@ -249,9 +256,10 @@ public class TestXdmFunction extends TestCase {
 
     }
 
+    @Test
     public void testContextDependentFunctionReturnedByFunctionLookup() {
         try {
-            Processor proc = new Processor(true);
+            Processor proc = new Processor(false);
             XPathCompiler comp = proc.newXPathCompiler();
             XdmItem value = comp.evaluateSingle("function-lookup(QName('http://www.w3.org/2005/xpath-functions', 'string'), 0)",
                                                 new XdmAtomicValue(3.14159));
@@ -265,6 +273,7 @@ public class TestXdmFunction extends TestCase {
 
     }
 
+    @Test
     public void testLangFunction() {
         try {
             Processor proc = new Processor(true);
@@ -285,10 +294,11 @@ public class TestXdmFunction extends TestCase {
 
     }
 
+    @Test
     public void testQueryReturningFunctionReferencingGlobalVariables() {
         try {
             Processor proc = new Processor(true);
-            proc.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, false);
+            proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
             XQueryCompiler comp = proc.newXQueryCompiler();
             comp.setSchemaAware(true);
             String query = "declare variable $offset as xs:integer external;"

@@ -1,9 +1,9 @@
 package pulltests;
 
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.stax.XMLStreamWriterDestination;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -18,15 +18,19 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * JUnit tests on StaxResults
  */
-public class TestStaxResult extends TestCase {
+public class TestStaxResult {
 
      /**
      * Test use of StaxResult with s9api
      */
 
+    @Test
     public void testStaxResults1()  {
         Processor proc = new Processor(true);
             XsltCompiler compiler = proc.newXsltCompiler();
@@ -41,9 +45,7 @@ public class TestStaxResult extends TestCase {
             byte[] byteArray = stylesheet.getBytes("UTF-8");
             ByteArrayInputStream inputStream = new ByteArrayInputStream(byteArray);
             reader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
-        } catch(XMLStreamException e) {
-            fail(e.getMessage());
-        } catch(UnsupportedEncodingException e){
+        } catch(XMLStreamException | UnsupportedEncodingException e) {
             fail(e.getMessage());
         }
         StAXSource source = new StAXSource(reader);
@@ -73,6 +75,7 @@ public class TestStaxResult extends TestCase {
      * Test use of StaxResult with JAXP
      */
 
+    @Test
     public void testStaxResults2() {
         try {
             TransformerFactory factory = new TransformerFactoryImpl();

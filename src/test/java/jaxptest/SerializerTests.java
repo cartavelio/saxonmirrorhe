@@ -1,12 +1,12 @@
 package jaxptest;
 
 import com.saxonica.config.ProfessionalTransformerFactory;
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.jaxp.TransformerImpl;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.*;
@@ -16,11 +16,18 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Test for s9api serialization
  */
-public class SerializerTests extends TestCase {
+public class SerializerTests {
 
+    @Test
     public void testTemplatesOutputProperties() {
         try {
             // Create stylesheet with call to extension function
@@ -37,14 +44,15 @@ public class SerializerTests extends TestCase {
             TransformerFactory tFactory = new net.sf.saxon.TransformerFactoryImpl();
             Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(stylesheet)));
             Properties props = templates.getOutputProperties();
-            assertEquals("method", "xml", props.getProperty("method"));
-            assertEquals("indent", "no", props.getProperty("indent"));
-            assertNull("doctype-system", props.getProperty("doctype-system"));
+            assertEquals("xml", props.getProperty("method"), "method");
+            assertEquals("no", props.getProperty("indent"), "indent");
+            assertNull(props.getProperty("doctype-system"), "doctype-system");
         } catch (Exception e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testUserOutputMethod() {
         try {
             // Create stylesheet with user-defined serialization method
@@ -65,13 +73,14 @@ public class SerializerTests extends TestCase {
             StringWriter output = new StringWriter();
             StreamResult result = new StreamResult(output);
             trans.transform(input, result);
-            assertTrue("output1", output.toString().contains("17"));
-            assertTrue("output2", output.toString().contains("<!--custom-emitter-->"));
+            assertTrue(output.toString().contains("17"), "output1");
+            assertTrue(output.toString().contains("<!--custom-emitter-->"), "output2");
         } catch (Exception e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testProperties() throws TransformerException {
         TransformerFactory tfactory = TransformerFactory.newInstance();
         String xsl = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
@@ -98,6 +107,7 @@ public class SerializerTests extends TestCase {
     }
 
 
+    @Test
     public void testUserOutputMethodSecondary() {
         try {
             // Create stylesheet with user-defined serialization method used for xsl:result-document
@@ -121,13 +131,14 @@ public class SerializerTests extends TestCase {
             final StreamResult result = new StreamResult(output);
             result.setSystemId("http://dummy.com/");
             trans.transform(input, result);
-            assertTrue("output1", output.toString().contains("17"));
-            assertTrue("output2", output.toString().contains("<!--custom-emitter-->"));
+            assertTrue(output.toString().contains("17"), "output1");
+            assertTrue(output.toString().contains("<!--custom-emitter-->"), "output2");
         } catch (Exception e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testOutputUriResolverClose() {
         try {
             // Test that calls on OutputURIResolver are correctly made
@@ -182,7 +193,15 @@ public class SerializerTests extends TestCase {
         }
     }
 
+    @Test
     public void testIllegalUri() {
+        // Run this test in the temp directory so that the output file isn't
+        // a problem. It's unclear to ndw how platform-specific this test
+        // might be.
+        String cwd = System.getProperty("user.dir");
+        String temp = ConfigTest.DATA_DIR + "temp";
+        System.setProperty("user.dir", temp);
+
         try {
             String stylesheet =
                     "<?xml version=\"1.0\"?> \n" +
@@ -201,15 +220,16 @@ public class SerializerTests extends TestCase {
             StreamSource input = new StreamSource(new StringReader(stylesheet));
             String s = ".\\config\\testIllegalUriOutput.xml";
             StreamResult result = new StreamResult(new File(s));
-            System.err.println(result.getSystemId());
             trans.transform(input, result);
 
+            System.setProperty("user.dir", cwd);
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
     }
 
+    @Test
     public void testExtensionAttribute() {
         // Bug 2364
         try {
@@ -241,6 +261,7 @@ public class SerializerTests extends TestCase {
 
 
 
+    @Test
     public void testRequireWellFormedBad1() {
         try {
             // Create stylesheet with user-defined emitter. The require-well-formed serialization property
@@ -262,13 +283,14 @@ public class SerializerTests extends TestCase {
             StringWriter output = new StringWriter();
             StreamResult result = new StreamResult(output);
             trans.transform(input, result);
-            assertTrue("output1", output.toString().contains("17"));
-            assertTrue("output2", output.toString().contains("<!--custom-emitter-->"));
+            assertTrue(output.toString().contains("17"), "output1");
+            assertTrue(output.toString().contains("<!--custom-emitter-->"), "output2");
         } catch (Exception e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testSAXRequireWellFormedOK() {
         try {
             // Create stylesheet with user-defined SAX content handler. Output must be well-formed (and is)
@@ -294,6 +316,7 @@ public class SerializerTests extends TestCase {
         }
     }
 
+    @Test
     public void testSAXRequireWellFormedBad1() {
         try {
             // Create stylesheet with user-defined emitter. The require-well-formed serialization property
@@ -322,6 +345,7 @@ public class SerializerTests extends TestCase {
     }
 
 
+    @Test
     public void testSAXRequireWellFormedBad2() {
         try {
             // Create stylesheet with user-defined serialization method. Output must be well-formed (and is not)
@@ -348,6 +372,7 @@ public class SerializerTests extends TestCase {
         }
     }
 
+    @Test
     public void testNonBMP() throws Exception {
 
         TransformerFactory tf = new net.sf.saxon.TransformerFactoryImpl();
@@ -366,6 +391,7 @@ public class SerializerTests extends TestCase {
         assertFalse(out.contains("&#"));
     }
 
+    @Test
     public void testNextInChain() {
         try {
             String stylesheet1 =
@@ -399,7 +425,7 @@ public class SerializerTests extends TestCase {
             StringWriter output = new StringWriter();
             StreamResult result = new StreamResult(output);
             trans.transform(input, result);
-            assertTrue("output", output.toString().contains("<b><a/></b>"));
+            assertTrue(output.toString().contains("<b><a/></b>"), "output");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -408,6 +434,7 @@ public class SerializerTests extends TestCase {
 
     // Error case - target stylesheet does not exist (base URI unknown)
 
+    @Test
     public void testNextInChainError() {
         //noinspection CatchMayIgnoreException
         try {
@@ -441,6 +468,7 @@ public class SerializerTests extends TestCase {
         }
     }
 
+    @Test
     public void testNextInChainResultDoc() {
         try {
             String stylesheet1 =
@@ -475,26 +503,30 @@ public class SerializerTests extends TestCase {
             StreamResult result = new StreamResult(output);
             result.setSystemId("http://dummy/");
             ((TransformerImpl)trans).getUnderlyingController().setOutputURIResolver(new OutputURIResolver() {
+                @Override
                 public OutputURIResolver newInstance() {
                     return this;
                 }
 
+                @Override
                 public Result resolve(String href, String base) throws TransformerException {
                     return result;
                 }
 
+                @Override
                 public void close(Result result) throws TransformerException {
 
                 }
             });
             trans.transform(input, result);
-            assertTrue("output", output.toString().contains("<b><a/></b>"));
+            assertTrue(output.toString().contains("<b><a/></b>"), "output");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testNextInChainNamedResultDoc() {
         try {
             String stylesheet1 =
@@ -524,10 +556,12 @@ public class SerializerTests extends TestCase {
             });
             final StringWriter sw = new StringWriter();
             tFactory.setAttribute(FeatureKeys.OUTPUT_URI_RESOLVER, new OutputURIResolver() {
+                @Override
                 public OutputURIResolver newInstance() {
                     return this;
                 }
 
+                @Override
                 public Result resolve(String href, String base) {
                     if (href.endsWith("out.xml")) {
                         return new StreamResult(sw);
@@ -536,6 +570,7 @@ public class SerializerTests extends TestCase {
                     }
                 }
 
+                @Override
                 public void close(Result result) {
                     //
                 }
@@ -546,7 +581,7 @@ public class SerializerTests extends TestCase {
             StringWriter output = new StringWriter();
             StreamResult result = new StreamResult(output);
             trans.transform(input, result);
-            assertTrue("output", sw.toString().contains("<b><a/></b>"));
+            assertTrue(sw.toString().contains("<b><a/></b>"), "output");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -554,6 +589,7 @@ public class SerializerTests extends TestCase {
     }
 
     // We need to run this junit test on different platforms to make sure we get the desired outcome on all of them.
+    @Test
     public void testOutFileClosed() throws Exception {
         String stylesheet =
                 "<?xml version=\"1.0\"?> \n" +
@@ -582,11 +618,12 @@ public class SerializerTests extends TestCase {
         // Run transformation
         System.out.println("Run transformation...");
         transformer.transform(input, outputTarget);
-        assertTrue("Output file exists: ", outFile.exists());
-        assertTrue("Can the output file be deleted? ", outFile.delete());
+        assertTrue(outFile.exists(), "Output file exists: ");
+        assertTrue(outFile.delete(), "Can the output file be deleted? ");
     }
 
 
+    @Test
     public void testRequireWellFormedOK() {
         try {
             // Create stylesheet with user-defined serialization method. Output must be well-formed (and is)
@@ -607,8 +644,8 @@ public class SerializerTests extends TestCase {
             StringWriter output = new StringWriter();
             StreamResult result = new StreamResult(output);
             trans.transform(input, result);
-            assertTrue("output1", output.toString().contains("17"));
-            assertTrue("output2", output.toString().contains("<!--custom-emitter-->"));
+            assertTrue(output.toString().contains("17"), "output1");
+            assertTrue(output.toString().contains("<!--custom-emitter-->"), "output2");
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -616,6 +653,7 @@ public class SerializerTests extends TestCase {
 
 
 
+    @Test
     public void testNextInChainPisoiTest() {
         try {
             String xslPath = ConfigTest.DATA_DIR + "next-in-chain/main.xsl";
@@ -640,7 +678,7 @@ public class SerializerTests extends TestCase {
             // Run transformation
             System.out.println("Run transformation...");
             transformer.transform(xmlSource, outputTarget);
-            assertEquals("result", "<second>principal</second>", sw.toString());
+            assertEquals( "<second>principal</second>", sw.toString(), "result");
         } catch (Exception err) {
             err.printStackTrace();
             fail(err.getMessage());
@@ -648,6 +686,7 @@ public class SerializerTests extends TestCase {
 
     }
 
+    @Test
     public void testCdataSectionProperty() {
         try {
             Source xslSource = new StreamSource(new StringReader(
@@ -666,7 +705,7 @@ public class SerializerTests extends TestCase {
 
             Transformer newTransformer = TransformerFactoryImpl.newInstance().newTransformer(xslSource);
             String outputProperty = newTransformer.getOutputProperty("cdata-section-elements");
-            assertTrue(outputProperty.trim().equals("MASTER_COMMENTS") || outputProperty.trim().equals("{}MASTER_COMMENTS"));
+            assertTrue(outputProperty.trim().equals("MASTER_COMMENTS") || outputProperty.trim().equals("Q{}MASTER_COMMENTS"));
 
             Source xmlSource = new StreamSource(new StringReader(
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -688,28 +727,4 @@ public class SerializerTests extends TestCase {
 
 
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
-
-
 

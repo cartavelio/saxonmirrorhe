@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,21 +7,15 @@
 
 package net.sf.saxon.expr.flwor;
 
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.trace.InstructionInfo;
-import net.sf.saxon.trace.LocationKind;
-
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import net.sf.saxon.trace.Traceable;
 
 /**
  * A "trace" clause in a FLWOR expression, added by a TraceCodeInjector
  */
-public class ClauseInfo implements InstructionInfo {
+public class ClauseInfo implements Traceable {
 
     private Clause clause;
     private NamespaceResolver nsResolver;
@@ -40,23 +34,18 @@ public class ClauseInfo implements InstructionInfo {
         return clause;
     }
 
-    /**
-     * Get the type of construct. This will either be the fingerprint of a standard XSLT instruction name
-     * (values in {@link net.sf.saxon.om.StandardNames}: all less than 1024)
-     * or it will be a constant in class {@link LocationKind}.
-     *
-     * @return an integer identifying the kind of construct
-     */
-    public int getConstructType() {
-        return LocationKind.CLAUSE_BASE + clause.getClauseKey();
+    @Override
+    public Location getLocation() {
+        return clause.getLocation();
     }
-
+    
     /**
      * Get a name identifying the object of the expression, for example a function name, template name,
      * variable name, key name, element name, etc. This is used only where the name is known statically.
      *
      * @return the QName of the object declared or manipulated by this instruction or expression
      */
+    @Override
     public StructuredQName getObjectName() {
         LocalVariableBinding[] vars = clause.getRangeVariables();
         if (vars != null && vars.length > 0) {
@@ -108,40 +97,6 @@ public class ClauseInfo implements InstructionInfo {
      */
     public int getLineNumber() {
         return clause.getLocation().getLineNumber();
-    }
-
-    /**
-     * Get an immutable copy of this Location object. By default Location objects may be mutable, so they
-     * should not be saved for later use. The result of this operation holds the same location information,
-     * but in an immutable form.
-     */
-    public Location saveLocation() {
-        return new ExplicitLocation(this);
-    }
-
-    /**
-     * Get the value of a particular property of the instruction. Properties
-     * of XSLT instructions are generally known by the name of the stylesheet attribute
-     * that defines them.
-     *
-     * @param name The name of the required property
-     * @return The value of the requested property, or null if the property is not available
-     */
-    public Object getProperty(String name) {
-        return null;
-    }
-
-    /**
-     * Get an iterator over all the properties available. The values returned by the iterator
-     * will be of type String, and each string can be supplied as input to the getProperty()
-     * method to retrieve the value of the property. The iterator may return properties whose
-     * value is null.
-     *
-     * @return an iterator over the properties.
-     */
-    public Iterator<String> getProperties() {
-        List<String> ls = Collections.emptyList();
-        return ls.iterator();
     }
 
     /**

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,8 +14,6 @@ package net.sf.saxon.lib;
  * <p>This class also defines constant URIs for some objects other than namespaces -
  * for example, URIs that identify the various object models used in the JAXP XPath API,
  * and the Unicode codepoint collation URI.</p>
- *
- * @author Michael H. Kay
  */
 
 public class NamespaceConstant {
@@ -112,7 +110,6 @@ public class NamespaceConstant {
      */
     public static final String ERR = "http://www.w3.org/2005/xqt-errors";
 
-
     /**
      * Predefined XQuery namespace for local functions
      */
@@ -128,11 +125,6 @@ public class NamespaceConstant {
      * Namespace URI for XPath 3.0 functions associated with maps
      */
     public final static String MAP_FUNCTIONS = "http://www.w3.org/2005/xpath-functions/map";
-
-    /**
-     * Namespace URI for XPath 3.0 functions associated with maps as defined in the 2013 XSLT specification
-     */
-    public final static String MAP_FUNCTIONS_2011 = "http://www.w3.org/2011/xpath-functions/map";
 
     /**
      * Namespace URI for XPath 3.1 functions associated with arrays
@@ -168,12 +160,6 @@ public class NamespaceConstant {
      */
 
     public static final String XLINK = "http://www.w3.org/1999/xlink";
-
-    /**
-     * The xquery-option namespace for the XQuery 3.0 feature names
-     */
-
-    public static final String XQUERY_OPTIONS = "http://www.w3.org/2011/xquery-options";
 
     /**
      * The xquery namespace for the XQuery 3.0 declare option
@@ -286,9 +272,9 @@ public class NamespaceConstant {
     public static final String GLOBAL_JS = "http://saxonica.com/ns/globalJS";
 
     /**
-      * URI for the user extension calls in Saxon/C for C++ and PHP
-      */
-     public static final String PHP = "http://php.net/xsl";
+     * URI for the user extension calls in Saxon/C for C++ and PHP
+     */
+    public static final String PHP = "http://php.net/xsl";
 
     /**
      * URI for interactive XSLT extensions in Saxon-CE and Saxon-JS
@@ -304,6 +290,7 @@ public class NamespaceConstant {
 
     /**
      * Get the conventional prefix for a common namespace
+     *
      * @param uri the namespace URI
      * @return the conventional prefix for this URI if there is one, or null otherwise
      */
@@ -314,12 +301,6 @@ public class NamespaceConstant {
                 return "xsl";
             case FN:
                 return "fn";
-            case MATH:
-                return "math";
-            case MAP_FUNCTIONS:
-                return "map";
-            case ARRAY_FUNCTIONS:
-                return "array";
             case XML:
                 return "xml";
             case SCHEMA:
@@ -334,6 +315,14 @@ public class NamespaceConstant {
                 return "saxon";
             case SAXON_GENERATED_VARIABLE:
                 return "vv";
+            case MATH:
+                return "math";
+            case MAP_FUNCTIONS:
+                return "map";
+            case ARRAY_FUNCTIONS:
+                return "array";
+            case ERR:
+                return "err";
             default:
                 return null;
         }
@@ -341,6 +330,7 @@ public class NamespaceConstant {
 
     /**
      * Get the URI associated with a commonly-used conventional prefix
+     *
      * @param prefix the namespace prefix
      * @return the namespace URI associated with this conventional prefix
      */
@@ -395,45 +385,14 @@ public class NamespaceConstant {
                          uri.equals(XML) ||
                          uri.equals(SCHEMA) ||
                          uri.equals(SCHEMA_INSTANCE) ||
-                        uri.equals(ERR) ||
-                        uri.equals(XMLNS));
+                         uri.equals(ERR) ||
+                         uri.equals(XMLNS));
     }
-
     /**
-     * Determine whether a namespace is a reserved namespace
+     * Determine whether a namespace is a reserved namespace in XQuery
      *
      * @param uri the namespace URI to be tested
-     * @return true if this namespace URI is reserved in XQuery
-     */
-
-    public static boolean isReservedInQuery(String uri) {
-        return uri.equals(FN) ||
-                uri.equals(XML) ||
-                uri.equals(SCHEMA) ||
-                uri.equals(SCHEMA_INSTANCE);
-    }
-
-    /**
-     * Determine whether a namespace is a reserved namespace
-     *
-     * @param uri the namespace URI to be tested
-     * @return true if this namespace URI is reserved in XQuery
-     */
-
-    public static boolean isReservedInQuery30(String uri) {
-        return uri.equals(FN) ||
-                uri.equals(XML) ||
-                uri.equals(SCHEMA) ||
-                uri.equals(SCHEMA_INSTANCE) ||
-                uri.equals(MATH) ||
-                uri.equals(XQUERY);
-    }
-
-    /**
-     * Determine whether a namespace is a reserved namespace
-     *
-     * @param uri the namespace URI to be tested
-     * @return true if this namespace URI is reserved in XQuery
+     * @return true if this namespace URI is reserved in XQuery 3.1
      */
 
     public static boolean isReservedInQuery31(String uri) {
@@ -442,7 +401,7 @@ public class NamespaceConstant {
                 uri.equals(SCHEMA) ||
                 uri.equals(SCHEMA_INSTANCE) ||
                 uri.equals(MATH) ||
-                uri.equals(XQUERY) ||
+                uri.equals(XQUERY)||
                 uri.equals(MAP_FUNCTIONS) ||
                 uri.equals(ARRAY_FUNCTIONS);
     }

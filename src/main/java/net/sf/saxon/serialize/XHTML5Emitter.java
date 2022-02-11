@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 
 package net.sf.saxon.serialize;
 
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
@@ -79,8 +79,8 @@ public class XHTML5Emitter extends XMLEmitter {
      * Output the document type declaration
      *
      * @param name        the qualified name of the element
-     * @param displayName The element nam
-     * @param systemId    The DOCTYP system identifier
+     * @param displayName The element name as displayed
+     * @param systemId    The DOCTYPE system identifier
      * @param publicId    The DOCTYPE public identifier
      * @throws net.sf.saxon.trans.XPathException
      *          if an error occurs writing to the output
@@ -99,6 +99,7 @@ public class XHTML5Emitter extends XMLEmitter {
         }
     }
 
+    @Override
     protected boolean writeDocTypeWithNullSystemId() {
         return true;
     }
@@ -107,6 +108,7 @@ public class XHTML5Emitter extends XMLEmitter {
      * Close an empty element tag.
      */
 
+    @Override
     protected String emptyElementTagCloser(String displayName, /*@NotNull*/ NodeName name) {
         if (isRecognizedHtmlElement(name) && emptyTags5.contains(name.getLocalPart())) {
             return "/>";

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.KeyFn;
@@ -22,6 +23,8 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static net.sf.saxon.expr.flwor.Clause.ClauseName.FOR;
 
 /**
  * A "for" clause in a FLWOR expression
@@ -38,10 +41,11 @@ public class ForClause extends Clause {
     }
 
     @Override
-    public int getClauseKey() {
+    public ClauseName getClauseKey() {
         return FOR;
     }
 
+    @Override
     public ForClause copy(FLWORExpression flwor, RebindingMap rebindings) {
         ForClause f2 = new ForClause();
         f2.setLocation(getLocation());
@@ -185,16 +189,17 @@ public class ForClause extends Clause {
      * output to another tuple stream
      *
      * @param destination the output tuple stream
+     * @param output the destination for the result
      * @param context     the dynamic evaluation context
      * @return the push tuple stream that implements the functionality of this clause of the FLWOR
      *         expression
      */
     @Override
-    public TuplePush getPushStream(TuplePush destination, XPathContext context) {
+    public TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context) {
         if (allowsEmpty) {
-            return new ForClauseOuterPush(destination, this);
+            return new ForClauseOuterPush(output, destination, this);
         } else {
-            return new ForClausePush(destination, this);
+            return new ForClausePush(output, destination, this);
         }
     }
 
@@ -313,8 +318,8 @@ public class ForClause extends Clause {
                     ContextItemStaticInfo cit = config.makeContextItemStaticInfo(getSequence().getItemType(), true);
                     Expression predicate = condition.typeCheck(visitor, cit);
                     // If the result of the predicate might be a number, wrap it in a call of boolean()
-                    int rel = th.relationship(predicate.getItemType(), BuiltInAtomicType.INTEGER);
-                    if (rel != TypeHierarchy.DISJOINT) {
+                    Affinity rel = th.relationship(predicate.getItemType(), BuiltInAtomicType.INTEGER);
+                    if (rel != Affinity.DISJOINT) {
                         RetainedStaticContext rsc = new RetainedStaticContext(visitor.getStaticContext());
                         predicate = SystemFunction.makeCall("boolean", rsc, predicate);
                         assert predicate != null;
@@ -406,16 +411,17 @@ public class ForClause extends Clause {
         out.endElement();
     }
 
+    @Override
     public String toShortString() {
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
         fsb.append("for $");
         fsb.append(rangeVariable.getVariableQName().getDisplayName());
-        fsb.append(' ');
+        fsb.cat(' ');
         LocalVariableBinding posVar = getPositionVariable();
         if (posVar != null) {
             fsb.append("at $");
             fsb.append(posVar.getVariableQName().getDisplayName());
-            fsb.append(' ');
+            fsb.cat(' ');
         }
         fsb.append("in ");
         fsb.append(getSequence().toShortString());
@@ -426,12 +432,12 @@ public class ForClause extends Clause {
         FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
         fsb.append("for $");
         fsb.append(rangeVariable.getVariableQName().getDisplayName());
-        fsb.append(' ');
+        fsb.cat(' ');
         LocalVariableBinding posVar = getPositionVariable();
         if (posVar != null) {
             fsb.append("at $");
             fsb.append(posVar.getVariableQName().getDisplayName());
-            fsb.append(' ');
+            fsb.cat(' ');
         }
         fsb.append("in ");
         fsb.append(getSequence().toString());

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,10 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.LocalParam;
 import net.sf.saxon.expr.instruct.LocalParamBlock;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -38,6 +35,7 @@ public class XSLIterate extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -46,6 +44,7 @@ public class XSLIterate extends StyleElement {
      * Specify that xsl:param is a permitted child
      */
 
+    @Override
     protected boolean isPermittedChild(StyleElement child) {
         return child instanceof XSLLocalParam || child instanceof XSLOnCompletion;
     }
@@ -56,6 +55,7 @@ public class XSLIterate extends StyleElement {
      * @return true: yes, it may contain a sequence constructor
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
@@ -66,23 +66,25 @@ public class XSLIterate extends StyleElement {
      * @return true if this element is allowed to contain an xsl:param
      */
 
+    @Override
     protected boolean mayContainParam() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
-
-        AttributeCollection atts = getAttributeList();
+    @Override
+    public void prepareAttributes() {
 
         String selectAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String f = attName.getDisplayName();
             if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
+                selectAtt = value;
+                select = makeExpression(selectAtt, att);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -100,6 +102,7 @@ public class XSLIterate extends StyleElement {
         return compilable;
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         //checkParamComesFirst(false);
         select = typeCheck("select", select);
@@ -109,16 +112,13 @@ public class XSLIterate extends StyleElement {
     }
 
     /*@Nullable*/
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
-        SequenceIterator children = iterateAxis(AxisInfo.CHILD);
         List<NodeInfo> nonFinallyChildren = new ArrayList<>();
         Expression finallyExp = null;
         List<XSLLocalParam> params = new ArrayList<>();
-        while (true) {
-            NodeInfo node = (NodeInfo) children.next();
-            if (node == null) {
-                break;
-            } else if (node instanceof XSLLocalParam) {
+        for (NodeInfo node : children()) {
+            if (node instanceof XSLLocalParam) {
                 params.add((XSLLocalParam) node);
             } else if (node instanceof XSLOnCompletion) {
                 finallyExp = ((XSLOnCompletion) node).compile(exec, decl);

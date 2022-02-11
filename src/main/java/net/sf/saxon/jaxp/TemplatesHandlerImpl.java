@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,6 @@ package net.sf.saxon.jaxp;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.CommentStripper;
 import net.sf.saxon.event.ReceivingContentHandler;
-import net.sf.saxon.event.StartTagBuffer;
 import net.sf.saxon.event.Stripper;
 import net.sf.saxon.om.StylesheetSpaceStrippingRule;
 import net.sf.saxon.s9api.Processor;
@@ -72,12 +71,8 @@ public class TemplatesHandlerImpl extends ReceivingContentHandler implements Tem
         builder.setLineNumbering(true);
 
         UseWhenFilter useWhenFilter = new UseWhenFilter(compilation, builder, NestedIntegerValue.TWO);
-
-        StartTagBuffer startTagBuffer = new StartTagBuffer(useWhenFilter);
-        useWhenFilter.setStartTagBuffer(startTagBuffer);
-
         StylesheetSpaceStrippingRule rule = new StylesheetSpaceStrippingRule(config.getNamePool());
-        Stripper styleStripper = new Stripper(rule, startTagBuffer);
+        Stripper styleStripper = new Stripper(rule, useWhenFilter);
         CommentStripper commentStripper = new CommentStripper(styleStripper);
         setReceiver(commentStripper);
 
@@ -88,6 +83,7 @@ public class TemplatesHandlerImpl extends ReceivingContentHandler implements Tem
      */
 
     /*@Nullable*/
+    @Override
     public Templates getTemplates() {
         if (templates == null) {
             DocumentImpl doc = (DocumentImpl) builder.getCurrentRoot();
@@ -122,23 +118,28 @@ public class TemplatesHandlerImpl extends ReceivingContentHandler implements Tem
      *            the static base URI in the static context of XPath expressions.
      */
 
+    @Override
     public void setSystemId(String url) {
         systemId = url;
         builder.setSystemId(url);
         super.setDocumentLocator(new Locator() {
+            @Override
             public int getColumnNumber() {
                 return -1;
             }
 
+            @Override
             public int getLineNumber() {
                 return -1;
             }
 
             /*@Nullable*/
+            @Override
             public String getPublicId() {
                 return null;
             }
 
+            @Override
             public String getSystemId() {
                 return systemId;
             }
@@ -149,6 +150,7 @@ public class TemplatesHandlerImpl extends ReceivingContentHandler implements Tem
      * Callback interface for SAX: not for application use
      */
 
+    @Override
     public void setDocumentLocator(final Locator locator) {
         // If the user has called setSystemId(), we use that system ID in preference to this one,
         // which probably comes from the XML parser possibly via some chain of SAX filters
@@ -161,6 +163,7 @@ public class TemplatesHandlerImpl extends ReceivingContentHandler implements Tem
      * Get the systemId of the document
      */
 
+    @Override
     public String getSystemId() {
         return systemId;
     }

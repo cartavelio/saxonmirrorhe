@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -48,6 +48,7 @@ final class PrecedingIterator implements AxisIterator {
     }
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
         if (pending != null) {
             current = pending;
@@ -83,12 +84,12 @@ final class PrecedingIterator implements AxisIterator {
             if (matchesTextNodes && tree.nodeKind[nextNodeNr] == Type.TEXTUAL_ELEMENT) {
                 TinyTextualElement element = (TinyTextualElement)tree.getNode(nextNodeNr);
                 TinyTextualElement.TinyTextualElementText text = element.getTextNode();
-                if (nodeTest.matchesNode(text)) {
-                    if (nodeTest.matchesNode(element)) {
+                if (nodeTest.test(text)) {
+                    if (nodeTest.test(element)) {
                         pending = element;
                     }
                     return current = text;
-                } else if (nodeTest.matchesNode(element)) {
+                } else if (nodeTest.test(element)) {
                     return current = element;
                 }
             } else {

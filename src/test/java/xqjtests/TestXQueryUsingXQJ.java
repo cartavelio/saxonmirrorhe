@@ -2,9 +2,10 @@ package xqjtests;
 
 import com.saxonica.xqj.SaxonXQDataSource;
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.IgnorableSpaceStrippingRule;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.namespace.QName;
@@ -16,11 +17,16 @@ import javax.xml.xquery.*;
 import java.io.*;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Some XQJ tests not covered by the XQJ compatibility tests
  */
-public class TestXQueryUsingXQJ extends TestCase {
+public class TestXQueryUsingXQJ {
 
+    @Test
     public void testBoundarySpace() {
         // This test case demonstrated a problem with the default setting of boundary-space policy under XQJ
         try {
@@ -78,8 +84,43 @@ public class TestXQueryUsingXQJ extends TestCase {
         }
     }
 
+    @Test
+    public void testBindSimpleDocument() {
+        // Investigating bug #4469
+        try {
+            // setup common to all XQuery nodes.
+            Configuration config = new Configuration();
+            XQDataSource dataSource = new SaxonXQDataSource(config);
+            XQConnection xqconnection = dataSource.getConnection();
+            XQStaticContext context = xqconnection.getStaticContext();
+            context.setBindingMode(XQConstants.BINDING_MODE_DEFERRED);
+            xqconnection.setStaticContext(context);
 
-    public static void testBindDocument() {
+            XQPreparedExpression q1 = xqconnection.prepareExpression(".");
+            q1.bindDocument(XQConstants.CONTEXT_ITEM,
+                                          new StreamSource(new StringReader("<a>x<b>text</b></a>")), null);
+            XQSequence q1_result = q1.executeQuery();
+
+            XQPreparedExpression q2= xqconnection.prepareExpression(".");
+            q2.bindDocument(XQConstants.CONTEXT_ITEM, q1_result.getSequenceAsStream(), null);
+            StringWriter sw = new StringWriter();
+            Properties props = new Properties();
+            props.setProperty("method", "xml");
+            props.setProperty("indent", "no");
+            props.setProperty("omit-xml-declaration", "yes");
+            q2.executeQuery().writeSequence(sw, props);
+
+            assertEquals("<a>x<b>text</b></a>", sw.toString().trim(), "result");
+
+        } catch (XQException err) {
+            err.printStackTrace();
+            fail(err.getMessage());
+        }
+    }
+
+
+    @Test
+    public void testBindDocument() {
         String dir = ConfigTest.DATA_DIR + "kessel/jan2009/";
         try {
 			// setup common to all XQuery nodes.
@@ -126,6 +167,7 @@ public class TestXQueryUsingXQJ extends TestCase {
      * This test demonstrated a problem with PARENT_POINTER pseudo-nodes in pull mode
      */
 
+    @Test
     public void testParentPointerPull() {
 
         // Declarations for Saxon XQJ interface.
@@ -165,6 +207,7 @@ public class TestXQueryUsingXQJ extends TestCase {
      * This test demonstrated a problem with setting serialization properties to null in writeSequence()
      */
 
+    @Test
     public void testNullOutputProperties() {
         try {
             XQDataSource xqjd = new SaxonXQDataSource();
@@ -181,6 +224,7 @@ public class TestXQueryUsingXQJ extends TestCase {
     }
 
     // Bug 3062 from Petr K
+    @Test
     public void testAbstractValidation() {
         try {
             XQDataSource ds = new SaxonXQDataSource();
@@ -223,6 +267,7 @@ public class TestXQueryUsingXQJ extends TestCase {
 
     // Some additional tests of getItemAsStream()
 
+    @Test
     public void testGetItemAsStream() throws XQException {
         XQDataSource ds = new SaxonXQDataSource();
         XQConnection xqc = ds.getConnection();
@@ -236,17 +281,17 @@ public class TestXQueryUsingXQJ extends TestCase {
         try {
             xmlReader = xqs.getItemAsStream();
         } catch (XQException e) {
-            junit.framework.Assert.fail("A-XQIA-9.1: getItemAsStream failed with message: " + e.getMessage());
+            fail("A-XQIA-9.1: getItemAsStream failed with message: " + e.getMessage());
         }
         try {
-            junit.framework.Assert.assertNotNull("A-XQIA-9.1: getItemAsStream returned a null XMLStreamReader", xmlReader);
-            junit.framework.Assert.assertEquals("A-XQIA-9.1: unexpected first event returned by XMLStreamReader", XMLStreamReader.START_DOCUMENT, xmlReader.getEventType());
-            junit.framework.Assert.assertEquals("A-XQIA-9.1: unexpected second event returned by XMLStreamReader", XMLStreamReader.START_ELEMENT, xmlReader.next());
-            junit.framework.Assert.assertEquals("A-XQIA-9.1: unexpected third event returned by XMLStreamReader", XMLStreamReader.COMMENT, xmlReader.next());
-            junit.framework.Assert.assertEquals("A-XQIA-9.1: unexpected fourth event returned by XMLStreamReader", XMLStreamReader.END_ELEMENT, xmlReader.next());
-            junit.framework.Assert.assertEquals("A-XQIA-9.1: unexpected fifth event returned by XMLStreamReader", XMLStreamReader.END_DOCUMENT, xmlReader.next());
+            assertNotNull(xmlReader, "A-XQIA-9.1: getItemAsStream returned a null XMLStreamReader");
+            assertEquals(XMLStreamReader.START_DOCUMENT, xmlReader.getEventType(), "A-XQIA-9.1: unexpected first event returned by XMLStreamReader");
+            assertEquals(XMLStreamReader.START_ELEMENT, xmlReader.next(), "A-XQIA-9.1: unexpected second event returned by XMLStreamReader");
+            assertEquals(XMLStreamReader.COMMENT, xmlReader.next(), "A-XQIA-9.1: unexpected third event returned by XMLStreamReader");
+            assertEquals(XMLStreamReader.END_ELEMENT, xmlReader.next(), "A-XQIA-9.1: unexpected fourth event returned by XMLStreamReader");
+            assertEquals(XMLStreamReader.END_DOCUMENT, xmlReader.next(), "A-XQIA-9.1: unexpected fifth event returned by XMLStreamReader");
         } catch (XMLStreamException e) {
-            junit.framework.Assert.fail("A-XQIA-9.1: XMLStreamReader.next() failed with message: " + e.getMessage());
+            fail("A-XQIA-9.1: XMLStreamReader.next() failed with message: " + e.getMessage());
         }
 
         xqs = xqe.executeQuery("2+2");
@@ -254,43 +299,36 @@ public class TestXQueryUsingXQJ extends TestCase {
         try {
             xmlReader = xqs.getItemAsStream();
         } catch (XQException e) {
-            junit.framework.Assert.fail("A-XQIA-9.1: getItemAsStream failed with message: " + e.getMessage());
+            fail("A-XQIA-9.1: getItemAsStream failed with message: " + e.getMessage());
         }
         try {
-            junit.framework.Assert.assertNotNull("A-XQIA-9.1: getItemAsStream returned a null XMLStreamReader", xmlReader);
-            junit.framework.Assert.assertEquals("A-XQIA-9.1: unexpected first event returned by XMLStreamReader", XMLStreamReader.START_DOCUMENT, xmlReader.getEventType());
-            junit.framework.Assert.assertEquals("A-XQIA-9.1: unexpected second event returned by XMLStreamReader", XMLStreamReader.CHARACTERS, xmlReader.next());
-            junit.framework.Assert.assertEquals("A-XQIA-9.1: unexpected third event returned by XMLStreamReader", XMLStreamReader.END_DOCUMENT, xmlReader.next());
+            assertNotNull(xmlReader, "A-XQIA-9.1: getItemAsStream returned a null XMLStreamReader");
+            assertEquals(XMLStreamReader.START_DOCUMENT, xmlReader.getEventType(),"A-XQIA-9.1: unexpected first event returned by XMLStreamReader");
+            assertEquals(XMLStreamReader.CHARACTERS, xmlReader.next(), "A-XQIA-9.1: unexpected second event returned by XMLStreamReader");
+            assertEquals(XMLStreamReader.END_DOCUMENT, xmlReader.next(), "A-XQIA-9.1: unexpected third event returned by XMLStreamReader");
         } catch (XMLStreamException e) {
-            junit.framework.Assert.fail("A-XQIA-9.1: XMLStreamReader.next() failed with message: " + e.getMessage());
+            fail("A-XQIA-9.1: XMLStreamReader.next() failed with message: " + e.getMessage());
         }
         xqe.close();
     }
 
+    @Test
+    public void testBug4433() {
+        SaxonXQDataSource dataSource = new SaxonXQDataSource();
+        dataSource.getConfiguration().setConfigurationProperty(Feature.TIMING, true);
+        XQConnection connection = dataSource.getConnection();
+        try (InputStream query = new FileInputStream(ConfigTest.BUGS_DIR + "4433/query.xq");
+             InputStream input = new FileInputStream(ConfigTest.BUGS_DIR + "4433/input.atom")) {
+            XQPreparedExpression expression = connection.prepareExpression(query);
+            expression.bindDocument(XQConstants.CONTEXT_ITEM, input, null, null);
+            XQResultSequence results = expression.executeQuery();
+            results.writeSequence(System.out, null);
+            results.close();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
 
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
-
-
 

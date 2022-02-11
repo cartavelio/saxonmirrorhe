@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,8 +9,7 @@ package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SequenceOutputter;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.flwor.Clause;
 import net.sf.saxon.expr.flwor.FLWORExpression;
@@ -29,7 +28,9 @@ import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ExpressionContext;
+import net.sf.saxon.style.ScopedBindingElement;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
@@ -52,24 +53,6 @@ import java.util.function.Predicate;
  */
 
 public class ExpressionTool {
-
-    public static final int UNDECIDED = -1;
-    public static final int EVALUATE_LITERAL = 0;
-    public static final int EVALUATE_VARIABLE = 1;
-    public static final int MAKE_CLOSURE = 3;
-    public static final int MAKE_MEMO_CLOSURE = 4;
-    public static final int RETURN_EMPTY_SEQUENCE = 5;
-    public static final int EVALUATE_AND_MATERIALIZE_VARIABLE = 6;
-    public static final int CALL_EVALUATE_OPTIONAL_ITEM = 7;
-    public static final int ITERATE_AND_MATERIALIZE = 8;
-    public static final int PROCESS = 9;
-    public static final int LAZY_TAIL_EXPRESSION = 10;
-    public static final int SHARED_APPEND_EXPRESSION = 11;
-    public static final int MAKE_INDEXED_VARIABLE = 12;
-    public static final int MAKE_SINGLETON_CLOSURE = 13;
-    public static final int EVALUATE_SUPPLIED_PARAMETER = 14;
-    public static final int STREAMING_ARGUMENT = 15;
-    public static final int CALL_EVALUATE_SINGLE_ITEM = 16;
 
     private ExpressionTool() {
     }
@@ -140,7 +123,7 @@ public class ExpressionTool {
 
     public static void copyLocationInfo(Expression from, Expression to) {
         if (from != null && to != null) {
-            if (to.getLocation() == null || to.getLocation() == ExplicitLocation.UNKNOWN_LOCATION) {
+            if (to.getLocation() == null || to.getLocation() == Loc.NONE) {
                 to.setLocation(from.getLocation());
             }
             if (to.getLocalRetainedStaticContext() == null) {
@@ -172,6 +155,25 @@ public class ExpressionTool {
         } else {
             return exp.unordered(false, forStreaming);
         }
+    }
+
+    /**
+     * Inject extra code into an expression, recursively, by applying a supplied {@link CodeInjector}
+     * to every expression (and FLWOR clause) in the subtree
+     * @param exp the expression to be augmented with injected code
+     * @param injector the code injector
+     * @return the augmented expression
+     */
+
+    public static Expression injectCode(Expression exp, CodeInjector injector) {
+        if (exp instanceof FLWORExpression) {
+            ((FLWORExpression)exp).injectCode(injector);
+        } else if (!(exp instanceof TraceExpression)){
+            for (Operand o : exp.operands()) {
+                o.setChildExpression(injectCode(o.getChildExpression(), injector));
+            }
+        }
+        return injector.inject(exp);
     }
 
     /**
@@ -280,137 +282,6 @@ public class ExpressionTool {
      * Do lazy evaluation of an expression. This will return a value, which may optionally
      * be a SequenceIntent, which is a wrapper around an iterator over the value of the expression.
      *
-     * @param exp            the expression to be evaluated
-     * @param evaluationMode the evaluation mode for this expression
-     * @param context        the run-time evaluation context for the expression. If
-     *                       the expression is not evaluated immediately, then parts of the
-     *                       context on which the expression depends need to be saved as part of
-     *                       the Closure
-     * @param ref            an indication of how the value will be used. The value 1 indicates that the value
-     *                       is only expected to be used once, so that there is no need to keep it in memory. A small value &gt;1
-     *                       indicates multiple references, so the value will be saved when first evaluated. The special value
-     *                       FILTERED indicates a reference within a loop of the form {@code $x[predicate]}, indicating that the value
-     *                       should be saved in a way that permits indexing.
-     * @return a value: either the actual value obtained by evaluating the
-     * expression, or a Closure containing all the information needed to
-     * evaluate it later
-     * @throws XPathException if any error occurs in evaluating the
-     *                        expression
-     */
-
-    public static Sequence<?> evaluate(
-            Expression exp, int evaluationMode, XPathContext context, int ref)
-            throws XPathException {
-        switch (evaluationMode) {
-
-            case EVALUATE_LITERAL:
-                return ((Literal) exp).getValue();
-
-            case EVALUATE_VARIABLE:
-                return ((VariableReference) exp).evaluateVariable(context);
-
-            case EVALUATE_SUPPLIED_PARAMETER:
-                return ((SuppliedParameterReference) exp).evaluateVariable(context);
-
-            case MAKE_CLOSURE:
-                return Closure.make(exp, context, ref);
-                //return SequenceExtent.makeSequenceExtent(exp.iterate(context));
-
-            case MAKE_MEMO_CLOSURE:
-                return Closure.make(exp, context, ref == 1 ? 10 : ref);
-                //return SequenceExtent.makeSequenceExtent(exp.iterate(context));
-
-            case MAKE_SINGLETON_CLOSURE:
-                return new SingletonClosure(exp, context);
-                //return SequenceExtent.makeSequenceExtent(exp.iterate(context));
-
-            case RETURN_EMPTY_SEQUENCE:
-                return EmptySequence.getInstance();
-
-            case EVALUATE_AND_MATERIALIZE_VARIABLE:
-                Sequence<?> v = ((VariableReference) exp).evaluateVariable(context);
-                if (v instanceof Closure) {
-                    return v.iterate().materialize();
-                } else {
-                    return v;
-                }
-
-            case CALL_EVALUATE_OPTIONAL_ITEM:
-                Item item = exp.evaluateItem(context);
-                if (item == null) {
-                    return EmptySequence.getInstance();
-                } else {
-                    return item;
-                }
-
-            case CALL_EVALUATE_SINGLE_ITEM:
-                return exp.evaluateItem(context);
-
-            case UNDECIDED:
-            case ITERATE_AND_MATERIALIZE:
-                if (ref == FilterExpression.FILTERED) {
-                    return context.getConfiguration().makeSequenceExtent(exp, ref, context);
-                } else {
-                    return exp.iterate(context).materialize();
-                }
-
-            case PROCESS:
-                return Evaluator.PROCESS.evaluate(exp, context);
-
-            case LAZY_TAIL_EXPRESSION: {
-                TailExpression tail = (TailExpression) exp;
-                VariableReference vr = (VariableReference) tail.getBaseExpression();
-                Sequence<?> base = evaluate(vr, EVALUATE_VARIABLE, context, ref);
-                if (base instanceof MemoClosure) {
-                    SequenceIterator<?> it = base.iterate();
-                    base = it.materialize();
-                }
-                if (base instanceof IntegerRange) {
-                    long start = ((IntegerRange) base).getStart() + tail.getStart() - 1;
-                    long end = ((IntegerRange) base).getEnd();
-                    if (start == end) {
-                        return Int64Value.makeIntegerValue(end);
-                    } else if (start > end) {
-                        return EmptySequence.getInstance();
-                    } else {
-                        return new IntegerRange(start, end);
-                    }
-                }
-                if (base instanceof GroundedValue) {
-                    return ((GroundedValue)base).subsequence(tail.getStart() - 1, ((GroundedValue)base).getLength() - tail.getStart() + 1);
-//                    if (tail.getStart() > ((SequenceExtent<?>) base).getLength()) {
-//                        return EmptySequence.getInstance();
-//                    } else {
-//                        return new SequenceExtent<>(
-//                                (SequenceExtent) base,
-//                                tail.getStart() - 1,
-//                                ((SequenceExtent) base).getLength() - tail.getStart() + 1).reduce();
-//                    }
-                }
-
-                return Closure.make(tail, context, ref);
-            }
-
-            case SHARED_APPEND_EXPRESSION: {
-                return Evaluator.SHARED_APPEND.evaluate(exp, context);
-            }
-
-            case MAKE_INDEXED_VARIABLE:
-                return context.getConfiguration().obtainOptimizer().makeIndexedValue(exp.iterate(context));
-
-            case STREAMING_ARGUMENT:
-                return context.getConfiguration().obtainOptimizer().evaluateStreamingArgument(exp, context);
-
-            default:
-                throw new IllegalArgumentException("Unknown evaluation mode " + evaluationMode);
-
-        }
-    }
-
-    /**
-     * Do lazy evaluation of an expression. This will return a value, which may optionally
-     * be a SequenceIntent, which is a wrapper around an iterator over the value of the expression.
-     *
      * @param exp     the expression to be evaluated
      * @param context the run-time evaluation context for the expression. If
      *                the expression is not evaluated immediately, then parts of the
@@ -426,7 +297,7 @@ public class ExpressionTool {
      *                        expression
      */
 
-    public static Sequence<?> lazyEvaluate(Expression exp, XPathContext context, boolean repeatable) throws XPathException {
+    public static Sequence lazyEvaluate(Expression exp, XPathContext context, boolean repeatable) throws XPathException {
         Evaluator evaluator = lazyEvaluator(exp, repeatable);
         return evaluator.evaluate(exp, context);
     }
@@ -441,7 +312,7 @@ public class ExpressionTool {
      *                                           expression
      */
 
-    public static GroundedValue<?> eagerEvaluate(Expression exp, XPathContext context) throws XPathException {
+    public static GroundedValue eagerEvaluate(Expression exp, XPathContext context) throws XPathException {
         Evaluator evaluator = eagerEvaluator(exp);
         return evaluator.evaluate(exp, context).materialize();
     }
@@ -764,16 +635,12 @@ public class ExpressionTool {
      * @throws XPathException if a dynamic error occurs
      */
 
-    public static SequenceIterator<?> getIteratorFromProcessMethod(
+    public static SequenceIterator getIteratorFromProcessMethod(
             Expression exp, XPathContext context) throws XPathException {
         Controller controller = context.getController();
         assert controller != null;
-        Receiver saved = context.getReceiver();
-        SequenceOutputter seq = controller.allocateSequenceOutputter(20);
-        seq.getPipelineConfiguration().setHostLanguage(exp.getPackageData().getHostLanguage());
-        context.setReceiver(seq);
-        exp.process(context);
-        context.setReceiver(saved);
+        SequenceCollector seq = controller.allocateSequenceOutputter();
+        exp.process(new ComplexContentOutputter(seq), context);
         seq.close();
         return seq.iterate();
     }
@@ -789,24 +656,15 @@ public class ExpressionTool {
 
     public static Item getItemFromProcessMethod(Expression exp, XPathContext context) throws XPathException {
         Controller controller = context.getController();
-        assert controller != null;
-        Receiver saved = context.getReceiver();
-        SequenceOutputter seq = controller.allocateSequenceOutputter(1);
-        seq.getPipelineConfiguration().setHostLanguage(exp.getPackageData().getHostLanguage());
-        context.setReceiver(seq);
-
-        exp.process(context);
-
-        context.setReceiver(saved);
+        if (controller == null) {
+            throw new NoDynamicContextException("No controller available");
+        }
+        SequenceCollector seq = controller.allocateSequenceOutputter(1);
+        exp.process(new ComplexContentOutputter(seq), context);
         seq.close();
         Item result = seq.getFirstItem();
         seq.reset();
         return result;
-    }
-
-    @FunctionalInterface
-    public interface ExpressionPredicate {
-        boolean test(Expression e);
     }
 
     /**
@@ -832,7 +690,6 @@ public class ExpressionTool {
         if (exp instanceof LocalParam && ((LocalParam) exp).getSlotNumber() < 0) {
             ((LocalParam) exp).setSlotNumber(nextFree++);
         }
-
         if (exp instanceof FLWORExpression) {
             for (Clause c : ((FLWORExpression) exp).getClauseList()) {
                 for (LocalVariableBinding b : c.getRangeVariables()) {
@@ -876,9 +733,10 @@ public class ExpressionTool {
             }
 
         }
-
         if (exp instanceof Pattern) {
             nextFree = ((Pattern) exp).allocateSlots(frame, nextFree);
+        } else if (exp instanceof ScopedBindingElement) {
+            nextFree = ((ScopedBindingElement) exp).allocateSlots(frame, nextFree);
         } else {
             for (Operand o : exp.operands()) {
                 nextFree = allocateSlots(o.getChildExpression(), nextFree, frame);
@@ -968,7 +826,7 @@ public class ExpressionTool {
         }
         if (item instanceof NodeInfo) {
             return true;
-        } else {
+        } else if (item instanceof AtomicValue){
             if (item instanceof BooleanValue) {
                 return ((BooleanValue) item).getBooleanValue();
             } else if (item instanceof StringValue) {   // includes anyURI value
@@ -979,9 +837,12 @@ public class ExpressionTool {
             } else if (item instanceof ExternalObject) {
                 return true;
             } else {
-                ebvError("an atomic value other than a boolean, number, string, or URI");
+                ebvError("an atomic value of type " + ((AtomicValue) item).getPrimitiveType().getDisplayName());
                 return false;
             }
+        } else {
+            ebvError(item.getGenre().toString());
+            return false;
         }
     }
 
@@ -1213,7 +1074,6 @@ public class ExpressionTool {
             if (opt.isOptionSet(OptimizerOptions.LOOP_LIFTING)) {
                 body = LoopLifter.process(body, visitor, cisi);
             }
-
         } else {
             body = avoidDocumentSort(body);
         }

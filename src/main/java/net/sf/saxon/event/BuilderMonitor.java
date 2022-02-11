@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -30,22 +30,6 @@ public abstract class BuilderMonitor extends ProxyReceiver {
      */
 
     public abstract void markNextNode(int nodeKind);
-
-    /**
-     * Indicate that the most recently written attribute whose name matches that of the supplied node
-     * is to act as the marked node
-     * @param origin the attribute in the input corresponding to the marked node in the output
-     */
-
-    public abstract void markAttributeNode(NodeInfo origin);
-
-    /**
-     * Indicate that the most recently written attribute whose name matches that of the supplied node
-     * is to act as the marked node
-     * @param origin the attribute in the input corresponding to the marked node in the output
-     */
-
-    public abstract void markNamespaceNode(NodeInfo origin);
 
     /**
      * On completion of tree building, get the node that was marked using markNextNode().

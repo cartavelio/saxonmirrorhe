@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,10 +8,10 @@
 package net.sf.saxon.expr.sort;
 
 import com.saxonica.ee.stream.ManualGroupIterator;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 
@@ -33,7 +33,7 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
                                AtomicComparer[] comparators
     ) {
         super(context, base, sortKeyEvaluator, comparators, true);
-        setHostLanguage(Configuration.XSLT);
+        setHostLanguage(HostLanguage.XSLT);
     }
 
     /**
@@ -42,9 +42,10 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
      * @throws XPathException in the event of a dynamic error
      */
 
+    @Override
     protected void buildArray() throws XPathException {
         int allocated;
-        if ((base.getProperties() & SequenceIterator.LAST_POSITION_FINDER) != 0) {
+        if (base.getProperties().contains(Property.LAST_POSITION_FINDER)) {
             allocated = ((LastPositionFinder) base).getLength();
         } else {
             allocated = 100;
@@ -54,7 +55,7 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
         count = 0;
 
         XPathContextMajor c2 = context.newContext();
-        c2.setCurrentIterator((FocusIterator<Item<?>>)base);
+        c2.setCurrentIterator((FocusIterator)base);
         GroupIterator groupIter = (GroupIterator)((FocusTrackingIterator)base).getUnderlyingIterator();
         c2.setCurrentGroupIterator(groupIter);
 
@@ -74,21 +75,24 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
             }
             gtbs.originalPosition = count++;
             gtbs.currentGroupingKey = groupIter.getCurrentGroupingKey();
-            gtbs.currentGroup = new MemoSequence<>(groupIter.iterateCurrentGroup());
+            gtbs.currentGroup = new MemoSequence(groupIter.iterateCurrentGroup());
         }
     }
 
     /*@Nullable*/
+    @Override
     public AtomicSequence getCurrentGroupingKey() {
         return ((GroupToBeSorted) values[position - 1]).currentGroupingKey;
     }
 
-    public SequenceIterator<?> iterateCurrentGroup() throws XPathException {
+    @Override
+    public SequenceIterator iterateCurrentGroup() throws XPathException {
         return ((GroupToBeSorted) values[position - 1]).currentGroup.iterate();
     }
 
     //#if EE==true
 
+    @Override
     public ManualGroupIterator getSnapShot(XPathContext context) throws XPathException {
         return new ManualSortedGroupIterator();
     }
@@ -98,16 +102,19 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
         ManualSortedGroupIterator() {
             super((Item) values[position - 1].value, position);
             setLastPositionFinder(new LastPositionFinder() {
+                @Override
                 public int getLength() throws XPathException {
                     return values.length;
                 }
             });
         }
 
+        @Override
         public AtomicSequence getCurrentGroupingKey() {
             return ((GroupToBeSorted) values[position() - 1]).currentGroupingKey;
         }
 
+        @Override
         public SequenceIterator iterateCurrentGroup() throws XPathException {
             return ((GroupToBeSorted) values[position() - 1]).currentGroup.iterate();
         }

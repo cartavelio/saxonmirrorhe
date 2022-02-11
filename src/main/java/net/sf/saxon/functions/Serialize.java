@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,7 +13,7 @@ import net.sf.saxon.event.SequenceCopier;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
@@ -26,8 +26,8 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.regex.UnicodeString;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
-import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.SerializationParamsHandler;
+import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -193,7 +193,7 @@ public class Serialize extends SystemFunction implements Callable {
         HashTrieMap result = new HashTrieMap();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
 
-        AtomicIterator keysIterator = map.keys();
+        AtomicIterator<?> keysIterator = map.keys();
         AtomicValue key;
         while ((key = keysIterator.next()) != null) {
             if (key instanceof StringValue) {
@@ -203,8 +203,8 @@ public class Serialize extends SystemFunction implements Callable {
                     role.setErrorCode("XPTY0004");
                     //If any serialization error occurs, including the detection of an invalid value for a serialization
                     // parameter, this results in the fn:serialize call failing with a dynamic error.
-                    Sequence<?> converted = th.applyFunctionConversionRules(
-                        map.get(key), requiredTypes.get(keyName), role, ExplicitLocation.UNKNOWN_LOCATION);
+                    Sequence converted = th.applyFunctionConversionRules(
+                            map.get(key), requiredTypes.get(keyName), role, Loc.NONE);
                     result = result.addEntry(key, converted.materialize());
                 }
             } else if (key instanceof QNameValue) {
@@ -215,8 +215,8 @@ public class Serialize extends SystemFunction implements Callable {
                     String keyName = ((QNameValue) key).getLocalName();
                     if (isParamNameSaxon(keyName)) {
                         RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0);
-                        Sequence<?> converted = th.applyFunctionConversionRules(
-                                map.get(key), requiredTypesSaxon.get(keyName), role, ExplicitLocation.UNKNOWN_LOCATION);
+                        Sequence converted = th.applyFunctionConversionRules(
+                                map.get(key), requiredTypesSaxon.get(keyName), role, Loc.NONE);
                         result = result.addEntry(key, converted.materialize());
                     }
                 }
@@ -230,7 +230,7 @@ public class Serialize extends SystemFunction implements Callable {
 
     // Convert a boolean value to a yes-no-type string.
 
-    private String toYesNoTypeString(Sequence<?> seqVal) throws XPathException {
+    private String toYesNoTypeString(Sequence seqVal) throws XPathException {
         String s;
         boolean booleanValue = ((BooleanValue) seqVal.head()).getBooleanValue();
         if (booleanValue) {
@@ -243,7 +243,7 @@ public class Serialize extends SystemFunction implements Callable {
 
     // Convert a value to a yes-no-omit-type string.
 
-    private String toYesNoOmitTypeString(Sequence<?> seqVal) throws XPathException {
+    private String toYesNoOmitTypeString(Sequence seqVal) throws XPathException {
         String stringVal = "";
         if (seqVal instanceof EmptySequence) {
             stringVal = "omit";
@@ -253,8 +253,6 @@ public class Serialize extends SystemFunction implements Callable {
         // otherwise invalid
         return stringVal;
     }
-
-    // Convert a sequence of QNames to a qnames-type string (containing a space-separated list of the QNames).
 
     // Convert a sequence of QNames to a qnames-type string (containing a space-separated list of the QNames).
 
@@ -273,18 +271,17 @@ public class Serialize extends SystemFunction implements Callable {
                 stringVal.append(" *");
             } else {
                 throw new XPathException("Invalid serialization parameter value: expected sequence of QNames "
-                                                 + (allowStar ? "(or *) " : ""), "SEPM0017");
+                + (allowStar ? "(or *) " : ""), "SEPM0017");
             }
 
         }
         return stringVal.toString();
     }
 
-
     // Convert a sequence of strings to a single space-separated string.
 
-    private String toSpaceSeparatedString(Sequence<?> seqVal) throws XPathException {
-        SequenceIterator<?> iterator = seqVal.iterate();
+    private String toSpaceSeparatedString(Sequence seqVal) throws XPathException {
+        SequenceIterator iterator = seqVal.iterate();
         Item item;
         StringBuilder stringVal = new StringBuilder();
         while ((item = iterator.next()) != null) {
@@ -295,7 +292,7 @@ public class Serialize extends SystemFunction implements Callable {
 
     // Convert a QName or string value to a method-type (or json-node-output-method-type) string.
 
-    private String toMethodTypeString(Sequence<?> seqVal) throws XPathException {
+    private String toMethodTypeString(Sequence seqVal) throws XPathException {
         String stringVal;
         if (seqVal.head() instanceof QNameValue) {
             QNameValue qNameValue = (QNameValue) seqVal.head();
@@ -333,13 +330,13 @@ public class Serialize extends SystemFunction implements Callable {
 
     // Convert a map defining a character map to a CharacterMap
 
-    private CharacterMap toCharacterMap(Sequence<?> seqVal, XPathContext context) throws XPathException {
+    private CharacterMap toCharacterMap(Sequence seqVal, XPathContext context) throws XPathException {
         MapItem charMap = checkCharacterMapOptions((MapItem) seqVal.head(), context);
         return toCharacterMap(charMap);
     }
 
     public static CharacterMap toCharacterMap(MapItem charMap) throws XPathException {
-        AtomicIterator iterator = charMap.keys();
+        AtomicIterator<?> iterator = charMap.keys();
         AtomicValue charKey;
         IntHashMap<String> intHashMap = new IntHashMap<>();
         while ((charKey = iterator.next()) != null) {
@@ -362,7 +359,7 @@ public class Serialize extends SystemFunction implements Callable {
     }
 
     private SerializationProperties serializationParamsFromMap(
-            Map<String, Sequence<?>> map, XPathContext context) throws XPathException {
+            Map<String, Sequence> map, XPathContext context) throws XPathException {
         Sequence seqVal;
         Properties props = new Properties();
         CharacterMapIndex charMapIndex = new CharacterMapIndex();
@@ -469,14 +466,15 @@ public class Serialize extends SystemFunction implements Callable {
     }
 
 
+    @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return evalSerialize(arguments[0].iterate(),
             arguments.length == 1 ? null : arguments[1].head(), context);
     }
 
-    private StringValue evalSerialize(SequenceIterator<?> iter, Item param, XPathContext context) throws XPathException {
+    private StringValue evalSerialize(SequenceIterator iter, Item param, XPathContext context) throws XPathException {
 
-        SerializationProperties params = null;
+        SerializationProperties params;
 
         // The default parameter values are implementation-defined when an output:serialization-parameters
         // element is used (or when the argument is omitted), but are fixed by this specification in the
@@ -497,7 +495,7 @@ public class Serialize extends SystemFunction implements Callable {
             } else if (param instanceof MapItem) {
                 // If any parameters are supplied as QNames in the Saxon namespace, convert them to EQName strings
                 MapItem paramMap = (MapItem)param;
-                AtomicIterator keyIter = ((MapItem)param).keys();
+                AtomicIterator<?> keyIter = ((MapItem)param).keys();
                 AtomicValue k;
                 while ((k = keyIter.next()) != null) {
                     if (k instanceof QNameValue) {
@@ -505,7 +503,7 @@ public class Serialize extends SystemFunction implements Callable {
                         paramMap = paramMap.addEntry(new StringValue(s), paramMap.get(k));
                     }
                 }
-                Map<String, Sequence<?>> checkedOptions = getDetails().optionDetails.processSuppliedOptions(paramMap, context);
+                Map<String, Sequence> checkedOptions = getDetails().optionDetails.processSuppliedOptions(paramMap, context);
                 params = serializationParamsFromMap(checkedOptions, context);
             } else {
                 throw new XPathException("Second argument to fn:serialize() must either be an element named {"
@@ -544,4 +542,4 @@ public class Serialize extends SystemFunction implements Callable {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

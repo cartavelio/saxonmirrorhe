@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -111,7 +111,7 @@ public class CompressedWhitespace implements CharSequence {
             int len = b & 0x3f;
             buffer.ensureCapacity(len);
             for (int j = 0; j < len; j++) {
-                buffer.append(c);
+                buffer.cat(c);
             }
         }
     }
@@ -120,6 +120,7 @@ public class CompressedWhitespace implements CharSequence {
         return value;
     }
 
+    @Override
     public int length() {
         int count = 0;
         long val = value;
@@ -147,6 +148,7 @@ public class CompressedWhitespace implements CharSequence {
      * @throws IndexOutOfBoundsException if the <tt>index</tt> argument is negative or not less than
      *                                   <tt>length()</tt>
      */
+    @Override
     public char charAt(int index) {
         int count = 0;
         final long val = value;
@@ -178,6 +180,7 @@ public class CompressedWhitespace implements CharSequence {
      *                                   if <tt>end</tt> is greater than <tt>length()</tt>,
      *                                   or if <tt>start</tt> is greater than <tt>end</tt>
      */
+    @Override
     public CharSequence subSequence(int start, int end) {
         return uncompress(null).subSequence(start, end);
     }

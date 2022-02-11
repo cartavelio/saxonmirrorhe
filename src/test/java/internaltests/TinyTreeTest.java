@@ -1,7 +1,6 @@
 package internaltests;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.om.AxisInfo;
@@ -11,6 +10,7 @@ import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
@@ -22,11 +22,16 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  *  Tests of the NodeInfo interface as implemented by the tinytree
  */
-public class TinyTreeTest extends TestCase {
+public class TinyTreeTest {
 
+    @Test
     public void testIsAncestor() {
         try {
             StringReader sr = new StringReader("<doc><chap><p n='1'/><p n='2'/></chap><chap><p n='3'/><p n='4'/></chap></doc>");
@@ -38,9 +43,9 @@ public class TinyTreeTest extends TestCase {
             while (true) {
                 TinyNodeImpl desc = (TinyNodeImpl)iter.next();
                 if (desc == null) break;
-                assertTrue("isAncestor", doc.isAncestorOrSelf(desc));
+                assertTrue(doc.isAncestorOrSelf(desc), "isAncestor");
                 if (desc != doc) {
-                    assertFalse("reverse isAncestor", desc.isAncestorOrSelf(doc));
+                    assertFalse(desc.isAncestorOrSelf(doc), "reverse isAncestor");
                 }
             }
         } catch (Exception err) {
@@ -49,6 +54,7 @@ public class TinyTreeTest extends TestCase {
         }
     }
 
+    @Test
     public void testCondensed() {
        try
           {
@@ -76,28 +82,6 @@ public class TinyTreeTest extends TestCase {
 
 
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
 
 
 

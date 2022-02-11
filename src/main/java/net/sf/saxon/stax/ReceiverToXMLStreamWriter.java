@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,13 +10,10 @@ package net.sf.saxon.stax;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -46,26 +43,32 @@ public class ReceiverToXMLStreamWriter implements Receiver {
         return writer;
     }
 
+    @Override
     public void setPipelineConfiguration(PipelineConfiguration pipe) {
         this.pipe = pipe;
         config = pipe.getConfiguration();
     }
 
+    @Override
     public PipelineConfiguration getPipelineConfiguration() {
         return pipe;
     }
 
+    @Override
     public void setSystemId(String systemId) {
         this.systemId = systemId;
     }
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
 
+    @Override
     public void open() throws XPathException {
     }
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         try {
             writer.writeStartDocument();
@@ -74,6 +77,7 @@ public class ReceiverToXMLStreamWriter implements Receiver {
         }
     }
 
+    @Override
     public void endDocument() throws XPathException {
         try {
             writer.writeEndDocument();
@@ -82,58 +86,50 @@ public class ReceiverToXMLStreamWriter implements Receiver {
         }
     }
 
+    @Override
     public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
 
     }
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         String local = elemName.getLocalPart();
         String uri = elemName.getURI();
         String prefix = elemName.getPrefix();
         try {
             if (prefix.equals("") && uri.equals("")) {
                 writer.writeStartElement(local);
-            } else if (prefix.equals("") && !uri.equals("")) {
+            } else if (prefix.equals("")) {
                 writer.writeStartElement(prefix, local, uri);
             } else {
                 writer.writeStartElement(prefix, local, uri);
             }
-        } catch (XMLStreamException e) {
-            throw new XPathException(e);
-        }
-
-    }
-
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        for (NamespaceBinding ns : namespaceBindings) {
-            try {
+            for (NamespaceBinding ns : namespaces) {
                 writer.writeNamespace(ns.getPrefix(), ns.getURI());
-            } catch (XMLStreamException e) {
-                throw new XPathException(e);
             }
-        }
-    }
-
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-        String local = attName.getLocalPart();
-        String uri = attName.getURI();
-        String prefix = attName.getPrefix();
-        try {
-            if (prefix.equals("") && uri.equals("")) {
-                writer.writeAttribute(local, value.toString());
-            } else if (prefix.equals("") & !uri.equals("")) {
-                writer.writeAttribute(uri, local, value.toString());
-            } else {
-                writer.writeAttribute(prefix, uri, local, value.toString());
+            for (AttributeInfo att : attributes) {
+                NodeName attName = att.getNodeName();
+                String attLocal = attName.getLocalPart();
+                String attUri = attName.getURI();
+                String attPrefix = attName.getPrefix();
+                String value = att.getValue();
+                if (attPrefix.equals("") && attUri.equals("")) {
+                    writer.writeAttribute(attLocal, value);
+                } else if (attPrefix.equals("") & !attUri.equals("")) {
+                    writer.writeAttribute(uri, local, value);
+                } else {
+                    writer.writeAttribute(prefix, uri, local, value);
+                }
             }
         } catch (XMLStreamException e) {
             throw new XPathException(e);
         }
+
     }
 
-    public void startContent() throws XPathException {
-    }
-
+    @Override
     public void endElement() throws XPathException {
         try {
             writer.writeEndElement();
@@ -142,6 +138,7 @@ public class ReceiverToXMLStreamWriter implements Receiver {
         }
     }
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         try {
             writer.writeCharacters(chars.toString());
@@ -150,6 +147,7 @@ public class ReceiverToXMLStreamWriter implements Receiver {
         }
     }
 
+    @Override
     public void processingInstruction(String name, CharSequence data, Location locationId, int properties) throws XPathException {
         try {
             writer.writeProcessingInstruction(name, data.toString());
@@ -158,6 +156,7 @@ public class ReceiverToXMLStreamWriter implements Receiver {
         }
     }
 
+    @Override
     public void comment(CharSequence content, Location locationId, int properties) throws XPathException {
         try {
             writer.writeComment(content.toString());
@@ -166,6 +165,7 @@ public class ReceiverToXMLStreamWriter implements Receiver {
         }
     }
 
+    @Override
     public void close() throws XPathException {
         try {
             writer.close();
@@ -174,6 +174,7 @@ public class ReceiverToXMLStreamWriter implements Receiver {
         }
     }
 
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }

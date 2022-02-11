@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -45,6 +45,7 @@ public class UserFunctionParameter implements LocalBinding {
      * @return false (always)
      */
 
+    @Override
     public final boolean isGlobal() {
         return false;
     }
@@ -57,6 +58,7 @@ public class UserFunctionParameter implements LocalBinding {
      * @return false (always)
      */
 
+    @Override
     public final boolean isAssignable() {
         return false;
     }
@@ -78,6 +80,7 @@ public class UserFunctionParameter implements LocalBinding {
      * @return the slot number, indicating the position of the parameter on the local stack frame
      */
 
+    @Override
     public int getLocalSlotNumber() {
         return slotNumber;
     }
@@ -98,6 +101,7 @@ public class UserFunctionParameter implements LocalBinding {
      * @return the declared type of the parameter
      */
 
+    @Override
     public SequenceType getRequiredType() {
         return requiredType;
     }
@@ -107,6 +111,7 @@ public class UserFunctionParameter implements LocalBinding {
      * Return null if unknown or not applicable
      */
     /*@Nullable*/
+    @Override
     public IntegerValue[] getIntegerBoundsForVariable() {
         return null;
     }
@@ -127,10 +132,12 @@ public class UserFunctionParameter implements LocalBinding {
      * @return the name of this parameter
      */
 
+    @Override
     public StructuredQName getVariableQName() {
         return variableQName;
     }
 
+    @Override
     public void addReference(VariableReference ref, boolean isLoopingReference) {
 
     }
@@ -180,6 +187,7 @@ public class UserFunctionParameter implements LocalBinding {
      *         is used in a filter expression such as $param[@a = 17]
      */
 
+    @Override
     public boolean isIndexedVariable() {
         return isIndexed;
     }
@@ -191,7 +199,8 @@ public class UserFunctionParameter implements LocalBinding {
      * @return the value of the parameter
      */
 
-    public Sequence<?> evaluateVariable(XPathContext context) {
+    @Override
+    public Sequence evaluateVariable(XPathContext context) {
         return context.evaluateLocalVariable(slotNumber);
     }
 

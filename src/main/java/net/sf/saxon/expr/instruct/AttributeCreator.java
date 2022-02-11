@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,8 +9,8 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ConversionRules;
@@ -34,7 +34,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
     //Null implies untyped (no validation required)
     /*@Nullable*/ SimpleType schemaType = null;
     private int validationAction;
-    private int options;
+    private int options = ReceiverOption.NONE;
     private boolean isInstruction;
 
     /**
@@ -77,6 +77,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
      */
 
     /*@Nullable*/
+    @Override
     public SimpleType getSchemaType() {
         return schemaType;
     }
@@ -97,6 +98,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
      * @return the validation action, for example strict or lax
      */
 
+    @Override
     public int getValidationAction() {
         return validationAction;
     }
@@ -105,7 +107,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
      * Set the options to be used on the attribute event
      *
      * @param options Options to be used. The only option currently defined is
-     *                {@link ReceiverOptions#REJECT_DUPLICATES}, which controls whether or not it is an error
+     *                {@link ReceiverOption#REJECT_DUPLICATES}, which controls whether or not it is an error
      *                to create two attributes with the same name for the same element. (This is an error in XQuery
      *                but not in XSLT).
      */
@@ -120,7 +122,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
      */
 
     public void setRejectDuplicates() {
-        options |= ReceiverOptions.REJECT_DUPLICATES;
+        options |= ReceiverOption.REJECT_DUPLICATES;
     }
 
     /**
@@ -129,7 +131,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
      */
 
     public void setNoSpecialChars() {
-        options |= ReceiverOptions.NO_SPECIAL_CHARS;
+        options |= ReceiverOption.NO_SPECIAL_CHARS;
     }
 
     /**
@@ -166,6 +168,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return NodeKindTest.ATTRIBUTE;
     }
@@ -174,13 +177,14 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
      * Process the value of the node, to create the new node.
      *
      * @param value   the string value of the new node
+     * @param output the destination for the result
      * @param context the dynamic evaluation context
      * @throws XPathException if a dynamic error occurs
      */
 
-    public void processValue(CharSequence value, XPathContext context) throws XPathException {
+    @Override
+    public void processValue(CharSequence value, Outputter output, XPathContext context) throws XPathException {
         NodeName attName = evaluateNodeName(context);
-        Receiver out = context.getReceiver();
         int opt = getOptions();
         SimpleType ann;
 
@@ -226,7 +230,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
         }
 
         try {
-            out.attribute(attName, ann, value, getLocation(), opt);
+            output.attribute(attName, ann, value, getLocation(), opt);
         } catch (XPathException err) {
             throw dynamicError(getLocation(), err, context);
         }

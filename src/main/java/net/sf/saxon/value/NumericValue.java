@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -90,6 +90,7 @@ public abstract class NumericValue extends AtomicValue
      * @return true, unless the value is boolean false, numeric zero, or
      * zero-length string
      */
+    @Override
     public abstract boolean effectiveBooleanValue();
 
     /**
@@ -220,6 +221,7 @@ public abstract class NumericValue extends AtomicValue
      */
 
     /*@NotNull*/
+    @Override
     public final AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
         return this;
     }
@@ -238,9 +240,14 @@ public abstract class NumericValue extends AtomicValue
 
     // This is the default implementation. Subclasses of number avoid the conversion to double
     // when comparing with another number of the same type.
+    @Override
     public int compareTo(/*@NotNull*/ NumericValue other) {
         double a = getDoubleValue();
-        double b = ((NumericValue) other).getDoubleValue();
+        double b = other.getDoubleValue();
+        // IntelliJ says this can be replaced with Double.compare(). But it can't. Double.compare()
+        // treats positive and negative zero as not equal; we want them treated as equal. XSLT3 test case
+        // boolean-014.  MHK 2020-02-17
+        //noinspection UseCompareMethod
         if (a == b) {
             return 0;
         }

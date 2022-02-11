@@ -49,6 +49,8 @@ namespace Saxon.Api
         private Processor processor;
         private IQueryResolver moduleResolver;
         private IList<StaticError> errorList;
+        private ErrorReporterToStaticError errorGatherer;
+        private ErrorReporter errorReporter;
         private JXQueryCompiler compiler;
 
         // internal constructor: the public interface is a factory method
@@ -84,6 +86,7 @@ namespace Saxon.Api
                 compiler.declareDefaultCollation(uri.ToString());
             }
         }
+
 
         /// <summary>
         /// Declare a namespace for use by the query. This has the same
@@ -229,18 +232,67 @@ namespace Saxon.Api
 		/// By supplying a custom <c>List</c> with a user-written <c>add()</c> method, it is possible to
         /// intercept error conditions as they occur.
         /// </remarks>
-
+        [Obsolete("IList<StaticError> ErrorList is deprecated, please use the methods SetErrorList and GetErrorList which hanldes IList<XmlProcessingError>.")]
         public IList<StaticError> ErrorList
         {
             set
             {
-                errorList = value;
-                compiler.setErrorListener(new ErrorGatherer(value));
+                errorGatherer = new ErrorReporterToStaticError(value);
+                compiler.setErrorReporter(errorGatherer);
             }
             get
             {
                 return errorList;
             }
+        }
+
+
+        /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined IErrorReporter.
+        ///  Requirements here is IErrorReport implementation with a user-written <c>report()</c> method, it is possible to
+        /// intercept error conditions as they occur.
+        /// If this property is used then the ErrorList property and SetErrorList method is overriden.</summary>
+        /// <remarks>The <c>IErrorReporter</c> to be used</remarks>
+        public IErrorReporter ErrorReporter
+        {
+            set
+            {
+                errorReporter = null;
+                compiler.setErrorReporter(new ErrorReporterWrapper(value));
+            }
+
+        }
+
+        /// <summary>
+        /// List of errors. The caller may supply an empty list before calling <c>Compile</c>;
+        /// the processor will then populate the list with error information obtained during
+        /// the query compilation. Each error will be included as an object of type <c>XmlProcessingError</c>.
+        /// If no error list is supplied by the caller, error information will be written to
+        /// the standard error stream.
+        /// </summary>
+		/// <remarks>
+		/// <para>By supplying a custom <c>List</c> with a user-written <c>add()</c> method, it is possible to
+		/// intercept error conditions as they occur.</para>
+        /// <para>Note that this error list is used only for errors detected during the compilation
+        /// of the stylesheet. It is not used for errors detected when executing the stylesheet.</para>
+		/// </remarks>
+		/// <param name="value">Supplied list.</param>
+        public void SetErrorList(IList<XmlProcessingError> value)
+        {
+            errorReporter = new ErrorReporter(value);
+            compiler.setErrorReporter(errorReporter);
+        }
+
+		/// <summary>
+		/// Get list of errors as <code>IList&lt;XmlProcessingError&gt;</code>
+		/// </summary>
+        public IList<XmlProcessingError> GetErrorList()
+        {
+            if(errorReporter == null)
+            {
+                return new List<XmlProcessingError>();
+            }
+            return errorReporter.ErrorList;
+
         }
 
         /// <summary>
@@ -862,7 +914,7 @@ namespace Saxon.Api
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.

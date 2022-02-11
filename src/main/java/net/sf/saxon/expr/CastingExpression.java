@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,10 +9,12 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Converter;
+import net.sf.saxon.value.SequenceType;
 
 /**
  * Casting Expression: abstract superclass for "cast as X" and "castable as X", which share a good deal of logic
@@ -39,8 +41,7 @@ public abstract class CastingExpression extends UnaryExpression {
         super(source);
         this.allowEmpty = allowEmpty;
         targetType = target;
-        targetPrimitiveType = (AtomicType) target.getPrimitiveItemType();
-        //derived = (targetType.getFingerprint() != targetPrimitiveType.getFingerprint());
+        targetPrimitiveType = target.getPrimitiveItemType();
     }
 
     /**
@@ -73,6 +74,7 @@ public abstract class CastingExpression extends UnaryExpression {
         return targetType;
     }
 
+    @Override
     protected OperandRole getOperandRole() {
         return OperandRole.SINGLE_ATOMIC;
     }
@@ -155,6 +157,7 @@ public abstract class CastingExpression extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression simplify() throws XPathException {
         if (targetType instanceof BuiltInAtomicType) {
             String s = XPathParser.whyDisallowedType(getPackageData(), (BuiltInAtomicType)targetType);
@@ -177,9 +180,28 @@ public abstract class CastingExpression extends UnaryExpression {
      * @return {@link net.sf.saxon.expr.StaticProperty#NO_NODES_NEWLY_CREATED}.
      */
 
+    @Override
     public int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         return p | StaticProperty.NO_NODES_NEWLY_CREATED;
+    }
+
+    /**
+     * Export expression structure to SEF file. The abstract expression tree
+     * is written to the supplied output destination. Helper method for subclasses.
+     * @param out the destination of the output
+     * @param elemName the element name to be used in the SEF file
+     * @throws XPathException if output fails
+     */
+
+    protected void export(ExpressionPresenter out, String elemName) throws XPathException {
+        out.startElement(elemName, this);
+        int card = allowsEmpty() ? StaticProperty.ALLOWS_ZERO_OR_ONE : StaticProperty.EXACTLY_ONE;
+        SequenceType st = SequenceType.makeSequenceType(getTargetType(), card);
+        out.emitAttribute("flags", "a" + (allowsEmpty() ? "e" : ""));
+        out.emitAttribute("as", st.toAlphaCode());
+        getBaseExpression().export(out);
+        out.endElement();
     }
 
 

@@ -1,17 +1,28 @@
 package commands;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
+/* ndw: won't compile at the moment
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
+ */
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
 /**
  * Tests invocation of Saxon via Ant
  */
-public class AntTests extends TestCase {
+public class AntTests {
 
+    @BeforeAll
+    public static void setUp() {
+        System.err.println("These tests require ant.jar and ant-launcher.jar to be on the classpath");
+    }
+
+    // These tests require ant.jar and ant-launcher.jar to be on the classpath
+
+    @Test
     public void testTransformTask() {
         runAnt(ConfigTest.DATA_DIR + "ant/build1.xml");
     }
@@ -23,6 +34,7 @@ public class AntTests extends TestCase {
 
     private void runAnt(String file) {
         File buildFile = new File(file);
+        /*
         Project p = new Project();
         p.setUserProperty("ant.file", buildFile.getAbsolutePath());
         p.init();
@@ -31,10 +43,12 @@ public class AntTests extends TestCase {
         helper.parse(p, buildFile);
         p.executeTarget(p.getDefaultTarget());
 
+         */
     }
 
+    @Test
     public void testWalmsleyBug() {
-        runAnt("/Users/mike/bugs/2015/Walmsley/saxonbug/build.xml");
+        runAnt(ConfigTest.DATA_DIR + "ant/walmsley/saxonbug/build.xml");
     }
 
 //    public void testXmlCatalog() {

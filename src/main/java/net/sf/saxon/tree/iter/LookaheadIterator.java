@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,6 @@
 
 package net.sf.saxon.tree.iter;
 
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 
 
@@ -17,7 +16,7 @@ import net.sf.saxon.om.SequenceIterator;
  * after the current node.
  */
 
-public interface LookaheadIterator<T extends Item<?>> extends SequenceIterator<T> {
+public interface LookaheadIterator extends SequenceIterator {
 
     /**
      * Determine whether there are more items to come. Note that this operation
@@ -25,7 +24,7 @@ public interface LookaheadIterator<T extends Item<?>> extends SequenceIterator<T
      * next(). It is used only when there is an explicit need to tell if we
      * are at the last element.
      * <p>This method must not be called unless the result of getProperties() on the iterator
-     * includes the bit setting {@link SequenceIterator#LOOKAHEAD} </p>
+     * includes the property {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD} </p>
      *
      * @return true if there are more items in the sequence
      */

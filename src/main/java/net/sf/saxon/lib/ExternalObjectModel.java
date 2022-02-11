@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -67,7 +67,7 @@ public interface ExternalObjectModel {
      * Get a converter from values in the external object model to XPath values.
      *
      * @param sourceClass the class (static or dynamic) of values to be converted
-     * @param config
+     * @param config the Saxon Configuration object
      * @return a converter, if the sourceClass is recognized as belonging to this object model;
      *         otherwise null
      */

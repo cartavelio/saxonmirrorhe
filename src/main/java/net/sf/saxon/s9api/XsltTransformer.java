@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,12 +17,12 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.linked.DocumentImpl;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import java.net.URI;
 
@@ -33,7 +33,9 @@ import java.net.URI;
  * An {@code XsltTransformer} must not be used concurrently in multiple threads.
  * It is safe, however, to reuse the object within a single thread to run the same
  * stylesheet several times. Running the stylesheet does not change the context
- * that has been established.
+ * that has been established. Some of the public methods are synchronized: this is not because
+ * multi-threaded execution is supported, rather it is to reduce the damage if multi-threaded
+ * execution is attempted.
  * <p>
  * An {@code XsltTransformer} is always constructed by running the {@code Load}
  * method of an {@link XsltExecutable}.
@@ -78,6 +80,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
      * @param baseURI the base URI to be used
      */
 
+    @Override
     public void setDestinationBaseURI(URI baseURI) {
         this.destinationBaseUri = baseURI;
     }
@@ -88,6 +91,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
      * @return the baseURI, or null if none is known
      */
 
+    @Override
     public URI getDestinationBaseURI() {
         return destinationBaseUri;
     }
@@ -146,7 +150,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
      * @param source the principal source document for the transformation
      */
 
-    public void setSource(Source source) {
+    public synchronized void setSource(Source source) {
         if (source instanceof NodeInfo) {
             setInitialContextNode(new XdmNode((NodeInfo) source));
         } else if (source instanceof DOMSource) {
@@ -181,7 +185,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
      * built using the wrong Configuration
      */
 
-    public void setInitialContextNode(XdmNode node) throws SaxonApiUncheckedException {
+    public synchronized void setInitialContextNode(XdmNode node) throws SaxonApiUncheckedException {
         try {
             if (node == null) {
                 initialSource = null;
@@ -233,10 +237,10 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
      * @throws SaxonApiUncheckedException if the value is lazily evaluated, and evaluation fails
      */
 
-    public void setParameter(QName name, XdmValue value) {
+    public synchronized void setParameter(QName name, XdmValue value) {
         try {
             parameters.put(name.getStructuredQName(),
-                    value == null ? null : ((Sequence<?>) value.getUnderlyingValue()).materialize());
+                    value == null ? null : ((Sequence) value.getUnderlyingValue()).materialize());
         } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
@@ -246,7 +250,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
      * Clear the values of all parameters that have been set
      */
 
-    public void clearParameters() {
+    public synchronized void clearParameters() {
         parameters = new GlobalParameterSet();
     }
 
@@ -257,8 +261,8 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
      * @return the value that has been set for the parameter, or null if no value has been set
      */
 
-    public XdmValue getParameter(QName name) {
-        Sequence<?> oval = parameters.get(name.getStructuredQName());
+    public synchronized XdmValue getParameter(QName name) {
+        Sequence oval = parameters.get(name.getStructuredQName());
         return oval == null ? null : XdmValue.wrap(oval);
     }
 
@@ -300,21 +304,17 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
      * of parameters, the initial template, and initial mode) are left unchanged after the
      * transformation completes.</p>
      *
-     * <p>If a named template has been supplied as the entry point (using {@link #setInitialTemplate(QName)},
-     * then that is used; if a source has also been supplied (using {@link #setSource(Source)}) then that
-     * is used to provide the global context item.</p>
-     *
-     * <p>If no named template has been supplied, then (a) if a source has been supplied
-     * (using {@link #setSource(Source)}), then that is used as both the global context item and the initial
-     * match selection; (b) if no source has been supplied, the code looks to see if the stylesheet includes
-     * a template named {@code xsl:initial-template}, and if so, uses that as the entry point. If there is
-     * no source and no initial template, the method fails.</p>
+     * <p>If no source has been supplied (using {@link #setSource(Source)}), then the method
+     * looks to see whether an initial named template has been supplied (using {@link #setInitialTemplate(QName)},
+     * and if so, the transformation starts with that named template. In the absence of an initial named template,
+     * it looks to see if the stylesheet includes a template named {@code xsl:initial-template}, and if so,
+     * uses that as the entry point. If there is no source and no initial template, the method fails.</p>
      *
      * @throws SaxonApiException     if any dynamic error occurs during the transformation
      * @throws IllegalStateException if no destination has been supplied
      */
 
-    public void transform() throws SaxonApiException {
+    public synchronized void transform() throws SaxonApiException {
         Source initialSelection = initialSource;
         boolean reset = false;
         if (destination == null) {
@@ -355,11 +355,8 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
 
         } catch (XPathException e) {
             if (!e.hasBeenReported()) {
-                try {
-                    getErrorListener().error(e);
-                } catch (TransformerException e1) {
-                    // no action
-                }
+                getErrorReporter().report(new XmlProcessingException(e));
+                e.setHasBeenReported(true);
             }
             throw new SaxonApiException(e);
         } finally {
@@ -405,6 +402,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
      * @throws IllegalStateException if no Destination has been supplied
      */
 
+    @Override
     public Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) throws SaxonApiException {
         if (destination == null) {
             throw new IllegalStateException("No destination has been supplied");
@@ -421,6 +419,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
      * to the destination.
      */
 
+    @Override
     public void close() {
 
     }

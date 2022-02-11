@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.expr.parser.OptimizerOptions;
-import net.sf.saxon.lib.ErrorGatherer;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
@@ -19,6 +19,7 @@ import net.sf.saxon.trace.XSLTTraceCodeInjector;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingAbort;
 import net.sf.saxon.trans.packages.IPackageLoader;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
@@ -39,9 +40,9 @@ import java.util.Objects;
 /**
  * An XsltCompiler object allows XSLT 2.0 and XSLT 3.0 stylesheets to be compiled. The compiler holds information that
  * represents the static context for the compilation.
- * <p>To construct an XsltCompiler, use the factory method {@link Processor#newXsltCompiler} on the Processor object.</p>
- * <p>An XsltCompiler may be used repeatedly to compile multiple queries. Any changes made to the
- * XsltCompiler (that is, to the static context) do not affect queries that have already been compiled.
+ * <p>To construct an {@code XsltCompiler}, use the factory method {@link Processor#newXsltCompiler} on the Processor object.</p>
+ * <p>An {@code XsltCompiler} may be used repeatedly to compile multiple queries. Any changes made to the
+ * {@code XsltCompiler} (that is, to the static context) do not affect queries that have already been compiled.
  * An XsltCompiler may in principle be used concurrently in multiple threads, but in practice this
  * is best avoided because all instances will share the same ErrorListener and it may therefore be
  * difficult to establish which error messages are associated with each compilation.</p>
@@ -80,7 +81,7 @@ public class XsltCompiler {
         this.processor = processor;
         this.config = processor.getUnderlyingConfiguration();
         compilerInfo = new CompilerInfo(config.getDefaultXsltCompilerInfo());
-        compilerInfo.setGenerateByteCode(config.isGenerateByteCode(Configuration.XSLT));
+        compilerInfo.setGenerateByteCode(config.isGenerateByteCode(HostLanguage.XSLT));
         compilerInfo.setTargetEdition(config.getEditionCode());
         compilerInfo.setJustInTimeCompilation(config.isJITEnabled());
     }
@@ -130,7 +131,7 @@ public class XsltCompiler {
     public void setParameter(QName name, XdmValue value) {
         try {
             compilerInfo.setParameter(name.getStructuredQName(),
-                                      ((Sequence<?>) value.getUnderlyingValue()).materialize());
+                                      ((Sequence) value.getUnderlyingValue()).materialize());
         } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
@@ -161,6 +162,12 @@ public class XsltCompiler {
      *
      * @param listener The error listener to be used. This is notified of all errors detected during the
      *                 compilation.
+     *
+     *                 <p><i>In earlier releases, contrary to the documentation, the supplied
+     *                 {@code ErrorListener} was also notified of run-time errors, unless a different
+     *                 {@code ErrorListener} was supplied at run-time. This is no longer the case from
+     *                 Saxon 10.0</i></p>
+     * @deprecated since 10.0. Use {@link #setErrorReporter(ErrorReporter)}                
      */
 
     public void setErrorListener(ErrorListener listener) {
@@ -172,11 +179,63 @@ public class XsltCompiler {
      *
      * @return listener The error listener in use. This is notified of all errors detected during the
      * compilation. Returns null if no user-supplied ErrorListener has been set.
+     * @deprecated since 10.0. Use {@link #getErrorReporter()}
      */
 
     public ErrorListener getErrorListener() {
         return compilerInfo.getErrorListener();
     }
+
+    /**
+     * Supply a (typically empty) {@code List} which will be populated with information about any static errors
+     * encountered during the transformation.
+     * <p>Calling this method overwrites the effect of any previous call on {@link #setErrorListener(ErrorListener)}
+     * as well as previous calls on {@code setErrorList}.</p>
+     *
+     * @param errorList a List (typically empty) to which information will be appended about
+     *                  static errors found during the compilation. Each such error is represented by a
+     *                  {@link XmlProcessingError} object.
+     * @since 9.9.
+     */
+
+    public void setErrorList(List<? super StaticError> errorList) {
+        compilerInfo.setErrorReporter(errorList::add);
+    }
+
+    /**
+     * Supply a callback which will be notified of all static errors and warnings
+     * encountered during a compilation carried out using this {@code XsltCompiler}.
+     * <p>Calling this method overwrites the effect of any previous call on {@link #setErrorListener(ErrorListener)}
+     * or {@code setErrorList}.</p>
+     * <p>Note that if multiple compilations are carried out concurrently in different threads using
+     * the same {@code XsltCompiler}, then the {@link ErrorReporter} must be thread-safe; messages from different
+     * compilations will be interleaved, and there is no obvious way of determining which message originated
+     * from which compilation. In practice, it is only sensible to do this in an environment
+     * where the stylesheets being compiled are known to be error-free.</p>
+     *
+     * @param reporter a Consumer which will be notified of all Static errors and warnings
+     *                 encountered during a compilation episode.
+     * @since 10.0
+     */
+
+    public void setErrorReporter(ErrorReporter reporter) {
+        compilerInfo.setErrorReporter(reporter);
+    }
+
+    /**
+     * Get the recipient of error information previously registered using {@link #setErrorReporter(ErrorReporter)}.
+     *
+     * @return the consumer previously registered explicitly using {@link #setErrorReporter(ErrorReporter)},
+     * or implicitly using {@link #setErrorListener(ErrorListener)} or {@link #setErrorList(List)}.
+     * If no error reporter has been registered, the result may be null, or may return
+     * a system supplied error reporter.
+     * @since 10.0
+     */
+
+    public ErrorReporter getErrorReporter() {
+        return compilerInfo.getErrorReporter();
+    }
+
 
     /**
      * Say that the stylesheet must be compiled to be schema-aware, even if it contains no
@@ -235,12 +294,12 @@ public class XsltCompiler {
     /**
      * Set the target edition under which the stylesheet will be executed.
      *
-     * @param edition the Saxon edition for the run-time environment. One of "EE", "PE", "HE", "JS", or "JS2".
+     * @param edition the Saxon edition for the run-time environment. One of "EE", "PE", "HE", or "JS".
      * @since 9.7.0.5. Experimental and subject to change.
      */
 
     public void setTargetEdition(String edition) {
-        if (!("EE".equals(edition) || "PE".equals(edition) || "HE".equals(edition) || "JS".equals(edition) || "JS2".equals(edition))) {
+        if (!("EE".equals(edition) || "PE".equals(edition) || "HE".equals(edition) || "JS".equals(edition))) {
             throw new IllegalArgumentException("Unknown Saxon edition " + edition);
         }
         compilerInfo.setTargetEdition(edition);
@@ -249,7 +308,7 @@ public class XsltCompiler {
     /**
      * Get the target edition under which the stylesheet will be executed.
      *
-     * @return the Saxon edition for the run-time environment. One of "EE", "PE", "HE", "JS", or "JS2".
+     * @return the Saxon edition for the run-time environment. One of "EE", "PE", "HE", or "JS".
      * @since 9.7.0.5. Experimental and subject to change.
      */
 
@@ -527,7 +586,7 @@ public class XsltCompiler {
             return pack;
         } catch (UncheckedXPathException e) {
             throw new SaxonApiException(e.getXPathException());
-        } catch (XPathException e) {
+        } catch (XPathException | XmlProcessingAbort e) {
             throw new SaxonApiException(e);
         }
     }
@@ -536,37 +595,6 @@ public class XsltCompiler {
         return compilerInfo.getPackageLibrary();
     }
 
-
-    /**
-     * Compile a list of packages.
-     *
-     * @param sources the collection of packages to be compiled, in the form of an Iterable
-     * @return the collection of compiled packages, in the form of an Iterable.
-     * @throws UnsupportedOperationException - always. This method is no longer available
-     * from Saxon 9.8
-     * @since 9.6
-     * @deprecated since 9.8. Multiple packages may be supplied in the form of a {@link PackageLibrary} registered
-     * with the underlying {@link CompilerInfo}, or may be listed in the configuration file. Alternatively they
-     * can be imported explicitly (taking care over the order of importing) using {@link #importPackage(XsltPackage)}.
-     */
-    public Iterable<XsltPackage> compilePackages(Iterable<Source> sources) {
-        throw new UnsupportedOperationException("XsltCompiler#compilePackages() was dropped in Saxon 9.8");
-    }
-
-    /**
-     * Add new packages to a package library.
-     * @param sources Sources for the packages
-     * @param link    Link each of the packages when loaded if true
-     * @return the collection of compiled packages, in the form of an Iterable
-     * ..... note that unless link = true these will probably require link() processing before execution.
-     * @since 9.6
-     * @deprecated since 9.8. Multiple packages may be supplied in the form of a {@link PackageLibrary} registered
-     * with the underlying {@link CompilerInfo}, or may be listed in the configuration file. Alternatively they
-     * can be imported explicitly (taking care over the order of importing) using {@link #importPackage(XsltPackage)}.
-     */
-    public Iterable<XsltPackage> addCompilePackages(Iterable<Source> sources, boolean link) {
-        throw new UnsupportedOperationException("XsltCompiler.addCompilePackages is dropped from Saxon 9.8");
-    }
 
     /**
      * Load a compiled package from a file or from a remote location.
@@ -587,10 +615,31 @@ public class XsltCompiler {
      */
 
     public XsltPackage loadLibraryPackage(URI location) throws SaxonApiException {
+        return loadLibraryPackage(new StreamSource(location.toString()));
+    }
+
+    /**
+     * Load a compiled package from a file or from a remote location.
+     * <p>The supplied URI represents the location of a resource which must have been originally
+     * created using {@link XsltPackage#save(java.io.File)}.</p>
+     * <p>The result of loading the package is returned as an <code>XsltPackage</code> object.
+     * Note that this package is not automatically imported to this <code>XsltCompiler</code>;
+     * if the package is required for use in subsequent compilations then it must be explicitly
+     * imported.</p>
+     *
+     * @param input the source from which the package is to be loaded, as a JAXP Source object
+     * @return the compiled package loaded from the supplied file or remote location
+     * @throws SaxonApiException if no resource can be loaded from the supplied location or if the
+     *                           resource that is loaded is not a compiled package, or if the compiled package is not
+     *                           consistent with this <code>XsltCompiler</code> (for example, if it was created using an
+     *                           incompatible Saxon version).
+     * @since 10.0
+     */
+
+    public XsltPackage loadLibraryPackage(Source input) throws SaxonApiException {
         try {
-            Source input = new StreamSource(location.toString());
             IPackageLoader loader = processor.getUnderlyingConfiguration().makePackageLoader();
-            if(loader != null){
+            if (loader != null) {
                 StylesheetPackage pack = loader.loadPackage(input);
                 return new XsltPackage(this, pack);
             }
@@ -599,6 +648,7 @@ public class XsltCompiler {
             throw new SaxonApiException(e);
         }
     }
+
 
     /**
      * Load a compiled package from a file or from a remote location, with the intent to use this as a complete
@@ -789,7 +839,7 @@ public class XsltCompiler {
             return new XsltExecutable(processor, pss);
         } catch (UncheckedXPathException e) {
             throw new SaxonApiException(e.getXPathException());
-        } catch (XPathException e) {
+        } catch (XPathException | XmlProcessingAbort e) {
             throw new SaxonApiException(e);
         }
     }
@@ -804,22 +854,6 @@ public class XsltCompiler {
 
     public CompilerInfo getUnderlyingCompilerInfo() {
         return compilerInfo;
-    }
-
-    /**
-     * Supply a (typically empty) {@code List} which will be populated with information about any static errors
-     * encountered during the transformation.
-     * <p>Calling this method overwrites the effect of any previous call on {@link #setErrorListener(ErrorListener)}
-     * as well as previous calls on {@code setErrorList}.</p>
-     *
-     * @param errorList a List (typically empty) to which information will be appended about
-     *                  static errors found during the compilation. Each such error is represented by a
-     *                  {@link StaticError} object.
-     * @since 9.9
-     */
-
-    public void setErrorList(List<StaticError> errorList) {
-        compilerInfo.setErrorListener(new ErrorGatherer(errorList));
     }
 
     /**
@@ -860,6 +894,79 @@ public class XsltCompiler {
     public boolean isJustInTimeCompilation(){
         return compilerInfo.isJustInTimeCompilation();
     }
+
+    /**
+     * Get the value of the default namespace for elements and types
+     * @return the value that was set using the method {@link #getDefaultElementNamespace()},
+     * if any; otherwise, the default value which is an empty string, representing "no namespace".
+     */
+
+    public String getDefaultElementNamespace() {
+        return compilerInfo.getDefaultElementNamespace();
+    }
+
+    /**
+     * Set the value of the default namespace for elements and types
+     *
+     * @param defaultNS the value to be used as the default namespace for elements and types.
+     *                  This provides a default for the <code>[xsl:]xpath-default-namespace</code>
+     *                  attribute in the stylesheet, and it has no effect in any part of the
+     *                  stylesheet where an explicit value for <code>[xsl:]xpath-default-namespace</code>
+     *                  is in force. The default value is a zero-length string, representing "no namespace".
+     */
+
+    public void setDefaultElementNamespace(String defaultNS) {
+        compilerInfo.setDefaultElementNamespace(defaultNS);
+    }
+
+    /**
+     * Get the policy for handling of unprefixed element names in path expressions and match patterns.
+     * @return the policy previously set using {@link #setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy)},
+     * or its default, which is {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE}.
+     */
+
+    public UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
+        return compilerInfo.getUnprefixedElementMatchingPolicy();
+    }
+
+    /**
+     * Set the policy for handling of unprefixed element names in path expressions and match patterns.
+     * By default, such names are expanded using the default namespace for elements and types, which
+     * can be set either using the <code>[xsl:]default-xpath-namespace</code> attribute in the stylesheet,
+     * or programmatically using the method {@link #setDefaultElementNamespace(String)}. The default policy
+     * is {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE},
+     * which causes such names to be expanded using the default namespace for elements and types,
+     * which itself defaults to "no namespace", but which can be changed either using the
+     * <code>[xsl:]xpath-default-namespace</code> attribute in the stylesheet, or using the
+     * {@link #setDefaultElementNamespace(String)} method.
+     *
+     * <p>Note that any setting other than the default causes the stylesheet to behave in a way that
+     * is not conformant with the W3C XSLT 3.0 specifications.</p>
+     *
+     * <p>The chosen policy affects:</p>
+     * <ul>
+     *     <li>Any NCName used as a node-test in an axis step (production <code>ForwardStep</code>
+     *     or <code>ReverseStep</code>) in an
+     *     XPath expression within the stylesheet, other than an axis step using the attribute or
+     *     namespace axis</li>
+     *     <li>Any NCName used as a node-test in an axis step (production <code>ForwardStepP</code>
+     *     in a pattern within the stylesheet, other than an axis step using the attribute or namespace
+     *     axis</li>
+     * </ul>
+     *
+     * <p>It does not affect names appearing in other contexts (for example, names used in
+     * {@code xsl:strip-space/@elements}), and it does not affect name tests expressed in a form
+     * other than a simple NCName (for example tests of the form <code>Q{}local</code>, or
+     * <code>*:local</code>, or <code>element(local)</code>).</p>
+     *
+     * <p>It does not affect XPath expressions evaluated dynamically using <code>xsl:evaluate</code>.</p>
+     * @param unprefixedElementMatchingPolicy the policy for handling unprefixed elements.
+     */
+
+    public void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy) {
+        compilerInfo.setUnprefixedElementMatchingPolicy(unprefixedElementMatchingPolicy);
+    }
+
 
 }
 

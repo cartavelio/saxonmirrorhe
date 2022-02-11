@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -41,6 +41,7 @@ public class NamespaceResolverWithDefault implements NamespaceResolver {
      */
 
     /*@Nullable*/
+    @Override
     public String getURIForPrefix(/*@NotNull*/ String prefix, boolean useDefault) {
         if (useDefault && prefix.isEmpty()) {
             return defaultNamespace;
@@ -54,6 +55,7 @@ public class NamespaceResolverWithDefault implements NamespaceResolver {
      * the default namespace (prefix="") and the XML namespace where appropriate
      */
 
+    @Override
     public Iterator<String> iteratePrefixes() {
         ArrayList<String> list = new ArrayList<String>(10);
         for (Iterator<String> it = baseResolver.iteratePrefixes(); it.hasNext(); ) {

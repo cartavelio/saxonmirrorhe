@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,9 +7,10 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.Configuration;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.DecimalSymbols;
 import net.sf.saxon.trans.XPathException;
@@ -51,61 +52,63 @@ public class XSLDecimalFormat extends StyleElement {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         if (prepared) {
             return;
         }
         prepared = true;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             switch (f) {
                 case "name":
-                    name = Whitespace.trim(atts.getValue(a));
+                    name = Whitespace.trim(value);
                     break;
                 case "decimal-separator":
-                    decimalSeparator = atts.getValue(a);
+                    decimalSeparator = value;
                     break;
                 case "grouping-separator":
-                    groupingSeparator = atts.getValue(a);
+                    groupingSeparator = value;
                     break;
                 case "infinity":
-                    infinity = atts.getValue(a);
+                    infinity = value;
                     break;
                 case "minus-sign":
-                    minusSign = atts.getValue(a);
+                    minusSign = value;
                     break;
                 case "NaN":
-                    NaN = atts.getValue(a);
+                    NaN = value;
                     break;
                 case "percent":
-                    percent = atts.getValue(a);
+                    percent = value;
                     break;
                 case "per-mille":
-                    perMille = atts.getValue(a);
+                    perMille = value;
                     break;
                 case "zero-digit":
-                    zeroDigit = atts.getValue(a);
+                    zeroDigit = value;
                     break;
                 case "digit":
-                    digit = atts.getValue(a);
+                    digit = value;
                     break;
                 case "exponent-separator":
-                    exponentSeparator = atts.getValue(a);
+                    exponentSeparator = value;
                     break;
                 case "pattern-separator":
-                    patternSeparator = atts.getValue(a);
+                    patternSeparator = value;
                     break;
                 default:
-                    checkUnknownAttribute(atts.getNodeName(a));
+                    checkUnknownAttribute(attName);
                     break;
             }
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         checkTopLevel("XTSE0010", false);
         checkEmpty();
@@ -167,22 +170,20 @@ public class XSLDecimalFormat extends StyleElement {
      * @param top  the outermost XSLStylesheet element
      */
 
-    public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) throws XPathException {
+    @Override
+    public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) {
         prepareAttributes();
         DecimalFormatManager dfm = getCompilation().getPrincipalStylesheetModule().getDecimalFormatManager();
         if (name == null) {
             symbols = dfm.getDefaultDecimalFormat();
         } else {
-            try {
-                StructuredQName formatName = makeQName(name);
-                symbols = dfm.obtainNamedDecimalFormat(formatName);
-                symbols.setHostLanguage(Configuration.XSLT, 30);
-            } catch (XPathException err) {
-                compileErrorInAttribute("Invalid decimal format name. " + err.getMessage(), "XTSE0020", "name");
-            }
+            StructuredQName formatName = makeQName(name, null, "name");
+            symbols = dfm.obtainNamedDecimalFormat(formatName);
+            symbols.setHostLanguage(HostLanguage.XSLT, 30);
         }
     }
 
+    @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) throws XPathException {
         // no action
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 
@@ -18,10 +17,9 @@ import net.sf.saxon.trans.XPathException;
  * <p>This is a specialization of the more general MappingFunction class: it differs in that
  * each item being processed becomes the context item while it is being processed.</p>
  *
- * @param <T> the type of items returned by this ContextMappingFunction
  */
 
-public interface ContextMappingFunction<T extends Item> {
+public interface ContextMappingFunction {
 
     /**
      * Map one item to a sequence.
@@ -33,7 +31,7 @@ public interface ContextMappingFunction<T extends Item> {
      * @throws XPathException if a dynamic error is detected
      */
 
-    SequenceIterator<? extends T> map(XPathContext context) throws XPathException;
+    SequenceIterator map(XPathContext context) throws XPathException;
 
 }
 

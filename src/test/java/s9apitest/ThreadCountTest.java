@@ -1,10 +1,10 @@
 package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import junit.framework.TestCase;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 
 
 import javax.xml.transform.Source;
@@ -12,12 +12,15 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ThreadCountTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class ThreadCountTest {
     private Processor saxonProcessor;
     private XQueryCompiler xqueryCompiler;
 
     // Bug 2549
 
+    @Test
     public void testOpenThreads() throws Exception {
         EnterpriseConfiguration configuration = new EnterpriseConfiguration();
         saxonProcessor = new Processor(configuration);

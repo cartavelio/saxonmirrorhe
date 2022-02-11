@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,12 +18,12 @@ import net.sf.saxon.trans.XPathException;
  * of the tuples in a supplied tuple stream, returning the result as an iterator
  */
 
-public class ReturnClauseIterator implements SequenceIterator<Item<?>> {
+public class ReturnClauseIterator implements SequenceIterator {
 
     private TuplePull base;
     private Expression action;
     private XPathContext context;
-    private SequenceIterator<?> results = null;
+    private SequenceIterator results = null;
 
     /**
      * Construct an iterator over the results of the FLWOR expression.
@@ -39,6 +39,7 @@ public class ReturnClauseIterator implements SequenceIterator<Item<?>> {
         this.context = context;
     }
 
+    @Override
     public Item next() throws XPathException {
         Item nextItem;
         while (true) {
@@ -70,6 +71,7 @@ public class ReturnClauseIterator implements SequenceIterator<Item<?>> {
     }
 
 
+    @Override
     public void close() {
         if (results != null) {
             results.close();
@@ -77,19 +79,6 @@ public class ReturnClauseIterator implements SequenceIterator<Item<?>> {
         base.close();
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link net.sf.saxon.om.SequenceIterator#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator#LAST_POSITION_FINDER},
-     *         and {@link net.sf.saxon.om.SequenceIterator#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    public int getProperties() {
-        return 0;
-    }
 
 }
 

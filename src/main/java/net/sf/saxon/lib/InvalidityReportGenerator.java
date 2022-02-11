@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import javax.xml.stream.XMLStreamWriter;
@@ -34,7 +34,7 @@ public class InvalidityReportGenerator extends StandardInvalidityHandler {
         * @param config   the Saxon configuration
         * @param receiver required to output the validation errors
      */
-    public InvalidityReportGenerator(Configuration config, Receiver receiver) throws XPathException {
+    public InvalidityReportGenerator(Configuration config, Outputter receiver) throws XPathException {
         super(config);
 
     }
@@ -43,7 +43,7 @@ public class InvalidityReportGenerator extends StandardInvalidityHandler {
      * Set the receiver
      * @param receiver required to output the validation errors
      */
-    public void setReceiver(Receiver receiver){
+    public void setReceiver(Outputter receiver){
         //no action
     }
 
@@ -100,11 +100,13 @@ public class InvalidityReportGenerator extends StandardInvalidityHandler {
      * @param systemId optional; may be used to represent the destination of any report produced
      * @throws XPathException if initialization of the invalidity handler fails for any reason
      */
+    @Override
     public void startReporting(String systemId) throws XPathException {
         // no action
     }
 
-    public Sequence<?> endReporting() throws XPathException {
+    @Override
+    public Sequence endReporting() throws XPathException {
        return null;
 
     }

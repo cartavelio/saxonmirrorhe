@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,13 +7,10 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 
 /**
  * An event is an object representing one of the events that can be passed to a receiver: for example, a startElement,
@@ -24,11 +21,14 @@ public abstract class Event {
 
     /**
      * Send the event to a receiver
+     *
      * @param out the receiver to which the event is to be sent
      * @throws XPathException the the receiver reports an error
      */
 
-    public abstract void replay(Receiver out) throws XPathException;
+    public void replay(Receiver out) throws XPathException {
+    }
+
 
     /**
      * Event representing start of document
@@ -60,25 +60,37 @@ public abstract class Event {
     }
 
     /**
-     * Event representing the start of an element (not including attributes or namespaces)
+     * Event representing the start of an element (including attributes or namespaces)
      */
 
     public static class StartElement extends Event {
         NodeName name;
         SchemaType type;
+        AttributeMap attributes;
+        NamespaceMap namespaces;
         Location location;
         int properties;
 
-        public StartElement(NodeName name, SchemaType type, Location location, int properties) {
+        public StartElement(NodeName name, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) {
             this.name = name;
             this.type = type;
+            this.attributes = attributes;
+            this.namespaces = namespaces;
             this.location = location;
             this.properties = properties;
         }
 
         @Override
         public void replay(Receiver out) throws XPathException {
-            out.startElement(name, type, location, properties);
+            out.startElement(name, type, attributes, namespaces, location, properties);
+        }
+
+        public void replay(Receiver out, int newProps) throws XPathException {
+            out.startElement(name, type, attributes, namespaces, location, newProps);
+        }
+
+        public int getProperties() {
+            return properties;
         }
     }
 
@@ -93,64 +105,6 @@ public abstract class Event {
         @Override
         public void replay(Receiver out) throws XPathException {
             out.endElement();
-        }
-    }
-
-    /**
-     * Event representing an attribute node
-     */
-
-    public static class Attribute extends Event {
-        NodeName name;
-        SimpleType type;
-        Location location;
-        String value;
-        int properties;
-
-        public Attribute(NodeName name, SimpleType type, Location location, CharSequence value, int properties) {
-            this.name = name;
-            this.type = type;
-            this.location = location;
-            this.value = value.toString();
-            this.properties = properties;
-        }
-
-        @Override
-        public void replay(Receiver out) throws XPathException {
-            out.attribute(name, type, value, location, properties);
-        }
-    }
-
-    /**
-     * Event representing a set of namespace bindings
-     */
-
-    public static class Namespace extends Event {
-
-        NamespaceBindingSet bindings;
-        int properties;
-
-        public Namespace(NamespaceBindingSet bindings, int properties) {
-            this.bindings = bindings;
-            this.properties = properties;
-        }
-        @Override
-        public void replay(Receiver out) throws XPathException {
-            out.namespace(bindings, properties);
-        }
-    }
-
-    /**
-     * Event representing the end of a start tag, that is, indicating that no more attributes or
-     * namespaces are expected for the current element
-     */
-
-    public static class StartContent extends Event {
-
-        public StartContent(){}
-
-        public void replay(Receiver out) throws XPathException {
-            out.startContent();
         }
     }
 

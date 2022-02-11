@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,13 +11,11 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.expr.parser.OptimizerOptions;
-import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.lib.OutputURIResolver;
-import net.sf.saxon.lib.StandardOutputResolver;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryLibrary;
+import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.packages.PackageLibrary;
 
 import javax.xml.transform.ErrorListener;
@@ -34,17 +32,15 @@ import java.util.Collection;
 public class CompilerInfo {
 
     private Configuration config;
-    private transient URIResolver uriResolver;
-    private transient OutputURIResolver outputURIResolver = StandardOutputResolver.getInstance();
-    private transient ErrorListener errorListener;
+    private URIResolver uriResolver;
+    private OutputURIResolver outputURIResolver = StandardOutputResolver.getInstance();
+    private ErrorReporter errorReporter = new StandardErrorReporter();
     private CodeInjector codeInjector;
-    private int recoveryPolicy = Configuration.RECOVER_WITH_WARNINGS;
+    private int recoveryPolicy = Mode.RECOVER_WITH_WARNINGS;
     private boolean schemaAware;
-    //private boolean versionWarning;
     private String messageReceiverClassName = "net.sf.saxon.serialize.MessageEmitter";
     private StructuredQName defaultInitialMode;
     private StructuredQName defaultInitialTemplate;
-    private FunctionLibrary extensionFunctionLibrary;
     private GlobalParameterSet suppliedParameters = new GlobalParameterSet();
     private String defaultCollation;
     private PackageLibrary packageLibrary;
@@ -53,6 +49,9 @@ public class CompilerInfo {
     private boolean relocatable = false;
     private Collection<QueryLibrary> queryLibraries;
     private OptimizerOptions optimizerOptions;
+    private String defaultNamespaceForElementsAndTypes = "";
+    private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
+            = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
 
     /**
      * Create an empty CompilerInfo object with default settings. (Note, this does not
@@ -87,14 +86,13 @@ public class CompilerInfo {
         config = info.config;
         uriResolver = info.uriResolver;
         outputURIResolver = info.outputURIResolver;
-        errorListener = info.errorListener;
+        errorReporter = info.errorReporter;
         codeInjector = info.codeInjector;
         recoveryPolicy = info.recoveryPolicy;
         schemaAware = info.schemaAware;
         messageReceiverClassName = info.messageReceiverClassName;
         defaultInitialMode = info.defaultInitialMode;
         defaultInitialTemplate = info.defaultInitialTemplate;
-        extensionFunctionLibrary = info.extensionFunctionLibrary;
         suppliedParameters = new GlobalParameterSet(info.suppliedParameters);
         defaultCollation = info.defaultCollation;
         assertionsEnabled = info.assertionsEnabled;
@@ -103,6 +101,8 @@ public class CompilerInfo {
         relocatable = info.relocatable;
         optimizerOptions = info.optimizerOptions;
         queryLibraries = info.queryLibraries;
+        defaultNamespaceForElementsAndTypes = info.defaultNamespaceForElementsAndTypes;
+        unprefixedElementMatchingPolicy = info.unprefixedElementMatchingPolicy;
     }
 
     public Configuration getConfiguration() {
@@ -163,7 +163,7 @@ public class CompilerInfo {
      * @param seq  the value of the stylesheet parameter
      */
 
-    public void setParameter(StructuredQName name, GroundedValue<?> seq) {
+    public void setParameter(StructuredQName name, GroundedValue seq) {
         suppliedParameters.put(name, seq);
     }
 
@@ -192,7 +192,7 @@ public class CompilerInfo {
     /**
      * Set the target edition under which the stylesheet will be executed.
      *
-     * @param edition the Saxon edition for the run-time environment. One of "EE", "PE", "HE", "JS", or "JS2".
+     * @param edition the Saxon edition for the run-time environment. One of "EE", "PE", "HE", or "JS".
      * @since 9.7.0.5. Experimental and subject to change.
      */
 
@@ -203,7 +203,7 @@ public class CompilerInfo {
     /**
      * Get the target edition under which the stylesheet will be executed.
      *
-     * @return the Saxon edition for the run-time environment. One of "EE", "PE", "HE", "JS", or "JS2".
+     * @return the Saxon edition for the run-time environment. One of "EE", "PE", "HE", or "JS".
      * @since 9.7.0.5. Experimental and subject to change.
      */
 
@@ -382,10 +382,11 @@ public class CompilerInfo {
      * @param listener The error listener to be used. This is notified of all errors detected during the
      *                 compilation.
      * @since 8.7
+     * @deprecated since 10.0 - use {@link #setErrorReporter(ErrorReporter)}
      */
 
     public void setErrorListener(ErrorListener listener) {
-        errorListener = listener;
+        setErrorReporter(new ErrorReporterToListener(listener));
     }
 
     /**
@@ -394,11 +395,40 @@ public class CompilerInfo {
      * @return listener The error listener in use. This is notified of all errors detected during the
      * compilation.
      * @since 8.7
+     * @deprecated since 10.0 - use {@link #getErrorReporter()}
      */
 
     public ErrorListener getErrorListener() {
-        return errorListener;
+        if (errorReporter instanceof ErrorReporterToListener) {
+            return ((ErrorReporterToListener) errorReporter).getErrorListener();
+        } else {
+            return null;
+        }
     }
+
+    /**
+     * Set an error reporter: that is, a used-supplied object that is to receive
+     * notification of static errors found in the stylesheet
+     * @param reporter the object to be notified of static errors
+     */
+
+    public void setErrorReporter(ErrorReporter reporter) {
+        this.errorReporter = reporter;
+    }
+
+    /**
+     * Get the error reporter: that is, a used-supplied object that is to receive
+     * notification of static errors found in the stylesheet
+     *
+     * @return the object to be notified of static errors. This may be the error reporter
+     * that was previously set using {@link #setErrorReporter(ErrorReporter)}, or it may be
+     * a system-allocated error reporter.
+     */
+
+    public ErrorReporter getErrorReporter() {
+        return this.errorReporter;
+    }
+
 
     /**
      * Get the name of the class that will be instantiated to create a MessageEmitter,
@@ -481,59 +511,6 @@ public class CompilerInfo {
 
     public boolean isCompileWithTracing() {
         return codeInjector != null;
-    }
-
-    /**
-     * Set the policy for handling recoverable errrors. Note that for some errors the decision can be
-     * made at run-time, but for the "ambiguous template match" error, the decision is (since 9.2)
-     * fixed at compile time.
-     *
-     * @param policy the recovery policy to be used. The options are {@link Configuration#RECOVER_SILENTLY},
-     *               {@link Configuration#RECOVER_WITH_WARNINGS}, or {@link Configuration#DO_NOT_RECOVER}.
-     * @since 9.2
-     */
-
-    public void setRecoveryPolicy(int policy) {
-        recoveryPolicy = policy;
-    }
-
-    /**
-     * Get the policy for handling recoverable errors. Note that for some errors the decision can be
-     * made at run-time, but for the "ambiguous template match" error, the decision is (since 9.2)
-     * fixed at compile time.
-     *
-     * @return the current policy.
-     * @since 9.2
-     */
-
-    public int getRecoveryPolicy() {
-        return recoveryPolicy;
-    }
-
-    /**
-     * Ask whether a warning is to be output when the stylesheet version does not match the processor version.
-     * In the case of stylesheet version="1.0", the XSLT specification requires such a warning unless the user disables it.
-     *
-     * @return true if these messages are to be output.
-     * @since 9.2
-     * @deprecated since 9.8.0.2. Always now returns false. See bug 3278.
-     */
-
-    public boolean isVersionWarning() {
-        return false;
-    }
-
-    /**
-     * Say whether a warning is to be output when the stylesheet version does not match the processor version.
-     * In the case of stylesheet version="1.0", the XSLT specification requires such a warning unless the user disables it.
-     *
-     * @param warn true if these messages are to be output.
-     * @since 9.2
-     * @deprecated since 9.8.0.2. The method no longer has any effect. See bug 3278.
-     */
-
-    public void setVersionWarning(boolean warn) {
-
     }
 
     /**
@@ -645,36 +622,23 @@ public class CompilerInfo {
         return 30;
     }
 
-    /**
-     * Set a library of extension functions. The functions in this library will be available
-     * in all modules of the stylesheet. The function library will be searched after language-defined
-     * libraries (such as built-in functions, user-defined XQuery functions, and constructor
-     * functions) but before extension functions defined at the Configuration level.
-     *
-     * @param library the function library to be added (replacing any that has previously been set).
-     *                May be null to clear a previously-set library
-     * @since 9.4
-     * @deprecated since 9.7. Any extension function library set using this mechanism will
-     * not be available if the package is saved and reloaded.
-     */
-
-    public void setExtensionFunctionLibrary(/*@Nullable*/ FunctionLibrary library) {
-        this.extensionFunctionLibrary = library;
+    public String getDefaultElementNamespace() {
+        return defaultNamespaceForElementsAndTypes;
     }
 
-    /**
-     * Get any function library that was previously set using
-     * {@link #setExtensionFunctionLibrary(net.sf.saxon.functions.FunctionLibrary)}.
-     *
-     * @return the extension function library, or null if none has been set.
-     * @since 9.4
-     */
-
-
-    /*@Nullable*/
-    public FunctionLibrary getExtensionFunctionLibrary() {
-        return extensionFunctionLibrary;
+    public void setDefaultElementNamespace(String defaultNamespaceForElementsAndTypes) {
+        this.defaultNamespaceForElementsAndTypes = defaultNamespaceForElementsAndTypes;
     }
+
+
+    public UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
+        return unprefixedElementMatchingPolicy;
+    }
+
+    public void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy) {
+        this.unprefixedElementMatchingPolicy = unprefixedElementMatchingPolicy;
+    }
+
 
     public void setXQueryLibraries(Collection<QueryLibrary> libraries) {
         this.queryLibraries = libraries;

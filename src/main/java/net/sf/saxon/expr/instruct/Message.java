@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,18 +7,23 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
@@ -101,6 +106,7 @@ public class Message extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         Message exp = new Message(getSelect().copy(rebindings), getTerminate().copy(rebindings), getErrorCode().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
@@ -111,6 +117,7 @@ public class Message extends Instruction {
      * Get the name of this instruction for diagnostic and tracing purposes
      */
 
+    @Override
     public int getInstructionNameCode() {
         return isAssert ? StandardNames.XSL_ASSERT : StandardNames.XSL_MESSAGE;
     }
@@ -122,6 +129,7 @@ public class Message extends Instruction {
      * @return AnyItemType
      */
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return AnyItemType.getInstance();
     }
@@ -133,6 +141,7 @@ public class Message extends Instruction {
      * @return zero or one
      */
 
+    @Override
     public int getCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_ONE;
     }
@@ -142,6 +151,7 @@ public class Message extends Instruction {
      * This implementation returns true.
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         return true;
     }
@@ -175,7 +185,8 @@ public class Message extends Instruction {
         return this;
     }
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         XsltController controller = (XsltController) context.getController();
         if (isAssert && !controller.isAssertionsEnabled()) {
             return null;
@@ -220,9 +231,10 @@ public class Message extends Instruction {
 
         controller.incrementMessageCounter(errorCode);
 
+
         Receiver emitter = controller.makeMessageReceiver();
         PipelineConfiguration pipe = controller.makePipelineConfiguration();
-        pipe.setHostLanguage(Configuration.XSLT);
+        pipe.setHostLanguage(HostLanguage.XSLT);
         pipe.setXPathContext(context);
         emitter.setPipelineConfiguration(pipe);
 
@@ -236,49 +248,39 @@ public class Message extends Instruction {
             rec = new MessageAdapter(new TreeReceiver(emitter), errorCode.getEQName(), getLocation());
         }
 
-        Receiver saved = context.getReceiver();
-
-//        SerializationProperties props = new SerializationProperties();
-//        props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-//        SerializerFactory sf = context.getConfiguration().getSerializerFactory();
-//
-//        Receiver receiver = sf.getReceiver(rec, props, pipe);
-//        context.setReceiver(receiver);
-//
-//
-
-        rec.startDocument(abort ? ReceiverOptions.TERMINATE : 0);
+        ComplexContentOutputter cco = new ComplexContentOutputter(rec);
+        cco.startDocument(abort ? ReceiverOption.TERMINATE : ReceiverOption.NONE);
 
         try {
-            SequenceIterator iter = getSelect().iterate(context);
-            Item item;
-            while ((item = iter.next()) != null) {
-                rec.append(item, getLocation(), ReceiverOptions.ALL_NAMESPACES);
-            }
+            getSelect().process(cco, context);
+//            SequenceIterator iter = getSelect().iterate(context);
+//            Item item;
+//            while ((item = iter.next()) != null) {
+//                rec.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
+//            }
         } catch (XPathException e) {
-            rec.append(new StringValue("Error " + e.getErrorCodeLocalPart() +
+            cco.append(new StringValue("Error " + e.getErrorCodeLocalPart() +
                                                " while evaluating xsl:message at line "
                                                + getLocation().getLineNumber() + " of " + getLocation().getSystemId() +
                                                ": " + e.getMessage()));
         }
 
-        rec.endDocument();
-        rec.close();
-        context.setReceiver(saved);
+        cco.endDocument();
+        cco.close();
         if (abort) {
             builder.close();
             NodeInfo content = builder.getCurrentRoot();
             emitter = new ProxyReceiver(emitter) {
                 @Override
                 public void startDocument(int properties) throws XPathException {
-                    super.startDocument(ReceiverOptions.TERMINATE);
+                    super.startDocument(ReceiverOption.TERMINATE);
                 }
             };
             content.copy(emitter, CopyOptions.ALL_NAMESPACES, getLocation());
             TerminationException te = new TerminationException(
-                    "Processing terminated by " + StandardErrorListener.getInstructionName(this) +
+                    "Processing terminated by " + StandardErrorListener.getInstructionNameDefault(this) +
                             " at line " + getLocation().getLineNumber() +
-                            " in " + StandardErrorListener.abbreviatePath(getLocation().getSystemId()));
+                            " in " + StandardDiagnostics.abbreviateLocationURIDefault(getLocation().getSystemId()));
             te.setLocation(getLocation());
             te.setErrorCodeQName(errorCode);
             te.setErrorObject(content);
@@ -293,6 +295,7 @@ public class Message extends Instruction {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("message", this);
         out.setChildRole("select");
@@ -316,7 +319,6 @@ public class Message extends Instruction {
      */
 
     private static class MessageAdapter extends ProxyReceiver {
-        private boolean contentStarted = true;
         private String errorCode;
         private Location location;
 
@@ -329,56 +331,32 @@ public class Message extends Instruction {
         @Override
         public void startDocument(int properties) throws XPathException {
             super.startDocument(properties);
-            processingInstruction("error-code", errorCode, location, 0);
+            processingInstruction("error-code", errorCode, location, ReceiverOption.NONE);
         }
 
         @Override
-        public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
-            contentStarted = false;
-            super.startElement(nameCode, typeCode, location, properties);
-        }
-
-        @Override
-        public void startContent() throws XPathException {
-            contentStarted = true;
-            super.startContent();
-        }
-
-        @Override
-        public void attribute(NodeName attributeName, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-                throws XPathException {
-            if (contentStarted) {
-                String attName = attributeName.getDisplayName();
-                processingInstruction("attribute", "name=\"" + attName + "\" value=\"" + value + "\"", locationId, 0);
-            } else {
-                super.attribute(attributeName, typeCode, value, locationId, properties);
-            }
-        }
-
-        @Override
-        public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-            if (contentStarted) {
-                for (NamespaceBinding ns : namespaceBindings) {
-                    String prefix = ns.getPrefix();
-                    String uri = ns.getURI();
-                    processingInstruction("namespace", "prefix=\"" + prefix + "\" uri=\"" + uri + "\"", ExplicitLocation.UNKNOWN_LOCATION, 0);
-                }
-            } else {
-                super.namespace(namespaceBindings, properties);
-            }
+        public void startElement(NodeName elemName, SchemaType type,
+                                 AttributeMap attributes, NamespaceMap namespaces,
+                                 Location location, int properties) throws XPathException {
+            super.startElement(elemName, type, attributes, namespaces, location, properties);
         }
 
         @Override
         public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {
             if (item instanceof NodeInfo) {
                 int kind = ((NodeInfo) item).getNodeKind();
-                if (kind == Type.ATTRIBUTE || kind == Type.NAMESPACE) {
-                    ((NodeInfo) item).copy(this, 0, locationId);
+                if (kind == Type.ATTRIBUTE) {
+                    String attName = ((NodeInfo)item).getDisplayName();
+                    processingInstruction("attribute", "name=\"" + attName + "\" value=\"" + item.getStringValue() + "\"", locationId, ReceiverOption.NONE);
+                    return;
+                } else if (kind == Type.NAMESPACE) {
+                    String prefix = ((NodeInfo) item).getLocalPart();
+                    processingInstruction("namespace", "prefix=\"" + prefix + "\" uri=\"" + item.getStringValue() + "\"", Loc.NONE, ReceiverOption.NONE);
                     return;
                 }
             } else if (item instanceof Function && !((Function) item).isArray()) {
                 CharSequence representation = ((Function) item).isMap() ? Err.depict(item) : "Function " + Err.depict(item);
-                nextReceiver.characters(representation, locationId, 0);
+                nextReceiver.characters(representation, locationId, ReceiverOption.NONE);
                 return;
             }
             nextReceiver.append(item, locationId, copyNamespaces);

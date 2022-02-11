@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -93,7 +93,7 @@ public class SingletonIntersectExpression extends VennExpression {
 
     /*@NotNull*/
     @Override
-    public SequenceIterator<?> iterate(XPathContext c) throws XPathException {
+    public SequenceIterator iterate(XPathContext c) throws XPathException {
         NodeInfo m = (NodeInfo) getLhsExpression().evaluateItem(c);
         if (m == null) {
             return EmptyIterator.getInstance();
@@ -139,6 +139,7 @@ public class SingletonIntersectExpression extends VennExpression {
         return false;
     }
 
+    @Override
     public String getExpressionName() {
         return "singleton-intersect";
     }
@@ -149,6 +150,7 @@ public class SingletonIntersectExpression extends VennExpression {
      * @return String representation of the operator (for diagnostic display only)
      */
 
+    @Override
     protected String displayOperator() {
         return "among";
     }

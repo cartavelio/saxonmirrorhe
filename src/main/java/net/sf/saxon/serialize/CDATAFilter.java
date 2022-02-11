@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,13 +9,11 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.XPathException;
@@ -27,7 +25,7 @@ import javax.xml.transform.OutputKeys;
 import java.util.*;
 
 /**
- * CDATAFilter: This ProxyEmitter converts character data to CDATA sections,
+ * CDATAFilter: This ProxyReceiver converts character data to CDATA sections,
  * if the character data belongs to one of a set of element types to be handled this way.
  *
  * @author Michael Kay
@@ -69,16 +67,21 @@ public class CDATAFilter extends ProxyReceiver {
      * Output element start tag
      */
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
+            throws XPathException {
         flush();
         stack.push(elemName);
-        nextReceiver.startElement(elemName, typeCode, location, properties);
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
     /**
      * Output element end tag
      */
 
+    @Override
     public void endElement() throws XPathException {
         flush();
         stack.pop();
@@ -89,6 +92,7 @@ public class CDATAFilter extends ProxyReceiver {
      * Output a processing instruction
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
         flush();
         nextReceiver.processingInstruction(target, data, locationId, properties);
@@ -98,9 +102,10 @@ public class CDATAFilter extends ProxyReceiver {
      * Output character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
 
-        if ((properties & ReceiverOptions.DISABLE_ESCAPING) == 0) {
+        if (!ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
             buffer.append(chars.toString());
         } else {
             // if the user requests disable-output-escaping, this overrides the CDATA request. We end
@@ -114,6 +119,7 @@ public class CDATAFilter extends ProxyReceiver {
      * Output a comment
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         flush();
         nextReceiver.comment(chars, locationId, properties);
@@ -145,7 +151,7 @@ public class CDATAFilter extends ProxyReceiver {
             // In this situation the normalizer will be the next thing in the serialization pipeline.
 
             if (getNextReceiver() instanceof UnicodeNormalizer) {
-                buffer = new FastStringBuffer(((UnicodeNormalizer) getNextReceiver()).normalize(buffer, true));
+                buffer = new FastStringBuffer(((UnicodeNormalizer)getNextReceiver()).normalize(buffer, true));
                 end = buffer.length();
             }
 
@@ -176,8 +182,7 @@ public class CDATAFilter extends ProxyReceiver {
                         // before restarting the CDATA section
                         //super.characters(CharBuffer.wrap(buffer, k, k+skip), 0, 0);
                         nextReceiver.characters(buffer.subSequence(k, k + skip),
-                            ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.DISABLE_CHARACTER_MAPS);
-                        // was: (..., ReceiverOptions.DISABLE_ESCAPING);
+                                                Loc.NONE, ReceiverOption.DISABLE_CHARACTER_MAPS);
                         k += skip;
                         if (k >= end) {
                             break;
@@ -200,7 +205,7 @@ public class CDATAFilter extends ProxyReceiver {
             flushCDATA(rest, end - start);
 
         } else {
-            nextReceiver.characters(buffer, ExplicitLocation.UNKNOWN_LOCATION, 0);
+            nextReceiver.characters(buffer, Loc.NONE, ReceiverOption.NONE);
         }
 
         buffer.setLength(0);
@@ -219,8 +224,9 @@ public class CDATAFilter extends ProxyReceiver {
         if (len == 0) {
             return;
         }
-        final int chprop = ReceiverOptions.DISABLE_ESCAPING | ReceiverOptions.DISABLE_CHARACTER_MAPS;
-        final Location loc = ExplicitLocation.UNKNOWN_LOCATION;
+        final int chprop =
+                ReceiverOption.DISABLE_ESCAPING | ReceiverOption.DISABLE_CHARACTER_MAPS;
+        final Location loc = Loc.NONE;
         nextReceiver.characters("<![CDATA[", loc, chprop);
 
         // Check that the character data doesn't include the substring "]]>"

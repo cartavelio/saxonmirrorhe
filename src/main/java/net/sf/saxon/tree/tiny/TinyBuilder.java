@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,7 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
@@ -19,6 +19,7 @@ import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 
 import java.util.Arrays;
+import java.util.Stack;
 
 
 /**
@@ -30,18 +31,23 @@ import java.util.Arrays;
 
 public class TinyBuilder extends Builder {
 
-    public static final int PARENT_POINTER_INTERVAL = 10;
+    private enum Eligibility {INELIGIBLE, PRIMED, ELIGIBLE}
+
+    private static final int PARENT_POINTER_INTERVAL = 10;
     // a lower value allocates more parent pointers which takes more space but reduces
     // the length of parent searches
 
     /*@Nullable*/ private TinyTree tree;
+    private Stack<NamespaceMap> namespaceStack = new Stack<>();
 
     private int currentDepth = 0;
     private int nodeNr = 0;             // this is the local sequence within this document
     private boolean ended = false;
+    private boolean noNewNamespaces = true;
     private Statistics statistics;
     private boolean markDefaultedAttributes = false;
-    private int textualElementEligibilityState = 0;
+    private Eligibility textualElementEligibilityState = Eligibility.INELIGIBLE;
+
 
     /**
      * Create a TinyTree builder
@@ -53,7 +59,6 @@ public class TinyBuilder extends Builder {
         super(pipe);
         Configuration config = pipe.getConfiguration();
         statistics = config.getTreeStatistics().TEMPORARY_TREE_STATISTICS;
-        //markDefaultedAttributes = true;
         markDefaultedAttributes = config.isExpandAttributeDefaults() && config.getBooleanProperty(Feature.MARK_DEFAULTED_ATTRIBUTES);
         //System.err.println("TinyBuilder " + this);
     }
@@ -109,6 +114,7 @@ public class TinyBuilder extends Builder {
      * Open the event stream
      */
 
+    @Override
     public void open() {
         //System.err.println("TinyBuilder " + this + " open; " + started);
         if (started) {
@@ -121,14 +127,18 @@ public class TinyBuilder extends Builder {
             if (lineNumbering) {
                 tree.setLineNumbering();
             }
+            uniformBaseURI = true;
+            tree.setUniformBaseUri(baseURI);
         }
         super.open();
     }
 
     /**
      * Write a document node to the tree
+     * @param properties
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         if ((started && !ended) || currentDepth > 0) {
             // this happens when using an IdentityTransformer, or when copying a document node to form
@@ -162,6 +172,7 @@ public class TinyBuilder extends Builder {
      * Callback interface for SAX: not for application use
      */
 
+    @Override
     public void endDocument() throws XPathException {
 //        System.err.println("TinyBuilder: " + this + " End document");
 
@@ -185,6 +196,7 @@ public class TinyBuilder extends Builder {
 
     }
 
+    @Override
     public void reset() {
         super.reset();
         tree = null;
@@ -194,6 +206,7 @@ public class TinyBuilder extends Builder {
         statistics = config.getTreeStatistics().TEMPORARY_TREE_STATISTICS;
     }
 
+    @Override
     public void close() throws XPathException {
         TinyTree tt = tree;
         if (tt != null) {
@@ -204,18 +217,40 @@ public class TinyBuilder extends Builder {
     }
 
     /**
-     * Notify the start tag of an element
+     * Notify the start of an element
+     *
+     * @param elemName   the name of the element.
+     * @param type       the type annotation of the element.
+     * @param attributes the attributes of this element
+     * @param namespaces the in-scope namespaces of this element: generally this is all the in-scope
+     *                   namespaces, without relying on inheriting namespaces from parent elements
+     * @param location   an object providing information about the module, line, and column where the node originated
+     * @param properties bit-significant properties of the element node. If there are no relevant
+     *                   properties, zero is supplied. The definitions of the bits are in class {@link ReceiverOption}
+     * @throws XPathException if an error occurs
      */
 
-    public void startElement(/*@NotNull*/ NodeName elemName, SchemaType type, Location location, int properties) throws XPathException {
-
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
+            throws XPathException {
         // if the number of siblings exceeds a certain threshold, add a parent pointer, in the form
         // of a pseudo-node
 
-        //System.err.println("startElement " + elemName);
+        //System.err.println(this + " startElement " + elemName + " " + currentDepth);
         TinyTree tt = tree;
         assert tt != null;
-        textualElementEligibilityState = 0;
+        textualElementEligibilityState = Eligibility.INELIGIBLE;
+
+        noNewNamespaces = true;
+        if (namespaceStack.isEmpty()) {
+            noNewNamespaces = false;
+            namespaceStack.push(namespaces);
+        } else {
+            noNewNamespaces = namespaces == namespaceStack.peek();
+            namespaceStack.push(namespaces);
+        }
 
         if (siblingsAtDepth[currentDepth] > PARENT_POINTER_INTERVAL) {
             nodeNr = tt.addNode(Type.PARENT_POINTER, currentDepth, prevAtDepth[currentDepth - 1], 0, 0);
@@ -234,12 +269,12 @@ public class TinyBuilder extends Builder {
         int nameCode = (prefixCode << 20) | fp;
         nodeNr = tt.addNode(Type.ELEMENT, currentDepth, -1, -1, nameCode);
 
-        isIDElement = (properties & ReceiverOptions.IS_ID) != 0;
+        isIDElement = ReceiverOption.contains(properties, ReceiverOption.IS_ID);
         int typeCode = type.getFingerprint();
         if (typeCode != StandardNames.XS_UNTYPED) {
 
             tt.setElementAnnotation(nodeNr, type);
-            if ((properties & ReceiverOptions.NILLED_ELEMENT) != 0) {
+            if (ReceiverOption.contains(properties, ReceiverOption.NILLED_ELEMENT)) {
                 tt.setNilled(nodeNr);
             }
             if (!isIDElement && type.isIdType()) {
@@ -250,7 +285,6 @@ public class TinyBuilder extends Builder {
         if (currentDepth == 0) {
             prevAtDepth[0] = nodeNr;
             prevAtDepth[1] = -1;
-            //tree.next[0] = -1;
             currentRoot = tt.getNode(nodeNr);
         } else {
             int prev = prevAtDepth[currentDepth];
@@ -270,15 +304,15 @@ public class TinyBuilder extends Builder {
         prevAtDepth[currentDepth] = -1;
         siblingsAtDepth[currentDepth] = 0;
 
-//        if (!pipe.isLocationIsCodeLocation() && location.getSystemId() != null) {
-//            tt.setSystemId(nodeNr, location.getSystemId());
-//        } else if (currentDepth == 1) {
-//            tt.setSystemId(nodeNr, systemId);
-//        }
-        if (isUseEventLocation() && location.getSystemId() != null) {
-            tt.setSystemId(nodeNr, location.getSystemId());
+        String localSystemId = location.getSystemId();
+        if (isUseEventLocation() && localSystemId != null) {
+            tt.setSystemId(nodeNr, localSystemId);
         } else if (currentDepth == 1) {
             tt.setSystemId(nodeNr, systemId);
+        }
+        if (uniformBaseURI && localSystemId != null && !localSystemId.equals(baseURI)) {
+            uniformBaseURI = false;
+            tt.setUniformBaseUri(null);
         }
 
         if (lineNumbering) {
@@ -288,51 +322,54 @@ public class TinyBuilder extends Builder {
                 ((ReceivingContentHandler.LocalLocator)location).levelInEntity == 0 && currentDepth >= 1) {
             tt.markTopWithinEntity(nodeNr);
         }
-    }
 
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        assert tree != null;
-        for (NamespaceBinding ns : namespaceBindings) {
-            tree.addNamespace(nodeNr, ns);
+        for (AttributeInfo att : attributes) {
+            attribute2(att.getNodeName(), att.getType(),
+                      getAttValue(att), location, att.getProperties());
         }
+        textualElementEligibilityState = noNewNamespaces ? Eligibility.PRIMED : Eligibility.INELIGIBLE;
+        tree.addNamespaces(nodeNr, namespaceStack.peek());
+        nodeNr++;
     }
 
-    //private static int counter = 0;
+    protected String getAttValue(AttributeInfo att) {
+        return att.getValue();
+    }
 
-    public void attribute(/*@NotNull*/ NodeName attName, SimpleType type, CharSequence value, Location locationId, int properties)
+
+    private void attribute2(/*@NotNull*/ NodeName attName, SimpleType type, CharSequence value, Location locationId, int properties)
             throws XPathException {
         // System.err.println("attribute " + nameCode + "=" + value);
-        //if (counter++ % 1000 == 0) System.err.println("T.addAttribute# = " + counter);
         int fp = attName.obtainFingerprint(namePool);
         String prefix = attName.getPrefix();
         int nameCode = prefix.isEmpty() ? fp : (tree.prefixPool.obtainPrefixCode(prefix) << 20) | fp;
         assert tree != null;
         assert currentRoot != null;
         tree.addAttribute(currentRoot, nodeNr, nameCode, type, value, properties);
-        if (markDefaultedAttributes && ((properties & ReceiverOptions.DEFAULTED_ATTRIBUTE) != 0)) {
+        if (markDefaultedAttributes && ReceiverOption.contains(properties, ReceiverOption.DEFAULTED_VALUE)) {
             tree.markDefaultedAttribute(tree.numberOfAttributes - 1);
         }
-    }
-
-    public void startContent() {
-        //System.err.println("startContent");
-        nodeNr++;
-        textualElementEligibilityState = 1;
+        if (fp == StandardNames.XML_BASE) {
+            uniformBaseURI = false;
+            tree.setUniformBaseUri(null);
+        }
     }
 
     /**
      * Notify the end of an element node
      */
 
+    @Override
     public void endElement() throws XPathException {
         assert tree != null;
-        //System.err.println("End element");
+        //System.err.println(this + " end element " + currentDepth);
 
-        boolean eligibleAsTextualElement = textualElementEligibilityState == 2;
-        textualElementEligibilityState = 0;
+        boolean eligibleAsTextualElement = textualElementEligibilityState == Eligibility.ELIGIBLE;
+        textualElementEligibilityState = Eligibility.INELIGIBLE;
         prevAtDepth[currentDepth] = -1;
         siblingsAtDepth[currentDepth] = 0;
         currentDepth--;
+        namespaceStack.pop();
         if (isIDElement) {
             // we're relying on the fact that an ID element has no element children!
             tree.indexIDElement(currentRoot, prevAtDepth[currentDepth]);
@@ -341,7 +378,7 @@ public class TinyBuilder extends Builder {
                 tree.nodeKind[nodeNr] == Type.TEXT &&
                 tree.nodeKind[nodeNr-1] == Type.ELEMENT &&
                 tree.alpha[nodeNr-1] == -1 &&
-                tree.beta[nodeNr-1] == -1) {
+                noNewNamespaces) {
             // Collapse a simple element with text content and no attributes or namespaces into a single node
             // of type TRIVIAL_ELEMENT
             //System.err.println("Created textual element");
@@ -374,15 +411,15 @@ public class TinyBuilder extends Builder {
         // Note: reading an incomplete tree needs care if it constructs a prior index, etc.
     }
 
-
     /**
      * Notify a text node
      */
 
+    @Override
     public void characters(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
         //System.err.println("characters: " + chars);
         if (chars instanceof CompressedWhitespace &&
-                (properties & ReceiverOptions.WHOLE_TEXT_NODE) != 0) {
+                ReceiverOption.contains(properties, ReceiverOption.WHOLE_TEXT_NODE)) {
             TinyTree tt = tree;
             assert tt != null;
             long lvalue = ((CompressedWhitespace) chars).getCompressedValue();
@@ -407,7 +444,9 @@ public class TinyBuilder extends Builder {
             if (lineNumbering) {
                 tree.setLineNumber(nodeNr, locationId.getLineNumber(), locationId.getColumnNumber());
             }
-            textualElementEligibilityState = textualElementEligibilityState == 1 ? 2 : 0;
+            textualElementEligibilityState = textualElementEligibilityState == Eligibility.PRIMED
+                    ? Eligibility.ELIGIBLE
+                    : Eligibility.INELIGIBLE;
         }
     }
 
@@ -448,11 +487,12 @@ public class TinyBuilder extends Builder {
      * Callback interface for SAX: not for application use
      */
 
+    @Override
     public void processingInstruction(String piname, /*@NotNull*/ CharSequence remainder, Location locationId, int properties) throws XPathException {
         TinyTree tt = tree;
         assert tt != null;
 
-        textualElementEligibilityState = 0;
+        textualElementEligibilityState = Eligibility.INELIGIBLE;
         if (tt.commentBuffer == null) {
             tt.commentBuffer = new FastStringBuffer(FastStringBuffer.C256);
         }
@@ -471,7 +511,12 @@ public class TinyBuilder extends Builder {
         prevAtDepth[currentDepth] = nodeNr;
         siblingsAtDepth[currentDepth]++;
 
-        tt.setSystemId(nodeNr, locationId.getSystemId());
+        String localLocation = locationId.getSystemId();
+        tt.setSystemId(nodeNr, localLocation);
+        if (localLocation != null && !localLocation.equals(baseURI)) {
+            uniformBaseURI = false;
+            tree.setUniformBaseUri(null);
+        }
         if (lineNumbering) {
             tt.setLineNumber(nodeNr, locationId.getLineNumber(), locationId.getColumnNumber());
         }
@@ -481,11 +526,12 @@ public class TinyBuilder extends Builder {
      * Callback interface for SAX: not for application use
      */
 
+    @Override
     public void comment(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
         TinyTree tt = tree;
         assert tt != null;
 
-        textualElementEligibilityState = 0;
+        textualElementEligibilityState = Eligibility.INELIGIBLE;
         if (tt.commentBuffer == null) {
             tt.commentBuffer = new FastStringBuffer(FastStringBuffer.C256);
         }
@@ -511,6 +557,7 @@ public class TinyBuilder extends Builder {
      * Set an unparsed entity in the document
      */
 
+    @Override
     public void setUnparsedEntity(String name, String uri, String publicId) {
         if (tree.getUnparsedEntity(name) == null) {
             // bug 2187
@@ -519,51 +566,11 @@ public class TinyBuilder extends Builder {
     }
 
     /*@NotNull*/
+    @Override
     public BuilderMonitor getBuilderMonitor() {
         return new TinyBuilderMonitor(this);
     }
 
-    public boolean isPositionedAtElement() {
-        return tree.numberOfNodes > 0 && (tree.nodeKind[tree.numberOfNodes-1]&0x0f) == Type.ELEMENT;
-    }
 
-    /**
-     * Copy an element node and its subtree from another TinyTree instance
-     *
-     * @param sourceNode the element at the root of the subtree to be copied
-     */
-
-    public void bulkCopy(TinyElementImpl sourceNode, boolean copyNamespaces) {
-        TinyTree sourceTree = sourceNode.tree;
-        int oldNodeNr = sourceNode.nodeNr;
-        int newNodeNr = tree.numberOfNodes;
-        tree.bulkCopy(sourceTree, oldNodeNr, prevAtDepth, currentDepth);
-        int prev = prevAtDepth[currentDepth];
-        if (prev > 0) {
-            tree.next[prev] = newNodeNr;
-        }
-        tree.next[newNodeNr] = prevAtDepth[currentDepth - 1];
-        prevAtDepth[currentDepth] = newNodeNr;
-        siblingsAtDepth[currentDepth]++;
-    }
-
-    /**
-     * Graft an element node and its subtree from another tree instance
-     *
-     * @param node the external node to be grafted
-     */
-
-    public void graft(NodeInfo node, boolean copyNamespaces) {
-        int newNodeNr = tree.numberOfNodes;
-        tree.graft(node, newNodeNr, currentDepth, copyNamespaces);
-        int prev = prevAtDepth[currentDepth];
-        if (prev > 0) {
-            tree.next[prev] = newNodeNr;
-        }
-        tree.next[newNodeNr] = prevAtDepth[currentDepth - 1];
-        prevAtDepth[currentDepth] = newNodeNr;
-        siblingsAtDepth[currentDepth]++;
-        //tree.diagnosticDump();
-    }
 }
 

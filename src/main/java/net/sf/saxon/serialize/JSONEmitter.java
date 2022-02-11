@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -291,12 +291,12 @@ public class JSONEmitter {
             while (true) {
                 int start = s.indexOf(0, prev);
                 if (start >= 0) {
-                    out.append(simpleEscape(s.substring(prev, start)));
+                    out.cat(simpleEscape(s.substring(prev, start)));
                     int end = s.indexOf(0, start + 1);
                     out.append(s.substring(start + 1, end));
                     prev = end + 1;
                 } else {
-                    out.append(simpleEscape(s.substring(prev)));
+                    out.cat(simpleEscape(s.substring(prev)));
                     return out;
                 }
             }

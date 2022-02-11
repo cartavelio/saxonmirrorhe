@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -30,6 +30,7 @@ public class Subsequence_2 extends SystemFunction implements Callable {
      * @param arguments the actual arguments to the function call
      */
 
+    @Override
     public int getSpecialProperties(Expression[] arguments) {
         return arguments[0].getSpecialProperties();
     }
@@ -39,6 +40,7 @@ public class Subsequence_2 extends SystemFunction implements Callable {
      * Determine the cardinality of the function.
      */
 
+    @Override
     public int getCardinality(Expression[] arguments) {
         return arguments[0].getCardinality() | StaticProperty.ALLOWS_ZERO_OR_ONE;
     }
@@ -62,13 +64,14 @@ public class Subsequence_2 extends SystemFunction implements Callable {
      * @throws XPathException if a dynamic error occurs
      */
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         return SequenceTool.toLazySequence(
             subSequence(arguments[0].iterate(), (NumericValue) arguments[1].head()));
     }
 
-    public static SequenceIterator<?> subSequence(
-            SequenceIterator<?> seq, NumericValue startVal)
+    public static SequenceIterator subSequence(
+            SequenceIterator seq, NumericValue startVal)
             throws XPathException {
 
         long lstart;
@@ -131,6 +134,7 @@ public class Subsequence_2 extends SystemFunction implements Callable {
         return super.makeFunctionCall(arguments);
     }
 
+    @Override
     public String getStreamerName() {
         return "Subsequence";
     }

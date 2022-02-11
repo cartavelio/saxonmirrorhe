@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,7 +11,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.CopyOf;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -36,36 +37,39 @@ public final class XSLCopyOf extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
         String selectAtt = null;
         String copyNamespacesAtt = null;
         String copyAccumulatorsAtt = null;
         String validationAtt = null;
         String typeAtt = null;
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String f = attName.getDisplayName();
             if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
+                selectAtt = value;
+                select = makeExpression(selectAtt, att);
             } else if (f.equals("copy-namespaces")) {
-                copyNamespacesAtt = Whitespace.trim(atts.getValue(a));
+                copyNamespacesAtt = Whitespace.trim(value);
             } else if (f.equals("copy-accumulators")) {
-                copyAccumulatorsAtt = Whitespace.trim(atts.getValue(a));
+                copyAccumulatorsAtt = Whitespace.trim(value);
             } else if (f.equals("validation")) {
-                validationAtt = Whitespace.trim(atts.getValue(a));
+                validationAtt = Whitespace.trim(value);
             } else if (f.equals("type")) {
-                typeAtt = Whitespace.trim(atts.getValue(a));
-            } else if (atts.getLocalName(a).equals("read-once") && atts.getURI(a).equals(NamespaceConstant.SAXON)) {
+                typeAtt = Whitespace.trim(value);
+            } else if (attName.getLocalPart().equals("read-once") && attName.hasURI(NamespaceConstant.SAXON)) {
                 compileError("The saxon:read-once attribute is no longer available - use xsl:stream");
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -111,11 +115,13 @@ public final class XSLCopyOf extends StyleElement {
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         checkEmpty();
         select = typeCheck("select", select);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) {
         CopyOf inst = new CopyOf(select, copyNamespaces, validation, schemaType, false);
         inst.setCopyAccumulators(copyAccumulators);

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,15 +18,13 @@ import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.om.QNameParser;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceCodeInjector;
-import net.sf.saxon.trans.DecimalFormatManager;
-import net.sf.saxon.trans.KeyManager;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
@@ -50,7 +48,7 @@ public class QueryModule implements StaticContext {
     private String baseURI;
     private String moduleNamespace; // null only if isMainModule is false
     private HashMap<String, String> explicitPrologNamespaces;
-    private Stack<ActiveNamespace> activeNamespaces;
+    private Stack<NamespaceBinding> activeNamespaces;  // The namespace bindings declared in element constructors
     private HashMap<StructuredQName, GlobalVariable> variables;
     // global variables declared in this module
     private HashMap<StructuredQName, GlobalVariable> libraryVariables;
@@ -114,7 +112,7 @@ public class QueryModule implements StaticContext {
         init(sqc);
 
         PackageData pd = new PackageData(config);
-        pd.setHostLanguage(Configuration.XQUERY);
+        pd.setHostLanguage(HostLanguage.XQUERY);
         pd.setSchemaAware(isSchemaAware());
         packageData = pd;
 
@@ -130,7 +128,7 @@ public class QueryModule implements StaticContext {
         executable.addPackage(pd);
 
         if (sqc.getModuleLocation() == null) {
-            moduleLocation = new ExplicitLocation(sqc.getSystemId(), 1, -1);
+            moduleLocation = new Loc(sqc.getSystemId(), 1, -1);
         } else {
             moduleLocation = sqc.getModuleLocation();
         }
@@ -245,9 +243,9 @@ public class QueryModule implements StaticContext {
         } else if (config.isCompileWithTracing()) {
             qp.setCodeInjector(new TraceCodeInjector());
         }
-        QNameParser qnp = new QNameParser(module.getLiveNamespaceResolver());
-        qnp.setAcceptEQName(importer.getXPathVersion() >= 30);
-        qnp.setUnescaper(new XQueryParser.Unescaper(config.getValidCharacterChecker()));
+        QNameParser qnp = new QNameParser(module.getLiveNamespaceResolver())
+            .withAcceptEQName(importer.getXPathVersion() >= 30)
+            .withUnescaper(new XQueryParser.Unescaper(config.getValidCharacterChecker()));
         qp.setQNameParser(qnp);
 
         qp.parseLibraryModule(query, module);
@@ -317,6 +315,7 @@ public class QueryModule implements StaticContext {
      * @return the Saxon Configuration
      */
 
+    @Override
     public Configuration getConfiguration() {
         return config;
     }
@@ -328,6 +327,7 @@ public class QueryModule implements StaticContext {
      * @return data about this query module
      */
 
+    @Override
     public PackageData getPackageData() {
         return packageData;
     }
@@ -430,6 +430,7 @@ public class QueryModule implements StaticContext {
      * @return a RetainedStaticContext object: either a newly created one, or one that is
      * reused from a previous invocation.
      */
+    @Override
     public RetainedStaticContext makeRetainedStaticContext() {
         // The only part of the RetainedStaticContext that can change as the query module is parsed is the
         // "activeNamespaces", that is, namespaces declared on direct element constructors. If this is empty,
@@ -658,6 +659,7 @@ public class QueryModule implements StaticContext {
      * @return the LocationMap
      */
 
+    @Override
     public Location getContainingLocation() {
         return moduleLocation;
     }
@@ -694,7 +696,7 @@ public class QueryModule implements StaticContext {
 
     public void setLocationURI(URI uri) {
         locationURI = uri;
-        moduleLocation = new ExplicitLocation(locationURI.toString(), 1, -1);
+        moduleLocation = new Loc(locationURI.toString(), 1, -1);
     }
 
     /**
@@ -715,6 +717,7 @@ public class QueryModule implements StaticContext {
      */
 
     /*@Nullable*/
+    @Override
     public String getSystemId() {
         return locationURI == null ? null : locationURI.toString();
     }
@@ -735,6 +738,7 @@ public class QueryModule implements StaticContext {
      * @return the base URI
      */
 
+    @Override
     public String getStaticBaseURI() {
         return baseURI;
     }
@@ -888,7 +892,7 @@ public class QueryModule implements StaticContext {
             XPathException err = new XPathException(message.toString());
             err.setErrorCode("XQST0093");
             err.setIsStaticError(true);
-            ExplicitLocation loc = new ExplicitLocation(getSystemId(), lineNumber, -1);
+            Loc loc = new Loc(getSystemId(), lineNumber, -1);
             err.setLocator(loc);
             throw err;
         } else {
@@ -897,7 +901,7 @@ public class QueryModule implements StaticContext {
             while (viter.hasNext()) {
                 GlobalVariable gv = viter.next();
                 //GlobalVariable gvc = gv.getCompiledVariable(); // will be null if the global variable is unreferenced
-                Expression select = gv.getSelectExpression();
+                Expression select = gv.getBody();
                 if (select != null) {
                     List<Binding> list = new ArrayList<>(10);
                     ExpressionTool.gatherReferencedVariables(select, list);
@@ -1035,6 +1039,7 @@ public class QueryModule implements StaticContext {
      */
 
     /*@NotNull*/
+    @Override
     public Expression bindVariable(/*@NotNull*/ StructuredQName qName) throws XPathException {
         GlobalVariable var = variables.get(qName);
         if (var == null) {
@@ -1110,6 +1115,7 @@ public class QueryModule implements StaticContext {
      * @see net.sf.saxon.functions.FunctionLibraryList
      */
 
+    @Override
     public FunctionLibrary getFunctionLibrary() {
         return functionLibraryList;
     }
@@ -1315,6 +1321,7 @@ public class QueryModule implements StaticContext {
      * @since 8.4
      */
 
+    @Override
     public boolean isImportedSchema(String namespace) {
         return importedSchemata != null && importedSchemata.contains(namespace);
     }
@@ -1326,6 +1333,7 @@ public class QueryModule implements StaticContext {
      */
 
     /*@Nullable*/
+    @Override
     public Set<String> getImportedSchemaNamespaces() {
         if (importedSchemata == null) {
             return Collections.emptySet();
@@ -1342,12 +1350,21 @@ public class QueryModule implements StaticContext {
 
     public void reportStaticError(/*@NotNull*/ XPathException err) {
         if (!err.hasBeenReported()) {
-            if (userQueryContext == null) {
-                config.getErrorListener().fatalError(err);
-            } else {
-                userQueryContext.getErrorListener().fatalError(err);
-            }
+            reportStaticError(new XmlProcessingException(err));
             err.setHasBeenReported(true);
+        }
+    }
+
+    /**
+     * Report a static error in the query (via the registered ErrorListener)
+     *
+     * @param err the error to be signalled
+     */
+
+    public void reportStaticError(XmlProcessingError err) {
+        userQueryContext.getErrorReporter().report(err);
+        if (err.getFatalErrorMessage() != null) {
+            throw new XmlProcessingAbort(err.getFatalErrorMessage());
         }
     }
     
@@ -1358,6 +1375,7 @@ public class QueryModule implements StaticContext {
      */
 
     /*@NotNull*/
+    @Override
     public XPathContext makeEarlyEvaluationContext() {
         return new EarlyEvaluationContext(getConfiguration());
     }
@@ -1371,6 +1389,7 @@ public class QueryModule implements StaticContext {
      */
 
     /*@Nullable*/
+    @Override
     public String getDefaultCollationName() {
         if (defaultCollationName == null) {
             defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
@@ -1441,14 +1460,8 @@ public class QueryModule implements StaticContext {
             throw new NullPointerException("Null namespace URI supplied to declareActiveNamespace()");
         }
 
-        ActiveNamespace entry = new ActiveNamespace();
-        entry.prefix = prefix;
-        entry.uri = uri;
+        NamespaceBinding entry = new NamespaceBinding(prefix, uri);
         activeNamespaces.push(entry);
-
-//         if (prefix.length() == 0) {
-//             defaultElementNamespace = uri;
-//         }
 
     }
 
@@ -1487,6 +1500,7 @@ public class QueryModule implements StaticContext {
              * @return the uri for the namespace, or null if the prefix is not in scope.
              *         The "null namespace" is represented by the pseudo-URI "".
              */
+            @Override
             public String getURIForPrefix(String prefix, boolean useDefault) {
                 return checkURIForPrefix(prefix);
             }
@@ -1498,6 +1512,7 @@ public class QueryModule implements StaticContext {
              * @return an iterator over all the prefixes for which a namespace binding exists, including
              *         the zero-length string to represent the null/absent prefix if it is bound
              */
+            @Override
             public Iterator<String> iteratePrefixes() {
                 return getNamespaceResolver().iteratePrefixes();
             }
@@ -1521,8 +1536,8 @@ public class QueryModule implements StaticContext {
         // Search the active namespaces first, then the passive ones.
         if (activeNamespaces != null) {
             for (int i = activeNamespaces.size() - 1; i >= 0; i--) {
-                if (activeNamespaces.get(i).prefix.equals(prefix)) {
-                    String uri = activeNamespaces.get(i).uri;
+                if (activeNamespaces.get(i).getPrefix().equals(prefix)) {
+                    String uri = activeNamespaces.get(i).getURI();
                     if (uri.equals("") && !prefix.equals("")) {
                         // the namespace is undeclared
                         return null;
@@ -1545,10 +1560,6 @@ public class QueryModule implements StaticContext {
             if (uri != null) {
                 return uri;
             }
-            NamespaceResolver externalResolver = userQueryContext.getExternalNamespaceResolver();
-            if (externalResolver != null) {
-                return externalResolver.getURIForPrefix(prefix, true);
-            }
         }
         return null;
     }
@@ -1563,6 +1574,7 @@ public class QueryModule implements StaticContext {
      */
 
     /*@Nullable*/
+    @Override
     public String getDefaultElementNamespace() {
         return checkURIForPrefix("");
     }
@@ -1583,6 +1595,7 @@ public class QueryModule implements StaticContext {
      * @return the default namespace for function names
      */
 
+    @Override
     public String getDefaultFunctionNamespace() {
         return defaultFunctionNamespace;
     }
@@ -1626,31 +1639,32 @@ public class QueryModule implements StaticContext {
     }
 
     /**
-     * Get an array containing the namespace codes of all active namespaces.
+     * Get an list of all active namespaces. This returns the namespace bindings
+     * declared using xmlns="XXX" or xmlns:p="XXX" declarations on containing direct
+     * element constructors. Namespace undeclarations are ignored, except to the extent
+     * that an xmlns="" declaration cancels an outer xmlns="XXX" declaration.
      * <p>This method is for internal use only.</p>
      *
-     * @return an array of namespace bindings (prefix/uri pairs).
+     * @return a map of namespace bindings (prefix/uri pairs).
      */
 
     /*@NotNull*/
-    public NamespaceBinding[] getActiveNamespaceCodes() {
+    NamespaceMap getActiveNamespaceBindings() {
         if (activeNamespaces == null) {
-            return NamespaceBinding.EMPTY_ARRAY;
+            return NamespaceMap.emptyMap();
         }
-        NamespaceBinding[] nsBindings = new NamespaceBinding[activeNamespaces.size()];
-        int used = 0;
+        NamespaceMap result = NamespaceMap.emptyMap();
         HashSet<String> prefixes = new HashSet<>(10);
         for (int n = activeNamespaces.size() - 1; n >= 0; n--) {
-            ActiveNamespace an = activeNamespaces.get(n);
-            if (!prefixes.contains(an.prefix)) {
-                prefixes.add(an.prefix);
-                nsBindings[used++] = new NamespaceBinding(an.prefix, an.uri);
+            NamespaceBinding an = activeNamespaces.get(n);
+            if (!prefixes.contains(an.getPrefix())) {
+                prefixes.add(an.getPrefix());
+                if (!an.getURI().isEmpty()) {
+                    result = result.put(an.getPrefix(), an.getURI());
+                }
             }
         }
-        if (used < nsBindings.length) {
-            nsBindings = Arrays.copyOf(nsBindings, used);
-        }
-        return nsBindings;
+        return result;
     }
 
     /**
@@ -1663,38 +1677,37 @@ public class QueryModule implements StaticContext {
      */
 
     /*@NotNull*/
+    @Override
     public NamespaceResolver getNamespaceResolver() {
-        List<NamespaceBinding> externalNamespaceCodes = null;
-        NamespaceResolver externalResolver = userQueryContext.getExternalNamespaceResolver();
-        if (externalResolver != null) {
-            externalNamespaceCodes = new ArrayList<>();
-            Iterator iter = externalResolver.iteratePrefixes();
-            while (iter.hasNext()) {
-                String prefix = (String) iter.next();
-                String uri = externalResolver.getURIForPrefix(prefix, true);
-                NamespaceBinding nscode = new NamespaceBinding(prefix, uri);
-                externalNamespaceCodes.add(nscode);
-            }
-        }
+        NamespaceMap result = NamespaceMap.emptyMap();
+
         HashMap<String, String> userDeclaredNamespaces = userQueryContext.getUserDeclaredNamespaces();
-        List<NamespaceBinding> nsBindings = new ArrayList<>();
 
         for (Map.Entry<String, String> e : userDeclaredNamespaces.entrySet()) {
-            nsBindings.add(new NamespaceBinding(e.getKey(), e.getValue()));
+            result = result.put(e.getKey(), e.getValue());
         }
         for (Map.Entry<String, String> e : explicitPrologNamespaces.entrySet()) {
-            nsBindings.add(new NamespaceBinding(e.getKey(), e.getValue()));
+            result = result.put(e.getKey(), e.getValue());
         }
         if (!defaultElementNamespace.isEmpty()) {
-            nsBindings.add(new NamespaceBinding("", defaultElementNamespace));
+            result = result.put("", defaultElementNamespace);
         }
-        nsBindings.addAll(Arrays.asList(getActiveNamespaceCodes()));
-
-        if (externalNamespaceCodes != null) {
-            nsBindings.addAll(externalNamespaceCodes);
+        if (activeNamespaces == null) {
+            return result;
         }
-
-        return new SavedNamespaceContext(nsBindings);
+        HashSet<String> prefixes = new HashSet<>(10);
+        for (int n = activeNamespaces.size() - 1; n >= 0; n--) {
+            NamespaceBinding an = activeNamespaces.get(n);
+            if (!prefixes.contains(an.getPrefix())) {
+                prefixes.add(an.getPrefix());
+                if (an.getURI().isEmpty()) {
+                    result = result.remove(an.getPrefix());
+                } else {
+                    result = result.put(an.getPrefix(), an.getURI());
+                }
+            }
+        }
+        return result;
     }
 
     /**
@@ -1705,6 +1718,7 @@ public class QueryModule implements StaticContext {
      * @since 9.3
      */
 
+    @Override
     public ItemType getRequiredContextItemType() {
         return requiredContextItemType;
     }
@@ -1718,9 +1732,10 @@ public class QueryModule implements StaticContext {
      */
 
     /*@Nullable*/
+    @Override
     public DecimalFormatManager getDecimalFormatManager() {
         if (decimalFormatManager == null) {
-            decimalFormatManager = new DecimalFormatManager(Configuration.XQUERY, getXPathVersion());
+            decimalFormatManager = new DecimalFormatManager(HostLanguage.XQUERY, getXPathVersion());
         }
         return decimalFormatManager;
     }
@@ -1731,14 +1746,12 @@ public class QueryModule implements StaticContext {
      * <p>This method is intended for internal use only.</p>
      */
 
+    @Override
     public void issueWarning(String s, Location locator) {
-        XPathException err = new XPathException(s);
-        err.setLocator(locator);
-        if (userQueryContext != null) {
-            userQueryContext.getErrorListener().warning(err);
-        } else {
-            getConfiguration().getErrorListener().warning(err);
-        }
+        XmlProcessingIncident err = new XmlProcessingIncident(s).asWarning();
+        err.setLocation(locator);
+        err.setHostLanguage(HostLanguage.XQUERY);
+        userQueryContext.getErrorReporter().report(err);
     }
 
     /**
@@ -1748,6 +1761,7 @@ public class QueryModule implements StaticContext {
      * @since 8.4
      */
 
+    @Override
     public boolean isInBackwardsCompatibleMode() {
         return false;
     }
@@ -1771,6 +1785,7 @@ public class QueryModule implements StaticContext {
      * @since 9.7
      */
 
+    @Override
     public int getXPathVersion() {
         return 31;
     }
@@ -1792,6 +1807,7 @@ public class QueryModule implements StaticContext {
      *         on key() used in XSLT, and system-generated calls on key() which may
      *         also appear in XQuery and XPath
      */
+    @Override
     public KeyManager getKeyManager() {
         return packageData.getKeyManager();
     }

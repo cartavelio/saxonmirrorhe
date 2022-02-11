@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -37,7 +37,7 @@ public class XSLUsePackage extends StyleElement {
      * Bind to the package to which this xsl:use-package element refers.
      */
 
-    public void findUsedPackage(CompilerInfo info) throws XPathException {
+    void findUsedPackage(CompilerInfo info) throws XPathException {
         if (usedPackage == null) {
             if (nameAtt == null) {
                 nameAtt = Whitespace.trim(getAttributeValue("", "name"));
@@ -46,8 +46,10 @@ public class XSLUsePackage extends StyleElement {
                 reportAbsence("name");
                 nameAtt = "unnamed-package";
             }
-            PackageDetails pack = info.getPackageLibrary().findPackage(nameAtt, getPackageVersionRanges());
-            usedPackage = pack==null ? null : pack.loadedPackage;
+
+            PackageVersionRanges ranges = getPackageVersionRanges();
+            PackageDetails pack = ranges == null ? null : info.getPackageLibrary().findPackage(nameAtt, ranges);
+            usedPackage = pack == null ? null : pack.loadedPackage;
             if (usedPackage == null) {
                 compileErrorInAttribute("Package " + nameAtt + " could not be found", "XTSE3000", "name");
                 // For error recovery, create an empty package
@@ -70,6 +72,7 @@ public class XSLUsePackage extends StyleElement {
      * @return the package that is referenced.
      */
 
+    @Override
     public StylesheetPackage getUsedPackage() {
         return usedPackage;
     }
@@ -81,36 +84,37 @@ public class XSLUsePackage extends StyleElement {
      * If no range is defined, the catchall '*' is assumed. </p>
      *
      * @return the ranges of versions of the named package that this declaration will accept
-     * @throws XPathException
+     * @throws XPathException should not happen
      */
 
-    public PackageVersionRanges getPackageVersionRanges() throws XPathException {
+    private PackageVersionRanges getPackageVersionRanges() throws XPathException {
         if (versionRanges == null) {
-            try {
-                prepareAttributes();
-            } catch (XPathException e) {
-                versionRanges = new PackageVersionRanges("*");
-            }
+            prepareAttributes();
         }
         return versionRanges;
     }
 
 
     @Override
-    protected void prepareAttributes() throws XPathException {
-        AttributeCollection atts = getAttributeList();
+    protected void prepareAttributes() {
+        AttributeMap atts = attributes();
         String ranges = "*";
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : atts) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
             if (f.equals("name")) {
-                nameAtt = Whitespace.trim(atts.getValue(a));
+                nameAtt = Whitespace.trim(att.getValue());
             } else if (f.equals("package-version")) {
-                ranges = Whitespace.trim(atts.getValue(a)).replaceAll("\\\\", "");
+                ranges = Whitespace.trim(att.getValue()).replaceAll("\\\\", "");
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
-        versionRanges = new PackageVersionRanges(ranges);
+        try {
+            versionRanges = new PackageVersionRanges(ranges);
+        } catch (XPathException e) {
+            compileError(e);
+        }
     }
 
     @Override
@@ -118,13 +122,13 @@ public class XSLUsePackage extends StyleElement {
         return true;
     }
 
-    public void validate(ComponentDeclaration decl) throws XPathException {
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while ((child = kids.next()) != null) {
+    @Override
+    public void validate(ComponentDeclaration decl) {
+        for (NodeInfo child : children()) {
             if (child.getNodeKind() == Type.TEXT) {
                 compileError("Character content is not allowed as a child of xsl:use-package");
-            } else if (child instanceof XSLAccept || child instanceof XSLOverride) {
+            } else //noinspection StatementWithEmptyBody
+                if (child instanceof XSLAccept || child instanceof XSLOverride) {
                 // no action
             } else {
                 compileError("Child element " + Err.wrap(child.getDisplayName(), Err.ELEMENT) +
@@ -133,17 +137,13 @@ public class XSLUsePackage extends StyleElement {
         }
     }
 
-    public Set<SymbolicName> getExplicitAcceptedComponentNames() throws XPathException {
-        Set<SymbolicName> explicitAccepts = new HashSet<SymbolicName>();
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while ((child = kids.next()) != null) {
-            if (child instanceof XSLAccept) {
-                Set<ComponentTest> explicitComponentTests = ((XSLAccept) child).getExplicitComponentTests();
-                for (ComponentTest test : explicitComponentTests) {
-                    SymbolicName name = test.getSymbolicNameIfExplicit();
-                    explicitAccepts.add(name);
-                }
+    private Set<SymbolicName> getExplicitAcceptedComponentNames() throws XPathException {
+        Set<SymbolicName> explicitAccepts = new HashSet<>();
+        for (NodeInfo child : children(XSLAccept.class::isInstance)) {
+            Set<ComponentTest> explicitComponentTests = ((XSLAccept) child).getExplicitComponentTests();
+            for (ComponentTest test : explicitComponentTests) {
+                SymbolicName name = test.getSymbolicNameIfExplicit();
+                explicitAccepts.add(name);
             }
         }
         return explicitAccepts;
@@ -151,9 +151,7 @@ public class XSLUsePackage extends StyleElement {
 
     @Override
     public void postValidate() throws XPathException {
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo curr;
-        while ((curr = kids.next()) != null) {
+        for (NodeInfo curr : children()) {
             if (curr instanceof XSLOverride || curr instanceof XSLAccept) {
                 ((StyleElement) curr).postValidate();
             }
@@ -182,21 +180,15 @@ public class XSLUsePackage extends StyleElement {
      * @return the list of child xsl:accept elements
      */
 
-    public List<XSLAccept> getAcceptors() {
+    List<XSLAccept> getAcceptors() {
         if (this.acceptors == null) {
-            acceptors = new ArrayList<XSLAccept>();
-            AxisIterator useKids = iterateAxis(AxisInfo.CHILD);
-            NodeInfo decl;
-            while ((decl = useKids.next()) != null) {
-                if (decl instanceof XSLAccept) {
-                    acceptors.add((XSLAccept) decl);
-                }
+            acceptors = new ArrayList<>();
+            for (NodeInfo decl : children(XSLAccept.class::isInstance)) {
+                acceptors.add((XSLAccept) decl);
             }
         }
         return acceptors;
     }
-
-    ;
 
     /**
      * Process all the xsl:override declarations in the xsl:use-package, adding the overriding named components
@@ -209,41 +201,32 @@ public class XSLUsePackage extends StyleElement {
      * @throws XPathException in the event of an error.
      */
 
-    public void gatherNamedOverrides(PrincipalStylesheetModule module,
-                                     List<ComponentDeclaration> topLevel,
-                                     Set<SymbolicName> overrides)
+    void gatherNamedOverrides(PrincipalStylesheetModule module,
+                              List<ComponentDeclaration> topLevel,
+                              Set<SymbolicName> overrides)
             throws XPathException {
         if (usedPackage == null) {
             return; // error already reported
         }
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
-        NodeInfo override;
-        while ((override = kids.next()) != null) {
-            if (override instanceof XSLOverride) {
-                AxisIterator overridings = override.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
-                NodeInfo overridingDeclaration;
-                while ((overridingDeclaration = overridings.next()) != null) {
-                    if (overridingDeclaration instanceof StylesheetComponent) {
-                        ComponentDeclaration decl = new ComponentDeclaration(module, (StyleElement) overridingDeclaration);
-                        topLevel.add(decl);
-                        SymbolicName name = ((StylesheetComponent) overridingDeclaration).getSymbolicName();
-                        if (name != null) {
-                            overrides.add(name);
-                        } else if (overridingDeclaration instanceof XSLTemplate && overridingDeclaration.getAttributeValue("", "match") != null) {
-                            StructuredQName[] modeNames = ((XSLTemplate)overridingDeclaration).getModeNames();
-                            for (StructuredQName m : modeNames) {
-                                overrides.add(new SymbolicName(StandardNames.XSL_MODE, m));
-                            }
-                        }
+        for (NodeInfo override : children(XSLOverride.class::isInstance)) {
+            for (NodeInfo overridingDeclaration : override.children(StylesheetComponent.class::isInstance)) {
+                ComponentDeclaration decl = new ComponentDeclaration(module, (StyleElement) overridingDeclaration);
+                topLevel.add(decl);
+                SymbolicName name = ((StylesheetComponent) overridingDeclaration).getSymbolicName();
+                if (name != null) {
+                    overrides.add(name);
+                } else if (overridingDeclaration instanceof XSLTemplate && overridingDeclaration.getAttributeValue("", "match") != null) {
+                    StructuredQName[] modeNames = ((XSLTemplate)overridingDeclaration).getModeNames();
+                    for (StructuredQName m : modeNames) {
+                        overrides.add(new SymbolicName(StandardNames.XSL_MODE, m));
                     }
                 }
             }
         }
     }
 
-    public Set<SymbolicName> getNamedOverrides()
-            throws XPathException {
-        Set<SymbolicName> overrides = new HashSet<SymbolicName>();
+    private Set<SymbolicName> getNamedOverrides() {
+        Set<SymbolicName> overrides = new HashSet<>();
         AxisIterator kids = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         NodeInfo override;
         while ((override = kids.next()) != null) {
@@ -276,12 +259,12 @@ public class XSLUsePackage extends StyleElement {
      * @throws XPathException in the event of an error.
      */
 
-    public void gatherRuleOverrides(PrincipalStylesheetModule module, Set<SymbolicName> overrides)
+    void gatherRuleOverrides(PrincipalStylesheetModule module, Set<SymbolicName> overrides)
             throws XPathException {
         StylesheetPackage thisPackage = module.getStylesheetPackage();
         RuleManager ruleManager = module.getRuleManager();
         AxisIterator kids = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
-        Set<SymbolicName> overriddenModes = new HashSet<SymbolicName>();
+        Set<SymbolicName> overriddenModes = new HashSet<>();
 
         // Process all template rules within xsl:override elements
         NodeInfo override;

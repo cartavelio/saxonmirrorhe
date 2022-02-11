@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,19 +9,18 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.Event;
 import net.sf.saxon.event.ProxyReceiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.CharSlice;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AnyType;
+import net.sf.saxon.type.ComplexType;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.Untyped;
 import net.sf.saxon.value.Whitespace;
 
 import javax.xml.transform.OutputKeys;
@@ -50,8 +49,8 @@ public class XMLIndenter extends ProxyReceiver {
     private int suppressedAtLevel = -1;
     private Set<NodeName> suppressedElements = null;
     private XMLEmitter emitter;
-    private AttributeCollectionImpl bufferedAttributes;
-    private List<NamespaceBindingSet> bufferedNamespaces = new ArrayList<NamespaceBindingSet>(8);
+    //private AttributeCollectionImpl bufferedAttributes;
+    //private List<NamespaceBindingSet> bufferedNamespaces = new ArrayList<NamespaceBindingSet>(8);
 
 
     /**
@@ -63,7 +62,7 @@ public class XMLIndenter extends ProxyReceiver {
     public XMLIndenter(XMLEmitter next) {
         super(next);
         emitter = next;
-        bufferedAttributes = new AttributeCollectionImpl(getConfiguration());
+        //bufferedAttributes = new AttributeCollectionImpl(getConfiguration());
     }
 
     /**
@@ -83,11 +82,11 @@ public class XMLIndenter extends ProxyReceiver {
             // for compatibility: since 9.3 also available in default namespace
         }
         if (s != null) {
-            suppressedElements = new HashSet<NodeName>(8);
+            suppressedElements = new HashSet<>(8);
             StringTokenizer st = new StringTokenizer(s, " \t\r\n");
             while (st.hasMoreTokens()) {
-                String clarkName = st.nextToken();
-                suppressedElements.add(FingerprintedQName.fromClarkName(clarkName));
+                String eqName = st.nextToken();
+                suppressedElements.add(FingerprintedQName.fromEQName(eqName));
             }
         }
 
@@ -97,18 +96,22 @@ public class XMLIndenter extends ProxyReceiver {
      * Start of document
      */
 
+    @Override
     public void open() throws XPathException {
-        nextReceiver.open();
+        emitter.open();
     }
 
     /**
      * Output element start tag
      */
 
-    public void startElement(NodeName nameCode, SchemaType type, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName nameCode, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         if (afterStartTag || afterEndTag) {
             if (isDoubleSpaced(nameCode)) {
-                nextReceiver.characters("\n", location, 0);
+                nextReceiver.characters("\n", location, ReceiverOption.NONE);
                 line = 0;
                 column = 0;
             }
@@ -116,8 +119,17 @@ public class XMLIndenter extends ProxyReceiver {
         } else {
             flushPendingWhitespace();
         }
-        nextReceiver.startElement(nameCode, type, location, properties);
+
         level++;
+        if (suppressedAtLevel < 0) {
+            String xmlSpace = attributes.getValue(NamespaceConstant.XML, "space");
+            if (xmlSpace != null && xmlSpace.trim().equals("preserve")) {
+                // Note, we are suppressing indentation within an xml:space="preserve" region even if a descendant
+                // specifies xml:space="default"
+                suppressedAtLevel = level;
+            }
+        }
+        
         sameline = true;
         afterStartTag = true;
         afterEndTag = false;
@@ -131,40 +143,11 @@ public class XMLIndenter extends ProxyReceiver {
             // indentation for all descendants of such elements. We could be smarter than this.)
             suppressedAtLevel = level;
         }
-        bufferedAttributes.clear();
-        bufferedNamespaces.clear();
-    }
 
-    @Override
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        bufferedNamespaces.add(namespaceBindings);
-    }
-
-    /**
-     * Output an attribute
-     */
-
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        if (value.equals("preserve") &&
-                attName.hasURI(NamespaceConstant.XML) &&
-                attName.getLocalPart().equals("space") &&
-                suppressedAtLevel < 0) {
-            // Note, we are suppressing indentation within an xml:space="preserve" region even if a descendant
-            // specifies xml:space="default"
-            suppressedAtLevel = level;
-        }
-        bufferedAttributes.addAttribute(attName, typeCode, value.toString(), locationId, properties);
-        //nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
-    }
-
-    public void startContent() throws XPathException {
-        int len = 0;
-        int count = 0;
-        int indent = -1;
-        AttributeCollectionImpl ba = bufferedAttributes;
+        // Calculate indentation to be applied to attributes/namespaces
         if (suppressedAtLevel < 0) {
-            for (NamespaceBindingSet nbs : bufferedNamespaces) {
+            int len = 0;
+            for (NamespaceBindingSet nbs : namespaces) {
                 for (NamespaceBinding binding : nbs) {
                     String prefix = binding.getPrefix();
                     if (prefix.isEmpty()) {
@@ -174,39 +157,26 @@ public class XMLIndenter extends ProxyReceiver {
                     }
                 }
             }
-            for (int i = 0; i < ba.getLength(); i++) {
-                String prefix = ba.getPrefix(i);
-                len += ba.getLocalName(i).length()
-                        + ba.getValue(i).length()
+            for (AttributeInfo att : attributes) {
+                NodeName name = att.getNodeName();
+                String prefix = name.getPrefix();
+                len += name.getLocalPart().length()
+                        + att.getValue().length()
                         + 4 + (prefix.isEmpty() ? 4 : prefix.length() + 5);
             }
             if (len > getLineLength()) {
-                indent = (level - 1) * getIndentation() + emitter.elementStack.peek().length() + 3;
-            }
-        }
-        for (NamespaceBindingSet nbs : bufferedNamespaces) {
-            for (NamespaceBinding binding : nbs) {
-                nextReceiver.namespace(binding, 0);
-                if (indent > 0 && count++ == 0) {
-                    emitter.setIndentForNextAttribute(indent);
-                }
-            }
-        }
-        for (int i = 0; i < ba.getLength(); i++) {
-            nextReceiver.attribute(ba.getNodeName(i), ba.getTypeAnnotation(i),
-                    ba.getValue(i), ba.getLocation(i), ba.getProperties(i));
-            if (indent > 0 && count++ == 0) {
+                int indent = (level - 1) * getIndentation() + 3;
                 emitter.setIndentForNextAttribute(indent);
             }
         }
-        nextReceiver.startContent();
-
+        nextReceiver.startElement(nameCode, type, attributes, namespaces, location, properties);
     }
 
     /**
      * Output element end tag
      */
 
+    @Override
     public void endElement() throws XPathException {
         level--;
         if (afterEndTag && !sameline) {
@@ -214,7 +184,7 @@ public class XMLIndenter extends ProxyReceiver {
         } else {
             flushPendingWhitespace();
         }
-        nextReceiver.endElement();
+        emitter.endElement();
         sameline = false;
         afterEndTag = true;
         afterStartTag = false;
@@ -229,13 +199,14 @@ public class XMLIndenter extends ProxyReceiver {
      * Output a processing instruction
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
         if (afterEndTag) {
             indent();
         } else {
             flushPendingWhitespace();
         }
-        nextReceiver.processingInstruction(target, data, locationId, properties);
+        emitter.processingInstruction(target, data, locationId, properties);
         //afterStartTag = false;
         //afterEndTag = false;
     }
@@ -244,6 +215,7 @@ public class XMLIndenter extends ProxyReceiver {
      * Output character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (suppressedAtLevel < 0 && Whitespace.isWhite(chars)) {
             pendingWhitespace = new Event.Text(chars, locationId, properties);
@@ -258,7 +230,7 @@ public class XMLIndenter extends ProxyReceiver {
                 }
                 column++;
             }
-            nextReceiver.characters(chars, locationId, properties);
+            emitter.characters(chars, locationId, properties);
             afterStartTag = false;
             afterEndTag = false;
         }
@@ -268,13 +240,14 @@ public class XMLIndenter extends ProxyReceiver {
      * Output a comment
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (afterEndTag) {
             indent();
         } else {
             flushPendingWhitespace();
         }
-        nextReceiver.comment(chars, locationId, properties);
+        emitter.comment(chars, locationId, properties);
         //afterStartTag = false;
         //afterEndTag = false;
     }
@@ -287,6 +260,7 @@ public class XMLIndenter extends ProxyReceiver {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return true;
     }
@@ -323,8 +297,9 @@ public class XMLIndenter extends ProxyReceiver {
         }
         // output the initial newline character only if line==0
         int start = line == 0 ? 0 : 1;
-        //super.characters(indentChars.subSequence(start, start+spaces+1), 0, ReceiverOptions.NO_SPECIAL_CHARS);
-        nextReceiver.characters(new CharSlice(indentChars, start, spaces + 1), ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.NO_SPECIAL_CHARS);
+        //super.characters(indentChars.subSequence(start, start+spaces+1), 0, ReceiverOption.NO_SPECIAL_CHARS);
+        emitter.characters(new CharSlice(indentChars, start, spaces + 1),
+                           Loc.NONE, ReceiverOption.NO_SPECIAL_CHARS);
         sameline = false;
     }
 
@@ -338,7 +313,7 @@ public class XMLIndenter extends ProxyReceiver {
     @Override
     public void endDocument() throws XPathException {
         if (afterEndTag) {
-            nextReceiver.characters("\n", ExplicitLocation.UNKNOWN_LOCATION, 0);  // if permitted, output a trailing newline, for tidier console output
+            emitter.characters("\n", Loc.NONE, ReceiverOption.NONE);  // if permitted, output a trailing newline, for tidier console output
         }
         super.endDocument();
     }

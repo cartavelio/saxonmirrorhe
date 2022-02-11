@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,11 +8,11 @@
 package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.type.SchemaType;
 
 
@@ -34,9 +34,7 @@ public interface NodeFactory {
      * @param elementType    The type annotation of the element
      * @param isNilled       true if the element is to be marked as nilled
      * @param attlist        The attribute collection, excluding any namespace attributes
-     * @param namespaces     List of new namespace declarations for this element, as a sequence
-*                       of namespace codes representing pairs of strings: (prefix1, uri1), (prefix2, uri2)...
-     * @param namespacesUsed the number of elemnts of the namespaces array actually used
+     * @param namespaces     in-scope namespace declarations for this element
      * @param pipe           The pipeline configuration (provides access to the error listener and the
 *                       location provider)
      * @param locationId     Indicates the source document and line number containing the node
@@ -45,14 +43,13 @@ public interface NodeFactory {
      */
 
     /*@Nullable*/
-    public ElementImpl makeElementNode(
+    ElementImpl makeElementNode(
             NodeInfo parent,
             NodeName nameCode,
             SchemaType elementType,
             boolean isNilled,
-            AttributeCollectionImpl attlist,
-            NamespaceBinding[] namespaces,
-            int namespacesUsed,
+            AttributeMap attlist,
+            NamespaceMap namespaces,
             PipelineConfiguration pipe,
             Location locationId,
             int sequenceNumber);

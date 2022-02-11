@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -25,13 +25,13 @@ import java.util.Iterator;
 
 /**
  * Implement the fn:uri-collection() function (new in XQuery 3.0/XSLT 3.0). This is responsible for calling the
- * registered {@link net.sf.saxon.lib.CollectionURIResolver}. For the effect of the default
- * system-supplied CollectionURIResolver, see {@link net.sf.saxon.lib.StandardCollectionURIResolver}
+ * registered {@link net.sf.saxon.lib.CollectionFinder}. For the effect of the default
+ * system-supplied CollectionFinder, see {@link net.sf.saxon.resource.StandardCollectionFinder}
  */
 
 public class UriCollection extends SystemFunction {
 
-    private SequenceIterator<AnyURIValue> getUris(final String href, final XPathContext context) throws XPathException {
+    private SequenceIterator getUris(final String href, final XPathContext context) throws XPathException {
         ResourceCollection rCollection = context.getConfiguration().getCollectionFinder().findCollection(context, href);
         if (rCollection == null) {
             // Should not happen, we're calling user code so we check for it.
@@ -42,8 +42,9 @@ public class UriCollection extends SystemFunction {
 
         }
         final Iterator<String> sources = rCollection.getResourceURIs(context);
-        return new SequenceIterator<AnyURIValue>() {
+        return new SequenceIterator() {
 
+            @Override
             public AnyURIValue next() {
                 if (sources.hasNext()) {
                     return new AnyURIValue(sources.next());
@@ -52,6 +53,7 @@ public class UriCollection extends SystemFunction {
                 }
             }
 
+            @Override
             public void close() {
                 if (sources instanceof Closeable) {
                     try {
@@ -74,7 +76,8 @@ public class UriCollection extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<AnyURIValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         if (arguments.length == 0) {
             return getDefaultUriCollection(context);
         } else {
@@ -101,12 +104,12 @@ public class UriCollection extends SystemFunction {
 
     }
 
-    private Sequence<AnyURIValue> getDefaultUriCollection(XPathContext context) throws XPathException {
+    private Sequence getDefaultUriCollection(XPathContext context) throws XPathException {
         String href = context.getConfiguration().getDefaultCollection();
         if (href == null) {
             throw new XPathException("No default collection has been defined", "FODC0002");
         } else {
-            return new LazySequence<>(getUris(href, context));
+            return new LazySequence(getUris(href, context));
         }
     }
 

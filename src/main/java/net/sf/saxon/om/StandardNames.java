@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -29,7 +29,6 @@ public abstract class StandardNames {
     private static final int XML_NS = 3;
     private static final int XS_NS = 4;
     private static final int XSI_NS = 5;
-    private static final int SCM_NS = 6;
 
     public static final int DFLT = 0;             //   0
     public static final int XSL = 128;            // 128
@@ -37,7 +36,6 @@ public abstract class StandardNames {
     public static final int XML = 128 * 3;        // 384
     public static final int XS = 128 * 4;         // 512
     public static final int XSI = 128 * 5;        // 640
-    public static final int SCM = 128 * 6;        // 768
 
     public static final int XSL_ACCEPT = XSL;
     public static final int XSL_ACCUMULATOR = XSL + 1;
@@ -115,8 +113,9 @@ public abstract class StandardNames {
     public static final int XSL_VALUE_OF = XSL + 77;
     public static final int XSL_VARIABLE = XSL + 78;
     public static final int XSL_WHEN = XSL + 79;
-    public static final int XSL_WITH_PARAM = XSL + 80;
-    public static final int XSL_WHERE_POPULATED = XSL + 81;
+    public static final int XSL_WHERE_POPULATED = XSL + 80;
+    public static final int XSL_WITH_PARAM = XSL + 81;
+
 
 
     public static final int XSL_DEFAULT_COLLATION = XSL + 100;
@@ -145,17 +144,13 @@ public abstract class StandardNames {
     // Schema extension elements
     public static final int SAXON_PARAM = SAXON + 20;
     public static final int SAXON_PREPROCESS = SAXON + 21;
+    public static final int SAXON_DISTINCT = SAXON + 22;
+    public static final int SAXON_ORDER = SAXON + 23;
 
     private static final String SAXON_B = '{' + NamespaceConstant.SAXON + '}';
-    public static final String SAXON_ASSIGNABLE = SAXON_B + "assignable";
     public static final String SAXON_ASYCHRONOUS = SAXON_B + "asynchronous";
     public static final String SAXON_EXPLAIN = SAXON_B + "explain";
-    public static final String SAXON_READ_ONCE = SAXON_B + "read-once";
-    public static final String SAXON_MEMO_FUNCTION = SAXON_B + "memo-function";
-    public static final String SAXON_THREADS = SAXON_B + "threads";
 
-    // Not sure about this one...
-    public static final int SAXON_JAVA_LANG_OBJECT = SAXON + 29;
 
     public static final int XML_BASE = XML + 1;
     public static final int XML_SPACE = XML + 2;
@@ -289,18 +284,6 @@ public abstract class StandardNames {
     public static final int XSI_SCHEMA_LOCATION = XSI + 3;
     public static final int XSI_NO_NAMESPACE_SCHEMA_LOCATION = XSI + 4;
     public static final int XSI_SCHEMA_LOCATION_TYPE = XSI + 5;
-
-    public static final int SCM_SCHEMA = SCM + 1;
-    public static final int SCM_ELEMENT_DECLARATION = SCM + 2;
-    public static final int SCM_ATTRIBUTE_DECLARATION = SCM + 3;
-    public static final int SCM_COMPLEX_TYPE_DEFINITION = SCM + 4;
-    public static final int SCM_SIMPLE_TYPE_DEFINITION = SCM + 5;
-    public static final int SCM_ATTRIBUTE_GROUP_DECLARATION = SCM + 6;
-    public static final int SCM_MODEL_GROUP_DECLARATION = SCM + 7;
-    public static final int SCM_NOTATION_DECLARATION = SCM + 2;
-    public static final int SCM_ANNOTATION = SCM + 2;
-    public static final int SCM_NAME = SCM + 2;
-    public static final int SCM_TARGET_NAMESPACE = SCM + 2;
 
 
     private static String[] localNames = new String[1023];
@@ -445,12 +428,15 @@ public abstract class StandardNames {
 
         bindSaxonName(SAXON_ASSIGN, "assign");
         bindSaxonName(SAXON_DEEP_UPDATE, "deep-update");
+        bindSaxonName(SAXON_DISTINCT, "distinct");
         bindSaxonName(SAXON_DO, "do");
         bindSaxonName(SAXON_DOCTYPE, "doctype");
         bindSaxonName(SAXON_ENTITY_REF, "entity-ref");
+        bindSaxonName(SAXON_ORDER, "order");
         bindSaxonName(SAXON_WHILE, "while");
         bindSaxonName(SAXON_PARAM, "param");
         bindSaxonName(SAXON_PREPROCESS, "preprocess");
+
 
         bindXMLName(XML_BASE, "base");
         bindXMLName(XML_SPACE, "space");
@@ -628,8 +614,6 @@ public abstract class StandardNames {
                 return NamespaceConstant.SCHEMA;
             case XSI_NS:
                 return NamespaceConstant.SCHEMA_INSTANCE;
-            case SCM_NS:
-                return NamespaceConstant.SCM;
             default:
                 throw new IllegalArgumentException("Unknown system fingerprint " + fingerprint);
         }
@@ -702,7 +686,8 @@ public abstract class StandardNames {
      * Get a StructuredQName representing a system-defined name
      *
      * @param fingerprint the fingerprint of the name
-     * @return a StructuredQName representing the system-defined name
+     * @return a StructuredQName representing the system-defined name. The prefix will be the
+     * conventional prefix for the system namespace
      */
 
     public static StructuredQName getStructuredQName(int fingerprint) {
@@ -710,10 +695,10 @@ public abstract class StandardNames {
     }
 
     /**
-     * Get a unprefixed StructuredQName representing a system-defined name
+     * Get a StructuredQName representing a system-defined name, with no prefix
      *
      * @param fingerprint the fingerprint of the name
-     * @return a StructuredQName representing the system-defined name, with a URI and local name but no prefix
+     * @return a StructuredQName representing the system-defined name, with no prefix
      */
 
     public static StructuredQName getUnprefixedQName(int fingerprint) {

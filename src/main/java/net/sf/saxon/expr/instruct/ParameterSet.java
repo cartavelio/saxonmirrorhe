@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class ParameterSet {
     private StructuredQName[] keys;
-    private Sequence<?>[] values;
+    private Sequence[] values;
     private boolean[] typeChecked;
     private int used = 0;
 
@@ -45,7 +45,7 @@ public class ParameterSet {
 
     public ParameterSet(int capacity) {
         keys = new StructuredQName[capacity];
-        values = (Sequence<?>[])new Sequence[capacity];
+        values = (Sequence[])new Sequence[capacity];
         typeChecked = new boolean[capacity];
     }
 
@@ -54,10 +54,10 @@ public class ParameterSet {
      * @param map the supplied map
      */
 
-    public ParameterSet(Map<StructuredQName, Sequence<?>> map) {
+    public ParameterSet(Map<StructuredQName, Sequence> map) {
         this(map.size());
         int i = 0;
-        for (Map.Entry<StructuredQName, Sequence<?>> entry : map.entrySet()) {
+        for (Map.Entry<StructuredQName, Sequence> entry : map.entrySet()) {
             keys[i] = entry.getKey();
             values[i] = entry.getValue();
             typeChecked[i++] = false;
@@ -96,7 +96,7 @@ public class ParameterSet {
      * @param checked True if the caller has done static type checking against the required type
      */
 
-    public void put(StructuredQName id, Sequence<?> value, boolean checked) {
+    public void put(StructuredQName id, Sequence value, boolean checked) {
         for (int i = 0; i < used; i++) {
             if (keys[i].equals(id)) {
                 values[i] = value;
@@ -147,7 +147,7 @@ public class ParameterSet {
      * @return the value of the parameter at that position
      */
 
-    public Sequence<?> getValue(int index) {
+    public Sequence getValue(int index) {
         return values[index];
     }
 

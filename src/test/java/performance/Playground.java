@@ -5,6 +5,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.UntypedAtomicValue;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ public class Playground extends PerformanceTestCase {
 
     // Some experiments to study different ways of testing item types. Results show they're all much the same
 
+    @Test
     public void testInstanceOf() {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i=0; i<5000000; i++) {
@@ -31,8 +33,8 @@ public class Playground extends PerformanceTestCase {
             }
 
             @Override
-            public int expectedTimeMilliseconds() {
-                return 50;
+            public int expectedTimeMicroseconds() {
+                return 50000;
             }
 
             @Override
@@ -42,6 +44,7 @@ public class Playground extends PerformanceTestCase {
         });
     }
 
+    @Test
     public void testPrimitiveType() {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 5000000; i++) {
@@ -60,8 +63,8 @@ public class Playground extends PerformanceTestCase {
             }
 
             @Override
-            public int expectedTimeMilliseconds() {
-                return 50;
+            public int expectedTimeMicroseconds() {
+                return 50000;
             }
 
             @Override
@@ -71,6 +74,7 @@ public class Playground extends PerformanceTestCase {
         });
     }
 
+    @Test
     public void testActualType() {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 5000000; i++) {
@@ -89,8 +93,8 @@ public class Playground extends PerformanceTestCase {
             }
 
             @Override
-            public int expectedTimeMilliseconds() {
-                return 50;
+            public int expectedTimeMicroseconds() {
+                return 50000;
             }
 
             @Override
@@ -100,6 +104,7 @@ public class Playground extends PerformanceTestCase {
         });
     }
 
+    @Test
     public void testFingerprint() {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 5000000; i++) {
@@ -118,8 +123,8 @@ public class Playground extends PerformanceTestCase {
             }
 
             @Override
-            public int expectedTimeMilliseconds() {
-                return 50;
+            public int expectedTimeMicroseconds() {
+                return 50000;
             }
 
             @Override

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.BooleanFn;
 import net.sf.saxon.functions.SystemFunction;
@@ -39,6 +38,7 @@ public class QuantifiedExpression extends Assignation {
      *         in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         return Token.tokens[operator];
     }
@@ -67,6 +67,7 @@ public class QuantifiedExpression extends Assignation {
      * Determine the static cardinality
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -76,6 +77,7 @@ public class QuantifiedExpression extends Assignation {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         // The order of events is critical here. First we ensure that the type of the
@@ -138,10 +140,8 @@ public class QuantifiedExpression extends Assignation {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-
-        Configuration config = visitor.getConfiguration();
-        Optimizer opt = visitor.obtainOptimizer();
 
         getSequenceOp().optimize(visitor, contextItemType);
         getActionOp().optimize(visitor, contextItemType);
@@ -220,6 +220,7 @@ public class QuantifiedExpression extends Assignation {
      *          if the expression has a non-permitted updateing subexpression
      */
 
+    @Override
     public void checkForUpdatingSubexpressions() throws XPathException {
         getSequence().checkForUpdatingSubexpressions();
         getAction().checkForUpdatingSubexpressions();
@@ -231,6 +232,7 @@ public class QuantifiedExpression extends Assignation {
      * @return true if this is an updating expression
      */
 
+    @Override
     public boolean isUpdatingExpression() {
         return false;
     }
@@ -243,19 +245,19 @@ public class QuantifiedExpression extends Assignation {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         QuantifiedExpression qe = new QuantifiedExpression();
-        rebindings.put(this, qe);
         ExpressionTool.copyLocationInfo(this, qe);
         qe.setOperator(operator);
         qe.setVariableQName(variableName);
         qe.setRequiredType(requiredType);
         qe.setSequence(getSequence().copy(rebindings));
+        rebindings.put(this, qe);
         Expression newAction = getAction().copy(rebindings);
         qe.setAction(newAction);
         qe.variableName = variableName;
         qe.slotNumber = slotNumber;
-        //ExpressionTool.rebindVariableReferences(newAction, this, qe);
         return qe;
     }
 
@@ -266,6 +268,7 @@ public class QuantifiedExpression extends Assignation {
      * @return {@link StaticProperty#NO_NODES_NEWLY_CREATED}.
      */
 
+    @Override
     public int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         return p | StaticProperty.NO_NODES_NEWLY_CREATED;
@@ -275,6 +278,7 @@ public class QuantifiedExpression extends Assignation {
      * Evaluate the expression to return a singleton value
      */
 
+    @Override
     public BooleanValue evaluateItem(XPathContext context) throws XPathException {
         return BooleanValue.get(effectiveBooleanValue(context));
     }
@@ -283,18 +287,19 @@ public class QuantifiedExpression extends Assignation {
      * Get the result as a boolean
      */
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
 
         // First create an iteration of the base sequence.
 
-        SequenceIterator<?> base = getSequence().iterate(context);
+        SequenceIterator base = getSequence().iterate(context);
 
         // Now test to see if some or all of the tests are true. The same
         // logic is used for the SOME and EVERY operators
 
         final boolean some = operator == Token.SOME;
         int slot = getLocalSlotNumber();
-        Item<?> it;
+        Item it;
         while ((it = base.next()) != null) {
             context.setLocalVariable(slot, it);
             if (some == getAction().effectiveBooleanValue(context)) {
@@ -313,6 +318,7 @@ public class QuantifiedExpression extends Assignation {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return BuiltInAtomicType.BOOLEAN;
     }
@@ -343,6 +349,7 @@ public class QuantifiedExpression extends Assignation {
                 ExpressionTool.parenthesize(getAction());
     }
 
+    @Override
     public String toShortString() {
         return (operator == Token.SOME ? "some" : "every") + " $" + getVariableName() +
                 " in " + getSequence().toShortString() + " satisfies ...";
@@ -353,6 +360,7 @@ public class QuantifiedExpression extends Assignation {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement(Token.tokens[operator], this);
         out.emitAttribute("var", getVariableQName());

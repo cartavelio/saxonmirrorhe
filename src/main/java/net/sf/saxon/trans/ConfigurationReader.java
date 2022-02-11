@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,25 +11,24 @@ package net.sf.saxon.trans;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.ContentHandlerProxy;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.ResultDocument;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.VersionedPackageName;
 import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.type.SchemaException;
 import org.xml.sax.*;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
@@ -51,7 +50,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
     private FastStringBuffer buffer = new FastStringBuffer(100);
     protected Configuration config;
     private ClassLoader classLoader = null;
-    private List<XPathException> errors = new ArrayList<>();
+    private List<XmlProcessingError> errors = new ArrayList<>();
     private Locator locator;
     private Stack<List<String[]>> namespaceStack = new Stack<>();
     private PackageLibrary packageLibrary;
@@ -92,8 +91,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
      */
 
     public Configuration makeConfiguration(Source source) throws XPathException {
-        InputSource is;
-        XMLReader parser = null;
+
         if (source instanceof NodeInfo) {
             ContentHandlerProxy proxy = new ContentHandlerProxy() {
                 @Override
@@ -117,59 +115,55 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             proxy.setUnderlyingContentHandler(this);
             proxy.setPipelineConfiguration(((NodeInfo) source).getConfiguration().makePipelineConfiguration());
             proxy.open();
-            setDocumentLocator(new ExplicitLocation(source.getSystemId(), -1, -1));   //Must be after the open() call
-            proxy.startDocument(0);
-            ((NodeInfo) source).copy(proxy, CopyOptions.ALL_NAMESPACES, ExplicitLocation.UNKNOWN_LOCATION);
+            setDocumentLocator(new Loc(source.getSystemId(), -1, -1));   //Must be after the open() call
+            proxy.startDocument(ReceiverOption.NONE);
+            ((NodeInfo) source).copy(proxy, CopyOptions.ALL_NAMESPACES, Loc.NONE);
             proxy.endDocument();
             proxy.close();
-            if (baseConfiguration != null) {
-                config.importLicenseDetails(baseConfiguration);
-            }
-            return config;
-        } else if (source instanceof SAXSource) {
-            parser = ((SAXSource) source).getXMLReader();
-            is = ((SAXSource) source).getInputSource();
-        } else if (source instanceof StreamSource) {
-            is = new InputSource(source.getSystemId());
-            is.setCharacterStream(((StreamSource) source).getReader());
-            is.setByteStream(((StreamSource) source).getInputStream());
         } else {
-            throw new XPathException("Source for configuration file must be a StreamSource or SAXSource or NodeInfo");
-        }
-        if (parser == null) {
-            // Don't use the parser from the pool, it might be validating
-            parser = Version.platform.loadParser();
-            try {
-                parser.setFeature("http://xml.org/sax/features/namespaces", true);
-                parser.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
-            } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
-                throw new TransformerFactoryConfigurationError(e);
+            InputSource is;
+            XMLReader parser = null;
+            if (source instanceof SAXSource) {
+                parser = ((SAXSource) source).getXMLReader();
+                is = ((SAXSource) source).getInputSource();
+            } else if (source instanceof StreamSource) {
+                is = new InputSource(source.getSystemId());
+                is.setCharacterStream(((StreamSource) source).getReader());
+                is.setByteStream(((StreamSource) source).getInputStream());
+            } else {
+                throw new XPathException("Source for configuration file must be a StreamSource or SAXSource or NodeInfo");
             }
-        }
-        try {
-            parser.setContentHandler(this);
-            parser.parse(is);
-        } catch (IOException e) {
-            throw new XPathException("Failed to read config file", e);
-        } catch (SAXException e) {
-            throw new XPathException("Failed to parse config file", e);
+            if (parser == null) {
+                // Don't use the parser from the pool, it might be validating
+                parser = Version.platform.loadParser();
+                try {
+                    parser.setFeature("http://xml.org/sax/features/namespaces", true);
+                    parser.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
+                } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
+                    throw new TransformerFactoryConfigurationError(e);
+                }
+            }
+            try {
+                parser.setContentHandler(this);
+                parser.parse(is);
+            } catch (IOException e) {
+                throw new XPathException("Failed to read config file", e);
+            } catch (SAXException e) {
+                throw new XPathException("Failed to parse config file", e);
+            }
         }
 
         if (!errors.isEmpty()) {
-            ErrorListener listener;
+            ErrorReporter reporter;
             if (config == null) {
-                listener = new StandardErrorListener();
+                reporter = new StandardErrorReporter();
             } else {
-                listener = config.getErrorListener();
+                reporter = config.makeErrorReporter();
             }
-            try {
-                for (XPathException err : errors) {
-                    listener.warning(err);
-                }
-            } catch (TransformerException e) {
-                //
+            for (XmlProcessingError err : errors) {
+                reporter.report(err.asWarning());
             }
-            throw errors.get(0);
+            throw XPathException.fromXmlProcessingError(errors.get(0));
         }
         if (baseConfiguration != null) {
             config.importLicenseDetails(baseConfiguration);
@@ -177,14 +171,17 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         return config;
     }
 
+    @Override
     public void setDocumentLocator(Locator locator) {
         this.locator = locator;
     }
 
+    @Override
     public void startDocument() {
         namespaceStack.push(new ArrayList<>());
     }
 
+    @Override
     public void endDocument() {
         namespaceStack.pop();
         if (config != null) {
@@ -192,14 +189,17 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         }
     }
 
+    @Override
     public void startPrefixMapping(String prefix, String uri) {
         namespaceStack.peek().add(new String[]{prefix, uri});
     }
 
+    @Override
     public void endPrefixMapping(String prefix) {
 
     }
 
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes atts) {
         buffer.setLength(0);
         if (NamespaceConstant.SAXON_CONFIGURATION.equals(uri)) {
@@ -234,14 +234,20 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
 
                 packageLibrary = new PackageLibrary(config.getDefaultXsltCompilerInfo());
                 String licenseLoc = atts.getValue("licenseFileLocation");
-                if (licenseLoc != null && !edition.equals("HE")) {
+                if (licenseLoc != null && !edition.equals("HE") && !config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
                     String base = locator.getSystemId();
                     try {
                         URI absoluteLoc = ResolveURI.makeAbsolute(licenseLoc, base);
                         config.setConfigurationProperty(FeatureKeys.LICENSE_FILE_LOCATION, absoluteLoc.toString());
                     } catch (Exception err) {
-                        errors.add(new XPathException("Failed to process license at " + licenseLoc, err));
+                        XmlProcessingIncident incident = new XmlProcessingIncident("Failed to process license at " + licenseLoc);
+                        incident.setCause(err);
+                        errors.add(incident);
                     }
+                }
+                String targetEdition = atts.getValue("targetEdition");
+                if (targetEdition != null) {
+                    packageLibrary.getCompilerInfo().setTargetEdition(targetEdition);
                 }
                 String label = atts.getValue("label");
                 if (label != null) {
@@ -318,7 +324,8 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
                 }
             }
         } else {
-            errors.add(new XPathException("Configuration elements must be in namespace " + NamespaceConstant.SAXON_CONFIGURATION));
+            XmlProcessingIncident incident = new XmlProcessingIncident("Configuration elements must be in namespace " + NamespaceConstant.SAXON_CONFIGURATION);
+            errors.add(incident);
         }
         level++;
         namespaceStack.push(new ArrayList<>());
@@ -334,81 +341,83 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             }
         }
         props.put("#element", "global");
-        applyProperty(props, "allowExternalFunctions", FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS);
-        applyProperty(props, "allowMultiThreading", FeatureKeys.ALLOW_MULTITHREADING);
-        applyProperty(props, "allowOldJavaUriFormat", FeatureKeys.ALLOW_OLD_JAVA_URI_FORMAT);
-        applyProperty(props, "allowSyntaxExtensions", FeatureKeys.ALLOW_SYNTAX_EXTENSIONS);
-        applyProperty(props, "collationUriResolver", FeatureKeys.COLLATION_URI_RESOLVER_CLASS);
-        applyProperty(props, "collectionUriResolver", FeatureKeys.COLLECTION_URI_RESOLVER_CLASS);
-        applyProperty(props, "compileWithTracing", FeatureKeys.COMPILE_WITH_TRACING);
-        applyProperty(props, "debugByteCode", FeatureKeys.DEBUG_BYTE_CODE);
-        applyProperty(props, "debugByteCodeDirectory", FeatureKeys.DEBUG_BYTE_CODE_DIR);
-        applyProperty(props, "defaultCollation", FeatureKeys.DEFAULT_COLLATION);
-        applyProperty(props, "defaultCollection", FeatureKeys.DEFAULT_COLLECTION);
-        applyProperty(props, "defaultRegexEngine", FeatureKeys.DEFAULT_REGEX_ENGINE);
-        applyProperty(props, "displayByteCode", FeatureKeys.DISPLAY_BYTE_CODE);
-        applyProperty(props, "dtdValidation", FeatureKeys.DTD_VALIDATION);
-        applyProperty(props, "dtdValidationRecoverable", FeatureKeys.DTD_VALIDATION_RECOVERABLE);
-        applyProperty(props, "eagerEvaluation", FeatureKeys.EAGER_EVALUATION);
-        applyProperty(props, "entityResolver", FeatureKeys.ENTITY_RESOLVER_CLASS);
-        applyProperty(props, "errorListener", FeatureKeys.ERROR_LISTENER_CLASS);
-        applyProperty(props, "environmentVariableResolver", FeatureKeys.ENVIRONMENT_VARIABLE_RESOLVER_CLASS);
-        applyProperty(props, "expandAttributeDefaults", FeatureKeys.EXPAND_ATTRIBUTE_DEFAULTS);
-        applyProperty(props, "generateByteCode", FeatureKeys.GENERATE_BYTE_CODE);
-        applyProperty(props, "ignoreSAXSourceParser", FeatureKeys.IGNORE_SAX_SOURCE_PARSER);
-        applyProperty(props, "lineNumbering", FeatureKeys.LINE_NUMBERING);
-        applyProperty(props, "markDefaultedAttributes", FeatureKeys.MARK_DEFAULTED_ATTRIBUTES);
-        applyProperty(props, "maxCompiledClasses", FeatureKeys.MAX_COMPILED_CLASSES);
-        applyProperty(props, "monitorHotSpotByteCode", FeatureKeys.MONITOR_HOT_SPOT_BYTE_CODE);
-        applyProperty(props, "optimizationLevel", FeatureKeys.OPTIMIZATION_LEVEL);
-        applyProperty(props, "parser", FeatureKeys.SOURCE_PARSER_CLASS);
-        applyProperty(props, "preEvaluateDoc", FeatureKeys.PRE_EVALUATE_DOC_FUNCTION);
-        applyProperty(props, "preferJaxpParser", FeatureKeys.PREFER_JAXP_PARSER);
-        applyProperty(props, "recognizeUriQueryParameters", FeatureKeys.RECOGNIZE_URI_QUERY_PARAMETERS);
-        applyProperty(props, "schemaValidation", FeatureKeys.SCHEMA_VALIDATION_MODE);
-        applyProperty(props, "serializerFactory", FeatureKeys.SERIALIZER_FACTORY_CLASS);
-        applyProperty(props, "sourceResolver", FeatureKeys.SOURCE_RESOLVER_CLASS);
-        applyProperty(props, "stableCollectionUri", FeatureKeys.STABLE_COLLECTION_URI);
-        applyProperty(props, "stableUnparsedText", FeatureKeys.STABLE_UNPARSED_TEXT);
-        applyProperty(props, "standardErrorOutputFile", FeatureKeys.STANDARD_ERROR_OUTPUT_FILE);
-        applyProperty(props, "streamability", FeatureKeys.STREAMABILITY);
-        applyProperty(props, "streamingFallback", FeatureKeys.STREAMING_FALLBACK);
-        applyProperty(props, "stripSpace", FeatureKeys.STRIP_WHITESPACE);
-        applyProperty(props, "styleParser", FeatureKeys.STYLE_PARSER_CLASS);
-        applyProperty(props, "suppressEvaluationExpiryWarning", FeatureKeys.SUPPRESS_EVALUATION_EXPIRY_WARNING);
-        applyProperty(props, "suppressXPathWarnings", FeatureKeys.SUPPRESS_XPATH_WARNINGS);
-        applyProperty(props, "suppressXsltNamespaceCheck", FeatureKeys.SUPPRESS_XSLT_NAMESPACE_CHECK);
-        applyProperty(props, "thresholdForHotspotByteCode", FeatureKeys.THRESHOLD_FOR_HOTSPOT_BYTE_CODE);
-        applyProperty(props, "timing", FeatureKeys.TIMING);
-        applyProperty(props, "traceExternalFunctions", FeatureKeys.TRACE_EXTERNAL_FUNCTIONS);
-        applyProperty(props, "traceListener", FeatureKeys.TRACE_LISTENER_CLASS);
-        applyProperty(props, "traceListenerOutputFile", FeatureKeys.TRACE_LISTENER_OUTPUT_FILE);
-        applyProperty(props, "traceOptimizerDecisions", FeatureKeys.TRACE_OPTIMIZER_DECISIONS);
-        applyProperty(props, "treeModel", FeatureKeys.TREE_MODEL_NAME);
-        applyProperty(props, "unparsedTextUriResolver", FeatureKeys.UNPARSED_TEXT_URI_RESOLVER_CLASS);
-        applyProperty(props, "uriResolver", FeatureKeys.URI_RESOLVER_CLASS);
-        applyProperty(props, "usePiDisableOutputEscaping", FeatureKeys.USE_PI_DISABLE_OUTPUT_ESCAPING);
-        applyProperty(props, "useTypedValueCache", FeatureKeys.USE_TYPED_VALUE_CACHE);
-        applyProperty(props, "validationComments", FeatureKeys.VALIDATION_COMMENTS);
-        applyProperty(props, "validationWarnings", FeatureKeys.VALIDATION_WARNINGS);
-        applyProperty(props, "versionOfXml", FeatureKeys.XML_VERSION);
-        applyProperty(props, "xInclude", FeatureKeys.XINCLUDE);
+        applyProperty(props, "allowedProtocols", Feature.ALLOWED_PROTOCOLS);
+        applyProperty(props, "allowExternalFunctions", Feature.ALLOW_EXTERNAL_FUNCTIONS);
+        applyProperty(props, "allowMultiThreading", Feature.ALLOW_MULTITHREADING);
+        applyProperty(props, "allowOldJavaUriFormat", Feature.ALLOW_OLD_JAVA_URI_FORMAT);
+        applyProperty(props, "allowSyntaxExtensions", Feature.ALLOW_SYNTAX_EXTENSIONS);
+        applyProperty(props, "collationUriResolver", Feature.COLLATION_URI_RESOLVER_CLASS);
+        applyProperty(props, "collectionFinder", Feature.COLLECTION_FINDER_CLASS);
+        applyProperty(props, "compileWithTracing", Feature.COMPILE_WITH_TRACING);
+        applyProperty(props, "debugByteCode", Feature.DEBUG_BYTE_CODE);
+        applyProperty(props, "debugByteCodeDirectory", Feature.DEBUG_BYTE_CODE_DIR);
+        applyProperty(props, "defaultCollation", Feature.DEFAULT_COLLATION);
+        applyProperty(props, "defaultCollection", Feature.DEFAULT_COLLECTION);
+        applyProperty(props, "defaultRegexEngine", Feature.DEFAULT_REGEX_ENGINE);
+        applyProperty(props, "displayByteCode", Feature.DISPLAY_BYTE_CODE);
+        applyProperty(props, "dtdValidation", Feature.DTD_VALIDATION);
+        applyProperty(props, "dtdValidationRecoverable", Feature.DTD_VALIDATION_RECOVERABLE);
+        applyProperty(props, "eagerEvaluation", Feature.EAGER_EVALUATION);
+        applyProperty(props, "entityResolver", Feature.ENTITY_RESOLVER_CLASS);
+        applyProperty(props, "errorListener", Feature.ERROR_LISTENER_CLASS);
+        applyProperty(props, "environmentVariableResolver", Feature.ENVIRONMENT_VARIABLE_RESOLVER_CLASS);
+        applyProperty(props, "expandAttributeDefaults", Feature.EXPAND_ATTRIBUTE_DEFAULTS);
+        applyProperty(props, "generateByteCode", Feature.GENERATE_BYTE_CODE);
+        applyProperty(props, "ignoreSAXSourceParser", Feature.IGNORE_SAX_SOURCE_PARSER);
+        applyProperty(props, "lineNumbering", Feature.LINE_NUMBERING);
+        applyProperty(props, "markDefaultedAttributes", Feature.MARK_DEFAULTED_ATTRIBUTES);
+        applyProperty(props, "maxCompiledClasses", Feature.MAX_COMPILED_CLASSES);
+        applyProperty(props, "monitorHotSpotByteCode", Feature.MONITOR_HOT_SPOT_BYTE_CODE);
+        applyProperty(props, "optimizationLevel", Feature.OPTIMIZATION_LEVEL);
+        applyProperty(props, "parser", Feature.SOURCE_PARSER_CLASS);
+        applyProperty(props, "preEvaluateDoc", Feature.PRE_EVALUATE_DOC_FUNCTION);
+        applyProperty(props, "preferJaxpParser", Feature.PREFER_JAXP_PARSER);
+        applyProperty(props, "recognizeUriQueryParameters", Feature.RECOGNIZE_URI_QUERY_PARAMETERS);
+        applyProperty(props, "retainNodeForDiagnostics", Feature.RETAIN_NODE_FOR_DIAGNOSTICS);
+        applyProperty(props, "schemaValidation", Feature.SCHEMA_VALIDATION_MODE);
+        applyProperty(props, "serializerFactory", Feature.SERIALIZER_FACTORY_CLASS);
+        applyProperty(props, "sourceResolver", Feature.SOURCE_RESOLVER_CLASS);
+        applyProperty(props, "stableCollectionUri", Feature.STABLE_COLLECTION_URI);
+        applyProperty(props, "stableUnparsedText", Feature.STABLE_UNPARSED_TEXT);
+        applyProperty(props, "standardErrorOutputFile", Feature.STANDARD_ERROR_OUTPUT_FILE);
+        applyProperty(props, "streamability", Feature.STREAMABILITY);
+        applyProperty(props, "streamingFallback", Feature.STREAMING_FALLBACK);
+        applyProperty(props, "stripSpace", Feature.STRIP_WHITESPACE);
+        applyProperty(props, "styleParser", Feature.STYLE_PARSER_CLASS);
+        applyProperty(props, "suppressEvaluationExpiryWarning", Feature.SUPPRESS_EVALUATION_EXPIRY_WARNING);
+        applyProperty(props, "suppressXPathWarnings", Feature.SUPPRESS_XPATH_WARNINGS);
+        applyProperty(props, "suppressXsltNamespaceCheck", Feature.SUPPRESS_XSLT_NAMESPACE_CHECK);
+        applyProperty(props, "thresholdForHotspotByteCode", Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE);
+        applyProperty(props, "timing", Feature.TIMING);
+        applyProperty(props, "traceExternalFunctions", Feature.TRACE_EXTERNAL_FUNCTIONS);
+        applyProperty(props, "traceListener", Feature.TRACE_LISTENER_CLASS);
+        applyProperty(props, "traceListenerOutputFile", Feature.TRACE_LISTENER_OUTPUT_FILE);
+        applyProperty(props, "traceOptimizerDecisions", Feature.TRACE_OPTIMIZER_DECISIONS);
+        applyProperty(props, "treeModel", Feature.TREE_MODEL_NAME);
+        applyProperty(props, "unparsedTextUriResolver", Feature.UNPARSED_TEXT_URI_RESOLVER_CLASS);
+        applyProperty(props, "uriResolver", Feature.URI_RESOLVER_CLASS);
+        applyProperty(props, "usePiDisableOutputEscaping", Feature.USE_PI_DISABLE_OUTPUT_ESCAPING);
+        applyProperty(props, "useTypedValueCache", Feature.USE_TYPED_VALUE_CACHE);
+        applyProperty(props, "validationComments", Feature.VALIDATION_COMMENTS);
+        applyProperty(props, "validationWarnings", Feature.VALIDATION_WARNINGS);
+        applyProperty(props, "versionOfXml", Feature.XML_VERSION);
+        applyProperty(props, "xInclude", Feature.XINCLUDE);
     }
 
-    private void applyProperty(Properties props, String propertyName, String featureKey) {
-        String value = props.getProperty(propertyName);
+    private void applyProperty(Properties props, String attributeName, Feature feature) {
+        String value = props.getProperty(attributeName);
         if (value != null) {
             try {
-                config.setConfigurationProperty(featureKey, value);
+                config.setConfigurationProperty(feature.name, value);
             } catch (IllegalArgumentException e) {
                 String message = e.getMessage();
-                if (message.startsWith(featureKey)) {
-                    message = message.replace(featureKey, "Value");
+                if (message.startsWith(attributeName)) {
+                    message = message.replace(attributeName, "Value");
                 }
                 if (message.startsWith("Unknown configuration property")) {
                     message = "Property not available in Saxon-" + config.getEditionCode();
                 }
-                error(props.getProperty("#element"), propertyName, value, message);
+                error(props.getProperty("#element"), attributeName, value, message);
             }
         }
     }
@@ -426,7 +435,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
                 ResultDocument.setSerializationProperty(props,
                                                         uri, name, value, this, false, config);
             } catch (XPathException e) {
-                errors.add(e);
+                errors.add(new XmlProcessingException(e));
             }
         }
         config.setDefaultSerializationProperties(props);
@@ -450,13 +459,13 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             }
         }
         if (collationUri == null) {
-            errors.add(new XPathException("collation specified with no uri"));
+            errors.add(new XmlProcessingIncident("collation specified with no uri"));
         }
         StringCollator collator = null;
         try {
             collator = Version.platform.makeCollation(config, props, collationUri);
         } catch (XPathException e) {
-            errors.add(e);
+            errors.add(new XmlProcessingIncident(e.getMessage()));
         }
         config.registerCollation(collationUri, collator);
 
@@ -518,8 +527,8 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
      */
 
     protected void readExtensionElement(Attributes atts) {
-        XPathException err = new XPathException("Extension elements are not available in Saxon-HE");
-        err.setLocator(ExplicitLocation.makeFromSax(locator));
+        XmlProcessingIncident err = new XmlProcessingIncident("Extension elements are not available in Saxon-HE");
+        err.setLocation(Loc.makeFromSax(locator));
         errors.add(err);
     }
 
@@ -605,11 +614,10 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         if (name == null) {
             error("withParam", "name", null, null);
         }
-        QNameParser qp = new QNameParser(this);
-        qp.setAcceptEQName(true);
+        QNameParser qp = new QNameParser(this).withAcceptEQName(true);
         StructuredQName qName = null;
         try {
-            qName = qp.parse(name);
+            qName = qp.parse(name, "");
         } catch (XPathException e) {
             error("withParam", "name", name, "Requires valid QName");
         }
@@ -620,7 +628,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         IndependentContext env = new IndependentContext(config);
         env.setNamespaceResolver(this);
         XPathParser parser = new XPathParser();
-        GroundedValue<?> value = null;
+        GroundedValue value = null;
         try {
             Expression exp = parser.parse(select, 0, Token.EOF, env);
             value = exp.iterate(env.makeEarlyEvaluationContext()).materialize();
@@ -644,19 +652,19 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             }
         }
         props.put("#element", "xquery");
-        applyProperty(props, "allowUpdate", FeatureKeys.XQUERY_ALLOW_UPDATE);
-        applyProperty(props, "constructionMode", FeatureKeys.XQUERY_CONSTRUCTION_MODE);
-        applyProperty(props, "defaultElementNamespace", FeatureKeys.XQUERY_DEFAULT_ELEMENT_NAMESPACE);
-        applyProperty(props, "defaultFunctionNamespace", FeatureKeys.XQUERY_DEFAULT_FUNCTION_NAMESPACE);
-        applyProperty(props, "emptyLeast", FeatureKeys.XQUERY_EMPTY_LEAST);
-        applyProperty(props, "inheritNamespaces", FeatureKeys.XQUERY_INHERIT_NAMESPACES);
-        applyProperty(props, "moduleUriResolver", FeatureKeys.MODULE_URI_RESOLVER_CLASS);
-        applyProperty(props, "preserveBoundarySpace", FeatureKeys.XQUERY_PRESERVE_BOUNDARY_SPACE);
-        applyProperty(props, "preserveNamespaces", FeatureKeys.XQUERY_PRESERVE_NAMESPACES);
-        applyProperty(props, "requiredContextItemType", FeatureKeys.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE);
-        applyProperty(props, "schemaAware", FeatureKeys.XQUERY_SCHEMA_AWARE);
-        applyProperty(props, "staticErrorListener", FeatureKeys.XQUERY_STATIC_ERROR_LISTENER_CLASS);
-        applyProperty(props, "version", FeatureKeys.XQUERY_VERSION);
+        applyProperty(props, "allowUpdate", Feature.XQUERY_ALLOW_UPDATE);
+        applyProperty(props, "constructionMode", Feature.XQUERY_CONSTRUCTION_MODE);
+        applyProperty(props, "defaultElementNamespace", Feature.XQUERY_DEFAULT_ELEMENT_NAMESPACE);
+        applyProperty(props, "defaultFunctionNamespace", Feature.XQUERY_DEFAULT_FUNCTION_NAMESPACE);
+        applyProperty(props, "emptyLeast", Feature.XQUERY_EMPTY_LEAST);
+        applyProperty(props, "inheritNamespaces", Feature.XQUERY_INHERIT_NAMESPACES);
+        applyProperty(props, "moduleUriResolver", Feature.MODULE_URI_RESOLVER_CLASS);
+        applyProperty(props, "preserveBoundarySpace", Feature.XQUERY_PRESERVE_BOUNDARY_SPACE);
+        applyProperty(props, "preserveNamespaces", Feature.XQUERY_PRESERVE_NAMESPACES);
+        applyProperty(props, "requiredContextItemType", Feature.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE);
+        applyProperty(props, "schemaAware", Feature.XQUERY_SCHEMA_AWARE);
+        applyProperty(props, "staticErrorListener", Feature.XQUERY_STATIC_ERROR_LISTENER_CLASS);
+        applyProperty(props, "version", Feature.XQUERY_VERSION);
     }
 
     private void readXsltElement(Attributes atts) {
@@ -669,20 +677,20 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             }
         }
         props.put("#element", "xslt");
-        applyProperty(props, "disableXslEvaluate", FeatureKeys.DISABLE_XSL_EVALUATE);
-        applyProperty(props, "enableAssertions", FeatureKeys.XSLT_ENABLE_ASSERTIONS);
-        applyProperty(props, "initialMode", FeatureKeys.XSLT_INITIAL_MODE);
-        applyProperty(props, "initialTemplate", FeatureKeys.XSLT_INITIAL_TEMPLATE);
-        applyProperty(props, "messageEmitter", FeatureKeys.MESSAGE_EMITTER_CLASS);
-        applyProperty(props, "outputUriResolver", FeatureKeys.OUTPUT_URI_RESOLVER_CLASS);
-        applyProperty(props, "recoveryPolicy", FeatureKeys.RECOVERY_POLICY_NAME);
-        applyProperty(props, "resultDocumentThreads", FeatureKeys.RESULT_DOCUMENT_THREADS);
-        applyProperty(props, "schemaAware", FeatureKeys.XSLT_SCHEMA_AWARE);
-        applyProperty(props, "staticErrorListener", FeatureKeys.XSLT_STATIC_ERROR_LISTENER_CLASS);
-        applyProperty(props, "staticUriResolver", FeatureKeys.XSLT_STATIC_URI_RESOLVER_CLASS);
-        applyProperty(props, "strictStreamability", FeatureKeys.STRICT_STREAMABILITY);
-        applyProperty(props, "styleParser", FeatureKeys.STYLE_PARSER_CLASS);
-        applyProperty(props, "version", FeatureKeys.XSLT_VERSION);
+        applyProperty(props, "disableXslEvaluate", Feature.DISABLE_XSL_EVALUATE);
+        applyProperty(props, "enableAssertions", Feature.XSLT_ENABLE_ASSERTIONS);
+        applyProperty(props, "initialMode", Feature.XSLT_INITIAL_MODE);
+        applyProperty(props, "initialTemplate", Feature.XSLT_INITIAL_TEMPLATE);
+        applyProperty(props, "messageEmitter", Feature.MESSAGE_EMITTER_CLASS);
+        applyProperty(props, "outputUriResolver", Feature.OUTPUT_URI_RESOLVER_CLASS);
+        applyProperty(props, "recoveryPolicy", Feature.RECOVERY_POLICY_NAME);
+        applyProperty(props, "resultDocumentThreads", Feature.RESULT_DOCUMENT_THREADS);
+        applyProperty(props, "schemaAware", Feature.XSLT_SCHEMA_AWARE);
+        applyProperty(props, "staticErrorListener", Feature.XSLT_STATIC_ERROR_LISTENER_CLASS);
+        applyProperty(props, "staticUriResolver", Feature.XSLT_STATIC_URI_RESOLVER_CLASS);
+        applyProperty(props, "strictStreamability", Feature.STRICT_STREAMABILITY);
+        applyProperty(props, "styleParser", Feature.STYLE_PARSER_CLASS);
+        applyProperty(props, "version", Feature.XSLT_VERSION);
         //applyProperty(props, "versionWarning", FeatureKeys.VERSION_WARNING);
     }
 
@@ -696,45 +704,47 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             }
         }
         props.put("#element", "xsd");
-        applyProperty(props, "assertionsCanSeeComments", FeatureKeys.ASSERTIONS_CAN_SEE_COMMENTS);
-        applyProperty(props, "implicitSchemaImports", FeatureKeys.IMPLICIT_SCHEMA_IMPORTS);
-        applyProperty(props, "multipleSchemaImports", FeatureKeys.MULTIPLE_SCHEMA_IMPORTS);
-        applyProperty(props, "occurrenceLimits", FeatureKeys.OCCURRENCE_LIMITS);
-        applyProperty(props, "schemaUriResolver", FeatureKeys.SCHEMA_URI_RESOLVER_CLASS);
-        applyProperty(props, "thresholdForCompilingTypes", FeatureKeys.THRESHOLD_FOR_COMPILING_TYPES);
-        applyProperty(props, "useXsiSchemaLocation", FeatureKeys.USE_XSI_SCHEMA_LOCATION);
-        applyProperty(props, "version", FeatureKeys.XSD_VERSION);
+        applyProperty(props, "assertionsCanSeeComments", Feature.ASSERTIONS_CAN_SEE_COMMENTS);
+        applyProperty(props, "implicitSchemaImports", Feature.IMPLICIT_SCHEMA_IMPORTS);
+        applyProperty(props, "multipleSchemaImports", Feature.MULTIPLE_SCHEMA_IMPORTS);
+        applyProperty(props, "occurrenceLimits", Feature.OCCURRENCE_LIMITS);
+        applyProperty(props, "schemaUriResolver", Feature.SCHEMA_URI_RESOLVER_CLASS);
+        applyProperty(props, "thresholdForCompilingTypes", Feature.THRESHOLD_FOR_COMPILING_TYPES);
+        applyProperty(props, "useXsiSchemaLocation", Feature.USE_XSI_SCHEMA_LOCATION);
+        applyProperty(props, "version", Feature.XSD_VERSION);
     }
 
     private void error(String element, String attribute, String actual, String required) {
-        XPathException err;
+        XmlProcessingIncident err;
         if (attribute == null) {
-            err = new XPathException("Invalid configuration element " + element);
+            err = new XmlProcessingIncident("Invalid configuration element " + element);
         } else if (actual == null) {
-            err = new XPathException("Missing configuration property " +
+            err = new XmlProcessingIncident("Missing configuration property " +
                                              element + "/@" + attribute);
         } else {
-            err = new XPathException("Invalid configuration property " +
+            err = new XmlProcessingIncident("Invalid configuration property " +
                                              element + "/@" + attribute + ". Supplied value '" + actual + "'. " + required);
         }
-        err.setLocator(ExplicitLocation.makeFromSax(locator));
+        err.setLocation(Loc.makeFromSax(locator));
         errors.add(err);
     }
 
     protected void error(XPathException err) {
-        err.setLocator(ExplicitLocation.makeFromSax(locator));
-        errors.add(err);
+        err.setLocator(Loc.makeFromSax(locator));
+        errors.add(new XmlProcessingException(err));
     }
 
     protected void errorClass(String element, String attribute, String actual, Class required, Exception cause) {
-        XPathException err = new XPathException("Invalid configuration property " +
+        XmlProcessingIncident err = new XmlProcessingIncident("Invalid configuration property " +
                                                         element + (attribute == null ? "" : "/@" + attribute) +
                                                         ". Supplied value '" + actual +
-                                                        "', required value is the name of a class that implements '" + required.getName() + "'", cause);
-        err.setLocator(ExplicitLocation.makeFromSax(locator));
+                                                        "', required value is the name of a class that implements '" + required.getName() + "'");
+        err.setCause(cause);
+        err.setLocation(Loc.makeFromSax(locator));
         errors.add(err);
     }
 
+    @Override
     public void endElement(String uri, String localName, String qName) {
         if (level == 3 && "resources".equals(section)) {
             String content = buffer.toString();
@@ -757,17 +767,15 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
                     try {
                         Source source = getInputSource(content);
                         config.addSchemaSource(source);
-                    } catch (SchemaException e) {
-                        errors.add(XPathException.makeXPathException(e));
                     } catch (XPathException e) {
-                        errors.add(e);
+                        errors.add(new XmlProcessingException(e));
                     }
                 } else if ("schemaComponentModel".equals(localName)) {
                     try {
                         Source source = getInputSource(content);
                         config.importComponents(source);
                     } catch (XPathException e) {
-                        errors.add(e);
+                        errors.add(new XmlProcessingException(e));
                     }
                 } else if ("fileExtension".equals(localName)) {
                     // already done at startElement time
@@ -791,18 +799,22 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         }
     }
 
+    @Override
     public void characters(char ch[], int start, int length) {
         buffer.append(ch, start, length);
     }
 
+    @Override
     public void ignorableWhitespace(char ch[], int start, int length) {
 
     }
 
+    @Override
     public void processingInstruction(String target, String data) {
 
     }
 
+    @Override
     public void skippedEntity(String name) {
 
     }
@@ -824,6 +836,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
      * The "null namespace" is represented by the pseudo-URI "".
      */
 
+    @Override
     public String getURIForPrefix(String prefix, boolean useDefault) {
         for (int i = namespaceStack.size() - 1; i >= 0; i--) {
             List<String[]> list = namespaceStack.get(i);
@@ -841,6 +854,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
      * the default namespace (prefix="") and the XML namespace where appropriate
      */
     
+    @Override
     public Iterator<String> iteratePrefixes() {
         Set<String> prefixes = new HashSet<>();
         for (List<String[]> list : namespaceStack) {

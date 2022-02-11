@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,8 @@
 package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NoNamespaceName;
 import net.sf.saxon.om.NodeName;
@@ -49,6 +50,7 @@ public class ProcInstImpl extends NodeImpl {
 
 
 
+    @Override
     public String getStringValue() {
         return content;
     }
@@ -59,10 +61,12 @@ public class ProcInstImpl extends NodeImpl {
      */
 
     /*@NotNull*/
+    @Override
     public AtomicSequence atomize() {
         return new StringValue(getStringValue());
     }
 
+    @Override
     public final int getNodeKind() {
         return Type.PROCESSING_INSTRUCTION;
     }
@@ -86,6 +90,7 @@ public class ProcInstImpl extends NodeImpl {
      * @return the system identifier
      */
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -94,6 +99,7 @@ public class ProcInstImpl extends NodeImpl {
      * Get the line number of the node within its source entity
      */
 
+    @Override
     public int getLineNumber() {
         return lineNumber;
     }
@@ -102,6 +108,7 @@ public class ProcInstImpl extends NodeImpl {
      * Get the column number of the node within its source entity
      */
 
+    @Override
     public int getColumnNumber() {
         return columnNumber;
     }
@@ -111,8 +118,9 @@ public class ProcInstImpl extends NodeImpl {
      * Copy this node to a given outputter
      */
 
+    @Override
     public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId) throws XPathException {
-        out.processingInstruction(getLocalPart(), content, locationId, 0);
+        out.processingInstruction(getLocalPart(), content, locationId, ReceiverOption.NONE);
     }
 
     /**
@@ -121,6 +129,7 @@ public class ProcInstImpl extends NodeImpl {
      * @param newNameCode the new name
      */
 
+    @Override
     public void rename(NodeName newNameCode) {
         name = newNameCode.getLocalPart();
     }
@@ -132,6 +141,7 @@ public class ProcInstImpl extends NodeImpl {
      * @param stringValue the new string value
      */
 
+    @Override
     public void replaceStringValue(/*@NotNull*/ CharSequence stringValue) {
         content = stringValue.toString();
     }

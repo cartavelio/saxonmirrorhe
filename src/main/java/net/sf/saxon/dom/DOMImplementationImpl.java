@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -30,6 +30,7 @@ class DOMImplementationImpl implements DOMImplementation {
      *         "", "3.0", "2.0", or "1.0".
      */
 
+    @Override
     public boolean hasFeature(String feature, String version) {
         return (feature.equalsIgnoreCase("XML") || feature.equalsIgnoreCase("Core")) &&
                 (version == null || version.isEmpty() ||
@@ -47,6 +48,7 @@ class DOMImplementationImpl implements DOMImplementation {
      * @since DOM Level 3
      */
 
+    @Override
     public Object getFeature(String feature,
                              String version) {
         return null;
@@ -69,6 +71,7 @@ class DOMImplementationImpl implements DOMImplementation {
      * @since DOM Level 2
      */
 
+    @Override
     public DocumentType createDocumentType(String qualifiedName,
                                            String publicId,
                                            String systemId)
@@ -91,6 +94,7 @@ class DOMImplementationImpl implements DOMImplementation {
      * @since DOM Level 2
      */
 /*@Nullable*/
+    @Override
     public Document createDocument(String namespaceURI,
                                    String qualifiedName,
                                    DocumentType doctype)

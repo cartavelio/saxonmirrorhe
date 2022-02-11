@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,7 @@ package net.sf.saxon.testdriver;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.Sequence;
@@ -18,6 +18,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Source;
@@ -30,6 +31,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.function.Predicate;
 
 import static net.sf.saxon.s9api.streams.Predicates.*;
 import static net.sf.saxon.s9api.streams.Steps.*;
@@ -50,6 +52,7 @@ public class QT3TestDriverHE extends TestDriver {
 
     //private FotsResultsDocument resultsDoc;
 
+    @Override
     public String catalogNamespace() {
         return CNS;
     }
@@ -59,6 +62,7 @@ public class QT3TestDriverHE extends TestDriver {
         super.go(args);
     }
 
+    @Override
     public void processSpec(String specStr) {
 
         switch (specStr) {
@@ -133,6 +137,7 @@ public class QT3TestDriverHE extends TestDriver {
      * @return true if the environment satisfies the dependency, else false
      */
 
+    @Override
     public boolean ensureDependencySatisfied(XdmNode dependency, Environment env) {
         String type = dependency.attribute("type");
         String value = dependency.attribute("value");
@@ -187,6 +192,7 @@ public class QT3TestDriverHE extends TestDriver {
                 }
             }
             env.resetActions.add(new Environment.ResetAction() {
+                @Override
                 public void reset(Environment env) {
                     env.processor.setConfigurationProperty(Feature.XSD_VERSION, old);
                 }
@@ -204,6 +210,7 @@ public class QT3TestDriverHE extends TestDriver {
             if (!value.equals(old)){
                 env.processor.setConfigurationProperty(Feature.DEFAULT_LANGUAGE, value);
                 env.resetActions.add(new Environment.ResetAction() {
+                    @Override
                     public void reset(Environment env) {
                         env.processor.setConfigurationProperty(Feature.DEFAULT_LANGUAGE, old);
                     }
@@ -245,7 +252,8 @@ public class QT3TestDriverHE extends TestDriver {
             } else if ("schema-location-hint".equals(value)) {
                 return (edition.equals("PE") || edition.equals("EE")) ^ inverse;
             } else if ("infoset-dtd".equals(value)) {
-                if (treeModel == TreeModel.TINY_TREE || treeModel == TreeModel.LINKED_TREE || treeModel == TreeModel.TINY_TREE_CONDENSED) {
+                if (treeModel == TreeModel.TINY_TREE || treeModel == TreeModel.LINKED_TREE ||
+                        treeModel == TreeModel.TINY_TREE_CONDENSED) {
                     return !inverse;
                 } else {
                     return inverse;
@@ -295,6 +303,7 @@ public class QT3TestDriverHE extends TestDriver {
      * @throws SaxonApiException
      */
 
+    @Override
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
     protected void runTestCase(XdmNode testCase, XPathCompiler xpc) throws SaxonApiException {
         boolean run = true;
@@ -342,6 +351,8 @@ public class QT3TestDriverHE extends TestDriver {
         }
         env.xpathCompiler.setBackwardsCompatible(false);
         env.processor.setXmlVersion("1.0");
+        env.processor.setConfigurationProperty(Feature.XQUERY_MULTIPLE_MODULE_IMPORTS, true);
+
 
         List<XdmNode> dependencies = testCase.getParent().select(child("dependency")).asList();
         dependencies.addAll(testCase.select(child("dependency")).asList());
@@ -365,6 +376,7 @@ public class QT3TestDriverHE extends TestDriver {
             }
             if (langVersion.equals("3.0") || langVersion.equals("3.1")) {
                 EnvironmentVariableResolver resolver = new EnvironmentVariableResolver() {
+                    @Override
                     public Set<String> getAvailableEnvironmentVariables() {
                         Set<String> strings = new HashSet<String>();
                         strings.add("QTTEST");
@@ -373,6 +385,7 @@ public class QT3TestDriverHE extends TestDriver {
                         return strings;
                     }
 
+                    @Override
                     public String getEnvironmentVariable(String name) {
                         if (name.equals("QTTEST")) {
                             return "42";
@@ -453,9 +466,9 @@ public class QT3TestDriverHE extends TestDriver {
             } catch (SaxonApiException err) {
                 println("*** Failed to read query: " + err.getMessage());
                 if (err.getErrorCode().getLocalName().equals("FOUT1190")) {
-                    outcome.setException(new SaxonApiException(new XPathException(err.getMessage(), "XPST0003")));
+                    outcome.setException(new QName("XPST0003"));
                 } else {
-                    outcome.setException(err);
+                    outcome.setException(err.getErrorCode());
                 }
             }
 
@@ -519,7 +532,7 @@ public class QT3TestDriverHE extends TestDriver {
                             outcome.setPrincipalResult(result);
                         } catch (SaxonApiException err) {
                             println(err.getMessage());
-                            outcome.setException(err);
+                            outcome.setException(err.getErrorCode());
                         } catch (Exception err) {
                             println(err.getMessage());
                             err.printStackTrace();
@@ -531,14 +544,14 @@ public class QT3TestDriverHE extends TestDriver {
                     }
                     case "XQ": {
                         XQueryCompiler testXqc = env.xqueryCompiler;
-                        testXqc.setLanguageVersion(langVersion);
+                        //testXqc.setLanguageVersion(langVersion);
                         testXqc.declareNamespace("fn", NamespaceConstant.FN);
                         testXqc.declareNamespace("xs", NamespaceConstant.SCHEMA);
                         //testXqc.declareNamespace("math", NamespaceConstant.MATH);
                         testXqc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
                         testXqc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
                         ErrorCollector errorCollector = new ErrorCollector();
-                        testXqc.setErrorListener(errorCollector);
+                        testXqc.setErrorReporter(errorCollector);
                         String decVars = env.paramDecimalDeclarations.toString();
                         if (!decVars.isEmpty()) {
                             int x = exp.indexOf("(:%DECL%:)");
@@ -564,7 +577,7 @@ public class QT3TestDriverHE extends TestDriver {
 
                         try {
                             testXqc.getUnderlyingStaticContext().setModuleLocation(
-                                    new ExplicitLocation(testXqc.getBaseURI().toString(), testCase.getLineNumber(), -1));
+                                    new Loc(testXqc.getBaseURI().toString(), testCase.getLineNumber(), -1));
                             XQueryExecutable q = null;
                             try {
                                 q = testXqc.compile(exp);
@@ -623,19 +636,14 @@ public class QT3TestDriverHE extends TestDriver {
                         } catch (SaxonApiException err) {
                             println("in TestSet " + testSetName);
                             println(err.getMessage());
-                            outcome.setException(err);
+                            outcome.setException(err.getErrorCode());
                             outcome.setErrorsReported(errorCollector.getErrorCodes());
                         } catch (LicenseException err) {
                             // treat this as "facility not available", XQST0075
                             println("in TestSet " + testSetName);
                             println(err.getMessage());
-                            XPathException xe = new XPathException(err.getMessage(), "XPST0075");
-                            outcome.setException(new SaxonApiException(xe));
-                            try {
-                                errorCollector.error(xe);
-                            } catch (Exception e3) {
-                                // ignore the exception
-                            }
+                            outcome.setException(new QName("XPST0075"));
+                            errorCollector.error(new XmlProcessingIncident(err.getMessage(), "XPST0075"));
                             outcome.setErrorsReported(errorCollector.getErrorCodes());
                         }
                         break;
@@ -691,14 +699,14 @@ public class QT3TestDriverHE extends TestDriver {
                             writeTestcaseElement(testCaseName, "wrongError", outcome.getComment());
                         } else {
                             writeTestcaseElement(testCaseName, "wrongError",
-                                    "Expected error:" + expectedError.getStringValue() + ", got " + outcome.getException().getErrorCode());
+                                    "Expected error:" + expectedError.getStringValue() + ", got " + outcome.getException());
                         }
-                        println("*** TEST WRONG ERRORCODE: result " + outcome.getException().getErrorCode() +
+                        println("*** TEST WRONG ERRORCODE: result " + outcome.getException() +
                                 " Expected error:" + expectedError.getStringValue());
                     } else {
                         noteFailure(testSetName, testCaseName);
-                        writeTestcaseElement(testCaseName, "fail", "Expected success, got " + outcome.getException().getErrorCode());
-                        println("*** TEST-FAILURE: result " + outcome.getException().getErrorCode() +
+                        writeTestcaseElement(testCaseName, "fail", "Expected success, got " + outcome.getException());
+                        println("*** TEST-FAILURE: result " + outcome.getException() +
                                 " Expected success.");
                     }
                 } else {
@@ -760,10 +768,12 @@ public class QT3TestDriverHE extends TestDriver {
     }
 
 
+    @Override
     protected void writeResultFilePreamble(Processor processor, XdmNode catalog) throws IOException, SaxonApiException, XMLStreamException {
         resultsDoc.writeResultFilePreamble(processor, catalog);
     }
 
+    @Override
     protected void writeResultFilePostamble() throws XMLStreamException {
         resultsDoc.writeResultFilePostamble();
         if (requestedTestSet != null) {
@@ -780,11 +790,13 @@ public class QT3TestDriverHE extends TestDriver {
     }
 
 
+    @Override
     protected void startTestSetElement(XdmNode testSetNode) {
         resultsDoc.startTestSetElement(testSetNode);
     }
 
 
+    @Override
     protected void writeTestSetEndElement() {
         resultsDoc.endElement();
     }
@@ -807,21 +819,47 @@ public class QT3TestDriverHE extends TestDriver {
             this.testCase = testCase;
         }
 
+        @Override
         public StreamSource[] resolve(String moduleURI, String baseURI, String[] locations) throws XPathException {
-            try {
-                XdmValue files = testCase.select(child("module").where(attributeEq("uri", moduleURI))
-                    .then(attribute("file")).then(atomize())).asXdmValue();
-                if (files.size() == 0) {
-                    throw new XPathException("Failed to find module entry for " + moduleURI);
+            if (locations.length == 0) {
+                try {
+                    XdmValue files = testCase.select(child("module").where(attributeEq("uri", moduleURI))
+                                                             .then(attribute("file")).then(atomize())).asXdmValue();
+                    if (files.size() == 0) {
+                        throw new XPathException("Failed to find module entry for " + moduleURI);
+                    }
+                    StreamSource[] ss = new StreamSource[files.size()];
+                    for (int i = 0; i < files.size(); i++) {
+                        URI uri = testCase.getBaseURI().resolve(files.itemAt(i).toString());
+                        ss[i] = getQuerySource(uri);
+                    }
+                    return ss;
+                } catch (SaxonApiUncheckedException e) {
+                    throw new XPathException(e);
                 }
-                StreamSource[] ss = new StreamSource[files.size()];
-                for (int i = 0; i < files.size(); i++) {
-                    URI uri = testCase.getBaseURI().resolve(files.itemAt(i).toString());
-                    ss[i] = getQuerySource(uri);
+            } else {
+                try {
+                    StreamSource[] ss = new StreamSource[locations.length];
+                    for (int i=0; i<locations.length; i++) {
+                        String loc = locations[i];
+                        URI hint = new URI(baseURI).resolve(loc);
+                        Predicate<XdmNode> matching = n ->
+                            n.attribute("uri").equals(moduleURI)
+                                    && n.attribute("location") != null
+                                    && testCase.getBaseURI().resolve(n.attribute("location")).equals(hint);
+
+                        XdmValue files = testCase.select(
+                                child("module").where(matching).then(attribute("file")).then(atomize())).asXdmValue();
+                        if (files.size() == 0) {
+                            throw new XPathException("Failed to find module entry for " + moduleURI + " at " + loc);
+                        }
+                        URI uri = testCase.getBaseURI().resolve(files.itemAt(0).toString());
+                        ss[i] = getQuerySource(uri);
+                    }
+                    return ss;
+                } catch (URISyntaxException e) {
+                    throw new XPathException(e);
                 }
-                return ss;
-            } catch (SaxonApiUncheckedException e) {
-                throw new XPathException(e);
             }
         }
     }
@@ -833,6 +871,7 @@ public class QT3TestDriverHE extends TestDriver {
             this.env = env;
         }
 
+        @Override
         public Source resolve(String href, String base) throws TransformerException {
             try {
                 String abs = ResolveURI.makeAbsolute(href, base).toString();
@@ -860,7 +899,7 @@ public class QT3TestDriverHE extends TestDriver {
      * @return the supplied value, unchanged
      */
 
-    public static Sequence<?> lazyLiteral(Sequence value) {
+    public static Sequence lazyLiteral(Sequence value) {
         return value;
     }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -34,11 +34,11 @@ package net.sf.saxon.regex;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.z.IntIterator;
 
-import java.util.function.IntPredicate;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.IntPredicate;
 
 
 /**
@@ -609,7 +609,7 @@ public class REMatcher {
                     if (ch == '\\') {
                         ch = replacement.uCharAt(++i);
                         if (ch == '\\' || ch == '$') {
-                            sb.append((char) ch);
+                            sb.cat((char) ch);
                         } else {
                             throw new RESyntaxException("Invalid escape '" + ch + "' in replacement string");
                         }
@@ -667,6 +667,67 @@ public class REMatcher {
                     sb.appendWideChar(replacement.uCharAt(i));
                 }
             }
+
+            // Move forward, skipping past match
+            int newpos = getParenEnd(0);
+
+            // We always want to make progress!
+            if (newpos == pos) {
+                newpos++;
+            }
+
+            // Try new position
+            pos = newpos;
+
+        }
+
+        // If there's remaining input, append it
+        for (int i = pos; i < len; i++) {
+            sb.appendWideChar(in.uCharAt(i));
+        }
+
+        // Return string buffer
+        return sb.condense();
+    }
+
+    /**
+     * Substitutes a string for this regular expression in another string.
+     * This method works like the Perl function of the same name.
+     * Given a regular expression of "a*b", a String to substituteIn of
+     * "aaaabfooaaabgarplyaaabwackyb" and the substitution String "-", the
+     * resulting String returned by subst would be "-foo-garply-wacky-".
+     * <p>It is also possible to reference the contents of a parenthesized expression
+     * with $0, $1, ... $9. A regular expression of "http://[\\.\\w\\-\\?/~_@&amp;=%]+",
+     * a String to substituteIn of "visit us: http://www.apache.org!" and the
+     * substitution String "&lt;a href=\"$0\"&gt;$0&lt;/a&gt;", the resulting String
+     * returned by subst would be
+     * "visit us: &lt;a href=\"http://www.apache.org\"&gt;http://www.apache.org&lt;/a&gt;!".</p>
+     * <p><i>Note:</i> $0 represents the whole match.</p>
+     *
+     * @param in          String to substitute within
+     * @param replacer    Function to process each matching substring and return a replacement
+     * @return The string substituteIn with zero or more occurrences of the current
+     * regular expression replaced with the substitution String (if this regular
+     * expression object doesn't match at any position, the original String is returned
+     * unchanged).
+     */
+    public CharSequence replaceWith(UnicodeString in, Function<CharSequence, CharSequence> replacer) {
+        // String to return
+        FastStringBuffer sb = new FastStringBuffer(in.uLength() * 2);
+
+        // Start at position 0 and search the whole string
+        int pos = 0;
+        int len = in.uLength();
+
+        // Try a match at each position
+        while (pos < len && match(in, pos)) {
+            // Append chars from input string before match
+            for (int i = pos; i < getParenStart(0); i++) {
+                sb.appendWideChar(in.uCharAt(i));
+            }
+            CharSequence matchingSubstring = in.subSequence(getParenStart(0), getParenEnd(0));
+            CharSequence replacement = replacer.apply(matchingSubstring);
+            sb.append(replacement);
 
             // Move forward, skipping past match
             int newpos = getParenEnd(0);

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,6 +10,7 @@ package net.sf.saxon.dom;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
@@ -28,6 +29,8 @@ import org.w3c.dom.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.function.Predicate;
 
 
 /**
@@ -49,6 +52,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     protected int span = 1;         // the number of adjacent text nodes wrapped by this NodeWrapper.
     // If span>1, node will always be the first of a sequence of adjacent text nodes
     private NamespaceBinding[] localNamespaces = null;
+    private NamespaceMap inScopeNamespaces = null;
 
     /**
      * This constructor is protected: nodes should be created using the makeWrapper
@@ -143,6 +147,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         return wrapper;
     }
 
+    @Override
     public DocumentWrapper getTreeInfo() {
         return (DocumentWrapper)treeInfo;
     }
@@ -151,6 +156,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * Get the underlying DOM node, to implement the VirtualNode interface
      */
 
+    @Override
     public Node getUnderlyingNode() {
         return node;
     }
@@ -161,6 +167,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * @return one of the values Node.ELEMENT, Node.TEXT, Node.ATTRIBUTE, etc.
      */
 
+    @Override
     public int getNodeKind() {
         return nodeKind;
     }
@@ -204,6 +211,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      *         return true, and the two nodes will produce the same result for generateId())
      */
 
+    @Override
     public int compareOrder(NodeInfo other) {
         // Use the DOM Level-3 compareDocumentPosition() method
         if (other instanceof DOMNodeWrapper && docWrapper.domLevel3) {
@@ -241,6 +249,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * the version of the method that returns a String.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         synchronized (docWrapper.docNode) {
             switch (nodeKind) {
@@ -315,6 +324,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * @return the local part of the name. For an unnamed node, returns "".
      */
 
+    @Override
     public String getLocalPart() {
         synchronized (docWrapper.docNode) {
             switch (getNodeKind()) {
@@ -360,6 +370,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      *         string.
      */
 
+    @Override
     public String getURI() {
         synchronized (docWrapper.docNode) {
             if (nodeKind == Type.ELEMENT) {
@@ -456,6 +467,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * @return The prefix of the name of the node.
      */
 
+    @Override
     public String getPrefix() {
         synchronized (docWrapper.docNode) {
             int kind = getNodeKind();
@@ -480,6 +492,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      *         For a node with no name, return an empty string.
      */
 
+    @Override
     public String getDisplayName() {
         switch (nodeKind) {
             case Type.ELEMENT:
@@ -498,6 +511,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * Get the NodeInfo object representing the parent of this node
      */
 
+    @Override
     public DOMNodeWrapper getParent() {
         if (parent == null) {
             synchronized (docWrapper.docNode) {
@@ -530,6 +544,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * parent element, when they are listed in document order.</p>
      */
 
+    @Override
     public int getSiblingPosition() {
         if (index == -1) {
             synchronized (docWrapper.docNode) {
@@ -581,7 +596,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
+    protected AxisIterator iterateAttributes(Predicate<? super NodeInfo> nodeTest) {
         AxisIterator iter = new AttributeEnumeration(this);
         if (nodeTest != AnyNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
@@ -589,9 +604,13 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         return iter;
     }
 
+    private boolean isElementOnly(Predicate<? super NodeInfo> nodeTest) {
+        return nodeTest instanceof NodeTest && ((NodeTest) nodeTest).getUType() == UType.ELEMENT;
+    }
+
     @Override
-    protected AxisIterator iterateChildren(NodeTest nodeTest) {
-        boolean elementOnly = nodeTest.getUType() == UType.ELEMENT;
+    protected AxisIterator iterateChildren(Predicate<? super NodeInfo> nodeTest) {
+        boolean elementOnly = isElementOnly(nodeTest);
         AxisIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, true, true, elementOnly));
         if (nodeTest != AnyNodeTest.getInstance()) {
@@ -601,8 +620,8 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
-        boolean elementOnly = nodeTest.getUType() == UType.ELEMENT;
+    protected AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards) {
+        boolean elementOnly = isElementOnly(nodeTest);
         AxisIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, false, forwards, elementOnly));
         if (nodeTest != AnyNodeTest.getInstance()) {
@@ -612,7 +631,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected AxisIterator iterateDescendants(Predicate<? super NodeInfo> nodeTest, boolean includeSelf) {
         return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
     }
 
@@ -626,6 +645,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      *         if this node is not an element.
      * @since 9.4
      */
+    @Override
     public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
         NameTest test = new NameTest(Type.ATTRIBUTE, uri, local, getNamePool());
         AxisIterator iterator = iterateAxis(AxisInfo.ATTRIBUTE, test);
@@ -643,6 +663,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * @return the NodeInfo representing the containing document
      */
 
+    @Override
     public NodeInfo getRoot() {
         return docWrapper.getRootNode();
     }
@@ -653,6 +674,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * <code>getEnumeration(Axis.CHILD, AnyNodeTest.getInstance()).hasNext()</code></p>
      */
 
+    @Override
     public boolean hasChildNodes() {
         // An attribute node has child text nodes
         synchronized (docWrapper.docNode) {
@@ -668,6 +690,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      *               documents
      */
 
+    @Override
     public void generateId(FastStringBuffer buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
     }
@@ -687,6 +710,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      *         <p>For a node other than an element, the method returns null.</p>
      */
 
+    @Override
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
         synchronized (docWrapper.docNode) {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -742,6 +766,49 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         }
     }
 
+    /**
+     * Get all the namespace bindings that are in-scope for this element.
+     * <p>For an element return all the prefix-to-uri bindings that are in scope. This may include
+     * a binding to the default namespace (represented by a prefix of ""). It will never include
+     * "undeclarations" - that is, the namespace URI will never be empty; the effect of an undeclaration
+     * is to remove a binding from the in-scope namespaces, not to add anything.</p>
+     * <p>For a node other than an element, returns null.</p>
+     *
+     * @return the in-scope namespaces for an element, or null for any other kind of node.
+     */
+    @Override
+    public NamespaceMap getAllNamespaces() {
+        if (getNodeKind() == Type.ELEMENT) {
+            if (inScopeNamespaces != null) {
+                return inScopeNamespaces;
+            } else {
+                NodeInfo parent = getParent();
+                NamespaceMap nsMap = parent != null && parent.getNodeKind() == Type.ELEMENT
+                        ? parent.getAllNamespaces()
+                        : NamespaceMap.emptyMap();
+                Element elem = (Element) node;
+                NamedNodeMap atts = elem.getAttributes();
+                if (atts != null) {
+                    int attsLen = atts.getLength();
+                    for (int i = 0; i < attsLen; i++) {
+                        Attr att = (Attr) atts.item(i);
+                        String attName = att.getName();
+                        if (attName.startsWith("xmlns")) {
+                            if (attName.length() == 5) {
+                                nsMap = nsMap.bind("", att.getValue());
+                            } else if (attName.charAt(5) == ':') {
+                                nsMap = nsMap.bind(attName.substring(6), att.getValue());
+                            }
+                        }
+                    }
+                }
+                return inScopeNamespaces = nsMap;
+            }
+        } else {
+            // not an element node
+            return null;
+        }
+    }
 
     /**
      * Determine whether this node has the is-id property
@@ -749,16 +816,18 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * @return true if the node is an ID
      */
 
+    @Override
     public boolean isId() {
         synchronized (docWrapper.docNode) {
             return (node instanceof Attr) && ((Attr) node).isId();
         }
     }
 
+    @Override
     public DOMNodeWrapper getNextSibling() {
-        synchronized (docWrapper.docNode) {
+        synchronized(docWrapper.docNode) {
             Node currNode = node;
-            for (int i=0; i<span; i++) {
+            for (int i = 0; i < span; i++) {
                 currNode = currNode.getNextSibling();
             }
             if (currNode != null) {
@@ -791,8 +860,9 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
 
+    @Override
     public DOMNodeWrapper getFirstChild() {
-        synchronized (docWrapper.docNode) {
+        synchronized(docWrapper.docNode) {
             Node currNode = node.getFirstChild();
             if (currNode != null) {
                 if (currNode.getNodeType() == Node.DOCUMENT_TYPE_NODE) {
@@ -807,8 +877,9 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         }
     }
 
+    @Override
     public DOMNodeWrapper getPreviousSibling() {
-        synchronized (docWrapper.docNode) {
+        synchronized(docWrapper.docNode) {
             Node currNode = node.getPreviousSibling();
             if (currNode != null) {
                 short type = currNode.getNodeType();
@@ -835,6 +906,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         }
     }
 
+    @Override
     public DOMNodeWrapper getSuccessorElement(DOMNodeWrapper anchor, String uri, String local) {
         synchronized (docWrapper.docNode) {
             Node stop = anchor == null ? null : anchor.node;
@@ -881,11 +953,11 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         }
     }
 
-    private final class AttributeEnumeration implements AxisIterator, LookaheadIterator<NodeInfo> {
+    private final class AttributeEnumeration implements AxisIterator, LookaheadIterator {
 
-        private ArrayList<Node> attList = new ArrayList<>(10);
+        private final ArrayList<Node> attList = new ArrayList<>(10);
         private int ix = 0;
-        private DOMNodeWrapper start;
+        private final DOMNodeWrapper start;
         private DOMNodeWrapper current;
 
         public  AttributeEnumeration(DOMNodeWrapper start) {
@@ -906,10 +978,12 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
             }
         }
 
+        @Override
         public boolean hasNext() {
             return ix < attList.size();
         }
 
+        @Override
         public NodeInfo next() {
             if (ix >= attList.size()) {
                 return null;
@@ -923,14 +997,16 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-         *         and {@link #LOOKAHEAD}. It is always
+         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED},
+         *         {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          *         It is acceptable for the properties of the iterator to change depending on its state.
          */
 
-        public int getProperties() {
-            return LOOKAHEAD;
+        @Override
+        public EnumSet<Property> getProperties() {
+            return EnumSet.of(Property.LOOKAHEAD);
         }
     }
 
@@ -942,13 +1018,13 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * preceding and preceding-or-ancestor axes (the latter being used by xsl:number)
      */
 
-    private final class ChildEnumeration implements AxisIterator, LookaheadIterator<NodeInfo> {
+    private final class ChildEnumeration implements AxisIterator, LookaheadIterator {
 
-        private DOMNodeWrapper start;
-        private DOMNodeWrapper commonParent;
-        private boolean downwards;  // iterate children of start node (not siblings)
-        private boolean forwards;   // iterate in document order (not reverse order)
-        private boolean elementsOnly;
+        private final DOMNodeWrapper start;
+        private final DOMNodeWrapper commonParent;
+        private final boolean downwards;  // iterate children of start node (not siblings)
+        private final boolean forwards;   // iterate in document order (not reverse order)
+        private final boolean elementsOnly;
         NodeList childNodes;
         private int childNodesLength;
         private int ix;             // index of the current DOM node within childNodes;
@@ -1041,6 +1117,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
             return count == 0 ? 1 : count;
         }
 
+        @Override
         public boolean hasNext() {
             if (forwards) {
                 return ix + currentSpan < childNodesLength;
@@ -1050,6 +1127,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         }
 
         /*@Nullable*/
+        @Override
         public NodeInfo next() {
             synchronized(start.docWrapper.docNode) {
                 while (true) {
@@ -1109,14 +1187,16 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-         *         and {@link #LOOKAHEAD}. It is always
+         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED},
+         *         {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          *         It is acceptable for the properties of the iterator to change depending on its state.
          */
 
-        public int getProperties() {
-            return LOOKAHEAD;
+        @Override
+        public EnumSet<Property> getProperties() {
+            return EnumSet.of(Property.LOOKAHEAD);
         }
 
     } // end of class ChildEnumeration

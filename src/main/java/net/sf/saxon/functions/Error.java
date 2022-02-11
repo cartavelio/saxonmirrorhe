@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
@@ -41,48 +41,7 @@ public class Error extends SystemFunction implements Callable {
         return true;
     }
 
-//    /**
-//     * Evaluation of the expression always throws an error
-//     */
-//
-//    /*@Nullable*/
-//    public Item evaluateItem(XPathContext context) throws XPathException {
-//        int len = getArity();
-//
-//        switch (len) {
-//            case 0:
-//                return error(context, null, null, null);
-//            case 1:
-//                // Note: error#1 does not allow the first argument to be an empty sequence. So we take
-//                // care to raise XPTY0004 in this case. But we still report a generic error message, rather
-//                // than complaining specifically about the missing error code
-//                QNameValue arg0 = (QNameValue) getArg(0).evaluateItem(context);
-//                if (arg0 == null) {
-//                    arg0 = new QNameValue("err", NamespaceConstant.ERR, "XPTY0004");
-//                }
-//                return error(context, arg0, null, null);
-//            case 2:
-//                return error(context, (QNameValue) getArg(0).evaluateItem(context), (StringValue) getArg(1).evaluateItem(context), null);
-//            case 3:
-//                return error(context, (QNameValue) getArg(0).evaluateItem(context), (StringValue) getArg(1).evaluateItem(context), getArg(2).iterate(context));
-//            default:
-//                return null;
-//        }
-//    }
-//
 
-//    /**
-//     * Evaluate an updating expression, adding the results to a Pending Update List.
-//     * The default implementation of this method, which is used for non-updating expressions,
-//     * throws an UnsupportedOperationException
-//     *
-//     * @param context the XPath dynamic evaluation context
-//     * @param pul     the pending update list to which the results should be written
-//     */
-//
-//    public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-//        evaluateItem(context);
-//    }
 
     public Item error(
             XPathContext context,
@@ -104,11 +63,11 @@ public class Error extends SystemFunction implements Callable {
         } else {
             description = "Error signalled by application call on error()";
         }
-        XPathException e = new XPathException(description);
+        XPathException e = new UserDefinedXPathException(description);
         e.setErrorCodeQName(qname.getStructuredQName());
         e.setXPathContext(context);
         if (getArity() > 2 && errObject != null) {
-            Sequence<?> errorObject = errObject.materialize();
+            Sequence errorObject = errObject.materialize();
             if (errorObject instanceof ZeroOrOne) {
                 Item root = ((ZeroOrOne) errorObject).head();
                 if ((root instanceof NodeInfo) && ((NodeInfo) root).getNodeKind() == Type.DOCUMENT) {
@@ -121,7 +80,7 @@ public class Error extends SystemFunction implements Callable {
                         int line = lineVal == null ? -1 : Integer.parseInt(lineVal);
                         String columnVal = errorElement.getAttributeValue("", "column");
                         int col = columnVal == null ? -1 : Integer.parseInt(columnVal);
-                        ExplicitLocation locator = new ExplicitLocation(module, line, col);
+                        Loc locator = new Loc(module, line, col);
                         e.setLocator(locator);
                     }
                 }
@@ -132,7 +91,8 @@ public class Error extends SystemFunction implements Callable {
     }
 
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         int len = arguments.length;
 
         switch (len) {
@@ -154,6 +114,13 @@ public class Error extends SystemFunction implements Callable {
                 return error(context, (QNameValue) arguments[0].head(), (StringValue) arguments[1].head(), arguments[2].iterate());
             default:
                 return null;
+        }
+    }
+
+    public static class UserDefinedXPathException extends XPathException {
+
+        public UserDefinedXPathException(String message) {
+            super(message);
         }
     }
 }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,11 +9,14 @@ package net.sf.saxon.trans;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.QName;
+import net.sf.saxon.s9api.XmlProcessingError;
 
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
@@ -168,6 +171,23 @@ public class XPathException extends TransformerException {
         }
     }
 
+    public static XPathException fromXmlProcessingError(XmlProcessingError error) {
+        if (error instanceof XmlProcessingException) {
+            return ((XmlProcessingException)error).getXPathException();
+        } else {
+            XPathException e = new XPathException(error.getMessage());
+            e.setLocation(error.getLocation());
+            e.setHostLanguage(error.getHostLanguage());
+            e.setIsStaticError(error.isStaticError());
+            e.setIsTypeError(error.isTypeError());
+            QName code = error.getErrorCode();
+            if (code != null) {
+                e.setErrorCodeQName(code.getStructuredQName());
+            }
+            return e;
+        }
+    }
+
     /**
      * Set dynamic context information in the exception object
      *
@@ -215,7 +235,7 @@ public class XPathException extends TransformerException {
         } else if (locator instanceof Location) {
             return (Location)locator;
         } else {
-            return new ExplicitLocation(locator);
+            return new Loc(locator);
         }
     }
 
@@ -317,8 +337,6 @@ public class XPathException extends TransformerException {
         return isGlobalError;
     }
 
-
-
     /**
      * Set the host language code
      *
@@ -327,6 +345,16 @@ public class XPathException extends TransformerException {
 
     public void setHostLanguage(String language) {
         this.hostLanguage = language;
+    }
+
+    /**
+     * Set the host language code
+     *
+     * @param language a value such as "XPath", "XQuery", "XSLT Pattern"
+     */
+
+    public void setHostLanguage(HostLanguage language) {
+        this.hostLanguage = language == null ? null : language.toString();
     }
 
     /**
@@ -415,7 +443,7 @@ public class XPathException extends TransformerException {
      * @param value the error object, as supplied to the fn:error() function
      */
 
-    public void setErrorObject(Sequence<?> value) {
+    public void setErrorObject(Sequence value) {
         errorObject = value;
     }
 
@@ -425,7 +453,7 @@ public class XPathException extends TransformerException {
      * @return the error object, as supplied to the fn:error() function
      */
 
-    public Sequence<?> getErrorObject() {
+    public Sequence getErrorObject() {
         return errorObject;
     }
 
@@ -521,7 +549,7 @@ public class XPathException extends TransformerException {
     }
 
     /**
-     * Subclass of XPathException used to report that stack overflow was detected
+     * Subclass of XPathException used to report stack overflow
      */
 
     public static class StackOverflow extends XPathException {

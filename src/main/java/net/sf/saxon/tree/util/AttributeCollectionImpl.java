@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,12 +8,12 @@
 package net.sf.saxon.tree.util;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SimpleType;
 import org.xml.sax.Attributes;
 
@@ -21,8 +21,7 @@ import java.util.Arrays;
 
 
 /**
- * AttributeCollectionImpl is an implementation of both the SAX2 interface Attributes
- * and the Saxon equivalent AttributeCollection.
+ * AttributeCollectionImpl is an implementation of the SAX2 interface Attributes.
  * <p>As well as providing the information required by the SAX2 interface, an
  * AttributeCollection can hold type information (as needed to support the JAXP 1.3
  * {@link javax.xml.validation.ValidatorHandler} interface), and location information
@@ -31,7 +30,7 @@ import java.util.Arrays;
  * generated.</p>
  */
 
-public class AttributeCollectionImpl implements Attributes, AttributeCollection {
+public class AttributeCollectionImpl implements Attributes {
 
     private Configuration config;
     // Following fields can be null ONLY if used==0. We avoid allocating the arrays for the common
@@ -44,57 +43,20 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
     // the types array can be null even if used>0; this indicates that all attributes are untyped
     private SimpleType[] types = null;
 
-    // Empty attribute collection. The caller is trusted not to try and modify it.
 
-    /*@NotNull*/ public static AttributeCollectionImpl EMPTY_ATTRIBUTE_COLLECTION =
-            new AttributeCollectionImpl((Configuration) null);
-
-    /**
-     * Create an empty attribute list.
-     *
-     * @param config the Saxon Configuration
-     */
-
-    public AttributeCollectionImpl(Configuration config) {
+    public AttributeCollectionImpl(Configuration config, int initialSize) {
         this.config = config;
+        names = new NodeName[initialSize];
+        values = new String[initialSize];
+        props = new int[initialSize];
+        locations = new Location[initialSize];
         used = 0;
     }
 
-    /**
-     * Create an attribute list as a copy of an existing attribute list
-     *
-     * @param atts the existing attribute list to be copied
-     * @return the copied attribute list. Note that if the original attribute list
-     *         is empty, the method returns the singleton object {@link #EMPTY_ATTRIBUTE_COLLECTION};
-     *         this case must therefore be handled specially if the returned attribute list is to
-     *         be modified.
-     */
-
-    /*@Nullable*/
-    public static AttributeCollectionImpl copy(/*@NotNull*/ AttributeCollectionImpl atts) {
-        if (atts.getLength() == 0) {
-            return EMPTY_ATTRIBUTE_COLLECTION;
-        }
-        AttributeCollectionImpl t = new AttributeCollectionImpl(atts.config);
-        t.used = atts.used;
-        t.names = new NodeName[atts.used];
-        t.values = new String[atts.used];
-        t.props = new int[atts.used];
-        t.locations = new Location[atts.used];
-        System.arraycopy(atts.names, 0, t.names, 0, atts.used);
-        System.arraycopy(atts.values, 0, t.values, 0, atts.used);
-        System.arraycopy(atts.props, 0, t.props, 0, atts.used);
-        System.arraycopy(atts.locations, 0, t.locations, 0, atts.used);
-        if (atts.types != null) {
-            t.types = new SimpleType[atts.used];
-            System.arraycopy(atts.types, 0, t.types, 0, atts.used);
-        }
-        return t;
-    }
 
     /**
      * Add an attribute to an attribute list. The parameters correspond
-     * to the parameters of the {@link net.sf.saxon.event.Receiver#attribute(NodeName, SimpleType, CharSequence, net.sf.saxon.expr.parser.Location, int)}
+     * to the parameters of the {@link Outputter#attribute(NodeName, SimpleType, CharSequence, Location, int)}
      * method. There is no check that the name of the attribute is distinct from other attributes
      * already in the collection: this check must be made by the caller.
      *
@@ -136,10 +98,9 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
 
     /**
      * Set (overwrite) an attribute in the attribute list. The parameters correspond
-     * to the parameters of the {@link net.sf.saxon.event.Receiver#attribute(NodeName, SimpleType, CharSequence, net.sf.saxon.expr.parser.Location, int)}
+     * to the parameters of the {@link Outputter#attribute(NodeName, SimpleType, CharSequence, Location, int)}
      * method.
-     *
-     * @param index      Identifies the entry to be replaced. Must be in range (nasty things happen if not)
+     *  @param index      Identifies the entry to be replaced. Must be in range (nasty things happen if not)
      * @param nodeName   representing the attribute name.
      * @param type       The attribute type code
      * @param value      The attribute value (must not be null)
@@ -155,35 +116,6 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
         values[index] = value;
     }
 
-
-    /**
-     * Clear the attribute list. This removes the values but doesn't free the memory used.
-     * free the memory, use clear() then compact().
-     */
-
-    public void clear() {
-        used = 0;
-    }
-
-    /**
-     * Compact the attribute list to avoid wasting memory
-     */
-
-    public void compact() {
-        if (used == 0) {
-            props = null;
-            values = null;
-        } else if (values != null && values.length > used) {
-            values = Arrays.copyOf(values, used);
-            props = Arrays.copyOf(props, used);
-            names = Arrays.copyOf(names, used);
-            locations = Arrays.copyOf(locations, used);
-            if (types != null) {
-                types = Arrays.copyOf(types, used);
-            }
-        }
-    }
-
     /**
      * Return the number of attributes in the list.
      *
@@ -192,46 +124,9 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      *         Such slots are not reused, to preserve attribute identity.
      */
 
+    @Override
     public int getLength() {
         return values == null ? 0 : used;
-    }
-
-    /**
-     * Get the fingerprint of an attribute (by position).
-     *
-     * @param index The position of the attribute in the list.
-     * @return The display name of the attribute as a string, or -1 if there
-     * is no attribute at that position.
-     */
-
-    public int getFingerprint(int index) {
-        if (names == null) {
-            return -1;
-        }
-        if (index < 0 || index >= used || names[index] == null) {
-            return -1;
-        }
-
-        return names[index].obtainFingerprint(config.getNamePool());
-    }
-
-    /**
-     * Get the node name of an attribute (by position).
-     *
-     * @param index The position of the attribute in the list.
-     * @return The node name, as a NodeName object, or null if there is no name at this index
-     */
-
-    /*@Nullable*/
-    public NodeName getNodeName(int index) {
-        if (names == null) {
-            return null;
-        }
-        if (index < 0 || index >= used) {
-            return null;
-        }
-
-        return names[index];
     }
 
 
@@ -263,86 +158,35 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
 
     public Location getLocation(int index) {
         if (locations == null) {
-            return ExplicitLocation.UNKNOWN_LOCATION;
+            return Loc.NONE;
         }
         if (index < 0 || index >= used) {
-            return ExplicitLocation.UNKNOWN_LOCATION;
+            return Loc.NONE;
         }
 
         return locations[index];
     }
 
-    /**
-     * Get the systemId part of the location of an attribute, at a given index.
-     * <p>Attribute location information is not available from a SAX parser, so this method
-     * is not useful for getting the location of an attribute in a source document. However,
-     * in a Saxon result document, the location information represents the location in the
-     * stylesheet of the instruction used to generate this attribute, which is useful for
-     * debugging.</p>
-     *
-     * @param index the required attribute
-     * @return the systemId of the location of the attribute
-     */
-
-    public String getSystemId(int index) {
-        return getLocation(index).getSystemId();
-    }
-
-    /**
-     * Get the line number part of the location of an attribute, at a given index.
-     * <p>Attribute location information is not available from a SAX parser, so this method
-     * is not useful for getting the location of an attribute in a source document. However,
-     * in a Saxon result document, the location information represents the location in the
-     * stylesheet of the instruction used to generate this attribute, which is useful for
-     * debugging.</p>
-     *
-     * @param index the required attribute
-     * @return the line number of the location of the attribute
-     */
-
-    public int getLineNumber(int index) {
-        return getLocation(index).getLineNumber();
-    }
 
     /**
      * Get the properties of an attribute (by position)
      *
      * @param index The position of the attribute in the list.
      * @return The properties of the attribute. This is a set
-     *         of bit-settings defined in class {@link net.sf.saxon.event.ReceiverOptions}. The
-     *         most interesting of these is {{@link net.sf.saxon.event.ReceiverOptions#DEFAULTED_ATTRIBUTE},
+     *         of bit-settings defined in class {@link net.sf.saxon.event.ReceiverOption}. The
+     *         most interesting of these is {{@link net.sf.saxon.event.ReceiverOption#DEFAULTED_VALUE},
      *         which indicates an attribute that was added to an element as a result of schema validation.
      */
 
     public int getProperties(int index) {
         if (props == null) {
-            return -1;
+            return ReceiverOption.NONE;
         }
         if (index < 0 || index >= used) {
-            return -1;
+            return ReceiverOption.NONE;
         }
 
         return props[index];
-    }
-
-    /**
-     * Get the prefix of the name of an attribute (by position).
-     *
-     * @param index The position of the attribute in the list.
-     * @return The prefix of the attribute name as a string, or null if there
-     *         is no attribute at that position. Returns "" for an attribute that
-     *         has no prefix.
-     */
-
-    /*@Nullable*/
-    public String getPrefix(int index) {
-        if (names == null) {
-            return null;
-        }
-        if (index < 0 || index >= used) {
-            return null;
-        }
-        return names[index].getPrefix();
     }
 
     /**
@@ -354,6 +198,7 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      */
 
     /*@Nullable*/
+    @Override
     public String getQName(int index) {
         if (names == null) {
             return null;
@@ -373,6 +218,7 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      */
 
     /*@Nullable*/
+    @Override
     public String getLocalName(int index) {
         if (names == null) {
             return null;
@@ -392,6 +238,7 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      */
 
     /*@Nullable*/
+    @Override
     public String getURI(int index) {
         if (names == null) {
             return null;
@@ -416,6 +263,7 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      */
 
     /*@NotNull*/
+    @Override
     public String getType(int index) {
         int typeCode = getTypeAnnotation(index).getFingerprint();
         switch (typeCode) {
@@ -447,6 +295,7 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      */
 
     /*@Nullable*/
+    @Override
     public String getType(String uri, String localname) {
         int index = findByName(uri, localname);
         return (index < 0 ? null : getType(index));
@@ -461,6 +310,7 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      */
 
     /*@Nullable*/
+    @Override
     public String getValue(int index) {
         if (values == null) {
             return null;
@@ -480,18 +330,9 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      */
 
     /*@Nullable*/
+    @Override
     public String getValue(String uri, String localname) {
         int index = findByName(uri, localname);
-        return (index < 0 ? null : getValue(index));
-    }
-
-    /**
-     * Get the attribute value using its fingerprint
-     */
-
-    /*@Nullable*/
-    public String getValueByFingerprint(int fingerprint) {
-        int index = findByFingerprint(fingerprint);
         return (index < 0 ? null : getValue(index));
     }
 
@@ -502,6 +343,7 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      * @return The index position of the attribute
      */
 
+    @Override
     public int getIndex(/*@NotNull*/ String qname) {
         if (names == null) {
             return -1;
@@ -542,17 +384,9 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      * @return The index position of the attribute, or -1 if absent
      */
 
+    @Override
     public int getIndex(String uri, String localname) {
         return findByName(uri, localname);
-    }
-
-    /**
-     * Get the index, given the fingerprint.
-     * Return -1 if not found.
-     */
-
-    public int getIndexByFingerprint(int fingerprint) {
-        return findByFingerprint(fingerprint);
     }
 
     /**
@@ -564,6 +398,7 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      */
 
     /*@NotNull*/
+    @Override
     public String getType(/*@NotNull*/ String name) {
         int index = getIndex(name);
         return getType(index);
@@ -579,29 +414,10 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
      */
 
     /*@Nullable*/
+    @Override
     public String getValue(/*@NotNull*/ String name) {
         int index = getIndex(name);
         return getValue(index);
-    }
-
-    /**
-     * Ask whether the attribute collection contains any attributes
-     * in a specified namespace
-     *
-     * @param uri the specified namespace
-     * @return true if there are one or more attributes in this namespace
-     */
-
-    public boolean hasAttributeInNamespace(String uri) {
-        if (names == null || config == null) {
-            return false;        // indicates an empty attribute set
-        }
-        for (int i = 0; i < used; i++) {
-            if (names[i] != null && names[i].hasURI(uri)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -622,135 +438,6 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
             }
         }
         return -1;
-    }
-
-    /**
-     * Find an attribute by fingerprint
-     *
-     * @param fingerprint the fingerprint representing the name of the required attribute
-     * @return the index of the attribute, or -1 if absent
-     */
-
-    private int findByFingerprint(int fingerprint) {
-        if (names == null || config == null) {
-            return -1;
-        }
-        NamePool pool = config.getNamePool();
-        for (int i = 0; i < used; i++) {
-            NodeName nn = names[i];
-            if (nn != null) {
-                if (nn.hasFingerprint()) {
-                    if (nn.getFingerprint() == fingerprint) {
-                        return i;
-                    }
-                } else {
-                    if (nn.hasURI(pool.getURI(fingerprint)) && nn.getLocalPart().equals(pool.getLocalName(fingerprint))) {
-                        return i;
-                    }
-                }
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Find an attribute by node name
-     *
-     * @param nodeName the name of the required attribute
-     * @return the index of the attribute, or -1 if absent
-     */
-
-    public int findByNodeName(/*@NotNull*/ NodeName nodeName) {
-        if (props == null || config == null) {
-            return -1;
-        }
-        if (nodeName.hasFingerprint()) {
-            return findByFingerprint(nodeName.getFingerprint());
-        } else {
-            return findByName(nodeName.getURI(), nodeName.getLocalPart());
-        }
-    }
-
-
-    /**
-     * Determine whether a given attribute has the is-ID property set
-     */
-
-    public boolean isId(int index) {
-        try {
-            return !isDeleted(index) &&
-                            (StandardNames.XML_ID_NAME.equals(names[index]) ||
-                                    (getProperties(index) & ReceiverOptions.IS_ID) != 0 ||
-                                     getTypeAnnotation(index).isIdType());
-        } catch (MissingComponentException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Determine whether a given attribute has the is-idref property set
-     */
-
-    public boolean isIdref(int index) {
-        try {
-            return getTypeAnnotation(index).isIdRefType();
-        } catch (MissingComponentException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Delete the attribute at a given index position. Note that the index position will not be reused, to ensure
-     * that any new attributes added to the element have a distinct identity. Instead, the slot occupied
-     * by the attribute is nilled out.
-     *
-     * @param index The index position of the attribute to be removed
-     */
-
-    public void removeAttribute(int index) {
-        names[index] = null;
-        props[index] = -1;
-        values[index] = null;
-        locations[index] = null;
-        if (types != null) {
-            types[index] = null;
-        }
-    }
-
-    /**
-     * Test whether the attribute at a given index has been deleted
-     *
-     * @param index the index position of the (ex-) attribute
-     * @return true if the attribute has been deleted
-     */
-
-    public boolean isDeleted(int index) {
-        return names[index] == null;
-    }
-
-    /**
-     * Rename an attribute
-     *
-     * @param index   the index position of the attribute
-     * @param newName the namecode of the new name
-     */
-
-    public void renameAttribute(int index, NodeName newName) {
-        names[index] = newName;
-        if (types != null) {
-            types[index] = BuiltInAtomicType.UNTYPED_ATOMIC;
-        }
-    }
-
-    /**
-     * Replace the value of an attribute
-     *
-     * @param index    position of the attribute
-     * @param newValue the new string value of the attribute
-     */
-
-    public void replaceAttribute(int index, /*@NotNull*/ CharSequence newValue) {
-        values[index] = newValue.toString();
     }
 
     /**
@@ -777,32 +464,23 @@ public class AttributeCollectionImpl implements Attributes, AttributeCollection 
     }
 
     /**
-     * Swap two attributes (used for sorting)
+     * Add an attribute to the collection, replacing any existing attribute
+     * with the same name
      *
-     * @param i the position of one value
-     * @param j the position of the other value
+     * @param attribute the attribute to be added to the collection
      */
 
-    public void swap(int i, int j) {
-        NodeName n = names[i];
-        names[i] = names[j];
-        names[j] = n;
-        if (types != null) {
-            SimpleType s = types[i];
-            types[i] = types[j];
-            types[j] = s;
+    public void setAttribute(AttributeInfo attribute) {
+        NodeName name = attribute.getNodeName();
+        int index = getIndex(name.getURI(), name.getLocalPart());
+        if (index < 0) {
+            addAttribute(name, attribute.getType(), attribute.getValue(),
+                         attribute.getLocation(), attribute.getProperties());
+        } else {
+            setAttribute(index, name, attribute.getType(), attribute.getValue(),
+                         attribute.getLocation(), attribute.getProperties());
         }
-        String c = values[i];
-        values[i] = values[j];
-        values[j] = c;
-        int p = props[i];
-        props[i] = props[j];
-        props[j] = p;
-        Location l = locations[i];
-        locations[i] = locations[j];
-        locations[j] = l;
     }
-
 
 }
 

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -53,7 +53,7 @@ public class ParseJsonFn extends JsonToXMLFn {
      */
     @Override
     protected Item eval(String input, MapItem options, XPathContext context) throws XPathException {
-        Map<String, Sequence<?>> checkedOptions = null;
+        Map<String, Sequence> checkedOptions = null;
         if (options != null) {
             checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
         }
@@ -70,7 +70,7 @@ public class ParseJsonFn extends JsonToXMLFn {
      * @throws XPathException if the syntax of the input is incorrect
      */
 
-    public static Item parse(String input, Map<String, Sequence<?>> options, XPathContext context) throws XPathException {
+    public static Item parse(String input, Map<String, Sequence> options, XPathContext context) throws XPathException {
         JsonParser parser = new JsonParser();
         int flags = 0;
         if (options != null) {
@@ -93,4 +93,4 @@ public class ParseJsonFn extends JsonToXMLFn {
 
 }
 
-// Copyright (c) 2011-2014 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

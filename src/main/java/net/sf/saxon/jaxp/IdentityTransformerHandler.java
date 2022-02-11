@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -55,6 +55,7 @@ public class IdentityTransformerHandler extends ReceivingContentHandler implemen
      * Get the Transformer used for this transformation
      */
 
+    @Override
     public Transformer getTransformer() {
         return controller;
     }
@@ -63,6 +64,7 @@ public class IdentityTransformerHandler extends ReceivingContentHandler implemen
      * Set the SystemId of the document
      */
 
+    @Override
     public void setSystemId(String url) {
         systemId = url;
     }
@@ -71,6 +73,7 @@ public class IdentityTransformerHandler extends ReceivingContentHandler implemen
      * Get the systemId of the document
      */
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -79,6 +82,7 @@ public class IdentityTransformerHandler extends ReceivingContentHandler implemen
      * Set the output destination of the transformation
      */
 
+    @Override
     public void setResult(Result result) {
         if (result == null) {
             throw new IllegalArgumentException("Result must not be null");
@@ -100,6 +104,7 @@ public class IdentityTransformerHandler extends ReceivingContentHandler implemen
      * Override the behaviour of startDocument() in ReceivingContentHandler
      */
 
+    @Override
     public void startDocument() throws SAXException {
         if (result == null) {
             result = new StreamResult(System.out);

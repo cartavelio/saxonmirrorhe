@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,13 +9,14 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.OptimizerOptions;
-import net.sf.saxon.lib.ErrorGatherer;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ModuleURIResolver;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingAbort;
 
 import javax.xml.transform.ErrorListener;
 import java.io.*;
@@ -24,14 +25,14 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 /**
- * An XQueryCompiler object allows XQuery 1.0 queries to be compiled. The compiler holds information that
+ * An {@code XQueryCompiler} object allows XQuery 1.0 queries to be compiled. The compiler holds information that
  * represents the static context for the compilation.
- * <p>To construct an XQueryCompiler, use the factory method {@link Processor#newXQueryCompiler}.</p>
- * <p>An XQueryCompiler may be used repeatedly to compile multiple queries. Any changes made to the
+ * <p>To construct an {@code XQueryCompiler}, use the factory method {@link Processor#newXQueryCompiler}.</p>
+ * <p>An {@code XQueryCompiler} may be used repeatedly to compile multiple queries. Any changes made to the
  * XQueryCompiler (that is, to the static context) do not affect queries that have already been compiled.
- * An XQueryCompiler may in principle be used concurrently in multiple threads, but in practice this
- * is best avoided because all instances will share the same ErrorListener and it will therefore be
- * difficult to establish which error messages are associated with each compilation.</p>
+ * An {@code XQueryCompiler} may in principle be used concurrently in multiple threads, but in practice this
+ * is best avoided because all instances will share the same {@code ErrorReporter} or {@code ErrorListener}
+ * and it will therefore be difficult to establish which error messages are associated with each compilation.</p>
  *
  * @since 9.0
  */
@@ -39,7 +40,7 @@ import java.util.List;
 public class XQueryCompiler {
 
     private Processor processor;
-    private StaticQueryContext env;
+    private StaticQueryContext staticQueryContext;
     private ItemType requiredContextItemType;
     private String encoding;
 
@@ -51,7 +52,7 @@ public class XQueryCompiler {
 
     protected XQueryCompiler(Processor processor) {
         this.processor = processor;
-        this.env = processor.getUnderlyingConfiguration().newStaticQueryContext();
+        this.staticQueryContext = processor.getUnderlyingConfiguration().newStaticQueryContext();
     }
 
     /**
@@ -73,12 +74,12 @@ public class XQueryCompiler {
 
     public void setBaseURI(URI baseURI) {
         if (baseURI == null) {
-            env.setBaseURI(null);
+            staticQueryContext.setBaseURI(null);
         } else {
             if (!baseURI.isAbsolute()) {
                 throw new IllegalArgumentException("Base URI must be an absolute URI: " + baseURI);
             }
-            env.setBaseURI(baseURI.toString());
+            staticQueryContext.setBaseURI(baseURI.toString());
         }
     }
 
@@ -90,14 +91,17 @@ public class XQueryCompiler {
 
     public URI getBaseURI() {
         try {
-            return new URI(env.getBaseURI());
+            return new URI(staticQueryContext.getBaseURI());
         } catch (URISyntaxException err) {
             throw new IllegalStateException(err);
         }
     }
 
     /**
-     * Set the ErrorListener to be used during this query compilation episode
+     * Set the ErrorListener to be used during this query compilation episode.
+     *
+     * <p>This method is obsoleted by {@link #setErrorReporter(ErrorReporter)}, and its effect
+     * is to set an error reporter that delegates to the supplied {@link ErrorListener}.</p>
      *
      * @param listener The error listener to be used. This is notified of all errors detected during the
      *                 compilation. Static errors (as defined in the XQuery specification) are notified
@@ -107,7 +111,7 @@ public class XQueryCompiler {
      */
 
     public void setErrorListener(ErrorListener listener) {
-        env.setErrorListener(listener);
+        staticQueryContext.setErrorListener(listener);
     }
 
     /**
@@ -119,8 +123,46 @@ public class XQueryCompiler {
      */
 
     public ErrorListener getErrorListener() {
-        return env.getErrorListener();
+        return staticQueryContext.getErrorListener();
     }
+
+    /**
+     * Supply a callback which will be notified of all static errors and warnings
+     * encountered during a compilation carried out using this {@code XQueryCompiler}.
+     * <p>Calling this method overwrites the effect of any previous call on {@link #setErrorListener(ErrorListener)}
+     * or {@code setErrorList}.</p>
+     * <p>If no error reporter is supplied by the caller, error information will be written to the standard error stream.
+     * Applications should then ensure that the contents of this stream are made visible to the query author.</p>
+     * <p>This error reporter is <b>not</b> used for dynamic errors occurring during query execution.</p>
+     * <p>Note that if multiple compilations are carried out concurrently in different threads using
+     * the same {@code XQueryCompiler}, then the {@link ErrorReporter} must be thread-safe; messages from different
+     * compilations will be interleaved, and there is no obvious way of determining which message originated
+     * from which compilation. In practice, it is only sensible to do this in an environment
+     * where the queries are known to be error-free.</p>
+     *
+     * @param reporter a callback function which will be notified of all Static errors and warnings
+     *                 encountered during a compilation episode.
+     * @since 10.0
+     */
+
+    public void setErrorReporter(ErrorReporter reporter) {
+        staticQueryContext.setErrorReporter(reporter);
+    }
+
+    /**
+     * Get the recipient of error information previously registered using {@link #setErrorReporter(ErrorReporter)}.
+     *
+     * @return the recipient previously registered explicitly using {@link #setErrorReporter(ErrorReporter)},
+     * or implicitly using {@link #setErrorListener(ErrorListener)} or {@link #setErrorList(List)}.
+     * If no error reporter has been registered, the result may be null, or may return
+     * a system supplied error reporter.
+     * @since 10.0
+     */
+
+    public ErrorReporter getErrorReporter() {
+        return staticQueryContext.getErrorReporter();
+    }
+
 
     /**
      * Set whether trace hooks are to be included in the compiled code. To use tracing, it is necessary
@@ -130,7 +172,7 @@ public class XQueryCompiler {
      */
 
     public void setCompileWithTracing(boolean option) {
-        env.setCompileWithTracing(option);
+        staticQueryContext.setCompileWithTracing(option);
     }
 
     /**
@@ -140,7 +182,7 @@ public class XQueryCompiler {
      */
 
     public boolean isCompileWithTracing() {
-        return env.isCompileWithTracing();
+        return staticQueryContext.isCompileWithTracing();
     }
 
     /**
@@ -152,7 +194,7 @@ public class XQueryCompiler {
      */
 
     public void setModuleURIResolver(ModuleURIResolver resolver) {
-        env.setModuleURIResolver(resolver);
+        staticQueryContext.setModuleURIResolver(resolver);
     }
 
     /**
@@ -165,7 +207,7 @@ public class XQueryCompiler {
 
     /*@Nullable*/
     public ModuleURIResolver getModuleURIResolver() {
-        return env.getModuleURIResolver();
+        return staticQueryContext.getModuleURIResolver();
     }
 
     /**
@@ -208,10 +250,10 @@ public class XQueryCompiler {
      */
 
     public void setUpdatingEnabled(boolean updating) {
-        if (updating && !env.getConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
+        if (updating && !staticQueryContext.getConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
             throw new UnsupportedOperationException("XQuery Update is not supported in this Saxon Configuration");
         }
-        env.setUpdatingEnabled(updating);
+        staticQueryContext.setUpdatingEnabled(updating);
     }
 
     /**
@@ -224,7 +266,7 @@ public class XQueryCompiler {
      */
 
     public boolean isUpdatingEnabled() {
-        return env.isUpdatingEnabled();
+        return staticQueryContext.isUpdatingEnabled();
     }
 
     /**
@@ -247,7 +289,7 @@ public class XQueryCompiler {
         if (schemaAware && !processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
             throw new UnsupportedOperationException("Schema-awareness requires a Saxon-EE license");
         }
-        env.setSchemaAware(schemaAware);
+        staticQueryContext.setSchemaAware(schemaAware);
     }
 
     /**
@@ -259,7 +301,7 @@ public class XQueryCompiler {
      */
 
     public boolean isSchemaAware() {
-        return env.isSchemaAware();
+        return staticQueryContext.isSchemaAware();
     }
 
     /**
@@ -279,7 +321,7 @@ public class XQueryCompiler {
      */
 
     public void setStreaming(boolean option) {
-        env.setStreaming(option);
+        staticQueryContext.setStreaming(option);
         // We check this again more securely, but it's good to give the error as soon as possible
         if (option && !processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
             throw new UnsupportedOperationException("Streaming requires a Saxon-EE license");
@@ -299,24 +341,7 @@ public class XQueryCompiler {
      */
 
     public boolean isStreaming() {
-        return env.isStreaming();
-    }
-
-    /**
-     * Say whether an XQuery 1.0, 3.0, or 3.1 processor is required.
-     *
-     * @param value Must be "3.1"; any other value is ignored with a warning.
-     * @since 9.2. The handling of different XQuery version numbers has changed in
-     * successive Saxon releases.
-     * @deprecated in 9.8; the only XQuery version supported is "3.1", and any other value is
-     * ignored with a warning.
-     */
-
-    public void setLanguageVersion(String value) {
-        if (!"3.1".equals(value)) {
-            env.getErrorListener().warning(new XPathException("XQuery version ignored: only \"3.1\" is recognized"));
-        }
-        env.setLanguageVersion(31);
+        return staticQueryContext.isStreaming();
     }
 
     /**
@@ -347,7 +372,7 @@ public class XQueryCompiler {
      */
 
     public void declareNamespace(String prefix, String uri) {
-        env.declareNamespace(prefix, uri);
+        staticQueryContext.declareNamespace(prefix, uri);
     }
 
     /**
@@ -363,7 +388,7 @@ public class XQueryCompiler {
      */
 
     public void declareDefaultCollation(String uri) {
-        env.declareDefaultCollation(uri);
+        staticQueryContext.declareDefaultCollation(uri);
     }
 
 
@@ -377,7 +402,7 @@ public class XQueryCompiler {
 
     public void setRequiredContextItemType(ItemType type) {
         requiredContextItemType = type;
-        env.setRequiredContextItemType(type.getUnderlyingItemType());
+        staticQueryContext.setRequiredContextItemType(type.getUnderlyingItemType());
     }
 
     /**
@@ -406,9 +431,9 @@ public class XQueryCompiler {
 
     public void setFastCompilation(boolean fast) {
         if (fast) {
-            env.setOptimizerOptions(new OptimizerOptions(0));
+            staticQueryContext.setOptimizerOptions(new OptimizerOptions(0));
         } else {
-            env.setOptimizerOptions(getProcessor().getUnderlyingConfiguration().getOptimizerOptions());
+            staticQueryContext.setOptimizerOptions(getProcessor().getUnderlyingConfiguration().getOptimizerOptions());
         }
     }
 
@@ -420,7 +445,7 @@ public class XQueryCompiler {
      */
 
     public boolean isFastCompilation() {
-        return env.getOptimizerOptions().getOptions() == 0;
+        return staticQueryContext.getOptimizerOptions().getOptions() == 0;
     }
 
     /**
@@ -438,8 +463,8 @@ public class XQueryCompiler {
 
     public void compileLibrary(String query) throws SaxonApiException {
         try {
-            env.compileLibrary(query);
-        } catch (XPathException e) {
+            staticQueryContext.compileLibrary(query);
+        } catch (XPathException | UncheckedXPathException | XmlProcessingAbort e) {
             throw new SaxonApiException(e);
         }
     }
@@ -464,11 +489,11 @@ public class XQueryCompiler {
 
     public void compileLibrary(File query) throws SaxonApiException, IOException {
         try (FileInputStream stream = new FileInputStream(query)) {
-            String savedBaseUri = env.getBaseURI();
-            env.setBaseURI(query.toURI().toString());
-            env.compileLibrary(stream, encoding);
-            env.setBaseURI(savedBaseUri);
-        } catch (XPathException e) {
+            String savedBaseUri = staticQueryContext.getBaseURI();
+            staticQueryContext.setBaseURI(query.toURI().toString());
+            staticQueryContext.compileLibrary(stream, encoding);
+            staticQueryContext.setBaseURI(savedBaseUri);
+        } catch (XPathException | UncheckedXPathException | XmlProcessingAbort e) {
             throw new SaxonApiException(e);
         }
     }
@@ -488,8 +513,8 @@ public class XQueryCompiler {
 
     public void compileLibrary(Reader query) throws SaxonApiException {
         try {
-            env.compileLibrary(query);
-        } catch (XPathException | IOException e) {
+            staticQueryContext.compileLibrary(query);
+        } catch (XPathException | IOException | UncheckedXPathException | XmlProcessingAbort e) {
             throw new SaxonApiException(e);
         }
     }
@@ -512,8 +537,8 @@ public class XQueryCompiler {
 
     public void compileLibrary(InputStream query) throws SaxonApiException {
         try {
-            env.compileLibrary(query, encoding);
-        } catch (XPathException | IOException e) {
+            staticQueryContext.compileLibrary(query, encoding);
+        } catch (XPathException | IOException | UncheckedXPathException | XmlProcessingAbort e ) {
             throw new SaxonApiException(e);
         }
     }
@@ -534,10 +559,10 @@ public class XQueryCompiler {
 
     public XQueryExecutable compile(String query) throws SaxonApiException {
         try {
-            return new XQueryExecutable(processor, env.compileQuery(query));
+            return new XQueryExecutable(processor, staticQueryContext.compileQuery(query));
         } catch (UncheckedXPathException e) {
             throw new SaxonApiException(e.getXPathException());
-        } catch (XPathException e) {
+        } catch (XPathException | XmlProcessingAbort e) {
             throw new SaxonApiException(e);
         }
     }
@@ -556,13 +581,15 @@ public class XQueryCompiler {
 
     public XQueryExecutable compile(File query) throws SaxonApiException, IOException {
         try (FileInputStream stream = new FileInputStream(query)) {
-            String savedBaseUri = env.getBaseURI();
-            env.setBaseURI(query.toURI().toString());
+            String savedBaseUri = staticQueryContext.getBaseURI();
+            staticQueryContext.setBaseURI(query.toURI().toString());
             XQueryExecutable exec =
-                    new XQueryExecutable(processor, env.compileQuery(stream, encoding));
-            env.setBaseURI(savedBaseUri);
+                    new XQueryExecutable(processor, staticQueryContext.compileQuery(stream, encoding));
+            staticQueryContext.setBaseURI(savedBaseUri);
             return exec;
-        } catch (XPathException e) {
+        } catch (UncheckedXPathException e) {
+            throw new SaxonApiException(e.getXPathException());
+        } catch (XPathException | XmlProcessingAbort e) {
             throw new SaxonApiException(e);
         }
     }
@@ -579,8 +606,10 @@ public class XQueryCompiler {
 
     public XQueryExecutable compile(InputStream query) throws SaxonApiException {
         try {
-            return new XQueryExecutable(processor, env.compileQuery(query, encoding));
-        } catch (XPathException e) {
+            return new XQueryExecutable(processor, staticQueryContext.compileQuery(query, encoding));
+        } catch (UncheckedXPathException e) {
+            throw new SaxonApiException(e.getXPathException());
+        } catch (XPathException | XmlProcessingAbort e) {
             throw new SaxonApiException(e);
         }
     }
@@ -598,8 +627,10 @@ public class XQueryCompiler {
 
     public XQueryExecutable compile(Reader query) throws SaxonApiException, IOException {
         try {
-            return new XQueryExecutable(processor, env.compileQuery(query));
-        } catch (XPathException e) {
+            return new XQueryExecutable(processor, staticQueryContext.compileQuery(query));
+        } catch (UncheckedXPathException e) {
+            throw new SaxonApiException(e.getXPathException());
+        } catch (XPathException | XmlProcessingAbort e) {
             throw new SaxonApiException(e);
         }
     }
@@ -615,24 +646,29 @@ public class XQueryCompiler {
      */
 
     public StaticQueryContext getUnderlyingStaticContext() {
-        return env;
+        return staticQueryContext;
     }
 
     /**
      * List of errors. The caller should supply an empty list before calling Compile; the processor will then populate
-     * the list with error information obtained during the compilation. Each error will be included as an object of type StaticError.
-     * If no error list is supplied by the caller, error information will be written to the standard error stream.
-     * <p>By supplying a custom List with a user-written add() method, it is possible to intercept error conditions as they occur.</p>
-     * <p>Calling this method overwrites any previous call to {@link #setErrorListener}, as well as any
-     * previous call to {@code #setErrorList}.</p>
+     * the list with error information obtained during the compilation. Each error will be included as an object of type
+     * {@link StaticError}.
+     * <p>If no error list is supplied by the caller, error information will be written to the standard error stream.
+     * Applications should then ensure that the contents of this stream are made visible to the query author.</p>
+     * <p>By supplying a custom List with a user-written add() method, it is possible to intercept error conditions as they occur.
+     * Such a custom List can conveniently be implemented by extending {@link java.util.AbstractList}, in which case the
+     * only methods that need to be provided are {@code java.util.AbstractList#get}, {@code java.util.AbstractList#size},
+     * and {@code java.util.AbstractList#add}; and the first two of these can be dummy implementations.</p>
+     * <p>Calling this method is equivalent to calling <code>setErrorReporter(errorList::add)</code>: that is,
+     * it registers an {@link ErrorReporter} whose {@link ErrorReporter#report} method adds the error to the list.</p>
      *
      * @param errorList a (typically empty) list that will be populated with {@link StaticError} objects giving details
      *                  of any static errors found in the query.
+     * @since 9.9. Redefined in 10.0 as a convenience wrapper over the new {@link #setErrorReporter(ErrorReporter)} method.
      */
-    public void setErrorList(List<StaticError> errorList) {
-        env.setErrorListener(new ErrorGatherer(errorList));
+    public void setErrorList(List<? super StaticError> errorList) {
+        setErrorReporter(errorList::add);
     }
-
 
 }
 

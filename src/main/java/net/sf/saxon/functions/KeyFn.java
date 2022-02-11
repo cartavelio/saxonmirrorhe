@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -22,6 +22,9 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class KeyFn extends SystemFunction implements StatefulSystemFunction {
@@ -68,6 +71,7 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
      * @param arguments expressions supplied as arguments in the function call
      */
 
+    @Override
     public int getSpecialProperties(Expression[] arguments) {
         int prop = StaticProperty.ORDERED_NODESET |
                 StaticProperty.SINGLE_DOCUMENT_NODESET |
@@ -90,7 +94,7 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
      * Mapping class to filter nodes that have the origin node as an ancestor-or-self
      */
 
-    public static class SubtreeFilter implements ItemMappingFunction<NodeInfo, NodeInfo> {
+    public static class SubtreeFilter implements ItemMappingFunction {
 
         private NodeInfo origin;
 
@@ -98,9 +102,10 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
             this.origin = origin;
         }
 
-        public NodeInfo mapItem(NodeInfo item) {
-            if (Navigator.isAncestorOrSelf(origin, item)) {
-                return item;
+        @Override
+        public NodeInfo mapItem(Item item) {
+            if (Navigator.isAncestorOrSelf(origin, (NodeInfo)item)) {
+                return (NodeInfo)item;
             } else {
                 return null;
             }
@@ -178,7 +183,8 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
      * @return the result of the evaluation, in the form of a Sequence
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo origin;
         if (arguments.length == 3) {
             origin = (NodeInfo) getOrigin(context, arguments[2]);
@@ -210,7 +216,7 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
         return ((NodeInfo) contextItem).getRoot();
     }
 
-    private static Item getOrigin(XPathContext context, Sequence<?> argument2) throws XPathException {
+    private static Item getOrigin(XPathContext context, Sequence argument2) throws XPathException {
         Item arg2;
         try {
             arg2 = argument2.head();
@@ -248,8 +254,8 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
         return selectedKeySet;
     }
 
-    protected static Sequence<NodeInfo> search(
-            final KeyManager keyManager, XPathContext context, Sequence<? extends AtomicValue> sought, NodeInfo origin, KeyDefinitionSet selectedKeySet) throws XPathException {
+    protected static Sequence search(
+            final KeyManager keyManager, XPathContext context, Sequence sought, NodeInfo origin, KeyDefinitionSet selectedKeySet) throws XPathException {
 
 
 //        if (internal) {
@@ -258,7 +264,7 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
         NodeInfo doc = origin.getRoot();
         if (selectedKeySet.isComposite()) {
             SequenceIterator soughtKey = sought.iterate();
-            SequenceIterator<NodeInfo> all =
+            SequenceIterator all =
                     keyManager.selectByCompositeKey(selectedKeySet, doc.getTreeInfo(), soughtKey, context);
             if (origin.equals(doc)) {
                 return new LazySequence(all);
@@ -266,25 +272,26 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
             return new LazySequence(new ItemMappingIterator(all, new SubtreeFilter(origin)));
 
         } else {
-            // Changed by bug 2929
-            SequenceIterator<NodeInfo> allResults = null;
-            SequenceIterator<? extends AtomicValue> keys = sought.iterate();
+            // Changed by bug 2929 and bug 4656
+            SequenceIterator allResults = null;
+            SequenceIterator keys = sought.iterate();
             AtomicValue keyValue;
-            while ((keyValue = keys.next()) != null) {
-                SequenceIterator<NodeInfo> someResults = keyManager.selectByKey(selectedKeySet, doc.getTreeInfo(), keyValue, context);
-                if (allResults == null) {
-                    allResults = someResults;
-                } else {
-                    allResults = new UnionEnumeration(allResults, someResults, LocalOrderComparer.getInstance());
-                }
+            List<SequenceIterator> allKeyIterators = new ArrayList<>();
+            while ((keyValue = (AtomicValue)keys.next()) != null) {
+                SequenceIterator someResults = keyManager.selectByKey(selectedKeySet, doc.getTreeInfo(), keyValue, context);
+                allKeyIterators.add(someResults);
             }
-            if (allResults == null) {
-                allResults = EmptyIterator.OfNodes.THE_INSTANCE;
+            if (allKeyIterators.isEmpty()) {
+                allResults = EmptyIterator.ofNodes();
+            } else if (allKeyIterators.size() == 1) {
+                allResults = allKeyIterators.get(0);
+            } else {
+                allResults = new UnionIterator(allKeyIterators, LocalOrderComparer.getInstance());
             }
             if (origin.equals(doc)) {
-                return new LazySequence<>(allResults);
+                return new LazySequence(allResults);
             }
-            return new LazySequence<>(new ItemMappingIterator<>(allResults, new SubtreeFilter(origin)));
+            return new LazySequence(new ItemMappingIterator(allResults, new SubtreeFilter(origin)));
         }
     }
 

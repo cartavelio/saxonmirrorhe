@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -46,7 +46,7 @@ import java.util.List;
 
 public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
 
-    private static XOMObjectModel THE_INSTANCE = new XOMObjectModel();
+    private final static XOMObjectModel THE_INSTANCE = new XOMObjectModel();
 
     public static XOMObjectModel getInstance() {
         return THE_INSTANCE;
@@ -62,6 +62,7 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
      * @return by convention (but not necessarily) the class that implements a document node in the relevant
      * external model
      */
+    @Override
     public String getDocumentClassName() {
         return "nu.xom.Document";
     }
@@ -71,23 +72,28 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
      * an XPath implementation
      */
 
+    @Override
     public String getIdentifyingURI() {
         return NamespaceConstant.OBJECT_MODEL_XOM;
     }
 
+    @Override
     public String getName() {
         return "XOM";
     }
 
+    @Override
     public Builder makeBuilder(PipelineConfiguration pipe) {
         return new XOMWriter(pipe);
     }
 
     /*@Nullable*/
+    @Override
     public PJConverter getPJConverter(Class<?> targetClass) {
         if (isRecognizedNodeClass(targetClass)) {
             return new PJConverter() {
-                public Object convert(Sequence<?> value, Class<?> targetClass, XPathContext context) throws XPathException {
+                @Override
+                public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
                     return convertXPathValueToObject(value, targetClass);
                 }
             };
@@ -96,13 +102,16 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
         }
     }
 
+    @Override
     public JPConverter getJPConverter(Class sourceClass, Configuration config) {
         if (isRecognizedNodeClass(sourceClass)) {
             return new JPConverter() {
-                public Sequence<?> convert(Object object, XPathContext context)  {
+                @Override
+                public Sequence convert(Object object, XPathContext context)  {
                     return convertObjectToXPathValue(object, context.getConfiguration());
                 }
 
+                @Override
                 public ItemType getItemType() {
                     return AnyNodeTest.getInstance();
                 }
@@ -122,6 +131,7 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
      *         returns a collection of nodes in this object model
      */
 
+    @Override
     public PJConverter getNodeListCreator(Object node) {
         return null;
     }
@@ -150,8 +160,10 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
      * Test whether this object model recognizes a particular kind of JAXP Result object,
      * and if it does, return a Receiver that builds an instance of this data model from
      * a sequence of events. If the Result is not recognised, return null.
+     * @return always null
      */
 
+    @Override
     public Receiver getDocumentBuilder(Result result) {
         return null;
     }
@@ -162,6 +174,7 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
      * Otherwise, return false.
      */
 
+    @Override
     public boolean sendSource(Source source, Receiver receiver) {
         return false;
     }
@@ -171,6 +184,7 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
      * source does not belong to this object model, return null
      */
 
+    @Override
     public NodeInfo unravel(Source source, Configuration config) {
         return null;
     }
@@ -182,7 +196,7 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
      * be converted, an exception should be thrown
      */
 
-    private Sequence<?> convertObjectToXPathValue(Object object, Configuration config)  {
+    private Sequence convertObjectToXPathValue(Object object, Configuration config)  {
         if (object instanceof Node) {
             return wrapNode((Node) object, config);
         } else if (object instanceof Node[]) {
@@ -190,7 +204,7 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
             for (int i = 0; i < nodes.length; i++) {
                 nodes[i] = wrapNode(((Node[]) object)[i], config);
             }
-            return new SequenceExtent<>(nodes);
+            return new SequenceExtent(nodes);
         } else {
             return null;
         }
@@ -208,7 +222,7 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
      * Value to see whether they belong to this object model.
      */
 
-    public Object convertXPathValueToObject(Sequence<?> value, Class<?> targetClass)
+    public Object convertXPathValueToObject(Sequence value, Class<?> targetClass)
             throws XPathException {
         // We accept the object if (a) the target class is Node or Node[],
         // or (b) the supplied object is a node, or sequence of nodes, that wrap XOM nodes,

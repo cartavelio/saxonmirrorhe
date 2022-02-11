@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,12 +10,11 @@ package net.sf.saxon.tree.linked;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
@@ -55,6 +54,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
     private LineNumberMap lineNumberMap;
     private SystemIdMap systemIdMap = new SystemIdMap();
     private boolean imaginary;
+    private boolean mutable;
     private SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.getInstance();
 
 
@@ -72,6 +72,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * @return the document node
      */
 
+    @Override
     public NodeInfo getRootNode() {
         return this;
     }
@@ -93,14 +94,38 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * @return the Saxon configuration
      */
 
+    @Override
     public Configuration getConfiguration() {
         return config;
+    }
+
+    /**
+     * Ask whether the tree is mutable. This is true only if {@link #setMutable(boolean) has been called
+     * supplying the value {@code true}}
+     * @return true if and only if the tree has been marked as mutable
+     */
+
+    @Override
+    public boolean isMutable() {
+        return mutable;
+    }
+
+    /**
+     * Say whether the tree is mutable. This is true only if {@link #setMutable(boolean) has been called
+     * supplying the value {@code true}}
+     *
+     * @param mutable true if and only if the tree is to be marked as mutable
+     */
+
+    public void setMutable(boolean mutable) {
+        this.mutable = mutable;
     }
 
     /**
      * Get the name pool used for the names in this document
      */
 
+    @Override
     public NamePool getNamePool() {
         return config.getNamePool();
     }
@@ -112,6 +137,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
     /*@NotNull*/
+    @Override
     public Builder newBuilder() {
         LinkedTreeBuilder builder = new LinkedTreeBuilder(config.makePipelineConfiguration());
         builder.setAllocateSequenceNumbers(false);
@@ -144,6 +170,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      *
      * @return true if the document contains elements whose type is other than UNTYPED
      */
+    @Override
     public boolean isTyped() {
         return documentElement != null && documentElement.getSchemaType() != Untyped.getInstance();
     }
@@ -152,6 +179,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * Get the unique document number
      */
 
+    @Override
     public long getDocumentNumber() {
         return documentNumber;
     }
@@ -185,6 +213,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * Set the system id (base URI) of this node
      */
 
+    @Override
     public void setSystemId(String /*@Nullable*/uri) {
         if (uri == null) {
             uri = "";
@@ -196,6 +225,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * Get the system id of this root node
      */
 
+    @Override
     public String getSystemId() {
         return systemIdMap.getSystemId(getRawSequenceNumber());
     }
@@ -216,6 +246,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * @return the base URI
      */
 
+    @Override
     public String getBaseURI() {
         if (baseURI != null) {
             return baseURI;
@@ -344,6 +375,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * @return 0 always
      */
 
+    @Override
     public int getLineNumber() {
         return 0;
     }
@@ -354,6 +386,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * @return Type.DOCUMENT (always)
      */
 
+    @Override
     public final int getNodeKind() {
         return Type.DOCUMENT;
     }
@@ -365,6 +398,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
 
+    @Override
     public /*@Nullable*/ final NodeImpl getNextSibling() {
         return null;
     }
@@ -376,6 +410,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
     /*@Nullable*/
+    @Override
     public final NodeImpl getPreviousSibling() {
         return null;
     }
@@ -398,6 +433,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
     /*@NotNull*/
+    @Override
     public NodeInfo getRoot() {
         return this;
     }
@@ -410,6 +446,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
     /*@NotNull*/
+    @Override
     public DocumentImpl getPhysicalRoot() {
         return this;
     }
@@ -420,8 +457,9 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * @param buffer a buffer into which will be placed a string based on the document number
      */
 
+    @Override
     public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
-        buffer.append('d');
+        buffer.cat('d');
         buffer.append(Long.toString(documentNumber));
     }
 
@@ -500,11 +538,11 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
                 if (e.isId()) {
                     registerID(e, Whitespace.trim(e.getStringValueCS()));
                 }
-                AttributeCollectionImpl atts = (AttributeCollectionImpl) e.getAttributeList();
-                for (int i = 0; i < atts.getLength(); i++) {
-                    if (!atts.isDeleted(i) && atts.isId(i) && NameChecker.isValidNCName(Whitespace.trim(atts.getValue(i)))) {
+                AttributeMap atts = e.attributes();
+                for (AttributeInfo att : atts) {
+                    if (att.isId() && NameChecker.isValidNCName(Whitespace.trim(att.getValue()))) {
                         // don't index any invalid IDs - these can arise when using a non-validating parser
-                        registerID(e, Whitespace.trim(atts.getValue(i)));
+                        registerID(e, Whitespace.trim(att.getValue()));
                     }
                 }
             }
@@ -538,6 +576,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
 
+    @Override
     public NodeInfo/*@Nullable*/ selectID(String id, boolean getParent) {
         if (idTable == null) {
             indexIDs();
@@ -592,6 +631,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      *         information is not available then an empty iterator is returned
      */
 
+    @Override
     public Iterator<String> getUnparsedEntityNames() {
         if (entityTable == null) {
             List<String> ls = Collections.emptyList();
@@ -611,6 +651,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
     /*@Nullable*/
+    @Override
     public String[] getUnparsedEntity(String name) {
         if (entityTable == null) {
             return null;
@@ -624,6 +665,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * @return the type annotation of the base node
      */
 
+    @Override
     public SchemaType getSchemaType() {
         if (documentElement == null || documentElement.getSchemaType() == Untyped.getInstance()) {
             return Untyped.getInstance();
@@ -636,6 +678,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * Copy this node to a given outputter
      */
 
+    @Override
     public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId) throws XPathException {
         out.startDocument(CopyOptions.getStartDocumentProperties(copyOptions));
 
@@ -666,6 +709,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * @param stringValue the new string value
      */
 
+    @Override
     public void replaceStringValue(CharSequence stringValue) {
         throw new UnsupportedOperationException("Cannot replace the value of a document node");
     }
@@ -675,6 +719,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * might be invalidated by such updates to be cleared
      */
 
+    @Override
     public void resetIndexes() {
         idTable = null;
         elementList = null;
@@ -689,6 +734,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      *             document during its construction.
      * @since 9.9
      */
+    @Override
     public void setSpaceStrippingRule(SpaceStrippingRule rule) {
         this.spaceStrippingRule = rule;
     }
@@ -703,6 +749,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * indicating that no space stripping has been applied
      * @since 9.9
      */
+    @Override
     public SpaceStrippingRule getSpaceStrippingRule() {
         return spaceStrippingRule;
     }
@@ -718,6 +765,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      *              removes the existing value for the property.
      */
 
+    @Override
     public void setUserData(String key, Object value) {
         /*@Nullable*/
         if (userData == null) {
@@ -739,6 +787,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
     /*@Nullable*/
+    @Override
     public Object getUserData(String key) {
         if (userData == null) {
             return null;

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -18,7 +18,6 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
@@ -90,7 +89,7 @@ public class ArrayItemType extends AnyFunctionType {
      * @return the alphacode for the nearest containing built-in type
      */
     @Override
-    public String getAlphaCode() {
+    public String getBasicAlphaCode() {
         return "FA";
     }
 
@@ -134,9 +133,20 @@ public class ArrayItemType extends AnyFunctionType {
      * @return the list of argument types of this array, viewed as a function
      */
 
+    @Override
     public SequenceType[] getArgumentTypes() {
         // regardless of the key type, a function call on this map can supply any atomic value
         return new SequenceType[]{BuiltInAtomicType.INTEGER.one()};
+    }
+
+    /**
+     * Get the default priority when this ItemType is used as an XSLT pattern
+     *
+     * @return the default priority
+     */
+    @Override
+    public double getDefaultPriority() {
+        return memberType.getPrimaryType().getNormalizedDefaultPriority();
     }
 
     /**
@@ -154,7 +164,7 @@ public class ArrayItemType extends AnyFunctionType {
         if (this == ANY_ARRAY_TYPE) {
             return true;
         } else {
-            for (Sequence<?> s : ((ArrayItem) item).members()){
+            for (Sequence s : ((ArrayItem) item).members()){
                 if (!memberType.matches(s, th)){
                     return false;
                 }
@@ -169,6 +179,7 @@ public class ArrayItemType extends AnyFunctionType {
      * @return the result type of this array, viewed as a function
      */
 
+    @Override
     public SequenceType getResultType() {
         return memberType;
     }
@@ -235,32 +246,30 @@ public class ArrayItemType extends AnyFunctionType {
     /**
      * Determine the relationship of one function item type to another
      *
-     * @return for example {@link net.sf.saxon.type.TypeHierarchy#SUBSUMES}, {@link net.sf.saxon.type.TypeHierarchy#SAME_TYPE}
+     * @return for example {@link Affinity#SUBSUMES}, {@link Affinity#SAME_TYPE}
      */
 
-    public int relationship(FunctionItemType other, TypeHierarchy th) {
+    @Override
+    public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
         if (other == AnyFunctionType.getInstance()) {
-            return TypeHierarchy.SUBSUMED_BY;
+            return Affinity.SUBSUMED_BY;
         } else if (equals(other)) {
-            return TypeHierarchy.SAME_TYPE;
+            return Affinity.SAME_TYPE;
         } else if (other == ArrayItemType.ANY_ARRAY_TYPE) {
-            return TypeHierarchy.SUBSUMED_BY;
+            return Affinity.SUBSUMED_BY;
         } else if (other.isMapType()){
-            return TypeHierarchy.DISJOINT;
+            return Affinity.DISJOINT;
         } else if (other instanceof ArrayItemType) {
             // See bug 3720. Array types are never disjoint, because the empty array
             // is an instance of every array type
             ArrayItemType f2 = (ArrayItemType) other;
-            int rel = th.sequenceTypeRelationship(memberType, f2.memberType);
-            return rel==TypeHierarchy.DISJOINT ? TypeHierarchy.OVERLAPS : rel;
+            Affinity rel = th.sequenceTypeRelationship(memberType, f2.memberType);
+            return rel== Affinity.DISJOINT ? Affinity.OVERLAPS : rel;
         } else {
-            int rel = TypeHierarchy.DISJOINT;
-            //#ifdefined HOF
-            rel = new SpecificFunctionType(getArgumentTypes(), getResultType()).relationship(other, th);
-            if (rel == TypeHierarchy.SUBSUMES || rel == TypeHierarchy.SAME_TYPE) {
-                rel = TypeHierarchy.OVERLAPS;
+            Affinity rel = new SpecificFunctionType(getArgumentTypes(), getResultType()).relationship(other, th);
+            if (rel == Affinity.SUBSUMES || rel == Affinity.SAME_TYPE) {
+                rel = Affinity.OVERLAPS;
             }
-            //#endif
             return rel;
         }
     }
@@ -268,11 +277,8 @@ public class ArrayItemType extends AnyFunctionType {
     @Override
     public Expression makeFunctionSequenceCoercer(Expression exp, RoleDiagnostic role)
             throws XPathException {
-        Expression result = exp;
-        //#ifdefined HOF                                                          ~
-        result = new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
-        //#endif
-        return result;
+        return new SpecificFunctionType(
+                getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
     }
 
     /**
@@ -289,7 +295,7 @@ public class ArrayItemType extends AnyFunctionType {
         if (item instanceof ArrayItem) {
             for (int i=0; i<((ArrayItem)item).arrayLength(); i++) {
                 try {
-                    GroundedValue<?> member = ((ArrayItem) item).get(i);
+                    GroundedValue member = ((ArrayItem) item).get(i);
                     if (!memberType.matches(member, th)) {
                         String s = "The " + RoleDiagnostic.ordinal(i+1) +
                                 " member of the supplied array {" +
@@ -310,38 +316,6 @@ public class ArrayItemType extends AnyFunctionType {
         return Optional.empty();
     }
 
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @param knownToBe a type that this item is known to conform to
-     * @param targetVersion the version of Saxon-JS SEF format
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @throws XPathException if JS code cannot be generated for this item type, for example because
-     *                        the test is schema-aware.
-     */
-    @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        if (this == ANY_ARRAY_TYPE) {
-            return "return SaxonJS.U.isArray(item)";
-        } else if (targetVersion == 1) {
-            FastStringBuffer fsb = new FastStringBuffer(256);
-            fsb.append("function v(item) {" + memberType.getPrimaryType().generateJavaScriptItemTypeTest(AnyItemType.getInstance(), targetVersion) + "};");
-            fsb.append(Cardinality.generateJavaScriptChecker(memberType.getCardinality()));
-            fsb.append("return SaxonJS.U.isArray(item) && " +
-                               "SaxonJS.U.ForArray(item.value).every(function(seq){return c(seq.length) && SaxonJS.U.ForArray(seq).every(v)});");
-            return fsb.toString();
-        } else {
-            // targetVersion == 2
-            FastStringBuffer fsb = new FastStringBuffer(256);
-            fsb.append("function v(item) {" + memberType.getPrimaryType().generateJavaScriptItemTypeTest(AnyItemType.getInstance(), targetVersion) + "};");
-            fsb.append(Cardinality.generateJavaScriptChecker(memberType.getCardinality()));
-            fsb.append("return SaxonJS.U.isConstrainedArray(item, v, c);");
-            return fsb.toString();
-
-        }
-    }
 }
 
-// Copyright (c) 2015-2016 Saxonica Limited.
+// Copyright (c) 2015-2020 Saxonica Limited

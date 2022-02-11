@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -66,12 +66,13 @@ public class Outermost extends SystemFunction {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
-        SequenceIterator<?> in = arguments[0].iterate();
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        SequenceIterator in = arguments[0].iterate();
         if (!presorted) {
             in = new DocumentOrderIterator(in, GlobalOrderComparer.getInstance());
         }
-        SequenceIterator<?> out = new OutermostIterator(in);
+        SequenceIterator out = new OutermostIterator(in);
         return SequenceTool.toLazySequence(out);
     }
 
@@ -119,6 +120,7 @@ public class Outermost extends SystemFunction {
             this.in = in;
         }
 
+        @Override
         public NodeInfo next() throws XPathException {
             while (true) {
                 NodeInfo next = (NodeInfo)in.next();
@@ -135,18 +137,17 @@ public class Outermost extends SystemFunction {
             }
         }
 
+        @Override
         public void close() {
             in.close();
         }
 
-        public int getProperties() {
-            return 0;
-        }
     }
 
+    @Override
     public String getStreamerName() {
         return "Outermost";
     }
 }
 
-// Copyright (c) 2012-2015 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

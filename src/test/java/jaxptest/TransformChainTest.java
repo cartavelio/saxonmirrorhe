@@ -1,10 +1,10 @@
 package jaxptest;
 
 import com.saxonica.config.ProfessionalTransformerFactory;
-import junit.framework.TestCase;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.StandardOutputResolver;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLFilter;
@@ -27,7 +27,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-public class TransformChainTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class TransformChainTest {
 
     private static final String IDENTITY_STYLESHEET
             = "<?xml version=\"1.0\"?> \n" +
@@ -43,6 +46,7 @@ public class TransformChainTest extends TestCase {
             IDENTITY_STYLESHEET, IDENTITY_STYLESHEET
     };
 
+    @Test
     public void testFilterChaining() throws Exception {
         InputSource inputSource = new InputSource(new StringReader("<test/>"));
 
@@ -92,6 +96,7 @@ public class TransformChainTest extends TestCase {
         transformer.transform(src, res);
     }
 
+    @Test
     public void testPipelineComment() {
         try {
             String style = "<xsl:stylesheet version=\"1.0\"\n" +
@@ -137,6 +142,7 @@ public class TransformChainTest extends TestCase {
      * Test saxon:next-in-chain
      */
 
+    @Test
     public void testNextInChain() {
         try {
             ProfessionalTransformerFactory factory = new ProfessionalTransformerFactory();

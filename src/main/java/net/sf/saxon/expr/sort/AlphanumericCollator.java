@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.regex.UnicodeString;
 import net.sf.saxon.tree.util.FastStringBuffer;
 
 import java.math.BigInteger;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
  * </p>
  */
 
-public class AlphanumericCollator implements StringCollator, java.io.Serializable {
+public class AlphanumericCollator implements StringCollator {
 
     private StringCollator baseCollator;
     private static Pattern pattern = Pattern.compile("\\d+");
@@ -44,7 +45,10 @@ public class AlphanumericCollator implements StringCollator, java.io.Serializabl
      *
      * @return a collation URI that can be used to reconstruct the collation when an XSLT package is reloaded.
      */
+    @Override
     public String getCollationURI() {
+        // Note this form of collation URI is not externally documented, it is retained solely to make
+        // it possible to reconstitute the collation easily
         return PREFIX + baseCollator.getCollationURI();
     }
 
@@ -54,6 +58,7 @@ public class AlphanumericCollator implements StringCollator, java.io.Serializabl
      * @return &lt;0 if a&lt;b, 0 if a=b, &gt;0 if a&gt;b
      */
 
+    @Override
     public int compareStrings(CharSequence cs1, CharSequence cs2) {
         String s1 = cs1.toString();
         String s2 = cs2.toString();
@@ -112,6 +117,7 @@ public class AlphanumericCollator implements StringCollator, java.io.Serializabl
      * @return true if and only if the strings are considered equal,
      */
 
+    @Override
     public boolean comparesEqual(CharSequence s1, CharSequence s2) {
         return compareStrings(s1, s2) == 0;
     }
@@ -123,6 +129,7 @@ public class AlphanumericCollator implements StringCollator, java.io.Serializabl
      * @param cs the string whose collation key is required
      */
 
+    @Override
     public AtomicMatchKey getCollationKey(/*@NotNull*/ CharSequence cs) {
         // The string is normalized by removing leading zeros in a numeric component
         String s = cs.toString();
@@ -143,7 +150,7 @@ public class AlphanumericCollator implements StringCollator, java.io.Serializabl
             // reached end?
 
             if (!b1) {
-                return new CodepointMatchKey(sb);
+                return UnicodeString.makeUnicodeString(sb);
             }
 
             // handle a numeric part

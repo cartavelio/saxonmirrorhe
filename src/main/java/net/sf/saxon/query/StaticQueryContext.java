@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,20 +13,22 @@ import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.parser.CodeInjector;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.expr.parser.OptimizerOptions;
-import net.sf.saxon.expr.sort.SimpleCollation;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NamePool;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.TraceCodeInjector;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.ErrorListener;
-import javax.xml.transform.Source;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -65,17 +67,15 @@ public class StaticQueryContext {
     private boolean inheritNamespaces = true;
     private boolean preserveNamespaces = true;
     private int constructionMode = Validation.PRESERVE;
-    /*@Nullable*/ private NamespaceResolver externalNamespaceResolver = null;
     private String defaultFunctionNamespace = NamespaceConstant.FN;
     /*@Nullable*/ private String defaultElementNamespace = NamespaceConstant.NULL;
     private ItemType requiredContextItemType = AnyItemType.getInstance();
     private boolean preserveSpace = false;
     private boolean defaultEmptyLeast = true;
     /*@Nullable*/ private ModuleURIResolver moduleURIResolver;
-    private UnfailingErrorListener errorListener;
+    private ErrorReporter errorReporter = new StandardErrorReporter();
     /*@Nullable*/ private CodeInjector codeInjector;
     private boolean isUpdating = false;
-    private int languageVersion = 30;
     private String defaultCollationName;
     private Location moduleLocation;
     private OptimizerOptions optimizerOptions;
@@ -169,14 +169,13 @@ public class StaticQueryContext {
         inheritNamespaces = c.inheritNamespaces;
         preserveNamespaces = c.preserveNamespaces;
         constructionMode = c.constructionMode;
-        externalNamespaceResolver = c.externalNamespaceResolver;
         defaultElementNamespace = c.defaultElementNamespace;
         defaultFunctionNamespace = c.defaultFunctionNamespace;
         requiredContextItemType = c.requiredContextItemType;
         preserveSpace = c.preserveSpace;
         defaultEmptyLeast = c.defaultEmptyLeast;
         moduleURIResolver = c.moduleURIResolver;
-        errorListener = c.errorListener;
+        errorReporter = c.errorReporter;
         codeInjector = c.codeInjector;
         isUpdating = c.isUpdating;
         optimizerOptions = c.optimizerOptions;
@@ -191,12 +190,7 @@ public class StaticQueryContext {
 
     public void reset() {
         userDeclaredNamespaces = new HashMap<>(10);
-        externalNamespaceResolver = null;
-        errorListener = config.getErrorListener();
-        if (errorListener instanceof StandardErrorListener) {
-            errorListener = ((StandardErrorListener) errorListener).makeAnother(Configuration.XQUERY);
-            ((StandardErrorListener) errorListener).setRecoveryPolicy(Configuration.DO_NOT_RECOVER);
-        }
+        errorReporter = new StandardErrorReporter();
         constructionMode = getConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY) ?
                 Validation.PRESERVE : Validation.STRIP;
         preserveSpace = false;
@@ -250,7 +244,7 @@ public class StaticQueryContext {
     public Executable makeExecutable() {
         Executable executable = new Executable(config);
         executable.setSchemaAware(isSchemaAware());
-        executable.setHostLanguage(Configuration.XQUERY);
+        executable.setHostLanguage(HostLanguage.XQUERY);
         return executable;
     }
 
@@ -322,30 +316,6 @@ public class StaticQueryContext {
         this.baseURI = baseURI;
     }
 
-    /**
-     * Convenience method for building Saxon's internal representation of a source XML
-     * document. The document will be built using Configuration (and NamePool) associated
-     * with this StaticQueryContext.
-     * <p>This method is retained for backwards compatibility; however, it is merely a wrapper
-     * around the method {@link Configuration#buildDocumentTree}, which should be called in preference.</p>
-     *
-     * @param source Any javax.xml.transform.Source object representing the document against
-     *               which queries will be executed. Note that a Saxon {@link net.sf.saxon.om.NodeInfo}
-     *               can be used as a Source. To use a third-party DOM Document as a source, create an instance of
-     *               {@link javax.xml.transform.dom.DOMSource} to wrap it.
-     *               <p>For additional control over the way in which the source document is processed,
-     *               supply an {@link net.sf.saxon.lib.AugmentedSource} object and set appropriate
-     *               options on the object.</p>
-     * @return the DocumentInfo representing the root node of the resulting document object.
-     * @throws XPathException if building the document fails
-     * @since 8.4
-     * @deprecated since 9.2: use {@link Configuration#buildDocumentTree(javax.xml.transform.Source)}
-     */
-
-    /*@NotNull*/
-    public TreeInfo buildDocument(Source source) throws XPathException {
-        return config.buildDocumentTree(source);
-    }
 
     /**
      * Set the language version.
@@ -354,6 +324,7 @@ public class StaticQueryContext {
      * @since 9.2; changed in 9.3 to expect a DecimalValue rather than a string. Changed in 9.7 to
      * accept an int (30 = "3.0") and to allow "3.1".  From 9.8.0.3 the supplied value is ignored
      * and the language version is always set to "3.1".
+     * @deprecated since 10.0
      */
 
     public void setLanguageVersion(int version) {
@@ -654,8 +625,12 @@ public class StaticQueryContext {
     /*@Nullable*/
     public synchronized XQueryExpression compileQuery(/*@NotNull*/ InputStream source, /*@Nullable*/ String encoding)
             throws XPathException {
-        String query = QueryReader.readInputStream(source, encoding, config.getValidCharacterChecker());
-        return compileQuery(query);
+        try {
+            String query = QueryReader.readInputStream(source, encoding, config.getValidCharacterChecker());
+            return compileQuery(query);
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 
     /**
@@ -813,8 +788,7 @@ public class StaticQueryContext {
 
     /**
      * Get the namespace URI for a given prefix, which must have been declared using the method
-     * {@link #declareNamespace}. Note that this method will not call the external namespace resolver
-     * to resolve the prefix.
+     * {@link #declareNamespace}.
      *
      * @param prefix the namespace prefix, or "" to represent the null prefix
      * @return the namespace URI. Returns "" to represent the non-namespace,
@@ -823,34 +797,6 @@ public class StaticQueryContext {
 
     public String getNamespaceForPrefix(String prefix) {
         return userDeclaredNamespaces.get(prefix);
-    }
-
-    /**
-     * Set an external namespace resolver. If a namespace prefix cannot be resolved using any
-     * other mechanism, then as a last resort the external namespace resolver is called to
-     * obtain a URI for the given prefix.
-     * <p><i>Changed in Saxon 9.0 so that the namespaces resolved by the external namespace resolver
-     * are available at run-time, just like namespaces declared in the query prolog. In consequence,
-     * the supplied NamespaceResolver must now implement the
-     * {@link net.sf.saxon.om.NamespaceResolver#iteratePrefixes()} method.</i></p>
-     *
-     * @param resolver the external namespace resolver
-     */
-
-    public void setExternalNamespaceResolver(NamespaceResolver resolver) {
-        externalNamespaceResolver = resolver;
-    }
-
-    /**
-     * Get the external namespace resolver that has been registered using
-     * setExternalNamespaceResolver(), if any.
-     *
-     * @return the external namespace resolver
-     */
-
-    /*@Nullable*/
-    public NamespaceResolver getExternalNamespaceResolver() {
-        return externalNamespaceResolver;
     }
 
     /**
@@ -914,7 +860,7 @@ public class StaticQueryContext {
      */
 
     public void declareGlobalVariable(
-            StructuredQName qName, SequenceType type, Sequence<?> value, boolean external)
+            StructuredQName qName, SequenceType type, Sequence value, boolean external)
             throws XPathException {
         if (value == null && !external) {
             throw new NullPointerException("No initial value for declared variable");
@@ -927,7 +873,7 @@ public class StaticQueryContext {
         var.setVariableQName(qName);
         var.setRequiredType(type);
         if (value != null) {
-            var.setSelectExpression(Literal.makeLiteral(value.materialize()));
+            var.setBody(Literal.makeLiteral(value.materialize()));
         }
         if (userDeclaredVariables == null) {
             userDeclaredVariables = new HashSet<>();
@@ -990,43 +936,6 @@ public class StaticQueryContext {
 
 
     /**
-     * Declare a named collation. Collations are only available in a query if this method
-     * has been called externally to declare the collation and associate it with an
-     * implementation, in the form of a Java Comparator. The default collation is the
-     * Unicode codepoint collation, unless otherwise specified.
-     *
-     * @param name       The name of the collation (technically, a URI)
-     * @param comparator The Java Comparator used to implement the collating sequence
-     * @since 8.4.
-     * @deprecated since 9.6. All collations are now registered at the level of the
-     * Configuration. If this method is called, the effect is that the supplied collation
-     * is registered with the configuration
-     */
-
-    public void declareCollation(String name, Comparator comparator) {
-        getConfiguration().registerCollation(name, new SimpleCollation(name, comparator));
-    }
-
-
-    /**
-     * Declare a named collation. Collations are only available in a query if this method
-     * has been called externally to declare the collation and associate it with an
-     * implementation, in the form of a Java StringCollator. The default collation is the
-     * Unicode codepoint collation, unless otherwise specified.
-     *
-     * @param name       The name of the collation (technically, a URI)
-     * @param collation The Java Comparator used to implement the collating sequence
-     * @since 8.9.
-     * @deprecated since 9.6. All collations are now registered at the level of the
-     * Configuration. If this method is called, the effect is that the supplied collation
-     * is registered with the configuration
-     */
-
-    public void declareCollation(String name, StringCollator collation) {
-        getConfiguration().registerCollation(name, collation);
-    }
-
-    /**
      * Set the default collation.
      *
      * @param name The collation name, as specified in the query prolog. Must be the name
@@ -1051,29 +960,6 @@ public class StaticQueryContext {
             throw new IllegalStateException("Unknown collation " + name);
         }
         this.defaultCollationName = name;
-    }
-
-    /**
-     * Get a named collation.
-     *
-     * @param name the name of the collation, as an absolute URI
-     * @return the collation identified by the given name, as set previously using declareCollation.
-     *         If no collation with this name has been declared, the method calls the CollationURIResolver
-     *         to locate a collation with this name.
-     *         Return null if no collation with this name is found.
-     * @throws NullPointerException if the collation name argument is null.
-     * @since 8.4
-     * @deprecated since 9.6. Collations are now all held globally at the level of the
-     * Configuration. Calling this method will get the relevant collation held in the Configuration.
-     */
-
-    public StringCollator getCollation(String name) {
-        try {
-            return getConfiguration().getCollation(name);
-        } catch (XPathException e) {
-            getErrorListener().warning(e);
-            return null;
-        }
     }
 
     /**
@@ -1206,37 +1092,56 @@ public class StaticQueryContext {
     /**
      * Set the ErrorListener to be used to report compile-time errors in a query. This will also
      * be the default for the run-time error listener used to report dynamic errors.
-     * <p>If the supplied listener is a StandardErrorListener, then a new copy will be made
-     * using {@link StandardErrorListener#makeAnother(int)}</p>
-     * <p>If the supplied listener is not an {@link UnfailingErrorListener}, then it will be wrapped
-     * in a {@link DelegatingErrorListener}.</p>
      *
      * @param listener the ErrorListener to be used
+     * @deprecated since 10.0: use {@link #setErrorReporter(ErrorReporter)}
      */
 
     public void setErrorListener(ErrorListener listener) {
-        if (listener instanceof StandardErrorListener) {
-            errorListener = ((StandardErrorListener) listener).makeAnother(Configuration.XQUERY);
-            ((StandardErrorListener) errorListener).setRecoveryPolicy(Configuration.DO_NOT_RECOVER);
-        } else if (listener instanceof UnfailingErrorListener) {
-            errorListener = (UnfailingErrorListener) listener;
-        } else {
-            errorListener = new DelegatingErrorListener(listener);
-        }
+        setErrorReporter(new ErrorReporterToListener(listener));
     }
 
     /**
      * Get the ErrorListener in use for this static context
      *
      * @return the registered ErrorListener
+     * @deprecated since 10.0: use {@link #getErrorReporter()}
      */
 
-    public UnfailingErrorListener getErrorListener() {
-        if (errorListener == null) {
-            errorListener = config.getErrorListener();
+    public ErrorListener getErrorListener() {
+        if (errorReporter instanceof ErrorReporterToListener) {
+            return ((ErrorReporterToListener) errorReporter).getErrorListener();
+        } else {
+            return null;
         }
-        return errorListener;
     }
+
+    /**
+     * Set an error reporter: that is, a used-supplied object that is to receive
+     * notification of static errors found in the stylesheet
+     *
+     * @param reporter the object to be notified of static errors
+     * @since 10.0
+     */
+
+    public void setErrorReporter(ErrorReporter reporter) {
+        this.errorReporter = reporter;
+    }
+
+    /**
+     * Get the error reporter: that is, a used-supplied object that is to receive
+     * notification of static errors found in the stylesheet
+     *
+     * @return the object to be notified of static errors. This may be the error reporter
+     * that was previously set using {@link #setErrorReporter(ErrorReporter)}, or it may be
+     * a system-allocated error reporter.
+     * @since 10.0
+     */
+
+    public ErrorReporter getErrorReporter() {
+        return this.errorReporter;
+    }
+
 
     /**
      * Say whether the query is allowed to be updating. XQuery update syntax will be rejected

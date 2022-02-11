@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -74,6 +74,7 @@ public final class IdentityComparison extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         getLhs().typeCheck(visitor, contextInfo);
@@ -117,6 +118,7 @@ public final class IdentityComparison extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         Expression r = super.optimize(visitor, contextItemType);
         if (r != this) {
@@ -143,6 +145,7 @@ public final class IdentityComparison extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         IdentityComparison ic = new IdentityComparison(getLhsExpression().copy(rebindings), operator, getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, ic);
@@ -170,6 +173,7 @@ public final class IdentityComparison extends BinaryExpression {
      */
 
     /*@Nullable*/
+    @Override
     public BooleanValue evaluateItem(XPathContext context) throws XPathException {
         NodeInfo node0 = getNode(getLhsExpression(), context);
         if (node0 == null) {
@@ -190,6 +194,7 @@ public final class IdentityComparison extends BinaryExpression {
         return BooleanValue.get(compareIdentity(node0, node1));
     }
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         NodeInfo node0 = getNode(getLhsExpression(), context);
         if (node0 == null) {
@@ -227,6 +232,7 @@ public final class IdentityComparison extends BinaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return BuiltInAtomicType.BOOLEAN;
     }

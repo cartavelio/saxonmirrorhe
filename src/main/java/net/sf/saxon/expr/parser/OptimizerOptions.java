@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -28,6 +28,7 @@ public class OptimizerOptions {
     public static final int REGEX_CACHE = 4096;
     public static final int VOID_EXPRESSIONS = 8192;
     public static final int TAIL_CALLS = 16384;
+    public static final int CONSTANT_FOLDING = 32768;
 
     private int options;
 
@@ -75,6 +76,8 @@ public class OptimizerOptions {
                 return LOOP_LIFTING;
             case 'm':
                 return MISCELLANEOUS;
+            case 'n':
+                return CONSTANT_FOLDING;
             case 'r':
                 return RULE_SET;
             case 's':
@@ -132,6 +135,9 @@ public class OptimizerOptions {
         }
         if (isSet(MISCELLANEOUS)) {
             result += "m";
+        }
+        if (isSet(CONSTANT_FOLDING)) {
+            result += "n";
         }
         if (isSet(RULE_SET)) {
             result += "r";

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,10 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.NamespaceReducer;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.IriToUri;
@@ -23,9 +26,9 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.style.XSLResultDocument;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
@@ -37,8 +40,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,12 +65,12 @@ public class ResultDocument extends Instruction
     private Operand formatOp;    // null if format was known at compile time
     private Operand contentOp;
     private boolean async = false;
-    protected final Properties globalProperties;
-    protected final Properties localProperties;
-    protected ParseOptions validationOptions;
-    protected final Map<StructuredQName, Operand> serializationAttributes;
-    protected boolean resolveAgainstStaticBase = false;        // used with fn:put()
-    protected final CharacterMapIndex characterMapIndex;
+    private final Properties globalProperties;
+    private final Properties localProperties;
+    private ParseOptions validationOptions;
+    private final Map<StructuredQName, Operand> serializationAttributes;
+    private boolean resolveAgainstStaticBase = false;        // used with fn:put()
+    private final CharacterMapIndex characterMapIndex;
 
 
     /**
@@ -143,6 +145,7 @@ public class ResultDocument extends Instruction
      * type of the document element)
      */
 
+    @Override
     public SchemaType getSchemaType() {
         return validationOptions == null ? null : validationOptions.getTopLevelType();
     }
@@ -189,6 +192,7 @@ public class ResultDocument extends Instruction
      *
      * @return the validation mode, for example {@link Validation#STRICT} or {@link Validation#PRESERVE}
      */
+    @Override
     public int getValidationAction() {
         return validationOptions == null ? Validation.PRESERVE : validationOptions.getSchemaValidationMode();
     }
@@ -234,6 +238,7 @@ public class ResultDocument extends Instruction
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
         String method = getStaticSerializationProperty(XSLResultDocument.METHOD);
@@ -252,6 +257,7 @@ public class ResultDocument extends Instruction
         return this;
     }
 
+    @Override
     public int getIntrinsicDependencies() {
         return StaticProperty.HAS_SIDE_EFFECTS;
     }
@@ -281,6 +287,7 @@ public class ResultDocument extends Instruction
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         Map<StructuredQName, Expression> map = new HashMap<>();
         for (Map.Entry<StructuredQName, Operand> entry : serializationAttributes.entrySet()) {
@@ -307,6 +314,7 @@ public class ResultDocument extends Instruction
      * (the string "xsl:result-document")
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_RESULT_DOCUMENT;
     }
@@ -319,6 +327,7 @@ public class ResultDocument extends Instruction
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return ErrorType.getInstance();
     }
@@ -357,6 +366,7 @@ public class ResultDocument extends Instruction
      * expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         PathMap.PathMapNodeSet result = super.addToPathMap(pathMap, pathMapNodeSet);
         result.setReturnable(false);
@@ -364,7 +374,8 @@ public class ResultDocument extends Instruction
     }
 
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         process(getContentExpression(), context);
         return null;
     }
@@ -386,14 +397,12 @@ public class ResultDocument extends Instruction
     public void processInstruction(Expression content, XPathContext context) throws XPathException {
         final XsltController controller = (XsltController) context.getController();
         assert controller != null;
-        final Configuration config = controller.getConfiguration();
-        Receiver saved = context.getReceiver();
-        PipelineConfiguration pipe = saved.getPipelineConfiguration();
+
         String savedOutputUri = context.getCurrentOutputUri();
-        Receiver out = processLeft(context);
+        ComplexContentOutputter out = processLeft(context);
         boolean failed = false;
         try {
-            content.process(context);
+            content.process(out, context);
         } catch (XPathException err) {
             failed = true;
             err.maybeSetContext(context);
@@ -407,22 +416,29 @@ public class ResultDocument extends Instruction
                     //noinspection ThrowFromFinallyBlock
                     throw e;
                 }
-                // Otherwise no further action; report the original error in preference. Bug 4227
+                // Otherwise, no further action; report the original error in preference. Bug 4227
             }
         }
-        context.setReceiver(saved);
         context.setCurrentOutputUri(savedOutputUri);
 
     }
 
-    public Receiver processLeft(XPathContext context) throws XPathException {
+    public ComplexContentOutputter processLeft(XPathContext context) throws XPathException {
         XsltController controller = (XsltController)context.getController();
         Configuration config = controller.getConfiguration();
         checkNotTemporaryOutputState(context);
 
         Properties computedLocalProps = gatherOutputProperties(context);
-        if (localProperties.contains(SaxonOutputKeys.PARAMETER_DOCUMENT) && getStaticBaseURIString() != null) {
-            computedLocalProps.setProperty(SaxonOutputKeys.PARAMETER_DOCUMENT_BASE_URI, getStaticBaseURIString());
+        if (computedLocalProps.getProperty(SaxonOutputKeys.PARAMETER_DOCUMENT) != null && getStaticBaseURIString() != null) {
+            try {
+                String abs = ResolveURI.makeAbsolute(
+                        computedLocalProps.getProperty(SaxonOutputKeys.PARAMETER_DOCUMENT),
+                        getStaticBaseURIString()).toASCIIString();
+                computedLocalProps.setProperty(SaxonOutputKeys.PARAMETER_DOCUMENT, abs);
+            } catch (URISyntaxException e) {
+                throw XPathException.makeXPathException(e);
+            }
+            //computedLocalProps.setProperty(SaxonOutputKeys.PARAMETER_DOCUMENT_BASE_URI, getStaticBaseURIString());
         }
         SerializationProperties serParams = new SerializationProperties(computedLocalProps, characterMapIndex);
 
@@ -471,13 +487,13 @@ public class ResultDocument extends Instruction
         String systemId = out.getSystemId();
 
         NamespaceReducer nr = new NamespaceReducer(out);
-        out = new ComplexContentOutputter(nr);
-        out.setSystemId(systemId);
-        context.setReceiver(out);
+        ComplexContentOutputter cco = new ComplexContentOutputter(nr);
+        cco.setSystemId(systemId);
+        //context.setReceiver(cco);
         context.setCurrentOutputUri(systemId);
 
-        out.open();
-        return out;
+        cco.open();
+        return cco;
     }
 
     public CharacterMapIndex getCharacterMapIndex() {
@@ -545,7 +561,7 @@ public class ResultDocument extends Instruction
                     dest = result.getClass().getName();
                 }
             }
-            config.getStandardErrorOutput().println("Writing to " + dest);
+            config.getLogger().info("Writing to " + dest);
         }
     }
 
@@ -561,7 +577,7 @@ public class ResultDocument extends Instruction
                 throw err;
             }
 
-            DocumentURI documentKey = new DocumentURI(uri);
+            DocumentKey documentKey = new DocumentKey(uri);
             //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized(controller) {
                 if (!controller.checkUniqueOutputDestination(documentKey)) {
@@ -665,7 +681,9 @@ public class ResultDocument extends Instruction
                     e.maybeSetContext(context);
                     if (NamespaceConstant.SAXON.equals(e.getErrorCodeNamespace()) &&
                             "SXWN".equals(e.getErrorCodeLocalPart().substring(0, 4))) {
-                        controller.getErrorListener().warning(e);
+                        XmlProcessingException ee = new XmlProcessingException(e);
+                        ee.setWarning(true);
+                        controller.getErrorReporter().report(ee);
                     } else {
                         throw e;
                     }
@@ -834,6 +852,7 @@ public class ResultDocument extends Instruction
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("resultDoc", this);
         out.emitAttribute("global", exportProperties(globalProperties));
@@ -865,13 +884,22 @@ public class ResultDocument extends Instruction
     }
 
     private String exportProperties(Properties props) {
-        try {
-            StringWriter writer = new StringWriter();
-            props.store(writer, "");
-            return writer.toString();
-        } catch (IOException e) {
-            throw new AssertionError(e);
+        StringBuilder writer = new StringBuilder();
+        for (String key : props.stringPropertyNames()) {
+            String val = props.getProperty(key);
+            if (key.equals(SaxonOutputKeys.ITEM_SEPARATOR) || key.equals(SaxonOutputKeys.NEWLINE)) {
+                val = ExpressionPresenter.jsEscape(val);
+            }
+            if (key.equals(SaxonOutputKeys.USE_CHARACTER_MAPS) || key.equals(OutputKeys.METHOD)) {
+                // TODO: other QName-valued fields such as cdata-section-elements??
+                val = val.replace("{", "Q{");
+            }
+            if (key.startsWith("{")) {
+                key = "Q" + key;
+            }
+            writer.append(key).append("=").append(val).append("\n");
         }
+        return writer.toString();
     }
 
     /**
@@ -885,14 +913,13 @@ public class ResultDocument extends Instruction
      */
 
     public static void processXslOutputElement(NodeInfo element, Properties props, XPathContext c) throws XPathException {
-        AxisIterator iter = element.iterateAxis(AxisInfo.ATTRIBUTE);
-        NamespaceResolver resolver = new InscopeNamespaceResolver(element);
-        iter.forEachOrFail(att -> {
-            String uri = att.getURI();
-            String local = att.getLocalPart();
-            String val = Whitespace.trim(att.getStringValueCS());
+        NamespaceResolver resolver = element.getAllNamespaces();
+        for (AttributeInfo att : element.attributes()) {
+            String uri = att.getNodeName().getURI();
+            String local = att.getNodeName().getLocalPart();
+            String val = Whitespace.trim(att.getValue());
             setSerializationProperty(props, uri, local, val, resolver, false, c.getConfiguration());
-        });
+        }
     }
 
     /**
@@ -919,6 +946,7 @@ public class ResultDocument extends Instruction
         formatOp.setChildExpression(formatExpression);
     }
 
+    @Override
     public Expression getContentExpression() {
         return contentOp.getChildExpression();
     }

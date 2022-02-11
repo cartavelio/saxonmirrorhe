@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,24 +12,28 @@ import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.functions.registry.XPath20FunctionSet;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.DecimalFormatManager;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.KeyManager;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * An abstract and configurable implementation of the StaticContext interface,
@@ -45,7 +49,7 @@ public abstract class AbstractStaticContext implements StaticContext {
     private String baseURI = null;
     private Configuration config;
     private PackageData packageData;
-    private Location containingLocation = ExplicitLocation.UNKNOWN_LOCATION;
+    private Location containingLocation = Loc.NONE;
     private String defaultCollationName;
     private FunctionLibraryList libraryList = new FunctionLibraryList();
     private String defaultFunctionNamespace = NamespaceConstant.FN;
@@ -54,6 +58,11 @@ public abstract class AbstractStaticContext implements StaticContext {
     private int xpathLanguageLevel = 31;
     protected boolean usingDefaultFunctionLibrary;
     private Map<StructuredQName, ItemType> typeAliases = new HashMap<>();
+    private UnprefixedElementMatchingPolicy unprefixedElementPolicy = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
+    private BiConsumer<String, Location> warningHandler = (message, locator) -> {
+        XmlProcessingIncident incident = new XmlProcessingIncident(message, SaxonErrorCode.SXWN9000, locator).asWarning();
+        config.makeErrorReporter().report(incident);
+    };
 
     /**
      * Set the Configuration. This is protected so it can be used only by subclasses;
@@ -71,6 +80,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      * Get the system configuration
      */
 
+    @Override
     public Configuration getConfiguration() {
         return config;
     }
@@ -88,6 +98,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      * Get data about the unit of compilation (XQuery module, XSLT package) to which this
      * container belongs
      */
+    @Override
     public PackageData getPackageData() {
         return packageData;
     }
@@ -110,6 +121,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      * @return a RetainedStaticContext object: either a newly created one, or one that is
      * reused from a previous invocation.
      */
+    @Override
     public RetainedStaticContext makeRetainedStaticContext() {
         return new RetainedStaticContext(this);
     }
@@ -162,24 +174,16 @@ public abstract class AbstractStaticContext implements StaticContext {
     }
 
     /**
-     * Get the host language (XSLT, XQuery, XPath) used to implement the code in this container
-     *
-     * @return the value {@link net.sf.saxon.Configuration#XPATH}
-     */
-
-    public int getHostLanguage() {
-        return Configuration.XPATH;
-    }
-
-    /**
      * Construct a dynamic context for early evaluation of constant subexpressions
      */
 
+    @Override
     public XPathContext makeEarlyEvaluationContext() {
         return new EarlyEvaluationContext(getConfiguration());
     }
 
 
+    @Override
     public Location getContainingLocation() {
         return containingLocation;
     }
@@ -213,6 +217,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      * @return "" if no base URI has been set
      */
 
+    @Override
     public String getStaticBaseURI() {
         return baseURI == null ? "" : baseURI;
     }
@@ -223,6 +228,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      * XPath expression to an implementation of the function.
      */
 
+    @Override
     public FunctionLibrary getFunctionLibrary() {
         return libraryList;
     }
@@ -236,25 +242,6 @@ public abstract class AbstractStaticContext implements StaticContext {
     public void setFunctionLibrary(FunctionLibraryList lib) {
         libraryList = lib;
         usingDefaultFunctionLibrary = false;
-    }
-
-    /**
-     * Declare a named collation
-     *
-     * @param name       The name of the collation (technically, a URI)
-     * @param comparator The StringCollator used to implement the collating sequence
-     * @param isDefault  True if this is to be used as the default collation
-     * @deprecated since 9.6. All collations are now registered at the level of the
-     * Configuration. If this method is called, the effect is (a) the supplied collation
-     * is registered with the configuration, and (b) if isDefault=true, the collation
-     * becomes the default collation for this static context
-     */
-
-    public void declareCollation(String name, StringCollator comparator, boolean isDefault) {
-        getConfiguration().registerCollation(name, comparator);
-        if (isDefault) {
-            defaultCollationName = name;
-        }
     }
 
     /**
@@ -273,20 +260,50 @@ public abstract class AbstractStaticContext implements StaticContext {
      *         if no default collation has been defined
      */
 
+    @Override
     public String getDefaultCollationName() {
         return defaultCollationName;
     }
 
     /**
-     * Issue a compile-time warning. This method is used during XPath expression compilation to
-     * output warning conditions. The default implementation writes the message to the
-     * error listener registered with the Configuration.
+     * Set a callback function that will be called to handle any static warnings found while
+     * processing warnings from the XPath parser
+     * @param handler the function to be called to handle static warnings. When a warning is
+     *                issued, the handler's {@code accept} method is called, supplying the string
+     *                of the warning message as the argument.  The default warning handler sends
+     *                the information to the default {@link ErrorReporter} associated with the
+     *                Saxon {@link Configuration}.
+     * @since 10.0
      */
 
+    public void setWarningHandler(BiConsumer<String, Location> handler) {
+        warningHandler = handler;
+    }
+
+    /**
+     * Get the callback function that will be called to handle any static warnings found while
+     * processing warnings from the XPath parser
+     *
+     * @return the function to be called to handle static warnings, if one has been supplied.
+     *                When a warning is
+     *                issued, the handler's {@code accept} method is called, supplying the string
+     *                of the warning message and the location information as the two arguments.
+     * @since 10.0
+     */
+
+    public BiConsumer<String, Location> getWarningHandler() {
+        return warningHandler;
+    }
+
+    /**
+     * Issue a compile-time warning. This method is used during XPath expression compilation to
+     * output warning conditions. The default implementation writes the message to the
+     * error reporter registered with the Configuration.
+     */
+
+    @Override
     public void issueWarning(String s, Location locator) {
-        XPathException ex = new XPathException(s);
-        ex.setLocation(locator);
-        config.getErrorListener().warning(ex);
+        getWarningHandler().accept(s, locator);
     }
 
     /**
@@ -295,6 +312,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      * @return "" always
      */
 
+    @Override
     public String getSystemId() {
         return "";
     }
@@ -307,6 +325,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      * @return the default namespace for elements and type
      */
 
+    @Override
     public String getDefaultElementNamespace() {
         return defaultElementNamespace;
     }
@@ -340,6 +359,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      * @return the default namesapce for functions
      */
 
+    @Override
     public String getDefaultFunctionNamespace() {
         return defaultFunctionNamespace;
     }
@@ -367,6 +387,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      * @since 9.7
      */
 
+    @Override
     public int getXPathVersion() {
         return xpathLanguageLevel;
     }
@@ -389,6 +410,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      *         otherwise false
      */
 
+    @Override
     public boolean isInBackwardsCompatibleMode() {
         return backwardsCompatible;
     }
@@ -413,6 +435,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      * @since 9.3
      */
 
+    @Override
     public ItemType getRequiredContextItemType() {
         return AnyItemType.getInstance();
     }
@@ -426,10 +449,11 @@ public abstract class AbstractStaticContext implements StaticContext {
      * @since 9.2
      */
 
+    @Override
     public DecimalFormatManager getDecimalFormatManager() {
         DecimalFormatManager manager = getPackageData().getDecimalFormatManager();
         if (manager == null) {
-            manager = new DecimalFormatManager(Configuration.XPATH, xpathLanguageLevel);
+            manager = new DecimalFormatManager(HostLanguage.XPATH, xpathLanguageLevel);
             getPackageData().setDecimalFormatManager(manager);
         }
         return manager;
@@ -442,6 +466,7 @@ public abstract class AbstractStaticContext implements StaticContext {
      *         on key() used in XSLT, and system-generated calls on key() which may
      *         also appear in XQuery and XPath
      */
+    @Override
     public KeyManager getKeyManager() {
         return getPackageData().getKeyManager();
     }
@@ -469,6 +494,26 @@ public abstract class AbstractStaticContext implements StaticContext {
     @Override
     public ItemType resolveTypeAlias(StructuredQName typeName) {
         return typeAliases.get(typeName);
+    }
+
+    /**
+     * Set the policy for matching unprefixed element names.
+     * @param policy the policy to be used
+     */
+
+    public void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy) {
+        this.unprefixedElementPolicy = policy;
+    }
+
+    /**
+     * Get the policy for matching unprefixed element names.
+     *
+     * @return the policy to be used
+     */
+
+    @Override
+    public UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
+         return unprefixedElementPolicy;
     }
 }
 

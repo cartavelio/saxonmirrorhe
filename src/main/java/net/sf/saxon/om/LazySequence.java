@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,9 +12,9 @@ import net.sf.saxon.trans.XPathException;
 /**
  * A sequence that wraps an iterator, without being materialized. It can only be used once.
  */
-public class LazySequence<T extends Item<?>> implements Sequence<T> {
+public class LazySequence implements Sequence {
 
-    SequenceIterator<T> iterator;
+    SequenceIterator iterator;
     boolean used = false;
 
     /**
@@ -22,7 +22,7 @@ public class LazySequence<T extends Item<?>> implements Sequence<T> {
      * @param iterator the iterator that delivers the items in the sequence
      */
 
-    public LazySequence(SequenceIterator<T> iterator) {
+    public LazySequence(SequenceIterator iterator) {
         this.iterator = iterator;
     }
 
@@ -34,7 +34,8 @@ public class LazySequence<T extends Item<?>> implements Sequence<T> {
      * @throws XPathException if an error occurs evaluating the underlying expression
      */
 
-    public T head() throws XPathException {
+    @Override
+    public Item head() throws XPathException {
         return iterate().next();
     }
 
@@ -46,7 +47,8 @@ public class LazySequence<T extends Item<?>> implements Sequence<T> {
      * @throws IllegalStateException if iterate() has already been called
      */
 
-    public synchronized SequenceIterator<T> iterate() throws XPathException {
+    @Override
+    public synchronized SequenceIterator iterate() throws XPathException {
         if (used) {
             throw new IllegalStateException("A LazySequence can only be read once");
         } else {
@@ -56,7 +58,7 @@ public class LazySequence<T extends Item<?>> implements Sequence<T> {
     }
 
     @Override
-    public Sequence<T> makeRepeatable() throws XPathException {
+    public Sequence makeRepeatable() throws XPathException {
         return materialize();
     }
 }

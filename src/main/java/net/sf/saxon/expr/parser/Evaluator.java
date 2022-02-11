@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,8 +8,8 @@
 package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SequenceOutputter;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.om.*;
@@ -23,47 +23,7 @@ import java.util.List;
  * An Evaluator evaluates an expression to return a sequence
  */
 public abstract class Evaluator {
-
-
-    public static Evaluator evaluatorForCode(int code) {
-        switch (code) {
-            case ExpressionTool.EVALUATE_LITERAL:
-                return Evaluator.LITERAL;
-            case ExpressionTool.EVALUATE_VARIABLE:
-                return Evaluator.VARIABLE;
-            case ExpressionTool.MAKE_CLOSURE:
-                return Evaluator.LAZY_SEQUENCE;
-            case ExpressionTool.MAKE_MEMO_CLOSURE:
-                return Evaluator.MEMO_CLOSURE;
-            case ExpressionTool.RETURN_EMPTY_SEQUENCE:
-                return Evaluator.EMPTY_SEQUENCE;
-            case ExpressionTool.EVALUATE_AND_MATERIALIZE_VARIABLE:
-                return Evaluator.VARIABLE;
-            case ExpressionTool.CALL_EVALUATE_SINGLE_ITEM:
-                return Evaluator.SINGLE_ITEM;
-            case ExpressionTool.CALL_EVALUATE_OPTIONAL_ITEM:
-                return Evaluator.OPTIONAL_ITEM;
-            case ExpressionTool.ITERATE_AND_MATERIALIZE:
-                return Evaluator.EAGER_SEQUENCE;
-            case ExpressionTool.PROCESS:
-                return Evaluator.PROCESS;
-            case ExpressionTool.LAZY_TAIL_EXPRESSION:
-                return Evaluator.LAZY_TAIL;
-            case ExpressionTool.SHARED_APPEND_EXPRESSION:
-                return Evaluator.SHARED_APPEND;
-            case ExpressionTool.MAKE_INDEXED_VARIABLE:
-                return Evaluator.MAKE_INDEXED_VARIABLE;
-            case ExpressionTool.MAKE_SINGLETON_CLOSURE:
-                return Evaluator.SINGLETON_CLOSURE;
-            case ExpressionTool.EVALUATE_SUPPLIED_PARAMETER:
-                return Evaluator.SUPPLIED_PARAMETER;
-            case ExpressionTool.STREAMING_ARGUMENT:
-                return Evaluator.STREAMING_ARGUMENT;
-            default:
-                return Evaluator.EAGER_SEQUENCE;
-        }
-    }
-
+    
     /**
      * Evaluate an expression to return a sequence
      * @param expr the expression to be evaluated
@@ -72,7 +32,7 @@ public abstract class Evaluator {
      * @throws XPathException if any dynamic error occurs during the evaluation
      */
 
-    public abstract Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException;
+    public abstract Sequence evaluate(Expression expr, XPathContext context) throws XPathException;
 
     /**
      * Get an integer code identifying this evaluator (for use in the SEF file). The codes are chosen
@@ -80,7 +40,7 @@ public abstract class Evaluator {
      * SEF compatibility.
      */
 
-    public abstract int getCode();
+    public abstract EvaluationMode getEvaluationMode();
 
     /**
      * An evaluator that always returns the empty sequence
@@ -88,7 +48,7 @@ public abstract class Evaluator {
 
     public final static Evaluator EMPTY_SEQUENCE = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) {
+        public Sequence evaluate(Expression expr, XPathContext context) {
             return EmptySequence.getInstance();
         }
 
@@ -98,8 +58,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.RETURN_EMPTY_SEQUENCE;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.RETURN_EMPTY_SEQUENCE;
         }
     };
 
@@ -109,7 +69,7 @@ public abstract class Evaluator {
 
     public final static Evaluator LITERAL = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) {
+        public Sequence evaluate(Expression expr, XPathContext context) {
             return ((Literal)expr).getValue();
         }
 
@@ -119,8 +79,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.EVALUATE_LITERAL;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.EVALUATE_LITERAL;
         }
     };
 
@@ -130,7 +90,7 @@ public abstract class Evaluator {
 
     public final static Evaluator VARIABLE = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             try {
                 return ((VariableReference) expr).evaluateVariable(context);
             } catch (ClassCastException e) {
@@ -147,8 +107,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.EVALUATE_AND_MATERIALIZE_VARIABLE;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.EVALUATE_AND_MATERIALIZE_VARIABLE;
         }
     };
 
@@ -158,7 +118,7 @@ public abstract class Evaluator {
 
     public final static Evaluator SUPPLIED_PARAMETER = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             try {
                 return ((SuppliedParameterReference) expr).evaluateVariable(context);
             } catch (ClassCastException e) {
@@ -175,8 +135,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.EVALUATE_SUPPLIED_PARAMETER;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.EVALUATE_SUPPLIED_PARAMETER;
         }
     };
 
@@ -187,7 +147,7 @@ public abstract class Evaluator {
 
     public final static Evaluator SINGLE_ITEM = new Evaluator() {
         @Override
-        public Item<?> evaluate(Expression expr, XPathContext context) throws XPathException {
+        public Item evaluate(Expression expr, XPathContext context) throws XPathException {
             return expr.evaluateItem(context);
         }
 
@@ -197,8 +157,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.CALL_EVALUATE_SINGLE_ITEM;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.CALL_EVALUATE_SINGLE_ITEM;
         }
     };
 
@@ -209,8 +169,8 @@ public abstract class Evaluator {
 
     public final static Evaluator OPTIONAL_ITEM = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
-            Item<?> item = expr.evaluateItem(context);
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
+            Item item = expr.evaluateItem(context);
             return item==null ? EmptySequence.getInstance() : item;
         }
 
@@ -220,8 +180,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.CALL_EVALUATE_OPTIONAL_ITEM;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.CALL_EVALUATE_OPTIONAL_ITEM;
         }
     };
 
@@ -235,9 +195,9 @@ public abstract class Evaluator {
 
     public final static Evaluator LAZY_SEQUENCE = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
-            SequenceIterator<?> iter = expr.iterate(context);
-            return new LazySequence<>(iter);
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
+            SequenceIterator iter = expr.iterate(context);
+            return new LazySequence(iter);
         }
 
         /**
@@ -246,8 +206,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.MAKE_CLOSURE;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.MAKE_CLOSURE;
         }
     };
 
@@ -258,9 +218,9 @@ public abstract class Evaluator {
 
     public final static Evaluator MEMO_SEQUENCE = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
-            SequenceIterator<?> iter = expr.iterate(context);
-            return new MemoSequence<>(iter);
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
+            SequenceIterator iter = expr.iterate(context);
+            return new MemoSequence(iter);
         }
 
         /**
@@ -269,8 +229,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.MAKE_MEMO_CLOSURE;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.MAKE_MEMO_CLOSURE;
         }
     };
 
@@ -281,7 +241,7 @@ public abstract class Evaluator {
 
     public final static Evaluator MEMO_CLOSURE = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             return new MemoClosure(expr, context);
         }
 
@@ -291,8 +251,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.MAKE_MEMO_CLOSURE;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.MAKE_MEMO_CLOSURE;
         }
     };
 
@@ -303,7 +263,7 @@ public abstract class Evaluator {
 
     public final static Evaluator SINGLETON_CLOSURE = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             return new SingletonClosure(expr, context);
         }
 
@@ -313,8 +273,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.MAKE_SINGLETON_CLOSURE;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.MAKE_SINGLETON_CLOSURE;
         }
     };
 
@@ -326,8 +286,8 @@ public abstract class Evaluator {
 
     public final static Evaluator EAGER_SEQUENCE = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
-            SequenceIterator<?> iter = expr.iterate(context);
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
+            SequenceIterator iter = expr.iterate(context);
             return iter.materialize();
         }
 
@@ -337,8 +297,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.ITERATE_AND_MATERIALIZE;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.ITERATE_AND_MATERIALIZE;
         }
     };
 
@@ -349,17 +309,17 @@ public abstract class Evaluator {
 
     public final static Evaluator SHARED_APPEND = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             if (expr instanceof Block) {
                 Block block = (Block) expr;
                 Operand[] children = block.getOperanda();
-                List<GroundedValue<?>> subsequences = new ArrayList<>(children.length);
+                List<GroundedValue> subsequences = new ArrayList<>(children.length);
                 for (Operand o : children) {
                     Expression child = o.getChildExpression();
                     if (Cardinality.allowsMany(child.getCardinality())) {
                         subsequences.add(child.iterate(context).materialize());
                     } else {
-                        Item<?> j = child.evaluateItem(context);
+                        Item j = child.evaluateItem(context);
                         if (j != null) {
                             subsequences.add(j);
                         }
@@ -378,8 +338,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.SHARED_APPEND_EXPRESSION;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.SHARED_APPEND_EXPRESSION;
         }
     };
 
@@ -389,7 +349,7 @@ public abstract class Evaluator {
 
     public final static Evaluator STREAMING_ARGUMENT = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             return context.getConfiguration().obtainOptimizer().evaluateStreamingArgument(expr, context);
         }
 
@@ -399,8 +359,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.STREAMING_ARGUMENT;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.STREAMING_ARGUMENT;
         }
     };
 
@@ -410,7 +370,7 @@ public abstract class Evaluator {
 
     public final static Evaluator MAKE_INDEXED_VARIABLE = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             return context.getConfiguration().obtainOptimizer().makeIndexedValue(expr.iterate(context));
         }
 
@@ -420,8 +380,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.MAKE_INDEXED_VARIABLE;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.MAKE_INDEXED_VARIABLE;
         }
     };
 
@@ -431,17 +391,14 @@ public abstract class Evaluator {
 
     public final static Evaluator PROCESS = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             Controller controller = context.getController();
-            Receiver saved = context.getReceiver();
-            SequenceOutputter seq = controller.allocateSequenceOutputter(20);
-            seq.getPipelineConfiguration().setHostLanguage(expr.getPackageData().getHostLanguage());
-            context.setReceiver(seq);
-            seq.open();
-            expr.process(context);
-            seq.close();
-            context.setReceiver(saved);
-            Sequence<?> val = seq.getSequence();
+            SequenceCollector seq = controller.allocateSequenceOutputter();
+            ComplexContentOutputter out = new ComplexContentOutputter(seq);
+            out.open();
+            expr.process(out, context);
+            out.close();
+            Sequence val = seq.getSequence();
             seq.reset();
             return val;
         }
@@ -452,8 +409,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.PROCESS;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.PROCESS;
         }
     };
 
@@ -467,12 +424,12 @@ public abstract class Evaluator {
 
     public final static Evaluator LAZY_TAIL = new Evaluator() {
         @Override
-        public Sequence<?> evaluate(Expression expr, XPathContext context) throws XPathException {
+        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             TailExpression tail = (TailExpression) expr;
             VariableReference vr = (VariableReference) tail.getBaseExpression();
-            Sequence<?> base = Evaluator.VARIABLE.evaluate(vr, context);
+            Sequence base = Evaluator.VARIABLE.evaluate(vr, context);
             if (base instanceof MemoClosure) {
-                SequenceIterator<?> it = base.iterate();
+                SequenceIterator it = base.iterate();
                 base = it.materialize();
             }
             if (base instanceof IntegerRange) {
@@ -487,12 +444,8 @@ public abstract class Evaluator {
                 }
             }
             if (base instanceof GroundedValue) {
-                GroundedValue<?> baseSeq = (GroundedValue<?>)base;
-                if (tail.getStart() > ((GroundedValue<?>) base).getLength()) {
-                    return EmptySequence.getInstance();
-                } else {
-                    return baseSeq.subsequence(tail.getStart() - 1, baseSeq.getLength() - tail.getStart() + 1);
-                }
+                GroundedValue baseSeq = (GroundedValue)base;
+                return baseSeq.subsequence(tail.getStart() - 1, baseSeq.getLength() - tail.getStart() + 1);
             }
 
             return new MemoClosure(tail, context);
@@ -504,8 +457,8 @@ public abstract class Evaluator {
          * SEF compatibility.
          */
         @Override
-        public int getCode() {
-            return ExpressionTool.LAZY_TAIL_EXPRESSION;
+        public EvaluationMode getEvaluationMode() {
+            return EvaluationMode.LAZY_TAIL_EXPRESSION;
         }
     };
 

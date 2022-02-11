@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -36,15 +36,13 @@ import java.util.List;
 
 public abstract class GeneralComparison extends BinaryExpression implements ComparisonExpression, Callable {
 
-    public static final int ONE_TO_ONE = 0;
-    public static final int MANY_TO_ONE = 1;
-    public static final int MANY_TO_MANY = 2;
+    public enum ComparisonCardinality {ONE_TO_ONE, MANY_TO_ONE, MANY_TO_MANY}
     // Note, a one-to-many comparison is inverted into a many-to-one comparison
 
     protected int singletonOperator;
     protected AtomicComparer comparer;
     protected boolean needsRuntimeCheck = true;
-    protected int comparisonCardinality = MANY_TO_MANY;
+    protected ComparisonCardinality comparisonCardinality = ComparisonCardinality.MANY_TO_MANY;
     protected boolean doneWarnings = false;
 
 
@@ -85,21 +83,21 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      * Ask whether the comparison is known to be many-to-one, one-to-one, or many-to-many.
      * (Note, an expression that is one-to-many will be converted to one that is many-to-one).
      *
-     * @return the Cardinality of the comparison as one of the values {@link #ONE_TO_ONE},
-     *         {@link #MANY_TO_MANY}, {@link #MANY_TO_ONE}
+     * @return the Cardinality of the comparison as one of the values {@link ComparisonCardinality#ONE_TO_ONE},
+     *         {@link ComparisonCardinality#MANY_TO_MANY}, {@link ComparisonCardinality#MANY_TO_ONE}
      */
 
-    public int getComparisonCardinality() {
+    public ComparisonCardinality getComparisonCardinality() {
         return comparisonCardinality;
     }
 
     /**
      * Say whether the comparison is known to be many-to-one, one-to-one, or many-to-many.
      *
-     * @param card the Cardinality of the comparison as one of the values {@link #ONE_TO_ONE},
-     *             {@link #MANY_TO_MANY}, {@link #MANY_TO_ONE}
+     * @param card the Cardinality of the comparison as one of the values {@link ComparisonCardinality#ONE_TO_ONE},
+     *             {@link ComparisonCardinality#MANY_TO_MANY}, {@link ComparisonCardinality#MANY_TO_ONE}
      */
-    public void setComparisonCardinality(int card) {
+    public void setComparisonCardinality(ComparisonCardinality card) {
         comparisonCardinality = card;
     }
 
@@ -121,6 +119,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      *         in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         return "GeneralComparison";
     }
@@ -138,6 +137,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      * Get the AtomicComparer used to compare atomic values. This encapsulates any collation that is used
      */
 
+    @Override
     public AtomicComparer getAtomicComparer() {
         return comparer;
     }
@@ -147,6 +147,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      * Token.FLE, Token.FGE
      */
 
+    @Override
     public int getSingletonOperator() {
         return singletonOperator;
     }
@@ -158,6 +159,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      *         should be converted to strings.
      */
 
+    @Override
     public boolean convertsUntypedToOther() {
         return true;
     }
@@ -166,6 +168,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      * Determine the static cardinality. Returns [1..1]
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -177,6 +180,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         final Configuration config = visitor.getConfiguration();
@@ -225,7 +229,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             return Literal.makeLiteral(BooleanValue.FALSE, this);
         }
 
-        if (((PlainType) t0).isExternalType() || ((PlainType) t1).isExternalType()) {
+        if (t0.getUType().union(t1.getUType()).overlaps(UType.EXTENSION)) {
             XPathException err = new XPathException("Cannot perform comparisons involving external objects");
             err.setIsTypeError(true);
             err.setErrorCode("XPTY0004");
@@ -292,9 +296,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                     adoptChildExpression(e0);
                     e1 = new CastExpression(getRhsExpression(), BuiltInAtomicType.STRING, Cardinality.allowsZero(c1));
                     adoptChildExpression(e1);
-                } else if (th.isSubType(t1, NumericType.getInstance())) {
-//                    e0 = new CastExpression(getLhsExpression(), BuiltInAtomicType.DOUBLE, false);
-//                    adoptChildExpression(e0);
+                } else if (NumericType.isNumericType(t1)) {
                     Expression vun = makeCompareUntypedToNumeric(getLhsExpression(), getRhsExpression(), singletonOperator);
                     return vun.typeCheck(visitor, contextInfo);
                 } else {
@@ -302,7 +304,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                     adoptChildExpression(e0);
                 }
             } else if (t1.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                if (th.isSubType(t0, NumericType.getInstance())) {
+                if (NumericType.isNumericType(t0)) {
 //                    e1 = new CastExpression(getRhsExpression(), BuiltInAtomicType.DOUBLE, false);
 //                    adoptChildExpression(e1);
                     Expression vun = makeCompareUntypedToNumeric(getRhsExpression(), getLhsExpression(), Token.inverse(singletonOperator));
@@ -377,7 +379,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
     private boolean mayInvolveCastToQName(TypeHierarchy th, Expression e1, Expression e2) {
         SimpleType s1 = (SimpleType) e1.getItemType().getAtomizedItemType();
         return (s1 == BuiltInAtomicType.ANY_ATOMIC || s1.isNamespaceSensitive()) &&
-                th.relationship(e2.getItemType().getAtomizedItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT &&
+                th.relationship(e2.getItemType().getAtomizedItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT &&
                 (e2.getSpecialProperties() & StaticProperty.NOT_UNTYPED_ATOMIC) == 0;
     }
 
@@ -396,6 +398,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         final TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
@@ -434,20 +437,20 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
         if (many0) {
             if (many1) {
-                comparisonCardinality = MANY_TO_MANY;
+                comparisonCardinality = ComparisonCardinality.MANY_TO_MANY;
             } else {
-                comparisonCardinality = MANY_TO_ONE;
+                comparisonCardinality = ComparisonCardinality.MANY_TO_ONE;
             }
         } else {
             if (many1) {
                 GeneralComparison mc = getInverseComparison();
-                mc.comparisonCardinality = MANY_TO_ONE;
+                mc.comparisonCardinality = ComparisonCardinality.MANY_TO_ONE;
                 ExpressionTool.copyLocationInfo(this, mc);
                 mc.comparer = comparer;
                 mc.needsRuntimeCheck = needsRuntimeCheck;
                 return mc.optimize(visitor, contextInfo);
             } else {
-                comparisonCardinality = ONE_TO_ONE;
+                comparisonCardinality = ComparisonCardinality.ONE_TO_ONE;
             }
         }
 
@@ -515,8 +518,9 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
         if (operator != Token.EQUALS &&
                 operator != Token.NE &&
-                (comparisonCardinality == MANY_TO_MANY || comparisonCardinality == MANY_TO_ONE && manyOperandIsLiftable()) &&
-                (th.isSubType(t0, NumericType.getInstance()) || th.isSubType(t1, NumericType.getInstance()))) {
+                (comparisonCardinality == ComparisonCardinality.MANY_TO_MANY ||
+                         comparisonCardinality == ComparisonCardinality.MANY_TO_ONE && manyOperandIsLiftable()) &&
+                (NumericType.isNumericType(t0) || NumericType.isNumericType(t1))) {
 
             // System.err.println("** using minimax optimization **");
             ValueComparison vc;
@@ -580,6 +584,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      */
 
     /*@Nullable*/
+    @Override
     public BooleanValue evaluateItem(XPathContext context) throws XPathException {
         switch (comparisonCardinality) {
             case ONE_TO_ONE: {
@@ -610,6 +615,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      * @throws XPathException if a dynamic error occurs during the evaluation of the expression
      */
 
+    @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         switch (comparisonCardinality) {
             case ONE_TO_ONE: {
@@ -638,6 +644,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      * @return a boolean representing the result of the numeric comparison of the two operands
      */
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         switch (comparisonCardinality) {
             case ONE_TO_ONE: {
@@ -833,11 +840,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                     StringConverter sc = a1.getItemType().getPrimitiveItemType().getStringConverter(rules);
                     if (a1 instanceof QualifiedNameValue) {
                         sc = (StringConverter) sc.setNamespaceResolver(nsResolver);
-                        // avoid using cached results - bug 3862
-                        a0 = sc.convertString(a0.getStringValueCS()).asAtomic();
-                    } else {
-                        a0 = ((UntypedAtomicValue) a0).obtainConversionResult(a1.getItemType().getPrimitiveType(), sc).asAtomic();
                     }
+                    a0 = sc.convertString(a0.getStringValueCS()).asAtomic();
                 }
             } else {
                 // a1 is untyped atomic
@@ -849,11 +853,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                     StringConverter sc = a0.getItemType().getPrimitiveItemType().getStringConverter(rules);
                     if (a0 instanceof QualifiedNameValue) {
                         sc = (StringConverter) sc.setNamespaceResolver(nsResolver);
-                        // avoid using cached results - bug 3862
-                        a1 = sc.convertString(a1.getStringValueCS()).asAtomic();
-                    } else {
-                        a1 = ((UntypedAtomicValue) a1).obtainConversionResult(a0.getItemType().getPrimitiveType(), sc).asAtomic();
                     }
+                    a1 = sc.convertString(a1.getStringValueCS()).asAtomic();
                 }
             }
             checkTypes = false; // No further checking needed if conversion succeeded
@@ -869,6 +870,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return BuiltInAtomicType.BOOLEAN;
     }
@@ -943,6 +945,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         return "gc";
     }
 
+    @Override
     protected void explainExtraAttributes(ExpressionPresenter out) {
         String cc = "";
         switch (comparisonCardinality) {

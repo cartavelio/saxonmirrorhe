@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,9 +14,10 @@ import net.sf.saxon.event.Stripper;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.style.StylesheetModule;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.type.AlphaCode;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
@@ -59,6 +60,7 @@ public class SelectedElementsSpaceStrippingRule implements SpaceStrippingRule {
      *         xml:space setting, and STRIP_DEFAULT otherwise
      */
 
+    @Override
     public int isSpacePreserving(NodeName fingerprint, SchemaType schemaType) throws XPathException {
 
         Rule rule = getRule(fingerprint);
@@ -269,6 +271,7 @@ public class SelectedElementsSpaceStrippingRule implements SpaceStrippingRule {
      * is necessary
      *
      * @return a filter in the form of a ProxyReceiver, or null
+     * @param next
      */
     @Override
     public ProxyReceiver makeStripper(Receiver next) {
@@ -280,6 +283,7 @@ public class SelectedElementsSpaceStrippingRule implements SpaceStrippingRule {
      *
      * @param presenter the output handler
      */
+    @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("strip");
         Rule rule = anyElementRule;
@@ -296,36 +300,12 @@ public class SelectedElementsSpaceStrippingRule implements SpaceStrippingRule {
             exportRule(r, presenter);
         }
         presenter.endElement();
-
-        FastStringBuffer fsb = null;
-        boolean foundCatchAll = false;
-        if ("JS".equals(((ExpressionPresenter.ExportOptions) presenter.getOptions()).target)) {
-            presenter.startElement("stripJS");
-            fsb = new FastStringBuffer(256);
-            Iterator<Rule> iter = getRankedRules();
-            foundCatchAll = false;
-            while (iter.hasNext()) {
-                rule = iter.next();
-                exportRuleJS(rule, fsb);
-                if (rule.getPattern().getItemType() instanceof NodeKindTest) {
-                    foundCatchAll = true;
-                    break;
-                }
-            }
-
-            if (!foundCatchAll) {
-                fsb.append("  return false;");
-            }
-            //System.err.println(fsb.toString());
-            presenter.emitAttribute("test", fsb.toString());
-            presenter.endElement();
-        }
     }
 
     private static void exportRule(Rule rule, ExpressionPresenter presenter) {
         String which = rule.getAction() == Stripper.STRIP ? "s" : "p";
         presenter.startElement(which);
-        presenter.emitAttribute("test", rule.getPattern().getItemType().toExportString());
+        presenter.emitAttribute("test", AlphaCode.fromItemType(rule.getPattern().getItemType()));
         presenter.emitAttribute("prec", rule.getPrecedence()+"");
         presenter.endElement();
     }

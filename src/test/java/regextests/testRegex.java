@@ -1,10 +1,10 @@
 package regextests;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntRangeSet;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,13 +16,14 @@ import java.util.regex.Pattern;
 /**
  *
  */
-public class testRegex extends TestCase {
+public class testRegex {
 
+    @Test
     public void testCharacterClasses() {
 
         PrintWriter out;
         try {
-            out = new PrintWriter(new FileWriter(new File(ConfigTest.DATA_DIR + "JavaSubCategories.xml")));
+            out = new PrintWriter(new FileWriter(new File(ConfigTest.TEMP_DIR + "JavaSubCategories.xml")));
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -75,6 +76,7 @@ public class testRegex extends TestCase {
 
     }
 
+    @Test
     public void testNonBmpClassComplement() {
         int[] ch = new int[]{119800, 119801, 119802, 119803, 119804, 119805, 119806, 119807, 119808, 119809, 119810};
         String s = new String(ch, 0, ch.length);
@@ -96,28 +98,3 @@ public class testRegex extends TestCase {
         return StringValue.diagnosticDisplay(s);
     }
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
-
-
-

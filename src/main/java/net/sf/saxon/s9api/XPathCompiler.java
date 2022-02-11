@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,14 +10,14 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.OptimizerOptions;
+import net.sf.saxon.functions.FunctionLibraryList;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathEvaluator;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
-import net.sf.saxon.trans.DecimalFormatManager;
-import net.sf.saxon.trans.DecimalSymbols;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.value.SequenceType;
 
 import java.net.URI;
@@ -28,18 +28,18 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * An XPathCompiler object allows XPath queries to be compiled. The compiler holds information that
+ * An {@code XPathCompiler} object allows XPath queries to be compiled. The compiler holds information that
  * represents the static context for an XPath expression.
- * <p>To construct an XPathCompiler, use the factory method
+ * <p>To construct an {@code XPathCompiler}, use the factory method
  * {@link Processor#newXPathCompiler}.</p>
- * <p>An XPathCompiler may be used repeatedly to compile multiple
- * queries. Any changes made to the XPathCompiler (that is, to the
+ * <p>An {@code XPathCompiler} may be used repeatedly to compile multiple
+ * queries. Any changes made to the {@code XPathCompiler} (that is, to the
  * static context) do not affect queries that have already been compiled.
- * An XPathCompiler may be used concurrently in multiple threads, but
+ * An {@code XPathCompiler} may be used concurrently in multiple threads, but
  * it should not then be modified once initialized.</p>
- * <p>Changes to an XPathCompiler are cumulative. There is no simple way to reset
- * the XPathCompiler to its initial state; instead, simply create a new
- * XPathCompiler.</p>
+ * <p>Changes to an {@code XPathCompiler} are cumulative. There is no simple way to reset
+ * the {@code XPathCompiler} to its initial state; instead, simply create a new
+ * {@code XPathCompiler}.</p>
  * <p>The <code>XPathCompiler</code> has the ability to maintain a cache of compiled
  * expressions. This is active only if enabled by calling {@link #setCaching(boolean)}.
  * If caching is enabled, then the compiler will recognize an attempt to compile
@@ -243,6 +243,22 @@ public class XPathCompiler {
     }
 
     /**
+     * Set the error reporter to be used for reporting static warnings during compilation.
+     * By default, the {@link ErrorReporter} associated with the Saxon Configuration is used.
+     * <p>Note that fatal static errors are always reported in the form
+     * of an exception thrown by the {@link #compile(String)} method, so this method only controls
+     * the handling of warnings</p>
+     * @param reporter the ErrorReporter to which warnings will be notified
+     * @since 10.0
+     */
+
+    public void setWarningHandler(ErrorReporter reporter) {
+        env.setWarningHandler((message, location) -> {
+            reporter.report(new XmlProcessingIncident(message, SaxonErrorCode.SXWN9000, location).asWarning());
+        });
+    }
+
+    /**
      * Declare a namespace binding as part of the static context for XPath expressions compiled using this
      * XPathCompiler
      *
@@ -355,6 +371,25 @@ public class XPathCompiler {
         var.setRequiredType(
                 SequenceType.makeSequenceType(
                         itemType.getUnderlyingItemType(), occurrences.getCardinality()));
+    }
+
+    /**
+     * Make available a set of functions defined in an XSLT 3.0 package. All functions
+     * defined with {@code visibility="public"} (or exposed as public using {@code xsl:expose}
+     * become part of the static context for an XPath expression created using this
+     * {@code XPathCompiler}. The functions are added to the search path after all existing
+     * functions, including functions added using a previous call on this method.
+     * <p>Note that if the library package includes functions that reference stylesheet parameters
+     * (or global variables that depend on the context item), then there is no way of supplying
+     * values for such parameters; calling such functions will cause a run-time error.</p>
+     * @param libraryPackage the XSLT compiled library package whose functions are to be made
+     *                       available
+     * @since 10.0
+     */
+
+    public void addXsltFunctionLibrary(XsltPackage libraryPackage) {
+        ((FunctionLibraryList)env.getFunctionLibrary()).addFunctionLibrary(
+                libraryPackage.getUnderlyingPreparedPackage().getPublicFunctions());
     }
 
     /**
@@ -606,18 +641,23 @@ public class XPathCompiler {
     }
 
     /**
-     * Registers the required decimal format properties
+     * Registers the required decimal format properties, for use in calls to the
+     * {@code fn:format-number()} function. The values for different properties may be supplied
+     * incrementally; they are only checked for consistency when an XPath expression is compiled.
      *
-     * @param format   The name of the decimal format
+     * @param format   The name of the decimal format. (Note: it is not possible to set
+     *                 properties for the default unnamed decimal format.)
      * @param property The decimal symbols name to update, for example {@code "grouping-separator"}
      * @param value    The value to update the decimal symbol property
-     * @throws SaxonApiException if there are two conflicting definitions of the named decimal-format
+     * @throws SaxonApiException if an invalid value is supplied for a decimal format property
+     * @throws IllegalArgumentException if the value of {code property} is not one of the recognized
+     * decimal format properties
      * @since 9.4
      */
     public void setDecimalFormatProperty(QName format, String property, String value) throws SaxonApiException {
         DecimalFormatManager dfm = env.getDecimalFormatManager();
         if (dfm == null) {
-            dfm = new DecimalFormatManager(Configuration.XPATH, env.getXPathVersion());
+            dfm = new DecimalFormatManager(HostLanguage.XPATH, env.getXPathVersion());
             env.setDecimalFormatManager(dfm);
         }
 

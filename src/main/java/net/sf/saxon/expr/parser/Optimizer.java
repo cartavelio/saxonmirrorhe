@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,12 +11,13 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.sort.DocumentSorter;
+import net.sf.saxon.functions.PositionAndLast;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.NodeSetPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.style.XSLFunction;
 import net.sf.saxon.style.XSLTemplate;
@@ -24,6 +25,7 @@ import net.sf.saxon.trans.GlobalVariableManager;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.RuleTarget;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.BooleanValue;
 
 /**
  * This class performs optimizations that vary between different versions of the Saxon product.
@@ -32,9 +34,6 @@ import net.sf.saxon.type.TypeHierarchy;
  * overridden in Saxon-EE.
  */
 public class Optimizer {
-
-    public static final int NO_OPTIMIZATION = 0;
-    public static final int FULL_OPTIMIZATION = 10;
 
     /*@NotNull*/ protected Configuration config;
     private OptimizerOptions optimizerOptions = OptimizerOptions.FULL_EE_OPTIMIZATION;
@@ -90,6 +89,63 @@ public class Optimizer {
 
     public boolean isOptionSet(int option) {
         return optimizerOptions.isSet(option);
+    }
+
+    /**
+     * Optimize a value comparison
+     *
+     * @param vc          the value comparison expression
+     * @param visitor     the expression visitor
+     * @param contextInfo static context item information
+     * @return either the original value comparison, or an optimized equivalent
+     * @throws XPathException if things go wrong
+     */
+
+    public Expression optimizeValueComparison(
+            ValueComparison vc, ExpressionVisitor visitor, ContextItemStaticInfo contextInfo)
+            throws XPathException {
+
+        Expression lhs = vc.getLhsExpression();
+        Expression rhs = vc.getRhsExpression();
+
+        Expression e2 = optimizePositionVsLast(lhs, rhs, vc.getOperator());
+        if (e2 != null) {
+            trace("Rewrote position() ~= last()", e2);
+            return e2;
+        }
+        e2 = optimizePositionVsLast(rhs, lhs, Token.inverse(vc.getOperator()));
+        if (e2 != null) {
+            trace("Rewrote last() ~= position()", e2);
+            return e2;
+        }
+        return vc;
+    }
+
+    private Expression optimizePositionVsLast(Expression lhs, Expression rhs, int operator) {
+
+        // optimise [position()=last()] etc
+
+        if (lhs.isCallOn(PositionAndLast.Position.class) &&
+                rhs.isCallOn(PositionAndLast.Last.class)) {
+            switch (operator) {
+                case Token.FEQ:
+                case Token.FGE:
+                    IsLastExpression iletrue = new IsLastExpression(true);
+                    ExpressionTool.copyLocationInfo(lhs, iletrue);
+                    return iletrue;
+                case Token.FNE:
+                case Token.FLT:
+                    IsLastExpression ilefalse = new IsLastExpression(false);
+                    ExpressionTool.copyLocationInfo(lhs, ilefalse);
+                    return ilefalse;
+                case Token.FGT:
+                    return Literal.makeLiteral(BooleanValue.FALSE, lhs);
+                case Token.FLE:
+                    return Literal.makeLiteral(BooleanValue.TRUE, lhs);
+            }
+        }
+        return null;
+
     }
 
     /**
@@ -154,16 +210,16 @@ public class Optimizer {
     }
 
     /**
-     * Consider reordering the predicates in a filter expression based on cost estimates
+     * Consider reordering the predicates in a filter expression based on cost estimates and other criteria
      *
-     * @param f       the filter expression (which is known to have more than one predicate)
+     * @param f       the filter expression
      * @param visitor expression visitor
      * @param cisi    information about the context item type
      * @return either the original expression, or an optimized replacement
      * @throws XPathException if things go wrong
      */
 
-    public Expression reorderPredicates(FilterExpression f, ExpressionVisitor visitor, ContextItemStaticInfo cisi)
+    public FilterExpression reorderPredicates(FilterExpression f, ExpressionVisitor visitor, ContextItemStaticInfo cisi)
             throws XPathException {
         return f;
     }
@@ -201,11 +257,15 @@ public class Optimizer {
      *
      * @param iter the iterator that delivers the sequence of values to be indexed
      * @return the indexed value
-     * @throws UnsupportedOperationException: this method should not be called in Saxon-HE
+     * @throws UnsupportedOperationException this method should not be called in Saxon-HE
      */
 
-    public <T extends Item<?>> GroundedValue<T> makeIndexedValue(SequenceIterator<? extends T> iter) throws XPathException {
+    public GroundedValue makeIndexedValue(SequenceIterator iter) throws XPathException {
         throw new UnsupportedOperationException("Indexing requires Saxon-EE");
+    }
+
+    public void optimizeNodeSetPattern(NodeSetPattern pattern) {
+        // No action in Saxon-HE
     }
 
     /**
@@ -225,7 +285,7 @@ public class Optimizer {
      * @return the (nominal) result of the evaluation
      */
 
-    public Sequence<?> evaluateStreamingArgument(Expression expr, XPathContext context) throws XPathException {
+    public Sequence evaluateStreamingArgument(Expression expr, XPathContext context) throws XPathException {
         // non-streaming fallback implementation
         return ExpressionTool.eagerEvaluate(expr, context);
     }
@@ -469,13 +529,13 @@ public class Optimizer {
 
     public void injectByteCodeCandidates(Expression exp) throws XPathException {
 
-    };
+    }
 
     public Expression optimizeNumberInstruction(NumberInstruction ni, ContextItemStaticInfo contextInfo) {
         return null;
     }
 
-    public void assessFunctionStreamability(XSLFunction sourceFunction, UserFunction compiledFunction) throws XPathException {
+    public void assessFunctionStreamability(XSLFunction reporter, UserFunction compiledFunction) throws XPathException {
         throw new XPathException("Streamable stylesheet functions are not supported in Saxon-HE", "XTSE3430");
     }
 

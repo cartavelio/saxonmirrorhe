@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,9 +7,11 @@
 
 package net.sf.saxon.serialize;
 
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.SaxonOutputKeys;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.CompressedWhitespace;
@@ -37,7 +39,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
     private int excludedRepresentation = REP_ENTITY;
 
     private int inScript;
-    protected int version = 4;
+    protected int version = 5;
     private String parentElement;
     private String uri;
     private boolean escapeNonAscii = false;
@@ -177,6 +179,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
      * @param escape true if all non ASCII characters should be escaped
      */
 
+    @Override
     public void setEscapeNonAscii(Boolean escape) {
         escapeNonAscii = escape;
     }
@@ -184,7 +187,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
     /**
      * Decide whether an element is "serialized as an HTML element" in the language of the 3.0 specification
      *
-     * @return true if the element
+     * @return true if the element is to be serialized as an HTML element
      */
 
     protected abstract boolean isHTMLElement(NodeName name);
@@ -193,9 +196,11 @@ public abstract class HTMLEmitter extends XMLEmitter {
      * Output start of document
      */
 
+    @Override
     public void open() throws XPathException {
     }
 
+    @Override
     protected void openDocument() throws XPathException {
         if (writer == null) {
             makeWriter();
@@ -203,11 +208,6 @@ public abstract class HTMLEmitter extends XMLEmitter {
         if (started) {
             return;
         }
-        started = true;
-        // This method is sometimes called twice, especially during an identity transform
-        // This check stops two DOCTYPE declarations being output.
-
-
         String byteOrderMark = outputProperties.getProperty(SaxonOutputKeys.BYTE_ORDER_MARK);
 
         if ("yes".equals(byteOrderMark) &&
@@ -233,6 +233,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
      * @param publicId    The DOCTYPE public identifier
      */
 
+    @Override
     protected void writeDocType(NodeName name, String displayName, String systemId, String publicId) throws XPathException {
         super.writeDocType(name, displayName, systemId, publicId);
     }
@@ -241,10 +242,12 @@ public abstract class HTMLEmitter extends XMLEmitter {
      * Output element start tag
      */
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
-
-        super.startElement(elemName, typeCode, location, properties);
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         uri = elemName.getURI();
+        super.startElement(elemName, type, attributes, namespaces, location, properties);
         parentElement = elementStack.peek();
         if (elemName.hasURI("") &&
                 (parentElement.equalsIgnoreCase("script") ||
@@ -255,7 +258,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
         nodeNameStack.push(elemName);
     }
 
-    public void startContent() throws XPathException {
+    public void startContentOLD() throws XPathException {
         closeStartTag();                   // prevent <xxx/> syntax
     }
 
@@ -265,10 +268,11 @@ public abstract class HTMLEmitter extends XMLEmitter {
      * a URL.
      */
 
+    @Override
     protected void writeAttribute(NodeName elCode, String attname, CharSequence value, int properties) throws XPathException {
         try {
             if (uri.isEmpty()) {
-                if (isBooleanAttribute(parentElement, attname, value.toString())) {
+                if (isBooleanAttribute(elCode.getLocalPart(), attname, value.toString())) {
                     writer.write(attname);
                     return;
                 }
@@ -284,6 +288,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
      * Escape characters. Overrides the XML behaviour
      */
 
+    @Override
     protected void writeEscape(final CharSequence chars, final boolean inAttribute)
             throws java.io.IOException, XPathException {
 
@@ -412,9 +417,30 @@ public abstract class HTMLEmitter extends XMLEmitter {
     }
 
     /**
+     * Ask whether control characters should be rejected: true for HTML4, false for HTML5
+     * @return true if control characters should be rejected
+     */
+
+    protected abstract boolean rejectControlCharacters();
+
+    /**
+     * Close an empty element tag. (This is overridden in XHTMLEmitter).
+     *
+     * @param displayName the name of the empty element
+     * @param nameCode    the fingerprint of the name of the empty element
+     * @return the string used to close an empty element tag.
+     */
+
+    @Override
+    protected String emptyElementTagCloser(String displayName, NodeName nameCode) {
+        return "></" + displayName + ">";
+    }
+
+    /**
      * Output an element end tag.
      */
 
+    @Override
     public void endElement() throws XPathException {
         NodeName nodeName = nodeNameStack.pop();
         String name = elementStack.peek();
@@ -436,19 +462,20 @@ public abstract class HTMLEmitter extends XMLEmitter {
      * Character data.
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties)
             throws XPathException {
-        int options = properties;
         if (inScript > 0) {
-            options |= ReceiverOptions.DISABLE_ESCAPING;
+            properties |= ReceiverOption.DISABLE_ESCAPING;
         }
-        super.characters(chars, locationId, options);
+        super.characters(chars, locationId, properties);
     }
 
     /**
      * Handle a processing instruction.
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
             throws XPathException {
         if (!started) {
@@ -462,6 +489,9 @@ public abstract class HTMLEmitter extends XMLEmitter {
             }
         }
         try {
+            if (openStartTag) {
+                closeStartTag();
+            }
             writer.write("<?");
             writer.write(target);
             writer.write(' ');
@@ -471,15 +501,6 @@ public abstract class HTMLEmitter extends XMLEmitter {
             throw new XPathException(err);
         }
     }
-
-
-    /**
-     * Ask whether control characters should be rejected: true for HTML4, false for HTML5
-     *
-     * @return true if control characters should be rejected
-     */
-
-    protected abstract boolean rejectControlCharacters();
 
 
 }

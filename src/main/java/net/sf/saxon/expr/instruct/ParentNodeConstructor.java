@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,10 +17,7 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.pattern.MultipleNodeKindTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.Untyped;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
 
 /**
@@ -35,9 +32,7 @@ public abstract class ParentNodeConstructor extends Instruction
             new OperandRole(0, OperandUsage.ABSORPTION, SequenceType.ANY_SEQUENCE);
 
     protected Operand contentOp;
-    private boolean lazyConstruction = false;
     private ParseOptions validationOptions = null;
-    private String baseURI;
 
     /**
      * Flag set to true if validation=preserve and no schema type supplied for validation; also true
@@ -54,43 +49,13 @@ public abstract class ParentNodeConstructor extends Instruction
     }
 
     /**
-     * Set the static base URI of the instruction
-     *
-     * @param uri the static base URI
-     */
-
-    public void setBaseURI(String uri) {
-        baseURI = uri;
-    }
-
-    /**
-     * Indicate that lazy construction should (or should not) be used. Note that
-     * this request will be ignored if validation is required
-     *
-     * @param lazy set to true if lazy construction should be used
-     */
-
-    public void setLazyConstruction(boolean lazy) {
-        lazyConstruction = lazy;
-    }
-
-    /**
-     * Establish whether lazy construction is to be used
-     *
-     * @return true if lazy construction is to be used
-     */
-
-    public final boolean isLazyConstruction() {
-        return lazyConstruction;
-    }
-
-    /**
      * Get the schema type chosen for validation; null if not defined
      *
      * @return the type to be used for validation. (For a document constructor, this is the required
      *         type of the document element)
      */
 
+    @Override
     public SchemaType getSchemaType() {
         return validationOptions == null ? null : validationOptions.getTopLevelType();
     }
@@ -136,6 +101,7 @@ public abstract class ParentNodeConstructor extends Instruction
      *
      * @return the validation mode, for example {@link Validation#STRICT} or {@link Validation#PRESERVE}
      */
+    @Override
     public int getValidationAction() {
         return validationOptions == null ? Validation.PRESERVE : validationOptions.getSchemaValidationMode();
     }
@@ -169,6 +135,7 @@ public abstract class ParentNodeConstructor extends Instruction
      * @return the content expression
      */
 
+    @Override
     public Expression getContentExpression() {
         return contentOp == null ? null : contentOp.getChildExpression();
     }
@@ -183,11 +150,13 @@ public abstract class ParentNodeConstructor extends Instruction
      * @return the static cardinality
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
         checkContentSequence(visitor.getStaticContext());
@@ -217,6 +186,7 @@ public abstract class ParentNodeConstructor extends Instruction
     protected abstract void checkContentSequence(StaticContext env) throws XPathException;
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         optimizeChildren(visitor, contextItemType);
         if (!Literal.isEmptySequence(getContentExpression())) {
@@ -234,12 +204,13 @@ public abstract class ParentNodeConstructor extends Instruction
             TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
             if (getValidationAction() == Validation.STRIP) {
                 if (getContentExpression().hasSpecialProperty(StaticProperty.ALL_NODES_UNTYPED) ||
-                    th.relationship(getContentExpression().getItemType(), MultipleNodeKindTest.DOC_ELEM_ATTR) == TypeHierarchy.DISJOINT) {
+                    th.relationship(getContentExpression().getItemType(), MultipleNodeKindTest.DOC_ELEM_ATTR) == Affinity.DISJOINT) {
                     // No need to strip type annotations if there are none needing to be stripped
                     setNoNeedToStrip();
                 }
             }
         } else {
+            setValidationAction(Validation.STRIP, null);
             setNoNeedToStrip();
         }
         return this;
@@ -269,6 +240,7 @@ public abstract class ParentNodeConstructor extends Instruction
         return true;
     }
 
+    @Override
     public int getCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
@@ -293,13 +265,14 @@ public abstract class ParentNodeConstructor extends Instruction
      *         expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         PathMap.PathMapNodeSet result = super.addToPathMap(pathMap, pathMapNodeSet);
         result.setReturnable(false);
         TypeHierarchy th = getConfiguration().getTypeHierarchy();
         ItemType type = getItemType();
-        if (th.relationship(type, NodeKindTest.ELEMENT) != TypeHierarchy.DISJOINT ||
-                th.relationship(type, NodeKindTest.DOCUMENT) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(type, NodeKindTest.ELEMENT) != Affinity.DISJOINT ||
+                th.relationship(type, NodeKindTest.DOCUMENT) != Affinity.DISJOINT) {
             result.addDescendants();
         }
         return new PathMap.PathMapNodeSet(pathMap.makeNewRoot(this));

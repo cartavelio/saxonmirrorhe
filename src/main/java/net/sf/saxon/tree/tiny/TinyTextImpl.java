@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,8 +8,9 @@
 package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
@@ -40,6 +41,7 @@ public final class TinyTextImpl extends TinyNodeImpl {
      * @return the string value of the node
      */
 
+    @Override
     public String getStringValue() {
         return getStringValueCS().toString();
     }
@@ -49,6 +51,7 @@ public final class TinyTextImpl extends TinyNodeImpl {
      * the version of the method that returns a String.
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         int start = tree.alpha[nodeNr];
         int len = tree.beta[nodeNr];
@@ -75,6 +78,7 @@ public final class TinyTextImpl extends TinyNodeImpl {
      * @return Type.TEXT
      */
 
+    @Override
     public final int getNodeKind() {
         return Type.TEXT;
     }
@@ -83,8 +87,9 @@ public final class TinyTextImpl extends TinyNodeImpl {
      * Copy this node to a given outputter
      */
 
+    @Override
     public void copy(Receiver out, int copyOptions, Location locationId) throws XPathException {
-        out.characters(getStringValueCS(), locationId, 0);
+        out.characters(getStringValueCS(), locationId, ReceiverOption.NONE);
     }
 
     /**
@@ -97,6 +102,7 @@ public final class TinyTextImpl extends TinyNodeImpl {
      */
 
     /*@NotNull*/
+    @Override
     public AtomicSequence atomize() throws XPathException {
         return new UntypedAtomicValue(getStringValueCS());
     }

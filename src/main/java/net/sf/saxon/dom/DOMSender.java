@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,24 +9,24 @@ package net.sf.saxon.dom;
 
 import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NoNamespaceName;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
-import org.w3c.dom.*;
 import org.w3c.dom.CharacterData;
+import org.w3c.dom.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 /**
  * DOMSender.java: pseudo-SAX driver for a DOM source document.
@@ -36,10 +36,10 @@ import java.util.*;
  */
 
 public class DOMSender {
-    private Receiver receiver;
+    private final Receiver receiver;
     protected Node root;
     protected String systemId;
-    private Stack<List<NamespaceBinding>> namespaces = new Stack<>();
+    private Stack<NamespaceMap> namespaces = new Stack<>();
     private Node currentNode;
 
     /**
@@ -61,6 +61,7 @@ public class DOMSender {
         }
         this.root = startNode;
         this.receiver = new NamespaceReducer(receiver);
+        namespaces.push(NamespaceMap.emptyMap());
     }
 
     /**
@@ -88,11 +89,11 @@ public class DOMSender {
         receiver.setSystemId(systemId);
 
         //receiver.open();
-        final Location loc = ExplicitLocation.UNKNOWN_LOCATION;
+        final Location loc = Loc.NONE;
         switch (root.getNodeType()) {
             case Node.DOCUMENT_NODE:
             case Node.DOCUMENT_FRAGMENT_NODE:
-                receiver.startDocument(0);
+                receiver.startDocument(ReceiverOption.NONE);
                 sendUnparsedEntities();
                 walkNode(root);
                 receiver.endDocument();
@@ -102,15 +103,15 @@ public class DOMSender {
                 break;
             case Node.TEXT_NODE:
             case Node.CDATA_SECTION_NODE:
-                receiver.characters(((CharacterData) root).getData(), loc, 0);
+                receiver.characters(((CharacterData) root).getData(), loc, ReceiverOption.NONE);
                 break;
             case Node.COMMENT_NODE:
-                receiver.comment(((Comment) root).getData(), loc, 0);
+                receiver.comment(((Comment) root).getData(), loc, ReceiverOption.NONE);
                 break;
             case Node.PROCESSING_INSTRUCTION_NODE:
                 receiver.processingInstruction(
                         ((ProcessingInstruction) root).getTarget(),
-                        ((ProcessingInstruction) root).getData(), loc, 0);
+                        ((ProcessingInstruction) root).getData(), loc, ReceiverOption.NONE);
                 break;
             default:
                 throw new IllegalStateException("DOMSender: unsupported kind of start node (" + root.getNodeType() + ")");
@@ -135,8 +136,7 @@ public class DOMSender {
                                 if (!systemIdURI.isAbsolute()) {
                                     String base = root.getBaseURI();
                                     if (base != null) {
-                                        systemIdURI = new URI(base).resolve(systemIdURI);
-                                        systemId = systemIdURI.toString();
+                                        systemId = ResolveURI.makeAbsolute(systemId, base).toString();
                                     } else {
                                         // base URI unknown: return the relative URI as written
                                     }
@@ -165,28 +165,17 @@ public class DOMSender {
 
     private void sendElement(Element startNode) throws XPathException {
         List<Element> ancestors = new ArrayList<>();
-        List<NamespaceBinding> bindings = new ArrayList<>();
+        NamespaceMap inScopeNamespaces = NamespaceMap.emptyMap();
         Node parent = startNode;
         while (parent != null && parent.getNodeType() == Type.ELEMENT) {
             ancestors.add((Element) parent);
             parent = parent.getParentNode();
         }
         for (int i=ancestors.size()-1; i>=0; i--) {
-            gatherNamespaces(ancestors.get(i), bindings);
+            inScopeNamespaces = inScopeNamespaces.applyDifferences(gatherNamespaces(ancestors.get(i)));
         }
-        // Eliminate duplicate bindings. We need to take the last binding for each prefix. We can't leave this to
-        // the NamespaceReducer, because it does it the wrong way.
-        Map<String, String> distinctNamespaces = new HashMap<>();
-        for (NamespaceBinding nb : bindings) {
-            distinctNamespaces.put(nb.getPrefix(), nb.getURI());
-        }
-        if (distinctNamespaces.size() != bindings.size()) {
-            bindings = new ArrayList<>();
-            for (Map.Entry<String, String> entry : distinctNamespaces.entrySet()) {
-                bindings.add(new NamespaceBinding(entry.getKey(), entry.getValue()));
-            }
-        }
-        namespaces.push(bindings);
+
+        namespaces.push(inScopeNamespaces);
         outputElement(startNode, true);
         namespaces.pop();
     }
@@ -227,7 +216,7 @@ public class DOMSender {
      */
 
     private void walkNode(Node node) throws XPathException {
-        final Location loc = ExplicitLocation.UNKNOWN_LOCATION;
+        final Location loc = Loc.NONE;
         if (node.hasChildNodes()) {
             NodeList nit = node.getChildNodes();
             final int len = nit.getLength();
@@ -240,10 +229,10 @@ public class DOMSender {
                         break;                  // should not happen
                     case Node.ELEMENT_NODE:
                         Element element = (Element) child;
-                        List<NamespaceBinding> bindings = new ArrayList<>();
-                        namespaces.push(bindings);
-                        gatherNamespaces(element, bindings);
-                        outputElement(element, !bindings.isEmpty());
+                        NamespaceMap parentNamespaces = namespaces.peek();
+                        NamespaceMap childNamespaces = parentNamespaces.applyDifferences(gatherNamespaces(element));
+                        namespaces.push(childNamespaces);
+                        outputElement(element, !childNamespaces.isEmpty());
                         namespaces.pop();
                         break;
                     case Node.ATTRIBUTE_NODE:        // have already dealt with attributes
@@ -252,12 +241,12 @@ public class DOMSender {
                         receiver.processingInstruction(
                                 ((ProcessingInstruction) child).getTarget(),
                                 ((ProcessingInstruction) child).getData(),
-                                loc, 0);
+                                loc, ReceiverOption.NONE);
                         break;
                     case Node.COMMENT_NODE: {
                         String text = ((Comment) child).getData();
                         if (text != null) {
-                            receiver.comment(text, loc, 0);
+                            receiver.comment(text, loc, ReceiverOption.NONE);
                         }
                         break;
                     }
@@ -265,7 +254,7 @@ public class DOMSender {
                     case Node.CDATA_SECTION_NODE: {
                         String text = ((CharacterData) child).getData();
                         if (text != null) {
-                            receiver.characters(text, loc, 0);
+                            receiver.characters(text, loc, ReceiverOption.NONE);
                         }
                         break;
                     }
@@ -293,29 +282,26 @@ public class DOMSender {
     /**
      * Process an element node. On entry, the namespace bindings have already been added to the stack,
      * and this method removes them from the stack before exit.
-     * @param element the element to be processed.
+     *
+     * @param element                  the element to be processed.
      * @param hasNamespaceDeclarations true if the attributes of the element contain namespace declaration
      *                                 attributes (which the method then ignores)
      * @throws XPathException if a dynamic error occurs
      */
 
     private void outputElement(Element element, boolean hasNamespaceDeclarations) throws XPathException {
-
         NodeName name = getNodeName(element.getTagName(), true);
-        final Location loc = new ExplicitLocation(systemId, -1, -1);
-        receiver.startElement(name, Untyped.getInstance(), loc, 0);
-        for (NamespaceBinding ns : namespaces.peek()) {
-            receiver.namespace(ns, 0);
-        }
+        final Location loc = new Loc(systemId, -1, -1);
 
+        AttributeMap attributes = EmptyAttributeMap.getInstance();
         NamedNodeMap atts = element.getAttributes();
         if (atts != null) {
             final int len = atts.getLength();
             for (int a2 = 0; a2 < len; a2++) {
                 Attr att = (Attr) atts.item(a2);
-                int props = att.isId() ? ReceiverOptions.IS_ID : 0;
+                int props = att.isId() ? ReceiverOption.IS_ID : ReceiverOption.NONE;
                 String attname = att.getName();
-                if (hasNamespaceDeclarations && (attname.equals("xmlns") || attname.startsWith("xmlns:"))) {
+                if (hasNamespaceDeclarations && attname.startsWith("xmlns") && ((attname.length()==5 || attname.charAt(5) == ':'))) {
                     // do nothing: namespace declarations have already been processed
                 } else {
                     //System.err.println("Processing attribute " + attname);
@@ -325,14 +311,13 @@ public class DOMSender {
                     // it's possible programmatically to construct attribute nodes that have a namespace URI but
                     // no prefix. We don't attempt to deal with such situations: garbage in, garbage out.
 
-                    receiver.attribute(attNodeName, BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), loc, props);
+                    attributes = attributes.put(
+                            new AttributeInfo(attNodeName, BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), loc, props));
                 }
             }
         }
-        receiver.startContent();
-
+        receiver.startElement(name, Untyped.getInstance(), attributes, namespaces.peek(), loc, ReceiverOption.NONE);
         walkNode(element);
-
         receiver.endElement();
     }
 
@@ -351,34 +336,24 @@ public class DOMSender {
         if (prefix.equals("xml")) {
             return NamespaceConstant.XML;
         }
-        for (int i=namespaces.size()-1; i>=0; i--) {
-            List<NamespaceBinding> localNamespaces = namespaces.get(i);
-            for (NamespaceBinding n : localNamespaces) {
-                if (n.getPrefix().equals(prefix)) {
-                    return n.getURI();
-                }
-            }
-        }
-        if (prefix.equals("")) {
-            return "";
-        } else {
-            throw new IllegalStateException("No binding for namespace prefix " + prefix);
-        }
+        String uri = namespaces.peek().getURI(prefix);
+        return uri==null ? "" : uri;
     }
 
     /**
      * Collect all the namespace attributes declared locally on a given element.
      *
      * @param element    The element whose namespace declarations are required
-     * @param list Namespace declarations are appended to the supplied list
+     * @return a set of namespace declarations and undeclarations
      */
 
-    private void gatherNamespaces(Element element, List<NamespaceBinding> list) {
+    private NamespaceDeltaMap gatherNamespaces(Element element) {
 
         // we can't rely on namespace declaration attributes being present -
         // there may be undeclared namespace prefixes. So we
         // declare all namespaces encountered, to be on the safe side.
 
+        NamespaceDeltaMap result = NamespaceDeltaMap.emptyMap();
         try {
             String prefix = element.getPrefix();
             String uri = element.getNamespaceURI();
@@ -388,10 +363,7 @@ public class DOMSender {
             if (uri == null) {
                 uri = "";
             }
-
-            if (!(prefix.isEmpty() && uri.isEmpty())) {
-                list.add(new NamespaceBinding(prefix, uri));
-            }
+            result = result.put(prefix, uri);
         } catch (Throwable err) {
             // it must be a level 1 DOM
         }
@@ -400,7 +372,7 @@ public class DOMSender {
 
         // Apparently the Oracle DOM returns null if there are no attributes:
         if (atts == null) {
-            return;
+            return result;
         }
         int alen = atts.getLength();
         for (int a1 = 0; a1 < alen; a1++) {
@@ -409,21 +381,22 @@ public class DOMSender {
             boolean possibleNamespace = attname.startsWith("xmlns");
             if (possibleNamespace && attname.length() == 5) {
                 String uri = att.getValue();
-                list.add(new NamespaceBinding("", uri));
+                result = result.put("", uri);
             } else if (possibleNamespace && attname.startsWith("xmlns:")) {
                 String prefix = attname.substring(6);
                 String uri = att.getValue();
-                list.add(new NamespaceBinding(prefix, uri));
+                result = result.put(prefix, uri);
             } else if (attname.indexOf(':') >= 0) {
                 try {
                     String prefix = att.getPrefix();
                     String uri = att.getNamespaceURI();
-                    list.add(new NamespaceBinding(prefix, uri));
+                    result = result.put(prefix, uri);
                 } catch (Throwable err) {
                     // it must be a level 1 DOM
                 }
             }
         }
+        return result;
     }
 
 }

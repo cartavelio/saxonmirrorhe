@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -15,6 +15,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.EnumSet;
+
 /**
  * An xsl:with-param element in the stylesheet. <br>
  * The xsl:with-param element has mandatory attribute name and optional attribute select
@@ -22,18 +24,21 @@ import net.sf.saxon.value.SequenceType;
 
 public class XSLWithParam extends XSLGeneralVariable {
 
-    private int allowedAttributes =
-            SourceBinding.SELECT | SourceBinding.AS | SourceBinding.TUNNEL;
+    private EnumSet<SourceBinding.BindingProperty> allowedAttributes = EnumSet.of(
+            SourceBinding.BindingProperty.SELECT,
+            SourceBinding.BindingProperty.AS,
+            SourceBinding.BindingProperty.TUNNEL);
 
     @Override
-    protected void prepareAttributes() throws XPathException {
+    protected void prepareAttributes() {
         sourceBinding.prepareAttributes(allowedAttributes);
     }
 
     public boolean isTunnelParam() {
-        return sourceBinding.hasProperty(SourceBinding.TUNNEL);
+        return sourceBinding.hasProperty(SourceBinding.BindingProperty.TUNNEL);
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
 

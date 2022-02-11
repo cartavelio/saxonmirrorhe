@@ -1,7 +1,7 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -10,17 +10,22 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * JUnit tests on s9api operations on UseWhenFilter class where we are using
  * the static=yes attribute on xsl:param and xsl:variable
  */
-public class TestStaticAttr extends TestCase {
+public class TestStaticAttr {
 
     /**
      * Test external supply of param value
      */
 
+    @Test
     public void testStaticAtt1() {
         try {
             Processor proc = new Processor(true);
@@ -55,6 +60,7 @@ public class TestStaticAttr extends TestCase {
      * Therefore an XPathException is expected
      */
 
+    @Test
     public void testStaticAtt2() {
         try {
             Processor proc = new Processor(true);
@@ -88,6 +94,7 @@ public class TestStaticAttr extends TestCase {
      * Therefore an XPathException is expected
      */
 
+    @Test
     public void testStaticAtt3() {
         try {
             Processor proc = new Processor(true);
@@ -119,6 +126,7 @@ public class TestStaticAttr extends TestCase {
      * Therefore references to it should not be allowed in a use-when attribute. XPathException is expected
      */
 
+    @Test
     public void testStaticAtt4() {
         try {
             Processor proc = new Processor(true);
@@ -142,7 +150,7 @@ public class TestStaticAttr extends TestCase {
             trans.transform();
             fail("Unexpected success");
         } catch (SaxonApiException e) {
-            assertEquals("error-code", "XPST0008", e.getErrorCode().getLocalName());
+            assertEquals("XPST0008", e.getErrorCode().getLocalName(), "error-code");
         }
     }
 
@@ -151,6 +159,7 @@ public class TestStaticAttr extends TestCase {
      * Test use of static variable in use-when (no params). Success expected
      */
 
+    @Test
     public void testStaticAtt5() {
         try {
             Processor proc = new Processor(true);
@@ -181,6 +190,7 @@ public class TestStaticAttr extends TestCase {
      * Supplying a dynamic value for a static parameter should fail
      */
 
+    @Test
     public void testStaticAtt6() {
         try {
             Processor proc = new Processor(false);
@@ -213,6 +223,7 @@ public class TestStaticAttr extends TestCase {
      * Supplying a dynamic value for a parameter already supplied dynamically should fail
      */
 
+    @Test
     public void testStaticAtt6a() {
         try {
             Processor proc = new Processor(false);
@@ -246,6 +257,7 @@ public class TestStaticAttr extends TestCase {
      * Supplying a dynamic value for a static parameter should fail
      */
 
+    @Test
     public void testStaticAtt7() {
         try {
             Processor proc = new Processor(false);

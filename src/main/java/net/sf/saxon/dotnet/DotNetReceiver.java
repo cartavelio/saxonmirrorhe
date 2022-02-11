@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,11 +8,9 @@
 package net.sf.saxon.dotnet;
 
 import cli.System.Xml.XmlWriter;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -22,9 +20,9 @@ import net.sf.saxon.type.SimpleType;
  * This class is a Saxon Receiver that writes events through to a .NET XmlTextWriter
  */
 
-public class DotNetReceiver implements Receiver {
+public class DotNetReceiver extends Outputter {
 
-    private XmlWriter writer;
+    private final XmlWriter writer;
     private PipelineConfiguration pipe;
     private String systemId;
     private boolean closeAfterUse = true;
@@ -69,6 +67,7 @@ public class DotNetReceiver implements Receiver {
      *                                start tag
      */
 
+    @Override
     public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
         writer.WriteAttributeString(
                 nameCode.getPrefix(),
@@ -81,16 +80,14 @@ public class DotNetReceiver implements Receiver {
     /**
      * Notify character data. Note that some receivers may require the character data to be
      * sent in a single event, but in general this is not a requirement.
-     *  @param chars      The characters
+     * @param chars      The characters
      * @param locationId an integer which can be interpreted using a LocationMap to return
      *                   information such as line number and system ID. If no location information is available,
      *                   the value zero is supplied.
      * @param properties Bit significant value. The following bits are defined:
-     *                   <dl>
-     *                   <dt>DISABLE_ESCAPING</dt>           <dd>Disable escaping for this text node</dd>
-     *                   </dl>
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         writer.WriteString(chars.toString());
     }
@@ -99,6 +96,7 @@ public class DotNetReceiver implements Receiver {
      * Notify the end of the event stream
      */
 
+    @Override
     public void close() throws XPathException {
         if (closeAfterUse) {
             writer.Close();
@@ -119,9 +117,10 @@ public class DotNetReceiver implements Receiver {
      *                   <dl>
      *                   <dt>CHECKED</dt>    <dd>Comment is known to be legal (e.g. doesn't contain "--")</dd>
      *                   </dl>
-     * @throws IllegalArgumentException: the content is invalid for an XML comment
+     * @throws IllegalArgumentException the content is invalid for an XML comment
      */
 
+    @Override
     public void comment(CharSequence content, Location locationId, int properties) throws XPathException {
         writer.WriteComment(content.toString());
     }
@@ -130,6 +129,7 @@ public class DotNetReceiver implements Receiver {
      * Notify the end of a document node
      */
 
+    @Override
     public void endDocument() throws XPathException {
         writer.WriteEndDocument();
     }
@@ -139,6 +139,7 @@ public class DotNetReceiver implements Receiver {
      * element is ending.
      */
 
+    @Override
     public void endElement() throws XPathException {
         writer.WriteEndElement();
     }
@@ -148,6 +149,7 @@ public class DotNetReceiver implements Receiver {
      */
 
     /*@NotNull*/
+    @Override
     public PipelineConfiguration getPipelineConfiguration() {
         return pipe;
     }
@@ -159,31 +161,25 @@ public class DotNetReceiver implements Receiver {
      * declarations and undeclarations rather than in-scope namespace nodes: an undeclaration is represented
      * by a namespace code of zero. If the sequence of namespace events contains two
      * A namespace must not conflict with any namespaces already used for element or attribute names.
-     *  @param namespaceBindings the prefix/uri pair to be notified
+     * @param prefix
+     * @param namespaceUri
      * @param properties       The most important property is REJECT_DUPLICATES. If this property is set, the
-     *                         namespace declaration will be rejected if it conflicts with a previous declaration of the same
-     *                         prefix. If the property is not set, the namespace declaration will be ignored if it conflicts
-     *                         with a previous declaration. This reflects the fact that when copying a tree, namespaces for child
-     *                         elements are emitted before the namespaces of their parent element. Unfortunately this conflicts
-     *                         with the XSLT rule for complex content construction, where the recovery action in the event of
      */
 
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        for (NamespaceBinding ns : namespaceBindings) {
-            String prefix = ns.getPrefix();
-            String uri = ns.getURI();
+    @Override
+    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
             if (prefix.isEmpty()) {
-                writer.WriteAttributeString("", "xmlns", null, uri);
+                writer.WriteAttributeString("", "xmlns", null, namespaceUri);
             } else {
-                writer.WriteAttributeString("xmlns", prefix, null, uri);
+                writer.WriteAttributeString("xmlns", prefix, null, namespaceUri);
             }
-        }
     }
 
     /**
      * Notify the start of the event stream
      */
 
+    @Override
     public void open() throws XPathException {
         // no-op
     }
@@ -201,9 +197,10 @@ public class DotNetReceiver implements Receiver {
      *                   <dl>
      *                   <dt>CHECKED</dt>    <dd>Data is known to be legal (e.g. doesn't contain "?>")</dd>
      *                   </dl>
-     * @throws IllegalArgumentException: the content is invalid for an XML processing instruction
+     * @throws IllegalArgumentException the content is invalid for an XML processing instruction
      */
 
+    @Override
     public void processingInstruction(String name, CharSequence data, Location locationId, int properties) throws XPathException {
         writer.WriteProcessingInstruction(name, data.toString());
     }
@@ -212,6 +209,7 @@ public class DotNetReceiver implements Receiver {
      * Set the pipeline configuration
      */
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         this.pipe = pipe;
     }
@@ -220,6 +218,7 @@ public class DotNetReceiver implements Receiver {
      * Set the System ID of the destination tree
      */
 
+    @Override
     public void setSystemId(String systemId) {
         this.systemId = systemId;
     }
@@ -232,6 +231,7 @@ public class DotNetReceiver implements Receiver {
      * @param publicID The public identifier of the unparsed entity
      */
 
+    @Override
     public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
         // no-op
     }
@@ -243,14 +243,17 @@ public class DotNetReceiver implements Receiver {
      * no attributes, no namespaces, and no content.
      */
 
+    @Override
     public void startContent() throws XPathException {
         // no-op
     }
 
     /**
      * Notify the start of a document node
+     * @param properties
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         writer.WriteStartDocument();
     }
@@ -259,11 +262,13 @@ public class DotNetReceiver implements Receiver {
      * Notify the start of an element
      * @param nameCode   integer code identifying the name of the element within the name pool.
      * @param typeCode   integer code identifying the element's type within the name pool. The value -1
- *                   indicates the default type, xs:untyped.
+     *                   indicates the default type, xs:untyped.
      * @param location line number information
-     * @param properties bit-significant properties of the element node. If there are no revelant
+     * @param properties bit-significant properties of the element node. If there are no relevant
+     *                   properties, zero is supplied. The definitions of the bits are in class ReceiverOption
      */
 
+    @Override
     public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
         writer.WriteStartElement(
                 nameCode.getPrefix(),
@@ -278,6 +283,7 @@ public class DotNetReceiver implements Receiver {
      * @return The system identifier that was set with setSystemId,
      *         or null if setSystemId was not called.
      */
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -290,6 +296,7 @@ public class DotNetReceiver implements Receiver {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }

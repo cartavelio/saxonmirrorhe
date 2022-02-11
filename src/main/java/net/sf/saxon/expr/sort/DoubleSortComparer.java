@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -17,7 +17,6 @@ import net.sf.saxon.value.NumericValue;
  * It also supports a separate method for getting a collation key to test equality of items.
  * This comparator treats NaN values as equal to each other, and less than any other value.
  *
- * @author Michael H. Kay
  */
 
 public class DoubleSortComparer implements AtomicComparer {
@@ -39,6 +38,7 @@ public class DoubleSortComparer implements AtomicComparer {
     }
 
     /*@Nullable*/
+    @Override
     public StringCollator getCollator() {
         return null;
     }
@@ -51,6 +51,7 @@ public class DoubleSortComparer implements AtomicComparer {
      *         is known. The original AtomicComparer is not modified
      */
 
+    @Override
     public AtomicComparer provideContext(XPathContext context) {
         return this;
     }
@@ -68,6 +69,7 @@ public class DoubleSortComparer implements AtomicComparer {
      * @throws ClassCastException if the objects are not comparable
      */
 
+    @Override
     public int compareAtomicValues(AtomicValue a, AtomicValue b) {
         if (a == null) {
             if (b == null) {
@@ -95,6 +97,7 @@ public class DoubleSortComparer implements AtomicComparer {
      * Test whether two values compare equal. Note that for this comparer, NaN is considered equal to itself
      */
 
+    @Override
     public boolean comparesEqual(AtomicValue a, AtomicValue b) {
         return compareAtomicValues(a, b) == 0;
     }
@@ -105,6 +108,7 @@ public class DoubleSortComparer implements AtomicComparer {
      *
      * @return a string representation of the AtomicComparer
      */
+    @Override
     public String save() {
         return "DblSC";
     }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -33,13 +33,14 @@ public class GenerateId_1 extends ScalarSystemFunction {
      * @param arguments the expressions supplied as arguments in the function call
      */
 
+    @Override
     public int getSpecialProperties(Expression[] arguments) {
         int p = super.getSpecialProperties(arguments);
         return p & ~StaticProperty.NO_NODES_NEWLY_CREATED;
     }
 
     @Override
-    public ZeroOrOne<? extends AtomicValue> resultWhenEmpty() {
+    public ZeroOrOne resultWhenEmpty() {
         return One.string("");
     }
 
@@ -56,6 +57,7 @@ public class GenerateId_1 extends ScalarSystemFunction {
 
     }
 
+    @Override
     public String getCompilerName() {
         return "GenerateIdCompiler";
     }

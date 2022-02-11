@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,7 +12,7 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.ZeroOrMore;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 
@@ -25,6 +25,7 @@ import java.util.HashSet;
 public class DistinctValues extends CollatingFunctionFixed {
 
 
+    @Override
     public String getStreamerName() {
         return "DistinctValues";
     }
@@ -34,9 +35,9 @@ public class DistinctValues extends CollatingFunctionFixed {
      * Iterator class to return the distinct values in a sequence
      */
 
-    public static class DistinctIterator implements SequenceIterator<AtomicValue> {
+    public static class DistinctIterator implements SequenceIterator {
 
-        private SequenceIterator<? extends AtomicValue> base;
+        private SequenceIterator base;
         private StringCollator collator;
         private XPathContext context;
         private HashSet<AtomicMatchKey> lookup = new HashSet<>(40);
@@ -50,7 +51,7 @@ public class DistinctValues extends CollatingFunctionFixed {
          * @param context the XPath dynamic context
          */
 
-        public DistinctIterator(SequenceIterator<? extends AtomicValue> base, StringCollator collator, XPathContext context) {
+        public DistinctIterator(SequenceIterator base, StringCollator collator, XPathContext context) {
             this.base = base;
             this.collator = collator;
             this.context = context;
@@ -64,10 +65,11 @@ public class DistinctValues extends CollatingFunctionFixed {
          *          if an error occurs retrieving the next item
          */
 
+        @Override
         public AtomicValue next() throws XPathException {
             int implicitTimezone = context.getImplicitTimezone();
             while (true) {
-                AtomicValue nextBase = base.next();
+                AtomicValue nextBase = (AtomicValue)base.next();
                 if (nextBase == null) {
                     return null;
                 }
@@ -84,28 +86,17 @@ public class DistinctValues extends CollatingFunctionFixed {
             }
         }
 
+        @Override
         public void close() {
             base.close();
         }
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-         *         and {@link #LOOKAHEAD}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         *         It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        public int getProperties() {
-            return 0;
-        }
     }
 
-    public Sequence<AtomicValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public ZeroOrMore<AtomicValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringCollator collator = getStringCollator();
-        return SequenceTool.toLazySequence(new DistinctIterator(arguments[0].iterate(), collator, context));
+        return new ZeroOrMore<>(new DistinctIterator(arguments[0].iterate(), collator, context));
     }
 
 }

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -53,8 +53,6 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
         return libraryList.get(n);
     }
 
-//#ifdefined HOF
-
     /**
      * Test whether a function with a given name and arity is available; if so, return a function
      * item that can be dynamically called.
@@ -66,6 +64,7 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
      * @return if a function of this name and arity is available for calling, then a corresponding
      *         function item; or null if the function does not exist
      */
+    @Override
     public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
         for (FunctionLibrary lib : libraryList) {
             Function fi = lib.getFunctionItem(functionName, staticContext);
@@ -75,7 +74,6 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
         }
         return null;
     }
-//#endif
 
 
     /**
@@ -85,6 +83,7 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
      * @param functionName the qualified name of the function being called
      * @return true if a function of this name and arity is available for calling
      */
+    @Override
     public boolean isAvailable(SymbolicName.F functionName) {
         for (FunctionLibrary lib : libraryList) {
             if (lib.isAvailable(functionName)) {
@@ -113,6 +112,7 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
      *         null if no extension function was found matching the required name and arity.
      */
 
+    @Override
     public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         boolean debug = env.getConfiguration().getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS);
         Logger err = env.getConfiguration().getLogger();
@@ -140,6 +140,7 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
      * @return the XQueryFunction if there is one, or null if not.
      */
 
+    @Override
     public XQueryFunction getDeclaration(StructuredQName functionName, int staticArgs) {
         for (FunctionLibrary lib : libraryList) {
             if (lib instanceof XQueryFunctionBinder) {
@@ -174,6 +175,7 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
      * @return a copy of this function library. This must be an instance of the original class.
      */
 
+    @Override
     public FunctionLibrary copy() {
         FunctionLibraryList fll = new FunctionLibraryList();
         fll.libraryList = new ArrayList<>(libraryList.size());

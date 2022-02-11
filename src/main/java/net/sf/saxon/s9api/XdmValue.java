@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -49,7 +49,7 @@ import java.util.stream.StreamSupport;
 
 public class XdmValue implements Iterable<XdmItem> {
 
-    private GroundedValue<?> value;
+    private GroundedValue value;
 
     protected XdmValue() {
         // must be followed by setValue()
@@ -64,11 +64,11 @@ public class XdmValue implements Iterable<XdmItem> {
      */
 
     public XdmValue(Iterable<? extends XdmItem> items) {
-        List<Item<?>> values = new ArrayList<>();
+        List<Item> values = new ArrayList<>();
         for (XdmItem item : items) {
             values.add(item.getUnderlyingValue());
         }
-        value = new SequenceExtent<>(values);
+        value = new SequenceExtent(values);
     }
 
     /**
@@ -81,11 +81,11 @@ public class XdmValue implements Iterable<XdmItem> {
 
     public XdmValue(Iterator<? extends XdmItem> iterator) throws SaxonApiException {
         try {
-            List<Item<?>> values = new ArrayList<>();
+            List<Item> values = new ArrayList<>();
             while (iterator.hasNext()) {
                 values.add(iterator.next().getUnderlyingValue());
             }
-            value = new SequenceExtent<>(values);
+            value = new SequenceExtent(values);
         } catch (SaxonApiUncheckedException e) {
             throw new SaxonApiException(e.getCause());
         }
@@ -100,13 +100,13 @@ public class XdmValue implements Iterable<XdmItem> {
         this(stream.iterator());
     }
 
-    protected static XdmValue fromGroundedValue(GroundedValue<?> value) {
+    protected static XdmValue fromGroundedValue(GroundedValue value) {
         XdmValue xv = new XdmValue();
         xv.setValue(value);
         return xv;
     }
 
-    protected void setValue(GroundedValue<?> value) {
+    protected void setValue(GroundedValue value) {
         this.value = value;
     }
 
@@ -129,11 +129,11 @@ public class XdmValue implements Iterable<XdmItem> {
      * @since 9.5 (previously a protected method)
      */
 
-    public static XdmValue wrap(Sequence<?> value) {
+    public static XdmValue wrap(Sequence value) {
         if (value == null) {
             return XdmEmptySequence.getInstance();
         }
-        GroundedValue<?> gv;
+        GroundedValue gv;
         try {
             gv = value.materialize();
         } catch (XPathException e) {
@@ -187,14 +187,14 @@ public class XdmValue implements Iterable<XdmItem> {
      */
 
     public XdmValue append(XdmValue otherValue) {
-        List<Item<?>> values = new ArrayList<>();
+        List<Item> values = new ArrayList<>();
         for (XdmItem item : this) {
             values.add(item.getUnderlyingValue());
         }
         for (XdmItem item : otherValue) {
             values.add(item.getUnderlyingValue());
         }
-        GroundedValue<Item<?>> gv = SequenceExtent.makeSequenceExtent(values);
+        GroundedValue gv = SequenceExtent.makeSequenceExtent(values);
         return XdmValue.fromGroundedValue(gv);
     }
 
@@ -203,16 +203,20 @@ public class XdmValue implements Iterable<XdmItem> {
      *
      * @return the number of items in the value, considered as a sequence. Note that for arrays
      * and maps, the answer will be 1 (one) since arrays and maps are items.
-     * @throws SaxonApiUncheckedException if the value is lazily evaluated and the delayed
-     *                                    evaluation fails with a dynamic error.
      */
 
     public int size() {
-        try {
-            return SequenceTool.getLength(value);
-        } catch (XPathException err) {
-            throw new SaxonApiUncheckedException(err);
-        }
+        return value.getLength();
+    }
+
+    /**
+     * Ask whether the sequence is empty
+     * @return true if the value is an empty sequence
+     * @since 10.1
+     */
+
+    public boolean isEmpty() {
+        return value.head() == null;
     }
 
     /**
@@ -231,7 +235,7 @@ public class XdmValue implements Iterable<XdmItem> {
             throw new IndexOutOfBoundsException("" + n);
         }
         try {
-            Item<?> item = SequenceTool.itemAt(value, n);
+            Item item = SequenceTool.itemAt(value, n);
             return (XdmItem)XdmItem.wrap(item);
         } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
@@ -245,9 +249,10 @@ public class XdmValue implements Iterable<XdmItem> {
      * @throws SaxonApiUncheckedException if the value is lazily evaluated and the delayed
      *                                    evaluation fails with a dynamic error.
      */
-    public Iterator<XdmItem> iterator() throws SaxonApiUncheckedException {
+    @Override
+    public XdmSequenceIterator<XdmItem> iterator() throws SaxonApiUncheckedException {
         try {
-            Sequence<?> v = getUnderlyingValue();
+            Sequence v = getUnderlyingValue();
             return new XdmSequenceIterator<>(v.iterate());
         } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
@@ -264,7 +269,7 @@ public class XdmValue implements Iterable<XdmItem> {
      * @return the underlying implementation object representing the value
      */
 
-    public GroundedValue<?> getUnderlyingValue() {
+    public GroundedValue getUnderlyingValue() {
         return value;
     }
 
@@ -313,7 +318,7 @@ public class XdmValue implements Iterable<XdmItem> {
      */
 
     public static XdmValue makeSequence(Iterable<?> list) throws IllegalArgumentException {
-        List<Item<?>> result = new ArrayList<>();
+        List<Item> result = new ArrayList<>();
         for (Object o : list) {
             XdmValue v = XdmValue.makeValue(o);
             if (v instanceof XdmItem) {
@@ -350,15 +355,15 @@ public class XdmValue implements Iterable<XdmItem> {
 
     public static XdmValue makeValue(Object o) throws IllegalArgumentException {
         if (o instanceof Sequence) {
-            return XdmValue.wrap((Sequence<?>) o);
+            return XdmValue.wrap((Sequence) o);
         } else if (o instanceof XdmValue) {
             return (XdmValue) o;
         } else if (o instanceof Map) {
-            return XdmMap.makeMap((Map) o);
+            return XdmMap.makeMap((Map<?,?>) o);
         } else if (o instanceof Object[]) {
             return XdmArray.makeArray((Object[]) o);
         } else if (o instanceof Iterable) {
-            return XdmValue.makeSequence((Iterable) o);
+            return XdmValue.makeSequence((Iterable<?>) o);
         } else {
             return XdmAtomicValue.makeAtomicValue(o);
         }
@@ -376,8 +381,8 @@ public class XdmValue implements Iterable<XdmItem> {
 
     public XdmValue documentOrder() throws SaxonApiException {
         try {
-            SequenceIterator<?> iter = value.iterate();
-            SequenceIterator<NodeInfo> sorted = new DocumentOrderIterator(iter, GlobalOrderComparer.getInstance());
+            SequenceIterator iter = value.iterate();
+            SequenceIterator sorted = new DocumentOrderIterator(iter, GlobalOrderComparer.getInstance());
             return XdmValue.fromGroundedValue(sorted.materialize());
         } catch (XPathException e) {
             throw new SaxonApiException(e);

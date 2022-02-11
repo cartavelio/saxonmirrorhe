@@ -4,15 +4,12 @@ import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.ee.optim.StaticQueryContextEE;
 import com.saxonica.expr.StaticQueryContextPE;
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StringLiteral;
-import net.sf.saxon.expr.flwor.Clause;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StaticQueryContextFactory;
@@ -20,15 +17,14 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
-import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
+import org.junit.jupiter.api.Test;
 
-import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
@@ -38,9 +34,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 // Some tests of the "native" XQuery API
 
-public class TestXQueryNative extends TestCase {
+public class TestXQueryNative {
     private static SequenceType showTheBug = SequenceType.ATOMIC_SEQUENCE;
 
 
@@ -49,6 +50,7 @@ public class TestXQueryNative extends TestCase {
 
     // Bug report against 9.1: compiling a query against one Configuration and running using another appears to give no error
 
+    @Test
     public void testConfigConsistent() {
         try {
             String query = "/*/*";
@@ -58,7 +60,7 @@ public class TestXQueryNative extends TestCase {
             DynamicQueryContext dqc = new DynamicQueryContext(dc);
             dqc.setContextItem(dc.buildDocumentTree(new StreamSource(new StringReader(xml))).getRootNode());
             exp.run(dqc, new StreamResult(System.out), new Properties());
-            assertTrue("Configuration mismatch not detected", false);
+            assertTrue(false, "Configuration mismatch not detected");
         } catch (XPathException e) {
             // All is well, error detected
         }
@@ -66,6 +68,7 @@ public class TestXQueryNative extends TestCase {
 
     // Bug report on 9.1.0.2 NPE with invalid query because executable not found
 
+    @Test
     public void testExecutableNPE() {
         try {
             String query = "let $t := text{<e a='abc'>0</e>/data((+., @a))} return max($t)";
@@ -76,12 +79,13 @@ public class TestXQueryNative extends TestCase {
             StreamResult r = new StreamResult(System.out);
             e.run(d, r, null);
 
-            assertTrue("Error in query not detected", false);
+            assertTrue(false, "Error in query not detected");
         } catch (XPathException e) {
             // All is well, error detected
         }
     }
 
+    @Test
     public void testSeparateCompilation() {
         try {
             Configuration c = new Configuration();
@@ -92,16 +96,17 @@ public class TestXQueryNative extends TestCase {
             String q1 = "import module namespace m='http://www.example.com/module-one'; m:add(2,2)";
             XQueryExpression e = s.compileQuery(q1);
             DynamicQueryContext d = new DynamicQueryContext(c);
-            assertTrue("2+2", "4".equals(e.evaluateSingle(d).toString()));
+            assertTrue("4".equals(e.evaluateSingle(d).toString()), "2+2");
             String q2 = "import module namespace m='http://www.example.com/module-one'; m:add($m:ten,5)";
             e = s.compileQuery(q2);
             d = new DynamicQueryContext(c);
-            assertTrue("10+5", "15".equals(e.evaluateSingle(d).toString()));
+            assertTrue("15".equals(e.evaluateSingle(d).toString()), "10+5");
         } catch (XPathException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testIterator() {
         try {
             Configuration c = new Configuration();
@@ -122,12 +127,13 @@ public class TestXQueryNative extends TestCase {
 //                assertTrue("value", (iter.position()==1 && item.getStringValue().equals("3")) ||
 //                            (iter.position()==2 && item.getStringValue().equals("5")));
             }
-            assertTrue("count " + count, count==2);
+            assertEquals(2, count, "count " + count);
         } catch (XPathException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testDirectFunctionCall() {
         try {
             Configuration config = new Configuration();
@@ -180,6 +186,7 @@ public class TestXQueryNative extends TestCase {
      * Test addition of an extension function library at the per-query level
      */
 
+    @Test
     public void testAddExtensionLibrary() {
         try {
             StaticQueryContextPE sqc = (StaticQueryContextPE)new ProfessionalConfiguration().newStaticQueryContext();
@@ -219,7 +226,7 @@ public class TestXQueryNative extends TestCase {
                     "hello:world()"
             );
             String result = (String)exp1.evaluateSingle(new DynamicQueryContext(sqc.getConfiguration()));
-            assertEquals(result, "hello world");
+            assertEquals("hello world", result);
         } catch (Exception err) {
             fail();
             err.printStackTrace();
@@ -237,6 +244,7 @@ public class TestXQueryNative extends TestCase {
         }
     }
 
+    @Test
     public void testCustomSQC() {
         StaticQueryContextFactory factory = new StaticQueryContextFactory() {
             public StaticQueryContext newStaticQueryContext(Configuration config, boolean copyFromDefault) {
@@ -249,7 +257,7 @@ public class TestXQueryNative extends TestCase {
             StaticQueryContext sqc = config.newStaticQueryContext();
             XQueryExpression exp = sqc.compileQuery("<e/>");
             Item result = exp.iterator(new DynamicQueryContext(config)).next();
-            assertEquals("wrong URI", "http://suprise.com/", ((NodeInfo) result).getURI());
+            assertEquals("http://suprise.com/", ((NodeInfo) result).getURI(), "wrong URI");
         } catch (XPathException e) {
             fail();
         }
@@ -258,6 +266,7 @@ public class TestXQueryNative extends TestCase {
     // Declare variables via SQC
     // Bug 2248
 
+    @Test
     public void testDeclareVariables() {
         try {
             String query = "$x + $y";
@@ -269,13 +278,14 @@ public class TestXQueryNative extends TestCase {
             dqc.setParameter(new StructuredQName("", "", "y"), Int64Value.PLUS_ONE);
             StringWriter sw = new StringWriter();
             exp.run(dqc, new StreamResult(sw), new Properties());
-            assertEquals(sw.toString(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>0");
+            assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>0", sw.toString());
         } catch (XPathException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testCollationQuery() throws XPathException {
         Configuration config = Configuration.newConfiguration();
         config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, true);
@@ -299,6 +309,7 @@ public class TestXQueryNative extends TestCase {
         assertNotNull(item.getStringValue());
     }
 
+    @Test
     public void testDynamicCollationQuery() throws XPathException {
         Configuration config = Configuration.newConfiguration();
         config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, true);
@@ -325,6 +336,7 @@ public class TestXQueryNative extends TestCase {
 
 
 
+    @Test
     public void testLocalW3CDTDaccess () {  // bug 3678
         Configuration config = new Configuration();
 
@@ -355,45 +367,6 @@ public class TestXQueryNative extends TestCase {
             System.out.println("<h1>ERROR</h1><p>" + e.toString() + "</p>");
             System.out.println("Error: " + e.toString());
             e.printStackTrace();
-        }
-    }
-
-    public void testCodeInjection() {
-        try {
-            String xpath = "declare variable $a as item() external; $a/x/text()";
-
-            Configuration config = Configuration.newConfiguration();
-            config.setCompileWithTracing(true);
-            Processor processor = new Processor(config);
-
-            XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
-            xqueryCompiler.setEncoding("UTF-8");
-            xqueryCompiler.getUnderlyingStaticContext()
-                    .setCodeInjector(new CodeInjector() {
-
-                        @Override
-                        public Clause injectClause(Clause target, StaticContext env) {
-                            System.out.println(target);
-                            return target;
-                        }
-
-                        @Override
-                        public Expression inject(Expression exp, StaticContext env, int construct, StructuredQName qName) {
-                            System.out.println(exp);
-                            return exp;
-                        }
-                    });
-
-            XQueryExecutable xqueryExecutable = xqueryCompiler.compile(xpath);
-            XQueryEvaluator evaluator = xqueryExecutable.load();
-            Source source = new StreamSource(new StringReader("<a><x>A</x></a>"));
-            DocumentBuilder documentBuilder = processor.newDocumentBuilder();
-            XdmNode document = documentBuilder.build(source);
-            evaluator.setExternalVariable(new QName("a"), document.children().iterator().next());
-            System.out.println(evaluator.evaluateSingle());
-        } catch (SaxonApiException e) {
-            e.printStackTrace();
-            fail();
         }
     }
 

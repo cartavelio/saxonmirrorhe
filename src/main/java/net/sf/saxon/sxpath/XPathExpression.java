@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -170,7 +170,7 @@ public class XPathExpression {
      *                        cases, the error will only be detected when the iterator is actually used).
      */
 
-    public SequenceIterator<?> iterate(XPathDynamicContext context) throws XPathException {
+    public SequenceIterator iterate(XPathDynamicContext context) throws XPathException {
         context.checkExternalVariables(stackFrameMap, numberOfExternalVariables);
         return expression.iterate(context.getXPathContextObject());
     }
@@ -184,8 +184,8 @@ public class XPathExpression {
      * @throws XPathException if a dynamic error occurs while evaluation the expression
      */
 
-    public List<Item<?>> evaluate(XPathDynamicContext context) throws XPathException {
-        List<Item<?>> list = new ArrayList<>(20);
+    public List<Item> evaluate(XPathDynamicContext context) throws XPathException {
+        List<Item> list = new ArrayList<>(20);
         expression.iterate(context.getXPathContextObject()).forEachOrFail(list::add);
         return list;
     }
@@ -204,7 +204,7 @@ public class XPathExpression {
 
     /*@Nullable*/
     public Item evaluateSingle(XPathDynamicContext context) throws XPathException {
-        SequenceIterator<?> iter = expression.iterate(context.getXPathContextObject());
+        SequenceIterator iter = expression.iterate(context.getXPathContextObject());
         Item result = iter.next();
         iter.close();
         return result;

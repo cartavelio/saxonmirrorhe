@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.expr.instruct.ResultDocument;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
@@ -125,7 +125,7 @@ public class SerializationParamsHandler {
                 String value = getAttribute(child, "value");
                 try {
                     ResultDocument.setSerializationProperty(properties, uri, lname, value,
-                        new InscopeNamespaceResolver(child), false, node.getConfiguration());
+                        child.getAllNamespaces(), false, node.getConfiguration());
                 } catch (XPathException err) {
                     if ("XQST0109".equals(err.getErrorCodeLocalPart()) || "SEPM0016".equals(err.getErrorCodeLocalPart())) {
                         if ("".equals(uri)) {
@@ -152,12 +152,13 @@ public class SerializationParamsHandler {
      */
 
     private static void restrictAttributes(NodeInfo element, String... allowedNames) throws XPathException {
-        element.iterateAxis(AxisInfo.ATTRIBUTE).forEachOrFail(att -> {
-            if ("".equals(att.getURI()) && Arrays.binarySearch(allowedNames, att.getLocalPart()) < 0) {
-                throw new XPathException("In serialization parameters, attribute @" + att.getLocalPart() +
+        for (AttributeInfo att : element.attributes()) {
+            NodeName name = att.getNodeName();
+            if ("".equals(name.getURI()) && Arrays.binarySearch(allowedNames, name.getLocalPart()) < 0) {
+                throw new XPathException("In serialization parameters, attribute @" + name.getLocalPart() +
                     " must not appear on element " + element.getDisplayName(), "SEPM0017");
             }
-        });
+        }
     }
 
     /**

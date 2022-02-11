@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,11 +8,13 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.QuitParsingException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.CharSlice;
 import net.sf.saxon.tree.tiny.CompressedWhitespace;
@@ -25,9 +27,7 @@ import org.xml.sax.ext.LexicalHandler;
 import javax.xml.transform.Result;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * ReceivingContentHandler is a glue class that provides a standard SAX ContentHandler
@@ -52,7 +52,7 @@ public class ReceivingContentHandler
     private PipelineConfiguration pipe;
     private Receiver receiver;
     private boolean inDTD = false;    // true while processing the DTD
-    private LocalLocator localLocator = new LocalLocator(ExplicitLocation.UNKNOWN_LOCATION);
+    private LocalLocator localLocator = new LocalLocator(Loc.NONE);
     private boolean lineNumbering;
     private Location lastTextNodeLocator;
 
@@ -62,10 +62,10 @@ public class ReceivingContentHandler
     private int charsUsed = 0;
     private CharSlice slice = new CharSlice(buffer, 0, 0);
 
-    // array for accumulating namespace information
+    // stack for accumulating namespace information
 
-    private NamespaceBinding[] namespaces = new NamespaceBinding[20];
-    private int namespacesUsed = 0;
+    private Stack<NamespaceMap> namespaceStack = new Stack<>();
+    private NamespaceMap currentNamespaceMap;
 
     // determine whether ignorable whitespace is ignored
 
@@ -98,7 +98,7 @@ public class ReceivingContentHandler
      * namecodes.
      */
 
-    private HashMap<String, HashMap<String, NodeName>> nameCache = new HashMap<>(10);
+    private final HashMap<String, HashMap<String, NodeName>> nameCache = new HashMap<>(10);
     private HashMap<String, NodeName> noNamespaceNameCache = new HashMap<>(10);
 
     // Action to be taken with defaulted attributes. 0=process normally, -1=suppress, +1=mark as defaulted
@@ -113,6 +113,8 @@ public class ReceivingContentHandler
      */
 
     public ReceivingContentHandler() {
+        currentNamespaceMap = NamespaceMap.emptyMap();
+        namespaceStack.push(currentNamespaceMap);
     }
 
     /**
@@ -127,8 +129,10 @@ public class ReceivingContentHandler
         retainDTDAttributeTypes = false;
         charsUsed = 0;
         slice.setLength(0);
-        namespacesUsed = 0;
-        localLocator = new LocalLocator(ExplicitLocation.UNKNOWN_LOCATION);
+        namespaceStack = new Stack<>();
+        currentNamespaceMap = NamespaceMap.emptyMap();
+        namespaceStack.push(currentNamespaceMap);
+        localLocator = new LocalLocator(Loc.NONE);
         allowDisableOutputEscaping = false;
         escapingDisabled = false;
         lineNumbering = false;
@@ -229,20 +233,24 @@ public class ReceivingContentHandler
      * Receive notification of the beginning of a document.
      */
 
+    @Override
     public void startDocument() throws SAXException {
 //        System.err.println("ReceivingContentHandler#startDocument");
         try {
             charsUsed = 0;
-            namespacesUsed = 0;
+            currentNamespaceMap = NamespaceMap.emptyMap();
+            namespaceStack = new Stack<>();
+            namespaceStack.push(currentNamespaceMap);
             receiver.setPipelineConfiguration(pipe);
             String systemId = localLocator.getSystemId();
             if (systemId != null) {
                 receiver.setSystemId(localLocator.getSystemId());
             }
             receiver.open();
-            receiver.startDocument(0);
+            receiver.startDocument(ReceiverOption.NONE);
         } catch (QuitParsingException quit) {
-            getPipelineConfiguration().getErrorListener().warning(quit);
+            getPipelineConfiguration().getErrorReporter().report(
+                    new XmlProcessingException(quit).asWarning());
             throw new SAXException(quit);
         } catch (XPathException err) {
             throw new SAXException(err);
@@ -253,6 +261,7 @@ public class ReceivingContentHandler
      * Receive notification of the end of a document
      */
 
+    @Override
     public void endDocument() throws SAXException {
         // System.err.println("RCH: end document");
         try {
@@ -275,6 +284,7 @@ public class ReceivingContentHandler
      * being parsed.
      */
 
+    @Override
     public void setDocumentLocator(Locator locator) {
         localLocator = new LocalLocator(locator);
         if (!lineNumbering) {
@@ -286,6 +296,7 @@ public class ReceivingContentHandler
      * Notify a namespace prefix to URI binding
      */
 
+    @Override
     public void startPrefixMapping(String prefix, String uri) {
         //System.err.println("StartPrefixMapping " + prefix + "=" + uri);
         if (prefix.equals("xmlns")) {
@@ -293,17 +304,16 @@ public class ReceivingContentHandler
             // should never be reported, but it's been known to happen
             return;
         }
-        if (namespacesUsed >= namespaces.length) {
-            namespaces = Arrays.copyOf(namespaces, namespacesUsed * 2);
-        }
-        namespaces[namespacesUsed++] = new NamespaceBinding(prefix, uri);
+        currentNamespaceMap = currentNamespaceMap.bind(prefix, uri);
     }
 
     /**
      * Notify that a namespace binding is going out of scope
      */
 
+    @Override
     public void endPrefixMapping(String prefix) {
+        //System.err.println("endPrefixMapping " + prefix);
     }
 
     /**
@@ -352,104 +362,107 @@ public class ReceivingContentHandler
      * @see org.xml.sax.Attributes
      * @see org.xml.sax.helpers.AttributesImpl
      */
+    @Override
     public void startElement(String uri, String localname, String rawname, Attributes atts)
             throws SAXException {
-//        System.err.println("ReceivingContentHandler#startElement " +
-//                uri + "," + localname + "," + rawname +
-//                " at line " + locator.getLineNumber() + " of " + locator.getSystemId());
+        //System.err.println("ReceivingContentHandler#startElement " + localname + " (depth=" + namespaceStack.size() + ")");
         //for (int a=0; a<atts.getLength(); a++) {
         //     System.err.println("  Attribute " + atts.getURI(a) + "/" + atts.getLocalName(a) + "/" + atts.getQName(a));
         //}
         try {
             flush(true);
 
+            int options = ReceiverOption.NAMESPACE_OK | ReceiverOption.ALL_NAMESPACES;
             NodeName elementName = getNodeName(uri, localname, rawname);
-            receiver.startElement(elementName, Untyped.getInstance(), localLocator, ReceiverOptions.NAMESPACE_OK);
+            AttributeMap attributes = makeAttributeMap(atts, localLocator);
+            receiver.startElement(elementName, Untyped.getInstance(),
+                                  attributes, currentNamespaceMap,
+                                  localLocator, options);
 
             localLocator.levelInEntity++;
-            for (int n = 0; n < namespacesUsed; n++) {
-                receiver.namespace(namespaces[n], 0);
-            }
-
-            for (int a = 0; a < atts.getLength(); a++) {
-                int properties = ReceiverOptions.NAMESPACE_OK;
-                String qname = atts.getQName(a);
-                if (qname.startsWith("xmlns") && (qname.length()==5 || qname.charAt(5)==':')) {
-                    // We normally configure the parser so that it doesn't notify namespaces as attributes.
-                    // But when running as a TransformerHandler, we have no control over the feature settings
-                    // of the sender of the events. So we filter them out, just in case. There might be cases
-                    // where we ought not just to ignore them, but to handle them as namespace events, but
-                    // we'll cross that bridge when we come to it.
-                    continue;
-                }
-
-                if (defaultedAttributesAction != 0
-                        && atts instanceof Attributes2
-                        && !((Attributes2) atts).isSpecified(qname)) {
-                    if (defaultedAttributesAction == -1) {
-                        // suppress defaulted attributes
-                        continue;
-                    } else {
-                        // mark defaulted attributes
-                        properties |= ReceiverOptions.DEFAULTED_ATTRIBUTE;
-                    }
-                }
-
-                NodeName attCode = getNodeName(atts.getURI(a), atts.getLocalName(a), atts.getQName(a));
-                String type = atts.getType(a);
-                SimpleType typeCode = BuiltInAtomicType.UNTYPED_ATOMIC;
-                if (retainDTDAttributeTypes) {
-                    switch (type) {
-                        case "CDATA":
-                            // common case, no action
-                            break;
-                        case "ID":
-                            typeCode = BuiltInAtomicType.ID;
-                            break;
-                        case "IDREF":
-                            typeCode = BuiltInAtomicType.IDREF;
-                            break;
-                        case "IDREFS":
-                            typeCode = BuiltInListType.IDREFS;
-                            break;
-                        case "NMTOKEN":
-                            typeCode = BuiltInAtomicType.NMTOKEN;
-                            break;
-                        case "NMTOKENS":
-                            typeCode = BuiltInListType.NMTOKENS;
-                            break;
-                        case "ENTITY":
-                            typeCode = BuiltInAtomicType.ENTITY;
-                            break;
-                        case "ENTITIES":
-                            typeCode = BuiltInListType.ENTITIES;
-                            break;
-                    }
-                } else {
-                    switch (type) {
-                        case "ID":
-                            properties |= ReceiverOptions.IS_ID;
-                            break;
-                        case "IDREF":
-                            properties |= ReceiverOptions.IS_IDREF;
-                            break;
-                        case "IDREFS":
-                            properties |= ReceiverOptions.IS_IDREF;
-                            break;
-                    }
-                }
-
-                receiver.attribute(attCode, typeCode, atts.getValue(a), localLocator, properties);
-            }
-
+            namespaceStack.push(currentNamespaceMap);
             afterStartTag = true;
-            receiver.startContent();
 
-            namespacesUsed = 0;
         } catch (XPathException err) {
             err.maybeSetLocation(localLocator);
             throw new SAXException(err);
         }
+    }
+
+    private AttributeMap makeAttributeMap(Attributes atts, Location location) throws SAXException {
+        int length = atts.getLength();
+        List<AttributeInfo> list = new ArrayList<>(atts.getLength());
+        for (int a=0; a<length; a++) {
+            int properties = ReceiverOption.NAMESPACE_OK;
+            String value = atts.getValue(a);
+            String qname = atts.getQName(a);
+            if (qname.startsWith("xmlns") && (qname.length() == 5 || qname.charAt(5) == ':')) {
+                // We normally configure the parser so that it doesn't notify namespaces as attributes.
+                // But when running as a TransformerHandler, we have no control over the feature settings
+                // of the sender of the events. So we filter them out, just in case. There might be cases
+                // where we ought not just to ignore them, but to handle them as namespace events, but
+                // we'll cross that bridge when we come to it.
+                continue;
+            }
+
+            if (defaultedAttributesAction != 0
+                    && atts instanceof Attributes2
+                    && !((Attributes2) atts).isSpecified(qname)) {
+                if (defaultedAttributesAction == -1) {
+                    // suppress defaulted attributes
+                    continue;
+                } else {
+                    // mark defaulted attributes
+                    properties |= ReceiverOption.DEFAULTED_VALUE;
+                }
+            }
+
+            NodeName attCode = getNodeName(atts.getURI(a), atts.getLocalName(a), atts.getQName(a));
+            String type = atts.getType(a);
+            SimpleType typeCode = BuiltInAtomicType.UNTYPED_ATOMIC;
+            if (retainDTDAttributeTypes) {
+                switch (type) {
+                    case "CDATA":
+                        // common case, no action
+                        break;
+                    case "ID":
+                        typeCode = BuiltInAtomicType.ID;
+                        break;
+                    case "IDREF":
+                        typeCode = BuiltInAtomicType.IDREF;
+                        break;
+                    case "IDREFS":
+                        typeCode = BuiltInListType.IDREFS;
+                        break;
+                    case "NMTOKEN":
+                        typeCode = BuiltInAtomicType.NMTOKEN;
+                        break;
+                    case "NMTOKENS":
+                        typeCode = BuiltInListType.NMTOKENS;
+                        break;
+                    case "ENTITY":
+                        typeCode = BuiltInAtomicType.ENTITY;
+                        break;
+                    case "ENTITIES":
+                        typeCode = BuiltInListType.ENTITIES;
+                        break;
+                }
+            } else {
+                switch (type) {
+                    case "ID":
+                        properties |= ReceiverOption.IS_ID;
+                        break;
+                    case "IDREF":
+                        properties |= ReceiverOption.IS_IDREF;
+                        break;
+                    case "IDREFS":
+                        properties |= ReceiverOption.IS_IDREF;
+                        break;
+                }
+            }
+            list.add(new AttributeInfo(attCode, typeCode, value, location, properties));
+        }
+        return AttributeMap.fromList(list);
     }
 
     /**
@@ -514,13 +527,13 @@ public class ReceivingContentHandler
 
     }
 
-
     /**
      * Report the end of an element (the close tag)
      */
 
+    @Override
     public void endElement(String uri, String localname, String rawname) throws SAXException {
-        //System.err.println("ReceivingContentHandler#End element " + rawname);
+        //System.err.println("ReceivingContentHandler#End element " + rawname + " (depth=" + namespaceStack.size() + ")");
         try {
             // don't attempt whitespace compression if this end tag follows a start tag
             flush(!afterStartTag);
@@ -529,7 +542,7 @@ public class ReceivingContentHandler
         } catch (ValidationException err) {
             err.maybeSetLocation(localLocator);
             if (!err.hasBeenReported()) {
-                pipe.getErrorListener().fatalError(err);
+                pipe.getErrorReporter().report(new XmlProcessingException(err));
             }
             err.setHasBeenReported(true);
             throw new SAXException(err);
@@ -538,6 +551,8 @@ public class ReceivingContentHandler
             throw new SAXException(err);
         }
         afterStartTag = false;
+        namespaceStack.pop();
+        currentNamespaceMap = namespaceStack.peek();
     }
 
     /**
@@ -545,7 +560,8 @@ public class ReceivingContentHandler
      * calls on this method, with arbitrary boundaries
      */
 
-    public void characters(char ch[], int start, int length) {
+    @Override
+    public void characters(char[] ch, int start, int length) {
         // System.err.println("characters (" + length + ")");
         // need to concatenate chunks of text before we can decide whether a node is all-white
 
@@ -565,7 +581,8 @@ public class ReceivingContentHandler
      * appearing as children of elements with an element-only content model
      */
 
-    public void ignorableWhitespace(char ch[], int start, int length) {
+    @Override
+    public void ignorableWhitespace(char[] ch, int start, int length) {
         if (!ignoreIgnorable) {
             characters(ch, start, length);
         }
@@ -575,6 +592,7 @@ public class ReceivingContentHandler
      * Notify the existence of a processing instruction
      */
 
+    @Override
     public void processingInstruction(String name, String remainder) throws SAXException {
         try {
             flush(true);
@@ -606,7 +624,7 @@ public class ReceivingContentHandler
                         // not strictly necessary (the parser should have done this) but needed in practice
                         data = Whitespace.removeLeadingWhitespace(remainder);
                     }
-                    receiver.processingInstruction(name, data, localLocator, 0);
+                    receiver.processingInstruction(name, data, localLocator, ReceiverOption.NONE);
                 }
             }
         } catch (XPathException err) {
@@ -619,11 +637,12 @@ public class ReceivingContentHandler
      * rather than the ContentHandler interface.
      */
 
-    public void comment(char ch[], int start, int length) throws SAXException {
+    @Override
+    public void comment(char[] ch, int start, int length) throws SAXException {
         try {
             flush(true);
             if (!inDTD) {
-                receiver.comment(new CharSlice(ch, start, length), localLocator, 0);
+                receiver.comment(new CharSlice(ch, start, length), localLocator, ReceiverOption.NONE);
             }
         } catch (XPathException err) {
             throw new SAXException(err);
@@ -644,7 +663,7 @@ public class ReceivingContentHandler
             slice.setLength(charsUsed);
             CharSequence cs = compress ? CompressedWhitespace.compress(slice) : slice;
             receiver.characters(cs, lastTextNodeLocator,
-                    escapingDisabled ? ReceiverOptions.DISABLE_ESCAPING : ReceiverOptions.WHOLE_TEXT_NODE);
+                    escapingDisabled ? ReceiverOption.DISABLE_ESCAPING : ReceiverOption.WHOLE_TEXT_NODE);
             charsUsed = 0;
             escapingDisabled = false;
         }
@@ -654,6 +673,7 @@ public class ReceivingContentHandler
      * Notify a skipped entity. Saxon ignores this event
      */
 
+    @Override
     public void skippedEntity(String name) {
     }
 
@@ -665,6 +685,7 @@ public class ReceivingContentHandler
      * are skipped because they are not part of the XPath data model
      */
 
+    @Override
     public void startDTD(String name, String publicId, String systemId) {
         inDTD = true;
     }
@@ -674,10 +695,12 @@ public class ReceivingContentHandler
      * are not part of the XPath data model
      */
 
+    @Override
     public void endDTD() {
         inDTD = false;
     }
 
+    @Override
     public void startEntity(String name) {
         if (elementDepthWithinEntity == null) {
             elementDepthWithinEntity = new Stack<>();
@@ -686,13 +709,16 @@ public class ReceivingContentHandler
         localLocator.levelInEntity = 0;
     }
 
+    @Override
     public void endEntity(String name) {
         localLocator.levelInEntity = elementDepthWithinEntity.pop();
     }
 
+    @Override
     public void startCDATA() {
     }
 
+    @Override
     public void endCDATA() {
     }
 
@@ -701,12 +727,14 @@ public class ReceivingContentHandler
     //////////////////////////////////////////////////////////////////////////////
 
 
+    @Override
     public void notationDecl(String name,
                              String publicId,
                              String systemId) {
     }
 
 
+    @Override
     public void unparsedEntityDecl(String name,
                                    String publicId,
                                    String systemId,
@@ -721,8 +749,7 @@ public class ReceivingContentHandler
                 if (!suppliedURI.isAbsolute()) {
                     String baseURI = localLocator.getSystemId();
                     if (baseURI != null) {   // See bug 21679
-                        URI absoluteURI = new URI(baseURI).resolve(systemId);
-                        uri = absoluteURI.toString();
+                        uri = ResolveURI.makeAbsolute(systemId, baseURI).toString();
                     }
                 }
             } catch (URISyntaxException err) {
@@ -745,10 +772,10 @@ public class ReceivingContentHandler
 
     public static class LocalLocator implements Location {
 
-        private Locator saxLocator;
+        private final Locator saxLocator;
         public int levelInEntity;
 
-        public LocalLocator(Locator saxLocator) {
+        LocalLocator(Locator saxLocator) {
             this.saxLocator = saxLocator;
             this.levelInEntity = 0;
         }
@@ -760,6 +787,7 @@ public class ReceivingContentHandler
          *         null if none is available.
          */
 
+        @Override
         public String getSystemId() {
             return saxLocator.getSystemId();
         }
@@ -771,6 +799,7 @@ public class ReceivingContentHandler
          *         null if none is available.
          */
 
+        @Override
         public String getPublicId() {
             return saxLocator.getPublicId();
         }
@@ -781,6 +810,7 @@ public class ReceivingContentHandler
          * @return The line number, or -1 if none is available.
          */
 
+        @Override
         public int getLineNumber() {
             return saxLocator.getLineNumber();
         }
@@ -791,6 +821,7 @@ public class ReceivingContentHandler
          * @return The column number, or -1 if none is available.
          */
 
+        @Override
         public int getColumnNumber() {
             return saxLocator.getColumnNumber();
         }
@@ -801,8 +832,9 @@ public class ReceivingContentHandler
          * but in an immutable form.
          */
 
+        @Override
         public Location saveLocation() {
-            return new ExplicitLocation(getSystemId(), getLineNumber(), getColumnNumber());
+            return new Loc(getSystemId(), getLineNumber(), getColumnNumber());
         }
     }
 

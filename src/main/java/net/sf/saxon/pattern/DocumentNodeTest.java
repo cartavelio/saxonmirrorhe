@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,7 +12,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
 
@@ -41,6 +40,7 @@ public class DocumentNodeTest extends NodeTest {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return UType.DOCUMENT;
     }
@@ -76,7 +76,8 @@ public class DocumentNodeTest extends NodeTest {
      * @return true if the node matches the Pattern, false otherwise
      */
 
-    public boolean matchesNode(NodeInfo node) {
+    @Override
+    public boolean test(NodeInfo node) {
         if (node.getNodeKind() != Type.DOCUMENT) {
             return false;
         }
@@ -93,7 +94,7 @@ public class DocumentNodeTest extends NodeTest {
                 if (found) {
                     return false;
                 }
-                if (elementTest.matchesNode(n)) {
+                if (elementTest.test(n)) {
                     found = true;
                 } else {
                     return false;
@@ -107,6 +108,7 @@ public class DocumentNodeTest extends NodeTest {
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
+    @Override
     public final double getDefaultPriority() {
         return elementTest.getDefaultPriority();
     }
@@ -117,6 +119,7 @@ public class DocumentNodeTest extends NodeTest {
      * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
      */
 
+    @Override
     public int getPrimitiveType() {
         return Type.DOCUMENT;
     }
@@ -148,24 +151,9 @@ public class DocumentNodeTest extends NodeTest {
                 ((DocumentNodeTest) other).elementTest.equals(elementTest);
     }
 
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     * @param knownToBe a type that the item is known to conform to, without further testing
-     * @param targetVersion the Saxon-JS version being targeted
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     *
-     */
     @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        String elTest = "function e(item) {" + elementTest.generateJavaScriptItemTypeTest(NodeKindTest.ELEMENT, targetVersion) + "};";
-        if (targetVersion == 1) {
-            return elTest + "return SaxonJS.U.isNode(item) && (item.nodeType===9 || item.nodeType===11) && " +
-                    "SaxonJS.U.Axis.child(item).filter(e).next();";
-        } else {
-            return elTest + "return SaxonJS.U.isConstrainedDocumentNode(item, e);";
-        }
+    public String getFullAlphaCode() {
+        return getBasicAlphaCode() + " e[" + elementTest.getFullAlphaCode() + "]";
     }
 
     /**
@@ -197,7 +185,7 @@ public class DocumentNodeTest extends NodeTest {
                 if (found) {
                     return Optional.of("The supplied document node has more than one element child");
                 }
-                if (elementTest.matchesNode(n)) {
+                if (elementTest.test(n)) {
                     found = true;
                 } else {
                     String s = "The supplied document node has an element child (" + Err.depict(n) +

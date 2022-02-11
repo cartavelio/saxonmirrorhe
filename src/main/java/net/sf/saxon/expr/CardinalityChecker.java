@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,13 +7,14 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.TypeCheckingFilter;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.pattern.DocumentNodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -76,6 +77,7 @@ public final class CardinalityChecker extends UnaryExpression {
         return result;
     }
 
+    @Override
     protected OperandRole getOperandRole() {
         return OperandRole.SAME_FOCUS_ACTION;
     }
@@ -95,6 +97,7 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
         Expression base = getBaseExpression();
@@ -121,6 +124,7 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().optimize(visitor, contextInfo);
         Expression base = getBaseExpression();
@@ -176,6 +180,7 @@ public final class CardinalityChecker extends UnaryExpression {
      * process() methods natively.
      */
 
+    @Override
     public int getImplementationMethod() {
         int m = ITERATE_METHOD | PROCESS_METHOD | ITEM_FEED_METHOD;
         if (!Cardinality.allowsMany(requiredCardinality)) {
@@ -207,12 +212,13 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
-        SequenceIterator<?> base = getBaseExpression().iterate(context);
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
+        SequenceIterator base = getBaseExpression().iterate(context);
 
         // If the base iterator knows how many items there are, then check it now rather than wasting time
 
-        if ((base.getProperties() & SequenceIterator.LAST_POSITION_FINDER) != 0) {
+        if (base.getProperties().contains(SequenceIterator.Property.LAST_POSITION_FINDER)) {
             int count = ((LastPositionFinder) base).getLength();
             if (count == 0 && !Cardinality.allowsZero(requiredCardinality)) {
                 typeError("An empty sequence is not allowed as the " +
@@ -230,7 +236,7 @@ public final class CardinalityChecker extends UnaryExpression {
 
         // Otherwise return an iterator that does the checking on the fly
 
-        return new CardinalityCheckingIterator<>(base, requiredCardinality, role, getLocation());
+        return new CardinalityCheckingIterator(base, requiredCardinality, role, getLocation());
 
     }
 
@@ -257,7 +263,7 @@ public final class CardinalityChecker extends UnaryExpression {
                     return sb.toString();
                 }
 
-                sb.append(Err.depict(next));
+                sb.cat(Err.depict(next));
             }
             sb.append(") ");
             return sb.toString();
@@ -272,6 +278,7 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     /*@Nullable*/
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         SequenceIterator iter = getBaseExpression().iterate(context);
         Item first = iter.next();
@@ -291,7 +298,7 @@ public final class CardinalityChecker extends UnaryExpression {
             if (second != null) {
                 Item[] leaders = new Item[]{first, second};
                 typeError("A sequence of more than one item is not allowed as the " +
-                    role.getMessage() + depictSequenceStart(new ArrayIterator<Item<?>>(leaders), 2), role.getErrorCode(), context);
+                    role.getMessage() + depictSequenceStart(new ArrayIterator<Item>(leaders), 2), role.getErrorCode(), context);
                 return null;
             }
         }
@@ -301,11 +308,12 @@ public final class CardinalityChecker extends UnaryExpression {
     /**
      * Process the instruction, without returning any tail calls
      *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
      */
 
-    public void process(XPathContext context) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
         Expression next = getBaseExpression();
         ItemType type = Type.ITEM_TYPE;
         if (next instanceof ItemChecker) {
@@ -313,21 +321,18 @@ public final class CardinalityChecker extends UnaryExpression {
             next = ((ItemChecker) next).getBaseExpression();
         }
         if ((next.getImplementationMethod() & PROCESS_METHOD) != 0 && !(type instanceof DocumentNodeTest)) {
-            Receiver out = context.getReceiver();
-            TypeCheckingFilter filter = new TypeCheckingFilter(out);
+            TypeCheckingFilter filter = new TypeCheckingFilter(output);
             filter.setRequiredType(type, requiredCardinality, role, getLocation());
-            context.setReceiver(filter);
-            next.process(context);
+            next.process(filter, context);
             try {
-                filter.close();
+                filter.finalCheck();
             } catch (XPathException e) {
                 e.maybeSetLocation(getLocation());
                 throw e;
             }
-            context.setReceiver(out);
         } else {
             // Force pull-mode evaluation
-            super.process(context);
+            super.process(output, context);
         }
     }
 
@@ -339,6 +344,7 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getBaseExpression().getItemType();
     }
@@ -347,6 +353,7 @@ public final class CardinalityChecker extends UnaryExpression {
      * Determine the static cardinality of the expression
      */
 
+    @Override
     public int computeCardinality() {
         return requiredCardinality;
     }
@@ -357,6 +364,7 @@ public final class CardinalityChecker extends UnaryExpression {
      * property bit is set, it is true, but if it is unset, the value is unknown.
      */
 
+    @Override
     public int computeSpecialProperties() {
         return getBaseExpression().getSpecialProperties();
     }
@@ -369,6 +377,7 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         CardinalityChecker c2 = new CardinalityChecker(getBaseExpression().copy(rebindings), requiredCardinality, role);
         ExpressionTool.copyLocationInfo(this, c2);
@@ -399,6 +408,7 @@ public final class CardinalityChecker extends UnaryExpression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("check", this);
         String occ = Cardinality.getOccurrenceIndicator(requiredCardinality);
@@ -441,6 +451,7 @@ public final class CardinalityChecker extends UnaryExpression {
      *         in explain() output displaying the expression.
      */
 
+    @Override
     public String getExpressionName() {
         return "CheckCardinality";
     }

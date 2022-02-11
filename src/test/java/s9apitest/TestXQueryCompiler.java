@@ -1,17 +1,15 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -26,11 +24,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * JUnit tests for the s9api XQueryCompiler
  */
-public class TestXQueryCompiler extends TestCase {
+public class TestXQueryCompiler {
 
+    @Test
     public void testModuleUriResolverNoBaseUri() {
         try {
             Processor p = new Processor(false);
@@ -51,12 +54,13 @@ public class TestXQueryCompiler extends TestCase {
             });
             XQueryExecutable exec = c.compile("import module namespace b = 'b.uri' at 'b.xq'; $b:b");
             XdmValue val = exec.load().evaluate();
-            assertEquals(((XdmAtomicValue) val).getLongValue(), 42L);
+            assertEquals(42L, ((XdmAtomicValue) val).getLongValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testDefaultNamespace() {
         try {
             Processor p = new Processor(false);
@@ -67,13 +71,14 @@ public class TestXQueryCompiler extends TestCase {
             XQueryEvaluator eval = c.compile("/foo").load();
             eval.setContextItem(foo);
             XdmValue val = eval.evaluate();
-            assertEquals(val.size(), 1);
+            assertEquals(1, val.size());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
 
     }
 
+    @Test
     public void testReusability() {
         // Test that the XQuery compiler can compile two queries without interference
         try {
@@ -95,13 +100,14 @@ public class TestXQueryCompiler extends TestCase {
             e2.setContextItem(foo);
             e2.setExternalVariable(new QName("p"), new XdmAtomicValue(6));
             val = e2.evaluate();
-            assertEquals(((XdmAtomicValue) val).getLongValue(), 18);
+            assertEquals(18, ((XdmAtomicValue) val).getLongValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
 
     }
 
+    @Test
     public void testMultithreading() {
         // Test that the XQuery compiler can compile many queries concurrently without interference
         try {
@@ -117,7 +123,7 @@ public class TestXQueryCompiler extends TestCase {
                     XQueryEvaluator q = c.compile("a:foo/b:bar + a:foo/b:bar + a:foo/b:bar + a:foo/b:bar").load();
                     q.setContextItem(foo);
                     XdmAtomicValue v = (XdmAtomicValue)q.evaluateSingle();
-                    assertEquals("ok", "48", v.toString());
+                    assertEquals("48", v.toString(), "ok");
                 } catch (Exception e) {
                     e.printStackTrace();
                     fail();
@@ -132,26 +138,9 @@ public class TestXQueryCompiler extends TestCase {
 
     }
 
-    public void testOptimizationOff() {
-        try {
-            Processor p = new Processor(false);
-            p.setConfigurationProperty(FeatureKeys.OPTIMIZATION_LEVEL, "0");
-            p.setConfigurationProperty(Feature.TRACE_OPTIMIZER_DECISIONS, true);
-            DocumentBuilder b = p.newDocumentBuilder();
-            XdmNode foo = b.build(new StreamSource(new StringReader("<foo><bar/></foo>")));
-            XQueryCompiler c = p.newXQueryCompiler();
-            XQueryExecutable expr = c.compile("let $x := //bar return count($x)");
-            expr.explain(p.newSerializer(System.out));
-            XQueryEvaluator eval = expr.load();
-            eval.setContextItem(foo);
-            XdmValue val = eval.evaluate();
-            assertEquals(val.size(), 1);
-        } catch (SaxonApiException e) {
-            fail(e.getMessage());
-        }
 
-    }
 
+    @Test
     public void testSeparateCompilation() {
         try {
             Processor proc = new Processor(true);
@@ -161,15 +150,16 @@ public class TestXQueryCompiler extends TestCase {
                     "declare variable $m:ten as xs:integer := 10;");
             String q1 = "import module namespace m='http://www.example.com/module-one'; m:add(2,2)";
             XQueryEvaluator ev = comp.compile(q1).load();
-            assertEquals("2+2", "4", ev.evaluate().toString());
+            assertEquals("4", ev.evaluate().toString(), "2+2");
             String q2 = "import module namespace m='http://www.example.com/module-one'; m:add($m:ten,5)";
             ev = comp.compile(q2).load();
-            assertEquals("10+5", "15", ev.evaluate().toString());
+            assertEquals("15", ev.evaluate().toString(), "10+5");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testSeparateCompilationNested() {
         try {
             Processor proc = new Processor(true);
@@ -183,15 +173,16 @@ public class TestXQueryCompiler extends TestCase {
                     "declare variable $m2:ten as xs:integer := $m1:ten;");
             String q1 = "import module namespace m2='http://www.example.com/module-two'; m2:add($m2:ten,2)";
             XQueryEvaluator ev = comp.compile(q1).load();
-            assertEquals("10+2", "12", ev.evaluate().toString());
+            assertEquals("12", ev.evaluate().toString(), "10+2");
             String q2 = "import module namespace m1='http://www.example.com/module-one'; m1:add($m1:ten,5)";
             ev = comp.compile(q2).load();
-            assertEquals("10+5", "15", ev.evaluate().toString());
+            assertEquals("15", ev.evaluate().toString(), "10+5");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testSeparateCompilationImportFromNonSeparatelyCompiledLibraryModule() {
         try {
             Processor proc = new Processor(true);
@@ -217,15 +208,16 @@ public class TestXQueryCompiler extends TestCase {
                 }
             });
             XQueryEvaluator ev = comp.compile(q1).load();
-            assertEquals("10+2", "12", ev.evaluate().toString());
+            assertEquals("12", ev.evaluate().toString(), "10+2");
             String q2 = "import module namespace m1='http://www.example.com/module-one'; m1:add($m1:ten,5)";
             ev = comp.compile(q2).load();
-            assertEquals("10+5", "15", ev.evaluate().toString());
+            assertEquals("15", ev.evaluate().toString(), "10+5");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void testSeparateCompilationDiamond() {
         try {
             Processor proc = new Processor(true);
@@ -271,6 +263,7 @@ public class TestXQueryCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testSeparateCompilationDiamondByteCode() {
         try {
             Processor proc = new Processor(true);
@@ -316,6 +309,7 @@ public class TestXQueryCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testSeparateCompilationDiamondWithVariables() {
         try {
             Processor proc = new Processor(true);
@@ -352,6 +346,7 @@ public class TestXQueryCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testSeparateCompilationForwardsRef() {
         try {
             Processor proc = new Processor(true);
@@ -367,7 +362,7 @@ public class TestXQueryCompiler extends TestCase {
             );
 
             XdmItem result = exp.load().evaluateSingle();
-            assertEquals(result.getStringValue(), "a!");
+            assertEquals("a!", result.getStringValue());
 
         } catch (SaxonApiException err) {
             fail(err.getMessage());
@@ -379,6 +374,7 @@ public class TestXQueryCompiler extends TestCase {
      * s9api query/transformation pipeline
      */
 
+    @Test
     public void testPipeline() {
         try {
             Processor proc = new Processor(false);
@@ -404,7 +400,7 @@ public class TestXQueryCompiler extends TestCase {
             stage5.setDestination(out);
             stage1.setInitialContextNode(in);
             stage1.transform();
-            assertTrue("output", sw.toString().contains("<t><q><t><q><t><z/></t></q></t></q></t>"));
+            assertTrue(sw.toString().contains("<t><q><t><q><t><z/></t></q></t></q></t>"), "output");
 
         } catch (SaxonApiException err) {
             err.printStackTrace();
@@ -413,6 +409,7 @@ public class TestXQueryCompiler extends TestCase {
     }
 
 
+    @Test
     public void testErrorListener() {
         final List<TransformerException> errors = new ArrayList<>();
         final List<TransformerException> fatalErrors = new ArrayList<>();
@@ -442,13 +439,14 @@ public class TestXQueryCompiler extends TestCase {
             eval.runStreamed(in, out);
             fail("unexpected success");
         } catch (SaxonApiException e) {
-            assertEquals("errors", 0, errors.size());
-            assertEquals("fatalErrors", 1, fatalErrors.size());
-            assertEquals("warnings", 0, warnings.size());
+            assertEquals(0, errors.size(), "errors");
+            assertEquals(1, fatalErrors.size(), "fatalErrors");
+            assertEquals(0, warnings.size(), "warnings");
         }
     }
 
 
+    @Test
     public void testIssue2111() {
         try {
             final Configuration configuration = new Configuration();
@@ -471,6 +469,7 @@ public class TestXQueryCompiler extends TestCase {
 
     }
 
+    @Test
     public void testAbleToCompileWithCompileLibraryMethod() throws SaxonApiException {
         // See bug 2429
         XQueryCompiler compiler = new Processor(true).newXQueryCompiler();
@@ -498,6 +497,7 @@ public class TestXQueryCompiler extends TestCase {
         compiler.compileLibrary(main);
     }
 
+    @Test
     public void testGlobalVariableLineNumber() {
         try {
             String query = "declare namespace c = 'c.uri';\n\n\ndeclare variable $foo := 3;\n$foo";
@@ -508,10 +508,10 @@ public class TestXQueryCompiler extends TestCase {
             int count = 0;
             while (vars.hasNext()) {
                 GlobalVariable v = vars.next();
-                assertEquals(v.getLineNumber(), 4);
+                assertEquals(4, v.getLineNumber());
                 count++;
             }
-            assertEquals(count, 1);
+            assertEquals(1, count);
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
@@ -519,6 +519,7 @@ public class TestXQueryCompiler extends TestCase {
     }
 
 
+    @Test
     public void testPreEvaluateDocFunction() {
         // Bug 2963
         String badQuery = "doc('http://example.com/bad')";
@@ -552,13 +553,13 @@ public class TestXQueryCompiler extends TestCase {
             fail("Compilation should not fail");
             err.printStackTrace();
         }
-        assertEquals("URI not accessed", 0, counter.size());
+        assertEquals(0, counter.size(), "URI not accessed");
         p.setConfigurationProperty(Feature.PRE_EVALUATE_DOC_FUNCTION, true);
         try {
             q = c.compile(goodQuery);
-            assertTrue("URI accessed", counter.size() > 0);
-            assertTrue("Compiled to Literal", q.getUnderlyingCompiledQuery().getExpression() instanceof Literal);
-            assertTrue("Compiled to NodeInfo", ((Literal) q.getUnderlyingCompiledQuery().getExpression()).getValue().head() instanceof NodeInfo);
+            assertTrue(counter.size() > 0, "URI accessed");
+            assertTrue(q.getUnderlyingCompiledQuery().getExpression() instanceof Literal, "Compiled to Literal");
+            assertTrue(((Literal) q.getUnderlyingCompiledQuery().getExpression()).getValue().head() instanceof NodeInfo, "Compiled to NodeInfo");
         } catch (Exception err) {
             fail("Compilation should not fail");
         }
@@ -590,6 +591,7 @@ public class TestXQueryCompiler extends TestCase {
         }
     }
 
+    @Test
     public void testXQueryValidationErrorReporting() {
         // Bug 3123
         MyErrorListener listener = new MyErrorListener();
@@ -606,11 +608,30 @@ public class TestXQueryCompiler extends TestCase {
             XdmValue val = eval.evaluate();
             fail();
         } catch (SaxonApiException e) {
-            assertEquals(1, listener.errors.size());
-            assertEquals(1, listener.fatalErrors.size());
+            // Changed since 9.9
+            assertEquals(0, listener.errors.size());
+            assertEquals(2, listener.fatalErrors.size());
         }
     }
 
+    @Test
+    public void testDiagnosticsOnAtomizationFailure() {
+        // Bug 4086
+        try {
+            Processor p = new Processor(true);
+            DocumentBuilder b = p.newDocumentBuilder();
+            XdmNode foo = b.build(new StreamSource(new StringReader("<foo xmlns='http://one.uri/'><bar/></foo>")));
+            XQueryCompiler c = p.newXQueryCompiler();
+            c.declareNamespace("", "http://one.uri/");
+            XQueryEvaluator eval = c.compile("declare function local:x($n as node(), $a as xs:integer){$a+string-length(name($n))}; local:x(<z/>, map{'x':2})").load();
+            XdmValue val = eval.evaluate();
+            fail();
+        } catch (SaxonApiException e) {
+            System.err.println(e);
+        }
+    }
+
+    @Test
     public void testXQueryOptimizationWithTracing() {
         // Bug 3497
 
@@ -629,140 +650,6 @@ public class TestXQueryCompiler extends TestCase {
             fail();
         }
     }
-
-//    public void testBug3843XP() {
-//        for (int i = 0; i < 10; i++) {
-//            long startRun = System.currentTimeMillis();
-//            try {
-//                Processor p = new Processor(true);
-//                //p.setConfigurationProperty(FeatureKeys.OPTIMIZATION_LEVEL, 0 );
-//                DocumentBuilder b = p.newDocumentBuilder();
-//                XdmNode doc = b.build(new File("/Users/mike/bugs/2018/thielen3843/queries/data_source.xml"));
-//                XPathCompiler c = p.newXPathCompiler();
-//                //c.setCaching(false);
-//                FileReader reader = new FileReader("/Users/mike/bugs/2018/thielen3843/queries/queries.txt");
-//                LineNumberReader lnr = new LineNumberReader(reader);
-//                String q;
-//                int k = 0;
-//                while ((q = lnr.readLine()) != null) {
-//                    //System.err.println("Processing query: " + (k++) + " : " + q);
-//                    long start = System.currentTimeMillis();
-//                    XPathExecutable exec = c.compile(q);
-//                    //System.err.println((System.currentTimeMillis() - start) + " - " + q);
-//                    XPathSelector eval = exec.load();
-//                    eval.setContextItem(doc);
-//                    XdmValue result = eval.evaluate();
-//                    //System.err.println((System.currentTimeMillis() - start) + " - " + result.size());
-//                }
-//
-//                System.err.println("Total time: " + (System.currentTimeMillis() - startRun) + "ms");
-//
-//            } catch (SaxonApiException | IOException e) {
-//                e.printStackTrace();
-//                fail();
-//            }
-//        }
-//    }
-//
-//    public void testBug3843XPfast() {
-//        for (int i = 0; i < 10; i++) {
-//            long startRun = System.currentTimeMillis();
-//            try {
-//                Processor p = new Processor(true);
-//                //p.setConfigurationProperty(FeatureKeys.OPTIMIZATION_LEVEL, 0 );
-//                DocumentBuilder b = p.newDocumentBuilder();
-//                XdmNode doc = b.build(new File("/Users/mike/bugs/2018/thielen3843/queries/data_source.xml"));
-//                XPathCompiler c = p.newXPathCompiler();
-//                c.setFastCompilation(true);
-//                //c.setCaching(false);
-//                FileReader reader = new FileReader("/Users/mike/bugs/2018/thielen3843/queries/queries.txt");
-//                LineNumberReader lnr = new LineNumberReader(reader);
-//                String q;
-//                int k = 0;
-//                while ((q = lnr.readLine()) != null) {
-//                    //System.err.println("Processing query: " + (k++) + " : " + q);
-//                    long start = System.currentTimeMillis();
-//                    XPathExecutable exec = c.compile(q);
-//                    //System.err.println((System.currentTimeMillis() - start) + " - " + q);
-//                    XPathSelector eval = exec.load();
-//                    eval.setContextItem(doc);
-//                    XdmValue result = eval.evaluate();
-//                    //System.err.println((System.currentTimeMillis() - start) + " - " + result.size());
-//                }
-//
-//                System.err.println("Total time: " + (System.currentTimeMillis() - startRun) + "ms");
-//
-//            } catch (SaxonApiException | IOException e) {
-//                e.printStackTrace();
-//                fail();
-//            }
-//        }
-//    }
-//
-//    public void testBug3843XQ() {
-//        for (int i = 0; i < 10; i++) {
-//            long startRun = System.currentTimeMillis();
-//            try {
-//                Processor p = new Processor(true);
-//                DocumentBuilder b = p.newDocumentBuilder();
-//                XdmNode doc = b.build(new File("/Users/mike/bugs/2018/thielen3843/queries/data_source.xml"));
-//                XQueryCompiler c = p.newXQueryCompiler();
-//                FileReader reader = new FileReader("/Users/mike/bugs/2018/thielen3843/queries/queries.txt");
-//                LineNumberReader lnr = new LineNumberReader(reader);
-//                String q;
-//                int k = 0;
-//                while ((q = lnr.readLine()) != null) {
-//                    //System.err.println("Processing query: " + (k++) + " : " + q);
-//                    long start = System.currentTimeMillis();
-//                    XQueryExecutable exec = c.compile(q);
-//                    //System.err.println((System.currentTimeMillis() - start) + " - " + q);
-//                    XQueryEvaluator eval = exec.load();
-//                    eval.setContextItem(doc);
-//                    XdmValue result = eval.evaluate();
-//                    //System.err.println((System.currentTimeMillis() - start) + " - " + result.size());
-//                }
-//
-//                System.err.println("Total time: " + (System.currentTimeMillis() - startRun) + "ms");
-//
-//            } catch (SaxonApiException | IOException e) {
-//                e.printStackTrace();
-//                fail();
-//            }
-//        }
-//    }
-//
-//    public void testBug3843XQfast() {
-//        for (int i = 0; i < 10; i++) {
-//            long startRun = System.currentTimeMillis();
-//            try {
-//                Processor p = new Processor(true);
-//                DocumentBuilder b = p.newDocumentBuilder();
-//                XdmNode doc = b.build(new File("/Users/mike/bugs/2018/thielen3843/queries/data_source.xml"));
-//                XQueryCompiler c = p.newXQueryCompiler();
-//                c.setFastCompilation(true);
-//                FileReader reader = new FileReader("/Users/mike/bugs/2018/thielen3843/queries/queries.txt");
-//                LineNumberReader lnr = new LineNumberReader(reader);
-//                String q;
-//                int k = 0;
-//                while ((q = lnr.readLine()) != null) {
-//                    //System.err.println("Processing query: " + (k++) + " : " + q);
-//                    long start = System.currentTimeMillis();
-//                    XQueryExecutable exec = c.compile(q);
-//                    //System.err.println((System.currentTimeMillis() - start) + " - " + q);
-//                    XQueryEvaluator eval = exec.load();
-//                    eval.setContextItem(doc);
-//                    XdmValue result = eval.evaluate();
-//                    //System.err.println((System.currentTimeMillis() - start) + " - " + result.size());
-//                }
-//
-//                System.err.println("Total time: " + (System.currentTimeMillis() - startRun) + "ms");
-//
-//            } catch (SaxonApiException | IOException e) {
-//                e.printStackTrace();
-//                fail();
-//            }
-//        }
-//    }
 
 
 }

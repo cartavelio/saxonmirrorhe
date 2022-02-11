@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,12 +8,10 @@
 package net.sf.saxon.trace;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.CheckSumFilter;
-import net.sf.saxon.event.NamespaceReducer;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -43,11 +41,13 @@ public class ExpressionPresenter {
 
     private Configuration config;
     private Receiver receiver;
+    private ComplexContentOutputter cco;
     private int depth = 0;
     private boolean inStartTag = false;
     private String nextRole = null;
-    private Stack<Expression> expressionStack = new Stack<Expression>();
-    private Stack<String> nameStack = new Stack<String>();
+    private Stack<Expression> expressionStack = new Stack<>();
+    private Stack<String> nameStack = new Stack<>();
+    private NamespaceMap namespaceMap = NamespaceMap.emptyMap();
     private String defaultNamespace;
     private Options options = new ExportOptions();
     private boolean relocatable = false;
@@ -117,14 +117,15 @@ public class ExpressionPresenter {
             if (checksum) {
                 receiver = new CheckSumFilter(receiver);
             }
+            cco = new ComplexContentOutputter(receiver);
         } catch (XPathException err) {
             err.printStackTrace();
             throw new InternalError(err.getMessage());
         }
         this.config = config;
         try {
-            receiver.open();
-            receiver.startDocument(0);
+            cco.open();
+            cco.startDocument(ReceiverOption.NONE);
         } catch (XPathException err) {
             err.printStackTrace();
             throw new InternalError(err.getMessage());
@@ -147,11 +148,11 @@ public class ExpressionPresenter {
         if (checksum) {
             receiver = new CheckSumFilter(receiver);
         }
-
+        cco = new ComplexContentOutputter(receiver);
         this.config = config;
         try {
-            receiver.open();
-            receiver.startDocument(0);
+            cco.open();
+            cco.startDocument(ReceiverOption.NONE);
         } catch (XPathException err) {
             err.printStackTrace();
             throw new InternalError(err.getMessage());
@@ -181,9 +182,10 @@ public class ExpressionPresenter {
     public ExpressionPresenter(Configuration config, /*@NotNull*/ Receiver receiver) {
         this.config = config;
         this.receiver = receiver;
+        this.cco = new ComplexContentOutputter(receiver);
         try {
-            receiver.open();
-            receiver.startDocument(0);
+            cco.open();
+            cco.startDocument(ReceiverOption.NONE);
         } catch (XPathException err) {
             err.printStackTrace();
             throw new InternalError(err.getMessage());
@@ -199,6 +201,7 @@ public class ExpressionPresenter {
 
     public void setDefaultNamespace(String namespace) {
         defaultNamespace = namespace;
+        namespaceMap = namespaceMap.put("", namespace);
     }
 
     /**
@@ -297,7 +300,7 @@ public class ExpressionPresenter {
         int n = _startElement(name);
         if (parent == null || expr.getRetainedStaticContext() != parent.getRetainedStaticContext()) {
             if (expr.getRetainedStaticContext() == null) {
-                throw new AssertionError("Export failure: no retained static context on " + expr.toShortString());
+        //        throw new AssertionError("Export failure: no retained static context on " + expr.toShortString());
             } else {
                 emitRetainedStaticContext(expr.getRetainedStaticContext(), parent == null ? null : parent.getRetainedStaticContext());
             }
@@ -387,7 +390,7 @@ public class ExpressionPresenter {
         //System.err.println("start " + name + " at " + new XPathException("").getStackTrace().length);
         try {
             if (inStartTag) {
-                receiver.startContent();
+                cco.startContent();
                 inStartTag = false;
             }
             NodeName nodeName;
@@ -396,7 +399,7 @@ public class ExpressionPresenter {
             } else {
                 nodeName = new FingerprintedQName("", defaultNamespace, name);
             }
-            receiver.startElement(nodeName, Untyped.getInstance(), ExplicitLocation.UNKNOWN_LOCATION, 0);
+            cco.startElement(nodeName, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             if (nextRole != null) {
                 emitAttribute("role", nextRole);
                 nextRole = null;
@@ -432,7 +435,8 @@ public class ExpressionPresenter {
                 value = truncatedModuleName(value);
             }
             try {
-                receiver.attribute(new NoNamespaceName(name), BuiltInAtomicType.UNTYPED_ATOMIC, value, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                cco.attribute(new NoNamespaceName(name), BuiltInAtomicType.UNTYPED_ATOMIC, value,
+                              Loc.NONE, ReceiverOption.NONE);
             } catch (XPathException err) {
                 err.printStackTrace();
                 throw new InternalError(err.getMessage());
@@ -449,70 +453,17 @@ public class ExpressionPresenter {
 
     public void emitAttribute(String name, StructuredQName value) {
         String attVal = value.getEQName();
-//        if (value.hasURI("") && value.getPrefix().isEmpty()) {
-//            attVal = value.getLocalPart();
-//        } else {
-//            String uri = value.getURI();
-//            String prefix = value.getPrefix();
-//            if (uri.equals(NamespaceConstant.getUriForConventionalPrefix(prefix))) {
-//                uri = "~";
-//            }
-//            attVal = prefix + "{" + uri + "}" + value.getLocalPart();
-//        }
         try {
-            receiver.attribute(new NoNamespaceName(name), BuiltInAtomicType.UNTYPED_ATOMIC,
-                               attVal, ExplicitLocation.UNKNOWN_LOCATION, 0);
+            cco.attribute(new NoNamespaceName(name), BuiltInAtomicType.UNTYPED_ATOMIC,
+                          attVal, Loc.NONE, ReceiverOption.NONE);
         } catch (XPathException err) {
             err.printStackTrace();
             throw new InternalError(err.getMessage());
         }
-//
-//        try {
-//            if (value.hasURI("")) {
-//                receiver.attribute(new NoNamespaceName(name), BuiltInAtomicType.UNTYPED_ATOMIC, value.getLocalPart(), ExplicitLocation.UNKNOWN_LOCATION, 0);
-//            } else if (value.getPrefix().isEmpty()) {
-//                String prefix = config.getNamePool().suggestPrefixForURI(value.getURI());
-//                if (prefix == null) {
-//                    prefix = allocatePrefix(value.getURI());
-//                }
-//                receiver.namespace(new NamespaceBinding(prefix, value.getURI()), 0);
-//                receiver.attribute(new NoNamespaceName(name),
-//                                   BuiltInAtomicType.UNTYPED_ATOMIC, prefix + ":" + value.getLocalPart(), ExplicitLocation.UNKNOWN_LOCATION, 0);
-//            } else {
-//                receiver.namespace(new NamespaceBinding(value.getPrefix(), value.getURI()), 0);
-//                receiver.attribute(new NoNamespaceName(name),
-//                                   BuiltInAtomicType.UNTYPED_ATOMIC, value.getDisplayName(), ExplicitLocation.UNKNOWN_LOCATION, 0);
-//            }
-//        } catch (XPathException err) {
-//            err.printStackTrace();
-//            throw new InternalError(err.getMessage());
-//        }
-    }
-
-    private String allocatePrefix(String uri) {
-        if (uri.equals(NamespaceConstant.SCHEMA)) {
-            return "xs";
-        } else if (uri.equals(NamespaceConstant.FN)) {
-            return "fn";
-        } else if (uri.equals(NamespaceConstant.SAXON)) {
-            return "saxon";
-        } else {
-            int c = uri.lastIndexOf('/');
-            if (c == uri.length() - 1) {
-                c = uri.substring(0, uri.length() - 1).lastIndexOf('/');
-            }
-            if (c >= 0 && c + 3 < uri.length()) {
-                String prefix = uri.substring(c + 1, c + 3);
-                if (NameChecker.isValidNCName(prefix)) {
-                    return prefix;
-                }
-            }
-            return "p";
-        }
     }
 
     /**
-     * Output a namespace declaration
+     * Output a namespace declaration. All namespaces should be declared at the top level.
      *
      * @param prefix the namespace prefix
      * @param uri    the namespace URI
@@ -520,7 +471,7 @@ public class ExpressionPresenter {
 
     public void namespace(String prefix, String uri) {
         try {
-            receiver.namespace(new NamespaceBinding(prefix, uri), 0);
+            cco.namespace(prefix, uri, ReceiverOption.NONE);
         } catch (XPathException e) {
             e.printStackTrace();
             throw new InternalError(e.getMessage());
@@ -538,10 +489,10 @@ public class ExpressionPresenter {
         //System.err.println("end at " + new XPathException("").getStackTrace().length);
         try {
             if (inStartTag) {
-                receiver.startContent();
+                cco.startContent();
                 inStartTag = false;
             }
-            receiver.endElement();
+            cco.endElement();
         } catch (XPathException err) {
             err.printStackTrace();
             throw new InternalError(err.getMessage());
@@ -579,16 +530,16 @@ public class ExpressionPresenter {
         try {
             if (receiver instanceof CheckSumFilter) {
                 int c = ((CheckSumFilter) receiver).getChecksum();
-                receiver.processingInstruction(CheckSumFilter.SIGMA, Integer.toHexString(c), ExplicitLocation.UNKNOWN_LOCATION, 0);
+                cco.processingInstruction(CheckSumFilter.SIGMA, Integer.toHexString(c),
+                                          Loc.NONE, ReceiverOption.NONE);
             }
-            receiver.endDocument();
-            receiver.close();
+            cco.endDocument();
+            cco.close();
         } catch (XPathException err) {
             err.printStackTrace();
             throw new InternalError(err.getMessage());
         }
     }
-
 
     /**
      * Get the Saxon configuration
@@ -631,7 +582,7 @@ public class ExpressionPresenter {
             char c = in.charAt(i);
             switch (c) {
                 case '\'':
-                    out.append("\\\'");
+                    out.append("\\'");
                     break;
                 case '"':
                     out.append("\\\"");
@@ -657,13 +608,13 @@ public class ExpressionPresenter {
                 default:
                     if (c < 32 || (c > 127 && c < 160) || c > UTF16CharacterSet.SURROGATE1_MIN) {
                         out.append("\\u");
-                        String hex = Integer.toHexString(c).toUpperCase();
+                        StringBuilder hex = new StringBuilder(Integer.toHexString(c).toUpperCase());
                         while (hex.length() < 4) {
-                            hex = "0" + hex;
+                            hex.insert(0, "0");
                         }
-                        out.append(hex);
+                        out.append(hex.toString());
                     } else {
-                        out.append(c);
+                        out.cat(c);
                     }
             }
         }

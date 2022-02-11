@@ -6,7 +6,7 @@ import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XQueryEvaluator;
 import net.sf.saxon.s9api.XQueryExecutable;
 import net.sf.saxon.s9api.XdmSequenceIterator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.*;
 
 import javax.xml.transform.Source;

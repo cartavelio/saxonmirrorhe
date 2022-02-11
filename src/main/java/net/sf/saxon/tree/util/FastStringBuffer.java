@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -25,7 +25,7 @@ import java.util.Arrays;
  * StringBuilder in JDK 1.5, but using our own class gives more control.)
  */
 
-public final class FastStringBuffer implements AppendableCharSequence {
+public final class FastStringBuffer implements AppendableCharSequence, CharSequenceConsumer {
 
     public static final int C16 = 16;
     public static final int C64 = 64;
@@ -55,7 +55,22 @@ public final class FastStringBuffer implements AppendableCharSequence {
 
     public FastStringBuffer(CharSequence cs) {
         array = new char[cs.length()];
-        append(cs);
+        this.cat(cs);
+    }
+
+    /**
+     * Append the contents of a String to the buffer
+     *
+     * @param s the String to be appended
+     * @return the FastStringBuffer with the new contents
+     */
+
+    public FastStringBuffer cat(String s) {
+        int len = s.length();
+        ensureCapacity(len);
+        s.getChars(0, len, array, used);
+        used += len;
+        return this;
     }
 
     /**
@@ -65,10 +80,7 @@ public final class FastStringBuffer implements AppendableCharSequence {
      */
 
     public void append(String s) {
-        int len = s.length();
-        ensureCapacity(len);
-        s.getChars(0, len, array, used);
-        used += len;
+        cat(s);
     }
 
     /**
@@ -114,9 +126,11 @@ public final class FastStringBuffer implements AppendableCharSequence {
      * Append the contents of a general CharSequence to the buffer
      *
      * @param s the CharSequence to be appended
+     * @return the result of the concatenation
      */
 
-    public void append(CharSequence s) {
+    @Override
+    public FastStringBuffer cat(CharSequence s) {
         // Although we provide variants of this method for different subtypes, Java decides which to use based
         // on the static type of the operand. We want to use the right method based on the dynamic type, to avoid
         // creating objects and copying strings unnecessarily. So we do a dynamic dispatch.
@@ -130,20 +144,32 @@ public final class FastStringBuffer implements AppendableCharSequence {
             ((FastStringBuffer) s).getChars(0, len, array, used);
         } else if (s instanceof CompressedWhitespace) {
             ((CompressedWhitespace) s).uncompress(this);
-            return;
+            return this;
         } else if (s instanceof BMPString) {
-            append(((BMPString) s).getCharSequence());
-            return;
+            this.cat(((BMPString) s).getCharSequence());
+            return this;
         } else if (s instanceof GeneralUnicodeString) {
             for (int i = 0; i < ((GeneralUnicodeString)s).uLength(); i++) {
                 appendWideChar(((GeneralUnicodeString)s).uCharAt(i));
             }
-            return;
+            return this;
         } else {
             s.toString().getChars(0, len, array, used);
         }
         used += len;
+        return this;
     }
+
+    /**
+     * Append the contents of a general CharSequence to the buffer
+     *
+     * @param s the CharSequence to be appended
+     */
+
+    public void append(CharSequence s) {
+        cat(s);
+    }
+
 
     /**
      * Append the contents of a character array to the buffer
@@ -176,11 +202,14 @@ public final class FastStringBuffer implements AppendableCharSequence {
      * Append a character to the buffer
      *
      * @param ch the character to be added
+     * @return this FastStringBuffer
      */
 
-    public void append(char ch) {
+    @Override
+    public FastStringBuffer cat(char ch) {
         ensureCapacity(1);
         array[used++] = ch;
+        return this;
     }
 
     /**
@@ -191,10 +220,10 @@ public final class FastStringBuffer implements AppendableCharSequence {
 
     public void appendWideChar(int ch) {
         if (ch > 0xffff) {
-            append(UTF16CharacterSet.highSurrogate(ch));
-            append(UTF16CharacterSet.lowSurrogate(ch));
+            cat(UTF16CharacterSet.highSurrogate(ch));
+            cat(UTF16CharacterSet.lowSurrogate(ch));
         } else {
-            append((char) ch);
+            cat((char) ch);
         }
     }
 
@@ -206,7 +235,7 @@ public final class FastStringBuffer implements AppendableCharSequence {
 
     public void append(UnicodeString str) {
         if (str instanceof BMPString) {
-            append(((BMPString) str).getCharSequence());
+            this.cat(((BMPString) str).getCharSequence());
         } else {
             for (int i = 0; i < str.uLength(); i++) {
                 appendWideChar(str.uCharAt(i));
@@ -235,6 +264,7 @@ public final class FastStringBuffer implements AppendableCharSequence {
      *
      * @return the number of <code>char</code>s in this sequence
      */
+    @Override
     public int length() {
         return used;
     }
@@ -262,6 +292,7 @@ public final class FastStringBuffer implements AppendableCharSequence {
      * @throws IndexOutOfBoundsException if the <tt>index</tt> argument is negative or not less than
      *                                   <tt>length()</tt>
      */
+    @Override
     public char charAt(int index) {
         if (index >= used) {
             throw new IndexOutOfBoundsException("" + index);
@@ -284,6 +315,7 @@ public final class FastStringBuffer implements AppendableCharSequence {
      *                                   if <tt>end</tt> is greater than <tt>length()</tt>,
      *                                   or if <tt>start</tt> is greater than <tt>end</tt>
      */
+    @Override
     public CharSequence subSequence(int start, int end) {
         return new CharSlice(array, start, end - start);
     }
@@ -526,6 +558,7 @@ public final class FastStringBuffer implements AppendableCharSequence {
      * @param length the new length
      */
 
+    @Override
     public void setLength(int length) {
         if (length < 0 || length > used) {
             return;
@@ -588,11 +621,11 @@ public final class FastStringBuffer implements AppendableCharSequence {
         for (int i = 0; i < in.length(); i++) {
             char c = in.charAt(i);
             if (c > 32 && c < 127) {
-                buff.append(c);
+                buff.cat(c);
             } else {
                 buff.append("\\u");
                 for (int d = 12; d >= 0; d -= 4) {
-                    buff.append("0123456789ABCDEF".charAt((c >> d) & 0xf));
+                    buff.cat("0123456789ABCDEF".charAt((c >> d) & 0xf));
                 }
             }
         }

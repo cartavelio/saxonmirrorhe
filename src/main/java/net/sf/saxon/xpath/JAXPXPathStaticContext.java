@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -119,6 +119,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
     }
 
     /*@NotNull*/
+    @Override
     public NamespaceResolver getNamespaceResolver() {
         return this;
     }
@@ -135,6 +136,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
      *         Return "" if the prefix maps to the null namespace.
      */
 
+    @Override
     public String getURIForPrefix(/*@NotNull*/ String prefix, boolean useDefault) {
         if (prefix.isEmpty()) {
             if (useDefault) {
@@ -157,6 +159,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
      * @throws UnsupportedOperationException if the NamespaceContext object is not a NamespaceResolver.
      */
 
+    @Override
     public Iterator<String> iteratePrefixes() {
         if (namespaceContext instanceof NamespaceResolver) {
             return ((NamespaceResolver) namespaceContext).iteratePrefixes();
@@ -175,6 +178,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
      */
 
     /*@NotNull*/
+    @Override
     public final Expression bindVariable(StructuredQName qName) throws XPathException {
         // bindVariable is called at compile time, but the JAXP variable resolver
         // is designed to be called at run time. So we need to create a variable now,
@@ -200,7 +204,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
      */
 
     public void importSchema(Source source) throws SchemaException {
-        getConfiguration().addSchemaSource(source, getConfiguration().getErrorListener());
+        getConfiguration().addSchemaSource(source, getConfiguration().makeErrorReporter());
         setSchemaAware(true);
     }
 
@@ -216,6 +220,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
      *         schema-aware configuration
      */
 
+    @Override
     public boolean isImportedSchema(String namespace) {
         return getConfiguration().isSchemaAvailable(namespace);
     }
@@ -226,6 +231,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
      * @return a Set, the set of URIs representing the names of imported schemas
      */
 
+    @Override
     public Set<String> getImportedSchemaNamespaces() {
         return getConfiguration().getImportedNamespaces();
     }
@@ -244,6 +250,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
          * @return Namespace URI bound to prefix in the current scope
          */
         /*@Nullable*/
+        @Override
         public String getNamespaceURI(/*@Nullable*/ String prefix) {
             if (prefix == null) {
                 throw new IllegalArgumentException("prefix");
@@ -268,6 +275,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
          * @throws UnsupportedOperationException (always)
          */
         /*@NotNull*/
+        @Override
         public String getPrefix(String namespaceURI) {
             throw new UnsupportedOperationException();
         }
@@ -278,6 +286,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
          * @throws UnsupportedOperationException (always)
          */
         /*@NotNull*/
+        @Override
         public Iterator getPrefixes(String namespaceURI) {
             throw new UnsupportedOperationException();
         }
@@ -287,6 +296,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
          * the default namespace (prefix="") and the XML namespace where appropriate
          */
 
+        @Override
         public Iterator<String> iteratePrefixes() {
             String[] prefixes = {"", "xml", "xs", "xsi", "saxon"};
             return Arrays.asList(prefixes).iterator();
@@ -306,6 +316,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
          */
 
         /*@Nullable*/
+        @Override
         public String getURIForPrefix(String prefix, boolean useDefault) {
             return getNamespaceURI(prefix);
         }

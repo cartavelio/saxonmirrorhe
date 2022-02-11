@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.map.MapItem;
@@ -36,7 +36,7 @@ import java.util.*;
 public class OptionsParameter {
 
     private Map<String, SequenceType> allowedOptions = new HashMap<>(8);
-    private Map<String, Sequence<?>> defaultValues = new HashMap<>(8);
+    private Map<String, Sequence> defaultValues = new HashMap<>(8);
     private Set<String> requiredOptions = new HashSet<>(4);
     private Map<String, Set<String>> allowedValues = new HashMap<>(8);
     private String errorCodeForDisallowedValue;
@@ -75,7 +75,7 @@ public class OptionsParameter {
      * @param defaultValue the default value if the option is not specified; or null
      *                                 if no default is defined
      */
-    public void addAllowedOption(String name, SequenceType type, Sequence<?> defaultValue) {
+    public void addAllowedOption(String name, SequenceType type, Sequence defaultValue) {
         allowedOptions.put(name, type);
         if (defaultValue != null) {
             defaultValues.put(name, defaultValue);
@@ -105,8 +105,8 @@ public class OptionsParameter {
      * @throws XPathException if any supplied options are invalid
      */
 
-    public Map<String, Sequence<?>> processSuppliedOptions(MapItem supplied, XPathContext context) throws XPathException {
-        Map<String, Sequence<?>> result = new HashMap<>();
+    public Map<String, Sequence> processSuppliedOptions(MapItem supplied, XPathContext context) throws XPathException {
+        Map<String, Sequence> result = new HashMap<>();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
 
         for (String req : requiredOptions) {
@@ -124,7 +124,7 @@ public class OptionsParameter {
                 actualKey = new StringValue(nominalKey);
             }
             SequenceType required = allowed.getValue();
-            Sequence<?> actual = supplied.get(actualKey);
+            Sequence actual = supplied.get(actualKey);
             if (actual != null) {
                 if (!required.matches(actual, th)) {
                     boolean ok = false;
@@ -141,7 +141,7 @@ public class OptionsParameter {
                         RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.OPTION, nominalKey, 0);
                         role.setErrorCode("XPTY0004");
                         actual = th.applyFunctionConversionRules(
-                                actual, required, role, ExplicitLocation.UNKNOWN_LOCATION);
+                                actual, required, role, Loc.NONE);
                     }
                 }
                 actual = actual.materialize();
@@ -158,7 +158,7 @@ public class OptionsParameter {
                 }
                 result.put(nominalKey, actual);
             } else {
-                Sequence<?> def = defaultValues.get(nominalKey);
+                Sequence def = defaultValues.get(nominalKey);
                 if (def != null) {
                     result.put(nominalKey, def);
                 }
@@ -174,9 +174,9 @@ public class OptionsParameter {
      * @return a map containing the default values
      */
 
-    public Map<String, Sequence<?>> getDefaultOptions()  {
-        Map<String, Sequence<?>> result = new HashMap<>();
-        for (Map.Entry<String, Sequence<?>> entry : defaultValues.entrySet()) {
+    public Map<String, Sequence> getDefaultOptions()  {
+        Map<String, Sequence> result = new HashMap<>();
+        for (Map.Entry<String, Sequence> entry : defaultValues.entrySet()) {
             result.put(entry.getKey(), entry.getValue());
         }
         return result;

@@ -59,31 +59,8 @@ namespace Saxon.Api
             this.processor = processor;
         }
 
-        /// <summary>
-        /// Create a collation based on a given <c>CompareInfo</c> and <c>CompareOptions</c>    
-        /// </summary>
-        /// <remarks>
-        /// In the current and recent releases of Saxon, collations are always defined at the level of a <c>Configuration</c>.
-        /// Declaring a collation here may therefore have wider effects than intended. It is recommended not to use
-        /// this method, but to use <see cref="Processor.DeclareCollation(Uri, CompareInfo, CompareOptions)"/> instead.
-        /// </remarks>
-        /// <param name="uri">The collation URI to be used within the XPath expression to refer to this collation</param>
-        /// <param name="compareInfo">The <c>CompareInfo</c>, which determines the language-specific
-        /// collation rules to be used</param>
-        /// <param name="options">Options to be used in performing comparisons, for example
-        /// whether they are to be case-blind and/or accent-blind</param>
-        /// <param name="isDefault">If true, this collation will be used as the default collation</param>
-        [Obsolete("Since 9.6. All collations are now registered at the level of the Configuration. If this method" +
-            "is called, the effect is (a) the supplied collation" +
-            "is registered with the configuration, and (b) if isDefault=true, the collation" +
-            "becomes the default collation for this static context.")]
-        public void DeclareCollation(Uri uri, CompareInfo compareInfo, CompareOptions options, Boolean isDefault)
-        {
-			JDotNetComparator comparator = new JDotNetComparator(uri.ToString(), compareInfo, options);
-            ((net.sf.saxon.sxpath.AbstractStaticContext)compiler.getUnderlyingStaticContext()).declareCollation(uri.ToString(), comparator, isDefault);
-        }
 
-        
+
         /// <summary>
         /// Declare the default collation
         /// </summary>
@@ -107,7 +84,40 @@ namespace Saxon.Api
         {
             compiler.declareNamespace(prefix, uri);
         }
-        
+
+        /// <summary>
+        /// Set the error reporter to be used for reporting static warnings during compilation.
+		/// By default, the <see cref="ErrorReporter"/> associated with the Saxon Configuration is used.
+        /// Note that fatal static errors are always reported in the form
+		/// of an exception thrown by the <see cref="Compile(String)"/> method, so this method only controls
+        /// the handling of warnings
+        /// </summary>
+        /// <remarks>The property IErrorReporter to which warnings will be notified</remarks>
+        public IErrorReporter WarningHandler {
+            set {
+                compiler.setWarningHandler(new ErrorReporterWrapper(value));
+            }
+
+        }
+
+
+        /// <summary>
+        /// Make available a set of functions defined in an XSLT 3.0 package. All functions
+		/// defined with <c>visibility="public"</c>
+		/// (or exposed as public using <c>xsl:expose</c>
+        /// become part of the static context for an XPath expression created using this
+		/// <c>XPathCompiler</c>. The functions are added to the search path after all existing
+        /// functions, including functions added using a previous call on this method.
+        /// <p>Note that if the library package includes functions that reference stylesheet parameters
+        /// (or global variables that depend on the context item), then there is no way of supplying
+        /// values for such parameters; calling such functions will cause a run-time error.</p>
+        /// </summary>
+        /// <param name="libraryPackage">the XSLT compiled library package whose functions are to be made available</param>
+        public void AddXsltFunctionLibrary(XsltPackage libraryPackage) {
+            compiler.addXsltFunctionLibrary(libraryPackage.GetUnderlyingXsltPackage());
+
+        }
+
         /// <summary>
         /// Get the namespace URI part of a QName provided in lexical form (<c>prefix:localname</c>)
         /// </summary>
@@ -119,18 +129,18 @@ namespace Saxon.Api
         /// lexical QName. The "null namespace" is represented by a zero length string. The method returns null
         /// if there is no known binding for the prefix used in the lexical QName.</returns>
 
-        public string GetNamespaceURI(string lexicalName, Boolean useDefault) 
-        {            
-			String[] parts = net.sf.saxon.om.NameChecker.checkQNameParts(net.sf.saxon.value.Whitespace.trimWhitespace(lexicalName));
-            
-            return compiler.getUnderlyingStaticContext().getNamespaceResolver().getURIForPrefix(parts[0], useDefault);        
+        public string GetNamespaceURI(string lexicalName, Boolean useDefault)
+        {
+            String[] parts = net.sf.saxon.om.NameChecker.checkQNameParts(net.sf.saxon.value.Whitespace.trimWhitespace(lexicalName));
+
+            return compiler.getUnderlyingStaticContext().getNamespaceResolver().getURIForPrefix(parts[0], useDefault);
         }
 
         /// <summary>
-		/// Get the <c>Processor</c> from which this <c>XPathCompiler</c> was constructed
+        /// Get the <c>Processor</c> from which this <c>XPathCompiler</c> was constructed
         /// </summary>
-        
-		public Processor Processor
+
+        public Processor Processor
         {
             get { return processor; }
         }
@@ -276,7 +286,7 @@ namespace Saxon.Api
                 {
                     return compiler.getLanguageVersion();
                 }
-                catch (Exception e) {
+                catch (Exception) {
                     throw new StaticError(new net.sf.saxon.trans.XPathException("Unknown XPath version " + compiler.getLanguageVersion()));
                 }
             }
@@ -285,7 +295,7 @@ namespace Saxon.Api
                 {
                     compiler.setLanguageVersion(value);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     throw new StaticError(new net.sf.saxon.trans.XPathException("Unknown XPath version " + value));
                 }
@@ -869,7 +879,7 @@ namespace Saxon.Api
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.

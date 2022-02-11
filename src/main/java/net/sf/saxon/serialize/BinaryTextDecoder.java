@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,7 +9,7 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.CharSlice;
@@ -29,6 +29,8 @@ import java.util.Properties;
  */
 
 public class BinaryTextDecoder extends ProxyReceiver {
+
+    // TODO: is this tested or documented?
 
     String outputEncoding = "utf8";
 
@@ -56,6 +58,7 @@ public class BinaryTextDecoder extends ProxyReceiver {
      * of the output method is assumed.
      */
 
+    @Override
     public void processingInstruction(String name, /*@NotNull*/ CharSequence value, Location locationId, int properties)
             throws XPathException {
         String encoding;

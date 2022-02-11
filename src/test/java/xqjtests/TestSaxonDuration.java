@@ -1,21 +1,24 @@
 package xqjtests;
 
 import com.saxonica.xqj.SaxonXQDataSource;
-import junit.framework.TestCase;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.DurationValue;
 import net.sf.saxon.value.SaxonDuration;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.datatype.Duration;
 import javax.xml.xquery.*;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Some tests for the SaxonDuration class, used only to support XQJ
  */
-public class TestSaxonDuration extends TestCase {
+public class TestSaxonDuration {
 
     private javax.xml.datatype.Duration getDayTimeDuration() {
         try {
@@ -53,24 +56,27 @@ public class TestSaxonDuration extends TestCase {
         return null;
     }
 
+    @Test
     public void testComponents() {
         Duration dayTimeDuration = getDayTimeDuration();
-        assertEquals(dayTimeDuration.getSign(), 1);
-        assertEquals(dayTimeDuration.getDays(), 1);
-        assertEquals(dayTimeDuration.getHours(), 2);
-        assertEquals(dayTimeDuration.getMinutes(), 3);
-        assertEquals(dayTimeDuration.getSeconds(), 4);
+        assertEquals(1, dayTimeDuration.getSign());
+        assertEquals(1, dayTimeDuration.getDays());
+        assertEquals(2, dayTimeDuration.getHours());
+        assertEquals(3, dayTimeDuration.getMinutes());
+        assertEquals(4, dayTimeDuration.getSeconds());
         Duration yearMonthDuration = getYearMonthDuration();
-        assertEquals(yearMonthDuration.getSign(), 1);
-        assertEquals(yearMonthDuration.getYears(), 8);
-        assertEquals(yearMonthDuration.getMonths(), 9);
+        assertEquals(1, yearMonthDuration.getSign());
+        assertEquals(8, yearMonthDuration.getYears());
+        assertEquals(9, yearMonthDuration.getMonths());
     }
 
+    @Test
     public void testEquals() {
         assertEquals(getDayTimeDuration(), getDayTimeDuration());
         assertEquals(getYearMonthDuration(), getYearMonthDuration());
     }
 
+    @Test
     public void testAddition() {
         try {
             Duration dayTimeDuration = getDayTimeDuration();
@@ -85,6 +91,7 @@ public class TestSaxonDuration extends TestCase {
         }
     }
 
+    @Test
     public void testAdditionToCalendar() {
         Duration yearMonthDuration = getYearMonthDuration();
         GregorianCalendar calendar = new GregorianCalendar(2001, 1, 1);
@@ -92,6 +99,7 @@ public class TestSaxonDuration extends TestCase {
         assertEquals(new GregorianCalendar(2009, 10, 1), calendar);
     }
 
+    @Test
     public void testAdditionToDate() {
         Duration yearMonthDuration = getYearMonthDuration();
         Date date = new GregorianCalendar(2001, 1, 1).getTime();

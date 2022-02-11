@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -8,7 +8,7 @@
 package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.om.*;
@@ -17,10 +17,7 @@ import net.sf.saxon.tree.linked.SystemIdMap;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
-import net.sf.saxon.z.IntArraySet;
-import net.sf.saxon.z.IntHashMap;
-import net.sf.saxon.z.IntHashSet;
-import net.sf.saxon.z.IntSet;
+import net.sf.saxon.z.*;
 
 import java.util.*;
 
@@ -113,6 +110,10 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     // boolean switch to disable the typed value caching
     private boolean allowTypedValueCache = true;
 
+    // index from local names to fingerprints, built only if a search by local name is done
+    private Map<String, IntSet> localNameIndex = null;
+
+
     public static final int TYPECODE_IDREF = 1 << 29;
 
     // the owner array gives fast access from a node to its parent; it is constructed
@@ -141,19 +142,9 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     /*@Nullable*/
     protected SimpleType[] attType;
 
-    // The following arrays have one entry for each namespace declaration
+    // The following arrays have one entry for each distinct namespace map
     protected int numberOfNamespaces = 0;
-
-    // namespaceParent is the index of the element node owning the namespace declaration
-    protected int[] namespaceParent;
-
-    // namespaceCode is the namespace binding, holding the prefix and URI
-    protected NamespaceBinding[] namespaceBinding;
-
-    // an array holding the offsets of all the level-0 (root) nodes, so that the root of a given
-    // node can be found efficiently
-    //private int[] rootIndex = new int[5];
-    //protected int rootIndexUsed = 0;
+    protected NamespaceMap[] namespaceMaps;
 
     /*@Nullable*/
     private int[] lineNumbers = null;
@@ -167,22 +158,16 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     protected PrefixPool prefixPool = new PrefixPool();
 
+    //private TinyDocumentImpl root;
     private HashMap<String, NodeInfo> idTable;
     protected HashMap<String, String[]> entityTable;
 
     private NodeInfo copiedFrom;
 
-    protected List<GraftedElement> externalNodes;
-
     protected IntHashMap<String> knownBaseUris;
 
-    /**
-     * Temporary flag introduced in Saxon 9.8.0.5 to enable or disable fast-path code for copying
-     * element nodes from one TinyTree to another. This code is currently disabled by default until
-     * it has been more thoroughly tested.
-     */
-    public final static boolean useBulkCopy = false;  // because of bug #4433
-    public static boolean useGraft = false; // KILROY
+    // uniformBaseUri is set if all nodes in the tree have the same Base URI; otherwise it is null.
+    private String uniformBaseUri = null;
 
     /**
      * Create a tree with a specified initial size
@@ -191,10 +176,9 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @param statistics the size parameters for the tree
      */
 
-    //private static int counter = 0;
     public TinyTree(/*@NotNull*/ Configuration config, Statistics statistics) {
         super(config);
-        //if (counter++ % 1000 == 0) System.err.println("TinyTree instances: " + counter);
+        //Instrumentation.count("TinyTree instances");
 
         int nodes = (int) statistics.getAverageNodes() + 1;
         int attributes = (int) statistics.getAverageAttributes() + 1;
@@ -214,10 +198,8 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         attValue = new String[attributes];
 
         numberOfNamespaces = 0;
-        namespaceParent = new int[namespaces];
-        namespaceBinding = new NamespaceBinding[namespaces];
+        namespaceMaps = new NamespaceMap[namespaces];
 
-        //charBuffer = new LargeStringBuffer(characters, 64000);
         charBuffer = characters > 65000 ? new LargeStringBuffer() : new FastStringBuffer(characters);
 
         setConfiguration(config);
@@ -229,11 +211,12 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @param config the Saxon configuration
      */
 
+    @Override
     public void setConfiguration(/*@NotNull*/ Configuration config) {
         super.setConfiguration(config);
         allowTypedValueCache = config.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION) &&
                 config.getBooleanProperty(Feature.USE_TYPED_VALUE_CACHE);
-        addNamespace(0, NamespaceBinding.XML);
+        //addNamespace(0, NamespaceBinding.XML);
     }
 
     private void ensureNodeCapacity(short kind, int needed) {
@@ -285,13 +268,12 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     }
 
     private void ensureNamespaceCapacity(int needed) {
-        if (namespaceParent.length < numberOfNamespaces + needed) {
+        if (namespaceMaps.length < numberOfNamespaces + needed) {
             int k = Math.max(numberOfNamespaces * 2, numberOfNamespaces + needed);
             if (k == 0) {
                 k = 10;
             }
-            namespaceParent = Arrays.copyOf(namespaceParent, k);
-            namespaceBinding = Arrays.copyOf(namespaceBinding, k);
+            namespaceMaps = Arrays.copyOf(namespaceMaps, k);
         }
     }
 
@@ -390,10 +372,9 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     void appendChars(CharSequence chars) {
         if (charBuffer instanceof FastStringBuffer && charBuffer.length() > 65000) {
             LargeStringBuffer lsb = new LargeStringBuffer();
-            lsb.append(charBuffer);
-            charBuffer = lsb;
+            charBuffer = lsb.cat(charBuffer);
         }
-        charBuffer.append(chars);
+        charBuffer.cat(chars);
     }
 
     /**
@@ -464,9 +445,8 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
             }
         }
 
-        if (numberOfNamespaces * 3 < namespaceParent.length) {
-            namespaceParent = Arrays.copyOf(namespaceParent, numberOfNamespaces);
-            namespaceBinding = Arrays.copyOf(namespaceBinding, numberOfNamespaces);
+        if (numberOfNamespaces * 3 < namespaceMaps.length) {
+            namespaceMaps = Arrays.copyOf(namespaceMaps, numberOfNamespaces);
         }
 
         prefixPool.condense();
@@ -668,6 +648,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @return the node kind
      */
 
+    @Override
     public int getNodeKind(int nodeNr) {
         int kind = nodeKind[nodeNr];
         return kind == Type.WHITESPACE_TEXT ? Type.TEXT : kind;
@@ -693,6 +674,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @return the name code
      */
 
+    @Override
     public int getFingerprint(int nodeNr) {
         int nc = nameCode[nodeNr];
         return nc == -1 ? -1 : nc & NamePool.FP_MASK;
@@ -770,7 +752,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         if (root instanceof TinyDocumentImpl) {
             boolean isID = false;
             try {
-                if ((properties & ReceiverOptions.IS_ID) != 0) {
+                if (ReceiverOption.contains(properties, ReceiverOption.IS_ID)) {
                     isID = true;
                 } else if ((nameCode & NamePool.FP_MASK) == StandardNames.XML_ID) {
                     isID = true;
@@ -801,7 +783,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
             }
             boolean isIDREF = false;
             try {
-                if ((properties & ReceiverOptions.IS_IDREF) != 0) {
+                if (ReceiverOption.contains(properties, ReceiverOption.IS_IDREF)) {
                     isIDREF = true;
                 } else if (type == BuiltInAtomicType.IDREF || type == BuiltInListType.IDREFS) {
                     isIDREF = true;
@@ -909,24 +891,24 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     }
 
     /**
-     * Add a namespace node to the current element
+     * Add a set of namespace bindings to the current element
      *
      * @param parent  the node number of the element
-     * @param binding namespace identifying the prefix and uri
+     * @param nsMap namespace map identifying the prefix and uri
      */
-    void addNamespace(int parent, /*@NotNull*/ NamespaceBinding binding) {
-
+    void addNamespaces(int parent, /*@NotNull*/ NamespaceMap nsMap) {
+        usesNamespaces = true;
+        // reuse existing entry if possible
+        for (int i=0; i<numberOfNamespaces; i++) {
+            if (namespaceMaps[i].equals(nsMap)) {
+                beta[parent] = i;
+                return;
+            }
+        }
         ensureNamespaceCapacity(1);
-        namespaceParent[numberOfNamespaces] = parent;
-        namespaceBinding[numberOfNamespaces] = binding;
-
-        if (beta[parent] == -1) {
-            beta[parent] = numberOfNamespaces;
-        }
+        namespaceMaps[numberOfNamespaces] = nsMap;
+        beta[parent] = numberOfNamespaces;
         numberOfNamespaces++;
-        if (!binding.isXmlNamespace()) {
-            usesNamespaces = true;
-        }
     }
 
     /**
@@ -936,6 +918,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @return the node at the given position
      */
 
+    @Override
     public final TinyNodeImpl getNode(int nr) {
         switch (nodeKind[nr]) {
             case Type.DOCUMENT:
@@ -944,8 +927,6 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                 return new TinyElementImpl(this, nr);
             case Type.TEXTUAL_ELEMENT:
                 return new TinyTextualElement(this, nr);
-            case Type.EXTERNAL_NODE_REFERENCE:
-                return externalNodes.get(alpha[nr]);
             case Type.TEXT:
                 return new TinyTextImpl(this, nr);
             case Type.WHITESPACE_TEXT:
@@ -1003,7 +984,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                         if (sb == null) {
                             sb = new FastStringBuffer(FastStringBuffer.C256);
                         }
-                        sb.append(TinyTextImpl.getStringValue(this, next));
+                        sb.cat(TinyTextImpl.getStringValue(this, next));
                     } else if (nodeKind[next] == Type.WHITESPACE_TEXT) {
                         if (sb == null) {
                             sb = new FastStringBuffer(FastStringBuffer.C256);
@@ -1174,7 +1155,13 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         systemIdMap.setSystemId(seq, uri);
     }
 
+    void setUniformBaseUri(String base) {
+        this.uniformBaseUri = base;
+    }
 
+    String getUniformBaseUri() {
+        return this.uniformBaseUri;
+    }
     /**
      * Get the system id of an element in the document
      *
@@ -1191,6 +1178,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     }
 
 
+    @Override
     public NodeInfo getRootNode() {
         if (getNodeKind(0) == Type.DOCUMENT) {
             if (root != null) {
@@ -1323,6 +1311,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo selectID(String id, boolean getParent) {
         if (idTable == null) {
             return null;            // no ID values found
@@ -1362,6 +1351,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * information is not available then an empty iterator is returned
      */
 
+    @Override
     public Iterator<String> getUnparsedEntityNames() {
         if (entityTable == null) {
             List<String> emptyList = Collections.emptyList();
@@ -1381,6 +1371,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     /*@Nullable*/
+    @Override
     public String[] getUnparsedEntity(String name) {
         if (entityTable == null) {
             return null;
@@ -1431,7 +1422,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         }
         System.err.println("      ns  parent  prefix     uri");
         for (int i = 0; i < numberOfNamespaces; i++) {
-            System.err.println(n8(i) + n8(namespaceParent[i]) + namespaceBinding[i].getPrefix() + "=" + namespaceBinding[i].getURI());
+            System.err.println(n8(i) + "  " + namespaceMaps[i]);
         }
     }
 
@@ -1479,6 +1470,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      *
      * @return true if the document contains elements whose type is other than UNTYPED
      */
+    @Override
     public boolean isTyped() {
         return typeArray != null;
     }
@@ -1519,6 +1511,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @return an array of bytes, byte N is the node kind of node number N
      */
 
+    @Override
     public byte[] getNodeKindArray() {
         return nodeKind;
     }
@@ -1539,6 +1532,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @return an array of integers, integer N is the name code of node number N
      */
 
+    @Override
     public int[] getNameCodeArray() {
         return nameCode;
     }
@@ -1656,7 +1650,17 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     public NamespaceBinding[] getNamespaceBindings() {
-        return namespaceBinding;
+        throw new UnsupportedOperationException();
+    }  // TODO
+
+    /**
+     * Get the array used to hold the in-scope namespaces
+     *
+     * @return an array of namespace bindings
+     */
+
+    public NamespaceMap[] getNamespaceMaps() {
+        return namespaceMaps;
     }
 
     /**
@@ -1666,8 +1670,8 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     public int[] getNamespaceParentArray() {
-        return namespaceParent;
-    }
+        throw new UnsupportedOperationException();
+    }   // TODO
 
     /**
      * Ask whether the tree contains any namespace declarations
@@ -1683,13 +1687,14 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     /**
      * Bulk copy an element node from another TinyTree. Type annotations will always be
      * stripped.
-     *
-     * @param source the source tree
-     * @param nodeNr the element node to be deep-copied
+     * @param source        the source tree
+     * @param nodeNr        the element node in the source tree to be deep-copied
+     * @param currentDepth  the current depth in this tree
+     * @param parentNodeNr  the node number in this tree of the parent which the copied node
+     *                      will be attached to
      */
 
-
-    public void bulkCopy(TinyTree source, int nodeNr, int[] prevAtDepth, int currentDepth) {
+    public void bulkCopy(TinyTree source, int nodeNr, int currentDepth, int parentNodeNr) {
         //System.err.println(" **** doing bulk copy **** ");
         int end = source.next[nodeNr];
         while (end < nodeNr && end >= 0) {
@@ -1706,6 +1711,12 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         ensureNodeCapacity(Type.ELEMENT, length);
         System.arraycopy(source.nodeKind, nodeNr, nodeKind, numberOfNodes, length);
         int depthDiff = currentDepth - source.depth[nodeNr];
+
+        NamespaceMap subtreeRoot = source.namespaceMaps[source.beta[nodeNr]];
+        NamespaceMap inherited = namespaceMaps[beta[parentNodeNr]];
+        boolean sameNamespaces = subtreeRoot == inherited || inherited.isEmpty();
+            // TODO: or more generally, if inherited is a subset of subtreeRoot
+
         for (int i = 0; i < length; i++) {
             int from = nodeNr + i;
             int to = numberOfNodes + i;
@@ -1750,63 +1761,31 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                     } else {
                         alpha[to] = -1;
                     }
-                    // Copy the namespaces. For the top-level element node, this needs special
-                    // attention: we need to ensure that all the in-scope namespaces of the
-                    // source node are declared in the new tree. We may also need to undeclare
-                    // a default namespace that is present in the target tree, but unwanted in the
-                    // new element node.
-                    if (i == 0) {
-                        boolean foundDefaultNamespace = false;
-                        Map<String, String> targetNamespaces = inScopeNamespaces(this, to, prevAtDepth, currentDepth);
-                        List<NamespaceBinding> newNamespaces = new ArrayList<>();
-                        NamespaceBinding[] sourceBindings = source.namespaceBinding;
-                        int anc = from;
-                        while (anc != -1 && source.nodeKind[anc] == Type.ELEMENT) {
-                            int sourceNS = source.beta[anc];
-                            while (sourceNS > 0 && sourceNS < source.numberOfNamespaces && source.namespaceParent[sourceNS] == anc) {
-                                NamespaceBinding nb = sourceBindings[sourceNS];
-                                String prefix = nb.getPrefix();
-                                if (prefix.isEmpty()) {
-                                    foundDefaultNamespace = true;
-                                }
-                                String existing = targetNamespaces.get(prefix);
-                                if (existing == null || !existing.equals(prefix)) {
-                                    newNamespaces.add(nb);
-                                }
-                                sourceNS++;
-                            }
-                            anc = TinyNodeImpl.getParentNodeNr(source, anc);
-                        }
-                        if (!foundDefaultNamespace && targetNamespaces.get("") != null) {
-                            newNamespaces.add(NamespaceBinding.DEFAULT_UNDECLARATION);
-                        }
-
-                        int nTo = numberOfNamespaces;
-                        ensureNamespaceCapacity(newNamespaces.size());
-                        beta[to] = nTo;
-                        for (NamespaceBinding nb : newNamespaces) {
-                            namespaceBinding[nTo++] = nb;
-                        }
-                        Arrays.fill(namespaceParent, numberOfNamespaces, nTo, to);
-                        numberOfNamespaces = nTo;
-
-                    } else {
-                        int firstNS = source.beta[from];
-                        if (firstNS >= 0) {
-                            int lastNS = firstNS;
-                            while (lastNS < source.numberOfNamespaces && source.namespaceParent[lastNS] == from) {
-                                lastNS++;
-                            }
-                            int nrOfNamespaces = lastNS - firstNS;
-                            ensureNamespaceCapacity(nrOfNamespaces);
-                            int nTo = numberOfNamespaces;
-                            beta[to] = nTo;
-                            System.arraycopy(source.namespaceBinding, firstNS, namespaceBinding, nTo, nrOfNamespaces);
-                            Arrays.fill(namespaceParent, nTo, nTo + nrOfNamespaces, to);
-                            numberOfNamespaces += nrOfNamespaces;
+                    // Copy the namespaces. The namespaces present on nodes in the copied
+                    // subtree need to be augmented with namespaces inherited from the destination
+                    // tree
+                    if (sameNamespaces) {
+                        // The namespace map from the source tree can be copied unchanged
+                        if (source.beta[from] == source.beta[nodeNr]) {
+                            beta[to] = beta[parentNodeNr];
                         } else {
-                            beta[to] = -1;
+                            ensureNamespaceCapacity(1);
+                            namespaceMaps[numberOfNamespaces] = source.namespaceMaps[source.beta[nodeNr]];
+                            beta[to] = numberOfNamespaces++;
                         }
+                    } else {
+                        if (i > 0 && source.beta[from] == source.beta[nodeNr]) {
+                            beta[to] = beta[parentNodeNr];
+                        } else {
+                            ensureNamespaceCapacity(1);
+                            NamespaceMap in = source.namespaceMaps[source.beta[from]];
+                            NamespaceMap out = inherited.putAll(in);
+                            namespaceMaps[numberOfNamespaces] = out;
+                            beta[to] = numberOfNamespaces++;
+                        }
+//                        ensureNamespaceCapacity(1);
+//                        namespaceMaps[numberOfNamespaces] = source.namespaceMaps[source.beta[nodeNr]];
+//                        beta[to] = numberOfNamespaces++;
                     }
                     break;
                 }
@@ -1839,12 +1818,12 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                     int start = source.alpha[from];
                     int len = source.beta[from];
                     nameCode[to] = -1;
-                    CharSequence text = source.commentBuffer.subSequence(start, start + len);
+                    CharSequence text = source.commentBuffer.subSequence(start, start+len);
                     if (commentBuffer == null) {
                         commentBuffer = new FastStringBuffer(FastStringBuffer.C256);
                     }
                     alpha[to] = commentBuffer.length();
-                    commentBuffer.append(text);
+                    commentBuffer.cat(text);
                     beta[to] = len;
                     break;
                 }
@@ -1857,7 +1836,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                         commentBuffer = new FastStringBuffer(FastStringBuffer.C256);
                     }
                     alpha[to] = commentBuffer.length();
-                    commentBuffer.append(text);
+                    commentBuffer.cat(text);
                     beta[to] = len;
                     break;
 
@@ -1874,61 +1853,35 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     }
 
     /**
-     * Get the in-scope namespaces for a given node on a supplied tree. This is designed to work on
-     * a tree that is under construction, so normal navigation using the parent axis is not possible.
-     * See bug 4273.
-     *
-     * @param tree   the tree
-     * @param nodeNr the starting element node
-     * @return a map containing the in-scope namespaces
+     * Get (and build if necessary) an index from local names to fingerprints
+     * @return a Map whose keys are local names and whose values are sets of
+     * fingerprints (usually singleton sets!) of names with that local name.
+     * The index is for element names only.
      */
 
-    private static Map<String, String> inScopeNamespaces(TinyTree tree, int nodeNr, int[] prevAtDepth, int currentDepth) {
-        assert tree.nodeKind[nodeNr] == Type.ELEMENT;
-        Map<String, String> result = new HashMap<>();
-        int depth = currentDepth - 1;
-        while (depth >= 0) {
-            int parent = prevAtDepth[depth];
-            if (parent >= 0 && tree.nodeKind[parent] == Type.ELEMENT) {
-                int ns = tree.beta[parent];
-                if (ns >= 0) {
-                    while (ns < tree.numberOfNamespaces && tree.namespaceParent[ns] == parent) {
-                        NamespaceBinding sourceNs = tree.namespaceBinding[ns];
-                        String prefix = sourceNs.getPrefix();
-                        result.computeIfAbsent(prefix, k -> sourceNs.getURI());
-                        ns++;
+    public synchronized Map<String, IntSet> getLocalNameIndex() {
+        if (localNameIndex == null) {
+            localNameIndex = new HashMap<>();
+            IntHashSet indexed = new IntHashSet();
+            for (int i=0; i<numberOfNodes; i++) {
+                if ((nodeKind[i] & 0xf) == Type.ELEMENT) {
+                    int fp = nameCode[i] & NamePool.FP_MASK;
+                    if (!indexed.contains(fp)) {
+                        String local = getNamePool().getLocalName(fp);
+                        indexed.add(fp);
+                        IntSet existing = localNameIndex.get(local);
+                        if (existing == null) {
+                            localNameIndex.put(local, new IntSingletonSet(fp));
+                        } else {
+                            IntSet copy = existing.isMutable() ? existing : existing.mutableCopy();
+                            copy.add(fp);
+                            localNameIndex.put(local, copy);
+                        }
                     }
                 }
             }
-            depth--;
         }
-        return result;
-    }
-    /**
-     * Graft an element node from an external tree
-     */
-
-    public void graft(NodeInfo externalNode, int nodeNr, int depth, boolean copyNamespaces) {
-        assert externalNode.getNodeKind() == Type.ELEMENT;
-        if (externalNodes == null) {
-            externalNodes = new ArrayList<>();
-        }
-        int externalNodeNr = externalNodes.size();
-        int fp = getNamePool().allocateFingerprint(externalNode.getURI(), externalNode.getLocalPart());
-        int prefixCode = prefixPool.obtainPrefixCode(externalNode.getPrefix());
-        int nameCode = (prefixCode << 20) | fp;
-        addNode(Type.EXTERNAL_NODE_REFERENCE, depth, externalNodeNr, -1, nameCode);
-        externalNodes.add(new GraftedElement(this, nodeNr, externalNode, copyNamespaces));
-
-    }
-
-    /**
-     * Ask if the tree contains grafted subtrees
-     * @return true if there are references to subtrees of other trees
-     */
-
-    public boolean containsGraftedSubtrees() {
-        return externalNodes != null;
+        return localNameIndex;
     }
 
 }

@@ -3,28 +3,31 @@ package s9apitest;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.optim.StaticQueryContextEE;
 import jaxptest.ConfigTest;
-import junit.framework.TestCase;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.query.StaticQueryContext;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * Loads xquery module info by parsing the module text
  */
-public class SumanGantaTest extends TestCase
-{
+public class SumanGantaTest {
    private int mIterations = 2000;
 
+    @Test
    public void testModuleLink()
    {
       parseWithModuleLinking(false);
    }
 
+    @Test
    public void testParse()
    {
       justParse(false);
@@ -185,28 +188,4 @@ public class SumanGantaTest extends TestCase
       }
    }
 }
-
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//
-
-
 

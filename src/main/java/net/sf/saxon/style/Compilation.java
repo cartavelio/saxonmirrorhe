@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,10 +11,14 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.trans.CompilerInfo;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.XmlProcessingError;
+import net.sf.saxon.trans.Timer;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.UsePack;
@@ -24,9 +28,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.NestedIntegerValue;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import java.util.*;
 
 /**
@@ -35,7 +37,7 @@ import java.util.*;
 public class Compilation {
 
     // diagnostic switch to control output of timing information
-    public final static boolean TIMING = false;
+    public static boolean TIMING = false;
     private Configuration config;
     private CompilerInfo compilerInfo;
     private PrincipalStylesheetModule principalStylesheetModule;
@@ -43,8 +45,8 @@ public class Compilation {
     private boolean schemaAware;
     private QNameParser qNameParser;
     private Map<StructuredQName, ValueAndPrecedence> staticVariables = new HashMap<>();
-    private Map<DocumentURI, TreeInfo> stylesheetModules = new HashMap<>();
-    private Stack<DocumentURI> importStack = new Stack<>(); // handles both include and import
+    private Map<DocumentKey, TreeInfo> stylesheetModules = new HashMap<>();
+    private Stack<DocumentKey> importStack = new Stack<>(); // handles both include and import
     private PackageData packageData;
     private boolean preScan = true;
     private boolean createsSecondaryResultDocuments = false;
@@ -54,6 +56,7 @@ public class Compilation {
     private List<VersionedPackageName> usingPackages = new ArrayList<>();
     private GlobalParameterSet suppliedParameters;
     private boolean fallbackToNonStreaming = false;
+    public Timer timer = null;
 
     private static class ValueAndPrecedence {
         public ValueAndPrecedence(GroundedValue v, NestedIntegerValue p, boolean isParam) {
@@ -81,11 +84,14 @@ public class Compilation {
         preScan = info.isJustInTimeCompilation();
         suppliedParameters = compilerInfo.getParameters();
 
-        qNameParser = new QNameParser(null);
-        qNameParser.setAcceptEQName(true);
-        qNameParser.setDefaultNamespace("");
-        qNameParser.setErrorOnBadSyntax("XTSE0020");
-        qNameParser.setErrorOnUnresolvedPrefix("XTSE0280");
+        qNameParser = new QNameParser(null)
+                .withAcceptEQName(true)
+                .withErrorOnBadSyntax("XTSE0020")
+                .withErrorOnUnresolvedPrefix("XTSE0280");
+
+        if (TIMING) {
+            timer = new Timer();
+        }
     }
 
     /**
@@ -108,11 +114,7 @@ public class Compilation {
 
         } catch (XPathException err) {
             if (!err.hasBeenReported()) {
-                try {
-                    compilerInfo.getErrorListener().fatalError(err);
-                } catch (TransformerException e2) {
-                    // ignore error
-                }
+                compilerInfo.getErrorReporter().report(new XmlProcessingException(err));
             }
             throw err;
         }
@@ -137,7 +139,7 @@ public class Compilation {
         if (getPackageData() == null) {
             // Create a temporary PackageData for use during use-when processing
             PackageData pd = new PackageData(getConfiguration());
-            pd.setHostLanguage(Configuration.XSLT);
+            pd.setHostLanguage(HostLanguage.XSLT);
             pd.setTargetEdition(compilerInfo.getTargetEdition());
             pd.setSchemaAware(schemaAware);
             packageData = pd;
@@ -256,13 +258,12 @@ public class Compilation {
             }
         } catch (XPathException e) {
             if (!e.hasBeenReported()) {
-                try {
-                    getCompilerInfo().getErrorListener().fatalError(e);
-                } catch (TransformerException e1) {
-                    // ignore secondary error
-                }
+                getCompilerInfo().getErrorReporter().report(new XmlProcessingException(e));
             }
             throw e;
+        }
+        if (Compilation.TIMING) {
+            timer.report("Built stylesheet documents");
         }
         CompilerInfo info = getCompilerInfo();
         StyleNodeFactory factory = getStyleNodeFactory(true);
@@ -273,24 +274,20 @@ public class Compilation {
         pack.setPackageName(xslpackage.getName());
         pack.setSchemaAware(info.isSchemaAware() || isSchemaAware());
         pack.createFunctionLibrary();
-        if (info.getExtensionFunctionLibrary() != null) {
-            pack.getFunctionLibrary().addFunctionLibrary(info.getExtensionFunctionLibrary());
-        }
-        psm.getRuleManager().setRecoveryPolicy(info.getRecoveryPolicy());
         psm.getRuleManager().setCompilerInfo(info);
         setPrincipalStylesheetModule(psm);
         packageData = null;
 
         satisfyPackageDependencies(xslpackage);
 
+        if (TIMING) {
+            timer.report("Preparing package");
+        }
+
         try {
-            psm.preprocess();
+            psm.preprocess(this);
         } catch (XPathException e) {
-            try {
-                info.getErrorListener().fatalError(e);
-            } catch (TransformerException e3) {
-                // ignore an error thrown by the ErrorListener
-            }
+            info.getErrorReporter().report(new XmlProcessingException(e));
             throw e;
         }
 
@@ -302,6 +299,10 @@ public class Compilation {
             }
         }
 
+        if (TIMING) {
+            timer.report("Fixup");
+        }
+
         // Compile groups of like-named attribute sets into a single attributeSet object
         if (getErrorCount() == 0) {
             try {
@@ -311,16 +312,10 @@ public class Compilation {
             }
         }
 
-
-        // Adjust visibility of components based on xsl:expose
-//        if (getErrorCount() == 0) {
-//            try {
-//                psm.adjustExposedVisibility();
-//            } catch (XPathException e) {
-//                reportError(e);
-//            }
-//        }
-
+        if (TIMING) {
+            timer.report("Combine attribute sets");
+        }
+        
         // Compile the stylesheet package
         if (getErrorCount() == 0) {
             try {
@@ -338,10 +333,18 @@ public class Compilation {
             }
         }
 
+        if (TIMING) {
+            timer.report("Completion");
+        }
+
         psm.getStylesheetPackage().setCreatesSecondaryResultDocuments(createsSecondaryResultDocuments);
 
         if (isFallbackToNonStreaming()) {
             psm.getStylesheetPackage().setFallbackToNonStreaming();
+        }
+
+        if (TIMING) {
+            timer.report("Streaming fallback");
         }
         return psm;
     }
@@ -438,15 +441,34 @@ public class Compilation {
      * @param err the exception containing details of the error
      */
 
+    public void reportError(XmlProcessingError err) {
+        ErrorReporter reporter = compilerInfo.getErrorReporter();
+        if (reporter != null) {
+            reporter.report(err);
+        }
+        errorCount++;
+        if (err.getFatalErrorMessage() != null) {
+            throw new XmlProcessingAbort(err.getFatalErrorMessage());
+        }
+    }
+
+    /**
+     * Report a compile time error. This calls the errorListener to output details
+     * of the error, and increments an error count.
+     *
+     * @param err the exception containing details of the error
+     */
+
     public void reportError(XPathException err) {
-        ErrorListener el = compilerInfo.getErrorListener();
+        err.setHostLanguage(HostLanguage.XSLT);
+        ErrorReporter el = compilerInfo.getErrorReporter();
         if (el == null) {
-            el = getConfiguration().getErrorListener();
+            el = getConfiguration().makeErrorReporter();
         }
         if (!err.hasBeenReported()) {
             errorCount++;
             try {
-                el.fatalError(err);
+                el.report(new XmlProcessingException(err));
                 err.setHasBeenReported(true);
             } catch (Exception err2) {
                 // ignore secondary error
@@ -475,17 +497,22 @@ public class Compilation {
      */
 
     public void reportWarning(XPathException err) {
-        ErrorListener el = compilerInfo.getErrorListener();
-        if (el == null) {
-            el = getConfiguration().getErrorListener();
+        err.setHostLanguage(HostLanguage.XSLT);
+        ErrorReporter reporter = compilerInfo.getErrorReporter();
+        if (reporter == null) {
+            reporter = getConfiguration().makeErrorReporter();
         }
-        if (el != null) {
-            try {
-                el.warning(err);
-            } catch (Exception err2) {
-                // ignore secondary error
-            }
+        if (reporter != null) {
+            XmlProcessingException error = new XmlProcessingException(err);
+            error.setWarning(true);
+            reporter.report(error);
         }
+    }
+
+    public void reportWarning(String message, String errorCode, Location location) {
+        XmlProcessingIncident error = new XmlProcessingIncident(message, errorCode, location).asWarning();
+        error.setHostLanguage(HostLanguage.XSLT);
+        compilerInfo.getErrorReporter().report(error);
     }
 
     /**
@@ -558,7 +585,7 @@ public class Compilation {
      * @return the value of the variable if there is one, or null if the variable is undeclared
      */
 
-    public GroundedValue<?> getStaticVariable(StructuredQName name) {
+    public GroundedValue getStaticVariable(StructuredQName name) {
         ValueAndPrecedence vp = staticVariables.get(name);
         return vp == null ? null : vp.value;
     }
@@ -583,7 +610,7 @@ public class Compilation {
      * @return the map from absolute URIs to (documents containing) stylesheet modules
      */
 
-    public Map<DocumentURI, TreeInfo> getStylesheetModules() {
+    public Map<DocumentKey, TreeInfo> getStylesheetModules() {
         return stylesheetModules;
     }
 
@@ -593,7 +620,7 @@ public class Compilation {
      * @return the include/import stack
      */
 
-    public Stack<DocumentURI> getImportStack() {
+    public Stack<DocumentKey> getImportStack() {
         return importStack;
     }
 
@@ -682,7 +709,7 @@ public class Compilation {
      * @param seq  the value of the stylesheet parameter
      */
 
-    public void setParameter(StructuredQName name, GroundedValue<?> seq) {
+    public void setParameter(StructuredQName name, GroundedValue seq) {
         suppliedParameters.put(name, seq);
     }
 

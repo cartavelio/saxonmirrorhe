@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -19,6 +19,7 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,7 +37,7 @@ import java.util.List;
  * current group is available via the getCurrentGroupingKey() method.</p>
  */
 
-public class GroupByIterator implements GroupIterator, LastPositionFinder, LookaheadIterator<Item<?>> {
+public class GroupByIterator implements GroupIterator, LastPositionFinder, LookaheadIterator {
 
     // The implementation of group-by is not pipelined. All the items in the population
     // are read at the start, their grouping keys are calculated, and the groups are formed
@@ -45,7 +46,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
     // as a list of items in population order), a list of grouping keys, and a list of
     // the initial items of the groups.
 
-    private SequenceIterator<?> population;
+    private SequenceIterator population;
     protected Expression keyExpression;
     private StringCollator collator;
     private XPathContext keyContext;
@@ -54,7 +55,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
     // Main data structure holds one entry for each group. The entry is also an ArrayList,
     // which contains the Items that are members of the group, in population order.
     // The groups are arranged in order of first appearance within the population.
-    protected List<List<Item<?>>> groups = new ArrayList<>(40);
+    protected List<List<Item>> groups = new ArrayList<>(40);
 
     // This parallel structure identifies the grouping key for each group. The list
     // corresponds one-to-one with the list of groups.
@@ -76,7 +77,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
      * @throws XPathException if an error occurs
      */
 
-    public GroupByIterator(SequenceIterator<?> population, Expression keyExpression,
+    public GroupByIterator(SequenceIterator population, Expression keyExpression,
                            XPathContext keyContext, StringCollator collator, boolean composite)
             throws XPathException {
         this.population = population;
@@ -103,7 +104,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
      */
 
     private void buildIndexedGroups() throws XPathException {
-        HashMap<AtomicMatchKey, List<Item<?>>> index = new HashMap<>(40);
+        HashMap<AtomicMatchKey, List<Item>> index = new HashMap<>(40);
         XPathContext c2 = keyContext.newMinorContext();
         FocusIterator focus = c2.trackFocus(population);
         int implicitTimezone = c2.getImplicitTimezone();
@@ -122,9 +123,9 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
                 } else {
                     comparisonKey = key.getXPathComparable(false, collator, implicitTimezone);
                 }
-                List<Item<?>> g = index.get(comparisonKey);
+                List<Item> g = index.get(comparisonKey);
                 if (g == null) {
-                    List<Item<?>> newGroup = new ArrayList<>(20);
+                    List<Item> newGroup = new ArrayList<>(20);
                     newGroup.add(item);
                     groups.add(newGroup);
                     groupKeys.add(key);
@@ -156,7 +157,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
      */
 
     private void buildIndexedGroupsComposite() throws XPathException {
-        HashMap<List<AtomicMatchKey>, List<Item<?>>> index = new HashMap<>(40);
+        HashMap<List<AtomicMatchKey>, List<Item>> index = new HashMap<>(40);
         XPathContext c2 = keyContext.newMinorContext();
         FocusIterator focus = c2.trackFocus(population);
         int implicitTimezone = c2.getImplicitTimezone();
@@ -180,9 +181,9 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
                 ckList.add(comparisonKey);
             }
 
-            List<Item<?>> g = index.get(ckList);
+            List<Item> g = index.get(ckList);
             if (g == null) {
-                List<Item<?>> newGroup = new ArrayList<>(20);
+                List<Item> newGroup = new ArrayList<>(20);
                 newGroup.add(item);
                 groups.add(newGroup);
                 groupKeys.add(new AtomicArray(compositeKey));
@@ -200,6 +201,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
      * @return the grouping key
      */
 
+    @Override
     public synchronized AtomicSequence getCurrentGroupingKey() {
         AtomicSequence val = groupKeys.get(position - 1);
         if (val == null) {
@@ -215,7 +217,8 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
      * @return the iterator
      */
 
-    public SequenceIterator<?> iterateCurrentGroup() {
+    @Override
+    public SequenceIterator iterateCurrentGroup() {
         return new ListIterator<>(groups.get(position - 1));
     }
 
@@ -229,11 +232,13 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
         return groups.get(position - 1);
     }
 
+    @Override
     public boolean hasNext() {
         return position < groups.size();
     }
 
     /*@Nullable*/
+    @Override
     public Item next() throws XPathException {
         if (position >= 0 && position < groups.size()) {
             position++;
@@ -252,40 +257,40 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
         return groups.get(position - 1).get(0);
     }
 
-    public void close() {
-    }
-
     /**
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return LAST_POSITION_FINDER | LOOKAHEAD;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD, Property.LAST_POSITION_FINDER);
     }
 
     /**
      * Get the last position (that is, the number of groups)
      */
 
+    @Override
     public int getLength() throws XPathException {
         return groups.size();
     }
 
 //#if EE==true
 
+    @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
         return new ManualGroupByIterator();
     }
 
     public class ManualGroupByIterator extends ManualGroupIterator {
 
-        List<Item<?>> currentGroup = groups.get(position - 1);
+        List<Item> currentGroup = groups.get(position - 1);
         AtomicSequence currentGroupingKey = groupKeys.get(position - 1);
 
         public ManualGroupByIterator() {
@@ -293,10 +298,12 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
             setLastPositionFinder(() -> groups.size());
         }
 
-        public SequenceIterator<Item<?>> iterateCurrentGroup()  {
+        @Override
+        public SequenceIterator iterateCurrentGroup()  {
             return new ListIterator<>(currentGroup);
         }
 
+        @Override
         public AtomicSequence getCurrentGroupingKey() {
             return currentGroupingKey;
         }

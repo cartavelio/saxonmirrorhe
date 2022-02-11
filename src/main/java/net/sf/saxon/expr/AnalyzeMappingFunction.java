@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trans.XPathException;
@@ -19,7 +18,7 @@ import net.sf.saxon.tree.iter.EmptyIterator;
  * expressions respectively to each such string
  */
 
-public class AnalyzeMappingFunction implements ContextMappingFunction<Item> {
+public class AnalyzeMappingFunction implements ContextMappingFunction {
 
     private RegexIterator base;
     private XPathContext c2;
@@ -44,7 +43,8 @@ public class AnalyzeMappingFunction implements ContextMappingFunction<Item> {
      *         sequence.
      */
 
-    public SequenceIterator<?> map(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator map(XPathContext context) throws XPathException {
         if (base.isMatching()) {
             if (matchingExpr != null) {
                 return matchingExpr.iterate(c2);

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,10 +7,14 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -86,6 +90,7 @@ public abstract class SimpleExpression extends Expression implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
 
         try {
@@ -129,6 +134,7 @@ public abstract class SimpleExpression extends Expression implements Callable {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return Type.ITEM_TYPE;
     }
@@ -138,6 +144,7 @@ public abstract class SimpleExpression extends Expression implements Callable {
      * returns "zero or more", which can be overridden in a subclass.
      */
 
+    @Override
     public int computeCardinality() {
         if ((getImplementationMethod() & Expression.EVALUATE_METHOD) == 0) {
             return StaticProperty.ALLOWS_ONE_OR_MORE;
@@ -161,6 +168,7 @@ public abstract class SimpleExpression extends Expression implements Callable {
      *                        expression
      */
 
+    @Override
     public final Item evaluateItem(XPathContext context) throws XPathException {
         return call(context, evaluateArguments(context)).head();
     }
@@ -180,21 +188,23 @@ public abstract class SimpleExpression extends Expression implements Callable {
      */
 
     /*@NotNull*/
-    public final SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public final SequenceIterator iterate(XPathContext context) throws XPathException {
         return call(context, evaluateArguments(context)).iterate();
     }
 
     /**
      * Process the instruction, without returning any tail calls
      *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
      */
 
-    public final void process(XPathContext context) throws XPathException {
-        SequenceIterator<?> iter = call(context, evaluateArguments(context)).iterate();
+    @Override
+    public final void process(Outputter output, XPathContext context) throws XPathException {
+        SequenceIterator iter = call(context, evaluateArguments(context)).iterate();
         iter.forEachOrFail(
-                it -> context.getReceiver().append(it, getLocation(), ReceiverOptions.ALL_NAMESPACES)
+                it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES)
         );
     }
 
@@ -206,8 +216,8 @@ public abstract class SimpleExpression extends Expression implements Callable {
      * @throws XPathException if a dynamic error occurs
      */
 
-    private Sequence<?>[] evaluateArguments(XPathContext context) throws XPathException {
-        Sequence<?>[] iters =
+    private Sequence[] evaluateArguments(XPathContext context) throws XPathException {
+        Sequence[] iters =
                 SequenceTool.makeSequenceArray(getOperanda().getNumberOfOperands());
         int i=0;
         for (Operand o : operands()) {
@@ -221,6 +231,7 @@ public abstract class SimpleExpression extends Expression implements Callable {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         throw new XPathException("In general, stylesheets using extension instructions cannot be exported");
     }

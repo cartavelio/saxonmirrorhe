@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,6 +13,7 @@ import net.sf.saxon.expr.LocalVariableReference;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.SlotManager;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibraryList;
@@ -44,15 +45,16 @@ import java.util.*;
 public class IndependentContext extends AbstractStaticContext
         implements XPathStaticContext, NamespaceResolver {
 
-    protected HashMap<String, String> namespaces = new HashMap<String, String>(10);
-    protected HashMap<StructuredQName, XPathVariable> variables = new HashMap<StructuredQName, XPathVariable>(20);
+    protected HashMap<String, String> namespaces = new HashMap<>(10);
+    protected HashMap<StructuredQName, XPathVariable> variables = new HashMap<>(20);
     protected NamespaceResolver externalResolver = null;
     protected ItemType requiredContextItemType = AnyItemType.getInstance();
-    protected Set<String> importedSchemaNamespaces = new HashSet<String>();
+    protected Set<String> importedSchemaNamespaces = new HashSet<>();
     protected boolean autoDeclare = false;
     protected Executable executable;
     protected RetainedStaticContext retainedStaticContext;
     protected OptimizerOptions optimizerOptions;
+    protected boolean parentlessContextItem;
 
 
     /**
@@ -77,7 +79,7 @@ public class IndependentContext extends AbstractStaticContext
         setDefaultCollationName(config.getDefaultCollationName());
         setOptimizerOptions(config.getOptimizerOptions());
         PackageData pd = new PackageData(config);
-        pd.setHostLanguage(Configuration.XPATH);
+        pd.setHostLanguage(HostLanguage.XPATH);
         pd.setSchemaAware(false);
         setPackageData(pd);
     }
@@ -96,8 +98,8 @@ public class IndependentContext extends AbstractStaticContext
         setDefaultElementNamespace(ic.getDefaultElementNamespace());
         setDefaultFunctionNamespace(ic.getDefaultFunctionNamespace());
         setBackwardsCompatibilityMode(ic.isInBackwardsCompatibleMode());
-        namespaces = new HashMap<String, String>(ic.namespaces);
-        variables = new HashMap<StructuredQName, XPathVariable>(10);
+        namespaces = new HashMap<>(ic.namespaces);
+        variables = new HashMap<>(10);
         FunctionLibraryList libList = (FunctionLibraryList) ic.getFunctionLibrary();
         if (libList != null) {
             setFunctionLibrary((FunctionLibraryList) libList.copy());
@@ -239,6 +241,7 @@ public class IndependentContext extends AbstractStaticContext
      * @param resolver the external NamespaceResolver
      */
 
+    @Override
     public void setNamespaceResolver(NamespaceResolver resolver) {
         externalResolver = resolver;
     }
@@ -280,6 +283,7 @@ public class IndependentContext extends AbstractStaticContext
      *         declared.
      */
 
+    @Override
     public XPathVariable declareVariable(QNameValue qname) {
         return declareVariable(qname.getStructuredQName());
     }
@@ -295,6 +299,7 @@ public class IndependentContext extends AbstractStaticContext
      *         declared.
      */
 
+    @Override
     public XPathVariable declareVariable(String namespaceURI, String localName) {
         StructuredQName qName = new StructuredQName("", namespaceURI, localName);
         return declareVariable(qName);
@@ -366,6 +371,7 @@ public class IndependentContext extends AbstractStaticContext
         return var.getLocalSlotNumber();
     }
 
+    @Override
     public NamespaceResolver getNamespaceResolver() {
         if (externalResolver != null) {
             return externalResolver;
@@ -386,6 +392,7 @@ public class IndependentContext extends AbstractStaticContext
      *         Return "" if the prefix maps to the null namespace.
      */
 
+    @Override
     public String getURIForPrefix(String prefix, boolean useDefault) {
         if (externalResolver != null) {
             return externalResolver.getURIForPrefix(prefix, useDefault);
@@ -402,6 +409,7 @@ public class IndependentContext extends AbstractStaticContext
      * the default namespace (prefix="") and the XML namespace where appropriate
      */
 
+    @Override
     public Iterator<String> iteratePrefixes() {
         if (externalResolver != null) {
             return externalResolver.iteratePrefixes();
@@ -420,6 +428,7 @@ public class IndependentContext extends AbstractStaticContext
      * @return the resulting variable reference
      */
 
+    @Override
     public Expression bindVariable(StructuredQName qName) throws XPathException {
         XPathVariable var = variables.get(qName);
         if (var == null) {
@@ -439,6 +448,7 @@ public class IndependentContext extends AbstractStaticContext
      * the static context itself.
      */
 
+    @Override
     public SlotManager getStackFrameMap() {
         SlotManager map = getConfiguration().makeSlotManager();
         XPathVariable[] va = new XPathVariable[variables.size()];
@@ -457,6 +467,7 @@ public class IndependentContext extends AbstractStaticContext
     }
 
 
+    @Override
     public boolean isImportedSchema(String namespace) {
         return importedSchemaNamespaces.contains(namespace);
     }
@@ -467,6 +478,7 @@ public class IndependentContext extends AbstractStaticContext
      * @return a Set, the set of URIs representing the names of imported schemas
      */
 
+    @Override
     public Set<String> getImportedSchemaNamespaces() {
         return importedSchemaNamespaces;
     }
@@ -506,6 +518,7 @@ public class IndependentContext extends AbstractStaticContext
      * @since 9.3
      */
 
+    @Override
     public ItemType getRequiredContextItemType() {
         return requiredContextItemType;
     }
@@ -527,6 +540,7 @@ public class IndependentContext extends AbstractStaticContext
      * @return the optimizer options being used
      */
 
+    @Override
     public OptimizerOptions getOptimizerOptions() {
         return this.optimizerOptions;
     }
@@ -553,5 +567,18 @@ public class IndependentContext extends AbstractStaticContext
         return -1;
     }
 
+    /**
+     * Ask whether the context item is known to be parentless
+     *
+     * @return true if it is known that the context item for evaluating the expression will have no parent
+     */
+    @Override
+    public boolean isContextItemParentless() {
+        return parentlessContextItem;
+    }
+
+    public void setContextItemParentless(boolean parentless) {
+        parentlessContextItem = parentless;
+    }
 }
 

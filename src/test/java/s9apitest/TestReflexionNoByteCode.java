@@ -1,9 +1,8 @@
 package s9apitest;
 
-import junit.framework.TestCase;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.sax.SAXSource;
@@ -11,8 +10,12 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestReflexionNoByteCode extends TestCase {
+
+public class TestReflexionNoByteCode {
 
     // This is a copy of TestReflexion with a different value for BYTECODE: do not fork!!!
 
@@ -27,6 +30,7 @@ public class TestReflexionNoByteCode extends TestCase {
     }
 
 
+    @Test
     public void testConstructor0() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -40,6 +44,7 @@ public class TestReflexionNoByteCode extends TestCase {
         }
     }
 
+    @Test
     public void testConstructor1() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -53,6 +58,7 @@ public class TestReflexionNoByteCode extends TestCase {
         }
     }
 
+    @Test
     public void testVoidSetter1() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -66,6 +72,7 @@ public class TestReflexionNoByteCode extends TestCase {
         }
     }
 
+    @Test
     public void testThisSetter1() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -81,6 +88,7 @@ public class TestReflexionNoByteCode extends TestCase {
     }
 
 
+    @Test
     public void testStringVsByteXQuery() {
         // See http://stackoverflow.com/questions/11448305/
         try {
@@ -94,6 +102,7 @@ public class TestReflexionNoByteCode extends TestCase {
         }
     }
 
+    @Test
     public void testStringVsByteXSLT() {
         // See http://stackoverflow.com/questions/11448305/
         try {
@@ -119,6 +128,7 @@ public class TestReflexionNoByteCode extends TestCase {
         }
     }
 
+    @Test
     public void testEmptySequenceToNull() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -147,10 +157,11 @@ public class TestReflexionNoByteCode extends TestCase {
         }
     }
 
+    @Test
     public void testEmptyList() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, BYTECODE);
+            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -173,10 +184,11 @@ public class TestReflexionNoByteCode extends TestCase {
         }
     }
 
+    @Test
     public void testNonEmptyList() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, BYTECODE);
+            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -199,10 +211,11 @@ public class TestReflexionNoByteCode extends TestCase {
         }
     }
 
+    @Test
     public void testStringSplit() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, BYTECODE);
+            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
@@ -223,10 +236,11 @@ public class TestReflexionNoByteCode extends TestCase {
         }
     }
 
+    @Test
     public void testStaticInvalidRequiredExternalObjectType() {
         // Error should be detected at compile time
         Processor p = new Processor(true);
-        p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, BYTECODE);
+        p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
         XsltCompiler c = p.newXsltCompiler();
         String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
@@ -254,12 +268,13 @@ public class TestReflexionNoByteCode extends TestCase {
 
     }
 
+    @Test
     public void testDynamicInvalidRequiredExternalObjectType() {
         XsltTransformer t;
         try {
             // Error should be detected at run time
             Processor p = new Processor(true);
-            p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, BYTECODE);
+            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, BYTECODE);
             XsltCompiler c = p.newXsltCompiler();
             String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
@@ -290,6 +305,7 @@ public class TestReflexionNoByteCode extends TestCase {
 
 
 
+    @Test
     public void testConvertUntypedAtomic() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -317,6 +333,7 @@ public class TestReflexionNoByteCode extends TestCase {
         }
     }
 
+    @Test
     public void testAtomization() {
         try {
             XQueryCompiler c = makeCompiler();
@@ -344,13 +361,14 @@ public class TestReflexionNoByteCode extends TestCase {
         }
     }
 
+    @Test
     public void testReturnNodes() {
         // Test that we detect when returned nodes have the wrong Configuration. See non-bug 1856.
         try {
             Processor p = new Processor(true);
             boolean[] options = {true, false};
             for (boolean option : options) {
-                p.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, option);
+                p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, option);
                 XQueryCompiler c = p.newXQueryCompiler();
                 c.declareNamespace("this", "java:s9apitest.TestReflexionHelper");
                 XQueryExecutable exec;
