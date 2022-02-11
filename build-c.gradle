@@ -34,11 +34,11 @@ task test_jetHome(
 }
 
 // ============================================================
-// Tasks to rejar Xerces
+// Tasks to rejar Xerces and XML Resolver
 
 task unjar_XercesImpl(
   type: Copy,
-  description: "Unjar XercesImple for .NET build"
+  description: "Unjar XercesImpl"
 ) {
   inputs.file("lib/xercesImpl.jar")
   outputs.files(fileTree("${buildDir}/xerces/org/apache/xerces"))
@@ -46,9 +46,39 @@ task unjar_XercesImpl(
   into "${buildDir}/xerces"
 }
 
+task unjar_XmlResolver(
+  type: Copy,
+  description: "Unjar XML Resolver"
+) {
+  inputs.file(resolverJar)
+  from zipTree(file(resolverJar))
+  into "${buildDir}/xerces"
+}
+// This task is always out of date because we're overwriting
+// files from different jars.
+// Skip this if it doesn't seem to be necessary
+unjar_XmlResolver.onlyIf {
+  !file("${buildDir}/xerces/org/xmlresolver/XMLCatalogResolver.class").exists()
+}
+
+task unjar_XmlResolverData(
+  type: Copy,
+  description: "Unjar XML Resolver data"
+) {
+  inputs.file(resolverDataJar)
+  from zipTree(file(resolverDataJar))
+  into "${buildDir}/xerces"
+}
+// This task is always out of date because we're overwriting
+// files from different jars.
+// Skip this if it doesn't seem to be necessary
+unjar_XmlResolver.onlyIf {
+  !file("${buildDir}/xerces/org/xmlresolver/cat-xhtml.xml").exists()
+}
+
 task rejar_Xerces(
   type: Jar,
-  dependsOn: ["unjar_XercesImpl"],
+  dependsOn: ["unjar_XercesImpl", "unjar_XmlResolver", "unjar_XmlResolverData"],
   description: "Unjar Xerces and Resolver for .NET build"
 ) {
   inputs.files fileTree("${buildDir}/xerces/org")
