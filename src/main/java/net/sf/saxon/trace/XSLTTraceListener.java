@@ -31,7 +31,7 @@ public class XSLTTraceListener extends AbstractTraceListener {
     /**
      * Get the trace element tagname to be used for a particular construct. Return null for
      * trace events that are ignored by this trace listener.
-     * @param info
+     * @param info trace information
      */
 
     /*@Nullable*/

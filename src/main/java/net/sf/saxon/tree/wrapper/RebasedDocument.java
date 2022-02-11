@@ -57,6 +57,7 @@ public class RebasedDocument extends GenericTreeInfo {
     /**
      * Create a wrapped node within this document
      * @param node the node to be wrapped - must be a node in the base document
+     * @return the wrapped node
      */
 
     public RebasedNode wrap(NodeInfo node) {

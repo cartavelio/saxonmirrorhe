@@ -35,7 +35,7 @@ public class XQueryTraceListener extends AbstractTraceListener {
     /**
      * Get the trace element tagname to be used for a particular construct. Return null for
      * trace events that are ignored by this trace listener.
-     * @param info
+     * @param info trace information
      */
 
     /*@Nullable*/
@@ -86,8 +86,8 @@ public class XQueryTraceListener extends AbstractTraceListener {
     /**
      * Called at the end of a rule search
      * @param rule the rule that has been selected
-     * @param mode
-     * @param item
+     * @param mode the mode in operation
+     * @param item the item that was checked against
      */
     @Override
     public void endRuleSearch(Object rule, Mode mode, Item item) {

@@ -48,6 +48,8 @@ public class AttributeLocation implements Location {
     /**
      * Add a reference to the containing element node. This needs care because we don't want to retain
      * links to the source stylesheet at run-time; it is therefore done only for static errors
+     *
+     * @param node the containing element node
      */
 
     public void setElementNode(NodeInfo node) {

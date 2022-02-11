@@ -1128,6 +1128,9 @@ public final class Navigator {
 
     /**
      * Convert a {@code Predicate<NodeInfo>} (if necessary) to a NodeTest
+     *
+     * @param predicate a Node predicate
+     * @return a NodeTest
      */
 
     public static NodeTest nodeTestFromPredicate(NodePredicate predicate) {
