@@ -269,17 +269,16 @@ namespace Saxon.Api {
                     try {
                         return numericValue.longValue();
                     }
-                    catch (Exception) {
-                        throw new ArgumentException("Cannot cast item to an integer");
+                    catch (System.Exception) {
+                        throw new System.ArgumentException("Cannot cast item to an integer");
                     }
 
-                    break;
                 case StringValue: {
                     StringToDouble converter = StringToDouble.getInstance();
                     return (long) converter.stringToNumber(av.getUnicodeStringValue());
                 }
                 default:
-                    throw new ArgumentException("Cannot cast item to an integer");
+                    throw new System.ArgumentException("Cannot cast item to an integer");
             }
         }
 
