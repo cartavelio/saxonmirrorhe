@@ -45,7 +45,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void xmlResolverParse() {
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 DocumentBuilder builder = processor.NewDocumentBuilder();
                 builder.DtdValidation = (true);
@@ -62,7 +62,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void xmlResolverUriResolver() {
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 XsltCompiler compiler = processor.NewXsltCompiler();
 
@@ -92,7 +92,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void xmlResolverStylesheetUriResolver() {
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 XsltCompiler compiler = processor.NewXsltCompiler();
 
@@ -123,7 +123,7 @@ namespace SaxonCS_NUnit {
         public void xmlResolverStylesheetUriResolverOverride() {
             // Override catalog resolution with specific resolver
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             string included =
                 "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' " +
                 "version='3.0'><xsl:template match='/'><boo/></xsl:template></xsl:transform>";
@@ -159,7 +159,7 @@ namespace SaxonCS_NUnit {
         public void xmlResolverStylesheetUriResolverFallback() {
             // Specific resolver returns null; fallback to catalog resolver
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             string included =
                 "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' " +
                 "version='3.0'><xsl:template match='/'><boo/></xsl:template></xsl:transform>";
@@ -194,7 +194,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void XsltUnparsedTextUriResolver() {
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 XsltCompiler compiler = processor.NewXsltCompiler();
 
@@ -225,7 +225,7 @@ namespace SaxonCS_NUnit {
         public void XsltUnparsedTextUriResolverOverride() {
             // Override catalog resolver with specific resolver
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 XsltCompiler compiler = processor.NewXsltCompiler();
 
@@ -258,7 +258,7 @@ namespace SaxonCS_NUnit {
         public void XsltUnparsedTextUriResolverFallbackToCatalog() {
             // Text resolver returns null; fallback to catalog resolver
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 XsltCompiler compiler = processor.NewXsltCompiler();
 
@@ -291,7 +291,7 @@ namespace SaxonCS_NUnit {
         public void XsltUnparsedTextUriResolverFallbackToDirect() {
             // Text resolver returns null; fallback to direct file access
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 XsltCompiler compiler = processor.NewXsltCompiler();
 
@@ -324,7 +324,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void XQueryUnparsedTextUriResolver() {
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 XQueryCompiler compiler = processor.NewXQueryCompiler();
                 XQueryEvaluator selector = compiler.Compile("string-length(unparsed-text('http://example.com/text'))").Load();
@@ -341,7 +341,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void XQueryUnparsedTextUriResolverOverride() {
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 XQueryCompiler compiler = processor.NewXQueryCompiler();
                 XQueryEvaluator selector = compiler.Compile("string-length(unparsed-text('http://example.com/text'))").Load();
@@ -360,7 +360,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void XQueryUnparsedTextUriResolverFallback() {
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 XQueryCompiler compiler = processor.NewXQueryCompiler();
                 compiler.BaseUri = ConfigTest.DataDirUri;
@@ -380,7 +380,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void XPathUnparsedTextUriResolverFallback() {
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 XPathCompiler compiler = processor.NewXPathCompiler();
                 compiler.BaseUri = ConfigTest.DataDirUri;
@@ -401,7 +401,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void xmlResolverModuleUriResolver() {
             Processor processor = new();
-            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            processor.SetCatalogFiles(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
                 XQueryCompiler compiler = processor.NewXQueryCompiler();
 
