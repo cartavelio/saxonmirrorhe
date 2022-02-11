@@ -101,6 +101,24 @@ namespace TestRunner {
             set => treeModel = value;
         }
 
+        public static void Main(string[] args) {
+            bool isXSLT = false;
+            foreach (string a in args)
+            {
+                if (a.StartsWith("-lang:XT")) {
+                    isXSLT = true;
+                    break;
+                } 
+            }
+
+            if (isXSLT) {
+                Xslt30TestSuiteDriver.MainXSLT(args);
+            }
+            else {
+                QT3TestSuiteDriver.MainQT(args);
+            }
+        }
+
         protected void go(string[] args) {
             try {
                 driverSerializer = driverProc.NewSerializer();
@@ -181,12 +199,7 @@ namespace TestRunner {
                 printResults(resultsDir + "/results" + driverProc.ProductVersion + ".xml");
             }
             catch (Exception e) {
-                Console.Error.WriteLine(e.Message);
-                if (e.InnerException != null) {
-                    Console.Error.WriteLine(e.InnerException.Message);
-                }
-
-                Console.Error.WriteLine(e.StackTrace);
+                Console.Error.WriteLine(e);
             }
         }
 
@@ -533,6 +546,10 @@ namespace TestRunner {
 
                 string testSet = testEnum.Current.GetStringValue();
 
+                if (SkipBecauseSlow(testSet)) {
+                    return;
+                }
+
                 IEnumerable<XdmNode> enumerable = testSetDocNode.Select(Steps.Descendant("test-case"));
 
                 foreach (XdmNode testCase in enumerable) {
@@ -551,6 +568,10 @@ namespace TestRunner {
             }
 
             writeTestSetEndElement();
+        }
+
+        public bool SkipBecauseSlow(string testSet) {
+            return testSet == "unicode-90";
         }
 
         protected abstract void runTestCase(XdmNode testCase, XPathCompiler catalogXpc);

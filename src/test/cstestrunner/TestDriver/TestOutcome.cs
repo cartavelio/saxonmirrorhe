@@ -70,23 +70,24 @@ namespace TestRunner {
             this.exception = ex;
 
             if (ex is DynamicError) {
-                try {
+                if (((DynamicError) ex).ErrorCode != null) {
                     errorsReported.Add(((DynamicError) ex).ErrorCode);
                 }
-                catch (Exception) {
-                    errorsReported.Add(new QName("ZZZZZZ999999"));
+                else {
+                    errorsReported.Add(new QName("DYNAMIC-999999"));
                 }
             }
-            else if (ex is StaticError && ((StaticError) ex).ErrorCode != null) {
-                try {
+            else if (ex is StaticError) {
+                if (((StaticError) ex).ErrorCode != null) {
                     errorsReported.Add(((StaticError) ex).ErrorCode);
                 }
-                catch (Exception) {
-                    errorsReported.Add(new QName("ZZZZZZ999999"));
+                else {
+                    errorsReported.Add(new QName("STATIC-999999"));
                 }
             }
             else {
-                errorsReported.Add(new QName("ZZZZZZ999999"));
+                Console.Error.WriteLine(ex);
+                errorsReported.Add(new QName("CRASH-999999"));
             }
         }
 
@@ -180,6 +181,10 @@ namespace TestRunner {
             }
 
             return doc;
+        }
+
+        public void ReportError(QName code) {
+            errorsReported.Add(code);
         }
 
         public void SetErrorsReported(SysCollGen.IList<XmlProcessingError> errors) {
@@ -403,8 +408,7 @@ namespace TestRunner {
                 return success;
             }
             catch (Exception e) {
-                System.Console
-                    .WriteLine(e.StackTrace); //To change body of catch statement use File | Settings | File Templates.
+                System.Console.Error.WriteLine(e); 
                 return false;
             }
         }
@@ -673,9 +677,9 @@ namespace TestRunner {
                         for (int i = 0; i < len; i++) {
                             if (resultstring[i] != assertionstring[i]) {
                                 driver.println("Results differ at index " + i +
-                                               "(\"" + resultstring.Substring(i, (i + 10 > len ? len : i + 10)) +
+                                               "(\"" + resultstring.Substring(i, (i + 10 > len ? len-i : 10)) +
                                                "\") vs (\"" +
-                                               assertionstring.Substring(i, (i + 10 > len ? len : i + 10)) + "\")");
+                                               assertionstring.Substring(i, (i + 10 > len ? len-i : 10)) + "\")");
                                 break;
                             }
                         }
@@ -983,7 +987,7 @@ namespace TestRunner {
                         .iterateAxis(JAxisInfo.CHILD);
                     JGroundedValue val1 = SequenceTool.toGroundedValue(iter1);
                     bool success = JDeepEqual.deepEqual(
-                        iter0, iter1,
+                        val0.iterate(), val1.iterate(),
                         new JGenericAtomicComparer(JCodepointCollator.getInstance(), null),
                         assertXpc.Processor.Implementation.getConversionContext(), flag);
                     // if necessary try again ignoring whitespace nodes
@@ -1019,7 +1023,7 @@ namespace TestRunner {
                     return success;
                 }
                 catch (DynamicError e) {
-                    Console.WriteLine(e.StackTrace);
+                    Console.WriteLine(e);
                     return false;
                 }
             }
@@ -1124,7 +1128,7 @@ namespace TestRunner {
             bool ok = (expectedError.Equals("*") ||
                        (GetErrorCode() != null &&
                         GetErrorCode().LocalName.Equals(expectedErrorQ.LocalName)) ||
-                       (HasReportedError(new QName(expectedError))));
+                       (HasReportedError(expectedErrorQ)));
             if (ok) {
                 wrongError = null;
             }
@@ -1146,19 +1150,7 @@ namespace TestRunner {
         }
 
 
-        public class MessageListener : IMessageListener {
-            TestOutcome outcome1;
-
-            public MessageListener(TestRunner.TestOutcome out1)
-                : base() {
-                outcome1 = out1;
-
-            }
-
-            public void Message(XdmNode content, QName errorCode, bool terminate, IXmlLocation location) {
-                outcome1.AddXslMessage(content);
-            }
-        }
+        
     }
 
 }
