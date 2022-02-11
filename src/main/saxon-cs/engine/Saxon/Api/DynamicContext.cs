@@ -7,7 +7,7 @@ namespace Saxon.Api {
 
     public class DynamicContext {
 
-        internal XPathContext context;
+        internal readonly XPathContext context;
 
         internal DynamicContext(XPathContext context) {
             this.context = context;
@@ -17,7 +17,7 @@ namespace Saxon.Api {
         /// The context item. May be null if no context item is defined
         /// </summary>
 
-        public XdmItem ContextItem => context.getContextItem() == null ? null : (XdmItem)XdmItem.Wrap(context.getContextItem());
+        public XdmItem ContextItem => context.getContextItem() == null ? null : (XdmItem)XdmValue.Wrap(context.getContextItem());
 
         /// <summary>
         /// The context position (equivalent to the XPath <c>position()</c> function).
@@ -51,3 +51,5 @@ namespace Saxon.Api {
         public XPathContext Implementation => context;
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

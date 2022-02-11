@@ -45,8 +45,9 @@ namespace Saxon.Api {
                     StructuredQName name = globalVariable.getVariableQName();
                     bool isRequired = globalVariable.isRequiredParam();
                     SequenceType type = globalVariable.getRequiredType();
-                    ParameterDetails parameterDetails = new (XdmSequenceType.FromSequenceType(type), isRequired);
-                    parameterDetails.Location = new Location(globalVariable.getLocation());
+                    ParameterDetails parameterDetails = new (XdmSequenceType.FromSequenceType(type), isRequired) {
+                        Location = new Location(globalVariable.getLocation())
+                    };
                     result[new QName(name)] = parameterDetails;
                 }
             }
@@ -73,3 +74,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

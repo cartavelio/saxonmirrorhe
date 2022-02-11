@@ -1,8 +1,6 @@
 using System.Globalization;
 
 namespace Saxon.Api.Support {
-using System;
-using System.Collections.Generic;
 
     public class ComparingCollation : Saxon.Hej.lib.SubstringMatcher {
         private readonly CompareInfo comparer;
@@ -118,3 +116,5 @@ using System.Collections.Generic;
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

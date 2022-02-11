@@ -8,9 +8,7 @@ namespace Saxon.Callbacks {
     public class StandardModuleURIResolver : Saxon.Hej.lib.ModuleURIResolver {
         private XmlResolver resolver;
         private Saxon.Hej.Configuration config;
-
-        public StandardModuleURIResolver() {
-        }
+        
 
         public StandardModuleURIResolver(Saxon.Hej.Configuration config) {
             this.config = config;
@@ -101,3 +99,5 @@ namespace Saxon.Callbacks {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

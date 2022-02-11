@@ -9,7 +9,7 @@ namespace Saxon.Api {
     /// This non-instantiable class provides a number of useful implementations of the <c>System.Predicate</c>
     /// interface, designed for use when navigating streams of XDM items.
     /// </summary>
-    public class Predicates {
+    public static class Predicates {
 
         /// <summary>
         /// A predicate to test whether all the supplied predicates are satisfied
@@ -17,15 +17,7 @@ namespace Saxon.Api {
         /// <param name="conditions">The predicates that must all be satisfied</param>
         /// <returns>A predicate that evaluates to true only if all the supplied predicates are satisfied</returns>
         public static Predicate<T> AllOf<T>(params Predicate<T>[] conditions) where T : XdmItem {
-            return item => {
-                foreach (Predicate<T> pred in conditions) {
-                    if (!pred.Invoke(item)) {
-                        return false;
-                    }
-                }
-
-                return true;
-            };
+            return item => conditions.All(pred => pred.Invoke(item));
         }
         
         /// <summary>
@@ -34,15 +26,7 @@ namespace Saxon.Api {
         /// <param name="conditions">The predicates, one of which must be satisfied</param>
         /// <returns>A predicate that evaluates to true only if all the supplied predicates are satisfied</returns>
         public static Predicate<T> AnyOf<T>(params Predicate<T>[] conditions) where T : XdmItem {
-            return item => {
-                foreach (Predicate<T> pred in conditions) {
-                    if (pred.Invoke(item)) {
-                        return true;
-                    }
-                }
-
-                return false;
-            };
+            return item => conditions.Any(pred => pred.Invoke(item));
         }
 
         /// <summary>
@@ -202,7 +186,7 @@ namespace Saxon.Api {
             };
         }
 
-        internal static Predicate<XdmNode> LocalNamePredicate(String given) {
+        internal static Predicate<XdmNode> LocalNamePredicate(string given) {
             if ("*".Equals(given)) {
                 return IsElement();
             }
@@ -233,7 +217,7 @@ namespace Saxon.Api {
         /// namespace URI. If a zero-length string is supplied, the predicate will also match nodes having no name,
         /// such as text and comment nodes, and nodes having a local name only, such as namespace and processing-instruction
         /// nodes.</returns>
-        public static Predicate<XdmNode> HasNamespace(String uri) {
+        public static Predicate<XdmNode> HasNamespace(string uri) {
             return item => {
                 QName name = item.NodeName;
                 return name != null && name.Uri.Equals(uri);
@@ -247,8 +231,8 @@ namespace Saxon.Api {
         /// <param name="local">The required attribute name</param>
         /// <returns>A predicate that returns true if and only if the supplied item is an element having an attribute
         /// with the given local name, in no namespace.</returns>
-        public static Predicate<XdmNode> HasAttribute(String local) {
-            return item => (item).GetAttributeValue(local) != null;
+        public static Predicate<XdmNode> HasAttribute(string local) {
+            return item => item.GetAttributeValue(local) != null;
         }
 
         /// <summary>
@@ -268,12 +252,12 @@ namespace Saxon.Api {
         /// Obtain a predicate that tests whether an atomic value compares equal to a supplied atomic value of
         /// a comparable type.
         /// </summary>
-        /// <param name="value2">The atomic value to be compared with</param>
+        /// <param name="value">The atomic value to be compared with</param>
         /// <returns>A predicate which returns true when applied to a value that is equal to the supplied
         /// value under the "is-same-key" comparison rules. (These are the rules used to compare key values
         /// in an XDM map. The rules are chosen to be context-free, error-free, and transitive.)</returns>
-        public static Predicate<XdmAtomicValue> Eq(XdmAtomicValue value2) {
-            return value1 => value1.Equals(value2);
+        public static Predicate<XdmAtomicValue> Eq(XdmAtomicValue value) {
+            return val => val.Equals(value);
         }
 
         /// <summary>
@@ -313,7 +297,7 @@ namespace Saxon.Api {
         /// contains a substring that matches the given regular expression. To test the string in its entirety,
         /// use anchors "^" and "$" in the regular expression.</returns>
         /// 
-        public static Predicate<XdmItem> MatchesRegex(String regex) {
+        public static Predicate<XdmItem> MatchesRegex(string regex) {
             return item1 => System.Text.RegularExpressions.Regex.Match(item1.StringValue, regex).Success;
         }
 
@@ -360,3 +344,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

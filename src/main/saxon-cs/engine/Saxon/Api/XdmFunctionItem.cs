@@ -101,7 +101,9 @@ namespace Saxon.Api {
             //         groundedResult = th.applyFunctionConversionRules(groundedResult, required, role, Loc.NONE);
             //     }
             // }
-            return XdmValue.Wrap(groundedResult);
+            return Wrap(groundedResult);
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

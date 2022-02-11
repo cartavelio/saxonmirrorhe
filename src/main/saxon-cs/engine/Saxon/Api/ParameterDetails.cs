@@ -7,7 +7,7 @@ namespace Saxon.Api {
 
     public class ParameterDetails
     {
-        private XdmSequenceType type;
+        private readonly XdmSequenceType type;
 
         /// <summary>
         /// Create parameter details.
@@ -26,11 +26,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>The type defined in the <code>as</code> attribute of the <code>xsl:param</code> element,
         /// without its occurrence indicator</returns>
-        public XdmItemType GetDeclaredItemType()
-        {
-            return type.itemType;
-        }
-
+        public XdmItemType DeclaredItemType => type.itemType;
 
         /// <summary>
         /// Gets the declared cardinality of the parameter.
@@ -70,3 +66,5 @@ namespace Saxon.Api {
     }
 
 }
+
+// Copyright (c) 2021 Saxonica Limited

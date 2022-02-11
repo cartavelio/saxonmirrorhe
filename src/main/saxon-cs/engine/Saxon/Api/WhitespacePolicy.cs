@@ -18,11 +18,11 @@ namespace Saxon.Api {
 
         /// <summary>All whitespace text nodes are stripped</summary>
         public static WhitespacePolicy StripAll = 
-            new WhitespacePolicy(Whitespace.ALL, AllElementsSpaceStrippingRule.getInstance());
+            new(Whitespace.ALL, AllElementsSpaceStrippingRule.getInstance());
 
         /// <summary>Whitespace text nodes appearing in element-only content are stripped</summary>
         public static WhitespacePolicy StripIgnorable =
-            new WhitespacePolicy(Whitespace.IGNORABLE, IgnorableSpaceStrippingRule.getInstance());
+            new(Whitespace.IGNORABLE, IgnorableSpaceStrippingRule.getInstance());
 
         /// <summary>No whitespace is stripped</summary>
         public static WhitespacePolicy PreserveAll =
@@ -106,3 +106,5 @@ namespace Saxon.Api {
     }
 
 }
+
+// Copyright (c) 2021 Saxonica Limited

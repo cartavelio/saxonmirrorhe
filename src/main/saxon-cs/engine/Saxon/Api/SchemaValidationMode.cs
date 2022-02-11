@@ -18,3 +18,5 @@ namespace Saxon.Api {
         Unspecified
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

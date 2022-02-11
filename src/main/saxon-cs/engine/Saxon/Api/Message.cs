@@ -17,10 +17,10 @@ namespace Saxon.Api {
         /// <param name="location">The location in the stylesheet of the originating instruction</param>
         
         public Message(XdmNode content, QName errorCode, bool terminate, Location location) {
-            this.Content = content;
-            this.ErrorCode = errorCode;
-            this.Terminate = terminate;
-            this.Location = location;
+            Content = content;
+            ErrorCode = errorCode;
+            Terminate = terminate;
+            Location = location;
         }
 
         /// <summary>
@@ -52,3 +52,5 @@ namespace Saxon.Api {
     
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

@@ -19,9 +19,11 @@ namespace Saxon.Api {
 
         ///<summary>The singular instance of this class</summary>
 
-        public static XdmEmptySequence Instance = new ();
+        public static readonly XdmEmptySequence Instance = new ();
 
         private XdmEmptySequence() : base(EmptySequence.getInstance())
         { }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

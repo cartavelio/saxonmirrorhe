@@ -1,10 +1,6 @@
 using System;
-using System.IO;
-using System.Numerics;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Saxon.Ejava.lang;
 using Saxon.Hej.trans;
 
 namespace Saxon.Impl.Overrides {
@@ -114,3 +110,5 @@ namespace Saxon.Impl.Overrides {
     }
     
 }
+
+// Copyright (c) 2021 Saxonica Limited

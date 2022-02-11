@@ -23,3 +23,5 @@ namespace Saxon.Api {
     /// 
     public delegate TextReader TextResolver(Uri uri, Encoding encoding);
 }
+
+// Copyright (c) 2021 Saxonica Limited

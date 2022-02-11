@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
-using Saxon.Hej.s9api;
 using Type = Saxon.Hej.type.Type;
 
 namespace Saxon.Api {
@@ -22,27 +21,27 @@ namespace Saxon.Api {
         /// <summary>
         /// The item type <c>document-node()</c>
         /// </summary>
-        public static readonly XdmNodeKind Document = new XdmNodeKind(NodeKindTest.DOCUMENT);
+        public static readonly XdmNodeKind Document = new(NodeKindTest.DOCUMENT);
 
         /// <summary>
         /// The item type <c>element()</c>
         /// </summary>
-        public static readonly XdmNodeKind Element = new XdmNodeKind(NodeKindTest.ELEMENT);
+        public static readonly XdmNodeKind Element = new(NodeKindTest.ELEMENT);
 
         /// <summary>
         /// The item type <c>attribute()</c>
         /// </summary>
-        public static readonly XdmNodeKind Attribute = new XdmNodeKind(NodeKindTest.ATTRIBUTE);
+        public static readonly XdmNodeKind Attribute = new(NodeKindTest.ATTRIBUTE);
 
         /// <summary>
         /// The item type <c>text()</c>
         /// </summary>
-        public static readonly XdmNodeKind Text = new XdmNodeKind(NodeKindTest.TEXT);
+        public static readonly XdmNodeKind Text = new(NodeKindTest.TEXT);
 
         /// <summary>
         /// The item type <c>comment()</c>
         /// </summary>
-        public static readonly XdmNodeKind Comment = new XdmNodeKind(NodeKindTest.COMMENT);
+        public static readonly XdmNodeKind Comment = new(NodeKindTest.COMMENT);
 
         /// <summary>
         /// The item type <c>processing-instruction()</c>
@@ -53,7 +52,7 @@ namespace Saxon.Api {
         /// <summary>
         /// The item type <c>namespace-node()</c>
         /// </summary>
-        public static readonly XdmNodeKind Namespace = new XdmNodeKind(NodeKindTest.NAMESPACE);
+        public static readonly XdmNodeKind Namespace = new(NodeKindTest.NAMESPACE);
 
         internal static XdmNodeKind ForNodeKindTest(NodeKindTest test) {
             int kind = test.getPrimitiveType();
@@ -114,22 +113,17 @@ namespace Saxon.Api {
         /// <param name="type">The <c>XmlNodeType</c> to be converted</param>
         /// <returns>The corresponding <c>XdmNodeKind</c></returns>
         public static XdmNodeKind ForNodeType(XmlNodeType type) {
-            switch (type) {
-                case XmlNodeType.Document:
-                    return Document;
-                case XmlNodeType.Element:
-                    return Element;
-                case XmlNodeType.Attribute:
-                    return Attribute;
-                case XmlNodeType.Text:
-                    return Text;
-                case XmlNodeType.Comment:
-                    return Comment;
-                case XmlNodeType.ProcessingInstruction:
-                    return ProcessingInstruction;
-                default:
-                    throw new ArgumentException("Unknown node kind");
-            }
+            return type switch {
+                XmlNodeType.Document => Document,
+                XmlNodeType.Element => Element,
+                XmlNodeType.Attribute => Attribute,
+                XmlNodeType.Text => Text,
+                XmlNodeType.Comment => Comment,
+                XmlNodeType.ProcessingInstruction => ProcessingInstruction,
+                _ => throw new ArgumentException("Unknown node kind")
+            };
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

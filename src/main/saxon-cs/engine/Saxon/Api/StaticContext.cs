@@ -1,5 +1,4 @@
 using System;
-using Saxon.Hej;
 using Saxon.Hej.trans;
 
 namespace Saxon.Api {
@@ -84,3 +83,5 @@ namespace Saxon.Api {
         public Saxon.Hej.expr.StaticContext Implementation { get; }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

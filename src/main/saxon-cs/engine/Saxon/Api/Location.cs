@@ -12,9 +12,7 @@ namespace Saxon.Api {
     public class Location
     {
         internal Location(Saxon.Hej.s9api.Location loc) {
-            if (loc == null) {
-                loc = Loc.NONE;
-            }
+            loc ??= Loc.NONE;
             SystemId = loc.getSystemId() == null || loc.getSystemId() == ""  ? null : new Uri(loc.getSystemId());
             LineNumber = loc.getLineNumber();
             ColumnNumber = loc.getColumnNumber();
@@ -42,3 +40,5 @@ namespace Saxon.Api {
         
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

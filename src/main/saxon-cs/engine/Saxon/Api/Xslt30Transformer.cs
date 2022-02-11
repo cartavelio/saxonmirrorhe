@@ -11,7 +11,6 @@ using Saxon.Hej.s9api;
 using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
-using Saxon.Impl.Helpers;
 using StandardMessageHandler = Saxon.Callbacks.StandardMessageHandler;
 
 namespace Saxon.Api {
@@ -598,27 +597,21 @@ namespace Saxon.Api {
         /// then the serialization parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param> 
         public void CallTemplate(QName templateName, IDestination destination) {
-            if (templateName == null) {
-                templateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
-            }
-
+            templateName ??= new QName("xsl", NamespaceConstant.XSLT, "initial-template");
             s9Transformer.callTemplate(templateName, destination.GetUnderlyingDestination());
         }
 
 
         /// <summary>
         /// Invoke a transformation by calling a named template. The results of calling
-        /// the template are returned as a raw value, without wrapping in a document nnode
+        /// the template are returned as a raw value, without wrapping in a document node
         /// or serializing.
         /// </summary>
         /// <param name="templateName">The name of the initial template. This must match the name of a
         /// public named template in the stylesheet. If the value is null, the QName <c>xsl:initial-template</c> is used.</param>
         /// <returns>the raw results of the called template, without wrapping in a document node or serialization.</returns>
         public XdmValue CallTemplate(QName templateName) {
-            if (templateName == null) {
-                templateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
-            }
-
+            templateName ??= new QName("xsl", NamespaceConstant.XSLT, "initial-template");
             return s9Transformer.callTemplate(templateName);
         }
 
@@ -650,3 +643,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

@@ -1,10 +1,8 @@
 using System;
-using Saxon.Hej.om;
-using Saxon.Hej.value;
 
 namespace Saxon.Api {
     /// <summary>
-    /// <c>An enumeration defining possible strategies for resolving unprefixed element names appearing
+    /// An enumeration defining possible strategies for resolving unprefixed element names appearing
     /// as name tests in the steps of a path expression or XSLT match pattern
     /// </summary>
     [Serializable]
@@ -47,3 +45,5 @@ namespace Saxon.Api {
         DefaultNamespaceOrNone
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

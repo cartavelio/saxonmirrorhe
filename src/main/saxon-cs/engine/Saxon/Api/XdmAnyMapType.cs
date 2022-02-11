@@ -10,9 +10,9 @@ namespace Saxon.Api {
         /// The singleton instance of this class: an <c>XdmMapType</c> corresponding to the
         /// item type <c>map(*)</c>, which matches any map.
         /// </summary>
-        public static XdmAnyMapType Instance = new XdmAnyMapType();
+        public static readonly XdmAnyMapType Instance = new();
 
-        internal XdmAnyMapType() : base(MapType.ANY_MAP_TYPE) {
+        private XdmAnyMapType() : base(MapType.ANY_MAP_TYPE) {
         }
         
         public override bool Matches(XdmItem item) {
@@ -24,3 +24,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

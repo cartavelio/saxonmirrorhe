@@ -7,7 +7,7 @@ namespace Saxon.Api {
     /// <summary> 
     /// Holds a set of constants representing known namespaces.
     /// </summary>
-    public class NamespaceConstant {
+    public static class NamespaceConstant {
         /// <summary>
         /// A URI representing the null namespace (actually, an empty string)
         /// </summary>
@@ -16,191 +16,156 @@ namespace Saxon.Api {
         /// <summary>
         /// Fixed namespace name for XML: "http://www.w3.org/XML/1998/namespace".
         /// </summary>
-        public static readonly string XML = "http://www.w3.org/XML/1998/namespace";
+        public const string XML = "http://www.w3.org/XML/1998/namespace";
 
         /// <summary>
         /// Fixed namespace name for XSLT: "http://www.w3.org/1999/XSL/Transform"
         /// </summary>
-        public static readonly string XSLT = "http://www.w3.org/1999/XSL/Transform";
+        public const string XSLT = "http://www.w3.org/1999/XSL/Transform";
 
         /// <summary>
         /// Fixed namespace name for Saxon: "http://saxon.sf.net/"
         /// </summary>
-        public static readonly string SAXON = "http://saxon.sf.net/";
+        public const string SAXON = "http://saxon.sf.net/";
 
         /// <summary>
         /// Fixed namespace name for the export of a Saxon stylesheet package: "http://ns.saxonica.com/xslt/export"
         /// </summary>
-        public static readonly string SAXON_XSLT_EXPORT = "http://ns.saxonica.com/xslt/export";
+        public const string SAXON_XSLT_EXPORT = "http://ns.saxonica.com/xslt/export";
 
         /// <summary>
         /// Namespace name for XML Schema: "http://www.w3.org/2001/XMLSchema"
         /// </summary>
-        public static readonly string SCHEMA = "http://www.w3.org/2001/XMLSchema";
+        public const string SCHEMA = "http://www.w3.org/2001/XMLSchema";
 
         /// <summary>
         /// XML-schema-defined namespace for use in instance documents ("xsi"): "http://www.w3.org/2001/XMLSchema-instance"
         /// </summary>
-        public static readonly string SCHEMA_INSTANCE = "http://www.w3.org/2001/XMLSchema-instance";
+        public const string SCHEMA_INSTANCE = "http://www.w3.org/2001/XMLSchema-instance";
 
         /// <summary>
         /// Namespace defined in XSD 1.1 for schema versioning: "http://www.w3.org/2007/XMLSchema-versioning"
         /// </summary>
-        public static readonly string SCHEMA_VERSIONING = "http://www.w3.org/2007/XMLSchema-versioning";
+        public const string SCHEMA_VERSIONING = "http://www.w3.org/2007/XMLSchema-versioning";
 
         /// <summary>
         /// Fixed namespace name for Saxon SQL extension: "http://saxon.sf.net/sql"
         /// </summary>
-        public static readonly string SQL = "http://saxon.sf.net/sql";
+        public const string SQL = "http://saxon.sf.net/sql";
 
         /// <summary>
         /// Fixed namespace name for EXSLT/Common: "http://exslt.org/common"
         /// </summary>
-        public static readonly string EXSLT_COMMON = "http://exslt.org/common";
-
-        /// <summary>
-        /// Fixed namespace name for EXSLT/math: "http://exslt.org/math"
-        /// </summary>
-        public static readonly string EXSLT_MATH = "http://exslt.org/math";
-
-        /// <summary>
-        /// Fixed namespace name for EXSLT/sets: "http://exslt.org/sets"
-        /// </summary>
-        public static readonly string EXSLT_SETS = "http://exslt.org/sets";
-
-        /// <summary>
-        /// Fixed namespace name for EXSLT/date: "http://exslt.org/dates-and-times"
-        /// </summary>
-        public static readonly string EXSLT_DATES_AND_TIMES = "http://exslt.org/dates-and-times";
-
-        /// <summary>
-        /// Fixed namespace name for EXSLT/random: "http://exslt.org/random"
-        /// </summary>
-        public static readonly string EXSLT_RANDOM = "http://exslt.org/random";
-
+        public const string EXSLT_COMMON = "http://exslt.org/common";
+        
         /// <summary>
         /// The standard namespace for functions and operators: "http://www.w3.org/2005/xpath-functions"
         /// </summary>
-        public static readonly string FN = "http://www.w3.org/2005/xpath-functions";
+        public const string FN = "http://www.w3.org/2005/xpath-functions";
 
         /// <summary>
         /// The standard namespace for XQuery output declarations: "http://www.w3.org/2010/xslt-xquery-serialization"
         /// </summary>
-        public static readonly string OUTPUT = "http://www.w3.org/2010/xslt-xquery-serialization";
+        public const string OUTPUT = "http://www.w3.org/2010/xslt-xquery-serialization";
 
 
         /// <summary>
         /// The standard namespace for system error codes: "http://www.w3.org/2005/xqt-errors"
         /// </summary>
-        public static readonly string ERR = "http://www.w3.org/2005/xqt-errors";
+        public const string ERR = "http://www.w3.org/2005/xqt-errors";
 
         /// <summary>
         /// Predefined XQuery namespace for local functions: "http://www.w3.org/2005/xquery-local-functions"
         /// </summary>
-        public static readonly string LOCAL = "http://www.w3.org/2005/xquery-local-functions";
+        public const string LOCAL = "http://www.w3.org/2005/xquery-local-functions";
 
         /// <summary>
         /// Namespace name for the XPath 3.0 math functions: "http://www.w3.org/2005/xpath-functions/math"
         /// </summary>
-        public static readonly string MATH = "http://www.w3.org/2005/xpath-functions/math";
+        public const string MATH = "http://www.w3.org/2005/xpath-functions/math";
 
         /// <summary>
         /// Namespace name for XPath 3.0 functions associated with maps: "http://www.w3.org/2005/xpath-functions/map"
         /// </summary>
-        public readonly static string MAP_FUNCTIONS = "http://www.w3.org/2005/xpath-functions/map";
+        public const string MAP = "http://www.w3.org/2005/xpath-functions/map";
 
         /// <summary>
         /// Namespace name for XPath 3.0 functions associated with arrays: "http://www.w3.org/2005/xpath-functions/array"
         /// </summary>
-        public readonly static string ARRAY_FUNCTIONS = "http://www.w3.org/2005/xpath-functions/array";
+        public const string ARRAY = "http://www.w3.org/2005/xpath-functions/array";
 
         /// <summary>
         /// The XHTML namespace: "http://www.w3.org/1999/xhtml"
         /// </summary>
-        public static readonly string XHTML = "http://www.w3.org/1999/xhtml";
+        public const string XHTML = "http://www.w3.org/1999/xhtml";
 
         /// <summary>
         /// The SVG namespace: "http://www.w3.org/2000/svg"
         /// </summary>
-        public static readonly string SVG = "http://www.w3.org/2000/svg";
+        public const string SVG = "http://www.w3.org/2000/svg";
 
         /// <summary>
         /// The MathML namespace: "http://www.w3.org/1998/Math/MathML"
         /// </summary>
-        public static readonly string MATHML = "http://www.w3.org/1998/Math/MathML";
+        public const string MATHML = "http://www.w3.org/1998/Math/MathML";
 
         /// <summary>
         /// The XMLNS namespace (used in DOM): "http://www.w3.org/2000/xmlns/"
         /// </summary>
-        public static readonly string XMLNS = "http://www.w3.org/2000/xmlns/";
+        public const string XMLNS = "http://www.w3.org/2000/xmlns/";
 
         /// <summary>
         /// The XLink namespace: "http://www.w3.org/1999/xlink"
         /// </summary>
-        public static readonly string XLINK = "http://www.w3.org/1999/xlink";
+        public const string XLINK = "http://www.w3.org/1999/xlink";
 
         /// <summary>
         /// The xquery-option namespace for the XQuery 3.0 feature names: "http://www.w3.org/2011/xquery-options"
         /// </summary>
-        public static readonly string XQUERY_OPTIONS = "http://www.w3.org/2011/xquery-options";
+        public const string XQUERY_OPTIONS = "http://www.w3.org/2011/xquery-options";
 
         /// <summary>
         /// The xquery namespace for the XQuery 3.0 declare option: "http://www.w3.org/2012/xquery"
         /// </summary>
-        public static readonly string XQUERY = "http://www.w3.org/2012/xquery";
-
-        /// <summary>
-        /// Namespace for types representing external Java objects: "http://saxon.sf.net/java-type"
-        /// </summary>
-        public static readonly string JAVA_TYPE = "http://saxon.sf.net/java-type";
-
-        /// <summary>
-        /// Namespace for types representing external .NET objects: "http://saxon.sf.net/clitype"
-        /// </summary>
-        public static readonly string DOT_NET_TYPE = "http://saxon.sf.net/clitype";
-
+        public const string XQUERY = "http://www.w3.org/2012/xquery";
+        
         /// <summary>
         /// Namespace for names allocated to anonymous types: "http://ns.saxonica.com/anonymous-type". 
         /// This exists so that a name fingerprint can be allocated for use as a type annotation.
         /// </summary>
-        public static readonly string ANONYMOUS = "http://ns.saxonica.com/anonymous-type";
+        public const string ANONYMOUS = "http://ns.saxonica.com/anonymous-type";
 
         /// <summary>
         /// Namespace for the Saxon serialization of the schema component model: "http://ns.saxonica.com/schema-component-model"
         /// </summary>
-        public static readonly string SCM = "http://ns.saxonica.com/schema-component-model";
-
-        /// <summary>
-        /// URI identifying the Saxon object model for use in the JAXP 1.3 XPath API: "http://saxon.sf.net/jaxp/xpath/om"
-        /// </summary>
-        public static readonly string OBJECT_MODEL_SAXON = "http://saxon.sf.net/jaxp/xpath/om";
-
+        public const string SCM = "http://ns.saxonica.com/schema-component-model";
+        
         /// <summary>
         /// URI identifying the Unicode codepoint collation
         /// </summary>
-        public static readonly string CODEPOINT_COLLATION_URI =
+        public const string CODEPOINT_COLLATION_URI =
             "http://www.w3.org/2005/xpath-functions/collation/codepoint";
 
         /// <summary>
         /// URI identifying the HML5 ascii-case-blind collation
         /// </summary>
-        public static readonly string HTML5_CASE_BLIND_COLLATION_URI =
+        public const string HTML5_CASE_BLIND_COLLATION_URI =
             "http://www.w3.org/2005/xpath-functions/collation/html5-ascii-case-insensitive";
 
         /// <summary>
         /// Namespace for the names of generated global variables: "http://saxon.sf.net/generated-global-variable"
         /// </summary>
-        public static readonly string SAXON_GENERATED_GLOBAL = SAXON + "generated-global-variable";
+        public const string SAXON_GENERATED_GLOBAL = SAXON + "generated-global-variable";
 
         /// <summary>
         /// Namespace for the Saxon configuration file: "http://saxon.sf.net/ns/configuration"
         /// </summary>
-        public static readonly string SAXON_CONFIGURATION = "http://saxon.sf.net/ns/configuration";
+        public const string SAXON_CONFIGURATION = "http://saxon.sf.net/ns/configuration";
 
         /// <summary>
         /// Namespace for the EXPath zip module: "http://expath.org/ns/zip" 
         /// </summary>
-        public static readonly string EXPATH_ZIP = "http://expath.org/ns/zip";
+        public const string EXPATH_ZIP = "http://expath.org/ns/zip";
 
 
         /// <summary>
@@ -211,8 +176,7 @@ namespace Saxon.Api {
         public static bool IsReserved( /*@Nullable*/ string uri) {
             return JNamespaceConstant.isReserved(uri);
         }
-
-
+        
         /// <summary>
         /// Determine whether a namespace is a reserved namespace in XQuery 3.1
         /// </summary>
@@ -224,3 +188,5 @@ namespace Saxon.Api {
         
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

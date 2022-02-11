@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Saxon.Hej;
 
 
@@ -61,4 +59,6 @@ namespace Saxon.Api {
 
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited
 

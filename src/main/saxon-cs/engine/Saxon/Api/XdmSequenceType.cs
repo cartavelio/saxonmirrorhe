@@ -42,27 +42,14 @@ namespace Saxon.Api {
 
         public XdmSequenceType(XdmItemType itemType, char occurrenceIndicator)
         {
-            int occ;
-            switch (occurrenceIndicator)
-            {
-                case ZERO_OR_MORE:
-                    occ = StaticProperty.ALLOWS_ZERO_OR_MORE;
-                    break;
-                case ONE_OR_MORE:
-                    occ = StaticProperty.ALLOWS_ONE_OR_MORE;
-                    break;
-                case ZERO_OR_ONE:
-                    occ = StaticProperty.ALLOWS_ZERO_OR_ONE;
-                    break;
-                case ONE:
-                    occ = StaticProperty.EXACTLY_ONE;
-                    break;
-                case ZERO:
-                    occ = StaticProperty.ALLOWS_ZERO;
-                    break;
-                default:
-                    throw new ArgumentException("Unknown occurrence indicator");
-            }
+            int occ = occurrenceIndicator switch {
+                ZERO_OR_MORE => StaticProperty.ALLOWS_ZERO_OR_MORE,
+                ONE_OR_MORE => StaticProperty.ALLOWS_ONE_OR_MORE,
+                ZERO_OR_ONE => StaticProperty.ALLOWS_ZERO_OR_ONE,
+                ONE => StaticProperty.EXACTLY_ONE,
+                ZERO => StaticProperty.ALLOWS_ZERO,
+                _ => throw new ArgumentException("Unknown occurrence indicator")
+            };
             this.itemType = itemType;
             this.occurrence = occ;
             this.occurrenceIn = occurrenceIndicator;
@@ -97,8 +84,12 @@ namespace Saxon.Api {
             }
             return new XdmSequenceType(itemType, occ);
         }
+        
+        /// <summary>
+        /// The ItemType part of the SequenceType
+        /// </summary>
 
-       
+        public XdmItemType ItemType => itemType;
 
         internal SequenceType ToSequenceType() {
             ItemType jit = itemType.Unwrap();
@@ -110,3 +101,5 @@ namespace Saxon.Api {
 
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

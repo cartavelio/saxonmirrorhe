@@ -15,8 +15,8 @@ namespace Saxon.Api {
         // internal constructor: Initializes a new instance of the <see cref="Saxon.Api.XsltPackage"/> class.
         internal XsltPackage(Processor p, Saxon.Hej.s9api.XsltPackage pp)
         {
-            this.package = pp;
-            this.Processor = p;
+            package = pp;
+            Processor = p;
 
         }
 
@@ -94,3 +94,5 @@ namespace Saxon.Api {
         
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

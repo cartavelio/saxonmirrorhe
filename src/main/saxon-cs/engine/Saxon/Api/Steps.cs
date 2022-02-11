@@ -666,20 +666,20 @@ namespace Saxon.Api {
                 item => {
                     IList<XdmAtomicValue> list = new List<XdmAtomicValue>();
 
-                    if (item is XdmAtomicValue) {
-                        list.Add((XdmAtomicValue) item);
+                    if (item is XdmAtomicValue atomicValue) {
+                        list.Add(atomicValue);
                     }
-                    else if (item is XdmNode) {
+                    else if (item is XdmNode node) {
                         try {
-                            var value = ((XdmNode) item).value;
+                            var value = node.value;
                             list.Add((XdmAtomicValue) XdmValue.Wrap(((NodeInfo) value).atomize())[0]);
                         }
-                        catch (Exception ex) {
+                        catch (Exception) {
                             throw new Exception("Cannot atomize supplied value");
                         }
                     }
-                    else if (item is XdmArray) {
-                        list.Add((XdmAtomicValue) XdmValue.Wrap(((ArrayItem) ((XdmArray) item).value).atomize()));
+                    else if (item is XdmArray array) {
+                        list.Add((XdmAtomicValue) XdmValue.Wrap(((ArrayItem) array.value).atomize()));
                     }
                     else {
                         throw new Exception("Cannot atomize supplied value");
@@ -749,32 +749,38 @@ namespace Saxon.Api {
             IList<Step<XdmNode, XdmNode>> pathSteps = new List<Step<XdmNode, XdmNode>>();
 
             foreach (string step in steps) {
-                if (step.Equals("/")) {
-                    pathSteps.Add(Steps.Root().Where(Predicates.IsDocument()));
-                }
-                else if (step.Equals("..")) {
-                    pathSteps.Add(Steps.Parent());
-                }
-                else if (step.Equals("*")) {
-                    pathSteps.Add(Steps.Child(Predicates.IsElement()));
-                }
-                else if (step.Equals("//")) {
-                    pathSteps.Add(Steps.DescendantOrSelf());
-                }
-                else if (step.StartsWith("@")) {
-                    String name = step.Substring(1);
-                    if (!Saxon.Hej.om.NameChecker.isValidNCName(name)) {
-                        throw new System.ArgumentException("Invalid attribute name " + name);
-                    }
+                switch (step) {
+                    case "/":
+                        pathSteps.Add(Steps.Root().Where(Predicates.IsDocument()));
+                        break;
+                    case "..":
+                        pathSteps.Add(Steps.Parent());
+                        break;
+                    case "*":
+                        pathSteps.Add(Steps.Child(Predicates.IsElement()));
+                        break;
+                    case "//":
+                        pathSteps.Add(Steps.DescendantOrSelf());
+                        break;
+                    default: {
+                        if (step.StartsWith("@")) {
+                            string name = step[1..];
+                            if (!Saxon.Hej.om.NameChecker.isValidNCName(name)) {
+                                throw new System.ArgumentException("Invalid attribute name " + name);
+                            }
 
-                    pathSteps.Add(Steps.Attribute(name));
-                }
-                else {
-                    if (!Saxon.Hej.om.NameChecker.isValidNCName(step)) {
-                        throw new System.ArgumentException("Invalid element name " + step);
-                    }
+                            pathSteps.Add(Steps.Attribute(name));
+                        }
+                        else {
+                            if (!Saxon.Hej.om.NameChecker.isValidNCName(step)) {
+                                throw new System.ArgumentException("Invalid element name " + step);
+                            }
 
-                    pathSteps.Add(Steps.Child(step));
+                            pathSteps.Add(Steps.Child(step));
+                        }
+
+                        break;
+                    }
                 }
             }
 
@@ -794,15 +800,13 @@ namespace Saxon.Api {
         /// <param name="steps">The constituent steps in the path</param>
         /// <returns>A composite step.</returns>
         public static Step<XdmNode, XdmNode> PathFromList(List<Step<XdmNode, XdmNode>> steps) {
-            if (steps.Count == 0) {
-                return new Step<XdmNode, XdmNode>(item => { return new List<XdmNode>(); });
-            }
-            else if (steps.Count == 1) {
-                return steps.ElementAt(0);
-            }
-            else {
-                return steps.ElementAt(0).Then(PathFromList(steps.GetRange(1, steps.Count - 1)));
-            }
+            return steps.Count switch {
+                0 => new Step<XdmNode, XdmNode>(item => new List<XdmNode>()),
+                1 => steps.ElementAt(0),
+                _ => steps.ElementAt(0).Then(PathFromList(steps.GetRange(1, steps.Count - 1)))
+            };
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited
