@@ -134,7 +134,7 @@ public class Categories {
         iter.forEach(item -> {
             String cat = ((TinyElementImpl)item).getAttributeValue(fp_name);
             IntRangeSet irs = new IntRangeSet();
-            for (NodeInfo r : ((NodeInfo)item).children(NodeKindTest.ELEMENT)) {
+            for (NodeInfo r : ((NodeInfo)item).children(NodeKindTest.ELEMENT::test)) {
                 String from = ((TinyElementImpl)r).getAttributeValue(fp_f);
                 String to = ((TinyElementImpl) r).getAttributeValue(fp_t);
                 irs.addRange(Integer.parseInt(from, 16), Integer.parseInt(to, 16));

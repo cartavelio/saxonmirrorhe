@@ -14,11 +14,11 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 /**
  * ElementImpl implements an element node in the Linked tree model. Subclasses of ElementImpl,
@@ -272,7 +271,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         return attributeMap;
     }
 
-    AxisIterator iterateAttributes(Predicate<? super NodeInfo> test) {
+    AxisIterator iterateAttributes(NodeTest test) {
         if (attributeMap instanceof AttributeMapWithIdentity) {
             // this case needs special care because of the possibility of deleted attribute nodes
             return new Navigator.AxisFilter(((AttributeMapWithIdentity)attributeMap).iterateAttributes(this), test);

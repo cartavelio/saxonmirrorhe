@@ -10,6 +10,7 @@ package net.sf.saxon.tree;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -389,7 +390,7 @@ public class NamespaceNode implements NodeInfo {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
                 return element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);
@@ -579,7 +580,7 @@ public class NamespaceNode implements NodeInfo {
      */
 
     /*@NotNull*/
-    public static AxisIterator makeIterator(final NodeInfo element, Predicate<? super NodeInfo> test) {
+    public static AxisIterator makeIterator(final NodeInfo element, NodeTest test) {
         List<NodeInfo> nodes = new ArrayList<>();
         Iterator<NamespaceBinding> bindings = element.getAllNamespaces().iterator();
         int position = 0;

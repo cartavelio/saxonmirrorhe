@@ -7,16 +7,14 @@
 
 package net.sf.saxon.tree.linked;
 
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.type.Type;
-
-import java.util.function.Predicate;
 
 final class FollowingEnumeration extends TreeEnumeration {
 
     private final NodeImpl root;
 
-    public FollowingEnumeration(NodeImpl node, Predicate<? super NodeInfo> nodeTest) {
+    public FollowingEnumeration(NodeImpl node, NodeTest nodeTest) {
         super(node, nodeTest);
         root = (NodeImpl)node.getRoot();
         // skip the descendant nodes if any

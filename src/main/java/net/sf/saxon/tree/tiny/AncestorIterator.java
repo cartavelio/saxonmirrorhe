@@ -8,9 +8,8 @@
 package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
-
-import java.util.function.Predicate;
 
 /**
  * This class enumerates the ancestor:: or ancestor-or-self:: axes,
@@ -21,9 +20,9 @@ final public class AncestorIterator implements AxisIterator {
 
     private final NodeInfo startNode;
     private NodeInfo current;
-    private final Predicate<? super NodeInfo> test;
+    private final NodeTest test;
 
-    public AncestorIterator(NodeInfo node, Predicate<? super NodeInfo> nodeTest) {
+    public AncestorIterator(NodeInfo node, NodeTest nodeTest) {
         test = nodeTest;
         startNode = node;
         current = startNode;

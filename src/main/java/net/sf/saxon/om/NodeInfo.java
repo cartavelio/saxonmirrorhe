@@ -12,13 +12,14 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-
 import net.sf.saxon.tree.jiter.WrappingJavaIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
@@ -434,10 +435,12 @@ public interface NodeInfo extends Source, Item, Location {
      *                                       requested and this axis is not supported for this implementation.
      * @see AxisInfo
      * @since 8.4. Changed in 10.0 to accept any {@code Predicate<NodeInfo>} as the second argument. It is still
-     * possible to supply an {@link NodeTest}, because {@code NodeTest} implements {@code Predicate<NodeInfo>}.
+     * possible to supply a {@link NodeTest}, because {@code NodeTest} implements {@code Predicate<NodeInfo>}.
+     * Change reverted in 11.0 because it doesn't work for C#; instead it is possible to supply a {@link NodePredicate},
+     * which is a {@link NodeTest} that wraps a {@code Predicate<NodeInfo>}.
      */
 
-    AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest);
+    AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest);
 
     /**
      * Get the string value of a given attribute of this node
@@ -494,6 +497,8 @@ public interface NodeInfo extends Source, Item, Location {
     /**
      * Return the sequence of children of this node, filtered by a supplied predicate,
      * as an {@code Iterable}.
+     * @apiNote To supply a NodeTest such as {@link NodeKindTest#ELEMENT} as the filter
+     * condition, write {@code NodeKindTest.ELEMENT::test}.
      * @param filter a condition that the selected children must satisfy
      * @return the children of the node, as an {@code Iterable}.
      */
@@ -501,7 +506,7 @@ public interface NodeInfo extends Source, Item, Location {
     default Iterable<? extends NodeInfo> children(Predicate<? super NodeInfo> filter) {
         if (hasChildNodes()) {
             NodeInfo parent = this;
-            return () -> new WrappingJavaIterator<>(parent.iterateAxis(AxisInfo.CHILD, filter));
+            return () -> new WrappingJavaIterator<>(parent.iterateAxis(AxisInfo.CHILD, new NodePredicate(filter)));
         } else {
             return Collections.emptyList();
         }
