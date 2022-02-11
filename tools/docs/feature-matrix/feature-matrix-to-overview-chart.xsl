@@ -106,7 +106,7 @@
                                                                 <xsl:text>SaxonJS further info: </xsl:text>
                                                                 <xsl:for-each
                                                                     select="$JSdetails">
-                                                                    <a href="../saxon-js/documentation/index.html#!{@JSlink}"
+                                                                    <a href="https://www.saxonica.com/saxon-js/documentation/index.html#!{@JSlink}"
                                                                         class="bodylink">
                                                                         <xsl:value-of select="@JSname"/>
                                                                     </a>
