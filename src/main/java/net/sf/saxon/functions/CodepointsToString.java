@@ -11,10 +11,10 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.StringItem;
-import net.sf.saxon.str.UnicodeBuilder;
 
 import java.util.function.IntPredicate;
 

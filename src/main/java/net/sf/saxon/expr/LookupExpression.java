@@ -135,6 +135,9 @@ public class LookupExpression extends BinaryExpression {
         Configuration config = visitor.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
 
+        if (Literal.isEmptySequence(getLhsExpression())) {
+            return getLhsExpression();
+        }
         // Running typeCheck on the first operand can lose static type information if it's declared
         // with a tuple type. So check this first.
         ItemType originalType = getLhsExpression().getItemType();
@@ -388,8 +391,16 @@ public class LookupExpression extends BinaryExpression {
         } else if (isAtomicLookup) {
             // TODO: map over sequences?
             AtomicValue val = ((AtomicValue)getLhsExpression().evaluateItem(context));
-            StringItem field = ((StringItem) getRhsExpression().evaluateItem(context));
-            return AtomicComponent.getComponentValue(val, field.getStringValue());
+            Item rhs = getRhsExpression().evaluateItem(context);
+            if (rhs instanceof StringItem) {
+                StringItem field = ((StringItem) getRhsExpression().evaluateItem(context));
+                return AtomicComponent.getComponentValue(val, field.getStringValue());
+            } else {
+                throw new XPathException(
+                        "An item on the LHS of the '?' operator is an atomic value, but a value on the RHS of the operator (" +
+                                rhs.toShortString() + ") is not a string", "XPTY0004");
+
+            }
         } else {
             SequenceIterator baseIterator = getLhsExpression().iterate(context);
             GroundedValue rhs = getRhsExpression().iterate(context).materialize();

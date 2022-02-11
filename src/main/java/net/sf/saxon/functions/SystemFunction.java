@@ -255,9 +255,13 @@ public abstract class SystemFunction extends AbstractFunction {
         OperandRole[] roles = new OperandRole[getArity()];
         OperandUsage[] usages = details.usage;
         try {
-            for (int i = 0; i < getArity(); i++) {
+            for (int i = 0; i < usages.length; i++) {
                 roles[i] = new OperandRole(0, usages[i], getRequiredType(i));
             }
+//            int last = usages.length - 1;
+//            for (int i = usages.length; i < arity; i++) {
+//                roles[i] = new OperandRole(0, usages[last], getRequiredType(last));
+//            }
         } catch (ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
         }
