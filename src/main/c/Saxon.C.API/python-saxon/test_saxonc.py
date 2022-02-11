@@ -332,26 +332,109 @@ def testEmbeddedStylesheet(saxonproc, data_dir):
     assert node is not None
 
 def testContext2NotRootNamedTemplate(saxonproc, files_dir, data_dir):
+        trans = saxonproc.new_xslt30_processor()
+        input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
+        executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='$x'/>]</xsl:template></xsl:stylesheet>")
+        if executable is None and trans.exception_occurred:
+            print(trans.error_message)
+        assert executable is not None
+        executable.set_global_context_item(xdm_item=input_)
+        result = executable.call_template_returning_value("main")
+        if executable.exception_occurred:
+            print(executable.error_message)
+        assert result is not None
+        print(result.head.string_value)
+        assert "[text]" in result.head.string_value
+
+        result2 = executable.call_template_returning_string("main")
+        if executable.exception_occurred:
+            print(executable.error_message)
+        print(result2)
+        assert result2 is not None
+        assert "text" in result2
+
+
+def testNamedTemplateDefault(saxonproc, files_dir, data_dir):
     trans = saxonproc.new_xslt30_processor()
     input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
-    executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='$x'/>]</xsl:template></xsl:stylesheet>")
+    executable = trans.compile_stylesheet(stylesheet_text = '''
+     <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+      version="3.0"
+      xmlns:xs="http://www.w3.org/2001/XMLSchema"
+      exclude-result-prefixes="#all"
+      expand-text="yes">
+    
+      <xsl:output method="html" indent="yes" html-version="5"/>
+    
+      <xsl:template match="/" name="xsl:initial-template">
+        <html>
+          <head>
+            <title>Test</title>
+          </head>
+          <body>
+            <h1>Test</h1>
+            <ol>
+              <xsl:iterate select="1 to 5">
+                <li>Item {.}</li>
+              </xsl:iterate>
+            </ol>
+          </body>
+        </html>
+        <xsl:comment>Run with {system-property('xsl:product-name')} {system-property('xsl:product-version')} {system-property('Q{http://saxon.sf.net/}platform')}</xsl:comment>
+      </xsl:template>
+    
+    </xsl:stylesheet>
+            
+             ''')
     if executable is None and trans.exception_occurred:
         print(trans.error_message)
     assert executable is not None
-    executable.set_global_context_item(xdm_item=input_)
-    result = executable.call_template_returning_value("main")
-    if executable.exception_occurred:
-        print(executable.error_message)
-    assert result is not None
-    print(result.head.string_value)
-    assert "[text]" in result.head.string_value
 
-    result2 = executable.call_template_returning_string("main")
-    if executable.exception_occurred:
-        print(executable.error_message)
-    print(result2)
-    assert result2 is not None
-    assert "text" in result2
+    result = executable.call_template_returning_string(None)
+
+    assert result is not None
+    assert "Item 3" in result
+
+
+def testNamedTemplateToFileDefault(saxonproc):
+    trans = saxonproc.new_xslt30_processor()
+    input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
+    executable = trans.compile_stylesheet(stylesheet_text = '''
+     <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+      version="3.0"
+      xmlns:xs="http://www.w3.org/2001/XMLSchema"
+      exclude-result-prefixes="#all"
+      expand-text="yes">
+    
+      <xsl:output method="html" indent="yes" html-version="5"/>
+    
+      <xsl:template match="/" name="xsl:initial-template">
+        <html>
+          <head>
+            <title>Test</title>
+          </head>
+          <body>
+            <h1>Test</h1>
+            <ol>
+              <xsl:iterate select="1 to 5">
+                <li>Item {.}</li>
+              </xsl:iterate>
+            </ol>
+          </body>
+        </html>
+        <xsl:comment>Run with {system-property('xsl:product-name')} {system-property('xsl:product-version')} {system-property('Q{http://saxon.sf.net/}platform')}</xsl:comment>
+      </xsl:template>
+    
+    </xsl:stylesheet>
+            
+             ''')
+    if executable is None and trans.exception_occurred:
+        print(trans.error_message)
+    assert executable is not None
+
+    executable.call_template_returning_file(output_file="result_For_call_template.xml")
+    assert isfile("result_For_call_template.xml") == True
+
 
 def testUseAssociated(saxonproc, files_dir):
     trans = saxonproc.new_xslt30_processor()
@@ -626,6 +709,7 @@ def testApplyTemplatesToFile(saxonproc):
     executable.set_initial_match_selection(xdm_value=inputDoc)
     executable.apply_templates_returning_file(output_file="output123.xml")
     assert isfile("output123.xml") == True
+
 
 '''@pytest.mark.skip('Test can only run with a license file present')'''
 def testCallTemplateWithResultValidation(files_dir):
@@ -1045,6 +1129,21 @@ def testMapValues(saxonproc):
     assert item.integer_value == 5
 
 
+def testXdmArray1(saxonproc):
+
+    list1 = [1,2,3]
+
+    xdmValueList1 = [saxonproc.make_integer_value(i) for i in list1]
+
+
+    xdmArray1 = saxonproc.make_array(xdmValueList1)
+
+    assert xdmArray1 is not None
+    assert isinstance(xdmArray1, PyXdmArray)
+
+    assert xdmArray1.array_length == 3
+
+
 
 def testMapPutOperations(saxonproc):
 
@@ -1077,6 +1176,28 @@ def testConversionFromPythonMap(saxonproc):
     aVar =   map.get("a")
     assert aVar is not None
     aVar.head.integer_value == 4
+
+
+def testArrayFromList(saxonproc):
+    list1 = [1,2,3]
+
+    xdmValueList1 = [saxonproc.make_integer_value(i) for i in list1]
+
+    assert xdmValueList1 is not None
+
+    xdmArray1 = saxonproc.make_array(xdmValueList1)
+
+    assert xdmArray1 is not None
+    assert isinstance(xdmArray1, PyXdmArray)
+
+    assert xdmArray1.array_length == 3
+    list1FromXdmArray = xdmArray1.as_list()
+
+    assert list1FromXdmArray is not None
+    assert len(list1FromXdmArray) == 3
+    assert isinstance(list1FromXdmArray[0].head.get_atomic_value(), PyXdmAtomicValue)
+    assert list1FromXdmArray[0].head.get_atomic_value().integer_value == 1
+    assert list1FromXdmArray[1].head.get_atomic_value().integer_value == 2
 
 
 def testMapAsFunction():

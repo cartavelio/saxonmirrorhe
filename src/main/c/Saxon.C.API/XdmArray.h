@@ -53,13 +53,23 @@ public:
      */
     XdmArray(jobject obj);
 
+
+
+    //! XdmArray constructor which is used a wrapper class for the Java XdmArray object - internal use
+    /**
+     * @param obj - The internal Java object for the XdmArray is wrapped here in the C++ XdmArray
+     * @param len - The length of the array if known
+     */
+    XdmArray(jobject obj, int len);
+
+
     //! Get the number of members in the array
     /**
      *
      * @return the number of members in the array. (Note that the <code>size()</code> method returns 1 (one),
      * because an XDM array is an item.)
      */
-    int arrayLength() const;
+    int arrayLength();
 
     /**
      * Get the n'th member in the array, counting from zero.
@@ -149,6 +159,7 @@ public:
 
 
 private:
+    int arrayLen;
 
 
 
