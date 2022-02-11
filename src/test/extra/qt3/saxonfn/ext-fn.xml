@@ -71,7 +71,10 @@
         <result>
             <all-of>
                 <assert-type>xs:integer</assert-type>
-                <assert-string-value>20</assert-string-value>
+                <any-of>
+                    <assert-eq>20</assert-eq>  <!-- SAX Parser on Java -->
+                    <assert-eq>4</assert-eq>   <!-- Microsoft parser on .NET -->
+                </any-of>
             </all-of>
         </result>
     </test-case>

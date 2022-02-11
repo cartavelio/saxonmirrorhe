@@ -377,6 +377,7 @@
       <created by="Michael Kay" on="2014-04-13"/>
       <environment>
          <source role="." file="../../docs/big-transaction-file.xml"/>
+         <!--<source role="." file="../../docs/transactions.xml"/>-->
       </environment>     
       <dependencies>
          <spec value="XSLT20+"/>
@@ -385,7 +386,7 @@
          <stylesheet file="threads-022.xsl"/>
       </test>
       <result>
-         <assert>true()</assert>
+         <assert>/out = 4630623</assert>
       </result>
    </test-case>
    

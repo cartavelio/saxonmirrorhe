@@ -2,6 +2,10 @@
 <test-set xmlns:xs="http://www.w3.org/2001/XMLSchema"
    xmlns="http://www.w3.org/2012/10/xslt-test-catalog" name="zip">
    <description>Tests zip</description>
+   
+   <dependencies>
+      <saxon:platform value="J" xmlns:saxon="http://saxon.sf.net/"/>
+   </dependencies>
 
    <test-case name="zip-001">
       <description>Test of arch:entries</description>

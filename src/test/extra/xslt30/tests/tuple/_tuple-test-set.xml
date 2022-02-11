@@ -4,18 +4,16 @@
    name="tuple">
    <description>Tests tuple types (Saxon extension proposed for XSLT 4.0)</description>
    
-   <dependencies>
-      <feature value="Saxon-PE"/>
-   </dependencies>
+
    
    <test-case name="tuple-001">
       <description>Basic use case for tuple types; use in "as" attributes</description>
       <created by="Michael Kay" on="2020-01-27"/>
-      <environment>
+      <!--<environment>
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
-      </environment>
+      </environment>-->
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-001.xsl"/>
@@ -33,7 +31,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-002.xsl"/>
@@ -50,7 +48,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-003.xsl"/>
@@ -67,7 +65,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-004.xsl"/>
@@ -84,7 +82,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-005.xsl"/>
@@ -101,7 +99,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-006.xsl"/>
@@ -118,7 +116,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-007.xsl"/>
@@ -135,7 +133,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-008.xsl"/>
@@ -152,13 +150,13 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-009.xsl"/>
       </test>
       <result>
-         <error code="XTDY0050"/>
+         <error code="XPDY0050"/>
       </result>
    </test-case>
    
@@ -169,7 +167,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-010.xsl"/>
@@ -189,7 +187,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-011.xsl"/>
@@ -209,7 +207,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-012.xsl"/>
@@ -229,7 +227,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-013.xsl"/>
@@ -246,7 +244,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-014.xsl"/>
@@ -263,7 +261,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-015.xsl"/>
@@ -280,7 +278,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-016.xsl"/>
@@ -297,7 +295,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-017.xsl"/>
@@ -314,7 +312,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-018.xsl"/>
@@ -331,7 +329,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-019.xsl"/>
@@ -348,7 +346,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-020.xsl"/>
@@ -365,7 +363,7 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-021.xsl"/>
@@ -382,7 +380,7 @@
       <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
     </environment>
     <dependencies>
-      <spec value="XSLT30+"/>
+      <spec value="XSLT40+"/>
     </dependencies>
     <test>
       <stylesheet file="tuple-022.xsl"/>
@@ -399,13 +397,13 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:integer, j as xs:integer)'"/>
-         <param name="S" static="true" select="'tuple(i as xs:integer, *)'"/>
+         <param name="T" static="true" select="'record(i as xs:integer, j as xs:integer)'"/>
+         <param name="S" static="true" select="'record(i as xs:integer, *)'"/>
       </test>
       <result>
          <assert>/out='true'</assert>
@@ -419,13 +417,13 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:integer, j as xs:integer)'"/>
-         <param name="S" static="true" select="'tuple(i as xs:integer, j as xs:decimal)'"/>
+         <param name="T" static="true" select="'record(i as xs:integer, j as xs:integer)'"/>
+         <param name="S" static="true" select="'record(i as xs:integer, j as xs:decimal)'"/>
       </test>
       <result>
          <assert>/out='true'</assert>
@@ -439,13 +437,13 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:integer)'"/>
-         <param name="S" static="true" select="'tuple(i as xs:integer, j as xs:decimal)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:integer)'"/>
+         <param name="S" static="true" select="'record(i as xs:integer, j as xs:decimal)'"/>
       </test>
       <result>
          <assert>/out='false'</assert>
@@ -459,13 +457,13 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, *)'"/>
-         <param name="S" static="true" select="'tuple(j as xs:string, *)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, *)'"/>
+         <param name="S" static="true" select="'record(j as xs:string, *)'"/>
       </test>
       <result>
          <assert>/out='false'</assert>
@@ -479,13 +477,13 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, *)'"/>
-         <param name="S" static="true" select="'tuple(i as xs:decimal+, *)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, *)'"/>
+         <param name="S" static="true" select="'record(i as xs:decimal+, *)'"/>
       </test>
       <result>
          <assert>/out='true'</assert>
@@ -499,13 +497,13 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:NCName)'"/>
-         <param name="S" static="true" select="'tuple(i as xs:decimal+, j as xs:string+)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:NCName)'"/>
+         <param name="S" static="true" select="'record(i as xs:decimal+, j as xs:string+)'"/>
       </test>
       <result>
          <assert>/out='true'</assert>
@@ -519,12 +517,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:NCName)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:NCName)'"/>
          <param name="S" static="true" select="'map(xs:string, xs:anyAtomicType)'"/>
       </test>
       <result>
@@ -539,12 +537,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:NCName, *)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:NCName, *)'"/>
          <param name="S" static="true" select="'map(xs:string, xs:anyAtomicType)'"/>
       </test>
       <result>
@@ -559,12 +557,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:NCName, *)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:NCName, *)'"/>
          <param name="S" static="true" select="'map(*)'"/>
       </test>
       <result>
@@ -579,12 +577,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:decimal)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:decimal)'"/>
          <param name="S" static="true" select="'map(xs:string, xs:decimal)'"/>
       </test>
       <result>
@@ -599,12 +597,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:decimal*)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:decimal*)'"/>
          <param name="S" static="true" select="'map(xs:string, xs:decimal)'"/>
       </test>
       <result>
@@ -619,12 +617,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:decimal)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:decimal)'"/>
          <param name="S" static="true" select="'map(xs:integer, xs:decimal)'"/>
       </test>
       <result>
@@ -639,12 +637,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:decimal)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:decimal)'"/>
          <param name="S" static="true" select="'function(*)'"/>
       </test>
       <result>
@@ -659,12 +657,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:decimal)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:decimal)'"/>
          <param name="S" static="true" select="'function(xs:string) as xs:decimal?'"/>
       </test>
       <result>
@@ -679,12 +677,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:decimal)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:decimal)'"/>
          <param name="S" static="true" select="'function(xs:string) as xs:decimal'"/>
       </test>
       <result>
@@ -700,12 +698,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:decimal)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:decimal)'"/>
          <param name="S" static="true" select="'function(xs:anyAtomicType) as xs:decimal?'"/>
       </test>
       <result>
@@ -720,12 +718,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:decimal)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:decimal)'"/>
          <param name="S" static="true" select="'function(item()) as xs:decimal?'"/>
       </test>
       <result>
@@ -740,12 +738,12 @@
          <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
       </environment>
       <dependencies>
-         <spec value="XSLT30+"/>
+         <spec value="XSLT40+"/>
       </dependencies>
       <test>
          <stylesheet file="tuple-100.xsl"/>
          <!-- return true if T is a subtype of S -->
-         <param name="T" static="true" select="'tuple(i as xs:decimal, j as xs:decimal)'"/>
+         <param name="T" static="true" select="'record(i as xs:decimal, j as xs:decimal)'"/>
          <param name="S" static="true" select="'function(xs:string, xs:string) as xs:decimal?'"/>
       </test>
       <result>

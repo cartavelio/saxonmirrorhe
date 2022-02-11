@@ -35,7 +35,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="saxon xs">
   </a>  
   <a>
     <xsl:variable name="pi" as="processing-instruction()">
-      <xsl:processing-instruction name="b64.utf-8" select="saxon:stringToBase64Binary('banana&#xa0;custard', 'utf-8')"/>
+      <xsl:processing-instruction name="b64.utf-8" select="saxon:string-to-base64Binary('banana&#xa0;custard', 'utf-8')"/>
     </xsl:variable>
     <xsl:value-of select="serialize($pi, $params)"/>
   </a>    

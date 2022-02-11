@@ -39,7 +39,6 @@ namespace TestRunner {
         }
 
 
-        //file:////C:/work/repositories/hg/xslt30-test/ C:/work/repositories/hg/xslt30-test/results/saxon/ -lang:XT30 -xt30:on
         public static void MainXSLT(string[] args) {
             if (args.Length == 0 || args[0].Equals("-?")) {
                 System.Console.WriteLine("testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
@@ -52,14 +51,13 @@ namespace TestRunner {
 
         public static Predicate<XdmItem> IsTrue(string attName) {
             return element => {
-                if (element is XdmNode) {
-                    string attVal = ((XdmNode) element).GetAttributeValue(attName);
+                if (element is XdmNode node) {
+                    string attVal = node.GetAttributeValue(attName);
                     if (attVal != null) {
                         attVal = attVal.Trim();
-                        return "yes".Equals(attVal) || "1".Equals(attVal) || "true".Equals(attVal);
+                        return ("yes" == attVal || "1" == attVal || "true" == attVal);
                     }
                 }
-
                 return false;
             };
         }
@@ -142,6 +140,7 @@ namespace TestRunner {
                 defaultEnv = localEnvironments["default"];
             }
             catch (Exception) {
+                // no action
             }
 
             foreach (XdmNode env in catalog.Select(Descendant("environment"))) {
@@ -165,7 +164,7 @@ namespace TestRunner {
             XPathCompiler xpath, XdmNode node, bool getStatic, bool tunnel) {
             SysCollGen.Dictionary<QName, XdmValue> params1 = new SysCollGen.Dictionary<QName, XdmValue>();
             int i = 1;
-            string staticTest = getStatic ? "@static='yes'" : "not(@static='yes')";
+            string staticTest = getStatic ? "@static=('yes','true','1')" : "not(@static=('yes','true','1'))";
             foreach (XdmItem parami in xpath.Evaluate("param[" + staticTest + "]", node)) {
                 QName name = GetQNameAttribute(xpath, parami, "@name");
                 string select = ((XdmNode) parami).GetAttributeValue(new QName("select"));
@@ -304,12 +303,10 @@ namespace TestRunner {
                     new EnvironmentVariableResolver());
             }
 
-            Step<XdmNode, XdmNode> testSetDependencies =
-                Root().Then(Child("test-set").Then(Child("dependencies")));
-            Step<XdmNode, XdmNode> testCaseDependencies = Child("dependencies");
+            XdmValue testSetDependencies = new XdmValue(testCase.Parent.Children("dependencies"));
+            XdmValue testCaseDependencies = new XdmValue(testCase.Children("dependencies"));
+            XdmValue allDependencies = testSetDependencies.Append(testCaseDependencies);
 
-
-            XdmValue allDependencies = new XdmValue(testCase.Select(testSetDependencies.Cat(testCaseDependencies)));
             XdmNode lastSpecValue = allDependencies.Select(Path("spec", "@value")).FirstOrDefault();
             String specAtt = lastSpecValue != null ? lastSpecValue.GetStringValue() : "XSLT10+";
             foreach (XdmNode dep in allDependencies.Select(Child(IsElement()))) {
@@ -389,21 +386,31 @@ namespace TestRunner {
             XsltExecutable sheet = env.xsltExecutable;
 
             XmlUrlResolver res = new XmlUrlResolver();
-            string xsltLanguageVersion = specAtt.Contains("XSLT30") || specAtt.Contains("XSLT20+") ? "3.0" : "2.0";
+            //string xsltLanguageVersion = specAtt.Contains("XSLT30") || specAtt.Contains("XSLT20+") ? "3.0" : "2.0";
             if (stylesheet != null) {
-                env.processor.SetProperty(FeatureKeys.ALLOW_MULTITHREADING, "false");
+                //env.processor.SetProperty(FeatureKeys.ALLOW_MULTITHREADING, "false");
                 XsltCompiler compiler = env.xsltCompiler;
                 compiler.ErrorReporter = err => {
                     if (!expectStaticError) {
-                        Console.Error.WriteLine("*** STATIC ERROR: " + err.Message);
+                        Console.Error.WriteLine("*** STATIC ERROR: " + err.ErrorCode.LocalName + " at " + 
+                                                err.Location.getSystemId() + "#" + err.Location.getLineNumber() + 
+                                                "\n   " + err.Message);
                     }
                     outcome.ReportError(err.ErrorCode);
                 };
-                Uri hrefFile = res.ResolveUri(stylesheet.BaseUri, stylesheet.GetAttributeValue(new QName("file")));
-                Stream styleSource = new FileStream(hrefFile.AbsolutePath, FileMode.Open, FileAccess.Read);
-                compiler.BaseUri = hrefFile;
-                compiler.XsltLanguageVersion =
-                    (specAtt.Contains("XSLT30") || specAtt.Contains("XSLT20+") ? "3.0" : "2.0");
+                Stream styleSource;
+                try {
+                    Uri hrefFile = res.ResolveUri(stylesheet.BaseUri, stylesheet.GetAttributeValue(new QName("file")));
+                    styleSource = new FileStream(hrefFile.AbsolutePath, FileMode.Open, FileAccess.Read);
+                    compiler.BaseUri = hrefFile;
+                }
+                catch (Exception e) {
+                    Console.WriteLine("*** Failed to load stylesheet");
+                    recordFailure(testSetName, testName);
+                    throw;
+                }
+                // compiler.XsltLanguageVersion =
+                //     (specAtt.Contains("XSLT30") || specAtt.Contains("XSLT20+") ? "3.0" : "2.0");
                 compiler.ClearParameters();
 
                 SysCollGen.IEnumerable<XdmNode> paramsi = testInput.Select(Child("param").Where(IsTrue("static")));
@@ -604,7 +611,10 @@ namespace TestRunner {
 
                         transformer.BaseOutputURI = baseOutputURI;
 
-                        transformer.MessageListener = msg => outcome.AddXslMessage(msg.Content);
+                        transformer.MessageListener = msg => {
+                            outcome.AddXslMessage(msg.Content);
+                            Console.Error.WriteLine(msg.Content);
+                        };
 
                         XdmValue result = null;
 
@@ -681,7 +691,7 @@ namespace TestRunner {
                                 GetNamedParameters(xpath, init, false, false);
                             SysCollGen.Dictionary<QName, XdmValue> tunnelledParams =
                                 GetNamedParameters(xpath, init, false, true);
-                            if (xsltLanguageVersion.Equals("2.0")) {
+                            if (env.xsltCompiler.XsltLanguageVersion.Equals("2.0")) {
                                 if (!(params1.Count == 0 && tunnelledParams.Count == 0)) {
                                     Console.WriteLine("*** Initial template parameters ignored for XSLT 2.0");
                                 }
@@ -1135,10 +1145,7 @@ namespace TestRunner {
 
         public override bool EnsureDependencySatisfied(XdmNode dependency, Environment env) {
             string type = dependency.NodeName.LocalName;
-            string value = dependency.GetAttributeValue("value");
-            if (value == null) {
-                value = "*";
-            }
+            string value = dependency.GetAttributeValue("value") ?? "*";
 
             String tv = type + "/" + value;
             bool inverse = "false".Equals(dependency.GetAttributeValue("satisfied"));
@@ -1228,9 +1235,11 @@ namespace TestRunner {
                                 : true; //in java the true is null. Check logic on .net
                     }
 
-
+                case "platform":
+                    string[] platforms = value.Split(' ');
+                    return Array.IndexOf(platforms, "CS") >= 0;
                 case "default_language_for_numbering": {
-                    String old = env.processor.GetProperty(Feature<string>.DEFAULT_LANGUAGE);
+                    string old = env.processor.GetProperty(Feature<string>.DEFAULT_LANGUAGE);
                     if (!value.Equals(old)) {
                         env.processor.SetProperty(Feature<string>.DEFAULT_LANGUAGE, value);
                         env.resetActions.Add(envi => {

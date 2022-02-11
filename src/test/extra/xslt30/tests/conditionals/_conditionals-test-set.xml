@@ -3,17 +3,17 @@
   xmlns="http://www.w3.org/2012/10/xslt-test-catalog" name="conditionals">
   <description>Tests saxon extensions for conditional instructions, such as xsl:when/@select and xsl:otherwise/@select</description>
 
-  <environment name="ccc">
-    <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true"
-      xmlns:saxon="http://saxon.sf.net/"/>
-  </environment>
-
+  <environment name="ccc"/>
+  
+  <dependencies>
+    <spec value="XSLT40+"/>
+  </dependencies>
 
   <test-case name="choose-501">
     <description>Simple test of xsl:choose with select attributes on xsl:when and xsl:otherwise</description>
     <created by="Michael Kay" on="2019-12-16"/>
     <dependencies>
-      <spec value="XSLT30+"/>
+      <spec value="XSLT40+"/>
     </dependencies>
     <environment ref="ccc"/>
     <test>
@@ -28,7 +28,7 @@
     <description>If xsl:when/@select is present then element must be empty</description>
     <created by="Michael Kay" on="2019-12-16"/>
     <dependencies>
-      <spec value="XSLT30+"/>
+      <spec value="XSLT40+"/>
     </dependencies>
     <environment ref="ccc"/>
     <test>
@@ -43,7 +43,7 @@
     <description>If xsl:otherwise/@select is present then element must be empty</description>
     <created by="Michael Kay" on="2019-12-16"/>
     <dependencies>
-      <spec value="XSLT30+"/>
+      <spec value="XSLT40+"/>
     </dependencies>
     <environment ref="ccc"/>
     <test>
@@ -58,7 +58,7 @@
     <description>Simple test of xsl:if with then and else attributes</description>
     <created by="Michael Kay" on="2019-12-16"/>
     <dependencies>
-      <spec value="XSLT30+"/>
+      <spec value="XSLT40+"/>
     </dependencies>
     <environment ref="ccc"/>
     <test>
@@ -73,7 +73,7 @@
     <description>Simple test of xsl:if with else attribute and sequence constructor</description>
     <created by="Michael Kay" on="2019-12-16"/>
     <dependencies>
-      <spec value="XSLT30+"/>
+      <spec value="XSLT40+"/>
     </dependencies>
     <environment ref="ccc"/>
     <test>
@@ -88,7 +88,7 @@
     <description>Simple test of xsl:if with then attribute and no else</description>
     <created by="Michael Kay" on="2019-12-16"/>
     <dependencies>
-      <spec value="XSLT30+"/>
+      <spec value="XSLT40+"/>
     </dependencies>
     <environment ref="ccc"/>
     <test>
@@ -103,7 +103,7 @@
     <description>Error case of xsl:if with then attribute and sequence constructor</description>
     <created by="Michael Kay" on="2019-12-16"/>
     <dependencies>
-      <spec value="XSLT30+"/>
+      <spec value="XSLT40+"/>
     </dependencies>
     <environment ref="ccc"/>
     <test>
@@ -118,7 +118,7 @@
     <description>Basic test of "otherwise" operator</description>
     <created by="Michael Kay" on="2019-12-16"/>
     <dependencies>
-      <spec value="XSLT30+"/>
+      <spec value="XSLT40+"/>
     </dependencies>
     <environment ref="ccc"/>
     <test>
@@ -136,7 +136,7 @@
     <description>Precedence of "otherwise" operator: higher than arithmetic operators</description>
     <created by="Michael Kay" on="2019-12-16"/>
     <dependencies>
-      <spec value="XSLT30+"/>
+      <spec value="XSLT40+"/>
     </dependencies>
     <environment ref="ccc"/>
     <test>
@@ -151,7 +151,7 @@
     <description>Precedence of "otherwise" operator: less than "union"</description>
     <created by="Michael Kay" on="2019-12-16"/>
     <dependencies>
-      <spec value="XSLT30+"/>
+      <spec value="XSLT40+"/>
     </dependencies>
     <environment ref="ccc"/>
     <test>
