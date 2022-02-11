@@ -122,6 +122,10 @@
               "target": "Package",
               "version": "[60.1.0-alpha.354, )"
             },
+            "Microsoft.AspNetCore.StaticFiles": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
             "Singulink.Numerics.BigDecimal": {
               "target": "Package",
               "version": "[2.0.0, )"

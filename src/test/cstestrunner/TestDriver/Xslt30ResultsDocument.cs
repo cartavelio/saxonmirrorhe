@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Saxon.Api;
 
-namespace TestRunner
+namespace TestDriver
 {
 
 public class Xslt30ResultsDocument : ResultsDocument {

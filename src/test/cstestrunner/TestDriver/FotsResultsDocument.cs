@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Saxon.Api;
+using TestRunner;
 
-namespace TestRunner
+namespace TestDriver
 {
     class FotsResultsDocument: ResultsDocument
     {
