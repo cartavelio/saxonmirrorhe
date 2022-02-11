@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Saxon.Api.Support {
     internal class ResourceCollectionWrapper {
        
@@ -15,11 +17,11 @@ namespace Saxon.Api.Support {
 
             public Iterator getResources(XPathContext xpc)
             {
-                java.util.List iter = new java.util.ArrayList();
+                List<ResourceWrapper> wrappers = new List<ResourceWrapper>();
                 List<IResource> list = resourceCollection.GetResources(new DynamicContext(xpc));
                 foreach (IResource src in list)
                 {
-                    iter.add(new ResourceWrapper(src));
+                    wrappers.add(new ResourceWrapper(src));
                 }
 
                 return iter.iterator();

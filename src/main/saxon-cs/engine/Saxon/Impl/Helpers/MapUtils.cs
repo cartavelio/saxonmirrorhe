@@ -12,6 +12,9 @@ namespace Saxon.Impl.Helpers {
                 map[pair.Key] = pair.Value;
             }
         }
+        public static SysCollGen.ISet<K> KeySet<K,V>(SysCollGen.IDictionary<K, V> map) {
+            return new SysCollGen.HashSet<K>(map.Keys);
+        }
         
         //If the specified key is not already associated with a value (or is mapped to null),
         //attempts to compute its value using the given mapping function and enters it into this map
@@ -26,6 +29,23 @@ namespace Saxon.Impl.Helpers {
                 map[key] = value;
                 return value;
             }
+        }
+        
+        public static V GetOrDefault<K,V>(SysCollGen.IDictionary<K, V> map, K key, V defaultVal)  {
+            if (map.ContainsKey(key)) {
+                return map[key];
+            } else {
+                return defaultVal;
+            }
+        }
+        
+        public static V PutIfAbsent<K,V>(SysCollGen.IDictionary<K, V> map, K key, V newVal)  {
+            if (map.ContainsKey(key)) {
+                return map[key];
+            } else {
+                map[key] = newVal;
+                return default(V);
+            } 
         }
     }
 }

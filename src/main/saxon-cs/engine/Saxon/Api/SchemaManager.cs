@@ -10,6 +10,7 @@ using net.sf.saxon.om;
 using net.sf.saxon.pull;
 using net.sf.saxon.s9api;
 using net.sf.saxon.type;
+using Saxon.Api.Support;
 
 namespace Saxon.Api {
     /// <summary>
@@ -48,7 +49,7 @@ namespace Saxon.Api {
         {
             this.processor = processor;
             this.schemaManager = processor.JProcessor.getSchemaManager();
-            this.config = (Configuration)processor.Implementation;
+            this.config = processor.Implementation;
             reporter = null;
         }
 
@@ -311,7 +312,7 @@ namespace Saxon.Api {
             else if (type is AtomicType)
             {
                 ItemTypeFactory factory = new ItemTypeFactory(processor.JProcessor);
-                return new XdmAtomicType(factory.getAtomicType(qname);
+                return (XdmAtomicType)factory.getAtomicType(qname);
             }
             else
             {

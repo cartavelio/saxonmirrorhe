@@ -1,5 +1,7 @@
 using java.util;
 using Sys = System;
+using SysColl = System.Collections;
+using SysCollGen = System.Collections.Generic;
 
 namespace java.lang
 {
@@ -38,8 +40,12 @@ namespace java.lang
             return nanoTime() / 1_000_000L;
         }
 
-        public static HashMap<string, string> getenv() {
-            return new HashMap<string, string>(Sys.Environment.GetEnvironmentVariables())
+        public static SysCollGen.IDictionary<string,string> getenv() {
+            SysCollGen.Dictionary<string, string> target = new SysCollGen.Dictionary<string, string>();
+            foreach (SysColl.DictionaryEntry kvp in Sys.Environment.GetEnvironmentVariables()) {
+                target[kvp.Key.ToString()] = kvp.Value.ToString();
+            }
+            return target;
         }
 
         public static string getenv(string name) {

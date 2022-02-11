@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+using SysCollGen = System.Collections.Generic;
 using java.lang;
 
 namespace java.util {
     public class TreeMap<K, V> : Map<K, V> {
-        protected SortedDictionary<K, V> dict;
+        protected SysCollGen.SortedDictionary<K, V> dict;
         public TreeMap() {
             dict = new SortedDictionary<K, V>();
         }
@@ -40,7 +40,7 @@ namespace java.util {
         public Set<K> keySet() {
             return null; // TODO
         }
-        public Collection<K> values() {
+        public Collection<V> values() {
             return null; // TODO
         }
         public Set<Map_Entry<K, V>> entries() {
