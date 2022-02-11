@@ -2192,7 +2192,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @deprecated since 9.9. Use {@link Xslt30Transformer#setResultDocumentHandler(java.util.function.Function)}
      * or {@link XsltController#setResultDocumentResolver(ResultDocumentResolver)} instead.
      */
-
+    @Deprecated
     public void setOutputURIResolver(OutputURIResolver outputURIResolver) {
         defaultXsltCompilerInfo.setOutputURIResolver(outputURIResolver);
     }
@@ -2354,7 +2354,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @since 8.4
      * @deprecated since 10.0; the method has had no effect since Saxon 9.8
      */
-
+    @Deprecated
     public boolean isVersionWarning() {
         return false;
     }
@@ -2368,7 +2368,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @since 8.4
      * @deprecated since 10.0; the method has had no effect since Saxon 9.8
      */
-
+    @Deprecated
     public void setVersionWarning(boolean warn) {
         // no action
     }

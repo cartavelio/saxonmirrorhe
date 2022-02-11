@@ -54,6 +54,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * that accepts nanosecond precision
      */
 
+    @Deprecated
     public TimeValue(byte hour, byte minute, byte second, int microsecond, int tz) {
         this.hour = hour;
         this.minute = minute;

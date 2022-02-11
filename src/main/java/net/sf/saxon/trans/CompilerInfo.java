@@ -398,7 +398,7 @@ public class CompilerInfo {
      * @since 8.7
      * @deprecated since 10.0 - use {@link #setErrorReporter(ErrorReporter)}
      */
-
+    @Deprecated
     public void setErrorListener(ErrorListener listener) {
         setErrorReporter(new ErrorReporterToListener(listener));
     }
@@ -411,7 +411,7 @@ public class CompilerInfo {
      * @since 8.7
      * @deprecated since 10.0 - use {@link #getErrorReporter()}
      */
-
+    @Deprecated
     public ErrorListener getErrorListener() {
         if (errorReporter instanceof ErrorReporterToListener) {
             return ((ErrorReporterToListener) errorReporter).getErrorListener();

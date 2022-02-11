@@ -150,7 +150,7 @@ public class XsltPackage {
      * @since 9.7.0.5
      * @deprecated since 9.9.1.3. Use XsltCompiler.setTargetEdition() to define the target environment.
      */
-
+    @Deprecated
     public void save(File file, String target) throws SaxonApiException {
         try {
             Query.createFileIfNecessary(file);

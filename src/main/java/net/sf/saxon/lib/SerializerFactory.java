@@ -118,7 +118,7 @@ public class SerializerFactory {
      *          if any failure occurs
      * @deprecated since Saxon 9.9: use one of the other {@code getReceiver} methods
      */
-
+    @Deprecated
     public Receiver getReceiver(Result result,
                                 PipelineConfiguration pipe,
                                 Properties props)

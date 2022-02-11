@@ -21,7 +21,6 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.DecimalSymbols;
 import net.sf.saxon.trans.XPathException;
-
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -89,6 +88,7 @@ public class Environment implements URIResolver {
     public static Environment createLocalEnvironment(URI baseURI, int generateByteCode, boolean unfolded, Spec spec, TestDriver testDriver) {
         final Environment environment = new Environment();
         environment.processor = new Processor(!testDriver.driverProc.getSaxonEdition().equals("HE"));
+
         //testDriver.getLicensor().activate(environment.processor);
         //AutoActivate.activate(environment.processor);
         environment.processor.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, testDriver.optimizerFlags);
@@ -119,7 +119,8 @@ public class Environment implements URIResolver {
         } else if (spec == Spec.XT20) {
             throw new AssertionError("Unsupported spec: XSLT 2.0");
         }
-        if (unfolded) {
+        if (unfolded && !baseURI.toString().contains("/upd/")) {
+            // Don't use code injection for update queries because it affects "void" expressions
             testDriver.addInjection(environment.xqueryCompiler);
         }
         if (testDriver.tracing) {
@@ -150,7 +151,12 @@ public class Environment implements URIResolver {
         if (name != null && !driver.quiet) {
             System.err.println("Loading environment " + name);
         }
-        environment.processor = new Processor(!driver.driverProc.getSaxonEdition().equals("HE"));
+        boolean needsLicense = !driver.driverProc.getSaxonEdition().equals("HE");
+        environment.processor = new Processor(needsLicense);
+        if (needsLicense) {
+            environment.processor.getUnderlyingConfiguration()
+                    .importLicenseDetails(driver.driverProc.getUnderlyingConfiguration());
+        }
         if (defaultEnvironment != null) {
             environment.processor.setConfigurationProperty(Feature.XSD_VERSION,
                     defaultEnvironment.processor.getConfigurationProperty(Feature.XSD_VERSION));
@@ -187,7 +193,8 @@ public class Environment implements URIResolver {
             environment.xsltCompiler.setRelocatable(driver.relocatable);
         }
 
-        if (driver.unfolded) {
+        if (driver.unfolded && !env.getBaseURI().toString().contains("/upd/")) {
+            // Don't use code injection for update queries because it affects "void" expressions
             driver.addInjection(environment.xqueryCompiler);
         }
 
