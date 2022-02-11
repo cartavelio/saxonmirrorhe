@@ -6,6 +6,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * This package contains classes specific to the implementation of XQuery
+ * <p>This package contains classes specific to the implementation of XQuery</p>
  */
 package net.sf.saxon.query;

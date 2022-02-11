@@ -6,8 +6,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * This package contains code for serializing trees using the standard W3C-defined serialization methods
+ * <p>This package contains code for serializing trees using the standard W3C-defined serialization methods
  * (xml, html, text, etc). Additional Saxon-specific serialization methods are in package
- * <code>com.saxonica.serialize</code>>.
+ * <code>com.saxonica.serialize</code>.</p>
  */
 package net.sf.saxon.serialize;
