@@ -88,10 +88,6 @@ namespace Saxon.Impl.Helpers {
             return "CS";
         }
 
-        public System.IO.Stream locateResource(string filename, SysCollGen.List<string> messages) {
-            throw new Saxon.Ejava.lang.UnsupportedOperationException();
-        }
-
         public bool hasICUCollator() {
             return true;
         }
