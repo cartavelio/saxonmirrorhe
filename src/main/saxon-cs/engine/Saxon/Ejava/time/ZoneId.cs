@@ -523,17 +523,13 @@ namespace Saxon.Ejava.time {
             return result;
         }
 
-        public int getOffset(long millisecsSinceEpoch) {
-            // Console.Error.WriteLine("TZ datum " + JavaTimeStampToDateTime(date));
-            // Console.Error.WriteLine("TZ offset Timespan " + timeZoneInfo.GetUtcOffset(JavaTimeStampToDateTime(date)));
-            return (int) timeZoneInfo.GetUtcOffset(JavaTimeStampToDateTime(millisecsSinceEpoch)).TotalMilliseconds;
-        }
-
-        private static System.DateTime JavaTimeStampToDateTime(long javaTimeStamp) {
-            // Java timestamp is milliseconds past epoch
-            System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            dtDateTime = dtDateTime.AddMilliseconds(javaTimeStamp).ToLocalTime();
-            return dtDateTime;
+        private static System.DateTime JavaTimeStampToDateTime(long secondsSinceEpoch) {
+            Console.WriteLine("JavaTimeStampToDateTime " + secondsSinceEpoch);
+            return DateTimeOffset.FromUnixTimeSeconds(secondsSinceEpoch).LocalDateTime;
+            // System.DateTime dtDateTime = DateTime.UnixEpoch;
+            // dtDateTime = dtDateTime.AddSeconds(secondsSinceEpoch).ToLocalTime();
+            // //dtDateTime = dtDateTime.AddMilliseconds(javaTimeStamp).ToLocalTime();
+            // return dtDateTime;
         }
 
         public string getDisplayName(bool summerTime) {
@@ -546,9 +542,10 @@ namespace Saxon.Ejava.time {
             }
         }
 
-        public bool inDaylightTime(long millisecsSinceEpoch) {
+        public bool inDaylightTime(long secondsSinceEpoch) {
+            Console.WriteLine("inDaylightTime " + secondsSinceEpoch);
             return timeZoneInfo.SupportsDaylightSavingTime &&
-                   timeZoneInfo.IsDaylightSavingTime(JavaTimeStampToDateTime(millisecsSinceEpoch));
+                   timeZoneInfo.IsDaylightSavingTime(JavaTimeStampToDateTime(secondsSinceEpoch));
         }
         
         public int getOffsetInSecondsAtDateTime(DateTimeValue dateTime) {

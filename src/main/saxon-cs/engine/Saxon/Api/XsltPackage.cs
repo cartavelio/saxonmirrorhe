@@ -11,23 +11,20 @@ namespace Saxon.Api {
     public class XsltPackage
     {
         private Saxon.Hej.s9api.XsltPackage package;
-        private Processor processor;
+
         // internal constructor: Initializes a new instance of the <see cref="Saxon.Api.XsltPackage"/> class.
         internal XsltPackage(Processor p, Saxon.Hej.s9api.XsltPackage pp)
         {
             this.package = pp;
-            this.processor = p;
+            this.Processor = p;
 
         }
 
         /// <summary>
-        /// Get the Processor from which this <c>XsltPackage</c> was constructed
+        /// The Processor from which this <c>XsltPackage</c> was constructed
         /// </summary>
 
-        public Processor Processor
-        {
-            get { return processor; }
-        }
+        public Processor Processor { get; }
 
 
         /// <summary>
@@ -35,20 +32,14 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>The package name</returns>
 
-        public String PackageName
-        {
-            get { return package.getName(); }
-        }
+        public string PackageName => package.getName();
 
 
         /// <summary>Get the version number of the package (the value of the attribute 
         /// <code>xsl:package/@package-version</code></summary>
         /// <returns>The package version number</returns>
 
-        public String Version
-        {
-            get { return package.getVersion(); }
-        }
+        public string Version => package.getVersion();
 
 
         /// <summary>Link this package with the packages it uses to form an executable stylesheet. This process fixes
@@ -62,7 +53,7 @@ namespace Saxon.Api {
             {
                 Saxon.Hej.s9api.XsltExecutable jexecutable = package.link();
                 XsltExecutable executable = new XsltExecutable(jexecutable);
-                executable.InternalProcessor = processor;
+                executable.InternalProcessor = Processor;
                 return executable;
             }
             catch (Saxon.Hej.trans.XPathException e)
