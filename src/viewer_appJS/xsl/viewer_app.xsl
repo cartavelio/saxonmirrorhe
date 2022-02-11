@@ -187,9 +187,9 @@
             </xsl:when>
             <xsl:when test="not(exists($first-item))">
                 <xsl:result-document href="#main" method="ixsl:replace-content">
-                    <h1>Page Not Found</h1>
+                    <h1>Page not found</h1>
                     <p>Error in URI hash-path:</p>
-                    <p>List item '<xsl:value-of select="$start"/>' not found</p>
+                    <p>List item '<xsl:value-of select="$start"/>' not found.</p>
                 </xsl:result-document>
             </xsl:when>
             <xsl:otherwise>
@@ -627,6 +627,7 @@
         <xsl:variable name="sectionEl" select="./(section|article)[@id eq $hash-parts[$index]]"/>
         <xsl:choose>
             <xsl:when test="empty($sectionEl)">
+                <h1>Page not found</h1>
                 <p>Error in URI hash-path:</p>
                 <p>Section '<xsl:value-of select="$hash-parts[$index]"/>' not found in path: <xsl:value-of
                         select="$hash-parts" separator="/"/></p>
@@ -1209,9 +1210,9 @@
     
     <xsl:function name="f:docnotfound">
         <xsl:param name="docpath" as="xs:string*"/>
-        <h1>Page Not Found</h1>
+        <h1>Page not found</h1>
         <p>Error in URI hash-path:</p>
-        <p>Document '<xsl:value-of select="$docpath"/>' not found</p>
+        <p>Document '<xsl:value-of select="$docpath"/>' not found.</p>
     </xsl:function>
 
 </xsl:transform>
