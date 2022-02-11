@@ -15,8 +15,8 @@
     
     <xsl:template match="ch:changes" mode="makepage">
         <xsl:message>Processing changes</xsl:message>
-        <article id="changes" title="Change History">
-            <h1>Change History</h1>
+        <article id="changes" title="Change history">
+            <h1>Change history</h1>
             <p>In this section you will find a complete list of changes made to the Saxon product since release 7.0, organized in reverse
                 order of releases.</p>
             <nav>
@@ -29,8 +29,8 @@
     <xsl:template match="ch:categories" mode="ch"/>
     
     <xsl:template match="ch:release" mode="ch">
-        <section id="v{@number}" title="Changes in Release {@number}">
-            <h1>Changes in Release <xsl:value-of select="@number"/> (<xsl:value-of select="format-date(@date, '[D] [MNn] [Y]')"/>)</h1>
+        <section id="v{@number}" title="Changes in release {@number}">
+            <h1>Changes in release <xsl:value-of select="@number"/> (<xsl:value-of select="format-date(@date, '[D] [MNn] [Y]')"/>)</h1>
             <xsl:apply-templates select="ch:head" mode="ch"/>
             <nav>
                 <ul/>

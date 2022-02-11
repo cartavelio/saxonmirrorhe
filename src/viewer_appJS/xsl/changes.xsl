@@ -24,7 +24,7 @@
         <xsl:param name="selectedCategory" select="()" as="xs:string?"/>
         <xsl:param name="selectedVersionRange" select="()" as="xs:string?"/>
         
-        <xsl:variable name="heading" select="concat('Saxon ', ch:changes/@title)"/>
+        <xsl:variable name="heading" select="string(ch:changes/@title)"/>
         <ixsl:set-property name="document.title" select="$heading"/>
         <h1><xsl:value-of select="$heading"/></h1>
         
