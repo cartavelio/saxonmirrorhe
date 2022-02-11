@@ -4,11 +4,13 @@ import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.URIQueryParameters;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.CollectionFinder;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.Resource;
+import net.sf.saxon.lib.ResourceCollection;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.resource.AbstractResourceCollection;
 import net.sf.saxon.resource.DirectoryCollection;
-import net.sf.saxon.resource.JSONResource;
 import net.sf.saxon.resource.XmlResource;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -258,8 +260,9 @@ public class TestCollections {
         try {
             Processor p = new Processor(true);
             Configuration config = p.getUnderlyingConfiguration();
-            config.registerFileExtension("json", "personal/plain");
-            config.registerMediaType("personal/plain", (config2, details) -> new JSONResource(context, details));
+            //???
+            //config.registerFileExtension("json", "personal/plain");
+            //config.registerMediaType("personal/plain", (config2, details) -> new JSONResource(context, details));
             XPathCompiler c = p.newXPathCompiler();
             c.setLanguageVersion("3.1");
             XPathExecutable exec = c.compile("for $X in (collection(.))" +
@@ -648,7 +651,7 @@ public class TestCollections {
                         try {
                             StreamSource ss = new StreamSource(file);
                             NodeInfo doc = config.buildDocumentTree(ss).getRootNode();
-                            return new XmlResource(config, doc);
+                            return new XmlResource(doc);
                         } catch (XPathException e) {
                             throw new UncheckedXPathException(e);
                         }
