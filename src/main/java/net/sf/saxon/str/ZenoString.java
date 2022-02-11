@@ -1,6 +1,7 @@
 package net.sf.saxon.str;
 
 import net.sf.saxon.expr.sort.EmptyIntIterator;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.ArrayList;
@@ -108,6 +109,7 @@ public class ZenoString extends UnicodeString {
      * @return an iterator that delivers the individual code points
      */
     @Override
+    @CSharpReplaceBody(code="return new Saxon.Impl.Overrides.ZenoStringCodepoints(segments);")
     public IntIterator codePoints() {
         if (isEmpty()) {
             return EmptyIntIterator.getInstance();
