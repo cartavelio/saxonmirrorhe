@@ -124,8 +124,11 @@
 
  <!-- Contents of namespace function list: links to each function in namespace. -->
  <xsl:template match="fc:function" mode="index">
+  <xsl:variable name="namespace" select="ancestor::section/@id"/>
+  <xsl:variable name="default.platform"
+   select="doc($implement-path)/implement/default[@id = $namespace]/@platform"/>
   <span class="flink" data-href="{fc:name}" data-ns="{fc:namespace-ref(fc:name/@namespace)}"
-   data-platform="{(.//fc:saxon-edition/@platform,'ALL')[1]}">
+   data-platform="{(.//fc:saxon-edition/@platform, $default.platform, 'ALL')[1]}">
    <xsl:value-of select="fc:name"/>
   </span>
   <br/>
