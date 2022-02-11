@@ -2071,11 +2071,11 @@
                 <attribute name="test" use="mandatory">The boolean expression to be tested. The full
                     syntax of boolean expressions is outlined in <a class="bodylink"
                         href="/expressions">XPath Syntax</a>.</attribute>
-                <attribute name="then" use="mandatory">Proposed extension for XSLT 4.0; defines the value
+                <attribute name="then" use="optional">Proposed extension for XSLT 4.0; defines the value
                 to be returned if the <code>test</code> condition is true, as an alternative to evaluating
                 the sequence constructor. If the <code>then</code> attribute is present, the <code>xsl:if</code>
                 element must be empty.</attribute>
-                <attribute name="else" use="mandatory">Proposed extension for XSLT 4.0; defines the value
+                <attribute name="else" use="optional">Proposed extension for XSLT 4.0; defines the value
                     to be returned if the <code>test</code> condition is false, as an alternative to returning an empty
                     sequence.</attribute>
             </attributes>

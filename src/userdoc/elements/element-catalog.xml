@@ -620,6 +620,12 @@
       <e:attribute name="test" required="yes">
          <e:data-type name="expression"/>
       </e:attribute>
+      <e:attribute name="then" required="no">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <e:attribute name="else" required="no">
+         <e:data-type name="expression"/>
+      </e:attribute>
       <e:model name="sequence-constructor"/>
       <e:allowed-parents>
          <e:parent-category name="sequence-constructor"/>
