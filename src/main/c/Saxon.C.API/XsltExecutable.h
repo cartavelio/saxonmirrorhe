@@ -280,7 +280,7 @@ public:
      * When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
      * via a user defined std::map object where we have the pair document URI and XdmNode object.
      * @param 
-     * @param resultMap - User defined map object which is used to save the result documents from the transformation
+     * @param flag - true enables map object which is used to save the result documents from the transformation
     */
     void setSaveResultDocument(bool flag);
 
