@@ -13,6 +13,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SchemaURIResolver;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.HostLanguage;
 
 import javax.xml.transform.URIResolver;
@@ -39,6 +40,7 @@ public class PipelineConfiguration {
     private HostLanguage hostLanguage = HostLanguage.XSLT;
     private Map<String, Object> components;
     private XPathContext context;
+    private java.util.function.Function<NodeInfo, Object> copyInformee;
 
     /**
      * Create a PipelineConfiguration. Note: the normal way to create
@@ -299,6 +301,14 @@ public class PipelineConfiguration {
             components = new HashMap<>();
         }
         components.put(name, value);
+    }
+
+    public void setCopyInformee(java.util.function.Function<NodeInfo, Object> informee) {
+        this.copyInformee = informee;
+    }
+
+    public java.util.function.Function<NodeInfo, Object> getCopyInformee() {
+        return this.copyInformee;
     }
 
     /**

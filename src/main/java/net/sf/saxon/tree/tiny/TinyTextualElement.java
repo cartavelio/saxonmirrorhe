@@ -7,7 +7,6 @@
 
 package net.sf.saxon.tree.tiny;
 
-import net.sf.saxon.event.CopyInformee;
 import net.sf.saxon.event.CopyNamespaceSensitiveException;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
@@ -84,9 +83,9 @@ public class TinyTextualElement extends TinyElementImpl {
             }
         }
 
-        CopyInformee informee = (CopyInformee) receiver.getPipelineConfiguration().getComponent("net.sf.saxon.event.CopyInformee");
+        java.util.function.Function<NodeInfo, Object> informee = receiver.getPipelineConfiguration().getCopyInformee();
         if (informee != null) {
-            Object o = informee.notifyElementNode(this);
+            Object o = informee.apply(this);
             if (o instanceof Location) {
                 location = (Location) o;
             }

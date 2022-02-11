@@ -34,6 +34,7 @@ import net.sf.saxon.style.SourceBinding;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.*;
@@ -3786,25 +3787,35 @@ public class XPathParser {
                 return "Perhaps the intended namespace was '" + similarNamespace + "'";
             }
         } else if (actualURI.contains("java")) {
-            if (config.getEditionCode().equals("HE")) {
-                return "Reflexive calls to Java methods are not available under Saxon-HE";
-            } else if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-                return "Reflexive calls to Java methods require a Saxon-PE or Saxon-EE license, and none was found";
-            } else {
-                return "For diagnostics on calls to Java methods, use the -TJ command line option " +
-                        "or set the Configuration property FeatureKeys.TRACE_EXTERNAL_FUNCTIONS";
-            }
+            return diagnoseCallToJavaMethod(config);
         } else if (actualURI.startsWith("clitype:")) {
-            if (config.getEditionCode().equals("HE")) {
-                return "Reflexive calls to external .NET methods are not available under Saxon-HE";
-            } else if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-                return "Reflexive calls to external .NET methods require a Saxon-PE or Saxon-EE license, and none was found";
-            } else {
-                return "For diagnostics on calls to .NET methods, use the -TJ command line option " +
-                        "or call processor.SetProperty(\"http://saxon.sf.net/feature/trace-external-functions\", \"true\")";
-            }
+            return diagnoseCallToCliMethod(config);
         }
         return null;
+    }
+
+    @CSharpReplaceBody(code="return \"Reflexive calls to external Java methods are not available under Saxon-CS\";")
+    private static String diagnoseCallToJavaMethod(Configuration config) {
+        if (config.getEditionCode().equals("HE")) {
+            return "Reflexive calls to Java methods are not available under Saxon-HE";
+        } else if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+            return "Reflexive calls to Java methods require a Saxon-PE or Saxon-EE license, and none was found";
+        } else {
+            return "For diagnostics on calls to Java methods, use the -TJ command line option " +
+                    "or set the Configuration property FeatureKeys.TRACE_EXTERNAL_FUNCTIONS";
+        }
+    }
+
+    @CSharpReplaceBody(code = "return \"Reflexive calls to external .NET methods are not available under Saxon-CS\";")
+    private static String diagnoseCallToCliMethod(Configuration config) {
+        if (config.getEditionCode().equals("HE")) {
+            return "Reflexive calls to external .NET methods are not available under Saxon-HE";
+        } else if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+            return "Reflexive calls to external .NET methods require a Saxon-PE or Saxon-EE license, and none was found";
+        } else {
+            return "For diagnostics on calls to .NET methods, use the -TJ command line option " +
+                    "or call processor.SetProperty(\"http://saxon.sf.net/feature/trace-external-functions\", \"true\")";
+        }
     }
 
     /**

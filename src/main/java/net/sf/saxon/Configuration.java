@@ -320,7 +320,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws IllegalAccessException if the class is not accessible
      */
 
-    @CSharpReplaceBody(code="return new net.sf.saxon.Configuration();")
+    @CSharpReplaceBody(code="return new com.saxonica.config.EnterpriseConfiguration();")
     public static Configuration instantiateConfiguration(String className, ClassLoader classLoader) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         Class theClass;
         ClassLoader loader = classLoader;
@@ -443,7 +443,6 @@ public class Configuration implements SourceResolver, NotationSet {
         registerFunctionAnnotationHandler(new XQueryFunctionAnnotationHandler());
     }
 
-    //#if CSHARP==false
     /**
      * Static method to instantiate a professional or enterprise configuration.
      * <p>This method fails if the specified configuration class cannot be loaded,
@@ -465,13 +464,16 @@ public class Configuration implements SourceResolver, NotationSet {
         if (className == null) {
             className = "com.saxonica.config.ProfessionalConfiguration";
         }
+        //#if CSHARP==false
         try {
+            //#endif
             return instantiateConfiguration(className, classLoader);
+            //#if CSHARP==false
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+        //#endif
     }
-    //#endif
 
     public void importLicenseDetails(Configuration config) {
         // No action for an HE configuration

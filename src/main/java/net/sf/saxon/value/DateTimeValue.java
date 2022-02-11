@@ -54,7 +54,8 @@ import java.util.*;
 
 @CSharpInjectMembers(code={""
         + "public static net.sf.saxon.value.DateTimeValue fromDateTime(System.DateTime dt) {"
-        + "    return new net.sf.saxon.value.DateTimeValue(dt.Year, (byte)dt.Month, (byte)dt.Day, (byte)dt.Hour, (byte)dt.Minute, (byte)dt.Second, dt.Millisecond * 1000000, 0);"
+        + "    net.sf.saxon.value.DateTimeValue dtv = new (dt.Year, (byte)dt.Month, (byte)dt.Day, (byte)dt.Hour, (byte)dt.Minute, (byte)dt.Second, dt.Millisecond * 1000000, 0);"
+        + "    return (net.sf.saxon.value.DateTimeValue)dtv.copyAsSubType(net.sf.saxon.type.BuiltInAtomicType.DATE_TIME_STAMP);"
         + "}"
 })
 
