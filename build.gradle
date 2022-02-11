@@ -70,6 +70,8 @@ ext {
   tagsoupJar = null
   mailJar = null
   resolverJar = null
+  resolverDataJar = null
+  loggerFactoryJar = null
   jlineJar = null
   version_h = saxonVersion.replace(".", "-")
   fileSeparator = System.getProperty("file.separator")
@@ -155,7 +157,7 @@ dependencies {
     files(saxonLicenseDir),
     files("lib/Tidy.jar"),
     files("lib/slf4j-simple-1.7.30.jar"),
-    fileTree(dir: 'extra/lib/', include: ['*.jar'])
+    //fileTree(dir: 'extra/lib/', include: ['*.jar'])
   )
   jarjarAsm (
     fileTree(dir: "${buildDir}/lib/asm")
@@ -218,22 +220,6 @@ test {
     // FIXME: how do I make this dynamic from junitExcludeTagList???
     excludeTags 'missingfiles', 'mikeonly', 'bytecode', 'expectedtofail', 'performance'
   }
-}
-
-ext {
-  systemOs = OperatingSystem.current()
-  icu4jJar = null
-  tagsoupJar = null
-  mailJar = null
-  resolverJar = null
-  resolverDataJar = null
-  loggerFactoryJar = null
-  jlineJar = null
-  version_h = saxonVersion.replace(".", "-")
-  fileSeparator = System.getProperty("file.separator")
-  DSTAMP=new Date().format("yyyyMMdd")
-  // Docker containers
-  c_sqlserver = "sqlserver"
 }
 
 docker_container.configure {
