@@ -32,15 +32,15 @@ int main()
      * Initialize JET run-time.
      * The handle of loaded component is used to retrieve Invocation API.
      */
-    initDefaultJavaRT (&environi);
-
+    //initDefaultJavaRT (&environi);
+    initJavaRT (environi->myDllHandle, &(environi->jvm), &(environi->env));
     const char *verCh = version(*environi);
     printf("XSLT Tests\n\nSaxon version: %s \n", verCh);	
     jobject num = integerValue(*environi, 5);
     setParameter(&parameters, &parLen, &parCap,"", "numParam", num);
   
 
-    const char *result = xsltApplyStylesheet(environi, &processor, NULL, "cat.xml","test.xsl", 0 ,0, 0, 0);
+    const char *result = xsltApplyStylesheet(*environi, &processor, NULL, "cat.xml","test.xsl", 0 ,0, 0, 0);
   
 	
 
