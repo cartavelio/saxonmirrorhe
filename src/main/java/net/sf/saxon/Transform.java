@@ -96,9 +96,10 @@ public class Transform {
         //#if CSHARP==false
         options.addRecognizedOption("a", CommandLineOptions.TYPE_BOOLEAN,
                                     "Use <?xml-stylesheet?> processing instruction to identify stylesheet");
-        //#endif
+
         options.addRecognizedOption("catalog", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified catalog file to resolve URIs");
+        //#endif
         options.addRecognizedOption("config", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified configuration file");
         //#if CSHARP==false
@@ -136,9 +137,9 @@ public class Transform {
                                     "Maintain line numbers for source documents");
         options.addRecognizedOption("lib", CommandLineOptions.TYPE_FILENAME_LIST | CommandLineOptions.VALUE_REQUIRED,
                                     "List of file names of library packages used by the stylesheet");
+        //#if CSHARP==false
         options.addRecognizedOption("license", CommandLineOptions.TYPE_BOOLEAN,
                                     "Check for local license file");
-        //#if CSHARP==false
         options.addRecognizedOption("m", CommandLineOptions.TYPE_CLASSNAME,
                                     "Use named class to handle xsl:message output");
         //#endif
@@ -621,6 +622,7 @@ public class Transform {
 
             // Check for a license if appropriate
 
+            //#if CSHARP==false
             if (!config.getEditionCode().equals("HE")) {
                 String lic = options.getOptionValue("license");
                 if (lic == null || "on".equals(lic)) {
@@ -629,7 +631,7 @@ public class Transform {
                     config.disableLicensing();
                 }
             }
-
+            //#endif
 
             //compilerInfo.setRecoveryPolicy(config.getRecoveryPolicy());
 

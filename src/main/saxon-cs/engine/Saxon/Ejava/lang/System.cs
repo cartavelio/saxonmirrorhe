@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Saxon.Ejava.util;
+using Saxon.Hej.functions;
 using Sys = System;
 using SysIO = System.IO;
 using SysColl = System.Collections;
@@ -22,6 +23,7 @@ namespace Saxon.Ejava.lang
         public static void exit(int exitCode)
         {
             Sys.Console.WriteLine("Exiting with code " + exitCode);
+            Sys.Environment.Exit(exitCode);
         }
 
         public static string getProperty(string name) {
