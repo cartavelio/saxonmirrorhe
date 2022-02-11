@@ -2,6 +2,7 @@ using System;
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
+using java.lang;
 using javax.xml.transform;
 using javax.xml.transform.stream;
 using net.sf.saxon;
@@ -12,6 +13,7 @@ using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
 using Saxon.Callbacks;
 using Saxon.Impl.Dom;
+using Exception = System.Exception;
 
 namespace Saxon.Api {
     /// <summary>
@@ -72,7 +74,7 @@ namespace Saxon.Api {
         /// returned for any other node will be that of the most recent element.</para> 
         /// </remarks>
 
-        public bool IsLineNumbering {
+        public bool LineNumbering {
             get => s9Builder.isLineNumbering();
             set => s9Builder.setLineNumbering(value);
         }
@@ -92,9 +94,9 @@ namespace Saxon.Api {
             get => validation;
             set {
                 validation = value;
-                if (value == SchemaValidationMode.Strict || value == SchemaValidationMode.Lax) {
+                if (value is SchemaValidationMode.Strict or SchemaValidationMode.Lax) {
                     schemaValidator = processor.SchemaManager.NewSchemaValidator();
-                    schemaValidator.IsLax = value == SchemaValidationMode.Lax;
+                    schemaValidator.Lax = value == SchemaValidationMode.Lax;
                     s9Builder.setSchemaValidator(schemaValidator.UnderlyingSchemaValidator);
                 }
             }
@@ -269,8 +271,9 @@ namespace Saxon.Api {
         /// <para>The document is parsed using the Microsoft <c>System.Xml</c> parser if the
         /// "http://saxon.sf.net/feature/preferJaxpParser" property on the <c>Processor</c> is set to false;
         /// otherwise it is parsed using the Apache Xerces XML parser.</para>
-        /// <para>Before calling this method, the <c>BaseUri</c> property must be set to identify the
-        /// base URI of this document, used for resolving any relative URIs contained within it.</para>
+        /// <para>Before calling this method, the <c>BaseUri</c> property should be set to identify the
+        /// base URI of this document, used for resolving any relative URIs contained within it;
+        /// if it has not been set, the current working directory is assumed.</para>
         /// <para>Note that the Microsoft <c>System.Xml</c> parser does not report whether attributes are
         /// defined in the DTD as being of type <c>ID</c> and <c>IDREF</c>. This is true whether or not
         /// DTD-based validation is enabled. This means that such attributes are not accessible to the 
@@ -282,11 +285,8 @@ namespace Saxon.Api {
         /// in-memory document.
         /// </returns>
         public XdmNode Build(Stream input) {
-            if (baseUri == null) {
-                throw new ArgumentException("No base URI supplied");
-            }
-
-            return Build(input, baseUri);
+            Uri localBaseUri = baseUri ?? new Uri(Environment.CurrentDirectory);
+            return Build(input, localBaseUri);
         }
 
         // Build a document from a given stream, with the base URI supplied
@@ -312,17 +312,19 @@ namespace Saxon.Api {
                 settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);
 
                 XmlReader parser = XmlReader.Create(input, settings, baseUri.ToString());
-                source = new PullSource(new DotNetPullProvider(parser));
+                DotNetPullProvider dotNetPullProvider = new (parser);
+                dotNetPullProvider.WhitespacePolicy = WhitespacePolicy;
+                source = new PullSource(dotNetPullProvider);
                 source.setSystemId(baseUri.ToString());
             }
 
             try {
                 XdmNode node = s9Builder.build(source);
-                if (schemaValidator != null 
-                        && schemaValidator.ErrorList != null 
-                        && schemaValidator.ErrorList.Count > 0) {
-                    throw new SaxonApiException("Validation errors were reported");
-                }
+                // if (schemaValidator != null 
+                //         && schemaValidator.ErrorList != null 
+                //         && schemaValidator.ErrorList.Count > 0) {
+                //     throw new SaxonApiException("Validation errors were reported");
+                // }
                 node.SetProcessor(processor);
                 return node;
             }
@@ -335,11 +337,10 @@ namespace Saxon.Api {
         /// Load an XML document supplied using a <c>TextReader</c>.
         /// </summary>
         /// <remarks>
-        /// <para>The document is parsed using the Microsoft <c>System.Xml</c> parser if the
-        /// "http://saxon.sf.net/feature/preferJaxpParser" property on the <c>Processor</c> is set to false;
-        /// otherwise it is parsed using the Apache Xerces XML parser.</para>
-        /// <para>Before calling this method, the <c>BaseUri</c> property must be set to identify the
-        /// base URI of this document, used for resolving any relative URIs contained within it.</para>
+        /// <para>The document is parsed using the Microsoft <c>System.Xml</c> parser.</para>
+        /// <para>Before calling this method, the <c>BaseUri</c> property should be set to identify the
+        /// base URI of this document, used for resolving any relative URIs contained within it;
+        /// if it has not been set, the current working directory is assumed.</para>
         /// <para>Note that the Microsoft <c>System.Xml</c> parser does not report whether attributes are
         /// defined in the DTD as being of type <c>ID</c> and <c>IDREF</c>. This is true whether or not
         /// DTD-based validation is enabled. This means that such attributes are not accessible to the 
@@ -350,14 +351,11 @@ namespace Saxon.Api {
         /// in-memory document.
         /// </returns>
         public XdmNode Build(TextReader input) {
-            if (baseUri == null) {
-                throw new ArgumentException("No base URI supplied");
-            }
-
-            return Build(input, baseUri);
+            Uri localBaseUri = baseUri ?? new Uri(Environment.CurrentDirectory);
+            return Build(input, localBaseUri);
         }
 
-        // Build a document from a given stream, with the base URI supplied
+        // Build a document from a given TextReader, with the base URI supplied
         // as an extra argument
 
         internal XdmNode Build(TextReader input, Uri baseUri) {
@@ -382,20 +380,13 @@ namespace Saxon.Api {
                 settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);
 
                 XmlReader parser = XmlReader.Create(input, settings, baseUri.ToString());
-                source = new PullSource(new DotNetPullProvider(parser));
+                DotNetPullProvider dotNetPullProvider = new (parser);
+                dotNetPullProvider.WhitespacePolicy = WhitespacePolicy;
+                source = new PullSource(dotNetPullProvider);
                 source.setSystemId(baseUri.ToString());
             }
 
-            //augmentParseOptions(options);
-            XdmNode doc = null;
-            try {
-                doc = s9Builder.build(source);
-            }
-            catch (net.sf.saxon.s9api.SaxonApiException ex) {
-                throw new Exception(ex.getMessage());
-            }
-
-            return doc;
+            return s9Builder.build(source);
         }
 
         private Source augmentSource(Source source, ParseOptions options) {
@@ -470,7 +461,7 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// Wrap an XML DOM document, supplied as an <c>XmlNode</c>, as a Saxon <c>XdmNode</c>.
+        /// Wrap an XML DOM document, supplied as an <c>XmlDocument</c>, as a Saxon <c>XdmNode</c>.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -486,8 +477,30 @@ namespace Saxon.Api {
         /// </returns>
         public XdmNode Wrap(XmlDocument doc) {
             String baseu = (baseUri == null ? null : baseUri.ToString());
-            DomDocumentWrapper wrapper = new DomDocumentWrapper(doc, baseu, config);
-            return (XdmNode) XdmValue.Wrap(wrapper.getRootNode());
+            DomDocumentTree tree = new DomDocumentTree(doc, baseu, config);
+            return (XdmNode) XdmValue.Wrap(tree.getRootNode());
+        }
+        
+        /// <summary>
+        /// Wrap an XML DOM node (other than a document node), as a Saxon <c>XdmNode</c>.
+        /// </summary>
+        /// <param name="docWrapper">The wrapper for the containing DOM document node</param>
+        /// <param name="node">The DOM node containing the node to be wrapped</param>
+        /// <returns>An <c>XdmNode</c>, wrapping the supplied DOM node
+        /// </returns>
+        public XdmNode Wrap(XdmNode docWrapper, XmlNode node) {
+            if (!(docWrapper.Implementation is DomNodeWrapper && docWrapper.NodeKind == XdmNodeKind.Document)) {
+                throw new IllegalArgumentException("First argument is not a wrapped DOM document node");
+            }
+
+            DomNodeWrapper doc = ((DomNodeWrapper) docWrapper.Implementation);
+            if (node.OwnerDocument != doc.getUnderlyingNode()) {
+                throw new IllegalArgumentException(
+                    "The node supplied in the second argument does not belong to the document supplied in the first argument");
+            }
+            DomDocumentTree tree = (DomDocumentTree)doc.getTreeInfo();
+            DomNodeWrapper wrappedNode = tree.wrap(node);
+            return new XdmNode(wrappedNode);
         }
     }
 }

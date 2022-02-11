@@ -31,10 +31,10 @@ namespace Saxon.Api {
     /// and <c>Xslt30Transformer</c> can be used irrespective of the XSLT language version used in the stylesheet.</para>
     /// </remarks>
     [Serializable]
-    public class XsltTransformer : XmlDestination {
-        private XmlDestination xmlDestination;
+    public class XsltTransformer : IDestination {
+        private IDestination xmlDestination;
         private StandardLogger traceFunctionDestination;
-        private IResultDocumentHandler resultDocumentHandler;
+        private ResultDocumentHandler resultDocumentHandler;
         private QName initialTemplateName;
         private XdmNode initialContextNode;
         private net.sf.saxon.s9api.XsltTransformer transformer;
@@ -116,10 +116,10 @@ namespace Saxon.Api {
         /// If the stylesheet is to be invoked by calling the template named <c>xsl:initial-template</c>,
         /// then the <c>InitialTemplate</c> property should be set to this <c>QName</c> explicitly.
         /// </remarks>
-        /// <exception cref="DynamicError">Setting this property to the name of a template
-        /// that does not exist in the stylesheet throws a <c>DynamicError</c> with error 
+        /// <exception cref="SaxonApiException">Setting this property to the name of a template
+        /// that does not exist in the stylesheet throws a <c>SaxonApiException</c> with error 
         /// code XTDE0040. Setting it to the name of a template that has template
-        /// parameters throws a <c>DynamicError</c> with error code XTDE0060.</exception>
+        /// parameters throws a <c>SaxonApiException</c> with error code XTDE0060.</exception>
 
         public QName InitialTemplate {
             get => initialTemplateName;
@@ -211,7 +211,7 @@ namespace Saxon.Api {
         /// a file in filestore, using the <c>file:</c> URI scheme).
         /// </remarks>
 
-        public IResultDocumentHandler ResultDocumentHandler {
+        public ResultDocumentHandler ResultDocumentHandler {
             get => resultDocumentHandler;
             set {
                 resultDocumentHandler = value;
@@ -293,7 +293,7 @@ namespace Saxon.Api {
         /// <c>XsltTransformer</c> as the destination of another.</para>
         /// </remarks>
 
-        public XmlDestination Destination {
+        public IDestination Destination {
             get => this.xmlDestination;
             set {
                 this.xmlDestination = value;
@@ -325,7 +325,7 @@ namespace Saxon.Api {
 
         // internal method
 
-        internal Receiver GetDestinationReceiver(XmlDestination destination) {
+        internal Receiver GetDestinationReceiver(IDestination destination) {
             Controller controller = transformer.getUnderlyingController();
             PipelineConfiguration pipe = makePipelineConfiguration();
             Receiver r = destination.GetUnderlyingDestination()
@@ -347,20 +347,15 @@ namespace Saxon.Api {
         /// is an abstraction that allows a number of different kinds of destination
         /// to be specified.
         /// </param>
-        /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if the transformation
+        /// <exception cref="Saxon.Api.SaxonApiException">Throws a <c>SaxonApiException</c> if the transformation
         /// fails.</exception>
-        public void Run(XmlDestination destination) {
+        public void Run(IDestination destination) {
             if (destination == null) {
-                throw new DynamicError("Destination is null");
+                throw new SaxonApiException("Destination is null");
             }
 
-            try {
-                transformer.setDestination(destination.GetUnderlyingDestination());
-                transformer.transform();
-            }
-            catch (SaxonApiException err) {
-                throw new DynamicError(err);
-            }
+            transformer.setDestination(destination.GetUnderlyingDestination());
+            transformer.transform();
         }
 
         /// <summary>

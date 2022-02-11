@@ -68,7 +68,7 @@ namespace Saxon.Impl.Overrides {
                 return conn.getInputStream();
             }
             catch (Exception e) {
-                throw new java.io.IOException("Failed to open connection to " + url + ": " + e.Message);
+                throw new System.IO.IOException("Failed to open connection to " + url + ": " + e.Message);
             }
         }
     }

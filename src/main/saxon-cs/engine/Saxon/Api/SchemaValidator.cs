@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
+using java.util.function;
 using javax.xml.transform;
 using javax.xml.transform.stream;
 using net.sf.saxon;
@@ -11,6 +12,7 @@ using net.sf.saxon.lib;
 using net.sf.saxon.om;
 using net.sf.saxon.pull;
 using net.sf.saxon.type;
+using Saxon.Api.Support;
 
 namespace Saxon.Api {
     /// <summary>
@@ -22,20 +24,30 @@ namespace Saxon.Api {
     /// instance document.
     /// </summary>
     /// <remarks>
-    /// If validation fails, an exception is thrown. If validation succeeds, the validated
+    /// <para>The <c>SchemaValidator.Run</c> method can be used either to validate a single
+    /// document (supplied using <c>SetSource()</c>), or multiple documents (supplied using
+    /// <c>AddSource</c>.</para>
+    ///  
+    /// <para>When validating a single document, if validation succeeds, the validated
     /// document can optionally be written to a specified destination. This will be a copy of
     /// the original document, augmented with default values for absent elements and attributes,
     /// and carrying type annotations derived from the schema processing. Saxon does not deliver
     /// the full PSVI as described in the XML schema specifications, only the subset of the
-    /// PSVI properties featured in the XDM data model.
+    /// PSVI properties featured in the XDM data model.</para>
+    ///
+    /// <para>When validating multiple documents, they are validated in parallel (in multiple
+    /// threads), and the validated documents are not made available. It is recommended in this
+    /// case to use <c>SetValidityReporting</c> to capture any validation errors in a single
+    /// XML report document.</para>
+    /// 
+    /// <para>If validation fails, an exception is thrown. This may indicate invalidity against
+    /// the schema, or it might result from other conditions, such as an input document not being
+    /// well-formed XML, or not existing.</para>
     /// </remarks>    
     [Serializable]
     public class SchemaValidator {
         private Configuration config;
-        private bool lax = false;
-        private Source source;
         private List<Source> sources = new List<Source>();
-        private IList<ValidationFailure> errorList = null;
         private net.sf.saxon.s9api.SchemaValidator s9SchemaValidator;
         private SchemaType documentElementType;
 
@@ -53,7 +65,7 @@ namespace Saxon.Api {
         /// validation, the absence of an element declaration results in the content being considered valid.
         /// </summary>
 
-        public bool IsLax {
+        public bool Lax {
             get => s9SchemaValidator.isLax();
             set => s9SchemaValidator.setLax(value);
         }
@@ -72,32 +84,77 @@ namespace Saxon.Api {
 
         /// <summary>Set the validation reporting feature, which saves the validation errors in an XML file</summary>
         /// <param name="destination"> destination where XML will be sent</param>
-        public void SetValidityReporting(XmlDestination destination) {
+        public void SetValidityReporting(IDestination destination) {
             s9SchemaValidator.setValidityReporting(destination.GetUnderlyingDestination());
         }
-
-
-        /// <summary>Set the <c>InvalidityHandler</c> to be used when validating instance documents</summary>
-        /// <param name="inHandler">the <c>InvalidityHandler</c> to be used</param>
-        public void SetInvalidityHandler(IInvalidityHandler inHandler) {
-            s9SchemaValidator.setInvalidityHandler(new InvalidityHandlerWrapper(inHandler));
+        
+        /// <summary>Set the <c>InvalidityHandler</c> to be used when validating instance documents;
+        /// the invalidity handler is called once at the start of validation, once for each
+        /// validation failure, and once at the end.</summary>
+        public IInvalidityHandler InvalidityHandler {
+            set => s9SchemaValidator.setInvalidityHandler(new InvalidityHandlerWrapper(value));
+        }
+        
+        /// <summary>Set the <c>InvalidityListener</c> to be used when validating instance documents;
+        /// this is a simple delegate callback which is called once for each validation failure.</summary>
+        /// <remarks>Previous versions of this API allowed validation failures to be gathered
+        /// in a user-supplied list. This effect can be achieved by declaring <c>List&lt;ValidationFailure> ErrorList</c>
+        /// and setting the <c>InvalidityListener</c> property to <c>ErrorList.Add</c>.</remarks> 
+        
+        public Consumer<ValidationFailure> InvalidityListener {
+            set => this.InvalidityHandler = new InvalidityDelegate(value);
         }
 
         /// <summary>
-        /// Add an instance document to the list of documents to be validated.
+        /// Add an instance document to the list of documents to be validated by a subsequent call
+        /// on <c>ValidateMultipleDocuments</c>.
         /// </summary>
         /// <param name="source">Source document supplied as a <c>Stream</c></param>
         /// <param name="baseUri">Base URI of the source document</param>
         public void AddSource(Stream source, Uri baseUri) {
-            StreamSource ss = new StreamSource(source);
-            ss.setSystemId(baseUri.ToString());
-            sources.Add(ss);
+            sources.Add(new StreamSource(source, baseUri.ToString()));
+        }
+        
+        /// <summary>
+        /// Add an instance document to the list of documents to be validated by a subsequent call
+        /// on <c>ValidateMultipleDocuments</c>. The base URI is taken as the current working
+        /// directory.
+        /// </summary>
+        /// <param name="source">Source document supplied as a <c>Stream</c></param>
+        /// <param name="baseUri">Base URI of the source document</param>
+        
+        public void AddSource(Stream source) {
+            AddSource(source, new Uri(Environment.CurrentDirectory));
+        }
+        
+        /// <summary>
+        /// Add an instance document to the list of documents to be validated by a subsequent call
+        /// on <c>ValidateMultipleDocuments</c>.
+        /// </summary>
+        /// <param name="source">Source document supplied as a <c>TextReader</c></param>
+        /// <param name="baseUri">Base URI of the source document</param>
+        public void AddSource(TextReader source, Uri baseUri) {
+            sources.Add(new StreamSource(source, baseUri.ToString()));
+        }
+        
+        /// <summary>
+        /// Add an instance document to the list of documents to be validated by a subsequent call
+        /// on <c>ValidateMultipleDocuments</c>. The base URI is taken as the current working
+        /// directory.
+        /// </summary>
+        /// <param name="source">Source document supplied as a <c>TextReader</c></param>
+        /// <param name="baseUri">Base URI of the source document</param>
+        
+        public void AddSource(TextReader source) {
+            AddSource(source, new Uri(Environment.CurrentDirectory));
         }
 
         /// <summary>
-        /// Add an instance document to the list of documents to be validated
+        /// Add an instance document to the list of documents to be validated by a subsequent call
+        /// on <c>ValidateMultipleDocuments</c>.
         /// </summary>
         /// <param name="uri">URI of the source document</param>
+        /// 
         public void AddSource(Uri uri) {
             StreamSource ss = new StreamSource(uri.ToString());
             AugmentedSource aug = AugmentedSource.makeAugmentedSource(ss);
@@ -106,9 +163,11 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Add an instance document to the list of documents to be validated
+        /// Add an instance document to the list of documents to be validated by a subsequent call
+        /// on <c>ValidateMultipleDocuments</c>.
         /// </summary>
         /// <param name="reader">Source document supplied as an <c>XmlReader</c></param>
+        /// 
         public void AddSource(XmlReader reader) {
             PullProvider pp = new DotNetPullProvider(reader);
             PipelineConfiguration pipe = config.makePipelineConfiguration();
@@ -121,7 +180,8 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Add an instance document to the list of documents to be validated.
+        /// Add an instance document to the list of documents to be validated  by a subsequent call
+        /// on <c>ValidateMultipleDocuments</c>.
         /// </summary>
         /// <param name="source">Source document supplied as an <c>XdmNode</c> value</param>
         public void AddSource(XdmNode source) {
@@ -129,7 +189,7 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Supply the instance document to be validated in the form of a <c>Stream</c>
+        /// Validate an instance document supplied in the form of a <c>Stream</c>
         /// </summary>
         /// <param name="source">A stream containing the XML document to be parsed
         /// and validated. This stream will be consumed by the validation process,
@@ -137,27 +197,62 @@ namespace Saxon.Api {
         /// caller.</param>
         /// <param name="baseUri">The base URI to be used for resolving any relative
         /// references, for example a reference to an <c>xsi:schemaLocation</c></param>                  
-        public void SetSource(Stream source, Uri baseUri) {
-            StreamSource ss = new StreamSource(source);
-            ss.setSystemId(baseUri.ToString());
-            this.source = ss;
-            sources.Clear();
+        public void Validate(Stream source, Uri baseUri) {
+            s9SchemaValidator.validate(new StreamSource(source, baseUri.ToString()));
+        }
+        
+        /// <summary>
+        /// Validate an instance document supplied in the form of a <c>Stream</c>.
+        /// The base Uri of the document is taken as the current working directory.
+        /// </summary>
+        /// <param name="source">A stream containing the XML document to be parsed
+        /// and validated. This stream will be consumed by the validation process,
+        /// but it will not be closed after use: that is the responsibility of the
+        /// caller.</param>
+        /// 
+        public void Validate(Stream source) {
+            Validate(source, new Uri(Environment.CurrentDirectory));
+        }
+        
+        /// <summary>
+        /// Validate an instance document supplied in the form of a <c>TextReader</c>
+        /// </summary>
+        /// <param name="source">A <c>TextReader</c> that supplies the XML document to be parsed
+        /// and validated. This reader will be consumed by the validation process,
+        /// but it will not be closed after use: that is the responsibility of the
+        /// caller.</param>
+        /// <param name="baseUri">The base URI to be used for resolving any relative
+        /// references, for example a reference to an <c>xsi:schemaLocation</c></param>                  
+        public void Validate(TextReader source, Uri baseUri) {
+            s9SchemaValidator.validate(new StreamSource(source, baseUri.ToString()));
+        }
+        
+        /// <summary>
+        /// Validate an instance document supplied in the form of a <c>TextReader</c>.
+        /// The base Uri of the document is taken as the current working directory.
+        /// </summary>
+        /// <param name="source">A <c>TextReader</c> that supplies the XML document to be parsed
+        /// and validated. This reader will be consumed by the validation process,
+        /// but it will not be closed after use: that is the responsibility of the
+        /// caller.</param>
+                 
+        public void Validate(TextReader source) {
+            Validate(source, new Uri(Environment.CurrentDirectory));
         }
 
         /// <summary>
-        /// Supply the instance document to be validated in the form of a <c>Uri</c> reference
+        /// Validate an instance document, supplied in the form of a <c>Uri</c> reference
         /// </summary>
         /// <param name="uri">URI of the document to be validated</param>                  
-        public void SetSource(Uri uri) {
+        public void Validate(Uri uri) {
             StreamSource ss = new StreamSource(uri.ToString());
             AugmentedSource aug = AugmentedSource.makeAugmentedSource(ss);
             aug.setPleaseCloseAfterUse(true);
-            this.source = aug;
-            sources.Clear();
+            s9SchemaValidator.validate(aug);
         }
 
         /// <summary>
-        /// Supply the instance document to be validated, in the form of an <c>XmlReader</c>.
+        /// Validate an instance document, supplied in the form of an <c>XmlReader</c>.
         /// </summary>
         /// <remarks>
         /// The <c>XmlReader</c> is responsible for parsing the document; this method validates it.
@@ -167,7 +262,7 @@ namespace Saxon.Api {
         /// plain <c>XmlTextReader</c> is discouraged, because it does not expand entity
         /// references. This may cause validation failures.
         /// </param>
-        public void SetSource(XmlReader reader) {
+        public void Validate(XmlReader reader) {
             PullProvider pp = new DotNetPullProvider(reader);
             PipelineConfiguration pipe = config.makePipelineConfiguration();
             pipe.setUseXsiSchemaLocation(s9SchemaValidator.isUseXsiSchemaLocation());
@@ -175,12 +270,11 @@ namespace Saxon.Api {
             // pp = new PullTracer(pp);  /* diagnostics */
             PullSource psource = new PullSource(pp);
             psource.setSystemId(reader.BaseURI);
-            this.source = psource;
-            sources.Clear();
+            s9SchemaValidator.validate(psource);
         }
 
         /// <summary>
-        /// Supply the instance document to be validated in the form of an <c>XdmNode</c>.
+        /// Validate an instance document, supplied in the form of an <c>XdmNode</c>.
         /// </summary>
         /// <remarks>
         /// <para>The supplied node must be either a document node or an element node.
@@ -192,9 +286,8 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="source">The document or element node at the root of the tree
         /// to be validated</param>        
-        public void SetSource(XdmNode source) {
-            this.source = ((NodeInfo) source.value).asActiveSource();
-            sources.Clear();
+        public void Validate(XdmNode source) {
+            s9SchemaValidator.validate(((NodeInfo) source.value).asActiveSource());
         }
 
         /// <summary>
@@ -211,7 +304,7 @@ namespace Saxon.Api {
         /// <param name="destination">
         /// The destination to hold the validated document.
         /// </param>
-        public void SetDestination(XmlDestination destination) {
+        public void SetDestination(IDestination destination) {
             s9SchemaValidator.setDestination(destination.GetUnderlyingDestination());
         }
 
@@ -227,7 +320,7 @@ namespace Saxon.Api {
         /// <summary>
         /// The name of the required top-level element of the document to be validated (that is, the
         /// name of the outermost element of the document).
-        /// if no value is supplied, there is no constraint on the required type
+        /// if no value is supplied, there is no constraint on the required element name
         /// </summary>
         public QName DocumentElementName {
             get => s9SchemaValidator.getDocumentElementName();
@@ -238,7 +331,7 @@ namespace Saxon.Api {
         /// <summary>
         /// The name of the required type of the top-level element of the document to be validated.
         /// QName of the name of the required type of the document element, or null if no value has been set.
-        /// If no value is supplied, there is no constrin on the required type
+        /// If no value is supplied, there is no constraint on the required type
         /// </summary>
         public QName DocumentElementTypeName {
             get => s9SchemaValidator.getDocumentElementTypeName();
@@ -259,18 +352,13 @@ namespace Saxon.Api {
         /// <param name="name">the name of the schema parameter, as a QName</param>
         /// <param name="value">the value of the schema  parameter, or null to clear a previously set value</param>
         public void SetParameter(QName name, XdmValue value) {
-            try {
-                s9SchemaValidator.setParameter(name, value);
-            }
-            catch (net.sf.saxon.s9api.SaxonApiUncheckedException ex) {
-                throw new StaticError(ex);
-            }
+            s9SchemaValidator.setParameter(name, value);
         }
 
 
         /// <summary>
-        /// Get the value that has set for a schema processor (a parameter defined in the schema using the <c>saxon:param</c>
-        /// extension)
+        /// Get the value that has been set for a schema processor (a parameter defined in the
+        /// schema using the <c>saxon:param</c> extension)
         /// </summary>
         /// <param name="name">the parameter whose name is required</param>
         /// <returns>the value that has been set for the parameter, or the EmptySequence if no value has been set</returns>
@@ -290,58 +378,23 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// List of errors. The caller may supply an empty list before calling <c>Compile</c>;
-        /// the processor will then populate the list with error information obtained during
-        /// the schema compilation. Each error will be included as an object of type <c>StaticError</c>.
-        /// If no error list is supplied by the caller, error information will be written to
-        /// the standard error stream.
+        /// Run the validation of a set of instance documents, previously
+        /// supplied by calling <c>AddSource</c>.
         /// </summary>
         /// <remarks>
-        /// <para>By supplying a custom <c>List</c> with a user-written <c>add()</c> method, it is possible to
-        /// intercept error conditions as they occur.</para>
-        /// <para>Note that this error list is used only for errors detected while 
-        /// using the schema to validate a source document. It is not used to report errors
-        /// in the schema itself.</para>
+        /// <para>Unless multithreading has been disabled at <c>Processor</c> level, the
+        /// instance documents are validated in parallel in multiple threads.</para>
+        /// <para>This requires care when deciding how invalidity should be reported: the
+        /// recommended option is to generate an XML validation report by calling
+        /// <c>SetValidityReporting</c>.</para>
+        /// <para>The validated documents (with type annotations and expanded defaults: that is,
+        /// the PSVIs) are not made available to the calling application.</para>
+        /// <para>The method does not throw an exception if any of the source documents
+        /// is found to be invalid. It does however throw an exception if any of the source
+        /// documents cannot be read, or is not well-formed XML.</para>
         /// </remarks>
-
-        public IList<ValidationFailure> ErrorList {
-            set {
-                errorList = value;
-                s9SchemaValidator.setInvalidityHandler(new InvalidityGatherer(errorList));
-            }
-            get => errorList;
-        }
-
-
-        /// <summary>
-        /// Run the validation of the supplied source document, optionally
-        /// writing the validated document to the supplied destination.
-        /// </summary>
-        public void Run() {
-            if (source == null) {
-                if (sources.Count == 0) {
-                    throw new StaticError(
-                        new net.sf.saxon.trans.XPathException("No source(s) set for the SchemaValidator"));
-                }
-
-                try {
-                    s9SchemaValidator.validateMultiple(sources);
-                }
-                catch (net.sf.saxon.s9api.SaxonApiException ex) {
-                    throw new StaticError(ex);
-                }
-            }
-            else {
-                AugmentedSource aug = AugmentedSource.makeAugmentedSource(source);
-                aug.setSchemaValidationMode(lax ? Validation.LAX : Validation.STRICT);
-                try {
-                    s9SchemaValidator.validate(aug);
-                }
-                catch (net.sf.saxon.s9api.SaxonApiException ex) {
-                    Console.Error.WriteLine(ex.StackTrace);
-                    throw new StaticError(ex);
-                }
-            }
+        public void ValidateMultipleDocuments() {
+            s9SchemaValidator.validateMultiple(sources);
         }
     }
 }

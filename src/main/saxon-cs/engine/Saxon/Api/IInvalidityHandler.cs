@@ -12,7 +12,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="systemId">Optional; may be used to represent the destination of any
         /// report produced.</param>
-        void startReporting(String systemId);
+        void startReporting(string systemId);
 
 
         /// <summary>

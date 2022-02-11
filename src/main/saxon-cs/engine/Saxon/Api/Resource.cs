@@ -140,7 +140,7 @@ namespace Saxon.Api {
 
         public XdmItem GetXdmItem(DynamicContext context)
         {
-            return XdmItem.FromGroundedValue(resource.getItem(context.context).materialize()).ItemAt(0);
+            return XdmItem.FromGroundedValue(resource.getItem(context.context).materialize())[0];
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Saxon.Api {
     /// A <c>NullDestination</c> is an <c>XmlDestination</c> that discards all its output.
     /// </summary>
 
-    public class NullDestination : XmlDestination
+    public class NullDestination : IDestination
     {
 
         net.sf.saxon.s9api.NullDestination destination;

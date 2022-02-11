@@ -21,7 +21,7 @@ namespace Saxon.Api {
     /// <para>An <c>XdmDestination</c> can be reused to hold the results of a second transformation only
     /// if the <c>Reset</c> method is first called to reset its state.</para>
     /// </remarks>
-    public class XdmDestination : XmlDestination {
+    public class XdmDestination : IDestination {
         internal net.sf.saxon.s9api.XdmDestination destination;
         internal Action<XdmNode> closeAction;
 

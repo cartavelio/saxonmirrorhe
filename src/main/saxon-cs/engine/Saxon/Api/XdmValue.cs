@@ -38,7 +38,7 @@ namespace Saxon.Api {
     /// </remarks>
     [Serializable]
     public class XdmValue : IEnumerable<XdmItem> {
-        internal GroundedValue value;
+        internal readonly GroundedValue value;
 
         // Internal constructor
 
@@ -240,12 +240,11 @@ namespace Saxon.Api {
         /// <returns>An <c>XdmValue</c> that wraps the underlying Saxon XDM value
         /// representation.</returns>
         public static XdmValue Wrap(Sequence value) {
-            if (value == null) {
-                return XdmEmptySequence.INSTANCE;
-            }
-
-            if (value is GroundedValue) {
-                return FromGroundedValue((GroundedValue) value);
+            switch (value) {
+                case null:
+                    return XdmEmptySequence.INSTANCE;
+                case GroundedValue grounded:
+                    return FromGroundedValue(grounded);
             }
 
             GroundedValue gv;
@@ -253,48 +252,25 @@ namespace Saxon.Api {
                 gv = value.materialize();
             }
             catch (Exception e) {
-                throw new DynamicError(e.Message);
+                throw new SaxonApiException(e);
             }
 
-            XdmValue result;
             if (gv.getLength() == 0) {
                 return XdmEmptySequence.INSTANCE;
             }
-            else if (gv.getLength() == 1) {
+            if (gv.getLength() == 1) {
                 Item first = gv.head();
-                if (first is AtomicValue) {
-                    result = new XdmAtomicValue();
-                    result.value = (AtomicValue) first;
-                    return result;
-                }
-                else if (first is NodeInfo) {
-                    return new XdmNode((NodeInfo)first);
-                }
-                // else if (first is ZeroOrOne<Item>) {
-                //     return Wrap(((JZeroOrOne) value).head());
-                // }
-                // else if (first is JOne) {
-                //     return Wrap(((JOne) value).head());
-                // }
-                else if (first is MapItem) {
-                    return new XdmMap((MapItem) first);
-                }
-                else if (first is ArrayItem) {
-                    return new XdmArray((ArrayItem) first);
-                }
-                else if (first is Function) {
-                    return new XdmFunctionItem((Function) first);
-                }
-                // else if (first is JObjectValue) {
-                //     return new XdmExternalObjectValue(((JObjectValue) first).getObject());
-                // }
-                else {
-                    return new XdmValue(first);
-                }
+                return first switch {
+                    AtomicValue atom => new XdmAtomicValue(atom),
+                    NodeInfo node => new XdmNode(node),
+                    MapItem map => new XdmMap(map),
+                    ArrayItem array => new XdmArray(array),
+                    Function fn => new XdmFunctionItem(fn),
+                    _ => new XdmValue(first)
+                };
             }
-            else {
-                return FromGroundedValue(gv);
-            }
+            return FromGroundedValue(gv);
+            
         }
 
         static internal XdmValue FromGroundedValue(GroundedValue value) {
@@ -445,10 +421,15 @@ namespace Saxon.Api {
             return GetList().GetEnumerator();
         }
 
+        // Indexer declaration.
+        public XdmItem this[int index] => ItemAt(index);
 
         /// <summary>
         /// Get the i'th item in the value, counting from zero.
         /// </summary>
+        /// <remarks>
+        /// Retained for compatibility; but <c>xdmValue.ItemAt(i)</c> can also be written <c>xdmValue[i]</c>
+        /// </remarks>
         /// <param name="i">The item that is required, counting the first item in the sequence as item zero.</param>
         /// <returns>The i'th item in the sequence making up the value, counting from zero.</returns>
         public XdmItem ItemAt(int i) {
@@ -460,7 +441,7 @@ namespace Saxon.Api {
                 return (XdmItem) Wrap(value.itemAt(i));
             }
             catch (net.sf.saxon.trans.XPathException e) {
-                throw new StaticError(e);
+                throw new Saxon.Api.SaxonApiException(e);
             }
         }
 
@@ -489,7 +470,7 @@ namespace Saxon.Api {
                 return XdmValue.Wrap(SequenceTool.toGroundedValue(sorted));
             }
             catch (net.sf.saxon.trans.XPathException e) {
-                throw new StaticError(e);
+                throw new Saxon.Api.SaxonApiException(e);
             }
         }
 

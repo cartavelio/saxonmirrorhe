@@ -67,7 +67,7 @@ namespace Saxon.Api {
             }
             catch (net.sf.saxon.trans.XPathException e)
             {
-                throw new StaticError(e);
+                throw new Saxon.Api.SaxonApiException(e);
             }
         }
 
@@ -83,7 +83,7 @@ namespace Saxon.Api {
             }
             catch (net.sf.saxon.trans.XPathException e)
             {
-                throw new StaticError(e);
+                throw new Saxon.Api.SaxonApiException(e);
             }
         }
 

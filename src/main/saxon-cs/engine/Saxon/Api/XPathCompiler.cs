@@ -203,13 +203,8 @@ namespace Saxon.Api {
         ///   "minus-sign", "percent", "per-mille", "zero-digit", "digit",
         ///   or "pattern-separator".</param>
         /// <param name="value">The new value for the property.</param>
-        public void SetDecimalFormatProperty(QName format, String property, String value) {
-            try {
-                compiler.setDecimalFormatProperty(format, property, value);
-            }
-            catch (SaxonApiException e) {
-                throw new StaticError(e);
-            }
+        public void SetDecimalFormatProperty(QName format, string property, string value) {
+            compiler.setDecimalFormatProperty(format, property, value);
         }
 
         /// <summary>
@@ -243,9 +238,8 @@ namespace Saxon.Api {
                     return compiler.getLanguageVersion();
                 }
                 catch (Exception) {
-                    throw new StaticError(
-                        new net.sf.saxon.trans.XPathException("Unknown XPath version " +
-                                                              compiler.getLanguageVersion()));
+                    throw new Saxon.Api.SaxonApiException("Unknown XPath version " +
+                                                              compiler.getLanguageVersion());
                 }
             }
             set {
@@ -253,7 +247,7 @@ namespace Saxon.Api {
                     compiler.setLanguageVersion(value);
                 }
                 catch (Exception) {
-                    throw new StaticError(new net.sf.saxon.trans.XPathException("Unknown XPath version " + value));
+                    throw new Saxon.Api.SaxonApiException("Unknown XPath version " + value);
                 }
             }
         }
@@ -294,7 +288,7 @@ namespace Saxon.Api {
         /// defined in a later XPath version; rather, it modifies the semantics of some
         /// constructs.</para></remarks>
 
-        public Boolean BackwardsCompatible {
+        public bool BackwardsCompatible {
             get => compiler.isBackwardsCompatible();
             set => compiler.setBackwardsCompatible(value);
         }
@@ -341,19 +335,13 @@ namespace Saxon.Api {
         /// The <c>XPathExecutable</c> may be run as many times as required, in the same or a different
         /// thread. The <c>XPathExecutable</c> is not affected by any changes made to the <c>XPathCompiler</c>
         /// once it has been compiled.</returns>
-        /// <exception cref="StaticError">
-        /// Throws a <c>Saxon.Api.StaticError</c> if there is any static error in the XPath expression.
-        /// This includes both syntax errors, semantic errors such as references to undeclared functions or
-        /// variables, and statically-detected type errors.
+        /// <exception cref="SaxonApiException">
+        /// Throws a <c>Saxon.Api.SaxonApiException</c> if there is any static error in the expression
+        /// (for example, a syntax error, or a reference to an undeclared function or variable).
         /// </exception>
-        public XPathExecutable Compile(String source) {
-            try {
-                net.sf.saxon.s9api.XPathExecutable executable = compiler.compile(source);
-                return new XPathExecutable(executable);
-            }
-            catch (SaxonApiException err) {
-                throw new StaticError(err);
-            }
+        public XPathExecutable Compile(string source) {
+            net.sf.saxon.s9api.XPathExecutable executable = compiler.compile(source);
+            return new XPathExecutable(executable);
         }
 
         /// <summary>
@@ -363,33 +351,14 @@ namespace Saxon.Api {
         /// <param name="contextItem">The context item to be used for evaluation of the XPath expression.
         /// May be null, in which case the expression is evaluated without any context item.</param>
         /// <returns>An <c>XdmValue</c> which is the result of evaluating the XPath expression.</returns>
-        /// <exception cref="StaticError">
-        /// Throws a <c>Saxon.Api.StaticError</c> if there is any static error in the XPath expression.
-        /// This includes both syntax errors, semantic errors such as references to undeclared functions or
-        /// variables, and statically-detected type errors.
+        /// <exception cref="SaxonApiException">
+        /// Throws a <c>Saxon.Api.SaxonApiException</c> if there is any static error in the expression
+        /// (for example, a syntax error, or a reference to an undeclared function or variable),
+        /// or if a dynamic error during its evaluation (for example, referring to the context item
+        /// if no context item was supplied.)
         /// </exception>
-        /// <exception cref="DynamicError">
-        /// Throws a <c>Saxon.Api.DynamicError</c> if there is any dynamic error during evaluation of the XPath expression.
-        /// This includes, for example, referring to the context item if no context item was supplied.
-        /// </exception>
-        public XdmValue Evaluate(String expression, XdmItem contextItem) {
-            try {
-                return compiler.evaluate(expression, contextItem);
-            }
-            catch (SaxonApiException err) {
-                if (err.getCause() is XPathException) {
-                    XPathException xpathException = (XPathException) err.getCause();
-                    if (xpathException.isStaticError()) {
-                        throw new StaticError(err);
-                    }
-                    else {
-                        throw new DynamicError(err.getMessage());
-                    }
-                }
-                else {
-                    throw new StaticError(err);
-                }
-            }
+        public XdmValue Evaluate(string expression, XdmItem contextItem) {
+            return compiler.evaluate(expression, contextItem);
         }
 
         /// <summary>
@@ -403,33 +372,14 @@ namespace Saxon.Api {
         /// which is the result of evaluating the XPath expression. If the expression returns an empty sequence,
         /// then null. If the expression returns a sequence containing more than one item, then the first
         /// item in the result.</returns>
-        /// <exception cref="StaticError">
-        /// Throws a <c>Saxon.Api.StaticError</c> if there is any static error in the XPath expression.
-        /// This includes both syntax errors, semantic errors such as references to undeclared functions or
-        /// variables, and statically-detected type errors.
-        /// </exception>
-        /// <exception cref="DynamicError">
-        /// Throws a <c>Saxon.Api.DynamicError</c> if there is any dynamic error during evaluation of the XPath expression.
-        /// This includes, for example, referring to the context item if no context item was supplied.
+        /// <exception cref="SaxonApiException">
+        /// Throws a <c>Saxon.Api.SaxonApiException</c> if there is any static error in the expression
+        /// (for example, a syntax error, or a reference to an undeclared function or variable),
+        /// or if a dynamic error during its evaluation (for example, referring to the context item
+        /// if no context item was supplied.)
         /// </exception>
         public XdmItem EvaluateSingle(String expression, XdmItem contextItem) {
-            try {
-                return compiler.evaluateSingle(expression, contextItem);
-            }
-            catch (SaxonApiException err) {
-                if (err.getCause() is XPathException) {
-                    XPathException xpathException = (XPathException) err.getCause();
-                    if (xpathException.isStaticError()) {
-                        throw new StaticError(err);
-                    }
-                    else {
-                        throw new DynamicError(err.getMessage());
-                    }
-                }
-                else {
-                    throw new StaticError(err);
-                }
-            }
+            return compiler.evaluateSingle(expression, contextItem);
         }
     }
 }

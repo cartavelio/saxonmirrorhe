@@ -14,6 +14,10 @@ namespace Saxon.Impl.Helpers {
     /// This class bridges the Saxon Receiver interface (a push API for XML)
     /// to the .NET XmlWriter interface (another push API for XML)
     /// </summary>
+    /// <remarks>
+    /// <para>A <c>NamespaceDifferencer</c> should be inserted in the pipeline to prevent
+    /// redundant namespace declarations being output.
+    /// <remarks>
     /// 
     public class XmlWriterReceiver : net.sf.saxon.@event.TreeReceiver {
         private readonly XmlWriter writer;
@@ -64,7 +68,6 @@ namespace Saxon.Impl.Helpers {
             writer.WriteStartElement(elemName.getPrefix(), elemName.getLocalPart(), elemName.getURI());
             
             foreach (NamespaceBinding ns in namespaces) {
-                // TODO: avoid sending redundant namespaces
                 if ((ns.getPrefix().Length == 0)) {
                     writer.WriteAttributeString("", "xmlns", null, ns.getURI());
                 }

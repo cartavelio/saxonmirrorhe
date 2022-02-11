@@ -13,11 +13,11 @@ namespace Saxon.Api {
     /// property.
     /// </remarks>
 
-    public class DomDestination : XmlDestination
+    public class DomDestination : IDestination
     {
 
-        internal DomBuilder builder;
-        internal DomDestinationImpl destination;
+        private readonly DomBuilder builder;
+        private readonly DomDestinationImpl destination;
 
         /// <summary>Construct a <c>DomDestination</c>.</summary>
         /// <remarks>With this constructor, the system will create a new DOM Document
@@ -40,6 +40,7 @@ namespace Saxon.Api {
         {
             builder = new DomBuilder();
             builder.setAttachmentPoint(attachmentPoint);
+            destination = new DomDestinationImpl(builder);
         }
 
         /// <summary>Construct a <c>DomDestination</c> based on an existing document fragment node.</summary>
@@ -51,6 +52,7 @@ namespace Saxon.Api {
         {
             builder = new DomBuilder();
             builder.setAttachmentPoint(attachmentPoint);
+            destination = new DomDestinationImpl(builder);
         }
 
         /// <summary>Construct a <c>DomDestination</c> based on an existing element node.</summary>
@@ -62,6 +64,7 @@ namespace Saxon.Api {
         {
             builder = new DomBuilder();
             builder.setAttachmentPoint(attachmentPoint);
+            destination = new DomDestinationImpl(builder);
         }
 
         /// <summary>After construction, retrieve the constructed document node.</summary>
@@ -71,10 +74,7 @@ namespace Saxon.Api {
         /// node or an element node, this method returns the <c>OwnerDocument</c> property of 
         /// that node.</remarks>
 
-        public XmlDocument XmlDocument
-        {
-            get { return builder.getDocumentNode(); }
-        }
+        public XmlDocument XmlDocument => builder.getDocumentNode();
 
 
         /// <summary>

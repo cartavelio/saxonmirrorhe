@@ -672,7 +672,7 @@ namespace Saxon.Api {
                     else if (item is XdmNode) {
                         try {
                             var value = ((XdmNode) item).value;
-                            list.Add((XdmAtomicValue) XdmValue.Wrap(((NodeInfo) value).atomize()).ItemAt(0));
+                            list.Add((XdmAtomicValue) XdmValue.Wrap(((NodeInfo) value).atomize())[0]);
                         }
                         catch (Exception ex) {
                             throw new Exception("Cannot atomize supplied value");

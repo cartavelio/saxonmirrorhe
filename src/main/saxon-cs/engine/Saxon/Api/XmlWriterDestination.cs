@@ -6,27 +6,26 @@ using Saxon.Impl.Helpers;
 
 namespace Saxon.Api {
     /// <summary>
-    /// A <c>TextWriterDestination</c> is an implementation of <c>XmlDestination</c> that wraps
+    /// An <c>XmlWriterDestination</c> is an implementation of <c>XmlDestination</c> that wraps
     /// an instance of <c>XmlWriter</c>.
     /// </summary>
     /// <remarks>
-    /// <para>The name <c>TextWriterDestination</c> is a misnomer; originally this class would
-    /// only wrap an <c>XmlTextWriter</c>. It will now wrap any <c>XmlWriter</c>.</para>
-    /// <para>Note that when a <c>TextWriterDestination</c> is used to process the output of a stylesheet
+    /// <para>The class was previously named <c>TextWriterDestination</c>, but this was a misnomer.</para>
+    /// <para>Note that when an <c>XmlWriterDestination</c> is used to process the output of a stylesheet
     /// or query, the output format depends only on the way the underlying <c>XmlWriter</c>
     /// is configured; serialization parameters present in the stylesheet or query are ignored.
     /// The XSLT <c>disable-output-escaping</c> option is also ignored. If serialization
     /// is to be controlled from the stylesheet or query, use a <c>Serializer</c> as the
     /// <c>Destination</c>.</para>
     /// </remarks>
-    public class TextWriterDestination : net.sf.saxon.s9api.AbstractDestination, XmlDestination {
+    public class XmlWriterDestination : net.sf.saxon.s9api.AbstractDestination, IDestination {
         private readonly XmlWriter writer;
         private bool closeAfterUse = true;
 
-        /// <summary>Construct a <c>TextWriterDestination</c></summary>
+        /// <summary>Construct a <c>XmlWriterDestination</c></summary>
         /// <param name="writer">The <c>XmlWriter</c> that is to be notified of the events
         /// representing the XML document.</param>
-        public TextWriterDestination(XmlWriter writer) {
+        public XmlWriterDestination(XmlWriter writer) {
             this.writer = writer;
         }
 
@@ -73,10 +72,11 @@ namespace Saxon.Api {
         /// to construct or configure the returned <c>Receiver</c>.</param>
         /// <param name="params1"></param>
         public Receiver GetReceiver(PipelineConfiguration pipe, SerializationProperties params1) {
-            XmlWriterReceiver dnr = new XmlWriterReceiver(writer, pipe);
+            XmlWriterReceiver dnr = new (writer, pipe);
             dnr.setPipelineConfiguration(pipe);
             dnr.setCloseAfterUse(closeAfterUse);
-            return params1.makeSequenceNormalizer(dnr);
+            NamespaceDifferencer delta = new NamespaceDifferencer(dnr, params1.getProperties());
+            return params1.makeSequenceNormalizer(delta);
         }
 
         /// <summary>

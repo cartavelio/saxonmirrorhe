@@ -68,15 +68,15 @@ namespace Saxon.Api {
     /// </remarks>
     [Serializable]
     public class Xslt30Transformer {
-        private IResultDocumentHandler resultDocumentHandler;
+        private ResultDocumentHandler resultDocumentHandler;
         private StandardLogger traceFunctionDestination;
-        private net.sf.saxon.s9api.Xslt30Transformer transformer;
+        private net.sf.saxon.s9api.Xslt30Transformer s9Transformer;
         private readonly StandardMessageHandler _standardMessageHandler;
 
         // internal constructor
 
         internal Xslt30Transformer(net.sf.saxon.s9api.Xslt30Transformer transformer) {
-            this.transformer = transformer;
+            this.s9Transformer = transformer;
             _standardMessageHandler = new StandardMessageHandler(transformer.controller.getConfiguration());
             transformer.controller.setMessageHandler(message => _standardMessageHandler.accept(message));
             //this.globalParameterSet = new GlobalParameterSet(globalParameters);
@@ -87,8 +87,8 @@ namespace Saxon.Api {
         /// This argument can be null if no context item is to be supplied.</summary>
 
         public XdmItem GlobalContextItem {
-            set => transformer.setGlobalContextItem(value);
-            get => transformer.getGlobalContextItem();
+            set => s9Transformer.setGlobalContextItem(value);
+            get => s9Transformer.getGlobalContextItem();
         }
 
 
@@ -96,9 +96,9 @@ namespace Saxon.Api {
         /// to lower-level methods not otherwise available in the Saxon.Api interface. Note that classes
         /// and methods obtained by this route cannot be guaranteed stable from release to release.</summary>
 
-        public XsltController GetUnderlyingController => transformer.getUnderlyingController();
+        public XsltController GetUnderlyingController => s9Transformer.getUnderlyingController();
 
-        internal net.sf.saxon.s9api.Xslt30Transformer GetUnderlyingXslt30Transformer => transformer;
+        internal net.sf.saxon.s9api.Xslt30Transformer GetUnderlyingXslt30Transformer => s9Transformer;
 
 
         /// <summary>
@@ -126,16 +126,16 @@ namespace Saxon.Api {
         /// as defined by the stylesheet from which which this <c>Xslt30Transformer</c>
         /// was generated, sending the principal result of the transformation to the supplied
         /// <c>finalDestination</c>.
-        /// The transformation is performed as if by the <see cref="ApplyTemplates(Stream, XmlDestination)"/>
+        /// The transformation is performed as if by the <see cref="ApplyTemplates(Stream, IDestination)"/>
         /// method: that is, by applying templates to the root node of the supplied XML document.
         /// </returns>
-        public XmlDestination AsDocumentDestination(XmlDestination finalDestination) {
+        public IDestination AsDocumentDestination(IDestination finalDestination) {
             return new TransformerDestination(this, finalDestination);
         }
 
         // internal method
-        internal Receiver GetDestinationReceiver(XmlDestination destination) {
-            Receiver r = transformer.getDestinationReceiver(transformer.getUnderlyingController(),
+        internal Receiver GetDestinationReceiver(IDestination destination) {
+            Receiver r = s9Transformer.getDestinationReceiver(s9Transformer.getUnderlyingController(),
                 destination.GetUnderlyingDestination());
             return r;
         }
@@ -154,17 +154,17 @@ namespace Saxon.Api {
         /// a file in filestore, using the <c>file:</c> URI scheme).
         /// </remarks>
 
-        public IResultDocumentHandler ResultDocumentHandler {
+        public ResultDocumentHandler ResultDocumentHandler {
             get => resultDocumentHandler;
             set {
                 resultDocumentHandler = value;
-                transformer.getUnderlyingController().setResultDocumentResolver(
+                s9Transformer.getUnderlyingController().setResultDocumentResolver(
                     new ResultDocumentHandlerWrapper(value,makePipelineConfiguration()));
             }
         }
 
         private PipelineConfiguration makePipelineConfiguration() {
-            return transformer.getUnderlyingController().makePipelineConfiguration();
+            return s9Transformer.getUnderlyingController().makePipelineConfiguration();
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace Saxon.Api {
 
         public SchemaValidationMode SchemaValidationMode {
             get {
-                switch (transformer.getUnderlyingController().getSchemaValidationMode()) {
+                switch (s9Transformer.getUnderlyingController().getSchemaValidationMode()) {
                     case Validation.STRICT:
                         return SchemaValidationMode.Strict;
                     case Validation.LAX:
@@ -193,20 +193,20 @@ namespace Saxon.Api {
             set {
                 switch (value) {
                     case SchemaValidationMode.Strict:
-                        transformer.setSchemaValidationMode(ValidationMode.STRICT);
+                        s9Transformer.setSchemaValidationMode(ValidationMode.STRICT);
                         break;
                     case SchemaValidationMode.Lax:
-                        transformer.setSchemaValidationMode(ValidationMode.LAX);
+                        s9Transformer.setSchemaValidationMode(ValidationMode.LAX);
                         break;
                     case SchemaValidationMode.None:
-                        transformer.setSchemaValidationMode(ValidationMode.STRIP);
+                        s9Transformer.setSchemaValidationMode(ValidationMode.STRIP);
                         break;
                     case SchemaValidationMode.Preserve:
-                        transformer.setSchemaValidationMode(ValidationMode.PRESERVE);
+                        s9Transformer.setSchemaValidationMode(ValidationMode.PRESERVE);
                         break;
                     case SchemaValidationMode.Unspecified:
                     default:
-                        transformer.setSchemaValidationMode(ValidationMode.DEFAULT);
+                        s9Transformer.setSchemaValidationMode(ValidationMode.DEFAULT);
                         break;
                 }
             }
@@ -221,10 +221,10 @@ namespace Saxon.Api {
         /// so subsequent changes to the <c>Dictionary</c> have no effect.</param>
         public void SetStylesheetParameters(Dictionary<QName, XdmValue> parameters) {
             try {
-                transformer.setStylesheetParameters(parameters);
+                s9Transformer.setStylesheetParameters(parameters);
             }
             catch (net.sf.saxon.trans.XPathException e) {
-                throw new StaticError(e);
+                throw new Saxon.Api.SaxonApiException(e);
             }
         }
 
@@ -238,9 +238,9 @@ namespace Saxon.Api {
         /// of the <code>xsl:result-document</code> instruction.</para></remarks>
         /// <returns> The base output URI</returns>
 
-        public String BaseOutputURI {
-            set { transformer.setBaseOutputURI(value); }
-            get { return transformer.getBaseOutputURI(); }
+        public string BaseOutputURI {
+            set => s9Transformer.setBaseOutputURI(value);
+            get => s9Transformer.getBaseOutputURI();
         }
 
         /// <summary>
@@ -249,10 +249,10 @@ namespace Saxon.Api {
         /// </summary>
 
         public XmlResolver InputXmlResolver {
-            get => ((StandardURIResolver) transformer.getURIResolver()).getXmlResolver();
-            set => transformer.setURIResolver(
+            get => ((StandardURIResolver) s9Transformer.getURIResolver()).getXmlResolver();
+            set => s9Transformer.setURIResolver(
                 new StandardURIResolver(
-                    transformer.getUnderlyingController().getConfiguration(), 
+                    s9Transformer.getUnderlyingController().getConfiguration(), 
                     value));
         }
 
@@ -266,7 +266,7 @@ namespace Saxon.Api {
         /// <returns>true if assertions are enabled at run time</returns>
         /// <remarks>Since 9.7</remarks>
 
-        public bool AssertionsEnabled => transformer.isAssertionsEnabled();
+        public bool AssertionsEnabled => s9Transformer.isAssertionsEnabled();
         
         /// <summary>
         /// Handler for messages output using <c>&lt;xsl:message&gt;</c>.
@@ -287,12 +287,18 @@ namespace Saxon.Api {
         /// </remarks>
 
         public Consumer<Message> MessageListener {
-            get {
-                return transformer.controller.getMessageHandler();
-            }
-            set {
-                transformer.controller.setMessageHandler(value);
-            }
+            get => s9Transformer.controller.getMessageHandler();
+            set => s9Transformer.controller.setMessageHandler(value);
+        }
+
+        /// <summary>
+        /// Destination for reporting warnings and non-fatal errors (including validation errors
+        /// that occur when validating constructed nodes, which will eventually cause the transformation
+        /// to fail)
+        /// </summary>
+        ///
+        public ErrorReporter ErrorReporter {
+            set => s9Transformer.setErrorReporter(new ErrorReporterWrapper(value));
         }
 
         /// <summary>
@@ -307,9 +313,9 @@ namespace Saxon.Api {
         public StandardLogger TraceFunctionDestination {
             set {
                 traceFunctionDestination = value;
-                transformer.setTraceFunctionDestination(value);
+                s9Transformer.setTraceFunctionDestination(value);
             }
-            get { return traceFunctionDestination; }
+            get => traceFunctionDestination;
         }
 
 
@@ -339,7 +345,7 @@ namespace Saxon.Api {
         /// <param name="tunnel"> true if these values are to be used for setting tunnel parameters;
         /// false if they are to be used for non-tunnel parameters</param>
         public void SetInitialTemplateParameters(Dictionary<QName, XdmValue> parameters, bool tunnel) {
-            transformer.setInitialTemplateParameters(parameters, tunnel);
+            s9Transformer.setInitialTemplateParameters(parameters, tunnel);
         }
 
 
@@ -349,15 +355,8 @@ namespace Saxon.Api {
         /// (unnamed) mode</para></remarks>
 
         public QName InitialMode {
-            set {
-                try {
-                    transformer.setInitialMode(value == null ? null : value);
-                }
-                catch (SaxonApiException e) {
-                    throw new DynamicError(e);
-                }
-            }
-            get => transformer.getInitialMode();
+            set => s9Transformer.setInitialMode(value);
+            get => s9Transformer.getInitialMode();
         }
 
 
@@ -372,14 +371,11 @@ namespace Saxon.Api {
         /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
         /// then the serialization parameters set in the serializer are combined with those defined in the 
         /// stylesheet (the parameters set in the serializer take precedence).</param>
-        public void ApplyTemplates(Stream input, XmlDestination destination) {
-            try {
-                StreamSource streamSource = new StreamSource(input);
-                transformer.applyTemplates(streamSource, destination.GetUnderlyingDestination());
-            }
-            catch (SaxonApiException exp) {
-                throw new DynamicError(exp);
-            }
+        /// <remarks>
+        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// </remarks>
+        public void ApplyTemplates(Stream input, IDestination destination) {
+            s9Transformer.applyTemplates(new StreamSource(input), destination.GetUnderlyingDestination());
         }
 
 
@@ -396,18 +392,56 @@ namespace Saxon.Api {
         /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
         /// then the serialization parameters set in the serializer are combined with those defined in the 
         /// stylesheet (the parameters set in the serializer take precedence).</param>
-        public void ApplyTemplates(Stream input, Uri baseUri, XmlDestination destination) {
+        /// <remarks>
+        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// </remarks>
+        public void ApplyTemplates(Stream input, Uri baseUri, IDestination destination) {
             StreamSource streamSource =
-                new StreamSource(input, Uri.EscapeUriString(baseUri.ToString()));
-            try {
-                transformer.applyTemplates(streamSource, destination.GetUnderlyingDestination());
-            }
-            catch (SaxonApiException exp) {
-                throw new DynamicError(exp);
-            }
+                new (input, Uri.EscapeUriString(baseUri.ToString()));
+            s9Transformer.applyTemplates(streamSource, destination.GetUnderlyingDestination());
+        }
+        
+               /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
+        /// sending the results (wrapped in a document node) to a given <c>Destination</c>. The 
+        /// invocation uses any initial mode set using <see cref="InitialMode"/>,
+        /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
+        /// </summary>
+        /// <param name="input">The source document. To apply more than one transformation to the same source 
+        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
+        /// <param name="destination">The destination of the result document produced by wrapping the result 
+        /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
+        /// then the serialization parameters set in the serializer are combined with those defined in the 
+        /// stylesheet (the parameters set in the serializer take precedence).</param>
+        /// <remarks>
+        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// </remarks>
+      
+        public void ApplyTemplates(TextReader input, IDestination destination) {
+            s9Transformer.applyTemplates(new StreamSource(input), destination.GetUnderlyingDestination());
         }
 
 
+        /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
+        /// using the supplied base URI,
+        /// sending the results (wrapped in a document node) to a given <c>Destination</c>. The 
+        /// invocation uses any initial mode set using <see cref="InitialMode"/>,
+        /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
+        /// </summary>
+        /// <param name="input">The source document. To apply more than one transformation to the same source 
+        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
+        /// <param name="baseUri">Base URI used for the input document</param>
+        /// <param name="destination">The destination of the result document produced by wrapping the result 
+        /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
+        /// then the serialization parameters set in the serializer are combined with those defined in the 
+        /// stylesheet (the parameters set in the serializer take precedence).</param>
+        /// <remarks>
+        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// </remarks>
+        public void ApplyTemplates(TextReader input, Uri baseUri, IDestination destination) {
+            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            s9Transformer.applyTemplates(streamSource, destination.GetUnderlyingDestination());
+        }
+        
         /// <summary>
         /// Invoke the stylesheet by applying templates to a supplied source document, sending the results
         /// to a given <c>Destination</c>. The invocation uses the initial mode set using <see cref="InitialMode"/>
@@ -421,15 +455,8 @@ namespace Saxon.Api {
         /// parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
         /// <remarks>since 9.9.1.5</remarks>
-        public void Transform(Stream input, XmlDestination destination) {
-            StreamSource streamSource = new StreamSource(input);
-
-            try {
-                transformer.transform(streamSource, destination.GetUnderlyingDestination());
-            }
-            catch (SaxonApiException exp) {
-                throw new DynamicError(exp);
-            }
+        public void Transform(Stream input, IDestination destination) {
+            s9Transformer.transform(new StreamSource(input), destination.GetUnderlyingDestination());
         }
 
         /// <summary>
@@ -447,21 +474,14 @@ namespace Saxon.Api {
         /// parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
         /// <remarks>since 9.9.1.5</remarks>
-        public void Transform(Stream input, Uri baseUri, XmlDestination destination) {
-            StreamSource streamSource =
-                new StreamSource(input, Uri.EscapeUriString(baseUri.ToString()));
-            try {
-                transformer.transform(streamSource, destination.GetUnderlyingDestination());
-            }
-            catch (SaxonApiException exp) {
-                throw new DynamicError(exp);
-            }
+        public void Transform(Stream input, Uri baseUri, IDestination destination) {
+            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            s9Transformer.transform(streamSource, destination.GetUnderlyingDestination());
         }
 
 
         /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
-        /// using the supplied base URI,
-        /// returning the raw results as an <c>XdmValue</c>. The 
+        /// using the supplied base URI, returning the raw results as an <c>XdmValue</c>. The 
         /// invocation uses any initial mode set using <see cref="InitialMode"/>,
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
@@ -471,17 +491,33 @@ namespace Saxon.Api {
         /// <returns>the raw result of applying templates to the supplied selection value, without wrapping in
         /// a document node or serializing the result. If there is more than one item in the selection, the result
         /// is the concatenation of the results of applying templates to each item in turn.</returns>
+        /// <remarks>
+        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// </remarks>
         public XdmValue ApplyTemplates(Stream input, Uri baseUri) {
-            StreamSource streamSource =
-                new StreamSource(input, Uri.EscapeUriString(baseUri.ToString()));
-
-            try {
-                return transformer.applyTemplates(streamSource);
-            }
-            catch (SaxonApiException exp) {
-                throw new DynamicError(exp);
-            }
+            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            return s9Transformer.applyTemplates(streamSource);
         }
+        
+        /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
+        /// using the supplied base URI, returning the raw results as an <c>XdmValue</c>. The 
+        /// invocation uses any initial mode set using <see cref="InitialMode"/>,
+        /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
+        /// </summary>
+        /// <param name="input">The source document. To apply more than one transformation to the same source 
+        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
+        /// <param name="baseUri">Base URI</param>
+        /// <returns>the raw result of applying templates to the supplied selection value, without wrapping in
+        /// a document node or serializing the result. If there is more than one item in the selection, the result
+        /// is the concatenation of the results of applying templates to each item in turn.</returns>
+        /// <remarks>
+        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// </remarks>
+        public XdmValue ApplyTemplates(TextReader input, Uri baseUri) {
+            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            return s9Transformer.applyTemplates(streamSource);
+        }
+
 
 
         /// <summary>
@@ -495,13 +531,8 @@ namespace Saxon.Api {
         /// call in a document node.  If the destination is a <see cref="Serializer"/>, then the serialization
         /// parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
-        public void ApplyTemplates(XdmValue selection, XmlDestination destination) {
-            try {
-                transformer.applyTemplates(selection, destination.GetUnderlyingDestination());
-            }
-            catch (SaxonApiException ex) {
-                throw new DynamicError(ex);
-            }
+        public void ApplyTemplates(XdmValue selection, IDestination destination) {
+            s9Transformer.applyTemplates(selection, destination.GetUnderlyingDestination());
         }
 
 
@@ -516,12 +547,7 @@ namespace Saxon.Api {
         /// a document node or serializing the result. If there is more than one item in the selection, the result
         /// is the concatenation of the results of applying templates to each item in turn.</returns>
         public XdmValue ApplyTemplates(XdmValue selection) {
-            try {
-                return transformer.applyTemplates(selection);
-            }
-            catch (SaxonApiException ex) {
-                throw new DynamicError(ex);
-            }
+            return s9Transformer.applyTemplates(selection);
         }
 
 
@@ -537,17 +563,12 @@ namespace Saxon.Api {
         /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
         /// then the serialization parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param> 
-        public void CallTemplate(QName templateName, XmlDestination destination) {
+        public void CallTemplate(QName templateName, IDestination destination) {
             if (templateName == null) {
                 templateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
             }
 
-            try {
-                transformer.callTemplate(templateName, destination.GetUnderlyingDestination());
-            }
-            catch (SaxonApiException exp) {
-                throw new DynamicError(exp);
-            }
+            s9Transformer.callTemplate(templateName, destination.GetUnderlyingDestination());
         }
 
 
@@ -564,12 +585,7 @@ namespace Saxon.Api {
                 templateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
             }
 
-            try {
-                return transformer.callTemplate(templateName);
-            }
-            catch (SaxonApiException exp) {
-                throw new DynamicError(exp);
-            }
+            return s9Transformer.callTemplate(templateName);
         }
 
 
@@ -581,12 +597,7 @@ namespace Saxon.Api {
         /// <returns> the result of calling the function. This is the raw result, without wrapping in a document
         /// node and without serialization.</returns>
         public XdmValue CallFunction(QName function, XdmValue[] arguments) {
-            try {
-                return transformer.callFunction(function, arguments);
-            }
-            catch (SaxonApiException ex) {
-                throw new DynamicError(ex);
-            }
+            return s9Transformer.callFunction(function, arguments);
         }
 
 
@@ -600,13 +611,8 @@ namespace Saxon.Api {
         /// result of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
         /// then the serialization parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
-        public void CallFunction(QName function, XdmValue[] arguments, XmlDestination destination) {
-            try {
-                transformer.callFunction(function, arguments, destination.GetUnderlyingDestination());
-            }
-            catch (SaxonApiException ex) {
-                throw new DynamicError(ex);
-            }
+        public void CallFunction(QName function, XdmValue[] arguments, IDestination destination) {
+            s9Transformer.callFunction(function, arguments, destination.GetUnderlyingDestination());
         }
     }
 }

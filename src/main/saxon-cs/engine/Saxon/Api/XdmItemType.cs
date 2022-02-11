@@ -25,9 +25,9 @@ namespace Saxon.Api {
         }
         
         internal static XdmItemType MakeXdmItemType(net.sf.saxon.type.ItemType type) {
-            if (type is AtomicType) {
+            if (type is AtomicType atomicType) {
                 return XdmAtomicType.BuiltInAtomicType(
-                        QName.FromStructuredQName(((AtomicType) type).getStructuredQName()));
+                        QName.FromStructuredQName(atomicType.getStructuredQName()));
             }
             else if (type is ErrorType) {
                 return XdmAnyNodeType.Instance; // TODO: need to represent this properly
@@ -86,7 +86,7 @@ namespace Saxon.Api {
         /// name of the nearest named base type will be given, preceded by the character '&lt;'
         /// </summary>
         /// <returns>a string representation of the type</returns>
-        public override String ToString() {
+        public override string ToString() {
             return underlyingType.ToString();
         }
     }

@@ -1,11 +1,12 @@
-using System;
-using net.sf.saxon.s9api;
-using net.sf.saxon.trans;
+
 
 namespace Saxon.Api {
     /// <summary>
     /// The <c>XmlProcessorError</c> class contains information about an error detected during
-    /// compilation or execution of a stylesheet, query, XPath expression, or schema. 
+    /// compilation or execution of a stylesheet, query, XPath expression, or schema. Note
+    /// that this class is not an exception (though in some cases it may wrap an exception);
+    /// errors in schemas or stylesheets are considered as normal events and do not cause
+    /// termination of processing, so they are not delivered as exceptions.
     /// </summary>
     public class XmlProcessingError
     {
@@ -26,9 +27,10 @@ namespace Saxon.Api {
         public QName ErrorCode => incident.getErrorCode();
         
         /// <summary>
-        /// The location of the error
+        /// The location of the error (typically identifying a module of a schema, query,
+        /// or stylesheet, and a line and column number within that module).
         /// </summary>
-        public Location Location => incident.getLocation();
+        public Location Location => new (incident.getLocation());
 
         /// <summary>
         /// This property indicates whether the error is to be treated as a warning condition.
@@ -36,7 +38,7 @@ namespace Saxon.Api {
         public bool IsWarning => incident.isWarning();
         
         /// <summary>
-        /// The underlying cause
+        /// The underlying cause. This many be null.
         /// </summary>
         public System.Exception Cause => null;
 

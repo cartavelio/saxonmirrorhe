@@ -43,7 +43,7 @@ namespace Saxon.Api {
         /// Construct an atomic value of type <c>xs:string</c>
         /// </summary>
         /// <param name="str">The string value</param>
-        public XdmAtomicValue(String str) : base(new StringValue(str)) {
+        public XdmAtomicValue(string str) : base(new StringValue(str)) {
         }
 
         /// <summary>
@@ -87,25 +87,32 @@ namespace Saxon.Api {
         /// Here we probe the object for timezone offset information to create the resulting value. 
         /// </summary>
         /// <param name="dt">The DateTime object value</param>
-        public XdmAtomicValue(DateTime dt) {
-            if (dt.Kind == DateTimeKind.Local) {
-                int offsetMinutes = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).Minutes;
-                this.value = new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
-                    Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
-                    Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)),
-                    offsetMinutes);
-            }
-            else if (dt.Kind == DateTimeKind.Utc) {
-                this.value = new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
-                    Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
-                    Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)), 0);
-            }
-            else if (dt.Kind == DateTimeKind.Unspecified) {
-                int offsetMinutes = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).Minutes;
-                this.value = new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
-                    Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
-                    Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)),
-                    net.sf.saxon.value.CalendarValue.NO_TIMEZONE);
+        public XdmAtomicValue(DateTime dt) : base(_init(dt)) {
+        }
+        
+        private static DateTimeValue _init(DateTime dt) {
+            switch (dt) {
+                case {Kind: DateTimeKind.Local}: {
+                    int offsetMinutes = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).Minutes;
+                    return new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
+                        Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
+                        Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)),
+                        offsetMinutes);
+                }
+                case {Kind: DateTimeKind.Utc}: {
+                    return new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
+                        Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
+                        Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)),
+                        0);
+                }
+                case {Kind: DateTimeKind.Unspecified}: {
+                    return new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
+                        Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
+                        Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)),
+                        net.sf.saxon.value.CalendarValue.NO_TIMEZONE);
+                }
+                default:
+                    return null;
             }
         }
 
@@ -113,12 +120,15 @@ namespace Saxon.Api {
         /// Construct an atomic value of type <c>xs:dateTime</c> with a specific timezone offset from a DateTimeOffset object.
         /// </summary>
         /// <param name="offset">The DateTimeOffset value</param>
-        public XdmAtomicValue(DateTimeOffset offset) {
-            int offsetMinutes = offset.Offset.Minutes;
+        public XdmAtomicValue(DateTimeOffset offset) : base (_initOffset(offset)) {
+        }
+
+        private static DateTimeValue _initOffset(DateTimeOffset offset) {
             DateTime dt = offset.DateTime;
-            this.value = new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month), Convert.ToByte(dt.Day),
+            return new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month), Convert.ToByte(dt.Day),
                 Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute), Convert.ToByte(dt.Second),
-                Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)), offsetMinutes);
+                Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)), offset.Offset.Minutes);
+
         }
 
 
@@ -126,33 +136,28 @@ namespace Saxon.Api {
         /// Construct an atomic value of type <c>xs:double</c>
         /// </summary>
         /// <param name="d">The double value</param>
-        public XdmAtomicValue(double d) {
-            this.value = new DoubleValue(d);
+        public XdmAtomicValue(double d) : base (new DoubleValue(d)) {
         }
 
         /// <summary>
         /// Construct an atomic value of type <c>xs:boolean</c>
         /// </summary>
         /// <param name="b">The boolean value</param>
-        public XdmAtomicValue(bool b) {
-            this.value = BooleanValue.get(b);
+        public XdmAtomicValue(bool b) : base (BooleanValue.get(b)) {
         }
 
         /// <summary>
         /// Construct an atomic value of type <c>xs:anyURI</c>
         /// </summary>
         /// <param name="u">The uri value</param>
-        public XdmAtomicValue(Uri u) {
-            this.value = new AnyURIValue(u.ToString());
+        public XdmAtomicValue(Uri u) : base (new AnyURIValue(u.ToString())) {
         }
 
         /// <summary>
         /// Construct an atomic value of type <c>xs:QName</c>
         /// </summary>
         /// <param name="q">The QName value</param>                
-        public XdmAtomicValue(QName q) {
-            this.value = new QNameValue(
-                q.Prefix, q.Uri, q.LocalName);
+        public XdmAtomicValue(QName q) : base(new QNameValue( q.Prefix, q.Uri, q.LocalName)) {
         }
 
         /// <summary>
@@ -162,78 +167,31 @@ namespace Saxon.Api {
         /// in the lexical space, as defined by XML Schema Part 2). Whitespace normalization as defined by
         /// the target type will be applied to the value.</param>
         /// <param name="type">The type given as an <c>XdmAtomicType</c></param>
-        public XdmAtomicValue(String lexicalForm, XdmAtomicType type) {
-            net.sf.saxon.type.ItemType it = type.Unwrap();
+        public XdmAtomicValue(string lexicalForm, XdmAtomicType type) : base(_initGeneric(lexicalForm, type)) {
+        }
+        
+        private static AtomicValue _initGeneric(string lexicalForm, XdmAtomicType type) {
+
+        net.sf.saxon.type.ItemType it = type.Unwrap();
             if (!it.isPlainType()) {
-                throw new StaticError(new net.sf.saxon.s9api.SaxonApiException("Requested type is not atomic"));
+                throw new SaxonApiException("Requested type is not atomic");
             }
 
             if (((AtomicType) it).isAbstract()) {
-                throw new StaticError(
-                    new net.sf.saxon.s9api.SaxonApiException("Requested type is not namespace-sensitive"));
+                throw new SaxonApiException("Requested type is not namespace-sensitive");
             }
 
             try {
                 net.sf.saxon.str.UnicodeString us = net.sf.saxon.str.StringView.of(lexicalForm).tidy();
                 net.sf.saxon.type.StringConverter Converter =
                     ((AtomicType) it).getStringConverter(ConversionRules.DEFAULT);
-                this.value = Converter.convertString(us).asAtomic();
+                return Converter.convertString(us).asAtomic();
             }
             catch (Exception ex) {
-                throw new DynamicError(ex.Message);
+                throw new SaxonApiException(ex);
             }
         }
-
-        /// <summary>
-        /// Construct an atomic value of a given built-in or user-defined type
-        /// </summary>
-        /// <example>
-        ///   <code>XdmAtomicValue("abcd", QName.XDT_UNTYPED_ATOMIC, processor)</code>
-        ///   <para>creates an untyped atomic value containing the string "abcd"</para>
-        /// </example>
-        /// <param name="lexicalForm">The string representation of the value (any value that is acceptable
-        /// in the lexical space, as defined by XML Schema Part 2). Whitespace normalization as defined by
-        /// the target type will be applied to the value.</param>
-        /// <param name="type">The QName giving the name of the target type. This must be an atomic
-        /// type, and it must not be a type that is namespace-sensitive (QName, NOTATION, or types derived
-        /// from these). If the type is a user-defined type then its definition must be present
-        /// in the schema cache maintained by the <c>SchemaManager</c>.</param> 
-        /// <param name="processor">The <c>Processor</c> object. This is needed for looking up user-defined
-        /// types, and also because some conversions are context-sensitive, for example they depend on the
-        /// implicit timezone or the choice of XML 1.0 versus XML 1.1 for validating names.</param>
-        /// <exception cref="ArgumentException">Thrown if the type is unknown or unsuitable, or if the supplied string is not
-        /// a valid lexical representation of a value of the given type.</exception>
-        public XdmAtomicValue(String lexicalForm, QName type, Processor processor) {
-            Configuration jconfig = processor.Implementation;
-            int fp = jconfig.getNamePool().getFingerprint(type.Uri, type.LocalName);
-            if (fp == -1) {
-                throw new ArgumentException("Unknown name " + type);
-            }
-
-            SchemaType st = jconfig.getSchemaType(new StructuredQName("", type.Uri.ToString(), type.LocalName));
-            if (st == null) {
-                throw new ArgumentException("Unknown type " + type);
-            }
-
-            if (!(st is AtomicType)) {
-                throw new ArgumentException("Specified type " + type + " is not atomic");
-            }
-
-            if (((net.sf.saxon.type.SimpleType) st).isNamespaceSensitive()) {
-                throw new ArgumentException("Specified type " + type + " is namespace-sensitive");
-            }
-
-            net.sf.saxon.str.UnicodeString us = net.sf.saxon.str.StringView.of(lexicalForm).tidy();
-            ConversionResult result = ((AtomicType) st).getStringConverter(jconfig.getConversionRules())
-                .convertString(us);
-
-            if (result is net.sf.saxon.type.ValidationFailure) {
-                throw new ArgumentException(((net.sf.saxon.type.ValidationFailure) result).getMessage());
-            }
-
-            this.value = (AtomicValue) result;
-        }
-
+        
 
         /// <summary>
         /// Create an atomic value of a type appropriate to the supplied value. 
@@ -256,52 +214,23 @@ namespace Saxon.Api {
         /// <param name="value">The value to be converted.</param>
         /// <returns>The converted value</returns>
         public static XdmAtomicValue MakeAtomicValue(object value) {
-            if (value is AtomicValue) {
-                return (XdmAtomicValue) XdmValue.Wrap((AtomicValue) value);
-            }
-            else if (value is Boolean) {
-                return new XdmAtomicValue((Boolean) value);
-            }
-            else if (value is int) {
-                return new XdmAtomicValue((int) value);
-            }
-            else if (value is long) {
-                return new XdmAtomicValue((long) value);
-            }
-            else if (value is short) {
-                return new XdmAtomicValue((short) value);
-            }
-            else if (value is Char) {
-                return new XdmAtomicValue((long) value);
-            }
-            else if (value is Byte) {
-                return new XdmAtomicValue((Byte) value);
-            }
-            else if (value is String) {
-                return new XdmAtomicValue((String) value);
-            }
-            else if (value is Double) {
-                return new XdmAtomicValue((Double) value);
-            }
-            else if (value is float) {
-                return new XdmAtomicValue((float) value);
-            }
-            else if (value is decimal) {
-                return new XdmAtomicValue((decimal) value);
-            }
-            else if (value is Uri) {
-                return new XdmAtomicValue((Uri) value);
-            }
-            else if (value is QName) {
-                return new XdmAtomicValue((QName) value);
-            }
-
-            if (value is XdmAtomicValue) {
-                return (XdmAtomicValue) value;
-            }
-            else {
-                throw new ArgumentException(value.ToString());
-            }
+            return value switch {
+                XdmAtomicValue xdm => xdm,
+                AtomicValue atomicValue => (XdmAtomicValue) XdmValue.Wrap(atomicValue),
+                bool boolValue => new XdmAtomicValue(boolValue),
+                int intValue => new XdmAtomicValue(intValue),
+                long longValue => new XdmAtomicValue(longValue),
+                short shortValue => new XdmAtomicValue(shortValue),
+                char charValue => new XdmAtomicValue((long) charValue),
+                byte byteValue => new XdmAtomicValue(byteValue),
+                string stringValue => new XdmAtomicValue(stringValue),
+                double doubleValue => new XdmAtomicValue(doubleValue),
+                float floatValue => new XdmAtomicValue(floatValue),
+                decimal decimalValue => new XdmAtomicValue(decimalValue),
+                Uri uriValue => new XdmAtomicValue(uriValue),
+                QName qNameValue => new XdmAtomicValue(qNameValue),
+                _ => throw new ArgumentException(value.ToString())
+            };
         }
 
 

@@ -155,15 +155,10 @@ namespace Saxon.Api {
         /// <returns>
         /// An <c>XdmValue</c> representing the results of the query
         /// </returns>
-        /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if any run-time failure
         /// occurs while evaluating the query.</exception>
         public XdmValue Evaluate() {
-            try {
-                return evaluator.evaluate();
-            }
-            catch (SaxonApiException err) {
-                throw new DynamicError(err);
-            }
+            return evaluator.evaluate();
         }
 
         /// <summary>
@@ -175,15 +170,10 @@ namespace Saxon.Api {
         /// returns an empty sequence. If the query returns a sequence of more than one item,
         /// any items after the first are ignored.
         /// </returns>
-        /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
+        /// <exception cref="SaxonApiException">Throws a <c>DynamicError</c> if any run-time failure
         /// occurs while evaluating the expression.</exception>
         public XdmItem EvaluateSingle() {
-            try {
-                return evaluator.evaluateSingle();
-            }
-            catch (SaxonApiException err) {
-                throw new DynamicError(err);
-            }
+            return evaluator.evaluateSingle();
         }
 
         /// <summary>
@@ -197,14 +187,14 @@ namespace Saxon.Api {
         /// from this method does not imply that the query has executed successfully: failures
         /// may be reported later while retrieving items from the iterator. 
         /// </returns>
-        /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if any run-time failure
         /// occurs while evaluating the expression.</exception>
         public IEnumerator GetEnumerator() {
             try {
                 return evaluator.GetEnumerator();
             }
             catch (net.sf.saxon.s9api.SaxonApiUncheckedException err) {
-                throw new DynamicError(XPathException.makeXPathException(err));
+                throw new SaxonApiException(XPathException.makeXPathException(err));
             }
         }
         
@@ -219,16 +209,11 @@ namespace Saxon.Api {
         /// from this method does not imply that the query has executed successfully: failures
         /// may be reported later while retrieving items from the iterator. 
         /// </returns>
-        /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
+        /// <exception cref="Saxon.Api.SaxonApiException">Throws a <c>SaxonApiException</c> if any run-time failure
         /// occurs while evaluating the expression.</exception>
 
         IEnumerator<XdmItem> IEnumerable<XdmItem>.GetEnumerator() {
-            try {
-                return evaluator.GetEnumerator();
-            }
-            catch (net.sf.saxon.s9api.SaxonApiUncheckedException err) {
-                throw new DynamicError(XPathException.makeXPathException(err));
-            }
+            return evaluator.GetEnumerator();
         }
 
 
@@ -240,16 +225,11 @@ namespace Saxon.Api {
         /// is an abstraction that allows a number of different kinds of destination
         /// to be specified.
         /// </param>
-        /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
+        /// <exception cref="SaxonApiException">Throws a <c>DynamicError</c> if any run-time failure
         /// occurs while evaluating the expression.</exception>
-        public void Run(XmlDestination destination) {
-            try {
-                evaluator.setDestination(destination.GetUnderlyingDestination());
-                evaluator.run();
-            }
-            catch (SaxonApiException err) {
-                throw new DynamicError(err);
-            }
+        public void Run(IDestination destination) {
+            evaluator.setDestination(destination.GetUnderlyingDestination());
+            evaluator.run();
         }
 
         /// <summary>
@@ -257,25 +237,20 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>An array containing the root nodes of documents that have been
         /// updated by the query.</returns>
-        /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if any run-time failure
         /// occurs while evaluating the expression, or if the expression is not an
         /// updating query.</exception>
         public XdmNode[] RunUpdate() {
-            try {
-                evaluator.run();
-                IEnumerator<Saxon.Api.XdmNode> updatedDocsIter = evaluator.getUpdatedDocuments();
-                List<XdmNode> resultList = new List<XdmNode>();
+            evaluator.run();
+            IEnumerator<Saxon.Api.XdmNode> updatedDocsIter = evaluator.getUpdatedDocuments();
+            List<XdmNode> resultList = new List<XdmNode>();
 
-                for (; updatedDocsIter.MoveNext();) {
-                    resultList.Add(updatedDocsIter.Current);
-                }
+            for (; updatedDocsIter.MoveNext();) {
+                resultList.Add(updatedDocsIter.Current);
+            }
 
-                XdmNode[] result = resultList.ToArray();
-                return result;
-            }
-            catch (SaxonApiException err) {
-                throw new DynamicError(err);
-            }
+            XdmNode[] result = resultList.ToArray();
+            return result;
         }
 
         /// <summary>
@@ -298,15 +273,10 @@ namespace Saxon.Api {
         /// <exception cref="ArgumentException">If no function has been defined with the given name and arity
         /// or if any of the arguments does not match its required type according to the function
         /// signature.</exception>
-        /// <exception cref="DynamicError">If a dynamic error occurs in evaluating the function.
+        /// <exception cref="SaxonApiException">If a dynamic error occurs in evaluating the function.
         /// </exception>
         public XdmValue CallFunction(QName function, XdmValue[] arguments) {
-            try {
-                return evaluator.callFunction(function, arguments);
-            }
-            catch (SaxonApiException e) {
-                throw new DynamicError(e);
-            }
+            return evaluator.callFunction(function, arguments);
         }
 
 

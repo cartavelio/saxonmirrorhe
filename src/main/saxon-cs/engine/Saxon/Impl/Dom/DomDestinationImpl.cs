@@ -7,7 +7,7 @@ namespace Saxon.Impl.Dom {
         }
         public override net.sf.saxon.@event.Receiver getReceiver(net.sf.saxon.@event.PipelineConfiguration pipe, net.sf.saxon.serialize.SerializationProperties @params) {
             builder.setPipelineConfiguration(pipe);
-            return builder;
+            return @params.makeSequenceNormalizer(builder);
         }
         public override void close() {
         }
