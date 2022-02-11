@@ -16,6 +16,8 @@
 
     <xsl:variable name="catalog" select="doc(resolve-uri('element-catalog.xml', base-uri(/)))"
         doc:doc="The W3C Spec catalog that contains the syntax information for the elements in this section"/>
+    <xsl:variable name="extensionsDoc" select="doc(resolve-uri('../extensions.xml', base-uri(/)))"
+        doc:doc="The W3C Spec catalog that contains the syntax information for the elements in this section"/>
     <xsl:variable name="namespace" select="'http://www.w3.org/1999/XSL/Transform'"
         doc:doc="The namespace for these elements"/>
 
@@ -109,7 +111,15 @@
                 <xsl:if test="empty($element-in-catalog/e:attribute[@name = current()])">
                     <xsl:choose>
                         <xsl:when test="starts-with(current(), 'saxon:')">
-                            <xsl:message>Extension attribute <xsl:value-of select="concat('xsl:',$el-name,'/@',current())"/></xsl:message>
+                            <!-- Check that all saxon extension attributes are documented in extensions.xml -->
+                            <xsl:if test="empty($extensionsDoc//section[@title eq current()])">
+                                <xsl:message>*** Extension attribute <xsl:value-of
+                                    select="concat('xsl:',$el-name,'/@',current())"/> undocumented</xsl:message>
+                            </xsl:if>
+                            <!--<xsl:if test="exists($extensionsDoc//section[@title eq current()])">
+                                <xsl:message>Extension attribute <xsl:value-of
+                                    select="concat('xsl:',$el-name,'/@',current())"/> is documented!</xsl:message>
+                            </xsl:if>-->
                             <xsl:variable name="data-type"
                                 select="string($current-element/el:attributes/el:attribute[@name=current()]/@data-type)"/>
                             <attribute xmlns="http://www.saxonica.com/ns/doc/elements" name="{current()}">
