@@ -27,6 +27,8 @@ apply plugin: ManageTestSuitesPlugin
 import org.gradle.internal.os.OperatingSystem;
 import com.nwalsh.DockerContainer
 
+project.extensions.create("testSuite", TestSuite, project)
+
 repositories {
   mavenLocal()
   mavenCentral()
@@ -794,6 +796,12 @@ task eej_copyTestDrivers(
 task asm_jarjar(
   description: "Rejar the asm classes for EE"
 ) {
+  def jars = ["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"]
+  jars.each { asm ->
+    inputs.file "lib/asm-${asmVersion}/${asm}-${asmVersion}.jar"
+    outputs.file "${buildDir}/lib/asm/${asm}-${asmVersion}.jar"
+  }
+
   doFirst {
     mkdir "${buildDir}/lib/asm"
   }
@@ -806,7 +814,7 @@ task asm_jarjar(
   }
   
   doLast {
-    ["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"].each { asm ->
+    jars.each { asm ->
       javaexec {
         classpath = configurations.preprocessor
         main = "com.tonicsystems.jarjar.Main"
@@ -1602,10 +1610,28 @@ task sqlServerStop(dependsOn: ["dockerup"]) {
 
 // ============================================================
 
+/*
+testSuite.qt3 {
+  debug true
+  taskName "adHocTest"
+  release "ee"
+  language "XP31"
+  directory "${projectDir}/src/test/extra/qt3"
+  bytecode true
+  option "-s:saxon-doc"
+  option "-t:s-doc-001"
+}
+*/
+
 // Testing task for various Gradle debugging efforts
 task helloWorld() {
   doLast {
     println("Hello, world.")
+    project.properties.keySet().each { key ->
+      if (key.startsWith("td")) {
+        println("${key} = ${project.properties.get(key)}")
+      }
+    }
 /*
     configurations.samples.resolve().each { path ->
       println(path)
