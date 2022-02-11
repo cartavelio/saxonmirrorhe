@@ -192,6 +192,7 @@ namespace SaxonCS_NUnit {
             }
         }
 
+        [Test]
         public static void testWriteXdmValue() {
             try {
                 Processor proc = new Processor(false);
@@ -232,7 +233,30 @@ namespace SaxonCS_NUnit {
             }
         }
 
+        [Test]
+        public void testCannotSerializeMap() {
+            try {
+                var processor = new Processor();
 
+                var xpathCompiler = processor.NewXPathCompiler();
+
+                xpathCompiler.DeclareVariable(new QName("value"));
+                xpathCompiler.DeclareVariable(new QName("serialization-params"));
+
+                var xpathExpression = xpathCompiler.Compile("serialize($value, $serialization-params)").Load();
+
+                xpathExpression.SetVariable(new QName("value"), new XdmMap());
+                xpathExpression.SetVariable(new QName("serialization-params"), XdmMap.MakeMap(new Dictionary<string, string>() { { "method", "xml" } }));
+
+                var result = xpathExpression.EvaluateSingle();
+
+                Console.WriteLine(result.StringValue);
+                Assert.Fail("Unexpected success");
+            }
+            catch (SaxonApiException e) {
+                Assert.AreEqual(e.Message, "Cannot serialize a map using this output method");
+            }
+        }
 
         // [Test]
         // public void testAsSaxContentHandler() throws Exception {
