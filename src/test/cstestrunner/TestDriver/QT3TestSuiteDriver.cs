@@ -281,6 +281,9 @@ namespace TestDriver {
                     else if ("non_empty_sequence_collection".Equals(value)) {
                         return !inverse;
                     }
+                    else if ("fn-load-xquery-module".Equals(value)) {
+                        return !inverse;
+                    }
                     else if ("fn-transform-XSLT".Equals(value)) {
                         return !inverse;
                     }
@@ -386,7 +389,7 @@ namespace TestDriver {
         }
 
         private bool isSlow(string name) {
-            return name == "RangeExpr-409d" || name.StartsWith("unicode90");
+            return name.StartsWith("unicode90");
         }
 
         /**
@@ -599,6 +602,10 @@ namespace TestDriver {
                             //testXpc.DeclareNamespace("math", NamespaceConstant.MATH);
                             //testXpc.DeclareNamespace("Dictionary", NamespaceConstant.Dictionary_FUNCTIONS);
 
+                            ModuleResolver mr = new ModuleResolver(null, this);
+                            mr.setTestCase(testCase);
+                            env.processor.Implementation.setModuleURIResolver(mr);
+                            
                             try {
                                 XPathSelector selector = testXpc.Compile(exp).Load();
 
@@ -645,6 +652,10 @@ namespace TestDriver {
                                     exp = exp[..x] + decVars + exp[(x + 13)..];
                                 }
                             }
+                            
+                            ModuleResolver mr = new ModuleResolver(null, this);
+                            mr.setTestCase(testCase);
+                            env.processor.Implementation.setModuleURIResolver(mr);
 
                             string vars = env.paramDeclarations.ToString();
                             if (vars.Length != 0) {

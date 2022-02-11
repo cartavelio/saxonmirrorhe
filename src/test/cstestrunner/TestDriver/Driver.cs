@@ -250,7 +250,7 @@ namespace TestDriver {
             return resultsDir;
         }
 
-        public void RegisterXQueryModule(Uri uri, String resource) {
+        public void RegisterXQueryModule(Uri uri, string resource) {
             queryModules.Add(uri, resource);
         }
 
