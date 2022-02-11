@@ -264,6 +264,9 @@ task rejar_Xerces(
         "-company", "Saxonica",
         "-product", "SaxonC ${RELEASE}",
         "-version", saxonVersion
+      doLast {
+        signExe("${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}.exe")
+      }
     }
   } else if (systemOs.isMacOsX()) {
     task "${release}c_copyAncillary"(
@@ -305,7 +308,8 @@ task rejar_Xerces(
       dependsOn: ["${release}c_releaseSetup"],
       description: "Make the ${RELEASE} release ZIP file for SaxonC"
     ) {
-      from("${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}")
+      from "${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}"
+      into "libsaxon-${RELEASE}C-${saxonVersion}"
       archiveFileName = "libsaxon-${RELEASE}C-mac-setup-v${saxonVersion}.zip"
     }
   } else if (systemOs.isLinux()) {
@@ -348,9 +352,8 @@ task rejar_Xerces(
       dependsOn: ["${release}c_releaseSetup"],
       description: "Make the ${RELEASE} release ZIP file for SaxonC"
     ) {
-      from ("${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}") {
-        include "**/*"
-      }
+      from "${buildDir}/releases/libsaxon-${RELEASE}C-${saxonVersion}"
+      into "libsaxon-${RELEASE}C-${saxonVersion}"
       archiveFileName = "libsaxon-${RELEASE}C-setup64-v${saxonVersion}.zip"
     }
   } else {
