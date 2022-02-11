@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2021 Saxonica Limited.
+// Copyright (c) 2022 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -37,7 +37,9 @@ class DocumentBuilder {
 
     public:
 
-
+    /**
+    * DocumentBuilder Destructor
+    */
         ~DocumentBuilder();
 
     /**
@@ -118,7 +120,6 @@ class DocumentBuilder {
      *
      * @param uri the base URI of documents loaded using this <code>DocumentBuilder</code>. This
      *            must be an absolute URI.
-     * @throws IllegalArgumentException if the baseURI supplied is not an absolute URI
      */
 
     void setBaseUri(const char* uri);
@@ -139,20 +140,30 @@ class DocumentBuilder {
      *
      * @return An <code>XdmNode</code>. This will be
      *         the document node at the root of the tree of the resulting in-memory document.
+     * @remark  if any failure occurs retrieving or parsing the document the exception methods will provide more information
      */
 
     XdmNode* parseXmlFromString(const char * content);
 
     /**
-     * Build a document from a supplied XML file   ;
+     * Build a document from a supplied XML file.
      *
-     * @param file the supplied file
+     * @param filename - the supplied file
      * @return the XdmNode representing the root of the document tree
-     * @throws SaxonApiException if any failure occurs retrieving or parsing the document
+     * @remark  if any failure occurs retrieving or parsing the document the exception methods will provide more information
      */
 
    XdmNode* parseXmlFromFile(const char * filename);
 
+   /**
+  * Build a document from a supplied URI source
+  *
+  * @param source - URI to the XML source
+  *
+  * @return An <code>XdmNode</code>. This will be
+  *         the document node at the root of the tree of the resulting in-memory document.
+  *         * @remark  if any failure occurs retrieving or parsing the document the exception methods will provide more information
+  */
    XdmNode * parseXmlFromUri(const char* source);
 
 
