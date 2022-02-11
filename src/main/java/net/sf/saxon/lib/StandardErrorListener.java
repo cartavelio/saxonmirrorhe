@@ -448,7 +448,7 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
      *     was violated;</li>
      *     <li>For other exceptions, it returns a string comprising two characters
      *     of indentation, followed by the result of calling {@link #getExpandedMessage(TransformerException)}
-     *     and then formatting the result using {@link #wordWrap(String)} and {@link #expandSpecialCharacters(CharSequence)}.</li>
+     *     and then formatting the result using {@link #wordWrap(String)} and {@link #expandSpecialCharacters(String)}.</li>
      * </ul>
      * @param err the original reported exception
      * @return the string to be used as the second line of the error message

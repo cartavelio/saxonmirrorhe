@@ -26,6 +26,7 @@ public abstract class QueryLibrary extends QueryModule {
      * Link this library module to a module that imports it
      *
      * @param importer the importing module (a user of the library)
+     * @throws XPathException if there are errors, for example inconsistencies between the modules
      */
 
     public abstract void link(QueryModule importer) throws XPathException;

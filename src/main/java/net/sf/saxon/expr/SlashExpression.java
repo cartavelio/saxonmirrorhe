@@ -145,7 +145,6 @@ public class SlashExpression extends BinaryExpression
      * inference rules defined in the XSLT 3.0 specification.
      *
      * @return the static item type of the expression according to the XSLT 3.0 defined rules
-     * @param contextItemType
      */
     @Override
     public UType getStaticUType(UType contextItemType) {
@@ -586,8 +585,6 @@ public class SlashExpression extends BinaryExpression
      * Add a representation of this expression to a PathMap. The PathMap captures a map of the nodes visited
      * by an expression in a source tree.
      *
-     * @param pathMap        the PathMap to which the expression should be added
-     * @param pathMapNodeSet
      * @return the pathMapNode representing the focus established by this expression, in the case where this
      *         expression is the first operand of a path expression or filter expression
      */
@@ -631,7 +628,7 @@ public class SlashExpression extends BinaryExpression
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables that need to be re-bound
      */
 
     /*@NotNull*/

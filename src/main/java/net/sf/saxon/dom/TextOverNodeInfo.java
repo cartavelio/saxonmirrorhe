@@ -144,7 +144,7 @@ public class TextOverNodeInfo extends NodeOverNodeInfo implements Text, Comment 
      *
      * @param offset The 16-bit unit offset at which to split, starting from 0.
      * @return The new node, of the same type as this node.
-     * @throws org.w3c.dom.DOMException
+     * @throws org.w3c.dom.DOMException always (the DOM is read-only)
      */
 
     @Override

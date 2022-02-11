@@ -336,7 +336,7 @@ public final class SingletonAtomizer extends UnaryExpression {
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.
      *
-     * @param out
+     * @param out the destination for the report
      */
     @Override
     public void export(ExpressionPresenter out) throws XPathException {

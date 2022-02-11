@@ -5,13 +5,18 @@ import java.util.Stack;
 
 /**
  * Provides an iterable over a stack that iterates in order from top to bottom.
+ * <p>Note: Java stacks natively iterate from bottom to top; C# stacks from top to bottom.</p>
  * @param <T> the type of the items on the stack
- * @implNote Java stacks natively iterate from bottom to top; C# stacks from top to bottom.
  */
 
 public class TopDownStackIterable<T> implements Iterable<T> {
 
     private final Stack<T> stack;
+
+    /**
+     * Construct a top-down iterable view of a stack
+     * @param stack the stack over which the top-down iterator will iterate
+     */
     public TopDownStackIterable(Stack<T> stack) {
         this.stack = stack;
     }

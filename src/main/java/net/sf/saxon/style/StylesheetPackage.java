@@ -421,6 +421,7 @@ public class StylesheetPackage extends PackageData {
     /**
      * Set the required context item type. Used when there is an xsl:global-context-item child element
      * @param requirement details of the requirement for the global context item
+     * @throws XPathException if there are conflicts
      */
 
     public void setContextItemRequirements(GlobalContextRequirement requirement) throws XPathException {
@@ -869,6 +870,7 @@ public class StylesheetPackage extends PackageData {
     /**
      * Get the library of functions exposed by this stylesheet package, that
      * is, functions whose visibility is public or final
+     * @return a function library containing only the functions that are exposed as public
      */
 
     public FunctionLibrary getPublicFunctions() {
@@ -889,6 +891,7 @@ public class StylesheetPackage extends PackageData {
      * Set details of functions available for calling anywhere in this package. This is the
      * function library used for resolving run-time references to functions, for example
      * from xsl:evaluate, function-available(), or function-lookup().
+     * @param library         the main function library (as a list of sub-libraries)
      * @param overriding      library of stylesheet functions declared with override=yes
      * @param underriding     library of stylesheet functions declared with override=no
      */
@@ -1072,6 +1075,7 @@ public class StylesheetPackage extends PackageData {
      * Output the abstract expression tree to the supplied destination.
      *
      * @param presenter the expression presenter used to display the structure
+     * @throws XPathException if exporting fails or is not permitted (it requires Saxon-EE)
      */
 
     public void export(ExpressionPresenter presenter) throws XPathException {

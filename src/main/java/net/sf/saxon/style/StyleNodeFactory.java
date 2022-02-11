@@ -533,6 +533,7 @@ public class StyleNodeFactory implements NodeFactory {
      * Create a stylesheet package
      * @param node the XSLPackage element
      * @return a new stylesheet package
+     * @throws XPathException if things go wrong
      */
 
     public PrincipalStylesheetModule newPrincipalModule(XSLPackage node) throws XPathException {

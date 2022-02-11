@@ -45,7 +45,7 @@ public class Twine8 extends UnicodeString {
 
     /**
      * Create a Twine8 from an array of characters that are known to be single byte chars
-     * @param chars character array, all characters in range must be <= 255
+     * @param chars character array, all characters in range must be LE 255
      * @param start offset of first character to be used
      * @param len number of characters to be used
      */
@@ -65,7 +65,7 @@ public class Twine8 extends UnicodeString {
     /**
      * Create a Twine8 from a string whose characters are known to be single byte chars
      *
-     * @param str the value, all characters in range must be <= 255
+     * @param str the value, all characters in range must be LE 255
      */
     
     public Twine8(String str) {
@@ -268,7 +268,7 @@ public class Twine8 extends UnicodeString {
     }
 
     /**
-     * Compute a hashCode. All implementations of {@code UniString use compatible hash codes and the
+     * Compute a hashCode. All implementations of {@code UnicodeString} use compatible hash codes and the
      * hashing algorithm is therefore identical to that for {@code java.lang.String}. This means
      * that for strings containing Astral characters, the hash code needs to be computed by decomposing
      * an Astral character into a surrogate pair.

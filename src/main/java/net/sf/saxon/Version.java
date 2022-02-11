@@ -120,6 +120,7 @@ public final class Version {
 
     /**
      * Get a string identifying the execution platform: "J" for "Java", "CS" for C#, etc
+     * @return "J" for "Java", "CS" for C#
      */
 
     @CSharpReplaceBody(code="return \"CS\";")

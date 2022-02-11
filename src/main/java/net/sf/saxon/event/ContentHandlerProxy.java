@@ -305,7 +305,7 @@ public class ContentHandlerProxy implements Receiver {
 
     /**
      * Notify the start of the document.
-     * @param properties
+     * @param properties not used
      */
 
     @Override
@@ -455,8 +455,9 @@ public class ContentHandlerProxy implements Receiver {
     }
 
     /**
-     * The following function is called when it is found that the output is not a well-formed document.
+     * The following method is called when it is found that the output is not a well-formed document.
      * Unless the ContentHandler accepts "balanced content", this is a fatal error.
+     * @throws XPathException unconditionally
      */
 
     protected void notifyNotWellFormed() throws XPathException {

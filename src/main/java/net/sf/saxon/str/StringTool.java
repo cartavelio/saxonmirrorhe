@@ -181,11 +181,21 @@ public class StringTool {
     /**
      * Get the last codepoint in a UnicodeString
      * @param str the input string
+     * @return the integer value of the last character in the string
+     * @throws IndexOutOfBoundsException if the string is empty
      */
 
     public static int lastCodePoint(UnicodeString str) {
         return str.codePointAt(str.length() - 1);
     }
+
+    /**
+     * Get the position of the last occurrence of a given codepoint within a string
+     * @param str the input string
+     * @param codePoint the sought codepoint
+     * @return the zero-based position of the last occurrence of the codepoint within the input string,
+     * or -1 if the codepoint does not appear within the string
+     */
 
     public static long lastIndexOf(UnicodeString str, int codePoint) {
         for (long i=str.length()-1; i>=0; i--) {
@@ -215,8 +225,11 @@ public class StringTool {
      * Attempt to compress a UniString consisting entirely of whitespace. This is the first thing we
      * do to an incoming text node
      *
-     * @param in the UniString to be compressed
-     * @return the compressed sequence if it can be compressed; or the original UniString otherwise
+     * @param in the Unicode string to be compressed
+     * @param offset the start position of the substring we are interested in
+     * @param len the length of the substring we are interested in
+     * @param compressWS set to true if whitespace compression is to be attempted
+     * @return the compressed sequence if it can be compressed; or the uncompressed UnicodeString otherwise
      */
 
     /*@NotNull*/

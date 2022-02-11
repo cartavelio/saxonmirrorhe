@@ -133,14 +133,14 @@ public class StandardErrorReporter
     }
 
     /**
-     * Set the maximum codepoint value for a character to be considered non-special.
+     * Get the maximum codepoint value for a character to be considered non-special.
      * Special characters (codepoints above this value) will be expanded in hex for
      * extra clarity in the error message.
      *
-     * @param max the highest codepoint considered non-special (defaults to 255)
+     * @return the highest codepoint considered non-special (defaults to 255)
      */
 
-    public int getMaxOrdinaryCharacter(int max) {
+    public int getMaxOrdinaryCharacter() {
         return maxOrdinaryCharacter;
     }
 

@@ -39,7 +39,11 @@ public class RangeExpression extends Expression {
     /**
      * Construct a stepping range expression of the form S by B. If S is a RangeExpression,
      * we collapse this into a 3-operand RangeExpression. If S is anything else, we generate
-     * a function call saxon:_step-over-sequence(S, B)
+     * a function call saxon:_step-over-sequence(S, B). Experimental feature.
+     * @param lhs the first operand
+     * @param rhs the second operand
+     * @return the constructed expression
+     * @throws XPathException if not valid
      */
 
     public static RangeExpression makeSteppingExpression(Expression lhs, Expression rhs) throws XPathException {
@@ -64,6 +68,7 @@ public class RangeExpression extends Expression {
      * Construct a RangeExpression with specified increment
      *
      * @param start expression that computes the start of the range
+     * @param step expression to compute interval between successive values
      * @param end   expression that computes the end of the range
      */
 
@@ -216,7 +221,6 @@ public class RangeExpression extends Expression {
      * inference rules defined in the XSLT 3.0 specification.
      *
      * @return the static item type of the expression according to the XSLT 3.0 defined rules
-     * @param contextItemType
      */
     @Override
     public UType getStaticUType(UType contextItemType) {
@@ -262,7 +266,7 @@ public class RangeExpression extends Expression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables that need to be re-bound
      */
 
     /*@NotNull*/

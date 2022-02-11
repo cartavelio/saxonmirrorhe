@@ -163,6 +163,8 @@ public class Compilation {
      * After the first phase of processing, we have gathered information about the xsl:use-package elements in the stylesheet.
      * We now ensure that these dependencies are satisfied and are bound to actual loaded packages, invoking the compiler
      * recursively to load the package if necessary. If there are cyclic references, these must be detected.
+     * @param thisPackage the package being checked
+     * @throws XPathException if errors are found
      */
 
     public void satisfyPackageDependencies(XSLPackage thisPackage) throws XPathException {

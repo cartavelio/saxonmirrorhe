@@ -144,9 +144,6 @@ public class AbsentExtensionElement extends StyleElement {
 
     /**
      * Recursive walk through the stylesheet to validate all nodes
-     *
-     * @param decl
-     * @param excludeStylesheet
      */
 
     @Override

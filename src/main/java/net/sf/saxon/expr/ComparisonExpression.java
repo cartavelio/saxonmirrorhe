@@ -16,6 +16,7 @@ public interface ComparisonExpression {
 
     /**
      * Get the AtomicComparer used to compare atomic values. This encapsulates any collation that is used
+     * @return the comparer
      */
 
     AtomicComparer getAtomicComparer();
@@ -23,19 +24,39 @@ public interface ComparisonExpression {
     /**
      * Get the primitive (singleton) operator used: one of Token.FEQ, Token.FNE, Token.FLT, Token.FGT,
      * Token.FLE, Token.FGE
+     * @return the operator, as defined in class {@link net.sf.saxon.expr.parser.Token}
      */
 
     int getSingletonOperator();
 
     /**
-     * Get the two operands of the comparison
+     * Get the left-hand operand of the comparison
+     * @return the first operand
      */
 
     Operand getLhs();
 
+    /**
+     * Get the right-hand operand of the comparison
+     *
+     * @return the second operand
+     */
+
     Operand getRhs();
 
+    /**
+     * Get the left-hand expression
+     *
+     * @return the first operand expression
+     */
+
     Expression getLhsExpression();
+
+    /**
+     * Get the right-hand expression
+     *
+     * @return the second operand expression
+     */
 
     Expression getRhsExpression();
 

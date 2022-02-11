@@ -32,8 +32,6 @@ public final class DocumentOrderIterator implements SequenceIterator {
      * Iterate over a sequence in document order.
      * @param base the input sequence to be sorted
      * @param comparer the comparer used for comparing node positions
-     * @throws XPathException if the input sequence cannot be evaluated, or if it contains an item
-     * that is not a node
      */
 
     public DocumentOrderIterator(SequenceIterator base, Comparator<? super NodeInfo> comparer)  {

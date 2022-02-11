@@ -541,6 +541,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
      *
      * @param context the dynamic evaluation context
      * @return the result of evaluating the expression that is bound to the variable
+     * @throws XPathException if evaluation of the variable fails
      */
 
     public Sequence eval(XPathContext context) throws XPathException {

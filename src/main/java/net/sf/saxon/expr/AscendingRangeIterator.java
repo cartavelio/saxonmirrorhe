@@ -61,6 +61,11 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
 
     /**
      * Factory method for use from bytecode
+     * @param start the first integer to return
+     * @param step the interval between successive integers (positive or negative, not zero)
+     * @param end stop the iteration when this value or one beyond it is reached
+     * @return an iterator over a range of integers
+     * @throws XPathException if, for example, implementation-defined limits are exceeded
      */
 
     public static AtomicIterator makeLongRangeIterator(long start, long step, long end) throws XPathException {
@@ -86,8 +91,8 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
      * Create an iterator over a range of monotonically increasing integers
      *
      * @param start the first integer in the sequence
-     * @param step the increment; must be > 0
-     * @param end   the last integer in the sequence. Must be >= start.
+     * @param step the increment; must be GT 0
+     * @param end   the last integer in the sequence. Must be GE start.
      */
 
     public AscendingRangeIterator(long start, long step, long end) {

@@ -93,7 +93,7 @@ public class XQueryParser extends XPathParser {
 
     /**
      * Constructor for internal use: this class should be instantiated via the QueryModule
-     * @param languageVersion
+     * @param languageVersion the XQuery language version, for example 31 for XQuery 3.1
      */
 
     public XQueryParser(int languageVersion) {

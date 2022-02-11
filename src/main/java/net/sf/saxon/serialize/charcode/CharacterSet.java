@@ -18,6 +18,8 @@ public interface CharacterSet {
 
     /**
      * Determine if a character is present in the character set
+     * @param ch the codepoint being tested
+     * @return true if the codepoint is supported
      */
 
     boolean inCharset(int ch);
@@ -25,6 +27,7 @@ public interface CharacterSet {
     /**
      * Get the preferred Java name of the character set. Note that Java in many
      * cases also supports a "historic name".
+     * @return the preferred Java name
      */
 
     String getCanonicalName();

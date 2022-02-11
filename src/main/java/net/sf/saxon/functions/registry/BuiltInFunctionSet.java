@@ -389,6 +389,9 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     /**
      * Register reduced-arity versions of a function, with arities in a specified range,
      * using common argument and return types
+     * @param key the function name
+     * @param min the minimum arity
+     * @param max the maximum arity
      */
 
     protected void registerReducedArityVariants(String key, int min, int max) {
@@ -427,6 +430,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     /**
      * Return a conventional prefix for use with this namespace, typically
      * the prefix used in the documentation of these functions.
+     * @return the string "fn"
      */
 
     public String getConventionalPrefix() {

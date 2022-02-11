@@ -389,7 +389,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      *                added. If the target element already has a namespace binding with this (prefix, uri) pair, the call has
      *                no effect. If the target element currently has a namespace binding with this prefix and a different URI, an
      *                exception is raised.
-     * @param inherit
+     * @param inherit true if the namespace is to be inherited by descendant elements
      *
      */
 
@@ -482,7 +482,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      * @param attType    the type annotation of the new attribute
      * @param value      the string value of the new attribute
      * @param properties properties including IS_ID and IS_IDREF properties
-     * @param inheritNamespaces
+     * @param inheritNamespaces true if any namespace used by this attribute name is to be inherited by descendant elements
      * @throws IllegalStateException if the element already has an attribute with the given name.
      */
 

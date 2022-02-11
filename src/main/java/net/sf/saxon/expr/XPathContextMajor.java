@@ -275,6 +275,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * object that creates the new context. It's up to the debugger to determine whether this information
      * is useful. The object will either be an {@link Expression}, allowing information
      * about the calling instruction to be obtained, or null.
+     * @param expr the originator of this context object
      */
 
     public void setOrigin(ContextOriginator expr) {
@@ -283,6 +284,7 @@ public class XPathContextMajor extends XPathContextMinor {
 
     /**
      * Get information about the creating expression or other construct.
+     * @return the originator of this context, or null if not known
      */
 
     public ContextOriginator getOrigin() {

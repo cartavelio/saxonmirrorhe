@@ -368,7 +368,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables that must be re-bound
      */
 
     /*@NotNull*/

@@ -689,6 +689,10 @@ public class GlobalVariable extends Actor
 
     /**
      * Evaluate the variable
+     * @param context the XPath dynamic context
+     * @param target the component representing this variable (in the context of a package where it is used)
+     * @return the value of the variable
+     * @throws XPathException if evaluation of the variable fails with a dynamic error
      */
 
     public GroundedValue evaluateVariable(XPathContext context, Component target) throws XPathException {
@@ -768,8 +772,9 @@ public class GlobalVariable extends Actor
      * on the context stack representing the evaluation of X. We don't set a dependency from X to Y if the value
      * of Y was already available in the Bindery; it's not needed, because in this case we know that evaluation
      * of Y is unproblematic, and can't lead to any circularities.
-     *  @param var     the global variable or parameter being evaluated
+     * @param var     the global variable or parameter being evaluated
      * @param context the dynamic evaluation context
+     * @throws XPathException if a cycle of dependencies is found
      */
 
     protected static void setDependencies(GlobalVariable var, XPathContext context) throws XPathException {
@@ -841,6 +846,7 @@ public class GlobalVariable extends Actor
 
     /**
      * Get a description of the variable for use in diagnostics
+     * @return a suitable description
      */
 
     public String getDescription() {

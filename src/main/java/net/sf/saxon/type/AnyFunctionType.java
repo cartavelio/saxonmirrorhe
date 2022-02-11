@@ -143,7 +143,7 @@ public class AnyFunctionType implements FunctionItemType {
      *
      *
      * @param item    The item to be tested
-     * @param th
+     * @param th   The type hierarchy cache
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override

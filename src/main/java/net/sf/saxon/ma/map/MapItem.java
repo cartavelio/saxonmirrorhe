@@ -109,6 +109,7 @@ public abstract class MapItem implements Function {
     /**
      * Get the type of the map. This method is used largely for diagnostics, to report
      * the type of a map when it differs from the required type.
+     * @param th the type hierarchy cache
      * @return the type of this map
      */
 
@@ -342,7 +343,7 @@ public abstract class MapItem implements Function {
      * Prepare an XPathContext object for evaluating the function
      *
      * @param callingContext the XPathContext of the function calling expression
-     * @param originator
+     * @param originator not used
      * @return a suitable context for evaluating the function (which may or may
      * not be the same as the caller's context)
      */
@@ -450,9 +451,9 @@ public abstract class MapItem implements Function {
     }
 
     /**
-     * Returns a string representation of the object.
-     *
-     * @return a string representation of the object.
+     * Returns a string representation of the map.
+     * @param map the input map
+     * @return a string representation of the input map (using syntax resembling that of an XPath 3.1 map constructor).
      */
 
     public static String mapToString(MapItem map) {

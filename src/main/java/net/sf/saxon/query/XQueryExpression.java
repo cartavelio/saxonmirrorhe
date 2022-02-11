@@ -178,6 +178,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
     /**
      * Get data about the unit of compilation (XQuery module, XSLT package) to which this
      * container belongs
+     * @return the package information
      */
     public PackageData getPackageData() {
         return mainModule.getPackageData();
@@ -618,6 +619,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
      *
      * @param out an ExpressionPresenter to which the XML representation of the compiled query
      *            will be sent
+     * @throws XPathException if things go wrong
      */
 
     public void explain(/*@NotNull*/ ExpressionPresenter out) throws XPathException {

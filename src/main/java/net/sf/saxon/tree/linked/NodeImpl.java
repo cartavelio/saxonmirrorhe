@@ -162,11 +162,10 @@ public abstract class NodeImpl
     /**
      * Determine whether this is the same node as another node
      *
-     * @return true if this Node object and the supplied Node object represent the
-     * same node in the tree.
+     * @return true if the argument is the same node in the tree.
      */
 
-    public boolean equals(NodeInfo other) {
+    public boolean equals(Object other) {
         // default implementation: differs for attribute and namespace nodes
         return this == other;
     }
@@ -320,6 +319,7 @@ public abstract class NodeImpl
 
     /**
      * Get the NamePool
+     * @return the namePool for the configuration owning this node
      */
 
     public NamePool getNamePool() {
@@ -860,7 +860,8 @@ public abstract class NodeImpl
      * @param attType    the type annotation of the new attribute
      * @param value      the string value of the new attribute
      * @param properties properties including IS_ID and IS_IDREF properties
-     * @param inheritNamespaces
+     * @param inheritNamespaces true if any namespace needed for this attribute is to be inherited
+     *                          by descendant elements
      * @throws IllegalStateException if the element already has an attribute with the given name.
      */
 
@@ -873,7 +874,7 @@ public abstract class NodeImpl
      * Rename this node
      *
      * @param newNameCode the NamePool code of the new name
-     * @param inherit
+     * @param inherit true if any namespace needed for the new name is to be inherited by descendant elements
      */
 
     @Override

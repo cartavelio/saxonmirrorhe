@@ -42,6 +42,7 @@ public abstract class AttributeValueTemplate {
      * @param env the static context
      * @return an expression that computes the value of the attribute / content, as a string.
      * In the case of a TVT this must be further processed to create a text node.
+     * @throws XPathException if a static error is found
      */
 
     public static Expression make(String avt, StaticContext env) throws XPathException {
@@ -185,6 +186,9 @@ public abstract class AttributeValueTemplate {
 
     /**
      * Make an expression that extracts the first item of a sequence, after atomization
+     * @param exp an expression that evaluates to a sequence
+     * @param env the static context of the expression
+     * @return an expression that returns the first item in the sequence returned by {@code exp}
      */
 
     /*@NotNull*/

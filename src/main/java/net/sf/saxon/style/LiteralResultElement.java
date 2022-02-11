@@ -141,8 +141,6 @@ public class LiteralResultElement extends StyleElement {
 
     /**
      * Validate that this node is OK
-     *
-     * @param decl
      */
 
     @Override
@@ -286,9 +284,6 @@ public class LiteralResultElement extends StyleElement {
     /**
      * Validate the children of this node, recursively. Overridden for top-level
      * data elements.
-     *
-     * @param decl
-     * @param excludeStylesheet
      */
 
     @Override

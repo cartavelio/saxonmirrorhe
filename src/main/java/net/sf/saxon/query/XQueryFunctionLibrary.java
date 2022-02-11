@@ -333,6 +333,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
      * Output "explain" information about each declared function
      *
      * @param out the ExpressionPresenter that renders the output
+     * @throws XPathException if things go wrong
      */
 
     public void explainGlobalFunctions(/*@NotNull*/ ExpressionPresenter out) throws XPathException {

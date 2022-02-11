@@ -11,7 +11,6 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.UncheckedXPathException;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -67,8 +66,6 @@ public class FocusTrackingIterator
      *         on next() has returned null, no further calls should be made. The preferred
      *         action for an iterator if subsequent calls on next() are made is to return
      *         null again, and all implementations within Saxon follow this rule.
-     * @throws XPathException
-     *          if an error occurs retrieving the next item
      * @since 8.4
      */
     @Override

@@ -144,17 +144,6 @@ public class StaticQueryContext {
         copyFrom(c);
     }
 
-    /**
-     * Static method used to create the default static context: intended for internal use only
-     */
-
-    public static StaticQueryContext makeDefaultStaticQueryContext(Configuration config) {
-        StaticQueryContext sqc = new StaticQueryContext();
-        sqc.config = config;
-        sqc.namePool = config.getNamePool();
-        sqc.reset();
-        return sqc;
-    }
 
     /**
      * Copy details from another StaticQueryContext

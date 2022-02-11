@@ -133,6 +133,7 @@ public class Predicates {
      * Obtain a predicate that tests whether a supplied {@link Step} delivers an empty result
      *
      * @param step a step to be applied to the item being tested
+     * @param <T> the type of items returned by the step
      * @return a predicate that returns true if the supplied step returns an empty result.
      * For example {@code empty(attribute("id")} is a predicate that returns true for a node that
      * has no "id" attribute. Similarly {@code CHILD.where(empty(child(IS_ELEMENT)))} is a step
@@ -160,6 +161,7 @@ public class Predicates {
      * Obtain a predicate that tests whether a supplied Step delivers a non-empty result
      *
      * @param step a step to be applied to the item being tested
+     * @param <T> the type of items returned by the step
      * @return a predicate that returns true if the
      * step returns a non-empty result. For example {@code exists(attribute("id")} is a
      * predicate that returns true for a node that has an "id" attribute. So
@@ -273,7 +275,9 @@ public class Predicates {
      * <p>If the step returns an empty sequence the result will always be false.</p>
      *
      * @param step      the step to be evaluated
+     * @param <T> the type of items returned by the step
      * @param condition the predicate to be applied to the items returned by the step
+     * @return a predicate that is true if at least one item selected by the step matches the supplied condition
      */
 
     public static <T extends XdmItem> Predicate<XdmItem> some(Step<T> step, Predicate<? super T> condition) {
@@ -288,7 +292,9 @@ public class Predicates {
      * <p>If the step returns an empty sequence the result will always be true.</p>
      *
      * @param step      the step to be evaluated
+     * @param <T> the type of items returned by the step
      * @param condition the predicate to be applied to the items returned by the step
+     * @return a predicate that is true if every item selected by the step matches the supplied condition
      */
 
     public static <T extends XdmItem> Predicate<XdmItem> every(Step<T> step, Predicate<? super XdmItem> condition) {
@@ -346,6 +352,7 @@ public class Predicates {
      *
      * @param step  the step to be evaluated
      * @param value the string to be compared against the items returned by the step
+     * @param <T>  the type of items to which the step applies
      * @return a Predicate which returns true if some item selected by the step has as string value
      * equal to the given string
      */

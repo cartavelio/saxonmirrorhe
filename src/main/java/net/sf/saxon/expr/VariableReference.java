@@ -45,6 +45,7 @@ public abstract class VariableReference extends Expression implements BindingRef
 
     /**
      * Create a Variable Reference
+     * @param name the name of the variable
      */
 
     public VariableReference(StructuredQName name) {

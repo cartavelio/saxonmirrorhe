@@ -75,7 +75,7 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
 
     /**
      * Start of a document node.
-     * @param properties
+     * @param properties not used
      */
 
     @Override
