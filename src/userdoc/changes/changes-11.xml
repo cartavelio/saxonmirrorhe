@@ -2,9 +2,14 @@
 
 <release number="11" date="2021-10-06" xmlns="http://www.saxonica.com/ns/doc/changes">
     
-    <!--<category name="documentation">
+    <category name="documentation">
         
-    </category>-->
+        <p>Sections in the documentation that are specific to the Java or C# products (SaxonJ, SaxonCS) are now tagged as such
+            (using <code>class="javaonly"</code> or <code>class="csonly"</code> on the containing element).
+            This causes the relevant text to be displayed with a colored side-bar; it also allows the text to
+            be displayed or hidden based on a checkbox displayed in the page footer.</p>
+        
+    </category>
     
     <!--<category name="xslt30">
 
@@ -198,7 +203,7 @@
             appeared to translate to very inefficient code on .NET.</p>
         
         <p>Most uses of <code>CharSequence</code> have been replaced by a new class <code
-            java="net.sf.saxon.str.UnicodeString">UnicodeString</code> (which also replaces the old class
+            java="net.sf.saxon.str.UnicodeString">net.sf.saxon.str.UnicodeString</code> (which also replaces the old class
             <code>net.sf.saxon.regex.UnicodeString</code>). The <code>UnicodeString</code> class has a number of implementations.
             All of them are designed to be codepoint-addressible: they expose an indexable array of 32-bit codepoint values, and
             never use surrogate pairs. The implementations of <code>UnicodeString</code> include:</p>
@@ -219,7 +224,7 @@
                 which is itself a <code>UnicodeString</code>. The name derives from the algorithm used to combine segments, which
                 results in segments having progressively decreasing lengths towards the end of the string.</li>
             <li><code java="net.sf.saxon.str.StringView">StringView</code>: a wrapper around an arbitrary Java/C# string. (This
-            stores the string both in its native Java form, and using a "real" codepoint-addressible implementation of <code>UnicodeString</code>,
+                stores the string both in its native Java/C# form, and using a "real" codepoint-addressible implementation of <code>UnicodeString</code>,
             which is constructed lazily when it is first required.)</li>
         </ul>
 
@@ -260,7 +265,7 @@
 
         <h2>NodeInfo</h2>
 
-        <p>The method <code>NodeInfo.iterateAxis(int axisNumber, Predicate&lt;? super NodeInfo> nodeTest)</code>
+        <p>The method <code>NodeInfo.iterateAxis(int axisNumber, Predicate&lt;? super NodeInfo&gt; nodeTest)</code>
         is replaced by <code>NodeInfo.iterateAxis(int axisNumber, NodePredicate predicate)</code>.</p>
 
         <p>The reason for this is to facilitate conversion of the source code from Java to C#. In Java, a functional interface can
@@ -281,7 +286,7 @@
 
         <p>For example, in some data objects such as <code>ParseOptions</code>, some properties were maintained
             as three-valued fields of type <code>java.lang.Boolean</code> (true, false, or null - meaning unspecified). C# booleans
-            do not have a null in the value space so the representation has changed, typically to <code>Optional&lt;Boolean</code>.
+            do not have a null in the value space so the representation has changed, typically to <code>Optional&lt;Boolean&gt;</code>.
             The same applies to enumeration types where there was a need for a "null" in the value space; in some cases an extra
             enumeration constant such as <code>UNKNOWN</code> has been added.</p>
         
@@ -302,18 +307,6 @@
         <samp>configuration.setLogger(new SystemLogger(Logger.getAnonymousLogger()))</samp>
         
  
-    </category>
-    
- 
-
-    <category name="documentation">
-        
-        <p>Sections in the documentation that are specific to the Java or C# products (SaxonJ, SaxonCS) are now tagged as such
-        (using <code>class="javaonly"</code> or <code>class="csonly"</code> on the containing element).
-        This causes the relevant text to be displayed with a colored side-bar; it also allows the text to
-        be displayed or hidden based on a checkbox displayed in the page footer.</p>
- 
-         
     </category>
 
     <category name="serialization">
@@ -359,9 +352,17 @@
     
     <category name="extensions">
         
+        <p>Changes to existing Saxon extensions and new extensions in Saxon 11 are outlined below. This includes
+            extension functions and instructions in the <code>saxon</code> namespace, as well as
+            experimental implementations for version 4.0 extensions to XPath, XSLT, and XQuery. A W3C
+            Community Group is working on these proposals; for more information see the <a class="bodylink"
+                href="https://qt4cg.org/">QT4CG Specifications</a>, and documentation about the Saxon
+            implementations at <a class="bodylink" href="/v4extensions">Experimental 4.0 Extensions</a>.</p>
+        
         <h2>Changes to Extension Functions</h2>
         
-        <p>Many of the extension functions in the <code>saxon</code> namespace have been re-implemented
+        <p>Many of the <a class="bodylink" href="/functions/saxon">extension functions</a> in the
+            <code>saxon</code> namespace have been re-implemented
         as <i>integrated extension functions</i> where they were previously <i>reflexive extension functions</i>.</p>
         
         <p>The main impact is that these functions now enforce the specification more strictly. In
@@ -381,28 +382,49 @@
         
         <h2>New Extension Functions</h2>
         
-        <p>The function <a class="bodylink code" href="/functions/saxon/xquery">saxon:xquery()</a> allows dynamic evaluation of
-            XQuery expressions: it replaces the existing <code>saxon:compile-query()</code> and <code>saxon:query()</code>, which
-            are now obsolescent.</p>
+        <p>Some new extension functions have been added:</p>
         
-        <p>The new function <a class="bodylink code" href="/functions/saxon/unindexed">saxon:unindexed()</a> returns the value of
-            its argument unchanged, and a static call will normally be optimized away. The purpose of the function is to suppress
-            optimization of a contained filter expression: for example <code>//x[@y=$z]</code> in Saxon-EE would normally be
-            optmized by building an index, but <code>saxon:unindexed(//x[@y=$z])</code> suppresses this optimization. This may be
-            useful if it is known, for example, (a) that the expression will not be evaluated often enough to justify the cost of
-            index construction, or (b) that the sequence <code>//x</code> contains very few items, or (c) that the predicate is
-            likely to select a high proportion of the items in the filtered sequence.</p>
-        
-        <p>Added <a class="bodylink code" href="/functions/saxon/slice">saxon:slice()</a>. 
-            For example <code>slice(("a", "b", "c"), -1)</code> returns <code>"c"</code>.
-            (The function was originally based on a proposed <code>fn:slice()</code> function, but that has since
-            diverged.)
-        </p>
-        
-        <p>The function <a class="bodylink code" href="/functions/saxon/escape-NCName">saxon:escape-NCName()</a> can be used to
-            turn any string into a valid <code>NCName</code>: for example <code>"date of birth"</code> becomes
-            <code>"date_20_of_20_birth"</code>. This can be useful when converting JSON to XML. The function <a class="bodylink
-                code" href="/functions/saxon/unescape-NCName">saxon:unescape-NCName()</a> reverses the operation.</p>
+        <ul>
+            <li>
+                <p><a class="bodylink code"
+                    href="/functions/saxon/escape-NCName">saxon:escape-NCName()</a> and <a class="bodylink
+                        code" href="/functions/saxon/unescape-NCName">saxon:unescape-NCName()</a></p>
+                <p>The function <code>saxon:escape-NCName()</code> can be used to
+                    turn any string into a valid <code>NCName</code>: for example <code>"date of birth"</code> becomes
+                    <code>"date_20_of_20_birth"</code>. This can be useful when converting JSON to XML. The
+                    function <code>saxonc:unescape-NCName()</code> reverses the operation.</p>
+                
+            </li>
+            <li>
+                <p><a class="bodylink code"
+                    href="/functions/saxon/slice">saxon:slice()</a></p>
+                <p>Selects items from a sequence. For example <code>slice(("a", "b", "c"), -1)</code> returns <code>"c"</code>.
+                    (The function was originally based on a proposed <code>fn:slice()</code> function, but that has since
+                    diverged.)
+                </p>
+                
+            </li>
+            <li>
+                <p><a class="bodylink code"
+                    href="/functions/saxon/unindexed">saxon:unindexed()</a></p>
+                <p>Returns the value of its argument unchanged, and a static call will normally be optimized
+                    away. The purpose of the function is to suppress
+                    optimization of a contained filter expression: for example <code>//x[@y=$z]</code> in Saxon-EE would normally be
+                    optmized by building an index, but <code>saxon:unindexed(//x[@y=$z])</code> suppresses this optimization. This may be
+                    useful if it is known, for example, (a) that the expression will not be evaluated often enough to justify the cost of
+                    index construction, or (b) that the sequence <code>//x</code> contains very few items, or (c) that the predicate is
+                    likely to select a high proportion of the items in the filtered sequence.</p>
+                
+            </li>
+            <li>
+                <p><a class="bodylink code"
+                    href="/functions/saxon/xquery">saxon:xquery()</a></p>
+                <p>Allows dynamic evaluation of XQuery expressions: it replaces the existing
+                    <code>saxon:compile-query()</code> and <code>saxon:query()</code>, which
+                    are now obsolescent.</p>
+                
+            </li>
+        </ul>
 
         <h2>Dropped Extension Functions</h2>
 
@@ -427,7 +449,7 @@
         <h2>Extension Instructions</h2>
         
         <p>The <a class="bodylink code" href="/extensions/instructions/array">saxon:array</a> instruction has changed to work the
-            same way as the proposed XSLT 4.0 <code>xsl:array</code> instruction: it has an attribute
+            same way as the proposed XSLT 4.0 <a class="bodylink code" href="/xsl-elements/array">xsl:array</a> instruction: it has an attribute
             <code>composite="yes|no"</code>. With <code>composite="yes"</code>, the members of the new array may be arbitrary
             sequences, and should be constructed using <a class="bodylink code"
                 href="/extensions/instructions/array-member">saxon:array-member</a> (or <code>fn:parcel()</code>). With
@@ -437,7 +459,8 @@
  
         <h2>XPath Syntax Extensions</h2>
         
-        <p><i>These extensions are all experimental, and may change as a result of community standardisation efforts.</i></p>
+        <aside>These extensions are all experimental, and may change as a result of community standardisation
+            efforts. For more information see <a class="bodylink" href="/v4extensions">Experimental 4.0 Extensions</a>.</aside>
         
         <p>The <a class="bodylink" href="/expressions/range">range expression</a> <code> A to B</code> has been extended to allow
             <code>A by S to B</code>, for example <code>1 by 3 to 10</code> returns <code>(1, 4, 7, 10)</code>. The step may be
@@ -463,27 +486,95 @@
  
         <h2>XSLT extensions</h2>
         
-        <p><i>These extensions are all experimental, and may change as a result of community standardisation efforts.
-        They are based on proposals for an XSLT version 4.0, but they do not necessarily correspond precisely with the
-        current draft of that proposal.</i></p>
+        <aside>These extensions are all experimental, and may change as a result of community standardisation efforts.
+            They are based on proposals for an <a class="bodylink"
+                href="https://qt4cg.org/branch/master/xslt-40/Overview.html">XSLT 4.0 Specification</a>, but they do
+            not necessarily correspond precisely with the current draft of that proposal. For more information
+            see <a class="bodylink" href="/v4extensions">Experimental 4.0 Extensions</a>.</aside>
         
         <p>An extension instruction can be used to invoke a named template. For example, a template with name <code>x:error</code>
         with declared parameters <code>message</code> and <code>code</code> might be called using the instruction
         <code>&lt;x:error message="Intoxication detected" code="ABXZ9275"/></code>, in place of an <code>xsl:call-template</code>
             instruction with multiple <code>xsl:with-param</code> children. For details, see 
-            <a class="bodylink" href="/v4extensions/xslt-syntax-extensions/ext-ins-call-template">Extension Instructions Calling Templates</a></p>
+            <a class="bodylink" href="/v4extensions/xslt-syntax-extensions/ext-ins-call-template">Extension
+                instructions calling templates</a>.</p>
         
+        <p>The syntax of match patterns is extended to make it easier to match maps and arrays, see <a
+            class="bodylink" href="/v4extensions/xslt-syntax-extensions/match-patterns">Match patterns</a>.</p>
         
-        <p>Implemented <code>xsl:for-each-group break-when="expression"</code>. For example, <code>&lt;xsl:for-each-group
-            break-when="sum($group!@length) + $next!@length) gt 30" ...&gt;</code> starts a new group when the total of the <code>@length</code>
-            attributes of the elements in a group would otherwise exceed 30.</p>
+        <p>A number of proposed new instructions are available:</p>
         
-        <p>Implemented the proposed <code>array</code> and <code>map</code> attributes as alternatives to <code>select</code>
-        on <code>xsl:for-each</code>, <code>xsl:iterate</code>, and <code>xsl:for-each-group</code>, to allow these instructions
-        to process maps and arrays as well as sequences.</p>
+        <ul>
+            <li>
+                <p><a class="bodylink code" href="/xsl-elements/array">xsl:array</a> and <a
+                class="bodylink code" href="/xsl-elements/array-member">xsl:array-member</a></p>
+                <p>Used to construct arrays; these instructions replace the previously available <a
+                    class="bodylink code" href="/extensions/instructions/array">saxon:array</a> and <a
+                        class="bodylink code"
+                        href="/extensions/instructions/array-member">saxon:array-member</a> (which are now
+                    synonyms). For more details see <a class="bodylink"
+                        href="/v4extensions/xslt-syntax-extensions/creating-arrays">Creating arrays</a>.</p>
+            </li>
+            <li>
+                <p><a class="bodylink code" href="/xsl-elements/item-type">xsl:item-type</a></p>
+                <p>Used to declare a name (or alias) for an item type; replaces the previously available <a class="bodylink code"
+                    href="/extensions/instructions/item-type">saxon:item-type</a>. For more details see <a class="bodylink"
+                        href="/v4extensions/xslt-syntax-extensions/xsl-item-type">The <code>xsl:item-type</code>
+                        declaration</a>.</p>
+            </li>
+            <li>
+                <p><a class="bodylink code" href="/xsl-elements/match">xsl:match</a></p>
+                <p>Used to match selected items against an XSLT pattern; see <a class="bodylink"
+                    href="/v4extensions/xslt-syntax-extensions/xsl-match">The <code>xsl:match</code>
+                    instruction</a>.)</p>
+            </li>
+            <li>
+                <p><a class="bodylink code" href="/xsl-elements/switch">xsl:switch</a></p>
+                <p>Used to choose one of a number of alternative outputs, based on the value of a supplied
+                    expression; see <a class="bodylink" 
+                        href="/v4extensions/xslt-syntax-extensions/xslt-conditionals">Conditional instructions</a>.</p>
+            </li>
+        </ul>
         
-        <p>Implemented the proposed <code>xsl:match</code> instruction to match selected items against an XSLT pattern.</p>
+        <p>Some new attributes are available on existing XSLT 3.0 instructions:</p>
         
+        <ul>
+            <li>
+                <p>The proposed <code>break-when</code> attribute is now available on <a class="bodylink code"
+                    href="/xsl-elements/map">xsl:for-each-group</a>. For example,
+                    <code>&lt;xsl:for-each-group break-when="sum($group!@length) + $next!@length) gt 30"
+                        ...&gt;</code> starts a new group when the total of the <code>@length</code>
+                    attributes of the elements in a group would otherwise exceed 30. For more details see <a
+                        class="bodylink" 
+                        href="/v4extensions/xslt-syntax-extensions/break-when">Grouping using
+                        <code>break-when</code></a>.</p>
+            </li>
+            <li>
+                <p>The proposed <code>array</code> and <code>map</code> attributes are implemented as alternatives
+                    to <code>select</code> on <a class="bodylink code"
+                        href="/xsl-elements/for-each">xsl:for-each</a>, <a class="bodylink code"
+                            href="/xsl-elements/for-each-group">xsl:for-each-group</a>, and
+                    <a class="bodylink code" href="/xsl-elements/iterate">xsl:iterate</a>, to allow these
+                    instructions to process maps and arrays as well as sequences. For more details see <a class="bodylink"
+                        href="/v4extensions/xslt-syntax-extensions/iteration-maps-arrays">Iterating over maps and
+                    arrays</a>.</p>
+            </li>
+            <li>
+                <p>The <code>on-duplicates</code> attribute is now available on a <a class="bodylink code"
+                    href="/xsl-elements/map">xsl:map</a> instruction; see <a class="bodylink"
+                        href="/v4extensions/xslt-syntax-extensions/xsl-map-duplicates">Controlling duplicates
+                        on <code>xsl:map</code></a>.</p>
+            </li>
+            <li>
+                <p>The <code>separator</code> attribute is now available on <a class="bodylink code"
+                    href="/xsl-elements/for-each">xsl:for-each</a> and <a class="bodylink code"
+                        href="/xsl-elements/apply-templates">xsl:apply-templates</a>, similar to the
+                    <code>separator</code> attribute on <code>xsl:value-of</code>. For more details see <a
+                        class="bodylink"
+                        href="/v4extensions/xslt-syntax-extensions/separator-attribute">Separator 
+                        attribute</a>.</p>
+            </li>
+        </ul>
         
         <p>In general, streamability of new constructs introduced beyond XSLT 3.0 has not been addressed in the specification or
             in testing. Constructs that are handled purely at compile time (such as the ternary operator <code>A ?? B !! C</code>)
