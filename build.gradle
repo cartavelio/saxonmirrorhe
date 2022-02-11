@@ -64,6 +64,46 @@ sourceSets {
   }
 }
 
+ext {
+  systemOs = OperatingSystem.current()
+  icu4jJar = null
+  tagsoupJar = null
+  mailJar = null
+  resolverJar = null
+  jlineJar = null
+  version_h = saxonVersion.replace(".", "-")
+  fileSeparator = System.getProperty("file.separator")
+  DSTAMP=new Date().format("yyyyMMdd")
+  // Docker containers
+  c_sqlserver = "sqlserver"
+  dotnetex = null
+}
+
+// Find dotnet
+// Laboriously construct a search path that includes some default locations
+// plus the users actual path.
+def spath = ["/usr/local/share/dotnet"]
+System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
+  spath += [dir]
+}
+spath.each { dir ->
+  if (dotnetex == null) {
+    def fn = new File(dir + "/dotnet")
+    if (fn.exists() && fn.canExecute()) {
+      dotnetex = fn.toString()
+    } else {
+      fn = new File(dir + "/dotnet.exe")
+      if (fn.exists() && fn.canExecute()) {
+        dotnetex = fn.toString()
+      }
+    }
+  }
+}
+
+if (dotnetex == null) {
+  println("WARNING: Failed to find dotnet[.exe]!")
+}
+
 // Set saxonLicenseDir in gradle.properties, or from the
 // command line if you have a license in some other place.
 if (!hasProperty("saxonLicenseDir")) {
@@ -174,20 +214,6 @@ javadoc {
 test {
   useJUnitPlatform {
   }
-}
-
-ext {
-  systemOs = OperatingSystem.current()
-  icu4jJar = null
-  tagsoupJar = null
-  mailJar = null
-  resolverJar = null
-  jlineJar = null
-  version_h = saxonVersion.replace(".", "-")
-  fileSeparator = System.getProperty("file.separator")
-  DSTAMP=new Date().format("yyyyMMdd")
-  // Docker containers
-  c_sqlserver = "sqlserver"
 }
 
 docker_container.configure {
@@ -1670,16 +1696,16 @@ task sqlServerStop(dependsOn: ["dockerup"]) {
 // Testing task for various Gradle debugging efforts
 task helloWorld() {
   doLast {
-    println("Hello, world.")
+    println("Hello, world. ${saxonMajorVersion}")
 /*
     project.properties.keySet().each { key ->
       if (key.startsWith("td")) {
         println("${key} = ${project.properties.get(key)}")
       }
     }
-*/
     configurations.samples.resolve().each { path ->
       println(path)
     }
+*/
   }
 }
