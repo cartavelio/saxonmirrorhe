@@ -115,6 +115,8 @@ namespace TestRunner {
                     break;
                 } else if (a.StartsWith("-lang:XSD")) {
                     language = "XSD";
+                } else if (a.StartsWith("-lang:XMark")) {
+                    language = "XMark";
                 }
             }
 
@@ -122,6 +124,8 @@ namespace TestRunner {
                 Xslt30TestSuiteDriver.MainXSLT(args);
             } else if (language == "XSD") {
                 SchemaTestSuiteDriver.MainXSD(args);
+            } else if (language == "XMark") {
+                XMarkBenchmark.XMark(args);
             } else {
                 QT3TestSuiteDriver.MainQT(args);
             }
@@ -635,10 +639,10 @@ namespace TestRunner {
         public abstract bool EnsureDependencySatisfied(XdmNode dependency, Environment env);
         
         public static void experiment() {
-            double d = 1e100 / 3;
-            Console.WriteLine(d);
-            BigDecimal dec = BigDecimal.FromDouble(d, false);
-            Console.WriteLine((double)dec);
+            // double d = 1e100 / 3;
+            // Console.WriteLine(d);
+            // BigDecimal dec = BigDecimal.FromDouble(d, false);
+            // Console.WriteLine((double)dec);
         }
 
     }
