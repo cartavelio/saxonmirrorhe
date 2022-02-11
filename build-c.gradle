@@ -1,114 +1,34 @@
-// Find Excelsior Jet to build the SaxonC releases
+// Find Excelsior Jet to build the Saxon/C releases
 def excelsiorJetHome = null
 ["${excelsiorJet}",
  "/opt/jet15.3-ent-amd64",
  "/usr/local/jet15.3-ent-amd64",
  "c:/jet15.3-ent-amd64"].each { jet ->
-  if (excelsiorJetHome == null && jet != "" && pathExists(jet)) {
+  if (excelsiorJetHome == null && pathExists(jet)) {
     excelsiorJetHome = jet
   }
 }
-
 task test_jetHome(
   description: "Test that excelsiorJetHome is configured"
 ) {
-  def images = new ByteArrayOutputStream()
   doLast {
-    exec {
-      commandLine "docker", "images", "-q", "--filter=reference=jet:${excelsiorJetVersion}",
-                  "--format", "{{.Repository}}:{{.Tag}}"
-      standardOutput = images
-    }
-  }
-  doLast {
-    if (images.toString("utf-8") != "") {
-      println("Running ExcelsiorJet ${excelsiorJetVersion} from Docker container")
-    } else {
-      if (excelsiorJetHome == null) {
-        throw new GradleException("Cannot build SaxonC, no Docker container and excelsiorJetHome undefined")
-      } else {
-        println("Running ExcelsiorJet from ${excelsiorJetHome}")
-      }
+    if (excelsiorJetHome == null) {
+      throw new GradleException("Cannot build Saxon/C, excelsiorJetHome undefined")
     }
   }
 }
-
-// ============================================================
-// Tasks to rejar Xerces and XML Resolver
-
-task unjar_XercesImpl(
-  type: Copy,
-  description: "Unjar XercesImpl"
-) {
-  inputs.file("lib/xercesImpl.jar")
-  outputs.files(fileTree("${buildDir}/xerces/org/apache/xerces"))
-  from zipTree(file("lib/xercesImpl.jar"))
-  into "${buildDir}/xerces"
-}
-
-task unjar_XmlResolver(
-  type: Copy,
-  description: "Unjar XML Resolver"
-) {
-  inputs.file(resolverJar)
-  from zipTree(file(resolverJar))
-  into "${buildDir}/xerces"
-}
-// This task is always out of date because we're overwriting
-// files from different jars.
-// Skip this if it doesn't seem to be necessary
-unjar_XmlResolver.onlyIf {
-  !file("${buildDir}/xerces/org/xmlresolver/XMLCatalogResolver.class").exists()
-}
-
-task unjar_XmlResolverData(
-  type: Copy,
-  description: "Unjar XML Resolver data"
-) {
-  inputs.file(resolverDataJar)
-  from zipTree(file(resolverDataJar))
-  into "${buildDir}/xerces"
-}
-// This task is always out of date because we're overwriting
-// files from different jars.
-// Skip this if it doesn't seem to be necessary
-unjar_XmlResolver.onlyIf {
-  !file("${buildDir}/xerces/org/xmlresolver/cat-xhtml.xml").exists()
-}
-
-task rejar_Xerces(
-  type: Jar,
-  dependsOn: ["unjar_XercesImpl", "unjar_XmlResolver", "unjar_XmlResolverData"],
-  description: "Unjar Xerces and Resolver for .NET build"
-) {
-  inputs.files fileTree("${buildDir}/xerces/org")
-  outputs.file "${buildDir}/xerces/xerces.jar"
-  archiveBaseName = "xerces"
-  destinationDirectory = file("${buildDir}/xerces")
-  from ("${buildDir}/xerces") {
-    include "**/*.class"
-    include "**/*.properties"
-    exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
-    exclude "META-INF/MANIFEST.MF"
-  }
-}
-
-// ============================================================
-
 ["h", "p", "e"].each { initial ->
   def release = initial + "e"
   def Release = initial.toUpperCase() + "e"
   def RELEASE = release.toUpperCase()
-
   task "${release}c_copyJet"(
     type: Copy,
-    dependsOn: ["${release}c_jar", "${release}c_copyAncillary"],
+    dependsOn: ["${release}c_jar"],
     description: "Copy the JET project file for ${RELEASE}"
   ) {
     from "${projectDir}/src/jet/libsaxon${release}c.prj"
     into "${buildDir}/jet"
   }
-
   task "${release}c_setupJet"(
     dependsOn: ["${release}c_copyJet"],
     description: "Create JET libsaxon${release}c.jprof for ${RELEASE}"
@@ -121,7 +41,6 @@ task rejar_Xerces(
         }
     }
   }
-
   task "${release}c_copyLibs"(
     type: Copy,
     description: "Copy library jar files into JET build directory"
@@ -130,8 +49,8 @@ task rejar_Xerces(
     from "${resolverJar}"
     from "${mailJar}"
   }
-
   task "${release}c_jet"(
+    type: Exec,
     dependsOn: ["${release}c_setupJet", "${release}c_copyLibs", "test_jetHome"],
     description: "Run JET on ${RELEASE}"
   ) {
@@ -139,32 +58,22 @@ task rejar_Xerces(
     inputs.file("${buildDir}/jet/libsaxon${release}c.jprof")
     inputs.files("${buildDir}/c/jars/${release}c")
     outputs.file("${buildDir}/c/${release}c/libsaxon${release}c.so")
-
-    doLast {
-      try {
-        exec {
-	    commandLine "docker", "run", "--rm", "-v", "${buildDir}:/src", "-i",
-                        "jet:${excelsiorJetVersion}",
-	                "sh", "-c", "cd /src/jet && /usr/local/jet/bin/jc =p libsaxon${release}c"
-	}
-      } catch (Exception ex) {
-        println("Attempt to run jet:${excelsiorJetVersion} in Docker failed; attempting local build...")
-        exec {
-	  workingDir "${buildDir}/jet"
-          commandLine "${excelsiorJetHome}/bin/jc",
-            "=p", "libsaxon${release}c"
-	}
-      }
-    }
+    workingDir = "${buildDir}/jet"
+    commandLine "${excelsiorJetHome}/bin/jc",
+      "=p", "libsaxon${release}c"
+    /*
+    commandLine "docker", "run",
+      "-e", "PROJECT=libsaxon${release}c",
+      "-v", "${projectDir}:/saxonica",
+      "${dockerBuildContainer}:latest"
+    */
   }
-
   if (systemOs.isWindows()) {
     task "${release}c_copyAncillary"(
       type: Copy,
       description: "Copy ancillary C files into the ${RELEASE} release build directory"
     ) {
       into "${buildDir}/c/${release}c"
-
       from("${projectDir}/src/main/c") {
         include "Saxon.C.API/**/*"
         include "samples/**/*"
@@ -187,16 +96,16 @@ task rejar_Xerces(
         include "command/build${release}c-command.sh"
       }
     }
-
     task "${release}cRelease"(
       type: Exec,
       dependsOn: ["${release}c_jet", "${release}c_copyAncillary"],
-      description: "Make the ${RELEASE} release for SaxonC"
+      description: "Make the ${RELEASE} release for Saxon/C"
     ) {
       commandLine "${excelsiorJetHome}/bin/xpack",
         "-backend", "excelsior-installer",
         "-source", "${buildDir}/c/${release}c",
-        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C"
+        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C",
+        "-add-locales", "all"
     }
   } else if (systemOs.isMacOsX()) {
     task "${release}c_copyAncillary"(
@@ -204,7 +113,6 @@ task rejar_Xerces(
       description: "Copy ancillary C files into the ${RELEASE} release build directory"
     ) {
       into "${buildDir}/c/${release}c"
-
       from("${projectDir}/src/main/c") {
         include "Saxon.C.API/**/*"
         exclude "Saxon.C.API/HEC/**"
@@ -225,7 +133,6 @@ task rejar_Xerces(
         exclude "Saxon.C.API/dllmain.cpp"
         exclude "Saxon.C.API/readme.txt"
         exclude "Saxon.C.API/targetver.h"
-
         include "samples/**/*"
         exclude "samples/cppTests/build*"
         include "samples/cppTests/build64-mac.sh"
@@ -240,7 +147,6 @@ task rejar_Xerces(
         exclude "samples/cTests/build64-linux.sh"
         exclude "samples/cTests/buildhec.sh"
         exclude "samples/cTests/buildpec.sh"
-
         exclude "samples/data/config_file.xml"
         exclude "samples/data/package*"
         include "saxon-data/**/*"
@@ -258,24 +164,23 @@ task rejar_Xerces(
         include "command/build${release}c-command.sh"
       }
     }
-
     task "${release}c_releaseSetup"(
       type: Exec,
       dependsOn: ["${release}c_jet", "${release}c_copyAncillary"],
-      description: "Make the ${RELEASE} release package for SaxonC"
+      description: "Make the ${RELEASE} release package for Saxon/C"
     ) {
       commandLine "${excelsiorJetHome}/bin/xpack",
         "-source", "${buildDir}/c/${release}c",
-        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C"
+        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C",
+        "-add-locales", "all"
     }
-
     task "${release}cRelease"(
       type: Zip,
       dependsOn: ["${release}c_releaseSetup"],
-      description: "Make the ${RELEASE} release ZIP file for SaxonC"
+      description: "Make the ${RELEASE} release ZIP file for Saxon/C"
     ) {
       from("${buildDir}/releases/libsaxon-${RELEASE}C")
-      archiveFileName = "libsaxon-${RELEASE}C-mac-setup-v${saxonVersion}.zip"
+      archiveFileName = "libsaxon-${RELEASE}C-mac-setup-v${saxonCversion}.zip"
     }
   } else {
     task "${release}c_copyAncillary"(
@@ -283,7 +188,6 @@ task rejar_Xerces(
       description: "Copy ancillary C files into the ${RELEASE} release build directory"
     ) {
       into "${buildDir}/c/${release}c"
-
       from("${projectDir}/src/main/c") {
         include "Saxon.C.API/**/*"
         exclude "Saxon.C.API/HEC/**"
@@ -304,7 +208,6 @@ task rejar_Xerces(
         exclude "Saxon.C.API/dllmain.cpp"
         exclude "Saxon.C.API/readme.txt"
         exclude "Saxon.C.API/targetver.h"
-
         include "samples/**/*"
         exclude "samples/cppTests/build*"
         include "samples/cppTests/build64-mac.sh"
@@ -319,7 +222,6 @@ task rejar_Xerces(
         exclude "samples/cTests/build64-linux.sh"
         exclude "samples/cTests/buildhec.sh"
         exclude "samples/cTests/buildpec.sh"
-
         exclude "samples/data/config_file.xml"
         exclude "samples/data/package*"
         include "saxon-data/**/*"
@@ -337,33 +239,30 @@ task rejar_Xerces(
         include "command/build${release}c-command.sh"
       }
     }
-
     task "${release}c_releaseSetup"(
       type: Exec,
       dependsOn: ["${release}c_jet", "${release}c_copyAncillary"],
-      description: "Make the ${RELEASE} release package for SaxonC"
+      description: "Make the ${RELEASE} release package for Saxon/C"
     ) {
       commandLine "${excelsiorJetHome}/bin/xpack",
         "-source", "${buildDir}/c/${release}c",
-        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C"
+        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C",
+        "-add-locales", "all"
     }
-
     task "${release}cRelease"(
       type: Zip,
       dependsOn: ["${release}c_releaseSetup"],
-      description: "Make the ${RELEASE} release ZIP file for SaxonC"
+      description: "Make the ${RELEASE} release ZIP file for Saxon/C"
     ) {
       from ("${buildDir}/releases/libsaxon-${RELEASE}C") {
         include "**/*"
       }
-      archiveFileName = "libsaxon-${RELEASE}C-setup64-v${saxonVersion}.zip"
+      archiveFileName = "libsaxon-${RELEASE}C-setup64-v${saxonCversion}.zip"
     }
   }
 }
-
 task hec_setupPreprocess(
   type: Copy,
-  dependsOn: ["hej_featureKeys"],
   description: "Copy HE sources for preprocessing HE"
 ) {
   into "${buildDir}/filtered/hec"
@@ -383,10 +282,8 @@ task hec_setupPreprocess(
     exclude "net/sf/saxon/option/sql/**"
   }
 }
-
 task pec_setupPreprocess(
   type: Copy,
-  dependsOn: ["hej_featureKeys"],
   description: "Copy PE sources for preprocessing PE"
 ) {
   into "${buildDir}/filtered/pec"
@@ -428,10 +325,8 @@ task pec_setupPreprocess(
     exclude "com/saxonica/jaxp/SchemaFactoryImpl11.java"
   }
 }
-
 task eec_setupPreprocess(
   type: Copy,
-  dependsOn: ["hej_featureKeys"],
   description: "Copy EE sources for preprocessing EE"
 ) {
   into "${buildDir}/filtered/eec"
@@ -461,7 +356,6 @@ task eec_setupPreprocess(
     include "com/saxonica/**/package.html"
   }
 }
-
 task hec_preprocess(
   type: JavaExec,
   dependsOn: ["hec_setupPreprocess"],
@@ -473,13 +367,12 @@ task hec_preprocess(
   main = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/hec", "/o:${buildDir}/preprocess/hec",
-    "/p:EE=false", "/p:PE=false", "/p:CSHARP=false",
+    "/p:EE=false", "/p:PE=false", "/p:DOTNET=false",
     "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false"
   doFirst {
     mkdir "${buildDir}/preprocess/hec"
   }
 }
-
 task pec_preprocess(
   type: JavaExec,
   dependsOn: ["pec_setupPreprocess"],
@@ -491,14 +384,13 @@ task pec_preprocess(
   main = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/pec", "/o:${buildDir}/preprocess/pec",
-    "/p:EE=false", "/p:PE=true", "/p:CSHARP=false",
+    "/p:EE=false", "/p:PE=true", "/p:DOTNET=false",
     "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false",
     "/p:HOF=true"
   doFirst {
     mkdir "${buildDir}/preprocess/pec"
   }
 }
-
 task eec_preprocess(
   type: JavaExec,
   dependsOn: ["eec_setupPreprocess"],
@@ -510,7 +402,7 @@ task eec_preprocess(
   main = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/eec", "/o:${buildDir}/preprocess/eec",
-    "/p:EE=true", "/p:PE=false", "/p:CSHARP=false",
+    "/p:EE=true", "/p:PE=false", "/p:DOTNET=false",
     "/p:SAXONC=true", "/p:BYTECODE=false", "/p:HOF=true",
     "/p:STREAM=true", "/p:SCHEMA=true", "/p:PACKAGES=true",
     "/p:OPT=false"
@@ -518,7 +410,6 @@ task eec_preprocess(
     mkdir "${buildDir}/preprocess/eec"
   }
 }
-
 task hec_sources(
   type: Copy,
   dependsOn: ["hec_preprocess"],
@@ -532,7 +423,6 @@ task hec_sources(
       : line
   }
 }
-
 task pec_sources(
   type: Copy,
   dependsOn: ["pec_preprocess"],
@@ -550,7 +440,6 @@ task pec_sources(
     }
   }
 }
-
 task eec_sources(
   type: Copy,
   dependsOn: ["eec_preprocess"],
@@ -564,7 +453,6 @@ task eec_sources(
       : line
   }
 }
-
 task hecCompile(
   type: JavaCompile,
   dependsOn: ["hec_sources"],
@@ -574,7 +462,6 @@ task hecCompile(
   source = "${buildDir}/src/hec"
   destinationDirectory = new File("${buildDir}/classes/hec")
 }
-
 task pecCompile(
   type: JavaCompile,
   dependsOn: ["pec_sources"],
@@ -584,22 +471,18 @@ task pecCompile(
   source = "${buildDir}/src/pec"
   destinationDirectory = new File("${buildDir}/classes/pec")
 }
-
 task eecCompile(
   type: JavaCompile,
   dependsOn: ["eec_sources"],
-  description: "Compile EE for SaxonC") {
+  description: "Compile EE for Saxon/C") {
   classpath = configurations.compileClasspath
   source = "${buildDir}/src/eec"
   destinationDirectory = new File("${buildDir}/classes/eec")
 }
-
-
-
 task hec_jar(
   type: Jar,
   dependsOn: ["hecCompile", "hej_MetaInf", "rejar_Xerces"],
-  description: "Build the HE jar file for SaxonC"
+  description: "Build the HE jar file for Saxon/C"
 ) {
   archiveBaseName = "saxon9he"
   destinationDirectory = file("${buildDir}/c/jars/hec")
@@ -626,11 +509,10 @@ task hec_jar(
     mkdir "build/c/jars/hec"
   }
 }
-
 task pec_jar(
   type: Jar,
   dependsOn: ["pecCompile", "pej_MetaInf", "rejar_Xerces"],
-  description: "Build the PE jar file for SaxonC"
+  description: "Build the PE jar file for Saxon/C"
 ) {
   archiveBaseName = "saxon9pe"
   destinationDirectory = file("${buildDir}/c/jars/pec")
@@ -671,11 +553,10 @@ task pec_jar(
     mkdir "build/c/pec"
   }
 }
-
 task eec_jar(
   type: Jar,
   dependsOn: ["eecCompile", "eej_MetaInf", "rejar_Xerces"],
-  description: "Build the EE jar file for SaxonC"
+  description: "Build the EE jar file for Saxon/C"
 ) {
   archiveBaseName = "saxon9ee"
   destinationDirectory = file("${buildDir}/c/jars/eec")
@@ -692,9 +573,6 @@ task eec_jar(
     exclude "**/sql/**/*.class"
     include "com/saxonica/**/*.class"
     include "javax/xml/xquery/*.class"
-  }
-  from ("src/main/resources") {
-    include "net/**"
   }
   from ("${buildDir}/xerces") {
       include "**/*.class"
