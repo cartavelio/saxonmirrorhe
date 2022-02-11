@@ -49,12 +49,11 @@ public class ConfigurationReader implements Receiver {
     protected Configuration targetConfig;
     private ClassLoader classLoader = null;
     private final List<XmlProcessingError> errors = new ArrayList<>();
-    private final Stack<List<String[]>> namespaceStack = new Stack<>();
     private PackageLibrary packageLibrary;
     private PackageDetails currentPackage;
     private Configuration baseConfiguration;
     private PipelineConfiguration pipe;
-    private Stack<String> localNameStack = new Stack<>();
+    private final Stack<String> localNameStack = new Stack<>();
     private String systemId = null;
 
     public ConfigurationReader() {
@@ -177,7 +176,6 @@ public class ConfigurationReader implements Receiver {
 
     @Override
     public void endDocument() {
-        namespaceStack.pop();
         if (targetConfig != null) {
             targetConfig.getDefaultXsltCompilerInfo().setPackageLibrary(packageLibrary);
         }
@@ -318,7 +316,6 @@ public class ConfigurationReader implements Receiver {
             errors.add(incident);
         }
         level++;
-        namespaceStack.push(new ArrayList<>());
     }
 
     private void readGlobalElement(AttributeMap atts) {
@@ -786,7 +783,6 @@ public class ConfigurationReader implements Receiver {
         }
         level--;
         buffer.setLength(0);
-        namespaceStack.pop();
     }
 
     private Source getInputSource(String href) throws XPathException {

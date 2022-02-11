@@ -83,12 +83,13 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
         config.registerMediaType(contentType, factory);
     }
 
+    @SuppressWarnings("OptionalIsPresent")
     protected ParseOptions optionsFromQueryParameters(URIQueryParameters params, XPathContext context) {
         ParseOptions options = new ParseOptions(context.getConfiguration().getParseOptions());
 
         if (params != null) {
             Optional<Integer> v = params.getValidationMode();
-            if (v != null) {
+            if (v.isPresent()) {
                 options.setSchemaValidationMode(v.get());
             }
 

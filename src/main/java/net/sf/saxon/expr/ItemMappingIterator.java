@@ -167,7 +167,7 @@ public class ItemMappingIterator
 
     @Override
     public boolean supportsGetLength() {
-        return SequenceTool.supportsGetLength(base);
+        return oneToOne && SequenceTool.supportsGetLength(base);
     }
 
     @Override
