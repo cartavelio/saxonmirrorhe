@@ -36,7 +36,7 @@ namespace Saxon.Hej.s9api {
             return controller.getErrorReporter();
         }
         public void setResultDocumentHandler(System.Func<System.Uri,Saxon.Hej.s9api.Destination> handler) {
-            controller.setResultDocumentResolver(new Inner_ResultDocumentResolver_d1541e367(handler));
+            controller.setResultDocumentResolver(new Inner_ResultDocumentResolver_d1484e367(handler));
         }
         public void setAssertionsEnabled(bool enabled) {
             controller.setAssertionsEnabled(enabled);
@@ -157,11 +157,11 @@ namespace Saxon.Hej.s9api {
             }
         }
         private Saxon.Hej.@event.TreeReceiver makeTreeReceiver(Saxon.Hej.trans.XsltController controller, Saxon.Hej.expr.instruct.GlobalParameterSet parameters, Saxon.Hej.s9api.Destination finalDestination, Saxon.Hej.@event.Builder sourceTreeBuilder, Saxon.Hej.@event.Receiver stripper) {
-            return new Inner_TreeReceiver_d1541e1361(this, stripper, sourceTreeBuilder, controller, finalDestination, parameters);
+            return new Inner_TreeReceiver_d1484e1361(this, stripper, sourceTreeBuilder, controller, finalDestination, parameters);
         }
     
-        private class Inner_ResultDocumentResolver_d1541e367 : Saxon.Hej.lib.ResultDocumentResolver {
-            public Inner_ResultDocumentResolver_d1541e367(System.Func<System.Uri,Saxon.Hej.s9api.Destination> handler) {
+        private class Inner_ResultDocumentResolver_d1484e367 : Saxon.Hej.lib.ResultDocumentResolver {
+            public Inner_ResultDocumentResolver_d1484e367(System.Func<System.Uri,Saxon.Hej.s9api.Destination> handler) {
                 this.handler = handler;
             }
             private System.Func<System.Uri,Saxon.Hej.s9api.Destination> handler;
@@ -188,9 +188,9 @@ namespace Saxon.Hej.s9api {
             }
         }
 
-        private class Inner_TreeReceiver_d1541e1361 : Saxon.Hej.@event.TreeReceiver {
+        private class Inner_TreeReceiver_d1484e1361 : Saxon.Hej.@event.TreeReceiver {
             private readonly AbstractXsltTransformer outerInstance;
-            public Inner_TreeReceiver_d1541e1361(AbstractXsltTransformer outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1, Saxon.Hej.@event.Builder sourceTreeBuilder, Saxon.Hej.trans.XsltController controller, Saxon.Hej.s9api.Destination finalDestination, Saxon.Hej.expr.instruct.GlobalParameterSet parameters) : base(arg1) {
+            public Inner_TreeReceiver_d1484e1361(AbstractXsltTransformer outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1, Saxon.Hej.@event.Builder sourceTreeBuilder, Saxon.Hej.trans.XsltController controller, Saxon.Hej.s9api.Destination finalDestination, Saxon.Hej.expr.instruct.GlobalParameterSet parameters) : base(arg1) {
                 this.outerInstance = outerInstance;
                 this.sourceTreeBuilder = sourceTreeBuilder;
                 this.controller = controller;

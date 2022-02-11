@@ -13,7 +13,7 @@ namespace Saxon.Hej.functions {
             return Saxon.Hej.value.BooleanValue.get(!(Saxon.Hej.expr.parser.ExpressionTool.effectiveBooleanValue(arguments[0].iterate())));
         }
         public override Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
-            return new Inner_SystemFunctionCall_d1151e209(this, this, arguments);
+            return new Inner_SystemFunctionCall_d1109e209(this, this, arguments);
         }
         public override Saxon.Hej.expr.Expression makeOptimizedFunctionCall(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, params Saxon.Hej.expr.Expression[]  arguments) {
             Saxon.Hej.type.TypeHierarchy th = visitor.getStaticContext().getConfiguration().getTypeHierarchy();
@@ -33,9 +33,9 @@ namespace Saxon.Hej.functions {
             return "NotFn";
         }
     
-        private class Inner_SystemFunctionCall_d1151e209 : Saxon.Hej.expr.SystemFunctionCall {
+        private class Inner_SystemFunctionCall_d1109e209 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly NotFn outerInstance;
-            public Inner_SystemFunctionCall_d1151e209(NotFn outerInstance, NotFn arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_d1109e209(NotFn outerInstance, NotFn arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext c) {

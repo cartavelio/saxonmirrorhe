@@ -297,7 +297,7 @@ namespace Saxon.Hej.om {
             }
         }
         public System.Collections.Generic.IEnumerator<Saxon.Hej.om.NamespaceBinding> GetEnumerator() {
-            return new Inner_Iterator_d1374e2327(this);
+            return new Inner_Iterator_d1325e2327(this);
         }
         // Extra method to make the class IEnumerable as well as IEnumerable<T>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
@@ -387,9 +387,9 @@ namespace Saxon.Hej.om {
             return ((this == obj) || ((((obj is Saxon.Hej.om.NamespaceMap) && Saxon.Ejava.util.Arrays.Equals(prefixes, ((Saxon.Hej.om.NamespaceMap)(obj)).prefixes)) && Saxon.Ejava.util.Arrays.Equals(uris, ((Saxon.Hej.om.NamespaceMap)(obj)).uris))));
         }
     
-        private class Inner_Iterator_d1374e2327 : System.Collections.Generic.IEnumerator<Saxon.Hej.om.NamespaceBinding> {
+        private class Inner_Iterator_d1325e2327 : System.Collections.Generic.IEnumerator<Saxon.Hej.om.NamespaceBinding> {
             private readonly NamespaceMap outerInstance;
-            public Inner_Iterator_d1374e2327(NamespaceMap outerInstance) {
+            public Inner_Iterator_d1325e2327(NamespaceMap outerInstance) {
                 this.outerInstance = outerInstance;
                 i = 0;
             }

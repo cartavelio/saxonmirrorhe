@@ -15,7 +15,7 @@ namespace Saxon.Eej.config {
             declareBuiltInExtensionElementNamespaces();
             declareBuiltInExtensionFunctions();
             setSerializerFactory(new Saxon.Eej.serialize.SerializerFactoryPE(this));
-            setStaticQueryContextFactory(new Inner_StaticQueryContextFactory_d15e444(this));
+            setStaticQueryContextFactory(new Inner_StaticQueryContextFactory_d13e444(this));
             internalSetBooleanProperty(Saxon.Hej.lib.FeatureCode.DISABLE_XSL_EVALUATE, Saxon.Hej.lib.FeatureKeys.DISABLE_XSL_EVALUATE, false);
         }
         private Saxon.Eej.config.Verifier makeVerifier() {
@@ -159,7 +159,7 @@ namespace Saxon.Eej.config {
         protected internal void loadLicense() {
             verifier.loadPrimaryLicense(this);
             if ((((Saxon.Ejava.lang.System.currentTimeMillis()%100) == 42) && "yes".Equals(verifier.getFeature("Evaluation", this)))) {
-                Saxon.Eej.serialize.SerializerFactoryPE sf = new Inner_SerializerFactoryPE_d15e1377(this, this);
+                Saxon.Eej.serialize.SerializerFactoryPE sf = new Inner_SerializerFactoryPE_d13e1377(this, this);
                 setSerializerFactory(sf);
             }
             setLicensedFeatures();
@@ -362,9 +362,9 @@ namespace Saxon.Eej.config {
             return new Saxon.Eej.trans.ModePE(modeName);
         }
     
-        private class Inner_StaticQueryContextFactory_d15e444 : Saxon.Hej.lib.StaticQueryContextFactory {
+        private class Inner_StaticQueryContextFactory_d13e444 : Saxon.Hej.lib.StaticQueryContextFactory {
             private readonly ProfessionalConfiguration outerInstance;
-            public Inner_StaticQueryContextFactory_d15e444(ProfessionalConfiguration outerInstance) {
+            public Inner_StaticQueryContextFactory_d13e444(ProfessionalConfiguration outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.query.StaticQueryContext newStaticQueryContext(Saxon.Hej.Configuration config, bool copyFromDefault) {
@@ -372,9 +372,9 @@ namespace Saxon.Eej.config {
             }
         }
 
-        private class Inner_SerializerFactoryPE_d15e1377 : Saxon.Eej.serialize.SerializerFactoryPE {
+        private class Inner_SerializerFactoryPE_d13e1377 : Saxon.Eej.serialize.SerializerFactoryPE {
             private readonly ProfessionalConfiguration outerInstance;
-            public Inner_SerializerFactoryPE_d15e1377(ProfessionalConfiguration outerInstance, ProfessionalConfiguration arg1) : base(arg1) {
+            public Inner_SerializerFactoryPE_d13e1377(ProfessionalConfiguration outerInstance, ProfessionalConfiguration arg1) : base(arg1) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ Saxon.Hej.@event.Receiver getReceiver(Saxon.Ejavax.xml.transform.Result result, Saxon.Hej.serialize.SerializationProperties parameters, Saxon.Hej.@event.PipelineConfiguration pipe) {

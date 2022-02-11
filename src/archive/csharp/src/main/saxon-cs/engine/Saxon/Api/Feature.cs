@@ -33,7 +33,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> ALLOW_EXTERNAL_FUNCTIONS = new Feature<bool>(1);
@@ -60,7 +60,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> ALLOW_OLD_JAVA_URI_FORMAT = new Feature<bool>(3);
@@ -115,7 +115,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> COLLATION_URI_RESOLVER_CLASS = new Feature<string>(7);
@@ -124,7 +124,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<Saxon.Hej.lib.CollectionFinder> COLLECTION_FINDER = new Feature<Saxon.Hej.lib.CollectionFinder>(8);
@@ -133,7 +133,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> COLLECTION_FINDER_CLASS = new Feature<string>(9);
@@ -196,7 +196,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> DEBUG_BYTE_CODE = new Feature<bool>(15);
@@ -205,7 +205,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> DEBUG_BYTE_CODE_DIR = new Feature<string>(16);
@@ -267,7 +267,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> DEFAULT_REGEX_ENGINE = new Feature<string>(21);
@@ -290,7 +290,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> DISPLAY_BYTE_CODE = new Feature<bool>(23);
@@ -315,7 +315,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> DTD_VALIDATION_RECOVERABLE = new Feature<bool>(25);
@@ -339,7 +339,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> ENTITY_RESOLVER_CLASS = new Feature<string>(27);
@@ -366,7 +366,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> ENVIRONMENT_VARIABLE_RESOLVER_CLASS = new Feature<string>(29);
@@ -375,7 +375,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> ERROR_LISTENER_CLASS = new Feature<string>(30);
@@ -403,7 +403,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> EXPATH_FILE_DELETE_TEMPORARY_FILES = new Feature<bool>(32);
@@ -412,7 +412,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> GENERATE_BYTE_CODE = new Feature<bool>(33);
@@ -421,7 +421,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> IGNORE_SAX_SOURCE_PARSER = new Feature<bool>(34);
@@ -447,7 +447,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> LAZY_CONSTRUCTION_MODE = new Feature<bool>(36);
@@ -494,7 +494,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> MARK_DEFAULTED_ATTRIBUTES = new Feature<bool>(39);
@@ -503,7 +503,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<int> MAX_COMPILED_CLASSES = new Feature<int>(40);
@@ -512,7 +512,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> MESSAGE_EMITTER_CLASS = new Feature<string>(41);
@@ -531,7 +531,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> MODULE_URI_RESOLVER_CLASS = new Feature<string>(43);
@@ -540,7 +540,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> MONITOR_HOT_SPOT_BYTE_CODE = new Feature<bool>(44);
@@ -660,7 +660,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<Saxon.Hej.lib.OutputURIResolver> OUTPUT_URI_RESOLVER = new Feature<Saxon.Hej.lib.OutputURIResolver>(49);
@@ -669,7 +669,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> OUTPUT_URI_RESOLVER_CLASS = new Feature<string>(50);
@@ -786,7 +786,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> RETAIN_DTD_ATTRIBUTE_TYPES = new Feature<bool>(57);
@@ -807,7 +807,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> SCHEMA_URI_RESOLVER_CLASS = new Feature<string>(59);
@@ -834,7 +834,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> SERIALIZER_FACTORY_CLASS = new Feature<string>(62);
@@ -843,7 +843,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> SOURCE_PARSER_CLASS = new Feature<string>(63);
@@ -852,7 +852,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> SOURCE_RESOLVER_CLASS = new Feature<string>(64);
@@ -1002,7 +1002,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> STYLE_PARSER_CLASS = new Feature<string>(72);
@@ -1044,7 +1044,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<int> THRESHOLD_FOR_COMPILING_TYPES = new Feature<int>(76);
@@ -1069,7 +1069,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> TRACE_EXTERNAL_FUNCTIONS = new Feature<bool>(78);
@@ -1096,7 +1096,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> TRACE_LISTENER_CLASS = new Feature<string>(80);
@@ -1167,7 +1167,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> UNPARSED_TEXT_URI_RESOLVER_CLASS = new Feature<string>(86);
@@ -1176,7 +1176,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> URI_RESOLVER_CLASS = new Feature<string>(87);
@@ -1185,7 +1185,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> USE_PI_DISABLE_OUTPUT_ESCAPING = new Feature<bool>(88);
@@ -1280,7 +1280,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> XINCLUDE = new Feature<bool>(94);
@@ -1299,7 +1299,7 @@ public class Feature<T> {
     ///                regular expressions, and to determine whether the serializer allows XML 1.1
     ///                documents to be constructed. </para>
     ///            <para>The default is 1.0.</para>
-    ///            <para>Saxon-CS uses the <code>System.Xml</code> parser, which does not support XML 1.1.</para>
+    ///            <para>SaxonCS uses the <code>System.Xml</code> parser, which does not support XML 1.1.</para>
     ///        
     /// </remarks>
 
@@ -1309,7 +1309,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> XML_PARSER_FEATURE = new Feature<bool>(96);
@@ -1318,7 +1318,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<bool> XML_PARSER_PROPERTY = new Feature<bool>(97);
@@ -1491,7 +1491,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> XQUERY_STATIC_ERROR_LISTENER_CLASS = new Feature<string>(109);
@@ -1603,7 +1603,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> XSLT_STATIC_ERROR_LISTENER_CLASS = new Feature<string>(116);
@@ -1612,7 +1612,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> XSLT_STATIC_URI_RESOLVER_CLASS = new Feature<string>(117);
@@ -1701,7 +1701,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<int> THRESHOLD_FOR_HOTSPOT_BYTE_CODE = new Feature<int>(123);
@@ -1710,7 +1710,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<object> ALLOWED_PROTOCOLS = new Feature<object>(124);
@@ -1762,7 +1762,7 @@ public class Feature<T> {
 
 
     /// <summary>
-    /// Not applicable to Saxon-CS
+    /// Not applicable to SaxonCS
     /// </summary>
 
     public static Feature<string> ZIP_URI_PATTERN = new Feature<string>(127);

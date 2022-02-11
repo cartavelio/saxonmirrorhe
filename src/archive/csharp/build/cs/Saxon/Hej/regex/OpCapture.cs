@@ -27,15 +27,15 @@ namespace Saxon.Hej.regex {
                 matcher.startBackref[groupNr] = position;
             }
             Saxon.Hej.z.IntIterator basis = childOp.iterateMatches(matcher, position);
-            return new Inner_IntIterator_d1494e194(this, matcher, position, basis);
+            return new Inner_IntIterator_d1439e194(this, matcher, position, basis);
         }
         public override string display() {
             return (("("+childOp.display())+")");
         }
     
-        private class Inner_IntIterator_d1494e194 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_d1439e194 : Saxon.Hej.z.IntIterator {
             private readonly OpCapture outerInstance;
-            public Inner_IntIterator_d1494e194(OpCapture outerInstance, Saxon.Hej.regex.REMatcher matcher, int position, Saxon.Hej.z.IntIterator basis) {
+            public Inner_IntIterator_d1439e194(OpCapture outerInstance, Saxon.Hej.regex.REMatcher matcher, int position, Saxon.Hej.z.IntIterator basis) {
                 this.outerInstance = outerInstance;
                 this.matcher = matcher;
                 this.position = position;

@@ -47,7 +47,7 @@ namespace Saxon.Hej.expr {
                 }
             }
             if (((converter == null) && !(allowNull))) {
-                converter = new Inner_Converter_d668e426(this, rules);
+                converter = new Inner_Converter_d635e426(this, rules);
             }
             return converter;
         }
@@ -241,9 +241,9 @@ namespace Saxon.Hej.expr {
             destination.endElement();
         }
     
-        private class Inner_Converter_d668e426 : Saxon.Hej.type.Converter {
+        private class Inner_Converter_d635e426 : Saxon.Hej.type.Converter {
             private readonly AtomicSequenceConverter outerInstance;
-            public Inner_Converter_d668e426(AtomicSequenceConverter outerInstance, /*AA*/Saxon.Hej.lib.ConversionRules arg1) : base(arg1) {
+            public Inner_Converter_d635e426(AtomicSequenceConverter outerInstance, /*AA*/Saxon.Hej.lib.ConversionRules arg1) : base(arg1) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ Saxon.Hej.type.ConversionResult convert(Saxon.Hej.value.AtomicValue input) {

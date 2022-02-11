@@ -144,7 +144,7 @@ namespace Saxon.Eej.ee.stream.feed {
                 Saxon.Hej.@event.PipelineConfiguration pipe = feed.getPipelineConfiguration();
                 if ((feed.valuesReadyToBeOutput.Count==0 && (((feed.getResultFeed() is Saxon.Eej.ee.stream.feed.DecomposingFeed) || (feed.getResultFeed() is Saxon.Eej.ee.stream.feed.ComplexNodeEventFeed))))) {
                     Saxon.Hej.@event.Outputter r = feed.getNextOutputter();
-                    destination = new Inner_ProxyOutputter_d333e1640(this, r);
+                    destination = new Inner_ProxyOutputter_d321e1640(this, r);
                 } else {
                     builder = new Saxon.Hej.tree.tiny.TinyBuilder(pipe);
                     builder.setStatistics(pipe.getConfiguration().getTreeStatistics().TEMPORARY_TREE_STATISTICS);
@@ -157,7 +157,7 @@ namespace Saxon.Eej.ee.stream.feed {
             public override Saxon.Hej.@event.Receiver getGatherer() {
                 Saxon.Hej.@event.Receiver copier = destination;
                 if (!(feed.copyNamespaces)) {
-                    copier = new Inner_ProxyReceiver_d333e1704(this, copier);
+                    copier = new Inner_ProxyReceiver_d321e1704(this, copier);
                 }
                 if (((feed.validation != Saxon.Hej.lib.Validation.PRESERVE) || (feed.type != null))) {
                     Saxon.Hej.lib.ParseOptions validationOptions = new Saxon.Hej.lib.ParseOptions();
@@ -177,7 +177,7 @@ namespace Saxon.Eej.ee.stream.feed {
                         }
                     }
                     Saxon.Hej.@event.PipelineConfiguration newPipe = new Saxon.Hej.@event.PipelineConfiguration(feed.getPipelineConfiguration());
-                    newPipe.setErrorReporter(new Inner_ErrorReporter_d333e2051(this));
+                    newPipe.setErrorReporter(new Inner_ErrorReporter_d321e2051(this));
                     copier.setPipelineConfiguration(newPipe);
                     copier = new Saxon.Eej.ee.validate.CatchingReceiver(copier, newPipe.getErrorReporter());
                 }
@@ -200,9 +200,9 @@ namespace Saxon.Eej.ee.stream.feed {
             public override void rollback() {
             }
         
-            private class Inner_ProxyOutputter_d333e1640 : Saxon.Hej.@event.ProxyOutputter {
+            private class Inner_ProxyOutputter_d321e1640 : Saxon.Hej.@event.ProxyOutputter {
                 private readonly PendingCopyAction outerInstance;
-                public Inner_ProxyOutputter_d333e1640(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
+                public Inner_ProxyOutputter_d321e1640(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
                     this.outerInstance = outerInstance;
                 }
                 public override void open() {
@@ -211,9 +211,9 @@ namespace Saxon.Eej.ee.stream.feed {
                 }
             }
 
-            private class Inner_ProxyReceiver_d333e1704 : Saxon.Hej.@event.ProxyReceiver {
+            private class Inner_ProxyReceiver_d321e1704 : Saxon.Hej.@event.ProxyReceiver {
                 private readonly PendingCopyAction outerInstance;
-                public Inner_ProxyReceiver_d333e1704(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1) : base(arg1) {
+                public Inner_ProxyReceiver_d321e1704(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1) : base(arg1) {
                     this.outerInstance = outerInstance;
                 }
                 public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
@@ -231,9 +231,9 @@ namespace Saxon.Eej.ee.stream.feed {
                 }
             }
 
-            private class Inner_ErrorReporter_d333e2051 : Saxon.Hej.lib.ErrorReporter {
+            private class Inner_ErrorReporter_d321e2051 : Saxon.Hej.lib.ErrorReporter {
                 private readonly PendingCopyAction outerInstance;
-                public Inner_ErrorReporter_d333e2051(PendingCopyAction outerInstance) {
+                public Inner_ErrorReporter_d321e2051(PendingCopyAction outerInstance) {
                     this.outerInstance = outerInstance;
                     errorCount = 0;
                 }
@@ -324,9 +324,9 @@ namespace Saxon.Eej.ee.stream.feed {
         
         }
     
-        private class Inner_ProxyOutputter_d333e1640 : Saxon.Hej.@event.ProxyOutputter {
+        private class Inner_ProxyOutputter_d321e1640 : Saxon.Hej.@event.ProxyOutputter {
             private readonly PendingCopyAction outerInstance;
-            public Inner_ProxyOutputter_d333e1640(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
+            public Inner_ProxyOutputter_d321e1640(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
                 this.outerInstance = outerInstance;
             }
             public override void open() {
@@ -335,9 +335,9 @@ namespace Saxon.Eej.ee.stream.feed {
             }
         }
 
-        private class Inner_ProxyReceiver_d333e1704 : Saxon.Hej.@event.ProxyReceiver {
+        private class Inner_ProxyReceiver_d321e1704 : Saxon.Hej.@event.ProxyReceiver {
             private readonly PendingCopyAction outerInstance;
-            public Inner_ProxyReceiver_d333e1704(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1) : base(arg1) {
+            public Inner_ProxyReceiver_d321e1704(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1) : base(arg1) {
                 this.outerInstance = outerInstance;
             }
             public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
@@ -355,9 +355,9 @@ namespace Saxon.Eej.ee.stream.feed {
             }
         }
 
-        private class Inner_ErrorReporter_d333e2051 : Saxon.Hej.lib.ErrorReporter {
+        private class Inner_ErrorReporter_d321e2051 : Saxon.Hej.lib.ErrorReporter {
             private readonly PendingCopyAction outerInstance;
-            public Inner_ErrorReporter_d333e2051(PendingCopyAction outerInstance) {
+            public Inner_ErrorReporter_d321e2051(PendingCopyAction outerInstance) {
                 this.outerInstance = outerInstance;
                 errorCount = 0;
             }

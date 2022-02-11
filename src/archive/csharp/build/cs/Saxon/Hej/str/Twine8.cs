@@ -126,7 +126,7 @@ namespace Saxon.Hej.str {
             return 8;
         }
         public override Saxon.Hej.z.IntIterator codePoints() {
-            return new Inner_IntIterator_d1657e905(bytes);
+            return new Inner_IntIterator_d1596e905(bytes);
         }
         public override int GetHashCode() {
             if ((cachedHash != 0)) {
@@ -186,8 +186,8 @@ namespace Saxon.Hej.str {
             return ("Twine8 bytes.length = "+bytes.Length);
         }
     
-        private class Inner_IntIterator_d1657e905 : Saxon.Hej.z.IntIterator {
-            public Inner_IntIterator_d1657e905(byte[] bytes) {
+        private class Inner_IntIterator_d1596e905 : Saxon.Hej.z.IntIterator {
+            public Inner_IntIterator_d1596e905(byte[] bytes) {
                 this.bytes = bytes;
                 i = 0;
             }

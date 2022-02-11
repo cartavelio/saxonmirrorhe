@@ -29,7 +29,7 @@ namespace Saxon.Eej.ee.stream.feed {
         }
         public override Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode) {
             if (isSimpleText) {
-                return new Inner_AbstractUniStringConsumer_d359e299(this);
+                return new Inner_AbstractUniStringConsumer_d346e299(this);
             } else {
                 return base.getStringReceiver(asTextNode);
             }
@@ -78,9 +78,9 @@ namespace Saxon.Eej.ee.stream.feed {
             }
         }
     
-        private class Inner_AbstractUniStringConsumer_d359e299 : Saxon.Hej.str.AbstractUniStringConsumer {
+        private class Inner_AbstractUniStringConsumer_d346e299 : Saxon.Hej.str.AbstractUniStringConsumer {
             private readonly SimpleNodeConstructorFeed outerInstance;
-            public Inner_AbstractUniStringConsumer_d359e299(SimpleNodeConstructorFeed outerInstance) {
+            public Inner_AbstractUniStringConsumer_d346e299(SimpleNodeConstructorFeed outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ Saxon.Hej.str.UniStringConsumer accept(Saxon.Hej.str.UnicodeString chars) {

@@ -5,11 +5,11 @@ namespace Saxon.Eej.ee.stream.adjunct {
     public class ItemsAfterStreamer : Saxon.Eej.ee.stream.adjunct.FilterFnStreamer {
         public override Saxon.Eej.ee.stream.feed.FilteringFeed.Filter makeFilter(Saxon.Hej.expr.XPathContext context, Saxon.Eej.ee.stream.feed.ItemFeed @out) {
             Saxon.Hej.om.Function function = (Saxon.Hej.om.Function)(((Saxon.Hej.expr.SystemFunctionCall)(getExpression())).getArg(1).evaluateItem(context));
-            return new Inner_Filter_d263e128(context, function);
+            return new Inner_Filter_d252e128(context, function);
         }
     
-        private class Inner_Filter_d263e128 : Saxon.Eej.ee.stream.feed.FilteringFeed.Filter {
-            public Inner_Filter_d263e128(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Function function) {
+        private class Inner_Filter_d252e128 : Saxon.Eej.ee.stream.feed.FilteringFeed.Filter {
+            public Inner_Filter_d252e128(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Function function) {
                 this.context = context;
                 this.function = function;
                 started = false;

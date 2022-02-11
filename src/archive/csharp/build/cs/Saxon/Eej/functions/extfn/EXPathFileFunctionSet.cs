@@ -417,7 +417,7 @@ namespace Saxon.Eej.functions.extfn {
                 if ((arguments.Length>2)) {
                     filter = Saxon.Hej.functions.URIQueryParameters.makeGlobFilter(arguments[2].head().getStringValue());
                 } else {
-                    filter = new Inner_FilenameFilter_d508e4927(this);
+                    filter = new Inner_FilenameFilter_d486e4927(this);
                 }
                 gatherDirectoryContents(file, "", recursive, filter, result);
                 return Saxon.Hej.value.SequenceExtent.makeSequenceExtent(result);
@@ -443,9 +443,9 @@ namespace Saxon.Eej.functions.extfn {
                 }
             }
         
-            private class Inner_FilenameFilter_d508e4927 : Saxon.Ejava.io.FilenameFilter {
+            private class Inner_FilenameFilter_d486e4927 : Saxon.Ejava.io.FilenameFilter {
                 private readonly FileList outerInstance;
-                public Inner_FilenameFilter_d508e4927(FileList outerInstance) {
+                public Inner_FilenameFilter_d486e4927(FileList outerInstance) {
                     this.outerInstance = outerInstance;
                 }
                 public bool accept(Saxon.Ejava.io.File dir, string name) {
@@ -983,9 +983,9 @@ namespace Saxon.Eej.functions.extfn {
             return null;
         }
     
-        private class Inner_FilenameFilter_d508e4927 : Saxon.Ejava.io.FilenameFilter {
+        private class Inner_FilenameFilter_d486e4927 : Saxon.Ejava.io.FilenameFilter {
             private readonly FileList outerInstance;
-            public Inner_FilenameFilter_d508e4927(FileList outerInstance) {
+            public Inner_FilenameFilter_d486e4927(FileList outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public bool accept(Saxon.Ejava.io.File dir, string name) {
