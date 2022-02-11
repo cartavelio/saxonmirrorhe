@@ -23,6 +23,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Properties;
 
 
@@ -64,16 +65,14 @@ public abstract class SystemFunction extends AbstractFunction {
      * @param rsc       Necessary information about the static context
      * @param arity     the arity of the function
      * @return          the function item
+     * @throws IllegalArgumentException if there is no system function with the required name and arity
      */
 
     public static SystemFunction makeFunction(String name, RetainedStaticContext rsc, int arity) {
-        if (rsc == null) {
-            throw new NullPointerException();
-        }
+        Objects.requireNonNull(rsc);
         SystemFunction fn = rsc.getConfiguration().makeSystemFunction(name, arity);
         if (fn == null) {
-            rsc.getConfiguration().makeSystemFunction(name, arity);
-            throw new IllegalStateException(name);
+            throw new IllegalArgumentException(name + "#" + arity);
         }
         fn.setRetainedStaticContext(rsc);
         return fn;

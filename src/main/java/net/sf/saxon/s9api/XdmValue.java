@@ -244,6 +244,24 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
+     * Get a subsequence of the value
+     *
+     * @param start  the index of the first item to be included in the result, counting from zero.
+     *               A negative value is taken as zero. If the value is beyond the end of the sequence, an empty
+     *               sequence is returned
+     * @param length the number of items to be included in the result. Specify Integer.MAX_VALUE to
+     *               get the subsequence up to the end of the base sequence. If the value is negative, an empty sequence
+     *               is returned. If the length goes off the end of the sequence, the result returns items up to the end
+     *               of the sequence
+     * @return the required subsequence.
+     * @since 11
+     */
+
+    public XdmValue subsequence(int start, int length) {
+        return fromGroundedValue(value.subsequence(start, length));
+    }
+
+    /**
      * Get an iterator over the items in this value.
      *
      * @return an Iterator over the items in this value.

@@ -136,7 +136,11 @@ public class StreamingTransformerImpl extends AbstractTransformerImpl {
      */
 
     public void setInitialMode(String name) throws IllegalArgumentException {
-        xsltTransformer.setInitialMode(QName.fromClarkName(name));
+        try {
+            xsltTransformer.setInitialMode(QName.fromClarkName(name));
+        } catch (SaxonApiException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**

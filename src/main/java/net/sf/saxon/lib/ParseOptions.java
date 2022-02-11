@@ -38,8 +38,8 @@ import java.util.*;
 
 @SuppressWarnings("WeakerAccess")
 //@CSharpInjectMembers(code = {
-//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
+//        "    public void setErrorReporter(Saxon.Api.ErrorReporter reporter) {"
+//                + "        setErrorReporter(new Saxon.Api.Support.ErrorReporterWrapper(reporter));"
 //                + "    }"
 //})
 public class ParseOptions {

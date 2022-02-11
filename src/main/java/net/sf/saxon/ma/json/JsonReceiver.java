@@ -509,7 +509,7 @@ public class JsonReceiver implements Receiver {
                         try {
                             String hex = literal.substring(i + 1, i + 5);
                             int code = Integer.parseInt(hex, 16);
-                            buffer.appendCodePoint(code);
+                            buffer.append((char)code);
                             i += 4;
                         } catch (Exception e) {
                             throw new XPathException("Invalid hex escape sequence in string '" + Err.wrap(literal) + "'", "FOJS0007");

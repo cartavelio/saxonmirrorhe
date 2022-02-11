@@ -33,7 +33,6 @@ import net.sf.saxon.tree.wrapper.TypeStrippedDocument;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -878,8 +877,7 @@ public class XsltController extends Controller {
      * Perform a transformation by applying templates in a streamable mode to a streamable
      * input document.
      *
-     * @param source The input for the source tree. Must be (or resolve to) a StreamSource
-     *               or SAXSource.
+     * @param source The input for the source tree.
      * @param out    The destination for the result sequence. The events that are written to this
      *               {@code Receiver} will form a <em>regular event sequence</em>
      *               as defined in {@link RegularSequenceChecker}. This event sequence represents
@@ -915,9 +913,9 @@ public class XsltController extends Controller {
             if (s2 != null) {
                 underSource = s2;
             }
-            if (!(source instanceof SAXSource || source instanceof StreamSource || source instanceof EventSource)) {
-                throw new IllegalArgumentException("Streaming requires a SAXSource, StreamSource, or EventSource");
-            }
+//            if (!(source instanceof SAXSource || source instanceof StreamSource || source instanceof EventSource)) {
+//                throw new IllegalArgumentException("Streaming requires a SAXSource, StreamSource, or EventSource");
+//            }
             if (!initialMode.getActor().isDeclaredStreamable()) {
                 throw new IllegalArgumentException("Initial mode is not streamable");
             }
@@ -955,7 +953,7 @@ public class XsltController extends Controller {
                 getConfiguration().getLogger().info("Streaming " + source.getSystemId());
             }
             try {
-                Sender.send(source, despatcher, null);
+                Sender.send(underSource, despatcher, null);
             } catch (QuitParsingException e) {
                 if (verbose) {
                     getConfiguration().getLogger().info("Streaming " + source.getSystemId() + " : early exit");

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.resource;
 
+import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
@@ -14,6 +15,7 @@ import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.query.InputStreamMarker;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
@@ -46,6 +48,22 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
 
     public AbstractResourceCollection(Configuration config) {
         this.config = config;
+    }
+
+    /**
+     * If the collectionURI is null, report that no default collection exists
+     * @param collectionURI the collection URI to be tested
+     * @param context XPath evaluation context
+     * @throws XPathException if the collectionURI is null
+     */
+
+    public static void checkNotNull(String collectionURI, XPathContext context) throws XPathException {
+        if (collectionURI == null) {
+            XPathException err = new XPathException("No default collection has been defined");
+            err.setErrorCode("FODC0002");
+            err.setXPathContext(context);
+            throw err;
+        }
     }
 
     @Override
@@ -117,11 +135,12 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                 options.setSpaceStrippingRule(stripSpace.get());
             }
 
+            //#if CSHARP==false
             Optional<Maker<XMLReader>> p = params.getXMLReaderMaker();
             if (p.isPresent()) {
                 options.setXMLReaderMaker(p.get());
             }
-
+            //#endif
 
             // If the URI requested suppression of errors, or that errors should be treated
             // as warnings, we set up a special ErrorListener to achieve this
@@ -144,18 +163,32 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
 
     public static void setupErrorHandlingForCollection(ParseOptions options, int onError, ErrorReporter oldErrorListener) {
         if (onError == URIQueryParameters.ON_ERROR_IGNORE) {
-            options.setErrorReporter(error -> {});
+            options.setErrorReporter(new ErrorSuppressor());
         } else if (onError == URIQueryParameters.ON_ERROR_WARNING) {
-            options.setErrorReporter(error -> {
-                if (error.isWarning()) {
-                    oldErrorListener.report(error);
-                } else {
-                    oldErrorListener.report(error.asWarning());
-                    XmlProcessingIncident supp = new XmlProcessingIncident("The document will be excluded from the collection").asWarning();
-                    supp.setLocation(error.getLocation());
-                    oldErrorListener.report(supp);
-                }
-            } );
+            options.setErrorReporter(new ErrorAsWarningReporter(oldErrorListener));
+        }
+    }
+
+    private static class ErrorSuppressor implements ErrorReporter {
+        @Override
+        public void report(XmlProcessingError error) {}
+    }
+
+    private static class ErrorAsWarningReporter implements ErrorReporter {
+        private final ErrorReporter originalErrorReporter;
+        public ErrorAsWarningReporter(ErrorReporter originalErrorReporter) {
+            this.originalErrorReporter = originalErrorReporter;
+        }
+        @Override
+        public void report(XmlProcessingError error) {
+            if (error.isWarning()) {
+                originalErrorReporter.report(error);
+            } else {
+                originalErrorReporter.report(error.asWarning());
+                XmlProcessingIncident supp = new XmlProcessingIncident("The document will be excluded from the collection").asWarning();
+                supp.setLocation(error.getLocation());
+                originalErrorReporter.report(supp);
+            }
         }
     }
 
@@ -218,11 +251,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                 return binaryContent;
             } else if (characterContent != null) {
                 String e = encoding != null ? encoding : "UTF-8";
-                try {
-                    return characterContent.getBytes(e);
-                } catch (UnsupportedEncodingException ex) {
-                    throw new XPathException(e);
-                }
+                return EXPathBinaryFunctionSet.encode(characterContent, e);
             } else {
                 try (InputStream stream = getInputStream()) {
                     return BinaryResource.readBinaryFromStream(stream, resourceUri);
@@ -244,20 +273,14 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
             if (characterContent != null) {
                 return characterContent;
             } else if (binaryContent != null && encoding != null) {
-                try {
-                    return new String(binaryContent, encoding);
-                } catch (UnsupportedEncodingException e) {
-                    throw new XPathException(e);
-                }
+                return EXPathBinaryFunctionSet.decode(binaryContent, encoding);
             } else {
                 try (InputStream stream = getInputStream()) {
-                    StringBuilder builder = null;
                     String enc = encoding;
                     if (enc == null) {
-                        enc = StandardUnparsedTextResolver.inferStreamEncoding(stream, null);
+                        enc = EncodingDetector.inferStreamEncoding(stream, null);
                     }
-                    builder = CatalogCollection.makeStringBuilderFromStream(stream, enc);
-                    return characterContent = builder.toString();
+                    return characterContent = CatalogCollection.makeStringFromStream(stream, enc);
                 } catch (IOException e) {
                     throw new XPathException(e);
                 }
@@ -467,7 +490,6 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
      * default (returned by this method if not overridden) is false.
      */
 
-    @Override
     public boolean stripWhitespace(SpaceStrippingRule rules) {
         return false;
     }

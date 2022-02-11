@@ -448,7 +448,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     @Override
-    @CSharpReplaceBody(code = "return new BigDecimalValue(Singulink.Numerics.BigDecimal.Round(value, scale));")
+    @CSharpReplaceBody(code = "return new BigDecimalValue(Saxon.Impl.Helpers.BigDecimalUtils.Round(value, scale));")
     public NumericValue round(int scale) {
         // The XPath rules say that we should round to the nearest integer, with .5 rounding towards
         // positive infinity. Unfortunately this is not one of the rounding modes that the Java BigDecimal
@@ -481,7 +481,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     @Override
-    @CSharpReplaceBody(code = "return new BigDecimalValue(Singulink.Numerics.BigDecimal.Round(value, scale));")
+    @CSharpReplaceBody(code = "return new BigDecimalValue(Singulink.Numerics.BigDecimal.Round(value, scale, System.MidpointRounding.ToEven));")
     public NumericValue roundHalfToEven(int scale) {
         if (scale >= value.scale()) {
             return this;

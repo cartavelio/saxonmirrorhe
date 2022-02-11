@@ -16,6 +16,7 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.resource.AbstractResourceCollection;
+import net.sf.saxon.resource.ExplicitCollection;
 import net.sf.saxon.resource.XmlResource;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.DecimalFormatManager;
@@ -722,44 +723,43 @@ public class Environment implements URIResolver {
                 driver.println("**** Invalid collection URI " + collectionURI);
                 break;
             }
-            if (!collectionURI.equals("") && !u.isAbsolute()) {
-                u = ((XdmNode) env).getBaseURI().resolve(collectionURI);
+            if (!u.isAbsolute()) {
+                u = env.getBaseURI().resolve(collectionURI);
                 collectionURI = u.toString();
             }
 
-            final String cURI = collectionURI;
-
-            collectioni = new AbstractResourceCollection(config) {
-
-
-                public void addResource(Resource r) {
-                    resourcesi.add(r);
-                }
-
-                @Override
-                public String getCollectionURI() {
-                    return cURI;
-                }
-
-                @Override
-                public Iterator<String> getResourceURIs(XPathContext context) {
-                    List<String> resourceUris = new ArrayList<>();
-                    for (Resource resource : resourcesi) {
-                        resourceUris.add(resource.getResourceURI());
-                    }
-                    return resourceUris.iterator();
-                }
-
-                @Override
-                public Iterator<? extends Resource> getResources(XPathContext context) {
-                    return resourcesi.iterator();
-                }
-
-                @Override
-                public boolean isStable(XPathContext context) {
-                    return true;
-                }
-            };
+            collectioni = new ExplicitCollection(config, collectionURI, resourcesi);
+//            {
+//
+//
+//                public void addResource(Resource r) {
+//                    resourcesi.add(r);
+//                }
+//
+//                @Override
+//                public String getCollectionURI() {
+//                    return cURI;
+//                }
+//
+//                @Override
+//                public Iterator<String> getResourceURIs(XPathContext context) {
+//                    List<String> resourceUris = new ArrayList<>();
+//                    for (Resource resource : resourcesi) {
+//                        resourceUris.add(resource.getResourceURI());
+//                    }
+//                    return resourceUris.iterator();
+//                }
+//
+//                @Override
+//                public Iterator<? extends Resource> getResources(XPathContext context) {
+//                    return resourcesi.iterator();
+//                }
+//
+//                @Override
+//                public boolean isStable(XPathContext context) {
+//                    return true;
+//                }
+//            };
 
             for (XdmNode source : coll.children("source")) {
                 String href = source.attribute("file");

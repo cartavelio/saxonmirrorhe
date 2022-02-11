@@ -418,7 +418,7 @@ public final class EvaluateInstr extends Expression {
             if (getActualParams() != null) {
                 for (WithParam actualParam : getActualParams()) {
                     StructuredQName name = actualParam.getVariableQName();
-                    if (locals.get(name) == null) {
+                    if (!locals.containsKey(name)) {
                         XPathVariable var = env.declareVariable(name);
                         locals.put(name, var.getLocalSlotNumber());
                     }
