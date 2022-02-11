@@ -541,7 +541,7 @@ namespace TestDriver {
                 QName initialModeName = initialMode == null ? null : GetQNameAttribute(xpath, initialMode, "@name");
                 QName initialTemplateName =
                     initialTemplate == null ? null : GetQNameAttribute(xpath, initialTemplate, "@name");
-                string baseOutputURI = new System.Uri(resultsDir + "/results/output.xml").AbsoluteUri;
+                string baseOutputURI = new System.Uri(System.IO.Path.GetFullPath(resultsDir + "/results/output.xml")).AbsoluteUri;
                 XdmNode outputNode = testInput.Select(Steps.Path("output", "@file")).FirstOrDefault();
                 string outputUri = (outputNode != null ? outputNode.StringValue : null);
 
