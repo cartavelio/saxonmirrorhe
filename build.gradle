@@ -218,8 +218,17 @@ javadoc {
   classpath = configurations.documentation
 }
 
+def junitExcludeTagList = []
+project.findProperty("junitExcludeTags").split(",").each { tag ->
+  if (tag.trim() != '') {
+    junitExcludeTagList.add(tag.trim())
+  }
+}
+
 test {
   useJUnitPlatform {
+    // FIXME: how do I make this dynamic from junitExcludeTagList???
+    excludeTags 'missingfiles', 'mikeonly', 'bytecode', 'expectedtofail', 'performance'
   }
 }
 
@@ -1304,17 +1313,12 @@ task eejTests(
     }
   }
 
-  def excludeTags = project.findProperty("junitExcludeTags")
-  if (excludeTags != null) {
-    junitExcludeTags.split(",").each { tag ->
-      if (tag.trim() != '') {
-        largs.add("--exclude-tag")
-        largs.add(tag.trim())
-      }
-    }
+  junitExcludeTagList.each { tag ->
+    largs.add("--exclude-tag")
+    largs.add(tag.trim())
   }
 
-  // println(largs)
+  //println(largs)
 
   classpath = configurations.productTests + files("${buildDir}/classes/eej") + files("${buildDir}/test_classes/eej")
   main = "org.junit.platform.console.ConsoleLauncher"
@@ -1741,7 +1745,7 @@ task sqlServerStop(dependsOn: ["dockerup"]) {
 // Testing task for various Gradle debugging efforts
 task helloWorld() {
   doLast {
-    println("Hello, world. ${saxonMajorVersion}")
+    println("Hello, world. ${junitExcludeTagList.join('|')}")
 /*
     project.properties.keySet().each { key ->
       if (key.startsWith("td")) {
