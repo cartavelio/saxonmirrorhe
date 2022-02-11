@@ -78,7 +78,7 @@ namespace Saxon.Api {
         /// Escape-hatch property to get the space stripping rules that
         /// implement this policy internally.
         
-        public SpaceStrippingRule Implementation => stripperRules;
+		public Saxon.Hej.om.SpaceStrippingRule Implementation => stripperRules;
         
     }
 

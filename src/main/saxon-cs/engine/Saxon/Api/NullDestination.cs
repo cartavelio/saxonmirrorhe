@@ -1,5 +1,4 @@
 using System;
-using JDestination = Saxon.Hej.s9api.Destination;
 
 namespace Saxon.Api {
     /// <summary>
@@ -31,7 +30,7 @@ namespace Saxon.Api {
         /// The underlying <c>Destination</c> object in the Saxon implementation, which in the NullDestination is null.
         /// </summary>
         /// <returns>returns null</returns>
-        public JDestination GetUnderlyingDestination()
+		public Saxon.Hej.s9api.Destination GetUnderlyingDestination()
         {
             return destination;
         }

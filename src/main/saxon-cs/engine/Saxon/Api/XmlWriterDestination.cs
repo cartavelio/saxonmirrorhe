@@ -1,8 +1,6 @@
 using System.Xml;
 using Saxon.Hej.@event;
 using Saxon.Hej.s9api;
-using JDestination = Saxon.Hej.s9api.Destination;
-using JAbstractDestination = Saxon.Hej.s9api.AbstractDestination;
 using Saxon.Hej.serialize;
 using Saxon.Impl.Helpers;
 
@@ -20,7 +18,7 @@ namespace Saxon.Api {
     /// is to be controlled from the stylesheet or query, use a <c>Serializer</c> as the
     /// <c>Destination</c>.</para>
     /// </remarks>
-	public class XmlWriterDestination : JAbstractDestination, IDestination {
+	public class XmlWriterDestination : Saxon.Hej.s9api.AbstractDestination, IDestination {
         private readonly XmlWriter writer;
         private bool closeAfterUse = true;
 
@@ -94,7 +92,7 @@ namespace Saxon.Api {
         /// <param name="value2">Serialization parameters known to the caller of the method; typically, output
         ///  properties defined in a stylesheet or query. These will mainly be of interest if the destination is performing serialization, but
         ///  some properties (such as <c>item-separator</c>) are also used in other situations.</param>
-        public override Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties value2) {
+		public override Saxon.Hej.@event.Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties value2) {
             return GetReceiver(pipe, value2);
         }
 
@@ -112,7 +110,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <returns>returns the underlying Destination object</returns>
-        public JDestination GetUnderlyingDestination() {
+		public Saxon.Hej.s9api.Destination GetUnderlyingDestination() {
             return this;
         }
     }

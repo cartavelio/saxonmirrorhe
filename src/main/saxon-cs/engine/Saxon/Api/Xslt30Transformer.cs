@@ -97,7 +97,7 @@ namespace Saxon.Api {
         /// to lower-level methods not otherwise available in the Saxon.Api interface. Note that classes
         /// and methods obtained by this route cannot be guaranteed stable from release to release.</summary>
 
-        public XsltController GetUnderlyingController => s9Transformer.getUnderlyingController();
+		public Saxon.Hej.trans.XsltController GetUnderlyingController => s9Transformer.getUnderlyingController();
 
         internal Saxon.Hej.s9api.Xslt30Transformer GetUnderlyingXslt30Transformer => s9Transformer;
 
@@ -343,7 +343,7 @@ namespace Saxon.Api {
         /// <para>The supplied destination is ignored if a <code>TraceListener</code> is in use.</para>
         /// </remarks>
 
-        public StandardLogger TraceFunctionDestination {
+		public StandardLogger TraceFunctionDestination {
             set {
                 traceFunctionDestination = value;
                 s9Transformer.setTraceFunctionDestination(value);

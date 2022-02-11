@@ -16,7 +16,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="conditions">The predicates that must all be satisfied</param>
         /// <returns>A predicate that evaluates to true only if all the supplied predicates are satisfied</returns>
-        public static Predicate<T> AllOf<T>(params Predicate<T>[] conditions) where T : XdmItem {
+        public static Predicate<T> AllOf<T>(params Predicate<T>[] conditions) 
+			where T : XdmItem {
             return item => conditions.All(pred => pred.Invoke(item));
         }
         
@@ -25,7 +26,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="conditions">The predicates, one of which must be satisfied</param>
         /// <returns>A predicate that evaluates to true only if all the supplied predicates are satisfied</returns>
-        public static Predicate<T> AnyOf<T>(params Predicate<T>[] conditions) where T : XdmItem {
+        public static Predicate<T> AnyOf<T>(params Predicate<T>[] conditions) 
+			where T : XdmItem {
             return item => conditions.Any(pred => pred.Invoke(item));
         }
 
