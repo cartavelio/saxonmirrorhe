@@ -319,12 +319,11 @@ public class StaticQueryContext {
      * @since 9.2; changed in 9.3 to expect a DecimalValue rather than a string. Changed in 9.7 to
      * accept an int (30 = "3.0") and to allow "3.1".  From 9.8.0.3 the supplied value is ignored
      * and the language version is always set to "3.1".  From 11.0 the value 40 is accepted.
-     * @deprecated since 10.0
      */
-    @Deprecated
+    
     public void setLanguageVersion(int version) {
         if (version==10 || version==30 || version==31) {
-            // value is ignored
+            languageVersion = 31;
         } else if (version == 40) {
             languageVersion = 40;
         } else {
