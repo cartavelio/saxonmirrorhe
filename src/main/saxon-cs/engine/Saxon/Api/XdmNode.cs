@@ -509,8 +509,8 @@ namespace Saxon.Api {
         /// Return a string representation of the node.
         /// </summary>
         /// <remarks>
-        /// This method returns the value of the <see cref="OuterXml"/> property.
-        /// To get the string value of a node as defined in XPath, use the <see cref="StringValue"/> property.
+        /// This method returns the value of the <see cref="OuterXml"/> property, that is, a serialization of the node.
+        /// To get the string value of a node as defined in XPath, use the <see cref="XdmItem.StringValue"/> property.
         /// </remarks>
         public override string ToString() {
             return OuterXml;

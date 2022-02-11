@@ -268,9 +268,7 @@ namespace Saxon.Api {
         /// Load an XML document supplied as raw (lexical) XML on a <c>Stream</c>.
         /// </summary>
         /// <remarks>
-        /// <para>The document is parsed using the Microsoft <c>System.Xml</c> parser if the
-        /// "http://saxon.sf.net/feature/preferJaxpParser" property on the <c>Processor</c> is set to false;
-        /// otherwise it is parsed using the Apache Xerces XML parser.</para>
+        /// <para>The document is parsed using the Microsoft <c>System.Xml</c> parser.</para>
         /// <para>Before calling this method, the <c>BaseUri</c> property should be set to identify the
         /// base URI of this document, used for resolving any relative URIs contained within it;
         /// if it has not been set, the current working directory is assumed.</para>
@@ -293,34 +291,26 @@ namespace Saxon.Api {
         // as an extra argument
 
         internal XdmNode Build(Stream input, Uri baseUri) {
-            Source source;
-            ParseOptions options = new ParseOptions(config.getParseOptions());
-            
-            if (processor.GetProperty("http://saxon.sf.net/feature/preferJaxpParser") == "true") {
-                source = new StreamSource(input, baseUri.ToString());
-                //options.setEntityResolver(new JDotNetURIResolver(XmlResolver));
-                source = augmentSource(source, options);
+
+            XmlReaderSettings settings = new () {
+                DtdProcessing = DtdProcessing.Parse // must expand entity references
+            };
+
+            if (xmlResolver != null) {
+                settings.XmlResolver = xmlResolver;
             }
-            else {
-                XmlReaderSettings settings = new () {
-                    DtdProcessing = DtdProcessing.Parse // must expand entity references
-                };
 
-                if (xmlResolver != null) {
-                    settings.XmlResolver = xmlResolver;
-                }
+            settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);
 
-                settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);
-
-                XmlReader parser = XmlReader.Create(input, settings, baseUri.ToString());
-                DotNetPullProvider dotNetPullProvider = new (parser);
-                if (WhitespacePolicy == WhitespacePolicy.StripIgnorable) {
-                    dotNetPullProvider.IgnoreIgnorableWhitespace = true;
-                }
-
-                source = new PullSource(dotNetPullProvider);
-                source.setSystemId(baseUri.ToString());
+            XmlReader parser = XmlReader.Create(input, settings, baseUri.ToString());
+            DotNetPullProvider dotNetPullProvider = new (parser);
+            if (WhitespacePolicy == WhitespacePolicy.StripIgnorable) {
+                dotNetPullProvider.IgnoreIgnorableWhitespace = true;
             }
+
+            Source source = new PullSource(dotNetPullProvider);
+            source.setSystemId(baseUri.ToString());
+       
 
             try {
                 return s9Builder.build(source);
@@ -356,29 +346,20 @@ namespace Saxon.Api {
         // as an extra argument
 
         internal XdmNode Build(TextReader input, Uri baseUri) {
-            Source source;
-            ParseOptions options = new ParseOptions(config.getParseOptions());
-            if (processor.GetProperty("http://saxon.sf.net/feature/preferJaxpParser") == "true") {
-                source = new StreamSource(input, baseUri.ToString());
-                //options.setEntityResolver(new JDotNetURIResolver(XmlResolver));
-                source = augmentSource(source, options);
+            XmlReaderSettings settings = new() {
+                DtdProcessing = DtdProcessing.Parse // must expand entity references
+            };
+
+            if (xmlResolver != null) {
+                settings.XmlResolver = xmlResolver;
             }
-            else {
-                XmlReaderSettings settings = new() {
-                    DtdProcessing = DtdProcessing.Parse // must expand entity references
-                };
 
-                if (xmlResolver != null) {
-                    settings.XmlResolver = xmlResolver;
-                }
+            settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);
 
-                settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);
-
-                XmlReader parser = XmlReader.Create(input, settings, baseUri.ToString());
-                DotNetPullProvider dotNetPullProvider = new (parser);
-                source = new PullSource(dotNetPullProvider);
-                source.setSystemId(baseUri.ToString());
-            }
+            XmlReader parser = XmlReader.Create(input, settings, baseUri.ToString());
+            DotNetPullProvider dotNetPullProvider = new (parser);
+            Source source = new PullSource(dotNetPullProvider);
+            source.setSystemId(baseUri.ToString());
 
             return s9Builder.build(source);
         }
