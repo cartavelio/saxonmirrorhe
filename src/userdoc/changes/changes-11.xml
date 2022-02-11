@@ -324,14 +324,14 @@
         <p>A new argument <code>-json</code> is added to support transformation of a JSON input file. The argument works like the
             <code>-s</code> argument for XML input: the value is the filename of a JSON file, which is parsed; the resulting item
             (if non-null) becomes both the global context item and the initial match selection for the transformation. (For more
-            information, see <a class="bodylink" href="/using-xsl/commandline">XSLT from the Command Line</a>.)</p>
+            information, see <a class="bodylink" href="/using-xsl/commandline">XSLT from the command line</a>.)</p>
         
         <h2>XQuery</h2>
         
         <p>A new argument <code>-json</code> is added to support querying of a JSON input file. The argument works like the
             <code>-s</code> argument for XML input: the value is the filename of a JSON file, which is parsed; the resulting item
             (if non-null) becomes the global context item for the query. (For more information, see <a class="bodylink"
-                href="/using-xquery/commandline">XQuery from the Command Line</a>.)</p>
+                href="/using-xquery/commandline">XQuery from the command line</a>.)</p>
         
     </category>
     
@@ -342,7 +342,7 @@
             experimental implementations for version 4.0 extensions to XPath, XSLT, and XQuery. A W3C
             Community Group is working on these proposals; for more information see the <a class="bodylink"
                 href="https://qt4cg.org/">QT4CG Specifications</a>, and documentation about the Saxon
-            implementations at <a class="bodylink" href="/v4extensions">Experimental 4.0 Extensions</a>.</p>
+            implementations at <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</p>
         
         <h2>Changes to Extension Functions</h2>
         
@@ -445,7 +445,7 @@
         <h2>XPath Syntax Extensions</h2>
         
         <aside>These extensions are all experimental, and may change as a result of community standardisation
-            efforts. For more information see <a class="bodylink" href="/v4extensions">Experimental 4.0 Extensions</a>.</aside>
+            efforts. For more information see <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</aside>
         
         <p>The <a class="bodylink" href="/expressions/range">range expression</a> <code> A to B</code> has been extended to allow
             <code>A by S to B</code>, for example <code>1 by 3 to 10</code> returns <code>(1, 4, 7, 10)</code>. The step may be
@@ -475,7 +475,7 @@
             They are based on proposals for an <a class="bodylink"
                 href="https://qt4cg.org/branch/master/xslt-40/Overview.html">XSLT 4.0 Specification</a>, but they do
             not necessarily correspond precisely with the current draft of that proposal. For more information
-            see <a class="bodylink" href="/v4extensions">Experimental 4.0 Extensions</a>.</aside>
+            see <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</aside>
         
         <p>An extension instruction can be used to invoke a named template. For example, a template with name <code>x:error</code>
         with declared parameters <code>message</code> and <code>code</code> might be called using the instruction

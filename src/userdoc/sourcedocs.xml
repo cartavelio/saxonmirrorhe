@@ -143,7 +143,7 @@
     <p>URIs used within an XML document to refer to external entities (including the DTD) are
       a little different since they are generally handled by the XML parser, and not by Saxon itself.
       Nevertheless, Saxon attempts to offer an integrated approach. For more information on this, 
-      see <a href="../resolving-entities" class="bodylink">Resolving Entities</a>.</p>
+      see <a href="../resolving-entities" class="bodylink">Resolving entities</a>.</p>
     
     <p>URIs for result documents produced using the <code>xsl:result-document</code> instruction
     are handled using a <code>ResultDocumentHandler</code> registered with the <code>XsltTransformer</code>
@@ -1820,8 +1820,8 @@ documentBuilder.build(as);]]></samp>
         <p>An alternative approach is to incorporate an XInclude processor as a SAX filter in the input
           pipeline. You can find a suitable SAX filter at <a href="http://xincluder.sourceforge.net/"
             class="bodylink">http://xincluder.sourceforge.net/</a>, and you can incorporate it into your
-          application as described in <a class="bodylink" href="../input-filters">Writing Input
-            Filters</a>.</p>
+          application as described in <a class="bodylink" href="../input-filters">Writing input
+            filters</a>.</p>
       </div>
       <div class="csonly">
         
@@ -2101,7 +2101,8 @@ documentBuilder.build(as);]]></samp>
     </p>
 
     <p>In the case of DOM, all Saxon editions support DOM access "out of the box", and no special
-      configuration action is necessary. See also <a class="bodylink" href="/sourcedocs/tree-models/domino">The Domino Tree Model</a>.</p>
+      configuration action is necessary. See also <a class="bodylink"
+        href="/sourcedocs/tree-models/domino">The Domino tree model</a>.</p>
 
     <p>Support for Axiom, JDOM2, XOM, and DOM4J is not available "out of the box" with
       Saxon-HE, but the source code is open source (in sub-packages of
@@ -2307,7 +2308,7 @@ documentBuilder.build(as);]]></samp>
             into account not only the official Javadoc specifications (which in some respects are woefully inadequate), but also the unofficial
             interpretation of the specifications found at <a
               href="http://veithen.github.io/2009/11/01/understanding-stax.html" class="bodylink">Understanding StAX:
-              How to Correctly Use XMLStreamWriter</a>.</p>
+              how to correctly use XMLStreamWriter</a>.</p>
         
       </section>
       <section id="preloading" title="Preloading shared reference documents">
@@ -2369,7 +2370,7 @@ documentBuilder.build(as);]]></samp>
         cs="Saxon.Api.CollectionFinder">CollectionFinder</code>. This section describes how
       the standard (default) collection finder behaves, if no user-written collection finder is
       supplied. For information on supplying a user-written <code>CollectionFinder</code>, see <a
-        class="bodylink" href="user-collections">Writing your own Collection Finder</a>.
+        class="bodylink" href="user-collections">Writing your own collection finder</a>.
     There are some differences between Java and C#.</p>
     
     <p>In XSLT 3.0 and XQuery 3.1, collections can contain resources other than XML documents: for
@@ -2397,10 +2398,10 @@ documentBuilder.build(as);]]></samp>
       <li><p>A registered collection is one that has been explicitly registered with the Configuration, by calling
         <code java="net.sf.saxon.Configuration#registerCollection">Configuration.registerCollection()</code>
         in Java, or <code cs="Saxon.Api.Processor#RegisterCollection">Processor.RegisterCollection()</code> in
-        C#. (See <a class="bodylink" href="../registered-collections">Registered Collections</a>.)</p></li>
+        C#. (See <a class="bodylink" href="../registered-collections">Registered collections</a>.)</p></li>
       <li><p>If the collection URI corresponds to a directory name, then a directory-based collection is used:
         the collection contains selected files from the named directory. (See <a class="bodylink"
-          href="../collection-directories">Directories as Collections</a>.)</p></li>
+          href="../collection-directories">Directories as collections</a>.)</p></li>
       <li class="javaonly"><p>If the collection URI identifies a ZIP or JAR file then a zip-based collection
         is used. (See <a class="bodylink" href="../ZIP-collections">ZIP collections</a>.)</p></li>
       <li><p>Otherwise, the collection URI must be the URI of an XML file which acts as a catalog, that is, it

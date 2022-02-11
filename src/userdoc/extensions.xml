@@ -6,7 +6,7 @@
     with the Saxon product.</p>
 
   <p>If you want to implement your own extensions, see <a class="bodylink" href="/extensibility"
-      >Extensibility Mechanisms</a>.</p>
+      >Extensibility mechanisms</a>.</p>
 
   <aside>Most of the extensions described in this section require Saxon-PE (Professional Edition) or
     higher. A few work with Saxon-HE (Home Edition), and some require Saxon-EE (Enterprise Edition).
@@ -34,18 +34,18 @@
 
 
   <p>For details of additional extensions available in XQuery only, see <a class="bodylink"
-      href="/using-xquery/extensions">XQuery Extensions</a>.</p>
+      href="/using-xquery/extensions">XQuery extensions</a>.</p>
 
   <p>For details of extensions to XML Schema 1.1 used for schema processing, see <a class="bodylink"
-      href="/schema-processing/extensions11">XML Schema 1.1 Extensions</a>.</p>
+      href="/schema-processing/extensions11">XML Schema 1.1 extensions</a>.</p>
 
   <p>Saxon also provides a set of extension elements providing access to SQL databases, see <a
-      class="bodylink" href="/sql-extension">Saxon SQL Extension</a>.</p>
+      class="bodylink" href="/sql-extension">Saxon SQL extension</a>.</p>
   
   <p>A W3C Community Group is working on proposals for extensions to XPath, XSLT, and XQuery, which
     could eventually become part of a version 4.0 set of specifications. Saxon includes experimental
   implementations of some of these proposals. For details of what is implemented in Saxon, and how
-  to enable these features, see <a class="bodylink" href="/v4extensions">Experimental 4.0 Extensions</a>.</p>
+  to enable these features, see <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</p>
 
   <p>Further information:</p>
   <nav>
@@ -62,7 +62,7 @@
     </p>
 
     <p>Full details of all extension functions, along with functions in the core library, are found
-      in the <a class="bodylink" href="/functions">Function Library</a>.</p>
+      in the <a class="bodylink" href="/functions">Function library</a>.</p>
 
     <aside>
       <p>As a general policy, Saxon's extension functions require Saxon-PE or Saxon-EE. The vast
@@ -72,7 +72,7 @@
       <p>Not all extension functions are available on all platforms. For instance only a selection of the EXSLT and EXPath
         functions are available on SaxonCS (see <a class="bodylink"
           href="/saxon-cs/saxon-extensions">SaxonCS built-in extensions</a> and the <a class="bodylink"
-            href="/functions">Function Library</a> for details).</p>
+            href="/functions">Function library</a> for details).</p>
     </aside>
 
     <p>The extension functions in Saxon fall into three groups, described in the following
@@ -121,7 +121,7 @@
       <h1>Saxon extension functions</h1>
 
       <p>These functions are listed and fully described, along with functions in the core library,
-        in the <a class="bodylink" href="/functions">Function Library</a>.</p>
+        in the <a class="bodylink" href="/functions">Function library</a>.</p>
 
       <aside>These extension functions are available in Saxon-PE and Saxon-EE except where otherwise
         stated. They are not available in Saxon-HE. There are some restrictions on the .NET and C/C++
@@ -172,7 +172,7 @@ saxon:evaluate($expression)
 
       <p>Details of the functions supported (with some additional information about the Saxon
         implementation) can be found in the main <a class="bodylink" href="/functions">Function
-          Library</a>.</p>
+          library</a>.</p>
 
       <aside>
         <p>These extensions are available in Saxon-PE and Saxon-EE "out of the box". Except for
@@ -249,7 +249,7 @@ saxon:evaluate($expression)
 
       <p>Details of the functions supported (with some additional information about the Saxon
         implementation) can be found in the main <a class="bodylink" href="/functions">Function
-          Library</a>.</p>
+          library</a>.</p>
 
 
       <h3>The EXPath file module</h3>
@@ -368,7 +368,7 @@ saxon:evaluate($expression)
     <aside>For the <code>select</code> attribute on <code>xsl:when</code> and <code>xsl:otherwise</code>,
     and the <code>then</code> and <code>else</code> attributes on <code>xsl:if</code>, see 
       <a class="bodylink" href="/v4extensions/xslt-syntax-extensions">Experimental XSLT 4.0
-        Extensions</a>.</aside>
+        extensions</a>.</aside>
     
     <section id="as" title="saxon:as">
       <h1>saxon:as</h1>

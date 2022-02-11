@@ -226,7 +226,7 @@
                     <code>../graphics</code> can be used to access <a href="../graphics">Using
                     graphics</a>.</p>
             <p>For a child topic, just include the topic name, like <code>child</code> to access the
-                    <a href="child">Child Topic</a> in this section.</p>
+                    <a href="child">Child topic</a> in this section.</p>
             <section id="child" title="Child topic">
                 <h1>Child topic</h1>
                 <p>The text of a child topic.</p>

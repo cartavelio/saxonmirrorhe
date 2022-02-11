@@ -34,17 +34,17 @@ as their Java counterparts, with some exceptions. They are described in the foll
       <ul>
          <li>
          <p>
-            <a class="bodylink" href="/using-xsl/commandline">XSLT from the Command Line</a>
+            <a class="bodylink" href="/using-xsl/commandline">XSLT from the command line</a>
          </p>
       </li>
          <li>
          <p>
-            <a class="bodylink" href="/using-xquery/commandline">XQuery from the Command Line</a>
+            <a class="bodylink" href="/using-xquery/commandline">XQuery from the command line</a>
          </p>
       </li>
          <li>
          <p>
-            <a class="bodylink" href="/schema-processing/commandline">Validation from the Command Line</a>
+            <a class="bodylink" href="/schema-processing/commandline">Validation from the command line</a>
          </p>
       </li>
       </ul>
@@ -67,7 +67,7 @@ platform. This is available from any .NET-supported language, although the examp
 available in the <a href="/dotnetdoc" class="bodylink">.NET API</a>.</p>
 
       <p>An example C# program illustrating various use cases for the API is available in the <code>samples/cs</code>
-         directory, see <a class="bodylink" href="/samples/dotnetsamples">API Examples for .NET</a> for further information</p>
+         directory, see <a class="bodylink" href="/samples/dotnetsamples">API examples for .NET</a> for further information</p>
 
       <p>All the classes referred to below are in the namespace <code>Saxon.Api</code>.</p>
 
@@ -328,7 +328,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <p>There are two interfaces that allow extension functions to be written: a simple interface where the function
       is written as a lambda expression, and a richer interface that gives access to the static and dynamic processing
       context of the function call. Both interfaces are described at 
-         <a class="bodylink" href="/extensibility/extension-functions-CS">Extension Functions (C#)</a>.</p>
+         <a class="bodylink" href="/extensibility/extension-functions-CS">Extension functions (C#)</a>.</p>
    </section>
    <section id="saxon-extensions" title="Built-in extensions" class="csonly">
       <h1>Built-in extensions</h1>
@@ -395,7 +395,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <h2>Restrictions and changes relative to Saxon-EE 10 on .NET</h2>
       
       <p>The only supported parser is the Microsoft System.Xml parser. (Saxon 10 on .NET also worked with
-         a port of Apache Xerces.) See <a href="../xmlparsing" class="bodylink">XML Parsing in SaxonCS</a>.</p>
+         a port of Apache Xerces.) See <a href="../xmlparsing" class="bodylink">XML parsing in SaxonCS</a>.</p>
       
       
       
