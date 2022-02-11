@@ -9730,10 +9730,10 @@ return saxon:serialize($x, <xsl:output method="xml"
         <div>
           <p>For each integer <code>$i</code> in the value of <code>$positions</code>, the function returns:</p>
           <ul>
-            <li>if the integer is between 1 and the length of <code>$seq</code> (inclusive), then <code>$seq[$i]</code></li>
-            <li>if the integer is negative and its absolute value is between 1 and the length of <code>$seq</code> (inclusive),
-            then <code>$seq[count($seq)-$i+1]</code></li>
-            <li>if the integer is zero, or if its absolute value exceeds the length of <code>$seq</code>, then nothing.</li>
+            <li><code>$seq[$i]</code> if the integer is between 1 and the length of <code>$seq</code> (inclusive)</li>
+            <li><code>$seq[count($seq)-$i+1]</code> if the integer is negative and its absolute value is
+              between 1 and the length of <code>$seq</code> (inclusive)</li>
+            <li>an empty sequence if the integer is zero, or if its absolute value exceeds the length of <code>$seq</code></li>
           </ul>
           <p>For example:</p>
           <ul>
