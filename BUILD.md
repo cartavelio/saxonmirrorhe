@@ -128,3 +128,34 @@ More options can easily be added if they would be useful.
 (In fact, you can use these properties when you run more than one test
 suite, but I think they’re going to be most useful against single test
 suites.)
+
+## Viewing task dependencies
+
+You can get nice diagrams showing task dependencies by adding
+this plugin to `build.gradle`:
+
+```
+plugins {
+  id "com.cdsap.talaiot" version "1.3.5"
+}
+```
+
+and this configuration:
+
+```
+talaiot {
+  metrics {
+    performanceMetrics = false
+  }
+  publishers {
+    taskDependencyGraphPublisher {
+      gexf = false
+      dot = true
+      html = false
+    }
+  }
+}
+```
+
+It’s not in the build by default because it generates a deprecation warning for Gradle 7.0 on every run.
+
