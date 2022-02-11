@@ -7,12 +7,19 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.ProxyReceiver;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Sink;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.*;
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -62,7 +69,8 @@ public class StreamAvailable extends SystemFunction implements Callable {
     private boolean isAvailable(String uri, XPathContext context) {
         try {
             Receiver tester = new StreamTester(context.getConfiguration().makePipelineConfiguration());
-            DocumentFn.sendDoc(uri, getRetainedStaticContext().getStaticBaseUriString(), context, null, tester, new ParseOptions());
+            RetainedStaticContext env = getRetainedStaticContext();
+            DocumentFn.sendDoc(uri, env.getStaticBaseUriString(), env.getPackageData(), context, null, tester, new ParseOptions());
         } catch (QuitParsingException e) {
             // Indicates that the first element was reported and the parse was then aborted
             return true;

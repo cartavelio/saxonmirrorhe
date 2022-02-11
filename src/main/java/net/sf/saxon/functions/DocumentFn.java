@@ -9,10 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Builder;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.Sender;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
@@ -189,24 +186,17 @@ public class DocumentFn extends SystemFunction implements Callable {
         Configuration config = c.getConfiguration();
 
         // If the href contains a fragment identifier, strip it out now
-        //System.err.println("Entering makeDoc " + href);
-        int hash = href.indexOf('#');
+        String[] parts = extractFragment(href);
+        String fragmentId = parts[1];
+        href = parts[0];
 
-        String fragmentId = null;
-        if (hash >= 0) {
-            if (hash == href.length() - 1) {
-                // If there's a # sign at end - just ignore it
-                href = href.substring(0, hash);
-            } else {
-                fragmentId = href.substring(hash + 1);
-                href = href.substring(0, hash);
-                if (!NameChecker.isValidNCName(fragmentId)) {
-                    XPathException de = new XPathException("The fragment identifier " + Err.wrap(fragmentId) + " is not a valid NCName");
-                    de.setErrorCode("XTDE1160");
-                    de.setXPathContext(c);
-                    de.setLocator(locator);
-                    throw de;
-                }
+        // Extract any query part
+        URIQueryParameters params = null;
+        if (config.getBooleanProperty(Feature.RECOGNIZE_URI_QUERY_PARAMETERS)) {
+            int qMark = href.indexOf('?');
+            if (qMark >= 0) {
+                params = new URIQueryParameters(href.substring(qMark+1), config);
+                href = href.substring(0, qMark);
             }
         }
 
@@ -293,7 +283,12 @@ public class DocumentFn extends SystemFunction implements Callable {
                     }
                     options.setSchemaValidationMode(controller.getSchemaValidationMode());
                 }
+
+                if (params != null) {
+                    options.merge(params.makeParseOptions(config));
+                }
                 b.getPipelineConfiguration().setParseOptions(options);
+
                 if (options.isLineNumbering()) {
                     b.setLineNumbering(true);
                 }
@@ -357,6 +352,29 @@ public class DocumentFn extends SystemFunction implements Callable {
             xerr.maybeSetErrorCode(code);
             throw xerr;
         }
+    }
+
+    private static String[] extractFragment(String href) throws XPathException {
+        // If the href contains a fragment identifier, strip it out now
+        //System.err.println("Entering makeDoc " + href);
+        int hash = href.indexOf('#');
+
+        String fragmentId = null;
+        if (hash >= 0) {
+            if (hash == href.length() - 1) {
+                // If there's a # sign at end - just ignore it
+                href = href.substring(0, hash);
+            } else {
+                fragmentId = href.substring(hash + 1);
+                href = href.substring(0, hash);
+                if (!NameChecker.isValidNCName(fragmentId)) {
+                    XPathException de = new XPathException("The fragment identifier " + Err.wrap(fragmentId) + " is not a valid NCName");
+                    de.setErrorCode("XTDE1160");
+                    throw de;
+                }
+            }
+        }
+        return new String[]{href, fragmentId};
     }
 
     /**
@@ -476,7 +494,7 @@ public class DocumentFn extends SystemFunction implements Callable {
      *         if a fragment identifier was supplied
      */
 
-    public static NodeInfo preLoadDoc(String href, String baseURI, Configuration config, SourceLocator locator)
+    public static NodeInfo preLoadDoc(String href, String baseURI, PackageData packageData, Configuration config, SourceLocator locator)
             throws XPathException {
 
         int hash = href.indexOf('#');
@@ -484,26 +502,17 @@ public class DocumentFn extends SystemFunction implements Callable {
             throw new XPathException("Fragment identifier not supported for preloaded documents");
         }
 
-        String documentKey;
-         if (baseURI == null) {    // no base URI available
-            try {
-                // the href might be an absolute URL
-                documentKey = new URI(href).toString();
-            } catch (URISyntaxException err) {
-                // it isn't; but the URI resolver might know how to cope
-                documentKey = '/' + href;
-                baseURI = "";
-            }
-        } else if (href.isEmpty()) {
-            // common case in XSLT, which java.net.URI#resolve() does not handle correctly
-            documentKey = baseURI;
-        } else {
-            try {
-                documentKey = ResolveURI.makeAbsolute(href, baseURI).toString();
-            } catch (URISyntaxException | IllegalArgumentException err) {
-                documentKey = baseURI + "/../" + href;
+        // Extract any query part
+        URIQueryParameters params = null;
+        if (config.getBooleanProperty(Feature.RECOGNIZE_URI_QUERY_PARAMETERS)) {
+            int qMark = href.indexOf('?');
+            if (qMark >= 0) {
+                params = new URIQueryParameters(href.substring(qMark + 1), config);
+                href = href.substring(0, qMark);
             }
         }
+
+        DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData, true);
 
         // see if the document is already loaded
 
@@ -515,7 +524,7 @@ public class DocumentFn extends SystemFunction implements Callable {
         ResourceRequest rr = new ResourceRequest();
         rr.relativeUri = href;
         rr.baseUri = baseURI;
-        rr.uri = documentKey;
+        rr.uri = documentKey.getAbsoluteURI();
 
         Source source;
         try {
@@ -530,7 +539,12 @@ public class DocumentFn extends SystemFunction implements Callable {
             throw de;
         }
 
-        TreeInfo newdoc = config.buildDocumentTree(source);
+        ParseOptions options = config.getParseOptions();
+        if (params != null) {
+            options.merge(params.makeParseOptions(config));
+        }
+
+        TreeInfo newdoc = config.buildDocumentTree(source, options);
         config.getGlobalDocumentPool().add(newdoc, documentKey);
         return newdoc.getRootNode();
 
@@ -545,13 +559,18 @@ public class DocumentFn extends SystemFunction implements Callable {
      *
      * @param href    the relative URI
      * @param baseURI the base URI
-     * @param context       the XPath dynamic context
-     * @param locator used to identify the lcoation of the instruction in case of error
+     * @param packageData the containing XSLT package
+     * @param context the XPath dynamic context
+     * @param locator used to identify the location of the instruction in case of error
      * @param out     the destination where the document is to be sent
      */
 
-    public static void sendDoc(String href, String baseURI, XPathContext context,
-                               Location locator, Receiver out,
+    public static void sendDoc(String href,
+                               String baseURI,
+                               PackageData packageData,
+                               XPathContext context,
+                               Location locator,
+                               Receiver out,
                                ParseOptions parseOptions) throws XPathException {
 
         PipelineConfiguration pipe = out.getPipelineConfiguration();
@@ -561,28 +580,15 @@ public class DocumentFn extends SystemFunction implements Callable {
             out.setPipelineConfiguration(pipe);
         }
 
+        String[] parts = extractFragment(href);
+        if (parts[1] != null) {
+            href = parts[0];
+            out = new IDFilter(out, parts[1]);
+        }
+
         // Resolve relative URI
 
-        String documentKey;
-        if (baseURI == null) {    // no base URI available
-            try {
-                // the href might be an absolute URL
-                documentKey = new URI(href).toString();
-            } catch (URISyntaxException err) {
-                // it isn't; but the URI resolver might know how to cope
-                documentKey = '/' + href;
-                baseURI = "";
-            }
-        } else if (href.isEmpty()) {
-            // common case in XSLT, which java.net.URI#resolve() does not handle correctly
-            documentKey = baseURI;
-        } else {
-            try {
-                documentKey = ResolveURI.makeAbsolute(href, baseURI).toString();
-            } catch (URISyntaxException | IllegalArgumentException err) {
-                documentKey = baseURI + "/../" + href;
-            }
-        }
+        DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData, true);
 
         Controller controller = context.getController();
         Configuration config = controller.getConfiguration();
@@ -600,7 +606,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                 ResourceRequest request = new ResourceRequest();
                 request.baseUri = baseURI;
                 request.relativeUri = href;
-                request.uri = documentKey;
+                request.uri = documentKey.getAbsoluteURI();
                 request.streamable = true;
                 request.nature = ResourceRequest.XML_NATURE;
                 request.purpose = "source document";
