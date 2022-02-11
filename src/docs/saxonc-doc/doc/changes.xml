@@ -7,9 +7,39 @@
          href="https://www.saxonica.com/saxon-c/release-notes.xml">Release Notes</a>, and for
       details of bug fixes see the <a href="https://saxonica.plan.io/projects/saxon-c">SaxonC
          project</a> at the Saxonica community site.</p>
+   
+   <h2 class="subtitle">Changes between releases 1.2 and 11</h2>
+   
+   <h3 class="subtitle">Naming and numbering</h3>
+   
+   <ul>
+      <li>SaxonC 11 introduces a change to the version numbering policy, to align with the numbering
+         used for the corresponding SaxonJ (Java) product (where the change was introduced with
+         Saxon 10), so the major version number jumps from 1.2 to 11. Three-part version numbers are
+         now used: major releases will be numbered 11, 12, etc; maintenance releases will use the
+         second component 11.1, 11.2 and so on; while the third digit will be used only to
+         distinguish internal or limited-release builds. Download files will carry the two-part
+         version number in their names, for example <code>libsaxon-EEC-setup64-v11.1.zip</code>. 
+         <!-- TODO check this: edition name and download file numbers -->
+      </li>
+      <li>The first release of SaxonC in the version 11 series is 11.1, built from SaxonJ 11.1
+         (which is released at the same time). This means that for the first time, the latest
+         SaxonC release is also built from the latest SaxonJ release. In the future, the intention
+         is that maintenance releases (11.2, 11.3, etc.) will be released on all platforms (Java,
+         .NET, and C/C++, PHP, and Python) at the same time.
+      </li>
+      <li>From Saxon 11, the versions of the products for the different platforms are now referred
+         to as the following: <b>SaxonJ</b> is the Java product, <b>SaxonCS</b> is the C# product
+         for .NET, and <b>SaxonC</b> is the product for C/C++, PHP, and Python. Note that SaxonC
+         was previously known as Saxon/C. The different editions of the SaxonC product are now
+         called SaxonC-HE, SaxonC-PE, and SaxonC-EE (rather than Saxon-HE/C, Saxon-PE/C, and
+         Saxon-EE/C, as previously).</li>
+   </ul>
 
 
    <h2 class="subtitle">Changes between releases 1.2.1 and 1.2.2</h2>
+   
+   <p>***** TODO 1.2.2 was never released. Where should this information be? Is it still relevant?</p>
 
    <ul>
       <li>Updated the core XSLT processor to the Java Saxon 9.9.1.6 version.</li>
