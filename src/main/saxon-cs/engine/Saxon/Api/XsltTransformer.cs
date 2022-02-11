@@ -317,6 +317,15 @@ namespace Saxon.Api {
         public void Close() {
             transformer.close();
         }
+        
+        /// <summary>
+        /// Define an action to be performed when writing to the Destination is complete.
+        /// </summary>
+        /// <param name="action">The action to be performed.</param>
+        public void OnClose(System.Action action) {
+            transformer.onClose(action.Invoke);
+        }
+
 
         // internal method
 

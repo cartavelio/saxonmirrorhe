@@ -104,7 +104,8 @@ namespace Saxon.Api {
         /// <summary>
         /// Construct a <c>Destination</c> object whose effect is to perform this transformation
         /// on any input that is sent to that <c>Destination</c>: for example, it allows this transformation
-        /// to post-process the results of another transformation.
+        /// to post-process the results of another transformation, or to process the output
+        /// of streamed validation.
         /// </summary>
         /// <remarks>
         /// <para>This method allows a pipeline of transformations to be created in which
@@ -123,13 +124,13 @@ namespace Saxon.Api {
         /// <returns>a <c>Destination</c> which accepts an XML document (typically as a stream
         /// of events) and which transforms this supplied XML document (possibly using streaming)
         /// as defined by the stylesheet from which which this <c>Xslt30Transformer</c>
-        /// was generated,
-        /// sending the principal result of the transformation to the supplied <c>finalDestination</c>.
+        /// was generated, sending the principal result of the transformation to the supplied
+        /// <c>finalDestination</c>.
         /// The transformation is performed as if by the <see cref="ApplyTemplates(Stream, XmlDestination)"/>
         /// method: that is, by applying templates to the root node of the supplied XML document.
         /// </returns>
         public XmlDestination AsDocumentDestination(XmlDestination finalDestination) {
-            return new AbstractDestination(this, finalDestination);
+            return new TransformerDestination(this, finalDestination);
         }
 
         // internal method

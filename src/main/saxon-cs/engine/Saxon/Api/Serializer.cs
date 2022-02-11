@@ -432,6 +432,14 @@ namespace Saxon.Api {
         {
             jSerializer.close();
         }
+        
+        /// <summary>
+        /// Define an action to be performed when writing to the Destination is complete.
+        /// </summary>
+        /// <param name="action">The action to be performed.</param>
+        public void OnClose(System.Action action) {
+            jSerializer.onClose(action.Invoke);
+        }
 
 
         /// <summary>
@@ -454,22 +462,22 @@ namespace Saxon.Api {
         }
 
 
-        /// <summary>
-        /// Close the destination and notify all registered listeners that it has been closed.
-        /// This method is intended for internal use by Saxon. The method first calls
-        /// <see cref="Close"/> to close the destination, then it calls <c>java.util.function.Consumer.accept()</c> 
-        /// on each of the listeners in turn to notify the fact that it has been closed.
-        /// </summary>
-        public void CloseAndNotify()
-        {
-            try
-            {
-                jSerializer.closeAndNotify();
-            }
-            catch (net.sf.saxon.s9api.SaxonApiException exception) {
-                throw new StaticError(exception);
-            }
-        }
+        // /// <summary>
+        // /// Close the destination and notify all registered listeners that it has been closed.
+        // /// This method is intended for internal use by Saxon. The method first calls
+        // /// <see cref="Close"/> to close the destination, then it calls <c>java.util.function.Consumer.accept()</c> 
+        // /// on each of the listeners in turn to notify the fact that it has been closed.
+        // /// </summary>
+        // public void CloseAndNotify()
+        // {
+        //     try
+        //     {
+        //         jSerializer.closeAndNotify();
+        //     }
+        //     catch (net.sf.saxon.s9api.SaxonApiException exception) {
+        //         throw new StaticError(exception);
+        //     }
+        // }
 
 
         /// <summary>This property determines the base Uri of the constructed <c>Serializer</c>. 

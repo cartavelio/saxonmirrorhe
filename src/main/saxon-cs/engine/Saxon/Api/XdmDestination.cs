@@ -1,10 +1,12 @@
 using System;
+using System.Reflection.Metadata;
 using net.sf.saxon.@event;
 using net.sf.saxon.om;
 using net.sf.saxon.s9api;
 using net.sf.saxon.str;
 using net.sf.saxon.trans;
 using net.sf.saxon.type;
+using Action = net.sf.saxon.s9api.Action;
 
 namespace Saxon.Api {
     /// <summary>
@@ -21,6 +23,7 @@ namespace Saxon.Api {
     /// </remarks>
     public class XdmDestination : XmlDestination {
         internal net.sf.saxon.s9api.XdmDestination destination;
+        internal Action<XdmNode> closeAction;
 
         /// <summary>Construct an <c>XdmDestination</c></summary>
         public XdmDestination() {
@@ -76,7 +79,6 @@ namespace Saxon.Api {
             return destination;
         }
 
-
         /// <summary>
         /// Set the base URI of the resource being written to this destination
         /// </summary>
@@ -103,143 +105,152 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// <c>TreeProtector</c> is a filter that ensures that the events reaching the <c>Builder</c> constitute a single
-        /// tree rooted at an element or document node (because anything else will crash the builder)
+        /// Define an action to be performed when writing to the Destination is complete.
         /// </summary>
-        public class TreeProtector : ProxyReceiver {
-            private int level = 0;
-            private bool ended = false;
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="next">Set the underlying receiver</param>
-            public TreeProtector(Receiver next)
-                : base(next) {
-            }
-
-            /// <summary>
-            /// Start of a document node
-            /// </summary>
-            /// <param name="properties"></param>
-            public override void startDocument(int properties) {
-                if (ended) {
-                    XPathException e = new XPathException("Only a single document can be written to an XdmDestination");
-                    throw new DynamicError(e);
-                }
-
-                base.startDocument(properties);
-                level++;
-            }
-
-            /// <summary>
-            /// Notify the end of a document node
-            /// </summary>
-            public override void endDocument() {
-                base.endDocument();
-                level--;
-                if (level == 0) {
-                    ended = true;
-                }
-            }
-
-            /// <summary>
-            /// Notify the start of an element
-            /// </summary>
-            /// <param name="nameCode"></param>
-            /// <param name="typeCode"></param>
-            /// <param name="attributes"></param>
-            /// <param name="namespaces"></param>
-            /// <param name="location"></param>
-            /// <param name="properties"></param>
-            public override void startElement(NodeName nameCode, SchemaType typeCode, AttributeMap attributes,
-                NamespaceMap namespaces, Location location, int properties) {
-                if (ended) {
-                    XPathException e =
-                        new XPathException("Only a single root node can be written to an XdmDestination");
-                    throw new DynamicError(e);
-                }
-
-                base.startElement(nameCode, typeCode, attributes, namespaces, location, properties);
-                level++;
-            }
-
-            /// <summary>
-            /// End of element
-            /// </summary>
-            public override void endElement() {
-                base.endElement();
-                level--;
-                if (level == 0) {
-                    ended = true;
-                }
-            }
-
-            /// <summary>
-            /// Character data
-            /// </summary>
-            /// <param name="chars">Character data as input</param>
-            /// <param name="location">Provides information such as line number and system ID</param>
-            /// <param name="properties">Bit significant value. The following bits are defined</param>
-            public override void characters(CodePoints chars, Location location, int properties) {
-                if (level == 0) {
-                    XPathException e = new XPathException(
-                        "When writing to an XdmDestination, text nodes are only allowed within a document or element node");
-                    throw new DynamicError(e);
-                }
-
-                base.characters(chars, location, properties);
-            }
-
-            /// <summary>
-            /// Processing instruction
-            /// </summary>
-            /// <param name="target">The PI name. This must be a legal name (it will not be checked)</param>
-            /// <param name="data">The data portion of the processing instruction</param>
-            /// <param name="location">provides information about the PI</param>
-            /// <param name="properties">Additional information about the PI</param>
-            public override void processingInstruction(String target, CodePoints data, Location location,
-                int properties) {
-                if (level == 0) {
-                    XPathException e = new XPathException(
-                        "When writing to an XdmDestination, processing instructions are only allowed within a document or element node");
-                    throw new DynamicError(e);
-                }
-
-                base.processingInstruction(target, data, location, properties);
-            }
-
-            /// <summary>
-            /// Output a comment
-            /// </summary>
-            /// <param name="chars">The content of the comment</param>
-            /// <param name="location">provides information such as line number and system ID</param>
-            /// <param name="properties">Additional information about the comment</param>
-            public override void comment(CodePoints chars, Location location, int properties) {
-                if (level == 0) {
-                    XPathException e = new XPathException(
-                        "When writing to an XdmDestination, comment nodes are only allowed within a document or element node");
-                }
-
-                base.comment(chars, location, properties);
-            }
-
-
-            /// <summary>
-            /// Append an  arbitrary item (node or atomic value) to the output
-            /// </summary>
-            /// <param name="item">the item to be appended</param>
-            /// <param name="location">the location of the calling instruction, for diagnostics</param>
-            /// <param name="copyNamespaces">if the item is an element node, this indicates whether its namespace need to be copied. 
-            /// 0x80000 means ALL_NAMESPACE, 0x40000 means LOCAL_NAMESPACE and 0 means no namespace</param>
-            public override void append(Item item, Location location, int copyNamespaces) {
-                if (level == 0) {
-                    XPathException e = new XPathException(
-                        "When writing to an XdmDestination, atomic values are only allowed within a document or element node");
-                }
-
-                base.append(item, location, copyNamespaces);
-            }
+        /// <param name="action">The action to be performed.</param>
+        public void OnClose(System.Action action) {
+            destination.onClose(action.Invoke);
         }
+
+
+        // /// <summary>
+        // /// <c>TreeProtector</c> is a filter that ensures that the events reaching the <c>Builder</c> constitute a single
+        // /// tree rooted at an element or document node (because anything else will crash the builder)
+        // /// </summary>
+        // public class TreeProtector : ProxyReceiver {
+        //     private int level = 0;
+        //     private bool ended = false;
+        //
+        //     /// <summary>
+        //     /// Constructor
+        //     /// </summary>
+        //     /// <param name="next">Set the underlying receiver</param>
+        //     public TreeProtector(Receiver next)
+        //         : base(next) {
+        //     }
+        //
+        //     /// <summary>
+        //     /// Start of a document node
+        //     /// </summary>
+        //     /// <param name="properties"></param>
+        //     public override void startDocument(int properties) {
+        //         if (ended) {
+        //             XPathException e = new XPathException("Only a single document can be written to an XdmDestination");
+        //             throw new DynamicError(e);
+        //         }
+        //
+        //         base.startDocument(properties);
+        //         level++;
+        //     }
+        //
+        //     /// <summary>
+        //     /// Notify the end of a document node
+        //     /// </summary>
+        //     public override void endDocument() {
+        //         base.endDocument();
+        //         level--;
+        //         if (level == 0) {
+        //             ended = true;
+        //         }
+        //     }
+        //
+        //     /// <summary>
+        //     /// Notify the start of an element
+        //     /// </summary>
+        //     /// <param name="nameCode"></param>
+        //     /// <param name="typeCode"></param>
+        //     /// <param name="attributes"></param>
+        //     /// <param name="namespaces"></param>
+        //     /// <param name="location"></param>
+        //     /// <param name="properties"></param>
+        //     public override void startElement(NodeName nameCode, SchemaType typeCode, AttributeMap attributes,
+        //         NamespaceMap namespaces, Location location, int properties) {
+        //         if (ended) {
+        //             XPathException e =
+        //                 new XPathException("Only a single root node can be written to an XdmDestination");
+        //             throw new DynamicError(e);
+        //         }
+        //
+        //         base.startElement(nameCode, typeCode, attributes, namespaces, location, properties);
+        //         level++;
+        //     }
+        //
+        //     /// <summary>
+        //     /// End of element
+        //     /// </summary>
+        //     public override void endElement() {
+        //         base.endElement();
+        //         level--;
+        //         if (level == 0) {
+        //             ended = true;
+        //         }
+        //     }
+        //
+        //     /// <summary>
+        //     /// Character data
+        //     /// </summary>
+        //     /// <param name="chars">Character data as input</param>
+        //     /// <param name="location">Provides information such as line number and system ID</param>
+        //     /// <param name="properties">Bit significant value. The following bits are defined</param>
+        //     public override void characters(CodePoints chars, Location location, int properties) {
+        //         if (level == 0) {
+        //             XPathException e = new XPathException(
+        //                 "When writing to an XdmDestination, text nodes are only allowed within a document or element node");
+        //             throw new DynamicError(e);
+        //         }
+        //
+        //         base.characters(chars, location, properties);
+        //     }
+        //
+        //     /// <summary>
+        //     /// Processing instruction
+        //     /// </summary>
+        //     /// <param name="target">The PI name. This must be a legal name (it will not be checked)</param>
+        //     /// <param name="data">The data portion of the processing instruction</param>
+        //     /// <param name="location">provides information about the PI</param>
+        //     /// <param name="properties">Additional information about the PI</param>
+        //     public override void processingInstruction(String target, CodePoints data, Location location,
+        //         int properties) {
+        //         if (level == 0) {
+        //             XPathException e = new XPathException(
+        //                 "When writing to an XdmDestination, processing instructions are only allowed within a document or element node");
+        //             throw new DynamicError(e);
+        //         }
+        //
+        //         base.processingInstruction(target, data, location, properties);
+        //     }
+        //
+        //     /// <summary>
+        //     /// Output a comment
+        //     /// </summary>
+        //     /// <param name="chars">The content of the comment</param>
+        //     /// <param name="location">provides information such as line number and system ID</param>
+        //     /// <param name="properties">Additional information about the comment</param>
+        //     public override void comment(CodePoints chars, Location location, int properties) {
+        //         if (level == 0) {
+        //             XPathException e = new XPathException(
+        //                 "When writing to an XdmDestination, comment nodes are only allowed within a document or element node");
+        //         }
+        //
+        //         base.comment(chars, location, properties);
+        //     }
+        //
+        //
+        //     /// <summary>
+        //     /// Append an  arbitrary item (node or atomic value) to the output
+        //     /// </summary>
+        //     /// <param name="item">the item to be appended</param>
+        //     /// <param name="location">the location of the calling instruction, for diagnostics</param>
+        //     /// <param name="copyNamespaces">if the item is an element node, this indicates whether its namespace need to be copied. 
+        //     /// 0x80000 means ALL_NAMESPACE, 0x40000 means LOCAL_NAMESPACE and 0 means no namespace</param>
+        //     public override void append(Item item, Location location, int copyNamespaces) {
+        //         if (level == 0) {
+        //             XPathException e = new XPathException(
+        //                 "When writing to an XdmDestination, atomic values are only allowed within a document or element node");
+        //         }
+        //
+        //         base.append(item, location, copyNamespaces);
+        //     }
+        // }
     }
 }

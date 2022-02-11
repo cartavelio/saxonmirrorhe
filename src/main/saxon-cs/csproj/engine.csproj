@@ -16,9 +16,17 @@
     </ItemGroup>
     
     <ItemGroup>
-      <PackageReference Include="Singulink.Numerics.BigDecimal" Version="0.9.1" />
-      <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="1.0.1" />
+      <PackageReference Include="HtmlAgilityPack" Version="1.11.33" />
+      <PackageReference Include="ICU4N" Version="60.1.0-alpha.354" />
+      <PackageReference Include="ICU4N.Collation" Version="60.1.0-alpha.354" />
+      <PackageReference Include="ICU4N.CurrencyData" Version="60.1.0-alpha.354" />
+      <PackageReference Include="ICU4N.LanguageData" Version="60.1.0-alpha.354" />
+      <PackageReference Include="ICU4N.RegionData" Version="60.1.0-alpha.354" />
+      <PackageReference Include="ICU4N.Transliterator" Version="60.1.0-alpha.354" />
+      <PackageReference Include="Singulink.Numerics.BigDecimal" Version="1.0.2" />
+      <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="1.1.0" />
       <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
     </ItemGroup>
+
     
 </Project>

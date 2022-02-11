@@ -1,9 +1,12 @@
 using System;
+using SysCollGen = System.Collections.Generic;
 using System.Text;
 using SysUri = System.Uri;
 using SysIO = System.IO;
 using Microsoft.VisualBasic;
 using SysIOFile = System.IO.File;
+using SysIODirectory = System.IO.Directory;
+using SysIOPath = System.IO.Path;
 using System = java.lang.System;
 
 namespace java.io {
@@ -31,8 +34,8 @@ namespace java.io {
         }
         
         public File(File dir, string name) {
-            throw new NotImplementedException(); 
-            // transpiler should convert to call on static factory method Resolve
+            string combined = SysIOPath.Combine(dir.fullPath, name);
+            this.fileName = this.fullPath = combined;
         }
         
         public File(string dir, string name) {
@@ -74,7 +77,7 @@ namespace java.io {
         }
 
         public bool exists() {
-            return SysIOFile.Exists(this.fullPath);
+            return SysIOFile.Exists(this.fullPath) || SysIODirectory.Exists(this.fullPath);
         }
 
         public bool canRead() {
@@ -168,7 +171,25 @@ namespace java.io {
         }
 
         public File[] listFiles(FilenameFilter filter) {
-            throw new NotImplementedException();
+            SysCollGen.IList<string> files = new SysCollGen.List<string>();
+            foreach (string dir in SysIODirectory.EnumerateDirectories(fullPath)) {
+                if (filter.accept(this, SysIOPath.GetFileName(dir))) {
+                    files.Add(dir);
+                }
+            }
+            foreach (string file in SysIODirectory.EnumerateFiles(fullPath)) {
+                if (filter.accept(this, SysIOPath.GetFileName(file))) {
+                    files.Add(file);
+                }
+            }
+
+            File[] result = new File[files.Count];
+            int i = 0;
+            foreach (string f in files) {
+                result[i++] = new File(f);
+            }
+
+            return result;
         }
 
         public SysIO.FileStream makeAppendOutputStream() {

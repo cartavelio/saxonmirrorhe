@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Sys = System;
 namespace Saxon.Impl.Helpers {
     public class UriUtils {
@@ -9,12 +10,13 @@ namespace Saxon.Impl.Helpers {
             return uri;
         }
 
-        public static string GetQuery(System.Uri uri) {
+        public static string? GetQuery(System.Uri uri) {
             string q = uri.Query;
-            if (q != null && q.StartsWith("?")) {
+            if (q.StartsWith("?")) {
                 return q.Substring(1);
-            }
-            else {
+            } else if (q == "") {
+                return null;
+            } else {
                 return q;
             }
         }
@@ -33,16 +35,30 @@ namespace Saxon.Impl.Helpers {
             throw new(uri.ToString());
         }
 
+        private static Regex twoHexDigits = new Regex("[0-9a-fA-F][0-9a-fA-F]");
         public static bool passesAdditionalChecks(Sys.Uri uri) {
             if (uri.IsWellFormedOriginalString()) {
                 return true;
             }
             
             string original = uri.OriginalString;
-            if (original.Contains("%")) {
-                // If the original contained "%" but wasn't well-formed, don't give it the benefit of the doubt
-                return false;
+            int index = 0;
+            while (index >= 0) {
+                index = original.IndexOf('%', index);
+                if (index < 0) {
+                    break;
+                }
+                if (index + 3 > original.Length ||
+                    !twoHexDigits.Match(original.Substring(index + 1, 2)).Success) {
+                    return false;
+                }
+
+                index += 3;
             }
+            // if (original.Contains("%")) {
+            //     // If the original contains "%" check that it's followed by two hex digits
+            //     return false;
+            // }
             
             string escaped = System.Uri.EscapeUriString(original);
             if (uri.IsAbsoluteUri) {

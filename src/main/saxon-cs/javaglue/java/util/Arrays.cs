@@ -47,10 +47,10 @@ namespace java.util
         }
 
         public static int binarySearch<T>(T[] array, T value) {
-            return SysArray.BinarySearch(array, value);
+            return SysArray.BinarySearch(array, value, StringComparer.Ordinal);
         }
         public static int binarySearch<T>(T[] array, int start, int end, T value) {
-            return SysArray.BinarySearch(array, start, end, value);
+            return SysArray.BinarySearch(array, start, end, value, StringComparer.Ordinal);
         }
 
         public static string ToString<T>(T[] array) {
