@@ -13,6 +13,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.functions.FormatNumber;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.PushableFunction;
 import net.sf.saxon.functions.SystemFunction;
@@ -35,7 +36,13 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
     public static OptionsParameter makeOptionsParameter() {
         OptionsParameter xmlToJsonOptions = new OptionsParameter();
         xmlToJsonOptions.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        xmlToJsonOptions.addAllowedOption("number-format", SequenceType.OPTIONAL_STRING, EmptySequence.getInstance());
         return xmlToJsonOptions;
+    }
+
+    private static class Options {
+        public boolean indent;
+        public java.util.function.Function<Double, String> numberFormatter;
     }
 
     @Override
@@ -45,40 +52,51 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
             return EmptySequence.getInstance();
         }
 
-        boolean indent = isindentingRequested(context, arguments);
+        Options options = getOptions(context, arguments);
 
         PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
         pipe.setXPathContext(context);
         UnicodeBuilder uniBuffer = new UnicodeBuilder();
-        convertToJson(xml, uniBuffer, indent, context);
+        convertToJson(xml, uniBuffer, options, context);
         return new StringItem(uniBuffer.toUnicodeString());
     }
 
-    private boolean isindentingRequested(XPathContext context, Sequence[] arguments) throws XPathException {
+    private Options getOptions(XPathContext context, Sequence[] arguments) throws XPathException {
         if (getArity() > 1) {
             MapItem suppliedOptions = (MapItem) arguments[1].head();
             Map<String, Sequence> options = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
-            return ((BooleanValue) options.get("indent").head()).getBooleanValue();
+            Options o = new Options();
+            o.indent = ((BooleanValue) options.get("indent").head()).getBooleanValue();
+            Sequence format = options.get("number-format");
+            if (format != null) {
+                String picture = format.head().getStringValue();
+                o.numberFormatter = FormatNumber.getFormatter(picture);
+            }
+            return o;
+        } else {
+            return new Options();
         }
-        return false;
     }
 
     @Override
     public void process(Outputter destination, XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo xml = (NodeInfo) arguments[0].head();
         if (xml != null) {
-            boolean indent = isindentingRequested(context, arguments);
+            Options options = getOptions(context, arguments);
             PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
             pipe.setXPathContext(context);
-            convertToJson(xml, destination.getStringReceiver(false), indent, context);
+            convertToJson(xml, destination.getStringReceiver(false), options, context);
         }
     }
 
-    private void convertToJson(NodeInfo xml, UniStringConsumer output, boolean indent, XPathContext context) throws XPathException {
+    private void convertToJson(NodeInfo xml, UniStringConsumer output, Options options, XPathContext context) throws XPathException {
         PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
         pipe.setXPathContext(context);
         JsonReceiver receiver = new JsonReceiver(pipe, output);
-        receiver.setIndenting(indent);
+        receiver.setIndenting(options.indent);
+        if (options.numberFormatter != null) {
+            receiver.setNumberFormatter(options.numberFormatter);
+        }
         Receiver r = receiver;
         if (xml.getNodeKind() == Type.DOCUMENT) {
             r = new DocumentValidator(r, "FOJS0006");
