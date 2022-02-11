@@ -63,7 +63,7 @@ public class Slice16 extends UnicodeString {
         }
         char b = (char)(codePoint & 0xffff);
         int limit = end;
-        for (int i = start + requireInt(from); i < limit; i++) {
+        for (int i = start + Math.max(requireInt(from), 0); i < limit; i++) {
             if (chars[i] == b) {
                 return i - start;
             }
@@ -78,20 +78,12 @@ public class Slice16 extends UnicodeString {
 
     @Override
     public UnicodeString substring(long start, long end) {
-        long len = length();
-        if (start < 0 || end < start || end > len) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkSubstringBounds(start, end);
         if (end == start) {
             return EmptyUnicodeString.getInstance();
         } else {
             return new Slice16(chars, requireInt(start) + this.start, requireInt(end) + this.start);
         }
-    }
-
-    @Override
-    public void supplyContent(LargeTextBuffer consumer, long start, long len) {
-        consumer.append16(chars, requireInt(start) + this.start, requireInt(len));
     }
 
     private void write(Writer writer, long start, long len) throws IOException {
@@ -116,6 +108,19 @@ public class Slice16 extends UnicodeString {
             }
         }
         return -1;
+    }
+
+    void copy16bit(char[] target, int offset) {
+        System.arraycopy(chars, start,target, offset, end - start);
+    }
+
+    void copy24bit(byte[] target, int offset) {
+        for (int i = start, j = offset; i < end; ) {
+            char c = chars[i++];
+            target[j++] = 0;
+            target[j++] = (byte) (c >> 8);
+            target[j++] = (byte) (c & 0xff);
+        }
     }
 
     @Override

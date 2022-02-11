@@ -12,7 +12,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 
 import net.sf.saxon.type.SchemaType;
@@ -169,7 +169,7 @@ public class DOM4JWriter extends net.sf.saxon.event.Builder {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         textBuffer.append(chars);
     }
 
@@ -187,7 +187,7 @@ public class DOM4JWriter extends net.sf.saxon.event.Builder {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties)
             throws XPathException {
         flush();
         ProcessingInstruction pi = new DefaultProcessingInstruction(target, data.toString());
@@ -199,7 +199,7 @@ public class DOM4JWriter extends net.sf.saxon.event.Builder {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         flush();
         Comment comment = new DefaultComment(chars.toString());
         ancestors.peek().add(comment);

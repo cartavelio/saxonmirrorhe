@@ -7,6 +7,7 @@
 
 package net.sf.saxon.str;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.z.IntIterator;
 
@@ -35,6 +36,9 @@ public class Twine24 extends UnicodeString {
 
     protected Twine24(byte[] bytes) {
         this.bytes = bytes;
+        if (Configuration.isAssertionsEnabled()) {
+            verifyCharacters();
+        }
     }
 
 
@@ -89,9 +93,7 @@ public class Twine24 extends UnicodeString {
         int start32 = StringTool.requireInt(start);
         int end32 = StringTool.requireInt(end);
         int len = length32();
-        if (start < 0 || end < start || end > len) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkSubstringBounds(start, end);
         if (end == start) {
             return EmptyUnicodeString.getInstance();
         } else if (start == 0 && end == len) {
@@ -123,10 +125,8 @@ public class Twine24 extends UnicodeString {
 
     @Override
     public long indexOf(int code, long from) {
-        int from32 = StringTool.requireInt(from);
-        if (from32 < 0) {
-            from32 = 0;
-        } else if (from32 >= length32()) {
+        int from32 = Math.max(requireInt(from), 0);
+        if (from32 >= length32()) {
             return -1;
         }
 
@@ -274,7 +274,7 @@ public class Twine24 extends UnicodeString {
     }
 
     @Override
-    public int compareTo(CodePoints other) {
+    public int compareTo(UnicodeString other) {
         if (other instanceof Twine24) {
             // TODO: for Java9, use Arrays.compareUnsigned(bytes, o.bytes);
             Twine24 o = (Twine24) other;
@@ -308,11 +308,10 @@ public class Twine24 extends UnicodeString {
         return sb.toString();
     }
 
-
-    @Override
-    public void supplyContent(LargeTextBuffer consumer, long start, long len) {
-        consumer.append24(bytes, requireInt(start), requireInt(len));
+    void copy24bit(byte[] target, int offset) {
+        System.arraycopy(bytes, 0, target, offset, bytes.length);
     }
+    
 
     /**
      * Get the position of the first occurrence of the specified codepoint,

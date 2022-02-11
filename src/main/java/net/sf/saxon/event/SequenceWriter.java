@@ -10,7 +10,7 @@ package net.sf.saxon.event;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.tree.util.Orphan;
@@ -167,7 +167,7 @@ public abstract class SequenceWriter extends SequenceReceiver {
 
 
     @Override
-    public void characters(CodePoints s, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString s, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             Orphan o = new Orphan(getConfiguration());
             o.setNodeKind(Type.TEXT);
@@ -182,7 +182,7 @@ public abstract class SequenceWriter extends SequenceReceiver {
     }
 
     @Override
-    public void comment(CodePoints comment, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString comment, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             Orphan o = new Orphan(getConfiguration());
             o.setNodeKind(Type.COMMENT);
@@ -195,7 +195,7 @@ public abstract class SequenceWriter extends SequenceReceiver {
     }
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             Orphan o = new Orphan(getConfiguration());
             o.setNodeName(new NoNamespaceName(target));

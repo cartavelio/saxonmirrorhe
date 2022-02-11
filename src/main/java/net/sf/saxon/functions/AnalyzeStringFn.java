@@ -19,7 +19,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegexMatchHandler;
 import net.sf.saxon.regex.RegularExpression;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -146,7 +145,7 @@ public class AnalyzeStringFn extends RegexFunction {
         }
 
         @Override
-        public void characters(CodePoints s) throws XPathException {
+        public void characters(UnicodeString s) throws XPathException {
             out.characters(s, Loc.NONE, ReceiverOption.NONE);
         }
 

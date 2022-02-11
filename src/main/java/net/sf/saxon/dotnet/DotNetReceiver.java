@@ -10,9 +10,9 @@ package net.sf.saxon.dotnet;
 import cli.System.Xml.XmlWriter;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -90,7 +90,7 @@ public class DotNetReceiver extends Outputter {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         writer.WriteString(chars.toString());
     }
 
@@ -123,7 +123,7 @@ public class DotNetReceiver extends Outputter {
      */
 
     @Override
-    public void comment(CodePoints content, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString content, Location locationId, int properties) throws XPathException {
         writer.WriteComment(content.toString());
     }
 
@@ -203,7 +203,7 @@ public class DotNetReceiver extends Outputter {
      */
 
     @Override
-    public void processingInstruction(String name, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String name, UnicodeString data, Location locationId, int properties) throws XPathException {
         writer.WriteProcessingInstruction(name, data.toString());
     }
 

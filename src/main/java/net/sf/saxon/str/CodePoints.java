@@ -93,10 +93,10 @@ public abstract class CodePoints implements Comparable<CodePoints> {
      * @return the result of the concatenation (neither input string is altered)
      */
 
-    public CodePoints concat(CodePoints other) {
-        UnicodeBuilder ub = new UnicodeBuilder();
-        return ub.accept(this).accept(other).toUnicodeString();
-    }
+//    public CodePoints concat(CodePoints other) {
+//        UnicodeBuilder ub = new UnicodeBuilder();
+//        return ub.accept(this).accept(other).toUnicodeString();
+//    }
 
     @Override
     public boolean equals(Object obj) {

@@ -72,7 +72,7 @@ public final class WhitespaceTextImpl extends TinyNodeImpl {
 
     public static void appendStringValue(TinyTree tree, int nodeNr, UnicodeBuilder buffer) {
         long value = ((long) tree.alpha[nodeNr] << 32) | ((long) tree.beta[nodeNr] & 0xffffffffL);
-        CompressedWhitespace.uncompress(value, buffer);
+        buffer.append(CompressedWhitespace.uncompress(value));
     }
 
     /**

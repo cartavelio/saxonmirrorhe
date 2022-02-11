@@ -15,7 +15,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
@@ -66,7 +66,7 @@ public class JsonDoc extends SystemFunction  {
             err.maybeSetErrorCode("FOUT1170");
             throw err;
         }
-        CodePoints content;
+        UnicodeString content;
         try {
             content = UnparsedTextFunction.readFile(checker, reader);
         } catch (java.io.UnsupportedEncodingException encErr) {

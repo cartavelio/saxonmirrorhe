@@ -643,7 +643,7 @@ public class ReceivingContentHandler
                             return;
                         }
                     }
-                    CodePoints data;
+                    UnicodeString data;
                     if (remainder == null) {
                         // allowed by the spec but rarely seen: see Saxon bug 2491
                         data = EmptyUnicodeString.getInstance();

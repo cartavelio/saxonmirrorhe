@@ -22,7 +22,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.XmlProcessingError;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
@@ -90,12 +90,12 @@ public class ConfigurationReader implements Receiver {
     }
 
     @Override
-    public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
+    public void processingInstruction(String name, UnicodeString data, Location location, int properties) throws XPathException {
 
     }
 
     @Override
-    public void comment(CodePoints content, Location location, int properties) throws XPathException {
+    public void comment(UnicodeString content, Location location, int properties) throws XPathException {
 
     }
 
@@ -798,7 +798,7 @@ public class ConfigurationReader implements Receiver {
     }
 
     @Override
-    public void characters(CodePoints chars, Location location, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location location, int properties) throws XPathException {
         buffer.append(chars.toString());
     }
 

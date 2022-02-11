@@ -332,8 +332,9 @@ public class HashTrieMap extends MapItem {
 //            Instrumentation.count("initialPut");
 //        }
         boolean empty = isEmpty();
-        boolean exists = get(key) != null;
-        imap = imap.put(makeKey(key), new net.sf.saxon.ma.map.KeyValuePair(key, value));
+        AtomicMatchKey amk = makeKey(key);
+        boolean exists = imap.get(amk) != null;
+        imap = imap.put(amk, new net.sf.saxon.ma.map.KeyValuePair(key, value));
         updateTypeInformation(key, value, empty);
         entries = -1;
         return exists;

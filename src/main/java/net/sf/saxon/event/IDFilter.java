@@ -9,7 +9,7 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -85,7 +85,7 @@ public class IDFilter extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (activeDepth > 0) {
             super.characters(chars, locationId, properties);
         }
@@ -96,7 +96,7 @@ public class IDFilter extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (activeDepth > 0) {
             super.processingInstruction(target, data, locationId, properties);
         }
@@ -107,7 +107,7 @@ public class IDFilter extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (activeDepth > 0) {
             super.comment(chars, locationId, properties);
         }

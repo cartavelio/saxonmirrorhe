@@ -19,7 +19,6 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.CompressedWhitespace;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.z.IntIterator;
@@ -200,7 +199,7 @@ public class HTMLIndenter extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         int withinSuppressed = level == 0 ? 0 : (propertyStack[level - 1] & IS_SUPPRESSED);
         if (inFormattedTag ||
                 withinSuppressed>0 ||
@@ -241,7 +240,7 @@ public class HTMLIndenter extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (afterEndElement && level != 0 && (propertyStack[level - 1] & IS_INLINE) == 0) {
             indent();
         }
@@ -254,7 +253,7 @@ public class HTMLIndenter extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (afterEndElement && level != 0 && (propertyStack[level - 1] & IS_INLINE) == 0) {
             indent();
         }

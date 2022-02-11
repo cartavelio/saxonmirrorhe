@@ -9,7 +9,7 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeWriterToWriter;
 import net.sf.saxon.trans.XPathException;
 
@@ -55,7 +55,7 @@ public class MessageEmitter extends XMLEmitter {
     }
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (!suppressProcessingInstruction(target, data, locationId, properties)) {
             super.processingInstruction(target, data, locationId, properties);
         }
@@ -73,7 +73,7 @@ public class MessageEmitter extends XMLEmitter {
      * @return true if the processing instruction is to be suppressed from the displayed message.
      */
 
-    protected boolean suppressProcessingInstruction(String target, CodePoints data, Location locationId, int properties) {
+    protected boolean suppressProcessingInstruction(String target, UnicodeString data, Location locationId, int properties) {
         return target.equals("error-code");
     }
 

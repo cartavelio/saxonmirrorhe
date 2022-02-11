@@ -71,7 +71,7 @@ public class UnicodeChar extends UnicodeString {
      */
     @Override
     public long indexOf(int codePoint, long from) {
-        return (this.codepoint == codePoint && from == 0) ? 0 : -1;
+        return (this.codepoint == codePoint && from <= 0) ? 0 : -1;
     }
 
     /**
@@ -98,25 +98,11 @@ public class UnicodeChar extends UnicodeString {
      */
     @Override
     public UnicodeString substring(long start, long end) {
+        checkSubstringBounds(start, end);
         if (start == 0 && end == 1) {
             return this;
         } else {
             return EmptyUnicodeString.getInstance();
-        }
-    }
-
-    /**
-     * Append the content, or part of the content, to a {@link LargeTextBuffer}
-     *
-     * @param consumer the recipient of the content
-     * @param start    the start offset (in codepoints) to be sent to the consumer
-     * @param length   the number of codepoints to be sent
-     * @throws IndexOutOfBoundsException if the start or end are out of range
-     */
-    @Override
-    public void supplyContent(LargeTextBuffer consumer, long start, long length) {
-        if (start == 0 && length == 1) {
-            consumer.append(codepoint);
         }
     }
 
@@ -142,6 +128,23 @@ public class UnicodeChar extends UnicodeString {
         } else {
             return "" + UTF16CharacterSet.highSurrogate(codepoint) + UTF16CharacterSet.lowSurrogate(codepoint);
         }
+    }
+
+    @Override
+    void copy8bit(byte[] target, int offset) {
+        target[offset] = (byte)(codepoint & 0xFF);
+    }
+
+    @Override
+    void copy16bit(char[] target, int offset) {
+        target[offset] = (char)codepoint;
+    }
+
+    @Override
+    void copy24bit(byte[] target, int offset) {
+        target[offset] = (byte)(codepoint>>16);
+        target[offset+1] = (byte) (codepoint >> 8);
+        target[offset+2] = (byte) (codepoint & 0xff);
     }
 }
 

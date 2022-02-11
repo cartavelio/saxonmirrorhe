@@ -1,6 +1,6 @@
 package net.sf.saxon.regex;
 
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -15,7 +15,7 @@ public interface RegexMatchHandler {
      * @param s a matching substring, or part thereof that falls within a specific group
      */
 
-    void characters(CodePoints s) throws XPathException;
+    void characters(UnicodeString s) throws XPathException;
 
     /**
      * Method to be called when the start of a captured group is encountered

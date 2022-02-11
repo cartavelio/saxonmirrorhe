@@ -9,7 +9,7 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.SchemaType;
@@ -41,12 +41,12 @@ import java.util.Stack;
  *         <tr><td>initial</td><td>{@link #open()}</td><td>open</td></tr>
  *         <tr><td>open</td><td>{@link #open()}</td><td>open</td></tr>
  *         <tr><td>open</td><td>{@link Outputter#append(Item, Location, int)}, {@link #append(Item)},
- *         {@link Receiver#characters(CodePoints, Location, int)}, {@link Receiver#comment(CodePoints, Location, int)},
- *         {@link Receiver#processingInstruction(String, CodePoints, Location, int)}</td><td>open</td></tr>
+ *         {@link Receiver#characters(UnicodeString, Location, int)}, {@link Receiver#comment(UnicodeString, Location, int)},
+ *         {@link Receiver#processingInstruction(String, UnicodeString, Location, int)}</td><td>open</td></tr>
  *         <tr><td>open</td><td>{@link Outputter#startDocument(int)}</td><td>content</td></tr>
  *         <tr><td>open</td><td>{@link Outputter#startElement(NodeName, SchemaType, Location, int)}</td><td>content</td></tr>
- *         <tr><td>content</td><td>{@link Receiver#characters(CodePoints, Location, int)}, {@link Receiver#comment(CodePoints, Location, int)},
- *         {@link Receiver#processingInstruction(String, CodePoints, Location, int)}</td><td>content</td></tr>
+ *         <tr><td>content</td><td>{@link Receiver#characters(UnicodeString, Location, int)}, {@link Receiver#comment(UnicodeString, Location, int)},
+ *         {@link Receiver#processingInstruction(String, UnicodeString, Location, int)}</td><td>content</td></tr>
  *         <tr><td>content</td><td>{@link Outputter#startElement(NodeName, SchemaType, Location, int)}</td><td>startTag</td></tr>
  *         <tr><td>content</td><td>{@link #endDocument()}, {@link #endElement()}</td><td>if the stack is empty, then content, otherwise open</td></tr>
  *         <tr><td>(any)</td><td>close</td><td>final</td></tr>
@@ -172,7 +172,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         transition(Transition.TEXT);
         if (chars.isEmpty() && !stack.isEmpty()) {
             throw new IllegalStateException("Zero-length text nodes not allowed within document/element content");
@@ -205,7 +205,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         transition(Transition.COMMENT);
         try {
             nextReceiver.comment(chars, locationId, properties);
@@ -274,7 +274,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         transition(Transition.PI);
         try {
             nextReceiver.processingInstruction(target, data, locationId, properties);

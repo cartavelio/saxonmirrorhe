@@ -10,7 +10,7 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -90,17 +90,17 @@ public class OutputterEventBuffer extends Outputter {
     }
 
     @Override
-    public void characters(CodePoints chars, Location location, int properties) {
+    public void characters(UnicodeString chars, Location location, int properties) {
         buffer.add(new OutputterEvent.Text(chars, location, properties));
     }
 
     @Override
-    public void processingInstruction(String name, CodePoints data, Location location, int properties) {
+    public void processingInstruction(String name, UnicodeString data, Location location, int properties) {
         buffer.add(new OutputterEvent.ProcessingInstruction(name, data, location, properties));
     }
 
     @Override
-    public void comment(CodePoints content, Location location, int properties) {
+    public void comment(UnicodeString content, Location location, int properties) {
         buffer.add(new OutputterEvent.Comment(content, location, properties));
     }
 

@@ -18,7 +18,7 @@ import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
@@ -247,7 +247,7 @@ public class DotNetPullProvider implements PullProvider, Location {
      */
 
     @Override
-    public CodePoints getStringValue() {
+    public UnicodeString getStringValue() {
         return StringView.of(parser.get_Value());
     }
 

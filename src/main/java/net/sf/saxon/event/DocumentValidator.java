@@ -8,10 +8,10 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -59,7 +59,7 @@ public class DocumentValidator extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             if (Whitespace.isAllWhite(chars)) {
                 return; // ignore whitespace outside the outermost element

@@ -11,8 +11,8 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
@@ -127,7 +127,7 @@ public class XHTML5Emitter extends XMLEmitter {
      * Character data.
      */
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         //noinspection StatementWithEmptyBody
         if (!started && Whitespace.isAllWhite(chars)) {
             // Ignore whitespace before the first start tag. This isn't explicit in the spec, but

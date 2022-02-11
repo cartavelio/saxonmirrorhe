@@ -169,7 +169,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         readFile(checker, reader, new AbstractUniStringConsumer() {
             @Override
             @CSharpModifiers(code={"public", "override"})
-            public UniStringConsumer accept(CodePoints chars) {
+            public UniStringConsumer accept(UnicodeString chars) {
                 return buffer.accept(chars);
             }
         });

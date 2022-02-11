@@ -7,9 +7,11 @@
 
 package net.sf.saxon.str;
 
-import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.Configuration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -30,8 +32,7 @@ public final class LargeTextBuffer {
     private final static int MASK = SEGLEN - 1;
 
 
-    private Segment[] completeSegments;
-    private int segmentsUsed;
+    private List<Segment> completeSegments;
     private Segment lastSegment;
     private int lastSegmentLength;
 
@@ -96,6 +97,9 @@ public final class LargeTextBuffer {
                 return this;
             } else if (newWidth == 16) {
                 char[] array16 = new char[newLength];
+                if (Configuration.isAssertionsEnabled()) {
+                    new Slice8(bytes, 0, oldLength).verifyCharacters();
+                }
                 StringTool.copy8to16(bytes, 0, array16, 0, oldLength);
                 return new Segment16(array16);
             } else {
@@ -213,167 +217,80 @@ public final class LargeTextBuffer {
      */
 
     public LargeTextBuffer() {
-        completeSegments = new Segment[2];
-        segmentsUsed = 0;
-        lastSegment = new Segment8(new byte[4096]);
+        completeSegments = new ArrayList<>(4);
+        lastSegment = new Segment8(new byte[0]);
         lastSegmentLength = 0;
     }
 
     private void addSegment(Segment segment) {
-        if (segmentsUsed + 1 >= completeSegments.length) {
-            completeSegments = Arrays.copyOf(completeSegments, completeSegments.length * 2);
-        }
-        completeSegments[segmentsUsed++] = segment;
+        completeSegments.add(segment);
     }
 
     private Segment getSegment(int n) {
-        if (n == segmentsUsed) {
+        if (n == completeSegments.size()) {
             return lastSegment;
         } else {
-            return completeSegments[n];
+            return completeSegments.get(n);
         }
     }
 
-    /**
-     * Append an array (or part of an array) of 8-bit characters to the content
-     * of the LargeTextBuffer
-     * @param bytes the array of characters to be added
-     * @param start the start offset of the first character to be copied
-     * @param len the number of characters (codepoints, one byte per character) to be copied
-     */
 
-    public void append8(byte[] bytes, int start, int len) {
-        if (lastSegment == null) {
-            byte[] newBytes = new byte[Math.min(len, 4096)];
-            lastSegment = new Segment8(newBytes);
-            lastSegmentLength = 0;
-        }
-        if (len > (SEGLEN - lastSegmentLength)) {
-            int firstChunkSize = SEGLEN - lastSegmentLength;
-            append8(bytes, start, firstChunkSize);
-            addSegment(lastSegment);
-            lastSegment = null;
-            lastSegmentLength = 0;
-            append8(bytes, start + firstChunkSize, len - firstChunkSize);
+    public void appendUnicodeString(UnicodeString chars) {
+        int spaceAvailableInLastSegment = SEGLEN - lastSegmentLength;
+        //System.err.println("appendUnicodeString " + chars.length() + " " + lastSegmentLength);
+        long charsSupplied = chars.length();
+        if (charsSupplied < spaceAvailableInLastSegment) {
+            extendLastSegment(chars);
         } else {
-            lastSegment = lastSegment.stretch(lastSegmentLength, lastSegmentLength + len, 8);
-            switch (lastSegment.getWidth()) {
-                case 8: {
-                    byte[] existing = ((Segment8) lastSegment).bytes;
-                    System.arraycopy(bytes, start, existing, lastSegmentLength, len);
-                    break;
-                }
-                case 16: {
-                    char[] existing = ((Segment16) lastSegment).chars;
-                    StringTool.copy8to16(bytes, start, existing, lastSegmentLength, len);
-                    break;
-                }
-                case 24: {
-                    byte[] existing = ((Segment24) lastSegment).bytes;
-                    StringTool.copy8to24(bytes, start, existing, lastSegmentLength, len);
-                    break;
-                }
-                default:
-                    throw new IllegalStateException();
+            long start = 0;
+            extendLastSegment(chars.substring(0, spaceAvailableInLastSegment));
+            charsSupplied -= spaceAvailableInLastSegment;
+            start += spaceAvailableInLastSegment;
+            while (charsSupplied > SEGLEN) {
+                //System.err.println("appendUnicodeString start=" + start + " supplied=" + charsSupplied);
+                extendLastSegment(chars.substring(start, start + SEGLEN));
+                charsSupplied -= SEGLEN;
+                start += SEGLEN;
             }
-            lastSegmentLength += len;
-        }
-    }
-
-    /**
-     * Append an array (or part of an array) of 16-bit characters to the content
-     * of the LargeTextBuffer
-     *
-     * @param chars the array of characters to be added. This must not contain any surrogates
-     * @param start the start offset of the first character to be copied
-     * @param len   the number of characters (codepoints, two bytes per character) to be copied
-     */
-
-    public void append16(char[] chars, int start, int len) {
-        if (lastSegment == null) {
-            byte[] newBytes = new byte[Math.min(len, 4096)];
-            lastSegment = new Segment8(newBytes);
-            lastSegmentLength = 0;
-        }
-        if (len > (SEGLEN - lastSegmentLength)) {
-            int firstChunkSize = SEGLEN - lastSegmentLength;
-            append16(chars, start, firstChunkSize);
-            addSegment(lastSegment);
-            lastSegment = null;
-            lastSegmentLength = 0;
-            append16(chars, start + firstChunkSize, len - firstChunkSize);
-        } else {
-            lastSegment = lastSegment.stretch(lastSegmentLength, lastSegmentLength + len, 16);
-            switch (lastSegment.getWidth()) {
-                case 16: {
-                    char[] existing = ((Segment16) lastSegment).chars;
-                    System.arraycopy(chars, start, existing, lastSegmentLength, len);
-                    break;
-                }
-                case 24: {
-                    byte[] existing = ((Segment24) lastSegment).bytes;
-                    StringTool.copy16to24(chars, start, existing, lastSegmentLength, len);
-                    break;
-                }
-                default:
-                    throw new IllegalStateException();
+            if (charsSupplied > 0) {
+                //System.err.println("appendUnicodeStringZ start=" + start + " supplied=" + charsSupplied);
+                extendLastSegment(chars.substring(start, start + charsSupplied));
             }
-            lastSegmentLength += len;
         }
     }
 
-    /**
-     * Append an array (or part of an array) of 24-bit characters to the content
-     * of the LargeTextBuffer
-     *
-     * @param bytes the array holding the characters to be added, three bytes per character
-     * @param start the start offset of the first character to be copied (codepoint offset, not byte offset)
-     * @param len   the number of characters (codepoints, three bytes per character) to be copied
-     */
-
-    public void append24(byte[] bytes, int start, int len) {
-        if (lastSegment == null) {
-            byte[] newBytes = new byte[Math.min(len, 4096)];
-            lastSegment = new Segment8(newBytes);
-            lastSegmentLength = 0;
+    private void extendLastSegment(UnicodeString chars) {
+        //System.err.println("Extend last segment from " + lastSegmentLength + " with " + chars.length());
+        lastSegment = lastSegment.stretch(lastSegmentLength, lastSegmentLength + chars.length32(), chars.getWidth());
+        if (lastSegment instanceof Segment8) {
+            chars.copy8bit(((Segment8)lastSegment).bytes, lastSegmentLength);
+        } else if (lastSegment instanceof Segment16) {
+            chars.copy16bit(((Segment16)lastSegment).chars, lastSegmentLength);
+        } else {
+            assert lastSegment instanceof Segment24;
+            chars.copy24bit(((Segment24)lastSegment).bytes, lastSegmentLength*3);
         }
-        if (len > (SEGLEN - lastSegmentLength)) {
-            // Allocate a new segment
-            int firstChunkSize = SEGLEN - lastSegmentLength;
-            append24(bytes, start, firstChunkSize);
+        lastSegmentLength += chars.length32();
+        if (Configuration.isAssertionsEnabled()) {
+            lastSegment.substring(0, lastSegmentLength).verifyCharacters();
+        }
+        if (lastSegmentLength == SEGLEN) {
             addSegment(lastSegment);
-            lastSegment = null;
+            lastSegment = new Segment8(new byte[1024]);
             lastSegmentLength = 0;
-            append24(bytes, start + firstChunkSize, len - firstChunkSize);
-        } else {
-            lastSegment = lastSegment.stretch(lastSegmentLength, lastSegmentLength + len, 24);
-            byte[] existing = ((Segment24) lastSegment).bytes;
-            System.arraycopy(bytes, start * 3, existing, lastSegmentLength * 3, len * 3);
-            lastSegmentLength += len;
         }
+        //showSegmentLengths();
     }
 
-    public void append(IntIterator codePoints) {
-        UnicodeBuilder builder = new UnicodeBuilder();
-        builder.append(codePoints);
-        UnicodeString str = builder.toUnicodeString();
-        str.supplyContent(this, 0, str.length());
-    }
-
-    public void append(int codePoint) {
-        if (codePoint < 256) {
-            append8(new byte[]{(byte)(codePoint & 0xff)}, 0, 1);
-        } else if (codePoint < 65536) {
-            append16(new char[]{(char)(codePoint & 0xffff)}, 0, 1);
-        } else {
-            Twine24 t = new Twine24(new int[]{codePoint});
-            t.supplyContent(this, 0, 1);
+    private void showSegmentLengths() {
+        StringBuilder sb = new StringBuilder();
+        for (Segment s : completeSegments) {
+            sb.append(s.asUnicodeString().length()).append(", ");
         }
+        sb.append(lastSegmentLength);
+        System.err.println(sb);
     }
 
-    public void append(UnicodeString str, long start, long length) {
-        str.supplyContent(this, start, length);
-    }
 
     /**
      * Returns a new character sequence that is a subsequence of this sequence.
@@ -429,7 +346,7 @@ public final class LargeTextBuffer {
     }
 
     public int length() {
-        return segmentsUsed*SEGLEN + (lastSegment == null ? 0 : lastSegmentLength);
+        return completeSegments.size()*SEGLEN + (lastSegment == null ? 0 : lastSegmentLength);
     }
 
     /**
@@ -443,10 +360,12 @@ public final class LargeTextBuffer {
     public void setLength(int newLength) {
         // used to remove a text node if it's found to be a duplicate
         if (newLength < length()) {
-            if (newLength <= segmentsUsed * SEGLEN) {
+            int segCount = completeSegments.size();
+            if (newLength <= segCount * SEGLEN) {
                 // drop the current "last segment", and make the last segment in the completed list
                 // the new "last segment"
-                lastSegment = completeSegments[--segmentsUsed];
+                lastSegment = completeSegments.get(segCount - 1);
+                completeSegments.remove(segCount - 1);
             }
             lastSegmentLength = newLength & MASK;
         }

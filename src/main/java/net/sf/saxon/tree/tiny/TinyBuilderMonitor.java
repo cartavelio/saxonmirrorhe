@@ -10,7 +10,7 @@ package net.sf.saxon.tree.tiny;
 import net.sf.saxon.event.BuilderMonitor;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -59,7 +59,7 @@ public class TinyBuilderMonitor extends BuilderMonitor {
     }
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (mark == Type.TEXT) {
             markedNodeNr = builder.getTree().getNumberOfNodes();
         }
@@ -68,7 +68,7 @@ public class TinyBuilderMonitor extends BuilderMonitor {
     }
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (mark == Type.COMMENT) {
             markedNodeNr = builder.getTree().getNumberOfNodes();
         }
@@ -77,7 +77,7 @@ public class TinyBuilderMonitor extends BuilderMonitor {
     }
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (mark == Type.PROCESSING_INSTRUCTION) {
             markedNodeNr = builder.getTree().getNumberOfNodes();
         }
