@@ -21,7 +21,8 @@ namespace Saxon.Api {
         /// A URI that identifies this resource
         /// </summary>
 
-        /**public**/ Uri ResourceUri { get; }   // Note, this is marked "public" for the benefit of API documentation
+        /**public**/ Uri ResourceUri { get; }   
+        // Note, this is marked "public" for the benefit of API documentation 
 
         ///  <summary>
         ///  Get an XDM Item holding the contents of this resource.
