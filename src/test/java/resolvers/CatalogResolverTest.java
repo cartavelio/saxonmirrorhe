@@ -48,7 +48,7 @@ public class CatalogResolverTest {
     @Test
     public void xmlResolverParse() {
         Processor processor = new Processor(false);
-        processor.setCatalogFile("src/test/testdata/resolvers/catalog.xml");
+        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
         try {
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setDTDValidation(true);
@@ -62,7 +62,7 @@ public class CatalogResolverTest {
     @Test
     public void xmlResolverUriResolver() {
         Processor processor = new Processor(false);
-        processor.setCatalogFile("src/test/testdata/resolvers/catalog.xml");
+        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
         try {
             XsltCompiler compiler = processor.newXsltCompiler();
 
@@ -90,7 +90,7 @@ public class CatalogResolverTest {
     @Test
     public void xmlResolverStylesheetUriResolver() {
         Processor processor = new Processor(false);
-        processor.setCatalogFile("src/test/testdata/resolvers/catalog.xml");
+        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
         try {
             XsltCompiler compiler = processor.newXsltCompiler();
 
@@ -118,7 +118,7 @@ public class CatalogResolverTest {
     @Test
     public void xmlResolverUnparsedTextUriResolver() {
         Processor processor = new Processor(false);
-        processor.setCatalogFile("src/test/testdata/resolvers/catalog.xml");
+        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
         try {
             XsltCompiler compiler = processor.newXsltCompiler();
 
@@ -147,7 +147,7 @@ public class CatalogResolverTest {
     @Test
     public void xmlResolverModuleUriResolver() {
         Processor processor = new Processor(false);
-        processor.setCatalogFile("src/test/testdata/resolvers/catalog.xml");
+        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
         try {
             XQueryCompiler compiler = processor.newXQueryCompiler();
 

@@ -292,7 +292,7 @@ public class SchemaTests {
             Processor proc = new Processor(true);
             SchemaManager mgr = proc.getSchemaManager();
             mgr.setXsdVersion("1.1");
-            proc.setCatalogFile(catalog);
+            proc.setCatalogFiles(catalog);
 
             mgr.load(new StreamSource(new StringReader(over), "http://dummy/over"));
             SchemaValidator val = mgr.newSchemaValidator();
