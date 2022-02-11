@@ -591,7 +591,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         public static Sequence toSequence(ArrayItem array) throws XPathException {
             ZenoSequence results = new ZenoSequence();
             for (GroundedValue seq : array.members()) {
-                results.appendSequence(seq);
+                results = results.appendSequence(seq);
             }
             return results;
         }
