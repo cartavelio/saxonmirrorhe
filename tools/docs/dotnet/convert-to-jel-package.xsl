@@ -124,9 +124,9 @@
     </xsl:template>
     
     <xsl:template match="delegate">
-        <delegate id="{@name}" 
+        <delegate id="{@name}" fullname="{@fullname}"
             visibility="{if (@public='true') then 'public' else 'protected'}"
-            type="{f:shortName(@type)}" fulltype="{@fulltype}">
+            type="{@type}" fulltype="{f:fullName(@fulltype)}">
             <xsl:apply-templates select="type"/>
             <xsl:apply-templates select="comments"/>
             <xsl:if test="not(comments/returns)">
@@ -237,6 +237,7 @@
             <xsl:copy-of select="@abstract[.='true']"/>
             <xsl:copy-of select="@get[.='true']"/>
             <xsl:copy-of select="@set[.='true']"/>
+            <xsl:copy-of select="@init[.='true']"/>
             <xsl:apply-templates/>
         </property>
     </xsl:template>

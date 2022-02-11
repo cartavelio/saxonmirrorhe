@@ -111,7 +111,7 @@
     
     <xsl:function name="f:sig" as="element()*">
         <xsl:param name="classid" as="xs:string"/>
-        <xsl:param name="method" as="node()"/><!-- method or constructor element -->
+        <xsl:param name="method" as="node()"/><!-- method or constructor or delegate element -->
         <xsl:param name="for-detail" as="xs:boolean"/>
         
         <xsl:variable name="isDotNetApiMember" select="starts-with($classid, 'Saxon.Api')" as="xs:boolean"/>
@@ -298,21 +298,34 @@
         </span>
     </xsl:function>
     
+    <xsl:function name="f:isJavaType" as="xs:boolean">
+        <xsl:param name="fulltype" as="xs:string"/>
+        <xsl:sequence select="starts-with($fulltype, 'net.sf.saxon.') or starts-with($fulltype, 'com.saxonica.')"/>
+    </xsl:function>
+    
+    <xsl:function name="f:isCSType" as="xs:boolean">
+        <xsl:param name="fulltype" as="xs:string"/>
+        <xsl:sequence select="starts-with($fulltype, 'Saxon.Api.')"/>
+    </xsl:function>
+    
     <!-- Functions for displaying the types of objects.
          Generally have 2 versions: 'show' to include links; and 'flat' which just returns a string value. -->
     
     <!-- Show the type of any object with @fulltype ($class can be any class, interface, exception, etc.)
+         Also used for delegate with @fullname.
          The result is a javalink (or cslink) span element for the main type (named in full if $showFull is true), 
          followed by a span element showing the types of type parameters if the type is generic. -->
     <xsl:function name="f:showType" as="element()*">
         <xsl:param name="class" as="node()"/>
         <xsl:param name="showFull" as="xs:boolean"/>
         <xsl:param name="isClass" as="xs:boolean"/>
-        <xsl:variable name="isDotNetApiMember" select="$class/ancestor-or-self::package/@id eq 'Saxon.Api'" as="xs:boolean"/>
+        <xsl:variable name="fulltype" select="if ($class/self::delegate) then $class/@fullname else
+            $class/@fulltype" as="xs:string"/>
         <xsl:for-each select="$class">
-            <span class="{if ($isDotNetApiMember) then 'cslink' else 'javalink'}" data-href="{@fulltype}">
+            <span class="{if (f:isJavaType($fulltype)) then 'javalink' else if
+                (f:isCSType($fulltype)) then 'cslink' else 'apilink'}" data-href="{$fulltype}">
                 <xsl:value-of
-                    select="if ($isClass) then @id else if ($showFull) then @fulltype else @type"/>
+                    select="if ($isClass) then @id else if ($showFull) then $fulltype else @type"/>
             </span>
             <xsl:sequence select="f:showParamTypes(.)"/>
         </xsl:for-each>
@@ -325,7 +338,6 @@
          Calls to this function usually check for a paramtypes child element first, except for the call from f:showType(). -->
     <xsl:function name="f:showParamTypes" as="element()*">
         <xsl:param name="class"/>
-        <xsl:variable name="isDotNetApiMember" select="$class/ancestor::package/@id eq 'Saxon.Api'" as="xs:boolean"/>
         <xsl:choose>
             <xsl:when test="$class/paramtypes">
                 <xsl:for-each select="$class/paramtypes">
@@ -334,7 +346,9 @@
                         <xsl:for-each select="type">
                             <xsl:choose>
                                 <xsl:when test="@fulltype ne ''">
-                                    <span class="{if ($isDotNetApiMember) then 'cslink' else 'javalink'}" data-href="{@fulltype}">
+                                    <span class="{if (f:isJavaType(@fulltype)) then 'javalink' else if
+                                        (f:isCSType(@fulltype)) then 'cslink' else 'apilink'}"
+                                        data-href="{@fulltype}">
                                         <xsl:value-of select="@name"/>
                                     </span>
                                 </xsl:when>
@@ -420,7 +434,9 @@
                         </xsl:when>
                         <xsl:otherwise>
                             <xsl:value-of select="@preamble"/>
-                            <span class="{if ($isDotNetApiMember) then 'cslink' else 'javalink'}" data-href="{@fulltype}">
+                            <span class="{if (f:isJavaType(@fulltype)) then 'javalink' else if
+                                (f:isCSType(@fulltype)) then 'cslink' else 'apilink'}"
+                                data-href="{@fulltype}">
                                 <xsl:value-of select="@type"/>
                             </span>
                         </xsl:otherwise>
@@ -436,8 +452,9 @@
                     <xsl:value-of select="@type"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <span class="{if (starts-with(@fulltype, 'net.sf.saxon.') or
-                        starts-with(@fulltype, 'com.saxonica.')) then 'javalink' else 'cslink'}" data-href="{@fulltype}">
+                    <span class="{if (f:isJavaType(@fulltype)) then 'javalink' else if
+                        (f:isCSType(@fulltype)) then 'cslink' else 'apilink'}"
+                        data-href="{@fulltype}">
                         <xsl:value-of select="@type"/>
                     </span>
                 </xsl:otherwise>
@@ -493,7 +510,7 @@
         <xsl:param name="property" as="element(property)"/>
         <xsl:for-each select="$property">
             <xsl:choose>
-                <xsl:when test="starts-with(@type, 'net.sf.saxon.') or starts-with(@type, 'com.saxonica.')">
+                <xsl:when test="f:isJavaType(@fulltype)">
                     <span class="javalink" data-href="{@fulltype}">
                         <xsl:value-of select="tokenize(@type,'\.')[last()]"/>
                     </span>
@@ -501,8 +518,13 @@
                 <xsl:when test="@type = @fulltype">
                     <code><xsl:value-of select="@type"/></code>
                 </xsl:when>
-                <xsl:otherwise>
+                <xsl:when test="f:isCSType(@fulltype)">
                     <span class="cslink" data-href="{@fulltype}">
+                        <xsl:value-of select="@type"/>
+                    </span>
+                </xsl:when>
+                <xsl:otherwise>
+                    <span class="apilink" data-href="{@fulltype}">
                         <xsl:value-of select="@type"/>
                     </span>
                 </xsl:otherwise>
@@ -710,7 +732,7 @@
             
             <hr style="margin:8px;"/>
             
-            <xsl:variable name="classid" select="@fulltype"/>
+            <xsl:variable name="classid" select="@fullname"/>
             <xsl:sequence select="f:sig($classid, ., true())"/>
             
         </xsl:result-document>
@@ -1040,8 +1062,9 @@
                 <xsl:text> </xsl:text>
                 <xsl:value-of select="@id"/>
                 <xsl:if test="$isProp">
-                    <xsl:value-of select="' {', if (@get eq 'true') then 'get;' else (), if
-                        (@set eq 'true') then 'set;' else (), '}'"/>
+                    <xsl:value-of select="' {', if (@get eq 'true') then 'get;' else (), 
+                        if (@set eq 'true') then 'set;' else (), 
+                        if (@init eq 'true') then 'init;' else (), '}'"/>
                 </xsl:if>
             </p>
             <xsl:if test="@const or @constexpr">
