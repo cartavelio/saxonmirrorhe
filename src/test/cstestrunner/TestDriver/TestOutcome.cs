@@ -897,7 +897,7 @@ namespace TestRunner {
                     }
                 }
                 catch (DynamicError e) {
-                    throw e;
+                    throw;
                 }
             }
         }

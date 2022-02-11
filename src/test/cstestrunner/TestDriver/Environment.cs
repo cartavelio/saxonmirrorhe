@@ -619,7 +619,7 @@ namespace TestRunner {
                         try {
                             Encoding.GetEncoding(encoding);
                         }
-                        catch (ArgumentException err) {
+                        catch (ArgumentException) {
                             throw new net.sf.saxon.trans.XPathException("Unknown encoding " + encoding, "FOUT1190");
                         }
                     }
