@@ -39,8 +39,9 @@ namespace Saxon.Impl.Helpers {
                 }
             }
             
-            XmlReader reader = new XmlTextReader(content, XmlNodeType.Element, 
+            XmlTextReader reader = new XmlTextReader(content, XmlNodeType.Element, 
                 new XmlParserContext(null, null, null, XmlSpace.None));
+            reader.Normalization = true;
             DotNetPullProvider provider = new DotNetPullProvider(reader) {
                 AcceptFragment = true
             };

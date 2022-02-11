@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using com.saxonica.expr.sort;
 using java.text;
 using java.util;
 using net.sf.saxon;
@@ -22,7 +23,11 @@ namespace SaxonCS3.Saxon.Impl.Helpers {
          */
 
         /*@Nullable*/
-        public static StringCollator makeCollation(Configuration config, String uri, Properties props) {
+        public static StringCollator makeCollation(Configuration config, string uri, Properties props) {
+
+            if (uri.StartsWith("http://www.w3.org/2013/collation/UCA")) {
+                return new UcaCollatorUsingIcu(uri);
+            }
 
             StringCollator stringCollator = null;
             

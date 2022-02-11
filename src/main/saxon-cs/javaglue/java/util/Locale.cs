@@ -11,5 +11,9 @@ namespace java.util {
         public string getCountry() {
             return "us";
         }
+
+        public string getDisplayName() {
+            return getLanguage();
+        }
     }
 }

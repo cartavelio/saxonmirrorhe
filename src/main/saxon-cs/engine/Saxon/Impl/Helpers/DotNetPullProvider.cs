@@ -197,6 +197,18 @@ namespace System.Impl.Helpers {
                 return net.sf.saxon.pull.PullEvent.TEXT;
               case XmlNodeType.Whitespace:
                 return net.sf.saxon.pull.PullEvent.TEXT;
+              case XmlNodeType.EntityReference:
+                  Console.WriteLine("Found entity reference " + parser.Name);
+                  
+                  if (parser.CanResolveEntity)
+                  {
+                      parser.ResolveEntity ();
+                      parser.Read ();
+                      
+                  }
+
+                  return null;
+
               default:
                 return null;
             }
