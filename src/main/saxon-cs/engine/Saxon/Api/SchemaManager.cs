@@ -207,7 +207,7 @@ namespace Saxon.Api {
         /// <returns>The XML representation of the SCM.</returns>
         public XdmNode ExportComponents() {
             XdmDestination destination = new XdmDestination();
-            s9schemaManager.exportComponents(destination.GetUnderlyingDestination());
+            s9schemaManager.exportComponents(destination.UnderlyingDestination);
             return destination.XdmNode;
         }
 

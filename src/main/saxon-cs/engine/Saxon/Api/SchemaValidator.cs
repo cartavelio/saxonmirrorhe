@@ -82,7 +82,7 @@ namespace Saxon.Api {
         /// <summary>Set the validation reporting feature, which saves the validation errors in an XML file</summary>
         /// <param name="destination"> destination where XML will be sent</param>
         public void SetValidityReporting(IDestination destination) {
-            UnderlyingSchemaValidator.setValidityReporting(destination.GetUnderlyingDestination());
+            UnderlyingSchemaValidator.setValidityReporting(destination.UnderlyingDestination);
         }
         
         /// <summary>Set the <c>InvalidityHandler</c> to be used when validating instance documents;
@@ -304,7 +304,7 @@ namespace Saxon.Api {
         /// The destination to hold the validated document.
         /// </param>
         public void SetDestination(IDestination destination) {
-            UnderlyingSchemaValidator.setDestination(destination.GetUnderlyingDestination());
+            UnderlyingSchemaValidator.setDestination(destination.UnderlyingDestination);
         }
 
         /// <summary>
