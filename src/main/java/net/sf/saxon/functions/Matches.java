@@ -16,7 +16,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -77,7 +77,7 @@ public class Matches extends RegexFunction {
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         RegularExpression re = getRegularExpression(arguments);
-        StringItem arg = (StringItem)arguments[0].head();
+        StringValue arg = (StringValue)arguments[0].head();
         UnicodeString in = arg==null ? EmptyUniString.getInstance() : arg.getUnicodeStringValue();
         boolean result = re.containsMatch(in);
         return BooleanValue.get(result);

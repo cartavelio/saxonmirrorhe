@@ -10,7 +10,7 @@ package net.sf.saxon.expr.sort;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * An AtomicComparer used for comparing strings, untypedAtomic values, and URIs using the Unicode codepoint
@@ -84,8 +84,8 @@ public class CodepointCollatingComparer implements AtomicComparer {
         } else if (b == null) {
             return +1;
         }
-        StringItem as = (StringItem) a;
-        StringItem bs = (StringItem) b;
+        StringValue as = (StringValue) a;
+        StringValue bs = (StringValue) b;
         //if (as.containsSurrogatePairs() || bs.containsSurrogatePairs()) {
         return collator.compareStrings(as.getUnicodeStringValue(), bs.getUnicodeStringValue());
         //} else {
@@ -106,7 +106,7 @@ public class CodepointCollatingComparer implements AtomicComparer {
 
     @Override
     public boolean comparesEqual(AtomicValue a, AtomicValue b) {
-        return ((StringItem)a).equals((StringItem)b);
+        return ((StringValue)a).equals((StringValue)b);
     }
 
     /**

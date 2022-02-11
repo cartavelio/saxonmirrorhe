@@ -28,7 +28,7 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
@@ -51,7 +51,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
     @Override
     @CSharpReplaceBody(code="return net.sf.saxon.value.EmptySequence.getInstance(); // TODO: implement me!")
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem input = (StringItem) arguments[0].head();
+        StringValue input = (StringValue) arguments[0].head();
         if (input == null) {
             return EmptySequence.getInstance();
         } else {
@@ -60,7 +60,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
     }
 
     //#if CSHARP==false
-    private NodeInfo evalParseXml(StringItem inputArg, XPathContext context) throws XPathException {
+    private NodeInfo evalParseXml(StringValue inputArg, XPathContext context) throws XPathException {
         NodeInfo node = null;
         final String baseURI = getStaticBaseUriString();
         ParseXml.RetentiveErrorHandler errorHandler = new ParseXml.RetentiveErrorHandler();

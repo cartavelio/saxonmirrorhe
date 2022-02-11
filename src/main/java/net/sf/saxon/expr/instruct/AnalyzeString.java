@@ -21,7 +21,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -394,14 +394,14 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      */
 
     private RegexIterator getRegexIterator(XPathContext context) throws XPathException {
-        StringItem input = (StringItem)getSelect().evaluateItem(context);
+        StringValue input = (StringValue)getSelect().evaluateItem(context);
         if (input == null) {
-            input = StringItem.EMPTY_STRING;
+            input = StringValue.EMPTY_STRING;
         }
         RegularExpression re = pattern;
         if (re == null) {
             String flagstr = getFlags().evaluateAsString(context).toString();
-            StringItem regexString = (StringItem)getRegex().evaluateItem(context);
+            StringValue regexString = (StringValue)getRegex().evaluateItem(context);
             re = context.getConfiguration().compileRegularExpression(
                     regexString.getUnicodeStringValue(), flagstr, "XP30", null);
         }

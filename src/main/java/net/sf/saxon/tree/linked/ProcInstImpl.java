@@ -16,7 +16,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * ProcInstImpl is an implementation of ProcInstInfo used by the Propagator to construct
@@ -63,7 +63,7 @@ public class ProcInstImpl extends NodeImpl {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize() {
-        return new StringItem(getUnicodeStringValue());
+        return new StringValue(getUnicodeStringValue());
     }
 
     @Override

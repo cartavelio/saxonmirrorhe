@@ -16,7 +16,7 @@ import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.UnparsedTextIterator;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.io.LineNumberReader;
 import java.io.StringReader;
@@ -36,7 +36,7 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem hrefVal = (StringItem) arguments[0].head();
+        StringValue hrefVal = (StringValue) arguments[0].head();
         String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
         try {
             return SequenceTool.toLazySequence(evalUnparsedTextLines(hrefVal, encoding, context));
@@ -48,7 +48,7 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
         }
     }
 
-    private SequenceIterator evalUnparsedTextLines(StringItem hrefVal, String encoding, XPathContext context) throws XPathException {
+    private SequenceIterator evalUnparsedTextLines(StringValue hrefVal, String encoding, XPathContext context) throws XPathException {
         if (hrefVal == null) {
             return EmptyIterator.ofAtomic();
         }
@@ -56,7 +56,7 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
         boolean stable = context.getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT);
         if (stable) {
             // if results have to be stable, the text has to be read into memory and cached
-            StringItem content = UnparsedText.evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context);
+            StringValue content = UnparsedText.evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context);
             assert content != null;
             URI abs = UnparsedTextFunction.getAbsoluteURI(href, getStaticBaseUriString(), context);
             LineNumberReader reader = new LineNumberReader(new StringReader(content.getStringValue()));

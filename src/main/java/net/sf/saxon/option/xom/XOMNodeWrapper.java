@@ -21,7 +21,7 @@ import net.sf.saxon.tree.util.SteppingNode;
 import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.UntypedAtomicValue;
 import nu.xom.*;
 
@@ -183,7 +183,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         switch (getNodeKind()) {
             case Type.COMMENT:
             case Type.PROCESSING_INSTRUCTION:
-                return new StringItem(getUnicodeStringValue());
+                return new StringValue(getUnicodeStringValue());
             default:
                 return new UntypedAtomicValue(getUnicodeStringValue());
         }

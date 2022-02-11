@@ -16,7 +16,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in XPath 2.0
@@ -173,7 +173,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(0, Type.ITEM_TYPE, STAR | INS, BooleanValue.TRUE);
 
         register("encode-for-uri", 1, EncodeForUri.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING);
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING);
 
         register("ends-with", 2, EndsWith.class, BuiltInAtomicType.BOOLEAN, ONE, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
@@ -185,7 +185,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
 
         register("escape-html-uri", 1, EscapeHtmlUri.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING);
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING);
 
         register("error", 0, Error.class, Type.ITEM_TYPE, OPT, LATE);
                 // The return type is chosen so that use of the error() function will never give a static type error,
@@ -261,7 +261,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(2, Type.ITEM_TYPE, STAR | TRA, null);
 
         register("iri-to-uri", 1, IriToUri.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING);
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING);
 
         register("lang", 1, Lang.class, BuiltInAtomicType.BOOLEAN, ONE, CITEM | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null);
@@ -275,14 +275,14 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("local-name", 0, ContextItemAccessorFunction.class, BuiltInAtomicType.STRING, ONE, CITEM | LATE);
 
         register("local-name", 1, LocalName_1.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, StringItem.EMPTY_STRING);
+                .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING);
 
         register("local-name-from-QName", 1, AccessorFn.LocalNameFromQName.class,
                  BuiltInAtomicType.NCNAME, OPT, 0)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, EMPTY);
 
         register("lower-case", 1, LowerCase.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING);
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING);
 
         register("matches", 2, RegexFunctionSansFlags.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
@@ -334,12 +334,12 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("name", 0, ContextItemAccessorFunction.class, BuiltInAtomicType.STRING, ONE, CITEM | LATE);
 
         register("name", 1, Name_1.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, StringItem.EMPTY_STRING);
+                .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING);
 
         register("namespace-uri", 0, ContextItemAccessorFunction.class, BuiltInAtomicType.ANY_URI, ONE, CITEM | LATE);
 
         register("namespace-uri", 1, NamespaceUri_1.class, BuiltInAtomicType.ANY_URI, ONE, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, StringItem.EMPTY_STRING);
+                .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING);
 
         register("namespace-uri-for-prefix", 2, NamespaceForPrefix.class, BuiltInAtomicType.ANY_URI, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
@@ -363,10 +363,10 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, null);
 
         register("normalize-unicode", 1, NormalizeUnicode.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING);
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING);
 
         register("normalize-unicode", 2, NormalizeUnicode.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
         register("number", 0, ContextItemAccessorFunction.Number_0.class, BuiltInAtomicType.DOUBLE, ONE, CITEM | LATE);
@@ -392,13 +392,13 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         register("replace", 3, RegexFunctionSansFlags.class, BuiltInAtomicType.STRING,
                  ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
 
         register("replace", 4, Replace.class, BuiltInAtomicType.STRING,
                  ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null)
                 .arg(3, BuiltInAtomicType.STRING, ONE, null);
@@ -455,7 +455,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("string", 0, ContextItemAccessorFunction.class, BuiltInAtomicType.STRING, ONE, CITEM | LATE);
 
         register("string", 1, String_1.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, Type.ITEM_TYPE, OPT | ABS, StringItem.EMPTY_STRING);
+                .arg(0, Type.ITEM_TYPE, OPT | ABS, StringValue.EMPTY_STRING);
 
         register("string-length", 0, ContextItemAccessorFunction.StringAccessor.class, BuiltInAtomicType.INTEGER, ONE, CITEM | LATE);
 
@@ -464,7 +464,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         // Use the 3.0 function signature even if we're running 2.0
         register("string-join", 2, StringJoin.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringItem.EMPTY_STRING)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
         register("string-to-codepoints", 1, StringToCodepoints.class, BuiltInAtomicType.INTEGER, STAR, 0)
@@ -480,11 +480,11 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(2, NumericType.getInstance(), ONE, null);
 
         register("substring", 2, Substring.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, NumericType.getInstance(), ONE, null);
 
         register("substring", 3, Substring.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, NumericType.getInstance(), ONE, null)
                 .arg(2, NumericType.getInstance(), ONE, null);
 
@@ -499,11 +499,11 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         register("substring-before", 2, SubstringBefore.class, BuiltInAtomicType.STRING, ONE, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING);
+                .arg(1, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING);
 
         register("substring-before", 3, CollatingFunctionFree.class, BuiltInAtomicType.STRING, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING)
+                .arg(1, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
 
         register("sum", 1, Sum.class, BuiltInAtomicType.ANY_ATOMIC, ONE, UO)
@@ -538,7 +538,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
         register("translate", 3, Translate.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
 
@@ -548,7 +548,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(0, Type.ITEM_TYPE, STAR | TRA, EMPTY);
 
         register("upper-case", 1, UpperCase.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING);
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING);
 
         register("year-from-date", 1, AccessorFn.YearFromDate.class,
                  BuiltInAtomicType.INTEGER, OPT, CARD0)

@@ -15,7 +15,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
@@ -482,7 +482,7 @@ public class BuiltInListType implements ListType {
         SimpleType base = getItemType();
         Whitespace.Tokenizer iter = new Whitespace.Tokenizer(value);
         boolean found = false;
-        StringItem val;
+        StringValue val;
         while ((val = iter.next()) != null) {
             found = true;
             ValidationFailure v = base.validateContent(val.getUnicodeStringValue(), nsResolver, rules);

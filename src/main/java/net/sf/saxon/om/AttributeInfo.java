@@ -13,7 +13,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * This class contains immutable information about an attribute. An {@code AttributeInfo} is not a node:
@@ -83,8 +83,8 @@ public class AttributeInfo {
      * @return the string value
      */
 
-    public StringItem getXdmStringValue() {
-        return new StringItem(value);
+    public StringValue getXdmStringValue() {
+        return new StringValue(value);
     }
 
     /**

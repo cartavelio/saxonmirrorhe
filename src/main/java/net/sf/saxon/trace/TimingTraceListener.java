@@ -29,7 +29,7 @@ import net.sf.saxon.style.Compilation;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
@@ -241,7 +241,7 @@ public class TimingTraceListener implements TraceListener {
         StreamSource ss = new StreamSource(in, "profile.xsl");
         CompilerInfo info = config.getDefaultXsltCompilerInfo();
         info.setParameter(new StructuredQName("", "", "lang"),
-                          StringItem.bmp(this.lang == HostLanguage.XSLT ? "XSLT" : "XQuery"));
+                          StringValue.bmp(this.lang == HostLanguage.XSLT ? "XSLT" : "XQuery"));
         return Compilation.compileSingletonPackage(config, info, ss);
     }
 

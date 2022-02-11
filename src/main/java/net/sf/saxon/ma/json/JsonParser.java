@@ -125,7 +125,7 @@ public class JsonParser {
         }
 
         if (options.containsKey("duplicates")) {
-            String duplicates = ((StringItem) options.get("duplicates")).getStringValue();
+            String duplicates = ((StringValue) options.get("duplicates")).getStringValue();
             switch (duplicates) {
                 case "reject":
                     flags |= DUPLICATES_REJECTED;
@@ -352,7 +352,7 @@ public class JsonParser {
             }
             if (numberParser != null) {
                 Sequence[] args = new Sequence[1];
-                args[0] = new StringItem(token);
+                args[0] = new StringValue(token);
                 Sequence result = SystemFunction.dynamicCall(numberParser, context, args).head();
                 return (AtomicValue)result.head();
             } else {

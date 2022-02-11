@@ -67,7 +67,7 @@ public abstract class PJConverter {
         jpmap.put(BigInteger.class, SequenceType.OPTIONAL_INTEGER);
         jpmap.put(BigDecimal.class, SequenceType.OPTIONAL_DECIMAL);
 
-        jpmap.put(StringItem.class, SequenceType.OPTIONAL_STRING);
+        jpmap.put(StringValue.class, SequenceType.OPTIONAL_STRING);
         jpmap.put(BooleanValue.class, SequenceType.OPTIONAL_BOOLEAN);
         jpmap.put(DoubleValue.class, SequenceType.OPTIONAL_DOUBLE);
         jpmap.put(FloatValue.class, SequenceType.OPTIONAL_FLOAT);
@@ -244,7 +244,7 @@ public abstract class PJConverter {
                 } else if (th.isSubType(itemType, BuiltInAtomicType.STRING)) {
                     if (targetClass == Object.class || targetClass == String.class || targetClass == CharSequence.class) {
                         return StringItemToString.INSTANCE;
-                    } else if (targetClass.isAssignableFrom(StringItem.class)) {
+                    } else if (targetClass.isAssignableFrom(StringValue.class)) {
                         return Identity.INSTANCE;
                     } else if (targetClass == char.class || targetClass == Character.class) {
                         return StringItemToChar.INSTANCE;
@@ -254,7 +254,7 @@ public abstract class PJConverter {
                 } else if (itemType == BuiltInAtomicType.UNTYPED_ATOMIC) {
                     if (targetClass == Object.class || targetClass == String.class || targetClass == CharSequence.class) {
                         return StringItemToString.INSTANCE;
-                    } else if (targetClass.isAssignableFrom(StringItem.class)) {
+                    } else if (targetClass.isAssignableFrom(StringValue.class)) {
                         return Identity.INSTANCE;
                     } else {
                         try {

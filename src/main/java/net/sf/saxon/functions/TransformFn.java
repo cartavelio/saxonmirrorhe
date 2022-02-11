@@ -214,7 +214,7 @@ public class TransformFn extends SystemFunction implements Callable {
     private boolean asBoolean(AtomicValue value) throws XPathException {
         if (value instanceof BooleanValue) {
             return ((BooleanValue)value).getBooleanValue();
-        } else if (value instanceof StringItem) {
+        } else if (value instanceof StringValue) {
             String s = Whitespace.normalizeWhitespace(value.getUnicodeStringValue()).toString();
             if (s.equals("yes") || s.equals("true") || s.equals("1")) {
                 return true;
@@ -835,7 +835,7 @@ public class TransformFn extends SystemFunction implements Callable {
         // Add primary result
 
         if (result != null) {
-            AtomicValue resultKey = new StringItem(principalResultKey);
+            AtomicValue resultKey = new StringValue(principalResultKey);
             resultMap = resultMap.addEntry(resultKey, result.materialize());
         }
         return resultMap;
@@ -977,7 +977,7 @@ public class TransformFn extends SystemFunction implements Callable {
                 while ((param = paramIterator.next()) != null) {
                     // See bug 29440/29443. For the time being, accept both the old and new forms of serialization params
                     QName paramName;
-                    if (param instanceof StringItem) {
+                    if (param instanceof StringValue) {
                         paramName = new QName(param.getStringValue());
                     } else if (param instanceof QNameValue) {
                         paramName = new QName(((QNameValue) param.head()).getStructuredQName());
@@ -989,7 +989,7 @@ public class TransformFn extends SystemFunction implements Callable {
                     if (supplied.getLength() > 0) {
                         if (supplied.getLength() == 1) {
                             Item val = supplied.itemAt(0);
-                            if (val instanceof StringItem) {
+                            if (val instanceof StringValue) {
                                 paramValue = val.getStringValue();
                             } else if (val instanceof BooleanValue) {
                                 paramValue = ((BooleanValue) val).getBooleanValue() ? "yes" : "no";
@@ -1060,7 +1060,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
         public GroundedValue postProcess(String uri, Sequence result) throws XPathException {
             if (postProcessor != null) {
-                result = postProcessor.call(context.newCleanContext(), new Sequence[]{new StringItem(uri), result});
+                result = postProcessor.call(context.newCleanContext(), new Sequence[]{new StringValue(uri), result});
             }
             return result.materialize();
         }
@@ -1105,7 +1105,7 @@ public class TransformFn extends SystemFunction implements Callable {
         public MapItem populateResultMap(MapItem resultMap) {
             for (Map.Entry<String, TreeInfo> entry : results.entrySet()) {
                 String uri = entry.getKey();
-                resultMap = resultMap.addEntry(new StringItem(uri),
+                resultMap = resultMap.addEntry(new StringValue(uri),
                                                entry.getValue().getRootNode());
             }
             return resultMap;
@@ -1140,7 +1140,7 @@ public class TransformFn extends SystemFunction implements Callable {
             if (str.isEmpty()) {
                 return null;
             }
-            return postProcess(baseOutputUri, new StringItem(str));
+            return postProcess(baseOutputUri, new StringValue(str));
         }
 
         @Override
@@ -1168,8 +1168,8 @@ public class TransformFn extends SystemFunction implements Callable {
         public MapItem populateResultMap(MapItem resultMap) {
             for (Map.Entry<String, String> entry : results.entrySet()) {
                 String uri = entry.getKey();
-                resultMap = resultMap.addEntry(new StringItem(uri),
-                                               new StringItem(entry.getValue()));
+                resultMap = resultMap.addEntry(new StringValue(uri),
+                                               new StringValue(entry.getValue()));
             }
             return resultMap;
         }
@@ -1208,7 +1208,7 @@ public class TransformFn extends SystemFunction implements Callable {
         public MapItem populateResultMap(MapItem resultMap) {
             for (Map.Entry<String, XdmValue> entry : results.entrySet()) {
                 String uri = entry.getKey();
-                resultMap = resultMap.addEntry(new StringItem(uri),
+                resultMap = resultMap.addEntry(new StringValue(uri),
                                                entry.getValue().getUnderlyingValue());
             }
             return resultMap;

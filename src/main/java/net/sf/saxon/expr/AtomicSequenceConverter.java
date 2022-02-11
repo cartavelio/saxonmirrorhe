@@ -19,7 +19,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -359,8 +359,8 @@ public class AtomicSequenceConverter extends UnaryExpression {
     public static class ToStringMappingFunction
             implements ItemMappingFunction {
         @Override
-        public StringItem mapItem(Item item) {
-            return new StringItem(item.getUnicodeStringValue());
+        public StringValue mapItem(Item item) {
+            return new StringValue(item.getUnicodeStringValue());
         }
     }
 

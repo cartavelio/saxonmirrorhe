@@ -14,7 +14,7 @@ import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * A ContextItemAccessorFunction is a function that takes no arguments, but operates implicitly on the
@@ -123,7 +123,7 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
         @Override
         public GroundedValue evaluate(Item item, XPathContext context) throws XPathException {
             SystemFunction f = SystemFunction.makeFunction(getDetails().name.getLocalPart(), getRetainedStaticContext(), 1);
-            StringItem val = new StringItem(item.getUnicodeStringValue());
+            StringValue val = new StringValue(item.getUnicodeStringValue());
             return f.call(context, new Sequence[]{val}).materialize();
         }
 

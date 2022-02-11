@@ -386,7 +386,7 @@ public final class EvaluateInstr extends Expression {
             env.setDecimalFormatManager(getRetainedStaticContext().getDecimalFormatManager());
             env.setXPathLanguageLevel(config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT));
             if (isSchemaAware) {
-                GroundedValue allowAny = options.get(StringItem.bmp("allow-any-namespace"));
+                GroundedValue allowAny = options.get(StringValue.bmp("allow-any-namespace"));
                 if (allowAny != null && allowAny.effectiveBooleanValue()) {
                     env.setImportedSchemaNamespaces(config.getImportedNamespaces());
                 } else {
@@ -394,7 +394,7 @@ public final class EvaluateInstr extends Expression {
                 }
             }
 
-            GroundedValue defaultCollation = options.get(StringItem.bmp("default-collation"));
+            GroundedValue defaultCollation = options.get(StringValue.bmp("default-collation"));
             if (defaultCollation != null) {
                 env.setDefaultCollationName(defaultCollation.head().getStringValue());
             }

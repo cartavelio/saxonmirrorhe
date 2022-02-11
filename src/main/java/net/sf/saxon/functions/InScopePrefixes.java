@@ -13,7 +13,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +49,9 @@ public class InScopePrefixes extends SystemFunction {
         String[] prefixes = element.getAllNamespaces().getPrefixArray();
         List<Item> result = new ArrayList<>();
         for (String s : prefixes) {
-            result.add(new StringItem(s));
+            result.add(new StringValue(s));
         }
-        result.add(StringItem.bmp("xml"));
+        result.add(StringValue.bmp("xml"));
         return SequenceExtent.makeSequenceExtent(result);
     }
 

@@ -17,7 +17,7 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * TinyProcInstImpl is a node in the TinyTree representing a processing instruction
@@ -48,7 +48,7 @@ final class TinyProcInstImpl extends TinyNodeImpl {
 
     @Override
     public AtomicSequence atomize() {
-        return new StringItem(getUnicodeStringValue());
+        return new StringValue(getUnicodeStringValue());
     }
 
     @Override

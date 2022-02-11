@@ -26,7 +26,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,14 +105,14 @@ public class AlphaCode {
 
         @Override
         public void setStringProperty(DictionaryMap container, String key, String value) {
-            container.initialPut(key, new StringItem(value));
+            container.initialPut(key, new StringValue(value));
         }
 
         @Override
         public void setMultiStringProperty(DictionaryMap container, String key, List<String> value) {
             List<Item> xdmValue = new ArrayList<>();
             for (String v : value) {
-                xdmValue.add(new StringItem(v));
+                xdmValue.add(new StringValue(v));
             }
             container.initialPut(key, new SequenceExtent.Of<>(xdmValue));
         }
@@ -418,10 +418,10 @@ public class AlphaCode {
         // TODO: may need updating. Used when running the XX compiler under Saxon/J
         StringBuilder out = new StringBuilder();
 
-        StringItem indicator = (StringItem) map.get(StringItem.bmp("o"));
+        StringValue indicator = (StringValue) map.get(StringValue.bmp("o"));
         out.append(indicator == null ? "1" : indicator.getStringValue());
 
-        StringItem alphaCode = (StringItem) map.get(StringItem.bmp("p"));
+        StringValue alphaCode = (StringValue) map.get(StringValue.bmp("p"));
         out.append(alphaCode == null ? "" : alphaCode.getStringValue());
 
         out.append(" ");
@@ -436,7 +436,7 @@ public class AlphaCode {
                 case "c":
                 case "t":
                     out.append(key);
-                    out.append(((StringItem) kvp.value).getStringValue());
+                    out.append(((StringValue) kvp.value).getStringValue());
                     out.append(" ");
                     break;
                 case "k":

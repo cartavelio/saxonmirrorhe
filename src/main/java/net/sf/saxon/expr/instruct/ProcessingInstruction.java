@@ -217,7 +217,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      */
     private String evaluateName(XPathContext context) throws XPathException {
         AtomicValue av = (AtomicValue) getNameExp().evaluateItem(context);
-        if (av instanceof StringItem && !(av instanceof AnyURIValue)) {
+        if (av instanceof StringValue && !(av instanceof AnyURIValue)) {
             // Always true under XSLT
             return checkName(av, context);
         } else {
@@ -229,7 +229,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
     }
 
     private String checkName(AtomicValue name, XPathContext context) throws XPathException {
-        if (name instanceof StringItem && !(name instanceof AnyURIValue)) {
+        if (name instanceof StringValue && !(name instanceof AnyURIValue)) {
             String expandedName = Whitespace.trim(name.getStringValue());
             if (!NameChecker.isValidNCName(expandedName)) {
                 XPathException e = new XPathException("Processing instruction name " + Err.wrap(expandedName) + " is not a valid NCName");

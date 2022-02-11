@@ -20,7 +20,7 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Implement XPath function fn:error()
@@ -48,7 +48,7 @@ public class Error extends SystemFunction implements Callable {
     public Item error(
             XPathContext context,
             /*@Nullable*/ QNameValue errorCode,
-            /*@Nullable*/ StringItem desc,
+            /*@Nullable*/ StringValue desc,
             /*@Nullable*/ SequenceIterator errObject) throws XPathException {
         QNameValue qname = null;
         if (getArity() > 0) {
@@ -111,9 +111,9 @@ public class Error extends SystemFunction implements Callable {
                 }
                 return error(context, arg0, null, null);
             case 2:
-                return error(context, (QNameValue) arguments[0].head(), (StringItem) arguments[1].head(), null);
+                return error(context, (QNameValue) arguments[0].head(), (StringValue) arguments[1].head(), null);
             case 3:
-                return error(context, (QNameValue) arguments[0].head(), (StringItem) arguments[1].head(), arguments[2].iterate());
+                return error(context, (QNameValue) arguments[0].head(), (StringValue) arguments[1].head(), arguments[2].iterate());
             default:
                 return null;
         }

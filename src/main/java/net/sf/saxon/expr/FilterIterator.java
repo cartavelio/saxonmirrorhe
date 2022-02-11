@@ -116,11 +116,11 @@ public class FilterIterator implements SequenceIterator {
                     ExpressionTool.ebvError("a sequence of two or more items starting with a boolean", filter);
                 }
                 return ((BooleanValue) first).getBooleanValue();
-            } else if (first instanceof StringItem) {
+            } else if (first instanceof StringValue) {
                 if (iterator.next() != null) {
                     ExpressionTool.ebvError("a sequence of two or more items starting with a string", filter);
                 }
-                return !((StringItem) first).isEmpty();
+                return !((StringValue) first).isEmpty();
             } else if (first instanceof Int64Value) {
                 if (iterator.next() != null) {
                     ExpressionTool.ebvError("a sequence of two or more items starting with a numeric value", filter);

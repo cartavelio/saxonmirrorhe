@@ -779,12 +779,12 @@ public class ExpressionTool {
                     }
                     iterator.close();
                     return ((BooleanValue) first).getBooleanValue();
-                } else if (first instanceof StringItem) {   // includes anyURI value
+                } else if (first instanceof StringValue) {   // includes anyURI value
                     if (iterator.next() != null) {
                         iterator.close();
                         ebvError("a sequence of two or more items starting with a string ('" + first.getStringValue() + "')");
                     }
-                    return !((StringItem) first).isEmpty();
+                    return !((StringValue) first).isEmpty();
                 } else if (first instanceof NumericValue) {
                     if (iterator.next() != null) {
                         iterator.close();
@@ -840,8 +840,8 @@ public class ExpressionTool {
         } else if (item instanceof AtomicValue) {
             if (item instanceof BooleanValue) {
                 return ((BooleanValue) item).getBooleanValue();
-            } else if (item instanceof StringItem) {   // includes anyURI value
-                return !((StringItem) item).isEmpty();
+            } else if (item instanceof StringValue) {   // includes anyURI value
+                return !((StringValue) item).isEmpty();
             } else if (item instanceof NumericValue) {
                 final NumericValue n = (NumericValue) item;
                 return (n.compareTo(0) != 0) && !n.isNaN();

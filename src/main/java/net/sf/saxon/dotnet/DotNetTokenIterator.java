@@ -11,7 +11,7 @@ import cli.System.Collections.IEnumerator;
 import cli.System.Text.RegularExpressions.Match;
 import cli.System.Text.RegularExpressions.Regex;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * A DotNetTokenIterator is an iterator over the strings that result from tokenizing
@@ -38,7 +38,7 @@ public class DotNetTokenIterator implements AtomicIterator {
     }
 
     @Override
-    public StringItem next() {
+    public StringValue next() {
         if (prevEnd < 0) {
             return null;
         }
@@ -52,7 +52,7 @@ public class DotNetTokenIterator implements AtomicIterator {
             current = input.substring(prevEnd);
             prevEnd = -1;
         }
-        return StringItem.makeStringValue(current);
+        return StringValue.makeStringValue(current);
     }
 
 

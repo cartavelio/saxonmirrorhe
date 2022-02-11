@@ -871,7 +871,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
      */
 
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         int numArgs = arguments.length;
         DecimalFormatManager dfm = getRetainedStaticContext().getDecimalFormatManager();
         DecimalSymbols dfs;
@@ -885,7 +885,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
         if (picture != null) {
             // Decimal format and picture known statically
             String result = formatNumber(number, subPictures, decimalSymbols);
-            return new StringItem(result);
+            return new StringValue(result);
 
         } else {
 
@@ -903,7 +903,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             }
             String format = arguments[1].head().getUnicodeStringValue().toString();
             SubPicture[] pics = getSubPictures(format, dfs);
-            return new StringItem(formatNumber(number, pics, dfs));
+            return new StringValue(formatNumber(number, pics, dfs));
         }
     }
 

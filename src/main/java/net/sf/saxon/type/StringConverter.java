@@ -165,13 +165,13 @@ public abstract class StringConverter extends Converter {
 
         @Override
         public ConversionResult convert(AtomicValue input) {
-            return new StringItem(input.getUnicodeStringValue().tidy());
+            return new StringValue(input.getUnicodeStringValue().tidy());
         }
 
         
         @Override
         public ConversionResult convertString(UnicodeString input) {
-            return new StringItem(input.tidy());
+            return new StringValue(input.tidy());
         }
 
         /*@Nullable*/
@@ -194,7 +194,7 @@ public abstract class StringConverter extends Converter {
         public static final StringToUntypedAtomic INSTANCE = new StringToUntypedAtomic();
 
         @Override
-        public StringItem convert(AtomicValue input) {
+        public StringValue convert(AtomicValue input) {
             return new UntypedAtomicValue(input.getUnicodeStringValue());
         }
 
@@ -226,7 +226,7 @@ public abstract class StringConverter extends Converter {
 
         @Override
         public ConversionResult convertString(UnicodeString input) {
-            return new StringItem(Whitespace.normalizeWhitespace(input).tidy(), BuiltInAtomicType.NORMALIZED_STRING);
+            return new StringValue(Whitespace.normalizeWhitespace(input).tidy(), BuiltInAtomicType.NORMALIZED_STRING);
         }
 
         /*@Nullable*/
@@ -250,7 +250,7 @@ public abstract class StringConverter extends Converter {
 
         @Override
         public ConversionResult convertString(UnicodeString input) {
-            return new StringItem(Whitespace.collapseWhitespace(input).tidy(), BuiltInAtomicType.TOKEN);
+            return new StringValue(Whitespace.collapseWhitespace(input).tidy(), BuiltInAtomicType.TOKEN);
         }
 
         /*@Nullable*/
@@ -282,7 +282,7 @@ public abstract class StringConverter extends Converter {
             if (!regex.matches(trimmed)) {
                 return new ValidationFailure("The value '" + input + "' is not a valid xs:language");
             }
-            return new StringItem(trimmed, BuiltInAtomicType.LANGUAGE);
+            return new StringValue(trimmed, BuiltInAtomicType.LANGUAGE);
         }
 
         /*@Nullable*/
@@ -318,7 +318,7 @@ public abstract class StringConverter extends Converter {
         public ConversionResult convertString(UnicodeString input) {
             UnicodeString trimmed = Whitespace.trim(input);
             if (NameChecker.isValidNCName(trimmed.codePoints())) {
-                return new StringItem(trimmed, targetType);
+                return new StringValue(trimmed, targetType);
             } else {
                 return new ValidationFailure("The value '" + input + "' is not a valid " + targetType.getDisplayName());
             }
@@ -348,7 +348,7 @@ public abstract class StringConverter extends Converter {
         public ConversionResult convertString(UnicodeString input) {
             UnicodeString trimmed = Whitespace.trim(input);
             if (NameChecker.isValidNmtoken(trimmed)) {
-                return new StringItem(trimmed, BuiltInAtomicType.NMTOKEN);
+                return new StringValue(trimmed, BuiltInAtomicType.NMTOKEN);
             } else {
                 return new ValidationFailure("The value '" + input + "' is not a valid xs:NMTOKEN");
             }
@@ -382,7 +382,7 @@ public abstract class StringConverter extends Converter {
         public ConversionResult convertString(UnicodeString input) {
             ValidationFailure vf = validate(input);
             if (vf == null) {
-                return new StringItem(Whitespace.trim(input), BuiltInAtomicType.NAME);
+                return new StringValue(Whitespace.trim(input), BuiltInAtomicType.NAME);
             } else {
                 return vf;
             }
@@ -429,9 +429,9 @@ public abstract class StringConverter extends Converter {
             } catch (ValidationException err) {
                 return err.getValidationFailure();
             }
-            ValidationFailure f = targetType.validate(new StringItem(cs), cs, getConversionRules());
+            ValidationFailure f = targetType.validate(new StringValue(cs), cs, getConversionRules());
             if (f == null) {
-                return new StringItem(cs, targetType);
+                return new StringValue(cs, targetType);
             } else {
                 return f;
             }
@@ -445,7 +445,7 @@ public abstract class StringConverter extends Converter {
             } catch (ValidationException err) {
                 return err.getValidationFailure();
             }
-            return targetType.validate(new StringItem(cs), cs, getConversionRules());
+            return targetType.validate(new StringValue(cs), cs, getConversionRules());
         }
     }
 
@@ -478,9 +478,9 @@ public abstract class StringConverter extends Converter {
             } catch (ValidationException err) {
                 return err.getValidationFailure();
             }
-            f = targetType.validate(new StringItem(cs), cs, getConversionRules());
+            f = targetType.validate(new StringValue(cs), cs, getConversionRules());
             if (f == null) {
-                return new StringItem(cs, targetType);
+                return new StringValue(cs, targetType);
             } else {
                 return f;
             }
@@ -541,7 +541,7 @@ public abstract class StringConverter extends Converter {
     public static class StringToInteger extends StringConverter {
         public static final StringToInteger INSTANCE = new StringToInteger();
 
-        public ConversionResult convert(StringItem input) {
+        public ConversionResult convert(StringValue input) {
             return IntegerValue.stringToInteger(input.toString());
         }
 

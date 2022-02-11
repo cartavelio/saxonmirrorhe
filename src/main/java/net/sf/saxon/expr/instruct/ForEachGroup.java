@@ -25,7 +25,7 @@ import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -639,7 +639,7 @@ public class ForEachGroup extends Instruction
 
     private StringCollator getCollator(XPathContext context) throws XPathException {
         if (getCollationNameExpression() != null) {
-            StringItem collationValue = (StringItem) getCollationNameExpression().evaluateItem(context);
+            StringValue collationValue = (StringValue) getCollationNameExpression().evaluateItem(context);
             assert collationValue != null;
             String cname = collationValue.getStringValue();
             try {

@@ -16,7 +16,7 @@ import net.sf.saxon.str.EmptyUniString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Base64BinaryValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * A Collation implemented as a wrapper around a .NET CompareInfo object. Note that the
@@ -190,8 +190,8 @@ public class DotNetComparator implements SubstringMatcher {
         }
     }
 
-    private StringItem stringValueFrom(String s, int from) {
-        return new StringItem(s.substring(from));
+    private StringValue stringValueFrom(String s, int from) {
+        return new StringValue(s.substring(from));
     }
 
     /**

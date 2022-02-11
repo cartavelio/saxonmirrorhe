@@ -54,7 +54,7 @@ public class UntypedNumericComparer implements AtomicComparer {
      */
 
     public static boolean quickCompare(
-            StringItem a0, NumericValue a1, int operator, ConversionRules rules)
+            StringValue a0, NumericValue a1, int operator, ConversionRules rules)
             throws XPathException {
         int comp = quickComparison(a0, a1, rules);
         switch (operator) {
@@ -87,7 +87,7 @@ public class UntypedNumericComparer implements AtomicComparer {
      */
 
     private static int quickComparison(
-            StringItem a0, NumericValue a1, ConversionRules rules)
+            StringValue a0, NumericValue a1, ConversionRules rules)
             throws XPathException {
         double d1 = a1.getDoubleValue();
 
@@ -177,7 +177,7 @@ public class UntypedNumericComparer implements AtomicComparer {
     @Override
     public int compareAtomicValues(AtomicValue a, AtomicValue b) {
         try {
-            return quickComparison((StringItem)a, (NumericValue)b, rules);
+            return quickComparison((StringValue)a, (NumericValue)b, rules);
         } catch (XPathException e) {
             throw new ComparisonException(e);
         }

@@ -1,7 +1,7 @@
 package net.sf.saxon.str;
 
 import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 
 import java.io.IOException;
@@ -296,8 +296,8 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return the constructed StringItem
      */
 
-    public StringItem toStringItem(AtomicType type) {
-        return new StringItem(toUnicodeString(), type);
+    public StringValue toStringItem(AtomicType type) {
+        return new StringValue(toUnicodeString(), type);
     }
 
     /**

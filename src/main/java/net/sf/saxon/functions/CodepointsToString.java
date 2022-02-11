@@ -14,7 +14,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntPredicateProxy;
 
 /**
@@ -33,12 +33,12 @@ public class CodepointsToString extends SystemFunction implements Callable {
      *          if any of the integers is not the codepoint of a valid XML character
      */
 
-    public static StringItem unicodeToString(SequenceIterator chars, IntPredicateProxy checker) throws XPathException {
+    public static StringValue unicodeToString(SequenceIterator chars, IntPredicateProxy checker) throws XPathException {
         UnicodeBuilder sb = new UnicodeBuilder();
         while (true) {
             NumericValue nextInt = (NumericValue) chars.next();
             if (nextInt == null) {
-                return new StringItem(sb.toUnicodeString());
+                return new StringValue(sb.toUnicodeString());
             }
             long next = nextInt.longValue();
             if (next < 0 || next > Integer.MAX_VALUE || !checker.test((int) next)) {
@@ -58,7 +58,7 @@ public class CodepointsToString extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         SequenceIterator chars = arguments[0].iterate();
         return unicodeToString(chars, context.getConfiguration().getValidCharacterChecker());
     }

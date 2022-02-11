@@ -13,7 +13,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Implements the XPath 2.0 fn:codepoint-equal() function.
@@ -26,8 +26,8 @@ public class CodepointEqual extends SystemFunction implements Callable {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem op1 = (StringItem) arguments[0].head();
-        StringItem op2 = (StringItem) arguments[1].head();
+        StringValue op1 = (StringValue) arguments[0].head();
+        StringValue op2 = (StringValue) arguments[1].head();
         if (op1 == null || op2 == null) {
             return EmptySequence.getInstance();
         }

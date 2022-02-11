@@ -275,15 +275,15 @@ public class RangeKey extends MapItem {
     private class RangeKeyIterator implements AtomicIterator {
 
         int pos = 0;
-        StringItem curr = null;
-        StringItem top;
+        StringValue curr = null;
+        StringValue top;
 
         public RangeKeyIterator() {
-            top = new StringItem((UnicodeString) (max == null ? index.lastKey() : index.floorKey(max)));
+            top = new StringValue((UnicodeString) (max == null ? index.lastKey() : index.floorKey(max)));
         }
 
-        private StringItem toStringItem(UnicodeString s) {
-            return new StringItem(s);
+        private StringValue toStringItem(UnicodeString s) {
+            return new StringValue(s);
         }
 
         /**
@@ -292,25 +292,25 @@ public class RangeKey extends MapItem {
          * @return the next Item. If there are no more nodes, return null.
          */
         @Override
-        public StringItem next() {
+        public StringValue next() {
             if (pos <= 0) {
                 if (pos < 0) {
                     return null;
                 }
                 if (min == null) {
-                    curr = new StringItem ((UnicodeString) index.firstKey());
+                    curr = new StringValue((UnicodeString) index.firstKey());
                 } else {
                     UnicodeString c = (UnicodeString) index.ceilingKey(min);
                     if (c == null || (max != null && c.compareTo(max) > 0)) {
                         curr = null;
                     } else {
-                        curr = new StringItem(c);
+                        curr = new StringValue(c);
                     }
                 }
             } else if (curr.equals(top)) {
                 curr = null;
             } else {
-                curr = new StringItem( (UnicodeString) index.higherKey(curr.getUnicodeStringValue()));
+                curr = new StringValue((UnicodeString) index.higherKey(curr.getUnicodeStringValue()));
             }
             if (curr == null) {
                 pos = -1;

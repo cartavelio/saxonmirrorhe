@@ -14,7 +14,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -24,7 +24,7 @@ import net.sf.saxon.value.StringItem;
 public class QNameFn extends SystemFunction {
 
 
-    public static QNameValue expandedQName(StringItem namespace, StringItem lexical) throws XPathException {
+    public static QNameValue expandedQName(StringValue namespace, StringValue lexical) throws XPathException {
 
         String uri;
         if (namespace == null) {
@@ -64,8 +64,8 @@ public class QNameFn extends SystemFunction {
     @Override
     public QNameValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return expandedQName(
-                (StringItem) arguments[0].head(),
-                (StringItem) arguments[1].head()
+                (StringValue) arguments[0].head(),
+                (StringValue) arguments[1].head()
         );
     }
 

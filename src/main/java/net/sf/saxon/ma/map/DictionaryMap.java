@@ -15,7 +15,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.*;
 
@@ -77,7 +77,7 @@ public class DictionaryMap extends MapItem {
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        if (key instanceof StringItem) {
+        if (key instanceof StringValue) {
             return hashMap.get(key.getStringValue());
         } else {
             return null;
@@ -123,7 +123,7 @@ public class DictionaryMap extends MapItem {
     public Iterable<KeyValuePair> keyValuePairs() {
         List<KeyValuePair> pairs = new ArrayList<>();
         for (Map.Entry<String, GroundedValue> entry : hashMap.entrySet()) {
-            pairs.add(new KeyValuePair(new StringItem(entry.getKey()), entry.getValue()));
+            pairs.add(new KeyValuePair(new StringValue(entry.getKey()), entry.getValue()));
         }
         return pairs;
     }
@@ -232,7 +232,7 @@ public class DictionaryMap extends MapItem {
         //System.err.println("Dictionary rewrite!!!!");
         HashTrieMap target = new HashTrieMap();
         for (Map.Entry<String, GroundedValue> entry : hashMap.entrySet()) {
-            target.initialPut(new StringItem(entry.getKey()), entry.getValue());
+            target.initialPut(new StringValue(entry.getKey()), entry.getValue());
         }
         return target;
     }
@@ -247,7 +247,7 @@ public class DictionaryMap extends MapItem {
         @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public AtomicValue next() {
             if (this.keyIter.hasNext()) {
-                return new StringItem(this.keyIter.next());
+                return new StringValue(this.keyIter.next());
             } else {
                 return null;
             }

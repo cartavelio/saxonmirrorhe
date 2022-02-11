@@ -24,7 +24,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -563,7 +563,7 @@ public class NamespaceNode implements NodeInfo {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize() throws XPathException {
-        return new StringItem(getStringValue());
+        return new StringValue(getStringValue());
     }
 
     @Override

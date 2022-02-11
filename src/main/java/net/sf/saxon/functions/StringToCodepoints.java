@@ -14,7 +14,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * This class supports the function string-to-codepoints()
@@ -42,7 +42,7 @@ public class StringToCodepoints extends SystemFunction {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem val = (StringItem)arguments[0].head();
+        StringValue val = (StringValue)arguments[0].head();
         if (val == null) {
             return EmptySequence.getInstance();
         }

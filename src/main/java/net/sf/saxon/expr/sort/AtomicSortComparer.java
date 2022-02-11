@@ -16,7 +16,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -164,7 +164,7 @@ public class AtomicSortComparer implements AtomicComparer {
             return b.isNaN() ? 0 : -1;
         } else if (b.isNaN()) {
             return +1;
-        } else if (a instanceof StringItem && b instanceof StringItem) {
+        } else if (a instanceof StringValue && b instanceof StringValue) {
             return collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
         } else {
             int implicitTimezone = context.getImplicitTimezone();

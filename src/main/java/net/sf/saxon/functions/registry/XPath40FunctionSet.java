@@ -25,7 +25,7 @@ import net.sf.saxon.functions.Parts;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.net.URISyntaxException;
 
@@ -161,7 +161,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
             Sequence input = arguments[0];
             String collationUri = null;
             if (arguments.length >= 2) {
-                StringItem val = (StringItem)arguments[1].head();
+                StringValue val = (StringValue)arguments[1].head();
                 if (val != null) {
                     try {
                         collationUri = ResolveURI.makeAbsolute(val.getStringValue(), getStaticBaseUriString()).toString();
@@ -184,7 +184,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
             Sequence[] args = new Sequence[4];
             args[0] = input.materialize();
-            args[1] = new StringItem(collationUri);
+            args[1] = new StringValue(collationUri);
             args[2] = key;
             args[3] = BooleanValue.get(getDetails().name.getLocalPart().equals("highest"));
 

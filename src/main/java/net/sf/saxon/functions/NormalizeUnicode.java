@@ -10,7 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.text.Normalizer;
@@ -31,13 +31,13 @@ public class NormalizeUnicode extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem sv = (StringItem) arguments[0].head();
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+        StringValue sv = (StringValue) arguments[0].head();
         if (sv == null) {
-            return StringItem.EMPTY_STRING;
+            return StringValue.EMPTY_STRING;
         }
         String nf = arguments.length == 1 ? "NFC" : Whitespace.trim(arguments[1].head().getStringValue());
-        return new StringItem(normalize(sv.getStringValue(), nf, context));
+        return new StringValue(normalize(sv.getStringValue(), nf, context));
     }
 
     public static String normalize(String sv, String form, XPathContext c) throws XPathException {

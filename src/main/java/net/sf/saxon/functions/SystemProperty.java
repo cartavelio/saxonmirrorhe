@@ -21,7 +21,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -76,7 +76,7 @@ public class SystemProperty extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
 
         String name = arguments[0].head().getStringValue();
         try {
@@ -84,7 +84,7 @@ public class SystemProperty extends SystemFunction implements Callable {
                     false, true,
                     getRetainedStaticContext());
 
-            return new StringItem(getProperty(
+            return new StringValue(getProperty(
                         qName.getURI(), qName.getLocalPart(), getRetainedStaticContext()));
 
         } catch (XPathException err) {

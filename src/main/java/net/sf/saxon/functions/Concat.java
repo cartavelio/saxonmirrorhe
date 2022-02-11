@@ -24,7 +24,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Arrays;
 
@@ -89,14 +89,14 @@ public class Concat extends SystemFunction implements PushableFunction {
 
             @Override
             public Item evaluateItem(XPathContext context) throws XPathException {
-                return new StringItem(evaluateAsString(context));
+                return new StringValue(evaluateAsString(context));
             }
         };
 
     }
 
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         UnicodeString str = EmptyUniString.getInstance();
         for (Sequence arg : arguments) {
             SequenceIterator iter = arg.iterate();
@@ -105,7 +105,7 @@ public class Concat extends SystemFunction implements PushableFunction {
                 str = str.concat(item.getUnicodeStringValue());
             }
         }
-        return new StringItem(str.economize());
+        return new StringValue(str.economize());
     }
 
     @Override

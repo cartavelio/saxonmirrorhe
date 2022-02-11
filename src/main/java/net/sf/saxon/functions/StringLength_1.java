@@ -16,7 +16,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Implement the XPath string-length() function
@@ -50,8 +50,8 @@ public class StringLength_1 extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
-        if (arg instanceof StringItem) {
-            return Int64Value.makeIntegerValue(((StringItem) arg).length());
+        if (arg instanceof StringValue) {
+            return Int64Value.makeIntegerValue(((StringValue) arg).length());
         } else {
             UnicodeString s;
             try {

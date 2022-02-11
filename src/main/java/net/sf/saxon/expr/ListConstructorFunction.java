@@ -16,7 +16,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * A function item representing a constructor function for a list type
@@ -145,7 +145,7 @@ public class ListConstructorFunction extends AbstractFunction {
                 throw e;
             }
         }
-        if (!(val instanceof StringItem) || val instanceof AnyURIValue) {
+        if (!(val instanceof StringValue) || val instanceof AnyURIValue) {
             XPathException e = new XPathException("Only xs:string and xs:untypedAtomic can be cast to a list type", "XPTY0004");
             e.setIsTypeError(true);
             throw e;

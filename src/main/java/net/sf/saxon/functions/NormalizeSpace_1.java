@@ -16,7 +16,7 @@ import net.sf.saxon.str.EmptyUniString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 /**
@@ -27,12 +27,12 @@ public class NormalizeSpace_1 extends ScalarSystemFunction {
 
     @Override
     public Sequence resultWhenEmpty() {
-        return StringItem.EMPTY_STRING;
+        return StringValue.EMPTY_STRING;
     }
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
-        return new StringItem(normalizeSpace(arg.getUnicodeStringValue()));
+        return new StringValue(normalizeSpace(arg.getUnicodeStringValue()));
     }
 
     public static UnicodeString normalizeSpace(UnicodeString sv) {

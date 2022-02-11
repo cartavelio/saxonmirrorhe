@@ -38,7 +38,7 @@ import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -159,7 +159,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
 
         if (accumulator.getInitialValueExpression() == null) {
             reportAbsence("initial-value");
-            StringLiteral zls = new StringLiteral(StringItem.EMPTY_STRING);
+            StringLiteral zls = new StringLiteral(StringValue.EMPTY_STRING);
             zls.setRetainedStaticContext(makeRetainedStaticContext());
             accumulator.setInitialValueExpression(zls);
         }

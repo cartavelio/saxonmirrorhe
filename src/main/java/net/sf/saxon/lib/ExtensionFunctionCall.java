@@ -14,7 +14,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * This abstract class is provided to allow user-written extension functions to be implemented
@@ -152,7 +152,7 @@ public abstract class ExtensionFunctionCall implements Callable {
      *         which means that the items in the sequence are computed lazily on demand. This means that any errors that occur
      *         while computing the sequence might not be thrown until the relevant item is actually read from the sequence.</p>
      *         <p>If the result is a single item, it can be returned directly, since single items all implement <code>Sequence</code>.
-     *         For example a string can be returned as an instance of {@link StringItem}, and a boolean as an instance
+     *         For example a string can be returned as an instance of {@link StringValue}, and a boolean as an instance
      *         of {@link net.sf.saxon.value.BooleanValue}.
      *         If the result is an empty sequence, the method should return {@link net.sf.saxon.value.EmptySequence#getInstance()}</p>
      * @throws XPathException if a dynamic error occurs during evaluation of the function. The Saxon run-time

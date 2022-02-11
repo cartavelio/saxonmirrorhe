@@ -19,7 +19,7 @@ import net.sf.saxon.str.EmptyUniString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Implements the fn:contains() function, with the collation already known
@@ -65,7 +65,7 @@ public class Contains extends CollatingFunctionFixed {
         return true;
     }
 
-    private static boolean contains(StringItem arg0, StringItem arg1, SubstringMatcher collator) {
+    private static boolean contains(StringValue arg0, StringValue arg1, SubstringMatcher collator) {
         if (arg1 == null || arg1.isEmpty() || collator.comparesEqual(arg1.getUnicodeStringValue(), EmptyUniString.getInstance())) {
             return true;
         }
@@ -77,8 +77,8 @@ public class Contains extends CollatingFunctionFixed {
 
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem s0 = (StringItem) arguments[0].head();
-        StringItem s1 = (StringItem) arguments[1].head();
+        StringValue s0 = (StringValue) arguments[0].head();
+        StringValue s1 = (StringValue) arguments[1].head();
         return BooleanValue.get(contains(s0, s1, (SubstringMatcher)getStringCollator()));
     }
 
