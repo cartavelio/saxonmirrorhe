@@ -14,7 +14,6 @@ import net.sf.saxon.trans.XPathException;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -139,16 +138,11 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
                 rr.baseUri = baseURI;
                 rr.nature = ResourceRequest.XQUERY_NATURE;
                 source = config.getResourceResolver().resolve(rr);
-                if (source == null && baseURI != null) {
-                    rr.uri = new URI(baseURI).resolve(moduleURI).toString();
-                    rr.uriIsNamespace = false;
-                    source = config.getResourceResolver().resolve(rr);
-                }
             }
             if (source != null) {
                 return toStreamSource(source);
             }
-        } catch (TransformerException | URISyntaxException ex) {
+        } catch (TransformerException e) {
             // nevermind
         }
         return null;

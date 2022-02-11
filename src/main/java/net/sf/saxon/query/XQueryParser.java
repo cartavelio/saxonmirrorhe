@@ -446,6 +446,15 @@ public class XQueryParser extends XPathParser {
                         allowXPath40Syntax || env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
 
         //t.setAllowExpandedQNameSyntax("3.0".equals(queryVersion));
+        if (t.currentToken != Token.MODULE_NAMESPACE) {
+            if (t.currentToken == Token.EOF) {
+                grumble("The file imported for module " + env.getModuleNamespace() +
+                                (queryString.trim().length() == 0 ? " is empty" : " has no significant content"));
+            } else {
+                grumble("The file imported for module " + env.getModuleNamespace() + " is not a valid XQuery library module. " +
+                                "The content starts: " + Err.truncate30(StringView.of(queryString.substring(t.currentTokenStartOffset))));
+            }
+        }
         parseModuleDeclaration();
         parseProlog();
         processPreamble();
