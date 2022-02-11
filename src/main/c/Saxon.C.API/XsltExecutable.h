@@ -137,7 +137,7 @@ public:
 
     /**
      * Get a parameter value by name
-     * @param name - Specified paramater name to get
+     * @param name - Specified parameter name to get
      * @return XdmValue
     */
      XdmValue* getParameter(const char* name);
@@ -147,7 +147,7 @@ public:
      * Remove a parameter (name, value) pair from a stylesheet
      *
      * @param name  the name of the stylesheet parameter
-     * @return bool - outcome of the romoval
+     * @return bool - outcome of the removal
      */
     bool removeParameter(const char* name);
 
