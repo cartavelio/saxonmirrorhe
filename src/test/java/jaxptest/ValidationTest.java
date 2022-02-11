@@ -1,5 +1,6 @@
 package jaxptest;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.EnterpriseTransformerFactory;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import net.sf.saxon.TransformerFactoryImpl;
@@ -19,6 +20,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -180,6 +182,142 @@ public class ValidationTest {
         } catch (Exception err) {
             err.printStackTrace();
             fail(err.getMessage());
+        }
+    }
+
+    private void validate(String xsd, String xml, int expectedErrors) {
+        try {
+            EnterpriseConfiguration conf = new EnterpriseConfiguration();
+            SchemaFactory schemaFactory = new com.saxonica.ee.jaxp.SchemaFactoryImpl(conf);
+            Schema schema = schemaFactory.newSchema(new StreamSource(new StringReader(xsd)));
+
+            Validator validator = schema.newValidator();
+            CustomHandler handler = new CustomHandler();
+            validator.setErrorHandler(handler);
+            validator.validate(new StreamSource(new StringReader(xml)));
+            assertEquals(expectedErrors, handler.errorCount());
+        } catch (Exception err) {
+            fail(err);
+        }
+    }
+
+    // Following tests are related to bug 5208
+
+    private final static String listOfElements = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>\n"
+            + "\n"
+            + " <xs:element name='list'>\n"
+            + "  <xs:complexType>\n"
+            + "   <xs:sequence>\n"
+            + "    <xs:element ref='item' maxOccurs='unbounded'/>\n"
+            + "   </xs:sequence>\n"
+            + "  </xs:complexType>\n"
+            + "  <xs:unique name='u'>\n"
+            + "   <xs:selector xpath='item'/>\n"
+            + "   <xs:field xpath='value'/>\n"
+            + "  </xs:unique>\n"
+            + " </xs:element>\n"
+            + "\n"
+            + " <xs:element name='item'>\n"
+            + "  <xs:complexType>\n"
+            + "   <xs:sequence>\n"
+            + "    <xs:element name='value' type='xs:$$$$'/>\n"
+            + "   </xs:sequence>\n"
+            + "  </xs:complexType>\n"
+            + " </xs:element>\n"
+            + "    \n"
+            + "</xs:schema>";
+
+    private final static String listOfAttributes = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>\n"
+            + "\n"
+            + " <xs:element name='list'>\n"
+            + "  <xs:complexType>\n"
+            + "   <xs:sequence>\n"
+            + "    <xs:element ref='item' maxOccurs='unbounded'/>\n"
+            + "   </xs:sequence>\n"
+            + "  </xs:complexType>\n"
+            + "  <xs:unique name='u'>\n"
+            + "   <xs:selector xpath='item'/>\n"
+            + "   <xs:field xpath='@value'/>\n"
+            + "  </xs:unique>\n"
+            + " </xs:element>\n"
+            + "\n"
+            + " <xs:element name='item'>\n"
+            + "  <xs:complexType>\n"
+            + "   <xs:sequence/>\n"
+            + "   <xs:attribute name='value' type='xs:$$$$'/>\n"
+            + "  </xs:complexType>\n"
+            + " </xs:element>\n"
+            + "    \n"
+            + "</xs:schema>";
+
+    @Test
+    public void testUniqueIntsE() {
+        String xsd = listOfElements.replace("$$$$", "int");
+        validate(xsd, "<list><item><value>1</value></item><item><value>10</value></item><item><value>20</value></item></list>", 0);
+        validate(xsd, "<list><item><value>1</value></item><item><value>10</value></item><item><value>1</value></item></list>", 1);
+        validate(xsd, "<list><item><value>1</value></item><item><value>Z</value></item><item><value>1</value></item></list>", 2);
+    }
+
+    @Test
+    public void testUniqueStringsE() {
+        String xsd = listOfElements.replace("$$$$", "string");
+        validate(xsd, "<list><item><value>X1</value></item><item><value>X10</value></item><item><value>X20</value></item></list>", 0);
+        validate(xsd, "<list><item><value>X1</value></item><item><value>X10</value></item><item><value>X1</value></item></list>", 1);
+    }
+
+    @Test
+    public void testUniqueQNamesE() {
+        String xsd = listOfElements.replace("$$$$", "QName");
+        validate(xsd, "<list xmlns:X='X' xmlns:Y='X'><item><value>X:A</value></item><item><value>X:B</value></item><item><value>Y:C</value></item></list>", 0);
+        validate(xsd, "<list xmlns:X='X' xmlns:Y='X'><item><value>X:A</value></item><item><value>X:B</value></item><item><value>Y:A</value></item></list>", 1);
+        validate(xsd, "<list xmlns:X='X' xmlns:Y='X'><item><value>X:A</value></item><item><value>X:22</value></item><item><value>Y:A</value></item></list>", 2);
+    }
+
+    @Test
+    public void testUniqueIntsA() {
+        String xsd = listOfAttributes.replace("$$$$", "int");
+        validate(xsd, "<list><item value='1'/><item value='20'/><item value='10'/></list>", 0);
+        validate(xsd, "<list><item value='1'/><item value='-20'/><item value='1'/></list>", 1);
+        validate(xsd, "<list><item value='1'/><item value='XIII'/><item value='1'/></list>", 2);
+    }
+
+    @Test
+    public void testUniqueStringsA() {
+        String xsd = listOfAttributes.replace("$$$$", "string");
+        validate(xsd, "<list><item value='x1'/><item value='x20'/><item value='x10'/></list>", 0);
+        validate(xsd, "<list><item value='x1'/><item value='x-20'/><item value='x1'/></list>", 1);
+    }
+
+    @Test
+    public void testUniqueQNamesA() {
+        String xsd = listOfAttributes.replace("$$$$", "QName");
+        validate(xsd, "<list xmlns:X='X' xmlns:Y='X'><item value='X:A'/><item value='X:B'/><item value='Y:C'/></list>", 0);
+        validate(xsd, "<list xmlns:X='X' xmlns:Y='X'><item value='X:A'/><item value='X:B'/><item value='Y:A'/></list>", 1);
+        validate(xsd, "<list xmlns:X='X' xmlns:Y='X'><item value='X:A'/><item value='X:22'/><item value='X:A'/></list>", 2);
+    }
+
+    private static class CustomHandler implements ErrorHandler {
+
+        int errors = 0;
+
+        @Override
+        public void warning(SAXParseException exception) throws SAXException {
+            System.out.println("Warning: " + exception);
+        }
+
+        @Override
+        public void error(SAXParseException exception) throws SAXException {
+            System.out.println("Error: " + exception);
+            errors++;
+        }
+
+        @Override
+        public void fatalError(SAXParseException exception) throws SAXException {
+            System.out.println("Fatal error: " + exception);
+        }
+
+        public int errorCount() {
+            return errors;
         }
     }
 
