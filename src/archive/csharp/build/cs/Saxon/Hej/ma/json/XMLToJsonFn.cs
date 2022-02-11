@@ -48,13 +48,13 @@ namespace Saxon.Hej.ma.json {
                 Saxon.Hej.ma.json.XMLToJsonFn.Options options = getOptions(context, arguments);
                 Saxon.Hej.@event.PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
                 pipe.setXPathContext(context);
-                convertToJson(xml, destination.getStringReceiver(false), options, context);
+                convertToJson(xml, destination.getStringReceiver(false, Saxon.Hej.expr.parser.Loc.NONE), options, context);
             }
         }
         private void convertToJson(Saxon.Hej.om.NodeInfo xml, Saxon.Hej.str.UniStringConsumer output, Saxon.Hej.ma.json.XMLToJsonFn.Options options, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.@event.PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
             pipe.setXPathContext(context);
-            Saxon.Hej.ma.json.JsonReceiver receiver = new Saxon.Hej.ma.json.JsonReceiver(pipe, output);
+            Saxon.Hej.ma.json.JsonReceiver receiver = new Saxon.Hej.ma.json.JsonReceiver(pipe, context, output);
             receiver.setIndenting(options.indent);
             if ((options.numberFormatter != null)) {
                 receiver.setNumberFormatter(options.numberFormatter);

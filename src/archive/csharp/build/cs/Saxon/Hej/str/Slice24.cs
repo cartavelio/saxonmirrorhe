@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.str {
     public class Slice24 : Saxon.Hej.str.UnicodeString {
-        private byte[] bytes;
-        private int start;
-        private int end;
+        private readonly byte[] bytes;
+        private readonly int start;
+        private readonly int end;
         private int cachedHash;
         public Slice24(byte[] bytes, int start, int end)  {
             this.bytes = bytes;
@@ -58,7 +58,7 @@ namespace Saxon.Hej.str {
             Saxon.Ejava.lang.System.arraycopy(bytes, (start*3), target, offset, (((end-start))*3));
         }
         public override Saxon.Hej.z.IntIterator codePoints() {
-            return new Inner_IntIterator_d1582e585(this);
+            return new Inner_IntIterator_27(this);
         }
         public override int GetHashCode() {
             if ((cachedHash != 0)) {
@@ -86,9 +86,9 @@ namespace Saxon.Hej.str {
             return sb.ToString();
         }
     
-        private class Inner_IntIterator_d1582e585 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_27 : Saxon.Hej.z.IntIterator {
             private readonly Slice24 outerInstance;
-            public Inner_IntIterator_d1582e585(Slice24 outerInstance) {
+            public Inner_IntIterator_27(Slice24 outerInstance) {
                 this.outerInstance = outerInstance;
                 i = (outerInstance.start*3);
                 j = (outerInstance.end*3);

@@ -63,6 +63,10 @@ namespace Saxon.Hej.expr.instruct {
         public bool isExternal() {
             return external;
         }
+        public Saxon.Hej.expr.parser.ContextItemStaticInfo makeGlobalContextInfo(Saxon.Hej.Configuration config) {
+            Saxon.Hej.type.ItemType type = (isAbsentFocus() ? Saxon.Hej.type.ErrorType.getInstance() : getRequiredItemType());
+            return config.makeContextItemStaticInfo(type, isMayBeOmitted());
+        }
     
     }
 }

@@ -22,7 +22,7 @@ namespace Saxon.Hej.tree.tiny {
             @out.characters(getUnicodeStringValue(), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
         }
         public override Saxon.Hej.om.AtomicSequence atomize() {
-            return new Saxon.Hej.value.UntypedAtomicValue(getUnicodeStringValue());
+            return Saxon.Hej.value.StringValue.makeUntypedAtomic(getUnicodeStringValue());
         }
     
     }

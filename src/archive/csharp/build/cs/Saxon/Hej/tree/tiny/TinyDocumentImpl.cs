@@ -49,11 +49,12 @@ namespace Saxon.Hej.tree.tiny {
             return this;
         }
         public override void generateId(Saxon.Ejava.lang.StringBuilder buffer) {
+            System.Console.Error.WriteLine("generateId(/)");
             buffer.append('d');
             buffer.append(getTreeInfo().getDocumentNumber());
         }
         public override Saxon.Hej.om.AtomicSequence atomize() {
-            return new Saxon.Hej.value.UntypedAtomicValue(getUnicodeStringValue());
+            return Saxon.Hej.value.StringValue.makeUntypedAtomic(getUnicodeStringValue());
         }
         internal Saxon.Hej.tree.iter.AxisIterator getAllElements(int fingerprint) {
             if ((elementList == null)) {

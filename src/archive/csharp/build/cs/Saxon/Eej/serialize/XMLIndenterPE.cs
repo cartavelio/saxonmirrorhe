@@ -15,16 +15,16 @@ namespace Saxon.Eej.serialize {
                 indentSpaces = 3;
             } else {
                 try {
-                    indentSpaces = System.Int32.Parse(Saxon.Hej.value.Whitespace.trim(s));
-                } catch (Saxon.Ejava.lang.NumberFormatException err) {
+                    indentSpaces = Saxon.Impl.Helpers.Utils.ParseInt(Saxon.Hej.value.Whitespace.trim(s));
+                } catch (/* substitute exception */ System.FormatException err) {
                     indentSpaces = 3;
                 }
             }
             s = props.getProperty(Saxon.Hej.lib.SaxonOutputKeys.LINE_LENGTH);
             if ((s != null)) {
                 try {
-                    lineLength = System.Int32.Parse(Saxon.Hej.value.Whitespace.trim(s));
-                } catch (Saxon.Ejava.lang.NumberFormatException err) {
+                    lineLength = Saxon.Impl.Helpers.Utils.ParseInt(Saxon.Hej.value.Whitespace.trim(s));
+                } catch (/* substitute exception */ System.FormatException err) {
                     lineLength = 80;
                 }
             }

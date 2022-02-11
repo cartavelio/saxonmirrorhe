@@ -7,7 +7,7 @@ namespace Saxon.Hej.resource {
         private readonly string contentType;
         private byte[] data;
         private Saxon.Ejava.net.URLConnection connection = null;
-        public static readonly Saxon.Hej.lib.ResourceFactory FACTORY = (config, details) => new Saxon.Hej.resource.BinaryResource(details);
+        public static readonly Saxon.Hej.lib.ResourceFactory FACTORY = (context, details) => new Saxon.Hej.resource.BinaryResource(details);
         public BinaryResource(Saxon.Hej.resource.AbstractResourceCollection.InputDetails @in)  {
             this.contentType = @in.contentType;
             this.href = @in.resourceUri;
@@ -88,7 +88,7 @@ namespace Saxon.Hej.resource {
                 throw new Saxon.Hej.trans.XPathException(((("Failed to read: "+path)+" ")+e));
             }
         }
-        public Saxon.Hej.om.Item getItem(Saxon.Hej.expr.XPathContext context) {
+        public Saxon.Hej.om.Item getItem() {
             if ((data != null)) {
                 return new Saxon.Hej.value.Base64BinaryValue(data);
             } else {

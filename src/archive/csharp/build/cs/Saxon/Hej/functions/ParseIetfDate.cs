@@ -177,7 +177,7 @@ namespace Saxon.Hej.functions {
                 if ((currentToken.Length>2)) {
                     badDate("Day number exceeds two digits", input);
                 }
-                day = (byte)(System.Int32.Parse(currentToken));
+                day = (byte)(Saxon.Impl.Helpers.Utils.ParseInt(currentToken));
                 currentToken = tokens[++i];
                 if (!(" ".Equals(currentToken))) {
                     badDate("Space missing after day number", input);
@@ -198,7 +198,7 @@ namespace Saxon.Hej.functions {
                     if ((currentToken.Length>2)) {
                         badDate("First number in string expected to be day in two digits", input);
                     }
-                    day = (byte)(System.Int32.Parse(currentToken));
+                    day = (byte)(Saxon.Impl.Helpers.Utils.ParseInt(currentToken));
                     i = requireDSep(tokens, ++i, input);
                     currentToken = tokens[i];
                     if (!(isMonthName(currentToken))) {
@@ -239,10 +239,10 @@ namespace Saxon.Hej.functions {
         private int checkTwoOrFourDigits(string input, string currentToken) {
             int year;
             if ((currentToken.Length == 4)) {
-                year = System.Int32.Parse(currentToken);
+                year = Saxon.Impl.Helpers.Utils.ParseInt(currentToken);
             } else {
                 if ((currentToken.Length == 2)) {
-                    year = (System.Int32.Parse(currentToken)+1900);
+                    year = (Saxon.Impl.Helpers.Utils.ParseInt(currentToken)+1900);
                 } else {
                     badDate("Year number must be two or four digits", input);
                     year = 0;
@@ -265,7 +265,7 @@ namespace Saxon.Hej.functions {
             if ((currentToken.length()>2)) {
                 badDate("Hour number exceeds two digits", input);
             }
-            hour = (byte)(System.Int32.Parse(currentToken.ToString()));
+            hour = (byte)(Saxon.Impl.Helpers.Utils.ParseInt(currentToken.ToString()));
             currentToken = new Saxon.Ejava.lang.StringBuilder(tokens[++i]);
             if (!(":".Equals(currentToken.ToString()))) {
                 badDate("Separator ':' missing after hour", input);
@@ -277,7 +277,7 @@ namespace Saxon.Hej.functions {
             if ((currentToken.length() != 2)) {
                 badDate("Minutes must be exactly two digits", input);
             }
-            minute = (byte)(System.Int32.Parse(currentToken.ToString()));
+            minute = (byte)(Saxon.Impl.Helpers.Utils.ParseInt(currentToken.ToString()));
             currentToken = new Saxon.Ejava.lang.StringBuilder(tokens[++i]);
             bool finished = false;
             if (currentToken.ToString().Equals(EOF)) {
@@ -292,7 +292,7 @@ namespace Saxon.Hej.functions {
                     if ((currentToken.length() != 2)) {
                         badDate("Seconds number must have exactly two digits (before decimal point)", input);
                     }
-                    second = (byte)(System.Int32.Parse(currentToken.ToString()));
+                    second = (byte)(Saxon.Impl.Helpers.Utils.ParseInt(currentToken.ToString()));
                     currentToken = new Saxon.Ejava.lang.StringBuilder(tokens[++i]);
                     if (currentToken.ToString().Equals(EOF)) {
                         n = (i-1);
@@ -308,7 +308,7 @@ namespace Saxon.Hej.functions {
                             while ((currentToken.length()<6)) {
                                 currentToken.append("0");
                             }
-                            microsecond = System.Int32.Parse(currentToken.ToString());
+                            microsecond = Saxon.Impl.Helpers.Utils.ParseInt(currentToken.ToString());
                             if ((i<(tokens.Count-1))) {
                                 currentToken = new Saxon.Ejava.lang.StringBuilder(tokens[++i]);
                             }
@@ -346,11 +346,11 @@ namespace Saxon.Hej.functions {
                                 badDate("Timezone offset does not have the correct number of digits", input);
                             } else {
                                 if ((tLength>=3)) {
-                                    tzOffsetHours = System.Int32.Parse(currentToken.substring(0, (tLength-2)));
-                                    tzOffsetMinutes = System.Int32.Parse(currentToken.substring((tLength-2), tLength));
+                                    tzOffsetHours = Saxon.Impl.Helpers.Utils.ParseInt(currentToken.substring(0, (tLength-2)));
+                                    tzOffsetMinutes = Saxon.Impl.Helpers.Utils.ParseInt(currentToken.substring((tLength-2), tLength));
                                     currentToken = new Saxon.Ejava.lang.StringBuilder(tokens[++i]);
                                 } else {
-                                    tzOffsetHours = System.Int32.Parse(currentToken.ToString());
+                                    tzOffsetHours = Saxon.Impl.Helpers.Utils.ParseInt(currentToken.ToString());
                                     currentToken = new Saxon.Ejava.lang.StringBuilder(tokens[++i]);
                                     if (":".Equals(currentToken.ToString())) {
                                         currentToken = new Saxon.Ejava.lang.StringBuilder(tokens[++i]);
@@ -358,7 +358,7 @@ namespace Saxon.Hej.functions {
                                             if ((currentToken.length() != 2)) {
                                                 badDate("Parsing timezone offset, minutes must be two digits", input);
                                             } else {
-                                                tzOffsetMinutes = System.Int32.Parse(currentToken.ToString());
+                                                tzOffsetMinutes = Saxon.Impl.Helpers.Utils.ParseInt(currentToken.ToString());
                                             }
                                             currentToken = new Saxon.Ejava.lang.StringBuilder(tokens[++i]);
                                         }

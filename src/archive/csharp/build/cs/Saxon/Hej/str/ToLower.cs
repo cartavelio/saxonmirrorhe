@@ -7,9 +7,9 @@ namespace Saxon.Hej.str {
         static ToLower() {
             init();
         }
-        private static Saxon.Hej.z.IntRangeToIntMap ranges = new Saxon.Hej.z.IntRangeToIntMap(650);
-        private static Saxon.Hej.z.IntHashMap<string> specials = new Saxon.Hej.z.IntHashMap<string>(10);
-        private static char[] latin = new char[256];
+        private readonly static Saxon.Hej.z.IntRangeToIntMap ranges = new Saxon.Hej.z.IntRangeToIntMap(650);
+        private readonly static Saxon.Hej.z.IntHashMap<string> specials = new Saxon.Hej.z.IntHashMap<string>(10);
+        private readonly static char[] latin = new char[256];
         private static void range(int start, int end, int delta) {
             ranges.addEntry(start, end, delta);
             if ((end<256)) {

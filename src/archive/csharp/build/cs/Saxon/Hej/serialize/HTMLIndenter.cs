@@ -132,7 +132,7 @@ namespace Saxon.Hej.serialize {
         }
         private void indent() {
             int spaces = (level*getIndentation());
-            nextReceiver.characters(Saxon.Hej.str.CompressedWhitespace.makeIndent(1, spaces), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
+            nextReceiver.characters(Saxon.Hej.str.IndentWhitespace.of(1, spaces), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
             sameLine = false;
         }
         protected internal virtual int getIndentation() {

@@ -41,10 +41,10 @@ namespace Saxon.Hej.expr {
                     if ((arg is Saxon.Hej.expr.VariableReference)) {
                         argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.Variable.INSTANCE;
                     } else {
-                        if ((cardinality == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE)) {
+                        if (((cardinality == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE) || (arg.getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE))) {
                             argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.SingleItem.INSTANCE;
                         } else {
-                            if ((cardinality == Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE)) {
+                            if (((cardinality == Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE) || (arg.getCardinality() == Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE))) {
                                 argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.OptionalItem.INSTANCE;
                             } else {
                                 argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.LazySequence.INSTANCE;

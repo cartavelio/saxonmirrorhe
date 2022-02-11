@@ -632,6 +632,7 @@ namespace Saxon.Hej.expr.parser {
             }
         }
         private Saxon.Hej.expr.Expression makeOtherwiseExpression(Saxon.Hej.expr.Expression lhs, Saxon.Hej.expr.Expression rhs) {
+            checkLanguageVersion40();
             Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
             let.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, ("n"+lhs.GetHashCode())));
             let.setSequence(lhs);
@@ -2435,9 +2436,9 @@ namespace Saxon.Hej.expr.parser {
               default:
                 Saxon.Hej.expr.Expression[] entriesArray = new Saxon.Hej.expr.Expression[entries.Count];
                 Saxon.Hej.expr.instruct.Block block = new Saxon.Hej.expr.instruct.Block(entries.ToArray());
-                Saxon.Hej.ma.map.DictionaryMap options = new Saxon.Hej.ma.map.DictionaryMap();
-                options.initialPut("duplicates", Saxon.Hej.value.StringValue.bmp("reject"));
-                options.initialPut("duplicates-error-code", Saxon.Hej.value.StringValue.bmp("XQDY0137"));
+                Saxon.Impl.DataModel.ImmMap options = new Saxon.Impl.DataModel.ImmMap();
+                options.initialPut(new Saxon.Hej.value.StringValue("duplicates"), new Saxon.Hej.value.StringValue("reject"));
+                options.initialPut(new Saxon.Hej.value.QNameValue("", Saxon.Hej.lib.NamespaceConstant.SAXON, "duplicates-error-code"), new Saxon.Hej.value.StringValue("XQDY0137"));
                 result = Saxon.Hej.ma.map.MapFunctionSet.getInstance().makeFunction("merge", 2).makeFunctionCall(block, Saxon.Hej.expr.Literal.makeLiteral(options));
                 break ;
             }
@@ -2623,7 +2624,7 @@ namespace Saxon.Hej.expr.parser {
                 for (int i = 0; (i<(arguments.Length+5)); i++) {
                     if ((i != arguments.Length)) {
                         Saxon.Hej.trans.SymbolicName.F sn = new Saxon.Hej.trans.SymbolicName.F(functionName, i);
-                        if (env.getFunctionLibrary().isAvailable(sn)) {
+                        if (env.getFunctionLibrary().isAvailable(sn, 31)) {
                             existsWithDifferentArity = true;
                             break ;
                         }
@@ -3195,11 +3196,7 @@ namespace Saxon.Hej.expr.parser {
         }
         public virtual Saxon.Hej.expr.Expression makeTracer(Saxon.Hej.expr.Expression exp, Saxon.Hej.om.StructuredQName qName) {
             exp.setRetainedStaticContextLocally(env.makeRetainedStaticContext());
-            if ((codeInjector != null)) {
-                return codeInjector.inject(exp);
-            } else {
-                return exp;
-            }
+            return exp;
         }
         protected internal bool isKeyword(string s) {
             return ((t.currentToken == Saxon.Hej.expr.parser.Token.NAME) && t.currentTokenValue.Equals(s));

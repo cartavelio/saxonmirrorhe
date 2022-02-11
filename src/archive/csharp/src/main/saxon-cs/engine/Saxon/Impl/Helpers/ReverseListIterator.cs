@@ -42,6 +42,9 @@ namespace Saxon.Impl.Helpers {
         public void close() {
             // no action
         }
+        
+        public void discharge() {
+        }
 
         public SequenceIterator getReverseIterator() {
             return new ListIterator.Of<T>(list);

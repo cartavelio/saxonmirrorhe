@@ -48,6 +48,11 @@ namespace Saxon.Hej.expr.flwor {
             }
             @base.close();
         }
+        public void discharge() {
+            if ((results != null)) {
+                results.discharge();
+            }
+        }
     
     }
 }

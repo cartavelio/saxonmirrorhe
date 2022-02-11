@@ -14,8 +14,8 @@ namespace Saxon.Hej.expr {
         public Saxon.Hej.expr.XPathContext getCaller() {
             return null;
         }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            return config.getURIResolver();
+        public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
+            return config.getResourceResolver();
         }
         public Saxon.Hej.lib.ErrorReporter getErrorReporter() {
             return config.makeErrorReporter();

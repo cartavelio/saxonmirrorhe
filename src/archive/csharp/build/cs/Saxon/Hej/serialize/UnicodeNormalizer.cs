@@ -42,8 +42,8 @@ namespace Saxon.Hej.serialize {
             }
         }
         public Saxon.Hej.str.UnicodeString normalize(Saxon.Hej.str.UnicodeString @in, bool containsNullMarkers) {
-            if ((@in is Saxon.Hej.str.CompressedWhitespace)) {
-                return @in.tidy();
+            if ((@in is Saxon.Hej.str.WhitespaceString)) {
+                return @in;
             }
             Saxon.Hej.str.UnicodeString t = @in.tidy();
             if (containsNullMarkers) {

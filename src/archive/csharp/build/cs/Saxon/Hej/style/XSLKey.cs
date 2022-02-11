@@ -202,7 +202,7 @@ namespace Saxon.Hej.style {
             keydef.setRangeKey(rangeKey);
             keydef.setIndexedItemType(useType);
             keydef.setStackFrameMap(stackFrameMap);
-            keydef.setLocation(getSystemId(), getLineNumber());
+            keydef.setLocation(this);
             keydef.setBackwardsCompatible(xPath10ModeIsEnabled());
             keydef.setComposite(composite);
             keydef.obtainDeclaringComponent(this);

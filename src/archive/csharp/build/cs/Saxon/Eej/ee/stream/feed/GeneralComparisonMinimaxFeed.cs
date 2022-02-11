@@ -54,7 +54,7 @@ namespace Saxon.Eej.ee.stream.feed {
                     while (((it = unstreamed.next()) != null)) {
                         Saxon.Hej.value.AtomicValue val = (Saxon.Hej.value.AtomicValue)(it);
                         unstreamedValues.Add(val);
-                        if ((val is Saxon.Hej.value.UntypedAtomicValue)) {
+                        if (val.isUntypedAtomic()) {
                             string str = Saxon.Hej.value.Whitespace.trim(val.getStringValue());
                             if (System.Text.RegularExpressions.Regex.IsMatch(str, "^[-+0-9\\.]*$")) {
                                 Saxon.Hej.value.NumericValue nv = Saxon.Hej.value.NumericValue.parseNumber(str);
@@ -84,7 +84,7 @@ namespace Saxon.Eej.ee.stream.feed {
                     }
                 }
                 Saxon.Hej.value.AtomicValue streamedVal = (Saxon.Hej.value.AtomicValue)(item);
-                if (((streamedVal is Saxon.Hej.value.UntypedAtomicValue) && (minUnstreamedNumeric != null))) {
+                if ((streamedVal.isUntypedAtomic() && (minUnstreamedNumeric != null))) {
                     streamedVal = new Saxon.Hej.value.DoubleValue(Saxon.Hej.value.StringToDouble11.getInstance().stringToNumber(streamedVal.getUnicodeStringValue()));
                 }
                 if ((streamedVal is Saxon.Hej.value.NumericValue)) {

@@ -49,12 +49,21 @@ namespace Saxon.Eej.ee.validate {
             } else {
                 try {
                     if (type.isNamespaceSensitive()) {
-                        val = type.getTypedValue(value, namespaceResolver, rules);
+                        try {
+                            val = type.getTypedValue(value, namespaceResolver, rules);
+                        } catch (Saxon.Hej.type.ValidationException e) {
+                            val = null;
+                        }
                     } else {
                         if (type.isAtomicType()) {
                             Saxon.Hej.type.AtomicType prim = (Saxon.Hej.type.AtomicType)(((Saxon.Hej.type.AtomicType)(type)).getPrimitiveItemType());
                             Saxon.Hej.type.StringConverter converter = prim.getStringConverter(getConfiguration().getConversionRules());
-                            val = converter.convertString(value).asAtomic();
+                            Saxon.Hej.type.ConversionResult result = converter.convertString(value);
+                            if ((result is Saxon.Hej.type.ValidationFailure)) {
+                                val = null;
+                            } else {
+                                val = result.asAtomic();
+                            }
                             if ((type is Saxon.Eej.ee.schema.UserAtomicType)) {
                                 Saxon.Eej.ee.schema.EnumerationFacetSet en = (Saxon.Eej.ee.schema.EnumerationFacetSet)(((Saxon.Eej.ee.schema.UserAtomicType)(type)).getFacet(typeof(Saxon.Eej.ee.schema.EnumerationFacetSet)));
                                 if ((en != null)) {
@@ -62,13 +71,19 @@ namespace Saxon.Eej.ee.validate {
                                 }
                             }
                         } else {
-                            val = type.getTypedValue(value, namespaceResolver, rules);
+                            try {
+                                val = type.getTypedValue(value, namespaceResolver, rules);
+                            } catch (Saxon.Hej.type.ValidationException e) {
+                                val = null;
+                            }
                         }
                     }
                 } catch (Saxon.Hej.trans.XPathException e) {
                     throw new Saxon.Hej.type.ValidationException(e);
                 }
-                parentWatch.addFieldValue(currentRow, column, val, false, locationId);
+                if ((val != null)) {
+                    parentWatch.addFieldValue(currentRow, column, val, false, locationId);
+                }
             }
         }
         public override void characters(Saxon.Hej.str.UnicodeString chars, Saxon.Hej.s9api.Location locationId, int properties) {
@@ -84,7 +99,7 @@ namespace Saxon.Eej.ee.validate {
                 Saxon.Hej.type.SchemaType eltype = elementType;
                 Saxon.Hej.str.UnicodeString fieldVal = buffer.toUnicodeString();
                 if (((eltype == null) || (eltype is Saxon.Hej.type.AnySimpleType))) {
-                    val = new Saxon.Hej.value.UntypedAtomicValue(fieldVal);
+                    val = Saxon.Hej.value.StringValue.makeUntypedAtomic(fieldVal);
                 } else {
                     Saxon.Hej.type.SchemaType contentType = eltype;
                     if ((eltype is Saxon.Hej.type.ComplexType)) {
@@ -101,12 +116,21 @@ namespace Saxon.Eej.ee.validate {
                         val = Saxon.Hej.value.StringValue.makeStringValue(buffer.ToString());
                     } else {
                         if (((Saxon.Hej.type.SimpleType)(contentType)).isNamespaceSensitive()) {
-                            val = ((Saxon.Hej.type.SimpleType)(contentType)).getTypedValue(fieldVal, namespaceResolver, getConfiguration().getConversionRules());
+                            try {
+                                val = ((Saxon.Hej.type.SimpleType)(contentType)).getTypedValue(fieldVal, namespaceResolver, getConfiguration().getConversionRules());
+                            } catch (Saxon.Hej.type.ValidationException e) {
+                                val = null;
+                            }
                         } else {
                             if (contentType.isAtomicType()) {
                                 Saxon.Hej.type.AtomicType prim = (Saxon.Hej.type.AtomicType)(((Saxon.Hej.type.AtomicType)(contentType)).getPrimitiveItemType());
                                 Saxon.Hej.type.StringConverter converter = prim.getStringConverter(getConfiguration().getConversionRules());
-                                val = converter.convertString(fieldVal).asAtomic();
+                                Saxon.Hej.type.ConversionResult result = converter.convertString(fieldVal);
+                                if ((result is Saxon.Hej.type.ValidationFailure)) {
+                                    val = null;
+                                } else {
+                                    val = result.asAtomic();
+                                }
                                 if ((contentType is Saxon.Eej.ee.schema.UserAtomicType)) {
                                     Saxon.Eej.ee.schema.EnumerationFacetSet en = (Saxon.Eej.ee.schema.EnumerationFacetSet)(((Saxon.Eej.ee.schema.UserAtomicType)(contentType)).getFacet(typeof(Saxon.Eej.ee.schema.EnumerationFacetSet)));
                                     if ((en != null)) {
@@ -114,12 +138,18 @@ namespace Saxon.Eej.ee.validate {
                                     }
                                 }
                             } else {
-                                val = ((Saxon.Hej.type.SimpleType)(contentType)).getTypedValue(fieldVal, namespaceResolver, getConfiguration().getConversionRules());
+                                try {
+                                    val = ((Saxon.Hej.type.SimpleType)(contentType)).getTypedValue(fieldVal, namespaceResolver, getConfiguration().getConversionRules());
+                                } catch (Saxon.Hej.type.ValidationException e) {
+                                    val = null;
+                                }
                             }
                         }
                     }
                 }
-                parentWatch.addFieldValue(currentRow, column, val, nillableElement, textLocationId);
+                if ((val != null)) {
+                    parentWatch.addFieldValue(currentRow, column, val, nillableElement, textLocationId);
+                }
             }
             depth--;
         }

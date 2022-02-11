@@ -44,7 +44,7 @@ namespace Saxon.Api {
     /// well-formed XML, or not existing.</para>
     /// </remarks>    
     [Serializable]
-    public class SchemaValidator {
+    public class SchemaValidator : IDestination {
         private Configuration config;
         private List<Source> sources = new();
 
@@ -393,6 +393,35 @@ namespace Saxon.Api {
         public void ValidateMultipleDocuments() {
             UnderlyingSchemaValidator.validateMultiple(sources);
         }
+        
+        /// <summary>
+        /// The underlying <c>Saxon.Hej.s9api.Destination</c> object in the Saxon implementation.
+        /// Note that this property represents the schema validator itself as the destination of
+        /// some other process (for example, a transformation whose output is to be validated);
+        /// it must not be confused with the destination to which output is sent after validation,
+        /// as set using the <c>SetDestination()</c> method.
+        /// </summary>
+        /// <remarks>
+        /// <para>This property provides access to internal methods in the Saxon engine that are
+        /// not specifically exposed in the .NET API. In general these methods should be
+        /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
+        /// <para>The internal methods follow
+        /// Java naming conventions rather than .NET conventions.</para>
+        /// <para>Information about the returned <see cref="Saxon.Hej.s9api.Destination"/> object 
+        /// (and the objects it provides access to) is included in the Saxon JavaDoc documentation.
+        /// </para>
+        /// </remarks>
+        /// <value>The underlying Destination object</value>
+        public Saxon.Hej.s9api.Destination UnderlyingDestination => UnderlyingSchemaValidator;
+        
+        /// <summary>
+        /// Define an action to be performed when writing to the Destination is complete.
+        /// </summary>
+        /// <param name="action">The action to be performed.</param>
+        public void OnClose(System.Action action) {
+            UnderlyingSchemaValidator.onClose(action.Invoke);
+        }
+
     }
 }
 

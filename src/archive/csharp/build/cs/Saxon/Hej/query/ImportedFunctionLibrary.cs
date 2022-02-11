@@ -53,8 +53,8 @@ namespace Saxon.Hej.query {
                 return null;
             }
         }
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
-            return (namespaces.Contains(functionName.getComponentName().getURI()) && baseLibrary.isAvailable(functionName));
+        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
+            return (namespaces.Contains(functionName.getComponentName().getURI()) && baseLibrary.isAvailable(functionName, languageLevel));
         }
     
         /* Expanding default method setConfiguration from interface FunctionLibrary */

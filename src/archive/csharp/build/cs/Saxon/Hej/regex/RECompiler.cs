@@ -65,7 +65,7 @@ namespace Saxon.Hej.regex {
                 number.appendCodePoint(pattern.codePointAt(idx++));
             }
             try {
-                bracketMin = System.Int32.Parse(number.ToString());
+                bracketMin = Saxon.Impl.Helpers.Utils.ParseInt(number.ToString());
             } catch (Saxon.Ejava.lang.NumberFormatException e) {
                 syntaxError("Expected valid number");
             }
@@ -96,7 +96,7 @@ namespace Saxon.Hej.regex {
                 number.appendCodePoint(pattern.codePointAt(idx++));
             }
             try {
-                bracketMax = System.Int32.Parse(number.ToString());
+                bracketMax = Saxon.Impl.Helpers.Utils.ParseInt(number.ToString());
             } catch (Saxon.Ejava.lang.NumberFormatException e) {
                 syntaxError("Expected valid number");
             }

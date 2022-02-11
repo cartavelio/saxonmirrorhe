@@ -58,6 +58,9 @@ namespace Saxon.Hej.expr {
         public void close() {
             @base.close();
         }
+        public void discharge() {
+            @base.discharge();
+        }
         private void typeError(string message, string errorCode) {
             Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(message, errorCode, locator);
             e.setIsTypeError(!(errorCode.StartsWith("FORG")));

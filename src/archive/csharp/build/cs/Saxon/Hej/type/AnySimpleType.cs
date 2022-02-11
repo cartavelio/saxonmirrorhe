@@ -65,7 +65,7 @@ namespace Saxon.Hej.type {
             return (other == /*implicit enum*/ Saxon.Hej.type.AnySimpleType.INSTANCE);
         }
         public Saxon.Hej.om.AtomicSequence atomize(Saxon.Hej.om.NodeInfo node) {
-            return new Saxon.Hej.value.UntypedAtomicValue(node.getUnicodeStringValue());
+            return Saxon.Hej.value.StringValue.makeUntypedAtomic(node.getUnicodeStringValue());
         }
         public void checkTypeDerivationIsOK(Saxon.Hej.type.SchemaType type, int block) {
             if ((type == this)) {
@@ -89,7 +89,7 @@ namespace Saxon.Hej.type {
             return this;
         }
         public Saxon.Hej.om.AtomicSequence getTypedValue(Saxon.Hej.str.UnicodeString value, Saxon.Hej.om.NamespaceResolver resolver, Saxon.Hej.lib.ConversionRules rules) {
-            return new Saxon.Hej.value.UntypedAtomicValue(value);
+            return Saxon.Hej.value.StringValue.makeUntypedAtomic(value);
         }
         public Saxon.Hej.type.ValidationFailure validateContent(Saxon.Hej.str.UnicodeString value, Saxon.Hej.om.NamespaceResolver nsResolver, Saxon.Hej.lib.ConversionRules rules) {
             return null;

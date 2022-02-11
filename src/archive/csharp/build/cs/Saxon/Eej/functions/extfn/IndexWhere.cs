@@ -19,6 +19,9 @@ namespace Saxon.Eej.functions.extfn {
             public void close() {
                 @base.close();
             }
+            public void discharge() {
+                @base.discharge();
+            }
             public Saxon.Hej.om.Item next() {
                 Saxon.Hej.om.Item baseItem;
                 while (((baseItem = @base.next()) != null)) {

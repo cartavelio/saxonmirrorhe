@@ -191,11 +191,15 @@ namespace Saxon.Hej.expr {
             } )));
         }
         public override void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            int slot = getLocalSlotNumber();
-            Saxon.Hej.om.SequenceTool.supply(getSequence().iterate(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => {
-                context.setLocalVariable(slot, item);
-                getAction().evaluatePendingUpdates(context, pul);
-            } )));
+            try {
+                int slot = getLocalSlotNumber();
+                Saxon.Hej.om.SequenceTool.supply(getSequence().iterate(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => {
+                    context.setLocalVariable(slot, item);
+                    getAction().evaluatePendingUpdates(context, pul);
+                } )));
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
         public override Saxon.Hej.type.ItemType getItemType() {
             return getAction().getItemType();

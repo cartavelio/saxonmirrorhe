@@ -58,7 +58,7 @@ namespace Saxon.Hej.tree.wrapper {
                 if (Saxon.Hej.tree.util.Navigator.isAncestorOrSelf(pivot, original)) {
                     return original.atomize();
                 } else {
-                    return new Saxon.Hej.value.UntypedAtomicValue(pivot.getUnicodeStringValue());
+                    return Saxon.Hej.value.StringValue.makeUntypedAtomic(pivot.getUnicodeStringValue());
                 }
             }
         }

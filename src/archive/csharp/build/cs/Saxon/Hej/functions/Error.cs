@@ -36,9 +36,19 @@ namespace Saxon.Hej.functions {
                         if ((errorElement != null)) {
                             string module = errorElement.getAttributeValue("", "module");
                             string lineVal = errorElement.getAttributeValue("", "line");
-                            int line = ((lineVal == null) ? -1 : System.Int32.Parse(lineVal));
+                            int line;
+                            try {
+                                line = ((lineVal == null) ? -1 : Saxon.Impl.Helpers.Utils.ParseInt(lineVal));
+                            } catch (Saxon.Ejava.lang.NumberFormatException ex) {
+                                line = -1;
+                            }
                             string columnVal = errorElement.getAttributeValue("", "column");
-                            int col = ((columnVal == null) ? -1 : System.Int32.Parse(columnVal));
+                            int col;
+                            try {
+                                col = ((columnVal == null) ? -1 : Saxon.Impl.Helpers.Utils.ParseInt(columnVal));
+                            } catch (Saxon.Ejava.lang.NumberFormatException ex) {
+                                col = -1;
+                            }
                             Saxon.Hej.expr.parser.Loc locator = new Saxon.Hej.expr.parser.Loc(module, line, col);
                             e.setLocator(locator);
                         }

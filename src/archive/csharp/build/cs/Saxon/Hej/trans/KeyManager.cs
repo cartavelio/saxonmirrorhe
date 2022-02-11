@@ -79,7 +79,6 @@ namespace Saxon.Hej.trans {
             return null;
         }
         private Saxon.Hej.trans.KeyIndex buildIndex(Saxon.Hej.trans.KeyDefinitionSet keySet, Saxon.Hej.om.TreeInfo doc, Saxon.Hej.expr.XPathContext context) { lock(this) {
-            Saxon.Hej.trace.Instrumentation.count("buildIndex");
             Saxon.Hej.trans.KeyIndex index = new Saxon.Hej.trans.KeyIndex(keySet.isRangeKey());
             index.buildIndex(keySet, doc, context);
             return index;

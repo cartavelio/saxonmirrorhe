@@ -10,10 +10,10 @@ namespace Saxon.Hej {
               platform = new Saxon.Impl.Helpers.DotNetPlatform();
         }
         private const int MAJOR_VERSION = 11;
-        private const int MINOR_VERSION = 0;
-        private const int BUILD = 100518;
+        private const int MINOR_VERSION = 1;
+        private const int BUILD = 12816;
         private const string MAJOR_RELEASE_DATE = "2021-10-05";
-        private const string MINOR_RELEASE_DATE = "2021-10-05";
+        private const string MINOR_RELEASE_DATE = "2022-01-28";
         private Version()  {
         }
         public static string getProductName() {
@@ -48,6 +48,9 @@ namespace Saxon.Hej {
         }
         public static void main(string[] args) {
             System.Console.Error.WriteLine((((getProductTitle()+" (build ")+BUILD)+')'));
+            if (((args.Length>0) && args[0].Equals("-resources"))) {
+                platform.showEmbeddedResources();
+            }
         }
         public static string softwareEdition;
         public static Saxon.Hej.Platform platform;

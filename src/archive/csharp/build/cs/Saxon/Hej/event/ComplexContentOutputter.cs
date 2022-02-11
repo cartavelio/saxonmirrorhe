@@ -305,33 +305,35 @@ namespace Saxon.Hej.@event {
                 nextReceiver.append(item, locationId, copyNamespaces);
             }
         }
-        public override Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode) {
+        public override Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode, Saxon.Hej.s9api.Location loc) {
             if ((level>=0)) {
-                return new Saxon.Hej.@event.ComplexContentOutputter.UnicodeStringReceiver(this, previousAtomic, asTextNode, prev => {
+                return new Saxon.Hej.@event.ComplexContentOutputter.UnicodeStringReceiver(this, previousAtomic, asTextNode, loc, prev => {
                     previousAtomic = prev;
                 } );
             } else {
-                return base.getStringReceiver(asTextNode);
+                return base.getStringReceiver(asTextNode, loc);
             }
         }
         private class UnicodeStringReceiver : Saxon.Hej.str.UniStringConsumer {
             private readonly Saxon.Hej.@event.ComplexContentOutputter cco;
             private readonly bool previousAtomic;
             private readonly bool asTextNode;
+            private readonly Saxon.Hej.s9api.Location location;
             private readonly Saxon.Ejava.util.function.Consumer<bool> resetPreviousAtomic;
-            public UnicodeStringReceiver(Saxon.Hej.@event.ComplexContentOutputter cco, bool previousAtomic, bool asTextNode, Saxon.Ejava.util.function.Consumer<bool> resetPreviousAtomic)  {
+            public UnicodeStringReceiver(Saxon.Hej.@event.ComplexContentOutputter cco, bool previousAtomic, bool asTextNode, Saxon.Hej.s9api.Location loc, Saxon.Ejava.util.function.Consumer<bool> resetPreviousAtomic)  {
                 this.cco = cco;
                 this.previousAtomic = previousAtomic;
                 this.asTextNode = asTextNode;
+                this.location = loc;
                 this.resetPreviousAtomic = resetPreviousAtomic;
             }
             public void open() {
                 if ((previousAtomic && !(asTextNode))) {
-                    cco.characters(Saxon.Hej.str.StringConstants.SINGLE_SPACE, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
+                    cco.characters(Saxon.Hej.str.StringConstants.SINGLE_SPACE, location, Saxon.Hej.@event.ReceiverOption.NONE);
                 }
             }
             public Saxon.Hej.str.UniStringConsumer accept(Saxon.Hej.str.UnicodeString chars) {
-                cco.characters(chars, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
+                cco.characters(chars, location, Saxon.Hej.@event.ReceiverOption.NONE);
                 return this;
             }
             public void close() {

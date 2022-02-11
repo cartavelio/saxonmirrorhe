@@ -88,6 +88,18 @@ namespace Saxon.Hej.str {
             }
             return -1;
         }
+        public override long indexWhere(Saxon.Ejava.util.function.IntPredicate predicate, long from) {
+            int first = segmentForOffset(from);
+            for (int i = first; (i<segments.Count); i++) {
+                Saxon.Hej.str.UnicodeString segment = segments[i];
+                long offset = offsets[i];
+                long pos = segment.indexWhere(predicate, ((i == first) ? (from-offset) : 0));
+                if ((pos>=0)) {
+                    return (pos+offset);
+                }
+            }
+            return -1;
+        }
         public override int codePointAt(long index) {
             int entry = segmentForOffset(index);
             Saxon.Hej.str.UnicodeString segment = segments[entry];
@@ -113,7 +125,7 @@ namespace Saxon.Hej.str {
                 for (int i = (first+1); (i<last); i++) {
                     z = z.concat(segments[i]);
                 }
-                return z.concat(segments[last].substring(0, (end-offsets[last])));
+                return z.concat(segments[last].prefix((end-offsets[last])));
             }
         }
         public override Saxon.Hej.str.ZenoString concat(Saxon.Hej.str.UnicodeString other) {
@@ -178,6 +190,11 @@ namespace Saxon.Hej.str {
                 i--;
             }
             return this;
+        }
+        public void writeSegments(Saxon.Hej.str.UnicodeWriter writer) {
+            foreach (Saxon.Hej.str.UnicodeString str in segments) {
+                writer.write(str);
+            }
         }
         public static Saxon.Hej.str.UnicodeString concatSegments(Saxon.Hej.str.UnicodeString left, Saxon.Hej.str.UnicodeString right) {
             if (((left.getWidth()<=8) && (right.getWidth()<=8))) {
@@ -280,9 +297,9 @@ namespace Saxon.Hej.str {
             }
         }
     
-        private class Inner_IntIterator_d1605e380 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_21 : Saxon.Hej.z.IntIterator {
             private readonly ZenoString outerInstance;
-            public Inner_IntIterator_d1605e380(ZenoString outerInstance) {
+            public Inner_IntIterator_21(ZenoString outerInstance) {
                 this.outerInstance = outerInstance;
                 outerIterator = outerInstance.segments.GetEnumerator();
             }

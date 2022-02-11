@@ -143,15 +143,15 @@ namespace Saxon.Hej.query {
                     compiledFunction.setParameterDefinitions(@params);
                     compiledFunction.setResultType(getResultType());
                     compiledFunction.setLineNumber(location.getLineNumber());
+                    compiledFunction.setColumnNumber(location.getColumnNumber());
                     compiledFunction.setSystemId(location.getSystemId());
                     compiledFunction.setStackFrameMap(map);
                     compiledFunction.setUpdating(updating);
                     compiledFunction.setAnnotations(annotations);
                     if (staticContext.getUserQueryContext().isCompileWithTracing()) {
                         namespaceResolver = staticContext.getNamespaceResolver();
-                        Saxon.Hej.expr.instruct.ComponentTracer trace = new Saxon.Hej.expr.instruct.ComponentTracer(compiledFunction);
-                        trace.setLocation(location);
-                        body = trace;
+                        staticContext.getCodeInjector().process(compiledFunction);
+                        body = compiledFunction.getBody();
                     }
                 }
                 fixupReferences();
@@ -187,7 +187,7 @@ namespace Saxon.Hej.query {
                 body = Saxon.Hej.expr.parser.LoopLifter.process(body, visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo.ABSENT);
             }
             if (opt.isOptionSet(Saxon.Hej.expr.parser.OptimizerOptions.EXTRACT_GLOBALS)) {
-                Saxon.Hej.trans.GlobalVariableManager manager = new Inner_GlobalVariableManager_d1414e1389(this);
+                Saxon.Hej.trans.GlobalVariableManager manager = new Inner_GlobalVariableManager_23(this);
                 Saxon.Hej.expr.Expression b2 = opt.promoteExpressionsToGlobal(body, manager, visitor);
                 if ((b2 != null)) {
                     body = body.optimize(visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo.ABSENT);
@@ -276,9 +276,9 @@ namespace Saxon.Hej.query {
             return Saxon.Api.HostLanguage.XQUERY;
         }
     
-        private class Inner_GlobalVariableManager_d1414e1389 : Saxon.Hej.trans.GlobalVariableManager {
+        private class Inner_GlobalVariableManager_23 : Saxon.Hej.trans.GlobalVariableManager {
             private readonly XQueryFunction outerInstance;
-            public Inner_GlobalVariableManager_d1414e1389(XQueryFunction outerInstance) {
+            public Inner_GlobalVariableManager_23(XQueryFunction outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public void addGlobalVariable(Saxon.Hej.expr.instruct.GlobalVariable variable) {

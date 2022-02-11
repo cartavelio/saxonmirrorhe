@@ -24,12 +24,12 @@ namespace Saxon.Eej.ee.stream.adjunct {
             for (int i = 1; (i<argValues.Length); i++) {
                 argValues[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(exp.getArg(i).iterate(context));
             }
-            return new Inner_ItemFeed_d232e371(this, resultFeed, context, argValues, targetComponent, target);
+            return new Inner_ItemFeed_17(this, resultFeed, context, argValues, targetComponent, target);
         }
     
-        private class Inner_ItemFeed_d232e371 : Saxon.Eej.ee.stream.feed.ItemFeed {
+        private class Inner_ItemFeed_17 : Saxon.Eej.ee.stream.feed.ItemFeed {
             private readonly FilterFunctionCallAdjunct outerInstance;
-            public Inner_ItemFeed_d232e371(FilterFunctionCallAdjunct outerInstance, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg1, /*AA*/Saxon.Hej.expr.XPathContext arg2, Saxon.Hej.om.Sequence[] argValues, Saxon.Hej.expr.Component targetComponent, Saxon.Hej.expr.instruct.UserFunction target) : base(arg1, arg2) {
+            public Inner_ItemFeed_17(FilterFunctionCallAdjunct outerInstance, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg1, /*AA*/Saxon.Hej.expr.XPathContext arg2, Saxon.Hej.om.Sequence[] argValues, Saxon.Hej.expr.Component targetComponent, Saxon.Hej.expr.instruct.UserFunction target) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
                 this.argValues = argValues;
                 this.targetComponent = targetComponent;

@@ -28,7 +28,7 @@ namespace Saxon.Hej.ma.json {
             Saxon.Hej.ma.json.JsonParser parser = new Saxon.Hej.ma.json.JsonParser();
             int flags = 0;
             if ((options != null)) {
-                flags = Saxon.Hej.ma.json.JsonParser.getFlags(options, context, false);
+                flags = Saxon.Hej.ma.json.JsonParser.getFlags(options, false, false);
             }
             Saxon.Hej.ma.json.JsonHandlerMap handler = new Saxon.Hej.ma.json.JsonHandlerMap(context, flags);
             if ((((flags&Saxon.Hej.ma.json.JsonParser.DUPLICATES_RETAINED)) != 0)) {

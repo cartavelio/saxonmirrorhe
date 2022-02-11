@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.ma.json {
     public class JsonReceiver : Saxon.Hej.@event.Receiver {
+        private Saxon.Hej.expr.XPathContext context;
         private Saxon.Hej.@event.PipelineConfiguration pipe;
         private Saxon.Hej.str.UniStringConsumer output;
         private readonly Saxon.Ejava.lang.StringBuilder textBuffer = new Saxon.Ejava.lang.StringBuilder(128);
@@ -13,11 +14,12 @@ namespace Saxon.Hej.ma.json {
         private readonly System.Collections.Generic.Stack<System.Collections.Generic.ISet<string>> keyChecker = new System.Collections.Generic.Stack<System.Collections.Generic.ISet<string>>();
         private Saxon.Hej.om.Function numberFormatter = null;
         private const string ERR_INPUT = "FOJS0006";
-        public JsonReceiver(Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Hej.str.UniStringConsumer output)  {
+        public JsonReceiver(Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Hej.expr.XPathContext context, Saxon.Hej.str.UniStringConsumer output)  {
             Saxon.Ejava.util.Objects.requireNonNull(pipe);
             Saxon.Ejava.util.Objects.requireNonNull(output);
             setPipelineConfiguration(pipe);
             this.output = output;
+            this.context = context;
         }
         public void setPipelineConfiguration(Saxon.Hej.@event.PipelineConfiguration pipe) {
             this.pipe = pipe;
@@ -196,7 +198,7 @@ namespace Saxon.Hej.ma.json {
                             throw new Saxon.Hej.trans.XPathException(("xml-to-json: Invalid number: "+textBuffer), ERR_INPUT);
                         }
                     } else {
-                        Saxon.Hej.om.Sequence result = Saxon.Hej.functions.SystemFunction.dynamicCall(numberFormatter, pipe.getXPathContext(), new Saxon.Hej.om.Sequence[]{new Saxon.Hej.value.StringValue(uContent)});
+                        Saxon.Hej.om.Sequence result = Saxon.Hej.functions.SystemFunction.dynamicCall(numberFormatter, context, new Saxon.Hej.om.Sequence[]{new Saxon.Hej.value.StringValue(uContent)});
                         output.accept(((Saxon.Hej.value.StringValue)(result)).getUnicodeStringValue());
                     }
                 } else {

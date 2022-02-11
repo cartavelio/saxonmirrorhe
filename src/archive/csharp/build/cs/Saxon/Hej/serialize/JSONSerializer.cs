@@ -37,7 +37,7 @@ namespace Saxon.Hej.serialize {
             string max = details.getProperty(Saxon.Hej.lib.SaxonOutputKeys.LINE_LENGTH);
             if ((max != null)) {
                 try {
-                    maxLineLength = System.Int32.Parse(max);
+                    maxLineLength = Saxon.Impl.Helpers.Utils.ParseInt(max);
                 } catch (Saxon.Ejava.lang.NumberFormatException err) {
                 }
             }
@@ -73,7 +73,7 @@ namespace Saxon.Hej.serialize {
                         keyList.Add(pair.key);
                     }
                     if ((propertySorter != null)) {
-                        keyList.Sort(propertySorter);
+                        Saxon.Impl.Helpers.ListUtils.Sort(keyList, propertySorter);
                     }
                     foreach (Saxon.Hej.value.AtomicValue key in keyList) {
                         string stringKey = key.getStringValue();
@@ -165,7 +165,7 @@ namespace Saxon.Hej.serialize {
                     write(seq.head());
                     level--;
                 } else {
-                    throw new Saxon.Hej.trans.XPathException((("JSON serialization: cannot handle a sequence of length "+len)+Saxon.Hej.trans.Err.depictSequence(seq)), "SERE0023");
+                    throw new Saxon.Hej.trans.XPathException(((("JSON serialization: cannot handle a sequence of length "+len)+" ")+Saxon.Hej.trans.Err.depictSequence(seq)), "SERE0023");
                 }
             }
         }

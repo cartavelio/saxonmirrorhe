@@ -149,7 +149,14 @@ namespace Saxon.Impl.Dom {
         }
 
         public override string getLocalPart() {
-            return node.LocalName;
+            switch (node.NodeType) {
+                case XmlNodeType.Element:
+                case XmlNodeType.Attribute:
+                case XmlNodeType.ProcessingInstruction:
+                    return node.LocalName;
+                default:
+                    return "";
+            }
         }
 
         public override string getURI() {
@@ -596,6 +603,9 @@ namespace Saxon.Impl.Dom {
 
             public void close() {
             }
+
+            public void discharge() {
+            }
             
         }
 
@@ -666,7 +676,7 @@ namespace Saxon.Impl.Dom {
                 return count == 0 ? 1 : count;
             }
             
-            //  Starting with ix positioned at a node, which in the first in a span, calculate the length
+            //  Starting with ix positioned at a node, which is the first in a span, calculate the length
             //  of the span, that is the number of DOM nodes mapped to this XPath node.
             //  @return the number of nodes spanned
 
@@ -763,6 +773,9 @@ namespace Saxon.Impl.Dom {
             }
 
             public void close() {
+            }
+
+            public void discharge() {
             }
         }
     }

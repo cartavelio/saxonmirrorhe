@@ -6,27 +6,21 @@ namespace Saxon.Hej.resource {
         private readonly string href;
         private string jsonStr;
         private Saxon.Hej.om.Item item;
+        private readonly Saxon.Hej.expr.XPathContext context;
         private Saxon.Hej.resource.AbstractResourceCollection.InputDetails details;
-        public readonly static Saxon.Hej.lib.ResourceFactory FACTORY = (config, details) => new Saxon.Hej.resource.JSONResource(details);
-        public JSONResource(Saxon.Hej.resource.AbstractResourceCollection.InputDetails details)  {
+        public readonly static Saxon.Hej.lib.ResourceFactory FACTORY = (context, details) => new Saxon.Hej.resource.JSONResource(context, details);
+        public JSONResource(Saxon.Hej.expr.XPathContext context, Saxon.Hej.resource.AbstractResourceCollection.InputDetails details)  {
             this.href = details.resourceUri;
+            this.context = context;
             if ((details.encoding == null)) {
                 details.encoding = "UTF-8";
             }
             this.details = details;
         }
-        public JSONResource(string uri, Saxon.Hej.ma.map.MapItem map)  {
-            this.item = map;
-            this.href = uri;
-        }
-        public JSONResource(string uri, Saxon.Hej.ma.arrays.ArrayItem array)  {
-            this.item = array;
-            this.href = uri;
-        }
         public string getResourceURI() {
             return href;
         }
-        public Saxon.Hej.om.Item getItem(Saxon.Hej.expr.XPathContext context) {
+        public Saxon.Hej.om.Item getItem() {
             if ((item != null)) {
                 return item;
             }

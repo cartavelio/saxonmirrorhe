@@ -616,11 +616,6 @@ namespace Saxon.Eej.ee.schema {
             return list;
         }
     
-        /* Creating stub method isNamespaceSensitive to satisfy interface HyperType */
-        public virtual bool isNamespaceSensitive() {
-            throw new System.NotImplementedException();
-        }
-
         /* Creating stub method isBuiltInType to satisfy interface SimpleType */
         public virtual bool isBuiltInType() {
             throw new System.NotImplementedException();
@@ -633,6 +628,11 @@ namespace Saxon.Eej.ee.schema {
 
         /* Creating stub method validateContent to satisfy interface SimpleType */
         public virtual Saxon.Hej.type.ValidationFailure validateContent(Saxon.Hej.str.UnicodeString arg1, Saxon.Hej.om.NamespaceResolver arg2, Saxon.Hej.lib.ConversionRules arg3) {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method isNamespaceSensitive to satisfy interface HyperType */
+        public virtual bool isNamespaceSensitive() {
             throw new System.NotImplementedException();
         }
 

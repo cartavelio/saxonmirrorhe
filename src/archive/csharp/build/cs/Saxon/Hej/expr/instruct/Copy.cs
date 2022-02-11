@@ -225,7 +225,11 @@ namespace Saxon.Hej.expr.instruct {
             Saxon.Hej.Controller controller = context.getController();
             Saxon.Hej.om.Item item = context.getContextItem();
             if ((item == null)) {
-                return null;
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("There is no context item for xsl:copy", "XTTE0945");
+                err.setIsTypeError(true);
+                err.setLocation(getLocation());
+                err.setXPathContext(context);
+                throw err;
             }
             if (!(((item is Saxon.Hej.om.NodeInfo)))) {
                 @out.append(item, getLocation(), Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES);

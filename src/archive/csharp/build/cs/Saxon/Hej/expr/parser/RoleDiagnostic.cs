@@ -159,9 +159,9 @@ namespace Saxon.Hej.expr.parser {
         }
         public static Saxon.Hej.expr.parser.RoleDiagnostic reconstruct(string @in) {
             int v = @in.IndexOf('|');
-            int kind = System.Int32.Parse(@in.Substring(0, v - 0));
+            int kind = Saxon.Impl.Helpers.Utils.ParseInt(@in.Substring(0, v - 0));
             int w = @in.IndexOf('|', (v+1));
-            int operand = System.Int32.Parse(@in.Substring((v+1), w - (v+1)));
+            int operand = Saxon.Impl.Helpers.Utils.ParseInt(@in.Substring((v+1), w - (v+1)));
             int x = @in.IndexOf('|', (w+1));
             string errorCode = @in.Substring((w+1), x - (w+1));
             string operation = @in.Substring((x+1));

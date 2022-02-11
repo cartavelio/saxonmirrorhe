@@ -48,6 +48,12 @@ namespace Saxon.Hej.tree.linked {
             if ((arrays == null)) {
                 arrays = new System.Collections.Generic.List<Saxon.Hej.tree.linked.NodeImpl[]>(20);
             }
+            if (useEventLocation) {
+                System.Object copier = getPipelineConfiguration().getComponent(typeof(Saxon.Hej.@event.CopyInformee).Name);
+                if ((copier is Saxon.Hej.@event.LocationCopier)) {
+                    setSystemId(((Saxon.Hej.@event.LocationCopier)(copier)).getSystemId());
+                }
+            }
             base.open();
         }
         public override void startDocument(int properties) {

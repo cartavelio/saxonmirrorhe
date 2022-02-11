@@ -29,13 +29,12 @@ namespace Saxon.Api {
         internal XQueryCompiler(Processor processor) {
             this.Processor = processor;
             Implementation = processor.JProcessor.newXQueryCompiler();
-            Implementation.setModuleURIResolver(new StandardModuleURIResolver(processor.XmlResolver));
         }
 
         /// <summary>
         /// Declare a namespace for use by the query. This has the same
-        /// status as a namespace appearing within the query prolog (though
-        /// a declaration in the query prolog of the same prefix will take
+        /// status as a namespace declaration appearing within the query prolog (though
+        /// a declaration of the same prefix in the query prolog will take
         /// precedence).
         /// </summary>
         /// <param name="prefix">The namespace prefix to be declared. Use
@@ -45,6 +44,16 @@ namespace Saxon.Api {
         /// a zero-length string to "undeclare" a namespace.</param>
         public void DeclareNamespace(string prefix, string uri) {
             Implementation.declareNamespace(prefix, uri);
+        }
+        
+        /// <summary>
+        /// The name of the default collation used by queries compiled using this <c>XQueryCompiler</c>.
+        /// This must be the name of a collation that is known to the <c>Processor</c>.
+        /// </summary>
+
+        public string DefaultCollationName {
+            get => Implementation.getDefaultCollationName();
+            set => Implementation.declareDefaultCollation(value);
         }
 
         /// <summary>
@@ -142,14 +151,29 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// A user-supplied <c>IQueryResolver</c> used to resolve location hints appearing in an
+        /// A user-supplied <c>XQueryResolver</c> used to resolve the URIs appearing in an
         /// <c>import module</c> declaration.
         /// </summary>
         /// <remarks>
-        /// <para>In the absence of a user-supplied <c>QueryResolver</c>, an <c>import module</c> declaration
-        /// is interpreted as follows. First, if the module URI identifies an already loaded module, that module
-        /// is used and the location hints are ignored. Otherwise, each URI listed in the location hints is
-        /// resolved using the <c>XmlResolver</c> registered with the <c>Processor</c>.</para>
+        /// <para>If an <c>import module</c> declaration identifies a module URI that has already been loaded,
+        /// then the existing module is used (regardless of location hints and regardless of the <c>XQueryResolver</c>),
+        /// unless the configuration option <c>XQUERY_MULTIPLE_MODULE_IMPORTS</c> is set. If this option is set, then an existing
+        /// module will be reused if the location hint matches; otherwise a new module is loaded (which can
+        /// potentially cause a failure if it results in duplicate variables or functions having the same name).
+        /// </para>
+        /// <para>The <c>XQueryResolver</c> can return multiple library modules; if it does so, they are all
+        /// imported. If it returns an empty array, nothing is imported.</para>
+        /// <para>If the <c>XQueryResolver</c> returns null (as distinct from returning an empty array),
+        /// then the <c>import module</c> declaration is resolved as if there were no user-supplied
+        /// <c>XQueryResolver</c>.</para>
+        /// <para>If there is no user-supplied <c>XQueryResolver</c>, and if the module has not already been
+        /// loaded, then an <c>import module</c> declaration is interpreted as follows. First, if there are no location hints,
+        /// then a static error is reported. Otherwise, each URI listed in the location hints is
+        /// resolved using the default resolution algorithm for the <c>Processor</c>, and this is expected
+        /// to deliver an input stream containing an XQuery library module.</para>
+        /// <para>The interface changed in Saxon 11.1 so that the <c>XQueryResolver</c> now returns one or more
+        /// <c>TextResource</c> objects. The previous class <c>XQueryModuleSource</c> no longer exists.
+        /// </para>
         /// </remarks>
 
         public XQueryResolver XQueryResolver {
@@ -157,7 +181,7 @@ namespace Saxon.Api {
             set {
                 this._moduleResolver = value;
                 Implementation.setModuleURIResolver(
-                    new QueryResolverWrapper(value, this.Processor.XmlResolver));
+                    new QueryResolverWrapper(value, this.Processor));
             }
         }
 
@@ -205,7 +229,7 @@ namespace Saxon.Api {
         /// status, and is not useful for diagnosing the actual error.</exception>
         public XQueryExecutable Compile(Stream query) {
             Saxon.Hej.s9api.XQueryExecutable exec = Implementation.compile(query);
-            return new XQueryExecutable(exec);
+            return new XQueryExecutable(Processor, exec);
         }
 
         /// <summary>
@@ -233,7 +257,7 @@ namespace Saxon.Api {
         /// status, and is not useful for diagnosing the actual error.</exception>
         public XQueryExecutable Compile(string query) {
             Saxon.Hej.s9api.XQueryExecutable exec = Implementation.compile(query);
-            return new XQueryExecutable(exec);
+            return new XQueryExecutable(Processor, exec);
         }
         
         /// <summary>

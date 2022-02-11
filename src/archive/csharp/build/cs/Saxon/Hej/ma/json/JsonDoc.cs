@@ -15,10 +15,13 @@ namespace Saxon.Hej.ma.json {
             string encoding = "UTF-8";
             System.IO.TextReader reader;
             try {
-                reader = /*Delegate.resolve()*/context.getController().getUnparsedTextURIResolver()(absoluteURI, encoding, config);
+                reader = context.getController().getUnparsedTextURIResolver().resolve(absoluteURI, encoding, config);
             } catch (Saxon.Hej.trans.XPathException err) {
                 err.maybeSetErrorCode("FOUT1170");
                 throw;
+            }
+            if ((reader == null)) {
+                throw new Saxon.Hej.trans.XPathException(("Unable to resolve json-doc() URI "+absoluteURI), "FOUT1170");
             }
             Saxon.Hej.str.UnicodeString content;
             try {
@@ -28,7 +31,7 @@ namespace Saxon.Hej.ma.json {
                 e.setErrorCode("FOUT1190");
                 throw e;
             } catch (System.IO.IOException ioErr) {
-                throw Saxon.Hej.functions.UnparsedTextFunction.handleIOError(absoluteURI, ioErr, context);
+                throw Saxon.Hej.functions.UnparsedTextFunction.handleIOError(absoluteURI, ioErr);
             }
             System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions;
             if ((getArity() == 2)) {

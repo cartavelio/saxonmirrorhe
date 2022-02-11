@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.parser {
     public sealed class Tokenizer {
+        public const char NUL = (char)(0);
         private int state = DEFAULT_STATE;
         public const int DEFAULT_STATE = 0;
         public const int BARE_NAME_STATE = 1;
@@ -829,12 +830,16 @@ namespace Saxon.Hej.expr.parser {
             return (precedingToken<=Saxon.Hej.expr.parser.Token.LAST_OPERATOR);
         }
         public char nextChar() {
-            char c = input[inputOffset++];
-            if ((c == '\n')) {
-                incrementLineNumber();
-                lineNumber++;
+            if ((inputOffset<inputLength)) {
+                char c = input[inputOffset++];
+                if ((c == '\n')) {
+                    incrementLineNumber();
+                    lineNumber++;
+                }
+                return c;
+            } else {
+                return NUL;
             }
-            return c;
         }
         private void incrementLineNumber() {
             nextLineNumber++;

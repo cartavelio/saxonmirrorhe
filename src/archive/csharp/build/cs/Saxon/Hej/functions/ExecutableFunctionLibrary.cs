@@ -30,7 +30,7 @@ namespace Saxon.Hej.functions {
             }
             return fn;
         }
-        public virtual bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
+        public virtual bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
             return (Saxon.Impl.Helpers.MapUtils.Get(functions, functionName) != null);
         }
         public virtual Saxon.Hej.functions.FunctionLibrary copy() {

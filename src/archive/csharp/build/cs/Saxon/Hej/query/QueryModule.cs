@@ -143,7 +143,7 @@ namespace Saxon.Hej.query {
                 qp.setCodeInjector(importer.getCodeInjector());
             } else {
                 if (config.isCompileWithTracing()) {
-                    qp.setCodeInjector(new Saxon.Hej.trace.TraceCodeInjector());
+                    qp.setCodeInjector(new Saxon.Hej.trace.XQueryTraceCodeInjector());
                 }
             }
             Saxon.Hej.om.QNameParser qnp = new Saxon.Hej.om.QNameParser(module.getLiveNamespaceResolver()).withAcceptEQName((importer.getXPathVersion()>=30)).withUnescaper(new Saxon.Hej.query.XQueryParser.Unescaper(config.getValidCharacterChecker()));
@@ -630,7 +630,7 @@ namespace Saxon.Hej.query {
             activeNamespaces.pop();
         }
         public Saxon.Hej.om.NamespaceResolver getLiveNamespaceResolver() {
-            return new Inner_NamespaceResolver_d1404e4607(this);
+            return new Inner_NamespaceResolver_306(this);
         }
         public string checkURIForPrefix(string prefix) {
             if ((activeNamespaces != null)) {
@@ -769,9 +769,9 @@ namespace Saxon.Hej.query {
         
         }
     
-        private class Inner_NamespaceResolver_d1404e4607 : Saxon.Hej.om.NamespaceResolver {
+        private class Inner_NamespaceResolver_306 : Saxon.Hej.om.NamespaceResolver {
             private readonly QueryModule outerInstance;
-            public Inner_NamespaceResolver_d1404e4607(QueryModule outerInstance) {
+            public Inner_NamespaceResolver_306(QueryModule outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public string getURIForPrefix(string prefix, bool useDefault) {

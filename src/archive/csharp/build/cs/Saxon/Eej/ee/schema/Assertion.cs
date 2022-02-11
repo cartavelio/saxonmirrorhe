@@ -120,7 +120,9 @@ namespace Saxon.Eej.ee.schema {
             return result;
         }
         public static void setDocumentsAndCollections(Saxon.Hej.Configuration config, Saxon.Hej.sxpath.XPathDynamicContext context) {
-            context.setURIResolver(new Inner_URIResolver_d61e1025());
+            context.setResourceResolver(new Saxon.Hej.lib.ResourceResolverDelegate(request => {
+                throw new Saxon.Hej.trans.UncheckedXPathException(new Saxon.Hej.trans.XPathException("Use of doc() function within an assertion is not allowed", "FODC0002"));
+            } ));
             context.getXPathContextObject().getController().setDefaultCollection(Saxon.Hej.functions.CollectionFn.EMPTY_COLLECTION_URI);
             context.setCollectionFinder((context1, collectionURI) => {
                 if (collectionURI.Equals(Saxon.Hej.functions.CollectionFn.EMPTY_COLLECTION_URI)) {
@@ -165,13 +167,5 @@ namespace Saxon.Eej.ee.schema {
             return new Saxon.Hej.functions.CallableFunction(1, callable, Saxon.Hej.type.SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
         }
     
-        private class Inner_URIResolver_d61e1025 : Saxon.Ejavax.xml.transform.URIResolver {
-            public Inner_URIResolver_d61e1025() {
-            }
-            public Saxon.Ejavax.xml.transform.Source resolve(string href, string @base) {
-                throw new Saxon.Hej.trans.XPathException("Use of doc() function within an assertion is not allowed", "FODC0002");
-            }
-        }
-
     }
 }

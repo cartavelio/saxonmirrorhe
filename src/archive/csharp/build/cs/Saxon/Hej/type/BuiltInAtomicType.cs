@@ -397,7 +397,7 @@ namespace Saxon.Hej.type {
                 return new Saxon.Hej.value.StringValue(stringValue.tidy());
             } else {
                 if ((fingerprint == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC)) {
-                    return new Saxon.Hej.value.UntypedAtomicValue(stringValue);
+                    return Saxon.Hej.value.StringValue.makeUntypedAtomic(stringValue);
                 }
             }
             Saxon.Hej.type.StringConverter converter = stringConverter;
@@ -415,7 +415,7 @@ namespace Saxon.Hej.type {
                 return new Saxon.Hej.value.StringValue(value.tidy());
             } else {
                 if ((fingerprint == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC)) {
-                    return new Saxon.Hej.value.UntypedAtomicValue(value);
+                    return Saxon.Hej.value.StringValue.makeUntypedAtomic(value);
                 }
             }
             Saxon.Hej.type.StringConverter converter = getStringConverter(rules);

@@ -180,7 +180,10 @@ namespace Saxon.Hej.expr {
                 if ((Saxon.Hej.expr.Literal.isEmptySequence(rhs) && (((lhs.getSpecialProperties()&Saxon.Hej.expr.StaticProperty.ORDERED_NODESET)) != 0))) {
                     return lhs;
                 }
-                if (((lhs is Saxon.Hej.functions.CurrentGroupCall) && (rhs is Saxon.Hej.expr.ContextItemExpression))) {
+                if (contextItemWithCurrentGroup(lhs, rhs)) {
+                    return rhs;
+                }
+                if (contextItemWithCurrentGroup(rhs, lhs)) {
                     return lhs;
                 }
                 break ;
@@ -191,7 +194,10 @@ namespace Saxon.Hej.expr {
                 if (Saxon.Hej.expr.Literal.isEmptySequence(rhs)) {
                     return rhs;
                 }
-                if (((lhs is Saxon.Hej.functions.CurrentGroupCall) && (rhs is Saxon.Hej.expr.ContextItemExpression))) {
+                if (contextItemWithCurrentGroup(lhs, rhs)) {
+                    return lhs;
+                }
+                if (contextItemWithCurrentGroup(rhs, lhs)) {
                     return rhs;
                 }
                 break ;
@@ -202,7 +208,10 @@ namespace Saxon.Hej.expr {
                 if ((Saxon.Hej.expr.Literal.isEmptySequence(rhs) && (((lhs.getSpecialProperties()&Saxon.Hej.expr.StaticProperty.ORDERED_NODESET)) != 0))) {
                     return lhs;
                 }
-                if (((lhs is Saxon.Hej.functions.CurrentGroupCall) && (rhs is Saxon.Hej.expr.ContextItemExpression))) {
+                if (contextItemWithCurrentGroup(lhs, rhs)) {
+                    return Saxon.Hej.expr.Literal.makeEmptySequence();
+                }
+                if (contextItemWithCurrentGroup(rhs, lhs)) {
                     return new Saxon.Hej.expr.TailExpression(lhs, 2);
                 }
                 break ;
@@ -294,6 +303,14 @@ namespace Saxon.Hej.expr {
         }
         private bool operandsAreDisjoint(Saxon.Hej.type.TypeHierarchy th) {
             return (th.relationship(getLhsExpression().getItemType(), getRhsExpression().getItemType()) == Saxon.Hej.type.Affinity.DISJOINT);
+        }
+        private bool contextItemWithCurrentGroup(Saxon.Hej.expr.Expression lhs, Saxon.Hej.expr.Expression rhs) {
+            if (((lhs is Saxon.Hej.expr.ContextItemExpression) && (rhs is Saxon.Hej.functions.CurrentGroupCall))) {
+                Saxon.Hej.expr.Expression focusSetter = Saxon.Hej.expr.parser.ExpressionTool.getFocusSettingContainer(lhs);
+                Saxon.Hej.expr.Expression forEachGroup = ((Saxon.Hej.functions.CurrentGroupCall)(rhs)).getControllingInstruction();
+                return ((forEachGroup != null) && (focusSetter == forEachGroup));
+            }
+            return false;
         }
         public override Saxon.Hej.expr.Expression unordered(bool retainAllNodes, bool forStreaming) {
             if ((((@operator == Saxon.Hej.expr.parser.Token.UNION) && !(forStreaming)) && operandsAreDisjoint(getConfiguration().getTypeHierarchy()))) {

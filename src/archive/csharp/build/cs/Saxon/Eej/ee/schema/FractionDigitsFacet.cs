@@ -9,7 +9,7 @@ namespace Saxon.Eej.ee.schema {
         public override void setValue(string value) {
             int val;
             try {
-                val = System.Int32.Parse(value);
+                val = Saxon.Impl.Helpers.Utils.ParseInt(value);
             } catch (Saxon.Ejava.lang.NumberFormatException err) {
                 throw new Saxon.Hej.type.SchemaException("Value of fractionDigits must be an integer");
             }

@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Hej.trans {
     public class CompilerInfo {
         private Saxon.Hej.Configuration config;
-        private Saxon.Ejavax.xml.transform.URIResolver uriResolver;
+        private Saxon.Hej.lib.JJ_ResourceResolver resourceResolver;
         private Saxon.Hej.lib.ErrorReporter errorReporter = new Saxon.Hej.lib.StandardErrorReporter();
         private Saxon.Hej.expr.parser.CodeInjector codeInjector;
         private int recoveryPolicy = Saxon.Hej.trans.Mode.RECOVER_WITH_WARNINGS;
@@ -24,6 +24,7 @@ namespace Saxon.Hej.trans {
         private int languageVersion = 30;
         public CompilerInfo(Saxon.Hej.Configuration config)  {
             this.config = config;
+            errorReporter = config.makeErrorReporter();
             packageLibrary = new Saxon.Hej.trans.packages.PackageLibrary(this);
             optimizerOptions = config.getOptimizerOptions();
         }
@@ -32,7 +33,7 @@ namespace Saxon.Hej.trans {
         }
         public void copyFrom(Saxon.Hej.trans.CompilerInfo info) {
             config = info.config;
-            uriResolver = info.uriResolver;
+            resourceResolver = info.resourceResolver;
             errorReporter = info.errorReporter;
             codeInjector = info.codeInjector;
             recoveryPolicy = info.recoveryPolicy;
@@ -65,7 +66,10 @@ namespace Saxon.Hej.trans {
             return optimizerOptions.isSet(Saxon.Hej.expr.parser.OptimizerOptions.JIT);
         }
         public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            uriResolver = resolver;
+            resourceResolver = new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver);
+        }
+        public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
+            resourceResolver = resolver;
         }
         public void setParameter(Saxon.Hej.om.StructuredQName name, Saxon.Hej.om.GroundedValue seq) {
             suppliedParameters.put(name, seq);
@@ -117,7 +121,14 @@ namespace Saxon.Hej.trans {
             return optimizerOptions.isSet(Saxon.Hej.expr.parser.OptimizerOptions.BYTE_CODE);
         }
         public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            return uriResolver;
+            if ((resourceResolver is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
+                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(resourceResolver)).getWrappedURIResolver();
+            } else {
+                return null;
+            }
+        }
+        public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
+            return resourceResolver;
         }
         public void setErrorReporter(Saxon.Hej.lib.ErrorReporter reporter) {
             this.errorReporter = reporter;

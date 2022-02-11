@@ -51,7 +51,7 @@ namespace Saxon.Hej.functions {
         }
         public void process(Saxon.Hej.@event.Outputter destination, Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.str.UnicodeString separator = ((arguments.Length>1) ? ((Saxon.Hej.om.GroundedValue)(arguments[1].head())).getUnicodeStringValue() : Saxon.Hej.str.EmptyUnicodeString.getInstance());
-            Saxon.Hej.str.UniStringConsumer output = destination.getStringReceiver(false);
+            Saxon.Hej.str.UniStringConsumer output = destination.getStringReceiver(false, Saxon.Hej.expr.parser.Loc.NONE);
             output.open();
             bool first = true;
             Saxon.Hej.om.SequenceIterator iter = arguments[0].iterate();

@@ -19,8 +19,8 @@ namespace Saxon.Hej.z {
         public override string ToString() {
             return (("in {"+set)+"}");
         }
-        public readonly static Saxon.Hej.z.IntPredicateProxy ALWAYS_TRUE = new Saxon.Hej.z.IntPredicateLambda(i => true);
-        public readonly static Saxon.Hej.z.IntPredicateProxy ALWAYS_FALSE = new Saxon.Hej.z.IntPredicateLambda(i => false);
+        public readonly static Saxon.Hej.z.IntPredicateProxy ALWAYS_TRUE = Saxon.Hej.z.IntPredicateLambda.of(i => true);
+        public readonly static Saxon.Hej.z.IntPredicateProxy ALWAYS_FALSE = Saxon.Hej.z.IntPredicateLambda.of(i => false);
     
         /* Expanding default method union from interface IntPredicateProxy */
         public virtual Saxon.Hej.z.IntPredicateProxy union(Saxon.Hej.z.IntPredicateProxy other) {

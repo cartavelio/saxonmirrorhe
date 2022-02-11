@@ -99,8 +99,8 @@ namespace Saxon.Hej.style {
                             test = new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, name.getURI(), name.getLocalPart(), getNamePool());
                             int arity = 0;
                             try {
-                                arity = System.Int32.Parse(tok.Substring((hash+1)));
-                            } catch (System.Exception err) {
+                                arity = Saxon.Impl.Helpers.Utils.ParseInt(tok.Substring((hash+1)));
+                            } catch (Saxon.Ejava.lang.NumberFormatException err) {
                                 compileErrorInAttribute((("Malformed function arity in '"+tok)+"'"), "XTSE0020", "names");
                             }
                             explicitComponentTests.Add(new Saxon.Hej.trans.ComponentTest(componentTypeCode, test, arity));

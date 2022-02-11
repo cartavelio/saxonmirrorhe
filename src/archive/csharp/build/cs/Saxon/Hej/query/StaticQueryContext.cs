@@ -17,7 +17,7 @@ namespace Saxon.Hej.query {
         private bool preserveSpace = false;
         private bool defaultEmptyLeast = true;
         private Saxon.Hej.lib.ModuleURIResolver moduleURIResolver;
-        private Saxon.Hej.lib.ErrorReporter errorReporter = new Saxon.Hej.lib.StandardErrorReporter();
+        private Saxon.Hej.lib.ErrorReporter errorReporter;
         private Saxon.Hej.expr.parser.CodeInjector codeInjector;
         private bool updating = false;
         private string defaultCollationName;
@@ -31,6 +31,7 @@ namespace Saxon.Hej.query {
         public StaticQueryContext(Saxon.Hej.Configuration config, bool initialize)  {
             this.config = config;
             this.namePool = config.getNamePool();
+            this.errorReporter = config.makeErrorReporter();
             if (initialize) {
                 copyFrom(config.getDefaultStaticQueryContext());
             } else {
@@ -70,7 +71,7 @@ namespace Saxon.Hej.query {
         }
         public void reset() {
             userDeclaredNamespaces = new System.Collections.Generic.Dictionary<string, string>(10);
-            errorReporter = new Saxon.Hej.lib.StandardErrorReporter();
+            errorReporter = config.makeErrorReporter();
             constructionMode = (getConfiguration().isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY) ? Saxon.Hej.lib.Validation.PRESERVE : Saxon.Hej.lib.Validation.STRIP);
             preserveSpace = false;
             defaultEmptyLeast = true;
@@ -120,6 +121,7 @@ namespace Saxon.Hej.query {
         }
         public void setLanguageVersion(int version) {
             if ((((version == 10) || (version == 30)) || (version == 31))) {
+                languageVersion = 31;
             } else {
                 if ((version == 40)) {
                     languageVersion = 40;
@@ -138,11 +140,7 @@ namespace Saxon.Hej.query {
             return (codeInjector is Saxon.Hej.trace.TraceCodeInjector);
         }
         public void setCompileWithTracing(bool trace) {
-            if (trace) {
-                codeInjector = new Saxon.Hej.trace.TraceCodeInjector();
-            } else {
-                codeInjector = null;
-            }
+            codeInjector = (trace ? new Saxon.Hej.trace.XQueryTraceCodeInjector() : null);
         }
         public void setCodeInjector(Saxon.Hej.expr.parser.CodeInjector injector) {
             this.codeInjector = injector;

@@ -67,7 +67,7 @@ namespace Saxon.Hej.expr {
             return function.getDeclaringComponent();
         }
         public void setArgumentEvaluators(Saxon.Hej.expr.parser.Evaluator[] evalModes) {
-            argumentEvaluators = new Saxon.Hej.expr.parser.Evaluator[evalModes.Length];
+            argumentEvaluators = evalModes;
         }
         private static readonly int UNHANDLED_DEPENDENCIES = (((Saxon.Hej.expr.StaticProperty.DEPENDS_ON_POSITION|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_LAST)|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_XSLT_CONTEXT)|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_USER_FUNCTIONS);
         public void allocateArgumentEvaluators() {

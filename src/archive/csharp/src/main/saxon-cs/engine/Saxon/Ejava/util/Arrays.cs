@@ -1,5 +1,8 @@
 using System;
 using System.Linq;
+using Saxon.Ejava.lang;
+using Exception = System.Exception;
+using Math = System.Math;
 using SysArray = System.Array;
 using SysColl = System.Collections;
 using SysCollGen = System.Collections.Generic;
@@ -43,7 +46,12 @@ namespace Saxon.Ejava.util
         }
         
         public static void sort<T>(T[] array, int start, int end, SysColl.IComparer comparer) {
-            SysArray.Sort(array, start, end, comparer);
+            try {
+                SysArray.Sort(array, start, end, comparer);
+            }
+            catch (Exception e) {
+                throw new System.InvalidCastException(e.Message);
+            }
         }
 
         public static int binarySearch<T>(T[] array, T value) {

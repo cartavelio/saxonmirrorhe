@@ -64,6 +64,9 @@ namespace Saxon.Hej.om {
         public virtual void close() {
             @base.close();
         }
+        public void discharge() {
+            @base.discharge();
+        }
         public bool isActuallyGrounded() {
             return (((@base is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(@base)).isActuallyGrounded()));
         }

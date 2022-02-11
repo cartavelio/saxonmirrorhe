@@ -358,7 +358,7 @@ namespace Saxon.Hej.expr.instruct {
                     }
                     Saxon.Hej.@event.PipelineConfiguration pipe = @out.getPipelineConfiguration();
                     if (copyLineNumbers) {
-                        Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier(false);
+                        Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier(false, @out.getSystemId());
                         pipe.setCopyInformee(element => copier.notifyElementNode(element));
                     }
                     item.copy(eval, copyOptions, getLocation());
@@ -422,7 +422,7 @@ namespace Saxon.Hej.expr.instruct {
                     Saxon.Hej.@event.PipelineConfiguration savedPipe = null;
                     if (copyLineNumbers) {
                         savedPipe = new Saxon.Hej.@event.PipelineConfiguration(val.getPipelineConfiguration());
-                        Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier(true);
+                        Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier(true, item.getBaseURI());
                         val.getPipelineConfiguration().setCopyInformee(element => copier.notifyElementNode(element));
                     }
                     item.copy(val, copyOptions, getLocation());

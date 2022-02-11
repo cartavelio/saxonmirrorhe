@@ -96,6 +96,9 @@ namespace Saxon.Hej.tree.tiny {
         public override bool isIdref() {
             return tree.isIdrefAttribute(nodeNr);
         }
+        public override bool isNilled() {
+            return false;
+        }
         public bool isDefaultedAttribute() {
             return tree.isDefaultedAttribute(nodeNr);
         }

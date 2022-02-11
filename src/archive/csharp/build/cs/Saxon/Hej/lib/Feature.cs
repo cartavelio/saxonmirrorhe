@@ -133,6 +133,8 @@ namespace Saxon.Hej.lib {
         public readonly static Saxon.Hej.lib.Feature<bool> RETAIN_NODE_FOR_DIAGNOSTICS = new Saxon.Hej.lib.Feature<bool>(125, "http://saxon.sf.net/feature/retainNodeForDiagnostics");
         public readonly static Saxon.Hej.lib.Feature<bool> ALLOW_UNRESOLVED_SCHEMA_COMPONENTS = new Saxon.Hej.lib.Feature<bool>(126, "http://saxon.sf.net/feature/allowUnresolvedSchemaComponents");
         public readonly static Saxon.Hej.lib.Feature<string> ZIP_URI_PATTERN = new Saxon.Hej.lib.Feature<string>(127, "http://saxon.sf.net/feature/zipUriPattern");
+        public readonly static Saxon.Hej.lib.Feature<System.Object> RESOURCE_RESOLVER = new Saxon.Hej.lib.Feature<System.Object>(128, "http://saxon.sf.net/feature/saxon-resource-resolver");
+        public readonly static Saxon.Hej.lib.Feature<string> RESOURCE_RESOLVER_CLASS = new Saxon.Hej.lib.Feature<string>(129, "http://saxon.sf.net/feature/saxon-resource-resolver-class");
     
     }
 }

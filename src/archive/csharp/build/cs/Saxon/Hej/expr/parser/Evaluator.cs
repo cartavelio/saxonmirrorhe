@@ -3,19 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.parser {
     public abstract class Evaluator {
-        private int code;
-        internal void setCode(int code) {
-            this.code = code;
-            Saxon.Hej.expr.parser.Evaluators.index(this, code);
-        }
-        public int getCode() {
-            return code;
-        }
+        public abstract int getCode();
         public abstract Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context);
         public sealed class EmptySequenceEvaluator : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.EmptySequenceEvaluator INSTANCE = new Saxon.Hej.expr.parser.Evaluator.EmptySequenceEvaluator();
             private EmptySequenceEvaluator()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.RETURN_EMPTY_SEQUENCE);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.RETURN_EMPTY_SEQUENCE;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 return Saxon.Hej.value.EmptySequence.getInstance();
@@ -25,7 +20,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class Literal : Saxon.Hej.expr.parser.Evaluator {
             public static Saxon.Hej.expr.parser.Evaluator.Literal INSTANCE = new Saxon.Hej.expr.parser.Evaluator.Literal();
             private Literal()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.EVALUATE_LITERAL);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.EVALUATE_LITERAL;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 return ((Saxon.Hej.expr.Literal)(expr)).getGroundedValue();
@@ -35,7 +32,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class Variable : Saxon.Hej.expr.parser.Evaluator {
             public static Saxon.Hej.expr.parser.Evaluator.Variable INSTANCE = new Saxon.Hej.expr.parser.Evaluator.Variable();
             private Variable()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.EVALUATE_VARIABLE);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.EVALUATE_VARIABLE;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 try {
@@ -50,7 +49,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class SuppliedParameter : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.SuppliedParameter INSTANCE = new Saxon.Hej.expr.parser.Evaluator.SuppliedParameter();
             private SuppliedParameter()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.EVALUATE_SUPPLIED_PARAMETER);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.EVALUATE_SUPPLIED_PARAMETER;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 try {
@@ -65,7 +66,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class SingleItem : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.SingleItem INSTANCE = new Saxon.Hej.expr.parser.Evaluator.SingleItem();
             private SingleItem()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.CALL_EVALUATE_SINGLE_ITEM);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.CALL_EVALUATE_SINGLE_ITEM;
             }
             public override Saxon.Hej.om.Item evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 return expr.evaluateItem(context);
@@ -75,7 +78,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class OptionalItem : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.OptionalItem INSTANCE = new Saxon.Hej.expr.parser.Evaluator.OptionalItem();
             public OptionalItem()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.CALL_EVALUATE_OPTIONAL_ITEM);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.CALL_EVALUATE_OPTIONAL_ITEM;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 Saxon.Hej.om.Item item = expr.evaluateItem(context);
@@ -90,7 +95,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class LazySequence : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.LazySequence INSTANCE = new Saxon.Hej.expr.parser.Evaluator.LazySequence();
             public LazySequence()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.MAKE_CLOSURE);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.MAKE_CLOSURE;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 Saxon.Hej.om.SequenceIterator iter = expr.iterate(context);
@@ -101,7 +108,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class MemoClosureEvaluator : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.MemoClosureEvaluator INSTANCE = new Saxon.Hej.expr.parser.Evaluator.MemoClosureEvaluator();
             public MemoClosureEvaluator()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.MAKE_MEMO_CLOSURE);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.MAKE_MEMO_CLOSURE;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 return new Saxon.Hej.value.MemoClosure(expr, context);
@@ -111,7 +120,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class SingletonClosure : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.SingletonClosure INSTANCE = new Saxon.Hej.expr.parser.Evaluator.SingletonClosure();
             public SingletonClosure()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.MAKE_SINGLETON_CLOSURE);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.MAKE_SINGLETON_CLOSURE;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 return new Saxon.Hej.value.SingletonClosure(expr, context);
@@ -121,7 +132,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class EagerSequence : Saxon.Hej.expr.parser.Evaluator {
             public static Saxon.Hej.expr.parser.Evaluator.EagerSequence INSTANCE = new Saxon.Hej.expr.parser.Evaluator.EagerSequence();
             public EagerSequence()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.ITERATE_AND_MATERIALIZE);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.ITERATE_AND_MATERIALIZE;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 try {
@@ -136,7 +149,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class SharedAppend : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.SharedAppend INSTANCE = new Saxon.Hej.expr.parser.Evaluator.SharedAppend();
             public SharedAppend()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.SHARED_APPEND_EXPRESSION);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.SHARED_APPEND_EXPRESSION;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 try {
@@ -168,7 +183,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class StreamingArgument : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.StreamingArgument INSTANCE = new Saxon.Hej.expr.parser.Evaluator.StreamingArgument();
             public StreamingArgument()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.STREAMING_ARGUMENT);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.STREAMING_ARGUMENT;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 return context.getConfiguration().obtainOptimizer().evaluateStreamingArgument(expr, context);
@@ -178,7 +195,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class MakeIndexedVariable : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.MakeIndexedVariable INSTANCE = new Saxon.Hej.expr.parser.Evaluator.MakeIndexedVariable();
             public MakeIndexedVariable()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.MAKE_INDEXED_VARIABLE);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.MAKE_INDEXED_VARIABLE;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 return context.getConfiguration().obtainOptimizer().makeIndexedValue(expr.iterate(context));
@@ -188,7 +207,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class Process : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.Process INSTANCE = new Saxon.Hej.expr.parser.Evaluator.Process();
             public Process()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.PROCESS);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.PROCESS;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 Saxon.Hej.Controller controller = context.getController();
@@ -206,7 +227,9 @@ namespace Saxon.Hej.expr.parser {
         public sealed class LazyTail : Saxon.Hej.expr.parser.Evaluator {
             public readonly static Saxon.Hej.expr.parser.Evaluator.LazyTail INSTANCE = new Saxon.Hej.expr.parser.Evaluator.LazyTail();
             public LazyTail()  {
-                setCode(Saxon.Hej.expr.parser.Evaluators.LAZY_TAIL_EXPRESSION);
+            }
+            public override int getCode() {
+                return Saxon.Hej.expr.parser.Evaluators.LAZY_TAIL_EXPRESSION;
             }
             public override Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
                 Saxon.Hej.expr.TailExpression tail = (Saxon.Hej.expr.TailExpression)(expr);

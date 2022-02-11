@@ -32,7 +32,7 @@ namespace Saxon.Hej.functions {
                 throw new Saxon.Hej.trans.XPathException(("Failed to create call to extension function "+functionName.getComponentName().getDisplayName()), err);
             }
         }
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
+        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
             Saxon.Hej.lib.ExtensionFunctionDefinition defn = Saxon.Impl.Helpers.MapUtils.Get(functions, functionName.getComponentName());
             int arity = functionName.getArity();
             return (((defn != null) && (defn.getMaximumNumberOfArguments()>=arity)) && (defn.getMinimumNumberOfArguments()<=arity));
