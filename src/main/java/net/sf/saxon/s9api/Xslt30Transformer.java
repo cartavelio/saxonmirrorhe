@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -641,6 +641,8 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * This makes the method unsuitable for passing intermediate results other than XML document
      * nodes.
      *
+     * @param finalDestination the destination for the principal result of this transformation
+     *
      * @return a {@link Destination} which accepts an XML document (typically as a stream
      * of events) and which transforms this supplied XML document (possibly using streaming)
      * as defined by the stylesheet from which which this {@code Xslt30Transformer} was generated,
@@ -681,6 +683,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * These serialization parameters can be overridden by use of
      * {@link Serializer#setOutputProperty(Serializer.Property, String)}.
      *
+     * @return the new serializer
      * @since 9.7.0.1
      */
 
@@ -698,6 +701,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * @param file the output file to which the serializer will write its output. As well as initializing
      *             the serializer to write to this output file, this method sets the base output URI of this
      *             Xslt30Transformer to be the URI of this file.
+     * @return the new serializer
      * @since 9.7.0.1
      */
 
@@ -714,6 +718,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * {@link Serializer#setOutputProperty(Serializer.Property, String)}.
      *
      * @param writer the Writer to which the serializer will write
+     * @return the new serializer
      * @since 9.7.0.1
      */
 
@@ -729,6 +734,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * {@link Serializer#setOutputProperty(Serializer.Property, String)}.
      *
      * @param stream the output stream to which the serializer will write
+     * @return the new serializer
      * @since 9.7.0.1
      */
 

@@ -23,6 +23,7 @@ public interface AnyExternalObject extends Item {
 
     /**
      * Get the item type of the object
+     * @param th the type hierarchy
      * @return the item type
      */
 

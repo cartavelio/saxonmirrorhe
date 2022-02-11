@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -728,6 +728,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      *
      * @param other the duration to be added to this one
      * @return the sum of the two durations
+     * @throws XPathException if an error is detected
      */
 
     public DurationValue add(DurationValue other) throws XPathException {
@@ -742,6 +743,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      *
      * @param other the duration to be subtracted from this one
      * @return the difference of the two durations
+     * @throws XPathException if an error is detected
      */
 
     public DurationValue subtract(DurationValue other) throws XPathException {
@@ -770,6 +772,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      *
      * @param factor the number to multiply by
      * @return the result of the multiplication
+     * @throws XPathException if an error is detected
      */
 
     public DurationValue multiply(long factor) throws XPathException {
@@ -782,6 +785,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      *
      * @param factor the number to multiply by
      * @return the result of the multiplication
+     * @throws XPathException if an error is detected
      */
 
     public DurationValue multiply(double factor) throws XPathException {
@@ -796,6 +800,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      *
      * @param factor the number to multiply by
      * @return the result of the multiplication
+     * @throws XPathException if an error is detected
      */
 
     public DurationValue multiply(BigDecimal factor) throws XPathException {
@@ -810,6 +815,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      *
      * @param factor the number to divide by
      * @return the result of the division
+     * @throws XPathException if an error is detected
      */
 
     public DurationValue divide(double factor) throws XPathException {
@@ -824,6 +830,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      *
      * @param other the duration to divide by
      * @return the result of the division
+     * @throws XPathException if an error is detected
      */
 
     public BigDecimalValue divide(DurationValue other) throws XPathException {

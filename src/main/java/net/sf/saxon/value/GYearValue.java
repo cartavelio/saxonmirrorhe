@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -60,7 +60,9 @@ public class GYearValue extends GDateValue {
     /**
      * Make a copy of this date, time, or dateTime value
      *
-     * @param typeLabel
+     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
+     *                  the value actually conforms to this type.
+     * @return the copied value
      */
 
     @Override
@@ -110,7 +112,7 @@ public class GYearValue extends GDateValue {
      * @param duration the duration to be added (which might be negative)
      * @return a new date/time value representing the result of adding the duration. The original
      *         object is not modified.
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws net.sf.saxon.trans.XPathException if an error is detected
      *
      */
 

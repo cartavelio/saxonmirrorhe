@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -54,7 +54,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      *
      * @param s     a string in the lexical space of one of the date/time types (date, time, dateTime,
      *              gYearMonth, gYear, gMonth, gMonthDay, or gDay
-     * @param rules
+     * @param rules conversion rules to apply (affects handling of year 0)
      * @return either a value of the appropriate type, or a ValidationFailure if the format is invalid
      */
 
@@ -165,7 +165,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      * @param duration the duration to be added (which might be negative)
      * @return a new date/time value representing the result of adding the duration. The original
      *         object is not modified.
-     * @throws XPathException
+     * @throws XPathException if an error is detected
      */
 
     public abstract CalendarValue add(DurationValue duration) throws XPathException;
@@ -228,6 +228,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      *
      * @param tz the new timezone, in minutes
      * @return the date/time in the new timezone
+     * @throws XPathException if an error is detected
      */
 
     public final CalendarValue adjustTimezone(/*@NotNull*/ DayTimeDurationValue tz) throws XPathException {
