@@ -5,7 +5,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +22,7 @@ public class Playground extends PerformanceTestCase {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i=0; i<5000000; i++) {
             values.add(new Int64Value(i));
-            values.add(new UntypedAtomicValue(StringView.wrap("" + i)));
+            values.add(StringValue.makeUntypedAtomic(StringView.wrap("" + i)));
         }
         measure(new Measurable() {
             @Override
@@ -53,7 +53,7 @@ public class Playground extends PerformanceTestCase {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 5000000; i++) {
             values.add(new Int64Value(i));
-            values.add(new UntypedAtomicValue(StringView.wrap ("" + i)));
+            values.add(StringValue.makeUntypedAtomic(StringView.wrap ("" + i)));
         }
         measure(new Measurable() {
             @Override
@@ -84,7 +84,7 @@ public class Playground extends PerformanceTestCase {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 5000000; i++) {
             values.add(new Int64Value(i));
-            values.add(new UntypedAtomicValue(StringView.wrap ("" + i)));
+            values.add(StringValue.makeUntypedAtomic(StringView.wrap ("" + i)));
         }
         measure(new Measurable() {
             @Override
@@ -115,7 +115,7 @@ public class Playground extends PerformanceTestCase {
         final List<AtomicValue> values = new ArrayList<>();
         for (int i = 0; i < 5000000; i++) {
             values.add(new Int64Value(i));
-            values.add(new UntypedAtomicValue(StringView.wrap("" + i)));
+            values.add(StringValue.makeUntypedAtomic(StringView.wrap("" + i)));
         }
         measure(new Measurable() {
             @Override
