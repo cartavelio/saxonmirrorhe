@@ -1738,7 +1738,7 @@ public class DOMTest {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(new InputSource(new StringReader(xml)));
 
-            Transformer tf = TransformerFactory.newInstance().newTransformer();
+            Transformer tf = new SaxonTransformerFactory().newTransformer();
 
             StringWriter writer = new StringWriter(512);
 

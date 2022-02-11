@@ -409,7 +409,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
                     }
                     i2++;
                 } else { // c == 0
-                    if (!u2[i2].isEmpty()) {
+                    if (!u2[i2].isEmpty() || p2[i2].isEmpty()) {
                         prefixList.add(p2[i2]);
                         uriList.add(u2[i2]);
                     }
