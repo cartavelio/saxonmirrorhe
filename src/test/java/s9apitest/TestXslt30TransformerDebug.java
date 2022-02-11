@@ -822,7 +822,7 @@ public class TestXslt30TransformerDebug {
             processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
 
             Serializer serializer = processor.newSerializer();
-            serializer.setOutputFile(new File(ConfigTest.DATA_DIR + "out/validationWarnings.xml"));
+            serializer.setOutputFile(new File(ConfigTest.TEMP_DIR + "validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(true);
