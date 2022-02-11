@@ -34,6 +34,9 @@ public class ToXml {
         new ToXml().go(args);
     }
 
+    
+    private static File repoDir = null;
+    private static String repoDirName = null;
     private File singleInputFile = null;
     private File historicInputDir = null; // directory holding the Java prior to preprocessing
     private File inputDir = null;
@@ -48,7 +51,20 @@ public class ToXml {
 
     private void go(String[] args) throws Exception {
         for (String arg : args) {
-            if (arg.startsWith("-f:")) {
+            if (arg.startsWith("-repo:")) {
+                repoDirName = arg.substring(6);
+                System.err.println("Repository name: " + repoDirName);
+                if (!repoDirName.endsWith("/")) {
+                    repoDirName = repoDirName + "/";
+                }
+                repoDir = new File(repoDirName);
+                if (!repoDir.isDirectory()) {
+                    throw new IllegalArgumentException(singleInputFile + " is not a directory");
+                }
+                if (!new File(repoDir, "src").exists()) {
+                    throw new IllegalArgumentException(singleInputFile + " is not the Saxon repository");
+                }
+            } else if (arg.startsWith("-f:")) {
                 singleInputFile = new File(arg.substring(3));
                 if (singleInputFile.isDirectory()) {
                     throw new IllegalArgumentException(singleInputFile + " is a directory");
@@ -89,6 +105,8 @@ public class ToXml {
                 compiler.setAssertionsEnabled(true);
             } else if (arg.equals("-force")) {
                 forceRebuild = true;
+            } else {
+                throw new IllegalArgumentException("Unknown option " + arg);
             }
         }
 
@@ -96,17 +114,19 @@ public class ToXml {
             throw new IllegalArgumentException("No input supplied (-f, -xml, -j)");
         }
 
+        JavaSymbolSolver symbolSolver = getJavaSymbolSolver();
+
         if (singleInputFile != null) {
 //            if (digest == null) {
 //                throw new IllegalArgumentException("No -digest supplied");
 //            }
-            processSingleFile(singleInputFile, digest);
+            processSingleFile(singleInputFile, digest, symbolSolver);
         } else {
             if (inputDir != null) {
                 if (xmlDir == null) {
                     throw new IllegalArgumentException("No -xml directory supplied");
                 }
-                processJavaDirToXml(inputDir, xmlDir, srcDir);
+                processJavaDirToXml(inputDir, xmlDir, srcDir, symbolSolver);
             }
             if (xmlDir != null && digest != null && csDir == null) {
                 processXmlToDigest(xmlDir, digest);
@@ -138,7 +158,7 @@ public class ToXml {
         return builder.build(digestFile);
     }
 
-    public void processSingleFile(File filename, File digest) throws Exception {
+    public void processSingleFile(File filename, File digest, JavaSymbolSolver symbolSolver) throws Exception {
 
         xmlToCSharp = compiler.compile(new StreamSource(new File("tools/transpiler/xslt/xml-to-cs.xsl")));
 
@@ -190,19 +210,19 @@ public class ToXml {
 //        trans.applyTemplates(new StreamSource(new StringReader(xmlOut.toString())), xmlToCSharp.getProcessor().newSerializer(System.out));
     }
 
-    public void processJavaDirToXml(File inputDir, File xmlDir, File srcDir) throws Exception {
+    public void processJavaDirToXml(File inputDir, File xmlDir, File srcDir, JavaSymbolSolver symbolSolver) throws Exception {
         String[] files = inputDir.list();
         if (files != null) {
             for (String file : files) {
-                processJavaFileToXml(inputDir, file, xmlDir, srcDir);
+                processJavaFileToXml(inputDir, file, xmlDir, srcDir, symbolSolver);
             }
         }
     }
 
-    public void processJavaFileToXml(File directory, String filename, File xmlDir, File srcDir) throws Exception {
+    public void processJavaFileToXml(File directory, String filename, File xmlDir, File srcDir, JavaSymbolSolver symbolSolver) throws Exception {
         File file = new File(directory, filename);
         if (file.isDirectory()) {
-            processJavaDirToXml(file, new File(xmlDir, filename), srcDir);
+            processJavaDirToXml(file, new File(xmlDir, filename), srcDir, symbolSolver);
         } else if (filename.endsWith(".java") && file.canRead()) {
             try {
                 xmlDir.mkdirs();
@@ -242,7 +262,7 @@ public class ToXml {
         }
     }
 
-    private static JavaSymbolSolver symbolSolver = getJavaSymbolSolver();
+    //private static JavaSymbolSolver symbolSolver = getJavaSymbolSolver();
 
     private static JavaSymbolSolver getJavaSymbolSolver() {
         try {
@@ -255,9 +275,10 @@ public class ToXml {
                     return super.filterName(name) || name.startsWith("org.");
                 }
             });
+
             // This tells the JavaParser to use the Saxon 10.3 JAR file to resolve references to classes and methods
-            combinedTypeSolver.add(new JarTypeSolver("build/libs/saxon-ee-11.0.jar"));
-            combinedTypeSolver.add(new JarTypeSolver("/Users/mike/GitHub/saxon-dev/lib/icu4j-59.1.jar")); // TODO: find this relative to the build directories
+            combinedTypeSolver.add(new JarTypeSolver(repoDirName + "build/libs/saxon-ee-11.0.jar"));
+            combinedTypeSolver.add(new JarTypeSolver(repoDirName + "lib/icu4j-59.1/icu4j-59.1.jar")); 
             JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
             StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
             StaticJavaParser.getConfiguration().setAttributeComments(false);
@@ -268,7 +289,7 @@ public class ToXml {
     }
 
     public void processXmlToDigest(File xmlDir, File digest) throws Exception {
-        XsltExecutable digester = compiler.compile(new StreamSource(new File("tools/transpiler/xslt/xml-to-digest.xsl")));
+        XsltExecutable digester = compiler.compile(new StreamSource(new File(repoDir, "tools/transpiler/xslt/xml-to-digest.xsl")));
         Xslt30Transformer trans = digester.load30();
         Map<QName, XdmValue> params = new HashMap<>();
         params.put(new QName("xmlDir"), new XdmAtomicValue(xmlDir.toURI()));
@@ -279,7 +300,7 @@ public class ToXml {
     
     public void processXmlDirToCSharp(File xmlDir, File digestFile, File csDir) throws Exception {
         XdmNode digest = parseDigest(digestFile);
-        xmlToCSharp = compiler.compile(new StreamSource(new File("/Users/mike/GitHub/saxon2020/tools/transpiler/xslt/xml-to-cs.xsl")));
+        xmlToCSharp = compiler.compile(new StreamSource(new File(repoDir, "tools/transpiler/xslt/xml-to-cs.xsl")));
         File xmlDirEE = new File(new File(xmlDir, "com"), "saxonica");
         File csDirEE = new File(new File(csDir, "Saxon"), "Eej");
         processXmlSubDirectoryToCSharp(xmlDirEE, csDirEE, digest, xmlToCSharp);

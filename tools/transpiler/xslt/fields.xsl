@@ -212,7 +212,7 @@
             <xsl:text>Saxon.Api.XdmAtomicType.{f:capitalize(lower-case(name/@identifier))}</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier=$nodeKinds">
-            <xsl:text>Saxon.Api.XdmNodeKind.{f:capitalize(lower-case(name/@identifier)) => replace('_node', '')}</xsl:text>
+            <xsl:text>Saxon.Api.XdmNodeKind.{f:capitalize(lower-case(name/@identifier)) => replace('Node$', '')}</xsl:text>
             <!-- Doesn't work for PROCESSING_INSTRUCTION -->
          </xsl:when>
          <xsl:otherwise>
