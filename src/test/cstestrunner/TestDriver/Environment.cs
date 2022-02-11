@@ -61,7 +61,7 @@ namespace TestDriver {
         public bool usable = true;
         public StringBuilder paramDeclarations = new StringBuilder(256);
         public StringBuilder paramDecimalDeclarations = new StringBuilder(256);
-        public TextResolver unparsedTextResolver;
+        public ResourceResolver unparsedTextResolver;
         public SysCollGen.IList<ResetAction> resetActions = new SysCollGen.List<ResetAction>();
         public bool outputTree = true;
         public bool outputSerialize = false;
@@ -625,7 +625,9 @@ namespace TestDriver {
             }
 
 
-            public TextResource resolve(Uri absoluteURI, Encoding encoding) {
+            public TextResource resolve(ResourceRequest request) {
+                Uri absoluteURI = request.Uri;
+                Encoding encoding = request.Encoding;
                 if (resources.ContainsKey(absoluteURI)) {
                     if (encoding == null) {
                         encodings.TryGetValue(new Uri(absoluteURI.ToString()), out encoding);
