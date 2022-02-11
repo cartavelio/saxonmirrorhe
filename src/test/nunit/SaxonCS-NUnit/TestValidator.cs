@@ -1133,6 +1133,129 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(e.Message);
             }
         }
+        
+        [Test]
+        public void TestValidateTransformationOutputPassing() {
+            // Use SchemaValidator as transformation destination (Saxon 11.1)
+            // This validation run should report no validation errors.
+
+            string xml = "<?xml version='1.0'?>"
+                         + "<doc><request>"
+                         + "<user_name>ed</user_name>"
+                         + "<password>sdsd</password>"
+                         + "<d1>2009-01-01</d1>"
+                         + "<d1>2010-01-01</d1>"
+                         + "<d2>2011-01-01</d2>"
+                         + "</request></doc>";
+            string xsl = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>"
+                         + "<xsl:mode on-no-match='shallow-copy'/>"
+                         + "<xsl:template match='/'><xsl:apply-templates select='//request'/></xsl:template>"
+                         + "<xsl:template match='d1'><date1><xsl:value-of select=\"' ' || .\"/></date1></xsl:template>"
+                         + "<xsl:template match='d2'><date2><xsl:value-of select=\"' ' || .\"/></date2></xsl:template>"
+                         + "</xsl:transform>";
+            string xsd =
+                "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t<xs:element name=\"request\">\n" +
+                "\t\t<xs:complexType>\n" +
+                "\t\t\t<xs:sequence>\n" +
+                "\t\t\t\t<xs:element name=\"user_name\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"password\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"date1\" type=\"xs:date\" maxOccurs='unbounded'/>\n" +
+                "\t\t\t\t<xs:element name=\"date2\" type=\"xs:date\"/>\n" +
+                "\t\t\t</xs:sequence>\n" +
+                "\t\t</xs:complexType>\n" +
+                "\t</xs:element>\n" +
+                "</xs:schema>";
+
+            List<ValidationFailure> errors = new();
+            try {
+                Processor proc = new Processor(true);
+                SchemaManager sm = proc.SchemaManager;
+                sm.Compile(new StringReader(xsd));
+                SchemaValidator sv = sm.NewSchemaValidator();
+                sv.InvalidityListener = failure => errors.Add(failure);
+                XsltCompiler xsltCompiler = proc.NewXsltCompiler();
+                xsltCompiler.SchemaAware = true;
+                Xslt30Transformer exec = xsltCompiler.Compile(new StringReader(xsl)).Load30();
+
+                StringWriter sw = new StringWriter();
+                sv.SetDestination(proc.NewSerializer(sw));
+                exec.Transform(new MemoryStream(new UTF8Encoding().GetBytes(xml)), sv);
+
+
+                Assert.That(sw.ToString().Contains("<date1> 2009-01-01</date1>"));
+
+            }
+            catch (SaxonApiException sapie) {
+                Assert.Fail(sapie.Message); 
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        
+        [Test]
+        public void TestValidateTransformationOutputFailing() {
+            // Use SchemaValidator as transformation destination (Saxon 11.1)
+            // This validation run should report exactly two validation errors.
+
+            string xml = "<?xml version='1.0'?>"
+                         + "<doc><request>"
+                         + "<user_name>ed</user_name>"
+                         + "<password>sdsd</password>"
+                         + "<d1>2009-01-01</d1>"
+                         + "<d1>2010-01-01</d1>"
+                         + "<d2>2011-01-01</d2>"
+                         + "</request></doc>";
+            string xsl = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>"
+                         + "<xsl:mode on-no-match='shallow-copy'/>"
+                         + "<xsl:template match='/'><xsl:apply-templates select='//request'/></xsl:template>"
+                         + "<xsl:template match='d1'><date1><xsl:value-of select=\"'x' || .\"/></date1></xsl:template>"
+                         + "<xsl:template match='d2'><date2><xsl:value-of select=\"'x' || .\"/></date2></xsl:template>"
+                         + "</xsl:transform>";
+            string xsd =
+                "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+                "\t<xs:element name=\"request\">\n" +
+                "\t\t<xs:complexType>\n" +
+                "\t\t\t<xs:sequence>\n" +
+                "\t\t\t\t<xs:element name=\"user_name\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"password\" type=\"xs:string\"/>\n" +
+                "\t\t\t\t<xs:element name=\"date1\" type=\"xs:date\" maxOccurs='unbounded'/>\n" +
+                "\t\t\t\t<xs:element name=\"date2\" type=\"xs:date\"/>\n" +
+                "\t\t\t</xs:sequence>\n" +
+                "\t\t</xs:complexType>\n" +
+                "\t</xs:element>\n" +
+                "</xs:schema>";
+
+            List<ValidationFailure> errors = new();
+            try {
+                Processor proc = new Processor(true);
+                SchemaManager sm = proc.SchemaManager;
+                sm.Compile(new StringReader(xsd));
+                SchemaValidator sv = sm.NewSchemaValidator();
+                sv.InvalidityListener = failure => errors.Add(failure);
+                XsltCompiler xsltCompiler = proc.NewXsltCompiler();
+                xsltCompiler.SchemaAware = true;
+                Xslt30Transformer exec = xsltCompiler.Compile(new StringReader(xsl)).Load30();
+
+                StringWriter sw = new StringWriter();
+                sv.SetDestination(proc.NewSerializer(sw));
+                exec.Transform(new MemoryStream(new UTF8Encoding().GetBytes(xml)), sv);
+
+
+                Assert.Fail("Validation errors not detected");
+
+            }
+            catch (SaxonApiException sapie) {
+                Assert.AreEqual(3, errors.Count, "No of errors"); // 3 validation errors
+                //Assert.AreEqual("/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
+
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
 
 
         [Test]
