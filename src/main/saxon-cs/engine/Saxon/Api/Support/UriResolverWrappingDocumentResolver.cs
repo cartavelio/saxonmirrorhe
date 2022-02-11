@@ -5,6 +5,7 @@ using Saxon.Ejavax.xml.transform;
 using Saxon.Hej;
 using Saxon.Hej.om;
 using Saxon.Hej.pull;
+using Saxon.Hej.trans;
 
 namespace Saxon.Api.Support {
     public class UriResolverWrappingDocumentResolver : URIResolver {
@@ -19,7 +20,13 @@ namespace Saxon.Api.Support {
         public Source resolve(string relativeUri, string baseUri) {
             IResource resource = null;
             if (baseUri == null) {
-                Uri href = new Uri(relativeUri, UriKind.RelativeOrAbsolute);
+                Uri href;
+                try {
+                    href = new Uri(relativeUri, UriKind.RelativeOrAbsolute);
+                }
+                catch (UriFormatException e) {
+                    throw new XPathException("Invalid relative URI: " + relativeUri + " (" + e.Message + ")");
+                }
                 ResourceRequest request = new() {
                     Uri = href,
                     RelativeUri = relativeUri
@@ -27,8 +34,20 @@ namespace Saxon.Api.Support {
                 resource = resolver.Invoke(request);
             }
             else {
-                Uri baseUriUri = new Uri(baseUri);
-                Uri abs = new Uri(baseUriUri, (string)relativeUri);
+                Uri baseUriUri;
+                try {
+                    baseUriUri = new Uri(baseUri);
+                }
+                catch (UriFormatException e) {
+                    throw new XPathException("Invalid base URI: " + baseUri + " (" + e.Message + ")");
+                }
+                Uri abs;
+                try {
+                    abs = new Uri(baseUriUri, (string)relativeUri);
+                }
+                catch (UriFormatException e) {
+                    throw new XPathException("Unable to resolve relative URI (" + relativeUri + ") against base URI (" + baseUri + "): " + e.Message);
+                }
                 ResourceRequest request = new() {
                     Uri = abs,
                     BaseUri = baseUriUri,
