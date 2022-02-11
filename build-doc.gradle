@@ -922,8 +922,8 @@ task saxonc_doc_sef(
 }
 
 task saxonc_api_doc(
-        dependsOn: ["copy_saxonc_api_doc", "copy_saxonc_python_api_doc"],
-        description: "Build the SaxonC API documentation for website"
+  dependsOn: ["copy_saxonc_api_doc", "copy_saxonc_python_api_doc"],
+  description: "Build the SaxonC API documentation for website"
 ) {
   // Just a place to hang dependencies
 }
@@ -938,9 +938,9 @@ task copy_saxonc_api_doc(
 }
 
 task copy_saxonc_python_api_doc(
-        type: Copy,
-        dependsOn: ["saxonc_pydoc3"],
-        description: "Copy generated SaxonC python API documentation"
+  type: Copy,
+  dependsOn: ["saxonc_pydoc3"],
+  description: "Copy generated SaxonC python API documentation"
 ) {
   into "${buildDir}/website/saxon-c/doc11/html"
   from "${buildDir}/docbuild/Saxon.C.API/python-saxon/saxonc.html"
