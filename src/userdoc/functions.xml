@@ -10528,7 +10528,7 @@ return saxon:transform($splitter, $results)]]></samp>
             <li>The context item for execution of the query. The argument may be set to
             an empty sequence if no context item is required.</li>
             <li>A map containing values of parameters (external variables) for the query.
-            The keys are xs:QNames representing the parameter names; the corresponding
+            The keys are <code>xs:QName</code>s representing the parameter names; the corresponding
             values are arbitrary values for the parameters.</li>
           </ol>
           
@@ -10537,7 +10537,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <samp><![CDATA[declare namespace saxon = "http://saxon.sf.net/"; 
             
 <out>{ 
-   let $src := "declare variable $x external; declare variable $y external; <z>{$x + $y + .}</z&>" 
+   let $q1 := "declare variable $x external; declare variable $y external; <z>{$x + $y + .}</z>" 
    let $qry := saxon:xquery($q1)
    return $qry(4, map{xs:QName('x'): 3, xs:QName('y'): 2})
 }</out>]]></samp>
