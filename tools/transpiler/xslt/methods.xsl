@@ -1303,8 +1303,7 @@
             <xsl:text>new System.Collections.Generic.HashSet&lt;{f:renameGenericType($targetClass)}>()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'emptyMap' and $targetClass">
-            <xsl:variable name="targetClass2" select="string(ancestor::member/type/typeArguments/typeArgument[2]/@RESOLVED_TYPE)"/>
-            <xsl:text>new System.Collections.Generic.Dictionary&lt;{f:renameGenericType($targetClass), f:renameGenericType($targetClass2)}>()</xsl:text>
+            <xsl:text>new System.Collections.Generic.Dictionary&lt;{f:renameGenericType($targetClass)}>()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'singleton' and $targetClass">
             <xsl:text>java.util.Collections.singleton&lt;{f:renameGenericType($targetClass)}>(</xsl:text>

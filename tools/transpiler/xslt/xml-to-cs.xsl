@@ -162,7 +162,8 @@
       <xsl:variable name="containing-interface" select="ancestor::*[@isInterface='true'][1]" as="element(*)?"/>
       <xsl:if test="$kind = 'class' or $include-nested-interfaces or empty($containing-interface)">
          <!-- that is, process everything other than a nested inner interface -->
-         <xsl:text>{$kind} {if (exists($containing-interface)) then ($containing-interface/name/@identifier || '_') else ''}{name/@identifier}</xsl:text>
+         <xsl:variable name="className" select="($renamedClasses?(name/@identifier),  name/@identifier)[1]"/>
+         <xsl:text>{$kind} {if (exists($containing-interface)) then ($containing-interface/name/@identifier || '_') else ''}{$className}</xsl:text>
          <xsl:apply-templates select="typeParameters"/>
          <!-- If the class implements java.lang.Iterable, then make it also implement IEnumerable so it
               can be used in a foreach loop -->
