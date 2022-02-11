@@ -417,7 +417,7 @@ public class ReceivingContentHandler
                 // Bug 4996 - if the attribute originates from Xerces schema processing,
                 // and if the attribute is namespaced, then the prefix and namespace declaration
                 // may be missing. Although Xerces is getting this wrong, we attempt to repair the damage.
-                if (atts.getURI(a) != null && qname.indexOf(':') < 0) {
+                if (atts.getURI(a) != null && !"".equals(atts.getURI(a)) && qname.indexOf(':') < 0) {
                     // defaulted attribute has a URI but no prefix
                     String uri = atts.getURI(a);
                     String trialPrefix = getConfiguration().getNamePool().suggestPrefixForURI(uri);
