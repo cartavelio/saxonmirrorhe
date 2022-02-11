@@ -401,9 +401,11 @@ public class XQueryFunction implements Declaration, Location {
 
                 if (staticContext.getUserQueryContext().isCompileWithTracing()) {
                     namespaceResolver = staticContext.getNamespaceResolver();
-                    ComponentTracer trace = new ComponentTracer(compiledFunction);
-                    trace.setLocation(location);
-                    body = trace;
+                    staticContext.getCodeInjector().process(compiledFunction);
+                    body = compiledFunction.getBody();
+//                    ComponentTracer trace = new ComponentTracer(compiledFunction);
+//                    trace.setLocation(location);
+//                    body = trace;
                 }
 
             }
