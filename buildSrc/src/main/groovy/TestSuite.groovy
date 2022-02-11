@@ -617,22 +617,39 @@ class TestSuite {
     GPathResult root = slurper.parse(current)
       .declareNamespace(fots: "http://www.w3.org/2012/08/qt-fots-results")
 
+    def summary = findTests(root)
     def results = [:]
+    def total = 0
+    def pass = 0
 
-    def sets = root.'**'.findAll { it.name() == "test-set" }
-    sets.each { tset ->
-      def setName = tset.attributes()['name']
-      def tests = tset.'**'.findAll { it.name() == 'test-case' }
-      tests.each { t->
-        def result = t.attributes()['result']
-        if (result in results) {
-          results[result] += 1
-        } else {
-          results[result] = 1
+    summary.keySet().each { key ->
+      def result = summary[key]
+      if (result in results) {
+        results[result] += 1
+      } else {
+        results[result] = 1
+      }
+      if (result != "n/a") {
+        total += 1
+        if (result == "pass") {
+          pass += 1
         }
       }
     }
 
     println("Summary: ${results}")
+
+    // HACK
+    def passing = "████████████████████████████████████████████████████████████████████████"
+    def failing = "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
+    def barlen = passing.length()
+
+    def passperc = pass / total
+    def perc = sprintf("%3.1f", passperc * 100.0)
+
+    def passcount = Math.floor(passperc * barlen).intValue()
+    def failcount = barlen - passcount
+
+    println("${passing.substring(0, passcount)}${failing.substring(0, failcount)} ${perc}%")
   }
 }
