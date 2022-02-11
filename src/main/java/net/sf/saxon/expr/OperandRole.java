@@ -92,6 +92,24 @@ public class OperandRole {
     }
 
     /**
+     * Create an operand role based on this one, but with a constraint
+     * @param constraint the constraint to be applied
+     * @return the new operand role (the original is unchanged)
+     */
+    public OperandRole withConstraint(Predicate<Expression> constraint) {
+        return new OperandRole(properties, usage, requiredType, constraint);
+    }
+
+    /**
+     * Create an operand role based on this one, but with a constrained class property
+     * @return the new operand role (the original is unchanged)
+     */
+
+    public OperandRole withConstrainedClass() {
+        return new OperandRole(properties | CONSTRAINED_CLASS, usage, requiredType, constraint);
+    }
+
+    /**
      * Ask whether the child expression sets the focus for evaluation of other child expressions
      * @return true if the child expression is evaluated with the same focus as its parent expression
      */
