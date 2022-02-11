@@ -43,11 +43,11 @@
             </tr>
             <tr class="javaonly">
                <td>s9api</td>
-               <td>net.sf.saxon.s9api.Processor</td>
+               <td><code>net.sf.saxon.s9api.Processor</code></td>
             </tr>
             <tr class="csonly">
                <td>Saxon.Api</td>
-               <td>Saxon.Api.Processor</td>
+               <td><code>Saxon.Api.Processor</code></td>
             </tr>
          </tbody>
       </table>
@@ -76,7 +76,7 @@
       <code>processor.setConfigurationFeature(Feature.LINE_NUMBERING, true)</code>. The method definition uses Java
       generics to ensure that the supplied property value is of the correct type for the selected feature.</p>
       
-      <p class="csonly">In the Saxon.Api interface on Java, configuration options can be set using a method call such as
+      <p class="csonly">In the Saxon.Api interface for C#, configuration options can be set using a method call such as
          <code>processor.SetConfigurationFeature(Feature&lt;bool>.LINE_NUMBERING, true)</code>. It's necessary to specify
          the type of the value (here <code>bool</code>) to make the method type-safe.</p>
       

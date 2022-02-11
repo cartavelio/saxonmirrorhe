@@ -27,14 +27,22 @@
       HTML document as input to Saxon.</p>
 
     <p>Non-standard input formats can also be handled by specifying a user-written
-        <code>URIResolver</code>. If the <code>-u</code> option is used on the command line, or if
+        <code>URIResolver</code> (Java) or <code>XmlResolver</code> (C#). 
+      If the <code>-u</code> option is used on the command line, or if
       the source file name begins with <code>http:</code> or <code>https:</code> or
-        <code>file:</code> or <code>classpath:</code>, then the source file name is resolved to a
-      JAXP Source object using the <code>URIResolver</code>; if a user-written
-        <code>URIResolver</code> is nominated (using the <code>-r</code> option) then this may
-      translate the file name into a <code>Source</code> object any way that it wishes.</p>
+        <code>file:</code> or <code>classpath:</code>, then the source file name is resolved 
+      as follows:
+      
+      <ul>
+        <li><p class="javaonly">On Java, the <code>URIResolver</code> is called, and returns
+          a JAXP <code>Source</code> object; if a user-written
+          <code>URIResolver</code> is nominated (using the <code>-r</code> option) then this may
+          translate the file name into a <code>Source</code> object any way that it wishes.</p></li>
+        <li><p class="csonly">On .NET, it is not currently possible to nominate an <code>XmlResolver</code>
+          when running from the command line; the default Saxon-supplied <code>XmlResolver</code> is used.</p></li>
+      </ul>
 
-    <aside>Saxon (from 9.7) supports the <code>classpath</code> URI scheme to locate resources
+    <aside class="javaonly">Saxon (from 9.7) supports the <code>classpath</code> URI scheme to locate resources
       using the Java classpath. This URI scheme is defined by the Spring framework, but Saxon's
       implementation is free-standing. For example, <code>classpath:utility.xsl</code> will locate
       a file called <code>utility.xsl</code> as a resource on the classpath.</aside>
@@ -51,26 +59,30 @@
         href="net.sf.saxon.lib.CollectionFinder">CollectionFinder</a>. This section describes how
       the standard (default) collection finder behaves, if no user-written collection finder is
       supplied. (For information on supplying a user-written <code>CollectionFinder</code>, see <a
-        class="bodylink" href="user-collections">Writing your own Collection Finder</a>.)</p>
+        class="bodylink" href="user-collections">Writing your own Collection Finder</a>.)
+    There are some differences between Java and C#.</p>
     
     <p>In XSLT 3.0 and XQuery 3.1, collections can contain resources other than XML documents: for
     example, JSON documents, plain text documents, and binary files.</p>
 
-    <p>The default collection can be registered with the <code>Configuration</code> in the form of a
+    <p>The default collection can be registered with the <code>Processor</code> 
+      (or with its underlying <code>Configuration</code>) by setting the Feature <a class="feature" href="DEFAULT_COLLECTION"/>.
+      The value takes the form of a
       collection URI. When the <code>collection()</code> function is called with no arguments, this
       is exactly the same as supplying this default collection URI. If no default collection URI has
       been registered, an empty collection is returned.</p>
 
     <p>The standard collection finder supports four different kinds of collection: registered collections,
-      catalog-based collections, directory-based collections, and zip-based collections:</p>
+      catalog-based collections, directory-based collections, and (on Java only) zip-based collections:</p>
     
     <ul>
       <li><p>A registered collection is one that has been explicitly registered with the Configuration, by calling
-      <code>Configuration.registerCollection()</code>.</p></li>
+      <code>Configuration.registerCollection()</code>.</p>
+      <p><i>Note: this cannot currently be done at the level of the <code>Processor</code> object.</i></p></li>
       <li><p>If the collection URI
         corresponds to a directory name, then a directory-based collection is used: the collection contains
       selected files from the named directory.</p></li>
-      <li><p>If the collection URI identifies a
+      <li><p class="javaonly">If the collection URI identifies a
         ZIP or JAR file (for details see below) then a zip-based collection is used.</p>
         
       </li>
@@ -351,7 +363,7 @@
       from this cache. </p>
 
     <h2 class="subtitle">Processing ZIP and JAR files</h2>
-
+<div class="javaonly">
     <p>If the collection URI identifies a ZIP or JAR file then it is processed in exactly the same
       way as a directory. URI query parameters can be used in the same way, and have much the same
       effect.</p>
@@ -376,25 +388,25 @@
       different, for example it includes any <code>comment</code> field associated with the ZIP file
       entry. Note that no items are returned in respect of directory nodes within the ZIP file; only
       leaf nodes are represented.</p>
-    
+</div>   
     <h2 class="subtitle">Registered Collections</h2>
     
     <p>It is possible to register a collection explicitly with the Saxon <code>Configuration</code>.</p>
     
-    <p>With the Java product, this is done using the method <code>Configuration.registerCollection()</code>;
-      the equivalent on .NET is <code>Processor.RegisterCollection()</code>. In both cases this works
-    only if you use the standard collection finder, or a custom collection finder that inherits the relevant
-    functionality.</p>
+    <p>This is done using the method <code>Configuration.registerCollection()</code>;
+      the equivalent on .NET is <code>Processor.RegisterCollection()</code>. When the URI provided
+      to <code>fn:collection()</code> has been registered in this way, the <code>CollectionFinder</code>
+      is not invoked.</p>
     
-    <p>The argument supplied to <code>Configuration.registerCollection()</code> is an object of type
+    <p class="javaonly">On Java, the argument supplied to <code>Configuration.registerCollection()</code> is an object of type
       <a class="javalink" href="net.sf.saxon.lib.ResourceCollection">ResourceCollection</a>, and
     you can either use one of the standard collection types (<code>CatalogCollection</code>,
     <code>DirectoryCollection</code>, <code>JarCollection</code>, etc), or you can implement
     your own.</p>
     
-    <p>Similarly, on .NET, <code>Processor.RegisterCollection()</code> accepts on object of type
-      <code>Saxon.Api.IResourceCollection</code>, which can either use one of the standard collection
-    types, or a custom implementation.</p>
+    <p class="csonly">On .NET, <code>Processor.RegisterCollection()</code> accepts on object of type
+      <code>IEnumerable&lt;Resource></IResource></code>: you can implement your own kind of <code>IEnumeration</code>
+    and your own kind of <code>IResource</code>, or you can use an existing implementation.</p>
     
     <section id="user-collections" title="Writing your own Collection Finder">
       <h1>Writing your own Collection Finder</h1>
@@ -403,43 +415,28 @@
         interface enables you to define a mapping from a collection URI to
         a set of resources (which can be arbitrary XDM values: they are not restricted
         to be XML documents).</p> 
-        
-        
+             
        <aside><p>The old <code>CollectionURIResolver</code> interface was dropped in Saxon 10.</p></aside>
       
-      <p>Details of the interface can be found in the Javadoc. The basic steps are:</p>
+      <p>The details differ between Java and .NET:</p>
       
-      <ol>
-        <li>
-          <p>Write a class that implements <code>CollectionFinder</code>. It takes a single method,
-            which accepts an absolute collection URI, and returns an object that implements
-            <code>ResourceCollection</code>. Register an instance of your
-            <code>CollectionFinder</code> with the Saxon <code>Configuration</code>.</p>
-          <p>For example, a <code>CollectionFinder</code> written to handle collection URIs using the
-            scheme name "sql" might be supplied as:</p>
-          <samp><![CDATA[config.setCollectionFinder((context, uri) -> 
-   uri.startsWith('sql:') 
-      ? sqlCollection(uri) 
-      : config.getStandardCollectionFinder().findCollection(context, uri)
-)]]></samp>
-          <p>where <code>sqlCollection(uri)</code> returns some user-defined implementation
-            of <code>ResourceCollection</code>, perhaps one that retrieves XML documents from
-            a relational database.</p>
-        </li>
-        <li>
-          <p>You can either reuse the existing implementations of <a class="javalink"
-            href="net.sf.saxon.lib.ResourceCollection">ResourceCollection</a>, namely
-            <code>CatalogCollection</code>, <code>DirectoryCollection</code>, and
-            <code>JarCollection</code>, or you can write your own. You can also of course subclass
+      <ul>
+        <li><p class="javaonly">On Java, the <code>CollectionFinder</code> is a functional
+        interface, so you can either write a class that implements the interface, or you can
+        supply an implementation directly as a lambda expression. It accepts a URI as input
+        (supplied as a string), and returns an instance of <code>ResourceCollection</code>.</p>
+          <p class="javaonly">You can either reuse the existing implementations of <a class="javalink"
+            href="net.sf.saxon.lib.ResourceCollection">ResourceCollection</a>, such as
+            <code>CatalogCollection</code>, <code>DirectoryCollection</code>, 
+            <code>JarCollection</code>, and <code>ExplicitCollection</code>
+            or you can write your own. You can also of course subclass
             the existing collection classes. The <code>ResourceCollection</code> object provides two
             key methods that you need to implement: <code>getResources()</code>, which returns a
             sequence of <code>Resource</code> objects, and <code>getResourceURIs()</code>, which
             returns a sequence of URIs. These are invoked by the <a class="bodylink code"
               href="/functions/fn/collection" >fn:collection()</a> and <a class="bodylink code"
                 href="/functions/fn/uri-collection" >fn:uri-collection()</a> functions respectively.</p>
-        </li>
-        <li>
-          <p>Again, you can either reuse existing implementations of <a class="javalink"
+          <p class="javaonly">Again, you can either reuse existing implementations of <a class="javalink"
             href="net.sf.saxon.lib.Resource">Resource</a> (such as <code>XmlResource</code>,
             <code>JSONResource</code>, <code>UnparsedTextResource</code>,
             <code>BinaryResource</code>, and <code>MetadataResource</code>), or you can create your
@@ -448,8 +445,41 @@
             It is good practice to delay any extensive work such as parsing until the
             <code>getItem()</code> method is called: this reduces the memory footprint, and enables
             parallel evaluation of multiple threads (Saxon-EE only).</p>
+          <p class="javaonly">For example, a <code>CollectionFinder</code> written to handle collection URIs using the
+            scheme name "sql" might be supplied as:</p>
+          <samp><![CDATA[config.setCollectionFinder((context, uri) -> 
+   uri.startsWith('sql:') 
+      ? sqlCollection(uri) 
+      : config.getStandardCollectionFinder().findCollection(context, uri)
+)]]></samp>
+          <p class="javaonly">where <code>sqlCollection(uri)</code> returns some user-defined implementation
+            of <code>ResourceCollection</code>, perhaps one that retrieves XML documents from
+            a relational database.</p>
         </li>
-      </ol>
+        <li>
+          <li><p class="csonly">On .NET, the <code>CollectionFinder</code> is a delegate
+            so you will typically implement it directly as a lambda expression. It accepts a URI as input
+            (supplied as a string), and returns an instance of <code>IEnumerable&lt;IResource</code>.</p>
+            <p class="csonly">You can either reuse the existing implementations of <code>IResource</code>,
+              or you can write your own. The key method that the <code>IResource</code> object must
+              provide is <code>GetItem()</code> which returns the resource in the form of an XDM item.
+              It is good practice to delay any extensive work such as parsing until the
+              <code>GetItem()</code> method is called: this reduces the memory footprint, and enables
+              parallel evaluation of multiple threads.
+            <p class="csonly">For example, a <code>CollectionFinder</code> written to handle collection URIs using the
+              scheme name "sql" might be supplied as:</p>
+            <samp><![CDATA[processor.CollectionFinder = uri => 
+   uri.startsWith('sql:') 
+      ? sqlCollection(uri) 
+      : config.getStandardCollectionFinder().findCollection(context, uri)
+)]]></samp>
+            <p class="javaonly">where <code>sqlCollection(uri)</code> returns some user-defined implementation
+              of <code>IEnumerable&lt;IResource</code>, perhaps one that retrieves XML documents from
+              a relational database.</p>
+        </li>
+      </ul>
+      
+     
     </section>
 
   </section>
@@ -461,46 +491,46 @@
     rather it provides interfaces that invoke XML parsers supplied by third parties. Platforms
     such as Java and .NET typically include a built-in XML parser that Saxon uses by default.</p>
 
-    <p>With the Java s9api interface, a source document can be built using the <a class="javalink"
+    <p>A source document can be built using the <a class="javalink"
         href="net.sf.saxon.s9api.DocumentBuilder">DocumentBuilder</a> class, which is created using
-      the factory method <code>newDocumentBuilder</code> on the <a class="javalink"
+      the factory method <code>newDocumentBuilder</code> (<code>NewDocumentBuilder()</code> in C#) on the <a class="javalink"
         href="net.sf.saxon.s9api.Processor">Processor</a> object. Various options for document
       building are available as methods on the <code>DocumentBuilder</code>, for example options to
       perform schema or DTD validation, to strip whitespace, to expand XInclude directives, and also
       to choose the tree implementation model to be used.</p>
     
-    <p>These methods create a document from a <code>Source</code> object. This is a JAXP interface designed
-    as an abstraction of various kinds of XML source, including <code>StreamSource</code>, which represents lexical XML
-    held in a file or input stream; <code>SAXSource</code>, which represents a source of SAX events; <code>DOMSource</code>,
-    representing an already-parsed XML document held in a DOM tree; and <code>StAXSource</code>, which represents a
-      class that responds to requests for STAX (pull-parser) events. In addition, Saxon's <code
-        java="net.sf.saxon.om.NodeInfo">NodeInfo</code> and <code
-          java="net.sf.saxon.om.TreeInfo">TreeInfo</code> classes
-      implements the JAXP <code>Source</code> interface, and the s9api <a class="javalink"
+    <p class="javaonly">On Java, the different ways of supplying input to the <code>DocumentBuilder</code>
+      are represented using the JAXP <code>Source</code> object. This is a JAXP interface designed
+    as an abstraction of various kinds of XML source, including:</p>
+      
+    <ul class="javaonly">
+      <li><code>StreamSource</code>, which represents lexical XML
+        held in a file or input stream</li>
+      <li><code>SAXSource</code>, which represents a source of SAX events</li>
+      <li><code>DOMSource</code>, representing an already-parsed XML document held in a DOM tree</li>
+      <li><code>StAXSource, which represents a
+        class that responds to requests for STAX (pull-parser) events</code></li>
+      <li><code>ActiveSource</code>: this is a Saxon extension of the JAXP <code>Source</code> interface,
+      allowing you to define your own kind of input source: all you need to do is implement the method
+      <code>deliver()</code>, which delivers the contents of the resource to a Saxon <code>Receiver</code></li>
+      <li><code>NodeInfo</code>, representing a node in an XDM tree, implements <code>ActiveSource</code.</li>
+    </ul>
+     <p>In addition, the s9api <a class="javalink"
         href="net.sf.saxon.s9api.XdmNode">XdmNode</a> class has an <code>asSource()</code> method,
-      so it is always possible to supply an existing Saxon tree as
-    the source for any of these interfaces.</p>
+      so it is always possible to supply an existing Saxon tree as the source for any of these interfaces.</p>
 
-    <p>Similarly in the .NET API, there is a <a class="cslink" href="Saxon.Api.DocumentBuilder"
-        >DocumentBuilder</a> object that can be created from the <a class="cslink"
-        href="Saxon.Api.Processor">Processor</a>. This allows options to be set controlling the way
-      documents are built, and provides an overloaded <code>Build</code> method allowing a tree to
-      be built from various kinds of source.</p>
-
-    <p>It is also possible to build a Saxon tree in memory by using the <code>buildDocumentTree()</code>
-      method of the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a> object.
-      (When using the JAXP Transformation API, the <code>Configuration</code> can be obtained from
-      the <code>TransformerFactory</code> as the value of the attribute named <a class="javalink"
-        href="net.sf.saxon.lib.Feature#CONFIGURATION">Feature.CONFIGURATION.name</a>.)</p>
-
-    <p>The <a class="javalink" href="net.sf.saxon.Configuration#buildDocumentTree">buildDocumentTree()</a>
-      method takes a single argument, a JAXP <code>Source</code>. This can be any of the standard
-      kinds of JAXP <code>Source</code>. See <a class="bodylink" href="../jaxpsources">JAXP
-        Sources</a> for more information. The method returns a <code
-          java="net.sf.saxon.om.TreeInfo">TreeInfo</code> containing information about the constructed tree,
-      notably the method <code>getRootNode()</code> to get the root node of the tree,
-      which in most cases will be a document node.
-    </p>
+    <p class="csonly">On .NET, the <code>DocumentBuilder</code> has an overloaded <code>Build</code> method
+    allowing input to be supplied from:</p>
+    
+    <ul class="csonly">
+      <li>A <code>Stream</code> (containing lexical XML as a stream of bytes)</li>
+      <li>A <code>TextReader</code> (containing lexical XML as a stream of characters)</li>
+      <li>A <code>Uri</code> (which can be dereferenced to fetch a stream of bytes)</li>
+      <li>An <code>XmlNode</code> (Microsoft's DOM implementation)</li>
+      <li>An <code>XmlReader</code> (An XML parser, primed with a source of input)</li>
+    </ul>
+    
+    
 
     <p>All the documents processed in a single transformation or query must be loaded using the same
         <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>. However, it is
@@ -513,7 +543,7 @@
     <h1>Building XML Trees Programmatically</h1>
     <p>There are various ways in Saxon to build an XDM tree programmatically 
       (that is, incrementally one node at a time).</p>
-    
+    <div class="javaonly">
     <h2 class="subtitle">The Sapling Tree API</h2>
     <p>A new API offered from Saxon 10 is the Sapling Tree API. This provides a collection of methods to create
     nodes; for example, to create a document containing a <code>body</code> element with two paragraphs, the expression</p>
@@ -537,9 +567,10 @@
     without modifying the input objects. This means that adding a child element to a new parent can be done without an expensive
     copy operation. Nodes do not have references to their parents in the tree, so a subtree can be shared by multiple trees
     without copying.</p>
-    
+    </div>
     <p>The Sapling Tree API is described in the JavaDoc for class <code java="net.sf.saxon.sapling.SaplingNode">SaplingNode</code>.</p>
     
+    <div class="javaonly">
     <h2 class="subtitle">Event APIs</h2>
     <p>Saxon 10 introduces a new event-based API (called simply "Push") designed explicitly for convenient use by 
       user-written applications.</p>
@@ -608,6 +639,7 @@
     interpretation of the specifications found at <a
       href="http://veithen.github.io/2009/11/01/understanding-stax.html" class="bodylink">Understanding StAX:
     How to Correctly Use XMLStreamWriter</a>.</p>
+    </div>
   </section>
   <section id="preloading" title="Preloading shared reference documents">
     <h1>Preloading shared reference documents</h1>
@@ -660,6 +692,7 @@
       resource using a conventional system identifier (URI) or public identifier, and a local
       catalog is used to map the system and public identifiers to an actual location.</p>
 
+<div class="javaonly">
     <p>When using Saxon from the command line, it is possible to specify a catalog to be used using
       the option <code>-catalog:<i>files</i></code>. Here <code><i>files</i></code> is the catalog
       file to be searched, or a list of filenames separated by semicolons. This catalog will be used
@@ -787,11 +820,13 @@
 
     <p>There are many tutorials for XML catalogs available on the web, including some that have
       information specific to Saxon, though this may well relate to earlier releases.</p>
+  
+</div>
   </section>
   <section id="input-filters" title="Writing input filters">
     <h1>Writing input filters</h1>
 
-
+<div class="javaonly">
     <p>Saxon can take its input from a JAXP <code>SAXSource</code> object, which essentially
       represents a sequence of SAX events representing the output of an XML parser. A very useful
       technique is to interpose a <i>filter</i> between the parser and Saxon. The filter will
@@ -832,6 +867,7 @@
       of source file, so long as it presents it in the form of a stream of SAX events. When using
       the JAXP API, the equivalent to the <code>-x</code> option is to set the configuration property 
       <a class="feature" href="SOURCE_PARSER_CLASS"/>.</p>
+</div>
   </section>
   <section id="XInclude" title="XInclude processing">
     <h1>XInclude processing</h1>
