@@ -1404,11 +1404,13 @@ public class XQueryParser extends XPathParser {
             if (baseURI == null) {
                 if (m < hints.length) {
                     baseURI = hints[m];
-                    ss.setSystemId(hints[m]);
                 } else {
-                    grumble("No base URI available for imported module", "XQST0059", mImport.offset);
+                    baseURI = env.getStaticBaseURI();
+                    //grumble("No base URI available for imported module", "XQST0059", mImport.offset);
                 }
+                ss.setSystemId(baseURI);
             }
+
             // Although the module hadn't been loaded when we started, it might have been loaded since, as
             // a result of a reference from another imported module.
             // TODO: use similar logic when loading schema modules

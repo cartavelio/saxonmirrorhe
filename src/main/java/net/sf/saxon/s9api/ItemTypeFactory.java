@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class ItemTypeFactory {
 
-    private final Processor processor;
+    private final Configuration config;
 
     /**
      * Create an ItemTypeFactory
@@ -39,7 +39,7 @@ public class ItemTypeFactory {
      */
 
     public ItemTypeFactory(Processor processor) {
-        this.processor = processor;
+        this.config = processor.getUnderlyingConfiguration();
     }
 
     /**
@@ -64,7 +64,6 @@ public class ItemTypeFactory {
         String local = name.getLocalPart();
         if (NamespaceConstant.SCHEMA.equals(uri)) {
             int fp = StandardNames.getFingerprint(uri, local);
-            Configuration config = processor.getUnderlyingConfiguration();
             if (config.getXsdVersion() == Configuration.XSD10 && config.getXMLVersion() == Configuration.XML10) {
                 return getBuiltInAtomicType(fp);
             } else {
@@ -72,12 +71,11 @@ public class ItemTypeFactory {
                         (ItemType.BuiltInAtomicItemType) getBuiltInAtomicType(fp), config.getConversionRules());
             }
         } else {
-            Configuration config = processor.getUnderlyingConfiguration();
             SchemaType type = config.getSchemaType(new StructuredQName("", uri, local));
             if (type == null || !type.isAtomicType()) {
                 throw new SaxonApiException("Unknown atomic type " + name.getClarkName());
             }
-            return new ConstructedItemType((AtomicType) type, processor);
+            return new ConstructedItemType((AtomicType) type, config);
         }
     }
 
@@ -227,7 +225,7 @@ public class ItemTypeFactory {
 
             default:
                 throw new SaxonApiException("Unknown atomic type " +
-                        processor.getUnderlyingConfiguration().getNamePool().getClarkName(fp));
+                        config.getNamePool().getClarkName(fp));
         }
     }
 
@@ -286,8 +284,8 @@ public class ItemTypeFactory {
                 throw new IllegalArgumentException("The name of a processing instruction must not be in a namespace");
             }
             NameTest type = new NameTest(k,
-                    name.getNamespaceURI(), name.getLocalName(), processor.getUnderlyingConfiguration().getNamePool());
-            return new ConstructedItemType(type, processor);
+                    name.getNamespaceURI(), name.getLocalName(), config.getNamePool());
+            return new ConstructedItemType(type, config);
         } else {
             throw new IllegalArgumentException("Node kind must be element, attribute, or processing-instruction");
         }
@@ -307,14 +305,13 @@ public class ItemTypeFactory {
      */
 
     public ItemType getSchemaElementTest(QName name) throws SaxonApiException {
-        Configuration config = processor.getUnderlyingConfiguration();
         SchemaDeclaration decl = config.getElementDeclaration(name.getStructuredQName());
         if (decl == null) {
             throw new SaxonApiException("No global declaration found for element " + name.getClarkName());
         }
         try {
             NodeTest test = decl.makeSchemaNodeTest();
-            return new ConstructedItemType(test, processor);
+            return new ConstructedItemType(test, config);
         } catch (MissingComponentException e) {
             throw new SaxonApiException(e);
         }
@@ -338,7 +335,6 @@ public class ItemTypeFactory {
      */
 
     public ItemType getElementTest(/*@Nullable*/ QName name, QName schemaType, boolean nillable) throws SaxonApiException {
-        Configuration config = processor.getUnderlyingConfiguration();
         NameTest nameTest = null;
         ContentTypeTest contentTest = null;
         if (name != null) {
@@ -357,17 +353,17 @@ public class ItemTypeFactory {
             if (nameTest == null) {
                 return getNodeKindTest(XdmNodeKind.ELEMENT);
             } else {
-                return new ConstructedItemType(nameTest, processor);
+                return new ConstructedItemType(nameTest, config);
             }
         } else {
             if (nameTest == null) {
-                return new ConstructedItemType(contentTest, processor);
+                return new ConstructedItemType(contentTest, config);
             } else {
                 CombinedNodeTest combo = new CombinedNodeTest(
                         nameTest,
                         Token.INTERSECT,
                         contentTest);
-                return new ConstructedItemType(combo, processor);
+                return new ConstructedItemType(combo, config);
             }
         }
     }
@@ -386,7 +382,6 @@ public class ItemTypeFactory {
      */
 
     public ItemType getSchemaAttributeTest(QName name) throws SaxonApiException {
-        Configuration config = processor.getUnderlyingConfiguration();
         StructuredQName nn = new StructuredQName("", name.getNamespaceURI(), name.getLocalName());
         SchemaDeclaration decl = config.getAttributeDeclaration(nn);
         if (decl == null) {
@@ -394,7 +389,7 @@ public class ItemTypeFactory {
         }
         try {
             NodeTest test = decl.makeSchemaNodeTest();
-            return new ConstructedItemType(test, processor);
+            return new ConstructedItemType(test, config);
         } catch (MissingComponentException e) {
             throw new SaxonApiException(e);
         }
@@ -418,7 +413,6 @@ public class ItemTypeFactory {
     public ItemType getAttributeTest(QName name, QName schemaType) throws SaxonApiException {
         NameTest nameTest = null;
         ContentTypeTest contentTest = null;
-        Configuration config = processor.getUnderlyingConfiguration();
         if (name != null) {
             int attributeFP = config.getNamePool().allocateFingerprint(name.getNamespaceURI(), name.getLocalName());
             nameTest = new NameTest(Type.ATTRIBUTE, attributeFP, config.getNamePool());
@@ -435,17 +429,17 @@ public class ItemTypeFactory {
             if (nameTest == null) {
                 return getNodeKindTest(XdmNodeKind.ATTRIBUTE);
             } else {
-                return new ConstructedItemType(nameTest, processor);
+                return new ConstructedItemType(nameTest, config);
             }
         } else {
             if (nameTest == null) {
-                return new ConstructedItemType(contentTest, processor);
+                return new ConstructedItemType(contentTest, config);
             } else {
                 CombinedNodeTest combo = new CombinedNodeTest(
                         nameTest,
                         Token.INTERSECT,
                         contentTest);
-                return new ConstructedItemType(combo, processor);
+                return new ConstructedItemType(combo, config);
             }
         }
     }
@@ -468,7 +462,7 @@ public class ItemTypeFactory {
             throw new IllegalArgumentException("Supplied itemType is not an element test");
         }
         DocumentNodeTest docTest = new DocumentNodeTest((NodeTest) test);
-        return new ConstructedItemType(docTest, processor);
+        return new ConstructedItemType(docTest, config);
     }
 
     //#if CSHARP==false
@@ -481,8 +475,8 @@ public class ItemTypeFactory {
      */
 
     public ItemType getExternalObjectType(Class externalClass) {
-        JavaExternalObjectType type = processor.getUnderlyingConfiguration().getJavaExternalObjectType(externalClass);
-        return new ConstructedItemType(type, processor);
+        JavaExternalObjectType type = config.getJavaExternalObjectType(externalClass);
+        return new ConstructedItemType(type, config);
     }
 
     /**
@@ -514,7 +508,7 @@ public class ItemTypeFactory {
             throw new IllegalArgumentException("Map key must be atomic");
         }
         return new ConstructedItemType(
-                new MapType((AtomicType)keyType.getUnderlyingItemType(), valueType.getUnderlyingSequenceType()), processor);
+                new MapType((AtomicType)keyType.getUnderlyingItemType(), valueType.getUnderlyingSequenceType()), config);
     }
 
     /**
@@ -525,7 +519,7 @@ public class ItemTypeFactory {
      */
 
     public ItemType getArrayType(SequenceType memberType) {
-        return new ConstructedItemType(new ArrayItemType(memberType.getUnderlyingSequenceType()), processor);
+        return new ConstructedItemType(new ArrayItemType(memberType.getUnderlyingSequenceType()), config);
     }
 
     /**
@@ -572,14 +566,14 @@ public class ItemTypeFactory {
         if (item.isAtomicValue()) {
             AtomicValue value = (AtomicValue) item.getUnderlyingValue();
             AtomicType type = value.getItemType();
-            return new ConstructedItemType(type, processor);
+            return new ConstructedItemType(type, config);
         } else if (item.isNode()) {
             NodeInfo node = (NodeInfo) item.getUnderlyingValue();
             int kind = node.getNodeKind();
             if (node.getLocalPart().isEmpty()) {
-                return new ConstructedItemType(NodeKindTest.makeNodeKindTest(kind), processor);
+                return new ConstructedItemType(NodeKindTest.makeNodeKindTest(kind), config);
             } else {
-                return new ConstructedItemType(new SameNameTest(node), processor);
+                return new ConstructedItemType(new SameNameTest(node), config);
             }
         } else {
             Item it = item.getUnderlyingValue();
@@ -589,7 +583,7 @@ public class ItemTypeFactory {
                 return ItemType.ANY_ARRAY;
             //#if CSHARP==false
             } else if (it.getGenre() == Genre.EXTERNAL) {
-                return new ConstructedItemType(ExternalObjectType.THE_INSTANCE, processor);
+                return new ConstructedItemType(ExternalObjectType.THE_INSTANCE, config);
             //#endif
             } else {
                 return ItemType.ANY_FUNCTION;
@@ -606,7 +600,7 @@ public class ItemTypeFactory {
      */
 
     public ItemType exposeItemType(net.sf.saxon.type.ItemType it) {
-        return new ConstructedItemType(it, processor);
+        return new ConstructedItemType(it, config);
     }
 
 }

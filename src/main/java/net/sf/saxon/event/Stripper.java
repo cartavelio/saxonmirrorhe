@@ -13,8 +13,6 @@ import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -55,26 +53,12 @@ public class Stripper extends ProxyReceiver {
     // stripStack is used to hold information used while stripping nodes. We avoid allocating
     // space on the tree itself to keep the size of nodes down. Each entry on the stack is two
     // booleans, one indicates the current value of xml-space is "preserve", the other indicates
-    // that we are in a space-preserving element.
+    // that we are in a space-preserving element. See masks below for information about other bits.
 
-    // We implement our own stack to avoid the overhead of allocating objects. The two booleans
-    // are held as the least-significant bits of an integer.
+    // We implement our own stack to avoid the overhead of allocating objects.
 
     private int[] stripStack = new int[100];
     private int top = 0;
-
-    /**
-     * Get a clean copy of this stripper. The new copy shares the same PipelineConfiguration
-     * as the original, but the underlying receiver (that is, the destination for post-stripping
-     * events) is changed.
-     *
-     * @param next the next receiver in the pipeline for the new Stripper
-     * @return a dublicate of this Stripper, with the output sent to "next".
-     */
-
-    public Stripper getAnother(Receiver next) {
-        return new Stripper(rule, next);
-    }
 
     /**
      * Decide whether an element is in the set of white-space preserving element types
@@ -109,7 +93,7 @@ public class Stripper extends ProxyReceiver {
     public void open() throws XPathException {
         // System.err.println("Stripper#startDocument()");
         top = 0;
-        stripStack[top] = ALWAYS_PRESERVE;             // {xml:preserve = false, preserve this element = true}
+        stripStack[top] = ALWAYS_PRESERVE;             // {xml:space = default, preserve this element = true}
         super.open();
     }
 
@@ -151,15 +135,13 @@ public class Stripper extends ProxyReceiver {
 
         String xmlSpace = attributes.getValue(NamespaceConstant.XML, "space");
         if (xmlSpace != null) {
-            if (Whitespace.normalizeWhitespace(StringView.of(xmlSpace)).equals(S_PRESERVE)) {
+            if (Whitespace.trim(xmlSpace).equals("preserve")) {
                 stripStack[top] |= PRESERVE_PARENT;
             } else {
                 stripStack[top] &= ~PRESERVE_PARENT;
             }
         }
     }
-
-    private final static UnicodeString S_PRESERVE = BMPString.of("preserve");
 
     /**
      * Handle an end-of-element event

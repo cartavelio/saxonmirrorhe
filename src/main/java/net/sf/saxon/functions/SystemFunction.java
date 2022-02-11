@@ -319,6 +319,12 @@ public abstract class SystemFunction extends AbstractFunction {
         return (o instanceof SystemFunction) && super.equals(o);
     }
 
+    @Override
+    public int hashCode() {
+        // included explicitly because equals() is overridden: prevents compiler warnings
+        return super.hashCode();
+    }
+
     /**
      * Return the error code to be used for type errors. This is overridden for functions
      * such as exactly-one(), one-or-more(), ...

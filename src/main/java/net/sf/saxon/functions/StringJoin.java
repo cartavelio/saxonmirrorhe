@@ -70,6 +70,11 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
                 returnEmptyIfEmpty == ((StringJoin) o).returnEmptyIfEmpty;
     }
 
+    @Override
+    public int hashCode() {
+        return super.hashCode() | (returnEmptyIfEmpty ? 0x05000000 : 0);
+    }
+
     /**
      * Allow the function to create an optimized call based on the values of the actual arguments
      *

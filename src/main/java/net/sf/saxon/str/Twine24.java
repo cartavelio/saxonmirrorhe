@@ -7,7 +7,6 @@
 
 package net.sf.saxon.str;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.z.IntIterator;
 
@@ -36,9 +35,9 @@ public class Twine24 extends UnicodeString {
 
     protected Twine24(byte[] bytes) {
         this.bytes = bytes;
-        if (Configuration.isAssertionsEnabled()) {
-            verifyCharacters();
-        }
+//        if (Configuration.isAssertionsEnabled()) {
+//            verifyCharacters();
+//        }
     }
 
 

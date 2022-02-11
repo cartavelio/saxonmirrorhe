@@ -700,6 +700,10 @@ public class KnownResourceFinder {
         return null;
     }
 
+    public static boolean isKnownPublicId(String publicId) {
+        return publicIds.get(publicId) != null;
+    }
+
     /**
      * Get the source from a given file.
      * @param filename the name of the file

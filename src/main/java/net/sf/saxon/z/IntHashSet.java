@@ -8,7 +8,7 @@
 package net.sf.saxon.z;
 
 
-
+import java.util.Arrays;
 
 /**
  * Set of int values. This class is modelled on the java.net.Set interface, but it does
@@ -226,7 +226,7 @@ public class IntHashSet extends IntSet {
         _size = 0;
         int[] values = _values;
         _values = new int[nmax];
-        java.util.Arrays.fill(_values, ndv); // empty all values
+        Arrays.fill(_values, ndv); // empty all values
         if (values != null) {
             for (int i = 0; i < nold; ++i) {
                 int value = values[i];

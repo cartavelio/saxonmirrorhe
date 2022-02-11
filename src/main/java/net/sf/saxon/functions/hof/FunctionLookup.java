@@ -59,6 +59,12 @@ public class FunctionLookup extends ContextAccessorFunction {
                 ExpressionTool.equalOrNull(getRetainedStaticContext(), ((FunctionLookup) o).getRetainedStaticContext());
     }
 
+    @Override
+    public int hashCode() {
+        // Included explicitly because equals() is overridden: prevents compiler warnings
+        return super.hashCode();
+    }
+
     /**
      * Bind a context item to appear as part of the function's closure. If this method
      * has been called, the supplied context item will be used in preference to the
