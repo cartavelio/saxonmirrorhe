@@ -363,7 +363,6 @@ SaxonProcessor::~SaxonProcessor() {
 
 
 bool SaxonProcessor::isSchemaAwareProcessor() {
-    std::cerr << "SaxonProcessor.isSchemaAware() cp0"  << std::endl;
     if (!licensei) {
         return false;
     } else {
@@ -701,9 +700,9 @@ const char *SaxonProcessor::version() {
         jstring jstr = (jstring) (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, MID_version,
                                                                                            proc));
         const char *tempVersionStr = SaxonProcessor::sxn_environ->env->GetStringUTFChars(jstr, nullptr);
-        int verLen = strlen(tempVersionStr) + 22 + strlen(CVERSION) + 1;
+        int verLen = strlen(tempVersionStr) + 1;
         versionStr = new char[verLen];
-        snprintf(versionStr, verLen, "SaxonC %s %s %s", CVERSION, "running with", tempVersionStr);
+        snprintf(versionStr, verLen, tempVersionStr);
         SaxonProcessor::sxn_environ->env->ReleaseStringUTFChars(jstr, tempVersionStr);
 
 
