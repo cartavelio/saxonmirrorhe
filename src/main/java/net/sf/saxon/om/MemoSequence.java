@@ -83,7 +83,7 @@ public class MemoSequence implements Sequence {
                         assert reservoir != null;
                         return SingletonIterator.makeIterator(reservoir[0]);
                     default:
-                        return new ArrayIterator<>(reservoir, 0, used);
+                        return new ArrayIterator(reservoir, 0, used);
                 }
 
             case BUSY:

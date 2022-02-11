@@ -65,7 +65,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
         uris = emptyArray;
     }
 
-    protected NamespaceMap newInstance() {
+    protected NamespaceMap makeNamespaceMap() {
         return new NamespaceMap();
     }
 
@@ -197,7 +197,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
                 return this;
             } else if (uri.isEmpty()) {
                 // Delete the entry for the prefix
-                NamespaceMap n2 = newInstance();
+                NamespaceMap n2 = makeNamespaceMap();
                 n2.prefixes = new String[prefixes.length - 1];
                 System.arraycopy(prefixes, 0, n2.prefixes, 0,position);
                 System.arraycopy(prefixes, position+1, n2.prefixes, position+1, prefixes.length - position);
@@ -207,7 +207,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
                 return n2;
             } else {
                 // Replace the entry for the prefix
-                NamespaceMap n2 = newInstance();
+                NamespaceMap n2 = makeNamespaceMap();
                 n2.prefixes = Arrays.copyOf(prefixes, prefixes.length);
                 n2.uris = Arrays.copyOf(uris, uris.length);
                 n2.uris[position] = uri;
@@ -225,7 +225,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
             System.arraycopy(prefixes, insertionPoint, p2, insertionPoint+1, prefixes.length - insertionPoint);
             System.arraycopy(uris, insertionPoint, u2, insertionPoint+1, prefixes.length - insertionPoint);
 
-            NamespaceMap n2 = newInstance();
+            NamespaceMap n2 = makeNamespaceMap();
             n2.prefixes = p2;
             n2.uris = u2;
             return n2;
@@ -279,7 +279,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
             System.arraycopy(prefixes, position+1, p2, position, prefixes.length - position - 1);
             System.arraycopy(uris, position+1, u2, position, uris.length - position - 1);
 
-            NamespaceMap n2 = newInstance();
+            NamespaceMap n2 = makeNamespaceMap();
             n2.prefixes = p2;
             n2.uris = u2;
             return n2;

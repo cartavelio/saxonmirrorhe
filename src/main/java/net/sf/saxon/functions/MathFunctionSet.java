@@ -12,12 +12,12 @@ import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.One;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.DoubleValue;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.NumericValue;
 
 
@@ -105,17 +105,17 @@ public class MathFunctionSet extends BuiltInFunctionSet {
      * Generic superclass for all the arity-1 trig functions
      */
 
-    private static abstract class TrigFn1 extends SystemFunction {
+    public static abstract class TrigFn1 extends SystemFunction {
 
         protected abstract double compute(double input);
 
         @Override
-        public ZeroOrOne call(XPathContext context, Sequence[] args) throws XPathException {
+        public GroundedValue call(XPathContext context, Sequence[] args) throws XPathException {
             DoubleValue in = (DoubleValue) args[0].head();
             if (in == null) {
-                return ZeroOrOne.empty();
+                return EmptySequence.getInstance();
             } else {
-                return One.dbl(compute(in.getDoubleValue()));
+                return new DoubleValue(compute(in.getDoubleValue()));
             }
         }
     }
@@ -266,11 +266,11 @@ public class MathFunctionSet extends BuiltInFunctionSet {
          * @throws XPathException if a dynamic error occurs within the function
          */
         @Override
-        public ZeroOrOne call(XPathContext context, Sequence[] args) throws XPathException {
+        public GroundedValue call(XPathContext context, Sequence[] args) throws XPathException {
             DoubleValue x = (DoubleValue) args[0].head();
             DoubleValue result;
             if (x == null) {
-                result = null;
+                return EmptySequence.getInstance();
             } else {
                 double dx = x.getDoubleValue();
                 if (dx == 1) {
@@ -285,8 +285,8 @@ public class MathFunctionSet extends BuiltInFunctionSet {
                         result = new DoubleValue(Math.pow(dx, dy));
                     }
                 }
+                return result;
             }
-            return new ZeroOrOne(result);
         }
     }
 

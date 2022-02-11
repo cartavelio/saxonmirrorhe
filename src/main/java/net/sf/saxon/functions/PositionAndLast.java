@@ -8,6 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableLambda;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
@@ -57,9 +58,9 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
         } catch (final XPathException e) {
             // This happens when we do a dynamic lookup of position() or last() when there is no context item
             SymbolicName.F name = new SymbolicName.F(getFunctionName(), getArity());
-            Callable callable = (context1, arguments) -> {
+            Callable callable = new CallableLambda((context1, arguments) -> {
                 throw e;
-            };
+            });
             return new CallableFunction(name, callable, getFunctionItemType());
         }
         ConstantFunction fn = new ConstantFunction(value);

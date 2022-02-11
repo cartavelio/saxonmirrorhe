@@ -26,7 +26,7 @@ import java.util.*;
 
 public class DictionaryMap extends MapItem {
 
-    private final HashMap<String, GroundedValue> hashMap;
+    private final Map<String, GroundedValue> hashMap;
 
     /**
      * Create an empty dictionary, to which entries can be added using {@link #initialPut(String, GroundedValue)},
@@ -111,7 +111,17 @@ public class DictionaryMap extends MapItem {
     @Override
     public AtomicIterator keys() {
         Iterator<String> base = hashMap.keySet().iterator();
-        return () -> base.hasNext() ? new StringItem(base.next()) : null;
+        //noinspection Convert2Lambda
+        return new AtomicIterator() {
+            @Override
+            public AtomicValue next() {
+                if (base.hasNext()) {
+                    return new StringItem(base.next());
+                } else {
+                    return null;
+                }
+            }
+        };
     }
 
     /**
@@ -122,7 +132,9 @@ public class DictionaryMap extends MapItem {
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
         List<KeyValuePair> pairs = new ArrayList<>();
-        hashMap.forEach((k, v) -> pairs.add(new KeyValuePair(new StringItem(k), v)));
+        for (Map.Entry<String, GroundedValue> entry : hashMap.entrySet()) {
+            pairs.add(new KeyValuePair(new StringItem(entry.getKey()), entry.getValue()));
+        }
         return pairs;
     }
 
@@ -229,7 +241,9 @@ public class DictionaryMap extends MapItem {
     private HashTrieMap toHashTrieMap() {
         //System.err.println("Dictionary rewrite!!!!");
         HashTrieMap target = new HashTrieMap();
-        hashMap.forEach((k, v) -> target.initialPut(new StringItem(k), v));
+        for (Map.Entry<String, GroundedValue> entry : hashMap.entrySet()) {
+            target.initialPut(new StringItem(entry.getKey()), entry.getValue());
+        }
         return target;
     }
 }

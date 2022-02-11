@@ -73,7 +73,7 @@ public class CharacterMapIndex implements Iterable<CharacterMap> {
 
     public CharacterMapIndex copy() {
         CharacterMapIndex copy = new CharacterMapIndex();
-        copy.index = new HashMap<>(this.index);
+        copy.index = new HashMap<StructuredQName, CharacterMap>(this.index);
         return copy;
     }
 

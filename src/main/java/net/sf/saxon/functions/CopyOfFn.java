@@ -37,7 +37,7 @@ public class CopyOfFn extends SystemFunction {
     public Sequence call(final XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence in = arguments.length == 0 ? context.getContextItem() : arguments[0];
         SequenceIterator input = in.iterate();
-        SequenceIterator output = new ItemMappingIterator(input, ItemMapper.of(item -> {
+        SequenceIterator output = new ItemMappingIterator(input, item -> {
             if (!(item instanceof NodeInfo)) {
                 return item;
             } else {
@@ -46,7 +46,7 @@ public class CopyOfFn extends SystemFunction {
                 // TODO: set the base URI
                 return vc;
             }
-        }));
+        });
         return new LazySequence(output);
     }
 

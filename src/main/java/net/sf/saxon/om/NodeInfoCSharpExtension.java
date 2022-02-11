@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 
 public interface NodeInfoCSharpExtension {
 
-    //#if CSHARP=true
+    //#if CSHARP==true
 
     Iterable<? extends NodeInfo> children(NodeTest filter);
     AxisIterator iterateAxis(AxisInfo axis, NodeTest nodeTest);

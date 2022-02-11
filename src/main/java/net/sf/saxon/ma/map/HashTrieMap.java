@@ -398,12 +398,12 @@ public class HashTrieMap extends MapItem {
     public AtomicIterator keys() {
         return new AtomicIterator() {
 
-            final Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> base = imap.iterator();
+            final Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> baseIter = imap.iterator();
 
             @Override
             public AtomicValue next() {
-                if (base.hasNext()) {
-                    return base.next()._2.key;
+                if (baseIter.hasNext()) {
+                    return baseIter.next()._2.key;
                 } else {
                     return null;
                 }
@@ -419,26 +419,27 @@ public class HashTrieMap extends MapItem {
      */
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-        // For .NEU - don't use a lambda expression here
+        // For C# - don't use a lambda expression here
+        //noinspection Convert2Lambda
         return new Iterable<KeyValuePair>() {
             @Override
             public Iterator<KeyValuePair> iterator() {
                 return new Iterator<KeyValuePair>() {
-                    Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> base = imap.iterator();
+                    final Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> baseIter = imap.iterator();
 
                     @Override
                     public boolean hasNext() {
-                        return base.hasNext();
+                        return baseIter.hasNext();
                     }
 
                     @Override
                     public KeyValuePair next() {
-                        return base.next()._2;
+                        return baseIter.next()._2;
                     }
 
                     @Override
                     public void remove() {
-                        base.remove();
+                        baseIter.remove();
                     }
                 };
             };

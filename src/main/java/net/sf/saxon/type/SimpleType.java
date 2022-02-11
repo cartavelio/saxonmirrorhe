@@ -17,7 +17,7 @@ import net.sf.saxon.str.UnicodeString;
  * a user-defined simple type.
  */
 
-public interface SimpleType extends SchemaType {
+public interface SimpleType extends SchemaType, HyperType {
 
     /**
      * Test whether this Simple Type is an atomic type
@@ -95,17 +95,6 @@ public interface SimpleType extends SchemaType {
     ValidationFailure validateContent(
             /*@NotNull*/ UnicodeString value, /*@Nullable*/ NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules);
 
-    /**
-     * Test whether this type is namespace sensitive, that is, if a namespace context is needed
-     * to translate between the lexical space and the value space. This is true for types derived
-     * from, or containing, QNames and NOTATIONs
-     *
-     * @return true if the type is namespace-sensitive, or if the namespace-sensitivity cannot be determined
-     * because there are missing schema components. (However, for xs:anyAtomicType, the result returned is
-     * false, even though the type allows xs:QName instances.)
-     */
-
-    boolean isNamespaceSensitive();
 
     /**
      * Determine how values of this simple type are whitespace-normalized.

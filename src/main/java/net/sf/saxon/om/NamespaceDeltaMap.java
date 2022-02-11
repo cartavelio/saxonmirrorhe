@@ -38,7 +38,7 @@ public class NamespaceDeltaMap extends NamespaceMap implements NamespaceBindingS
     }
 
     @Override
-    protected NamespaceMap newInstance() {
+    protected NamespaceMap makeNamespaceMap() {
         return new NamespaceDeltaMap();
     }
 

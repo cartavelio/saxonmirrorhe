@@ -259,7 +259,10 @@ public class RoleDiagnostic {
             message.append(" does not match. ");
             if (th != null) {
                 Optional<String> more = requiredItemType.explainMismatch(item, th);
-                more.ifPresent(message::append);
+                //noinspection OptionalIsPresent
+                if (more.isPresent()) {
+                    message.append(more.get());
+                }
             }
         }
         return message.toString();

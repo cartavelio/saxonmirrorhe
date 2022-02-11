@@ -65,7 +65,7 @@ public class KeyIndex {
     private Status status;
 
     public KeyIndex(boolean isRangeKey) {
-        index = isRangeKey ? new TreeMap<>() : new HashMap<>(100);
+        index = isRangeKey ? new TreeMap<AtomicMatchKey, Object>() : new HashMap<AtomicMatchKey, Object>(100);
         creatingThread = Thread.currentThread().getId();
         status = Status.UNDER_CONSTRUCTION;
     }
@@ -424,7 +424,7 @@ public class KeyIndex {
 
         @Override
         public int hashCode() {
-            int h = 0x8ab27cd6;
+            int h = 0x1ab27cd6;
             for (AtomicMatchKey amk : keys) {
                 h ^= amk.hashCode();
                 h = h << 1;

@@ -10,9 +10,10 @@ package net.sf.saxon.expr;
 import net.sf.saxon.om.EnumSetTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.EnumSet;
 
@@ -23,7 +24,17 @@ import java.util.EnumSet;
  * <p>This is a specialization of the more general MappingIterator class, for use
  * in cases where a single input item never maps to a sequence of more than one
  * output item.</p>
+ * <p>The Java implementation accepts a lambda expression as the mapping function
+ * (because it is a functional interface, even though not declared as such). To achieve
+ * the same effect on C# we add extra constructors that explicitly accept a lambda
+ * expression, by virtue of the fact that the expected type is a functional interface
+ * (which translates to a C# delegate)</p>
  */
+
+@CSharpInjectMembers(code={
+        "public ItemMappingIterator(net.sf.saxon.om.SequenceIterator first, net.sf.saxon.expr.ItemMapper.Lambda action) : this(first, net.sf.saxon.expr.ItemMapper.of(action)) {}",
+        "public ItemMappingIterator(net.sf.saxon.om.SequenceIterator first, net.sf.saxon.expr.ItemMapper.ItemMapper.Lambda action, bool oneToOne) : this(first, net.sf.saxon.expr.ItemMapper.of(action), oneToOne) {}"
+})
 
 public class ItemMappingIterator
         implements SequenceIterator, LookaheadIterator, LastPositionFinder {

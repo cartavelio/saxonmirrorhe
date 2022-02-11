@@ -280,7 +280,7 @@ public class AlphaCode {
         private void expect(char c) {
             int d = nextChar();
             if (d != c) {
-                throw new IllegalStateException("Expected '" + c + "', found '" + (d == -1 ? "<eof>" : (char)d) + "'");
+                throw new IllegalStateException("Expected '" + c + "', found '" + (d == -1 ? "<eof>" : (""+(char)d)) + "'");
             }
         }
 

@@ -26,10 +26,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.jiter.MonoIterator;
-
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
@@ -872,7 +869,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     /*@NotNull*/
     public SequenceIterator iterate(XPathContext context) throws XPathException {
         Item value = evaluateItem(context);
-        return value == null ? EmptyIterator.emptyIterator() : SingletonIterator.rawIterator(value);
+        return SequenceTool.itemOrEmpty(value).iterate();
     }
 
     /**
