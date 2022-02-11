@@ -651,7 +651,7 @@ public class EnumerationType implements AtomicType {
      *
      * @return the schema component represented as a function from property names to property values.
      */
-    @Override
+    // ndw ??? no longer an @Override
     public Function getComponentAsFunction() {
         return null;
     }
