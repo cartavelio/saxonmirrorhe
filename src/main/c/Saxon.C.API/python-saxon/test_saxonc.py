@@ -398,6 +398,7 @@ def testNamedTemplateDefault(saxonproc, files_dir, data_dir):
 
 def testNamedTemplateToFileDefault(saxonproc):
     trans = saxonproc.new_xslt30_processor()
+
     input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
     executable = trans.compile_stylesheet(stylesheet_text = '''
      <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -433,6 +434,9 @@ def testNamedTemplateToFileDefault(saxonproc):
     assert executable is not None
 
     executable.call_template_returning_file(output_file="result_For_call_template.xml")
+    if executable.exception_occurred:
+        print(executable.error_message)
+        executable.exception_clear
     assert isfile("result_For_call_template.xml") == True
 
 
@@ -441,7 +445,7 @@ def testUseAssociated(saxonproc, files_dir):
     foo_xml = files_dir+"/trax/xml/foo.xml"
     executable = trans.compile_stylesheet(associated_file=foo_xml)
     if executable is None and trans.exception_occurred:
-        print(trans.get_error_message)
+        print(trans.error_message)
     assert executable is not None
     executable.set_initial_match_selection(file_name=foo_xml)
     result = executable.apply_templates_returning_string()
