@@ -26,6 +26,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceCodeInjector;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
+import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
@@ -49,7 +50,7 @@ public class QueryModule implements StaticContext {
     private String baseURI;
     private String moduleNamespace; // null only if moduleIsMainModule is false
     private HashMap<String, String> explicitPrologNamespaces;
-    private Stack<NamespaceBinding> activeNamespaces;  // The namespace bindings declared in element constructors
+    private IndexedStack<NamespaceBinding> activeNamespaces;  // The namespace bindings declared in element constructors
     private HashMap<StructuredQName, GlobalVariable> variables;
     // global variables declared in this module
     private HashMap<StructuredQName, GlobalVariable> libraryVariables;
@@ -102,7 +103,7 @@ public class QueryModule implements StaticContext {
         moduleIsMainModule = true;
         topModule = this;
         languageLevel = sqc.getLanguageVersion();
-        activeNamespaces = new Stack<>();
+        activeNamespaces = new IndexedStack<>();
         baseURI = sqc.getBaseURI();
         defaultCollationName = sqc.getDefaultCollationName();
         try {
@@ -158,7 +159,7 @@ public class QueryModule implements StaticContext {
         }
         init(userQueryContext);
         packageData = importer.getPackageData();
-        activeNamespaces = new Stack<>();
+        activeNamespaces = new IndexedStack<>();
         executable = null;
         optimizerOptions = importer.optimizerOptions;
     }
@@ -182,7 +183,7 @@ public class QueryModule implements StaticContext {
         //importedSchemata.add(NamespaceConstant.JSON);
         importedModuleNamespaces = new HashSet<>(5);
         moduleNamespace = null;
-        activeNamespaces = new Stack<>();
+        activeNamespaces = new IndexedStack<>();
 
         explicitPrologNamespaces = new HashMap<>(10);
         if (sqc != null) {
@@ -439,7 +440,7 @@ public class QueryModule implements StaticContext {
         // The only part of the RetainedStaticContext that can change as the query module is parsed is the
         // "activeNamespaces", that is, namespaces declared on direct element constructors. If this is empty,
         // we can reuse the top-level static context on each request.
-        if (activeNamespaces.empty()) {
+        if (activeNamespaces.isEmpty()) {
             if (moduleStaticContext == null) {
                 moduleStaticContext = new RetainedStaticContext(this);
             }
@@ -863,113 +864,6 @@ public class QueryModule implements StaticContext {
     }
 
     /**
-     * Look for module cycles. This is a restriction introduced in the PR specification because of
-     * difficulties in defining the formal semantics.
-     * <p>[Definition: A module M1 directly depends on another module M2 (different from M1) if a
-     * variable or function declared in M1 depends on a variable or function declared in M2.]
-     * It is a static error [err:XQST0093] to import a module M1 if there exists a sequence
-     * of modules M1 ... Mi ... M1 such that each module directly depends on the next module
-     * in the sequence (informally, if M1 depends on itself through some chain of module dependencies.)</p>
-     *
-     * @param referees   a Stack containing the chain of module import references leading to this
-     *                   module
-     * @param lineNumber used for diagnostics
-     * @throws net.sf.saxon.trans.XPathException
-     *          if cycles are found
-     */
-
-    public void lookForModuleCycles(/*@NotNull*/ Stack<QueryModule> referees, int lineNumber) throws XPathException {
-        if (referees.contains(this)) {
-            int s = referees.indexOf(this);
-            referees.push(this);
-            StringBuilder message = new StringBuilder("Circular dependency between modules. ");
-            for (int i = s; i < referees.size() - 1; i++) {
-                QueryModule next = referees.get(i + 1);
-                if (i == s) {
-                    message.append("Module ").append(getSystemId()).append(" references module ").append(next.getSystemId());
-                } else {
-                    message.append(", which references module ").append(next.getSystemId());
-                }
-            }
-            message.append('.');
-            XPathException err = new XPathException(message.toString());
-            err.setErrorCode("XQST0093");
-            err.setIsStaticError(true);
-            Loc loc = new Loc(getSystemId(), lineNumber, -1);
-            err.setLocator(loc);
-            throw err;
-        } else {
-            referees.push(this);
-            Iterator<GlobalVariable> viter = getModuleVariables();
-            while (viter.hasNext()) {
-                GlobalVariable gv = viter.next();
-                //GlobalVariable gvc = gv.getCompiledVariable(); // will be null if the global variable is unreferenced
-                Expression select = gv.getBody();
-                if (select != null) {
-                    List<Binding> list = new ArrayList<>(10);
-                    ExpressionTool.gatherReferencedVariables(select, list);
-                    for (Binding b : list) {
-                        if (b instanceof GlobalVariable) {
-                            String sysId = ((GlobalVariable) b).getSystemId();
-                            StructuredQName qName = b.getVariableQName();
-                            boolean synthetic = qName.hasURI(NamespaceConstant.SAXON_GENERATED_VARIABLE);
-                            if (!synthetic && sysId != null && !sysId.equals(getSystemId())) {
-                                QueryModule sqc = executable.getQueryModuleWithSystemId(sysId, topModule);
-                                if (sqc != null) {
-                                    sqc.lookForModuleCycles(referees, ((GlobalVariable) b).getLineNumber());
-                                }
-                            }
-                        }
-                    }
-                    List<UserFunction> fList = new ArrayList<>(5);
-                    ExpressionTool.gatherCalledFunctions(select, fList);
-                    for (UserFunction f : fList) {
-                        String sysId = f.getSystemId();
-                        if (sysId != null && !sysId.equals(getSystemId())) {
-                            QueryModule sqc = executable.getQueryModuleWithSystemId(sysId, topModule);
-                            if (sqc != null) {
-                                sqc.lookForModuleCycles(referees, f.getLineNumber());
-                            }
-                        }
-                    }
-                }
-            }
-            for (XQueryFunction gf : getLocalFunctionLibrary().getFunctionDefinitions()) {
-                Expression body = gf.getUserFunction().getBody();
-                if (body != null) {
-                    List<Binding> vList = new ArrayList<>(10);
-                    ExpressionTool.gatherReferencedVariables(body, vList);
-                    for (Binding b : vList) {
-                        if (b instanceof GlobalVariable) {
-                            String uri = ((GlobalVariable) b).getSystemId();
-                            StructuredQName qName = b.getVariableQName();
-                            boolean synthetic = qName.hasURI(NamespaceConstant.SAXON) && "gg".equals(qName.getPrefix());
-                            if (!synthetic && uri != null && !uri.equals(getSystemId())) {
-                                QueryModule sqc = executable.getQueryModuleWithSystemId(uri, topModule);
-                                if (sqc != null) {
-                                    sqc.lookForModuleCycles(referees, ((GlobalVariable) b).getLineNumber());
-                                }
-                            }
-                        }
-                    }
-                    List<UserFunction> fList = new ArrayList<>(10);
-                    ExpressionTool.gatherCalledFunctions(body, fList);
-                    for (UserFunction f : fList) {
-                        String uri = f.getSystemId();
-                        if (uri != null && !uri.equals(getSystemId())) {
-                            QueryModule sqc = executable.getQueryModuleWithSystemId(uri, topModule);
-                            if (sqc != null) {
-                                sqc.lookForModuleCycles(referees, f.getLineNumber());
-                            }
-                        }
-                    }
-                }
-            }
-            referees.pop();
-        }
-    }
-
-    /**
      * Get global variables declared in this module
      *
      * @return an Iterator whose items are GlobalVariable objects
@@ -991,10 +885,10 @@ public class QueryModule implements StaticContext {
 
     public void checkForCircularities(/*@NotNull*/ List<GlobalVariable> compiledVars, /*@NotNull*/ XQueryFunctionLibrary globalFunctionLibrary) throws XPathException {
         Iterator<GlobalVariable> iter = compiledVars.iterator();
-        Stack<Object> stack = null;
+        IndexedStack<Object> stack = null;
         while (iter.hasNext()) {
             if (stack == null) {
-                stack = new Stack<>();
+                stack = new IndexedStack<>();
             }
             GlobalVariable gv = iter.next();
             if (gv != null) {

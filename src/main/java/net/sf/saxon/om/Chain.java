@@ -303,14 +303,14 @@ public class Chain implements GroundedValue {
             // If there are iterators on the queue waiting to be processed, then take the first
             // item from the first iterator on the queue.
             while (!queue.isEmpty()) {
-                SequenceIterator ui = queue.peek();
+                SequenceIterator ui = queue.getFirst();
                 while (ui != null) {
                     Item current = ui.next();
                     if (current != null) {
                         return current;
                     } else {
-                        queue.remove();
-                        ui = queue.peek();
+                        queue.removeFirst();
+                        ui = queue.getFirst();
                     }
                 }
             }

@@ -109,7 +109,7 @@ public class CharacterSetFactory {
                 return cs;
             }
 
-            CSharp.emitCode("unknownEncoding(encoding)");
+            CSharp.emitCode("return unknownEncoding(encoding)");
 
 //#if CSHARP==false
 
@@ -135,7 +135,7 @@ public class CharacterSetFactory {
     }
 
     //#if CSHARP==true
-    public void unknownEncoding(String encoding) throws XPathException {
+    public CharacterSet unknownEncoding(String encoding) throws XPathException {
         throw new net.sf.saxon.trans.XPathException("Unknown encoding requested: " + encoding);
     }
     //#endif

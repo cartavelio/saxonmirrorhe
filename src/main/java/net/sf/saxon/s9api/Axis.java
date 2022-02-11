@@ -28,16 +28,16 @@ public enum Axis {
     SELF(AxisInfo.SELF),
     NAMESPACE(AxisInfo.NAMESPACE);
 
-    private final int number;
+    private final int axisNumber;
 
     /**
      * Create an Axis
      *
-     * @param number the internal axis number as defined in class {@link net.sf.saxon.om.AxisInfo}
+     * @param axisNumber the internal axis number as defined in class {@link net.sf.saxon.om.AxisInfo}
      */
 
-    Axis(int number) {
-        this.number = number;
+    Axis(int axisNumber) {
+        this.axisNumber = axisNumber;
     }
 
     /**
@@ -46,7 +46,7 @@ public enum Axis {
      * @return the axis number
      */
     public int getAxisNumber() {
-        return number;
+        return axisNumber;
     }
 }
 

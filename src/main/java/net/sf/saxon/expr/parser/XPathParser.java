@@ -35,6 +35,7 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
+import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntArraySet;
@@ -56,12 +57,12 @@ public class XPathParser {
 
     protected Tokenizer t;
     protected StaticContext env;
-    protected Stack<LocalBinding> rangeVariables = new Stack<>();
+    protected IndexedStack<LocalBinding> rangeVariables = new IndexedStack<>();
     // The stack holds a list of range variables that are in scope.
     // Each entry on the stack is a Binding object containing details
     // of the variable.
 
-    public Stack<InlineFunctionDetails> inlineFunctionStack = new Stack<>();
+    public IndexedStack<InlineFunctionDetails> inlineFunctionStack = new IndexedStack<>();
     protected QNameParser qNameParser;
     protected ParserExtension parserExtension = new ParserExtension();
 
@@ -99,7 +100,7 @@ public class XPathParser {
     protected int catchDepth = 0;
 
     public static class InlineFunctionDetails {
-        public Stack<LocalBinding> outerVariables;    // Local variables defined in the immediate outer scope (the father scope)
+        public IndexedStack<LocalBinding> outerVariables;    // Local variables defined in the immediate outer scope (the father scope)
         public List<LocalBinding> outerVariablesUsed; // Local variables from the outer scope that are actually used
         public List<UserFunctionParameter> implicitParams; // Parameters corresponding (1:1) with the above
     }
@@ -3885,7 +3886,7 @@ public class XPathParser {
         int offset = t.currentTokenStartOffset;
 
         InlineFunctionDetails details = new InlineFunctionDetails();
-        details.outerVariables = new Stack<>();
+        details.outerVariables = new IndexedStack<>();
         for (LocalBinding lb : getRangeVariables()) {
             details.outerVariables.push(lb);
         }
@@ -3893,7 +3894,7 @@ public class XPathParser {
         details.implicitParams = new ArrayList<>(4);
         inlineFunctionStack.push(details);
         //noinspection Convert2Diamond
-        setRangeVariables(new Stack<LocalBinding>());
+        setRangeVariables(new IndexedStack<LocalBinding>());
         nextToken();
         HashSet<StructuredQName> paramNames = new HashSet<>(8);
         List<UserFunctionParameter> params = new ArrayList<>(8);
@@ -4096,7 +4097,7 @@ public class XPathParser {
      * parameter, each one bound to the corresponding parameter in the containing function.
      */
 
-    public static LocalBinding findOuterRangeVariable(StructuredQName qName, Stack<InlineFunctionDetails> inlineFunctionStack, StaticContext env) {
+    public static LocalBinding findOuterRangeVariable(StructuredQName qName, IndexedStack<InlineFunctionDetails> inlineFunctionStack, StaticContext env) {
         // If we didn't find the variable, it might be defined in an outer scope.
         LocalBinding b2 = findOuterXPathRangeVariable(qName, inlineFunctionStack);
         if (b2 != null) {
@@ -4116,10 +4117,10 @@ public class XPathParser {
      * @param inlineFunctionStack the stack of inline functions that we are within
      * @return a binding to the innermost declaration of the variable
      */
-    private static LocalBinding findOuterXPathRangeVariable(StructuredQName qName, Stack<InlineFunctionDetails> inlineFunctionStack) {
+    private static LocalBinding findOuterXPathRangeVariable(StructuredQName qName, IndexedStack<InlineFunctionDetails> inlineFunctionStack) {
         for (int s = inlineFunctionStack.size() - 1; s >= 0; s--) {
             InlineFunctionDetails details = inlineFunctionStack.get(s);
-            Stack<LocalBinding> outerVariables = details.outerVariables;
+            IndexedStack<LocalBinding> outerVariables = details.outerVariables;
             for (int v = outerVariables.size() - 1; v >= 0; v--) {
                 LocalBinding b2 = outerVariables.get(v);
                 if (b2.getVariableQName().equals(qName)) {
@@ -4165,7 +4166,7 @@ public class XPathParser {
      */
 
     private static LocalBinding findOuterXSLTVariable(
-            StructuredQName qName, Stack<InlineFunctionDetails> inlineFunctionStack, StaticContext env) {
+            StructuredQName qName, IndexedStack<InlineFunctionDetails> inlineFunctionStack, StaticContext env) {
         SourceBinding decl = ((ExpressionContext) env).getStyleElement().bindLocalVariable(qName);
         if (decl != null) {
             InlineFunctionDetails details = inlineFunctionStack.get(0);
@@ -4209,7 +4210,7 @@ public class XPathParser {
      */
 
     private static LocalBinding bindParametersInNestedFunctions(
-            StructuredQName qName, Stack<InlineFunctionDetails> inlineFunctionStack, int start) {
+            StructuredQName qName, IndexedStack<InlineFunctionDetails> inlineFunctionStack, int start) {
         InlineFunctionDetails details = inlineFunctionStack.get(start);
         List<UserFunctionParameter> params = details.implicitParams;
         for (UserFunctionParameter param : params) {
@@ -4254,14 +4255,14 @@ public class XPathParser {
         int offset = t.currentTokenStartOffset;
 
         InlineFunctionDetails details = new InlineFunctionDetails();
-        details.outerVariables = new Stack<>();
+        details.outerVariables = new IndexedStack<>();
         for (LocalBinding lb : getRangeVariables()) {
             details.outerVariables.push(lb);
         }
         details.outerVariablesUsed = new ArrayList<>(4);
         details.implicitParams = new ArrayList<>(4);
         inlineFunctionStack.push(details);
-        setRangeVariables(new Stack<>());
+        setRangeVariables(new IndexedStack<>());
         nextToken();
         List<UserFunctionParameter> params = new ArrayList<>(1);
         SequenceType resultType = SequenceType.ANY_SEQUENCE;
@@ -4368,7 +4369,7 @@ public class XPathParser {
      * @return the stack of variables
      */
 
-    public Stack<LocalBinding> getRangeVariables() {
+    public IndexedStack<LocalBinding> getRangeVariables() {
         return rangeVariables;
     }
 
@@ -4378,7 +4379,7 @@ public class XPathParser {
      * @param variables the stack of variables
      */
 
-    public void setRangeVariables(Stack<LocalBinding> variables) {
+    public void setRangeVariables(IndexedStack<LocalBinding> variables) {
         this.rangeVariables = variables;
     }
 
@@ -4429,7 +4430,7 @@ public class XPathParser {
      * @param stack the stack to be used for local variables declared within the expression
      */
 
-    public void setRangeVariableStack(Stack<LocalBinding> stack) {
+    public void setRangeVariableStack(IndexedStack<LocalBinding> stack) {
         rangeVariables = stack;
     }
 

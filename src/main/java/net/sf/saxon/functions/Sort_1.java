@@ -17,7 +17,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class implements the function fn:sort#1, which is a standard function in XPath 3.1
@@ -41,13 +40,13 @@ public class Sort_1 extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        final List<ItemToBeSorted> inputList = getItemsToBeSorted(arguments[0]);
+        final ArrayList<ItemToBeSorted> inputList = getItemsToBeSorted(arguments[0]);
         StringCollator collation = context.getConfiguration().getCollation(getRetainedStaticContext().getDefaultCollationName());
         return doSort(inputList, collation, context);
     }
 
-    protected List<ItemToBeSorted> getItemsToBeSorted(Sequence input) throws XPathException {
-        final List<ItemToBeSorted> inputList = new ArrayList<>();
+    protected ArrayList<ItemToBeSorted> getItemsToBeSorted(Sequence input) throws XPathException {
+        final ArrayList<ItemToBeSorted> inputList = new ArrayList<>();
         int i = 0;
         SequenceIterator iterator = input.iterate();
         Item item;
@@ -61,7 +60,7 @@ public class Sort_1 extends SystemFunction {
         return inputList;
     }
 
-    protected Sequence doSort(final List<ItemToBeSorted> inputList, StringCollator collation, XPathContext context) throws XPathException {
+    protected Sequence doSort(final ArrayList<ItemToBeSorted> inputList, StringCollator collation, XPathContext context) throws XPathException {
         final AtomicComparer atomicComparer = AtomicSortComparer.makeSortComparer(
                 collation, StandardNames.XS_ANY_ATOMIC_TYPE, context);
         try {
@@ -80,7 +79,7 @@ public class Sort_1 extends SystemFunction {
             err.setErrorCode("XPTY0004");
             throw err;
         }
-        List<Item> outputList = new ArrayList<>(inputList.size());
+        ArrayList<Item> outputList = new ArrayList<>(inputList.size());
         for (ItemToBeSorted member : inputList) {
             outputList.add(member.value);
         }

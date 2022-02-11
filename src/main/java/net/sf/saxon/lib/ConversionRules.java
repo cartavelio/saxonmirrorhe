@@ -244,7 +244,8 @@ public class ConversionRules {
         }
 
         if (!targetType.isPrimitiveType()) {
-            AtomicType primTarget = targetType.getPrimitiveItemType();
+            @SuppressWarnings("RedundantCast")
+            AtomicType primTarget = (AtomicType)targetType.getPrimitiveItemType();
             if (sourceType == primTarget) {
                 return new Converter.DownCastingConverter(targetType, this);
             } else if (st == StandardNames.XS_STRING || st == StandardNames.XS_UNTYPED_ATOMIC) {
@@ -265,7 +266,8 @@ public class ConversionRules {
             if (typeHierarchy != null && typeHierarchy.isSubType(sourceType, targetType)) {
                 return new Converter.UpCastingConverter(targetType);
             }
-            Converter upcast = new Converter.UpCastingConverter(sourceType.getPrimitiveItemType());
+            @SuppressWarnings("RedundantCast")
+            Converter upcast = new Converter.UpCastingConverter((AtomicType)sourceType.getPrimitiveItemType());
             Converter downcast = new Converter.DownCastingConverter(targetType, this);
             return new Converter.TwoPhaseConverter(upcast, downcast);
         }
@@ -615,7 +617,8 @@ public class ConversionRules {
                 }
             } else {
                 // converter to user-defined types derived from types other than xs:string
-                StringConverter first = targetType.getPrimitiveItemType().getStringConverter(this);
+                @SuppressWarnings("RedundantCast")
+                StringConverter first = ((AtomicType)targetType.getPrimitiveItemType()).getStringConverter(this);
                 Converter.DownCastingConverter second = new Converter.DownCastingConverter(targetType, this);
                 return new StringConverter.StringToNonStringDerivedType(first, second);
             }

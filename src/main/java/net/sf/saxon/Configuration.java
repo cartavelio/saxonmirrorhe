@@ -47,8 +47,8 @@ import net.sf.saxon.trace.TraceCodeInjector;
 import net.sf.saxon.trace.XSLTTraceCodeInjector;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.packages.IPackageLoader;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TreeStatistics;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
@@ -114,11 +114,11 @@ import java.util.function.Predicate;
  * @since 8.4
  */
 
-@CSharpInjectMembers(code = {
-        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-                + "    }"
-})
+//@CSharpInjectMembers(code = {
+//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
+//                + "    }"
+//})
 public class Configuration implements SourceResolver, NotationSet {
 
     protected static IntSet booleanFeatures = new IntHashSet(40);
@@ -131,7 +131,13 @@ public class Configuration implements SourceResolver, NotationSet {
     private String defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
 
     private Predicate<URI> allowedUriTest = uri -> true;
-    private final StandardCollectionFinder standardCollectionFinder = new StandardCollectionFinder();
+
+    private final CollectionFinder standardCollectionFinder
+            //#if CSHARP==false
+            = new StandardCollectionFinder()
+            //#endif
+            ;
+
     private CollectionFinder collectionFinder;
     private EnvironmentVariableResolver environmentVariableResolver = new StandardEnvironmentVariableResolver();
     private String defaultCollection = null;
@@ -159,13 +165,13 @@ public class Configuration implements SourceResolver, NotationSet {
 
     private String defaultCountry = Locale.getDefault().getCountry();
     private Properties defaultOutputProperties = new Properties();
-    private transient DynamicLoader dynamicLoader = new DynamicLoader();
+    private transient IDynamicLoader dynamicLoader = Version.platform.getDefaultDynamicLoader();
 
     private final IntSet enabledProperties = new IntHashSet(64);
     private final IntHashMap<String> stringProperties = new IntHashMap<>(); // TODO: not yet widely used
-
+    //#if CSHARP==false
     private List<ExternalObjectModel> externalObjectModels = new ArrayList<>(4);
-
+    //#endif
     private final DocumentPool globalDocumentPool = new DocumentPool();
     private final IntegratedFunctionLibrary integratedFunctionLibrary = new IntegratedFunctionLibrary();
     private transient LocalizerFactory localizerFactory;
@@ -205,7 +211,9 @@ public class Configuration implements SourceResolver, NotationSet {
     // Plug-in to allow media queries in an xml-stylesheet processing instruction to be evaluated
     private Comparator<String> mediaQueryEvaluator;
     private final Map<String, String> fileExtensions = new HashMap<>();
+    //#if CSHARP==false
     private final Map<String, ResourceFactory> resourceFactoryMapping = new HashMap<>();
+    //#endif
     private final Map<String, FunctionAnnotationHandler> functionAnnotationHandlers = new HashMap<>();
     protected int byteCodeThreshold = 100;
     private int regexBacktrackingLimit = 10000000;
@@ -393,7 +401,9 @@ public class Configuration implements SourceResolver, NotationSet {
         standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
         serializerFactory = new net.sf.saxon.lib.SerializerFactory(this);
         sourceResolver = this;
+        //#if CSHARP==false
         mediaQueryEvaluator = (o1, o2) -> 0;
+        //#endif
 
         Version.platform.initialize(this);
         defaultXsltCompilerInfo.setURIResolver(systemURIResolver);
@@ -414,7 +424,7 @@ public class Configuration implements SourceResolver, NotationSet {
         internalSetBooleanProperty(FeatureCode.DISABLE_XSL_EVALUATE, FeatureKeys.DISABLE_XSL_EVALUATE, false);
         //internalSetBooleanProperty(FeatureKeys.STABLE_COLLECTION_URI, true);
 
-
+        //#if CSHARP==false
         registerFileExtension("xml", "application/xml");
         registerFileExtension("html", "application/html");
         registerFileExtension("atom", "application/atom");
@@ -440,6 +450,7 @@ public class Configuration implements SourceResolver, NotationSet {
         registerMediaType("application/binary", BinaryResource.FACTORY);
         registerMediaType("application/json", JSONResource.FACTORY);
         registerMediaType("application/unknown", UnknownResource.FACTORY);
+        //#endif
 
         registerFunctionAnnotationHandler(new XQueryFunctionAnnotationHandler());
     }
@@ -649,7 +660,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param dynamicLoader the DynamicLoader to be used by this Configuration
      */
 
-    public void setDynamicLoader(DynamicLoader dynamicLoader) {
+    public void setDynamicLoader(IDynamicLoader dynamicLoader) {
         this.dynamicLoader = dynamicLoader;
     }
 
@@ -661,7 +672,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * supplied by the system.
      */
 
-    public DynamicLoader getDynamicLoader() {
+    public IDynamicLoader getDynamicLoader() {
         return dynamicLoader;
     }
 
@@ -1030,11 +1041,12 @@ public class Configuration implements SourceResolver, NotationSet {
      * the version of XML (1.0 or 1.1) selected by this configuration
      */
 
+    @SuppressWarnings("Convert2MethodRef")
     public IntPredicateProxy getValidCharacterChecker() {
         if (xmlVersion == XML10) {
-            return IntPredicateLambda.of(XMLCharacterData::isValid10);
+            return IntPredicateLambda.of(ch -> XMLCharacterData.isValid10(ch));
         } else {
-            return IntPredicateLambda.of(XMLCharacterData::isValid11);
+            return IntPredicateLambda.of(ch -> XMLCharacterData.isValid11(ch));
         }
     }
 
@@ -1660,6 +1672,7 @@ public class Configuration implements SourceResolver, NotationSet {
         return collectionFinder;
     }
 
+    //#if CSHARP==false
     /**
      * Get the standard collection finder. This is always an instance of {@link StandardCollectionFinder}
      * and there is no way of changing it. It is available for calling from a user-supplied collection
@@ -1669,7 +1682,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public StandardCollectionFinder getStandardCollectionFinder() {
-        return standardCollectionFinder;
+        return (StandardCollectionFinder)standardCollectionFinder;
     }
 
     /**
@@ -1687,12 +1700,14 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void registerCollection(String collectionURI, ResourceCollection collection) {
-        standardCollectionFinder.registerCollection(collectionURI, collection);
+        ((StandardCollectionFinder)standardCollectionFinder).registerCollection(collectionURI, collection);
         if (collectionFinder instanceof StandardCollectionFinder
                 && collectionFinder != standardCollectionFinder) {
             ((StandardCollectionFinder) collectionFinder).registerCollection(collectionURI, collection);
         }
     }
+
+    //#endif
 
     /**
      * Set the media type to be associated with a file extension by the standard
@@ -1710,6 +1725,7 @@ public class Configuration implements SourceResolver, NotationSet {
         fileExtensions.put(extension, mediaType);
     }
 
+    //#if CSHARP==false
     /**
      * Associate a media type with a resource factory. This method may
      * be called to customize the behaviour of a collection to recognize different file extensions
@@ -1722,6 +1738,7 @@ public class Configuration implements SourceResolver, NotationSet {
     public void registerMediaType(String contentType, ResourceFactory factory) {
         resourceFactoryMapping.put(contentType, factory);
     }
+    //#endif
 
     /**
      * Get the media type to be associated with a file extension by the standard
@@ -1745,6 +1762,7 @@ public class Configuration implements SourceResolver, NotationSet {
         return mediaType;
     }
 
+    //#if CSHARP==false
     /**
      * Get the resource factory associated with a media type
      *
@@ -1756,6 +1774,7 @@ public class Configuration implements SourceResolver, NotationSet {
     public ResourceFactory getResourceFactoryForMediaType(String mediaType) {
         return resourceFactoryMapping.get(mediaType);
     }
+    //#endif
 
     /**
      * Set the localizer factory to be used
@@ -2148,6 +2167,7 @@ public class Configuration implements SourceResolver, NotationSet {
         this.styleParserClass = parser;
     }
 
+    //#if CSHARP==false
     /**
      * Get the OutputURIResolver that will be used to resolve URIs used in the
      * href attribute of the xsl:result-document instruction.
@@ -2174,6 +2194,7 @@ public class Configuration implements SourceResolver, NotationSet {
     public void setOutputURIResolver(OutputURIResolver outputURIResolver) {
         defaultXsltCompilerInfo.setOutputURIResolver(outputURIResolver);
     }
+    //#endif
 
     /**
      * Set a custom SerializerFactory. This will be used to create a serializer for a given
@@ -4292,6 +4313,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param feature details of the property to be set
      * @param value value of the property to be set
      */
+    @CSharpModifiers(code="public")
     protected void setFeature(FeatureData feature, Object value) {
         String name = feature.uri;
         int code = feature.code;
@@ -4456,6 +4478,7 @@ public class Configuration implements SourceResolver, NotationSet {
                     defaultXsltCompilerInfo.setOptimizerOptions(optimizerOptions);
                     break;
 
+                //#if CSHARP==false
                 case FeatureCode.OUTPUT_URI_RESOLVER:
                     if (!(value instanceof OutputURIResolver)) {
                         throw new IllegalArgumentException(
@@ -4468,6 +4491,7 @@ public class Configuration implements SourceResolver, NotationSet {
                     setOutputURIResolver(
                             (OutputURIResolver) instantiateClassName(name, value, OutputURIResolver.class));
                     break;
+                //#endif
 
                 case FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS: {
                     boolean b = requireBoolean(name, value);
@@ -5016,11 +5040,16 @@ public class Configuration implements SourceResolver, NotationSet {
         switch (code) {
 
             case FeatureCode.ALLOWED_PROTOCOLS:
+                // TODO: support this in Saxon-CS
+                //#if CSHARP==false
                 if (allowedUriTest instanceof ProtocolRestricter) {
                     return allowedUriTest.toString();
                 } else {
+                    //#endif
                     return "all";
+                    //#if CSHARP==false
                 }
+                //#endif
 
             case FeatureCode.COLLATION_URI_RESOLVER:
                 return getCollationURIResolver();
@@ -5089,11 +5118,13 @@ public class Configuration implements SourceResolver, NotationSet {
             case FeatureCode.OPTIMIZATION_LEVEL:
                 return optimizerOptions.toString();
 
+            //#if CSHARP==false
             case FeatureCode.OUTPUT_URI_RESOLVER:
                 return getOutputURIResolver();
 
             case FeatureCode.OUTPUT_URI_RESOLVER_CLASS:
                 return getOutputURIResolver().getClass().getName();
+            //#endif
 
             case FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS:
                 return getSystemURIResolver().queryParametersAreRecognized();

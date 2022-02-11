@@ -17,7 +17,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.AnyNodeTest;
-import net.sf.saxon.resource.ActiveSource;
+import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceExtent;

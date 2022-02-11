@@ -50,11 +50,11 @@ public class ParseOptions {
     private StructuredQName topLevelElement;
     private SchemaType topLevelType;
 
-    /*@Nullable*/ private Boolean wrapDocument = null;
+    private Optional<Boolean> wrapDocument = Optional.empty();
     /*@Nullable*/ private TreeModel treeModel = null;
     //private int stripSpace = Whitespace.UNSPECIFIED;
     private SpaceStrippingRule spaceStrippingRule = null;
-    /*@Nullable*/ private Boolean lineNumbering = null;
+    private Optional<Boolean> lineNumbering = Optional.empty();
     private boolean pleaseClose = false;
     /*@Nullable*/ private transient ErrorReporter errorReporter = null;
     /*@Nullable*/ private List<FilterFactory> filters = null;
@@ -165,7 +165,7 @@ public class ParseOptions {
         if (options.topLevelType != null) {
             topLevelType = options.topLevelType;
         }
-        if (options.wrapDocument != null) {
+        if (options.wrapDocument.isPresent()) {
             wrapDocument = options.wrapDocument;
         }
         if (options.treeModel != null) {
@@ -174,7 +174,7 @@ public class ParseOptions {
         if (options.spaceStrippingRule != null) {
             spaceStrippingRule = options.spaceStrippingRule;
         }
-        if (options.lineNumbering != null) {
+        if (options.lineNumbering.isPresent()) {
             lineNumbering = options.lineNumbering;
         }
         if (options.pleaseClose) {
@@ -245,8 +245,8 @@ public class ParseOptions {
         if (spaceStrippingRule == null) {
             spaceStrippingRule = config.getParseOptions().getSpaceStrippingRule();
         }
-        if (lineNumbering == null) {
-            lineNumbering = config.isLineNumbering();
+        if (!lineNumbering.isPresent()) {
+            lineNumbering = Optional.of(config.isLineNumbering());
         }
 
         //#if (CSHARP==false)
@@ -618,7 +618,7 @@ public class ParseOptions {
      */
 
     public void setLineNumbering(boolean lineNumbering) {
-        this.lineNumbering = lineNumbering;
+        this.lineNumbering = Optional.of(lineNumbering);
     }
 
     /**
@@ -628,7 +628,7 @@ public class ParseOptions {
      */
 
     public boolean isLineNumbering() {
-        return lineNumbering != null && lineNumbering;
+        return lineNumbering.isPresent() && lineNumbering.get();
     }
 
     /**
@@ -638,7 +638,7 @@ public class ParseOptions {
      */
 
     public boolean isLineNumberingSet() {
-        return lineNumbering != null;
+        return lineNumbering.isPresent();
     }
 
     //#if CSHARP==false
@@ -761,7 +761,8 @@ public class ParseOptions {
      *             and its contained subtree is copied. If null, the system default is chosen.
      */
 
-    public void setWrapDocument(/*@Nullable*/ Boolean wrap) {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public void setWrapDocument(Optional<Boolean> wrap) {
         wrapDocument = wrap;
     }
 
@@ -775,7 +776,7 @@ public class ParseOptions {
      */
 
     /*@Nullable*/
-    public Boolean getWrapDocument() {
+    public Optional<Boolean> getWrapDocument() {
         return wrapDocument;
     }
 

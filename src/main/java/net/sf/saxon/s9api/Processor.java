@@ -45,7 +45,9 @@ import java.util.Objects;
 public class Processor implements Configuration.ApiProvider {
 
     private Configuration config;
+    //#if CSHARP==false
     private SchemaManager schemaManager;
+    //#endif
 
     /**
      * Create a Processor
@@ -62,9 +64,11 @@ public class Processor implements Configuration.ApiProvider {
     public Processor(boolean licensedEdition) {
         if (licensedEdition) {
             config = Configuration.newConfiguration();
+            //#if CSHARP==false
             if (config.getEditionCode().equals("EE")) {
                 schemaManager = makeSchemaManager();
             }
+            //#endif
         } else {
             config = new Configuration();
         }
@@ -85,9 +89,11 @@ public class Processor implements Configuration.ApiProvider {
 
     public Processor(/*@NotNull*/ Configuration config) {
         this.config = config;
+        //#if CSHARP==false
         if (config.getEditionCode().equals("EE")) {
             schemaManager = makeSchemaManager();
         }
+        //#endif
     }
 
     /**
@@ -101,7 +107,9 @@ public class Processor implements Configuration.ApiProvider {
     public Processor(Source source) throws SaxonApiException {
         try {
             config = Configuration.readConfiguration(source);
+            //#if CSHARP==false
             schemaManager = makeSchemaManager();
+            //#endif
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
@@ -281,7 +289,7 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     //#endif
-
+    //#if CSHARP==false
     /**
      * Get the associated SchemaManager. The SchemaManager provides capabilities to load and cache
      * XML schema definitions. There is exactly one SchemaManager in a schema-aware Processor, and none
@@ -293,7 +301,7 @@ public class Processor implements Configuration.ApiProvider {
     public SchemaManager getSchemaManager() {
         return schemaManager;
     }
-
+    //#endif
     /**
      * Test whether this processor is schema-aware
      *
@@ -689,6 +697,7 @@ public class Processor implements Configuration.ApiProvider {
     }
     //#endif
 
+    //#if CSHARP==false
     private SchemaManager makeSchemaManager() {
         SchemaManager manager = null;
         //#if EE==true
@@ -696,6 +705,7 @@ public class Processor implements Configuration.ApiProvider {
         //#endif
         return manager;
     }
+    //#endif
 
 
 }

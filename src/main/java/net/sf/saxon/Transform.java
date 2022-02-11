@@ -1457,8 +1457,7 @@ public class Transform {
             throw new RuntimeException(message);
         }
     }
-
-
+    
     private String getCommandName() {
         String s = getClass().getName();
         if (s.equals("cli.Saxon.Cmd.DotNetTransform")) {

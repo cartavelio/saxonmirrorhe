@@ -9,11 +9,13 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Sort_2;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class implements the function fn:sort#2, which is a higher-order function in XPath 3.1
@@ -33,7 +35,7 @@ public class Sort_3 extends Sort_2 {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence input = arguments[0];
-        final List<ItemToBeSorted> inputList = new ArrayList<>();
+        final ArrayList<ItemToBeSorted> inputList = new ArrayList<>();
         int i = 0;
         Function key = (Function) arguments[2].head();
         SequenceIterator iterator = input.iterate();

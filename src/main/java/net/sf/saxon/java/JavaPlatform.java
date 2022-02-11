@@ -17,20 +17,17 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.functions.FunctionLibraryList;
-import net.sf.saxon.lib.ModuleURIResolver;
-import net.sf.saxon.lib.StandardEntityResolver;
-import net.sf.saxon.lib.StandardModuleURIResolver;
-import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.pull.ActiveStAXSource;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.JavaRegularExpression;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.resource.ActiveSAXSource;
-import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.resource.ActiveStreamSource;
 import net.sf.saxon.resource.StandardCollectionFinder;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.DynamicLoader;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ExternalObjectType;
 import net.sf.saxon.xpath.JAXPXPathStaticContext;
@@ -226,6 +223,15 @@ public class JavaPlatform implements Platform {
         return "J";
     }
 
+    /**
+     * Get the default DynamicLoader for the platform
+     *
+     * @return the default DynamicLoader
+     */
+
+    public IDynamicLoader getDefaultDynamicLoader() {
+        return new DynamicLoader();
+    }
 
     /**
      * Get a parser by instantiating the SAXParserFactory
@@ -554,8 +560,11 @@ public class JavaPlatform implements Platform {
      * @since 9.6.0.3
      */
     @Override
-    public ClassLoader makeGeneratedClassLoader(Configuration config, Class thisClass) {
-        ClassLoader parentClassLoader = config.getDynamicLoader().getClassLoader();
+    public ClassLoader makeGeneratedClassLoader(Configuration config, Class<?> thisClass) {
+        ClassLoader parentClassLoader = null;
+        if (config.getDynamicLoader() instanceof DynamicLoader) {
+            parentClassLoader = ((DynamicLoader)config.getDynamicLoader()).getClassLoader();
+        }
         if (parentClassLoader == null) {
             parentClassLoader = Thread.currentThread().getContextClassLoader();
         }

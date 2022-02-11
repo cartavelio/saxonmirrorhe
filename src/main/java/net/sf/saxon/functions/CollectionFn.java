@@ -20,6 +20,7 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.ExternalObject;
@@ -45,6 +46,7 @@ public class CollectionFn extends SystemFunction implements Callable {
      */
     public static String EMPTY_COLLECTION_URI = "http://saxon.sf.net/collection/empty";
 
+    //#if CSHARP==false
     /**
      * An empty collection
      */
@@ -87,6 +89,7 @@ public class CollectionFn extends SystemFunction implements Callable {
             return false;
         }
     }
+    //#endif
 
     @Override
     public int getSpecialProperties(Expression[] arguments) {
@@ -95,6 +98,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         return (super.getSpecialProperties(arguments) & ~StaticProperty.NO_NODES_NEWLY_CREATED) | StaticProperty.PEER_NODESET;
     }
 
+    //#if CSHARP==false
     private String getAbsoluteCollectionURI(String href, XPathContext context) throws XPathException {
         String absoluteURI;
         if (href == null) {
@@ -177,6 +181,8 @@ public class CollectionFn extends SystemFunction implements Callable {
         }
     }
 
+    //#endif
+
     /**
      * Dynamic call on collection() function
      *
@@ -187,6 +193,7 @@ public class CollectionFn extends SystemFunction implements Callable {
      */
 
     @Override
+    @CSharpReplaceBody(code="throw new NotImplementedException();")
     public Sequence call(final XPathContext context, Sequence[] arguments) throws XPathException {
         String href;
         if (getArity() == 0) {

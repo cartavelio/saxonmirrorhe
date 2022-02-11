@@ -8,16 +8,18 @@
 package net.sf.saxon.trans;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.IDynamicLoader;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.serialize.MessageEmitter;
 
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
 /**
  * Utility class used to perform dynamic loading of user-hook implementations
  */
-public class DynamicLoader {
+public class DynamicLoader implements IDynamicLoader {
 
     private ClassLoader classLoader;
 
@@ -83,8 +85,8 @@ public class DynamicLoader {
      * @throws XPathException if the class cannot be loaded.
      */
 
-    public Class getClass(String className, Logger traceOut, ClassLoader classLoader) throws XPathException {
-        Class known = knownClasses.get(className);
+    public Class<?> getClass(String className, Logger traceOut, ClassLoader classLoader) throws XPathException {
+        Class<?> known = knownClasses.get(className);
         if (known != null) {
             return known;
         }
@@ -142,12 +144,15 @@ public class DynamicLoader {
      */
 
     public Object getInstance(String className, /*@Nullable*/ ClassLoader classLoader) throws XPathException {
-        Class theclass = getClass(className, null, classLoader);
+        Class<?> theclass = getClass(className, null, classLoader);
         try {
-            return theclass.newInstance();
+            Constructor<?> constructor = theclass.getConstructor();
+            return constructor.newInstance();
+        } catch (NoSuchMethodException err) {
+                throw new XPathException("Failed to instantiate class " + className +
+                                                 " (it has no public zero-argument constructor)", err);
         } catch (Exception err) {
-            throw new XPathException("Failed to instantiate class " + className +
-                    " (does it have a public zero-argument constructor?)", err);
+            throw new XPathException("Failed to instantiate class " + className, err);
         }
     }
 
@@ -172,9 +177,13 @@ public class DynamicLoader {
      */
 
     public Object getInstance(String className, Logger traceOut, /*@Nullable*/ ClassLoader classLoader) throws XPathException {
-        Class theclass = getClass(className, traceOut, classLoader);
+        Class<?> theclass = getClass(className, traceOut, classLoader);
         try {
-            return theclass.newInstance();
+            Constructor<?> constructor = theclass.getConstructor();
+            return constructor.newInstance();
+        } catch (NoSuchMethodException err) {
+            throw new XPathException("Failed to instantiate class " + className +
+                                             " (it has no public zero-argument constructor)", err);
         } catch (NoClassDefFoundError err) {
             throw new XPathException("Failed to load instance of class " + className + getMissingJarFileMessage(className), err);
         } catch (Exception err) {

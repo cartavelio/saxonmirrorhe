@@ -481,6 +481,27 @@ public class XsltController extends Controller {
         }
     }
 
+    //#if CSHARP==false
+
+    /**
+     * Get the output URI resolver.
+     *
+     * @return the user-supplied URI resolver if there is one, or the
+     * system-defined one otherwise.
+     * @see #setOutputURIResolver
+     * @since 8.4. Retained for backwards compatibility in 9.9; superseded by
+     * {@link #getResultDocumentResolver()}
+     */
+
+    /*@Nullable*/
+    public OutputURIResolver getOutputURIResolver() {
+        if (resultDocumentResolver instanceof OutputURIResolverWrapper) {
+            return ((OutputURIResolverWrapper) resultDocumentResolver).getOutputURIResolver();
+        } else {
+            return getConfiguration().getOutputURIResolver();
+        }
+    }
+
     /**
      * Set the URI resolver for secondary output documents.
      * <p>XSLT 2.0 introduces the <code>xsl:result-document</code> instruction,
@@ -504,6 +525,7 @@ public class XsltController extends Controller {
         OutputURIResolver our = resolver == null ? getConfiguration().getOutputURIResolver() : resolver;
         setResultDocumentResolver(new OutputURIResolverWrapper(our));
     }
+    //#endif
 
     public ResultDocumentResolver getResultDocumentResolver() {
         return resultDocumentResolver;
@@ -511,25 +533,6 @@ public class XsltController extends Controller {
 
     public void setResultDocumentResolver(ResultDocumentResolver resultDocumentResolver) {
         this.resultDocumentResolver = resultDocumentResolver;
-    }
-
-    /**
-     * Get the output URI resolver.
-     *
-     * @return the user-supplied URI resolver if there is one, or the
-     * system-defined one otherwise.
-     * @see #setOutputURIResolver
-     * @since 8.4. Retained for backwards compatibility in 9.9; superseded by
-     * {@link #getResultDocumentResolver()}
-     */
-
-    /*@Nullable*/
-    public OutputURIResolver getOutputURIResolver() {
-        if (resultDocumentResolver instanceof OutputURIResolverWrapper) {
-            return ((OutputURIResolverWrapper) resultDocumentResolver).getOutputURIResolver();
-        } else {
-            return getConfiguration().getOutputURIResolver();
-        }
     }
 
     /**
