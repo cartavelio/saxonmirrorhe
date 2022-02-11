@@ -25,8 +25,7 @@ namespace Saxon.Api {
         private readonly Properties props = new();
         private readonly CharacterMapIndex characterMapIndex = new();
         private Properties defaultOutputProperties;
-        private Configuration config = null; // Beware: this will often be null
-
+        
         /// <summary>QName identifying the serialization parameter "method". If the value
         /// is a user-defined method, then it is given as a QName in Clark notation, that is
         /// "{uri}local".</summary>
@@ -293,20 +292,10 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Set default output properties, for use when no explicit properties are set using <c>SetOutputProperty()</c>.
-        /// The values supplied are typically those specified in the stylesheet or query. In the case of XSLT,
-        /// they are the properties associated with unnamed <c>xsl:output</c> declarations.
+        /// Get the character map with a given name
         /// </summary>
-        /// <param name="props"></param>
-
-        public void SetDefaultOutputProperties(Properties props)
-        {
-            this.defaultOutputProperties = props;
-        }
-
-        /// <summary>
-        /// Get the character map with a given nae
-        /// </summary>
+        /// <param name="name">The name of the character map, as a QName</param>
+        /// <returns>A dictionary that maps integer Unicode codepoint values to strings</returns>
         
         public IDictionary<int, string> GetCharacterMap(QName name) {
             Saxon.Hej.serialize.CharacterMap map = 
@@ -333,7 +322,8 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <param name="name">the name of the character map</param>
-        /// <param name="charMap">the content of the character map</param>
+        /// <param name="charMap">the content of the character map, supplied as
+        /// a dictionary that maps integer Unicode codepoint values to strings</param>
 
         public void SetCharacterMap(QName name, IDictionary<int, string> charMap) {
             IntHashMap<string> content = new IntHashMap<string>();
