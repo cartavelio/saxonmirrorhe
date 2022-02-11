@@ -293,7 +293,7 @@ namespace Saxon.Impl.DataModel {
             bool isNew = !imap.ContainsKey(amk);
             bool empty = isEmpty();
             ImmutableDictionary<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> imap2 =
-                imap.Add(amk, new net.sf.saxon.ma.map.KeyValuePair(key, value));
+                imap.SetItem(amk, new net.sf.saxon.ma.map.KeyValuePair(key, value));
             ImmMap t2 = new ImmMap(imap2) {
                 valueCardinality = this.valueCardinality,
                 keyUType = keyUType,
@@ -322,7 +322,7 @@ namespace Saxon.Impl.DataModel {
             AtomicMatchKey amk = makeKey(key);
             bool empty = isEmpty();
             bool exists = imap.ContainsKey(amk);
-            imap = imap.Add(amk, new net.sf.saxon.ma.map.KeyValuePair(key, value));
+            imap = imap.SetItem(amk, new net.sf.saxon.ma.map.KeyValuePair(key, value));
             updateTypeInformation(key, value, empty);
             entries = -1;
             return exists;

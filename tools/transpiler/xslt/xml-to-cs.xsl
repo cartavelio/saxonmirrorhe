@@ -481,7 +481,7 @@
          <xsl:when test="annotations/annotation[name/@identifier='CSharpReplaceBody']">
             <xsl:text> {{{$NL}</xsl:text>
             <xsl:call-template name="indent-extra"/>
-            <xsl:text>{annotations/annotation[name/@identifier='CSharpReplaceBody']//value[@nodeType='StringLiteralExpr']/@value ! f:unescapeJava(.)}{$NL}</xsl:text>
+            <xsl:text>{annotations/annotation[name/@identifier='CSharpReplaceBody']//*[@nodeType='StringLiteralExpr']/@value ! f:unescapeJava(.)}{$NL}</xsl:text>
             <xsl:call-template name="indent"/>
             <xsl:text>}}{$NL}</xsl:text>
          </xsl:when>
