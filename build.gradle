@@ -734,7 +734,7 @@ task record_branch(
   description: "Records the branch so we can detect switches."
 ) {
   def recordBranch = new ByteArrayOutputStream();
-  commandLine "git", "branch", "--show-current"
+  commandLine "git", "rev-parse", "--abbrev-ref", "HEAD"
   standardOutput = recordBranch
   doLast {
     def output = new FileWriter(new File("build/built-branch"))
