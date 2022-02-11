@@ -73,7 +73,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
             StringValue href = (StringValue) arguments[0].head();
             URI absoluteURI = getAbsoluteURI(href.getStringValue(), getStaticBaseUriString(), context);
             String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
-            UniStringConsumer consumer = destination.getStringReceiver(false);
+            UniStringConsumer consumer = destination.getStringReceiver(false, Loc.NONE);
             consumer.open();
             try {
                 readFile(absoluteURI, encoding, consumer, context);
