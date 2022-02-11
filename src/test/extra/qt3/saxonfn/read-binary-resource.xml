@@ -23,7 +23,6 @@
    <test-case name="read-binary-001">
       <description>Basic test that the function exists and returns the right type</description>
       <created by="Michael Kay" on="2015-05-07"/>
-      <environment ref="atomic"/>
       <test>saxon:read-binary-resource("http://www.saxonica.com")</test>
       <result>
          <assert-type>xs:base64Binary</assert-type>
@@ -33,7 +32,6 @@
    <test-case name="read-binary-002">
       <description>Test the content of an HTTP resource</description>
       <created by="Michael Kay" on="2015-05-07"/>
-      <environment ref="atomic"/>
       <test>saxon:base64Binary-to-string(saxon:read-binary-resource("http://www.saxonica.com"), "utf-8")</test>
       <result>
          <assert><![CDATA[contains($result, "<title>Saxonica: XSLT and XQuery Processing</title>")]]></assert>
@@ -43,7 +41,6 @@
    <test-case name="read-binary-003">
       <description>Non-existent resource</description>
       <created by="Michael Kay" on="2015-05-07"/>
-      <environment ref="atomic"/>
       <test>saxon:base64Binary-to-string(saxon:read-binary-resource("file:///non-existent.xml"), "utf-8")</test>
       <result>
          <error code="SXJE0053"/>
@@ -53,10 +50,19 @@
    <test-case name="read-binary-004">
       <description>Bad URI</description>
       <created by="Michael Kay" on="2015-05-07"/>
-      <environment ref="atomic"/>
       <test>saxon:read-binary-resource("http:\\www.saxonica.com\")</test>
       <result>
          <error code="SXJE0053"/>
+      </result>
+   </test-case>
+   
+   <test-case name="read-binary-005">
+      <description>A URI that gets a "redirected" response</description>
+      <created by="Michael Kay" on="2015-05-07"/>
+      <environment ref="atomic"/>
+      <test>saxon:base64Binary-to-string(saxon:read-binary-resource("http://www.saxonica.com"), "utf-8")</test>
+      <result>
+         <assert><![CDATA[contains($result, "<title>Saxonica: XSLT and XQuery Processing</title>")]]></assert>
       </result>
    </test-case>
    
