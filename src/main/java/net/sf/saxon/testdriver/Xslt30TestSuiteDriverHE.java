@@ -171,6 +171,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
         Step<XdmNode> testSetDependencies = root().then(child("test-set").then(child("dependencies")));
         Step<XdmNode> testCaseDependencies = child("dependencies");
+
         XdmValue allDependencies = testCase.select(testSetDependencies.cat(testCaseDependencies)).asXdmValue();
 
         Optional<XdmNode> lastSpecValue = allDependencies.select(path("spec", "@value")).last().asOptionalNode();

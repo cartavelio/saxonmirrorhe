@@ -36,6 +36,25 @@ public class SingleEntryMap extends MapItem {
     }
 
     /**
+     * Get the key
+     * @return the key (of the single entry in this map)
+     */
+
+    public AtomicValue getKey() {
+        return key;
+    }
+
+    /**
+     * Get the value
+     *
+     * @return the value (of the single entry in this map)
+     */
+
+    public GroundedValue getValue() {
+        return value;
+    }
+
+    /**
      * Get an entry from the Map
      *
      * @param key the value of the key

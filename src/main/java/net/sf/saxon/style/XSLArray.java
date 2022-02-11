@@ -21,6 +21,7 @@ public class XSLArray extends XSLSequence {
 
     @Override
     protected void prepareAttributes() {
+
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
             String value = att.getValue();
@@ -33,7 +34,6 @@ public class XSLArray extends XSLSequence {
                 checkUnknownAttribute(attName);
             }
         }
-
     }
 
     @Override
