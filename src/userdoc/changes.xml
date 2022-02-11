@@ -1109,7 +1109,7 @@ and via new options in <code java="net.sf.saxon.lib.FeatureKeys">FeatureKeys</co
 value is the string value of the feature; or <code>--F</code> as a synonym for <code>--F:true</code>.</p>
 
          <p xmlns="">Most places in the code that previously wrote to <code>System.err</code>, or that used <code>System.err</code> as a default destination,
-now default instead to using <code java="net.sf.saxon.Configuration#getStandardErrorOutput">Configuration.getStandardErrorOutput()</code>.
+now default instead to using <code>Configuration.getStandardErrorOutput()</code>.
                   This can be set to a different destination by calling
                   <code java="net.sf.saxon.Configuration#setStandardErrorOutput">Configuration.setStandardErrorOutput()</code>
                            (which expects a <code>PrintStream</code>), or by setting the write-only configuration property

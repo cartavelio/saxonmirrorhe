@@ -105,7 +105,7 @@
             the StAX <code>XMLStreamWriter</code>, but attempts to achieve much higher levels of usability, especially for constructing
             simple documents. The need for a stable API at this level arises partly because a number of Saxon users have taken to using
             the <code>Receiver</code> interface, which is complex and error-prone to use, and is not always stable between releases. The new
-                <code>Push</code> API is documented at <code java="net.sf.saxon.s9api.Push">net.sf.saxon.s9api.Push</code>.
+                <code>Push</code> API is documented at <code>net.sf.saxon.s9api.Push</code>.
                 A <code>Push</code> provider allowing the application to write to any 
                 <code java="net.sf.saxon.s9api.Destination">Destination</code> may be obtained by calling <code>Processor.newPush()</code>.</p></li>
         </ul>
@@ -949,8 +949,8 @@
     
     <category name="dotnet">
         
-        <p>The classes <code cs="Saxon.Api.Step">Step</code> and <code
-            cs="Saxon.Api.Predicate">Predicate</code> are now available on .NET. As on Java these
+        <p>The classes <code cs="Saxon.Api.Step">Step</code> and <code>Predicate</code> are now
+            available on .NET. As on Java these 
             classes can be used to navigate XML documents from the Saxon API. The extensions
             are designed to make it easier to manipulate the inputs and outputs of the XPath, XSLT,
             XQuery, and XSD processors directly in the Java or .NET code. (These were introduced for

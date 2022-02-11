@@ -553,8 +553,7 @@
     <p>Conventional event-based APIs such as the SAX <code>ContentHandler</code> and StAX <code>XMLStreamWriter</code>
     and <code>XMLEventWriter</code> rely on the application to issue a properly-nested
     sequence of calls to methods such as <code>startElement()</code> and <code>endElement()</code>. This can make
-      it very difficult to diagnose errors if the calls are not properly matched. The Saxon <code
-        java="net.sf.saxon.s9api.Push">Push</code> API differs in that
+      it very difficult to diagnose errors if the calls are not properly matched. The Saxon <code>Push</code> API differs in that
     a call to start a new element node returns an <code>Element</code> object representing that element, and methods to create attributes
       and children for the element, and to end the element, are defined as methods on that <code>Element</code> object.
       Furthermore, these methods return the element to which they are applied, allowing method chaining.
