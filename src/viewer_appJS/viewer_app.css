@@ -12,6 +12,7 @@ brown: #B3956F
 
 dark grey: #7F7396
 purple-ish grey: #9FA6B4
+mid grey: #C4C4C4
 light grey: #F5F5F5 (Menu dropdown blocks) */
 
 
@@ -347,21 +348,25 @@ div.section h2{
 }
 .javaclassmember, .javalink, .feature {
     font-family:monospace;
-    color:#3D5B96;
+    color:#96433D;
+}
+.cslink{
+    font-family:monospace;
+    color:#B3956F;
 }
 .javaonly {
    padding: .5em;
    border: .5em;
    border-left-style: solid;
    margin: 1em auto;
-   border-color: #333399;
+   border-color: #96433D;
 }
 .csonly {
    padding: .5em;
    border: .5em;
    border-left-style: solid;
    margin: 1em auto;
-   border-color: #990033;
+   border-color: #B3956F;
 }
 .signature, .fullsignature {
     font-size:inherit;
@@ -922,7 +927,8 @@ tt{
     color:inherit;
     line-height:1.4em;
 }
-a.javalink{
+a.javalink,
+a.cslink{
     font-family:monospace;
     text-decoration:underline;
 }
@@ -938,6 +944,12 @@ span.javasee{
     font-family:monospace;
     /*text-decoration:underline;*/
     /*font-weight:bold;*/
+}
+span.cslink{
+    color:#B3956F !important;
+    font-size:inherit;
+    cursor:pointer;
+    font-family:monospace;
 }
 /*span.normal{
     /\*color:#96433D !important;*\/

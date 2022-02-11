@@ -178,7 +178,7 @@
 
 
 
-         <p>In Saxon's Saxon.Api interface on .NET, the root API object is the <a class="javalink" href="Saxon.Api.Processor">Saxon.Api.Processor</a> object.
+         <p>In Saxon's Saxon.Api interface on .NET, the root API object is the <a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a> object.
             This is a wrapper around a <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>. All the configuration properties are
             exposed via the <code>Processor</code> methods <code>getProperty(name)</code> and <code>setProperty(name, value)</code> which map directly to the
             methods <code>getConfigurationProperty(name)</code> and <code>setConfigurationProperty(name, value)</code> on the underlying
@@ -189,8 +189,8 @@
                href="/configuration/configuration-file">Configuration file</a>.</p>
 
          <p>In many cases with the Saxon.Api interface it is more appropriate to set options at a finer level of granularity than the <code>Processor</code>.
-            For example, options that affect XSLT stylesheet compilation can be set on the <a class="javalink" href="Saxon.Api.XsltCompiler">XsltCompiler</a>
-            object, and options that affect XQuery compilation on the <a class="javalink" href="Saxon.Api.XQueryCompiler">XQueryCompiler</a>.</p>
+            For example, options that affect XSLT stylesheet compilation can be set on the <a class="cslink" href="Saxon.Api.XsltCompiler">XsltCompiler</a>
+            object, and options that affect XQuery compilation on the <a class="cslink" href="Saxon.Api.XQueryCompiler">XQueryCompiler</a>.</p>
       </section>
 
       <section id="config-commandline" title="Configuration from the command line">

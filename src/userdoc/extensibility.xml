@@ -993,11 +993,11 @@
    documenting it because I don't know if we want to retain it...</p>
 
       <p>The full API for integrated .NET extension functions is available via the .NET classes
-        <a class="javalink" href="Saxon.Api.ExtensionFunctionDefinition">ExtensionFunctionDefinition</a> and 
-        <a class="javalink" href="Saxon.Api.ExtensionFunctionCall">ExtensionFunctionCall</a>, both
+        <a class="cslink" href="Saxon.Api.ExtensionFunctionDefinition">ExtensionFunctionDefinition</a> and 
+        <a class="cslink" href="Saxon.Api.ExtensionFunctionCall">ExtensionFunctionCall</a>, both
         defined in the <code>Saxon.Api</code> module. Here is a simple example that defines an extension function
         to calculate square roots, registers this extension function with the 
-        <a class="javalink" href="Saxon.Api.Processor">Processor</a>, and then invokes it from an XPath expression:</p>
+        <a class="cslink" href="Saxon.Api.Processor">Processor</a>, and then invokes it from an XPath expression:</p>
 
       <samp><![CDATA[public class Sqrt : ExtensionFunctionDefinition {
             
