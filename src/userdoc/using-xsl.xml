@@ -354,7 +354,7 @@
                   <li>The value <code>##html5</code>
                   declares that an unprefixed element name will match either a name in the XHTML namespace, or a name
                   in no namespace. This option is intended primarily for use when generating stylesheets to run under
-                  Saxon-JS in the browser, since the resulting behavior is close to that defined by the special rules in the HTML5
+                  SaxonJS in the browser, since the resulting behavior is close to that defined by the special rules in the HTML5
                   specification for XSLT and XPath running against an HTML5 DOM.</li></ul>
             </td>
          </tr>
@@ -626,10 +626,10 @@
             </td>
             <td>
                <p>Relevant only when <code>-export</code> is specified, identifies the target platform
-                  on which the exported stylesheet is to run. When exporting for Saxon-JS, the value
+                  on which the exported stylesheet is to run. When exporting for SaxonJS, the value
                   "JS" <bold>must</bold> be specified, because this adds information to the
-                  SEF file that is required by Saxon-JS. Specifying "JS" means the SEF is produced
-                  in JSON format for use with Saxon-JS 2.x. (To generate SEF files for Saxon-JS 1.x, 
+                  SEF file that is required by SaxonJS. Specifying "JS" means the SEF is produced
+                  in JSON format for use with SaxonJS 2.x. (To generate SEF files for Saxon-JS 1.x, 
                   you need to revert to Saxon-EE 9.9). In principle, specifying "HE" or "PE" will
                   inhibit optimizations that generate code which Saxon-HE/Saxon-PE cannot execute;
                   however, this is not fully tested.</p>
@@ -1804,7 +1804,7 @@
          default is <code>EE</code>. For instance, specify <code>-target:HE</code> to produce an
          export file which can be executed by Saxon-HE (this will suppress the generation of optimized
          constructs that SaxonJ-HE cannot execute). The option <code>-target:JS</code> is used when
-      generating stylesheets to be executed by Saxon-JS (in the browser, or on Node.js); in this case
+      generating stylesheets to be executed by SaxonJS (in the browser, or on Node.js); in this case
       the SEF file is in JSON format rather than XML.</p>
       
       <p>A stylesheet export file for a complete stylesheet (as distinct from a library package) is accepted
