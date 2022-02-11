@@ -26,12 +26,7 @@ public:
     XdmAtomicValue(const XdmAtomicValue &d);
 
 
-    virtual ~XdmAtomicValue(){
-	//std::cerr<<"destructor called fpr XdmAtomicValue"<<std::endl;
-	    if(!valType.empty()) {
-		    valType.clear();
-	    }
-    }
+    virtual ~XdmAtomicValue();
 
     XdmAtomicValue(jobject);
 

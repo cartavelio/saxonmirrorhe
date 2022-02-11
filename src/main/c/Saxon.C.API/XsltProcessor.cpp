@@ -12,6 +12,10 @@
 #include <typeinfo> //used for testing only
 #endif
 
+#ifdef MEM_DEBUG
+#define new new(__FILE__, __LINE__)
+#endif
+
 XsltProcessor::XsltProcessor() {
 
 	SaxonProcessor *p = new SaxonProcessor(false);
@@ -39,7 +43,7 @@ XsltProcessor::XsltProcessor(SaxonProcessor * p, std::string curr) {
 #endif
 	nodeCreated = false;
     jitCompilation = false;
-	exception = NULL;
+	exception = nullptr;
 	if(!(proc->cwd.empty()) && curr.empty()){
 		cwdXT = proc->cwd;
 	} else {
@@ -60,7 +64,7 @@ XsltProcessor::XsltProcessor(const XsltProcessor &other) {
     {
 
        XdmValue * valuei = paramIter->second;
-       if(valuei == NULL) {
+       if(valuei == nullptr) {
     	 	//std::cerr<<"Error in XsltProcessor copy constructor"<<std::endl;
        } else {
             parameters[paramIter->first] = new XdmValue(*(valuei));
@@ -78,6 +82,13 @@ XsltProcessor::XsltProcessor(const XsltProcessor &other) {
 }
 
 
+
+XsltProcessor::~XsltProcessor(){
+    clearProperties();
+    clearParameters();
+}
+
+
 XsltProcessor * XsltProcessor::clone() {
      XsltProcessor * proc = new XsltProcessor(*this);
      return proc;
@@ -89,21 +100,21 @@ bool XsltProcessor::exceptionOccurred() {
 }
 
 const char * XsltProcessor::getErrorCode() {
- if(exception == NULL) {
-    return NULL;
+ if(exception == nullptr) {
+    return nullptr;
  }
  return exception->getErrorCode();
 }
 
 void XsltProcessor::setSourceFromXdmNode(XdmNode * value) {
-    if(value != NULL){
+    if(value != nullptr){
       value->incrementRefCount();
       parameters["node"] = value;
     }
 }
 
 void XsltProcessor::setSourceFromFile(const char * ifile) {
-	if(ifile != NULL) {
+	if(ifile != nullptr) {
 		setProperty("s", ifile);
 	}
 }
@@ -113,13 +124,13 @@ void XsltProcessor::setOutputFile(const char * ofile) {
 }
 
 void XsltProcessor::setBaseOutputURI(const char * baseURI) {
-	if(baseURI != NULL) {
+	if(baseURI != nullptr) {
   	    setProperty("baseoutput", baseURI);
 	}
 }
 
 void XsltProcessor::setParameter(const char* name, XdmValue * value) {
-	if(value != NULL && name != NULL){
+	if(value != nullptr && name != nullptr){
 		value->incrementRefCount();
 		int s = parameters.size();
 		std::string skey = "param:"+std::string(name);
@@ -129,12 +140,14 @@ void XsltProcessor::setParameter(const char* name, XdmValue * value) {
             it = parameters.find(skey);
             if (it != parameters.end()) {
                 XdmValue * valuei = it->second;
-                valuei->decrementRefCount();
-                if(valuei != NULL && valuei->getRefCount() < 1){
-                    delete value;
+                if(valuei != nullptr) {
+                    valuei->decrementRefCount();
+                    if (valuei->getRefCount() < 1) {
+                        delete value;
+                    }
+                    parameters.erase(skey);
+                    parameters[skey] = value;
                 }
-                parameters.erase(skey);
-                parameters[skey] = value;
             }
 		}
 	} 
@@ -145,7 +158,7 @@ XdmValue* XsltProcessor::getParameter(const char* name) {
         it = parameters.find("param:"+std::string(name));
         if (it != parameters.end())
           return it->second;
-        return NULL;
+        return nullptr;
 }
 
 bool XsltProcessor::removeParameter(const char* name) {
@@ -157,17 +170,17 @@ void XsltProcessor::setJustInTimeCompilation(bool jit){
 }
 
 void XsltProcessor::setProperty(const char* name, const char* value) {	
-	if(name != NULL) {
+	if(name != nullptr) {
 	    int s = properties.size();
 		std::string skey = std::string(name);
-		properties.insert(std::pair<std::string, std::string>(skey, std::string((value == NULL ? "" : value))));
+		properties.insert(std::pair<std::string, std::string>(skey, std::string((value == nullptr ? "" : value))));
 
 		if(s == properties.size()) {
             std::map<std::string, std::string>::iterator it;
             it = properties.find(skey);
             if (it != properties.end()) {
                 properties.erase(skey);
-                properties[skey] = std::string((value == NULL ? "" : value));
+                properties[skey] = std::string((value == nullptr ? "" : value));
             }
 		}
 	}
@@ -178,30 +191,34 @@ const char* XsltProcessor::getProperty(const char* name) {
         it = properties.find(std::string(name));
         if (it != properties.end())
           return it->second.c_str();
-	return NULL;
+	return nullptr;
 }
 
 void XsltProcessor::clearParameters(bool delValues) {
 	if(delValues){
-       		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
-			
-			XdmValue * value = itr->second;
-			value->decrementRefCount();
+       		for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
+
+                XdmValue *value = itr->second;
+                if (value != nullptr) {
+                    value->decrementRefCount();
 #ifdef DEBUG
-			std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
+                    std::cout<<"clearParameter() - XdmValue refCount="<<value->getRefCount()<<std::endl;
 #endif
-			if(value != NULL && value->getRefCount() < 1){		
-	        		delete value;
-			}
-        	}
+                    if (value->getRefCount() < 1) {
+                        delete value;
+                    }
+                }
+            }
 		
 	} else {
-for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
+        for(std::map<std::string, XdmValue*>::iterator itr = parameters.begin(); itr != parameters.end(); itr++){
 		
 			XdmValue * value = itr->second;
-			value->decrementRefCount();
+			if(value != nullptr) {
+                value->decrementRefCount();
+            }
 		
-        	}
+        }
 
 	}
 	parameters.clear();
@@ -224,26 +241,26 @@ std::map<std::string,std::string>& XsltProcessor::getProperties(){
 }
 
 void XsltProcessor::exceptionClear(){
- if(exception != NULL) {
+ if(exception != nullptr) {
  	delete exception;
- 	exception = NULL;
+ 	exception = nullptr;
 	SaxonProcessor::sxn_environ->env->ExceptionClear();
  }
   
  }
 
    void XsltProcessor::setcwd(const char* dir){
-    if(dir != NULL) {
+    if(dir != nullptr) {
         cwdXT = std::string(dir);
     }
    }
 
 const char* XsltProcessor::checkException() {
-	/*if(proc->exception == NULL) {
+	/*if(proc->exception == nullptr) {
 	 proc->exception = proc->checkForException(environi, cpp);
 	 }
 	 return proc->exception;*/
-	return proc->checkException(cppXT);
+	return proc->checkException();
 }
 
 
@@ -346,7 +363,7 @@ void XsltProcessor::compileFromString(const char* stylesheetStr) {
 void XsltProcessor::compileFromXdmNode(XdmNode * node) {
 	static jmethodID cNodemID =
 			(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass,
-					"createStylesheetFromFile",
+					"createStylesheetFromXdmNode",
 					"(Ljava/lang/String;Lnet/sf/saxon/s9api/XdmNode;)Lnet/sf/saxon/s9api/XsltExecutable;");
 	if (!cNodemID) {
 		std::cerr << "Error: "<< getDllname() << "createStylesheetFromXdmNode"
@@ -398,7 +415,7 @@ void XsltProcessor::compileFromFile(const char* stylesheet) {
 
 void XsltProcessor::releaseStylesheet() {
 
-	stylesheetObject = NULL;
+	stylesheetObject = nullptr;
 	
 }
 
@@ -410,15 +427,15 @@ XdmValue * XsltProcessor::transformFileToValue(const char* sourcefile,
 	if(exceptionOccurred()) {
 		//Possible error detected in the compile phase. Processor not in a clean state.
 		//Require clearing exception.
-		return NULL;	
+		return nullptr;
 	}
 
-	if(sourcefile == NULL && stylesheetfile == NULL && !stylesheetObject){
+	if(sourcefile == nullptr && stylesheetfile == nullptr && !stylesheetObject){
 	
-		return NULL;
+		return nullptr;
 	}
 
-	setProperty("resources", proc->getResourcesDirectory());
+
 	static jmethodID mID =
 			(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass,
 					"transformToNode",
@@ -428,8 +445,9 @@ XdmValue * XsltProcessor::transformFileToValue(const char* sourcefile,
 				<< std::endl;
 
 	} else {
-		jobjectArray stringArray = NULL;
-		jobjectArray objectArray = NULL;
+	    setProperty("resources", proc->getResourcesDirectory());
+		jobjectArray stringArray = nullptr;
+		jobjectArray objectArray = nullptr;
 		jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env,
 				"java/lang/Object");
 		jclass stringClass = lookForClass(SaxonProcessor::sxn_environ->env,
@@ -463,20 +481,19 @@ XdmValue * XsltProcessor::transformFileToValue(const char* sourcefile,
 		jobject result = (jobject)(
 				SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, mID,
 						SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
-						(sourcefile != NULL ?
+						(sourcefile != nullptr ?
 								SaxonProcessor::sxn_environ->env->NewStringUTF(sourcefile) :
-								NULL),
-						(stylesheetfile != NULL ?
+								nullptr),
+						(stylesheetfile != nullptr ?
 								SaxonProcessor::sxn_environ->env->NewStringUTF(
 										stylesheetfile) :
-								NULL), stringArray, objectArray));
+								nullptr), stringArray, objectArray));
 		if (size > 0) {
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray);
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(objectArray);
 		}
 		if (result) {
 			XdmNode * node = new XdmNode(result);
-			node->setProcessor(proc);
 			XdmValue * value = new XdmValue();
 			value->addXdmItem(node);
 			return value;
@@ -486,7 +503,7 @@ XdmValue * XsltProcessor::transformFileToValue(const char* sourcefile,
 	   		
      		}
 	}
-	return NULL;
+	return nullptr;
 
 }
 
@@ -499,11 +516,11 @@ void XsltProcessor::transformFileToFile(const char* source,
 		//Require clearing exception.
 		return;	
 	}
-	if(source == NULL && outputfile == NULL && !stylesheetObject){
+	if(source == nullptr && outputfile == nullptr && !stylesheetObject){
 		
 		return;
 	}
-	setProperty("resources", proc->getResourcesDirectory());
+
 	jmethodID mID =
 			(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass,
 					"transformToFile",
@@ -513,8 +530,9 @@ void XsltProcessor::transformFileToFile(const char* source,
 				<< std::endl;
 
 	} else {
-		jobjectArray stringArray = NULL;
-		jobjectArray objectArray = NULL;
+    	setProperty("resources", proc->getResourcesDirectory());
+		jobjectArray stringArray = nullptr;
+		jobjectArray objectArray = nullptr;
 		jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env,
 				"java/lang/Object");
 		jclass stringClass = lookForClass(SaxonProcessor::sxn_environ->env,
@@ -547,14 +565,14 @@ void XsltProcessor::transformFileToFile(const char* source,
 				std::string s1 = typeid(iter->second).name();
 				std::cerr<<"Type of itr:"<<s1<<std::endl;
 				jobject xx = (iter->second)->getUnderlyingValue();
-				if(xx == NULL) {
+				if(xx == nullptr) {
 					std::cerr<<"value failed"<<std::endl;
 				} else {
 
 					std::cerr<<"Type of value:"<<(typeid(xx).name())<<std::endl;
 				}
-				if((iter->second)->getUnderlyingValue() == NULL) {
-					std::cerr<<"(iter->second)->getUnderlyingValue() is NULL"<<std::endl;
+				if((iter->second)->getUnderlyingValue() == nullptr) {
+					std::cerr<<"(iter->second)->getUnderlyingValue() is nullptr"<<std::endl;
 				}
 #endif
 				SaxonProcessor::sxn_environ->env->SetObjectArrayElement(objectArray, i,
@@ -574,11 +592,14 @@ void XsltProcessor::transformFileToFile(const char* source,
 		}
 		SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, mID,
 								SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
-								(source != NULL ?
+								(source != nullptr ?
 										SaxonProcessor::sxn_environ->env->NewStringUTF(
 												source) :
-										NULL),
-								SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet),NULL,
+										nullptr),
+								SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet),(outputfile != nullptr ?
+                                                                                            SaxonProcessor::sxn_environ->env->NewStringUTF(
+                                                                                                    outputfile) :
+                                                                                            nullptr),
 								stringArray, objectArray);
 		if (size > 0) {
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray);
@@ -590,9 +611,9 @@ void XsltProcessor::transformFileToFile(const char* source,
 	proc->checkAndCreateException(cppClass);
 }
 
-void XsltProcessor::setupXslMessage(bool show, const char* filename) {
+void XsltProcessor::setSaveXslMessage(bool show, const char* filename) {
     if(show) {
-        if(filename == NULL) {
+        if(filename == nullptr) {
             setProperty("m", "on");
         } else {
             setProperty("m", filename);
@@ -609,24 +630,25 @@ const char * XsltProcessor::transformFileToString(const char* source,
 	if(exceptionOccurred()) {
 		//Possible error detected in the compile phase. Processor not in a clean state.
 		//Require clearing exception.
-		return NULL;	
+		return nullptr;
 	}
-	if(source == NULL && stylesheet == NULL && !stylesheetObject){
+	if(source == nullptr && stylesheet == nullptr && !stylesheetObject){
 		std::cerr<< "Error: The most recent StylesheetObject failed. Please check exceptions"<<std::endl;
-		return NULL;
+		return nullptr;
 	}
-	setProperty("resources", proc->getResourcesDirectory());
+
 	jmethodID mID =
 			(jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(cppClass,
 					"transformToString",
-					"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+					"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)[B");
 	if (!mID) {
-		std::cerr << "Error: "<<getDllname() << "transformFileToString" << " not found\n"
+		std::cerr << "Error: "<<getDllname() << ".transformFileToString" << " not found\n"
 				<< std::endl;
 
 	} else {
-		jobjectArray stringArray = NULL;
-		jobjectArray objectArray = NULL;
+		setProperty("resources", proc->getResourcesDirectory());
+		jobjectArray stringArray = nullptr;
+		jobjectArray objectArray = nullptr;
 		jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env,
 				"java/lang/Object");
 		jclass stringClass = lookForClass(SaxonProcessor::sxn_environ->env,
@@ -660,14 +682,14 @@ const char * XsltProcessor::transformFileToString(const char* source,
 
 				jobject xx = (iter->second)->getUnderlyingValue();
 
-				if(xx == NULL) {
+				if(xx == nullptr) {
 					std::cerr<<"value failed"<<std::endl;
 				} else {
 
 					std::cerr<<"Type of value:"<<(typeid(xx).name())<<std::endl;
 				}
-				if((iter->second)->getUnderlyingValue() == NULL) {
-					std::cerr<<"(iter->second)->getUnderlyingValue() is NULL"<<std::endl;
+				if((iter->second)->getUnderlyingValue() == nullptr) {
+					std::cerr<<"(iter->second)->getUnderlyingValue() is nullptr"<<std::endl;
 				}
 #endif
 
@@ -687,53 +709,57 @@ const char * XsltProcessor::transformFileToString(const char* source,
 			}
 		}
 
-	jstring result = NULL;
-	jobject obj =
-				(
-						SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, mID,
+    jbyteArray result = nullptr;
+	jobject obj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(cppXT, mID,
 								SaxonProcessor::sxn_environ->env->NewStringUTF(cwdXT.c_str()),
-								(source != NULL ?
+								(source != nullptr ?
 										SaxonProcessor::sxn_environ->env->NewStringUTF(
 												source) :
-										NULL),
+										nullptr),
 								SaxonProcessor::sxn_environ->env->NewStringUTF(stylesheet),
 								stringArray, objectArray));
-		if(obj) {
-			result = (jstring)obj;
-		}		
+        if(obj) {
+            result = (jbyteArray)obj;
+        }
 		if (size > 0) {
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(stringArray);
 			SaxonProcessor::sxn_environ->env->DeleteLocalRef(objectArray);
 		}
-		if (result) {
-			const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result,
-					NULL);
-			SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
-			return str;
-		} else  {
-			exception = proc->checkAndCreateException(cppClass);
-	   		
-     		}
+        if (result) {
+            jboolean isCopy = false;
+            jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
+            jsize num_bytes = SaxonProcessor::sxn_environ->env->GetArrayLength(result);
+
+            const char *str = new char[num_bytes];
+            memcpy ((void *) str, b , num_bytes );
+
+            SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+            return str;
+        } else  {
+            exception = proc->checkAndCreateException(cppClass);
+
+        }
+
 	}
-	return NULL;
+	return nullptr;
 }
 
 
    const char * XsltProcessor::transformToString(){
 	if(!stylesheetObject){
 		std::cerr<< "Error: No styleheet found. Please compile stylsheet before calling transformToString or check exceptions"<<std::endl;
-		return NULL;
+		return nullptr;
 	}
-	return transformFileToString(NULL, NULL);
+	return transformFileToString(nullptr, nullptr);
    }
 
 
     XdmValue * XsltProcessor::transformToValue(){
 	if(!stylesheetObject){
 		std::cerr<< "Error: No styleheet found. Please compile stylsheet before calling transformToValue or check exceptions"<<std::endl;
-		return NULL;
+		return nullptr;
 	}
-	return transformFileToValue(NULL, NULL);
+	return transformFileToValue(nullptr, nullptr);
    }
 
     void XsltProcessor::transformToFile(){
@@ -741,13 +767,17 @@ const char * XsltProcessor::transformFileToString(const char* source,
 		std::cerr<< "Error: No styleheet found. Please compile stylsheet before calling transformToFile or check exceptions"<<std::endl;
 		return;
 	}
-	transformFileToFile(NULL, NULL, NULL);
+	transformFileToFile(nullptr, nullptr, nullptr);
    }
 
 const char * XsltProcessor::getErrorMessage(){
- 	if(exception == NULL) {
- 	    return NULL;
+ 	if(exception == nullptr) {
+ 	    return nullptr;
  	}
- 	return exception->getErrorMessage();
+ 	return exception->getMessage();
  }
+
+SaxonApiException* XsltProcessor::getException() {
+    return exception;
+}
 

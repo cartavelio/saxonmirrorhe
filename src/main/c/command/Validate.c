@@ -81,7 +81,7 @@ char * dllPath =
 
 //===============================================================================================//
 /*! <code>sxnc_environment</code>. This struct captures the jni, JVM and handler to the cross compiled Saxon/C library.
- * <p/>
+ *
  */
 typedef struct {
 		JNIEnv *env;
@@ -93,7 +93,7 @@ typedef struct {
 //===============================================================================================//
 
 /*! <code>MyParameter</code>. This struct captures details of paramaters used for the transformation as (string, value) pairs.
- * <p/>
+ *
  */
 typedef struct {
 		char* name;
@@ -103,7 +103,7 @@ typedef struct {
 //===============================================================================================//
 
 /*! <code>MyProperty</code>. This struct captures details of properties used for the transformation as (string, string) pairs.
- * <p/>
+ *
  */
 typedef struct {
 		char * name;

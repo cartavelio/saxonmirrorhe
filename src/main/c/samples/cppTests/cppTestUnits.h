@@ -9,15 +9,6 @@
 #define SAXON_CPPTESTUNIT_H
 
 
-#include <list> 
 
-
-typedef struct
-{
-    int success;
-    int failure;
-    std::list<std::string> failureList; 
-
-}sResultCount;
 
 #endif

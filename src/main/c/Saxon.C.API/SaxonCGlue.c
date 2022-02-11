@@ -272,13 +272,13 @@ void invokeInstanceMethod(JNIEnv* penv, jclass myClassInDll, char * name, char *
 
 	MID_init = (*penv)->GetMethodID(penv, myClassInDll, "<init>", "()V");
 	if (!MID_init) {
-		printf("Error: MyClassInDll.<init>() not found\n");
+		printf("Error: SaxoncDll.%s <init>() not found\n", name);
 		return;
 	}
 
 	obj = (*penv)->NewObject(penv, myClassInDll, MID_init);
 	if (!obj) {
-		printf("Error: failed to allocate an object\n");
+		printf("Error: failed to allocate an object - please check if an exception was thrown\n");
 		return;
 	}
 
@@ -321,7 +321,7 @@ jmethodID findConstructor(JNIEnv* penv, jclass myClassInDll, char* arguments)
 
 	MID_initj = (jmethodID)(*penv)->GetMethodID(penv, myClassInDll, "<init>", arguments);
 	if (!MID_initj) {
-		printf("Error: MyClassInDll.<init>() not found\n");
+		printf("Error: SaxoncDll.<init>() not found\n");
 		fflush(stdout);
 		return 0;
 	}
@@ -340,7 +340,7 @@ jobject createSaxonProcessor(JNIEnv* penv, jclass myClassInDll, const char * arg
 
 	MID_initi = (jmethodID)(*(penv))->GetMethodID(penv, myClassInDll, "<init>", arguments);
 	if (!MID_initi) {
-		printf("Error: MyClassInDll.<init>() not found\n");
+		printf("Error: SaxoncDll.<init>() not found\n");
 		return NULL;
 	}
 
@@ -353,7 +353,7 @@ jobject createSaxonProcessor(JNIEnv* penv, jclass myClassInDll, const char * arg
 		obj = (jobject)(*(penv))->NewObject(penv, myClassInDll, MID_initi, license);
 	}
 	if (!obj) {
-		printf("Error: failed to allocate an object\n");
+		printf("Error: failed to allocate an object - please check if an exception was thrown\n");
 		return NULL;
 	}
 	return obj;
@@ -371,7 +371,7 @@ jobject createSaxonProcessor2(JNIEnv* penv, jclass myClassInDll, const char * ar
 
 	MID_initi = (jmethodID)(*(penv))->GetMethodID(penv, myClassInDll, "<init>", arguments);
 	if (!MID_initi) {
-		printf("Error: MyClassInDll.<init>() not found\n");
+		printf("Error: SaxoncDll.<init>() not found\n");
 		return NULL;
 	}
 
@@ -384,7 +384,7 @@ jobject createSaxonProcessor2(JNIEnv* penv, jclass myClassInDll, const char * ar
 		obj = (jobject)(*(penv))->NewObject(penv, myClassInDll, MID_initi);
 	}
 	if (!obj) {
-		printf("Error: failed to allocate an object\n");
+		printf("Error: failed to allocate an object - please check if an exception was thrown\n");
 		return NULL;
 	}
 	return obj;
@@ -396,8 +396,7 @@ jobject createSaxonProcessor2(JNIEnv* penv, jclass myClassInDll, const char * ar
 /*
  * Callback to check for exceptions. When called it returns the exception as a string
  */
-const char * checkForException(sxnc_environment *environii, jobject callingObject) {
-	if (callingObject) {} // TODO: Remove the callingObject variable
+const char * checkForException(sxnc_environment *environii) {
 	if ((*(environii->env))->ExceptionCheck(environii->env)) {
 
 		jthrowable exc = (*(environii->env))->ExceptionOccurred(environii->env);
@@ -440,7 +439,7 @@ const char * checkForException(sxnc_environment *environii, jobject callingObjec
 		// }
 		(*(environii->env))->ReleaseStringUTFChars(environii->env, name, utfName);
 	}
-	//(*(environii->env))->ExceptionClear(environii->env);
+
 	return 0;
 }
 
