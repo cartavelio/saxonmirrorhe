@@ -213,6 +213,7 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="value">The value to be converted.</param>
         /// <returns>The converted value</returns>
+        /// <exception cref="ArgumentException">If the supplied value is not one of the recognized types</exception>
         public static XdmAtomicValue MakeAtomicValue(object value) {
             return value switch {
                 XdmAtomicValue xdm => xdm,
@@ -238,20 +239,21 @@ namespace Saxon.Api {
         /// Get the value converted to a boolean using the XPath casting rules.
         /// </summary>
         /// <returns>The result of converting to a boolean (Note: this is not the same as the
-        /// effective boolean value).</returns> 
-        public bool GetBooleanValue() {
+        /// effective boolean value).</returns>
+        /// <exception cref="InvalidCastException">If the value cannot be cast to an xs:boolean</exception> 
+        public bool AsBoolean() {
             AtomicValue av = (AtomicValue) value;
             switch (av) {
                 case BooleanValue booleanValue:
                     return booleanValue.getBooleanValue();
                 case NumericValue numericValue:
                     return !numericValue.isNaN() && numericValue.signum() != 0;
-                case StringValue: {
-                    String s = av.getStringValue().Trim();
+                case StringValue stringValue: {
+                    string s = stringValue.getStringValue().Trim();
                     return "1".Equals(s) || "true".Equals(s);
                 }
                 default:
-                    throw new ArgumentException("Cannot cast item to a boolean");
+                    throw new InvalidCastException("Cannot cast " + TypeName + " to boolean");
             }
         }
 
@@ -260,7 +262,8 @@ namespace Saxon.Api {
         /// Get the value converted to a long using the XPath casting rules.
         /// </summary>
         /// <returns>The result of converting to a long</returns>
-        public long GetLongValue() {
+        /// <exception cref="InvalidCastException">If the value cannot be cast to an xs:long</exception> 
+        public long AsLong() {
             AtomicValue av = (AtomicValue) value;
             switch (av) {
                 case BooleanValue booleanValue:
@@ -270,15 +273,15 @@ namespace Saxon.Api {
                         return numericValue.longValue();
                     }
                     catch (System.Exception) {
-                        throw new System.ArgumentException("Cannot cast item to an integer");
+                        throw new InvalidCastException("Cannot cast " + TypeName + " to an integer");
                     }
 
-                case StringValue: {
+                case StringValue stringValue: {
                     StringToDouble converter = StringToDouble.getInstance();
                     return (long) converter.stringToNumber(av.getUnicodeStringValue());
                 }
                 default:
-                    throw new System.ArgumentException("Cannot cast item to an integer");
+                    throw new InvalidCastException("Cannot cast " + TypeName + " to an integer");
             }
         }
 
@@ -289,23 +292,24 @@ namespace Saxon.Api {
         /// <remarks>If the value is a string, the XSD 1.1 rules are used, which means that the string
         /// "+INF" is recognised.</remarks>
         /// <returns>The result of converting to a double</returns>
-        public double GetDoubleValue() {
+        /// <exception cref="InvalidCastException">If the value cannot be cast to an xs:double</exception> 
+        public double AsDouble() {
             AtomicValue av = (AtomicValue) this.value;
             switch (av) {
                 case BooleanValue booleanValue:
                     return booleanValue.getBooleanValue() ? 0.0 : 1.0;
                 case NumericValue numericValue:
                     return numericValue.getDoubleValue();
-                case StringValue:
+                case StringValue stringValue:
                     try {
                         return StringToDouble11.getInstance().stringToNumber(av.getUnicodeStringValue());
                     }
                     catch (Exception e) {
-                        throw new ArgumentException(e.Message);
+                        throw new InvalidCastException(e.Message);
                     }
 
                 default:
-                    throw new ArgumentException("Cannot cast item to a double");
+                    throw new InvalidCastException("Cannot cast " + TypeName + " to a double");
             }
         }
 
@@ -314,7 +318,9 @@ namespace Saxon.Api {
         /// Get the value converted to a decimal using the XPath casting rules.
         /// </summary>
         /// <returns>The result of converting to a decimal</returns>
-        public decimal GetDecimalValue() {
+        /// <exception cref="InvalidCastException">If the value cannot be cast to an xs:decimal, or converted
+        /// to a .NET primitive decimal.</exception> 
+        public decimal AsDecimal() {
             AtomicValue av = (AtomicValue) this.value;
             switch (av) {
                 case BooleanValue booleanValue:
@@ -324,14 +330,27 @@ namespace Saxon.Api {
                         return Convert.ToDecimal(numericValue.getDecimalValue().ToString());
                     }
                     catch (Exception) {
-                        throw new ArgumentException("Cannot cast item to a decimal");
+                        throw new InvalidCastException("Cannot cast " + TypeName + " to a decimal");
                     }
 
-                case StringValue:
+                case StringValue stringValue:
                     return Convert.ToDecimal(av.getUnicodeStringValue().ToString());
                 default:
-                    throw new ArgumentException("Cannot cast item to a decimal");
+                    throw new InvalidCastException("Cannot cast " + TypeName + " to a decimal");
             }
+        }
+        
+        /// <summary>
+        /// Get the value converted to a QName. The value must be of type xs:QName or xs:NOTATION.
+        /// </summary>
+        /// <returns>The result of converting to a QName</returns>
+        /// <exception cref="InvalidCastException">If the value cannot be cast to an xs:QName</exception> 
+        public QName AsQName() {
+            AtomicValue av = (AtomicValue) this.value;
+            if (av is QualifiedNameValue q)
+                return new QName(q.qName);
+            else
+                throw new InvalidCastException("Cannot cast " + TypeName + " to a QName");
         }
 
 
@@ -339,7 +358,7 @@ namespace Saxon.Api {
         /// Convert the atomic value to a string
         /// </summary>
         /// <returns>The value converted to a string, according to the rules
-        /// of the XPath cast expression</returns>        
+        /// of the XPath cast expression. The result is the same as the <c>StringValue</c> property.</returns>        
         public override string ToString() {
             return ((AtomicValue) value).getStringValue();
         }
@@ -371,14 +390,7 @@ namespace Saxon.Api {
         /// Get the name of the value's XDM type
         /// </summary>
         /// <returns>The type of the value, as a QName.</returns>
-        public QName TypeName {
-            get {
-                StructuredQName sqname = ((AtomicValue) value).getItemType().getStructuredQName();
-                return new QName(sqname.getPrefix(),
-                    sqname.getURI(),
-                    sqname.getLocalPart());
-            }
-        }
+        public QName TypeName => new QName(((AtomicValue) value).getItemType().getStructuredQName());
 
         /// <summary>
         /// Get the name of the primitive type of the value
@@ -388,14 +400,8 @@ namespace Saxon.Api {
         /// type <c>xs:untypedAtomic</c>. For the purposes of this method, <c>xs:integer</c> is considered
         /// to be a primitive type.
         /// </returns>
-        public QName PrimitiveTypeName {
-            get {
-                int fp = ((AtomicValue) value).getItemType().getPrimitiveType();
-                return new QName(StandardNames.getPrefix(fp),
-                    StandardNames.getURI(fp),
-                    StandardNames.getLocalName(fp));
-            }
-        }
+        public QName PrimitiveTypeName => 
+            new QName(StandardNames.getStructuredQName(((AtomicValue) value).getItemType().getPrimitiveType()));
 
         /// <summary>Get the value as a CLI object of the nearest equivalent type.</summary>
         /// <remarks>
@@ -416,33 +422,16 @@ namespace Saxon.Api {
         /// </remarks>
         /// <returns>The value converted to the most appropriate CLI type</returns>
 
-        public object Value {
-            get {
-                if (value is IntegerValue integerValue) {
-                    return integerValue.longValue();
-                }
-                else if (value is DoubleValue doubleValue) {
-                    return doubleValue.getDoubleValue();
-                }
-                else if (value is FloatValue floatValue) {
-                    return floatValue.getFloatValue();
-                }
-                else if (value is DecimalValue decimalValue) {
-                    return decimal.Parse(decimalValue.getStringValue());
-                }
-                else if (value is BooleanValue booleanValue) {
-                    return booleanValue.getBooleanValue();
-                }
-                else if (value is AnyURIValue uriValue) {
-                    return new Uri(uriValue.getStringValue());
-                }
-                else if (value is QNameValue nameValue) {
-                    return new QName(nameValue);
-                }
-                else {
-                    return ((AtomicValue) value).getStringValue();
-                }
-            }
-        }
+        public object Value =>
+            value switch {
+                IntegerValue integerValue => integerValue.longValue(),
+                DoubleValue doubleValue => doubleValue.getDoubleValue(),
+                FloatValue floatValue => floatValue.getFloatValue(),
+                DecimalValue decimalValue => decimal.Parse(decimalValue.getStringValue()),
+                BooleanValue booleanValue => booleanValue.getBooleanValue(),
+                AnyURIValue uriValue => new Uri(uriValue.getStringValue()),
+                QNameValue nameValue => new QName(nameValue),
+                _ => ((AtomicValue) value).getStringValue()
+            };
     }
 }

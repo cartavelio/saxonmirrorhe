@@ -437,7 +437,7 @@ namespace Saxon.Api {
             // pp = new PullTracer(pp);  /* diagnostics */
             Source source = new PullSource(pp);
             string documentBaseUri = reader.BaseURI;
-            if (string.IsNullOrEmpty(documentBaseUri)) {
+            if (string.IsNullOrEmpty(documentBaseUri) && this.BaseUri != null) {
                 documentBaseUri = this.BaseUri.ToString();
             }
             source.setSystemId(documentBaseUri);

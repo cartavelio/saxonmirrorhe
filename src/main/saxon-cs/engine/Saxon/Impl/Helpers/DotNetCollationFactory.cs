@@ -30,13 +30,18 @@ namespace Saxon.Impl.Helpers {
 
             StringCollator stringCollator = null;
             
+            // rules attribute works only on Java platform
+
+            if (props.getProperty("rules") != null) {
+                throw new XPathException("Rules parameter is not supported in collation URIs on Saxon-CS");
+            }
 
             // Start with the lang attribute
 
             CompareInfo info;
             CompareOptions options = CompareOptions.None;
 
-            String langAtt = props.getProperty("lang");
+            string langAtt = props.getProperty("lang");
             if (langAtt != null) {
                 info = CultureInfo.CreateSpecificCulture(langAtt).CompareInfo;
             } else {
@@ -44,24 +49,21 @@ namespace Saxon.Impl.Helpers {
             }
 
             // See if there is a strength attribute
-            String strengthAtt = props.getProperty("strength");
+            string strengthAtt = props.getProperty("strength");
             if (strengthAtt != null && options == CompareOptions.None) {
-                if (strengthAtt == "primary") {
-                    options = System.Globalization.CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreWidth;
-                } else if (strengthAtt == "secondary") {
-                    options = CompareOptions.IgnoreCase | CompareOptions.IgnoreWidth;
-                } else if (strengthAtt == "tertiary") {
-                    options = CompareOptions.IgnoreWidth;
-                } else if (strengthAtt == "identical") {
-                    options = 0;
-                } else {
-                    throw new XPathException("strength must be primary, secondary, tertiary, or identical");
-                }
+                options = strengthAtt switch {
+                    "primary" => System.Globalization.CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace |
+                                 CompareOptions.IgnoreWidth,
+                    "secondary" => CompareOptions.IgnoreCase | CompareOptions.IgnoreWidth,
+                    "tertiary" => CompareOptions.IgnoreWidth,
+                    "identical" => 0,
+                    _ => throw new XPathException("strength must be primary, secondary, tertiary, or identical")
+                };
             }
 
             // Look for the properties ignore-case, ignore-modifiers, ignore-width
 
-            String ignore = props.getProperty("ignore-case");
+            string ignore = props.getProperty("ignore-case");
             if (ignore != null) {
                 if (ignore == "yes") {
                     options |= CompareOptions.IgnoreCase;
@@ -110,7 +112,7 @@ namespace Saxon.Impl.Helpers {
             }
 
             // See if there is a case-order property
-            String caseOrder = props.getProperty("case-order");
+            string caseOrder = props.getProperty("case-order");
             if (caseOrder != null && "#default" != caseOrder) {
                 // force the base collation to ignore case
                 options |= CompareOptions.IgnoreCase;
@@ -119,7 +121,7 @@ namespace Saxon.Impl.Helpers {
             }
 
             // See if there is an alphanumeric property
-            String alphanumeric = props.getProperty("alphanumeric");
+            string alphanumeric = props.getProperty("alphanumeric");
             if (alphanumeric != null && "no" != alphanumeric) {
                 if (alphanumeric == "yes") {
                     stringCollator = new AlphanumericCollator(stringCollator);

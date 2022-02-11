@@ -29,49 +29,43 @@ namespace Saxon.Api {
         // not all types can be constructed precisely, so in some cases the result is an approximation.
         // For a more accurate type, use the method that accepts the Configuration as a second argument.
         internal static XdmItemType MakeXdmItemType(Saxon.Hej.type.ItemType type) {
-            if (type is BuiltInAtomicType builtInAtomicType) {
-                return XdmAtomicType.BuiltInAtomicType(
-                    QName.FromStructuredQName(builtInAtomicType.getStructuredQName()));
-            } else if (type is AtomicType atomicType) {
-                return new XdmAtomicType(atomicType);
-            }
-            else if (type is ErrorType) {
-                return XdmAnyNodeType.Instance; // TODO: need to represent this properly
-            }
-            else if (type is NodeTest) {
-                if (type is AnyNodeTest) {
-                    return XdmAnyNodeType.Instance;
+            switch (type) {
+                case BuiltInAtomicType builtInAtomicType:
+                    return XdmAtomicType.BuiltInAtomicType(
+                        new QName(builtInAtomicType.getStructuredQName()));
+                case AtomicType atomicType:
+                    return new XdmAtomicType(atomicType);
+                default: {
+                    switch (type) {
+                        case ErrorType:
+                        case AnyNodeTest:
+                            return XdmAnyNodeType.Instance; // TODO: need to represent this properly
+                        case NodeTest test: {
+                            int kind = test.getPrimitiveType();
+                            return XdmNodeKind.ForNodeKindTest((NodeKindTest) NodeKindTest.makeNodeKindTest(kind));
+                        }
+                        case MapType:
+                            return XdmAnyMapType.Instance;
+                        case ArrayItemType:
+                            return XdmAnyArrayType.Instance;
+                        case AnyItemType:
+                            return XdmAnyItemType.Instance;
+                        case FunctionItemType:
+                            return XdmAnyFunctionType.Instance;
+                        default:
+                            return null;
+                    }
                 }
-                else {
-                    int kind = ((NodeTest) type).getPrimitiveType();
-                    return XdmNodeKind.ForNodeKindTest((NodeKindTest) NodeKindTest.makeNodeKindTest(kind));
-                }
-            }
-            else if (type is MapType) {
-                return XdmAnyMapType.Instance;
-            }
-            else if (type is ArrayItemType) {
-                return XdmAnyArrayType.Instance;
-            }
-            else if (type is AnyItemType) {
-                return XdmAnyItemType.Instance;
-            }
-            else if (type is FunctionItemType) {
-                return XdmAnyFunctionType.Instance;
-            }
-            else {
-                return null;
             }
         }
 
         internal static XdmItemType MakeXdmItemType(Saxon.Hej.type.ItemType type, Saxon.Hej.Configuration config) {
-            if (type is BuiltInAtomicType builtInAtomicType) {
-                return XdmAtomicType.BuiltInAtomicType(
-                    QName.FromStructuredQName(builtInAtomicType.getStructuredQName()));
-            } else if (type is AtomicType atomicType) {
-                return new XdmAtomicType(atomicType);
-            }
-            return new ConstructedItemType(type, config);
+            return type switch {
+                BuiltInAtomicType builtInAtomicType => XdmAtomicType.BuiltInAtomicType(
+                    new QName(builtInAtomicType.getStructuredQName())),
+                AtomicType atomicType => new XdmAtomicType(atomicType),
+                _ => new ConstructedItemType(type, config)
+            };
         }
 
         internal ItemType Unwrap() {

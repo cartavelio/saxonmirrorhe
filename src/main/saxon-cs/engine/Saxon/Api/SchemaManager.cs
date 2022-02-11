@@ -9,6 +9,8 @@ using Saxon.Hej.pull;
 using Saxon.Hej.s9api;
 using Saxon.Hej.type;
 using Saxon.Api.Support;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Hej.lib;
 
 
 namespace Saxon.Api {
@@ -80,7 +82,7 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// The <c>SchemaResolver</c> is a user-supplied class used for resolving references to
+        /// The <c>SchemaResolver</c> is a user-supplied callback used for resolving references to
         /// schema documents. It applies to references from one schema document to another
         /// appearing in <c>xs:import</c>, <c>xs:include</c>, and <c>xs:redefine</c>; to
         /// references from an instance document to a schema in <c>xsi:schemaLocation</c> and
@@ -90,17 +92,14 @@ namespace Saxon.Api {
 
         public SchemaResolver SchemaResolver
         {
-            get => throw new SaxonApiException("Schema processing requires Saxon-EE");
-            set => throw new SaxonApiException("Schema processing requires Saxon-EE");
+            set => s9schemaManager.setSchemaURIResolver(new DelegatingSchemaResolver(value));
         }
 
         /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined ErrorReporter.
         /// If this property is used then the ErrorList property and SetErrorList method is overriden </summary>
         /// <remarks>The <c>IErrorReporter</c> to be used</remarks>
         public ErrorReporter ErrorReporter {
-            set {
-                s9schemaManager.setErrorReporter(new ErrorReporterWrapper(value));
-            }
+            set => s9schemaManager.setErrorReporter(new ErrorReporterWrapper(value));
         }
         
         /// <summary>
@@ -277,6 +276,25 @@ namespace Saxon.Api {
             else
             {
                 return null;
+            }
+        }
+        
+        private class DelegatingSchemaResolver : SchemaURIResolver {
+
+            private readonly SchemaResolver resolver;
+
+            public DelegatingSchemaResolver(SchemaResolver resolver) {
+                this.resolver = resolver;
+            }
+            public void setConfiguration(Configuration config) {
+                // no action
+            }
+
+            public Source[] resolve(string targetNamespace, string baseURI, string[] locations) {
+                XdmNode result = resolver(targetNamespace, 
+                    new Uri(baseURI), 
+                    locations.Length == 0 ? null : new Uri(locations[0]));
+                return new Source[] {result.Implementation.asActiveSource()};
             }
         }
 
