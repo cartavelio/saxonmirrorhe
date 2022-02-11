@@ -1123,8 +1123,17 @@ public class BuiltInAtomicType implements AtomicType, ItemType.WithSequenceTypeC
             case StandardNames.XS_DECIMAL:
             case StandardNames.XS_FLOAT:
             case StandardNames.XS_DOUBLE:
-            case StandardNames.XS_INTEGER:
                 return null;
+            case StandardNames.XS_INTEGER:
+                if (primValue.getItemType() == BuiltInAtomicType.DECIMAL) {
+                    if (((DecimalValue)primValue).isWholeNumber()) {
+                        return null;
+                    } else {
+                        return new ValidationFailure("xs:decimal value " + primValue.toShortString() + " cannot be down-cast to xs:integer");
+                    }
+                } else {
+                    return null;
+                }
             case StandardNames.XS_NON_POSITIVE_INTEGER:
             case StandardNames.XS_NEGATIVE_INTEGER:
             case StandardNames.XS_LONG:
