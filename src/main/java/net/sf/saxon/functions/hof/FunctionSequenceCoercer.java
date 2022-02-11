@@ -259,7 +259,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         public Function mapItem(Item item) throws XPathException {
             if (!(item instanceof Function)) {
                 throw new XPathException(
-                        "Function coercion attempted on an item which is not a function", "XPTY0004", locator);
+                        "Function coercion attempted on an item (" + item.toShortString() + ") which is not a function", "XPTY0004", locator);
             }
             try {
                 checkAnnotations((Function)item, requiredItemType, config);

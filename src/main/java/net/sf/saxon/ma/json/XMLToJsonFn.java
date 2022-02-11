@@ -11,20 +11,26 @@ import net.sf.saxon.event.DocumentValidator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.functions.FormatNumber;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.PushableFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.str.UniStringConsumer;
+import net.sf.saxon.type.FunctionItemType;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringItem;
 
 import java.util.Map;
 
@@ -33,16 +39,22 @@ import java.util.Map;
  */
 public class XMLToJsonFn extends SystemFunction implements PushableFunction {
 
+    private final static FunctionItemType formatterFunctionType = new SpecificFunctionType(
+            new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_STRING
+    );
+
     public static OptionsParameter makeOptionsParameter() {
         OptionsParameter xmlToJsonOptions = new OptionsParameter();
         xmlToJsonOptions.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        xmlToJsonOptions.addAllowedOption("number-format", SequenceType.OPTIONAL_STRING, EmptySequence.getInstance());
+        xmlToJsonOptions.addAllowedOption("number-formatter",
+                                          SequenceType.makeSequenceType(formatterFunctionType, StaticProperty.ALLOWS_ZERO_OR_ONE),
+                                          EmptySequence.getInstance());
         return xmlToJsonOptions;
     }
 
     private static class Options {
         public boolean indent;
-        public java.util.function.Function<Double, String> numberFormatter;
+        public Function numberFormatter;
     }
 
     @Override
@@ -67,10 +79,9 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
             Map<String, Sequence> options = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
             Options o = new Options();
             o.indent = ((BooleanValue) options.get("indent").head()).getBooleanValue();
-            Sequence format = options.get("number-format");
+            Sequence format = options.get("number-formatter");
             if (format != null) {
-                String picture = format.head().getStringValue();
-                o.numberFormatter = FormatNumber.getFormatter(picture);
+                o.numberFormatter = (Function)format.head();
             }
             return o;
         } else {
