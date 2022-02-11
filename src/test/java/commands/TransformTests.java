@@ -102,7 +102,7 @@ public class TransformTests {
         try {
             VerifyingTransform vt = new VerifyingTransform();
             String result = vt.transform(args);
-            assertTrue(vt.outputMatches(s -> s.startsWith("Saxon-EE 11")), "SaxonVersion");
+            assertTrue(vt.outputMatches(s -> s.startsWith("SaxonJ-EE 11")), "SaxonVersion");
             assertTrue(vt.outputMatches(s -> s.startsWith("Java version")), "JavaVersion");
             assertTrue(vt.outputMatches(s -> s.startsWith("Using license serial number")), "License");
             assertTrue(vt.outputMatches(s -> s.matches("Processing.*othello.xml")), "SourceFile");
