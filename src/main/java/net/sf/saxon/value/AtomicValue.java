@@ -245,9 +245,8 @@ public abstract class AtomicValue
     }
 
     /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     * @return
+     * Get the value of the item as a UnicodeString.
+     * @return the string value (the result of casting to string using the XPath casting rules)
      */
 
     @Override

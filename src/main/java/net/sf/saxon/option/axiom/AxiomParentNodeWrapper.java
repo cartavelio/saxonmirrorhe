@@ -59,9 +59,8 @@ public abstract class AxiomParentNodeWrapper extends AbstractNodeWrapper
     }
 
     /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     * @return
+     * Get the string value of the node as a UnicodeString.
+     * @return the node's string value
      */
 
     @Override

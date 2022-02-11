@@ -88,7 +88,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      * as the string value for the corresponding node in the source tree; the string value for a node above the pivot
      * is the same as the string value of the pivot. For attributes and namespaces the string value is the same
      * as in the original tree.
-     * @return
+     * @return the string value of the node, as a {@code UnicodeString}
      */
 
     @Override

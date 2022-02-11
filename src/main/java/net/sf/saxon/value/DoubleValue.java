@@ -208,7 +208,7 @@ public final class DoubleValue extends NumericValue {
      * Get the canonical lexical representation as defined in XML Schema. This is not always the same
      * as the result of casting to a string according to the XPath rules. For xs:double, the canonical
      * representation always uses exponential notation.
-     * @return
+     * @return the value, represented as a string using exponential notation
      */
 
     @Override
