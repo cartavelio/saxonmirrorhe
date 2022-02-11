@@ -1240,19 +1240,11 @@
         <uri>http://saxon.sf.net/feature/recoveryPolicy</uri>
         <editions>HE PE EE</editions>
         <platforms>J CS</platforms>
-        <setter class="net.sf.saxon.Configuration">setRecoveryPolicy</setter>
-        <getter class="net.sf.saxon.Configuration">getRecoveryPolicy</getter>
         <commandline for="T">-warnings:(silent|recover|fatal)</commandline>
         <desc>
-            <p>An integer, one of <link>net.sf.saxon.trans.RecoveryPolicy#RECOVER_SILENTLY</link>,
-                <link>net.sf.saxon.trans.RecoveryPolicy#RECOVER_WITH_WARNINGS</link>, or
-                <link>net.sf.saxon.trans.RecoveryPolicy#DO_NOT_RECOVER</link>. Indicates the policy for
-                handling dynamic errors that the XSLT specification defines as recoverable.</p>
-            <p>0 means recover silently; 1 means recover after signalling a warning to the
-                    <code>ErrorListener</code>; 2 means treat the error as fatal. An example of a
-                recoverable error is when two template rules match the same node.</p>
-            <p>Note that XSLT 3.0 has eliminated all "recoverable errors" from the
-                specification.</p>
+            <p>At one time this property controlled how recoverable errors were handled
+            (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
+                specification, so the property is no longer used.</p>
         </desc>
     </feature>
     <feature>
@@ -1262,8 +1254,6 @@
         <uri>http://saxon.sf.net/feature/recoveryPolicyName</uri>
         <editions>HE PE EE</editions>
         <platforms>J CS</platforms>
-        <setter class="net.sf.saxon.Configuration">setRecoveryPolicy</setter>
-        <getter class="net.sf.saxon.Configuration">getRecoveryPolicy</getter>
         <commandline for="T">-warnings:(silent|recover|fatal)</commandline>
         <configfile>xslt/@recoveryPolicy</configfile>
         <configfiledesc>
@@ -1272,14 +1262,9 @@
         </configfiledesc>
         <typedesc>recoverWithWarnings|recoverSilently| doNotRecover</typedesc>
         <desc>
-            <p>Indicates the policy for handling dynamic errors that the XSLT specification defines
-                as recoverable.</p>
-            <p>"recoverSilently" means recover silently; "recoverWithWarnings"
-                means recover after signalling a warning to the <code>ErrorListener</code>;
-                "doNotRecover" means treat the error as fatal. An example of a recoverable error is
-                when two template rules match the same node. </p>
-            <p>Note that XSLT 3.0 has eliminated all "recoverable errors" from the
-                specification.</p>
+            <p>At one time this property controlled how recoverable errors were handled
+                (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
+                specification, so the property is no longer used.</p>
         </desc>
     </feature>
     <feature>
