@@ -6,7 +6,10 @@ using System.IO;
 using System.Text;
 using NUnit.Framework;
 using Saxon.Api;
+using Saxon.Callbacks;
 using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej;
+using Saxon.Hej.lib;
 using Saxon.Hej.trace;
 using Saxon.Hej.tree.tiny;
 using SaxonCS_NUnit;
@@ -142,7 +145,7 @@ namespace SaxonCS_NUnit {
         private void multipleSchemaImports(bool on) {
             try {
                 Processor p = new Processor(true);
-                p.SetProperty(Saxon.Api.Feature<bool>.MULTIPLE_SCHEMA_IMPORTS, on);
+                p.SetProperty(Saxon.Api.Feature.MULTIPLE_SCHEMA_IMPORTS, on);
                 SchemaManager sm = p.SchemaManager;
                 string xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n" +
                               "<xs:import namespace='http://ns.example.com/' schemaLocation='file:///1'/>" +
@@ -202,7 +205,7 @@ namespace SaxonCS_NUnit {
             SchemaManager sm = null;
             try {
                 Processor p = new Processor(true);
-                p.SetProperty(Saxon.Api.Feature<bool>.MULTIPLE_SCHEMA_IMPORTS, on);
+                p.SetProperty(Saxon.Api.Feature.MULTIPLE_SCHEMA_IMPORTS, on);
                 sm = p.SchemaManager;
                 string xsd0 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:a'>\n" +
                               "<xs:import namespace='ns:b' schemaLocation='file:///1'/>" +
@@ -337,6 +340,12 @@ namespace SaxonCS_NUnit {
             }
         }
 
+        public class MyThing : StandardUnparsedTextResolver {
+            public MyThing(Configuration config) : base(config) {
+                
+            }
+        }
+
         [Test]
         public void TestAssertionsHidingComments() {
 
@@ -359,8 +368,8 @@ namespace SaxonCS_NUnit {
 
             try {
                 Processor proc = new Processor(true);
-                proc.SetProperty(Saxon.Api.Feature<bool>.ASSERTIONS_CAN_SEE_COMMENTS, false);
-                proc.SetProperty(Saxon.Api.Feature<bool>.XSD_VERSION, "1.1");
+                proc.SetProperty(Saxon.Api.Feature.ASSERTIONS_CAN_SEE_COMMENTS, false);
+                proc.SetProperty(Saxon.Api.Feature.XSD_VERSION, "1.1");
                 SchemaManager sm = proc.SchemaManager;
                 StreamSource source_xsd = new StreamSource(new StringReader(xsd));
 
@@ -416,8 +425,8 @@ namespace SaxonCS_NUnit {
 
             try {
                 Processor proc = new Processor(true);
-                proc.SetProperty(Saxon.Api.Feature<bool>.ASSERTIONS_CAN_SEE_COMMENTS, true);
-                proc.SetProperty(Saxon.Api.Feature<string>.XSD_VERSION, "1.1");
+                proc.SetProperty(Saxon.Api.Feature.ASSERTIONS_CAN_SEE_COMMENTS, true);
+                proc.SetProperty(Saxon.Api.Feature.XSD_VERSION, "1.1");
                 SchemaManager sm = proc.SchemaManager;
 
                 sm.Compile(new StringReader(xsd));
@@ -465,9 +474,9 @@ namespace SaxonCS_NUnit {
 
             try {
                 Processor proc = new Processor(true);
-                proc.SetProperty(Saxon.Api.Feature<bool>.ASSERTIONS_CAN_SEE_COMMENTS, true);
-                proc.SetProperty(Saxon.Api.Feature<string>.XSD_VERSION, "1.1");
-                proc.SetProperty(Saxon.Api.Feature<int>.XPATH_VERSION_FOR_XSD, allow ? 31 : 20);
+                proc.SetProperty(Saxon.Api.Feature.ASSERTIONS_CAN_SEE_COMMENTS, true);
+                proc.SetProperty(Saxon.Api.Feature.XSD_VERSION, "1.1");
+                proc.SetProperty(Saxon.Api.Feature.XPATH_VERSION_FOR_XSD, allow ? 31 : 20);
                 SchemaManager sm = proc.SchemaManager;
                 StreamSource source_xsd = new StreamSource(new StringReader(xsd));
 
@@ -642,7 +651,7 @@ namespace SaxonCS_NUnit {
             using Stream output = File.Create(ConfigTest.DATA_DIR + "sandpit/validation.out");
             try {
                 Processor proc = new ();
-                proc.SetProperty(Saxon.Api.Feature<bool>.IMPLICIT_SCHEMA_IMPORTS, true);
+                proc.SetProperty(Saxon.Api.Feature.IMPLICIT_SCHEMA_IMPORTS, true);
 
                 SchemaManager sm = proc.SchemaManager;
                 sm.SchemaResolver = (targetNamespace, uri, hints) => {
@@ -982,7 +991,7 @@ namespace SaxonCS_NUnit {
         public void TestLeak() {
             try {
                 Processor processor = new Processor(true);
-                processor.SetProperty(Saxon.Api.Feature<string>.SCHEMA_VALIDATION_MODE, "lax");
+                processor.SetProperty(Saxon.Api.Feature.SCHEMA_VALIDATION_MODE, "lax");
                 processor.SchemaManager.Compile(new Uri(ConfigTest.DataDirUri, "leak/schema.xsd"));
 
                 DocumentBuilder builder = processor.NewDocumentBuilder();
@@ -1027,7 +1036,7 @@ namespace SaxonCS_NUnit {
             try {
                 Processor proc = new();
 
-                proc.SetProperty(Saxon.Api.Feature<bool>.MULTIPLE_SCHEMA_IMPORTS, multiple);
+                proc.SetProperty(Saxon.Api.Feature.MULTIPLE_SCHEMA_IMPORTS, multiple);
 
                 Uri dir = new Uri(ConfigTest.DataDirUri, "petrk/AbstractType-2/");
 

@@ -49,7 +49,7 @@ namespace SaxonCS_NUnit {
         public void TestDirectoryNoRecurse30() {
             try {
                 Processor p = new Processor(true);
-                p.SetProperty(Feature<bool>.ALLOW_MULTITHREADING, false);
+                p.SetProperty(Feature.ALLOW_MULTITHREADING, false);
                 XPathCompiler c = p.NewXPathCompiler();
                 c.XPathLanguageVersion = ("3.0");
                 XPathExecutable exec = c.Compile("collection(.)!base-uri(.)");
@@ -154,7 +154,7 @@ namespace SaxonCS_NUnit {
         private TimeSpan speedTest(bool parallel) {
             Processor p = new ();
             if (!parallel) {
-                p.SetProperty(Feature<bool>.ALLOW_MULTITHREADING, false);
+                p.SetProperty(Feature.ALLOW_MULTITHREADING, false);
             }
             Stopwatch stopwatch = Stopwatch.StartNew();
             TimeSpan startTime = stopwatch.Elapsed;
@@ -242,7 +242,7 @@ namespace SaxonCS_NUnit {
         public void TestJSONCollection() {
             try {
                 Processor p = new Processor(true);
-                p.SetProperty(Feature<bool>.ALLOW_MULTITHREADING, false);
+                p.SetProperty(Feature.ALLOW_MULTITHREADING, false);
                 XPathCompiler c = p.NewXPathCompiler();
                 c.XPathLanguageVersion = "3.1";
                 XPathExecutable exec = c.Compile("for $X in (collection(.))" +
