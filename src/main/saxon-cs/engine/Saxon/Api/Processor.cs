@@ -318,11 +318,11 @@ namespace Saxon.Api {
         /// Register a named collection. A collection is identified by a URI (the collection URI),
         /// and its content is represented by an <c>IResourceCollection</c>.
         /// </summary>
-        /// <param name="collectionUri">The URI used to identify the collection in a call
+        /// <param name="collectionURI">The URI used to identify the collection in a call
         /// of the XPath <c>collection()</c> function. The default collection is registered
         /// by supplying null as the value of this argument (this is the collection returned
         /// when the XPath <c>collection()</c> function is called with no arguments).</param> 
-        /// <param name="contents">An object that represents the contents of the
+		/// <param name="collection">An object that represents the contents of the
         /// collection.</param>
         /// <remarks>
         /// <para>Collections should be stable: that is, two calls to retrieve the same collection URI
@@ -338,8 +338,6 @@ namespace Saxon.Api {
         /// <para>If a collection URI has been registered using this method, the registered collection
         /// is used, and the collection finder is not called.</para>
         /// </remarks>
-        /// <param name="collectionURI">The name of the collection</param>
-        /// <param name="collection">The contents of the collection</param>
         /// 
         
         public void RegisterCollection(string collectionURI, IResourceCollection collection) {
