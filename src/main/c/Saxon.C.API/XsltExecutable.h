@@ -247,14 +247,14 @@ public:
     void clearProperties();
 
     /**
-    * Utility method for working with Saxon/C on Python
+    * Utility method for working with SaxonC on Python
     */
     XdmValue ** createXdmValueArray(int len){
 	return (new XdmValue*[len]);
     }
 
     /**
-    * Utility method for working with Saxon/C on Python
+    * Utility method for working with SaxonC on Python
     */
     char** createCharArray(int len){
 	return (new char*[len]);
@@ -282,7 +282,7 @@ public:
      * @param 
      * @param flag - true enables map object which is used to save the result documents from the transformation
     */
-    void setCaptureResultDocuments(bool flag);
+    void setSaveResultDocument(bool flag);
 
 
     /**

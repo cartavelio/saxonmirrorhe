@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#Build file for Saxon/C on C++
+#Build file for SaxonC on C++
 
 #jdkdir=/usr/lib/jvm/java-7-oracle/include
 

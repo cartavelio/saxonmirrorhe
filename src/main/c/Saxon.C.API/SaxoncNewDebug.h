@@ -12,7 +12,7 @@ std::vector<void*> myAlloc;
 extern void* newImpl(std::size_t sz,char const* file, int line){
     static int counter{};
     void* ptr= std::malloc(sz);
-    std::cerr << "Saxon/C Mem test: "<<file << ": " << line << " " <<  ptr << std::endl;
+    std::cerr << "SaxonC Mem test: "<<file << ": " << line << " " <<  ptr << std::endl;
     myAlloc.push_back(ptr);
     return ptr;
 }

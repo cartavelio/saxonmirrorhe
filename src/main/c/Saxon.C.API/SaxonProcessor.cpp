@@ -29,7 +29,7 @@
 void* newImpl(std::size_t sz,char const* file, int line){
     static int counter{};
     void* ptr= std::malloc(sz);
-    std::cerr << "Saxon/C Mem test: "<<file << ": " << line << " " <<  ptr << std::endl;
+    std::cerr << "SaxonC Mem test: "<<file << ": " << line << " " <<  ptr << std::endl;
     myAlloc.push_back(ptr);
     return ptr;
 }
@@ -50,7 +50,7 @@ void operator delete(void* ptr) noexcept{
 
 void operator delete(void* ptr, std::size_t) noexcept {
     auto ind= std::distance(myAlloc.begin(),std::find(myAlloc.begin(), myAlloc.end(),ptr));
-        std::cerr << "Saxon/C Mem test deleting: " <<  ptr << std::endl;
+        std::cerr << "SaxonC Mem test deleting: " <<  ptr << std::endl;
     myAlloc[ind]= nullptr;
     std::free(ptr);
 

@@ -1,8 +1,8 @@
 """@package saxonc
-This documentation details the Python API for Saxon/C, which has been written in cython for Python3.
-Saxon/C is a cross-compiled variant of Saxon from the Java platform to the C/C++ platform.
-Saxon/C provides processing in XSLT 3.0, XQuery 3.0/3.1 and XPath 2.0/3.0/3.1, and Schema validation 1.0/1.1.
-Main classes in Saxon/C Python API: PySaxonProcessor, PyXsltProcessor, PyXslt30Processor, PyXQueryProcessor, PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmNode and PyXdmAtomicValue."""
+This documentation details the Python API for SaxonC, which has been written in cython for Python3.
+SaxonC is a cross-compiled variant of Saxon from the Java platform to the C/C++ platform.
+SaxonC provides processing in XSLT 3.0, XQuery 3.0/3.1 and XPath 2.0/3.0/3.1, and Schema validation 1.0/1.1.
+Main classes in SaxonC Python API: PySaxonProcessor, PyXsltProcessor, PyXslt30Processor, PyXQueryProcessor, PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmNode and PyXdmAtomicValue."""
 # distutils: language = c++
 # distutils: sources = SaxonProcessor.cpp
 # cython: language_level = 3
@@ -104,7 +104,7 @@ cdef class PySaxonProcessor:
     This class is itself the context that needs to be managed (i.e. allocation & release)
     Example:
           with saxonc.PySaxonProcessor(license=False) as proc:
-             print("Test Saxon/C on Python")
+             print("Test SaxonC on Python")
              print(proc.version)
              xdmAtomicval = proc.make_boolean_value(False)
              xslt30proc = proc.new_xslt30_processor()
@@ -636,16 +636,16 @@ cdef class PySaxonProcessor:
     def exception_occurred(self):
         """
         exception_occurred(self)
-        Check if an exception has occurred internally within Saxon/C
+        Check if an exception has occurred internally within SaxonC
         Returns:
-            boolean: True or False if an exception has been reported internally in Saxon/C
+            boolean: True or False if an exception has been reported internally in SaxonC
         """
         return self.thisptr.exceptionOccurred()
 
     def exception_clear(self):
         """
         exceltion_clear(self)
-        Clear any exception thrown internally in Saxon/C.
+        Clear any exception thrown internally in SaxonC.
         """
         self.thisptr.exceptionClear()
 
@@ -1409,9 +1409,9 @@ cdef class PyXsltExecutable:
         #else:
         #raise Warning("setJustInTimeCompilation: argument must be a boolean type. JIT not set")
 
-     def set_capture_result_documents(self, bool value):
+     def set_save_result_document(self, bool value):
         """
-        set_capture_result_documents(self, value)
+        set_save_result_document(self, value)
         When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
         via a user defined dictionary object where we have the pair document URI and XdmNode object.
         Args:
@@ -1419,7 +1419,7 @@ cdef class PyXsltExecutable:
         """
         cdef bool c_value
         c_value = value
-        self.thisxptr.setCaptureResultDocuments(c_value)
+        self.thisxptr.setSaveResultDocument(c_value)
 
      def get_result_documents(self):
          """
@@ -2911,9 +2911,9 @@ cdef class PyXPathProcessor:
      def exception_occurred(self):
         """
         exception_occurred(self)
-        Check if an exception has occurred internally within Saxon/C
+        Check if an exception has occurred internally within SaxonC
         Returns:
-            boolean: True or False if an exception has been reported internally in Saxon/C
+            boolean: True or False if an exception has been reported internally in SaxonC
         """
         return self.thisxpptr.exceptionOccurred()
 
@@ -3194,9 +3194,9 @@ cdef class PySchemaValidator:
      def exception_occurred(self):
         """
         exception_occurred(self)
-        Check if an exception has occurred internally within Saxon/C
+        Check if an exception has occurred internally within SaxonC
         Returns:
-            boolean: True or False if an exception has been reported internally in Saxon/C
+            boolean: True or False if an exception has been reported internally in SaxonC
         """
         return self.thissvptr.exceptionOccurred()
 

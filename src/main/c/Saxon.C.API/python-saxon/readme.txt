@@ -1,4 +1,4 @@
-See Saxon/C documentation for full guide on installing Saxon/C python extension:
+See SaxonC documentation for full guide on installing SaxonC python extension:
 
 https://www.saxonica.com/saxon-c/documentation/index.html#!starting/installingpython
 

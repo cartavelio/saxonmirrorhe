@@ -37,7 +37,7 @@ char dllname[] =
 
 #endif
 //===============================================================================================//
-/*! <code>Environment</code>. This struct captures the jni, JVM and handler to the cross compiled Saxon/C library.
+/*! <code>Environment</code>. This struct captures the jni, JVM and handler to the cross compiled SaxonC library.
  * <p/>
  */
 typedef struct {
