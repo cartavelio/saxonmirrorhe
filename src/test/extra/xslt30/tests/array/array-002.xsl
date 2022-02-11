@@ -10,7 +10,7 @@
 
 <xsl:template name="xsl:initial-template">
   <xsl:variable name="a" as="array(*)">
-    <saxon:array select="1 to 10"/>
+    <saxon:array composite="no" select="1 to 10"/>
   </xsl:variable>
   <out count="{array:size($a)}" values="{$a?*}" last="{$a?10}"/>
 </xsl:template>

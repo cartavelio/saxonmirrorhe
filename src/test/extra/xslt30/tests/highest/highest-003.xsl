@@ -22,8 +22,8 @@ exclude-result-prefixes="my saxon xs">
     <out>
       <xsl:copy-of select="saxon:highest($data, my:val#1)"
         default-collation="http://www.w3.org/2005/xpath-functions/collation/html-ascii-case-insensitive" />
-      <xsl:copy-of select="max($data)"
-        default-collation="http://www.w3.org/2005/xpath-functions/collation/html-ascii-case-insensitive" />
+      <max><xsl:copy-of select="max($data ! xs:string(.)) => upper-case()"
+        default-collation="http://www.w3.org/2005/xpath-functions/collation/html-ascii-case-insensitive" /></max>
     </out>
   </xsl:template>
   
