@@ -153,8 +153,7 @@ dependencies {
     fileTree(dir: "extra/MyDotNet/stubs"),
     fileTree(dir: "lib/asm-${asmVersion}"),
     files(saxonLicenseDir),
-    files("lib/Tidy.jar"),
-    fileTree(dir: 'extra/lib/', include: ['*.jar'])
+    files("lib/Tidy.jar")
   )
   jarjarAsm (
     fileTree(dir: "${buildDir}/lib/asm")
