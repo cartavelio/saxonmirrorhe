@@ -117,7 +117,7 @@ namespace System.Impl.Helpers {
         }
 
         public Saxon.Hej.s9api.Location getSourceLocator() {
-            if (((parser is IXmlLineInfo) || (parser is XmlValidatingReader))) {
+            if (((parser is IXmlLineInfo) /* || (parser is XmlValidatingReader) */)) {
                 return this;
             }
             else {

@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.NetworkInformation;
+using System.Text;
 using System.Xml;
 using Saxon.Hej.lib;
 using Saxon.Hej.om;
@@ -30,6 +32,7 @@ namespace Saxon.Api {
     public class XQueryEvaluator : IEnumerable<XdmItem> {
         private Saxon.Hej.s9api.XQueryEvaluator evaluator;
         private StandardLogger traceFunctionDestination;
+        private TextResolver textResolver;
         private Action closeAction;
 
 
@@ -106,12 +109,40 @@ namespace Saxon.Api {
         /// supplied to the <c>doc()</c> function.
         /// </summary>
 
-        public XmlResolver InputXmlResolver {
+        public XmlResolver XmlResolver {
             get => ((StandardURIResolver) evaluator.getURIResolver()).getXmlResolver();
             set => evaluator.setURIResolver(
                 new StandardURIResolver(
                     evaluator.getUnderlyingQueryContext().getConfiguration(), 
                     value));
+        }
+        
+        /// <summary>
+        /// The <code>TextResolver</code> to be used at run-time to resolve and dereference URIs
+        /// supplied to the <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>,
+        /// <c>unparsed-text-available()</c>, and <c>json-doc()</c> functions.
+        /// </summary>
+
+        public TextResolver TextResolver {
+            get => textResolver;
+            set {
+                textResolver = value;
+                evaluator.setUnparsedTextResolver((uri, encoding, config) => {
+                    Encoding enc;
+                    if (encoding == null) {
+                        enc = null;
+                    }
+                    else {
+                        try {
+                            enc = Encoding.GetEncoding(encoding);
+                        }
+                        catch (System.ArgumentException e) {
+                            throw new SaxonApiException(new Saxon.Hej.trans.XPathException("Unparsed-text encoding problem: " + e.Message, "FOUT1190"));
+                        }
+                    }
+                    return value(uri, enc);
+                });
+            }
         }
 
         /// <summary>
