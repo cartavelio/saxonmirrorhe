@@ -346,7 +346,11 @@ div.section h2{
     color:#688790 !important;
     font-size:inherit;
 }
-.javaclassmember, .javalink, .feature {
+.javaclassmember{
+    font-family:monospace;
+    color:#688790;
+}
+.javalink, .feature {
     font-family:monospace;
     color:#96433D;
 }

@@ -815,8 +815,7 @@
           <p>The top-level object is the <a href="Saxon/Api/Processor.html" class="apilink">Processor</a>;
             this allows creation of factory classes for using each of the different processing
             languages.</p>
-          <p>The classes are all found in each of the assemblies: <code>saxon9ee-api.dll</code>, 
-            <code>saxon9pe-api.dll</code>, and <code>saxon9he-api.dll</code>.</p>
+          <p>The classes are all found in the assembly: <code>saxoncs.dll</code>.</p>
           <p>Further background information about this API is available at 
             <a href="http://www.saxonica.com/html/documentation/dotnet/dotnetapi.html"
               >http://www.saxonica.com/html/documentation/dotnet/dotnetapi.html</a></p>

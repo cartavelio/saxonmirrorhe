@@ -316,6 +316,12 @@
     </xsl:copy>
   </xsl:template>
   
+  <xsl:template match="c|code" mode="comment">
+    <xsl:copy>
+      <xsl:value-of select="replace(replace(text(), 'Saxon.Hej.', 'net.sf.saxon.'), 'Saxon.Eej.', 'com.saxonica.')"/>
+    </xsl:copy>
+  </xsl:template>
+  
   <xsl:template match="exception" mode="comment">
     <xsl:copy>
       <xsl:attribute name="name" select="if (@name) then @name else (substring-after(@cref,':'))"/>
@@ -340,7 +346,7 @@
           <xsl:value-of select="concat('Saxon.Api.', translate(substring-after($preArgs, 'Saxon.Api.'), '.', '#'))"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="$preArgs"/>
+          <xsl:value-of select="replace(replace($preArgs, 'Saxon.Hej.', 'net.sf.saxon.'), 'Saxon.Eej.', 'com.saxonica.')"/>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
@@ -583,11 +589,13 @@
     <xsl:variable name="out" select="if ($known-class) then
       string($known-class/@fulltype) else if (map:contains($knownSystemClassesMap, $in3)) then
       map:get($knownSystemClassesMap, $in3) else $in3"/>
+    <xsl:variable name="out" select="replace($out, 'Saxon.Hej.', 'net.sf.saxon.')"/>
+    <xsl:variable name="out" select="replace($out, 'Saxon.Eej.', 'com.saxonica.')"/>
     <xsl:sequence select="if ($is-list) then concat($out,'[]') else $out"/>
   </xsl:function>
   
   <!-- Types which are known to be interfaces, rather than classes -->
-  <xsl:variable name="knownInterfaces" select="('IEnumerable', 'JInvalidityHandler', 'JConfiguration.ApiProvider')"/>
+  <xsl:variable name="knownInterfaces" select="('IEnumerable', 'IInvalidityHandler', 'Configuration.ApiProvider')"/>
   
   <!-- Resolve all known System types. Map from short name to resolved type. 
       This map requires maintenance. -->
