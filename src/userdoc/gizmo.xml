@@ -1,0 +1,795 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article id="gizmo" title="The Gizmo Utility">
+  <h1>The Gizmo Utility</h1>
+  
+  <p>Saxon (from 10.0) provides the Gizmo command line utility, which can be used interactively or in batch mode, 
+    to perform simple operations such as examining the content of a document, renaming or deletion of 
+    selected elements in the document, or performing simple XSLT transformation and XSD validation.</p>
+  
+    <p>The utility can be started from the command line using the Java entry-point class
+  <code>net.sf.saxon.Gizmo</code>, and its actions are controlled by sub-commands entered one per line, either
+      on the standard input, or in a file named in the <code>-q</code> option.</p>
+  
+  <aside><p>Gizmo uses a library called JLine2 to handle terminal input and output. The JLine2 library provides
+    basic command-line editing capabilities such as copy/paste; it also maintains command history (so you can
+    recall previous commands using the up-arrow key), and offers content completion suggestions using the
+    tab key.</p>
+    <p>The JLine2 library is delivered with the Saxon product, but as a separate JAR file. To run Gizmo
+      from the command line, the classpath must contain both the standard Saxon JAR file (for example
+      <code>saxon-pe-10.0.jar</code>), and also the JLine2 JAR file, which is named <code>jline-2.9.jar</code>.</p></aside>
+  
+  <h2 class="subtitle">Command Line Syntax</h2>
+  
+  <kbd>java net.sf.saxon.Gizmo [-s:source.xml] [-q:script.txt]</kbd>
+  
+  <ul>
+    <li><code>-s:source.xml</code> defines the source document supplied as the input to the 
+      pipeline of sub-commands. If omitted, input is taken from standard input.</li>
+    <li><code>-q:script.txt</code>. Identifies a filename containing sub-commands to be executed, one per line.
+      By default, sub-commands are taken from standard input.</li>
+  </ul>
+  
+  <p>Each line of input is a sub-command. The various sub-commands are listed in the following sections.</p>
+  
+  <p>At any point in the processing, there is (or is not) a current document. 
+    On entry, the current document is the source document
+    identified in the <code>-s</code> option, if specified. Many of the sub-commands change the current document. The current document
+    may be inspected using the <a class="bodylink" href="show">show</a> sub-command, and
+    may be saved to filestore using the <a class="bodylink" href="save">save</a>
+    sub-command.</p>
+  
+  <p>Most of the sub-commands select nodes within the current document using an XPath expression.
+    If unprefixed element names appear within the expression, they match nodes in the source document
+    by local-name alone. (That is, <code>X</code> means <code>*:X</code>). If you only want to select
+    no-namespace names, use the form <code>Q{}X</code>.</p>
+  
+  <p>Within XPath expressions, content completion is available for (a) recognized XPath keywords
+    such as "following-sibling", and (b) the names of elements and attributes appearing in the
+    current source document when it was first loaded.</p>
+  
+  <p>Some of the sub-commands also have a second argument which is a query. Generally this will be
+    an XQuery element constructor such as <code><![CDATA[<a>Title: {string(.)}<a/>]]></code>. It is
+    evaluated with the context item set to each item selected by the first expression, in turn.</p>
+   
+   <nav>
+      <ul/>
+   </nav>
+  
+  <section id="copy" title="The copy command">
+    <h1>The copy command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>copy <i>expression</i></kbd>
+    
+    <p>Deletes everything other than the nodes selected by the expression; returns a new document
+      containing only the selected nodes. Note that if the expression selects multiple elements,
+      the new document will not be a well-formed XML document (it will be a "fragment").</p>
+    
+    <p>The result of the operation can be inspected using the command 
+      <a class="bodylink" href="../show">show</a>.</p>
+    
+    <h3 class="subtitle">Example</h3>
+    
+    <p>The command:</p> 
+    <kbd>copy //img</kbd> 
+    <p>returns a document containing as its children copies of all the <code>img</code> elements in
+      the source.</p>
+    
+  </section>
+  
+  <section id="call" title="The call command">
+    <h1>The call command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>call {filename}</kbd>
+    
+    <p>Executes the script contained in the specified file.</p>
+    <p>The script shares the context with the calling script. It has access to the variables and namespaces
+    declared in the calling script, and any variables and namespaces that it declared are available to the
+    caller on return.</p>
+    
+  </section>
+   
+   <section id="delete" title="The delete command">
+     <h1>The delete command</h1>
+     
+      <p><i>Syntax:</i></p>
+      <kbd>delete <i>expression</i></kbd>
+      
+      <p>The selected nodes (elements, attributes, or namespaces) are deleted, along with their children and descendants.</p>
+     
+     <p>The result of the operation can be inspected using the command 
+       <a class="bodylink" href="../show">show</a>.</p>
+     
+     <h3 class="subtitle">Example</h3>
+     
+     <p>Given a source document:</p>
+     <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE"/>
+  <city name="Paris" country="FR"/>
+  <city name="Rome" country="IT"/>
+</cities>]]></samp>
+     
+     <p>The command:</p>
+     <kbd>delete //city[@name='Rome']</kbd>
+     <p>produces the document:</p>
+     <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE"/>
+  <city name="Paris" country="FR"/>
+</cities>]]></samp>
+     
+   </section>
+  
+  <section id="follow" title="The follow command">
+    <h1>The follow command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>follow <i>expression</i> with <i>query</i></kbd>
+    
+    <p>After each node <i>N</i> selected by the expression, the query is evaluated (with <i>N</i> as the context item), and its result is 
+      inserted as an immediate following sibling of <i>N</i>. Both the expression and the query must return nodes that are capable of having
+    siblings: that is, element, text, comment, or processing instruction nodes. But if the query returns an atomic value,
+    it is treated as a text node with the same string value.</p>
+    
+    <p>The result of the operation can be inspected using the command 
+      <a class="bodylink" href="../show">show</a>.</p>
+    
+    <h3 class="subtitle">Examples</h3>
+    
+    <p>The command:</p> 
+    <kbd>follow //img with &lt;caption/></kbd> 
+    <p>inserts an empty <code>&lt;caption/></code> element
+      after every <code>img</code> element in the document.</p>
+    
+    <p>Given a source document:</p>
+    <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE"/>
+  <city name="Paris" country="FR"/>
+  <city name="Rome" country="IT"/>
+</cities>]]></samp>
+    
+    <p>The command:</p>
+    <kbd>follow //city[@name='Paris'] with &lt;city name="Lyon" country="{@country}"/></kbd>
+    <p>produces the document:</p>
+    <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE"/>
+  <city name="Paris" country="FR"/>
+  <city name="Lyon" country="FR"/>
+  <city name="Rome" country="IT"/>
+</cities>]]></samp>
+    
+  </section>
+  
+  <section id="help" title="The help command">
+    <h1>The help command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>help <i>keyword</i></kbd>
+    
+    <p>If the keyword is the name of a command, a brief summary of the syntax and purpose of the command is displayed.</p>
+    <p>If the keyword is omitted, a list of available commands is displayed.</p>
+    
+  </section>
+   
+  <section id="list" title="The list command">
+    <h1>The list command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>list <i>expression</i></kbd>
+    
+    <p>Outputs a representation of the result of the expression.</p>
+    <p>If a node is selected, it is shown as a path (for example <code>DOC/SECTION[3]/PARA[2]</code>), preceded
+    by a line number if one is available.</p>
+    <p>If an atomic value is selected, its string value is displayed.</p>
+    
+    <p>Line numbers are available in documents loaded directly from filestore, but not
+      in documents constructed using commands such as <code>rename</code> or <code>delete</code>.</p>
+    
+    <h3 class="subtitle">Example</h3>
+    
+    <p>Given a source document:</p>
+    <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE"/>
+  <city name="Paris" country="FR"/>
+  <city name="Rome" country="IT"/>
+</cities>]]></samp>
+    
+    <p>The command:</p>
+    <kbd>list //city[@name='Paris']</kbd>
+    <p>displays:</p>
+    <samp>Line 3: /cities/city[2]</samp>
+    
+  </section> 
+  
+  <section id="load" title="The load command">
+    <h1>The load command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>load <i>filename</i></kbd>
+    
+    <p>The current document is discarded, and a new current document is loaded from the specified file.</p>
+    
+    <p>If the filename is relative, it is taken as being relative to the current working directory.</p>
+    
+    <p>The user's home directory can be referred to as <code>~</code>.</p>
+    
+    <p>Content completion is available: use the tab key to suggest possible names at each level.</p>
+      
+  </section> 
+  
+  <section id="namespace" title="The namespace command">
+    <h1>The namespace command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>namespace {prefix} {uri}</kbd>
+    
+    <p>Binds a namespace prefix to a URI. QNames using this prefix may be used in subsequent
+    XPath expressions within the script.</p>
+    <p>Note that the conventional prefixes <code>xml</code>, <code>xsl</code>, <code>saxon</code>, <code>xs</code>, 
+      <code>xsi</code>, <code>fn</code>, <code>math</code>, <code>map</code>, and <code>array</code> are
+    already bound to the conventional namespace URIs.</p>
+    
+    <p>In path expressions, unprefixed names match by local name only, so it is usually possible
+    to select elements without binding a namespace prefix.</p>
+    
+  </section>
+  
+  <section id="paths" title="The paths command">
+    <h1>The paths command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>paths</kbd>
+    
+    <p>Outputs a list of the distinct element paths that exist in the current source document. They are output
+    in order of first appearance, when scanning the tree in document order.</p>
+    
+    <p>This command is useful to get an overview of the structure of the source document, especially if it is
+    too large to display comfortably.</p>
+    
+    <h3 class="subtitle">Example</h3>
+    
+    <p>For example, given the <code>books.xml</code> data file included with the Saxon resources
+    download, the output would be:</p>
+    
+    <samp>
+      Found 16 items
+      /BOOKLIST
+      /BOOKLIST/BOOKS
+      /BOOKLIST/BOOKS/ITEM
+      /BOOKLIST/BOOKS/ITEM/TITLE
+      /BOOKLIST/BOOKS/ITEM/AUTHOR
+      /BOOKLIST/BOOKS/ITEM/PUBLISHER
+      /BOOKLIST/BOOKS/ITEM/PUB-DATE
+      /BOOKLIST/BOOKS/ITEM/LANGUAGE
+      /BOOKLIST/BOOKS/ITEM/PRICE
+      /BOOKLIST/BOOKS/ITEM/QUANTITY
+      /BOOKLIST/BOOKS/ITEM/ISBN
+      /BOOKLIST/BOOKS/ITEM/PAGES
+      /BOOKLIST/BOOKS/ITEM/DIMENSIONS
+      /BOOKLIST/BOOKS/ITEM/WEIGHT
+      /BOOKLIST/CATEGORIES
+      /BOOKLIST/CATEGORIES/CATEGORY      
+    </samp>
+    
+  </section>
+  
+  <section id="precede" title="The precede command">
+    <h1>The precede command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>precede <i>expression</i> with <i>query</i></kbd>
+    
+    <p>Before each node <i>N</i> selected by the expression, the query is evaluated (with <i>N</i> as the context item), and its result is 
+      inserted as an immediate preceding sibling of <i>N</i>. Both the expression and the query must return nodes that are capable of having
+      siblings: that is, element, text, comment, or processing instruction nodes. But if the query returns an atomic value,
+      it is treated as a text node with the same string value.</p>
+    
+    <p>The result of the operation can be inspected using the command 
+      <a class="bodylink" href="../show">show</a>.</p>
+    
+    <h3 class="subtitle">Examples</h3>
+    
+    <p>The command:</p> 
+    <kbd>precede //img with &lt;caption/></kbd> 
+    <p>inserts an empty <code>&lt;caption/></code> element
+      before every <code>img</code> element in the document.</p>
+    
+    <p>Given a source document:</p>
+    <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE"/>
+  <city name="Munich" country="DE"/>
+  <city name="Paris" country="FR"/>
+  <city name="Lyon" country="FR"/>
+  <city name="Rome" country="IT"/>
+</cities>]]></samp>
+    
+    <p>The command:</p>
+    <kbd>precede //city[not(@country=preceding-sibling::*[1]/@country)] with &lt;country name="{@country}"/></kbd>
+    <p>produces the document:</p>
+    <samp><![CDATA[<cities>
+  <country name="DE"/>
+  <city name="Berlin" country="DE"/>
+  <city name="Munich" country="DE"/>
+  <country name="FR"/>
+  <city name="Paris" country="FR"/>
+  <city name="Lyon" country="FR"/>
+  <country name="IT"/>
+  <city name="Rome" country="IT"/>
+</cities>]]></samp>
+    
+  </section>
+  
+  <section id="prefix" title="The prefix command">
+    <h1>The prefix command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>prefix <i>expression</i> with <i>query</i></kbd>
+    
+    <p>For every node <i>N</i> selected by the expression, the query is evaluated (with <i>N</i> as the context item), and its result is 
+      inserted as the first child of <i>N</i>. The expression must return nodes that are capable of having children (that is document
+      or element nodes). The query must return nodes that are capable of having
+      siblings (that is, element, text, comment, or processing instruction nodes). But if the query returns an atomic value,
+      it is treated as a text node with the same string value.</p>
+    <p>As a special case, if the query returns an attribute node, it is added as an attribute of the selected element,
+      replacing any existing attribute with the same name.</p>
+    
+    <p>The result of the operation can be inspected using the command 
+      <a class="bodylink" href="../show">show</a>.</p>
+    
+    <h3 class="subtitle">Examples</h3>
+    
+    <p>The command:</p> 
+    <kbd>prefix //section with &lt;head>{data(@title)}&lt;/head></kbd> 
+    <p>copies the value of the
+      <code>title</code> attribute of every <code>section</code> element into a new <code>head</code> element appearing
+      as the first child of the <code>section</code>.</p>
+    
+    <p>Given a source document:</p>
+    <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE"/>
+  <city name="Munich" country="DE"/>
+  <city name="Paris" country="FR"/>
+  <city name="Lyon" country="FR"/>
+  <city name="Rome" country="IT"/>
+</cities>]]></samp>
+    
+    <p>The command:</p>
+    <kbd>prefix //city with &lt;country name="{@country}"/></kbd>
+    <p>produces the document:</p>
+    <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE">
+    <country name="DE"/>
+  </city>  
+  <city name="Munich" country="DE">
+    <country name="DE"/>
+  </city>  
+  <city name="Paris" country="FR">
+    <country name="FR"/>
+  </city>  
+  <city name="Lyon" country="FR">
+    <country name="FR"/>
+  </city>  
+  <city name="Rome" country="IT">
+    <country name="FR"/>
+  </city>  
+</cities>]]></samp>
+    
+    <p>With the same document, the command:</p>
+    
+    <kbd>prefix //city with attribute{'id'}{count(preceding-sibling::*)+1}</kbd>
+    
+    <p>produces:</p>
+    
+    <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE" id="1"/>
+  <city name="Munich" country="DE" id="2"/>
+  <city name="Paris" country="FR" id="3"/>
+  <city name="Lyon" country="FR" id="4"/>
+  <city name="Rome" country="IT" id="5"/>
+</cities>]]></samp>
+    
+  </section>
+  
+  <section id="quit" title="The quit command">
+    <h1>The quit command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>quit [now]</kbd>
+    
+    <p>Quits the application.</p>
+    
+    <p>If "now" is specified, the command exits immediately. Otherwise, if the current document has been modified since
+    it was read from filestore, the command prompts the user asking whether the document should first be saved. (See the
+      <a class="bodylink" href="../save">save</a> command).</p>
+    
+  </section>
+   
+   
+   
+   <section id="rename" title="The rename command">
+      <h1>The rename command</h1>
+     
+      <p><i>Syntax:</i></p>
+     <kbd>rename <i>expression</i> as <i>expression</i> </kbd>
+     
+      <p>Nodes (elements or attributes) selected by the first expression are renamed; the new name is given by 
+        computing the expression in the second argument. </p>
+
+      <p>The second expression is evaluated with the existing node as the context item. If the result
+      of the expression is a string, then this string is used as the new name of the node (if it contains a prefix,
+      this must first be declared using the <a class="bodylink" href="../namespace">namespace</a> command). 
+        If the result of the expression is a QName, then it defines the expanded name of the new element or attribute in its
+      entirety. New namespace declarations will be added to the output document if required; existing namespace declarations are not
+      removed, unless new bindings are defined for existing prefixes.</p>
+      
+     <h3 class="subtitle">Examples</h3>
+     
+      <kbd>rename //NOTE as "COMMENT"</kbd> 
+     <p>renames all <code>NOTE</code> elements as <code>COMMENT</code> elements.</p>
+     <kbd>rename //@* as lower-case(name())</kbd>
+      <p>renames all attributes by converting the existing name to lower-case.</p>
+     
+   </section>
+  
+  <section id="replace" title="The replace command">
+    <h1>The replace command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>replace <i>expression</i> with <i>query</i> </kbd>
+    
+    <p>The nodes (elements or attributes) selected by the given expression are
+      replaced by the result of evaluating the query.</p>
+    
+    <p>Note that it is the entire node that is replaced, not just its content. To replace the
+      content of an element or attribute node, rather than replacing the entire
+      node, use the command <a class="bodylink" href="../update">update</a>.</p>
+    
+    <p>The result of the operation can be inspected using the command 
+      <a class="bodylink" href="../show">show</a>.</p>
+    
+    <h3 class="subtitle">Examples</h3>
+    
+    <p>Given a source document:</p>
+    <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE"/>
+  <city name="Munich" country="DE"/>
+  <city name="Paris" country="FR"/>
+  <city name="Lyon" country="FR"/>
+  <city name="Rome" country="IT"/>
+</cities>]]></samp>
+    
+    <p>The command:</p>
+    <kbd>replace //city[@country="DE"] with &lt;stadt @Name="{@name}"/></kbd>
+    <p>produces the document:</p>
+    
+    <samp><![CDATA[<cities>
+  <stadt Name="Berlin"/>
+  <stadt Name="Munich"/>
+  <city name="Paris" country="FR"/>
+  <city name="Lyon" country="FR"/>
+  <city name="Rome" country="IT"/>
+</cities>]]></samp>
+    
+    <p>Given a source document:</p>
+    <samp><![CDATA[<cities>
+  <city><name>Berlin</name><country>DE</country></city>
+  <city><name>Munich</name><country>DE</country></city>
+  <city><name>Paris</name><country>FR</country></city>
+  <city><name>Lyon</name><country>FR</country></city>
+  <city><name>Rome</name><country>IT</country></city>
+</cities>]]></samp>
+    
+    <p>The command:</p>
+    <kbd>replace //city/name[.="Munich"]/text() with "München"</kbd>
+    <p>produces the document:</p>
+    
+    <samp><![CDATA[<cities>
+  <city><name>Berlin</name><country>DE</country></city>
+  <city><name>München</name><country>DE</country></city>
+  <city><name>Paris</name><country>FR</country></city>
+  <city><name>Lyon</name><country>FR</country></city>
+  <city><name>Rome</name><country>IT</country></city>
+</cities>]]></samp>
+    
+    <p>With the same source document, the command:</p>
+    <kbd>replace //name with <cityName>{.}</cityName></kbd>
+    <p>produces the document:</p>
+    
+    <samp><![CDATA[<cities>
+  <city><cityName><name>Berlin</name></cityName><country>DE</country></city>
+  <city><cityName><name>Munich</name></cityName><country>DE</country></city>
+  <city><cityName><name>Paris</name></cityName><country>FR</country></city>
+  <city><cityName><name>Lyon</name></cityName><country>FR</country></city>
+  <city><cityName><name>Rome</name></cityName><country>IT</country></city>
+</cities>]]></samp>
+    
+    <p>Note that in this expression, <code>{.}</code> follows the XQuery rules rather than
+    the XSLT rules: it copies the whole element, rather than extract its string value.</p>
+    
+  </section>
+  
+  <section id="save" title="The save command">
+    <h1>The save command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>save <i>filename</i> [<i>output-param</i>=<i>value</i>]...</kbd>
+    
+    <p>Saves the current document to filestore, with the serialization parameters specified.</p>
+    
+    <p>If the file already exists, Gizmo asks "Overwrite existing file? (Y|N)" and proceeds
+      only if the answer is "Y" or "y".</p>
+    
+    <p>If the filename is relative, it is taken as being relative to the current working directory.</p>
+    
+    <p>The user's home directory can be referred to as <code>~</code>.</p>
+    
+    <p>Content completion is available: use the tab key to suggest possible names at each level.</p>
+    
+    <h3 class="subtitle">Examples</h3>
+    
+    <p>The command:</p> 
+    <kbd>save updated-data.xml method=xml indent=yes</kbd> 
+    <p>saves the document to filestore using the XML output method with indentation.</p>
+    
+  </section>
+  
+  <section id="schema" title="The schema command">
+    <h1>The schema command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>schema <i>filename</i></kbd>
+    
+    <aside>Requires Saxon-EE</aside>
+    
+    <p>Loads an XSD schema from the specified location.</p>
+    <p>The filename is handled in the same way as the <a class="bodylink" href="../load">load</a> command.</p>
+    <p>The schema definitions are available for use in <a class="bodylink"
+      href="../validate">validate</a> commands issued subsequently in the session.
+    The command is additive; the schema components are added to the collection of schema components that are already
+    loaded, which means an error will be reported if the definitions conflict. It is not possible to unload
+    schema definitions once loaded, except by closing the session and starting a new one.</p>
+    
+  </section>
+   
+  <section id="set" title="The set command">
+    <h1>The set command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>set <i>name</i> = <i>expression</i></kbd>
+    <kbd>set . = <i>expression</i></kbd>
+    
+    <p>The first form binds a variable to the value of the expression. The variable name may be written as a simple
+    NCName, or as a lexical QName, or as an EQName in <code>Q{uri}local</code> format; it may
+    also be preceded by a "$" sign (which is ignored).</p>
+    <p>The variable may be used in XPath expressions and queries appearing later in the script.</p>
+    <p>The second form:</p> 
+    <kbd>set . = <i>expression</i></kbd>
+    <p>may be used to set the current document. In this case the expression must evaluate to a
+      single document node. For example:</p> 
+    <kbd>set . = doc('books.xml')</kbd>
+    <p>achieves the same effect as:</p>
+    <kbd>load books.xml</kbd>
+    
+    <p>Note that all updating commands (such as <code>delete</code>, <code>rename</code> etc.) create
+    a new copy of the current document. Variables that were set before the updating command continue to
+    reference the document in the state it was in before the update.</p>
+    <aside>To display the value of a variable, use the <a class="bodylink" href="../show">show</a>
+      or <a class="bodylink" href="../list">list</a> commands.</aside>
+    
+  </section>
+
+  <section id="show" title="The show command">
+    <h1>The show command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>show [<i>expression</i>]</kbd>
+    
+    <p>Outputs a representation of the result of the expression.</p>
+    <p>If a node is selected, it is shown as an XML serialization of the content of the node.</p>
+    <p>If an atomic value is selected, its string value is displayed.</p>
+    <p>The expression may be omitted, and defaults to <code>/</code>, which displays
+    the current document.</p>
+    
+    <p>The document is always shown with indentation enabled, so it is not necessarily the same as the
+      document that will be written to filestore by the <a class="bodylink" href="../save">save</a>
+    command.</p>
+    
+    <h3 class="subtitle">Examples</h3>
+    
+    <kbd>show</kbd>
+    
+    <p>Displays the current document, with indentation.</p>
+    
+    <kbd>show //TITLE</kbd>
+    
+    <p>Displays selected elements, for example:</p>
+    
+    <samp><![CDATA[  <title>Pride and Prejudice</title>
+  <title>Sense and Sensibility</title>
+  <title>Emma</title>
+  <title>Northanger Abbey</title>]]></samp>
+    
+    <kbd>show count(//TITLE), sort(//TITLE)</kbd>
+    
+    <p>Displays the result of an arbitrary XPath expression.</p>
+    
+    
+  </section> 
+   
+   <section id="strip" title="The strip command">
+      <h1>The strip command</h1>
+     
+      <p><i>Syntax:</i></p>
+     <kbd>strip</kbd>
+     
+     <p>The effect is the same as:</p> 
+     <kbd>delete //text()[not(normalize-space())]</kbd>
+     <p>That is, all text nodes consisting entirely of whitespace are removed from the document.</p>
+     
+   </section>
+ 
+  <section id="suffix" title="The suffix command">
+    <h1>The suffix command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>suffix <i>expression</i> with <i>query</i></kbd>
+    
+    <p>For every node <i>N</i> selected by the expression, the query is evaluated (with <i>N</i> as the context item), and its result is 
+      inserted as the last child of <i>N</i>. The expression must return nodes that are capable of having children (that is document
+      or element nodes). The query must return nodes that are capable of having
+      siblings (that is, element, text, comment, or processing instruction nodes). But if the query returns an atomic value,
+      it is treated as a text node with the same string value.</p>
+    
+    <h3 class="subtitle">Example</h3>
+    
+    <p>The command:</p> 
+    <kbd>suffix //page with &lt;copyright>Copyright (c) Saxonica 2020&lt;/page></kbd> 
+    <p>injects a <code>copyright</code> element at the end of every <code>page</code>.</p>
+    
+  </section>
+  
+  <section id="transform" title="The transform command">
+    <h1>The transform command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>transform <i>filename</i></kbd>
+    
+    <p>Transforms the current document using the XSLT stylesheet contained in the specified file.</p>
+    
+    <p>The filename is handled in the same way as the <a class="bodylink" href="../load">load</a> command.</p>
+    
+    <p>On completion, the result of the transformation becomes the new current document.</p>
+    <p>Note: it is not currently possible to specify parameters to the transformation.</p>
+    
+  </section> 
+  
+  <section id="undo" title="The undo command">
+    <h1>The undo command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>undo</kbd>
+    
+    <p>Reverts the most recent changes.</p>
+    
+    <p>The current document is returned to the state it was in before the most recent <code>copy</code>,
+      <code>delete</code>,
+      <code>follow</code>,
+      <code>load</code>,
+      <code>precede</code>,
+      <code>prefix</code>,
+      <code>rename</code>,
+      <code>replace</code>,
+      <code>strip</code>,
+      <code>suffix</code>,
+      <code>transform</code>,
+      <code>update</code>, or
+      <code>validate</code> command.</p>
+    
+    <p>It will also undo the effect of:</p> 
+    <kbd>set . = <i>expression</i></kbd>
+    <p>that is, it reverts to the previous current document.</p>
+    
+    <p>It is not possible to undo the effect of <a class="bodylink" href="../save">save</a> or
+      <a class="bodylink" href="../schema">schema</a> commands.</p>
+    
+  </section> 
+  
+  <section id="update" title="The update command">
+    <h1>The update command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>update <i>expression</i> with <i>query</i> </kbd>
+    
+    <p>The content of the nodes selected by the given expression is
+      replaced by the result of evaluating the query:</p>
+    <ul>
+      <li><p>When an element or document node is selected, the existing children are deleted, and
+        replaced with the result of the expression.</p></li>
+      <li><p>When the selected element is a node kind that cannot have children, for example
+        a comment, text node, or attribute, then its content is replaced with the string value of the
+        query result.</p></li>
+    </ul>
+    
+    <h3 class="subtitle">Examples</h3>
+    
+    <p>Given the source document:</p>
+    
+    <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE"/>
+  <city name="Munich" country="DE"/>
+  <city name="Paris" country="FR"/>
+  <city name="Lyon" country="FR"/>
+  <city name="Rome" country="IT"/>
+</cities>]]></samp>
+    
+    <p>The command:</p>
+    
+    <kbd>update //@country[.='IT'] with "ITALIA"</kbd>
+    
+    <p>produces:</p>
+    
+    <samp><![CDATA[<cities>
+  <city name="Berlin" country="DE"/>
+  <city name="Munich" country="DE"/>
+  <city name="Paris" country="FR"/>
+  <city name="Lyon" country="FR"/>
+  <city name="Rome" country="ITALIA"/>
+</cities>]]></samp>
+    
+    <p>Given a source document:</p>
+    <samp><![CDATA[<cities>
+  <city><name>Berlin</name><country>DE</country></city>
+  <city><name>Munich</name><country>DE</country></city>
+  <city><name>Paris</name><country>FR</country></city>
+  <city><name>Lyon</name><country>FR</country></city>
+  <city><name>Rome</name><country>IT</country></city>
+</cities>]]></samp>
+    
+    <p>The command:</p>
+    <kbd>update //city/name[.="Munich"] with "München"</kbd>
+    <p>produces the document:</p>
+    
+    <samp><![CDATA[<cities>
+  <city><name>Berlin</name><country>DE</country></city>
+  <city><name>München</name><country>DE</country></city>
+  <city><name>Paris</name><country>FR</country></city>
+  <city><name>Lyon</name><country>FR</country></city>
+  <city><name>Rome</name><country>IT</country></city>
+</cities>]]></samp>
+    
+    <p>With the same source document, the command:</p>
+    
+    <kbd>update //@country with lower-case(.)</kbd>
+    
+    <p>produces:</p>
+    
+    <samp><![CDATA[<cities>
+  <city><name>Berlin</name><country>de</country></city>
+  <city><name>Munich</name><country>de</country></city>
+  <city><name>Paris</name><country>fr</country></city>
+  <city><name>Lyon</name><country>fr</country></city>
+  <city><name>Rome</name><country>it</country></city>
+</cities>]]></samp>
+    
+  </section>
+  
+  <section id="validate" title="The validate command">
+    <h1>The validate command</h1>
+    
+    <p><i>Syntax:</i></p>
+    <kbd>validate</kbd>
+    
+    <aside>Requires Saxon-EE</aside>
+    
+    <p>Validates the current document using the XSD schema(s) previously loaded using the
+      <a class="bodylink" href="../schema">schema</a>
+      command, supplemented with any schema found via an <code>xsi:schemaLocation</code> or 
+      <code>xsi:noNamespaceSchemaLocation</code> attribute in the source document.</p>
+    <p>On completion, the validated result (complete with type annotations) becomes the new current document.
+    Any expressions and queries executed against a typed document are treated as schema-aware.</p>
+    <p>If validation fails, the validation error messages are output, and the current document remains unchanged.</p>
+    
+  </section> 
+  
+ 
+</article>

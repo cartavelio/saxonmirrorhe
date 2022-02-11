@@ -1,0 +1,598 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article id="configuration" title="Saxon Configuration">
+   <h1>Saxon Configuration</h1>
+
+
+   <p>There are many parameters and options that can be set to control the way in which Saxon
+      options can be set. This section of the documentation brings this information together in one place.</p>
+
+   <nav>
+      <ul/>
+   </nav>
+
+   <section id="config-interfaces" title="Configuration interfaces">
+      <h1>Configuration interfaces</h1>
+
+
+      <p>At the heart of Saxon is the object <a class="javalink" href="net.sf.saxon.Configuration">net.sf.saxon.Configuration</a>. This contains all the current
+         settings of configuration options. All Saxon tasks, such as compiling and running queries and transformations, or building and validating source
+         documents, happen under the control of a <code>Configuration</code>. Many resources are owned by the <code>Configuration</code>, meaning that related
+         tasks must run under the same <code>Configuration</code>. Most notably, the <code>Configuration</code> holds a <a class="javalink"
+            href="net.sf.saxon.om.NamePool">NamePool</a>, which is a table allocating integer codes to the qualified names that appear in stylesheets, queries,
+         schemas, and source documents, and during the execution of a stylesheet or query all the resources used (for example, the stylesheet, all its input
+         documents, and any schemas it uses) must all use the same <code>NamePool</code> to ensure that they all use the same integer codes for the same
+         qualified names. However, two Saxon tasks that are unrelated can run under different <code>Configuration</code> objects.</p>
+
+      <p>There are subclasses of <code>Configuration</code> containing resources associated with the capabilities of the different Saxon editions: specifically,
+            <a class="javalink" href="com.saxonica.config.ProfessionalConfiguration">com.saxonica.config.ProfessionalConfiguration</a> and <a class="javalink"
+            href="com.saxonica.config.EnterpriseConfiguration">com.saxonica.config.EnterpriseConfiguration</a>. In many cases the <code>Configuration</code> is
+         used as a factory class to deliver services associated with the different capability levels, for example the method <code>getOptimizer()</code> returns
+         the query optimizer appropriate to the loaded Saxon edition.</p>
+
+      <p>Many configuration options have direct setter and getter methods on the <code>Configuration</code> object, for example
+            <code>setAllowExternalFunctions()</code> and <code>isAllowExternalFunctions()</code>. Some other options have setters and getters on objects
+         reachable from the <code>Configuration</code>, for example defaults for XSLT processing can be controlled using methods such as
+            <code>getDefaultXsltCompilerInfo().setXsltVersion()</code>, while defaults for XQuery processing can be controlled using methods such as
+            <code>getDefaultStaticQueryContext().setLanguageVersion()</code>.</p>
+      
+      <p>The most general mechanism for getting and setting configuration properties, however, is provided by the methods
+         <code>getConfigurationProperty(Feature)</code> and <code>setConfigurationProperty(Feature,
+            value)</code>. In these methods the property to be read or written is identified by a
+         <a class="javalink" href="net.sf.saxon.lib.Feature">net.sf.saxon.lib.Feature</a> object,
+         typically one of the objects defined as static constants, for example
+         <code>Feature.ALLOW_EXTERNAL_FUNCTIONS</code>. The Feature object is also parameterized by
+         the type of value required, for example <code>Feature.ALLOW_EXTERNAL_FUNCTIONS</code> is a
+         <code>Feature&lt;Boolean&gt;</code>. Internally, the <code>Feature</code> object defines
+         both a unique integer code for the feature, and a unique string in the form of a URI (for
+         example, <code>"http://saxon.sf.net/feature/allowExternalFunctions"</code>). In some
+         interfaces, for example the JAXP <code>TransformerFactory</code>, configuration options are identified
+         by strings, and the required strings can be accessed using the <code>name</code> property of the
+         <code>Feature</code>, for example <code>net.sf.saxon.lib.Feature.ALLOW_EXTERNAL_FUNCTIONS.name</code>.
+         For backwards compatibility reasons, these strings are also available as constants in the class
+         <a class="javalink" href="net.sf.saxon.lib.FeatureKeys">net.sf.saxon.lib.FeatureKeys</a>.</p>
+      
+      <p>On command line interfaces such as <code>net.sf.saxon.Transform</code>, configuration
+         options can be supplied using the form <code>--name:value</code>. Here <code>name</code> is
+         the part of the URI after the final "/", for example <code>allowExternalFunctions</code>,
+         and the <code>value</code> must be supplied as a string. In such cases, and in other cases
+         where values must be supplied as strings (for example the
+         <code>xslt/factory/attribute</code> element in Ant), Saxon accepts the strings "true", "1",
+         "yes", "on", or "false", "0", "no", "off", to represent booleans.</p>
+
+      <p>For backwards compatibility, the <code>Configuration</code> class continues to support the methods 
+            <code>getConfigurationProperty(name)</code> and <code>setConfigurationProperty(name, value)</code>. In these methods the name of the configuration
+         property is always a string in the form of a URI (for example, <code>"http://saxon.sf.net/feature/initialTemplate"</code>), and the strings available
+         are all defined by constants in the class <a class="javalink" href="net.sf.saxon.lib.FeatureKeys">net.sf.saxon.lib.FeatureKeys</a> (for example,
+            <code>FeatureKeys.INITIAL_TEMPLATE</code>). The value is of various types depending on the property. In the vast majority of cases, the property can
+         be supplied as a string, or it has an alternative, equivalent property that can be supplied as a string. For properties that are essentially boolean in
+         nature the value can be supplied either as one of the Java constants <code>Boolean.TRUE</code> or <code>Boolean.FALSE</code>, or as one of the strings
+         "true", "1", "yes", "on", or "false", "0", "no", "off". These choices are designed to suit the conventions of different APIs in which the configuration
+         options are exposed.</p>
+
+      <p>In many APIs for controlling Saxon activities, the <code>Configuration</code> object is not exposed directly, but is hidden below some similar object
+         acting as the root object for that particular API. Many of these objects provide a direct way to set the configuration options. These are discussed in
+         the following sections.</p>
+
+      <nav>
+         <ul/>
+      </nav>
+
+      <section id="jaxp-configuration" title="JAXP Factory Interfaces">
+         <h1>JAXP Factory Interfaces</h1>
+
+
+         <p>Saxon implements a number of JAXP interfaces, notably the APIs for transformation, XPath processing, and validation.</p>
+         
+         <h2>XSLT</h2>
+         
+         <p>For transformation, the root object of the API is the JAXP <code>TransformerFactory</code>. Saxon provides several implementations of this interface:</p>
+         
+         <ul>
+            <li>For any Saxon edition: <a class="javalink" href="net.sf.saxon.TransformerFactoryImpl">net.sf.saxon.TransformerFactoryImpl</a>. This creates
+            the "highest possible" configuration based on what software is in use (without taking into account what license file is deployed). An application
+            creating an instance of this class can therefore use Saxon-PE or Saxon-EE facilities if they are available.</li>
+            
+            <li>For Saxon-HE: <a class="javalink" href="net.sf.saxon.BasicTransformerFactory">net.sf.saxon.BasicTransformerFactory</a>. This strictly
+            disables all Saxon-PE and Saxon-EE features.</li>
+            <li>For Saxon-PE: <a class="javalink" href="com.saxonica.config.ProfessionalTransformerFactory">com.saxonica.config.ProfessionalTransformerFactory</a></li>
+            <li>For Saxon-EE: <a class="javalink" href="com.saxonica.config.EnterpriseTransformerFactory">com.saxonica.config.EnterpriseTransformerFactory</a></li>
+            <li>For streaming with Saxon-EE: <a class="javalink" href="com.saxonica.config.StreamingTransformerFactory">com.saxonica.config.StreamingTransformerFactory</a>.
+            This <code>TransformerFactory</code> does not fully comply with the JAXP specifications, because (in the interests of enabling streaming) it does not set
+            the global context item to the root node of the source document; if any global variables in the stylesheet refer to the context item, this will
+            cause a streaming failure.</li>
+         </ul>
+         
+         <p>The JAXP static method <code>TransformerFactory.newInstance()</code> searches the classpath for a JAR file containing a manifest that identifies
+            it as a JAXP transformation engine. If it finds Saxon-HE on the classpath, it will instantiate <code>net.sf.saxon.TransformerFactoryImpl</code>;
+            if it finds Saxon-PE, then <code>ProfessionalTransformerFactory</code>; if Saxon-EE, then <code>EnterpriseTransformerFactory</code>.</p>
+         
+         <aside>The JAXP classpath search is time-consuming, and creates the danger that the application will fail if the classpath is configured incorrectly.
+         Saxonica recommends instantiating the desired <code>TransformerFactory</code> directly, using its own constructor, or by naming the class as the
+            first argument of the <code>TransformerFactory.newInstance()</code> method. Better still, use the s9api interface.</aside>
+               
+         <p>The <code>TransformerFactory</code> interface provides methods <code>getAttribute(name)</code> and <code>setAttribute(name, value)</code> which correspond directly
+            to the methods <code>getConfigurationProperty(name)</code> and <code>setConfigurationProperty(name, value)</code> on the underlying <a
+               class="javalink" href="net.sf.saxon.Configuration">Configuration</a> object. By casting from the JAXP interface to the Saxon implementation class
+            it is also possible to call the <code>getConfiguration</code> method which exposes the <code>Configuration</code> object directly.</p>
+
+         <p>The Saxon-PE and Saxon-EE implementations of the <code>TransformerFactory</code> also allow the configuration property <a class="bodylink code"
+               href="/configuration/config-features">Feature.CONFIGURATION_FILE.name</a> to be set. The value is a filename containing the name of a
+            configuration file, which must have the format described in <a class="bodylink" href="/configuration/configuration-file">Configuration file</a>.
+            This causes any previously-initialized configuration to be discarded, and replaced with a new <code>Configuration</code> object built from the
+            settings in the specified configuration file.</p>
+
+         <h2>XPath</h2>
+         
+         <p>Saxon implements the JAXP XPath interface <code>javax.xml.xpath.XPathFactory</code>; the implementation class is <a class="javalink"
+               href="net.sf.saxon.xpath.XPathFactoryImpl">net.sf.saxon.xpath.XPathFactoryImpl</a>.</p>
+         
+         <p>However, the Saxon JAR files do not contain the manifest information that causes Saxon to be picked up as an XPath implementation by the factory method
+         <code>XPathFactory.newInstance()</code>; it must be instantiated directly. This is because an application calling this method is probably expecting to
+         find an XPath 1.0 engine, and is very likely to fail in some way if an XPath 3.1 engine is returned.</p>
+         
+         <p>The JAXP <code>XPathFactory</code> interface is designed very much around (a) the XPath 1.0 type system, and (b) the DOM as the expected tree model. In addition,
+            it only works with Saxon if the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a> that underpins the <code>XPathFactory</code> is the same as the <code>Configuration</code>
+            used to build the source document. Use of this interface with Saxon is therefore not very satisfactory, and the s9api interface is strongly preferred.</p>
+
+         <p>The JAXP <code>XPathFactory</code> interface has a general-purpose configuration mechanism in the form of the two methods <code>setFeature()</code>
+            and <code>getFeature()</code>. These can be used to set/get all boolean-valued configuration options in the underlying Saxon <a class="javalink"
+               href="net.sf.saxon.Configuration">Configuration</a>, as well as the options defined in the JAXP interface itself. To set configuration options
+            that are not boolean-valued, it is necessary to navigate to the underlying <code>Configuration</code> object and use its native interfaces. Saxon's
+            implementation class for the <code>XPathFactory</code> is <code>net.sf.saxon.xpath.XPathFactoryImpl</code>, regardless which Saxon edition is in use.</p>
+
+         <h2>XSD (Schema processing)</h2>
+
+         <p>Saxon-EE also implements the JAXP <code>SchemaFactory</code> in class <a class="javalink" href="com.saxonica.ee.jaxp.SchemaFactoryImpl"
+               >com.saxonica.ee.jaxp.SchemaFactoryImpl</a>. The interface offers methods <code>getProperty(name)</code> and <code>setProperty(name,
+               value)</code> which map to the underlying methods in the Saxon <code>Configuration</code>; again, it is also possible to cast to the Saxon
+            implementation class and call configuration-setting methods directly.</p>
+
+      </section>
+      <section id="s9api-config" title="Configuration using s9api">
+         <h1>Configuration using s9api</h1>
+
+
+         <p>In Saxon's s9api interface the root API object is the <a class="javalink" href="net.sf.saxon.s9api.Processor">net.sf.saxon.s9api.Processor</a>
+            object. This again is a wrapper around a <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>. All the configuration properties
+            are exposed via the <code>Processor</code> methods <code>getConfigurationProperty(Feature)</code> and <code>setConfigurationProperty(Feature,
+               value)</code> which map directly to the same methods on the underlying <code>Configuration</code>.</p>
+
+         <p>The s9api <code>Processor</code> object also has a constructor <code>new Processor(source)</code> which allows the underlying
+               <code>Configuration</code> to be built from a supplied configuration file. The argument is a <code>org.xml.sax.Source</code> object, for example
+            a <code>StreamSource</code>, which identifies the configuration file, which must have the format described in <a class="bodylink"
+               href="/configuration/configuration-file">Configuration file</a>.</p>
+
+         <p>In many cases with s9api it is more appropriate to set options at a finer level of granularity than the <code>Processor</code>. For example, options
+            that affect XSLT stylesheet compilation can be set on the <a class="javalink" href="net.sf.saxon.s9api.XsltCompiler">XsltCompiler</a> object, and
+            options that affect XQuery compilation on the <a class="javalink" href="net.sf.saxon.s9api.XQueryCompiler">XQueryCompiler</a>. Some more specialized
+            configuration options are not exposed directly by these two classes, but can be tailored by accessing the underlying support objects: <a
+               class="javalink" href="net.sf.saxon.trans.CompilerInfo">CompilerInfo</a> in the case of XSLT, and <a class="javalink"
+               href="net.sf.saxon.query.StaticQueryContext">StaticQueryContext</a> in the case of XQuery.</p>
+        
+        <aside>When s9api was introduced, the name stood for "Saxon 9 Application Programming Interface.
+          It's a nice snappy name, so we've retained it unchanged for Saxon 10.</aside>
+      </section>
+
+      <section id="config-dotnet" title="Configuration using the .NET API">
+         <h1>Configuration using the .NET API</h1>
+
+
+
+         <p>In Saxon's Saxon.Api interface on .NET, the root API object is the <a class="javalink" href="Saxon.Api.Processor">Saxon.Api.Processor</a> object.
+            This again is a wrapper around a <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>. All the configuration properties are
+            exposed via the <code>Processor</code> methods <code>getProperty(name)</code> and <code>setProperty(name, value)</code> which map directly to the
+            methods <code>getConfigurationProperty(name)</code> and <code>setConfigurationProperty(name, value)</code> on the underlying
+               <code>Configuration</code>.</p>
+
+         <p>The Saxon.Api <code>Processor</code> object also has a constructor <code>new Processor(stream)</code> which allows the underlying
+               <code>Configuration</code> to be built from a supplied configuration file, which must have the format described in <a class="bodylink"
+               href="/configuration/configuration-file">Configuration file</a>. Configuration files are available only in Saxon-PE and Saxon-EE.</p>
+
+         <p>In many cases with the Saxon.Api interface it is more appropriate to set options at a finer level of granularity than the <code>Processor</code>.
+            For example, options that affect XSLT stylesheet compilation can be set on the <a class="javalink" href="Saxon.Api.XsltCompiler">XsltCompiler</a>
+            object, and options that affect XQuery compilation on the <a class="javalink" href="Saxon.Api.XQueryCompiler">XQueryCompiler</a>.</p>
+      </section>
+
+      <section id="config-commandline" title="Configuration from the command line">
+         <h1>Configuration from the command line</h1>
+
+         <p>The main command-line interfaces to Saxon are <a class="javalink" href="net.sf.saxon.Transform">net.sf.saxon.Transform</a> for running a
+            transformation, <a class="javalink" href="net.sf.saxon.Query">net.sf.saxon.Query</a> for running XQuery, and <a class="javalink"
+               href="com.saxonica.Validate">com.saxonica.Validate</a> for validating a document against a schema. These commands allow many
+            configuration options to be specified by command line options: for example if XML Schema 1.1 support is wanted, all three
+            commands allow this to be requested using the option <code>-xsdversion:1.1</code> (the
+            default from Saxon 9.8). Many of these options correspond directly to the configuration
+            properties available on the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a> object.</p>
+         
+         <p>For full details, including lists of the available command line options for each of
+            these interfaces, see the following:</p>
+         <ul><li><a class="bodylink" href="/using-xsl/commandline">Running XSLT from the Command Line</a></li>
+            <li><a class="bodylink" href="/using-xquery/commandline">Running XQuery from the Command Line</a></li>
+            <li><a class="bodylink" href="/schema-processing/commandline">Running Validation from the Command Line</a></li>
+         </ul>
+
+         <p>For more specialized options, there is also a fallback mechanism. Each configuration property has a URI, which is always of the form
+               <code>http://saxon.sf.net/feature/SOME_NAME</code>. Provided the property allows a string value (as most do), the property can be set from the
+            command line using the syntax <code>--SOME_NAME:value</code>. For example the property identified by <a class="bodylink code"
+               href="/configuration/config-features">Feature.LICENSE_FILE_LOCATION</a> has the URI
+               <code>http://saxon.sf.net/feature/licenseFileLocation</code>, and it can therefore be set on the command line using an option such as
+               <code>--licenseFileLocation:c:/saxon/license.lic</code>. </p>
+
+         <aside>For boolean-valued configuration properties, Saxon accepts any of the values "yes", "on", "true", or "1" to switch the option on, or "no",
+            "off", "false", or "0" to switch it off.</aside>
+      </section>
+      <section id="config-xqj" title="Configuration using XQJ">
+         <h1>Configuration using XQJ</h1>
+
+         <p>The root object in the XQJ (XQuery for Java) API is <code>javax.xml.query.XQDataSource</code>, and the Saxon implementation class is <a
+               class="javalink" href="com.saxonica.xqj.SaxonXQDataSource">com.saxonica.xqj.SaxonXQDataSource</a>. The <code>XQDataSource</code> provides methods
+               <code>getProperty(name)</code> and <code>setProperty(name, value)</code>. In these
+            calls, the name is the URI-valued string associated with one of the <a
+               class="javalink" href="net.sf.saxon.lib.Feature">net.sf.saxon.lib.Feature</a>
+            constants.</p>
+
+         <p>There is a glitch however. The XQJ specifications mandate that the properties available through this interface should also have
+            explicit getters and setters: for example if a property named "lineNumbering" is available, then there should be a pair of methods
+               <code>setLineNumbering()</code> and <code>getLineNumbering()</code>. This does not square well with the use of URIs for property names. Secondly,
+            XQJ requires that the property values should be strings. Saxon therefore:</p>
+
+         <ol>
+            <li>
+               <p>exposes a subset of commonly-used configuration properties using shortened names such as <code>dtdValidation</code> and
+                     <code>retainLineNumbers</code></p>
+            </li>
+            <li>
+               <p>provides getters and setters for these properties, as required by the XQJ specification</p>
+            </li>
+            <li>
+               <p>lists the names of the above properties (only) in the result of the method <code>getSupportedPropertyNames()</code></p>
+            </li>
+            <li>
+               <p>makes all other configuration properties available using URIs as the name, without providing getters and setters, and without listing the
+                  names in the result of <code>getSupportedPropertyNames()</code>, provided that the value can be represented as a string. Boolean values can be
+                  represented using any of the strings ("yes", "on", "true", or "1"), or ("no", "off", "false", or "0").</p>
+            </li>
+         </ol>
+
+      </section>
+      <section id="config-ant" title="Configuration when running Ant">
+         <h1>Configuration when running Ant</h1>
+
+         <p>It is possible to run XSLT transformations from Ant using the <code>xslt</code> task, selecting Saxon as the XSLT processor by setting the
+               <code>factory</code> child element to the Saxon implementation class of <code>javax.xml.transform.TransformerFactory</code>; that is one of <a
+               class="javalink" href="net.sf.saxon.TransformerFactoryImpl">net.sf.saxon.TransformerFactoryImpl</a>, <a class="javalink"
+               href="com.saxonica.config.ProfessionalTransformerFactory">com.saxonica.config.ProfessionalTransformerFactory</a>, or <a class="javalink"
+               href="com.saxonica.config.EnterpriseTransformerFactory">com.saxonica.config.EnterpriseTransformerFactory</a> depending on the Saxon edition in
+            use.</p>
+
+         <p>Additional configuration options can be specified using the <code>attribute</code> child of the <code>factory</code> element, for example the
+            following task was used as part of the pipeline for publishing this documentation:</p>
+
+         <samp><![CDATA[  <xslt in="${userdoc.dir}/src/function-data.xml"
+        style="${userdoc.dir}/style/preprocess-functions.xsl"
+        out="${userdoc.dir}/src/functions.xml"
+        classpath="e:/saxon/eej/saxon-ee-10.0.jar;e:/saxon/eej/saxon-licenses">
+        <factory name="com.saxonica.config.EnterpriseTransformerFactory">
+            <attribute name="http://saxon.sf.net/feature/xsltSchemaAware" value="true"/>
+            <attribute name="http://saxon.sf.net/feature/schema-validation-mode" value="strict"/>
+            <attribute name="http://saxon.sf.net/feature/xsd-version" value="1.1"/>
+        </factory>
+  </xslt>]]></samp>
+         <p>Many of the options available as configuration parameters (for example <a class="bodylink code" href="/configuration/config-features"
+               >Feature.XSLT_INITIAL_TEMPLATE</a>) were provided explicitly with Ant in mind. The provision of these parameters makes the customized version
+            of the Ant XSLT task provided with some earlier Saxon versions redundant, and the customized task is no longer supported.</p>
+         
+         <aside><p>One configuration property that is particularly useful when running Ant is 
+            <code>http://saxon.sf.net/feature/ignoreSAXSourceParser</code>. Normally, Saxon attempts
+         to set its own <code>EntityResolver</code> on the XML parser used for parsing source documents,
+         because this allows commonly used DTDs and external entities to be fetched from Saxon's internal
+         copies rather than from the web. However, when the application invoking Saxon supplies its own
+         pre-configured XML parser, Saxon normally respects this and does not change the settings supplied.
+         Ant, when it invokes Saxon, supplies an XML parser, so by default Saxon will not set its own
+         <code>EntityResolver</code>. Setting the <code>ignoreSAXSourceParser</code> configuration option
+         in an <code>attribute</code> child of the <code>factory</code> element overrides this. This can
+         give dramatic performance improvements when using Ant to transform documents that contain references
+         to these common W3C DTDs and entity files.</p></aside>
+      </section>
+   </section>
+   <section id="configuration-file" title="Saxon configuration file">
+      <h1>Saxon Configuration File</h1>
+
+      <p>Configuration parameters for Saxon can be defined in a configuration file. This file is optional. It can be applied by using the option
+            <code>-config:filename</code> on the <code>Transform</code>, <code>Query</code>, or <code>Validate</code> command line, or using the factory method
+            <code>Configuration.readConfiguration()</code>.</p>
+      <aside>A schema <code>config.xsd</code> for the configuration file, as well as example configuration files, are provided in the
+            <code>samples/config</code> directory of the <code>saxon-resources</code> download.</aside>
+      <p>In both the s9api interface on Java, and the Saxon.Api interface on .NET, there is a constructor on the <code>Processor</code> class that takes a
+         configuration file as input.</p>
+      <p>Here is an example configuration file. It is designed to show as many options as possible; in practice, no option needs to be included if it is to take
+         its default value, and it is probably good practice to only include those parameters that you need to specify explicitly. Some of the example values
+         used in this sample will not work unless you have files with the relevant names at particular locations, or unless you have classes with particular
+         names available on your classpath; if such entries cause problems, you can always delete them.</p>
+      <samp><![CDATA[<configuration xmlns="http://saxon.sf.net/ns/configuration"
+               edition="EE"
+               licenseFileLocation="saxon-license.lic"
+               label="Some label">
+  <global
+    allowedProtocols="all"
+    allowExternalFunctions="true"
+    allowMultiThreading="true"
+    allowOldJavaUriFormat="false"
+    allowSyntaxExtensions="true"
+    collectionFinder="net.sf.saxon.resource.StandardCollectionFinder"
+    compileWithTracing="false"
+    defaultCollation="http://www.w3.org/2005/xpath-functions/collation/codepoint"
+    defaultCollection="file:///e:/temp"
+    defaultRegexEngine="S"
+    dtdValidation="false"
+    dtdValidationRecoverable="true"
+    eagerEvaluation="true"
+    entityResolver="net.sf.saxon.lib.StandardEntityResolver"
+    environmentVariableResolver=""
+    errorListener="net.sf.saxon.lib.StandardErrorListener"
+    expandAttributeDefaults="true"
+    generateByteCode="true"
+    ignoreSAXSourceParser="false"
+    lazyConstructionMode="false"
+    lineNumbering="true"
+    markDefaultedAttributes="true"
+    maxCompiledClasses="10000"
+    monitorHotSpotByteCode="true"
+    optimizationLevel="10"
+    parser=""
+    preEvaluateDoc="false"
+    preferJaxpParser="true"
+    recognizeUriQueryParameters="true"
+    regexBacktrackingLimit="10000000"
+    retainNodeForDiagnostics="false"
+    schemaValidation="strict"
+    serializerFactory=""
+    sourceResolver=""
+    stableCollectionUri="false"
+    stableUnparsedText="false"
+    standardErrorOutputFile="file:///e:/errorOutput.log"
+    streamability="standard"
+    streamingFallback="true"
+    stripSpace="all"
+    styleParser=""
+    suppressEvaluationExpiryWarning="false"
+    suppressXPathWarnings="false"
+    suppressXsltNamespaceCheck="false"
+    thresholdForFunctionInlining="100"
+    thresholdForHotspotByteCode="100"
+    timing="false"
+    traceExternalFunctions="true"
+    traceListener="net.sf.saxon.trace.XSLTTraceListener"
+    traceOptimizerDecisions="false"
+    treeModel="tinyTreeCondensed"
+    unparsedTextURIResolver="net.sf.saxon.lib.StandardUnparsedTextResolver"
+    uriResolver="net.sf.saxon.lib.StandardURIResolver"
+    usePiDisableOutputEscaping="false"
+    useTypedValueCache="true"
+    validationComments="false"
+    validationWarnings="true"
+    versionOfXml="1.0"
+    xInclude="false"
+    xpathVersionForXsd="20"
+    xpathVersionForXslt="31"
+  />
+
+  <xslt
+    disableXslEvaluate="false"
+    enableAssertions="false"
+    initialMode=""
+    initialTemplate=""
+    messageEmitter=""
+    outputUriResolver=""
+    recoveryPolicy="recoverWithWarnings"
+    resultDocumentThreads="10"
+    schemaAware="false"
+    staticErrorListener=""
+    staticUriResolver=""
+    styleParser="">
+    <extensionElement namespace="http://saxon.sf.net/sql" 
+      factory="net.sf.saxon.option.sql.SQLElementFactory"/>
+  </xslt>
+  
+  <xsltPackages>
+    <package name="http://package.one/" version="1.0" sourceLocation="packageOne.xsl" 
+      exportLocation="packageOne.sef"/>
+    <package name="http://package.one/" version="2.0-beta" sourceLocation="2.0beta/packageOne.xsl" 
+      exportLocation="2.0beta/packageOne.sef"/>
+    <package name="http://package.two/" version="8.6.3" sourceLocation="packageTwo.xsl">
+       <withParam name="debug" select="true()"/>
+       <withParam name="maxTransactions" select="300"/>
+    </package>
+  </xsltPackages>  
+
+  <xquery
+    allowUpdate="true"
+    constructionMode="preserve"
+    defaultElementNamespace=""
+    defaultFunctionNamespace="http://www.w3.org/2005/xpath-functions"
+    emptyLeast="true"
+    inheritNamespaces="true"
+    moduleUriResolver="net.sf.saxon.lib.StandardModuleURIResolver"
+    multipleModuleImports="true"
+    preserveBoundarySpace="false"
+    preserveNamespaces="true"
+    requiredContextItemType="document-node()"
+    schemaAware="false"
+    staticErrorListener=""
+    />
+    
+  <xsd
+    allowUnresolvedSchemaComponents="false"
+    assertionsCanSeeComments="false"
+    implicitSchemaImports="false"
+    multipleSchemaImports="false"
+    occurrenceLimits="100,250"
+    schemaUriResolver="com.saxonica.config.ee.StandardSchemaResolver"
+    thresholdForCompilingTypes="100"
+    useXsiSchemaLocation="false"
+    version="1.1"
+  />
+  
+  <serialization
+    method="xml"
+    indent="yes"
+    saxon:indent-spaces="8"
+    xmlns:saxon="http://saxon.sf.net/"/>
+    
+  <localizations defaultLanguage="en" defaultCountry="US">
+    <localization lang="da" class="net.sf.saxon.option.local.Numberer_da"/>
+    <localization lang="de" class="net.sf.saxon.option.local.Numberer_de"/>
+  </localizations>
+  
+  <resources>
+    <externalObjectModel>net.sf.saxon.option.xom.XOMObjectModel</externalObjectModel>
+    <extensionFunction>s9apitest.TestIntegrationFunctions$SqrtFunction</extensionFunction>
+    <fileExtension extension="xq" mediaType="text/plain"/>
+    <schemaDocument>file:///c:/MyJava/samples/data/books.xsd</schemaDocument>
+    <schemaComponentModel/>
+  </resources>
+  
+  <collations>
+    <collation uri="http://www.w3.org/2005/xpath-functions/collation/codepoint" 
+               class="net.sf.saxon.expr.sort.CodepointCollator"/>
+    <collation uri="http://www.microsoft.com/collation/caseblind" 
+               class="net.sf.saxon.expr.sort.CodepointCollator"/>
+    <collation uri="http://example.com/french" lang="fr" ignore-case="yes"/>
+  </collations>  
+</configuration>
+]]></samp>
+      <p>The <code>configuration</code> element takes three possible attributes:</p>
+      <ul>
+         <li>
+            <p>
+               <code>edition</code>, whose value indicates the Saxon edition in use: HE (home edition), PE (professional edition), or EE (enterprise edition).
+               The default value is HE. If PE or EE is specified, then the appropriate license file must be installed.</p>
+         </li>
+         <li>
+            <p>
+               <code>licenseFileLocation</code>, a URI identifying the location of the license file. This may be an absolute URI, or it may be relative to the base
+            URI of the configuration file; it must use the <code>file</code> URI scheme. If the attribute is absent, then Saxon will search for a license file
+            using the installed software location and the classpath in the usual way. For example, if the license file is in the same directory as the configuration
+            file, specify <code>licenseFileLocation="saxon-license.lic"</code>.</p>
+         </li>
+         <li>
+            <p><code>label</code>, being a label string that may be used to identify the configuration. Within the implementation the value of this label may be
+               retrieved using <a class="javalink" href="net.sf.saxon.Configuration#getLabel">net.sf.saxon.Configuration.getLabel()</a><link/>. The default is
+                  <code>null</code>.</p>
+         </li>
+      </ul>
+      <p>The children of the <code>configuration</code> element may appear in any order.</p>
+      <p>The contents of the different sections of the configuration file are described in the following subsections. </p>
+      <nav>
+         <ul/>
+      </nav>
+      <section id="config-global" title="The &lt;global&gt; element">
+         <h1>The &lt;global&gt; element</h1>
+         <p>The <code>global</code> input element of the configuration file contains properties defining global configuration options.</p>
+         <xi:include href="featureKeys/ConfigFileDoc-global.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+      </section>
+      <section id="config-xslt" title="The &lt;xslt&gt; element">
+         <h1>The &lt;xslt&gt; element</h1>
+         <p>The <code>xslt</code> element of the configuration file contains properties specific to XSLT. Remember that these are defaults; they can always be
+            overridden for specific queries or transformations. An attribute whose value is set to a zero-length string is ignored: the effect is the same as
+            omitting the attribute.</p>
+         <xi:include href="featureKeys/ConfigFileDoc-xslt.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+         
+         <p>The <code>xslt</code> element may also contain one or more <code>extensionElement</code> children defining namespaces used for extension instructions.
+            Each <code>extensionElement</code> element must have the following attributes:</p>
+         <xi:include href="featureKeys/ConfigFileDoc-extensionElement.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+      </section>
+      <section id="config-xsltPackages" title="The &lt;xsltPackages&gt; element">
+         <h1>The &lt;xsltPackages&gt; element</h1>
+         <p>The <code>xsltPackages</code> element contains zero or more <code>package</code> elements, each of which defines an XSLT 3.0 package, or a version 
+            of a package. The packages may be listed in any order.</p>
+         <p>Each <code>package</code> element may have the following attributes:</p>
+         <xi:include href="featureKeys/ConfigFileDoc-package.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+         
+         <p>The <code>package</code> element may also have zero or more <code>withParam</code> children supplying values of static stylesheet parameters
+            to be used during package compilation. If it is necessary to have different
+            sets of parameter bindings for a package in the same configuration, this should be achieved by use of different versions, for example "1.0-streamable"
+            versus "1.0-nonstreamable". </p>
+         <p>Each <code>withParam</code> element must have the following attributes:</p>
+         <xi:include href="featureKeys/ConfigFileDoc-withParam.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+         
+         <p>The list of packages in the configuration file is used:</p>
+         <ul>
+            <li>When running XSLT from the command line, to resolve any packages used in <code>xsl:use-package</code> declarations.</li>
+            <li>When compiling an XSLT package using the s9api <code>XsltCompiler</code>, to resolve any packages used in <code>xsl:use-package</code> declarations,
+               unless they have already been compiled and imported explicitly using the same <code>XsltCompiler</code>.</li>
+         </ul>
+         
+      </section>
+      
+      <section id="config-xquery" title="The &lt;xquery&gt; element">
+         <h1>The &lt;xquery&gt; element</h1>
+         <p>The <code>xquery</code> element of the configuration file contains properties specific to XQuery. Remember that these are defaults, they can always
+            be overridden for specific queries. An attribute whose value is set to a zero-length string is ignored, the effect is the same as omitting the
+            attribute.</p>
+         <xi:include href="featureKeys/ConfigFileDoc-xquery.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+      </section>
+      <section id="config-xsd" title="The &lt;xsd&gt; element">
+         <h1>The &lt;xsd&gt; element</h1>
+         <p>The <code>xsd</code> element of the configuration file contains properties defining how schema documents are compiled by Saxon. </p>
+         <xi:include href="featureKeys/ConfigFileDoc-xsd.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+      </section>
+      <section id="config-serialization" title="The &lt;serialization&gt; element">
+         <h1>The &lt;serialization&gt; element</h1>
+         <p>The <code>serialization</code> input element of the configuration file contains default serialization properties. These are
+         used as defaults for serialization properties that are not present in an <a class="bodylink
+            code" href="/xsl-elements/output">xsl:output</a> declaration in an XSLT stylesheet. They
+         currently have no effect on serialization of secondary result documents, or on serialization of XQuery results. The values are used
+         only at stylesheet compile time. When a stylesheet is loaded from a Stylesheet Export File, the serialization properties of the run-time
+         configuration have no effect.</p>
+         <xi:include href="featureKeys/ConfigFileDoc-serialization.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+      </section>
+      <section id="config-resources" title="The &lt;resources&gt; element">
+         <h1>The &lt;resources&gt; element</h1>
+         <p>The <code>resources</code> element in the configuration file defines a number of resources that can be preloaded into the configuration. It contains
+            child elements as detailed below, in any order; most of them can appear more than once.</p>
+         <xi:include href="featureKeys/ConfigFileDoc-resources.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+         <p>The <code>resources</code> element may also contain zero or more <code>fileExtension</code> elements as detailed below.
+         These are used to define a mapping from file extensions to media types.</p>
+         <p>Each <code>fileExtension</code> element must have the following attributes, to define one pair in the mapping:</p>
+         <xi:include href="featureKeys/ConfigFileDoc-fileExtension.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+      </section>
+      <section id="config-collations" title="The &lt;collations&gt; element">
+         <h1>The &lt;collations&gt; element</h1>
+         <p>The <code>collations</code> element in the configuration file defines a number of collations that can be preloaded into the configuration. It
+            contains zero or more child <code>collation</code> elements as detailed below.</p>
+         <p>Each <code>collation</code> element may have the following attributes:</p>
+         <xi:include href="featureKeys/ConfigFileDoc-collation.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+      </section>
+      <section id="config-localizations" title="The &lt;localizations&gt; element">
+         <h1>The &lt;localizations&gt; element</h1>
+         <p>The <code>localizations</code> element in the configuration file defines classes used to localize the output of the <a class="bodylink code"
+               href="/xsl-elements/number">xsl:number</a> instruction in XSLT, and the functions <a class="bodylink code" href="/functions/fn/format-date"
+               >format-date()</a>, <a class="bodylink code" href="/functions/fn/format-time">format-time()</a>, and <a class="bodylink code"
+               href="/functions/fn/format-dateTime">format-dateTime()</a>.</p>
+         <p>It has two attributes, <code>defaultLanguage</code> and <code>defaultCountry</code> which provide default values for the <code>lang</code>
+            attribute/argument and the <code>country</code> argument respectively. If no values are supplied, the defaults are taken from the default Locale in
+            the Java VM (which in turn will typically depend on operating system settings).</p>
+         <p>The element contains zero or more child <code>localization</code> elements as detailed below.</p>
+         <p>Each <code>localization</code> element may have the following attributes:</p>
+         <xi:include href="featureKeys/ConfigFileDoc-localization.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+         <p>Note that numberers for various European languages (da, de, fr, dr-BE, it, nl, nl-BE, sv) are supplied in package
+               <code>net.sf.saxon.option.local</code>. In Saxon-PE and Saxon-EE these are compiled into the standard JAR file, but they are not configured by
+            default. In Saxon-HE they are not built-in to the product, but can be integrated from the supplied source code in the same way as user-written
+            localizations.</p>
+      </section>
+   </section>
+   <section id="config-features" title="Configuration Features">
+      <h1>Configuration Features</h1>
+
+
+      <p>This page provides a complete list of the configuration features available.</p>
+
+      <p>The properties are identified by a symbolic name and a URI value defined in the Java module <a class="javalink" href="net.sf.saxon.lib.Feature"
+         >Feature</a>. The table below describes the effect for each property.</p>
+
+      <xi:include href="featureKeys/FeatureKeysDoc.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+
+   </section>
+</article>

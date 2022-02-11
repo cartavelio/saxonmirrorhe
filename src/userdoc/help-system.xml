@@ -1,0 +1,354 @@
+<article id="help-system" title="Using this Documentation">
+    <h1>Using this Documentation</h1>
+    <p>This documentation system runs as a single-page web application, exploiting XSLT 3.0 running in the
+        browser. This section provides extra detail on how to get the most out of the documentation,
+        along with some extra details on how Saxon-JS is used to run the application.</p>
+    <nav>
+        <ul/>
+    </nav>
+    <section id="guide" title="User Guide">
+        <h1>User Guide</h1>
+        <p>This section outlines the key parts to this application - designed for rendering help
+            documentation.</p>
+        <h2>Breadcrumbs</h2>
+        <p>The breadcrumbs bar is found at the top of the app - it shows where you currently are in
+            the hierarchy of the documentation. Clicking items on this bar provides quick access to
+            parent pages.</p>
+        <h2>Search</h2>
+        <p>Located at the top-left of the app, the <strong>search box</strong> can be used to enter
+            in a plain-text search term, press <code>Enter</code> or the <code>search</code> button
+            to initiate a search.</p>
+        <p>Two pop-up boxes show the pages found with hits, and the app will navigate to the first
+            page hit. The first box (top left) shows the number of hits, and the up/down buttons can
+            be used to move between pages with hits. The second box (bottom left) provides a
+            scrollable list of links to all page hits, referenced by section name. All matching
+            words will be highlighted in the rendered document until the pop-up is closed (by
+            pressing the <code>close</code> button).</p>
+        <p>To perform a <strong>Java API search</strong> for a class or class-member, prefix the
+            name of the search item with a '#' character, for example:
+                <code>#qualifiednamevalue</code>. The name search is not case sensitive but the
+            search term must match the whole name.</p>
+        <h2>Collapse All</h2>
+        <p>Pressing the "collapse all" button (adjacent to the search button) collapes the tree-view
+            menu.</p>
+        <h2>Tree-View</h2>
+        <p>The tree-view menu provides a collapsible hierarchical view of the Table of Contents.
+            Nodes are expanded or collapsed by either selecting the node itself (which may change
+            the page selection) or the adjacent arrow icon.</p>
+        <h3>Page Up/Page Down</h3>
+        <p>Buttons for page up/down are placed at the right edge of the application footer. Note that the
+            keyboard <code>PgUp</code> and <code>PgDn</code> keys serve the same purpose.</p>
+        <h3>Touch Control</h3>
+        <p>This app should work with any touch-enabled device. The layout is optimised for desktop
+            or tablet devices in landscape orientation.</p>
+    </section>
+    <section id="technical" title="Technical Details">
+        <h1>Technical Details</h1>
+        <p>This section provides information on the design of this application. The app has been
+            updated to run with Saxon-JS rather than Saxon-CE. The stylesheets have been
+            updated for use with Saxon-JS: to use XSLT 3.0, and new interactive XSLT extensions
+            available with Saxon-JS.</p>
+        <!--<p>This section provides information on the design of this application. The major design
+            considerations are outlined below:</p>
+        <ul>
+            <li>Separation of visual style from functionality<ul>
+                    <li>CSS = Visual Style</li>
+                    <li>HTML = Visual Tree</li>
+                    <li>XSLT = Functionality</li>
+                </ul></li>
+
+            <li>'Thin Server' design - no build pipeline</li>
+            <li>Side-effect free transforms</li>
+            <li>SEO and Accessibility - Restricted static-HTML transformer</li>
+            <li>Scalability - Lazy loading &amp; processing</li>
+            <li>Browser history &amp; bookmarkability - simulated client/server split</li>
+            <li>Three schemas supported<ul>
+                    <li>HTML5 Article Element Schema</li>
+                    <li>Function Specification Schema</li>
+                    <li>JavaDoc Data Schema</li>
+                </ul></li>
+            <li>Maintainability - Predominantly coded in XSLT 2.0</li>
+            <li>State-management and non-standard browser features - Used 'Raw' JS</li>
+        </ul>-->
+        <p>For details on the resource files that generate this application, see the next section:</p>
+        <nav>
+            <ul/>
+        </nav>
+        
+        <section id="resources" title="Application Resources">
+            <h1>Application Resources</h1>
+            <p>This application relies on a number of resource files, these are outlined below</p>
+            <table border="1">
+                <tbody>
+                    <tr>
+                        <td><p>xsl/viewer_app.sef.xml</p></td>
+                        <td>
+                            <p>Stylesheet Export File (SEF) generated from the viewer_app.xsl stylesheet using
+                                Saxon-EE, for use with Saxon-JS.</p>
+                            <p/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><p>xsl/viewer_app.xsl</p></td>
+                        <td>
+                            <p>The top-level XSLT file - imports other XSLT resources.</p>
+                            <p>Controls responses to user and system events and imports remaining
+                                XSLT.</p>
+                            <p>Responsible for dynamic control over all visual elements in the
+                                application - except the rendered page.</p>
+                            <p/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><p>xsl/*.xsl</p></td>
+                        <td><p>All the imported XSLT files - each one responsible for rendering a
+                            different document structure or serving a specialist function - such as
+                            search.</p></td><!--  and link-checking -->
+                    </tr>
+                    <tr>
+                        <td><p>viewer_app.js</p></td>
+                        <td><p>JavaScript for managing state and for non-standard features like
+                            text-highlighting.</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>viewer_app.css and saxon-base.css</p></td>
+                        <td><p>Controls all style and layout aspects of the application.</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>index.html</p></td>
+                        <td><p>The host HTML page - loads the Saxon-JS processor and contains the
+                            'skeleton' on which to hang the dynamic elements of the
+                            application.</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>doc/catalog.xml</p></td>
+                        <td><p>References all the top-level documents containing article elements -
+                            represented as top-level nodes in the Table of Contents.</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>doc/*.xml</p></td>
+                        <td><p>All the top-level documents - each one containing an HTML 5 article
+                            element with a number of nested section elements.</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>docimg/*.*</p></td>
+                        <td><p>Container for all media files (such as graphics) referenced
+                            from within articles or sections.</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>image/*.*</p></td>
+                        <td><p>Images used by the application - should be kept separate from images
+                            referenced by the documentation (unless they serve both purposes).</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>javadoc-xml/*.*</p></td>
+                        <td><p>JavaDoc files for the Saxon Java API.</p>
+                            <p>All files in this directory should be auto-generated on a Saxon build.
+                            The build uses a Java doclet to create one 'master' XML file which is
+                            then processed by XSLT to partition, sort and group the data.</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>javadoc-xml/javadoc-tree.xml</p></td>
+                        <td><p>Used by the application to show the tree-view of the JavaDoc
+                            members.</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>javadoc-packages.xml</p></td>
+                        <td><p>The aggregated and processed well-formed content of HTML pages that
+                            describe each Saxon Java package and are maintained alongside the
+                            code.</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>javadoc-types.xml</p></td>
+                        <td><p>File used as a rough indexing measure to locate Saxon Java types and
+                            functions.</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>javadoc-xml/packages/*.xml</p></td>
+                        <td><p>Each XML file represents a Java package with data about each contained
+                            type, plus authored HTML comments (converted to well-formed XML by
+                            tagsoup).</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>dotnetdoc-xml/*.*</p></td>
+                        <td><p>JavaDoc files for the Saxon.NET API. (Similar to javadoc-xml, see
+                            above.)</p></td>
+                    </tr>
+                    <tr>
+                        <td><p>Saxon-JS/*.*</p></td>
+                        <td><p>Saxon-JS processor.</p></td>
+                    </tr>
+                    <!-- The following are now "external" -->
+                    <!--<tr>
+                        <td><p>html/*.*</p></td>
+                        <td><p>(Optional) Directory for static HTML generated by XSLT 3.0 - run from an
+                            Ant task.</p></td>
+                    </tr>-->
+                    <!--<tr>
+                        <td><p>to-static</p></td>
+                        <td><p>Contains resources for creating static HTML rendered from the XML files
+                            in the doc directory - output goes to the <code>html</code>
+                            directory.</p></td>
+                    </tr>-->
+                </tbody>
+            </table>
+        </section>
+    </section>
+    <section id="authoring" title="Authoring">
+        <h1>Authoring Help</h1>
+        <p>This section is a brief guide to the main elements used in this Saxon documentation which
+            conforms to the HTML-5 <code>article</code> element.</p>
+        <p>The <code>article</code> element is the top-level element in the XML document. It must
+            have an <code>id</code> attribute that corresponds to a <code>ref</code> attribute value
+            found in the <code>catalog.xml</code> file. The <code>title</code> attribute is what
+            will be shown in the table of contents and other links.</p>
+        <p>Introductory text goes inside the top-level article element - normally, this will be
+            headed by an <code>h1</code> element as the heading for the article (which may be the
+            same as the <code>title</code> attribute of <code>article</code>). Navigation links can
+            also be added for all child topics in the article using
+                <code><![CDATA[<nav><ul/></nav>]]></code>.</p>
+        <nav>
+            <ul/>
+        </nav>
+        <section id="links" title="Using Links">
+            <h1>Using Links</h1>
+            <p>Links are represented using <code>a</code> elements, for example: <code>&lt;a
+                    href=&quot;/changes"&gt;</code> is used to reference the top-level <a
+                    href="/changes"> Changes</a> topic. Specific forms include:</p>
+            <ul>
+                <li><code>&lt;a
+                    class="bodylink" href="<em>path</em>"&gt;</code> - internal reference</li>
+                <li><code>&lt;a
+                class="bodylink" href="<em>URI</em>"&gt;</code> - external reference</li>
+                <li><code>&lt;a
+               class="javalink" href="<em>className</em>(#<em>methodName</em>)?"&gt;</code> - link to Javadoc</li>
+            </ul>
+            <p>Relative links can be used also, this can be useful because it makes the links more
+                resilient when refactoring. So, to access a sibling topic the link
+                    <code>../graphics</code> can be used to access <a href="../graphics">Using
+                    Graphics</a>.</p>
+            <p>For a child topic, just include the topic name, like <code>child</code> to access the
+                    <a href="child">Child Topic</a> in this section.</p>
+            <section id="child" title="Child Topic">
+                <h1>Child Topic</h1>
+                <p>The text of a child topic.</p>
+            </section>
+        </section>
+        <!-- TODO - link checker not implemented -->
+        <!--<section id="checking-links" title="Checking Links">
+            <h1>Checking Links</h1>
+            <p>For convenience, this help-system includes a client-side link checker. This scans all
+                internal site links, checking for referential integrity. A summary of all broken
+                links is shown in a panel displayed at the bottom of the web page. </p>
+            <p>To display the Page Analyser panel, add the <code>test=ON</code> URL parameter to the
+                website address URL in the browser.</p>
+            <samp>http://localhost/viewer_app/<strong>?test=ON</strong>#!help-system/authoring/checking-links</samp>
+            <p> The link-checker is then started by clicking on the <code>Check Links</code> button.
+                Broken link details are listed, including a hyperlink to the container page for
+                each link.</p>
+        </section>-->
+        <section id="graphics" title="Using Graphics">
+            <h1>Using Graphics</h1>
+            <p>Images should be referenced using the usual </p>
+            <samp><![CDATA[<img src="/docimg/graphic.jpg"/>]]></samp>
+            <p>
+                <img src="/docimg/black-knight.png" alt="picture of a black knight chess piece."/>
+            </p>
+            <p>The HTML 5 <code>figure</code> and <code>figcaption</code> elements could be
+                supported in future</p>
+            <hr/>
+            <p>Other resources, such as PDFs may also be referenced using links to internal
+                resources, for example <a href="/docimg/web-changes.pdf">web-changes.pdf</a></p>
+        </section>
+        <section id="markup" title="Using Markup">
+            <h1>Using Markup</h1>
+            <p>Code samples use the HTML <code>samp</code> element as follows:</p>
+            <samp><![CDATA[<html>
+    <head></head>
+    <body>
+        <p>First Para</p>
+        <p>Second Para</p>
+    </body>
+</html>]]></samp>
+            <p>Text sections that are asides (annotations to the main topic) are marked using the
+                    <code>aside</code> element:</p>
+            <aside>
+                <p>This is an <strong>important</strong> aside</p>
+                <ul>
+                    <li>Rendered with highlighted background and italics by default</li>
+                </ul>
+            </aside>
+            <p>The <code>hr</code> element can be used to split sections (see also <a
+                    href="subtitles">Using Sub-titles</a>).</p>
+            <hr/>
+            <p>The <code>code</code> element is used for inline code or
+                programming-terms. The <code>strong</code> and <code>em</code> elements are
+                rendered as <strong>bold</strong> and <em>italic</em> respectively by default.</p>
+            <p>The <code>dfn</code> element is now used instead of the <code>index</code> element to
+                mark up terms suitable for adding to an index. The block <code>kbd</code> element is
+                used to highlight command-line entry:</p>
+            <kbd>java -s -t keyboard-entry</kbd>
+            <p>See also:</p>
+            <nav>
+                <ul/>
+            </nav>
+            <section id="tables" title="Using Tables">
+                <h1>Using Tables</h1>
+                <p>Tables are rendered as shown.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <td>
+                                <p>small number</p>
+                            </td>
+                            <td>
+                                <p>big</p>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>one</td>
+                            <td>one thousand<br/>multi-line</td>
+                        </tr>
+                        <tr>
+                            <td>two</td>
+                            <td>two thousand<br/>multi-line</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section id="lists" title="Using Lists">
+                <h1>Using Lists</h1>
+                <p>Ordered or Unordered lists are styled in the usual way:</p>
+                <ol>
+                    <li>alpha <ol>
+                            <li>sub-alpha</li>
+                            <li>sub-alpha-2</li>
+                        </ol></li>
+                    <li>bravo</li>
+                </ol>
+
+                <ul>
+                    <li>alpha <ul>
+                            <li>sub-alpha</li>
+                            <li>sub-alpha-2</li>
+                        </ul></li>
+                    <li>bravo</li>
+                </ul>
+            </section>
+            <section id="subtitles" title="Using Sub-titles">
+                <h1>Using Sub-titles</h1>
+                <p>There is no dedicated element for sub-titles in HTML-5, but a class attribute
+                    value of <code>subtitle</code> for a header element like <code>h1</code>
+                    provides the same effect:</p>
+                <h2 class="subtitle">First Sub-Title</h2>
+                <p>Text below the sub-title. Sometimes it is more helpful to refactor pages divided
+                    in such a way into sub-pages by using a child <code>section</code> element.</p>
+                <h2 class="subtitle">Second Sub-Title</h2>
+                <p>Text below the sub-title.</p>
+            </section>
+        </section>
+
+    </section>
+</article>
