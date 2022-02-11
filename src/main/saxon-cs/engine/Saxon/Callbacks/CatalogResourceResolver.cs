@@ -16,7 +16,7 @@ namespace Saxon.Callbacks {
     /// resource resolver, which is incorporated into SaxonCS as a dependency. It provides its own
     /// API for resolving URIs, as well as implementing the (highly fragile) .NET XmlResolver interface.
     /// </summary>
-    internal class CatalogResourceResolver : Saxon.Hej.lib.JJ_ResourceResolver, Saxon.Callbacks.ConfigurableResourceResolver {
+    public class CatalogResourceResolver : Saxon.Hej.lib.JJ_ResourceResolver, Saxon.Callbacks.ConfigurableResourceResolver {
         private readonly Org.XmlResolver.Resolver catalogBasedResolver;
 
         /// <summary>
@@ -39,10 +39,6 @@ namespace Saxon.Callbacks {
             this.catalogBasedResolver = resolver;
         }
 
-        public CatalogResourceResolver NewInstance() {
-            return new CatalogResourceResolver(catalogBasedResolver);
-        }
-
         /// <summary>
         /// Get a stream, and associated base URI, for a resource identified by a URI, supplied typically
         /// as the combination of a relative URI amd base URI
@@ -51,7 +47,7 @@ namespace Saxon.Callbacks {
         /// <returns>An <c>IResource</c> containing the content of the resource as a <c>Stream</c> or
         /// <c>TextReader</c>, together with a <c>SystemId</c> that identifies the base URI of the
         /// resource.</returns>
-        public Saxon.Ejavax.xml.transform.Source resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
+        public virtual Saxon.Ejavax.xml.transform.Source resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
             if (catalogBasedResolver != null) {
                 try {
                     ResolvedResource rr;
@@ -91,7 +87,7 @@ namespace Saxon.Callbacks {
             return null;
         }
 
-        public void setFeature(ResolverFeature feature, object value) {
+        public virtual void setFeature(ResolverFeature feature, object value) {
             if (catalogBasedResolver == null) {
                 throw new NullReferenceException();
             }
@@ -99,11 +95,11 @@ namespace Saxon.Callbacks {
             catalogBasedResolver.GetConfiguration().SetFeature(feature, value);
         }
 
-        public object getFeature(ResolverFeature resolverFeature) {
+        public virtual object getFeature(ResolverFeature resolverFeature) {
             return catalogBasedResolver?.GetConfiguration().GetFeature(resolverFeature);
         }
 
-        public XmlResolver GetEntityResolver() {
+        public virtual XmlResolver GetEntityResolver() {
             return catalogBasedResolver;
         }
     }
