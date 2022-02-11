@@ -300,8 +300,8 @@ select="$fndoc/def:functions/def:function[*:name = $href]"/>
             <xsl:when test="empty($section)">
                 <xsl:message>
                     <p>Get-Section Error in URI hash-path:</p>
-                    <p>Section '<xsl:value-of select="$ids[$index]"/>' not found in path:
-                            <xsl:value-of select="$ids" separator="/"/></p>
+                    <p>Section '<xsl:value-of select="$ids[$index]"
+                    />' not found in path: <xsl:value-of select="$ids" separator="/"/></p>
                 </xsl:message>
             </xsl:when>
             <xsl:when test="$index gt count($ids)"/>
