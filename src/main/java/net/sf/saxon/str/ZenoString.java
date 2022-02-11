@@ -4,10 +4,12 @@ import net.sf.saxon.expr.sort.EmptyIntIterator;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.IntPredicate;
 
 /**
  * A ZenoString is an implementation of UnicodeString that comprises a list
@@ -212,6 +214,20 @@ public class ZenoString extends UnicodeString {
         return -1;
     }
 
+    @Override
+    public long indexWhere(IntPredicate predicate, long from) {
+        int first = segmentForOffset(from);
+        for (int i = first; i < segments.size(); i++) {
+            UnicodeString segment = segments.get(i);
+            long offset = offsets.get(i);
+            long pos = segment.indexWhere(predicate, i == first ? from - offset : 0);
+            if (pos >= 0) {
+                return pos + offset;
+            }
+        }
+        return -1;
+    }
+
     /**
      * Get the code point at a given position in the string
      * @param index the given position (0-based)
@@ -336,6 +352,17 @@ public class ZenoString extends UnicodeString {
         }
         //showSegmentLengths();
         return this;
+    }
+
+    /**
+     * Write each of the segments in turn to a UnicodeWriter
+     * @param writer the writer to which the string is to be written
+     */
+
+    public void writeSegments(UnicodeWriter writer) throws IOException {
+        for (UnicodeString str : segments) {
+            writer.write(str);
+        }
     }
 
     public static UnicodeString concatSegments(UnicodeString left, UnicodeString right) {
