@@ -71,10 +71,8 @@ public class StandardDiagnostics {
                 nodeMessage += "/@" + saLoc.getAttributeName();
             }
             nodeMessage += ' ';
-        //#if CSHARP==false
         } else if (loc instanceof DOMLocator) {
             nodeMessage = "at " + ((DOMLocator) loc).getOriginatingNode().getNodeName() + ' ';
-        //#endif
         } else if (loc instanceof NodeInfo) {
             node = (NodeInfo) loc;
             nodeMessage = "at " + node.getDisplayName() + ' ';
@@ -243,7 +241,7 @@ public class StandardDiagnostics {
      *                2=values of variables
      */
 
-    public void logStackTrace(XPathContext context, Logger out, int level) {
+    public void printStackTrace(XPathContext context, Logger out, int level) {
         if (level > 0) {
             int depth = 20;
             while (depth-- > 0) {
@@ -420,10 +418,10 @@ public class StandardDiagnostics {
     /**
      * Variable defining an absolute limit on the length of an error message;
      * any message longer than this will be truncated by the {@link #wordWrap(String)}
-     * method. The value can be assigned. Default value is 1000.
+     * method. The value can be assigned. Default value is 2000.
      */
 
-    public int MAX_MESSAGE_LENGTH = 1000;
+    public int MAX_MESSAGE_LENGTH = 2000;
 
     /**
      * Variable defining a threshold for word-wrapping a message. If a message
@@ -493,7 +491,7 @@ public class StandardDiagnostics {
      * @return the expanded message
      */
 
-    public String expandSpecialCharacters(String in, int threshold) {
+    public CharSequence expandSpecialCharacters(CharSequence in, int threshold) {
         if (threshold >= UTF16CharacterSet.NONBMP_MAX) {
             return in;
         }
@@ -510,7 +508,7 @@ public class StandardDiagnostics {
                 fsb.append("]");
             }
         }
-        return fsb.toString();
+        return fsb;
     }
 
 
