@@ -155,7 +155,7 @@
       
       
       <p>XML Catalogs (<a
-        href="http://xml.apache.org/commons/components/resolver/resolver-article.html"
+        href="https://xmlcatalogs.org/"
         class="bodylink">defined by OASIS</a>) provide a way to avoid hard-coding the locations of
         XML documents and other resources in your application. Instead, the application refers to the
         resource using a conventional system identifier (URI) or public identifier, and a local
