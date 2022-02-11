@@ -67,7 +67,7 @@ public class CompressedWhitespace extends UnicodeString {
         }
         long value = 0;
         for (int i = 0; i < outlength; i++) {
-            value = (value << 8) | out[i];
+            value = (value << 8) | (byte)out[i];
         }
         value = value << (8 * (8 - outlength));
         return new CompressedWhitespace(value);
@@ -94,7 +94,7 @@ public class CompressedWhitespace extends UnicodeString {
         }
         while (spaces > 0) {
             int run = spaces % 63;
-            result = (result << 8) | (CODES[32] << 6) | run;
+            result = (result << 8) | (byte)(CODES[32] << 6) | (byte)run;
             spaces -= run;
             outlength++;
         }

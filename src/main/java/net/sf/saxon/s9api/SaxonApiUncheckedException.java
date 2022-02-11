@@ -7,7 +7,7 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.*;
 
 /**
  * An unchecked exception thrown by the Saxon API. Unchecked exceptions are used only when errors occur in a method
@@ -37,6 +37,7 @@ public class SaxonApiUncheckedException extends RuntimeException {
      *         (which may be <tt>null</tt>).
      */
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public String getMessage() {
         return getCause().getMessage();
     }
