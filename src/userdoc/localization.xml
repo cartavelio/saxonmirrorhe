@@ -27,8 +27,8 @@
     <li><a class="bodylink" href="java-collations">Implementing Collations in Java</a></li>
   </ul>
 
-  <section id="number-formatting" title="Formatting Numbers">
-    <h1>Formatting Numbers</h1>
+  <section id="number-formatting" title="Formatting numbers">
+    <h1>Formatting numbers</h1>
 
     <p>Formatting of numbers affects the output of the <a class="bodylink code"
       href="/xsl-elements/number">xsl:number</a> instruction, and the <a class="bodylink code"
@@ -77,8 +77,8 @@
 
   </section>
 
-  <section id="date-formatting" title="Formatting Dates">
-    <h1>Formatting Dates</h1>
+  <section id="date-formatting" title="Formatting dates">
+    <h1>Formatting dates</h1>
 
     <p>Formatting of dates is achieved using the functions <a class="bodylink code"
       href="/functions/fn/format-date">fn:format-date()</a>, <a class="bodylink code"
@@ -126,8 +126,8 @@
 
   </section>
 
-  <section id="sorting-and-collations" title="Sorting and Collations">
-    <h1>Sorting and Collations</h1>
+  <section id="sorting-and-collations" title="Sorting and collations">
+    <h1>Sorting and collations</h1>
 
     <p>Different countries (or languages) have different rules for sorting strings into alphabetical order.
       For example, in German "Ä" comes between "A" and "B", while in Swedish it comes after "Z". (And the
@@ -1003,8 +1003,8 @@ config.setLocalizerFactory(new LocalizerFactory() {
 
   </section>
   
-  <section id="java-collations" title="Implementing Collations in Java" class="javaonly">
-    <h1>Implementing Collations in Java</h1>
+  <section id="java-collations" title="Implementing collations in Java" class="javaonly">
+    <h1>Implementing collations in Java</h1>
     
     <p>If you want to use your own URIs to define collations, there are two ways of doing this:</p>
     
