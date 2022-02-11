@@ -27,8 +27,6 @@
       <li>No support for the XDM function type in the XDM data model.</li>
       <li>The bytecode generation feature available in SaxonJ-EE on Java is not available in
          SaxonC-EE.</li>
-      <li>It is currently not possible to create and export to file a precompiled schema component
-         model (SCM).</li>
       <li>The XQuery Update feature is not supported.</li>
    </ul>
 
