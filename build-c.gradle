@@ -294,7 +294,7 @@ task test_jetHome(
       from ("${buildDir}/releases/libsaxon-${RELEASE}C") {
         include "**/*"
       }
-      archiveFileName = "libsaxon-${RELEASE}C-setup64-v${saxonCversion}.zip"
+      archiveFileName = "libsaxon-${RELEASE}C-setup64-v${saxonVersion}.zip"
     }
   }
 }
