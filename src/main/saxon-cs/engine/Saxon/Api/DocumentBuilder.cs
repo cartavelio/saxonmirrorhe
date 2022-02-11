@@ -58,7 +58,7 @@ namespace Saxon.Api {
         /// allocates an <c>XmlReader</c>.
         /// </summary>
         /// <remarks>
-        /// <para>If no <c>EntityResolver</c> is supplied, the <c>ResourceResolver</c> associated with the
+        /// <para>If no <c>XmlResolver</c> is supplied, the <c>ResourceResolver</c> associated with the
         /// Saxon configuration is used (<c>Configuration.getResourceResolver()</c>)</para>
         /// <para>In Saxon releases prior to 11.1, the supplied <c>XmlResolver</c> was also used to
         /// resolve any relative URI passed to the <c>DocumentBuilder.Build()</c> method.</para>
@@ -325,6 +325,9 @@ namespace Saxon.Api {
             if (XmlResolver != null) {
                 settings.XmlResolver = XmlResolver;
             }
+            else {
+                settings.XmlResolver = new XmlResolverWrappingResourceResolver(config.getResourceResolver());
+            }
 
             settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);
 
@@ -378,6 +381,8 @@ namespace Saxon.Api {
 
             if (XmlResolver != null) {
                 settings.XmlResolver = XmlResolver;
+            } else {
+                settings.XmlResolver = new XmlResolverWrappingResourceResolver(config.getResourceResolver());
             }
 
             settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);
