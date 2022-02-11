@@ -1,4 +1,5 @@
 using System.Xml;
+using net.sf.saxon.dotnet;
 using net.sf.saxon.@event;
 using net.sf.saxon.s9api;
 using net.sf.saxon.serialize;
@@ -18,19 +19,14 @@ namespace Saxon.Api {
     /// is to be controlled from the stylesheet or query, use a <c>Serializer</c> as the
     /// <c>Destination</c>.</para>
     /// </remarks>
-
-    public class TextWriterDestination : net.sf.saxon.s9api.AbstractDestination, XmlDestination
-    {
-
-        internal XmlWriter writer;
-        internal bool closeAfterUse = true;
+    public class TextWriterDestination : net.sf.saxon.s9api.AbstractDestination, XmlDestination {
+        private readonly XmlWriter writer;
+        private bool closeAfterUse = true;
 
         /// <summary>Construct a <c>TextWriterDestination</c></summary>
         /// <param name="writer">The <c>XmlWriter</c> that is to be notified of the events
         /// representing the XML document.</param>
-
-        public TextWriterDestination(XmlWriter writer)
-        {
+        public TextWriterDestination(XmlWriter writer) {
             this.writer = writer;
         }
 
@@ -42,10 +38,9 @@ namespace Saxon.Api {
         /// which can be useful if further output is to be written to the <c>XmlWriter</c> by the application.
         /// </summary>
 
-        public bool CloseAfterUse
-        {
-            get { return closeAfterUse; }
-            set { closeAfterUse = value; }
+        public bool CloseAfterUse {
+            get => closeAfterUse;
+            set => closeAfterUse = value;
         }
 
         /// <summary>
@@ -53,8 +48,7 @@ namespace Saxon.Api {
         /// close any user-supplied OutputStream or Writer; those must be closed explicitly
         /// by the calling application.
         /// </summary>
-        public override void close()
-        {
+        public override void close() {
             writer.Close();
         }
 
@@ -70,11 +64,9 @@ namespace Saxon.Api {
         /// use information from the configuration (for example, a reference to the name pool)
         /// to construct or configure the returned <c>Receiver</c>.</param>
         /// <param name="params1"></param>
-        
-        public Receiver GetReceiver(PipelineConfiguration pipe, SerializationProperties params1)
-        {
-            JDotNetReceiver dnr = new JDotNetReceiver(writer);
-            dnr.setPipelineConfiguration (pipe);
+        public Receiver GetReceiver(PipelineConfiguration pipe, SerializationProperties params1) {
+            DotNetReceiver dnr = new DotNetReceiver(writer);
+            dnr.setPipelineConfiguration(pipe);
             dnr.setCloseAfterUse(closeAfterUse);
             return params1.makeSequenceNormalizer(dnr);
         }
@@ -92,9 +84,8 @@ namespace Saxon.Api {
         /// <param name="value2">Serialization parameters known to the caller of the method; typically, output
         ///  properties defined in a stylesheet or query. These will mainly be of interest if the destination is performing serialization, but
         ///  soem properties (such as <c>item-separator</c>) are also used in other situations.</param>
-        public override Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties value2)
-        {
-            return GetReceiver(pipe, value2); 
+        public override Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties value2) {
+            return GetReceiver(pipe, value2);
         }
 
         /// <summary>
@@ -111,8 +102,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <returns>returns the underlying Destination object</returns>
-        public Destination GetUnderlyingDestination()
-        {
+        public Destination GetUnderlyingDestination() {
             return this;
         }
     }

@@ -20,8 +20,8 @@ namespace Saxon.Api {
     public class Serializer : XmlDestination
     {
 
-        private net.sf.saxon.s9api.Serializer serializer;
-        private Properties props = new Properties();
+        private readonly net.sf.saxon.s9api.Serializer jSerializer;
+        private readonly Properties props = new Properties();
         private CharacterMapIndex characterMap;
         private Properties defaultOutputProperties = null;
         private Processor processor = null;
@@ -260,7 +260,7 @@ namespace Saxon.Api {
 
         internal Serializer(net.sf.saxon.s9api.Serializer s)
         {
-            serializer = s;
+            jSerializer = s;
         }
 
         /// <summary>Set a serialization property</summary>
@@ -283,7 +283,7 @@ namespace Saxon.Api {
         public void SetOutputProperty(QName name, String value)
         {
             props.setProperty(name.ClarkName, value);
-            serializer.setOutputProperty(net.sf.saxon.s9api.Serializer.getProperty(name.UnderlyingQName()), value);
+            jSerializer.setOutputProperty(net.sf.saxon.s9api.Serializer.getProperty(name.UnderlyingQName()), value);
         }
 
         /// <summary>
@@ -330,7 +330,7 @@ namespace Saxon.Api {
         {
             try
             {
-                serializer.setOutputFile(new java.io.File(filename));
+                jSerializer.setOutputFile(new java.io.File(filename));
             }
             catch (java.io.IOException err)
             {
@@ -350,7 +350,7 @@ namespace Saxon.Api {
         public void SetOutputStream(Stream stream)
         {
 
-            serializer.setOutputStream(stream);
+            jSerializer.setOutputStream(stream);
         }
 			
         /// <summary>Get the current output destination.</summary> 
@@ -359,7 +359,7 @@ namespace Saxon.Api {
         /// been set up.</returns>
 
         public object GetOutputDestination(){
-            return serializer.getOutputDestination();		
+            return jSerializer.getOutputDestination();		
         }
 
 
@@ -387,7 +387,7 @@ namespace Saxon.Api {
 
         public void SetOutputWriter(TextWriter textWriter)
         {
-            serializer.setOutputWriter(textWriter);
+            jSerializer.setOutputWriter(textWriter);
         }
 
 
@@ -398,7 +398,7 @@ namespace Saxon.Api {
         /// <remarks>since 9.8</remarks>
         public void SerializeXdmNode(XdmNode node)
         {
-            serializer.serializeNode((net.sf.saxon.s9api.XdmNode)XdmValue.FromGroundedValueToJXdmValue(node.value));
+            jSerializer.serializeNode((net.sf.saxon.s9api.XdmNode)XdmValue.FromGroundedValueToJXdmValue(node.value));
         }
 
 
@@ -420,7 +420,7 @@ namespace Saxon.Api {
                 SerializeXdmNode((XdmNode)value);  
             }
             else {
-                serializer.serializeXdmValue(net.sf.saxon.s9api.XdmValue.wrap(value.Unwrap()));
+                jSerializer.serializeXdmValue(net.sf.saxon.s9api.XdmValue.wrap(value.Unwrap()));
             }
 
         }
@@ -433,7 +433,7 @@ namespace Saxon.Api {
         /// </summary>
         public void Close()
         {
-            serializer.close();
+            jSerializer.close();
         }
 
 
@@ -453,7 +453,7 @@ namespace Saxon.Api {
         /// <returns>returns the underlying Destination object</returns>
         public Destination GetUnderlyingDestination()
         {
-            return serializer;
+            return jSerializer;
         }
 
 
@@ -467,7 +467,7 @@ namespace Saxon.Api {
         {
             try
             {
-                serializer.closeAndNotify();
+                jSerializer.closeAndNotify();
             }
             catch (net.sf.saxon.s9api.SaxonApiException exception) {
                 throw new StaticError(exception);
@@ -480,8 +480,8 @@ namespace Saxon.Api {
 
         public Uri BaseUri
         {
-            get { return new Uri(serializer.getDestinationBaseURI().toASCIIString()); }
-            set { serializer.setDestinationBaseURI(new java.net.URI(value.ToString())); }
+            get => new Uri(jSerializer.getDestinationBaseURI().toASCIIString());
+            set => jSerializer.setDestinationBaseURI(new Uri(value.ToString()));
         }
 
 

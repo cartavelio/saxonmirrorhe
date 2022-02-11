@@ -3,6 +3,8 @@ using System.Collections;
 using System.Xml;
 using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
+using Saxon.Api.Support;
+using Saxon.Impl.Helpers;
 
 namespace Saxon.Api {
     /// <summary inherits="IEnumerable">
@@ -98,11 +100,11 @@ namespace Saxon.Api {
         {
             get
             {
-                return ((JDotNetURIResolver)selector.getURIResolver()).getXmlResolver();
+                return ((DotNetURIResolver)selector.getURIResolver()).getXmlResolver();
             }
             set
             {
-                selector.setURIResolver(new JDotNetURIResolver(value));
+                selector.setURIResolver(new DotNetURIResolver(value));
             }
         }
 

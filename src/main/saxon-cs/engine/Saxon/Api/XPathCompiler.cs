@@ -24,23 +24,18 @@ namespace Saxon.Api {
     /// for example, by setting the <c>BaseUri</c> property. Unless the cache is emptied,
     /// it grows indefinitely: compiled expressions are never discarded.</para>
     /// </remarks>
-
     [Serializable]
-    public class XPathCompiler
-    {
-
+    public class XPathCompiler {
         private net.sf.saxon.s9api.XPathCompiler compiler;
         private Processor processor;
 
         // internal constructor: the public interface is a factory method
         // on the Processor object
 
-        internal XPathCompiler(Processor processor, net.sf.saxon.s9api.XPathCompiler compiler)
-        {
+        internal XPathCompiler(Processor processor, net.sf.saxon.s9api.XPathCompiler compiler) {
             this.compiler = compiler;
             this.processor = processor;
         }
-
 
 
         /// <summary>
@@ -48,8 +43,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="uri">the absolute URI of the default collation. This URI must identify a known collation;
         /// either one that has been explicitly declared, or one that is recognized implicitly, such as a UCA collation</param>
-        public void DeclareDefaultCollation(String uri)
-        {
+        public void DeclareDefaultCollation(String uri) {
             compiler.declareDefaultCollation(uri);
         }
 
@@ -61,9 +55,7 @@ namespace Saxon.Api {
         /// default namespace for elements and types).</param>
         /// <param name="uri">The namespace URI. It is possible to specify
         /// a zero-length string to "undeclare" a namespace.</param>
-
-        public void DeclareNamespace(String prefix, String uri)
-        {
+        public void DeclareNamespace(String prefix, String uri) {
             compiler.declareNamespace(prefix, uri);
         }
 
@@ -76,10 +68,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <remarks>The property IErrorReporter to which warnings will be notified</remarks>
         public IErrorReporter WarningHandler {
-            set {
-                compiler.setWarningHandler(new ErrorReporterWrapper(value));
-            }
-
+            set { compiler.setWarningHandler(new ErrorReporterWrapper(value)); }
         }
 
 
@@ -97,7 +86,6 @@ namespace Saxon.Api {
         /// <param name="libraryPackage">the XSLT compiled library package whose functions are to be made available</param>
         public void AddXsltFunctionLibrary(XsltPackage libraryPackage) {
             compiler.addXsltFunctionLibrary(libraryPackage.GetUnderlyingXsltPackage());
-
         }
 
         /// <summary>
@@ -110,10 +98,9 @@ namespace Saxon.Api {
         /// <returns>The namespace URI associated with the prefix (or absence thereof) in the supplied
         /// lexical QName. The "null namespace" is represented by a zero length string. The method returns null
         /// if there is no known binding for the prefix used in the lexical QName.</returns>
-
-        public string GetNamespaceURI(string lexicalName, Boolean useDefault)
-        {
-            String[] parts = net.sf.saxon.om.NameChecker.checkQNameParts(net.sf.saxon.value.Whitespace.trim(lexicalName));
+        public string GetNamespaceURI(string lexicalName, Boolean useDefault) {
+            String[] parts =
+                net.sf.saxon.om.NameChecker.checkQNameParts(net.sf.saxon.value.Whitespace.trim(lexicalName));
 
             return compiler.getUnderlyingStaticContext().getNamespaceResolver().getURIForPrefix(parts[0], useDefault);
         }
@@ -122,8 +109,7 @@ namespace Saxon.Api {
         /// Get the <c>Processor</c> from which this <c>XPathCompiler</c> was constructed
         /// </summary>
 
-        public Processor Processor
-        {
+        public Processor Processor {
             get { return processor; }
         }
 
@@ -144,9 +130,7 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="uri">The namespace URI whose declarations and type definitions are to
         /// be made available for use within the XPath expression.</param>
-
-        public void ImportSchemaNamespace(String uri)
-        {
+        public void ImportSchemaNamespace(String uri) {
             compiler.importSchemaNamespace(uri);
         }
 
@@ -155,8 +139,7 @@ namespace Saxon.Api {
         /// Escape hatch to the <c>net.sf.saxon.s9api.XPathCompiler</c> object in the underlying Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.XPathCompiler Implementation
-        {
+        public net.sf.saxon.s9api.XPathCompiler Implementation {
             get { return compiler; }
         }
 
@@ -171,16 +154,9 @@ namespace Saxon.Api {
         /// variables it refers to by calling the method <c>EnumerateExternalVariables</c> on the <c>XPathExecutable</c> object.
         /// </remarks>
 
-        public Boolean AllowUndeclaredVariables
-        {
-            get
-            {
-                return compiler.isAllowUndeclaredVariables();
-            }
-            set
-            {
-                compiler.setAllowUndeclaredVariables(value);
-            }
+        public Boolean AllowUndeclaredVariables {
+            get { return compiler.isAllowUndeclaredVariables(); }
+            set { compiler.setAllowUndeclaredVariables(value); }
         }
 
         /// <summary>
@@ -191,25 +167,20 @@ namespace Saxon.Api {
         /// input documents.
         /// </summary>
 
-        public Boolean SchemaAware
-        {
-            get {
-                return compiler.isSchemaAware();
-            }
-            set 
-            {
-                compiler.setSchemaAware(value);
-            }
+        public Boolean SchemaAware {
+            get { return compiler.isSchemaAware(); }
+            set { compiler.setSchemaAware(value); }
         }
 
 
-        private int checkSingleChar(String s)
-        {
+        private int checkSingleChar(String s) {
             if (s.Length == 1) {
                 return s[0];
-            } else if (s.Length == 2 && Char.IsSurrogatePair(s, 0)) {
+            }
+            else if (s.Length == 2 && Char.IsSurrogatePair(s, 0)) {
                 return Char.ConvertToUtf32(s, 0);
-            } else {
+            }
+            else {
                 throw new ArgumentException("Attribute \"" + s + "\" should be a single character");
             }
         }
@@ -231,16 +202,13 @@ namespace Saxon.Api {
         ///   "minus-sign", "percent", "per-mille", "zero-digit", "digit",
         ///   or "pattern-separator".</param>
         /// <param name="value">The new value for the property.</param>
-
         public void SetDecimalFormatProperty(QName format, String property, String value) {
-            try
-            {
-                compiler.setDecimalFormatProperty(format.UnderlyingQName(), property, value);
+            try {
+                compiler.setDecimalFormatProperty(format, property, value);
             }
             catch (SaxonApiException e) {
                 throw new StaticError(e);
             }
-
         }
 
         /// <summary>
@@ -249,11 +217,8 @@ namespace Saxon.Api {
         /// <c>AllowUndeclaredVariables</c> property has been set to true.
         /// </summary>
         /// <param name="name">The name of the variable, as a <c>QName</c></param>
-
-
-        public void DeclareVariable(QName name)
-        {
-            compiler.declareVariable(name.UnderlyingQName());
+        public void DeclareVariable(QName name) {
+            compiler.declareVariable(name);
         }
 
         /// <summary>
@@ -271,27 +236,24 @@ namespace Saxon.Api {
         /// </remarks>
 
 
-        public string XPathLanguageVersion
-        {
+        public string XPathLanguageVersion {
             get {
-                try
-                {
+                try {
                     return compiler.getLanguageVersion();
                 }
                 catch (Exception) {
-                    throw new StaticError(new net.sf.saxon.trans.XPathException("Unknown XPath version " + compiler.getLanguageVersion()));
+                    throw new StaticError(
+                        new net.sf.saxon.trans.XPathException("Unknown XPath version " +
+                                                              compiler.getLanguageVersion()));
                 }
             }
-            set { 
-                try
-                {
+            set {
+                try {
                     compiler.setLanguageVersion(value);
                 }
-                catch (Exception)
-                {
+                catch (Exception) {
                     throw new StaticError(new net.sf.saxon.trans.XPathException("Unknown XPath version " + value));
                 }
-                
             }
         }
 
@@ -302,10 +264,9 @@ namespace Saxon.Api {
         /// that the value supplied for the context item is the correct type.
         /// </summary>
 
-        public XdmItemType ContextItemType
-        {
-            get { return XdmItemType.MakeXdmItemType( compiler.getRequiredContextItemType().getUnderlyingItemType()); }
-            set { compiler.setRequiredContextItemType(value.Unwrap()); }
+        public XdmItemType ContextItemType {
+            get => XdmItemType.MakeXdmItemType(compiler.getRequiredContextItemType().getUnderlyingItemType());
+            set => compiler.setRequiredContextItemType(value);
         }
 
 
@@ -315,12 +276,9 @@ namespace Saxon.Api {
         /// within the expression, for example in the argument to the <c>doc()</c> function.
         /// </summary>
 
-        public String BaseUri
-        {
-            get { return compiler.getBaseURI().getRawPath(); }
-            set {
-                compiler.setBaseURI(new java.net.URI(value)); 
-            }
+        public String BaseUri {
+            get => compiler.getBaseURI().OriginalString;
+            set => compiler.setBaseURI(new Uri(value));
         }
 
         /// <summary>
@@ -335,12 +293,9 @@ namespace Saxon.Api {
         /// defined in a later XPath version; rather, it modifies the semantics of some
         /// constructs.</para></remarks>
 
-        public Boolean BackwardsCompatible
-        {
+        public Boolean BackwardsCompatible {
             get { return compiler.isBackwardsCompatible(); }
-            set {
-                compiler.setBackwardsCompatible(value);
-            }
+            set { compiler.setBackwardsCompatible(value); }
         }
 
         /// <summary>
@@ -351,15 +306,9 @@ namespace Saxon.Api {
         /// by default.
         /// </summary>
 
-        public Boolean Caching
-        {
-            get { 
-                return compiler.isCaching(); 
-            }
-            set
-            {
-                compiler.setCaching(value);
-            }
+        public Boolean Caching {
+            get { return compiler.isCaching(); }
+            set { compiler.setCaching(value); }
         }
 
 
@@ -372,10 +321,8 @@ namespace Saxon.Api {
         /// Set to true to request fast compilation; set to false to revert to the optimization options
         /// defined in the Configuration.
         /// </remarks>
-        
-        public bool FastCompliation
-        {
 
+        public bool FastCompliation {
             set { compiler.setFastCompilation(value); }
             get { return compiler.isFastCompilation(); }
         }
@@ -398,16 +345,12 @@ namespace Saxon.Api {
         /// This includes both syntax errors, semantic errors such as references to undeclared functions or
         /// variables, and statically-detected type errors.
         /// </exception>
-
-        public XPathExecutable Compile(String source)
-        {
-            try { 
+        public XPathExecutable Compile(String source) {
+            try {
                 net.sf.saxon.s9api.XPathExecutable executable = compiler.compile(source);
                 return new XPathExecutable(executable);
-           
             }
-            catch (SaxonApiException err)
-            {
+            catch (SaxonApiException err) {
                 throw new StaticError(err);
             }
         }
@@ -428,30 +371,21 @@ namespace Saxon.Api {
         /// Throws a <c>Saxon.Api.DynamicError</c> if there is any dynamic error during evaluation of the XPath expression.
         /// This includes, for example, referring to the context item if no context item was supplied.
         /// </exception>
-
-        public XdmValue Evaluate(String expression, XdmItem contextItem)
-        {
-            try
-            {
-                net.sf.saxon.s9api.XdmValue value = compiler.evaluate(expression, contextItem == null ? null : XdmItem.FromXdmItemItemToJXdmItem(contextItem));
-                return XdmValue.Wrap(value.getUnderlyingValue());
+        public XdmValue Evaluate(String expression, XdmItem contextItem) {
+            try {
+                return compiler.evaluate(expression, contextItem);
             }
-            catch (SaxonApiException err)
-            {
-                if (err.getCause() is XPathException)
-                {
-                    XPathException xpathException = (XPathException)err.getCause();
-                    if (xpathException.isStaticError())
-                    {
+            catch (SaxonApiException err) {
+                if (err.getCause() is XPathException) {
+                    XPathException xpathException = (XPathException) err.getCause();
+                    if (xpathException.isStaticError()) {
                         throw new StaticError(err);
                     }
-                    else
-                    {
+                    else {
                         throw new DynamicError(err.getMessage());
                     }
                 }
-                else
-                {
+                else {
                     throw new StaticError(err);
                 }
             }
@@ -477,35 +411,24 @@ namespace Saxon.Api {
         /// Throws a <c>Saxon.Api.DynamicError</c> if there is any dynamic error during evaluation of the XPath expression.
         /// This includes, for example, referring to the context item if no context item was supplied.
         /// </exception>
-
-        public XdmItem EvaluateSingle(String expression, XdmItem contextItem)
-        {
-
-            try
-            {
-                net.sf.saxon.s9api.XdmItem value = compiler.evaluateSingle(expression, contextItem == null ? null : XdmItem.FromXdmItemItemToJXdmItem(contextItem));
-                return (value == null ? null : (XdmItem)XdmValue.Wrap(value.getUnderlyingValue()));
+        public XdmItem EvaluateSingle(String expression, XdmItem contextItem) {
+            try {
+                return compiler.evaluateSingle(expression, contextItem);
             }
-            catch (SaxonApiException err)
-            {
-                if (err.getCause() is XPathException)
-                {
-                    XPathException xpathException = (XPathException)err.getCause();
-                    if (xpathException.isStaticError())
-                    {
+            catch (SaxonApiException err) {
+                if (err.getCause() is XPathException) {
+                    XPathException xpathException = (XPathException) err.getCause();
+                    if (xpathException.isStaticError()) {
                         throw new StaticError(err);
                     }
                     else {
                         throw new DynamicError(err.getMessage());
                     }
                 }
-                else
-                {
+                else {
                     throw new StaticError(err);
                 }
             }
-            
         }
-
     }
 }

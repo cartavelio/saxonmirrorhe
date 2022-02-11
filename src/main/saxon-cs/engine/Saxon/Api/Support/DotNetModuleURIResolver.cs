@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using javax.xml.transform.stream;
 
-namespace Saxon.Api {
+namespace Saxon.Api.Support {
     /// <summary>
     /// Internal class that wraps a (.NET) <c>IQueryResolver</c> to create a (Java) <c>ModuleURIResolver</c>.
     /// <para>A <c>ModuleURIResolver</c> is used when resolving references to
@@ -10,18 +10,14 @@ namespace Saxon.Api {
     /// location hints, and returns one or more <c>StreamSource</c> obects containing the queries
     /// to be imported.</para>
     /// </summary>
-
-    internal class DotNetModuleURIResolver : net.sf.saxon.lib.ModuleURIResolver
-    {
-
+    internal class DotNetModuleURIResolver : net.sf.saxon.lib.ModuleURIResolver {
         private IQueryResolver resolver;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Saxon.Api.DotNetModuleURIResolver"/> class.
         /// </summary>
         /// <param name="resolver">Resolver.</param>
-        public DotNetModuleURIResolver(IQueryResolver resolver)
-        {
+        public DotNetModuleURIResolver(IQueryResolver resolver) {
             this.resolver = resolver;
         }
 
@@ -41,29 +37,25 @@ namespace Saxon.Api {
         /// and either an InputSource or a Reader representing the text of the module. The method
         /// may also return null, in which case the system attempts to resolve the URI using the
         /// standard module URI resolver.</returns>
-        public StreamSource[] resolve(String moduleURI, String baseURI, String[] locations)
-        {
+        public StreamSource[] resolve(String moduleURI, String baseURI, String[] locations) {
             Uri baseU = (baseURI == null ? null : new Uri(baseURI));
             Uri[] modules = resolver.GetModules(moduleURI, baseU, locations);
             StreamSource[] ss = new StreamSource[modules.Length];
-            for (int i = 0; i < ss.Length; i++)
-            {
+            for (int i = 0; i < ss.Length; i++) {
                 ss[i] = new StreamSource();
                 ss[i].setSystemId(modules[i].ToString());
                 Object query = resolver.GetEntity(modules[i]);
-                if (query is Stream)
-                {
-                    ss[i].setInputStream(new JDotNetInputStream((Stream)query));
+                if (query is Stream) {
+                    ss[i].setInputStream((Stream) query);
                 }
-                else if (query is String)
-                {
-                    ss[i].setReader(new JDotNetReader(new StringReader((String)query)));
+                else if (query is String) {
+                    ss[i].setReader(new StringReader((String) query));
                 }
-                else
-                {
+                else {
                     throw new ArgumentException("Invalid response from GetEntity()");
                 }
             }
+
             return ss;
         }
     }

@@ -16,17 +16,13 @@ namespace Saxon.Api {
     /// <para>An <c>XPathExecutable</c> is created by using the <c>Compile</c>
     /// method on the <c>XPathCompiler</c> class.</para>
     /// </remarks>    
-
     [Serializable]
-    public class XPathExecutable
-    {
-
+    public class XPathExecutable {
         private net.sf.saxon.s9api.XPathExecutable executable;
 
         // internal constructor
 
-        internal XPathExecutable(net.sf.saxon.s9api.XPathExecutable executable)
-        {
+        internal XPathExecutable(net.sf.saxon.s9api.XPathExecutable executable) {
             this.executable = executable;
         }
 
@@ -38,16 +34,15 @@ namespace Saxon.Api {
         /// <returns>
         /// An <c>IEnumerator</c> over the names of the external variables, as instances of <c>QName</c>.
         /// </returns>
-        
-        public IEnumerator EnumerateExternalVariables()
-        {
+        public IEnumerator EnumerateExternalVariables() {
             ArrayList list = new ArrayList();
-            JIterator iter = executable.iterateExternalVariables();
-            while (iter.hasNext())
-            {
-                net.sf.saxon.s9api.QName var = (net.sf.saxon.s9api.QName)iter.next();
+            System.Collections.Generic.IEnumerator<net.sf.saxon.s9api.QName> iter =
+                executable.iterateExternalVariables();
+            while (iter.MoveNext()) {
+                net.sf.saxon.s9api.QName var = (net.sf.saxon.s9api.QName) iter.Current;
                 list.Add(new QName(var));
             }
+
             return list.GetEnumerator();
         }
 
@@ -55,8 +50,7 @@ namespace Saxon.Api {
         /// Escape hatch to the <c>net.sf.saxon.s9api.XPathExecutable</c> object in the underlying Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.XPathExecutable Implementation
-        {
+        public net.sf.saxon.s9api.XPathExecutable Implementation {
             get { return executable; }
         }
 
@@ -68,16 +62,15 @@ namespace Saxon.Api {
         /// <returns>
         /// An <c>IEnumerator</c> over the names of the external variables, as instances of <c>QName</c>.
         /// </returns>
-
-        public IEnumerator<QName> EnumerateExternalVariables2()
-        {
+        public IEnumerator<QName> EnumerateExternalVariables2() {
             IList<QName> list = new List<QName>();
-            JIterator iter = executable.iterateExternalVariables();
-            while (iter.hasNext())
-            {
-                net.sf.saxon.s9api.QName var = (net.sf.saxon.s9api.QName)iter.next();
+            System.Collections.Generic.IEnumerator<net.sf.saxon.s9api.QName> iter =
+                executable.iterateExternalVariables();
+            while (iter.MoveNext()) {
+                net.sf.saxon.s9api.QName var = iter.Current;
                 list.Add(new QName(var));
             }
+
             return list.GetEnumerator();
         }
 
@@ -107,17 +100,14 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="variableName">the name of a declared variable</param>
         /// <returns>The required cardinality, in the form of an occurrence indicator.</returns>
-
-
-        public char GetRequiredCardinalityForVariable(QName variableName)
-        {
-            XPathVariable var = ((IndependentContext)executable.getUnderlyingStaticContext()).getExternalVariable(variableName.ToStructuredQName());
-            if (var == null)
-            {
+        public char GetRequiredCardinalityForVariable(QName variableName) {
+            XPathVariable var =
+                ((IndependentContext) executable.getUnderlyingStaticContext()).getExternalVariable(
+                    variableName.GetStructuredQName());
+            if (var == null) {
                 return '0';
             }
-            else
-            {
+            else {
                 return GetOccurrenceIndicator(var.getRequiredType().getCardinality());
             }
         }
@@ -125,10 +115,8 @@ namespace Saxon.Api {
 
         //internal method
 
-        internal char GetOccurrenceIndicator(int occurrenceIndicator)
-        {
-            switch (occurrenceIndicator)
-            {
+        internal char GetOccurrenceIndicator(int occurrenceIndicator) {
+            switch (occurrenceIndicator) {
                 case StaticProperty.ALLOWS_ZERO_OR_MORE:
 
                     return XdmSequenceType.ZERO_OR_MORE;
@@ -152,7 +140,6 @@ namespace Saxon.Api {
                 default:
                     throw new ArgumentException("Unknown occurrence indicator");
             }
-            
         }
 
 
@@ -163,9 +150,7 @@ namespace Saxon.Api {
         /// An <c>XPathSelector</c>. The returned <c>XPathSelector</c> can be used to
         /// set up the dynamic context, and then to evaluate the expression.
         /// </returns>
-
-        public XPathSelector Load()
-        {
+        public XPathSelector Load() {
             net.sf.saxon.s9api.XPathSelector selector = executable.load();
             return new XPathSelector(selector);
         }

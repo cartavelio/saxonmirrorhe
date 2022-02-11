@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 namespace java.util {
-    public interface Collection<E> : java.lang.Iterable<E> {
+    public interface Collection<E> : IEnumerable<E> {
         int size();
         bool isEmpty();
         bool contains(E e);

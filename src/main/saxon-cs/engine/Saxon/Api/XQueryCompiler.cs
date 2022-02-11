@@ -20,11 +20,8 @@ namespace Saxon.Api {
     /// <para>An <c>XQueryCompiler</c> may be used concurrently in multiple threads, but
     /// it should not then be modified once initialized.</para>
     /// </remarks>
-
     [Serializable]
-    public class XQueryCompiler
-    {
-
+    public class XQueryCompiler {
         private Configuration config;
         private Processor processor;
         private IQueryResolver moduleResolver;
@@ -36,8 +33,7 @@ namespace Saxon.Api {
         // internal constructor: the public interface is a factory method
         // on the Processor object
 
-        internal XQueryCompiler(Processor processor)
-        {
+        internal XQueryCompiler(Processor processor) {
             this.processor = processor;
             this.config = processor.Implementation;
             compiler = processor.JProcessor.newXQueryCompiler();
@@ -58,7 +54,6 @@ namespace Saxon.Api {
         /// <param name="options">Options to be used in performing comparisons, for example
         /// whether they are to be case-blind and/or accent-blind</param>
         /// <param name="isDefault">If true, this collation will be used as the default collation</param>
-
         public void DeclareCollation(Uri uri, CompareInfo compareInfo, CompareOptions options, Boolean isDefault) {
             JDotNetComparator comparator = new JDotNetComparator(uri.ToString(), compareInfo, options);
             config.registerCollation(uri.ToString(), comparator);
@@ -79,9 +74,7 @@ namespace Saxon.Api {
         /// default namespace for elements and types).</param>
         /// <param name="uri">The namespace URI. It is possible to specify
         /// a zero-length string to "undeclare" a namespace.</param>
-
-        public void DeclareNamespace(String prefix, String uri)
-        {
+        public void DeclareNamespace(String prefix, String uri) {
             compiler.declareNamespace(prefix, uri);
         }
 
@@ -89,11 +82,8 @@ namespace Saxon.Api {
         /// <summary>
         /// Get the <c>Processor</c> from which this <c>XQueryCompiler</c> was constructed
         /// </summary>
-        
-        public Processor Processor
-        {
-            get {return processor;}
-        }
+
+        public Processor Processor => processor;
 
         /// <summary>
         /// The required context item type for the expression. This is used for
@@ -101,8 +91,7 @@ namespace Saxon.Api {
         /// that the value supplied for the context item is the correct type.
         /// </summary>
 
-        public XdmItemType ContextItemType
-        {
+        public XdmItemType ContextItemType {
             get { return XdmItemType.MakeXdmItemType(compiler.getRequiredContextItemType().getUnderlyingItemType()); }
             set { compiler.setRequiredContextItemType(value.Unwrap()); }
         }
@@ -115,10 +104,9 @@ namespace Saxon.Api {
         /// </summary>
 
 
-        public String BaseUri
-        {
-            get { return compiler.getBaseURI().toASCIIString(); }
-            set { compiler.setBaseURI(new java.net.URI(value)); }
+        public String BaseUri {
+            get => compiler.getBaseURI().OriginalString;
+            set => compiler.setBaseURI(new Uri(value));
         }
 
 
@@ -134,16 +122,9 @@ namespace Saxon.Api {
         /// means that schema-aware code will be compiled regardless.</para>
         /// </remarks>
 
-        public Boolean SchemaAware
-        {
-            get
-            {
-                return compiler.isSchemaAware();
-            }
-            set
-            {
-                compiler.setSchemaAware(value);
-            }
+        public bool SchemaAware {
+            get => compiler.isSchemaAware();
+            set => compiler.setSchemaAware(value);
         }
 
         /// <summary>
@@ -160,10 +141,9 @@ namespace Saxon.Api {
         /// </remarks>
 
 
-        public bool UpdatingEnabled
-        {
-            get { return compiler.isUpdatingEnabled(); }
-            set { compiler.setUpdatingEnabled(value); }
+        public bool UpdatingEnabled {
+            get => compiler.isUpdatingEnabled();
+            set => compiler.setUpdatingEnabled(value);
         }
 
         /// <summary>
@@ -171,12 +151,9 @@ namespace Saxon.Api {
         /// of Saxon the version is always "3.1"; any attempt to set a different value is ignored.
         /// </summary>
 
-        public string XQueryLanguageVersion
-        {
-            get { 
-                return "3.1";
-            }
-            set {}
+        public string XQueryLanguageVersion {
+            get => "3.1";
+            set { }
         }
 
 
@@ -191,11 +168,9 @@ namespace Saxon.Api {
         /// resolved using the <c>XmlResolver</c> registered with the <c>Processor</c>.</para>
         /// </remarks>
 
-        public IQueryResolver QueryResolver
-        {
-            get { return moduleResolver; }
-            set
-            {
+        public IQueryResolver QueryResolver {
+            get => moduleResolver;
+            set {
                 moduleResolver = value;
                 compiler.setModuleURIResolver(new DotNetModuleURIResolver(value));
             }
@@ -212,18 +187,14 @@ namespace Saxon.Api {
         /// By supplying a custom <c>List</c> with a user-written <c>add()</c> method, it is possible to
         /// intercept error conditions as they occur.
         /// </remarks>
-        [Obsolete("IList<StaticError> ErrorList is deprecated, please use the methods SetErrorList and GetErrorList which hanldes IList<XmlProcessingError>.")]
-        public IList<StaticError> ErrorList
-        {
-            set
-            {
+        [Obsolete(
+            "IList<StaticError> ErrorList is deprecated, please use the methods SetErrorList and GetErrorList which handle IList<XmlProcessingError>.")]
+        public IList<StaticError> ErrorList {
+            set {
                 errorGatherer = new ErrorReporterToStaticError(value);
                 compiler.setErrorReporter(errorGatherer);
             }
-            get
-            {
-                return errorList;
-            }
+            get { return errorList; }
         }
 
 
@@ -232,14 +203,11 @@ namespace Saxon.Api {
         /// intercept error conditions as they occur.
         /// If this property is used then the ErrorList property and SetErrorList method is overriden.</summary>
         /// <remarks>The <c>IErrorReporter</c> to be used</remarks>
-        public IErrorReporter ErrorReporter
-        {
-            set
-            {
+        public IErrorReporter ErrorReporter {
+            set {
                 errorReporter = null;
                 compiler.setErrorReporter(new ErrorReporterWrapper(value));
             }
-
         }
 
         /// <summary>
@@ -256,8 +224,7 @@ namespace Saxon.Api {
         /// of the stylesheet. It is not used for errors detected when executing the stylesheet.</para>
         /// </remarks>
         /// <param name="value">Supplied list.</param>
-        public void SetErrorList(IList<XmlProcessingError> value)
-        {
+        public void SetErrorList(IList<XmlProcessingError> value) {
             errorReporter = new ErrorReporter(value);
             compiler.setErrorReporter(errorReporter);
         }
@@ -265,14 +232,12 @@ namespace Saxon.Api {
         /// <summary>
         /// Get list of errors as <code>IList&lt;XmlProcessingError&gt;</code>
         /// </summary>
-        public IList<XmlProcessingError> GetErrorList()
-        {
-            if(errorReporter == null)
-            {
+        public IList<XmlProcessingError> GetErrorList() {
+            if (errorReporter == null) {
                 return new List<XmlProcessingError>();
             }
-            return errorReporter.ErrorList;
 
+            return errorReporter.ErrorList;
         }
 
         /// <summary>
@@ -304,16 +269,12 @@ namespace Saxon.Api {
         /// objects to the <c>ErrorList</c> if supplied; otherwise they will be written to the standard
         /// error stream. The exception that is returned is merely a summary indicating the
         /// status.</exception>
-
-        public XQueryExecutable Compile(Stream query)
-        {
-            try
-            {
+        public XQueryExecutable Compile(Stream query) {
+            try {
                 net.sf.saxon.s9api.XQueryExecutable exec = compiler.compile(query);
                 return new XQueryExecutable(exec);
             }
-            catch (SaxonApiException e)
-            {
+            catch (SaxonApiException e) {
                 throw new StaticError(e);
             }
         }
@@ -341,16 +302,12 @@ namespace Saxon.Api {
         /// objects to the <c>ErrorList</c> if supplied; otherwise they will be written to the standard
         /// error stream. The exception that is returned is merely a summary indicating the
         /// status.</exception>        
-
-        public XQueryExecutable Compile(String query)
-        {
-            try
-            {
+        public XQueryExecutable Compile(String query) {
+            try {
                 net.sf.saxon.s9api.XQueryExecutable exec = compiler.compile(query);
                 return new XQueryExecutable(exec);
             }
-            catch (SaxonApiException e)
-            {
+            catch (SaxonApiException e) {
                 throw new StaticError(e);
             }
         }
@@ -359,8 +316,7 @@ namespace Saxon.Api {
         /// Escape hatch to the underlying Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.XQueryCompiler Implementation
-        {
+        public net.sf.saxon.s9api.XQueryCompiler Implementation {
             get { return compiler; }
         }
 
@@ -378,9 +334,7 @@ namespace Saxon.Api {
         /// defined in the Configuration.</para>
         /// </remarks>
 
-        public bool FastCompliation
-        {
-
+        public bool FastCompliation {
             set { compiler.setFastCompilation(value); }
             get { return compiler.isFastCompilation(); }
         }

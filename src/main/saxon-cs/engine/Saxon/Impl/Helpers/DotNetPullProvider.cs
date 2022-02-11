@@ -9,7 +9,7 @@ namespace System.Impl.Helpers {
         private readonly XmlReader parser;
         private string baseURI;
         private bool isEmptyElement = false;
-        private net.sf.saxon.pull.PullEvent currentEvent = net.sf.saxon.pull.PullEvent.START_OF_INPUT;
+        private net.sf.saxon.pull.PullEvent? currentEvent = net.sf.saxon.pull.PullEvent.START_OF_INPUT;
         private bool expandDefaults = true;
         private readonly java.util.Stack<net.sf.saxon.om.NamespaceMap> namespaceStack = new java.util.Stack<net.sf.saxon.om.NamespaceMap>();
         public DotNetPullProvider(XmlReader parser)  {
@@ -23,7 +23,7 @@ namespace System.Impl.Helpers {
             parser.Close();
         }
         public net.sf.saxon.pull.PullEvent current() {
-            return currentEvent;
+            return currentEvent.Value;
         }
         public net.sf.saxon.value.AtomicValue getAtomicValue() {
             return null;
@@ -99,27 +99,17 @@ namespace System.Impl.Helpers {
         public net.sf.saxon.pull.PullEvent next() {
             if ((currentEvent==net.sf.saxon.pull.PullEvent.START_OF_INPUT)) {
                 currentEvent = net.sf.saxon.pull.PullEvent.START_DOCUMENT;
-                return currentEvent;
-            } else {
-                if (((currentEvent==net.sf.saxon.pull.PullEvent.END_DOCUMENT)||(currentEvent==net.sf.saxon.pull.PullEvent.END_OF_INPUT))) {
-                    currentEvent = net.sf.saxon.pull.PullEvent.END_OF_INPUT;
-                    return currentEvent;
-                } else {
-                    if (((currentEvent==net.sf.saxon.pull.PullEvent.START_ELEMENT)&&isEmptyElement)) {
-                        currentEvent = net.sf.saxon.pull.PullEvent.END_ELEMENT;
-                        return currentEvent;
-                    }
-                }
+                return currentEvent.Value;
+            } else if (((currentEvent==net.sf.saxon.pull.PullEvent.END_DOCUMENT) || (currentEvent==net.sf.saxon.pull.PullEvent.END_OF_INPUT))) {
+                currentEvent = net.sf.saxon.pull.PullEvent.END_OF_INPUT;
+                return currentEvent.Value;
+            } else if (((currentEvent==net.sf.saxon.pull.PullEvent.START_ELEMENT) && isEmptyElement)) {
+                currentEvent = net.sf.saxon.pull.PullEvent.END_ELEMENT;
+                return currentEvent.Value;
             }
             do {
                 try {
                     parser.Read();
-                    if (false) {
-                        throw new XmlException("dummy");
-                    }
-                    if (false) {
-                        throw new XmlSchemaException("dummy", new XmlException("dummy"));
-                    }
                 } catch (XmlException e) {
                     net.sf.saxon.trans.XPathException de = new net.sf.saxon.trans.XPathException(("Error reported by XML parser: "+e.Message), e);
                     net.sf.saxon.expr.parser.Loc loc = new net.sf.saxon.expr.parser.Loc(getSystemId(), e.LineNumber, e.LinePosition);
@@ -140,7 +130,7 @@ namespace System.Impl.Helpers {
                 isEmptyElement = parser.IsEmptyElement;
                 if (parser.EOF) {
                     currentEvent = net.sf.saxon.pull.PullEvent.END_DOCUMENT;
-                    return currentEvent;
+                    return currentEvent.Value;
                 }
                 if ((intype==XmlNodeType.EntityReference)) {
                     currentEvent = null;
@@ -148,36 +138,32 @@ namespace System.Impl.Helpers {
                     currentEvent = mapInputKindToOutputKind(intype);
                     if (((currentEvent==net.sf.saxon.pull.PullEvent.TEXT)&&(parser.Depth==0))) {
                         currentEvent = null;
-                    } else {
-                        if ((currentEvent==net.sf.saxon.pull.PullEvent.START_ELEMENT)) {
-                            net.sf.saxon.om.NamespaceMap nsMap = namespaceStack.peek();
-                            if (parser.HasAttributes) {
-                                int limit = parser.AttributeCount;
-                                for (int i = 0; (i<limit); i++) {
-                                    parser.MoveToAttribute(i);
-                                    string prefix = parser.Prefix;
-                                    string localName = parser.LocalName;
-                                    if ("xmlns".Equals(prefix)) {
-                                        nsMap = nsMap.bind(localName, parser.Value);
-                                    } else {
-                                        if (((prefix.Length==0)&&"xmlns".Equals(localName))) {
-                                            nsMap = nsMap.bind("", parser.Value);
-                                        }
+                    } else if ((currentEvent==net.sf.saxon.pull.PullEvent.START_ELEMENT)) {
+                        net.sf.saxon.om.NamespaceMap nsMap = namespaceStack.peek();
+                        if (parser.HasAttributes) {
+                            int limit = parser.AttributeCount;
+                            for (int i = 0; (i<limit); i++) {
+                                parser.MoveToAttribute(i);
+                                string prefix = parser.Prefix;
+                                string localName = parser.LocalName;
+                                if ("xmlns".Equals(prefix)) {
+                                    nsMap = nsMap.bind(localName, parser.Value);
+                                } else {
+                                    if (((prefix.Length==0)&&"xmlns".Equals(localName))) {
+                                        nsMap = nsMap.bind("", parser.Value);
                                     }
                                 }
                             }
-                            namespaceStack.push(nsMap);
-                        } else {
-                            if ((currentEvent==net.sf.saxon.pull.PullEvent.END_ELEMENT)) {
-                                namespaceStack.pop();
-                            }
                         }
+                        namespaceStack.push(nsMap);
+                    } else if ((currentEvent==net.sf.saxon.pull.PullEvent.END_ELEMENT)) {
+                        namespaceStack.pop(); 
                     }
                 }
             } while ((currentEvent==null));
-            return currentEvent;
+            return currentEvent.Value;
         }
-        private net.sf.saxon.pull.PullEvent mapInputKindToOutputKind(XmlNodeType @in) {
+        private net.sf.saxon.pull.PullEvent? mapInputKindToOutputKind(XmlNodeType @in) {
             switch (@in) {
               case XmlNodeType.Attribute:
                 return net.sf.saxon.pull.PullEvent.ATTRIBUTE;
@@ -221,7 +207,7 @@ namespace System.Impl.Helpers {
                     throw new java.lang.IllegalStateException((currentEvent+""));
                 }
             }
-            return currentEvent;
+            return currentEvent.Value;
         }
         public int getColumnNumber() {
             if (((parser is IXmlLineInfo)&&((IXmlLineInfo)parser).HasLineInfo())) {
@@ -260,7 +246,7 @@ namespace System.Impl.Helpers {
         public string getSystemId(int locationId) {
             return getSystemId();
         }
-        public java.util.List<net.sf.saxon.pull.UnparsedEntity> getUnparsedEntities() {
+        public IList<net.sf.saxon.pull.UnparsedEntity> getUnparsedEntities() {
             return null;
         }
     

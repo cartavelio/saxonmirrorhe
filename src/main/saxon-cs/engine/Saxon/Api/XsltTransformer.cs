@@ -7,6 +7,7 @@ using net.sf.saxon.@event;
 using net.sf.saxon.lib;
 using net.sf.saxon.om;
 using net.sf.saxon.s9api;
+using Saxon.Impl.Helpers;
 
 namespace Saxon.Api {
     /// <summary inherits="XdmDestination">
@@ -23,16 +24,8 @@ namespace Saxon.Api {
     /// with the XSLT 3.0 specification, for example streamed evaluation. However, both <c>XsltTransformer</c> 
     /// and <c>Xslt30Transformer</c> can be used irrespective of the XSLT language version used in the stylesheet.</para>
     /// </remarks>
-
     [Serializable]
-    public class XsltTransformer : XmlDestination
-    {
-
-        /* private JXsltController controller;
-      
-         private JStreamSource streamSource;
-         private GlobalParameterSet globalParameters;
-         private bool baseOutputUriWasSet = false;*/
+    public class XsltTransformer : XmlDestination {
         private XmlDestination xmlDestination;
         private StandardLogger traceFunctionDestination;
         private IMessageListener messageListener;
@@ -44,8 +37,7 @@ namespace Saxon.Api {
 
         // internal constructor
 
-        internal XsltTransformer(net.sf.saxon.s9api.XsltTransformer transformer)
-        {
+        internal XsltTransformer(net.sf.saxon.s9api.XsltTransformer transformer) {
             this.transformer = transformer;
         }
 
@@ -62,12 +54,15 @@ namespace Saxon.Api {
         /// implemented as a view or wrapper of the supplied document.</para>
         /// </remarks>
 
-        public XdmNode InitialContextNode
-        {
+        public XdmNode InitialContextNode {
             get {
                 NodeInfo node = transformer.getInitialContextNode().getUnderlyingNode();
-                return node == null ? null : ((XdmNode)XdmValue.Wrap(node)); }
-            set { transformer.setInitialContextNode(value == null ? null : (net.sf.saxon.s9api.XdmNode)XdmValue.FromGroundedValueToJXdmValue(value.value)); }
+                return node == null ? null : ((XdmNode) XdmValue.Wrap(node));
+            }
+            set =>
+                transformer.setInitialContextNode(value == null
+                    ? null
+                    : (net.sf.saxon.s9api.XdmNode) XdmValue.FromGroundedValueToJXdmValue(value.value));
         }
 
         /// <summary>
@@ -91,10 +86,9 @@ namespace Saxon.Api {
         /// <param name="baseUri">
         /// The base URI of the principal input document. This is used for example by the <c>document()</c>
         /// function if the document contains links to other documents in the form of relative URIs.</param>
-
-        public void SetInputStream(Stream input, Uri baseUri)
-        {
-            StreamSource streamSource = new StreamSource(new JDotNetInputStream(input), Uri.EscapeUriString(baseUri.ToString()));
+        public void SetInputStream(Stream input, Uri baseUri) {
+            StreamSource streamSource =
+                new StreamSource(input), Uri.EscapeUriString(baseUri.ToString());
             transformer.setSource(streamSource);
         }
 
@@ -107,20 +101,16 @@ namespace Saxon.Api {
         /// named mode as the default mode, then supplying null as the <c>InitialMode</c> invokes this default.
         /// </remarks>
 
-        public QName InitialMode
-        {
-            get
-            {
+        public QName InitialMode {
+            get {
                 net.sf.saxon.s9api.QName mode = transformer.getInitialMode();
-                if (mode == null)
-                {
+                if (mode == null) {
                     return null;
                 }
 
                 return QName.FromClarkName(mode.getClarkName());
             }
-            set
-            {
+            set {
                 transformer.setInitialMode(value == null ? null : net.sf.saxon.s9api.QName.fromEQName(value.EQName));
             }
         }
@@ -139,14 +129,9 @@ namespace Saxon.Api {
         /// code XTDE0040. Setting it to the name of a template that has template
         /// parameters throws a <c>DynamicError</c> with error code XTDE0060.</exception>
 
-        public QName InitialTemplate
-        {
-            get
-            {
-                return initialTemplateName;
-            }
-            set
-            {
+        public QName InitialTemplate {
+            get => initialTemplateName;
+            set {
                 initialTemplateName = value;
                 transformer.setInitialTemplate(initialTemplateName.UnderlyingQName());
             }
@@ -157,16 +142,9 @@ namespace Saxon.Api {
         /// attribute of <c>xsl:result-document</c>.
         /// </summary>
 
-        public Uri BaseOutputUri
-        {
-            get
-            {
-                return new Uri(transformer.getBaseOutputURI());
-            }
-            set
-            {
-                transformer.setBaseOutputURI(value.ToString());
-            }
+        public Uri BaseOutputUri {
+            get { return new Uri(transformer.getBaseOutputURI()); }
+            set { transformer.setBaseOutputURI(value.ToString()); }
         }
 
 
@@ -175,12 +153,9 @@ namespace Saxon.Api {
         /// loaded using the <c>doc()</c>, <c>document()</c>, or <c>collection()</c> functions.
         /// </summary>
 
-        public SchemaValidationMode SchemaValidationMode
-        {
-            get
-            {
-                switch (transformer.getUnderlyingController().getSchemaValidationMode())
-                {
+        public SchemaValidationMode SchemaValidationMode {
+            get {
+                switch (transformer.getUnderlyingController().getSchemaValidationMode()) {
                     case Validation.STRICT:
                         return SchemaValidationMode.Strict;
                     case Validation.LAX:
@@ -195,10 +170,8 @@ namespace Saxon.Api {
                 }
             }
 
-            set
-            {
-                switch (value)
-                {
+            set {
+                switch (value) {
                     case SchemaValidationMode.Strict:
                         transformer.setSchemaValidationMode(ValidationMode.STRICT);
                         break;
@@ -220,24 +193,14 @@ namespace Saxon.Api {
         }
 
 
-
-
-
         /// <summary>
         /// The <c>XmlResolver</c> to be used at run-time to resolve and dereference URIs
         /// supplied to the <c>doc()</c> and <c>document()</c> functions.
         /// </summary>
 
-        public XmlResolver InputXmlResolver
-        {
-            get
-            {
-                return ((JDotNetURIResolver)transformer.getURIResolver()).getXmlResolver();
-            }
-            set
-            {
-                transformer.setURIResolver(new JDotNetURIResolver(value));
-            }
+        public XmlResolver InputXmlResolver {
+            get => ((DotNetURIResolver) transformer.getURIResolver()).getXmlResolver();
+            set => transformer.setURIResolver(new DotNetURIResolver(value));
         }
 
         /// <summary>
@@ -253,16 +216,13 @@ namespace Saxon.Api {
         /// a file in filestore, using the <c>file:</c> URI scheme).
         /// </remarks>
 
-        public IResultDocumentHandler ResultDocumentHandler
-        {
-            get
-            {
-                return resultDocumentHandler;
-            }
-            set
-            {
+        public IResultDocumentHandler ResultDocumentHandler {
+            get { return resultDocumentHandler; }
+            set {
                 resultDocumentHandler = value;
-                transformer.getUnderlyingController().setResultDocumentResolver(new ResultDocumentHandlerWrapper(value, transformer.getUnderlyingController().makePipelineConfiguration()));
+                transformer.getUnderlyingController().setResultDocumentResolver(
+                    new ResultDocumentHandlerWrapper(value,
+                        transformer.getUnderlyingController().makePipelineConfiguration()));
             }
         }
 
@@ -284,19 +244,13 @@ namespace Saxon.Api {
         /// which terminates the transformation.</para>
         /// </remarks>
 
-        public IMessageListener MessageListener
-        {
-            set
-            {
+        public IMessageListener MessageListener {
+            set {
                 messageListener = value;
                 transformer.setMessageListener(new MessageListenerProxy(value));
             }
-            get
-            {
-                return messageListener;
-            }
+            get { return messageListener; }
         }
-
 
 
         /// <summary>
@@ -319,17 +273,12 @@ namespace Saxon.Api {
         /// in allowing the error code supplied to xsl:message to be notified</para>
         /// </remarks>
 
-        public IMessageListener2 MessageListener2
-        {
-            set
-            {
+        public IMessageListener2 MessageListener2 {
+            set {
                 messageListener2 = value;
                 transformer.setMessageListener(new MessageListenerProxy2(value));
             }
-            get
-            {
-                return messageListener2;
-            }
+            get { return messageListener2; }
         }
 
         /// <summary>
@@ -341,19 +290,13 @@ namespace Saxon.Api {
         /// <para>The supplied destination is ignored if a <c>TraceListener</c> is in use.</para>
         /// </remarks>
 
-        public StandardLogger TraceFunctionDestination
-        {
-            set
-            {
+        public StandardLogger TraceFunctionDestination {
+            set {
                 traceFunctionDestination = value;
                 transformer.setTraceFunctionDestination(value);
             }
-            get
-            {
-                return traceFunctionDestination;
-            }
+            get { return traceFunctionDestination; }
         }
-
 
 
         /// <summary>
@@ -368,25 +311,18 @@ namespace Saxon.Api {
         /// If the parameter declaration defines a required type for the variable, then
         /// this value will be converted in the same way as arguments to function calls
         /// (for example, numeric promotion is applied).</param>
-
-        public void SetParameter(QName name, XdmValue value)
-        {
-            transformer.setParameter(net.sf.saxon.s9api.QName.fromEQName(name.EQName), net.sf.saxon.s9api.XdmValue.wrap(value.value));
+        public void SetParameter(QName name, XdmValue value) {
+            transformer.setParameter(net.sf.saxon.s9api.QName.fromEQName(name.EQName),
+                net.sf.saxon.s9api.XdmValue.wrap(value.value));
         }
 
         public Destination GetUnderlyingDestination() {
             return transformer;
         }
 
-        public net.sf.saxon.s9api.XsltTransformer Implemmentation
-        {
-            get
-            {
-                return transformer;
-
-            }
+        public net.sf.saxon.s9api.XsltTransformer Implemmentation {
+            get { return transformer; }
         }
-
 
 
         /// <summary>
@@ -398,18 +334,12 @@ namespace Saxon.Api {
         /// <c>XsltTransformer</c> as the destination of another.</para>
         /// </remarks>
 
-        public XmlDestination Destination
-        {
-            get
-            {
-                return this.xmlDestination;
-            }
-            set
-            {
+        public XmlDestination Destination {
+            get { return this.xmlDestination; }
+            set {
                 this.xmlDestination = value;
                 transformer.setDestination(value.GetUnderlyingDestination());
             }
-
         }
 
 
@@ -421,21 +351,17 @@ namespace Saxon.Api {
         /// Some kinds of <c>Destination</c> may need to close an output stream, others might
         /// not need to do anything. The default implementation does nothing.
         /// </remarks>
-
-        public void Close()
-        {
+        public void Close() {
             transformer.close();
-
         }
 
         // internal method
 
-        internal Receiver GetDestinationReceiver(XmlDestination destination)
-        {
-
+        internal Receiver GetDestinationReceiver(XmlDestination destination) {
             Controller controller = transformer.getUnderlyingController();
             PipelineConfiguration pipe = controller.getConfiguration().makePipelineConfiguration();
-            Receiver r = destination.GetUnderlyingDestination().getReceiver(pipe, controller.getExecutable().getPrimarySerializationProperties());
+            Receiver r = destination.GetUnderlyingDestination()
+                .getReceiver(pipe, controller.getExecutable().getPrimarySerializationProperties());
             pipe.setController(controller);
             return r;
             //}
@@ -451,22 +377,16 @@ namespace Saxon.Api {
         /// </param>
         /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if the transformation
         /// fails.</exception>
-
-        public void Run(XmlDestination destination)
-        {
-            if (destination == null)
-            {
+        public void Run(XmlDestination destination) {
+            if (destination == null) {
                 throw new DynamicError("Destination is null");
             }
-           
-            try
-            {
+
+            try {
                 transformer.setDestination(destination.GetUnderlyingDestination());
-                transformer.transform() ;
-               
+                transformer.transform();
             }
-            catch (SaxonApiException err)
-            {
+            catch (SaxonApiException err) {
                 throw new DynamicError(err);
             }
         }
@@ -483,11 +403,8 @@ namespace Saxon.Api {
         /// Escape hatch to the underlying Java implementation
         /// </summary>
 
-        public Controller Implementation
-        {
+        public Controller Implementation {
             get { return transformer.getUnderlyingController(); }
         }
-
-
     }
 }

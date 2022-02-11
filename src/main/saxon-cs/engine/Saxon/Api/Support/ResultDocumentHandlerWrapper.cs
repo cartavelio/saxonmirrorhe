@@ -4,7 +4,7 @@ using javax.xml.transform;
 using net.sf.saxon.@event;
 using net.sf.saxon.lib;
 
-namespace Saxon.Api {
+namespace Saxon.Api.Support {
     ///<summary>Internal wrapper class for <c>IResultDocumentHandler</c></summary>
     internal class ResultDocumentHandlerWrapper : ResultDocumentResolver
     {
