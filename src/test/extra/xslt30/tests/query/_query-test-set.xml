@@ -83,5 +83,85 @@
          <assert-xml><![CDATA[<result><z>38</z></result>]]></assert-xml>
       </result>
    </test-case>
+   
+   <test-case name="query-101">
+      <description>test saxon:xquery()</description>
+      <created by="Michael Kay" on="2021-09-01"/>
+      <dependencies>
+         <spec value="XSLT20+"/>
+         <feature value="Saxon-PE"/>
+      </dependencies>
+      <test>
+         <stylesheet file="query-101.xsl"/>
+         <initial-template name="main"/>
+      </test>
+      <result>
+         <assert-xml><![CDATA[<result><z>38</z></result>]]></assert-xml>
+      </result>
+   </test-case>
+   
+   <test-case name="query-001b">
+      <description>test saxon:xquery(), when not available</description>
+      <created by="Debbie Lockett" on="2021-09-01"/>
+      <dependencies>
+         <spec value="XSLT20+"/>
+         <feature value="Saxon-PE" satisfied="false"/>
+      </dependencies>
+      <test>
+         <stylesheet file="query-101.xsl"/>
+         <initial-template name="main"/>
+      </test>
+      <result>
+         <error code="XPST0017"/>
+      </result>
+   </test-case>
+   
+   <test-case name="query-102">
+      <description>test saxon:xquery() with inherited context item</description>
+      <created by="Michael Kay" on="2021-09-01"/>
+      <dependencies>
+         <spec value="XSLT20+"/>
+         <feature value="Saxon-PE"/>
+      </dependencies>
+      <test>
+         <stylesheet file="query-102.xsl"/>
+         <initial-template name="main"/>
+      </test>
+      <result>
+         <assert-xml><![CDATA[<result><a><z>2</z></a><a><z>3</z></a><a><z>4</z></a><a><z>5</z></a><a><z>6</z></a></result>]]></assert-xml>
+      </result>
+   </test-case>
+   
+   <test-case name="query-102b">
+      <description>test saxon:xquery() inheriting the context item implicitly</description>
+      <created by="Debbie Lockett" on="2021-09-01"/>
+      <dependencies>
+         <spec value="XSLT20+"/>
+         <feature value="Saxon-PE" satisfied="false"/>
+      </dependencies>
+      <test>
+         <stylesheet file="query-102.xsl"/>
+         <initial-template name="main"/>
+      </test>
+      <result>
+         <error code="XPST0017"/>
+      </result>
+   </test-case>
+   
+   <test-case name="query-103">
+      <description>test saxon:xquery() supplying params </description>
+      <created by="Michael Kay" on="2021-09-01"/>
+      <dependencies>
+         <spec value="XSLT20+"/>
+         <feature value="Saxon-PE"/>
+      </dependencies>
+      <test>
+         <stylesheet file="query-103.xsl"/>
+         <initial-template name="main"/>
+      </test>
+      <result>
+         <assert-xml><![CDATA[<result><z>38</z></result>]]></assert-xml>
+      </result>
+   </test-case>
 
 </test-set>
