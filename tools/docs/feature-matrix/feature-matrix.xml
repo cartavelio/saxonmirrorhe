@@ -2,8 +2,10 @@
   
   <!-- For different descriptions in the Product Descriptions, but not the feature matrix table,
       use description and alt-description elements.
-      Use description/@generic="true" for generic descriptions used by the feature matrix only, for features
-      with levels.
+      
+      When features overlap, such that one feature is subsumed by others, then in the product descriptions we
+      don't include details for the subsumed feature, if the referenced subsuming features are included (for
+      that product variant). Use 'subsumed-by' element in product element, referencing other feature/@ids.
   --> 
   
   <packages>
@@ -652,7 +654,9 @@
       <p>Numbers can be formatted as words in English.</p>
     </description>
     <products>
-      <product J="HE" C="HE"/>
+      <product J="HE" C="HE">
+        <subsumed-by feature="ICU-numbers"/>
+      </product>
     </products>
   </feature>
   
@@ -663,7 +667,9 @@
       <p>Dates can be formatted as words in English.</p>
     </description>
     <products>
-      <product J="HE" CS="HE" C="HE" JS="HE"/>
+      <product J="HE" CS="HE" C="HE" JS="HE">
+        <subsumed-by feature="ICU-dates"/>
+      </product>
     </products>
   </feature>
   
@@ -688,11 +694,13 @@
         Belgium Flemish (nl-BE), and Swedish (sv).</p>
     </alt-description>-->
     <products>
-      <product J="HE"/><!-- C="PE" -->
+      <product J="HE"><!-- C="PE" -->
+        <subsumed-by feature="ICU-numbers ICU-dates"/>
+      </product>
     </products>
   </feature>
   
-  <feature class="Localization">
+  <feature class="Localization" id="ICU-numbers">
     <shortName>Formatting numbers using ICU</shortName>
     <details link="localization/ICU-numbers-and-dates" name="Numbers and Dates from ICU" subpages="has-subpages"/>
     <description>
@@ -704,7 +712,7 @@
     </products>
   </feature>
   
-  <feature class="Localization">
+  <feature class="Localization" id="ICU-dates">
     <shortName>Formatting dates using ICU</shortName>
     <details link="localization/ICU-numbers-and-dates" name="Numbers and Dates from ICU" subpages="has-subpages"/>
     <description>
@@ -733,11 +741,13 @@
         collation facilities available directly from the JDK.</p>
     </description>
     <products>
-      <product J="HE" C="HE"/>
+      <product J="HE" C="HE">
+        <subsumed-by feature="ICU-sort"/>
+      </product>
     </products>
   </feature>
   
-  <feature class="Localization">
+  <feature class="Localization" id="ICU-sort">
     <shortName>Sorting and collations using ICU</shortName>
     <details link="localization/unicode-collation-algorithm" name="Unicode Collation Algorithm" subpages="has-subpages"/>
     <description>
