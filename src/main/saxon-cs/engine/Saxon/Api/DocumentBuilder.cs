@@ -37,7 +37,7 @@ namespace Saxon.Api {
             this.processor = processor;
             this.s9Builder = processor.JProcessor.newDocumentBuilder();
             this.config = processor.Implementation;
-            this.xmlResolver = new StandardXmlResolver(this.config);
+            this.xmlResolver = config.getCommonResourceResolver();
 
         }
 
