@@ -164,13 +164,13 @@ task samples_common(
     // Just a place to hang dependencies
 }
 
-task copy_usecases(
+/*task copy_usecases(
         type: Copy,
         description: "Copy use-cases into the resources folder"
 ) {
     into "${buildDir}/saxon-resources/use-cases"
     from "${projectDir}/src/use-cases"
-}
+}*/
 
 task copy_samples(
         type: Copy,
@@ -245,7 +245,7 @@ task samples_j_src(
 
 task samples_j(
         type: Copy,
-        dependsOn: ["copy_usecases", "samples_j_src", "run_eej_samples_ee"],
+        dependsOn: ["samples_j_src", "run_eej_samples_ee"],
         description: "Copy compiled Java samples into the resources folder"
 ) {
     into "${buildDir}/saxon-resources/samples/java/classes"
