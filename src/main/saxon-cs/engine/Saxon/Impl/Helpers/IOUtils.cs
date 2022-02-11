@@ -1,6 +1,6 @@
 using System;
 using System.Text;
-using java.lang;
+using Saxon.Ejava.lang;
 
 namespace Saxon.Impl.Helpers {
     public class IOUtils {

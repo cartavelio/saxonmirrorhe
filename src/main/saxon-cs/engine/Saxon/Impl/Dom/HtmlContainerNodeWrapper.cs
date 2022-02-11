@@ -1,7 +1,7 @@
-using net.sf.saxon.om;
-using net.sf.saxon.tree.wrapper;
+using Saxon.Hej.om;
+using Saxon.Hej.tree.wrapper;
 
-namespace SaxonCS3.Impl.Dom {
+namespace Saxon.Impl.Dom {
     /// <summary>
     /// Marker interface representing a wrapper for a document or element node in the HTML tree
     /// </summary>

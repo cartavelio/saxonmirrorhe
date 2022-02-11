@@ -1,7 +1,7 @@
-using net.sf.saxon.ma.arrays;
-using net.sf.saxon.ma.map;
-using net.sf.saxon.om;
-using net.sf.saxon.resource;
+using Saxon.Hej.ma.arrays;
+using Saxon.Hej.ma.map;
+using Saxon.Hej.om;
+using Saxon.Hej.resource;
 
 namespace Saxon.Api {
     /// <summary>
@@ -10,13 +10,13 @@ namespace Saxon.Api {
     /// </summary>
     public class Resource : IResource
     {
-        internal net.sf.saxon.lib.Resource resource;
+        internal Saxon.Hej.lib.Resource resource;
         
         /// <summary>
         /// Construct a <c>Resource<c/> by wrapping an internal representation of the resource
         /// </summary>
         /// <param name="rc"></param>
-        public Resource(net.sf.saxon.lib.Resource rc) {
+        public Resource(Saxon.Hej.lib.Resource rc) {
             resource = rc;
         }
 

@@ -5,22 +5,22 @@ using System.Globalization;
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
-using javax.xml.transform;
-using javax.xml.transform.stream;
-using net.sf.saxon;
-using net.sf.saxon.@event;
-using net.sf.saxon.om;
-using net.sf.saxon.pull;
-using net.sf.saxon.s9api;
-using net.sf.saxon.style;
-using net.sf.saxon.trans;
-using net.sf.saxon.trans.packages;
-using net.sf.saxon.tree.util;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej;
+using Saxon.Hej.@event;
+using Saxon.Hej.om;
+using Saxon.Hej.pull;
+using Saxon.Hej.s9api;
+using Saxon.Hej.style;
+using Saxon.Hej.trans;
+using Saxon.Hej.trans.packages;
+using Saxon.Hej.tree.util;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
-using JXsltCompiler = net.sf.saxon.s9api.XsltCompiler;
-using System = java.lang.System;
+using JXsltCompiler = Saxon.Hej.s9api.XsltCompiler;
+using System = Saxon.Ejava.lang.System;
 
 namespace Saxon.Api {
     /// <summary>
@@ -109,7 +109,7 @@ namespace Saxon.Api {
         public XmlResolver XmlResolver {
             get {
                 if (xmlResolver == null) {
-                    javax.xml.transform.URIResolver resolver =
+                    Saxon.Ejavax.xml.transform.URIResolver resolver =
                         jXsltCompiler.getUnderlyingCompilerInfo().getURIResolver();
                     if (resolver is StandardURIResolver standardUriResolver) {
                         return standardUriResolver.getXmlResolver();
@@ -355,7 +355,7 @@ namespace Saxon.Api {
                 }
             }
 
-            net.sf.saxon.s9api.XsltExecutable jexecutable = jXsltCompiler.compile(ss);
+            Saxon.Hej.s9api.XsltExecutable jexecutable = jXsltCompiler.compile(ss);
 
             if (closeStream) {
                 input.Close();
@@ -474,7 +474,7 @@ namespace Saxon.Api {
         /// <param name="location">the location from which the package is to be loaded, as a URI</param>
         /// <returns>the compiled package loaded from the supplied file or remote location</returns>
         public XsltPackage LoadLibraryPackage(Uri location) {
-            net.sf.saxon.s9api.XsltPackage package = jXsltCompiler.loadLibraryPackage(location);
+            Saxon.Hej.s9api.XsltPackage package = jXsltCompiler.loadLibraryPackage(location);
             return new XsltPackage(processor, package);
         }
 
@@ -511,7 +511,7 @@ namespace Saxon.Api {
         /// Escape hatch to the underlying Java-derived implementation of the <c>XsltCompiler</c>
         /// </summary>
 
-        public net.sf.saxon.s9api.XsltCompiler Implementation => jXsltCompiler;
+        private Saxon.Hej.s9api.XsltCompiler Implementation => jXsltCompiler;
 
 
         /// <summary>

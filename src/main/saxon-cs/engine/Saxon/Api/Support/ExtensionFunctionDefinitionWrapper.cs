@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using net.sf.saxon.expr;
-using net.sf.saxon.om;
-using net.sf.saxon.value;
+using Saxon.Hej.expr;
+using Saxon.Hej.om;
+using Saxon.Hej.value;
 
 namespace Saxon.Api.Support {
-    public class ExtensionFunctionDefinitionWrapper : net.sf.saxon.lib.ExtensionFunctionDefinition {
+    public class ExtensionFunctionDefinitionWrapper : Saxon.Hej.lib.ExtensionFunctionDefinition {
 
         private Saxon.Api.ExtensionFunctionDefinition apiFunction;
         public ExtensionFunctionDefinitionWrapper(Saxon.Api.ExtensionFunctionDefinition apiFunction) {
@@ -34,20 +34,20 @@ namespace Saxon.Api.Support {
             return resultType.ToSequenceType();
         }
 
-        public override net.sf.saxon.lib.ExtensionFunctionCall makeCallExpression() {
+        public override Saxon.Hej.lib.ExtensionFunctionCall makeCallExpression() {
             Saxon.Api.ExtensionFunctionCall apiCall = apiFunction.MakeFunctionCall();
             return new ExtensionFunctionCallWrapper(apiCall);
         }
     }
 
-    public class ExtensionFunctionCallWrapper : net.sf.saxon.lib.ExtensionFunctionCall {
+    public class ExtensionFunctionCallWrapper : Saxon.Hej.lib.ExtensionFunctionCall {
         private readonly Saxon.Api.ExtensionFunctionCall apiCall;
 
         public ExtensionFunctionCallWrapper(Saxon.Api.ExtensionFunctionCall apiCall) {
             this.apiCall = apiCall;
         }
 
-        public override void supplyStaticContext(net.sf.saxon.expr.StaticContext context, int locationId, Expression[] arguments) {
+        public override void supplyStaticContext(Saxon.Hej.expr.StaticContext context, int locationId, Expression[] arguments) {
             apiCall.SupplyStaticContext(new Saxon.Api.StaticContext(context));
         }
 

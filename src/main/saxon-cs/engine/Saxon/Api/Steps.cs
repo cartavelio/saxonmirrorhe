@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using net.sf.saxon.ma.arrays;
-using net.sf.saxon.om;
-using net.sf.saxon.value;
+using Saxon.Hej.ma.arrays;
+using Saxon.Hej.om;
+using Saxon.Hej.value;
 using Saxon.Api.Support;
 
 namespace Saxon.Api {
@@ -713,7 +713,7 @@ namespace Saxon.Api {
             return new Step<XdmAtomicValue, XdmAtomicValue>(item => {
                 {
                     return new SequenceEnumerable<XdmAtomicValue>(
-                        new net.sf.saxon.value.Whitespace.Tokenizer(item.GetStringValue()));
+                        new Saxon.Hej.value.Whitespace.Tokenizer(item.GetStringValue()));
                 }
             });
         }
@@ -763,14 +763,14 @@ namespace Saxon.Api {
                 }
                 else if (step.StartsWith("@")) {
                     String name = step.Substring(1);
-                    if (!net.sf.saxon.om.NameChecker.isValidNCName(name)) {
+                    if (!Saxon.Hej.om.NameChecker.isValidNCName(name)) {
                         throw new System.ArgumentException("Invalid attribute name " + name);
                     }
 
                     pathSteps.Add(Steps.Attribute(name));
                 }
                 else {
-                    if (!net.sf.saxon.om.NameChecker.isValidNCName(step)) {
+                    if (!Saxon.Hej.om.NameChecker.isValidNCName(step)) {
                         throw new System.ArgumentException("Invalid element name " + step);
                     }
 

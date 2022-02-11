@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using JNamespaceConstant = net.sf.saxon.lib.NamespaceConstant;
+using JNamespaceConstant = Saxon.Hej.lib.NamespaceConstant;
 
 namespace Saxon.Api
 {

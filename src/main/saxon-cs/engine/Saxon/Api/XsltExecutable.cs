@@ -19,11 +19,11 @@ namespace Saxon.Api {
     {
 
         private Processor processor;
-        private net.sf.saxon.s9api.XsltExecutable jExecutable;
+        private Saxon.Hej.s9api.XsltExecutable jExecutable;
 
         // internal constructor
 
-        internal XsltExecutable(net.sf.saxon.s9api.XsltExecutable executable)
+        internal XsltExecutable(Saxon.Hej.s9api.XsltExecutable executable)
         {
             this.jExecutable = executable;
         }
@@ -87,7 +87,7 @@ namespace Saxon.Api {
         /// Escape hatch to the underlying Java implementation object.
         /// </summary>
 
-        public net.sf.saxon.s9api.XsltExecutable Implementation => jExecutable;
+        private Saxon.Hej.s9api.XsltExecutable Implementation => jExecutable;
 
         /// <summary>
         /// Get the whitespace stripping policy defined by this stylesheet, that is, the policy
@@ -114,10 +114,10 @@ namespace Saxon.Api {
         /// </returns>
         public Dictionary<QName, ParameterDetails> GetGlobalParameters()
         {
-            Dictionary<QName, net.sf.saxon.s9api.XsltExecutable.ParameterDetails> globals = jExecutable.getGlobalParameters();
+            Dictionary<QName, Saxon.Hej.s9api.XsltExecutable.ParameterDetails> globals = jExecutable.getGlobalParameters();
             Dictionary<QName, ParameterDetails> params1 = new Dictionary<QName, ParameterDetails>();
             int count = globals.Count;
-            foreach (KeyValuePair<QName, net.sf.saxon.s9api.XsltExecutable.ParameterDetails> pair in globals) {
+            foreach (KeyValuePair<QName, Saxon.Hej.s9api.XsltExecutable.ParameterDetails> pair in globals) {
                 XdmSequenceType sType = XdmSequenceType.FromSequenceType(pair.Value.getUnderlyingDeclaredType());
                 params1.Add(pair.Key, new ParameterDetails(sType, false));
             }

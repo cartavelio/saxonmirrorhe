@@ -1,5 +1,5 @@
-using net.sf.saxon.pattern;
-using net.sf.saxon.s9api;
+using Saxon.Hej.pattern;
+using Saxon.Hej.s9api;
 
 namespace Saxon.Api {
     /// <summary>
@@ -25,7 +25,7 @@ namespace Saxon.Api {
         /// <param name="item">the item to be tested against this item type</param>
         /// <returns>true if the item matches this item type, false if it does not match.</returns>
         public override bool Matches(XdmItem item) {
-            return ((net.sf.saxon.om.Item)item.value) is net.sf.saxon.om.NodeInfo;
+            return ((Saxon.Hej.om.Item)item.value) is Saxon.Hej.om.NodeInfo;
         }
 
         /// <summary>

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using net.sf.saxon.expr;
-using net.sf.saxon.om;
-using net.sf.saxon.tree.iter;
+using Saxon.Hej.expr;
+using Saxon.Hej.om;
+using Saxon.Hej.tree.iter;
 
 namespace Saxon.Impl.Helpers {
     public class ReverseListIterator<T> : SequenceIterator, 

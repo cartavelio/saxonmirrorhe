@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using java.lang;
-using java.util;
+using Saxon.Ejava.lang;
+using Saxon.Ejava.util;
 using Math = System.Math;
 using StringBuilder = System.Text.StringBuilder;
 

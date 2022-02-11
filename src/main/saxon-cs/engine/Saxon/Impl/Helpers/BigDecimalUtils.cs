@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-using java.math;
+using Saxon.Ejava.math;
 using Singulink.Numerics;
 
 namespace Saxon.Impl.Helpers {

@@ -1,5 +1,5 @@
 using System;
-using net.sf.saxon.om;
+using Saxon.Hej.om;
 
 namespace Saxon.Api {
     /// <summary inherits="XdmValue">
@@ -77,7 +77,7 @@ namespace Saxon.Api {
         }
         
         /// <summary>
-        /// Create an <c>XdmItem</c> from an underlying Saxon <c>net.sf.saxon.om.Item</c> object.
+        /// Create an <c>XdmItem</c> from an underlying Saxon <c>Saxon.Hej.om.Item</c> object.
         /// The result is the same as applying the <c>XdmValue.Wrap</c> method, but
         /// it is returned more conveniently as an instance of <c>XdmItem</c>
         /// </summary>
@@ -85,13 +85,13 @@ namespace Saxon.Api {
         /// underlying Saxon implementation. Must not be null.</param>
         /// <returns>An <c>XdmItem</c> that wraps the underlying Saxon XDM item
         /// representation.</returns>
-        public static XdmItem WrapItem(net.sf.saxon.om.Item value) {
+        public static XdmItem WrapItem(Saxon.Hej.om.Item value) {
             return (XdmItem) Wrap(value);
         }
-        public static XdmNode WrapItem(net.sf.saxon.om.NodeInfo value) {
+        public static XdmNode WrapItem(Saxon.Hej.om.NodeInfo value) {
             return (XdmNode) Wrap(value);
         }
-        public static XdmAtomicValue WrapItem(net.sf.saxon.value.AtomicValue value) {
+        public static XdmAtomicValue WrapItem(Saxon.Hej.value.AtomicValue value) {
             return (XdmAtomicValue) Wrap(value);
         }
     }

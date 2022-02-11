@@ -4,16 +4,16 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices.ComTypes;
 using System.Xml;
-using javax.xml.transform.stream;
-using net.sf.saxon;
-using net.sf.saxon.@event;
-using net.sf.saxon.lib;
-using net.sf.saxon.resource;
-using net.sf.saxon.trans;
+using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej;
+using Saxon.Hej.@event;
+using Saxon.Hej.lib;
+using Saxon.Hej.resource;
+using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
-using Version = net.sf.saxon.Version;
+using Version = Saxon.Hej.Version;
 
 namespace Saxon.Api {
     /// <summary>
@@ -28,14 +28,14 @@ namespace Saxon.Api {
         // For largely historic reasons, the Saxon.Api.Processor is implemented
         // as a wrapper around the s9api Processor, which is C# code converted from Java
 
-        private net.sf.saxon.s9api.Processor jProcessor;
+        private Saxon.Hej.s9api.Processor jProcessor;
         private SchemaManager schemaManager = null;
         private TextWriter textWriter = Console.Error;
         private IQueryResolver moduleResolver;
         private CollectionFinder collectionFinder = (cxt, uri) => new ResourceCollectionWrapper(
             new StandardCollectionFinder().findCollection(cxt.context, uri));
 
-        internal Processor(net.sf.saxon.s9api.Processor p) {
+        internal Processor(Saxon.Hej.s9api.Processor p) {
             jProcessor = p;
             jProcessor.getUnderlyingConfiguration().setProcessor(this);
             QueryResolver = null;
@@ -46,7 +46,7 @@ namespace Saxon.Api {
         /// of the software that has been loaded, and on the features that have been licensed.
         /// </summary>
         public Processor() {
-            jProcessor = new net.sf.saxon.s9api.Processor(true);
+            jProcessor = new Saxon.Hej.s9api.Processor(true);
             jProcessor.getUnderlyingConfiguration().setProcessor(this);
         }
 
@@ -59,7 +59,7 @@ namespace Saxon.Api {
         /// verify the license key. If false, the <c>Processor</c> will load a default <c>Configuration</c> that gives restricted
         /// capability and does not require a license, regardless of which version of the software is actually being run.</param>
         public Processor(bool licensedEdition) {
-            jProcessor = new net.sf.saxon.s9api.Processor(licensedEdition);
+            jProcessor = new Saxon.Hej.s9api.Processor(licensedEdition);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Saxon.Api {
             StreamSource ss = new StreamSource(configurationFile);
             Configuration config = Configuration.readConfiguration(ss);
             //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
-            jProcessor = new net.sf.saxon.s9api.Processor(config);
+            jProcessor = new Saxon.Hej.s9api.Processor(config);
             config.setProcessor(this);
         }
 
@@ -86,12 +86,12 @@ namespace Saxon.Api {
             StreamSource ss = new StreamSource(configurationFile, baseUri.AbsoluteUri);
             Configuration config = Configuration.readConfiguration(ss);
             //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
-            jProcessor = new net.sf.saxon.s9api.Processor(config);
+            jProcessor = new Saxon.Hej.s9api.Processor(config);
             config.setProcessor(this);
         }
 
         public Processor(Configuration config) {
-            jProcessor = new net.sf.saxon.s9api.Processor(config);
+            jProcessor = new Saxon.Hej.s9api.Processor(config);
             config.setProcessor(this);
         }
 
@@ -154,12 +154,12 @@ namespace Saxon.Api {
         /// <para>By default a <c>StandardXmlResolver</c> is used.</para>
         /// <para>When Saxon invokes a user-written <c>XmlResolver</c>, the <c>GetEntity</c> method
         /// may return any of: a <c>System.IO.Stream</c>; a <c>System.IO.TextReader</c>; or a
-        /// <c>java.xml.transform.Source</c>.</para>
+        /// <c>Saxon.Ejava.xml.transform.Source</c>.</para>
         /// </remarks>
 
         public XmlResolver XmlResolver {
             get {
-                javax.xml.transform.URIResolver resolver = jProcessor.getUnderlyingConfiguration().getURIResolver();
+                Saxon.Ejavax.xml.transform.URIResolver resolver = jProcessor.getUnderlyingConfiguration().getURIResolver();
                 if (resolver is StandardURIResolver uriResolver) {
                     return uriResolver.getXmlResolver();
                 }
@@ -239,9 +239,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns> a new <c>Serializer</c> </returns>
         public Serializer NewSerializer() {
-            Serializer s = new Serializer(jProcessor.newSerializer());
-            s.SetProcessor(this); //TODO this method call might no longer be needed
-            return s;
+            return new Serializer(this, jProcessor.newSerializer());
         }
 
         /// <summary>
@@ -251,7 +249,7 @@ namespace Saxon.Api {
         /// <param name="textWriter">The <c>TextWriter</c> to which the <c>Serializer</c> will write</param>
         /// <returns> a new <c>Serializer</c> </returns>
         public Serializer NewSerializer(TextWriter textWriter) {
-            Serializer s = new Serializer(jProcessor.newSerializer());
+            Serializer s = new Serializer(this, jProcessor.newSerializer());
             s.SetOutputWriter(textWriter);
             return s;
         }
@@ -263,7 +261,7 @@ namespace Saxon.Api {
         /// <param name="stream">The output <c>Stream</c> to which the <c>Serializer</c> will write</param>
         /// <returns> a new Serializer </returns>
         public Serializer NewSerializer(Stream stream) {
-            Serializer s = new Serializer(jProcessor.newSerializer());
+            Serializer s = new Serializer(this, jProcessor.newSerializer());
             s.SetOutputStream(stream);
             return s;
         }
@@ -489,7 +487,7 @@ namespace Saxon.Api {
         /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>
-        /// <para>Information about the returned <see cref="net.sf.saxon.Configuration"/> object 
+        /// <para>Information about the returned <see cref="Saxon.Hej.Configuration"/> object 
         /// (and the objects it provides access to) is included in the Saxon JavaDoc docmentation.
         /// </para>
         /// </remarks>
@@ -524,10 +522,10 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// The underlying <c>net.sf.saxon.s9api.Processor</c> in the Java implementation
+        /// The underlying <c>Saxon.Hej.s9api.Processor</c> in the Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.Processor JProcessor {
+        public Saxon.Hej.s9api.Processor JProcessor {
             get { return jProcessor; }
         }
 
@@ -537,7 +535,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>This method provides the ability to set named properties of the configuration.
         /// The property names are set as strings, whose values can be found in the Java
-        /// class <c>net.sf.saxon.FeatureKeys</c>. The property values are always strings. 
+        /// class <c>Saxon.Hej.FeatureKeys</c>. The property values are always strings. 
         /// Properties whose values are other types are not available via this interface:
         /// however all properties have an effective equivalent whose value is a string.
         /// Note that on/off properties are set using the strings "true" and "false".</para>
@@ -566,7 +564,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>This method provides the ability to get named properties of the configuration.
         /// The property names are supplied as strings, whose values can be found in the Java
-        /// class <c>net.sf.saxon.FeatureKeys</c>. The property values are always returned as strings. 
+        /// class <c>Saxon.Hej.FeatureKeys</c>. The property values are always returned as strings. 
         /// Properties whose values are other types are returned by converting the value to a string.
         /// Note that on/off properties are returned using the strings "true" and "false".</para>
         /// <para><i>Method added in Saxon 9.1</i></para>

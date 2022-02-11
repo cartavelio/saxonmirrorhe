@@ -1,6 +1,6 @@
 using System;
 using System.Xml;
-using net.sf.saxon.trans;
+using Saxon.Hej.trans;
 
 namespace Saxon.Impl.Helpers {
     public class ProcInstParser {
@@ -29,7 +29,7 @@ namespace Saxon.Impl.Helpers {
                         // and throw the original exception
                     }
                 }
-                throw new net.sf.saxon.trans.XPathException(
+                throw new Saxon.Hej.trans.XPathException(
                     "Invalid syntax for pseudo-attributes: " + e.Message, 
                     SaxonErrorCode.SXCH0005);
             }

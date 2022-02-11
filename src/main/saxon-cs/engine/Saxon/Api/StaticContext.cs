@@ -1,6 +1,6 @@
 using System;
-using net.sf.saxon;
-using net.sf.saxon.trans;
+using Saxon.Hej;
+using Saxon.Hej.trans;
 
 namespace Saxon.Api {
     /// <summary>
@@ -9,9 +9,9 @@ namespace Saxon.Api {
 
     public class StaticContext {
 
-        private net.sf.saxon.expr.StaticContext env;
+        private Saxon.Hej.expr.StaticContext env;
 
-        internal StaticContext(net.sf.saxon.expr.StaticContext jsc) {
+        internal StaticContext(Saxon.Hej.expr.StaticContext jsc) {
             env = jsc;
         }
 
@@ -90,7 +90,7 @@ namespace Saxon.Api {
 
         /// <summary>
         /// The underlying object in the Saxon implementation, an instance of class
-        /// <code>net.sf.saxon.expr.StaticContext</code>
+        /// <code>Saxon.Hej.expr.StaticContext</code>
         /// </summary>
         /// <remarks>
         /// <para>This property provides access to internal methods in the Saxon engine that are
@@ -99,11 +99,11 @@ namespace Saxon.Api {
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>
         /// <para>Information about the returned object (and the objects it provides access to)
-        /// is included in the Saxon JavaDoc documentation, see <see cref="net.sf.saxon.expr.StaticContext"/>.
+        /// is included in the Saxon JavaDoc documentation, see <see cref="Saxon.Hej.expr.StaticContext"/>.
         /// </para>
         /// </remarks>
 
-        public net.sf.saxon.expr.StaticContext Implementation
+        public Saxon.Hej.expr.StaticContext Implementation
         {
             get { return env; }
         }

@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
 using System.Xml;
-using net.sf.saxon.expr.instruct;
-using net.sf.saxon.pattern;
+using Saxon.Hej.expr.instruct;
+using Saxon.Hej.pattern;
 
 namespace Saxon.Api {
     /// <summary>

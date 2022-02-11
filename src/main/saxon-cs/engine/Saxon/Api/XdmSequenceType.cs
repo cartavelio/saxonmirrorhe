@@ -1,8 +1,8 @@
 using System;
-using net.sf.saxon.expr;
-using net.sf.saxon.s9api;
-using ItemType = net.sf.saxon.type.ItemType;
-using SequenceType = net.sf.saxon.value.SequenceType;
+using Saxon.Hej.expr;
+using Saxon.Hej.s9api;
+using ItemType = Saxon.Hej.type.ItemType;
+using SequenceType = Saxon.Hej.value.SequenceType;
 
 namespace Saxon.Api {
     /// <summary>

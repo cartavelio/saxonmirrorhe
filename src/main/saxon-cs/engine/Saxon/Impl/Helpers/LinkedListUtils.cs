@@ -1,5 +1,5 @@
 using System.Linq;
-using java.lang;
+using Saxon.Ejava.lang;
 
 namespace Saxon.Impl.Helpers {
     public class LinkedListUtils {

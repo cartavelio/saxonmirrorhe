@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using net.sf.saxon.ma.arrays;
-using net.sf.saxon.z;
+using Saxon.Hej.ma.arrays;
+using Saxon.Hej.z;
 using Saxon.Impl.Helpers;
-using GroundedValue = net.sf.saxon.om.GroundedValue;
+using GroundedValue = Saxon.Hej.om.GroundedValue;
 
 namespace Saxon.Impl.DataModel {
     
@@ -12,11 +12,11 @@ namespace Saxon.Impl.DataModel {
      * This is a C# implementation of the Saxon AbstractArrayItem interface, implementing
      * XDM arrays underpinned by the .NET ImmutableList data structure.
      */
-    public class ImmArray : net.sf.saxon.ma.arrays.AbstractArrayItem {
+    public class ImmArray : Saxon.Hej.ma.arrays.AbstractArrayItem {
         
         private readonly ImmutableList<GroundedValue> backing;
         
-        public ImmArray(net.sf.saxon.ma.arrays.SimpleArrayItem other) {
+        public ImmArray(Saxon.Hej.ma.arrays.SimpleArrayItem other) {
             this.backing = ImmutableList<GroundedValue>.Empty.AddRange(other.members());
         }
 
@@ -24,13 +24,13 @@ namespace Saxon.Impl.DataModel {
             this.backing = backingList;
         }
 
-        public override net.sf.saxon.om.GroundedValue get(int index) {
+        public override Saxon.Hej.om.GroundedValue get(int index) {
             return backing[index];
         }
-        public override net.sf.saxon.ma.arrays.ArrayItem put(int index, net.sf.saxon.om.GroundedValue newValue) {
+        public override Saxon.Hej.ma.arrays.ArrayItem put(int index, Saxon.Hej.om.GroundedValue newValue) {
             return new ImmArray(backing.SetItem(index, newValue));
         }
-        public override net.sf.saxon.ma.arrays.ArrayItem insert(int position, net.sf.saxon.om.GroundedValue member) {
+        public override Saxon.Hej.ma.arrays.ArrayItem insert(int position, Saxon.Hej.om.GroundedValue member) {
             return new ImmArray(backing.Insert(position, member));
         }
         public override int arrayLength() {
@@ -39,13 +39,13 @@ namespace Saxon.Impl.DataModel {
         public override bool isEmpty() {
             return backing.IsEmpty;
         }
-        public override IEnumerable<net.sf.saxon.om.GroundedValue> members() {
+        public override IEnumerable<Saxon.Hej.om.GroundedValue> members() {
             return backing;
         }
-        public override net.sf.saxon.ma.arrays.ArrayItem subArray(int start, int end) {
+        public override Saxon.Hej.ma.arrays.ArrayItem subArray(int start, int end) {
             return new ImmArray(backing.GetRange(start, end - start));
         }
-        public override net.sf.saxon.ma.arrays.ArrayItem concat(net.sf.saxon.ma.arrays.ArrayItem other) {
+        public override Saxon.Hej.ma.arrays.ArrayItem concat(Saxon.Hej.ma.arrays.ArrayItem other) {
             if ((other.arrayLength()==0)) {
                 return this;
             }
@@ -57,10 +57,10 @@ namespace Saxon.Impl.DataModel {
                 return concat(a2);
             }
         }
-        public override net.sf.saxon.ma.arrays.ArrayItem remove(int index) {
+        public override Saxon.Hej.ma.arrays.ArrayItem remove(int index) {
             return new ImmArray(backing.RemoveAt(index));
         }
-        public override net.sf.saxon.ma.arrays.ArrayItem removeSeveral(net.sf.saxon.z.IntSet positions) {
+        public override Saxon.Hej.ma.arrays.ArrayItem removeSeveral(Saxon.Hej.z.IntSet positions) {
             // TODO: optimize for the case where positions is an IntRangeSet, by calling RemoveRange once for each range
             ImmutableList<GroundedValue> vec = backing;
             // Sort the positions and start at the last so the positions of remaining items aren't affected

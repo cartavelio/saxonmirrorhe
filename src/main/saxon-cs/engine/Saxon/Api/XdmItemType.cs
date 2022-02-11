@@ -1,11 +1,11 @@
 using System;
 using System.Net.NetworkInformation;
-using net.sf.saxon.lib;
-using net.sf.saxon.ma.arrays;
-using net.sf.saxon.ma.map;
-using net.sf.saxon.om;
-using net.sf.saxon.pattern;
-using net.sf.saxon.type;
+using Saxon.Hej.lib;
+using Saxon.Hej.ma.arrays;
+using Saxon.Hej.ma.map;
+using Saxon.Hej.om;
+using Saxon.Hej.pattern;
+using Saxon.Hej.type;
 
 namespace Saxon.Api {
     /// <summary>
@@ -18,13 +18,13 @@ namespace Saxon.Api {
     /// be instantiated in this API.
     /// </remarks>
     public abstract class XdmItemType {
-        protected readonly net.sf.saxon.type.ItemType underlyingType;
+        protected readonly Saxon.Hej.type.ItemType underlyingType;
 
-        protected XdmItemType(net.sf.saxon.type.ItemType underlyingType) {
+        protected XdmItemType(Saxon.Hej.type.ItemType underlyingType) {
             this.underlyingType = underlyingType;
         }
         
-        internal static XdmItemType MakeXdmItemType(net.sf.saxon.type.ItemType type) {
+        internal static XdmItemType MakeXdmItemType(Saxon.Hej.type.ItemType type) {
             if (type is AtomicType atomicType) {
                 return XdmAtomicType.BuiltInAtomicType(
                         QName.FromStructuredQName(atomicType.getStructuredQName()));

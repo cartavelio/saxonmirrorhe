@@ -4,16 +4,16 @@ using System.Net;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
-using java.lang;
-using javax.xml.transform.stream;
-using net.sf.saxon;
-using net.sf.saxon.query;
-using net.sf.saxon.resource;
+using Saxon.Ejava.lang;
+using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej;
+using Saxon.Hej.query;
+using Saxon.Hej.resource;
 using Saxon.Api;
 using Exception = System.Exception;
 
 namespace Saxon.Callbacks {
-    public class StandardUnparsedTextResolver : net.sf.saxon.lib.UnparsedTextURIResolver {
+    public class StandardUnparsedTextResolver : Saxon.Hej.lib.UnparsedTextURIResolver {
         private XmlResolver resolver = new StandardXmlResolver();
 
         public StandardUnparsedTextResolver() {
@@ -22,7 +22,7 @@ namespace Saxon.Callbacks {
         public TextReader resolve(Uri absoluteURI, string encoding, Configuration config) {
             // Handle a URI using the data: URI scheme
             if (absoluteURI.Scheme == "data") {
-                net.sf.saxon.lib.Resource resource;
+                Saxon.Hej.lib.Resource resource;
                 try {
                     resource = DataURIScheme.decode(absoluteURI);
                 }
@@ -49,7 +49,7 @@ namespace Saxon.Callbacks {
                     }
                 }
                 catch (System.Net.WebException e) {
-                    throw new net.sf.saxon.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
+                    throw new Saxon.Hej.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
                 }
             }
 
@@ -61,7 +61,7 @@ namespace Saxon.Callbacks {
                 return new StreamReader(stream, Encoding.GetEncoding(encoding));
             }
             catch (Exception e) {
-                throw new net.sf.saxon.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
+                throw new Saxon.Hej.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
 
             }
         }

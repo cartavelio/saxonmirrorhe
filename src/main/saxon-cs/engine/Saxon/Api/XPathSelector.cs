@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using System.Xml;
-using net.sf.saxon.s9api;
-using net.sf.saxon.trans;
+using Saxon.Hej.s9api;
+using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
@@ -23,11 +23,11 @@ namespace Saxon.Api {
     /// </remarks>     
     [Serializable]
     public class XPathSelector : IEnumerable {
-        net.sf.saxon.s9api.XPathSelector selector;
+        Saxon.Hej.s9api.XPathSelector selector;
 
         // internal constructor
 
-        internal XPathSelector(net.sf.saxon.s9api.XPathSelector selector) {
+        internal XPathSelector(Saxon.Hej.s9api.XPathSelector selector) {
             this.selector = selector;
         }
 
@@ -49,17 +49,17 @@ namespace Saxon.Api {
                 try {
                     selector.setContextItem(value);
                 }
-                catch (net.sf.saxon.trans.XPathException err) {
+                catch (Saxon.Hej.trans.XPathException err) {
                     throw new Saxon.Api.SaxonApiException(err);
                 }
             }
         }
 
         /// <summary>
-        /// Escape hatch to the <c>net.sf.saxon.s9api.XPathSelector</c> object in the underlying Java implementation
+        /// Escape hatch to the <c>Saxon.Hej.s9api.XPathSelector</c> object in the underlying Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.XPathSelector Implementation => selector;
+        private Saxon.Hej.s9api.XPathSelector Implementation => selector;
 
         /// <summary>
         /// Set the value of a variable

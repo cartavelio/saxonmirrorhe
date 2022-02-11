@@ -2,15 +2,15 @@ using System;
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
-using java.lang;
-using javax.xml.transform;
-using javax.xml.transform.stream;
-using net.sf.saxon;
-using net.sf.saxon.lib;
-using net.sf.saxon.om;
-using net.sf.saxon.pull;
-using net.sf.saxon.s9api;
-using net.sf.saxon.trans;
+using Saxon.Ejava.lang;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej;
+using Saxon.Hej.lib;
+using Saxon.Hej.om;
+using Saxon.Hej.pull;
+using Saxon.Hej.s9api;
+using Saxon.Hej.trans;
 using Saxon.Callbacks;
 using Saxon.Impl.Dom;
 using Exception = System.Exception;
@@ -32,7 +32,7 @@ namespace Saxon.Api {
         private QName topLevelElement;
         private XQueryExecutable projectionQuery;
 
-        private net.sf.saxon.s9api.DocumentBuilder s9Builder;
+        private Saxon.Hej.s9api.DocumentBuilder s9Builder;
 
 
         internal DocumentBuilder(Processor processor) {
@@ -50,7 +50,7 @@ namespace Saxon.Api {
         /// <para>By default a <c>StandardXmlResolver</c> is used.</para>
         /// <para>When Saxon invokes a user-written <c>XmlResolver</c>, the <c>GetEntity</c> method
         /// may return any of: a <c>System.IO.Stream</c>; a <c>System.IO.TextReader</c>; or a
-        /// <c>java.xml.transform.Source</c>. However, if the <c>XmlResolver</c> is called
+        /// <c>Saxon.Ejava.xml.transform.Source</c>. However, if the <c>XmlResolver</c> is called
         /// by the XML parser to resolve external entity references, then it must return an 
         /// instance of <c>System.IO.Stream</c>.</para>
         /// </remarks>
@@ -174,7 +174,7 @@ namespace Saxon.Api {
 
         public TreeModel TreeModel {
             get => (TreeModel) s9Builder.getTreeModel().getSymbolicValue();
-            set => s9Builder.setTreeModel(net.sf.saxon.om.TreeModel.getTreeModel((int) value));
+            set => s9Builder.setTreeModel(Saxon.Hej.om.TreeModel.getTreeModel((int) value));
         }
 
         /// <summary>

@@ -1,10 +1,13 @@
 using System;
 using System.IO;
-using java.util;
-using net.sf.saxon;
-using net.sf.saxon.s9api;
-using net.sf.saxon.serialize;
-using net.sf.saxon.trans;
+using System.Linq;
+using System.Reflection.Emit;
+using Saxon.Ejava.util;
+using Saxon.Hej;
+using Saxon.Hej.s9api;
+using Saxon.Hej.serialize;
+using Saxon.Hej.z;
+using SysCollGen = System.Collections.Generic;
 
 namespace Saxon.Api {
     /// <summary>
@@ -20,9 +23,9 @@ namespace Saxon.Api {
     public class Serializer : IDestination
     {
 
-        private readonly net.sf.saxon.s9api.Serializer jSerializer;
+        private readonly Saxon.Hej.s9api.Serializer jSerializer;
         private readonly Properties props = new Properties();
-        private CharacterMapIndex characterMap;
+        private CharacterMapIndex characterMapIndex = new CharacterMapIndex();
         private Properties defaultOutputProperties = null;
         private Processor processor = null;
         private Configuration config = null; // Beware: this will often be null
@@ -137,8 +140,9 @@ namespace Saxon.Api {
             new QName("", "undeclare-prefixes");
 
         /// <summary>QName identifying the serialization parameter "use-character-maps".
-        /// This is available only with XSLT. The value of the parameter is a list of expanded QNames
-        /// in Clark notation giving the names of character maps defined in the XSLT stylesheet.</summary>
+        /// The value of the parameter is a list of expanded QNames
+        /// in Clark notation giving the names of character maps defined in the XSLT stylesheet,
+        /// or supplied programmatically.</summary>
 
         public static readonly QName USE_CHARACTER_MAPS =
             new QName("", "use-character-maps");
@@ -148,7 +152,7 @@ namespace Saxon.Api {
         public static readonly QName VERSION =
             new QName("", "version");
 
-        private static readonly String SAXON = NamespaceConstant.SAXON;
+        private static readonly string SAXON = NamespaceConstant.SAXON;
 
 
         /// <summary>QName identifying the serialization parameter "saxon:character-representation"</summary>
@@ -259,10 +263,14 @@ namespace Saxon.Api {
 
         /// <summary>Create a Serializer</summary>
 
-        internal Serializer(net.sf.saxon.s9api.Serializer s)
-        {
+        internal Serializer(Processor processor, Saxon.Hej.s9api.Serializer s) {
+            this.processor = processor;
             jSerializer = s;
         }
+
+        /// <summary>The Processor from which this <c>Serializer</c> was created.</summary>
+
+        public Processor Processor => processor;
 
         /// <summary>Set a serialization property</summary>
         /// <remarks>In the case of XSLT, properties set within the serializer override
@@ -284,7 +292,7 @@ namespace Saxon.Api {
         public void SetOutputProperty(QName name, string value)
         {
             props.setProperty(name.ClarkName, value);
-            jSerializer.setOutputProperty(net.sf.saxon.s9api.Serializer.getProperty(name), value);
+            jSerializer.setOutputProperty(Saxon.Hej.s9api.Serializer.getProperty(name), value);
         }
 
         /// <summary>
@@ -300,22 +308,44 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Get a character map
+        /// Get the character map with a given nae
         /// </summary>
         
-        public CharacterMapIndex GetCharacterMap()
-        {
-            return this.characterMap;
+        public SysCollGen.IDictionary<int, string> GetCharacterMap(QName name) {
+            Saxon.Hej.serialize.CharacterMap map = 
+                    characterMapIndex.getCharacterMap(name.GetStructuredQName());
+            if (map != null) {
+                IntHashMap<string> content = map.getMap();
+                SysCollGen.Dictionary<int, string> result = new();
+                IntIterator iter = content.keyIterator();
+                while (iter.hasNext()) {
+                    int key = iter.next();
+                    result.Add(key, content.get(key));
+                }
+                return result;
+            }
+            return null;
         }
 
         /// <summary>
         /// Set a character map to be used
         /// </summary>
-        /// <param name="charMap">the character map</param>
+        /// <remarks>
+        /// <para>Note that the character map is used by the serializer only if the
+        /// <c>USE_CHARACTER_MAPS</c> output property includes the name of this character map.
+        /// </para>
+        /// </remarks>
+        /// <param name="name">the name of the character map</param>
+        /// <param name="charMap">the content of the character map</param>
 
-        public void SetCharacterMap(CharacterMapIndex charMap)
-        {
-            this.characterMap = charMap;
+        public void SetCharacterMap(QName name, SysCollGen.IDictionary<int, string> charMap) {
+            IntHashMap<string> content = new IntHashMap<string>();
+            foreach(SysCollGen.KeyValuePair<int, string> pair in charMap) {
+                content.put(pair.Key, pair.Value);
+            }
+
+            CharacterMap map = new CharacterMap(name.GetStructuredQName(), content);
+            characterMapIndex.putCharacterMap(name.GetStructuredQName(), map);
         }
 			
 
@@ -331,9 +361,9 @@ namespace Saxon.Api {
         {
             try
             {
-                jSerializer.setOutputFile(new java.io.File(filename));
+                jSerializer.setOutputFile(new Saxon.Ejava.io.File(filename));
             }
-            catch (java.io.IOException err)
+            catch (Saxon.Ejava.io.IOException err)
             {
                 throw new SaxonApiException(err);
             }
@@ -451,7 +481,7 @@ namespace Saxon.Api {
         /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>
-        /// <para>Information about the returned <see cref="net.sf.saxon.Configuration"/> object 
+        /// <para>Information about the returned <see cref="Saxon.Hej.Configuration"/> object 
         /// (and the objects it provides access to) is included in the Saxon JavaDoc docmentation.
         /// </para>
         /// </remarks>
@@ -465,7 +495,7 @@ namespace Saxon.Api {
         // /// <summary>
         // /// Close the destination and notify all registered listeners that it has been closed.
         // /// This method is intended for internal use by Saxon. The method first calls
-        // /// <see cref="Close"/> to close the destination, then it calls <c>java.util.function.Consumer.accept()</c> 
+        // /// <see cref="Close"/> to close the destination, then it calls <c>Saxon.Ejava.util.function.Consumer.accept()</c> 
         // /// on each of the listeners in turn to notify the fact that it has been closed.
         // /// </summary>
         // public void CloseAndNotify()
@@ -474,7 +504,7 @@ namespace Saxon.Api {
         //     {
         //         jSerializer.closeAndNotify();
         //     }
-        //     catch (net.sf.saxon.s9api.SaxonApiException exception) {
+        //     catch (Saxon.Hej.s9api.SaxonApiException exception) {
         //         throw new StaticError(exception);
         //     }
         // }

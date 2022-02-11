@@ -1,5 +1,5 @@
 using System;
-using net.sf.saxon.value;
+using Saxon.Hej.value;
 
 namespace Saxon.Api {
     /// <summary inherits="XdmValue">

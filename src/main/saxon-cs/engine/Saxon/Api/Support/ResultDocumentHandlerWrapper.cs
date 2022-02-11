@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
-using javax.xml.transform;
-using net.sf.saxon.@event;
-using net.sf.saxon.lib;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Hej.@event;
+using Saxon.Hej.lib;
 
 namespace Saxon.Api.Support {
     ///<summary>Internal wrapper class for <c>IResultDocumentHandler</c></summary>
@@ -51,7 +51,7 @@ namespace Saxon.Api.Support {
         /// </summary>
         /// <param name="href">Href.</param>
         /// <param name="baseString">Base string.</param>
-        public Receiver resolve(net.sf.saxon.expr.XPathContext xpc, string href, string baseString, net.sf.saxon.serialize.SerializationProperties sp)
+        public Receiver resolve(Saxon.Hej.expr.XPathContext xpc, string href, string baseString, Saxon.Hej.serialize.SerializationProperties sp)
         {
             Uri baseUri;
             try

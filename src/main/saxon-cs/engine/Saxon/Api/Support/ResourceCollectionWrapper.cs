@@ -3,9 +3,9 @@ using System.Collections.Generic;
 namespace Saxon.Api.Support {
     public class ResourceCollectionWrapper : IResourceCollection {
 
-        private readonly net.sf.saxon.lib.ResourceCollection resources;
+        private readonly Saxon.Hej.lib.ResourceCollection resources;
 
-        public ResourceCollectionWrapper(net.sf.saxon.lib.ResourceCollection resources) {
+        public ResourceCollectionWrapper(Saxon.Hej.lib.ResourceCollection resources) {
             this.resources = resources;
         }
 
@@ -16,13 +16,13 @@ namespace Saxon.Api.Support {
         }
 
         public IEnumerator<IResource> GetResources(DynamicContext context) {
-            IEnumerator<net.sf.saxon.lib.Resource> enumerator = resources.getResources(context.context);
+            IEnumerator<Saxon.Hej.lib.Resource> enumerator = resources.getResources(context.context);
             while (enumerator.MoveNext()) {
                 yield return new ResourceWrapper(enumerator.Current);
             }
         }
 
-        public net.sf.saxon.lib.ResourceCollection Implementation => resources;
+        public Saxon.Hej.lib.ResourceCollection Implementation => resources;
 
     }
 }

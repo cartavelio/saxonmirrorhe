@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace Saxon.Impl.Helpers {
-    public class IteratorFromEnumerator<T> : java.util.Iterator<T> {
+    public class IteratorFromEnumerator<T> : Saxon.Ejava.util.Iterator<T> {
         private IEnumerator<T> enumerator;
         private bool moreToCome ;
         public IteratorFromEnumerator(IEnumerator<T> enumerator) {

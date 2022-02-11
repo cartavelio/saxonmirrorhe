@@ -1,5 +1,5 @@
 using System;
-using java.lang;
+using Saxon.Ejava.lang;
 using Math = System.Math;
 
 namespace Saxon.Impl.Helpers {

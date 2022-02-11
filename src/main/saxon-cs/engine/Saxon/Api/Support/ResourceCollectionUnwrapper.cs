@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using net.sf.saxon.expr;
+using Saxon.Hej.expr;
 using Saxon.Impl.Overrides;
 
 namespace Saxon.Api.Support {
-    public class ResourceCollectionUnwrapper : net.sf.saxon.lib.ResourceCollection {
+    public class ResourceCollectionUnwrapper : Saxon.Hej.lib.ResourceCollection {
 
         private readonly Saxon.Api.IResourceCollection resources;
 
@@ -11,7 +11,7 @@ namespace Saxon.Api.Support {
             this.resources = resources;
         }
 
-        public static net.sf.saxon.lib.ResourceCollection Unwrap(Saxon.Api.IResourceCollection resources) {
+        public static Saxon.Hej.lib.ResourceCollection Unwrap(Saxon.Api.IResourceCollection resources) {
             if (resources is ResourceCollectionWrapper) {
                 return ((ResourceCollectionWrapper) resources).Implementation;
             }
@@ -28,8 +28,8 @@ namespace Saxon.Api.Support {
             return resources.GetResourceURIs(new DynamicContext(context));
         }
 
-        public IEnumerator<net.sf.saxon.lib.Resource> getResources(XPathContext context) {
-            return new MappingEnumerator<IResource, net.sf.saxon.lib.Resource>(
+        public IEnumerator<Saxon.Hej.lib.Resource> getResources(XPathContext context) {
+            return new MappingEnumerator<IResource, Saxon.Hej.lib.Resource>(
                 resources.GetResources(new DynamicContext(context)),
                 r=> Saxon.Api.Support.ResourceUnwrapper.Unwrap(r));
         }

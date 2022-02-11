@@ -3,28 +3,27 @@ using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
 using SysCollGen = System.Collections.Generic;
-using java.lang;
-using javax.xml.transform;
-using javax.xml.transform.stream;
-using net.sf.saxon;
-using net.sf.saxon.lib;
-using net.sf.saxon.pull;
+using Saxon.Ejava.lang;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej;
+using Saxon.Hej.lib;
+using Saxon.Hej.pull;
 using Saxon.Callbacks;
-using SaxonCS3.Saxon.Impl.Helpers;
 using System;
 using System.Collections.Generic;
 
 
 namespace Saxon.Impl.Helpers {
     
-    public class DotNetPlatform : net.sf.saxon.Platform {
+    public class DotNetPlatform : Saxon.Hej.Platform {
         public DotNetPlatform() {
         }
 
-        public void initialize(net.sf.saxon.Configuration config) {
+        public void initialize(Saxon.Hej.Configuration config) {
             config.setURIResolver(new StandardURIResolver(config, new StandardXmlResolver()));
             config.setCollectionFinder((cxt, uri) => 
-                new net.sf.saxon.resource.StandardCollectionFinder().findCollection(cxt, uri));
+                new Saxon.Hej.resource.StandardCollectionFinder().findCollection(cxt, uri));
         }
         
 
@@ -69,7 +68,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public System.IO.Stream locateResource(string filename, SysCollGen.List<string> messages) {
-            throw new java.lang.UnsupportedOperationException();
+            throw new Saxon.Ejava.lang.UnsupportedOperationException();
         }
 
         public bool hasICUCollator() {
@@ -83,24 +82,24 @@ namespace Saxon.Impl.Helpers {
         // public org.xml.sax.XMLReader loadParser() {
         //     org.xml.sax.XMLReader parser;
         //     try {
-        //         parser = javax.xml.parsers.SAXParserFactory.newInstance("org.apache.xerces.jaxp.SAXParserFactoryImpl", this.GetType().GetClassLoader()).newSAXParser().getXMLReader();
-        //     } catch (javax.xml.parsers.ParserConfigurationException err) {
-        //         throw new javax.xml.transform.TransformerFactoryConfigurationError(err);
+        //         parser = Saxon.Ejavax.xml.parsers.SAXParserFactory.newInstance("org.apache.xerces.jaxp.SAXParserFactoryImpl", this.GetType().GetClassLoader()).newSAXParser().getXMLReader();
+        //     } catch (Saxon.Ejavax.xml.parsers.ParserConfigurationException err) {
+        //         throw new Saxon.Ejavax.xml.transform.TransformerFactoryConfigurationError(err);
         //     } catch (org.xml.sax.SAXException err) {
-        //         throw new javax.xml.transform.TransformerFactoryConfigurationError(err);
+        //         throw new Saxon.Ejavax.xml.transform.TransformerFactoryConfigurationError(err);
         //     }
         //     return parser;
         // }
         // public org.xml.sax.XMLReader loadParserForXmlFragments() {
         //     return loadParser();
         // }
-        public javax.xml.transform.Source getParserSource(net.sf.saxon.@event.PipelineConfiguration pipe,
-            javax.xml.transform.stream.StreamSource input, int validation, bool dtdValidation) {
+        public Saxon.Ejavax.xml.transform.Source getParserSource(Saxon.Hej.@event.PipelineConfiguration pipe,
+            Saxon.Ejavax.xml.transform.stream.StreamSource input, int validation, bool dtdValidation) {
             return getParserSourceInternal(pipe, input, validation, dtdValidation, 0);
         }
 
-        private javax.xml.transform.Source getParserSourceInternal(net.sf.saxon.@event.PipelineConfiguration pipe,
-            javax.xml.transform.stream.StreamSource input, int validation, bool dtdValidation, int depth) {
+        private Saxon.Ejavax.xml.transform.Source getParserSourceInternal(Saxon.Hej.@event.PipelineConfiguration pipe,
+            Saxon.Ejavax.xml.transform.stream.StreamSource input, int validation, bool dtdValidation, int depth) {
             if (depth > 2) {
                 return input;
             }
@@ -132,13 +131,13 @@ namespace Saxon.Impl.Helpers {
                 //     ((XmlValidatingReader) parser).ValidationType = ValidationType.DTD;
                 // else
                 //     ((XmlValidatingReader) parser).ValidationType = ValidationType.None;
-                net.sf.saxon.pull.PullProvider provider = new DotNetPullProvider(parser);
-                var ps = new net.sf.saxon.pull.PullSource(provider);
+                Saxon.Hej.pull.PullProvider provider = new DotNetPullProvider(parser);
+                var ps = new Saxon.Hej.pull.PullSource(provider);
                 ps.setSystemId(input.getSystemId());
-                if (validation == net.sf.saxon.lib.Validation.DEFAULT) {
+                if (validation == Saxon.Hej.lib.Validation.DEFAULT) {
                     return ps;
                 } else {
-                    var @as = net.sf.saxon.lib.AugmentedSource.makeAugmentedSource(ps);
+                    var @as = Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(ps);
                     @as.setSchemaValidationMode(validation);
                     return @as;
                 }
@@ -160,13 +159,13 @@ namespace Saxon.Impl.Helpers {
                 //     ((XmlValidatingReader) parser).ValidationType = ValidationType.DTD;
                 // else
                 //     ((XmlValidatingReader) parser).ValidationType = ValidationType.None;
-                net.sf.saxon.pull.PullProvider provider = new DotNetPullProvider(parser);
+                Saxon.Hej.pull.PullProvider provider = new DotNetPullProvider(parser);
                 PullSource ps = new (provider);
                 ps.setSystemId(input.getSystemId());
-                if (validation == net.sf.saxon.lib.Validation.DEFAULT) {
+                if (validation == Saxon.Hej.lib.Validation.DEFAULT) {
                     return ps;
                 } else {
-                    var @as = net.sf.saxon.lib.AugmentedSource.makeAugmentedSource(ps);
+                    var @as = Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(ps);
                     @as.setSchemaValidationMode(validation);
                     return @as;
                 }
@@ -180,9 +179,9 @@ namespace Saxon.Impl.Helpers {
                         return input;
                     }
                     else {
-                        if (r is net.sf.saxon.lib.AugmentedSource augmentedSource) {
+                        if (r is Saxon.Hej.lib.AugmentedSource augmentedSource) {
                             Source r2 = augmentedSource.getContainedSource();
-                            if (r2 is javax.xml.transform.stream.StreamSource streamSource) {
+                            if (r2 is Saxon.Ejavax.xml.transform.stream.StreamSource streamSource) {
                                 r2 = getParserSourceInternal(pipe, streamSource,
                                     validation, dtdValidation, depth + 1);
                                 return r2;
@@ -190,11 +189,11 @@ namespace Saxon.Impl.Helpers {
                                 return r2;
                             }
                         } else {
-                            if (r is javax.xml.transform.stream.StreamSource streamSource) {
+                            if (r is Saxon.Ejavax.xml.transform.stream.StreamSource streamSource) {
                                 if (isSame(streamSource, input)) return input;
                                 Source r2 = getParserSourceInternal(pipe, streamSource,
                                     validation, dtdValidation, depth + 1);
-                                AugmentedSource @as = net.sf.saxon.lib.AugmentedSource.makeAugmentedSource(r2);
+                                AugmentedSource @as = Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(r2);
                                 @as.setPleaseCloseAfterUse(true);
                                 return @as;
                             }
@@ -204,18 +203,18 @@ namespace Saxon.Impl.Helpers {
                         }
                     }
                 }
-                catch (javax.xml.transform.TransformerException) {
+                catch (Saxon.Ejavax.xml.transform.TransformerException) {
                     return input;
                 }
 
             return input;
         }
 
-        private static bool isSame(javax.xml.transform.Source first, javax.xml.transform.Source second) {
+        private static bool isSame(Saxon.Ejavax.xml.transform.Source first, Saxon.Ejavax.xml.transform.Source second) {
             if (first == second) return true;
-            if (first is javax.xml.transform.stream.StreamSource && second is javax.xml.transform.stream.StreamSource) {
-                var ssFirst = (javax.xml.transform.stream.StreamSource) first;
-                var ssSecond = (javax.xml.transform.stream.StreamSource) second;
+            if (first is Saxon.Ejavax.xml.transform.stream.StreamSource && second is Saxon.Ejavax.xml.transform.stream.StreamSource) {
+                var ssFirst = (Saxon.Ejavax.xml.transform.stream.StreamSource) first;
+                var ssSecond = (Saxon.Ejavax.xml.transform.stream.StreamSource) second;
                 if (ssFirst.getInputStream() != null && ssSecond.getInputStream() != null)
                     return ssFirst.getInputStream() == ssSecond.getInputStream();
                 if (ssFirst.getReader() != null && ssSecond.getReader() != null)
@@ -227,29 +226,29 @@ namespace Saxon.Impl.Helpers {
             return false;
         }
 
-        public net.sf.saxon.lib.StringCollator makeCollation(net.sf.saxon.Configuration config,
-                    java.util.Properties props, string uri) {
+        public Saxon.Hej.lib.StringCollator makeCollation(Saxon.Hej.Configuration config,
+                    Saxon.Ejava.util.Properties props, string uri) {
             return DotNetCollationFactory.makeCollation(config, uri, props);
         }
 
-        public bool canReturnCollationKeys(net.sf.saxon.lib.StringCollator collation) {
+        public bool canReturnCollationKeys(Saxon.Hej.lib.StringCollator collation) {
             return true;
-            //return collation is DotNetComparator || collation is net.sf.saxon.expr.sort.CodepointCollator;
+            //return collation is DotNetComparator || collation is Saxon.Hej.expr.sort.CodepointCollator;
         }
 
-        public net.sf.saxon.expr.sort.AtomicMatchKey getCollationKey(
-                net.sf.saxon.expr.sort.SimpleCollation namedCollation, string value) {
+        public Saxon.Hej.expr.sort.AtomicMatchKey getCollationKey(
+                Saxon.Hej.expr.sort.SimpleCollation namedCollation, string value) {
             // DotNetComparator c = (DotNetComparator) namedCollation.getComparator();
             // return c.getCollationKey(value);
             throw new NotImplementedException(); 
         }
 
-        public net.sf.saxon.lib.StringCollator makeUcaCollator(string uri, net.sf.saxon.Configuration config) {
+        public Saxon.Hej.lib.StringCollator makeUcaCollator(string uri, Saxon.Hej.Configuration config) {
             return null;
         }
 
-        public net.sf.saxon.regex.RegularExpression compileRegularExpression(net.sf.saxon.Configuration config,
-            net.sf.saxon.str.UnicodeString regex, string flags, string hostLanguage, IList<string> warnings) {
+        public Saxon.Hej.regex.RegularExpression compileRegularExpression(Saxon.Hej.Configuration config,
+            Saxon.Hej.str.UnicodeString regex, string flags, string hostLanguage, IList<string> warnings) {
             var useJava = false;
             var useDotNet = false;
             var useSaxon = false;
@@ -272,25 +271,25 @@ namespace Saxon.Impl.Helpers {
             }
 
             if (useJava) {
-                return new net.sf.saxon.regex.JavaRegularExpression(regex, flags);
+                return new Saxon.Hej.regex.JavaRegularExpression(regex, flags);
             }
             else {
                 if (useDotNet)
-                    return new net.sf.saxon.regex.JavaRegularExpression(regex, flags);
+                    return new Saxon.Hej.regex.JavaRegularExpression(regex, flags);
                 else
-                    return new net.sf.saxon.regex.ARegularExpression(regex, flags, hostLanguage, warnings, config);
+                    return new Saxon.Hej.regex.ARegularExpression(regex, flags, hostLanguage, warnings, config);
             }
         }
 
-        public net.sf.saxon.type.ExternalObjectType getExternalObjectType(net.sf.saxon.Configuration config, string uri,
+        public Saxon.Hej.type.ExternalObjectType getExternalObjectType(Saxon.Hej.Configuration config, string uri,
                     string localName) {
-            // if (uri.Equals(net.sf.saxon.lib.NamespaceConstant.DOT_NET_TYPE))
+            // if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.DOT_NET_TYPE))
             //     return new DotNetExternalObjectType(System.Type.GetType(localName), config);
             // else
-                throw new java.lang.IllegalArgumentException("Type is not in .NET namespace");
+                throw new Saxon.Ejava.lang.IllegalArgumentException("Type is not in .NET namespace");
         }
 
-        public string getInstallationDirectory(string edition, net.sf.saxon.Configuration config) {
+        public string getInstallationDirectory(string edition, Saxon.Hej.Configuration config) {
             // RegistryKey[] bases = {Registry.LocalMachine, Registry.CurrentUser};
             // string[] paths = {"Software\\Saxonica\\Saxon", "Software\\Wow6432Node\\Saxonica\\Saxon"};
             // foreach (RegistryKey @base in bases)
@@ -308,22 +307,22 @@ namespace Saxon.Impl.Helpers {
             return null;
         }
 
-        public void registerAllBuiltInObjectModels(net.sf.saxon.Configuration config) {
+        public void registerAllBuiltInObjectModels(Saxon.Hej.Configuration config) {
         }
 
-        public void setDefaultSAXParserFactory(net.sf.saxon.Configuration config) {
+        public void setDefaultSAXParserFactory(Saxon.Hej.Configuration config) {
             // var editionCode = "he";
-            // java.lang.System.setProperty("javax.xml.parsers.SAXParserFactory",
+            // Saxon.Ejava.lang.System.setProperty("Saxon.Ejavax.xml.parsers.SAXParserFactory",
             //     "org.apache.xerces.jaxp.SAXParserFactoryImpl, saxon9" + editionCode + ", Version=" +
-            //     net.sf.saxon.Version.getProductVersion() + ", Culture=neutral, PublicKeyToken=e1fdd002d5083fe6");
+            //     Saxon.Hej.Version.getProductVersion() + ", Culture=neutral, PublicKeyToken=e1fdd002d5083fe6");
         }
 
-        public bool JAXPStaticContextCheck(net.sf.saxon.expr.parser.RetainedStaticContext retainedStaticContext,
-            net.sf.saxon.expr.StaticContext sc) {
+        public bool JAXPStaticContextCheck(Saxon.Hej.expr.parser.RetainedStaticContext retainedStaticContext,
+            Saxon.Hej.expr.StaticContext sc) {
             return false;
         }
 
-        public net.sf.saxon.lib.ModuleURIResolver makeStandardModuleURIResolver(net.sf.saxon.Configuration config) {
+        public Saxon.Hej.lib.ModuleURIResolver makeStandardModuleURIResolver(Saxon.Hej.Configuration config) {
             return new StandardModuleURIResolver(new StandardXmlResolver());
         }
 
@@ -338,7 +337,7 @@ namespace Saxon.Impl.Helpers {
             //     Console.WriteLine("Resource: " + name);
             // }
             // TODO: project name hard-coded here, but will change?
-            return ass.GetManifestResourceStream(@"SaxonCS3.resources.net.sf.saxon.data." + filename.Replace('/', '.'));
+            return ass.GetManifestResourceStream(@"SaxonCS3.resources.Saxon.Hej.data." + filename.Replace('/', '.'));
         }
 
         public ActiveSource resolveSource(Source source, Configuration config) {

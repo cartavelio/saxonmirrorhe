@@ -1,10 +1,10 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml;
-using net.sf.saxon.om;
-using net.sf.saxon.pattern;
-using net.sf.saxon.s9api;
-using Type = net.sf.saxon.type.Type;
+using Saxon.Hej.om;
+using Saxon.Hej.pattern;
+using Saxon.Hej.s9api;
+using Type = Saxon.Hej.type.Type;
 
 namespace Saxon.Api {
     /// <summary>
@@ -92,7 +92,7 @@ namespace Saxon.Api {
         /// <param name="item">item the item to be tested against this item type</param>
         /// <returns>true if the item matches this item type, false if it does not match.</returns>
         public override bool Matches(XdmItem item) {
-            return item.Unwrap() is NodeInfo && kind == ((net.sf.saxon.om.NodeInfo) item.Unwrap()).getNodeKind();
+            return item.Unwrap() is NodeInfo && kind == ((Saxon.Hej.om.NodeInfo) item.Unwrap()).getNodeKind();
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Saxon.Api {
         /// <returns>true if this ItemType subsumes the other ItemType. This includes the case where A and B
         ///         represent the same ItemType.</returns>
         public override bool Subsumes(XdmItemType other) {
-            net.sf.saxon.type.ItemType otherType = other.Unwrap();
+            Saxon.Hej.type.ItemType otherType = other.Unwrap();
             return otherType is NodeTest test && test.getUType() == underlyingType.getUType();
         }
 

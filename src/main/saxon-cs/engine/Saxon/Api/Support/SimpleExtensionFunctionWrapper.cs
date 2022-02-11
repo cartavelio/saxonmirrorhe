@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using net.sf.saxon.expr;
-using net.sf.saxon.om;
-using net.sf.saxon.value;
+using Saxon.Hej.expr;
+using Saxon.Hej.om;
+using Saxon.Hej.value;
 
 namespace Saxon.Api.Support {
-    public class SimpleExtensionFunctionWrapper : net.sf.saxon.lib.ExtensionFunctionDefinition {
+    public class SimpleExtensionFunctionWrapper : Saxon.Hej.lib.ExtensionFunctionDefinition {
 
         private Saxon.Api.ExtensionFunction apiFunction;
         public SimpleExtensionFunctionWrapper(Saxon.Api.ExtensionFunction apiFunction) {
@@ -31,12 +31,12 @@ namespace Saxon.Api.Support {
             return apiFunction.GetResultType().ToSequenceType();
         }
 
-        public override net.sf.saxon.lib.ExtensionFunctionCall makeCallExpression() {
+        public override Saxon.Hej.lib.ExtensionFunctionCall makeCallExpression() {
             return new SimpleExtensionFunctionCallWrapper(apiFunction);
         }
     }
     
-    public class SimpleExtensionFunctionCallWrapper : net.sf.saxon.lib.ExtensionFunctionCall {
+    public class SimpleExtensionFunctionCallWrapper : Saxon.Hej.lib.ExtensionFunctionCall {
         private Saxon.Api.ExtensionFunction apiFunction;
 
         public SimpleExtensionFunctionCallWrapper(Saxon.Api.ExtensionFunction apiFunction) {

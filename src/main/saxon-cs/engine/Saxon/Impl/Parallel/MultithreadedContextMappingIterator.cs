@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using SysCollGen = System.Collections.Generic;
-using net.sf.saxon.expr;
-using net.sf.saxon.om;
-using net.sf.saxon.trans;
-using net.sf.saxon.tree.iter;
+using Saxon.Hej.expr;
+using Saxon.Hej.om;
+using Saxon.Hej.trans;
+using Saxon.Hej.tree.iter;
 
 namespace Saxon.Impl.Parallel {
     
@@ -14,14 +14,14 @@ namespace Saxon.Impl.Parallel {
     // Note that unlike the Java implementation, this implementation fully evaluates both the input
     // and output sequences as lists in memory. This enables the C# Parallel.For construct to be used.
     // It also makes implementation of last() rather straightforward. But it is memory-hungry.
-    public sealed class MultithreadedContextMappingIterator : net.sf.saxon.om.SequenceIterator {
+    public sealed class MultithreadedContextMappingIterator : Saxon.Hej.om.SequenceIterator {
         
         private readonly SysCollGen.List<Item>[] outputSequence;
         private SequenceIterator stepIterator;
         private int index = 0;
 
-        public MultithreadedContextMappingIterator(net.sf.saxon.expr.Expression action,
-                net.sf.saxon.expr.XPathContextMinor context, int threads) {
+        public MultithreadedContextMappingIterator(Saxon.Hej.expr.Expression action,
+                Saxon.Hej.expr.XPathContextMinor context, int threads) {
             SysCollGen.List<Item> inputSequence = new SysCollGen.List<Item>();
             SequenceIterator inputIter = context.currentIterator;
             for (Item item; (item = inputIter.next()) != null;) {

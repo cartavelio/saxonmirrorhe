@@ -1,6 +1,6 @@
-using net.sf.saxon.om;
-using net.sf.saxon.type;
-using net.sf.saxon.value;
+using Saxon.Hej.om;
+using Saxon.Hej.type;
+using Saxon.Hej.value;
 
 
 namespace Saxon.Api {
@@ -19,7 +19,7 @@ namespace Saxon.Api {
         /// Instance object of the <c>XdmAtomicType</c> class
         /// </summary>
         public static readonly XdmAtomicType Instance =
-            new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.ANY_ATOMIC);
+            new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC);
 
         private XdmAtomicType(AtomicType type) : base (type) {
         }
@@ -275,139 +275,139 @@ namespace Saxon.Api {
                     return XdmAtomicType.Instance;
 
                 case StandardNames.XS_STRING:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.STRING);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.STRING);
 
                 case StandardNames.XS_BOOLEAN:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.BOOLEAN);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.BOOLEAN);
 
                 case StandardNames.XS_DURATION:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.DURATION);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.DURATION);
 
                 case StandardNames.XS_DATE_TIME:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.DATE_TIME);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.DATE_TIME);
 
                 case StandardNames.XS_DATE:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.DATE);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.DATE);
 
                 case StandardNames.XS_TIME:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.TIME);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.TIME);
 
                 case StandardNames.XS_G_YEAR_MONTH:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.G_YEAR_MONTH);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.G_YEAR_MONTH);
 
                 case StandardNames.XS_G_MONTH:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.G_MONTH);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.G_MONTH);
 
                 case StandardNames.XS_G_MONTH_DAY:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.G_MONTH_DAY);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.G_MONTH_DAY);
 
                 case StandardNames.XS_G_YEAR:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.G_YEAR);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.G_YEAR);
 
                 case StandardNames.XS_G_DAY:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.G_DAY);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.G_DAY);
 
                 case StandardNames.XS_HEX_BINARY:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.HEX_BINARY);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.HEX_BINARY);
 
                 case StandardNames.XS_BASE64_BINARY:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.BASE64_BINARY);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY);
 
                 case StandardNames.XS_ANY_URI:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.ANY_URI);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.ANY_URI);
 
                 case StandardNames.XS_QNAME:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.QNAME);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.QNAME);
 
                 case StandardNames.XS_NOTATION:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.NOTATION);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.NOTATION);
 
                 case StandardNames.XS_UNTYPED_ATOMIC:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.UNTYPED_ATOMIC);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC);
 
                 case StandardNames.XS_DECIMAL:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.DECIMAL);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.DECIMAL);
 
                 case StandardNames.XS_FLOAT:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.FLOAT);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.FLOAT);
 
                 case StandardNames.XS_DOUBLE:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.DOUBLE);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.DOUBLE);
 
                 case StandardNames.XS_INTEGER:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.INTEGER);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.INTEGER);
 
                 case StandardNames.XS_NON_POSITIVE_INTEGER:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.NON_POSITIVE_INTEGER);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.NON_POSITIVE_INTEGER);
 
                 case StandardNames.XS_NEGATIVE_INTEGER:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.NEGATIVE_INTEGER);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.NEGATIVE_INTEGER);
 
                 case StandardNames.XS_LONG:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.LONG);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.LONG);
 
                 case StandardNames.XS_INT:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.INT);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.INT);
 
                 case StandardNames.XS_SHORT:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.SHORT);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.SHORT);
 
                 case StandardNames.XS_BYTE:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.BYTE);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.BYTE);
 
                 case StandardNames.XS_NON_NEGATIVE_INTEGER:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.NON_NEGATIVE_INTEGER);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.NON_NEGATIVE_INTEGER);
 
                 case StandardNames.XS_POSITIVE_INTEGER:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.POSITIVE_INTEGER);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.POSITIVE_INTEGER);
 
                 case StandardNames.XS_UNSIGNED_LONG:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.UNSIGNED_LONG);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.UNSIGNED_LONG);
 
                 case StandardNames.XS_UNSIGNED_INT:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.UNSIGNED_INT);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.UNSIGNED_INT);
 
                 case StandardNames.XS_UNSIGNED_SHORT:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.UNSIGNED_SHORT);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.UNSIGNED_SHORT);
 
                 case StandardNames.XS_UNSIGNED_BYTE:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.UNSIGNED_BYTE);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.UNSIGNED_BYTE);
 
                 case StandardNames.XS_YEAR_MONTH_DURATION:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.YEAR_MONTH_DURATION);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.YEAR_MONTH_DURATION);
 
                 case StandardNames.XS_DAY_TIME_DURATION:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.DAY_TIME_DURATION);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.DAY_TIME_DURATION);
 
                 case StandardNames.XS_NORMALIZED_STRING:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.NORMALIZED_STRING);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.NORMALIZED_STRING);
 
                 case StandardNames.XS_TOKEN:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.TOKEN);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.TOKEN);
 
                 case StandardNames.XS_LANGUAGE:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.LANGUAGE);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.LANGUAGE);
 
                 case StandardNames.XS_NAME:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.NAME);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.NAME);
 
                 case StandardNames.XS_NMTOKEN:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.NMTOKEN);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.NMTOKEN);
 
                 case StandardNames.XS_NCNAME:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.NCNAME);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.NCNAME);
 
                 case StandardNames.XS_ID:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.ID);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.ID);
 
                 case StandardNames.XS_IDREF:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.IDREF);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.IDREF);
 
                 case StandardNames.XS_ENTITY:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.ENTITY);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.ENTITY);
 
                 case StandardNames.XS_DATE_TIME_STAMP:
-                    return new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.DATE_TIME_STAMP);
+                    return new XdmAtomicType(Saxon.Hej.type.BuiltInAtomicType.DATE_TIME_STAMP);
 
 
                 case StandardNames.XS_ERROR:
@@ -459,7 +459,7 @@ namespace Saxon.Api {
         /// <returns>true if this ItemType subsumes the other ItemType. This includes the case where A and B
         /// represent the same ItemType.</returns>
         public override bool Subsumes(XdmItemType other) {
-            net.sf.saxon.type.ItemType otherType = other.Unwrap();
+            Saxon.Hej.type.ItemType otherType = other.Unwrap();
             if (!otherType.isPlainType()) {
                 return false;
             }

@@ -1,11 +1,11 @@
 using Singulink.Numerics;
 
 namespace Saxon.Impl.Overrides {
-    public class FormatNumberSubPicture : net.sf.saxon.functions.FormatNumber.SubPicture {
-        public FormatNumberSubPicture(int[] pic, net.sf.saxon.trans.DecimalSymbols dfs) : base(pic, dfs) {
+    public class FormatNumberSubPicture : Saxon.Hej.functions.FormatNumber.SubPicture {
+        public FormatNumberSubPicture(int[] pic, Saxon.Hej.trans.DecimalSymbols dfs) : base(pic, dfs) {
         }
         // Override the Java handling of formatDecimal().
-        protected override void formatDecimal(BigDecimal dval, java.lang.StringBuilder fsb) {
+        protected override void formatDecimal(BigDecimal dval, Saxon.Ejava.lang.StringBuilder fsb) {
             int exponent = 0;
             if (minExponentSize != 0) {
                 if (dval.IsZero) {
@@ -22,13 +22,13 @@ namespace Saxon.Impl.Overrides {
                 dval = Singulink.Numerics.BigDecimal.Round(dval, maxFractionPartSize);
             }
 
-            net.sf.saxon.value.BigDecimalValue.decimalToString(dval, fsb);
+            Saxon.Hej.value.BigDecimalValue.decimalToString(dval, fsb);
             if (dval.DecimalPlaces < minFractionPartSize) {
                 if (dval.DecimalPlaces == 0) {
                     fsb.append('.');
                 }
 
-                net.sf.saxon.str.StringTool.appendRepeated(fsb, '0', minFractionPartSize - dval.DecimalPlaces);
+                Saxon.Hej.str.StringTool.appendRepeated(fsb, '0', minFractionPartSize - dval.DecimalPlaces);
             }
 
             int point = fsb.indexOf(".");
@@ -70,14 +70,14 @@ namespace Saxon.Impl.Overrides {
             }
             else {
                 if ((minWholePartSize > intDigits)) {
-                    net.sf.saxon.str.StringTool.prependRepeated(fsb, '0', (minWholePartSize - intDigits));
+                    Saxon.Hej.str.StringTool.prependRepeated(fsb, '0', (minWholePartSize - intDigits));
                 }
             }
 
             if ((minExponentSize != 0)) {
                 fsb.append('e');
-                net.sf.saxon.value.IntegerValue exp =
-                    (net.sf.saxon.value.IntegerValue) (net.sf.saxon.value.IntegerValue.fromDouble(exponent));
+                Saxon.Hej.value.IntegerValue exp =
+                    (Saxon.Hej.value.IntegerValue) (Saxon.Hej.value.IntegerValue.fromDouble(exponent));
                 string expStr = exp.getUnicodeStringValue().ToString();
                 char first = expStr[0];
                 if ((first == '-')) {

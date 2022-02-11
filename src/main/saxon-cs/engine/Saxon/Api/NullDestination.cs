@@ -1,5 +1,5 @@
 using System;
-using net.sf.saxon.s9api;
+using Saxon.Hej.s9api;
 
 namespace Saxon.Api {
     /// <summary>
@@ -9,12 +9,12 @@ namespace Saxon.Api {
     public class NullDestination : IDestination
     {
 
-        net.sf.saxon.s9api.NullDestination destination;
+        Saxon.Hej.s9api.NullDestination destination;
         /// <summary>Construct a <c>NullDestination</c></summary>
 
         public NullDestination()
         {
-            destination = new net.sf.saxon.s9api.NullDestination();
+            destination = new Saxon.Hej.s9api.NullDestination();
         }
 
         /// <summary>This property determines the base Uri of the constructed <c>Serializer</c>. 

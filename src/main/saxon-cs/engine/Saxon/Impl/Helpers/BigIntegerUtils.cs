@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-using java.lang;
+using Saxon.Ejava.lang;
 using BigInt = System.Numerics.BigInteger;
 
 namespace Saxon.Impl.Helpers {

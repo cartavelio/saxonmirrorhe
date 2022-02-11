@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using java.util;
-using net.sf.saxon;
-using net.sf.saxon.@event;
-using net.sf.saxon.expr.parser;
-using net.sf.saxon.om;
-using net.sf.saxon.pattern;
-using net.sf.saxon.tree.wrapper;
+using Saxon.Ejava.util;
+using Saxon.Hej;
+using Saxon.Hej.@event;
+using Saxon.Hej.expr.parser;
+using Saxon.Hej.om;
+using Saxon.Hej.pattern;
+using Saxon.Hej.tree.wrapper;
 using Saxon.Api.Support;
 using Saxon.Impl.Helpers;
-using Type = net.sf.saxon.type.Type;
+using Type = Saxon.Hej.type.Type;
 
 namespace Saxon.Api {
     /// <summary inherits="XdmItem">
@@ -21,7 +21,7 @@ namespace Saxon.Api {
     /// </summary>
     /// <remarks>
     /// <para>An <c>XdmNode</c> is implemented as a wrapper around an object
-    /// of type <c>net.sf.saxon.NodeInfo</c>. Because this is a key interface
+    /// of type <c>Saxon.Hej.NodeInfo</c>. Because this is a key interface
     /// within Saxon, it is exposed via this API, even though it is a Java
     /// interface that is not part of the API proper.</para>
     /// <para>The <c>XdmNode</c> interface exposes basic properties of the node, such
@@ -168,7 +168,7 @@ namespace Saxon.Api {
         /// <para>In most cases this will be the original <see cref="Processor"/>
         /// object used to create the <see cref="DocumentBuilder"/> that built the document that 
         /// contains this node. If that <see cref="Processor"/> is not available, it will be a 
-        /// compatible <c>Processor</c>, one that shares the same underlying <see cref="net.sf.saxon.Configuration"/>, 
+        /// compatible <c>Processor</c>, one that shares the same underlying <see cref="Saxon.Hej.Configuration"/>, 
         /// and hence is initialized with the same configuration settings, schema components, license features,
         /// and so on.</para>
         /// <para><i>Note: the only case where the original <c>Processor</c> is not available is when
@@ -185,7 +185,7 @@ namespace Saxon.Api {
                     return processor;
                 }
                 else {
-                    return new Processor(new net.sf.saxon.s9api.Processor(config));
+                    return new Processor(new Saxon.Hej.s9api.Processor(config));
                 }
             }
         }
@@ -376,13 +376,13 @@ namespace Saxon.Api {
             int kind;
             switch (axis) {
                 case XdmAxis.Attribute:
-                    kind = net.sf.saxon.type.Type.ATTRIBUTE;
+                    kind = Saxon.Hej.type.Type.ATTRIBUTE;
                     break;
                 case XdmAxis.Namespace:
-                    kind = net.sf.saxon.type.Type.NAMESPACE;
+                    kind = Saxon.Hej.type.Type.NAMESPACE;
                     break;
                 default:
-                    kind = net.sf.saxon.type.Type.ELEMENT;
+                    kind = Saxon.Hej.type.Type.ELEMENT;
                     break;
             }
 
@@ -450,7 +450,7 @@ namespace Saxon.Api {
             XmlWriterReceiver receiver = new (writer, pipe);
             NamespaceDifferencer differencer = new (receiver, new Properties());
             differencer.open();
-            node.copy(differencer, net.sf.saxon.om.CopyOptions.ALL_NAMESPACES, Loc.NONE);
+            node.copy(differencer, Saxon.Hej.om.CopyOptions.ALL_NAMESPACES, Loc.NONE);
             differencer.close();
         }
 
@@ -490,7 +490,7 @@ namespace Saxon.Api {
                     return name + "=\"" + val + '"';
                 }
 
-                return net.sf.saxon.query.QueryResult.serialize(node).Trim();
+                return Saxon.Hej.query.QueryResult.serialize(node).Trim();
             }
         }
 

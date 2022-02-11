@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using SysCollGen = System.Collections.Generic;
 using System.Xml;
-using net.sf.saxon.om;
-using net.sf.saxon.pattern;
-using net.sf.saxon.tree.iter;
-using net.sf.saxon.tree.util;
-using net.sf.saxon.tree.wrapper;
-using net.sf.saxon.type;
+using Saxon.Hej.om;
+using Saxon.Hej.pattern;
+using Saxon.Hej.tree.iter;
+using Saxon.Hej.tree.util;
+using Saxon.Hej.tree.wrapper;
+using Saxon.Hej.type;
 
 namespace Saxon.Impl.Dom {
     public class DomNodeWrapper : AbstractNodeWrapper, SteppingNode, SiblingCountingNode {
@@ -33,11 +33,11 @@ namespace Saxon.Impl.Dom {
 
         protected internal static DomNodeWrapper makeWrapper(XmlNode node, DomDocumentTree docTree) {
             if ((node == null)) {
-                throw new java.lang.NullPointerException("NodeWrapper#makeWrapper: Node must not be null");
+                throw new Saxon.Ejava.lang.NullPointerException("NodeWrapper#makeWrapper: Node must not be null");
             }
 
             if ((docTree == null)) {
-                throw new java.lang.NullPointerException("NodeWrapper#makeWrapper: DocumentWrapper must not be null");
+                throw new Saxon.Ejava.lang.NullPointerException("NodeWrapper#makeWrapper: DocumentWrapper must not be null");
             }
 
             return makeWrapper(node, docTree, null, -1);
@@ -51,35 +51,35 @@ namespace Saxon.Impl.Dom {
                     wrapper = (DomNodeWrapper) docTree.getRootNode();
                     if ((wrapper == null)) {
                         wrapper = new DomNodeWrapper(node, parent, index);
-                        wrapper.nodeKind = net.sf.saxon.type.Type.DOCUMENT;
+                        wrapper.nodeKind = Saxon.Hej.type.Type.DOCUMENT;
                     }
 
                     break;
                 case XmlNodeType.Element:
                     wrapper = new DomNodeWrapper(node, parent, index);
-                    wrapper.nodeKind = net.sf.saxon.type.Type.ELEMENT;
+                    wrapper.nodeKind = Saxon.Hej.type.Type.ELEMENT;
                     break;
                 case XmlNodeType.Attribute:
                     wrapper = new DomNodeWrapper(node, parent, index);
-                    wrapper.nodeKind = net.sf.saxon.type.Type.ATTRIBUTE;
+                    wrapper.nodeKind = Saxon.Hej.type.Type.ATTRIBUTE;
                     break;
                 case XmlNodeType.Text:
                 case XmlNodeType.CDATA:
                 case XmlNodeType.Whitespace:
                 case XmlNodeType.SignificantWhitespace:
                     wrapper = new DomNodeWrapper(node, parent, index);
-                    wrapper.nodeKind = net.sf.saxon.type.Type.TEXT;
+                    wrapper.nodeKind = Saxon.Hej.type.Type.TEXT;
                     break;
                 case XmlNodeType.Comment:
                     wrapper = new DomNodeWrapper(node, parent, index);
-                    wrapper.nodeKind = net.sf.saxon.type.Type.COMMENT;
+                    wrapper.nodeKind = Saxon.Hej.type.Type.COMMENT;
                     break;
                 case XmlNodeType.ProcessingInstruction:
                     wrapper = new DomNodeWrapper(node, parent, index);
-                    wrapper.nodeKind = net.sf.saxon.type.Type.PROCESSING_INSTRUCTION;
+                    wrapper.nodeKind = Saxon.Hej.type.Type.PROCESSING_INSTRUCTION;
                     break;
                 default:
-                    throw new java.lang.IllegalArgumentException(
+                    throw new Saxon.Ejava.lang.IllegalArgumentException(
                         ("Unsupported node type in DOM! " + node.NodeType + " instance " + node.ToString()));
             }
 
@@ -105,7 +105,7 @@ namespace Saxon.Impl.Dom {
         }
 
         public override int GetHashCode() {
-            java.lang.StringBuilder buffer = new java.lang.StringBuilder(64);
+            Saxon.Ejava.lang.StringBuilder buffer = new Saxon.Ejava.lang.StringBuilder(64);
             generateId(buffer);
             return buffer.ToString().GetHashCode();
         }
@@ -119,19 +119,19 @@ namespace Saxon.Impl.Dom {
             }
         }
 
-        public override net.sf.saxon.str.UnicodeString getUnicodeStringValue() {
+        public override Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
             switch (nodeKind) {
-                case net.sf.saxon.type.Type.DOCUMENT:
-                case net.sf.saxon.type.Type.ELEMENT:
-                    return net.sf.saxon.str.StringView.tidy(node.InnerText);
-                case net.sf.saxon.type.Type.ATTRIBUTE:
-                    return net.sf.saxon.str.StringView.tidy(node.Value);
-                case net.sf.saxon.type.Type.TEXT:
+                case Saxon.Hej.type.Type.DOCUMENT:
+                case Saxon.Hej.type.Type.ELEMENT:
+                    return Saxon.Hej.str.StringView.tidy(node.InnerText);
+                case Saxon.Hej.type.Type.ATTRIBUTE:
+                    return Saxon.Hej.str.StringView.tidy(node.Value);
+                case Saxon.Hej.type.Type.TEXT:
                     if ((span == 1)) {
-                        return net.sf.saxon.str.StringView.tidy(node.InnerText);
+                        return Saxon.Hej.str.StringView.tidy(node.InnerText);
                     }
                     else {
-                        net.sf.saxon.str.UnicodeBuilder fsb = new ();
+                        Saxon.Hej.str.UnicodeBuilder fsb = new ();
                         XmlNode textNode = node;
                         for (int i = 0; (i < span); i++) {
                             fsb.append(textNode.InnerText);
@@ -140,11 +140,11 @@ namespace Saxon.Impl.Dom {
 
                         return fsb.toUnicodeString();
                     }
-                case net.sf.saxon.type.Type.COMMENT:
-                case net.sf.saxon.type.Type.PROCESSING_INSTRUCTION:
-                    return net.sf.saxon.str.StringView.tidy(node.Value);
+                case Saxon.Hej.type.Type.COMMENT:
+                case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
+                    return Saxon.Hej.str.StringView.tidy(node.Value);
                 default:
-                    return net.sf.saxon.str.EmptyUnicodeString.getInstance();
+                    return Saxon.Hej.str.EmptyUnicodeString.getInstance();
             }
         }
 
@@ -154,11 +154,11 @@ namespace Saxon.Impl.Dom {
 
         public override string getURI() {
             NodeInfo element;
-            if ((nodeKind == net.sf.saxon.type.Type.ELEMENT)) {
+            if ((nodeKind == Saxon.Hej.type.Type.ELEMENT)) {
                 element = this;
             }
             else {
-                if ((nodeKind == net.sf.saxon.type.Type.ATTRIBUTE)) {
+                if ((nodeKind == Saxon.Hej.type.Type.ATTRIBUTE)) {
                     element = parent;
                 }
                 else {
@@ -172,7 +172,7 @@ namespace Saxon.Impl.Dom {
             }
 
             if (node.Name.StartsWith("xml:")) {
-                return net.sf.saxon.lib.NamespaceConstant.XML;
+                return Saxon.Hej.lib.NamespaceConstant.XML;
             }
 
             string[] parts;
@@ -180,10 +180,10 @@ namespace Saxon.Impl.Dom {
                 parts = NameChecker.getQNameParts(node.Name);
             }
             catch (QNameException e) {
-                throw new java.lang.IllegalStateException(("Invalid QName in DOM node. " + e));
+                throw new Saxon.Ejava.lang.IllegalStateException(("Invalid QName in DOM node. " + e));
             }
 
-            if (((nodeKind == net.sf.saxon.type.Type.ATTRIBUTE) && (parts[0].Length == 0))) {
+            if (((nodeKind == Saxon.Hej.type.Type.ATTRIBUTE) && (parts[0].Length == 0))) {
                 uri = "";
             }
             else {
@@ -201,7 +201,7 @@ namespace Saxon.Impl.Dom {
                         uri = "";
                     }
                     else {
-                        throw new java.lang.IllegalStateException(("Undeclared namespace prefix in DOM input: " +
+                        throw new Saxon.Ejava.lang.IllegalStateException(("Undeclared namespace prefix in DOM input: " +
                                                                    parts[0]));
                     }
                 }
@@ -216,9 +216,9 @@ namespace Saxon.Impl.Dom {
 
         public override string getDisplayName() {
             switch (nodeKind) {
-                case net.sf.saxon.type.Type.ELEMENT:
-                case net.sf.saxon.type.Type.ATTRIBUTE:
-                case net.sf.saxon.type.Type.PROCESSING_INSTRUCTION:
+                case Saxon.Hej.type.Type.ELEMENT:
+                case Saxon.Hej.type.Type.ATTRIBUTE:
+                case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
                     return node.Name;
                 default:
                     return "";
@@ -228,7 +228,7 @@ namespace Saxon.Impl.Dom {
         public override NodeInfo getParent() {
             if ((parent == null)) {
                 switch (getNodeKind()) {
-                    case net.sf.saxon.type.Type.ATTRIBUTE:
+                    case Saxon.Hej.type.Type.ATTRIBUTE:
                         parent = makeWrapper(((XmlAttribute) node).OwnerElement, docTree);
                         break;
                     default:
@@ -250,10 +250,10 @@ namespace Saxon.Impl.Dom {
         public int getSiblingPosition() {
             if ((index == -1)) {
                 switch (nodeKind) {
-                    case net.sf.saxon.type.Type.ELEMENT:
-                    case net.sf.saxon.type.Type.TEXT:
-                    case net.sf.saxon.type.Type.COMMENT:
-                    case net.sf.saxon.type.Type.PROCESSING_INSTRUCTION:
+                    case Saxon.Hej.type.Type.ELEMENT:
+                    case Saxon.Hej.type.Type.TEXT:
+                    case Saxon.Hej.type.Type.COMMENT:
+                    case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
                         int ix = 0;
                         XmlNode start = node;
                         while (true) {
@@ -265,7 +265,7 @@ namespace Saxon.Impl.Dom {
 
                             ix++;
                         }
-                    case net.sf.saxon.type.Type.ATTRIBUTE:
+                    case Saxon.Hej.type.Type.ATTRIBUTE:
                         ix = 0;
                         AxisIterator iter = parent.iterateAxis(AxisInfo.ATTRIBUTE);
                         while (true) {
@@ -277,7 +277,7 @@ namespace Saxon.Impl.Dom {
 
                             ix++;
                         }
-                    case net.sf.saxon.type.Type.NAMESPACE:
+                    case Saxon.Hej.type.Type.NAMESPACE:
                         ix = 0;
                         iter = parent.iterateAxis(AxisInfo.NAMESPACE);
                         while (true) {
@@ -298,9 +298,9 @@ namespace Saxon.Impl.Dom {
             return index;
         }
 
-        protected internal override AxisIterator iterateAttributes(net.sf.saxon.pattern.NodeTest nodeTest) {
+        protected internal override AxisIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
             AxisIterator iter = new DomNodeWrapper.AttributeEnumeration(docTree, this);
-            if ((nodeTest != net.sf.saxon.pattern.AnyNodeTest.getInstance())) {
+            if ((nodeTest != Saxon.Hej.pattern.AnyNodeTest.getInstance())) {
                 iter = new Navigator.AxisFilter(iter, nodeTest);
             }
 
@@ -314,7 +314,7 @@ namespace Saxon.Impl.Dom {
         protected internal override AxisIterator iterateChildren(NodeTest nodeTest) {
             bool elementOnly = isElementOnly(nodeTest);
             AxisIterator iter = new DomNodeWrapper.ChildEnumeration(docTree, this, true, true, elementOnly);
-            if ((nodeTest != net.sf.saxon.pattern.AnyNodeTest.getInstance())) {
+            if ((nodeTest != Saxon.Hej.pattern.AnyNodeTest.getInstance())) {
                 iter = new Navigator.AxisFilter(iter, nodeTest);
             }
 
@@ -331,14 +331,14 @@ namespace Saxon.Impl.Dom {
             return iter;
         }
         
-        protected override AxisIterator iterateDescendants(net.sf.saxon.pattern.NodeTest nodeTest,
+        protected override AxisIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest,
             bool includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
         }
 
         public override string getAttributeValue(string uri, string local) {
-            net.sf.saxon.pattern.NameTest test =
-                new net.sf.saxon.pattern.NameTest(net.sf.saxon.type.Type.ATTRIBUTE, uri, local, getNamePool());
+            Saxon.Hej.pattern.NameTest test =
+                new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, uri, local, getNamePool());
             AxisIterator iterator = iterateAxis(AxisInfo.ATTRIBUTE, test);
             NodeInfo attribute = ((NodeInfo) iterator.next());
             return attribute?.getStringValue();
@@ -350,12 +350,12 @@ namespace Saxon.Impl.Dom {
             return ((node.NodeType != XmlNodeType.Attribute) && node.HasChildNodes);
         }
 
-        public override void generateId(java.lang.StringBuilder buffer) {
+        public override void generateId(Saxon.Ejava.lang.StringBuilder buffer) {
             Navigator.appendSequentialKey(this, buffer, true);
         }
 
-        public override void copy(net.sf.saxon.@event.Receiver @out, int copyOptions, net.sf.saxon.s9api.Location locationId) {
-            net.sf.saxon.@event.Receiver r = new net.sf.saxon.@event.NamespaceReducer(@out);
+        public override void copy(Saxon.Hej.@event.Receiver @out, int copyOptions, Saxon.Hej.s9api.Location locationId) {
+            Saxon.Hej.@event.Receiver r = new Saxon.Hej.@event.NamespaceReducer(@out);
             Navigator.copy(this, r, copyOptions, locationId);
         }
 
@@ -405,12 +405,12 @@ namespace Saxon.Impl.Dom {
         }
 
         public NamespaceMap getAllNamespaces() {
-            if (getNodeKind() == net.sf.saxon.type.Type.ELEMENT) {
+            if (getNodeKind() == Saxon.Hej.type.Type.ELEMENT) {
                 if (inScopeNamespaces != null) {
                     return inScopeNamespaces;
                 } else {
                     NodeInfo parent = getParent();
-                    NamespaceMap nsMap = parent != null && parent.getNodeKind() == net.sf.saxon.type.Type.ELEMENT
+                    NamespaceMap nsMap = parent != null && parent.getNodeKind() == Saxon.Hej.type.Type.ELEMENT
                         ? parent.getAllNamespaces()
                         : NamespaceMap.emptyMap();
                     XmlElement elem = (XmlElement) node;

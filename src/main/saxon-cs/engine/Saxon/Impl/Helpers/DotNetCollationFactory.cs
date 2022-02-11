@@ -1,14 +1,13 @@
 using System;
 using System.Globalization;
-using com.saxonica.expr.sort;
-using java.text;
-using java.util;
-using net.sf.saxon;
-using net.sf.saxon.expr.sort;
-using net.sf.saxon.lib;
-using net.sf.saxon.trans;
+using Saxon.Eej.expr.sort;
+using Saxon.Ejava.util;
+using Saxon.Hej;
+using Saxon.Hej.expr.sort;
+using Saxon.Hej.lib;
+using Saxon.Hej.trans;
 
-namespace SaxonCS3.Saxon.Impl.Helpers {
+namespace Saxon.Impl.Helpers {
     public class DotNetCollationFactory {
         /**
          * Make a collator with given properties
@@ -17,7 +16,7 @@ namespace SaxonCS3.Saxon.Impl.Helpers {
          * @param uri the collation URI
          * @param props  the desired properties of the collation
          * @return a collation with these properties
-         * @throws net.sf.saxon.trans.XPathException
+         * @throws Saxon.Hej.trans.XPathException
          *          if it is not possible to create a collation with the
          *          requested properties
          */

@@ -10,7 +10,7 @@ namespace Saxon.Api {
 
     public class Location
     {
-        internal Location(net.sf.saxon.s9api.Location loc) {
+        internal Location(Saxon.Hej.s9api.Location loc) {
             SystemId = loc.getSystemId() == null ? null : new Uri(loc.getSystemId());
             LineNumber = loc.getLineNumber();
             ColumnNumber = loc.getColumnNumber();

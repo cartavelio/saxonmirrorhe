@@ -10,8 +10,8 @@ namespace Saxon.Api {
     /// </summary>
     public class XmlProcessingError
     {
-        private readonly net.sf.saxon.s9api.XmlProcessingError incident;
-        public XmlProcessingError(net.sf.saxon.s9api.XmlProcessingError err)
+        private readonly Saxon.Hej.s9api.XmlProcessingError incident;
+        public XmlProcessingError(Saxon.Hej.s9api.XmlProcessingError err)
         {
             this.incident = err;
         }
