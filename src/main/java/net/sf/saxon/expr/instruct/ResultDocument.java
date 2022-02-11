@@ -457,7 +457,7 @@ public class ResultDocument extends Instruction
         }
 
         Receiver out = null;
-        ResultDocumentResolver resolver = null;
+        ResultDocumentResolver resolver;
         String hrefValue = "";
         if (getHref() != null) {
             hrefValue = IriToUri.iriToUri(getHref().evaluateAsString(context)).toString();
@@ -862,6 +862,9 @@ public class ResultDocument extends Instruction
         final SchemaType schemaType = getSchemaType();
         if (schemaType != null) {
             out.emitAttribute("type", schemaType.getStructuredQName());
+        }
+        if (async) {
+            out.emitAttribute("flags", "a");
         }
         if (getHref() != null) {
             out.setChildRole("href");

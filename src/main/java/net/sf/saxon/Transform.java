@@ -781,7 +781,7 @@ public class Transform {
                                     ((StandardLogger) logger).setThreshold(threshold);
                                 }
                                 Compilation.TIMING = true;
-                            } else {
+                            } else if (j < 0) {
                                 if (logger instanceof StandardLogger) {
                                     ((StandardLogger) logger).setThreshold(Logger.ERROR);
                                 }

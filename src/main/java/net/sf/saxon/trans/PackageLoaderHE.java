@@ -3047,6 +3047,9 @@ public class PackageLoaderHE implements IPackageLoader {
             ResultDocument instr = new ResultDocument(globals, locals, href, format, validation, schemaType,
                                                       dynamicProperties, loader.packStack.peek().getCharacterMapIndex());
             instr.setContentExpression(content);
+            if ("a".equals(element.getAttributeValue("", "flags"))) {
+                instr.setAsynchronous(true);
+            }
             return instr;
         });
 
