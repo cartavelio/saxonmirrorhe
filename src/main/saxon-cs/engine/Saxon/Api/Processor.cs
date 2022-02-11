@@ -2,14 +2,17 @@ using System;
 using System.Collections;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 using System.Xml;
 using javax.xml.transform.stream;
 using net.sf.saxon;
 using net.sf.saxon.@event;
 using net.sf.saxon.lib;
+using net.sf.saxon.resource;
 using net.sf.saxon.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
+using Saxon.Impl.Helpers;
 using Version = net.sf.saxon.Version;
 
 namespace Saxon.Api {
@@ -29,13 +32,12 @@ namespace Saxon.Api {
         private SchemaManager schemaManager = null;
         private TextWriter textWriter = Console.Error;
         private IQueryResolver moduleResolver;
-        private ICollectionFinder collectionFinder = null;
-        private StandardCollectionFinder standardCollectionFinder;
+        private ICollectionFinder collectionFinder = (cxt, uri) => new ResourceCollectionWrapper(
+            new StandardCollectionFinder().findCollection(cxt.context, uri));
 
         internal Processor(net.sf.saxon.s9api.Processor p) {
             jProcessor = p;
             jProcessor.getUnderlyingConfiguration().setProcessor(this);
-            collectionFinder = new StandardCollectionFinder(Implementation.getCollectionFinder());
             QueryResolver = null;
         }
 
@@ -46,9 +48,6 @@ namespace Saxon.Api {
         public Processor() {
             jProcessor = new net.sf.saxon.s9api.Processor(false);
             jProcessor.getUnderlyingConfiguration().setProcessor(this);
-            //jProcessor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
-            //collectionFinder = new StandardCollectionFinder(Implementation.getCollectionFinder());
-            //standardCollectionFinder = new StandardCollectionFinder(Implementation.getStandardCollectionFinder());
         }
 
         /// <summary>
@@ -111,27 +110,7 @@ namespace Saxon.Api {
             config.setProcessor(this);
         }
 
-        // public ICollectionFinder CollectionFinder {
-        //     set {
-        //         if (value != null) {
-        //             collectionFinder = value;
-        //             Implementation.setCollectionFinder(new CollectionFinderWrapper(collectionFinder));
-        //         }
-        //     }
-        //     get { return collectionFinder; }
-        // }
-
-
-        // public StandardCollectionFinder StandardCollectionFinder {
-        //     get { return standardCollectionFinder; }
-        // }
-        //
-        // public void RegisterCollection(String collectionURI, IResourceCollection collection) {
-        //     StandardCollectionFinder.RegisterCollection(collectionURI, collection);
-        //     if (CollectionFinder is StandardCollectionFinder && collectionFinder != standardCollectionFinder) {
-        //         ((StandardCollectionFinder) collectionFinder).RegisterCollection(collectionURI, collection);
-        //     }
-        // }
+     
 
 
         /// <summary>
@@ -193,9 +172,7 @@ namespace Saxon.Api {
         /// XPath expressions, and stylesheets, if no other <c>XmlResolver</c> is nominated
         /// </summary>
         /// <remarks>
-        /// <para>By default an <c>XmlUrlResolver</c> is used. This means that the responsibility
-        /// for resolving and dereferencing URIs rests with the .NET platform, not with the
-        /// IKVM/OpenJDK runtime.</para>
+        /// <para>By default a <c>StandardXmlResolver</c> is used.</para>
         /// <para>When Saxon invokes a user-written <c>XmlResolver</c>, the <c>GetEntity</c> method
         /// may return any of: a <c>System.IO.Stream</c>; a <c>System.IO.TextReader</c>; or a
         /// <c>java.xml.transform.Source</c>.</para>
@@ -208,10 +185,10 @@ namespace Saxon.Api {
                     return uriResolver.getXmlResolver();
                 }
 
-                return new XmlUrlResolver();
+                return new StandardXmlResolver();
             }
             set => jProcessor.getUnderlyingConfiguration().setURIResolver(
-                                new StandardURIResolver(value));
+                                new StandardURIResolver(jProcessor.getUnderlyingConfiguration(), value));
         }
 
 
@@ -350,36 +327,64 @@ namespace Saxon.Api {
             Implementation.registerCollation(uri.ToString(), collator);
         }
 
-        // /// <summary>
-        // /// Register a named collection. A collection is identified by a URI (the collection URI),
-        // /// and its content is represented by an <c>IEnumerable</c> that enumerates the contents
-        // /// of the collection. The values delivered by this enumeration are Uri values, which 
-        // /// can be mapped to nodes using the registered <c>XmlResolver</c>.
-        // /// </summary>
-        // /// <param name="collectionUri">The URI used to identify the collection in a call
-        // /// of the XPath <c>collection()</c> function. The default collection is registered
-        // /// by supplying null as the value of this argument (this is the collection returned
-        // /// when the XPath <c>collection()</c> function is called with no arguments).</param> 
-        // /// <param name="contents">An enumerable object that represents the contents of the
-        // /// collection, as a sequence of document URIs. The enumerator returned by this
-        // /// IEnumerable object must return instances of the Uri class.</param>
-        // /// <remarks>
-        // /// <para>Collections should be stable: that is, two calls to retrieve the same collection URI
-        // /// should return the same sequence of document URIs. This requirement is imposed by the
-        // /// W3C specifications, but in the case of a user-defined collection it is not enforced by
-        // /// the Saxon product.</para>
-        // /// <para>A collection may be replaced by specifying the URI of an existing
-        // /// collection.</para>
-        // /// <para>Collections registered with a processor are available to all queries and stylesheets
-        // /// running under the control of that processor. Collections should not normally be registered
-        // /// while queries and transformations are in progress.</para>
-        // /// </remarks>
-        // /// 
-        // public void RegisterCollection(Uri collectionUri, IEnumerable contents) {
-        //     String u = (collectionUri == null ? null : collectionUri.ToString());
-        //     Configuration config = jProcessor.getUnderlyingConfiguration();
-        //     config.registerCollection(u, new JDotNetEnumerableCollection(config, contents));
-        // }
+        /// <summary>
+        /// Register a named collection. A collection is identified by a URI (the collection URI),
+        /// and its content is represented by an <c>IResourceCollection</c>.
+        /// </summary>
+        /// <param name="collectionUri">The URI used to identify the collection in a call
+        /// of the XPath <c>collection()</c> function. The default collection is registered
+        /// by supplying null as the value of this argument (this is the collection returned
+        /// when the XPath <c>collection()</c> function is called with no arguments).</param> 
+        /// <param name="contents">An object that represents the contents of the
+        /// collection.</param>
+        /// <remarks>
+        /// <para>Collections should be stable: that is, two calls to retrieve the same collection URI
+        /// should return the same sequence of document URIs. This requirement is imposed by the
+        /// W3C specifications, but in the case of a user-defined collection it is not enforced by
+        /// the Saxon product.</para>
+        /// <para>A collection may be replaced by specifying the URI of an existing
+        /// collection. However, this should only be done during initialization of the processor;
+        /// the effect of changing collection bindings while transformations or queries are
+        /// in progress is undefined.</para>
+        /// <para>Collections registered with a processor are available to all queries and stylesheets
+        /// running under the control of that processor.</para>
+        /// <para>If a collection URI has been registered using this method, the registered collection
+        /// is used, and the collection finder is not called.</para>
+        /// </remarks>
+        /// <param name="collectionURI">The name of the collection</param>
+        /// <param name="collection">The contents of the collection</param>
+        /// 
+        
+        public void RegisterCollection(string collectionURI, IResourceCollection collection) {
+            Configuration config = jProcessor.getUnderlyingConfiguration();
+            config.registerCollection(collectionURI, ResourceCollectionUnwrapper.Unwrap(collection));
+        }
+        
+        /// <summary>
+        /// Get or set a function that is used to retrieve a resource collection given a collection URI.
+        /// </summary>
+        /// <remarks>
+        /// <para>This function will be called only if the collection URI has not been registered using
+        /// <c>RegisterCollection</c>.</para>
+        /// <para>A collection finder should be set only while the processor is being initialized; the
+        /// effect of changing the collection finder (or changing any data on which it depends) while
+        /// queries or transformations are in progress is undefined.
+        /// </para>
+        /// <para>The initial value of the property is a system collection finder that recognizes various
+        /// kinds of collection including directory collections and catalog collections. It is always possible
+        /// for a user-defined collection finder to delegate to this system collection finder.</para>
+        /// </remarks>
+        
+        public ICollectionFinder CollectionFinder {
+            set {
+                if (value != null) {
+                    this.collectionFinder = value;
+                    Implementation.setCollectionFinder(
+                        (context, uri) => ResourceCollectionUnwrapper.Unwrap(value(new DynamicContext(context), uri)));
+                }
+            }
+            get { return collectionFinder; }
+        }
 
         /// <summary>
         /// Register an extension function with the <c>Processor</c>. This interface provides
@@ -413,19 +418,20 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Set the media type to be associated with a file extension by  the standard collection handler
+        /// Set the media type to be associated with a file extension by the standard collection handler
         /// </summary>
         /// <param name="extension">the file extension, for exmaple "xml". The value "" sets the 
         /// default media type to be used for unregistered file extensions</param>
         /// <param name="mediaType">the corresponding media type, for example "application/xml". The
         /// choice of media type determines how a resource with this extension gets parsed, when the file 
         /// appears as part of a collection</param>
+        /// 
         public void RegisterFileExtension(String extension, String mediaType) {
             Implementation.registerFileExtension(extension, mediaType);
         }
 
         // /// <summary>
-        // /// Associated a media type with a resource factory. This methodm may be called
+        // /// Associated a media type with a resource factory. This method may be called
         // /// to customize the behaviour of a collection to recognize different file extensions
         // /// </summary>
         // /// <param name="contentType">a media type or MIME type, for example application/xsd+xml</param>

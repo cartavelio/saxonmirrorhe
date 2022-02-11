@@ -8,7 +8,7 @@ using net.sf.saxon;
 
 namespace Saxon.Callbacks {
     public class StandardUnparsedTextResolver : net.sf.saxon.lib.UnparsedTextURIResolver {
-        private XmlResolver resolver = new XmlUrlResolver();
+        private XmlResolver resolver = new StandardXmlResolver();
 
         public StandardUnparsedTextResolver() {
         }

@@ -10,6 +10,7 @@ using net.sf.saxon.om;
 using net.sf.saxon.pull;
 using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
+using Saxon.Callbacks;
 using Saxon.Impl.Dom;
 
 namespace Saxon.Api {
@@ -36,7 +37,7 @@ namespace Saxon.Api {
             this.processor = processor;
             this.s9Builder = processor.JProcessor.newDocumentBuilder();
             this.config = processor.Implementation;
-            this.xmlResolver = new XmlUrlResolver();
+            this.xmlResolver = new StandardXmlResolver();
         }
 
         /// <summary>
@@ -44,9 +45,7 @@ namespace Saxon.Api {
         /// and of references to external entities within those documents (including any external DTD).
         /// </summary>
         /// <remarks>
-        /// <para>By default an <c>XmlUrlResolver</c> is used. This means that the responsibility
-        /// for resolving and dereferencing URIs rests with the .NET platform (and not with the
-        /// GNU Classpath).</para>
+        /// <para>By default a <c>StandardXmlResolver</c> is used.</para>
         /// <para>When Saxon invokes a user-written <c>XmlResolver</c>, the <c>GetEntity</c> method
         /// may return any of: a <c>System.IO.Stream</c>; a <c>System.IO.TextReader</c>; or a
         /// <c>java.xml.transform.Source</c>. However, if the <c>XmlResolver</c> is called

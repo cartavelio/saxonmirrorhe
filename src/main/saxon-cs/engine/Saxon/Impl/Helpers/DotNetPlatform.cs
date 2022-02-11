@@ -1,6 +1,7 @@
 using System.Impl.Helpers;
 using System.IO;
 using System.Runtime.Versioning;
+using System.Text;
 using System.Xml;
 using java.lang;
 using javax.xml.transform;
@@ -22,8 +23,9 @@ namespace Saxon.Impl.Helpers {
         }
 
         public void initialize(net.sf.saxon.Configuration config) {
-            config.setURIResolver(new DotNetURIResolver(new XmlUrlResolver()));
-            //config.setCollectionFinder(new net.sf.saxon.resource.StandardCollectionFinder());
+            config.setURIResolver(new StandardURIResolver(config, new StandardXmlResolver()));
+            config.setCollectionFinder((cxt, uri) => 
+                new net.sf.saxon.resource.StandardCollectionFinder().findCollection(cxt, uri));
         }
 
         public bool isJava() {
@@ -83,9 +85,9 @@ namespace Saxon.Impl.Helpers {
                 XmlReader parser = new XmlTextReader(input.getSystemId(), @is);
                 ((XmlTextReader) parser).WhitespaceHandling = WhitespaceHandling.All;
                 ((XmlTextReader) parser).Normalization = true;
-                if (pipe.getURIResolver() is DotNetURIResolver)
+                if (pipe.getURIResolver() is StandardURIResolver)
                     ((XmlTextReader) parser).XmlResolver =
-                        ((DotNetURIResolver) pipe.getURIResolver()).getXmlResolver();
+                        ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
                 parser = new XmlValidatingReader(parser);
                 if (dtdValidation)
                     ((XmlValidatingReader) parser).ValidationType = ValidationType.DTD;
@@ -108,8 +110,8 @@ namespace Saxon.Impl.Helpers {
                 XmlReader parser = new XmlTextReader(input.getSystemId(), reader);
                 ((XmlTextReader) parser).Normalization = true;
                 ((XmlTextReader) parser).WhitespaceHandling = WhitespaceHandling.All;
-                if (pipe.getURIResolver() is DotNetURIResolver)
-                    ((XmlTextReader) parser).XmlResolver = ((DotNetURIResolver) pipe.getURIResolver()).getXmlResolver();
+                if (pipe.getURIResolver() is StandardURIResolver)
+                    ((XmlTextReader) parser).XmlResolver = ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
                 parser = new XmlValidatingReader(parser);
                 if (dtdValidation)
                     ((XmlValidatingReader) parser).ValidationType = ValidationType.DTD;
@@ -278,7 +280,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public net.sf.saxon.lib.ModuleURIResolver makeStandardModuleURIResolver(net.sf.saxon.Configuration config) {
-            return new StandardModuleURIResolver(new XmlUrlResolver());
+            return new StandardModuleURIResolver(new StandardXmlResolver());
         }
 
         public IDynamicLoader getDefaultDynamicLoader() {
@@ -308,7 +310,22 @@ namespace Saxon.Impl.Helpers {
                 XmlReader xmlReader = null;
                 if (((StreamSource) source).getInputStream() != null) {
                     xmlReader = XmlReader.Create(((StreamSource) source).getInputStream(),
-                        settings, parserContext);
+                         settings, parserContext);
+                    // Console.Error.WriteLine("CONTENTS OF STREAM SOURCE");
+                    // var reader = new StreamReader(((StreamSource) source).getInputStream(), Encoding.UTF8);
+                    // System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                    // string line;
+                    // while ((line = reader.ReadLine()) != null) {
+                    //     sb.Append(line);
+                    //     Console.Error.WriteLine(line);
+                    // }
+                    //
+                    // if (sb.Length == 0) {
+                    //     Console.Error.WriteLine("STREAM SOURCE IS EMPTY!!");
+                    // }
+                    // Console.Error.WriteLine("END OF CONTENTS OF STREAM SOURCE");
+                    // xmlReader = XmlReader.Create(new StringReader(sb.ToString()),
+                    //     settings, parserContext);
                 }
                 else if (((StreamSource) source).getReader() != null) {
                     xmlReader = XmlReader.Create(((StreamSource) source).getReader(),
@@ -322,8 +339,8 @@ namespace Saxon.Impl.Helpers {
                     else {
                         Uri uri = new Uri(sysId);
                         URIResolver ur = config.getURIResolver();
-                        if (ur is DotNetURIResolver) {
-                            XmlResolver xr = ((DotNetURIResolver) ur).getXmlResolver();
+                        if (ur is StandardURIResolver) {
+                            XmlResolver xr = ((StandardURIResolver) ur).getXmlResolver();
                             object o = xr.GetEntity(uri, "xml", typeof(Stream));
                             if (o is Stream) {
                                 xmlReader = XmlReader.Create((Stream) o, settings, parserContext);
@@ -339,6 +356,7 @@ namespace Saxon.Impl.Helpers {
 
                 DotNetPullProvider provider = new DotNetPullProvider(xmlReader);
                 PullSource pullSource = new PullSource(provider);
+                pullSource.setSystemId(source.getSystemId());
                 return pullSource;
             }
             return null;

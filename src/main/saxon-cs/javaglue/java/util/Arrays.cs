@@ -54,7 +54,20 @@ namespace java.util
         }
 
         public static string ToString<T>(T[] array) {
-            return "Arrays.ToString not implemented";
+            var sb = new System.Text.StringBuilder();
+            bool first = true;
+            foreach (T t in array) {
+                if (first) {
+                    first = false;
+                }
+                else {
+                    sb.Append(' ');
+                }
+
+                sb.Append(t.ToString());
+            }
+
+            return sb.ToString();
         }
 
         public static int hashCode<T>(T[] array) {

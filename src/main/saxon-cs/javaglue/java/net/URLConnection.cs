@@ -1,21 +1,38 @@
 using System;
+using System.IO;
 
 namespace java.net {
     public class URLConnection {
 
-        public System.IO.Stream getInputStream() {
-            throw new NotImplementedException();
+        private readonly URL url;
+        protected Stream stream;
+        
+        public URLConnection(URL url) {
+            this.url = url;
         }
 
-        public int getContentLength() {
-            return 0;
+        public URLConnection(URL url, Stream stream) {
+            this.url = url;
+            this.stream = stream;
+        }
+
+        public System.IO.Stream getInputStream() {
+            return stream;
+        }
+
+        public long getContentLengthLong() {
+            return stream.Length;
         }
 
         public URL getURL() {
-            return null;
+            return url;
         }
 
-        public string getContentType() {
+        public virtual string getContentType() {
+            throw new NotImplementedException();
+        }
+
+        public virtual string getContentEncoding() {
             throw new NotImplementedException();
         }
 
@@ -27,7 +44,7 @@ namespace java.net {
             return "application/xml";
         }
 
-        public long getLastModified() {
+        public virtual long getLastModified() {
             throw new NotImplementedException();
         }
 

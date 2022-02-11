@@ -1,5 +1,5 @@
 namespace java.util.concurrent {
     public interface Executor {
-        void execute(Runnable command);
+        void execute(java.lang.Runnable command);
     }
 }
