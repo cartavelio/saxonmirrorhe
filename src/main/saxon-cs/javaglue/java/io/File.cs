@@ -31,7 +31,7 @@ namespace java.io {
         }
 
         public string getAbsolutePath() {
-            return null
+            return null;
         }
         public string getCanonicalPath() {
             return null;
@@ -78,6 +78,9 @@ namespace java.io {
         }
         
         public void createNewFile() {}
+
+        public void mkdirs() {
+        }
 
         public bool renameTo(File file) {
             return false;

@@ -12,16 +12,16 @@ namespace javax.xml.transform.stream {
 
         public StreamSource(string uri) {
         }
-        public StreamSource(Reader reader) {
+        public StreamSource(System.IO.TextReader reader) {
             
         }
-        public StreamSource(Reader reader, string sysId) {
+        public StreamSource(System.IO.TextReader reader, string sysId) {
             
         }
-        public StreamSource(InputStream stream) {
+        public StreamSource(System.IO.Stream stream) {
             
         }
-        public StreamSource(InputStream stream, string sysId) {
+        public StreamSource(System.IO.Stream stream, string sysId) {
             
         }
 
@@ -33,18 +33,18 @@ namespace javax.xml.transform.stream {
             this.systemId = uri;
         }
 
-        public void setInputStream(InputStream stream) {
+        public void setInputStream(System.IO.Stream stream) {
             
         }
-        public InputStream getInputStream() {
+        public System.IO.Stream getInputStream() {
             return null;
         }
 
-        public void setReader(Reader reader) {
+        public void setReader(System.IO.TextReader reader) {
             
         }
 
-        public Reader getReader() {
+        public System.IO.TextReader getReader() {
             return null;
         }
         

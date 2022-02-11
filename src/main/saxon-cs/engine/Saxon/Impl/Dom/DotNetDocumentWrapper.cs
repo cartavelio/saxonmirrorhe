@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 
-namespace com.saxonica.dotnetdom {
+namespace Saxon.Impl.Dom {
     /**
      * Wraps a .NET DOM tree. This is derived from the Java code in the Saxon .NET product,
      * but for Saxon-CS is maintained as native C# code.
