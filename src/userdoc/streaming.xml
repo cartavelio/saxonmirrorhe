@@ -30,7 +30,7 @@
     <section id="xslt-streaming" title="Streaming using XSLT 3.0">
       <h1>Streaming using XSLT 3.0</h1>
 
-      <aside>Requires Saxon-EE (either Java or C#).</aside>
+      <aside>Requires Saxon-EE.</aside>
 
       <p>Saxon-EE (from Saxon 9.8) is fully conformant to the final XSLT 3.0 recommendation in terms of the
         streaming facilities it supports. A few gaps in coverage that were found after release were fixed for Saxon 9.9. 
@@ -50,15 +50,17 @@
           supplied as a stream, and not as an in-memory
           tree. The details depend on which API is being used:</p>
           <ul>
-            <li class="javaonly"><p>With the Java s9api API, compile the stylesheet to create an <code>XsltExecutable</code>,
+            <li class="javaonly"><p>With the Java s9api API, compile the stylesheet to create an <code
+              java="net.sf.saxon.s9api.XsltExecutable">XsltExecutable</code>,
             and then use the <code>load30</code> method to create an <code>Xslt30Transformer</code>.
-            Invoke the streamed transformation using the <code>applyTemplates</code> method of
-            the <code>Xslt30Transformer</code>, supplying the input as a <code>StreamSource</code>
-            or <code>SAXSource</code>.</p></li> 
+              Invoke the streamed transformation using the <code
+                java="net.sf.saxon.s9api.Xslt30Transformer#applyTemplates">Xslt30Transformer.applyTemplates()</code>
+              method, supplying the input as a <code>StreamSource</code> or <code>SAXSource</code>.</p></li> 
             <li class="csonly"><p>Similarly with the Saxon.Api interface on .NET, use the method
-            <code>Xslt30Transformer.ApplyTemplates()</code>, supplying a <code>Stream</code> 
-            as input.</p></li>
-            <li class="javaonly"><p>With the JAXP API, start by instantiating a <code>com.saxonica.config.StreamingTransformerFactory</code>.
+              <code cs="Saxon.Api.Xslt30Transformer#ApplyTemplates">Xslt30Transformer.ApplyTemplates()</code>,
+              supplying a <code>Stream</code>   as input.</p></li>
+            <li class="javaonly"><p>With the JAXP API, start by instantiating a <code
+              java="com.saxonica.config.StreamingTransformerFactory">com.saxonica.config.StreamingTransformerFactory</code>.
             Invoke the transformation in the usual way by creating a <code>Transformer</code> (optionally via a
             <code>Templates</code> object). When the <code>transform()</code> method is called with a
             <code>StreamSource</code> or <code>SAXSource</code> as input, and when the initial mode
@@ -77,7 +79,7 @@
       <p>The <a class="bodylink code" href="/functions/saxon/stream">saxon:stream</a> extension
         function used in previous releases is still supported for the time being. In Saxon 9.8 and later a
         call on <code>saxon:stream</code> is translated at compile time into a call on the XSLT 3.0
-          <code>&lt;xsl:source-document&gt;</code> instruction. The original Saxon mechanism for streaming,
+          <code>xsl:source-document</code> instruction. The original Saxon mechanism for streaming,
         namely the <code>saxon:read-once</code> attribute on <code>xsl:copy-of</code>, was dropped
         in Saxon 9.6.</p>
 
@@ -96,7 +98,7 @@
         not necessary to be familiar with the detailed rules. The main things to remember are:</p>
 
       <ul>
-        <li>A construct is "consuming" if it reads a subtree of the source document, that is, if it
+        <li>A construct is <em>consuming</em> if it reads a subtree of the source document, that is, if it
           makes a downwards selection from the context item. In general, constructs are not allowed
           to have two operands that are both consuming. Some exceptions to this are: the <a
             class="bodylink code" href="/xsl-elements/fork">xsl:fork</a> instruction; conditional
@@ -113,7 +115,7 @@
           an ancestor node).</li>
         <li>It's not permitted to bind a streamed node to a variable or parameter, or to pass it to
           a function, except in the special case of functions that are declared streamable.</li>
-        <li>An expression such as <code>//section</code> is referred to as a crawling expression.
+        <li>An expression such as <code>//section</code> is referred to as a <em>crawling</em> expression.
           Crawling expressions potentially contain nodes which overlap each other, which creates
           problems if you want to make further downward selections from such nodes. The XSLT 3.0
           specification allows this in some circumstances, for example you can pass such an
@@ -130,7 +132,7 @@
           subtree of the streamed document, for example by using the new <a class="bodylink code"
             href="/functions/fn/copy-of">copy-of()</a> or <a class="bodylink code"
             href="/functions/fn/snapshot">snapshot()</a> functions. These are consuming expressions,
-          but the result is "grounded" (that is, an ordinary in-memory tree) so it can be used
+          but the result is <em>grounded</em> (that is, an ordinary in-memory tree) so it can be used
           without any restrictions. Clearly this only works if the subtrees that you copy are small
           enough to fit in memory.</li>
       </ul>
@@ -143,7 +145,8 @@
           rules in a particular mode to be declared streamable (<code>&lt;xsl:mode
             streamable="yes"/&gt;</code>). If a mode is declared streamable, then Saxon checks
           whether all the template rules in that mode are actually streamable, and reports a
-          compile-time error if not.</li>
+          compile-time error if not. (See also <a class="bodylink" href="../streaming-templates">Streaming
+            templates</a>.)</li>
         <li>The <a class="bodylink code"
           href="/xsl-elements/source-document">xsl:source-document</a> instruction.
           This has an <code>href</code> attribute which defines the URI of a streamed input
@@ -175,11 +178,13 @@
           information to be maintained in the accumulator is complex, it can be useful to hold it in
           a map, which is a new data structure introduced in XSLT 3.0.</li>
         <li>Saxon (from 9.9) supports an additional capability: <em>capturing accumulators</em>.
-         By adding the attribute <code>saxon:capture="yes"</code> to an accumulator rule with
+          By adding the attribute <a class="bodylink code"
+            href="/extensions/attributes/capture">saxon:capture="yes"</a> to an accumulator rule with
           <code>phase="end"</code>, you can tell Saxon to make a snapshot copy of the matched
-          element (as if by calling the <code>fn:snapshot</code> function) and the code for computing
+          element (as if by calling the <a class="bodylink code" href="/functions/fn/snapshot">snapshot()</a>
+          function) and the code for computing 
           the next value of the accumulator then has full access to this snapshot, which means it is
-          no longer constrained to be motionless. You can even keep the snapshot copy directly
+          no longer constrained to be <em>motionless</em>. You can even keep the snapshot copy directly
           as the value of the accumulator (just write <code>select="."</code>), or you can retain
           all the matched elements (write <code>select="($value, .)"</code>). One way of writing a
           streamed transformation is now to capture all the data you need in accumulators, and
@@ -244,7 +249,7 @@
           <p>Path expressions must use downward selection only.</p>
         </li>
         <li>
-          <p>Predicates must be motionless, which means they can reference attributes but not child
+          <p>Predicates must be <em>motionless</em>, which means they can reference attributes but not child
             elements of the node being filtered.</p>
         </li>
         <li>
@@ -508,73 +513,70 @@ satisfies number($t/@value) lt 0
       <p>The following example takes a sequence of <code>&lt;transaction&gt;</code> elements in an
         input document, each one containing the value of a debit or credit from an account. As
         output it copies the transaction elements, adding a current balance.</p>
-      <samp><![CDATA[    <xsl:source-document streamable="yes" href="transactions.xml">          
-      <xsl:iterate select="account/transaction">
-        <xsl:param name="balance" as="xs:decimal" select="0.00"/>
-        <xsl:variable name="new-balance" as="xs:decimal" select="$balance + xs:decimal(@value)"/>
-        <transaction balance="{$new-balance}">
-           <xsl:copy-of select="@*"/>
-        </transaction>
-        <xsl:next-iteration>
-          <xsl:with-param name="balance" select="$new-balance"/>
-        </xsl:next-iteration>
-      </xsl:iterate>
-    </xsl:source-document>  
-]]></samp>
+      <samp><![CDATA[<xsl:source-document streamable="yes" href="transactions.xml">          
+  <xsl:iterate select="account/transaction">
+    <xsl:param name="balance" as="xs:decimal" select="0.00"/>
+    <xsl:variable name="new-balance" as="xs:decimal" select="$balance + xs:decimal(@value)"/>
+    <transaction balance="{$new-balance}">
+      <xsl:copy-of select="@*"/>
+    </transaction>
+    <xsl:next-iteration>
+      <xsl:with-param name="balance" select="$new-balance"/>
+    </xsl:next-iteration>
+  </xsl:iterate>
+</xsl:source-document>  ]]></samp>
 
       <p>The following example is similar: this time it copies the account number (contained in a
         separate element at the start of the file) into each transaction element:</p>
-      <samp><![CDATA[    <xsl:source-document streamable="yes" href="transactions.xml">           
-      <xsl:iterate select="account/(account-number|transaction)">
-        <xsl:param name="accountNr"/>
-        <xsl:choose>
-           <xsl:when test="self::account-number">
-             <xsl:next-iteration>
-                <xsl:with-param name="accountNr" select="string(.)"/>
-             </xsl:next-iteration>
-           </xsl:when>
-           <xsl:otherwise>
-             <transaction account-number="{$accountNr}">
-               <xsl:copy-of select="@*"/>
-             </transaction>
-           </xsl:otherwise>
-        </xsl:choose>
-      </xsl:iterate>
-    </xsl:source-document>  
-]]></samp>
+      <samp><![CDATA[<xsl:source-document streamable="yes" href="transactions.xml">           
+  <xsl:iterate select="account/(account-number|transaction)">
+    <xsl:param name="accountNr"/>
+    <xsl:choose>
+      <xsl:when test="self::account-number">
+        <xsl:next-iteration>
+          <xsl:with-param name="accountNr" select="string(.)"/>
+        </xsl:next-iteration>
+      </xsl:when>
+      <xsl:otherwise>
+        <transaction account-number="{$accountNr}">
+          <xsl:copy-of select="@*"/>
+        </transaction>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:iterate>
+</xsl:source-document>  ]]></samp>
 
       <p>Here is a more complex example, one that groups adjacent transaction elements having the
         same date attribute. The two loop parameters are the current grouping key and the current
         date. The contents of a group are accumulated in a variable until the date changes.</p>
-      <samp><![CDATA[    <xsl:source-document streamable="yes" href="transactions.xml">           
-      <xsl:iterate select="account/transaction">
-        <xsl:param name="group" as="element(transaction)*" select="()"/>
-        <xsl:param name="currentDate" as="xs:date?" select="()"/>
-        <xsl:choose>
-          <xsl:when test="xs:date(@date) eq $currentDate or empty($group)">
-            <xsl:next-iteration>
-              <xsl:with-param name="currentDate" select="@date"/>
-              <xsl:with-param name="group" select="($group, .)"/>
-            </xsl:next-iteration>
-          </xsl:when>
-          <xsl:otherwise>
-            <daily-transactions date="{$currentDate}">
-              <xsl:copy-of select="$group"/>
-            </daily-transactions>
-            <xsl:next-iteration>
-              <xsl:with-param name="group" select="."/>
-              <xsl:with-param name="currentDate" select="@date"/>
-            </xsl:next-iteration>            
-          </xsl:otherwise>
-        </xsl:choose>
-        <xsl:on-completion>
-          <final-daily-transactions date="{$currentDate}">
-            <xsl:copy-of select="$group"/>
-          </final-daily-transactions>
-        </xsl:on-completion>        
-      </xsl:iterate>
-    </xsl:source-document>  
-]]></samp>
+      <samp><![CDATA[<xsl:source-document streamable="yes" href="transactions.xml">           
+  <xsl:iterate select="account/transaction">
+    <xsl:param name="group" as="element(transaction)*" select="()"/>
+    <xsl:param name="currentDate" as="xs:date?" select="()"/>
+    <xsl:choose>
+      <xsl:when test="xs:date(@date) eq $currentDate or empty($group)">
+        <xsl:next-iteration>
+          <xsl:with-param name="currentDate" select="@date"/>
+          <xsl:with-param name="group" select="($group, .)"/>
+        </xsl:next-iteration>
+      </xsl:when>
+      <xsl:otherwise>
+        <daily-transactions date="{$currentDate}">
+          <xsl:copy-of select="$group"/>
+        </daily-transactions>
+        <xsl:next-iteration>
+          <xsl:with-param name="group" select="."/>
+          <xsl:with-param name="currentDate" select="@date"/>
+        </xsl:next-iteration>            
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:on-completion>
+      <final-daily-transactions date="{$currentDate}">
+        <xsl:copy-of select="$group"/>
+      </final-daily-transactions>
+    </xsl:on-completion>        
+  </xsl:iterate>
+</xsl:source-document>  ]]></samp>
 
       <p>Note that when an <a class="bodylink code" href="/xsl-elements/iterate">xsl:iterate</a>
         loop is terminated using <a class="bodylink code" href="/xsl-elements/break">xsl:break</a>,
@@ -699,7 +701,7 @@ satisfies number($t/@value) lt 0
             Examples of acceptable patterns are <code>*</code>, <code>para</code>,
               <code>para[1]</code>, or <code>para/*</code>.</p>
           <p>If the match pattern includes a boolean predicate, then the predicate must be
-            "motionless", which means that it can be evaluated while the input stream is positioned
+            <em>motionless</em>, which means that it can be evaluated while the input stream is positioned
             at the start tag. This means it can reference properties such as <code>name()</code> and
               <code>base-uri()</code>, and can reference attributes of the element, but cannot
             reference its children or content.</p>
