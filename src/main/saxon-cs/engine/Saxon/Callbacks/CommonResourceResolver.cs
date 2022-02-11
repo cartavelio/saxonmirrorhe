@@ -1,16 +1,17 @@
 using System;
-using Org.XmlResolver;
+using System.Xml;
 using Org.XmlResolver.Features;
 using Saxon.Api;
-using Saxon.Ejavax.xml.transform;
-using Saxon.Ejavax.xml.transform.stream;
-using Saxon.Hej.lib;
+
 
 namespace Saxon.Callbacks {
-    public abstract class CommonResourceResolver : System.Xml.XmlResolver {
+    public abstract class CommonResourceResolver {
         protected CommonResourceResolver nextResourceResolver = null;
 
         public abstract CommonResourceResolver NewInstance();
+        
+        
+
 
         internal void CopyFrom(CommonResourceResolver resolver) {
             nextResourceResolver = resolver.nextResourceResolver;
@@ -30,27 +31,21 @@ namespace Saxon.Callbacks {
 
         /// <summary>
         /// Get a resource identified by a URI, supplied typically as the combination of a relative URI and base URI.
-        /// This method is used for URIs that typically represent locations (for example URIs passed to the <c>fn:doc</c>
-        /// function) as distinct from namespace URIs.
         /// </summary>
+        /// <remarks>
+        /// <para>Note that this method has the same signature as the <c>ResourceResolver</c> delegate, so
+        /// where a <c>ResourceResolver</c> is required, it is possible to supply <c>commonResourceResolver.Resolve</c>
+        /// as the value.</para>
+        /// <para>This method is used for URIs that typically represent locations (for example URIs passed to the <c>fn:doc</c>
+        /// function). It is also used to resolve namespaces appearing in XQuery <c>import module</c> and <c>import schema</c>
+        /// declarations (and other constructs for importing schema documents) where no location hint is provided: in this
+        /// case the property <c>request.UriIsNamespace</c> will be set to true.</para>
+        /// </remarks>
         /// <param name="request">Details of the required resource, including its URI</param>
         /// <returns>An IResource containing the content of the resource, together with its base URI. It is
         /// always acceptable to return a <c>TextResource</c>; other kinds of resource may be acceptable
-        /// depending on the nature of the request.</returns>
-        public abstract IResource DereferenceLocation(ResourceRequest request);
-
-        /// <summary>
-        /// Get a resource identified by a URI.
-        /// This method is used for URIs that typically represent namespaces, for example the namespace of a query module
-        /// or the target namespace of a schema, as distinct from URIs that normally correspond to addresses.
-        /// </summary>
-        /// <param name="namespaceUri">The URI of the required resource</param>
-        /// <param name="nature">As defined in RDDL (corresponds to the <c>role</c> attribute in XLink)</param>
-        /// <param name="purpose">As defined in RDDL (corresponds to the <c>arcrole</c> attribute in XLink)</param>
-        /// <returns>An IResource containing the content of the resource, together with its base URI. It is
-        /// always acceptable to return a <c>TextResource</c>; other kinds of resource may be acceptable
-        /// depending on the nature of the request.</returns>
-        public abstract IResource DereferenceNamespace(string namespaceUri, ResourceRequest request);
+        /// depending on the nature of the request. Returns null if the request cannot be resolved.</returns>
+        public abstract IResource Resolve(ResourceRequest request);
 
         /// <summary>
         /// Set a feature of the underlying implementation (geared towards the case where the underlying
@@ -69,7 +64,33 @@ namespace Saxon.Callbacks {
         public virtual object GetFeature(ResolverFeature feature) {
             return null;
         }
+        
+        /// <summary>
+        /// Get an instance of <c>System.Xml.XmlResolver</c> based on this <c>CommonResourceResolver</c>,
+        /// which can be passed to an XML parser (<c>XmlReader</c>) to be used for resolving external entities
+        /// within an XML document (including the external DTD subset).
+        /// </summary>
+        /// <returns>An <c>System.Xml.XmlResolver</c> based on this <c>CommonResourceResolver</c></returns>
 
         
+        public virtual XmlResolver GetEntityResolver() {
+            return new DelegatingXmlResolver(this);
+        }
+
+        private class DelegatingXmlResolver : XmlUrlResolver {
+
+            private readonly CommonResourceResolver commonResolver;
+
+            public DelegatingXmlResolver(CommonResourceResolver resolver) {
+                commonResolver = resolver;
+            }
+            
+            public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn) {
+                object o = base.GetEntity(absoluteUri, role, ofObjectToReturn);
+                return o ?? commonResolver.nextResourceResolver.GetEntityResolver()
+                    .GetEntity(absoluteUri, role, ofObjectToReturn);
+            }
+            
+        }
     }
 }

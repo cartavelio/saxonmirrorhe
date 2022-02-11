@@ -72,9 +72,12 @@ namespace Saxon.Api {
         /// the <c>import schema</c> declaration in XQuery.
         /// </summary>
 
-        public SchemaResolver SchemaResolver
-        {
-            set => s9schemaManager.setSchemaURIResolver(new DelegatingSchemaResolver(value));
+        public SchemaResolver SchemaResolver {
+            set {
+                DelegatingSchemaResolver dsr = new DelegatingSchemaResolver(value);
+                dsr.setConfiguration(processor.Implementation);
+                s9schemaManager.setSchemaURIResolver(dsr);
+            }
         }
 
         /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined ErrorReporter.

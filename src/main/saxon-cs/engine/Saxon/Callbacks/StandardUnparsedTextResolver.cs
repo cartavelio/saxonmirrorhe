@@ -56,7 +56,7 @@ namespace Saxon.Callbacks {
                 if (encoding != null) {
                     request.Encoding = Encoding.GetEncoding(encoding);
                 }
-                IResource ss = resolver.DereferenceLocation(request);
+                IResource ss = resolver.Resolve(request);
                 if (ss is TextResource text) {
                     return text.TextReader;
                     // if (text.TextReader != null) {

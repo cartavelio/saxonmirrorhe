@@ -194,7 +194,6 @@ namespace Saxon.Api {
             return result;
         }
 
-
         /// <summary>
         /// Static factory method to construct an XDM map by converting each entry
         /// in a supplied generic collection of key/value pairs; <code>IDictionary</code>. The keys in the 
