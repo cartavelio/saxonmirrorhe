@@ -294,6 +294,11 @@
       <xsl:sequence select="replace($nameOfType, '^\? (extends|super) ', '') => replace('&lt;.*$', '') => f:escapeDottedName()"/>
    </xsl:function>
    
+   <xsl:function name="f:degenerifyWithoutEscaping" as="xs:string?">
+      <xsl:param name="nameOfType" as="xs:string?"/>
+      <xsl:sequence select="replace($nameOfType, '^\? (extends|super) ', '') => replace('&lt;.*$', '')"/>
+   </xsl:function>
+   
    <xsl:function name="f:escapeSimpleName" as="xs:string">
       <xsl:param name="simpleName" as="xs:string"/>
       <xsl:sequence select="if ($simpleName = $reservedWords) then ('@' || $simpleName) else $simpleName"/>
