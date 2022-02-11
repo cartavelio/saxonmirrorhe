@@ -115,13 +115,13 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// This property indicates which version of XQuery language syntax is accepted. In this version
-        /// of Saxon the version is always "3.1"; any attempt to set a different value is ignored.
+        /// This property indicates which version of XQuery language syntax is accepted. The values
+        /// accepted are "3.1" and "4.0"
         /// </summary>
 
         public string XQueryLanguageVersion {
-            get => "3.1";
-            set { }
+            get => Implementation.getLanguageVersion();
+            set => Implementation.setLanguageVersion(value);
         }
 
 
