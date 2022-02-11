@@ -478,7 +478,7 @@ namespace SaxonEE
 
             // Create a serializer, with output to the standard output stream
             Serializer serializer = processor.NewSerializer();
-            serializer.SetOutputWriter(Console.Out);
+            serializer.OutputWriter = Console.Out;
 
             // Transform the source XML and serialize the result document
             transformer.ApplyTemplates(input, serializer);
@@ -508,7 +508,7 @@ namespace SaxonEE
             // Create a serializer
             const string outfile = "OutputFromXsltSimple2.xml";
             Serializer serializer = processor.NewSerializer();
-            serializer.SetOutputStream(new FileStream(outfile, FileMode.Create, FileAccess.Write));
+            serializer.OutputStream = new FileStream(outfile, FileMode.Create, FileAccess.Write);
 
             // Transform the source XML and serialize the result to the output file.
             transformer.ApplyTemplates(input, serializer);
@@ -555,7 +555,7 @@ namespace SaxonEE
 
             // Create a serializer, with output to the standard output stream
             Serializer serializer = processor.NewSerializer();
-            serializer.SetOutputWriter(Console.Out);
+            serializer.OutputWriter = Console.Out;
 
             // Transform the source XML and serialize the result document
             transformer.ApplyTemplates(input, serializer);
@@ -603,7 +603,7 @@ namespace SaxonEE
 
             // Create a serializer, with output to the standard output stream
             Serializer serializer = processor.NewSerializer();
-            serializer.SetOutputWriter(Console.Out);
+            serializer.OutputWriter = Console.Out;
 
             // Transform the source XML and serialize the result document
             transformer.ApplyTemplates(input, serializer);
@@ -952,7 +952,7 @@ namespace SaxonEE
             Serializer serializer = processor.NewSerializer();
             serializer.SetOutputProperty(Serializer.METHOD, "xml");
             serializer.SetOutputProperty(Serializer.INDENT, "no");
-            serializer.SetOutputWriter(Console.Out);
+            serializer.OutputWriter = Console.Out;
 
             // Transform the source XML and serialize the result document
             transformer.ApplyTemplates(input, serializer);
@@ -1011,7 +1011,7 @@ namespace SaxonEE
 
             // Create a serializer
             Serializer serializer = processor.NewSerializer();
-            serializer.SetOutputWriter(Console.Out);
+            serializer.OutputWriter = Console.Out;
 
             // Transform the source XML and serialize the result document
             transformer.ApplyTemplates(input, serializer);
@@ -1158,7 +1158,7 @@ namespace SaxonEE
 
             // Create a serializer, with output to the standard output stream
             Serializer serializer = processor.NewSerializer();
-            serializer.SetOutputWriter(Console.Out);
+            serializer.OutputWriter = Console.Out;
 
             // Transform the source XML, calling a named initial template, and serialize the result document
             transformer.CallTemplate(new QName("", "main"), serializer);
@@ -1210,7 +1210,7 @@ namespace SaxonEE
 
             // Create a serializer, with output to the standard output stream
             Serializer serializer = processor.NewSerializer();
-            serializer.SetOutputWriter(Console.Out);
+            serializer.OutputWriter = Console.Out;
 
             // Transform the source XML and serialize the result document
             transformer.ApplyTemplates(input, serializer);
@@ -1247,7 +1247,7 @@ namespace SaxonEE
 
             // Create a serializer, with output to the standard output stream
             Serializer serializer = processor.NewSerializer();
-            serializer.SetOutputWriter(Console.Out);
+            serializer.OutputWriter = Console.Out;
 
             // Transform the source XML and serialize the result document
             transformer.ApplyTemplates(input, serializer);
@@ -1541,7 +1541,7 @@ namespace SaxonEE
 
             // Create a serializer, with output to the standard output stream
             Serializer serializer = processor.NewSerializer();
-            serializer.SetOutputWriter(Console.Out);
+            serializer.OutputWriter = Console.Out;
             serializer.SetOutputProperty(Serializer.INDENT, "yes");
 
             // Transform the source XML, calling a named initial template, and serialize the result document
@@ -1673,7 +1673,7 @@ namespace SaxonEE
 
             // Create a serializer, with output to the standard output stream
             Serializer serializer = processor.NewSerializer();
-            serializer.SetOutputWriter(Console.Out);
+            serializer.OutputWriter = Console.Out;
             serializer.SetOutputProperty(Serializer.INDENT, "yes");
 
             // Transform the source XML, calling a named initial template, and serialize the result document
@@ -1703,7 +1703,7 @@ namespace SaxonEE
             qout.SetOutputProperty(Serializer.METHOD, "xml");
             qout.SetOutputProperty(Serializer.INDENT, "yes");
             qout.SetOutputProperty(Serializer.SAXON_INDENT_SPACES, "1");
-            qout.SetOutputStream(new FileStream("testoutput.xml", FileMode.Create, FileAccess.Write));
+            qout.OutputStream = new FileStream("testoutput.xml", FileMode.Create, FileAccess.Write);
             Console.WriteLine("Output written to testoutput.xml");
             eval.Run(qout);
         }
@@ -1883,7 +1883,7 @@ namespace SaxonEE
             Serializer qout = processor.NewSerializer();
             qout.SetOutputProperty(Serializer.METHOD, "xml");
             qout.SetOutputProperty(Serializer.INDENT, "yes");
-            qout.SetOutputStream(new FileStream("testoutput2.xml", FileMode.Create, FileAccess.Write));
+            qout.OutputStream = new FileStream("testoutput2.xml", FileMode.Create, FileAccess.Write);
             Console.WriteLine("Output written to testoutput2.xml");
             eval.Run(qout);
         }
@@ -2108,7 +2108,7 @@ namespace SaxonEE
             Serializer serializer0 = processor.NewSerializer();
             serializer0.SetOutputProperty(Serializer.METHOD, "xml");
             serializer0.SetOutputProperty(Serializer.INDENT, "yes");
-            serializer0.SetOutputWriter(Console.Out);
+            serializer0.OutputWriter = Console.Out;
             processor.WriteXdmValue(indoc, serializer0);
 
             const string query = "for $i in //PRICE return \n" +
@@ -2131,7 +2131,7 @@ namespace SaxonEE
                     serializer.SetOutputProperty(Serializer.METHOD, "xml");
                     serializer.SetOutputProperty(Serializer.INDENT, "yes");
                     Console.Out.WriteLine("=========== AFTER UPDATE ===========");
-                    serializer.SetOutputWriter(Console.Out);
+                    serializer.OutputWriter = Console.Out;
                     processor.WriteXdmValue(root, serializer);
                 }
             }
@@ -2252,7 +2252,7 @@ namespace SaxonEE
 
             // Create a serializer, with output to the standard output stream
             Serializer serializer = processor.NewSerializer();
-            serializer.SetOutputWriter(Console.Out);
+            serializer.OutputWriter = Console.Out;
             //  serializer.SetOutputProperty(Serializer.INDENT, "yes");
 
             // Transform the source XML, calling a named initial template, and serialize the result document.
