@@ -244,7 +244,7 @@ def testSuiteMatrix = [
       ]
     ],
     "qt4": [
-      "_exceptions": "${projectDir}/src/test/exceptions/qt4.xml",
+      "_exceptions": "${projectDir}/src/test/exceptions/qt3cs.xml",
       "_depends": ["cloneQT4TestSuite"],
 
       "XP40": [
