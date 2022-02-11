@@ -259,13 +259,13 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
 
     protected void checkSubstringBounds(long start, long end) {
         if (start < 0) {
-            throw new IndexOutOfBoundsException("UnicodeString.substring(): start < 0");
+            throw new IndexOutOfBoundsException("UnicodeString.substring(): start (" + start + ") < 0");
         }
         if (end < start) {
-            throw new IndexOutOfBoundsException("UnicodeString.substring(): end < start");
+            throw new IndexOutOfBoundsException("UnicodeString.substring(): end (" + end + ") < start ( + start + ");
         }
         if (end > length()) {
-            throw new IndexOutOfBoundsException("UnicodeString.substring(): end > length()");
+            throw new IndexOutOfBoundsException("UnicodeString.substring(): end (" + end + ") > length (" + length() + ")");
         }
     }
 

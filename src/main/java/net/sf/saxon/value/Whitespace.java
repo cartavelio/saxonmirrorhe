@@ -71,7 +71,7 @@ public class Whitespace {
             case PRESERVE:
                 return value;
             case REPLACE:
-                UnicodeBuilder sb = new UnicodeBuilder();
+                UnicodeBuilder sb = new UnicodeBuilder(value.length32());
                 IntIterator iter = value.codePoints();
                 while (iter.hasNext()) {
                     int c = iter.next();
@@ -239,7 +239,7 @@ public class Whitespace {
 
     /*@NotNull*/
     public static UnicodeString normalizeWhitespace(UnicodeString input) {
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(input.length32());
         IntIterator iter = input.codePoints();
         while (iter.hasNext()) {
             int c = iter.next();
@@ -272,7 +272,7 @@ public class Whitespace {
             return in;
         }
         final long len = trimmedEnd(in);
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(in.length32());
         boolean inWhitespace = true;
         for (long i = 0; i < len; i++) {
             int c = in.codePointAt(i);
@@ -405,7 +405,7 @@ public class Whitespace {
     }
 
     public static UnicodeString collapse(UnicodeString in) {
-        UnicodeBuilder builder = new UnicodeBuilder();
+        UnicodeBuilder builder = new UnicodeBuilder(in.length32());
         tokenize(in.codePoints(), (s, e, cat) -> {
             @SuppressWarnings("UnnecessaryLocalVariable")
             TokenCategory category = cat; // redeclared to assist C# conversion
@@ -445,7 +445,7 @@ public class Whitespace {
     }
 
     public static UnicodeString normalize(UnicodeString in) {
-        UnicodeBuilder builder = new UnicodeBuilder();
+        UnicodeBuilder builder = new UnicodeBuilder(in.length32());
         tokenize(in.codePoints(), (s, e, cat) -> {
             @SuppressWarnings("UnnecessaryLocalVariable")
             TokenCategory category = cat; // redeclared to assist C# conversion

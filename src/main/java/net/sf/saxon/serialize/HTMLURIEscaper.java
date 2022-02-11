@@ -15,7 +15,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
 import net.sf.saxon.str.StringTool;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -142,7 +141,7 @@ public class HTMLURIEscaper extends ProxyReceiver {
                                 return new AttributeInfo(
                                         att.getNodeName(),
                                         att.getType(),
-                                        escapeURL(StringView.tidy(value), true, getConfiguration()).toString(),
+                                        escapeURL(value, true, getConfiguration()),
                                         att.getLocation(),
                                         att.getProperties() | ReceiverOption.DISABLE_CHARACTER_MAPS);
                             } catch (XPathException e) {
@@ -178,17 +177,17 @@ public class HTMLURIEscaper extends ProxyReceiver {
      */
 
     /*@NotNull*/
-    public static UnicodeString escapeURL(UnicodeString url, boolean normalize, Configuration config) throws XPathException {
+    public static String escapeURL(String url, boolean normalize, Configuration config) throws XPathException {
         // optimize for the common case where the string is all ASCII characters
-        IntIterator iter = url.codePoints();
+        IntIterator iter = StringTool.codePoints(url);
         while (iter.hasNext()) {
             int ch = iter.next();
             if (ch < 32 || ch > 126) {
                 if (normalize) {
-                    String normalized = Normalizer.normalize(url.toString(), Normalizer.Form.NFC);
-                    return reallyEscapeURL(normalized);
+                    String normalized = Normalizer.normalize(url, Normalizer.Form.NFC);
+                    return reallyEscapeURL(normalized).toString();
                 } else {
-                    return reallyEscapeURL(url.toString());
+                    return reallyEscapeURL(url).toString();
                 }
             }
         }
@@ -196,9 +195,9 @@ public class HTMLURIEscaper extends ProxyReceiver {
     }
 
     private static UnicodeString reallyEscapeURL(String url) {
-        UnicodeBuilder ub = new UnicodeBuilder();
+        UnicodeBuilder ub = new UnicodeBuilder(url.length() + 20);
         final String hex = "0123456789ABCDEF";
-        byte[] array = new byte[4];
+        byte[] array;
 
         IntIterator iter = StringTool.codePoints(url);
         while (iter.hasNext()) {

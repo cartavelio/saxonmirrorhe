@@ -184,7 +184,7 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, XP
      */
 
     public static UnicodeString encode(byte[] value) {
-        UnicodeBuilder buff = new UnicodeBuilder();
+        UnicodeBuilder buff = new UnicodeBuilder(value.length*2);
         int whole = value.length - value.length % 3;
         // process bytes 3 at a time: 3 bytes => 4 characters
         for (int i = 0; i < whole; i += 3) {

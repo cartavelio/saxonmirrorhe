@@ -86,7 +86,7 @@ public class GDayValue extends GDateValue {
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeBuilder sb = new UnicodeBuilder(16);
 
         sb.appendLatin("---");
         appendTwoDigits(sb, day);
