@@ -988,13 +988,13 @@
             license key for a 30-day evaluation, or purchase an unrestricted license key, from the
                <a href="http://www.saxonica.com/" class="bodylink">Saxonica</a> website.</p>
          
-         <p><i>From Saxon 11, license keys have an expiry date. You can choose a one-year, two-year, or
-         five-year license at the time of purchase. If the license has expired, Saxon will continue to run,
+         <p><i>From Saxon 11, license keys have an expiry date, configured according to 
+            the terms under which you purchased the product. If the license has expired, Saxon will continue to run,
          but with degraded performance. Messages are logged when expiry is imminent.</i></p>
          
          <p>License files are interchangeable across the Java and .NET products. License files issued
-         for previous releases continue to function with Saxon 11 until their "end of support" date
-         is reached.</p>
+         for previous releases continue to function with Saxon 11 until the date on which their upgrade 
+         entitlement ends.</p>
 
          <p>The license key will arrive in the form of a file named <code>saxon-license.lic</code>
             attached to an email message, or placed in a location you can download. </p>
