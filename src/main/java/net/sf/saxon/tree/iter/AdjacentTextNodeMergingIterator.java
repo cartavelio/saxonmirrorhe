@@ -26,9 +26,6 @@ import java.io.Closeable;
 
 public class AdjacentTextNodeMergingIterator implements LookaheadIterator, Closeable {
 
-    // Ideally we would specify bounds: AdjacentTextNodeMergingIterator<? extends Item super NodeInfo>,
-    // but Java doesn't allow both an upper and a lower bound
-
     private final SequenceIterator base;
     private Item _next;
 
@@ -85,6 +82,11 @@ public class AdjacentTextNodeMergingIterator implements LookaheadIterator, Close
     @Override
     public void close() {
         base.close();
+    }
+
+    @Override
+    public void discharge() {
+        base.discharge();
     }
 
 }

@@ -92,6 +92,11 @@ public class Remove extends SystemFunction {
             base.close();
         }
 
+        @Override
+        public void discharge() {
+            base.discharge();
+        }
+
         /**
          * Ask whether this iterator supports use of the {@link #getLength()} method. This
          * method should always be called before calling {@link #getLength()}, because an iterator

@@ -14,6 +14,7 @@ import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.GroundedIterator;
 
 /**
  * A MemoClosure represents a value that has not yet been evaluated: the value is represented
@@ -90,7 +91,14 @@ public class MemoClosure extends Closure implements ContextOriginator {
     private void makeSequence() throws XPathException {
         if (sequence == null) {
             inputIterator = expression.iterate(savedXPathContext);
-            sequence = SequenceTool.toMemoSequence(inputIterator);
+            inputIterator.discharge();
+//                // Bug 5177. If the input iterator holds resources and must be closed, then we read it to
+//                // completion now, because there's no guarantee we will be able to close it later.
+            if (inputIterator instanceof GroundedIterator && ((GroundedIterator)inputIterator).isActuallyGrounded()) {
+                sequence = ((GroundedIterator)inputIterator).materialize();
+            } else {
+                sequence = SequenceTool.toMemoSequence(inputIterator);
+            }
         }
     }
 

@@ -229,26 +229,6 @@ public abstract class Evaluator {
 
     };
 
-//    /**
-//     * An evaluator for arguments that in general return a sequence, where the sequence is evaluated
-//     * lazily on first use, and where the value might be needed more than once.
-//     */
-//
-//    public final static class MemoSequence extends Evaluator {
-//        public final static MemoSequence INSTANCE = new MemoSequence();
-//
-//        public MemoSequence() {
-//            setCode(Evaluators.MAKE_MEMO_S);
-//        }
-//
-//        @Override
-//        public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
-//            SequenceIterator iter = expr.iterate(context);
-//            return new net.sf.saxon.om.MemoSequence(iter);
-//        }
-//
-//    };
-
     /**
      * An evaluator for arguments that in general return a sequence, where the sequence is evaluated
      * lazily on first use, and where the value might be needed more than once.

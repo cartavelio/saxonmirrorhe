@@ -114,6 +114,12 @@ public class InsertBefore extends SystemFunction {
             insert.close();
         }
 
+        @Override
+        public void discharge() {
+            base.discharge();
+            insert.discharge();
+        }
+
     }
 
     @Override

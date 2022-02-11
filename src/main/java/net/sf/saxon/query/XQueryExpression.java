@@ -787,6 +787,11 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             base.close();
         }
 
+        @Override
+        public void discharge() {
+            base.discharge();
+        }
+
     }
 
 }

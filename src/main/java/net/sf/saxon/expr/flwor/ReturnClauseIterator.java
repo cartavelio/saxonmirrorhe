@@ -84,6 +84,14 @@ public class ReturnClauseIterator implements SequenceIterator {
         base.close();
     }
 
+    @Override
+    public void discharge() {
+        // TODO: handle the TuplePull base...
+        if (results != null) {
+            results.discharge();
+        };
+    }
+
 
 }
 

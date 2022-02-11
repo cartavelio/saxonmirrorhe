@@ -70,6 +70,11 @@ public class ItemCheckingIterator
     }
 
     @Override
+    public void discharge() {
+        base.discharge();
+    }
+
+    @Override
     public boolean supportsGetLength() {
         return SequenceTool.supportsGetLength(base);
     }

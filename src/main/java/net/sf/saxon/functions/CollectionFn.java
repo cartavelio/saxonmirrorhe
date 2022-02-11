@@ -169,6 +169,8 @@ public class CollectionFn extends SystemFunction implements Callable {
                 }
             }
         }
+
+        // TODO: implement discharge()
     }
 
     /**

@@ -189,6 +189,11 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
         population.close();
     }
 
+    @Override
+    public void discharge() {
+        population.discharge();
+    }
+
 
 //#if EE==true
 
