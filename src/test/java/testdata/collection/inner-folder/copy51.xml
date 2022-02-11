@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<a:root xmlns:a="http://name-a.com/">
+  <b:sub xmlns:b="http://name-b.com/"/>
+  <c:sub xmlns:c="http://name-c.com/"/>
+</a:root>

@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns='http://ns.saxonica.com/xslt/export' xmlns:fn='http://www.w3.org/2005/xpath-functions' xmlns:java-type='http://saxon.sf.net/java-type' xmlns:vv='http://saxon.sf.net/generated-variable' xmlns:xs='http://www.w3.org/2001/XMLSchema' when='2020-02-26T12:50:29.062Z' id='0' version='20' packageVersion='1' saxonProduct='SAXON-EE' saxonVersion='10.0.0' buildDateTime='2020-02-26T12:50:29.062Z' target='EE' targetVersion='1' relocatable='true' implicit='true'>
+ <co id='0' binds=''>
+  <globalVariable name='Q{}categories' as='*NE nQ{}CATEGORY' line='13' module='booksWithMain.xsl' visibility='PRIVATE'>
+   <slash ns='xsl=~ xml=~' line='13' simple='1'>
+    <fn name='doc'>
+     <str val='books.xml'/>
+    </fn>
+    <axis name='descendant' nodeTest='NE nQ{}CATEGORY'/>
+   </slash>
+  </globalVariable>
+ </co>
+ <co id='1' binds='2'>
+  <globalVariable name='Q{http://saxon.sf.net/generated-variable}gg19986569' as='1AS' line='54' module='booksWithMain.xsl' visibility='PRIVATE'>
+   <fn ns='xsl=~ xml=~' line='54' name='string-join'>
+    <convert from='A' to='AS'>
+     <data>
+      <mergeAdj>
+       <gVarRef name='Q{}top-author' bSlot='0'/>
+      </mergeAdj>
+     </data>
+    </convert>
+    <str val=' '/>
+   </fn>
+  </globalVariable>
+ </co>
+ <co id='3' binds=''>
+  <mode name='Q{}by-category' onNo='TC' flags='W' patternSlots='0'>
+   <templateRule prec='0' prio='0.0' seq='3' rank='0' minImp='0' slots='0' matches='NE nQ{}BOOKS' flags='s' line='117' module='booksWithMain.xsl'>
+    <p.nodeTest role='match' test='NE nQ{}BOOKS'/>
+    <elem role='action' ns='xsl=~ xml=~' line='118' name='div' nsuri=''>
+     <forEachGroup line='119' algorithm='by'>
+      <axis role='select' name='child' nodeTest='NE nQ{}ITEM'/>
+      <attVal role='key' name='Q{}CAT' chk='0'/>
+      <sortKey role='sort' line='120' comp='CCC'>
+       <atomSing role='select' card='?' diag='4|0|XTTE1020|xsl:sort/select'>
+        <slash simple='2'>
+         <fn name='id'>
+          <cvUntyped to='AS'>
+           <attVal name='Q{}CAT' chk='0'/>
+          </cvUntyped>
+         </fn>
+         <axis name='attribute' nodeTest='NA nQ{}DESC'/>
+        </slash>
+       </atomSing>
+       <str role='order' val='ascending'/>
+       <str role='lang' val=''/>
+       <str role='caseOrder' val='#default'/>
+       <str role='stable' val='yes'/>
+       <str role='collation' val='http://www.w3.org/2005/xpath-functions/collation/codepoint'/>
+      </sortKey>
+      <sortKey line='121' comp='CCC'>
+       <atomSing role='select' card='?' diag='4|0|XTTE1020|xsl:sort/select'>
+        <axis name='child' nodeTest='NE nQ{}TITLE'/>
+       </atomSing>
+       <str role='order' val='ascending'/>
+       <str role='lang' val=''/>
+       <str role='caseOrder' val='#default'/>
+       <str role='stable' val='yes'/>
+       <str role='collation' val='http://www.w3.org/2005/xpath-functions/collation/codepoint'/>
+      </sortKey>
+      <str role='collation' val='http://www.w3.org/2005/xpath-functions/collation/codepoint'/>
+      <sequence role='content' line='122'>
+       <elem name='h3' nsuri='' flags='l'>
+        <sequence>
+         <valueOf flags='l'>
+          <str val='CATEGORY: '/>
+         </valueOf>
+         <valueOf flags='l'>
+          <fn name='string-join'>
+           <convert from='AZ' to='AS'>
+            <data>
+             <slash simple='2'>
+              <fn name='id'>
+               <cvUntyped to='AS'>
+                <attVal name='Q{}CAT' chk='0'/>
+               </cvUntyped>
+              </fn>
+              <axis name='attribute' nodeTest='NA nQ{}DESC'/>
+             </slash>
+            </data>
+           </convert>
+           <str val=' '/>
+          </fn>
+         </valueOf>
+        </sequence>
+       </elem>
+       <elem line='123' name='ol' nsuri='' flags='l'>
+        <forEach line='124'>
+         <currentGroup/>
+         <elem line='125' name='li' nsuri='' flags='l'>
+          <sequence>
+           <valueOf flags='l'>
+            <str val='AUTHOR: '/>
+           </valueOf>
+           <valueOf flags='l'>
+            <fn name='string-join'>
+             <convert from='AZ' to='AS'>
+              <data>
+               <axis name='child' nodeTest='NE nQ{}AUTHOR'/>
+              </data>
+             </convert>
+             <str val=' '/>
+            </fn>
+           </valueOf>
+           <elem name='br' nsuri='' flags='l'>
+            <empty/>
+           </elem>
+           <valueOf flags='l'>
+            <str val='&#xA;                TITLE: '/>
+           </valueOf>
+           <valueOf line='126' flags='l'>
+            <fn name='string-join'>
+             <convert from='AZ' to='AS'>
+              <data>
+               <axis name='child' nodeTest='NE nQ{}TITLE'/>
+              </data>
+             </convert>
+             <str val=' '/>
+            </fn>
+           </valueOf>
+          </sequence>
+         </elem>
+        </forEach>
+       </elem>
+       <elem line='130' name='hr' nsuri='' flags='l'>
+        <empty/>
+       </elem>
+      </sequence>
+     </forEachGroup>
+    </elem>
+   </templateRule>
+  </mode>
+ </co>
+ <co id='4' binds=''>
+  <globalVariable name='Q{}now' as='1AM' line='15' module='booksWithMain.xsl' visibility='PRIVATE'>
+   <fn ns='xsl=~ xml=~' line='15' name='current-dateTime'/>
+  </globalVariable>
+ </co>
+ <co id='5' binds=''>
+  <mode name='Q{}by-author' onNo='TC' flags='W' patternSlots='0'>
+   <templateRule prec='0' prio='0.0' seq='2' rank='0' minImp='0' slots='0' matches='NE nQ{}BOOKS' flags='s' line='94' module='booksWithMain.xsl'>
+    <p.nodeTest role='match' test='NE nQ{}BOOKS'/>
+    <elem role='action' ns='xsl=~ xml=~' line='95' name='div' nsuri=''>
+     <forEachGroup line='96' algorithm='by'>
+      <axis role='select' name='child' nodeTest='NE nQ{}ITEM'/>
+      <data role='key' diag='4|0||xsl:for-each-group/group-by'>
+       <axis name='child' nodeTest='NE nQ{}AUTHOR'/>
+      </data>
+      <sortKey role='sort' line='97' comp='CCC'>
+       <atomSing role='select' card='?' diag='4|0|XTTE1020|xsl:sort/select'>
+        <axis name='child' nodeTest='NE nQ{}AUTHOR'/>
+       </atomSing>
+       <str role='order' val='ascending'/>
+       <str role='lang' val=''/>
+       <str role='caseOrder' val='#default'/>
+       <str role='stable' val='yes'/>
+       <str role='collation' val='http://www.w3.org/2005/xpath-functions/collation/codepoint'/>
+      </sortKey>
+      <sortKey line='98' comp='CCC'>
+       <atomSing role='select' card='?' diag='4|0|XTTE1020|xsl:sort/select'>
+        <axis name='child' nodeTest='NE nQ{}TITLE'/>
+       </atomSing>
+       <str role='order' val='ascending'/>
+       <str role='lang' val=''/>
+       <str role='caseOrder' val='#default'/>
+       <str role='stable' val='yes'/>
+       <str role='collation' val='http://www.w3.org/2005/xpath-functions/collation/codepoint'/>
+      </sortKey>
+      <str role='collation' val='http://www.w3.org/2005/xpath-functions/collation/codepoint'/>
+      <sequence role='content' line='99'>
+       <elem name='h3' nsuri='' flags='l'>
+        <sequence>
+         <valueOf flags='l'>
+          <str val='AUTHOR: '/>
+         </valueOf>
+         <valueOf flags='l'>
+          <fn name='string-join'>
+           <convert from='AZ' to='AS'>
+            <data>
+             <axis name='child' nodeTest='NE nQ{}AUTHOR'/>
+            </data>
+           </convert>
+           <str val=' '/>
+          </fn>
+         </valueOf>
+        </sequence>
+       </elem>
+       <elem line='100' name='table' nsuri='' flags='l'>
+        <forEach line='101'>
+         <currentGroup/>
+         <elem line='102' name='tr' nsuri='' flags='l'>
+          <sequence line='103'>
+           <elem name='td' nsuri='' flags='l'>
+            <sequence>
+             <att name='width' flags='l'>
+              <str val='100'/>
+             </att>
+             <att name='valign' flags='l'>
+              <str val='top'/>
+             </att>
+             <valueOf flags='l'>
+              <numSeqFmt>
+               <fn role='value' name='position'/>
+               <str role='format' val='i'/>
+               <str role='startAt' val='1'/>
+              </numSeqFmt>
+             </valueOf>
+            </sequence>
+           </elem>
+           <elem line='104' name='td' nsuri='' flags='l'>
+            <sequence>
+             <valueOf flags='l'>
+              <str val='&#xA;                TITLE: '/>
+             </valueOf>
+             <valueOf line='105' flags='l'>
+              <fn name='string-join'>
+               <convert from='AZ' to='AS'>
+                <data>
+                 <axis name='child' nodeTest='NE nQ{}TITLE'/>
+                </data>
+               </convert>
+               <str val=' '/>
+              </fn>
+             </valueOf>
+             <elem line='105' name='br' nsuri='' flags='l'>
+              <empty/>
+             </elem>
+             <valueOf flags='l'>
+              <str val='&#xA;                CATEGORY: '/>
+             </valueOf>
+             <valueOf line='106' flags='l'>
+              <fn name='string-join'>
+               <convert from='AZ' to='AS'>
+                <data>
+                 <slash simple='2'>
+                  <fn name='id'>
+                   <cvUntyped to='AS'>
+                    <attVal name='Q{}CAT' chk='2'/>
+                   </cvUntyped>
+                  </fn>
+                  <axis name='attribute' nodeTest='NA nQ{}DESC'/>
+                 </slash>
+                </data>
+               </convert>
+               <str val=' '/>
+              </fn>
+             </valueOf>
+             <valueOf flags='l'>
+              <str val='&#xA;                        ('/>
+             </valueOf>
+             <valueOf line='107' flags='l'>
+              <convert from='AZ' to='AS'>
+               <attVal name='Q{}CAT' chk='2'/>
+              </convert>
+             </valueOf>
+             <valueOf flags='l'>
+              <str val=')&#xA;              '/>
+             </valueOf>
+            </sequence>
+           </elem>
+          </sequence>
+         </elem>
+        </forEach>
+       </elem>
+       <elem line='112' name='hr' nsuri='' flags='l'>
+        <empty/>
+       </elem>
+      </sequence>
+     </forEachGroup>
+    </elem>
+   </templateRule>
+  </mode>
+ </co>
+ <co id='6' binds=''>
+  <template name='Q{}header' flags='os' line='38' module='booksWithMain.xsl' slots='1'>
+   <sequence role='body' ns='xsl=~ xml=~' line='39'>
+    <param name='Q{}title' slot='0'>
+     <str role='select' val='Default Title'/>
+     <supplied role='conversion' slot='0'/>
+    </param>
+    <elem line='40' name='head' nsuri=''>
+     <choose line='42'>
+      <fn name='not'>
+       <varRef name='Q{}title' slot='0'/>
+      </fn>
+      <elem line='43' name='title' nsuri='' flags='l'>
+       <valueOf flags='l'>
+        <fn name='string-join'>
+         <convert from='A' to='AS'>
+          <data>
+           <mergeAdj>
+            <varRef name='Q{}title' slot='0'/>
+           </mergeAdj>
+          </data>
+         </convert>
+         <str val=' '/>
+        </fn>
+       </valueOf>
+      </elem>
+      <true/>
+      <elem line='46' name='title' nsuri='' flags='l'>
+       <valueOf flags='Sl'>
+        <str val='Untitled'/>
+       </valueOf>
+      </elem>
+     </choose>
+    </elem>
+   </sequence>
+  </template>
+ </co>
+ <co id='7' binds='8'>
+  <template name='Q{}main' flags='os' line='19' module='booksWithMain.xsl' slots='0'>
+   <applyT role='body' ns='xsl=~ xml=~' line='20' flags='t' bSlot='0'>
+    <slash role='select' simple='1'>
+     <fn name='doc'>
+      <str val='books.xml'/>
+     </fn>
+     <axis name='child' nodeTest='NE nQ{}BOOKLIST'/>
+    </slash>
+   </applyT>
+  </template>
+ </co>
+ <co id='2' binds=''>
+  <globalParam name='Q{}top-author' as='*' line='17' module='booksWithMain.xsl' visibility='PUBLIC'>
+   <doc ns='xsl=~ xml=~' line='17' flags='t' text='Jasper Fforde'>
+    <valueOf flags='l'>
+     <str val='Jasper Fforde'/>
+    </valueOf>
+   </doc>
+  </globalParam>
+ </co>
+ <co id='8' binds='4 6 8 1 2 5 3 8 0'>
+  <mode onNo='TC' flags='dW' patternSlots='0'>
+   <templateRule prec='0' prio='-0.5' seq='0' rank='0' minImp='0' slots='0' matches='ND' flags='s' line='23' module='booksWithMain.xsl'>
+    <p.nodeTest role='match' test='ND'/>
+    <elem role='action' ns='xsl=~ xml=~' line='25' name='html' nsuri=''>
+     <sequence line='26'>
+      <comment flags='l'>
+       <fn name='string-join'>
+        <convert from='AZ' to='AS'>
+         <data>
+          <mergeAdj>
+           <sequence>
+            <valueOf>
+             <str val='Generated at '/>
+            </valueOf>
+            <valueOf>
+             <convert from='AM' to='AS'>
+              <gVarRef name='Q{}now' bSlot='0'/>
+             </convert>
+            </valueOf>
+           </sequence>
+          </mergeAdj>
+         </data>
+        </convert>
+        <str val=' '/>
+       </fn>
+      </comment>
+      <callT line='28' name='Q{}header' bSlot='1'>
+       <withParam name='Q{}title' flags='c' as='1AS'>
+        <str val='Book List'/>
+       </withParam>
+      </callT>
+      <elem line='32' name='body' nsuri='' flags='l'>
+       <sequence>
+        <att name='leftmargin' flags='l'>
+         <str val='100'/>
+        </att>
+        <applyT line='33' flags='i' bSlot='2'>
+         <axis role='select' name='child' nodeTest='N'/>
+        </applyT>
+       </sequence>
+      </elem>
+     </sequence>
+    </elem>
+   </templateRule>
+   <templateRule prec='0' prio='0.0' seq='4' rank='1' minImp='0' slots='0' matches='NE nQ{}CATEGORY' flags='s' line='135' module='booksWithMain.xsl'>
+    <p.nodeTest role='match' test='NE nQ{}CATEGORY'/>
+    <sequence role='action' ns='xsl=~ xml=~' line='136'>
+     <elem name='h4' nsuri=''>
+      <sequence>
+       <valueOf flags='l'>
+        <str val='CATEGORY '/>
+       </valueOf>
+       <valueOf flags='l'>
+        <numSeqFmt>
+         <fn role='value' name='position'/>
+         <str role='format' val='I'/>
+         <str role='startAt' val='1'/>
+        </numSeqFmt>
+       </valueOf>
+      </sequence>
+     </elem>
+     <elem line='137' name='table' nsuri=''>
+      <forEach line='138'>
+       <axis name='attribute' nodeTest='NA'/>
+       <elem line='139' name='tr' nsuri='' flags='l'>
+        <sequence line='140'>
+         <elem name='td' nsuri='' flags='l'>
+          <valueOf flags='l'>
+           <fn name='name'>
+            <dot type='1NA'/>
+           </fn>
+          </valueOf>
+         </elem>
+         <elem line='141' name='td' nsuri='' flags='l'>
+          <valueOf flags='l'>
+           <convert from='AZ' to='AS'>
+            <data>
+             <dot type='1NA'/>
+            </data>
+           </convert>
+          </valueOf>
+         </elem>
+        </sequence>
+       </elem>
+      </forEach>
+     </elem>
+     <elem line='145' name='hr' nsuri=''>
+      <empty/>
+     </elem>
+    </sequence>
+   </templateRule>
+   <templateRule prec='0' prio='0.0' seq='1' rank='1' minImp='0' slots='1' matches='NE nQ{}BOOKLIST' flags='s' line='52' module='booksWithMain.xsl'>
+    <p.nodeTest role='match' test='NE nQ{}BOOKLIST'/>
+    <sequence role='action' ns='xsl=~ xml=~' line='54'>
+     <elem name='h2' nsuri=''>
+      <sequence>
+       <valueOf flags='l'>
+        <str val='This week&#39;s top author is '/>
+       </valueOf>
+       <valueOf flags='l'>
+        <gVarRef name='Q{http://saxon.sf.net/generated-variable}gg19986569' bSlot='3'/>
+       </valueOf>
+      </sequence>
+     </elem>
+     <let line='55' var='Q{}top-authors-books' as='*N' slot='0' eval='4'>
+      <fn name='key'>
+       <str val='authkey'/>
+       <data diag='0|1||fn:key'>
+        <gVarRef name='Q{}top-author' bSlot='4'/>
+       </data>
+      </fn>
+      <sequence line='57'>
+       <choose>
+        <fn name='exists'>
+         <varRef name='Q{}top-authors-books' slot='0'/>
+        </fn>
+        <sequence line='58'>
+         <elem name='p' nsuri=''>
+          <sequence>
+           <valueOf flags='l'>
+            <str val='We stock the following '/>
+           </valueOf>
+           <valueOf flags='l'>
+            <convert from='ADI' to='AS'>
+             <fn name='count'>
+              <varRef name='Q{}top-authors-books' slot='0'/>
+             </fn>
+            </convert>
+           </valueOf>
+           <valueOf flags='l'>
+            <str val=' books by this author:'/>
+           </valueOf>
+          </sequence>
+         </elem>
+         <elem line='59' name='ul' nsuri=''>
+          <forEach line='60'>
+           <varRef name='Q{}top-authors-books' slot='0'/>
+           <elem line='61' name='li' nsuri='' flags='l'>
+            <valueOf flags='l'>
+             <fn name='string-join'>
+              <convert from='AZ' to='AS'>
+               <data>
+                <axis name='child' nodeTest='NE nQ{}TITLE'/>
+               </data>
+              </convert>
+              <str val=' '/>
+             </fn>
+            </valueOf>
+           </elem>
+          </forEach>
+         </elem>
+         <elem line='65' name='p' nsuri=''>
+          <valueOf flags='l'>
+           <str val='This author has written books in the following categories:'/>
+          </valueOf>
+         </elem>
+         <elem line='66' name='ul' nsuri=''>
+          <forEach line='67'>
+           <slash simple='2'>
+            <fn name='key'>
+             <str val='codekey'/>
+             <data diag='0|1||fn:key'>
+              <slash simple='2'>
+               <varRef name='Q{}top-authors-books' slot='0'/>
+               <axis name='attribute' nodeTest='NA nQ{}CAT'/>
+              </slash>
+             </data>
+            </fn>
+            <axis name='attribute' nodeTest='NA nQ{}DESC'/>
+           </slash>
+           <elem line='68' name='li' nsuri='' flags='l'>
+            <valueOf flags='l'>
+             <convert from='AZ' to='AS'>
+              <data>
+               <dot type='1NA nQ{}DESC'/>
+              </data>
+             </convert>
+            </valueOf>
+           </elem>
+          </forEach>
+         </elem>
+         <elem line='72' name='p' nsuri=''>
+          <sequence>
+           <valueOf flags='l'>
+            <str val='The average price of these books is: &#xA;        '/>
+           </valueOf>
+           <valueOf line='76' flags='l'>
+            <fn name='format-number'>
+             <treat as='A n~numeric' diag='0|0||fn:format-number'>
+              <arith op='div' calc='a/a'>
+               <cvUntyped to='AO'>
+                <fn name='sum'>
+                 <data diag='0|0||fn:sum'>
+                  <conditionalSort>
+                   <fn name='exists'>
+                    <tail start='2'>
+                     <varRef name='Q{}top-authors-books' slot='0'/>
+                    </tail>
+                   </fn>
+                   <docOrder intra='1'>
+                    <slash simple='2'>
+                     <varRef name='Q{}top-authors-books' slot='0'/>
+                     <axis name='child' nodeTest='NE nQ{}PRICE'/>
+                    </slash>
+                   </docOrder>
+                  </conditionalSort>
+                 </data>
+                </fn>
+               </cvUntyped>
+               <fn name='count'>
+                <varRef name='Q{}top-authors-books' slot='0'/>
+               </fn>
+              </arith>
+             </treat>
+             <str val='$####.00'/>
+            </fn>
+           </valueOf>
+          </sequence>
+         </elem>
+        </sequence>
+       </choose>
+       <elem line='80' name='h2' nsuri=''>
+        <valueOf flags='l'>
+         <str val='A complete list of books, grouped by author'/>
+        </valueOf>
+       </elem>
+       <applyT line='81' mode='Q{}by-author' bSlot='5'>
+        <axis role='select' name='child' nodeTest='NE nQ{}BOOKS'/>
+       </applyT>
+       <elem line='83' name='h2' nsuri=''>
+        <valueOf flags='l'>
+         <str val='A complete list of books, grouped by category'/>
+        </valueOf>
+       </elem>
+       <applyT line='84' mode='Q{}by-category' bSlot='6'>
+        <axis role='select' name='child' nodeTest='NE nQ{}BOOKS'/>
+       </applyT>
+       <elem line='86' name='h2' nsuri=''>
+        <valueOf flags='l'>
+         <str val='List of categories'/>
+        </valueOf>
+       </elem>
+       <applyT line='87' bSlot='7'>
+        <sort role='select'>
+         <gVarRef role='select' name='Q{}categories' bSlot='8'/>
+         <sortKey line='88' comp='DESC|CCC'>
+          <attVal role='select' name='Q{}DESC' chk='0'/>
+          <str role='order' val='descending'/>
+          <str role='lang' val=''/>
+          <str role='caseOrder' val='#default'/>
+          <str role='stable' val='yes'/>
+          <str role='collation' val='http://www.w3.org/2005/xpath-functions/collation/codepoint'/>
+         </sortKey>
+         <sortKey line='89' comp='DESC|CCC'>
+          <attVal role='select' name='Q{}CODE' chk='0'/>
+          <str role='order' val='descending'/>
+          <str role='lang' val=''/>
+          <str role='caseOrder' val='#default'/>
+          <str role='stable' val='yes'/>
+          <str role='collation' val='http://www.w3.org/2005/xpath-functions/collation/codepoint'/>
+         </sortKey>
+        </sort>
+       </applyT>
+      </sequence>
+     </let>
+    </sequence>
+   </templateRule>
+  </mode>
+ </co>
+ <overridden/>
+ <key name='Q{}authkey' line='8' module='booksWithMain.xsl' binds='' flags='u'>
+  <p.nodeTest test='NE nQ{}ITEM'/>
+  <data ns='xsl=~ xml=~' line='8' diag='4|0||xsl:key/use'>
+   <axis name='child' nodeTest='NE nQ{}AUTHOR'/>
+  </data>
+ </key>
+ <key name='Q{}codekey' line='9' module='booksWithMain.xsl' binds='' flags='u'>
+  <p.nodeTest test='NE nQ{}CATEGORY'/>
+  <attVal ns='xsl=~ xml=~' line='9' name='Q{}CODE' chk='0'/>
+ </key>
+ <output>
+  <property name='Q{http://saxon.sf.net/}stylesheet-version' value='20'/>
+ </output>
+ <decimalFormat/>
+ <decimalFormat name='Q{}comma' decimal-separator='44' grouping-separator='46'/>
+</package>
+<?Σ 2c41fcde?>

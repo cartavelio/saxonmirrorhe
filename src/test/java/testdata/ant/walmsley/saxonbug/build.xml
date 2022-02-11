@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="st.96_conformance" default="go" basedir=".">
+   <target name="go">
+      <xslt basedir="input" destdir="out" extension=".txt" style="test.xsl" force="true">
+         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+      </xslt>
+   </target>
+</project>

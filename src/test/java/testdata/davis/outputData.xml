@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<outputData>
+   <outputRow text="A line of text containing only ascii characters."/>
+   <outputRow text="ß The first char of this line is sharp-S, U+00DF, which is c3 9f in UTF-8, 0x00DF in UTF-16."/>
+   <outputRow text="ဪ the first char of this line is U+102A, e1 80 aa, 0x102A in UTF-16."/>
+   <outputRow text="💩 the first char of this line is poo, U+1F4A9, f0 9f 92 a9, or a surrogate pair of 0xD83D, 0xDCA9 in UTF-16.  &amp;#128169; in decimal."/>
+   <outputRow text="💩😁 it works!  127378"/>
+   <outputRow text="We'll put another single poo on this line: 💩😁💩"/>
+   <outputRow text="and another single COOL on this line: 💩😁💩🆒"/>
+</outputData>

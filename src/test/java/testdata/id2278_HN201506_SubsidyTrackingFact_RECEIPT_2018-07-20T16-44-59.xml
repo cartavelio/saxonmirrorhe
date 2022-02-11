@@ -1,0 +1,14 @@
+<root>
+  <metadata>
+    <result>true</result>
+    <errors>0</errors>
+    <warnings>0</warnings>
+    <startTime>2018-07-20T16:44:59.882+01:00</startTime>
+    <endTime>2018-07-20T16:44:59.923+01:00</endTime>
+    <xmlFile>\Users\mike\repo\tests\junit\testdata\id2278_HN201506_SubsidyTrackingFact.xml</xmlFile>
+    <xsdFile>\Users\mike\repo\tests\junit\testdata\SubsidyTrackingFactXSD11.xsd</xsdFile>
+    <xsdProcessor>SAXON 9.8.0.13, EE-Java, Saxonica</xsdProcessor>
+    <xsdVersion>1.1</xsdVersion>
+  </metadata>
+  <messages/>
+</root>

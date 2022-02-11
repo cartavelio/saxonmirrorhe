@@ -1,0 +1,982 @@
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "ValueComparison-compare"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    INVOKEINTERFACE net/sf/saxon/om/Item.atomize ()Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L6
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    GOTO L7
+   L7
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GOTO L8
+   L9
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "ValueComp-returnEmpty"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ACONST_NULL
+   L8
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "ValueComparison-compare"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    INVOKEINTERFACE net/sf/saxon/om/Item.atomize ()Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L6
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    GOTO L7
+   L7
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GOTO L8
+   L9
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "ValueComp-returnEmpty"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ACONST_NULL
+   L8
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "ValueComparison-compare"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    INVOKESTATIC net/sf/saxon/tree/tiny/TinyTree.doAtomize (Lnet/sf/saxon/om/Item;)Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L6
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    GOTO L7
+   L7
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GOTO L8
+   L9
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "ValueComp-returnEmpty"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ACONST_NULL
+   L8
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "ValueComparison-compare"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    INVOKESTATIC net/sf/saxon/tree/tiny/TinyTree.doAtomize (Lnet/sf/saxon/om/Item;)Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L6
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    GOTO L7
+   L7
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GOTO L8
+   L9
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "ValueComp-returnEmpty"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ACONST_NULL
+   L8
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "ValueComparison-compare"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    INVOKESTATIC net/sf/saxon/tree/tiny/TinyTree.doAtomize (Lnet/sf/saxon/om/Item;)Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L6
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    GOTO L7
+   L7
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GOTO L8
+   L9
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "ValueComp-returnEmpty"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ACONST_NULL
+   L8
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "ValueComparison-compare"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    INVOKESTATIC net/sf/saxon/tree/tiny/TinyTree.doAtomize (Lnet/sf/saxon/om/Item;)Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L6
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    GOTO L7
+   L7
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GOTO L8
+   L9
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "ValueComp-returnEmpty"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ACONST_NULL
+   L8
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "ValueComparison-compare"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    INVOKESTATIC net/sf/saxon/tree/tiny/TinyTree.doAtomize (Lnet/sf/saxon/om/Item;)Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L6
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    GOTO L7
+   L7
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GOTO L8
+   L9
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "ValueComp-returnEmpty"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ACONST_NULL
+   L8
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "ValueComparison-compare"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    INVOKESTATIC net/sf/saxon/tree/tiny/TinyTree.doAtomize (Lnet/sf/saxon/om/Item;)Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L6
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    GOTO L7
+   L7
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GOTO L8
+   L9
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "ValueComp-returnEmpty"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ACONST_NULL
+   L8
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "ValueComparison-compare"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    INVOKESTATIC net/sf/saxon/tree/tiny/TinyTree.doAtomize (Lnet/sf/saxon/om/Item;)Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L6
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    GOTO L7
+   L7
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GOTO L8
+   L9
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "ValueComp-returnEmpty"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ACONST_NULL
+   L8
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "ValueComparison-compare"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    INVOKESTATIC net/sf/saxon/tree/tiny/TinyTree.doAtomize (Lnet/sf/saxon/om/Item;)Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L6
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    GOTO L7
+   L7
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GOTO L8
+   L9
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "ValueComp-returnEmpty"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ACONST_NULL
+   L8
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "GeneralComparison-OneToOne-boolean"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    DUP
+    IFNULL L5
+    INVOKESTATIC net/sf/saxon/tree/tiny/TinyTree.doAtomize (Lnet/sf/saxon/om/Item;)Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    DUP
+    IFNONNULL L6
+    POP
+    GOTO L7
+   L6
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L8
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+   L9
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/Object.equals (Ljava/lang/Object;)Z
+    GOTO L10
+   L11
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L10
+   L7
+    BIPUSH 11
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L10
+    BIPUSH 12
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_9 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 5 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "GeneralComparison-OneToOne-boolean"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L2
+    LDC "AtomizerCompiler-Item"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+   L3
+    LDC "AxisExpressionCompiler - iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_2
+    GETSTATIC gen_CompiledFilterIterator_9.nNameTest10 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/SequenceIterator.next ()Lnet/sf/saxon/om/Item;
+    DUP
+    IFNULL L5
+    INVOKEINTERFACE net/sf/saxon/om/Item.atomize ()Lnet/sf/saxon/om/AtomicSequence;
+    INVOKEINTERFACE net/sf/saxon/om/AtomicSequence.head ()Lnet/sf/saxon/value/AtomicValue;
+   L5
+    BIPUSH 7
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    DUP
+    IFNONNULL L6
+    POP
+    GOTO L7
+   L6
+    BIPUSH 8
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/value/StringValue
+    INVOKEVIRTUAL net/sf/saxon/value/StringValue.getStringValueCS ()Ljava/lang/CharSequence;
+    INVOKEVIRTUAL java/lang/Object.toString ()Ljava/lang/String;
+   L8
+    BIPUSH 9
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+   L9
+    LDC "LiteralCompiler-Primitive"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LDC "attr1"
+    INVOKEVIRTUAL java/lang/Object.equals (Ljava/lang/Object;)Z
+    GOTO L10
+   L11
+    BIPUSH 10
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L10
+   L7
+    BIPUSH 11
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L10
+    BIPUSH 12
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest10
+}

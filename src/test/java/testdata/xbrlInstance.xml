@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xbrli:xbrl xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xbrldi="http://xbrl.org/2006/xbrldi"   xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:ocw-dim="http://www.nltaxonomie.nl/nt11/ocw/20170301.b/dictionary/ocw-axes" xmlns:ocw-dm="http://www.nltaxonomie.nl/nt11/ocw/20170301.b/dictionary/ocw-domains" xml:lang="nl" xml:space="preserve">
+  <link:schemaRef xlink:type="simple" xlink:href="http://www.nltaxonomie.nl/nt11/ocw/20170301.b/entrypoints/ocw-rpt-jaarrekening-hbo_wo-2016.xsd" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase"/>
+	<xbrli:context id="BR-OCW-JRK.S.10_test"> 
+		<xbrli:entity> 
+			<xbrli:identifier scheme="http://www.duo.nl/bevoegdgezagnummer">99999</xbrli:identifier> 
+		</xbrli:entity>  
+		<xbrli:period> 
+			<xbrli:instant>2017-12-31</xbrli:instant>
+		</xbrli:period> 
+		<xbrli:scenario>
+			<xbrldi:typedMember dimension="ocw-dim:EquityIndividualSpecificationAxis">
+				<ocw-dm:SequenceNumberTypedMember>1</ocw-dm:SequenceNumberTypedMember>
+			</xbrldi:typedMember>
+		</xbrli:scenario>
+	</xbrli:context>
+</xbrli:xbrl>

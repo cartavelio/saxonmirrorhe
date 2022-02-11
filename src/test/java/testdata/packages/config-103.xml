@@ -1,0 +1,7 @@
+<configuration edition="EE" xmlns="http://saxon.sf.net/ns/configuration"> 
+    <xsltPackages>
+        <package name='http://package-103/' version='3.4' sourceLocation='pack-103.xsl'/>
+        <package name='http://package-104/' version='2.1.0.5' sourceLocation='pack-104.xsl'/>  
+        <package name='http://package-105/' version='9.7.0.19-alpha' sourceLocation='pack-105.xsl'/> <!--suffix differs from the actual package--> 
+    </xsltPackages>
+</configuration>
