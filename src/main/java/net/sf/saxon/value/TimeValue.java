@@ -98,6 +98,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @param nanosecond  the number of nanoseconds, 0-999_999_999
      * @param tz          the timezone displacement in minutes from UTC. Supply the value
      *                    {@link CalendarValue#NO_TIMEZONE} if there is no timezone component.
+     * @return the constructed time value
      */
 
     public TimeValue makeTimeValue(byte hour, byte minute, byte second, int nanosecond, int tz) {

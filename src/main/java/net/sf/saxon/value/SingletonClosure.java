@@ -69,6 +69,7 @@ public class SingletonClosure extends Closure implements Sequence {
      * Return the value in the form of an Item
      *
      * @return the value in the form of an Item
+     * @throws XPathException if an error is detected
      */
 
     /*@Nullable*/
@@ -83,7 +84,11 @@ public class SingletonClosure extends Closure implements Sequence {
 
     /**
      * Get the n'th item in the sequence (starting from 0). This is defined for all
-     * SequenceValues, but its real benefits come for a SequenceValue stored extensionally
+     * SequenceValues, but its real benefits come for a SequenceValue stored extensionally.
+     *
+     * @param n the index of the requested item
+     * @return the n'th item in the sequence
+     * @throws XPathException if an error is detected
      */
 
     /*@Nullable*/
@@ -96,6 +101,9 @@ public class SingletonClosure extends Closure implements Sequence {
 
     /**
      * Get the length of the sequence
+     *
+     * @return the length of the sequence
+     * @throws XPathException if an error is detected
      */
 
     public int getLength() throws XPathException {
