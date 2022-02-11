@@ -1826,7 +1826,7 @@ public static int lineNumber(XPathContext c) {
       <samp>proc.RegisterExtensionFunction(
                        new QName("urn:math", "sqrt"), 
                        proc.ParseItemType("function(xs:double) as xs:double"), 
-                       val => new XdmAtomicValue(Math.sqrt(val.GetDoubleValue()))</samp>
+                       val => new XdmAtomicValue(Math.sqrt(val.AsDouble()))</samp>
         
         <p>This can then be invoked from XPath as <code>Q{urn:math}sqrt(2)</code>.</p>
         
