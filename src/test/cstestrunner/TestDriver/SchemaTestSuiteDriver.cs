@@ -166,7 +166,6 @@ namespace TestDriver {
                 QName nameAtt = new QName("", "", "name");
                 QName contributorAtt = new QName("", "", "contributor");
 
-
                 DocumentBuilder builder = processor.NewDocumentBuilder();
                 builder.BaseUri = new Uri(testSuiteDir + "/");
                 XdmNode catalog = builder.Build(
