@@ -135,9 +135,9 @@ public class AtomicArray implements AtomicSequence {
     }
 
     /**
-     * Get the value of the item as a UniString. This is in some cases more efficient than
+     * Get the value of the item as a UnicodeString. This is in some cases more efficient than
      * the version of the method that returns a String.
-     * @return the string value, as a UniString
+     * @return the string value, as a UnicodeString
      */
 
     @Override
@@ -156,10 +156,10 @@ public class AtomicArray implements AtomicSequence {
     }
 
     /**
-     * Get the value of the item as a UniString. This is in some cases more efficient than
+     * Get the value of the item as a UnicodeString. This is in some cases more efficient than
      * the version of the method that returns a String.
      *
-     * @return the string value, as a UniString
+     * @return the string value, as a UnicodeString
      */
 
     @Override

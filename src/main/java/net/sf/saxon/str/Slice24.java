@@ -64,7 +64,7 @@ class Slice24 extends UnicodeString {
      * @param predicate condition that the codepoint must satisfy
      * @param from      the position from which the search should start (0-based)
      * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      *                                       for codePoint access
      */
     @Override
@@ -125,7 +125,7 @@ class Slice24 extends UnicodeString {
     }
 
     /**
-     * Compute a hashCode. All implementations of {@code UniString} use compatible hash codes and the
+     * Compute a hashCode. All implementations of {@code UnicodeString} use compatible hash codes and the
      * hashing algorithm is therefore identical to that for {@code java.lang.String}. This means
      * that for strings containing Astral characters, the hash code needs to be computed by decomposing
      * an Astral character into a surrogate pair.

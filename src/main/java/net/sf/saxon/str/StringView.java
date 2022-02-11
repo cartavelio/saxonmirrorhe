@@ -125,7 +125,7 @@ public class StringView extends UnicodeString {
      *              code point to be included
      * @param end   the end position (0-based): specifically, the position of the first
      *              code point not to be included
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      *                                       for codePoint access
      */
     @Override
