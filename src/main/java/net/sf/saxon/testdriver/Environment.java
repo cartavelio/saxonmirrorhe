@@ -494,8 +494,13 @@ public class Environment implements URIResolver {
                 }
                 value = sourceDoc;
             } else {
+                URI oldBase = xpc.getBaseURI();
+                xpc.setBaseURI(env.getBaseURI());
                 String select = param.attribute("select");
                 value = xpc.evaluate(select, null);
+                if (oldBase.isAbsolute()) {
+                    xpc.setBaseURI(oldBase);
+                }
             }
             boolean isStatic = isTrue("static").test(param);
             QName varQName;
@@ -892,6 +897,7 @@ public class Environment implements URIResolver {
             CatalogResource res = new CatalogResource();
             String rawUri = source.attribute("uri");
             String role = source.attribute("role");
+            boolean mutable = isTrue("mutable").test(source);
             if (rawUri != null) {
                 res.uri = env.getBaseURI().resolve(rawUri).toString();
                 environment.catalogResources.put(res.uri, res);
@@ -909,6 +915,10 @@ public class Environment implements URIResolver {
             }
             String streaming = source.attribute("streaming");
             TreeModel selectedTreeModel = builder.getTreeModel();
+            if (mutable && !selectedTreeModel.isMutable()) {
+                selectedTreeModel = TreeModel.LINKED_TREE;
+                builder.setTreeModel(selectedTreeModel);
+            }
             if (!validateSources && validation.equals("skip")) {
                 builder.setSchemaValidator(null);
             } else if (manager == null) {
@@ -1065,7 +1075,9 @@ public class Environment implements URIResolver {
                         String varName = role.substring(1);
                         environment.params.put(new QName(varName), selectedItem);
                         environment.xpathCompiler.declareVariable(new QName(varName));
-                        environment.paramDeclarations.append("declare variable $" + varName + " external; ");
+                        if (!isTrue("declared").test(source)) {
+                            environment.paramDeclarations.append("declare variable $" + varName + " external; ");
+                        }
                     }
                 }
             }
