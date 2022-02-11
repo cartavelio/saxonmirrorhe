@@ -2854,7 +2854,7 @@
         <type>string</type>
         <uri>http://saxon.sf.net/feature/zipUriPattern</uri>
         <editions>EE</editions>
-        <configfile>xsd/@zipUriPattern</configfile>
+        <configfile>global/@zipUriPattern</configfile>
         <configfiledesc>
             <p>A regular expression used to decide whether a collection URI is to
                 be treated as representing a ZIP file. The default pattern is
