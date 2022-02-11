@@ -10,8 +10,12 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.QNameParser;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.SymbolicName;
@@ -72,7 +76,7 @@ public class FunctionAvailable extends SystemFunction {
 
             for (int i = minArity; i <= maxArity; i++) {
                 SymbolicName.F sn = new SymbolicName.F(functionName, i);
-                if (env.getFunctionLibrary().isAvailable(sn)) {
+                if (env.getFunctionLibrary().isAvailable(sn, env.getXPathVersion())) {
                     b = true;
                     break;
                 }
@@ -84,10 +88,10 @@ public class FunctionAvailable extends SystemFunction {
         }
     }
 
-    private boolean isFunctionAvailable(String lexicalName, String edition, int arity, XPathContext context) throws XPathException {
+    private boolean isFunctionAvailable(String lexicalName, RetainedStaticContext rsc, int arity, XPathContext context) throws XPathException {
         if (arity == -1) {
             for (int i = 0; i < 20; i++) {
-                if (isFunctionAvailable(lexicalName, edition, i, context)) {
+                if (isFunctionAvailable(lexicalName, rsc, i, context)) {
                     return true;
                 }
             }
@@ -123,7 +127,7 @@ public class FunctionAvailable extends SystemFunction {
 //                // TODO: some further functions are not available in Saxon-JS
 //            }
 //        }
-        return lib.isAvailable(sn);
+        return lib.isAvailable(sn, rsc.getPackageData().getHostLanguageVersion());
     }
 
     /**
@@ -143,7 +147,7 @@ public class FunctionAvailable extends SystemFunction {
             arity = (int) ((NumericValue) arguments[1].head()).longValue();
         }
         return BooleanValue.get(
-                isFunctionAvailable(lexicalQName, getRetainedStaticContext().getPackageData().getTargetEdition(), arity, context));
+                isFunctionAvailable(lexicalQName, getRetainedStaticContext(), arity, context));
     }
 }
 

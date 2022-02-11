@@ -3751,7 +3751,7 @@ public class XPathParser {
             for (int i = 0; i < arguments.length + 5; i++) {
                 if (i != arguments.length) {
                     SymbolicName.F sn = new SymbolicName.F(functionName, i);
-                    if (env.getFunctionLibrary().isAvailable(sn)) {
+                    if (env.getFunctionLibrary().isAvailable(sn, 31)) {
                         existsWithDifferentArity = true;
                         break;
                     }
