@@ -1,4 +1,5 @@
 using System;
+using java.lang;
 //using System.Collections.Generic;
 using NG = System.Collections.Generic;
 
@@ -14,6 +15,10 @@ namespace java.util {
             return _stack.Count;
         }
 
+        public bool empty() {
+            return _stack.Count == 0;
+        }
+        
         public bool isEmpty() {
             return _stack.Count == 0;
         }
@@ -33,9 +38,17 @@ namespace java.util {
         public bool contains(E value) {
             return _stack.Contains(value);
         }
+        
+        public int indexOf(E value) {
+            throw new UnsupportedOperationException();
+        }
 
         public E get(int index) {
             return _stack.ToArray()[index];
+        }
+
+        public void addAll(java.util.Stack<E> other) {
+            throw new java.lang.UnsupportedOperationException();
         }
     }
 }

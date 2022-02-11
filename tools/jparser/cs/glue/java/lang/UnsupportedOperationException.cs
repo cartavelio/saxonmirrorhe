@@ -9,6 +9,9 @@ namespace java.lang {
         public UnsupportedOperationException(string str, Throwable cause) : base(str, cause) {
 
         }
+        public UnsupportedOperationException(Throwable cause) : base(cause) {
+
+        }
 
     }
 }

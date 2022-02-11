@@ -2,6 +2,8 @@ using SysDouble = System.Double;
 namespace java.lang {
     public class Double {
         public const double NaN = SysDouble.NaN;
+        public const double POSITIVE_INFINITY = SysDouble.PositiveInfinity;
+        public const double NEGATIVE_INFINITY = SysDouble.NegativeInfinity;
         public static bool isNaN(double x) {
             return double.IsNaN(x);
         }

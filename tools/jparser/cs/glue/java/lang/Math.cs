@@ -6,11 +6,28 @@ namespace java.lang {
         public static int max(int x, int y) {
             return x > y ? x : y;
         }
+        
+        public static long max(long x, long y) {
+            return x > y ? x : y;
+        }
+        
+        public static double max(double x, double y) {
+            return x > y ? x : y;
+        }
 
         public static int min(int x, int y) {
             return x < y ? x : y;
         }
+        
+        public static long min(long x, long y) {
+            return x < y ? x : y;
+        }
+        
+        public static double min(double x, double y) {
+            return x < y ? x : y;
+        }
 
+        public const double PI = SysMath.PI; 
         public static long abs(long x) {
             return x >= 0 ? x : -x;
         }
@@ -34,8 +51,8 @@ namespace java.lang {
         public static double ceil(double x) {
             return SysMath.Ceiling(x);
         }
-        public static double round(double x) {
-            return SysMath.Round(x);
+        public static long round(double x) {
+            return (long)SysMath.Round(x);
         }
 
         public static double sin(double x) {
@@ -54,5 +71,13 @@ namespace java.lang {
         public static double acos(double x) {
             return SysMath.Atan(x);
         }
+        public static double sqrt(double x) {
+            return SysMath.Sqrt(x);
+        }
+        public static double pow(double x, double y) {
+            return SysMath.Pow(x, y);
+        }
+
+
     }
 }

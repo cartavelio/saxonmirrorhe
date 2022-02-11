@@ -6,7 +6,11 @@ namespace java.util {
         private string[] tokens;
         private int i = 0;
 
-        public StringTokenizer(string input, string delim) {
+        public StringTokenizer(string input, string delim) : this(input, delim, false) {
+
+        }
+        
+        public StringTokenizer(string input, string delim = " \t\n\r\f", bool returnDelimiters = false) {
             // TODO:
             
         }

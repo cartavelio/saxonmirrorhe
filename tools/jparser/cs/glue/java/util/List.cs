@@ -5,6 +5,7 @@ namespace java.util {
         bool add(E entry);
         void add(int index, E entry);
         void remove(int index);
+        void clear();
         void set(int index, E entry);
         E get(int index);
         bool contains(E entry);
@@ -12,6 +13,7 @@ namespace java.util {
         List<E> subList(int start, int end);
         int indexOf(E entry);
         E[] toArray();
-        E[] toArray(E[] supplied);
+        S[] toArray<S>(S[] supplied) where S : E;
+        Iterator<E> iterator();
     }
 }

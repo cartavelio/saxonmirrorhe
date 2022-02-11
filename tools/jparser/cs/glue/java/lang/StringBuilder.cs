@@ -22,9 +22,24 @@ namespace java.lang {
             this._builder.Append(str);
             return this;
         }
+        
+        public StringBuilder append(string str, int start, int end) {
+            this._builder.Append(str, start, end);
+            return this;
+        }
+        
+        public StringBuilder append(char[] str, int start, int end) {
+            this._builder.Append(str, start, end);
+            return this;
+        }
 
         public StringBuilder append(char ch) {
             this._builder.Append(("" + ch));
+            return this;
+        }
+        
+        public StringBuilder append(int i) {
+            this._builder.Append(("" + i));
             return this;
         }
 
@@ -33,12 +48,43 @@ namespace java.lang {
             return this;
         }
 
+        public StringBuilder insert(int index, string str) {
+            this._builder.Insert(index, str);
+            return this;
+        }
+        
+        public StringBuilder insert(int index, char ch) {
+            this._builder.Insert(index, ch);
+            return this;
+        }
+
+        public StringBuilder setCharAt(int index, char replacement) {
+            this._builder[index] = replacement;
+            return this;
+        }
+
+        public StringBuilder deleteCharAt(int index) {
+            this._builder.Remove(index, 1);
+            return this;
+        }
         public int length() {
             return this._builder.Length;
         }
 
         public string toString() {
             return _builder.ToString();
+        }
+
+        public char charAt(int i) {
+            return _builder[i];
+        }
+        
+        public string substring(int start) {
+            return _builder.ToString().Substring(start);
+        }
+        
+        public string substring(int start, int end) {
+            return _builder.ToString().Substring(start, end);
         }
 
         public void setLength(int len) {
