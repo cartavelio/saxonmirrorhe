@@ -52,6 +52,10 @@ configurations {
 
 sourceSets {
   main
+  samples {
+    runtimeClasspath += configurations.samples + main.output
+    compileClasspath += configurations.samples + main.output
+  }
   transpiler {
     compileClasspath += main.output
     runtimeClasspath += main.output
@@ -89,7 +93,6 @@ dependencies {
     [group: 'org.jetbrains', name: 'annotations', version: '20.1.0' ],
     [group: 'com.github.javaparser', name: 'javaparser-symbol-solver-core', version: '3.17.0'],
     [group: 'com.github.javaparser', name: 'javaparser-core', version: '3.17.0'],
-    [group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'],
     // PE and EE
     [group: 'javax.mail', name: 'javax.mail-api', version: mailVersion ],
     [group: 'com.sun.mail', name: 'javax.mail', version: mailVersion ],
@@ -246,7 +249,7 @@ def currentBranch = branch.toString().trim()
 
 def builtBranch = "none";
 try {
-  def xbranch = new BufferedReader(new FileReader(new File("build/built-branch")))
+  def xbranch = new BufferedReader(new FileReader(new File("${buildDir}/built-branch")))
   builtBranch = "${xbranch.readLine().trim()}"
 } catch (FileNotFoundException foe) {
   // nop
@@ -257,8 +260,9 @@ if (currentBranch != builtBranch
         || file("${buildDir}/preprocess").exists()
         || file("${buildDir}/filtered").exists()
         || file("${buildDir}/classes").exists())) {
-  println("You appear to have switched to the '${currentBranch}' branch.")
-  println("Deleting stale build sources...")
+  if (builtBranch != "none") {
+    println("Switching branches from '${builtBranch}' to '${currentBranch}'...")
+  }
   DeleteFilesRecursively.delete(new File("${buildDir}/src"))
   DeleteFilesRecursively.delete(new File("${buildDir}/preprocess"))
   DeleteFilesRecursively.delete(new File("${buildDir}/filtered"))
@@ -1799,10 +1803,8 @@ task helloWorld() {
   doLast {
     println("Hello, world.")
 
-    /*
-    configurations.documentation.resolve().each { path ->
+    configurations.samples.resolve().each { path ->
       println(path)
     }
-     */
   }
 }
