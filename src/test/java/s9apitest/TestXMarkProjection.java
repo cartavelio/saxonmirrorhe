@@ -22,6 +22,10 @@ public class TestXMarkProjection {
         try {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.TIMING, true);
+            proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
+            //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, true);
+            //proc.setConfigurationProperty(Feature.DISPLAY_BYTE_CODE, true);
+            //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, ConfigTest.TEMP_DIR);
             File queryFile = new File(ConfigTest.DATA_DIR + "../xmark/" + query + ".xq");
             File source = new File(ConfigTest.DATA_DIR + "../xmark/xmark4.xml");
             DocumentBuilder b1 = proc.newDocumentBuilder();
