@@ -1549,28 +1549,25 @@ task sqlServerStart(dependsOn: ["dockerdown"]) {
 
   doLast {
     exec {
-      workingDir "docker"
+      workingDir "tools/docker"
       commandLine DockerContainer.dockerCompose(), "up", "-d"
     }
     exec {
-      commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
+      def id = DockerContainer.containerid(c_sqlserver)
+      commandLine "${projectDir}/tools/docker/wait-for-postgresql", id
     }
-  }
-}
-
-task sqlServerSetup(dependsOn: ["dockerup"]) {
-  def id = "NA"
-  doFirst {
-    id = DockerContainer.containerid(c_sqlserver)
-  }
-  doLast {
     exec {
+      def id = DockerContainer.containerid(c_sqlserver)
       commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
         id, "psql", "-f", "/app/sql/setup.sql"
     }
     exec {
+      def id = DockerContainer.containerid(c_sqlserver)
       commandLine DockerContainer.docker(), "exec", "-i", id,
-       "psql", "-d", "sample", "-U", "testeditor", "-f", "/app/sql/fruits.sql"
+        "psql", "-d", "sample", "-U", "testeditor", "-f", "/app/sql/fruits.sql"
+    }
+    exec {
+      commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
     }
   }
 }
