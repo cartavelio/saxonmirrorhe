@@ -43,7 +43,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.*;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.TraceCodeInjector;
+import net.sf.saxon.trace.XQueryTraceCodeInjector;
 import net.sf.saxon.trace.XSLTTraceCodeInjector;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.packages.IPackageLoader;
@@ -1273,13 +1273,7 @@ public class Configuration implements SourceResolver, NotationSet {
                 defaultXsltCompilerInfo.setCodeInjector(null);
             }
         }
-        if (defaultStaticQueryContext != null) {
-            if (trace) {
-                defaultStaticQueryContext.setCodeInjector(new TraceCodeInjector());
-            } else {
-                defaultStaticQueryContext.setCodeInjector(null);
-            }
-        }
+        getDefaultStaticQueryContext().setCodeInjector(trace ? new XQueryTraceCodeInjector() : null);
     }
 
     /**
