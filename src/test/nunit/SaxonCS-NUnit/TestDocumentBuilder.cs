@@ -484,10 +484,10 @@ namespace SaxonCS_NUnit {
                 s = builder.Build(sr).ToString();
                 Assert.True(s.Contains("<doc> </doc"));
 
-                sr = new StringReader("<doc> </doc>");
+                sr = new StringReader("<doc> </doc>"); // Microsoft considers this whitespace to be ignorable
                 builder.WhitespacePolicy = WhitespacePolicy.StripIgnorable;
                 s = builder.Build(sr).ToString();
-                Assert.True(s.Contains("<doc> </doc"));
+                Assert.True(s.Contains("<doc/>"));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
