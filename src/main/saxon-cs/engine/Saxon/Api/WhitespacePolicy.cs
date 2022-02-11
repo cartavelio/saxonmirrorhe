@@ -16,15 +16,22 @@ namespace Saxon.Api {
         private int policy;
         SpaceStrippingRule stripperRules;
 
-        /// <summary>All whitespace text nodes are stripped</summary>
+        /// <summary>
+        /// All whitespace text nodes are stripped
+        /// </summary>
         public static WhitespacePolicy StripAll = 
             new(Whitespace.ALL, AllElementsSpaceStrippingRule.getInstance());
 
-        /// <summary>Whitespace text nodes appearing in element-only content are stripped</summary>
+        /// <summary>
+        /// Whitespace text nodes other than whitespace within mixed content are stripped.
+        /// Note that whitespace in text-only content models is considered ignorable under this definition.
+        /// </summary>
         public static WhitespacePolicy StripIgnorable =
             new(Whitespace.IGNORABLE, IgnorableSpaceStrippingRule.getInstance());
 
-        /// <summary>No whitespace is stripped</summary>
+        /// <summary>
+        /// No whitespace is stripped
+        /// </summary>
         public static WhitespacePolicy PreserveAll =
             new WhitespacePolicy(Whitespace.NONE, NoElementsSpaceStrippingRule.getInstance());
 
