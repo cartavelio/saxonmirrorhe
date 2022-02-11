@@ -66,17 +66,19 @@ cdef extern from "../SaxonProcessor.h":
 
         const char * getStringValue(XdmItem * item)
 
-        XdmNode * parseXmlFromString(const char* source)
+        XdmNode * parseXmlFromString(const char* source, SchemaValidator * validator)
 
-        XdmNode * parseXmlFromFile(const char* source)
+        XdmNode * parseXmlFromFile(const char* source, SchemaValidator * validator)
 
-        XdmNode * parseXmlFromUri(const char* source)
+        XdmNode * parseXmlFromUri(const char* source, SchemaValidator * validator)
 
         bool isSchemaAwareProcessor()
 
         bool exceptionOccurred()
 
         void exceptionClear()
+
+        const char * getErrorMessage()
 
 
     cdef cppclass DocumentBuilder:
@@ -412,6 +414,8 @@ cdef extern from "../SaxonProcessor.h":
         void setProperty(const char * name, const char * value)
 
         void declareNamespace(const char *prefix, const char * uri)
+
+        void declareVariable(const char * name)
 
         void setBackwardsCompatible(bool option)
 

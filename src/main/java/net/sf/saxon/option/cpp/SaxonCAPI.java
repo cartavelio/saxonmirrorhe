@@ -738,9 +738,16 @@ public class SaxonCAPI {
      * @param filename
      * @return file object
      */
-    public static File absoluteFile(String cwd, String filename) {
+    public static File absoluteFile(String cwd, String filename) throws SaxonApiException{
+        if(filename == null) {
+             throw new SaxonApiException("Failed to create file - File name is null");
+        }
         if(cwd == null) {
-            return new File(filename);
+            try {
+                return new File(filename);
+            }catch(NullPointerException ex) {
+                throw new SaxonApiException("Failed to create file - File name is null");
+            }
         };
         char separatorChar = '/';
         if (File.separatorChar != '/') {
@@ -751,14 +758,23 @@ public class SaxonCAPI {
         if (cwd!= null && !cwd.endsWith(String.valueOf(separatorChar))) {
             cwd = cwd.concat(String.valueOf(separatorChar));
         }
-        File absFile = new File(filename);
+        File absFile = null;
+        try {
+            absFile = new File(filename);
+        }catch(NullPointerException ex) {
+            throw new SaxonApiException("Failed to create file - File name is null");
+        }
         String fullpath;
         if (!absFile.isAbsolute()) {
             fullpath = cwd + filename;
         } else {
             fullpath = filename;
         }
-        return new File(fullpath);
+        try {
+            return new File(fullpath);
+        }catch(NullPointerException ex) {
+            throw new SaxonApiException("Failed to create file - File name is null");
+        }
     }
 
     /**
@@ -873,8 +889,16 @@ public class SaxonCAPI {
      */
     public static Serializer resolveOutputFile(Processor processor, String cwd, String outfile) throws SaxonApiException {
         Serializer serializer = null;
-        File file = absoluteFile(cwd, outfile);
-
+        File file = null;
+        try {
+            file = absoluteFile(cwd, outfile);
+        } catch(Exception ex){
+              throw new SaxonApiException(ex.getMessage());
+            
+        }
+        if(file == null) {
+            throw new SaxonApiException("Output file is null");
+        }
         serializer = processor.newSerializer(file);
         return serializer;
     }
