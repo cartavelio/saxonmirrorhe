@@ -86,7 +86,6 @@
 
   </doc:doc>
 
-  <!--<xsl:include href="saxondocs.xsl"/>-->
   <xsl:include href="prod-fo.xsl"/>
   <xsl:include href="css2xslt.xsl"/>
   <xsl:include href="self-doc.xsl"/>
@@ -99,13 +98,23 @@
   <xsl:param name="possible-base-uri" as="xs:string?"/>
 
   <xsl:param name="variants" select="
-      'HE',
-      'PE',
-      'EE',
-      'EE-T',
-      'EE-Q',
-      'EE-V',
-      'CS'"/>
+    'J-HE',
+    'J-PE',
+    'J-EE',
+    'J-EET',
+    'J-EEQ',
+    'J-EEV',
+    'CS-EE',
+    'CS-EET',
+    'CS-EEQ',
+    'CS-EEV',
+    'C-HE',
+    'C-PE',
+    'C-EE',
+    'C-EET',
+    'C-EEQ',
+    'C-EEV',
+    'JS'"/>
   <xsl:param name="CSS" as="xs:string">saxondocs_new.css</xsl:param>
   <xsl:variable name="CSS.URI" as="xs:anyURI" select="resolve-uri($CSS)"/>
 
@@ -122,10 +131,12 @@
       </xsl:call-template>
     </xsl:result-document>
     <xsl:variable name="prod.doc" select="doc"/>
-    <xsl:variable name="version" select="$prod.doc/@version"/>
     <xsl:variable name="variant-defs" as="map(xs:string,item()*)">
       <xsl:map>
         <xsl:for-each select="$variants">
+          <xsl:variable name="platform" select="tokenize(., '-')[1]"/>
+          <xsl:variable name="version" select="if ($platform eq 'C') then $prod.doc/@c-version else (if
+            ($platform eq 'JS') then $prod.doc/@js-version else $prod.doc/@version)"/>
           <xsl:map-entry key=".">
             <xsl:apply-templates select="$prod.doc" mode="variant">
               <xsl:with-param name="variant" select="." tunnel="yes"/>
@@ -182,7 +193,7 @@
       <xsl:sequence select="doc:self-doc($this.document, $CSS)"/>
     </xsl:result-document>
     <RESULT>
-      <xsl:sequence select="$variant-defs('EE-T')"/>
+      <xsl:sequence select="$variant-defs('EET')"/>
     </RESULT>
 
   </xsl:template>
@@ -193,12 +204,20 @@
 
   <xsl:template match="*" mode="variant">
     <xsl:param name="variant" tunnel="yes"/>
-    <xsl:if test="not(@variant) or (tokenize(@variant, '\s') = $variant)">
-      <xsl:copy>
-        <xsl:copy-of select="@* except @variant"/>
-        <xsl:apply-templates mode="#current"/>
-      </xsl:copy>
-    </xsl:if>
+    <xsl:choose>
+      <xsl:when test="exists(@variant) and tokenize(@variant, '\s') = $variant">
+        <xsl:copy>
+          <xsl:copy-of select="@* except @variant"/>
+          <xsl:apply-templates mode="#current"/>
+        </xsl:copy>
+      </xsl:when>
+      <xsl:when test="not(@variant)">
+        <xsl:copy>
+          <xsl:copy-of select="@*"/>
+          <xsl:apply-templates mode="#current"/>
+        </xsl:copy>
+      </xsl:when>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="span[@value = '$timestamp']" mode="variant">

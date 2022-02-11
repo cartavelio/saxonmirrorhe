@@ -840,7 +840,16 @@ task gen_prod_desc_pdf(
   // Just a place to hang dependencies
 }
 
-["EE-Q", "EE-T", "EE-V", "EE", "PE", "HE", "CS"].each { ds ->
+def variants = ["JS"]
+["J", "C"].each {plat ->
+  ["EEQ", "EET", "EEV", "EE", "PE", "HE"].each { pk ->
+    variants.push("${plat}-${pk}")
+  }
+}
+["EEQ", "EET", "EEV", "EE"].each { pk ->
+  variants.push("CS-${pk}")
+}
+variants.each { ds ->
   Task t = task "gen_${ds}_desc_pdf"(
     type: JavaExec,
     dependsOn: ["setup_fop", "gen_prod_desc_fo"],
