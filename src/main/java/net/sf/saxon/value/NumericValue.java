@@ -12,6 +12,7 @@ import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
@@ -37,6 +38,7 @@ public abstract class NumericValue extends AtomicValue
      */
 
     /*@NotNull*/
+    @CSharpReplaceException(from="java.lang.NumberFormatException", to="System.FormatException")
     public static NumericValue parseNumber(/*@NotNull*/ String in) {
         if (in.indexOf('e') >= 0 || in.indexOf('E') >= 0) {
             try {

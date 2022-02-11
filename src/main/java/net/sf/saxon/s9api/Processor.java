@@ -20,6 +20,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.push.Push;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -516,12 +517,10 @@ public class Processor implements Configuration.ApiProvider {
      *                  files that were previously registered.
      */
 
-    public void setCatalogFile(String... fileNames) {
-        //#if CSHARP==false
-        if (config.getResourceResolver() instanceof CatalogResourceResolver) {
-            ((CatalogResourceResolver) config.getResourceResolver()).setFeature(ResolverFeature.CATALOG_FILES, Arrays.asList(fileNames));
+    public void setCatalogFiles(String... fileNames) {
+        if (config.getResourceResolver() instanceof ConfigurableResourceResolver) {
+            CommandLineOptions.setCatalogFiles(((ConfigurableResourceResolver) config.getResourceResolver() ), Arrays.asList(fileNames));
         }
-        //#endif
     }
 
     /**

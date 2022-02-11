@@ -12,7 +12,7 @@ import javax.xml.transform.Source;
 /**
  * This class is an implementation of the JAXP Source interface. It represents
  * a dummy Source, which resolves to an empty sequence. A URIResolver (called
- * perhaps in furtherance of the doc() or document() function can choose to
+ * perhaps in furtherance of the doc() or document() function) can choose to
  * return an {@code EmptySource} for example if a URI is not accessible; the effect
  * is that the call on doc() or document() returns an empty sequence. This may
  * be useful to emulate the behaviour of earlier versions of XSLT.

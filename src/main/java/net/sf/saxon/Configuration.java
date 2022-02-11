@@ -379,8 +379,8 @@ public class Configuration implements SourceResolver, NotationSet {
         standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
         serializerFactory = new net.sf.saxon.lib.SerializerFactory(this);
         sourceResolver = this;
-        //#if CSHARP==false
         unparsedTextURIResolver = new StandardUnparsedTextResolver();
+        //#if CSHARP==false
         mediaQueryEvaluator = (o1, o2) -> 0;
         //#endif
 
@@ -950,7 +950,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * instruction, and the second argument is the value of the required media given
      * in the calling API. The default implementation always returns 0, indicating that
      * the media pseudo-attribute is ignored. An alternative implementation, consistent
-     * with previous Saxon releases, would be compare the strings for equality. A fully
+     * with previous Saxon releases, would be to compare the strings for equality. A fully
      * conformant implementation could implement the syntax and semantics of media queries
      * as defined in CSS 3.
      */
@@ -2687,6 +2687,8 @@ public class Configuration implements SourceResolver, NotationSet {
 //        return parser;
 //    }
 
+    //#if CSHARP==false
+
     /**
      * Get a parser for source documents. The parser is allocated from a pool if any are available
      * from the pool: the client should ideally return the parser to the pool after use, so that it
@@ -2799,6 +2801,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private static XMLReader loadParser() {
         return Version.platform.loadParser();
     }
+    //#endif
 
     //#if CSHARP==false
     /**

@@ -253,7 +253,7 @@ public class DocumentFn extends SystemFunction implements Callable {
 
             Source source = resolveURI(href, baseURI, documentKey.toString(), c);
 
-            if (source instanceof EmptySource) {
+            if (source == null || source instanceof EmptySource) {
                 return null;
             }
 
