@@ -623,11 +623,20 @@ public class QT3TestDriverHE extends TestDriver {
                             mr.setTestCase(testCase);
                             testXqc.getProcessor().getUnderlyingConfiguration().setModuleURIResolver(mr);
                             testXqc.setModuleURIResolver(mr);
-                            //testXqc.setBaseURI(testCase.getBaseURI());
+
+                            // Is a static base URI defined?
+                            if (env.xqueryCompiler != null && env.xqueryCompiler.getBaseURI() == null) {
+                                // If not, establish one.
+                                // This avoids an NPE in qt3extra test -s:fn-doc -t:fn-doc-101
+                                testXqc.setBaseURI(testCase.getBaseURI());
+                            }
 
                             try {
-                                testXqc.getUnderlyingStaticContext().setModuleLocation(
-                                        new Loc(testXqc.getBaseURI().toString(), testCase.getLineNumber(), -1));
+                                // If for some reason there still isn't a base URI, don't NPE here...
+                                if (testXqc.getBaseURI() != null) {
+                                    testXqc.getUnderlyingStaticContext().setModuleLocation(
+                                            new Loc(testXqc.getBaseURI().toString(), testCase.getLineNumber(), -1));
+                                }
                                 XQueryExecutable q = null;
                                 try {
                                     q = testXqc.compile(exp);
