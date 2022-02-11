@@ -31,6 +31,7 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceableComponent;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.tree.iter.GroundedIterator;
@@ -779,7 +780,16 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         /*@Nullable*/
         @Override
         public Item next() {
-            return base.next();
+            try {
+                return base.next();
+            } catch (UncheckedXPathException e1) {
+                XPathException xe = e1.getXPathException();
+                xe.maybeSetLocation(location);
+                XmlProcessingException err = new XmlProcessingException(xe);
+                reporter.report(err);
+                xe.setHasBeenReported(true);
+                throw e1;
+            }
         }
 
         @Override

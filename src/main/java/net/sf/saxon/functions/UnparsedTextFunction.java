@@ -99,7 +99,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         } catch (java.io.IOException ioErr) {
 //            System.err.println("ProxyHost: " + System.getProperty("http.proxyHost"));
 //            System.err.println("ProxyPort: " + System.getProperty("http.proxyPort"));
-            throw handleIOError(absoluteURI, ioErr, context);
+            throw handleIOError(absoluteURI, ioErr);
         }
     }
 
@@ -142,7 +142,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
     }
     //#endif
 
-    public static XPathException handleIOError(URI absoluteURI, IOException ioErr, XPathContext context) {
+    public static XPathException handleIOError(URI absoluteURI, IOException ioErr) {
         String message = "Failed to read input file";
         if (absoluteURI != null && !ioErr.getMessage().equals(absoluteURI.toString())) {
             message += ' ' + absoluteURI.toString();
@@ -155,7 +155,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
     }
 
     @CSharpReplaceBody(code="return \"FOUT1170\";")
-    private static String getErrorCode(IOException ioErr) {
+    public static String getErrorCode(IOException ioErr) {
         // FOUT1200 should be used when the encoding was inferred, FOUT1190 when it was explicit. We rely on the
         // caller to change FOUT1200 to FOUT1190 when necessary
         if (ioErr instanceof MalformedInputException) {
