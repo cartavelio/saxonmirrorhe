@@ -740,11 +740,10 @@ public class XMLEmitter extends Emitter {
             if (openStartTag) {
                 closeStartTag();
             }
-
-            if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
+            if (chars instanceof CompressedWhitespace) {
+                ((CompressedWhitespace) chars).write(writer);
+            } else if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
                 writer.write(chars);
-            } else if (chars instanceof CompressedWhitespace) {
-                ((CompressedWhitespace)chars).write(writer);
             } else if (!ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
                 writeEscape(chars.tidy(), false);
             } else {
