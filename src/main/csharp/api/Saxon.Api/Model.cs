@@ -1926,7 +1926,9 @@ namespace Saxon.Api
         public XdmMap Put(XdmAtomicValue key, XdmValue value)
         {
             XdmMap map2 = new XdmMap();
-            map2.value = ((JMapItem)this.value).addEntry((JAtomicValue)key.Unwrap(), value.value);
+            JAtomicValue jkey = (JAtomicValue)key.Unwrap();
+            JGroundedValue jval = value.value;
+            map2.value =net.sf.saxon.dotnet.DotNetMapUtils.addEntry(this.value, jkey, jval);
             return map2;
         }
 
@@ -1942,7 +1944,7 @@ namespace Saxon.Api
         public XdmMap Remove(XdmAtomicValue key)
         {
             XdmMap map2 = new XdmMap();
-            map2.value = ((JMapItem)this.value).remove((JAtomicValue)key.Unwrap());
+            map2.value = net.sf.saxon.dotnet.DotNetMapUtils.remove(this.value, (JAtomicValue)key.Unwrap());
             return map2;
         }
 
