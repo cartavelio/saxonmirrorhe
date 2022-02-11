@@ -56,7 +56,7 @@ public class StylesheetModule {
     private int inputTypeAnnotations = 0;
 
     // A list of all the declarations in the stylesheet and its descendants, in increasing precedence order
-    protected List<ComponentDeclaration> topLevel = new ArrayList<ComponentDeclaration>();
+    protected List<ComponentDeclaration> topLevel = new ArrayList<>();
 
     public StylesheetModule(StyleElement rootElement, int precedence) {
         this.rootElement = rootElement;

@@ -368,6 +368,8 @@ public class StyleNodeFactory implements NodeFactory {
                 return new XSLImportSchema();
             case StandardNames.XSL_INCLUDE:
                 return new XSLInclude();
+            case StandardNames.XSL_ITEM_TYPE:
+                return new XSLItemType();
             case StandardNames.XSL_ITERATE:
                 return new XSLIterate();
             case StandardNames.XSL_KEY:
