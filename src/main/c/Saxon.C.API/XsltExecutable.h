@@ -283,7 +283,7 @@ public:
    /**
      * If this option is enabled, then any document created using xsl:result-document is saved (as an XdmNode)
      * in an std::map object where it is accessible using the URI as a key. After the execution of the transformation
-     * a call on the <code>getResultDocuments</code> method is required to get access to the result-documents in the map.
+     * a call on the <code>getResultDocuments()</code> method is required to get access to the result-documents in the map.
      * @param flag - true causes secondary result documents from the transformation to be saved in a map; false disables
      * this option.
     */
