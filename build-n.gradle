@@ -102,6 +102,7 @@ task pen_setupPreprocess(
   exclude "com/saxonica/config/JavaPlatformPE.java" 
   exclude "com/saxonica/config/JavaPlatformEE.java" 
   exclude "com/saxonica/config/JavaPlatformC.java"
+    exclude "com/saxonica/config/NativePlatformPE.java"
   exclude "com/saxonica/config/ee/**" 
   exclude "com/saxonica/stream/**" 
   exclude "com/saxonica/schema/**" 
