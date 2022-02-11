@@ -76,6 +76,14 @@ namespace Saxon.Api
 /// </summary>
 
 public class Feature<T> {
+
+    /// <summary>
+    /// A unique numeric code associated with a feature
+    /// </summary>
+    /// <remarks>
+    /// Feature codes should remain stable across releases so that compiled applications work without recompilation
+    /// </remarks>
+    
     
     public readonly int Code;
 
@@ -107,8 +115,8 @@ public class Feature<T> {
     </xsl:template>
 
 
-    <xsl:template match="name" mode="FeatureKeys.cs"><!-- TODO or public static readonly ??? -->
-        <xsl:text>&#xa;&#xa;    public const String </xsl:text>
+    <xsl:template match="name" mode="FeatureKeys.cs">
+        <xsl:text>&#xa;&#xa;    public const string </xsl:text>
         <xsl:value-of select="."/>
         <xsl:text> = </xsl:text>
     </xsl:template>
