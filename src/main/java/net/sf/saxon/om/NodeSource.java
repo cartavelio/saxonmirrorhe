@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.om;
 
 import net.sf.saxon.event.Receiver;
@@ -7,10 +14,19 @@ import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.trans.XPathException;
 
+/**
+ * A JAXP Source object representing a Saxon {@link NodeInfo}. The class implements the
+ * {@link ActiveSource} interface, allowing the content to be delivered to a {@link Receiver}.
+ */
 public class NodeSource implements ActiveSource {
 
-    private NodeInfo node;
+    private final NodeInfo node;
     private String systemId;
+
+    /**
+     * Create a <code>NodeSource</code> that wraps a supplied node
+     * @param node the supplied node
+     */
 
     public NodeSource(NodeInfo node) {
         this.node = node;
@@ -61,6 +77,11 @@ public class NodeSource implements ActiveSource {
             return this.systemId;
         }
     }
+
+    /**
+     * Get the node represented by this {@link NodeSource} object
+     * @return the wrapped node
+     */
 
     public NodeInfo getNode() {
         return node;

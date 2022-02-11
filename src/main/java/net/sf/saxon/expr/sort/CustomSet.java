@@ -1,15 +1,24 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.z.IntHashMap;
 
 /**
- * A set implementation using a custom equality matcher, to avoid having to wrap
+ * A mutable set implementation using a custom equality matcher, to avoid having to wrap
  * each entry in a wrapper object to achieve customised equality testing.
  *
- * <p>Note: this doesn't implement {@code java.util.Set<T>} to save the effort of implementing
+ * <p>Note: this doesn't implement {@code java.util.Set<T>}. This is to save the effort of implementing
  * methods like size() and iterator() that aren't required for our use cases. These
  * methods could easily be added without changing the basic design.
  * </p>
+ *
+ * @param <T> The type of the entries in the set
  */
 
 public class CustomSet<T>  {
@@ -17,6 +26,10 @@ public class CustomSet<T>  {
     private final IntHashMap<CustomSetEntryChain<T>> buckets;
     private final EqualityMatcher<T> equalityMatcher;
 
+    /**
+     * Create an empty set using the supplied equality matcher
+     * @param matcher the function used to compare items for equality
+     */
     public CustomSet(EqualityMatcher<T> matcher) {
         buckets = new IntHashMap<>();
         equalityMatcher = matcher;

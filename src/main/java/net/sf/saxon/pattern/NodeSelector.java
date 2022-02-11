@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.NodeInfo;
@@ -23,6 +30,12 @@ public class NodeSelector extends NodeTest {
         this.predicate = predicate;
     }
 
+    /**
+     * Create a NodeTest based on a supplied predicate. The NodeTest selects a node if the
+     * predicate returns true.
+     * @param predicate the supplied predicate (a boolean function of a node)
+     * @return a NodeTest matching the selected nodes
+     */
     public static NodeSelector of(Predicate<? super NodeInfo> predicate) {
         return new NodeSelector(predicate);
     }
