@@ -394,14 +394,12 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>The source argument identifies an input stream containing an <c>xsl:package</c> element. Any packages
         /// on which this package depends must have been made available to the <c>XsltCompiler</c>
-        /// by importing them using <see cref="ImportPackage"/>.</para>
+        /// by importing them using <see cref="ImportPackage(XsltPackage)"/> or similar.</para>
         /// <para>The <c>BaseUri</c> property of the compiler is ignored</para>>
         /// <para>The caller is responsible for closing the input stream after use.</para>
         /// </remarks>
-		/// <param name='input'>source identifies an XML document holding the the XSLT package to be compiled</param>
-		/// <param name="baseUri">The base URI of the stylesheet, used for resolving
-		/// any relative URIs in <c>xsl:include</c> and <c>xsl:import</c> declarations,
-		/// and anywhere else that the static base URI of the stylesheet is relevant.</param>
+        /// <param name='input'>a stream containing an XML document holding the the XSLT package to be compiled</param>
+        /// <param name='baseUri'>the base URI of the stream, used for resolving any relative references</param>
         /// <returns>The <c>XsltPackage</c> that results from the compilation. Note that this package
         /// is not automatically imported to this <c>XsltCompiler</c>; if the package is required
         /// for use in subsequent compilations then it must be explicitly imported.</returns>

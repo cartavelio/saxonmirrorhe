@@ -57,7 +57,7 @@ namespace Saxon.Api {
         /// used) Saxon may clone the returned iterator by calling its <c>GetAnother()</c> method, 
         /// allowing the function results to be read more than once.</returns>
 
-        public abstract IEnumerator<XdmItem> Call(IEnumerator<XdmItem>[] arguments, DynamicContext context);
+        public abstract XdmValue Call(XdmValue[] arguments, DynamicContext context);
         
     }
 }

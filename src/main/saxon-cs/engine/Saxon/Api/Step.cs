@@ -44,7 +44,7 @@ namespace Saxon.Api {
         /// function or the XPath <c>!</c> operator: there is no sorting of nodes into document order, and
         /// no elimination of duplicates.</returns>
         public Step<TInput, TResult> Then(Step<TResult, TResult> next) {
-            return new Step<TInput, TResult>(item => { return function.Invoke(item).SelectMany(next.Func); });
+            return new Step<TInput, TResult>(item => function.Invoke(item).SelectMany(next.Func));
         }
 
         /// <summary>
@@ -54,10 +54,8 @@ namespace Saxon.Api {
         /// <returns>A new <c>Step</c> (that is, a function from one <c>IEnumerable</c> of items to another) that
         /// filters the results of this step by selecting only the items that satisfy the predicate.</returns>
         public Step<TInput, TResult> At(int index) {
-            return new Step<TInput, TResult>(item => {
-                List<TResult> list = new List<TResult>(1);
-                list.Add(function.Invoke(item).ElementAt(index));
-                return list;
+            return new Step<TInput, TResult>(item => new List<TResult>(1) {
+                function.Invoke(item).ElementAt(index)
             });
         }
 
@@ -80,9 +78,7 @@ namespace Saxon.Api {
         /// <summary>
         /// The <c>Func</c> property that represents the wrapped delegate method which can be invoked.
         /// </summary>
-        public Func<TInput, IEnumerable<TResult>> Func {
-            get { return function; }
-        }
+        public Func<TInput, IEnumerable<TResult>> Func => function;
 
 
         /// <summary>

@@ -2,6 +2,11 @@ using Saxon.Hej.expr;
 using Saxon.Hej.om;
 
 namespace Saxon.Api.Support {
+    
+    /// <summary>
+    /// Converts an <c>Saxon.Api.IResource<c> (the external Saxon-CS representation) to an <c>Saxon.Hej.lib.Resource</c>
+    /// (the internal representation).
+    /// </summary>
     public class ResourceUnwrapper : Saxon.Hej.lib.Resource {
 
         private readonly IResource resource;
@@ -10,16 +15,11 @@ namespace Saxon.Api.Support {
         }
 
         public static Saxon.Hej.lib.Resource Unwrap(IResource resource) {
-            if (resource is ResourceWrapper) {
-                return ((ResourceWrapper) resource).Implementation;
-            }
-            else {
-                return new ResourceUnwrapper(resource);
-            }
+            return new ResourceUnwrapper(resource);
         }
 
         public string getResourceURI() {
-            return resource.ResourceURI;
+            return resource.ResourceUri.ToString();
         }
 
         public Item getItem(XPathContext context) {

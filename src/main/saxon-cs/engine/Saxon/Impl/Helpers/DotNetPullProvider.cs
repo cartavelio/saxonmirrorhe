@@ -5,6 +5,7 @@ using System.Xml.Schema;
 using Saxon.Hej.str;
 using Saxon.Api;
 using Saxon.Hej.@event;
+using Saxon.Hej.expr.parser;
 using Saxon.Hej.type;
 using Saxon.Hej.value;
 using WSP = Saxon.Api.WhitespacePolicy;
@@ -46,6 +47,7 @@ namespace System.Impl.Helpers {
         public Saxon.Hej.om.AttributeMap getAttributes() {
             if (parser.HasAttributes) {
                 Saxon.Hej.om.AttributeMap atts = Saxon.Hej.om.EmptyAttributeMap.getInstance();
+                Saxon.Hej.s9api.Location location = saveLocation();
                 for (int i = 0; (i < parser.AttributeCount); i++) {
                     parser.MoveToAttribute(i);
                     string prefix = parser.Prefix;
@@ -59,7 +61,7 @@ namespace System.Impl.Helpers {
                                 new Saxon.Hej.om.FingerprintedQName(prefix, namespaceURI, localName);
                             atts = atts.put(new Saxon.Hej.om.AttributeInfo(nc,
                                 Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, parser.Value,
-                                Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE));
+                                location, Saxon.Hej.@event.ReceiverOption.NONE));
                         }
                     }
                 }
@@ -319,7 +321,7 @@ namespace System.Impl.Helpers {
 
         public string getSystemId() {
             string @base = parser.BaseURI;
-            Console.WriteLine("BASE " + @base);
+            //Console.WriteLine("BASE " + @base);
             if (((@base == null) || (@base.Length == 0))) {
                 return baseURI;
             }

@@ -50,10 +50,18 @@ namespace Saxon.Api {
         /// are referenced within the expression but not explicitly declared.
         /// </summary>
         /// <returns>
-        /// An <c>IEnumerator</c> over the names of the external variables, as instances of <c>QName</c>.
+        /// A collection holding the names of the external variables, as instances of <c>QName</c>.
         /// </returns>
-        public IEnumerator<QName> EnumerateExternalVariables2() {
-            return executable.iterateExternalVariables();
+
+        public IEnumerable<QName> ExternalVariables {
+            get {
+                List<QName> names = new ();
+                var iter = executable.iterateExternalVariables();
+                while (iter.MoveNext()) {
+                    names.Add(iter.Current);
+                }
+                return names;
+            }
         }
 
 

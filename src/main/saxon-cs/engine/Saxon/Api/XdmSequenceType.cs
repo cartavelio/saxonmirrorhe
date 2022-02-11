@@ -10,6 +10,9 @@ namespace Saxon.Api {
     /// An instance of class <c>XdmSequenceType</c> represents a sequence type, that is, the combination
     /// of an item type and an occurrence indicator.
     /// </summary>
+    /// <remarks>
+    /// <para>An <c>XdmSequenceType</c> may be constructed using the method <c>Processor.ParseSequenceType()</c></para>
+    /// </remarks>
 
     public class XdmSequenceType
     {
@@ -25,7 +28,7 @@ namespace Saxon.Api {
         public const char ZERO = '0'; 
         public const char ONE = ' ';
 
-        public static XdmSequenceType AnySequenceType = new XdmSequenceType(
+        public static readonly XdmSequenceType AnySequenceType = new XdmSequenceType(
             XdmItemType.MakeXdmItemType(AnyItemType.getInstance()), ZERO_OR_MORE);
 
         /// <summary>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using SysCollGen = System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices.ComTypes;
@@ -14,6 +15,11 @@ using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Ejava.lang;
+using Saxon.Hej.expr;
+using Saxon.Hej.expr.parser;
+using Saxon.Hej.sxpath;
+using Saxon.Hej.type;
+using Saxon.Hej.value;
 using Saxon.Impl.Helpers;
 using Version = Saxon.Hej.Version;
 
@@ -22,9 +28,14 @@ namespace Saxon.Api {
     /// The <c>Processor</c> class serves three purposes: it allows global Saxon configuration
     /// options to be set; it acts as a factory for generating XQuery, XPath, and XSLT
     /// compilers; and it owns certain shared resources such as the Saxon <c>NamePool</c> and 
-    /// compiled schemas. This is the first object that a Saxon application should create. Once
-    /// established, a <c>Processor</c> may be used in multiple threads.
+    /// compiled schemas.
     /// </summary>
+    /// <remarks>
+    /// <para>This is the first object that a Saxon application should create. Most
+    /// applications should only create one <c>Processor</c> object. Once established, a 
+    /// <c>Processor</c> may be used in multiple threads.</para>
+    /// </remarks>
+
     [Serializable]
     public class Processor : Configuration.ApiProvider {
         // For largely historic reasons, the Saxon.Api.Processor is implemented
@@ -32,15 +43,14 @@ namespace Saxon.Api {
 
         private SchemaManager schemaManager = null;
         private TextWriter textWriter = Console.Error;
-        private CollectionFinder collectionFinder = (cxt, uri) => new ResourceCollectionWrapper(
-            new StandardCollectionFinder().findCollection(cxt.context, uri));
+        private CollectionFinder userCollectionFinder;
 
         private TextResolver textResolver;
 
         internal Processor(Saxon.Hej.s9api.Processor p) {
             JProcessor = p;
             JProcessor.getUnderlyingConfiguration().setProcessor(this);
-            checkLicense();
+            init();
         }
 
         /// <summary>
@@ -50,7 +60,7 @@ namespace Saxon.Api {
         public Processor() {
             JProcessor = new Saxon.Hej.s9api.Processor(true);
             JProcessor.getUnderlyingConfiguration().setProcessor(this);
-            checkLicense();
+            init();
         }
 
         /// <summary>
@@ -63,7 +73,7 @@ namespace Saxon.Api {
             }
             JProcessor = new Saxon.Hej.s9api.Processor(true);
             JProcessor.getUnderlyingConfiguration().setProcessor(this);
-            checkLicense();
+            init();
         }
 
         /// <summary>
@@ -78,7 +88,7 @@ namespace Saxon.Api {
             //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
             JProcessor = new Saxon.Hej.s9api.Processor(config);
             config.setProcessor(this);
-            checkLicense();
+            init();
         }
 
         /// <summary>
@@ -93,13 +103,21 @@ namespace Saxon.Api {
             //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
             JProcessor = new Saxon.Hej.s9api.Processor(config);
             config.setProcessor(this);
-            checkLicense();
+            init();
         }
 
         public Processor(Configuration config) {
             JProcessor = new Saxon.Hej.s9api.Processor(config);
             config.setProcessor(this);
+            init();
+        }
+
+        private void init() {
             checkLicense();
+            Saxon.Hej.expr.XPathContext context = new EarlyEvaluationContext(Implementation);
+            StandardCollectionFinder = uri => new ResourceCollectionWrapper(
+                new StandardCollectionFinder().findCollection(context, uri.ToString()), context);
+            userCollectionFinder = StandardCollectionFinder;
         }
 
         private void checkLicense() {
@@ -315,61 +333,45 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Register a named collection. A collection is identified by a URI (the collection URI),
-        /// and its content is represented by an <c>IResourceCollection</c>.
-        /// </summary>
-        /// <param name="collectionURI">The URI used to identify the collection in a call
-        /// of the XPath <c>collection()</c> function. The default collection is registered
-        /// by supplying null as the value of this argument (this is the collection returned
-        /// when the XPath <c>collection()</c> function is called with no arguments).</param> 
-		/// <param name="collection">An object that represents the contents of the
-        /// collection.</param>
-        /// <remarks>
-        /// <para>Collections should be stable: that is, two calls to retrieve the same collection URI
-        /// should return the same sequence of document URIs. This requirement is imposed by the
-        /// W3C specifications, but in the case of a user-defined collection it is not enforced by
-        /// the Saxon product.</para>
-        /// <para>A collection may be replaced by specifying the URI of an existing
-        /// collection. However, this should only be done during initialization of the processor;
-        /// the effect of changing collection bindings while transformations or queries are
-        /// in progress is undefined.</para>
-        /// <para>Collections registered with a processor are available to all queries and stylesheets
-        /// running under the control of that processor.</para>
-        /// <para>If a collection URI has been registered using this method, the registered collection
-        /// is used, and the collection finder is not called.</para>
-        /// </remarks>
-        /// 
-        
-        public void RegisterCollection(string collectionURI, IResourceCollection collection) {
-            Configuration config = JProcessor.getUnderlyingConfiguration();
-            config.registerCollection(collectionURI, ResourceCollectionUnwrapper.Unwrap(collection));
-        }
-        
-        /// <summary>
-        /// Get or set a function that is used to retrieve a resource collection given a collection URI.
+        /// A used-supplied function that is used to retrieve a resource collection given a collection URI.
         /// </summary>
         /// <remarks>
-        /// <para>This function will be called only if the collection URI has not been registered using
-        /// <c>RegisterCollection</c>.</para>
+        /// <para>If no collection finder is supplied, then the built-in collection finder is used. The
+        /// built-in collection finder recognizes various kinds of collection including directory collections
+        /// and catalog collections. A user-defined collection finder can delegate to the built-in collection finder
+        /// by invoking the function available as <c>Processor.StandardCollectionFinder</c>.</para>
         /// <para>A collection finder should be set only while the processor is being initialized; the
         /// effect of changing the collection finder (or changing any data on which it depends) while
-        /// queries or transformations are in progress is undefined.
-        /// </para>
-        /// <para>The initial value of the property is a system collection finder that recognizes various
-        /// kinds of collection including directory collections and catalog collections. It is always possible
-        /// for a user-defined collection finder to delegate to this system collection finder.</para>
+        /// queries or transformations are in progress is undefined.</para>
+        /// <para>The collection finder returns a set of <c>IResource</c> objects. Typically a used-defined
+        /// class implementing <c>IResource</c> is used. An <c>IResource</c> has a resource URI, a content type
+        /// (MIME or media type), and a method to deliver the resource content as an <c>XdmItem</c>. Typically
+        /// fetching the resource over the network, and parsing it according to the rules of the relevant content
+        /// type, is delayed until the <c>GetXdmItem</c> method is called.</para>
+        /// <para>For deterministic results, and for W3C conformance, it is recommended that the supplied function
+        /// should be deterministic: repeated calls for the same collection URI should deliver the same set of
+        /// resources. However, this requirement can lead to high memory requirements, so Saxon does not enforce it.</para>
+        /// <para>The <c>CollectionFinder</c> registered with a processor is available to all queries and stylesheets
+        /// running under the control of that processor.</para>
         /// </remarks>
         
         public CollectionFinder CollectionFinder {
             set {
-                if (value != null) {
-                    this.collectionFinder = value;
-                    Implementation.setCollectionFinder(
-                        (context, uri) => ResourceCollectionUnwrapper.Unwrap(value(new DynamicContext(context), uri)));
-                }
+                userCollectionFinder = value;
+                Implementation.setCollectionFinder(
+                        (context, uri) => new ResourceCollectionUnwrapper(uri, value.Invoke(new Uri(uri))));
+                
             }
-            get => collectionFinder;
+            get => userCollectionFinder;
         }
+
+        /// <summary>
+        /// The standard (built-in) collection finder that is used by default if no user-defined
+        /// collection finder has been supplied. This is exposed as a property of the <c>Processor</c>
+        /// so that it can be invoked by a user-written collection finder.
+        /// </summary>
+
+        public CollectionFinder StandardCollectionFinder { get; private set; }
 
         /// <summary>
         /// Register an extension function with the <c>Processor</c>. This interface provides
@@ -407,15 +409,20 @@ namespace Saxon.Api {
         /// or XPath expression compiled under the control of this <c>Processor</c>
         /// </summary>
         /// <param name="name">The name of the function, as a QName</param>
-        /// <param name="arity">The arity of the function (number of arguments), as an integer</param>
+        /// <param name="type">The type of the function, for example <c>ParseItemType("function(xs:double) as xs:double")</c>.
+        /// This must be a specific function type.</param>
         /// <param name="function">The body of the function, supplied typically as a lambda expression.
         /// This interface provides only for extensions that have no side-effects and no
         /// dependencies on the static or dynamic context. It does however allow the type signature
         /// of the function to be defined.
         /// </param>
 
-        public void RegisterExtensionFunction(QName name, int arity, Func<XdmValue[], XdmValue> function) {
-            RegisterExtensionFunction(new LambdaExtensionFunction(name, arity, function));
+        public void RegisterExtensionFunction(QName name, XdmItemType type, Func<XdmValue[], XdmValue> function) {
+            if (type.Unwrap() is not SpecificFunctionType ft) {
+                throw new ArgumentException("Supplied type must be a specific function type");
+            }
+            // TODO (for diagnostics): introspect the type of the supplied function to check that the arity is consistent with the declared type
+            Implementation.registerExtensionFunction(new LambdaExtensionFunctionWrapper(name.GetStructuredQName(), ft, function));
         }
 
         /// <summary>
@@ -569,6 +576,59 @@ namespace Saxon.Api {
         /// <returns>the value of the property</returns>
         public T GetProperty<T>(Feature<T> feature) {
             return (T)Implementation.getFeature(FeatureIndex.getData(feature.Code));
+        }
+
+        /// <summary>
+        /// Construct an XdmSequenceType object by parsing a sequence type definition in XPath syntax
+        /// </summary>
+        /// <param name="input">The input string, in XPath syntax (for example <c>array(xs:integer)*</c>). The only
+        /// namespace prefix recognized is "xs", representing the XML Schema namespace.</param>
+        /// <exception cref="SaxonApiException">If the syntax of the input is invalid, or if there are references
+        /// to undeclared schema types</exception>
+        public XdmSequenceType ParseSequenceType(string input) {
+            try {
+                XPathParser parser = new ();
+                parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 31);
+                SequenceType st = parser.parseSequenceType(input, new IndependentContext(Implementation));
+                return XdmSequenceType.FromSequenceType(st);
+            }
+            catch (XPathException e) {
+                throw new SaxonApiException(e);
+            }
+        }
+        /// <summary>
+        /// Construct an XdmItemType object by parsing an item type definition in XPath syntax
+        /// </summary>
+        /// <param name="input">The input string, in XPath syntax (for example <c>array(xs:integer)</c>). The only
+        /// namespace prefix recognized is "xs", representing the XML Schema namespace.</param>
+        /// <exception cref="SaxonApiException">If the syntax of the input is invalid, or if there are references
+        /// to undeclared schema types</exception>
+        public XdmItemType ParseItemType(string input) {
+            try {
+                XPathParser parser = new ();
+                IndependentContext env = new IndependentContext(Implementation);
+                env.declareNamespace("xs", NamespaceConstant.SCHEMA);
+                parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 31);
+                SequenceType st = parser.parseSequenceType(input, env);
+                if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {
+                    throw new XPathException("Item type must not have an occurrence indicator", "XPST0003");
+                }
+                return XdmItemType.MakeXdmItemType(st.getPrimaryType(), Implementation);
+            }
+            catch (XPathException e) {
+                throw new SaxonApiException(e);
+            }
+        }
+
+        /// <summary>
+        /// Get the system function with a given name and arity
+        /// </summary>
+        /// <param name="name">The required function name</param>
+        /// <param name="arity">The required arity</param>
+        /// <returns>The system function if it exists, or null otherwise</returns>
+        public XdmFunctionItem GetSystemFunction(QName name, int arity) {
+            Saxon.Hej.om.Function f = Implementation.getSystemFunction(name.GetStructuredQName(), arity);
+            return f==null ? null : new XdmFunctionItem(f);
         }
     }
 }

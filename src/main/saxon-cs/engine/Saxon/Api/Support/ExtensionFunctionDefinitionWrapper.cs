@@ -53,18 +53,12 @@ namespace Saxon.Api.Support {
 
         public override Sequence call(XPathContext context, Sequence[] arguments) {
             DynamicContext dc = new DynamicContext(context);
-            IEnumerator<XdmItem>[] args = new IEnumerator<XdmItem>[arguments.Length];
+            XdmValue[] args = new XdmValue[arguments.Length];
             for (int i = 0; i < arguments.Length; i++) {
-                args[i] = XdmValue.Wrap(arguments[i]).GetEnumerator();
+                args[i] = XdmValue.Wrap(arguments[i]);
             }
 
-            IEnumerator<XdmItem> result = apiCall.Call(args, dc);
-            List<Item> unwrappedResult = new List<Item>();
-            while (result.MoveNext()) {
-                unwrappedResult.Add((Item)result.Current.Unwrap());
-            }
-
-            return new SequenceExtent.Of<Item>(unwrappedResult);
+            return apiCall.Call(args, dc).Unwrap();
         }
     }
     
