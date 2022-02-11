@@ -161,24 +161,25 @@ task rejar_Xerces(
         into "${buildDir}/c/${release}c"
         
         from("${projectDir}/src/main/c") {
-          include "Saxon.C.API/**/*.h"
-          include "Saxon.C.API/**/*.cpp"
+          include "Saxon.C.API/*.h"
+          include "Saxon.C.API/*.cpp"
           exclude "Saxon.C.API/config.m4"
-          exclude "Saxon.C.API/HEC/**"
-          exclude "Saxon.C.API/PEC/**"
-          exclude "Saxon.C.API/EEC/**"
+          exclude "Saxon.C.API/HEC"
+          exclude "Saxon.C.API/PEC"
+          exclude "Saxon.C.API/EEC"
           exclude "Saxon.C.API/Makefile"
           exclude "Saxon.C.API/PHP7-Build/config.m4"
-          include "Saxon.C.API/PHP7-Build/config.w32"
+          exclude "Saxon.C.API/PHP7-Build/config.w32"
           exclude "Saxon.C.API/config.h"
-          include "Saxon.C.API/config.w32"
+          exclude "Saxon.C.API/config.w32"
           exclude "Saxon.C.API/dllmain.cpp"
           exclude "Saxon.C.API/readme.txt"
           exclude "Saxon.C.API/targetver.h"
 
-          include "samples/**/*.cpp"
-          include "samples/**/*.h"
-          include "samples/**/*.c"
+          include "samples/cppTests/*.cpp"
+          include "samples/cppTests/*.h"
+          include "samples/cTests/*.h"
+          include "samples/cTests/*.c"
           include "samples/php/*.php"
           include "samples/php/xsl"
           include "samples/php/xml"
@@ -232,6 +233,10 @@ task rejar_Xerces(
           from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
         }
         copy {
+          into "${buildDir}/c/${release}c/Saxon.C.API"
+          from("${projectDir}/src/main/c/Saxon.C.API/PHP7-Build/config.w32")
+        }
+        copy {
           into "${buildDir}/c/${release}c/samples/cppTests"
           from("${projectDir}/src/main/c/samples/cppTests/build-windows.bat")
         }
@@ -261,6 +266,10 @@ task rejar_Xerces(
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
           from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+        }
+        copy {
+          into "${buildDir}/c/${release}c/Saxon.C.API"
+          from("${projectDir}/src/main/c/Saxon.C.API/PHP7-Build/config.m4")
         }
         copy {
           into "${buildDir}/c/${release}c/samples/cppTests"
@@ -300,6 +309,10 @@ task rejar_Xerces(
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
           from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+        }
+        copy {
+          into "${buildDir}/c/${release}c/Saxon.C.API"
+          from("${projectDir}/src/main/c/Saxon.C.API/PHP7-Build/config.m4")
         }
           copy {
             into "${buildDir}/c/${release}c/samples/cppTests"
