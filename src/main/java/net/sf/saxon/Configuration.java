@@ -571,11 +571,12 @@ public class Configuration implements SourceResolver, NotationSet {
         String require = feature == LicenseFeature.PROFESSIONAL_EDITION ? "PE" : "EE";
         String message = "Requested feature (" + name + ") requires Saxon-" + require;
         if (!Version.softwareEdition.equals("HE")) {
+            String packageNs = Version.platform.isDotNet() ? "Saxon.Eej.config" : "com.saxonica.config";
             message += ". You are using Saxon-" + Version.softwareEdition + " software, but the Configuration is an instance of " +
-                    getClass().getName() + "; to use this feature you need to create an instance of " +
+                    getClass() + "; to use this feature you need to create an instance of " +
                     (feature == LicenseFeature.PROFESSIONAL_EDITION ?
-                             "com.saxonica.config.ProfessionalConfiguration" :
-                             "com.saxonica.config.EnterpriseConfiguration");
+                             packageNs + ".ProfessionalConfiguration" :
+                             packageNs + ".EnterpriseConfiguration");
         }
         throw new LicenseException(message, LicenseException.WRONG_CONFIGURATION);
     }
@@ -4815,15 +4816,15 @@ public class Configuration implements SourceResolver, NotationSet {
                     //getDefaultXsltCompilerInfo().setXsltVersion(v);
                     break;
 
-                //#if CSHARP==false
-                case FeatureCode.SAXON_RESOURCE_RESOLVER:
+                case FeatureCode.COMMON_RESOURCE_RESOLVER:
                     if (!(value instanceof CommonResourceResolver)) {
                         throw new IllegalArgumentException(
                                 "SAXON_RESOURCE_RESOLVER value must be an instance of net.sf.saxon.lib.CommonResourceResolver");
                     }
                     setCommonResourceResolver((CommonResourceResolver) value);
                     break;
-                case FeatureCode.SAXON_RESOURCE_RESOLVER_CLASS:
+                //#if CSHARP==false
+                case FeatureCode.COMMON_RESOURCE_RESOLVER_CLASS:
                     CommonResourceResolver rresolver = (CommonResourceResolver) instantiateClassName(name, value, CommonResourceResolver.class);
                     setCommonResourceResolver(rresolver);
                     break;
@@ -5330,11 +5331,12 @@ public class Configuration implements SourceResolver, NotationSet {
             case FeatureCode.XSLT_VERSION:
                 return 30;
 
-            //#if CSHARP==false
-            case FeatureCode.SAXON_RESOURCE_RESOLVER:
+
+            case FeatureCode.COMMON_RESOURCE_RESOLVER:
                 return getCommonResourceResolver();
 
-            case FeatureCode.SAXON_RESOURCE_RESOLVER_CLASS:
+            //#if CSHARP==false
+            case FeatureCode.COMMON_RESOURCE_RESOLVER_CLASS:
                 return getCommonResourceResolver().getClass().getName();
             //#endif
         }
