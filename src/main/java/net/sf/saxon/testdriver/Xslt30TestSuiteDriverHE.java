@@ -107,6 +107,14 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
               //  || testName.equals("catalog-005");
     }
 
+    /**
+     * Construct a predicate that tests whether a specified attribute of the supplied
+     * element has the value "true", "yes", or "1" after whitespace trimming
+     * @param attName the name of the attribute
+     * @return a function which, when applied to an XDM item, returns true if the item is
+     * an element that has an attribute with the given name, and whose whitespace-normalized
+     * value is "true", "yes", or "1".
+     */
     protected static Predicate<XdmItem> isTrue(String attName) {
         return element -> {
             if (element instanceof XdmNode) {
