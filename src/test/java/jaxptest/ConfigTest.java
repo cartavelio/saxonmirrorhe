@@ -34,17 +34,96 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class ConfigTest {
 
-    public static final String DATA_DIR = baseDirectory(); // "/Users/mike/repo/tests/junit/testdata/";
-    public static final String TEMP_DIR = baseDirectory() + "temp/";
-    public static final String BUGS_DIR = baseDirectory() + "../../bugs/";
-    public static final String XMARK_DIR = baseDirectory() + "../../xmark/";  //"/Users/mike/repo/tests/junit/testdata/";
+    public static final String DATA_DIR = junitDataDirectory();
+    public static final String TEMP_DIR = junitTempDirectory();
+    public static final String BUGS_DIR = junitBugsDirectory();
+    public static final String XMARK_DIR = junitXMarkDirectory();
 
-    public static String baseDirectory() {
-        Properties p = System.getProperties();
-        if (System.getProperty("junitTestData") == null) {
-            throw new RuntimeException("The junitTestData directory is unspecified.");
+    public static String junitDataDirectory() {
+        File dir = null;
+        String envar = "SAXON_TEST_DATA";
+        String env = System.getenv(envar);
+        if (env == null) {
+            // Assume the current directory is the root of the project
+            dir = new File(System.getProperty("user.dir") + "/src/test/testdata");
+            if (!dir.exists() || !dir.isDirectory()) {
+                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; set " + envar);
+            }
+        } else {
+            dir = new File(env);
+            if (!dir.exists() || !dir.isDirectory()) {
+                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
+            }
         }
-        return System.getProperty("junitTestData");
+        return dir.getAbsolutePath() + "/";
+    }
+
+    public static String junitTempDirectory() {
+        File dir = null;
+        String envar = "SAXON_TEMP_DATA";
+        String env = System.getenv(envar);
+        if (env == null) {
+            // Assume the current directory is the root of the project
+            dir = new File(System.getProperty("user.dir") + "/build");
+            if (!dir.exists() || !dir.isDirectory()) {
+                throw new RuntimeException("Failed to find build in " + dir.getAbsolutePath() + "; set " + envar);
+            }
+            dir = new File(System.getProperty("user.dir") + "/build/temp");
+            if (!dir.exists()) {
+                if (!dir.mkdir()) {
+                    throw new RuntimeException("Failed to create " + dir.getAbsolutePath() + "; set " + envar);
+                }
+            }
+            dir = new File(System.getProperty("user.dir") + "/build/temp");
+            if (!dir.exists() || !dir.isDirectory()) {
+                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; set " + envar);
+            }
+        } else {
+            dir = new File(env);
+            if (!dir.exists() || !dir.isDirectory()) {
+                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
+            }
+        }
+        return dir.getAbsolutePath() + "/";
+    }
+
+    public static String junitBugsDirectory() {
+        File dir = null;
+        String envar = "SAXON_BUGS_DATA";
+        String env = System.getenv(envar);
+        if (env == null) {
+            // Assume the current directory is the root of the project
+            dir = new File(System.getProperty("user.dir") + "/src/test/bugs");
+            if (!dir.exists() || !dir.isDirectory()) {
+                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; set " + envar);
+            }
+        } else {
+            dir = new File(env);
+            if (!dir.exists() || !dir.isDirectory()) {
+                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
+            }
+        }
+        return dir.getAbsolutePath() + "/";
+    }
+
+    public static String junitXMarkDirectory() {
+        File dir = null;
+        String envar = "SAXON_XMARK_DATA";
+        String env = System.getenv(envar);
+        if (env == null) {
+            // Assume the current directory is the root of the project
+            dir = new File(System.getProperty("user.dir") + "/src/test/xmark");
+            if (!dir.exists() || !dir.isDirectory()) {
+                Properties p = System.getProperties();
+                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; set " + envar);
+            }
+        } else {
+            dir = new File(env);
+            if (!dir.exists() || !dir.isDirectory()) {
+                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
+            }
+        }
+        return dir.getAbsolutePath() + "/";
     }
 
     @Test

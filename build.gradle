@@ -1,10 +1,3 @@
-buildscript {
-  repositories {
-    mavenLocal()
-    mavenCentral()
-  }
-}
-
 plugins {
   id "java"
   id "maven-publish"
@@ -48,6 +41,17 @@ if (!hasProperty("saxonLicenseDir")) {
   }
 }
 
+// Set the locations of the W3C test suites
+if (!hasProperty("w3cQT3TestSuiteDir")) {
+  ext.w3cQT3TestSuiteDir = System.getenv("W3C_QT3_TEST_SUITE_DIR")
+}
+if (!hasProperty("w3cXslt30TestSuiteDir")) {
+  ext.w3cXslt30TestSuiteDir = System.getenv("W3C_XSLT30_TEST_SUITE_DIR")
+}
+if (!hasProperty("w3cXsdTestSuiteDir")) {
+  ext.w3cXsdTestSuiteDir = System.getenv("W3C_XSD_TEST_SUITE_DIR")
+}
+
 dependencies {
   preprocessor (
     [group: 'com.igormaznitsa', name: 'jcp', version: '7.0.4'],
@@ -68,7 +72,7 @@ dependencies {
     // PE and EE
     [group: 'javax.mail', name: 'javax.mail-api', version: mailVersion ],
     [group: 'com.sun.mail', name: 'javax.mail', version: mailVersion ],
-    [group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: tagsoupVersion],
+    [group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: tagsoupVersion]
   )
   jarjarAsm (
     fileTree(dir: "${buildDir}/lib/asm")
@@ -89,14 +93,17 @@ dependencies {
     [group: 'junit', name: 'junit', version: '4.12'],
     [group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.2'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
-    files("${buildDir}/classes/eej"),
-    files("lib/Tidy.jar")
+    files("${buildDir}/classes/${saxonEdition}j"),
+    files("${buildDir}/filtered/${saxonEdition}j"),
+    files("lib/Tidy.jar"),
+    files(saxonLicenseDir),
+    fileTree("${buildDir}/lib/asm")
   )
   testRuntimeOnly (
     [group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.4.2'],
     [group: 'org.junit.vintage', name: 'junit-vintage-engine', version: '5.4.2'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
-    files("${buildDir}/classes/eej")
+    files("${buildDir}/classes/${saxonEdition}j")
   )
 }
 
@@ -109,7 +116,9 @@ sourceSets {
 }
 
 test {
-  useJUnitPlatform()
+  useJUnitPlatform {
+    excludeTags 'bytecode'
+  }
 }
 
 /*
@@ -134,6 +143,7 @@ ext {
   mailJar = null
   resolverJar = null
   version_h = saxonVersion.replace(".", "-")
+  pathSeparator = System.getProperty("file.separator")
 }
 
 // ============================================================
@@ -249,39 +259,124 @@ def pathExists(pathname) {
 }
 
 // ============================================================
+// In an ideal world, I'd make the build process more standalone
+// by automatically cloning the repositories if they weren't
+// available. But the QT3 test suite in particular is huge and
+// takes a long time to clone. So for now, just force users to
+// tell us where they've cloned them.
 
-task "hej_compileTestDrivers"(
-  type: JavaCompile,
-  dependsOn: ["hej_copyTestDrivers", "hejCompile"],
-  description: "Compile the test classes for HE"
-) {
-  classpath = configurations.testDrivers + files("${buildDir}/classes/hej")
-  source = "${buildDir}/src/testdrivers/hej"
-  destinationDirectory = new File("${buildDir}/classes/hej/testdrivers")
+task cloneQT3TestSuite() {
+  doLast {
+    if (w3cQT3TestSuiteDir == null) {
+      throw new GradleException("The location of the QT3 test suite is unknown.")
+    }
+  }
 }
 
-task "pej_compileTestDrivers"(
-  type: JavaCompile,
-  dependsOn: ["pej_copyTestDrivers", "pejCompile", "eejCompile"],
-  description: "Compile the test classes for PE"
-) {
-  classpath = configurations.testDrivers \
-              + files("${buildDir}/classes/pej") \
-              + files("${buildDir}/classes/eej")
-  source = "${buildDir}/src/testdrivers/pej"
-  destinationDirectory = new File("${buildDir}/classes/pej/testdrivers")
+task cloneXslt30TestSuite() {
+  doLast {
+    if (w3cXslt30TestSuiteDir == null) {
+      throw new GradleException("The location of the XSLT 3.0 test suite is unknown.")
+    }
+  }
 }
 
-task "eej_compileTestDrivers"(
-  type: JavaCompile,
-  dependsOn: ["eej_copyTestDrivers", "eejCompile", "eejCompile"],
-  description: "Compile the test classes for EE"
-) {
-  classpath = configurations.testDrivers \
-              + files("${buildDir}/classes/eej")
-  source = "${buildDir}/src/testdrivers/eej"
-  destinationDirectory = new File("${buildDir}/classes/eej/testdrivers")
+task cloneXsdTestSuite() {
+  doLast {
+    if (w3cXsdTestSuiteDir == null) {
+      throw new GradleException("The location of the XSD test suite is unknown.")
+    }
+  }
 }
+
+// ============================================================
+
+task compileTestDrivers() {
+  // Just a container to hang dependencies on
+}
+
+task runQT3TestDriver() {
+  // Just a container to hang dependencies on
+}
+
+task runXslt30TestSuiteDriver() {
+  // Just a container to hang dependencies on
+}
+
+["h", "p", "e"].each { initial ->
+  def release = initial + "e"
+  def RELEASE = release.toUpperCase()
+  def jpackage = "com.saxonica.testdriver"
+  if (release == "he") {
+    jpackage = "net.sf.saxon.testdriver"
+  }
+
+  task "${release}j_compileTestDrivers"(
+    type: JavaCompile,
+    dependsOn: ["${release}j_copyTestDrivers", "${release}jCompile"],
+    description: "Compile the test classes for ${RELEASE}"
+  ) {
+    classpath = configurations.testDrivers + files("${buildDir}/classes/${release}j")
+    source = "${buildDir}/src/testdrivers/${release}j"
+    destinationDirectory = new File("${buildDir}/testdriver_classes/${release}j")
+  }
+
+  fileTree(dir: "src/test/exceptions").each { fn ->
+    def pos = fn.toString().lastIndexOf(pathSeparator)
+    def base = fn.toString().substring(pos+1)
+    base = base.substring(0, base.length() - 4)
+    task "${release}j_setup_${base}_TestResults"(
+      type: Copy,
+      description: "Sets up the test results directory the ${base} tests for ${RELEASE}"
+    ) {
+      into "${buildDir}/test-results/${release}j/${base}"
+      from "src/test/exceptions/${base}.xml"
+      rename { "exceptions.xml" }
+    }
+  }
+
+  task "${release}j_runQT3TestDriver"(
+    type: JavaExec,
+    dependsOn: ["${release}j_compileTestDrivers", "${release}j_setup_qt3_TestResults",
+                "cloneQT3TestSuite"],
+    description: "Run the QT3 test suite driver for ${RELEASE}"
+  ) {
+    classpath = configurations.testDrivers \
+                + files("${buildDir}/classes/${release}j") \
+                + files("${buildDir}/testdriver_classes/${release}j") \
+                + files("${buildDir}/filtered/${release}j")
+    main = "${jpackage}.QT3TestDriver${RELEASE}"
+    //args "-?"
+    args "${w3cQT3TestSuiteDir}",
+      "catalog.xml",
+      "-o:${buildDir}/test-results/${release}j/qt3",
+      "-lang:XQ31",
+      "-qt30:on",
+      "-bytecode:off"
+  }
+
+  task "${release}j_runXslt30TestSuiteDriver"(
+    type: JavaExec,
+    dependsOn: ["${release}j_compileTestDrivers", "${release}j_setup_xslt30_TestResults",
+                "cloneXslt30TestSuite"],
+    description: "Run the XSLT 3.0 test suite driver for ${RELEASE}"
+  ) {
+    classpath = configurations.testDrivers \
+                + files("${buildDir}/classes/${release}j") \
+                + files("${buildDir}/testdriver_classes/${release}j") \
+                + files("${buildDir}/filtered/${release}j")
+    main = "${jpackage}.Xslt30TestSuiteDriver${RELEASE}"
+    //args "-?"
+    args "/Volumes/Saxonica/src/w3c/xslt30-test",
+      "catalog.xml",
+      "-o:${buildDir}/test-results/${release}j/xslt30",
+      "-lang:XT30",
+      "-qt30:on",
+      "-bytecode:off"
+  }
+}
+
+// ============================================================
 
 task hejJarTests(
   type: Jar,
@@ -293,7 +388,7 @@ task hejJarTests(
     attributes "Project-Name": "Saxon-HE-TestDriver"
     attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
   }
-  from ("${buildDir}/classes/hej/testdrivers") {
+  from ("${buildDir}/testdriver_classes/hej") {
     include "net/sf/saxon/testdriver/**"
   }
 }
@@ -308,7 +403,7 @@ task pejJarTests(
     attributes "Project-Name": "Saxon-PE-TestDriver"
     attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
   }
-  from ("${buildDir}/classes/pej/testdrivers") {
+  from ("${buildDir}/testdriver_classes/pej") {
     include "net/sf/saxon/testdriver/**"
     include "com/saxonica/testdriver/**"
     exclude "com/saxonica/testdriver/ee/**"
@@ -325,7 +420,7 @@ task eejJarTests(
     attributes "Project-Name": "Saxon-EE-TestDriver"
     attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
   }
-  from ("${buildDir}/classes/eej/testdrivers") {
+  from ("${buildDir}/testdriver_classes/eej") {
     include "net/sf/saxon/testdriver/**"
     include "com/saxonica/testdriver/**"
   }
@@ -606,7 +701,6 @@ task hejCompile(
   source "${buildDir}/src/hej"
   destinationDirectory = new File("${buildDir}/classes/hej")
 }
-compileJava.dependsOn hejCompile
 
 task pejCompile(
   type: JavaCompile,
@@ -617,7 +711,6 @@ task pejCompile(
   source "${buildDir}/src/pej"
   destinationDirectory = new File("${buildDir}/classes/pej")
 }
-compileJava.dependsOn pejCompile
 
 task eejCompile(
   type: JavaCompile,
@@ -628,7 +721,6 @@ task eejCompile(
   source "${buildDir}/src/eej"
   destinationDirectory = new File("${buildDir}/classes/eej")
 }
-compileJava.dependsOn eejCompile
 
 // ============================================================
 
@@ -647,15 +739,10 @@ task pej_copyTestDriverSources(
 ) {
   from "src/main/java"
   into "${buildDir}/src/testdrivers/pej"
-  include "net/sf/saxon/testdriver/*.java"
-  include "com/saxonica/testdriver/ee/*.java"
-  include "com/saxonica/testdriver/gui/**"
   include "com/saxonica/testdriver/QT3TestDriverPE.java"
-  include "com/saxonica/testdriver/XMarkBenchmark.java"
-  include "com/saxonica/testdriver/Xslt30TestSuiteDriverEE.java"
   include "com/saxonica/testdriver/Xslt30TestSuiteDriverPE.java"
-  include "com/saxonica/testdriver/ee/SchemaTestSuiteDriver.java"
   include "com/saxonica/testdriver/Licensor.java"
+  include "net/sf/saxon/testdriver/*.java"
 }
 
 task eej_copyTestDriverSources(
@@ -664,14 +751,7 @@ task eej_copyTestDriverSources(
 ) {
   from "src/main/java"
   into "${buildDir}/src/testdrivers/eej"
-  include "com/saxonica/testdriver/ee/*.java"
-  include "com/saxonica/testdriver/gui/**"
-  include "com/saxonica/testdriver/QT3TestDriverPE.java"
-  include "com/saxonica/testdriver/XMarkBenchmark.java"
-  include "com/saxonica/testdriver/Xslt30TestSuiteDriverEE.java"
-  include "com/saxonica/testdriver/Xslt30TestSuiteDriverPE.java"
-  include "com/saxonica/testdriver/ee/SchemaTestSuiteDriver.java"
-  include "com/saxonica/testdriver/Licensor.java"
+  include "com/saxonica/testdriver/**/*.java"
   include "net/sf/saxon/testdriver/*.java"
 }
 
@@ -680,7 +760,7 @@ task hej_copyTestDriverResources(
   description: "Copy test drivers resources for HE"
 ) {
   from "src/main/java"
-  into "${buildDir}/classes/hej/testdrivers"
+  into "${buildDir}/testdriver_classes/hej"
   include "net/sf/saxon/testdriver/**"
   exclude "net/sf/saxon/testdriver/**/*.java"
 }
@@ -690,7 +770,7 @@ task pej_copyTestDriverResources(
   description: "Copy test drivers resources for PE"
 ) {
   from "src/main/java"
-  into "${buildDir}/classes/pej/testdrivers"
+  into "${buildDir}/testdriver_classes/pej"
   include "net/sf/saxon/testdriver/**"
   include "com/saxonica/testdriver/**"
   exclude "net/sf/saxon/testdriver/**/*.java"
@@ -704,7 +784,7 @@ task eej_copyTestDriverResources(
   description: "Copy test drivers resources for EE"
 ) {
   from "src/main/java"
-  into "${buildDir}/classes/eej/testdrivers"
+  into "${buildDir}/testdriver_classes/eej"
   include "net/sf/saxon/testdriver/**"
   include "com/saxonica/testdriver/**"
   exclude "net/sf/saxon/testdriver/**/*.java"
@@ -773,7 +853,7 @@ task asm_unzip(
   t = task "asm_unzip${asm}"(
     type: Copy,
     dependsOn: ["asm_jarjar"],
-    description: "Extract the classes from the ${asm}-{$asmVersion} jar"
+    description: "Extract the classes from the ${asm}-${asmVersion} jar"
   ) {
     def zipFile = file("${buildDir}/lib/asm/${asm}-${asmVersion}.jar")
     def outputDir = "${buildDir}/classes/eej"
@@ -1138,10 +1218,18 @@ task docker_setupJet(
 
 // ============================================================
 
+assemble.dependsOn "${saxonEdition}j_sources"
+compileJava.dependsOn "${saxonEdition}jCompile"
+jar.dependsOn "${saxonEdition}jJar"
+compileTestDrivers.dependsOn "${saxonEdition}j_compileTestDrivers"
+runQT3TestDriver.dependsOn "${saxonEdition}j_runQT3TestDriver"
+runXslt30TestSuiteDriver.dependsOn "${saxonEdition}j_runXslt30TestSuiteDriver"
+
+// ============================================================
+
 // Testing task for various Gradle debugging efforts
 task helloWorld() {
   doLast {
     println("Hello, world.")
   }
 }
-
