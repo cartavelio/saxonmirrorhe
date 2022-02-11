@@ -1463,11 +1463,11 @@
          
          <p>The open source Java code of Saxon-HE is maintained in a 
             <a href="https://saxonica.plan.io/projects/saxonmirrorhe/repository" class="bodylink">GIT repository</a>. 
-            (Follow the link, and click the button "How to connect?" for instructions.) This repository
-            exists solely to provide early access to source patches; it is
+            (Follow the link, and click the button "How to connect?" for instructions.) This
+            repository exists solely to provide early access to source patches; it is
             not used to deliver incremental releases of new functionality. Building the
-            JAR files is reasonably easy for an experienced Java programmer; an Ant script is
-            provided to assist with this, but it is likely to require customization to local
+            JAR files is reasonably easy for an experienced Java programmer; a gradle script is
+            provided to assist with this, but may require customization to local
             requirements (for example, deleting the parts concerned only with Saxon-EE or Saxon-CS). 
             Building the Saxon-CS product requires proprietary Saxonica tooling.</p>
 
