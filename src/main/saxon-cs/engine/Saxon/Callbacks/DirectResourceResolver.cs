@@ -37,7 +37,6 @@ namespace Saxon.Callbacks {
         /// <c>TextReader</c>, together with a <c>SystemId</c> that identifies the base URI of the
         /// resource. Returns null if the request cannot be resolved.</returns>
         public Source resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
-
             try {
                 string href = request.relativeUri ?? request.uri;
                 string baseUri = request.baseUri ?? request.uri;
@@ -51,18 +50,22 @@ namespace Saxon.Callbacks {
 
             catch (WebException) {
                 // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent URI
+                return new StreamSource(request.uri);
             }
             catch (System.ArgumentException) {
                 // Thrown for an unknown URI scheme
+                return new StreamSource(request.uri);
             }
             catch (System.IO.FileNotFoundException) {
                 // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent file
+                return new StreamSource(request.uri);
             }
             catch (System.IO.DirectoryNotFoundException) {
                 // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent file
+                return new StreamSource(request.uri);
             }
 
-            return null;
+            //return null;
         }
 
     }
