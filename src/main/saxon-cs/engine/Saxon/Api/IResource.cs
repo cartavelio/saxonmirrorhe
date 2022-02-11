@@ -18,9 +18,9 @@ namespace Saxon.Api {
     public interface IResource
     {
         /// <summary>
-        /// Get a URI that identifies this resource
+        /// A URI that identifies this resource
         /// </summary>
-        /// <returns>a URI identifying the resource</returns>
+
 		/**public**/ Uri ResourceUri { get; }
 
         /// <summary>
@@ -35,10 +35,9 @@ namespace Saxon.Api {
 		/**public**/ XdmItem GetXdmItem(DynamicContext context);
 
         /// <summary> 
-        /// Get the media type (MIME type) of the resource if known
+        /// The media type (MIME type) of the resource if known (otherwise null)
         /// </summary>
-        /// <returns>the media type if known; otherwise null</returns>
-		/**public**/ string ContentType { get; }
+        /**public**/ string ContentType { get; }
     }
 }
 

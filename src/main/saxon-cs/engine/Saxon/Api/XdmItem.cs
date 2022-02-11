@@ -14,7 +14,7 @@ namespace Saxon.Api {
     /// value.</para>
     /// <para>It cannot be assumed that every sequence of length one will always be 
     /// represented by an <c>XdmItem</c>. It is quite possible for an <c>XdmValue</c>
-    /// that is not an <c>XdmItem</c> to hold a singleton sequence. Use <see cref="XdmValue.Simplify"/> 
+    /// that is not an <c>XdmItem</c> to hold a singleton sequence. Use <see cref="XdmValue.Simplify()"/> 
     /// to ensure that a singleton is represented as an <c>XdmItem</c>.</para>
     /// </remarks> 
 
