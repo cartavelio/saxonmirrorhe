@@ -97,9 +97,6 @@ namespace Saxon.Callbacks {
                         return new StreamSource(rr.GetInputStream(), rr.GetResolvedUri().ToString());
                     }
                 }
-                catch (WebException webex) {
-                    // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent URI
-                }
                 catch (System.ArgumentException argex) {
                     // Thrown for an unknown URI scheme
                 }
