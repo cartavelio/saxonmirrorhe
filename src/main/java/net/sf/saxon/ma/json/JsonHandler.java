@@ -13,6 +13,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringItem;
 
@@ -88,11 +89,11 @@ public class JsonHandler {
     /**
      * Write a numeric value
      *
-     * @param asString the string representation of the value
-     * @param asDouble the double representation of the value
+     * @param asString the raw string representation of the value
+     * @param parsedValue the parsed representation of the value, typically an xs:double, but under user control
      * @throws XPathException if any error occurs
      */
-    public void writeNumeric(String asString, double asDouble) throws XPathException {}
+    public void writeNumeric(String asString, AtomicValue parsedValue) throws XPathException {}
 
     /**
      * Write a string value
@@ -109,7 +110,7 @@ public class JsonHandler {
      *            because there are special rules for handling unpaired surrogates, which cannot be represented
      *            in a UniString
      * @return the escaped or unescaped string
-     * @throws XPathException
+     * @throws XPathException if there are invalid characters or escape sequences
      */
 
     public String reEscape(String val) throws XPathException {
@@ -121,7 +122,7 @@ public class JsonHandler {
                     !charChecker.test(value) ||
                     (value == 0x5C));
         } else {
-            StringBuilder buffer = new StringBuilder(val.toString());
+            StringBuilder buffer = new StringBuilder(val);
             handleInvalidCharacters(buffer);
             escaped = buffer.toString();
         }
@@ -192,12 +193,11 @@ public class JsonHandler {
         StringBuilder escaped = new StringBuilder(count*6);
         for (int j=0; j<count; j++) {
             escaped.append("\\u");
-            String hex = Integer.toHexString(buffer.charAt(offset + j));
+            StringBuilder hex = new StringBuilder(Integer.toHexString(buffer.charAt(offset + j)));
             while (hex.length() < 4) {
-                hex = "0" + hex;
+                hex.insert(0, "0");
             }
-            hex = hex.toUpperCase(); // cheat to get through test json-to-xml-039
-            escaped.append(hex);
+            escaped.append(hex.toString().toUpperCase());
         }
         String replacement = replace(escaped.toString(), context);
         if (replacement.length() == count) {
