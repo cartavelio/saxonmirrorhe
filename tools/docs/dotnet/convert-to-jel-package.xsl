@@ -129,6 +129,9 @@
             type="{f:shortName(@type)}" fulltype="{@fulltype}">
             <xsl:apply-templates select="type"/>
             <xsl:apply-templates select="comments"/>
+            <xsl:if test="not(comments/returns)">
+                <xsl:message>-- Missing returns comment for delegate <xsl:value-of select="@name"/></xsl:message>
+            </xsl:if>
             <xsl:call-template name="gen-params"/>           
         </delegate>
     </xsl:template>
@@ -287,6 +290,8 @@
     
     <xsl:template match="comments"/>
     
+    <xsl:template match="typeparam"/>
+    
     <xsl:template match="obsolete">
         <attribute name="@deprecated">
             <body>
@@ -424,7 +429,7 @@
     
     <xsl:variable name="root" select="/"/>
     
-    <xsl:key name="class-by-name" match="class | interface | enum" 
+    <xsl:key name="class-by-name" match="class | interface | enum | delegate" 
         use="if (contains(@name,'.')) then tokenize(@name, '\.')[last()] else @name"/>
     
     <!-- Get short name for type: use abbreviated name for relevant System types, 

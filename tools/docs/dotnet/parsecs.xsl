@@ -358,18 +358,24 @@
                         <xsl:message expand-text="true">method args for: {$name}</xsl:message>
                       </xsl:if>-->
                       <xsl:for-each select="$method-args">
-                        <xsl:variable name="arg-type" select="substring-before(normalize-space(.),' ')"/>
+                        <xsl:variable name="arg-tokens" select="tokenize(normalize-space(.), ' ')"/>
+                        <xsl:variable name="arg-type" select="if ($arg-tokens[1] eq 'params') then
+                          $arg-tokens[2] else $arg-tokens[1]"/>
+                        <xsl:variable name="arg-name" select="if ($arg-tokens[1] eq 'params') then
+                          $arg-tokens[3] else $arg-tokens[2]"/>
                         <!--<xsl:if test="$has-args and matches($method-input, '^.*&lt;.*,.*&gt;')">
                           <xsl:message expand-text="true">method arg: {$arg-type}</xsl:message>
                         </xsl:if>-->
                         <xsl:choose>
                           <xsl:when test="contains($arg-type, '&lt;')">
-                            <param type="{substring-before($arg-type, '&lt;')}" name="{substring-after(normalize-space(.),' ')}">
+                            <xsl:variable name="isArray" select="ends-with($arg-type, '[]')"/>
+                            <param type="{concat(substring-before($arg-type, '&lt;'), if ($isArray)
+                              then '[]' else '')}" name="{$arg-name}">
                               <xsl:sequence select="f:getTypeParamTypes($arg-type)"/>
                             </param>
                           </xsl:when>
                           <xsl:otherwise>
-                            <param type="{$arg-type}" name="{substring-after(normalize-space(.),' ')}"/>
+                            <param type="{$arg-type}" name="{$arg-name}"/>
                           </xsl:otherwise>
                         </xsl:choose>
                       </xsl:for-each>
