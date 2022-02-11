@@ -132,6 +132,7 @@ public class TestValidator {
 
     @Test
     public void testValidationWithEntities() {
+        // Fails, bug 5107
         try {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
@@ -150,7 +151,7 @@ public class TestValidator {
             XdmNode validDoc = dest.getXdmNode();
 
             assertEquals(3, getAllBaseUris(validDoc).size(), "3 distinct base URIs in output");
-            assertTrue(doc.getBaseURI().toString().endsWith("book-wrapper.xml"), "validated doc base URI");
+            assertTrue(validDoc.getBaseURI().toString().endsWith("book-wrapper.xml"), "validated doc base URI");
 
         } catch (Exception e) {
             e.printStackTrace();
