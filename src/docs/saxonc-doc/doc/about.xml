@@ -3,7 +3,7 @@
    <h1>About SaxonC</h1>
 
    <p>SaxonC is a version of Saxon developed by cross-compiling the Java source code to executables
-      that run on the C/C+++ platform (C++14 now required as minimum), with extensions for PHP and Python. All features of Saxon have
+      that run on the C/C++ platform (C++14 now required as minimum), with extensions for PHP and Python. All features of Saxon have
       been ported, other than those (such as collations) that are necessarily platform dependent. In
       particular, SaxonC provides processing in XSLT, XQuery and XPath, and Schema validation. It
       therefore makes these processing capabilities available to a plethora of other languages that
