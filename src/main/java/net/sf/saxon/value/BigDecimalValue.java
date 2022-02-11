@@ -202,7 +202,7 @@ public final class BigDecimalValue extends DecimalValue {
             BigDecimal d = new BigDecimal(in);
             // Note, this gives a different result from BigDecimal.valueOf(in) - it retains more precision.
             value = d.stripTrailingZeros();
-        } catch (NumberFormatException err) {
+        } catch (Exception err) {
             // Must be a special value such as NaN or infinity
             ValidationFailure e = new ValidationFailure(
                     "Cannot convert double " + Err.wrap(in + "", Err.VALUE) + " to decimal");
