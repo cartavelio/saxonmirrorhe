@@ -139,7 +139,7 @@ namespace Saxon.Impl.Dom {
                 case net.sf.saxon.type.Type.PROCESSING_INSTRUCTION:
                     return net.sf.saxon.str.StringView.tidy(node.Value);
                 default:
-                    return net.sf.saxon.str.EmptyUniString.getInstance();
+                    return net.sf.saxon.str.EmptyUnicodeString.getInstance();
             }
         }
 

@@ -27,5 +27,9 @@ namespace java.net {
             return "application/xml";
         }
 
+        public long getLastModified() {
+            throw new NotImplementedException();
+        }
+
     }
 }

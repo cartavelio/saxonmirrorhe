@@ -1,3 +1,5 @@
+using System;
+
 namespace java.lang {
     public class Runtime {
         public static Runtime getRuntime() {
@@ -10,6 +12,10 @@ namespace java.lang {
         
         public long freeMemory() {
             return 0L;
+        }
+
+        public int availableProcessors() {
+            return Environment.ProcessorCount;
         }
     }
 }
