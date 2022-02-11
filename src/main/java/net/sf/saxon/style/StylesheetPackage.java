@@ -918,7 +918,7 @@ public class StylesheetPackage extends PackageData {
      * @return the requested function, or null if none can be found
      */
 
-    protected UserFunction getFunction(SymbolicName.F name) {
+    public UserFunction getFunction(SymbolicName.F name) {
         if (name.getArity() == -1) {
             // supports the single-argument function-available() function
             int maximumArity = 20;

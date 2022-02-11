@@ -12,12 +12,15 @@ public enum Spec {
     XP20("2.0", "XPath2.0", "XP", "XP20"),
     XP30("3.0", "XPath3.0", "XP", "XP30"),
     XP31("3.1", "XPath3.1", "XP", "XP31"),
+    XP40("3.1", "XPath4.0", "XP", "XP40"),
     XQ10("1.0", "XQuery1.0", "XQ", "XQ10"),
     XQ30("3.0", "XQuery3.0", "XQ", "XQ30"),
     XQ31("3.1", "XQuery3.1", "XQ", "XQ31"),
+    XQ40("4.0", "XQuery4.0", "XQ", "XQ40"),
     XT10("1.0", "XSLT1.0", "XT", "XT10"),
     XT20("2.0", "XSLT2.0", "XT", "XT20"),
-    XT30("3.0", "XSLT3.0", "XT", "XT30");
+    XT30("3.0", "XSLT3.0", "XT", "XT30"),
+    XT40("4.0", "XSLT4.0", "XT", "XT40");
 
 
     public final String version;

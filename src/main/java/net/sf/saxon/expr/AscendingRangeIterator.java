@@ -32,17 +32,19 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
     long limit;
 
     public static AtomicIterator<IntegerValue> makeRangeIterator(IntegerValue start, IntegerValue step, IntegerValue end) throws XPathException {
-        if (start == null || end == null) {
+        if (start == null || step == null || end == null) {
             return EmptyIterator.ofAtomic();
         } else {
             int direction = step.compareTo(Int64Value.ZERO);
-            if (direction == 0
-                || direction > 0 && start.compareTo(end) > 0
-                || direction < 0 && start.compareTo(end) < 0) {
+            if (direction == 0 || start.compareTo(end) > 0) {
                 return EmptyIterator.ofAtomic();
             }
             if (start instanceof BigIntegerValue || step instanceof BigIntegerValue || end instanceof BigIntegerValue) {
-                return new BigRangeIterator(start.asBigInteger(), step.asBigInteger(), end.asBigInteger());
+                if (direction < 0) {
+                    return new BigRangeIterator(end.asBigInteger(), step.asBigInteger(), start.asBigInteger());
+                } else {
+                    return new BigRangeIterator(start.asBigInteger(), step.asBigInteger(), end.asBigInteger());
+                }
             } else {
                 long startVal = start.longValue();
                 long stepVal = step.longValue();
@@ -53,7 +55,7 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
                 if (stepVal > 0) {
                     return new AscendingRangeIterator(startVal, stepVal, endVal);
                 } else {
-                    return new DescendingRangeIterator(startVal, -stepVal, endVal);
+                    return new DescendingRangeIterator(endVal, -stepVal, startVal);
                 }
             }
         }
@@ -167,11 +169,7 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
 
     @Override
     public AtomicIterator<IntegerValue> getReverseIterator() {
-        //try {
-            return new DescendingRangeIterator(limit, step, start);
-//        } catch (XPathException err) {
-//            throw new AssertionError(err);
-//        }
+        return new DescendingRangeIterator(limit, step, start);
     }
 
     /**

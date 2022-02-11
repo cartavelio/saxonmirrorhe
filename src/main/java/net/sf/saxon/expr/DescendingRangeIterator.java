@@ -157,7 +157,7 @@ public class DescendingRangeIterator extends RangeIterator implements AtomicIter
 
     @Override
     public AtomicIterator<IntegerValue> getReverseIterator() {
-        return new AscendingRangeIterator(limit, 1, start);
+        return new AscendingRangeIterator(start, step, limit);
     }
 
 

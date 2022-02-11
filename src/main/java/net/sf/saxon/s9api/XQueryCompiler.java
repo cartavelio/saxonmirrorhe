@@ -43,6 +43,7 @@ public class XQueryCompiler {
     private final StaticQueryContext staticQueryContext;
     private ItemType requiredContextItemType;
     private String encoding;
+    private int languageVersion;
 
     /**
      * Protected constructor
@@ -345,14 +346,34 @@ public class XQueryCompiler {
     }
 
     /**
-     * Ask whether an XQuery 1.0 or XQuery 3.0 or XQuery 3.1 processor is being used
+     * Say which version of XQuery should be used
      *
-     * @return always "3.1" in the current Saxon release.
-     * @since 9.2. From Saxon 9.8, only XQuery 3.1 is supported
+     * @param version "3.1" or "4.0" in the current Saxon release.
+     */
+
+    public void setLanguageVersion(String version) {
+        switch (version) {
+            case "3.1":
+                languageVersion = 31;
+                break;
+            case "4.0":
+                languageVersion = 40;
+                break;
+            default:
+                throw new IllegalArgumentException("XQuery version must be 3.1 or 4.0");
+        }
+        staticQueryContext.setLanguageVersion(languageVersion);
+    }
+
+    /**
+     * Ask which version of XQuery is being used
+     *
+     * @return "3.1" or "4.0" in the current Saxon release.
+     * @since 9.2. From Saxon 9.8, only XQuery 3.1 was supported. From 11.0, XQuery 4.0 is supported
      */
 
     public String getLanguageVersion() {
-        return "3.1";
+        return languageVersion == 40 ? "4.0" : "3.1";
     }
 
     /**

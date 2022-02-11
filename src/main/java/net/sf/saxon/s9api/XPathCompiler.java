@@ -175,6 +175,8 @@ public class XPathCompiler {
             version = 30;
         } else if ("3.1".equals(value)) {
             version = 31;
+        } else if ("4.0".equals(value)) {
+            version = 40;
         } else {
             throw new IllegalArgumentException("XPath version");
         }
@@ -196,6 +198,8 @@ public class XPathCompiler {
             return "3.0";
         } else if (env.getXPathVersion() == 31) {
             return "3.1";
+        } else if (env.getXPathVersion() == 40) {
+            return "4.0";
         } else {
             throw new IllegalStateException("Unknown XPath version " + env.getXPathVersion());
         }

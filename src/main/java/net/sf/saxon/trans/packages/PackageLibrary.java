@@ -97,9 +97,15 @@ public class PackageLibrary {
         compilerInfo = info;
         config = info.getConfiguration();
         for (File file : files) {
-            PackageDetails details = PackageInspector.getPackageDetails(file, config);
+            PackageInspector inspector = new PackageInspector(config.makePipelineConfiguration());
+            PackageDetails details = inspector.getPackageDetails(file, config);
             if (details == null) {
-                throw new XPathException("Unable to get package name and version for file " + file.getName());
+                String message = "Unable to get package name and version for file " + file.getName();
+                String diagnostics = inspector.getDiagnostics();
+                if (diagnostics != null) {
+                    message += " (" + diagnostics + ")";
+                }
+                throw new XPathException(message);
             }
             addPackage(details);
         }
@@ -150,9 +156,15 @@ public class PackageLibrary {
      */
 
     public void addPackage(File file) throws XPathException {
-        PackageDetails details = PackageInspector.getPackageDetails(file, config);
+        PackageInspector inspector = new PackageInspector(config.makePipelineConfiguration());
+        PackageDetails details = inspector.getPackageDetails(file, config);
         if (details == null) {
-            throw new XPathException("Unable to get package name and version for file " + file.getName());
+            String message = "Unable to get package name and version for file " + file.getName();
+            String diagnostics = inspector.getDiagnostics();
+            if (diagnostics != null) {
+                message += " (" + diagnostics + ")";
+            }
+            throw new XPathException(message);
         }
         addPackage(details);
     }

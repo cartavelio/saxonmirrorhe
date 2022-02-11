@@ -41,8 +41,9 @@ public class PackageInspector extends ProxyReceiver {
     private String packageName;
     private String packageVersion = "1";
     private int elementCount = 0;
+    private String diagnostics;
 
-    private PackageInspector(PipelineConfiguration pipe) {
+    PackageInspector(PipelineConfiguration pipe) {
         super(new Sink(pipe));
     }
 
@@ -60,7 +61,9 @@ public class PackageInspector extends ProxyReceiver {
             throw new XPathException("#start#");
         }
         isSefFile = elemName.hasURI(NamespaceConstant.SAXON_XSLT_EXPORT);
-        if (attributes.get("", "name") != null) {
+        if (attributes.get("", "name") == null) {
+            diagnostics = "Top level element " + elemName.getStructuredQName().getEQName() + " has no @name attribute";
+        } else {
             packageName = attributes.get("", "name").getValue();
         }
         if (attributes.get("", "package-version") != null) {
@@ -88,31 +91,34 @@ public class PackageInspector extends ProxyReceiver {
         }
     }
 
-    public static PackageDetails getPackageDetails(File top, Configuration config) throws XPathException {
-        PackageInspector inspector = new PackageInspector(config.makePipelineConfiguration());
+    public PackageDetails getPackageDetails(File top, Configuration config) throws XPathException {
         try {
             ParseOptions options = new ParseOptions();
             options.setDTDValidationMode(Validation.SKIP);
             options.setSchemaValidationMode(Validation.SKIP);
-            Sender.send(new StreamSource(top), inspector, new ParseOptions());
+            Sender.send(new StreamSource(top), this, new ParseOptions());
         } catch (XPathException e) {
             // early exit is expected
             if (!e.getMessage().equals("#start#")) {
                 throw e;
             }
         }
-        VersionedPackageName vp = inspector.getNameAndVersion();
+        VersionedPackageName vp = getNameAndVersion();
         if (vp == null) {
             return null;
         } else {
             PackageDetails details = new PackageDetails();
             details.nameAndVersion = vp;
-            if (inspector.isSefFile) {
+            if (isSefFile) {
                 details.exportLocation = new StreamSource(top);
             } else {
                 details.sourceLocation = new StreamSource(top);
             }
             return details;
         }
+    }
+
+    public String getDiagnostics() {
+        return diagnostics;
     }
 }

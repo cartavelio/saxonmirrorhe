@@ -49,7 +49,6 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
 
         SpecificFunctionType ft;
 
-
         register("collation-key", 1, CollationKeyFn.class, BuiltInAtomicType.BASE64_BINARY,
                  OPT, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);

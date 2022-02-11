@@ -129,11 +129,13 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
         return EnumSet.of(Property.LOOKAHEAD);
     }
 
+    //#if EE==true
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
         throw new UnsupportedOperationException();
         // TODO: implement me. Needed for parallel operation
     }
+    //#endif
 
 
 }

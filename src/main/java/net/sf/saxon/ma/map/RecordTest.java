@@ -25,26 +25,29 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * An instance of this class represents a specific tuple item type, for example
- * tuple(x as xs:double, y as element(employee)).
+ * An instance of this class represents a specific record item type, for example
+ * record(x as xs:double, y as element(employee)).
  *
- * Tuple types are a Saxon extension introduced in Saxon 9.8. The syntax for constructing
- * a tuple type requires Saxon-PE or higher, but the supporting code is included in
+ * Record types are a proposed extension for XPath 4.0. They were previously introduced
+ * as a Saxon extension in Saxon 9.8, under the name "tuple types". The syntax for constructing
+ * a record type requires Saxon-PE or higher, but the supporting code is included in
  * Saxon-HE for convenience.
  *
- * Extended in 10.0 to distinguish extensible vs non-extensible tuple types. Extensible tuple
- * types permit fields other than those listed to appear; non-extensible tuple types do not.
- * An extensible tuple type is denoted by tuple(... ,*).
+ * Extended in 10.0 to distinguish extensible vs non-extensible record types. Extensible record
+ * types permit fields other than those listed to appear; non-extensible record types do not.
+ * An extensible record type is denoted by record(... ,*).
  */
-public class TupleItemType extends AnyFunctionType implements TupleType {
+public class RecordTest extends AnyFunctionType implements TupleType {
 
-    private final Map<String, SequenceType> fields = new HashMap<>();
+    private final Map<String, SequenceType> fieldTypes = new HashMap<>();
+    private final Set<String> optionalFields = new HashSet<>();
     private final boolean extensible;
 
-    public TupleItemType(List<String> names, List<SequenceType> types, boolean extensible) {
+    public RecordTest(List<String> names, List<SequenceType> types, List<String> optionalFieldNames, boolean extensible) {
         for (int i=0; i<names.size(); i++) {
-            fields.put(names.get(i), types.get(i));
+            fieldTypes.put(names.get(i), types.get(i));
         }
+        optionalFields.addAll(optionalFieldNames);
         this.extensible = extensible;
     }
 
@@ -87,7 +90,7 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
      */
     @Override
     public Iterable<String> getFieldNames() {
-        return fields.keySet();
+        return fieldTypes.keySet();
     }
 
     /**
@@ -98,11 +101,22 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
 
     @Override
     public SequenceType getFieldType(String field) {
-        return fields.get(field);
+        return fieldTypes.get(field);
     }
 
     /**
-     * Ask whether the tuple type is extensible, that is, whether fields other than those named are permitted
+     * Ask whether a given field is optional
+     * @param field the name of the field
+     * @return true if the field is defined as an optional field
+     */
+
+    @Override
+    public boolean isOptionalField(String field) {
+        return optionalFields.contains(field);
+    }
+
+    /**
+     * Ask whether the record type is extensible, that is, whether fields other than those named are permitted
      *
      * @return true if fields other than the named fields are permitted to appear
      */
@@ -124,12 +138,13 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
             return false;
         }
         MapItem map = (MapItem)item;
-        for (Map.Entry<String, SequenceType> field : fields.entrySet()) {
+        for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
             Sequence val = map.get(new StringItem(field.getKey()));
             if (val == null) {
-                val = EmptySequence.getInstance();
-            }
-            if (!field.getValue().matches(val, th)) {
+                if (!isOptionalField(field.getKey())) {
+                    return false;
+                }
+            } else if (!field.getValue().matches(val, th)) {
                 return false;
             }
         }
@@ -137,7 +152,7 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
             AtomicIterator<? extends AtomicValue> keyIter = map.keys();
             AtomicValue key;
             while ((key = keyIter.next()) != null) {
-                if (!(key instanceof StringItem) || !fields.containsKey(key.getUnicodeStringValue())) {
+                if (!(key instanceof StringItem) || !fieldTypes.containsKey(key.getStringValue())) {
                     return false;
                 }
             }
@@ -168,9 +183,9 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
     }
 
     /**
-     * Get the result type of this tuple type, viewed as a function
+     * Get the result type of this record type, viewed as a function
      *
-     * @return the result type of this tuple type, viewed as a function
+     * @return the result type of this record type, viewed as a function
      */
 
     @Override
@@ -180,7 +195,7 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
         } else {
             ItemType resultType = null;
             boolean allowsMany = false;
-            for (Map.Entry<String, SequenceType> field : fields.entrySet()) {
+            for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
                if (resultType == null) {
                    resultType = field.getValue().getPrimaryType();
                } else {
@@ -200,9 +215,9 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
      */
     @Override
     public double getDefaultPriority() {
-        // TODO: this algorithm means that adding fields to the tuple type reduces its priority, which is wrong
+        // TODO: this algorithm means that adding fields to the record type reduces its priority, which is wrong
         double prio = 1;
-        for (SequenceType st : fields.values()) {
+        for (SequenceType st : fieldTypes.values()) {
             prio *= st.getPrimaryType().getNormalizedDefaultPriority();
         }
         return extensible ? 0.5 + prio/2 : prio;
@@ -222,7 +237,7 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
      * Return a string representation of this ItemType suitable for use in stylesheet
      * export files. This differs from the result of toString() in that it will not contain
      * any references to anonymous types. Note that it may also use the Saxon extended syntax
-     * for union types and tuple types.
+     * for union types and record types.
      *
      * @return the string representation as an instance of the XPath ItemType construct
      */
@@ -244,22 +259,25 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
     }
 
     /**
-     * Return a string representation of the tuple type
+     * Return a string representation of the record type
      * @param show a function to use for converting the types of the component fields to strings
      * @return the string representation
      */
 
     private String makeString(Function<SequenceType, String> show) {
         StringBuilder sb = new StringBuilder(100);
-        sb.append("tuple(");
+        sb.append("record(");
         boolean first = true;
-        for (Map.Entry<String, SequenceType> field : fields.entrySet()) {
+        for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
             if (first) {
                 first = false;
             } else {
                 sb.append(", ");
             }
             sb.append(field.getKey());
+            if (isOptionalField(field.getKey())) {
+                sb.append('?');
+            }
             sb.append(": ");
             sb.append(show.apply(field.getValue()));
         }
@@ -276,9 +294,10 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
 
     public boolean equals(Object other) {
         return this == other ||
-                other instanceof TupleItemType
-                        && extensible == ((TupleItemType) other).extensible
-                        && fields.equals(((TupleItemType) other).fields);
+                other instanceof RecordTest
+                        && extensible == ((RecordTest) other).extensible
+                        && fieldTypes.equals(((RecordTest) other).fieldTypes)
+                        && optionalFields.equals(((RecordTest) other).optionalFields);
     }
 
     /**
@@ -286,7 +305,7 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
      */
     @Override
     public int hashCode() {
-        return fields.hashCode();
+        return fieldTypes.hashCode();
     }
 
     /**
@@ -299,14 +318,14 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
     public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
         if (other == AnyFunctionType.getInstance()) {
             return Affinity.SUBSUMED_BY;
-        } else if (other instanceof TupleItemType) {
-            return tupleTypeRelationship((TupleItemType)other, th);
+        } else if (other instanceof RecordTest) {
+            return recordTypeRelationship((RecordTest)other, th);
         } else if (other == MapType.ANY_MAP_TYPE) {
             return Affinity.SUBSUMED_BY;
         } else if (other.isArrayType()) {
             return Affinity.DISJOINT;
         } else if (other instanceof MapType) {
-            return tupleToMapRelationship((MapType)other, th);
+            return recordToMapRelationship((MapType)other, th);
         } else {
             Affinity rel;
             rel = new SpecificFunctionType(getArgumentTypes(), getResultType()).relationship(other, th);
@@ -314,9 +333,9 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
         }
     }
 
-    private Affinity tupleToMapRelationship(MapType other, TypeHierarchy th) {
-        AtomicType tupleKeyType = isExtensible() ? BuiltInAtomicType.ANY_ATOMIC : BuiltInAtomicType.STRING;
-        Affinity keyRel = th.relationship(tupleKeyType, other.getKeyType());
+    private Affinity recordToMapRelationship(MapType other, TypeHierarchy th) {
+        AtomicType recordKeyType = isExtensible() ? BuiltInAtomicType.ANY_ATOMIC : BuiltInAtomicType.STRING;
+        Affinity keyRel = th.relationship(recordKeyType, other.getKeyType());
         if (keyRel == Affinity.DISJOINT) {
             return Affinity.DISJOINT;
         }
@@ -330,8 +349,8 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
         } else if (isExtensible()) {
             return Affinity.OVERLAPS;
         } else {
-            // The type of every field in the tuple must be a subtype of the map value type
-            for (SequenceType entry : fields.values()) {
+            // The type of every field in the record must be a subtype of the map value type
+            for (SequenceType entry : fieldTypes.values()) {
                 Affinity rel = th.sequenceTypeRelationship(entry, other.getValueType());
                 if (!(rel == Affinity.SUBSUMED_BY || rel == Affinity.SAME_TYPE)) {
                     return Affinity.OVERLAPS;
@@ -341,9 +360,9 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
         }
     }
 
-    private Affinity tupleTypeRelationship(TupleItemType other, TypeHierarchy th) {
-        Set<String> keys = new HashSet<>(fields.keySet());
-        keys.addAll(other.fields.keySet());
+    private Affinity recordTypeRelationship(RecordTest other, TypeHierarchy th) {
+        Set<String> keys = new HashSet<>(fieldTypes.keySet());
+        keys.addAll(other.fieldTypes.keySet());
         boolean foundSubsuming = false;
         boolean foundSubsumed = false;
         boolean foundOverlap = false;
@@ -355,8 +374,8 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
             foundSubsumed = true;
         }
         for (String key : keys) {
-            SequenceType t1 = fields.get(key);
-            SequenceType t2 = other.fields.get(key);
+            SequenceType t1 = fieldTypes.get(key);
+            SequenceType t2 = other.fieldTypes.get(key);
             if (t1 == null) {
                 if (isExtensible()) {
                     foundSubsuming = true;
@@ -414,7 +433,7 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
     @Override
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (item instanceof MapItem) {
-            for (Map.Entry<String, SequenceType> entry : fields.entrySet()) {
+            for (Map.Entry<String, SequenceType> entry : fieldTypes.entrySet()) {
                 String key = entry.getKey();
                 SequenceType required = entry.getValue();
                 GroundedValue value = ((MapItem) item).get(new StringItem(key));
@@ -446,9 +465,9 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
                 AtomicValue key;
                 while ((key = keyIter.next()) != null) {
                     if (!(key instanceof StringItem)) {
-                        return Optional.of("Undeclared field " + key + " is present, but it is not a string, and the tuple type is not extensible");
-                    } else if (!fields.containsKey(key.getUnicodeStringValue())) {
-                        return Optional.of("Undeclared field " + key + " is present, but the tuple type is not extensible");
+                        return Optional.of("Undeclared field " + key + " is present, but it is not a string, and the record type is not extensible");
+                    } else if (!fieldTypes.containsKey(key.getUnicodeStringValue())) {
+                        return Optional.of("Undeclared field " + key + " is present, but the record type is not extensible");
                     }
                 }
             }
