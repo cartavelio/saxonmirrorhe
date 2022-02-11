@@ -39,7 +39,7 @@ namespace Saxon.Api {
         /// </remarks>
 
         public XdmItem ContextItem {
-            get { return (XdmItem) XdmValue.Wrap(selector.getContextItem()); }
+            get => selector.getContextItem();
             set {
                 if (value == null) {
                     throw new ArgumentException("contextItem is null");
@@ -173,7 +173,7 @@ namespace Saxon.Api {
         /// </exception>
         public IEnumerator GetEnumerator() {
             try {
-                return new SequenceEnumerator<XdmItem>(selector.iterator());
+                return selector.GetEnumerator();
             }
             catch (net.sf.saxon.s9api.SaxonApiUncheckedException err) {
                 throw new DynamicError(XPathException.makeXPathException(err));

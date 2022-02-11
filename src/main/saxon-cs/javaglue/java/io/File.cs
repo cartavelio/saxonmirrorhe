@@ -86,6 +86,10 @@ namespace java.io {
             return false;
         }
 
+        public string[] list() {
+            return new string[0];
+        }
+
         public File[] listFiles(FilenameFilter filter) {
             return new File[0];
         }

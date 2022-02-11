@@ -12,12 +12,15 @@ namespace Saxon.Api {
         /// </summary>
         public static XdmAnyMapType Instance = new XdmAnyMapType();
 
-        internal XdmAnyMapType() {
-            this.type = MapType.ANY_MAP_TYPE;
+        internal XdmAnyMapType() : base(MapType.ANY_MAP_TYPE) {
         }
         
         public override bool Matches(XdmItem item) {
             return ((Item) item.value).getGenre() == Genre.MAP;
+        }
+
+        public override bool Subsumes(XdmItemType other) {
+            return other.Unwrap() is MapType;
         }
     }
 }

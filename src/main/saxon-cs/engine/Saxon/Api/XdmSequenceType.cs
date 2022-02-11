@@ -21,7 +21,7 @@ namespace Saxon.Api {
         public const char ZERO_OR_MORE='*';
         public const char ONE_OR_MORE = '+';
         public const char ZERO_OR_ONE = '?';
-        public const char ZERO = '0'; //xBA
+        public const char ZERO = '0'; 
         public const char ONE = ' ';
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Saxon.Api {
         /// <param name="itemType">The item type</param>
         /// <param name="occurrenceIndicator">The occurrence indicator, one of '?' (zero-or-one), 
         /// '*' (zero-or-more), '+' (one-or-more), ' ' (a single space) (exactly one),
-        /// or 'º' (masculine ordinal indicator, xBA) (exactly zero). The type <c>empty-sequence()</c>
+        /// or '0' (exactly zero). The type <c>empty-sequence()</c>
         /// can be represented by an occurrence indicator of 'º' with any item type.</param>
 
         public XdmSequenceType(XdmItemType itemType, char occurrenceIndicator)
@@ -48,7 +48,6 @@ namespace Saxon.Api {
                     occ = StaticProperty.ALLOWS_ZERO_OR_ONE;
                     break;
                 case ONE:
-
                     occ = StaticProperty.EXACTLY_ONE;
                     break;
                 case ZERO:
@@ -99,29 +98,8 @@ namespace Saxon.Api {
             return SequenceType.makeSequenceType(jit, occurrence);
         }
 
-        internal OccurrenceIndicator GetJOccurrenceIndicator(int cardinality) {
-            switch (cardinality) {
-                case StaticProperty.EMPTY:
-                    return OccurrenceIndicator.ZERO;
-                case StaticProperty.ALLOWS_ZERO_OR_ONE:
-                    return OccurrenceIndicator.ZERO_OR_ONE;
-                case StaticProperty.ALLOWS_ZERO_OR_MORE:
-                    return OccurrenceIndicator.ZERO_OR_MORE;
-                case StaticProperty.ALLOWS_ONE:
-                    return OccurrenceIndicator.ONE;
-                case StaticProperty.ALLOWS_ONE_OR_MORE:
-                    return OccurrenceIndicator.ONE_OR_MORE;
-                default:
-                    return OccurrenceIndicator.ZERO_OR_MORE;
-            }
-        }
-
-        internal net.sf.saxon.s9api.SequenceType ToJXdmSequenceType()
-        {
-            ItemType jit = itemType.Unwrap();
-            return net.sf.saxon.s9api.SequenceType.makeSequenceType(itemType, GetJOccurrenceIndicator(occurrence));
-        }
-
+        
+ 
 
     }
 }

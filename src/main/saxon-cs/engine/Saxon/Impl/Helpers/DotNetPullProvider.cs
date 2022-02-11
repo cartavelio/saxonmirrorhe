@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using SysCollGen = System.Collections.Generic;
 using System.Xml;
 using System.Xml.Schema;
 
@@ -11,10 +11,10 @@ namespace System.Impl.Helpers {
         private bool isEmptyElement = false;
         private net.sf.saxon.pull.PullEvent? currentEvent = net.sf.saxon.pull.PullEvent.START_OF_INPUT;
         private bool expandDefaults = true;
-        private readonly java.util.Stack<net.sf.saxon.om.NamespaceMap> namespaceStack = new java.util.Stack<net.sf.saxon.om.NamespaceMap>();
+        private readonly SysCollGen.Stack<net.sf.saxon.om.NamespaceMap> namespaceStack = new SysCollGen.Stack<net.sf.saxon.om.NamespaceMap>();
         public DotNetPullProvider(XmlReader parser)  {
             this.parser = parser;
-            namespaceStack.push(net.sf.saxon.om.NamespaceMap.emptyMap());
+            namespaceStack.Push(net.sf.saxon.om.NamespaceMap.emptyMap());
         }
         public void setBaseURI(string @base) {
             baseURI = @base;
@@ -139,7 +139,7 @@ namespace System.Impl.Helpers {
                     if (((currentEvent==net.sf.saxon.pull.PullEvent.TEXT)&&(parser.Depth==0))) {
                         currentEvent = null;
                     } else if ((currentEvent==net.sf.saxon.pull.PullEvent.START_ELEMENT)) {
-                        net.sf.saxon.om.NamespaceMap nsMap = namespaceStack.peek();
+                        net.sf.saxon.om.NamespaceMap nsMap = namespaceStack.Peek();
                         if (parser.HasAttributes) {
                             int limit = parser.AttributeCount;
                             for (int i = 0; (i<limit); i++) {
@@ -155,9 +155,9 @@ namespace System.Impl.Helpers {
                                 }
                             }
                         }
-                        namespaceStack.push(nsMap);
+                        namespaceStack.Push(nsMap);
                     } else if ((currentEvent==net.sf.saxon.pull.PullEvent.END_ELEMENT)) {
-                        namespaceStack.pop(); 
+                        namespaceStack.Pop(); 
                     }
                 }
             } while ((currentEvent==null));
@@ -246,7 +246,7 @@ namespace System.Impl.Helpers {
         public string getSystemId(int locationId) {
             return getSystemId();
         }
-        public IList<net.sf.saxon.pull.UnparsedEntity> getUnparsedEntities() {
+        public SysCollGen.IList<net.sf.saxon.pull.UnparsedEntity> getUnparsedEntities() {
             return null;
         }
     

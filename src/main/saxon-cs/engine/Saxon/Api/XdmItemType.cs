@@ -18,10 +18,12 @@ namespace Saxon.Api {
     /// be instantiated in this API.
     /// </remarks>
     public abstract class XdmItemType {
-        protected net.sf.saxon.type.ItemType type;
+        protected readonly net.sf.saxon.type.ItemType underlyingType;
 
-        private ConversionRules defaultConversionRules = new ConversionRules();
-
+        protected XdmItemType(net.sf.saxon.type.ItemType underlyingType) {
+            this.underlyingType = underlyingType;
+        }
+        
         internal static XdmItemType MakeXdmItemType(net.sf.saxon.type.ItemType type) {
             if (type is AtomicType) {
                 return XdmAtomicType.BuiltInAtomicType(
@@ -57,13 +59,8 @@ namespace Saxon.Api {
         }
 
         internal ItemType Unwrap() {
-            return type;
+            return underlyingType;
         }
-
-        internal void SetJXdmItemType(ItemType type) {
-            this.type = type;
-        }
-
 
         /// <summary>
         /// Determine whether this item type matches a given item.
@@ -80,10 +77,7 @@ namespace Saxon.Api {
         /// <param name="other">the other ItemType</param>
         /// <returns>true if this ItemType subsumes the other ItemType. This includes the case where A and B
         ///         represent the same ItemType.</returns>
-        virtual public bool Subsumes(XdmItemType other) {
-            return type.subsumes(other.type);
-        }
-
+        public abstract bool Subsumes(XdmItemType other);
 
         /// <summary>
         /// Get a string representation of the type. This will be a string that confirms to
@@ -93,7 +87,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>a string representation of the type</returns>
         public override String ToString() {
-            return type.ToString();
+            return underlyingType.ToString();
         }
     }
 }

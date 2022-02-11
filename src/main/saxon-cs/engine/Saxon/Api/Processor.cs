@@ -6,8 +6,11 @@ using System.Xml;
 using javax.xml.transform.stream;
 using net.sf.saxon;
 using net.sf.saxon.@event;
+using net.sf.saxon.lib;
 using net.sf.saxon.trans;
 using Saxon.Api.Support;
+using Saxon.Callbacks;
+using SaxonCS3.engine.Saxon.Api.Support;
 using Version = net.sf.saxon.Version;
 
 namespace Saxon.Api {
@@ -24,7 +27,7 @@ namespace Saxon.Api {
         // as a wrapper around the s9api Processor, which is C# code converted from Java
 
         private net.sf.saxon.s9api.Processor jProcessor;
-        private SchemaManager schemaManager = null;
+        //private SchemaManager schemaManager = null;
         private TextWriter textWriter = Console.Error;
         private IQueryResolver moduleResolver;
         private ICollectionFinder collectionFinder = null;
@@ -34,7 +37,7 @@ namespace Saxon.Api {
             jProcessor = p;
             jProcessor.getUnderlyingConfiguration().setProcessor(this);
             collectionFinder = new StandardCollectionFinder(Implementation.getCollectionFinder());
-            standardCollectionFinder = new StandardCollectionFinder(Implementation.getStandardCollectionFinder());
+            //standardCollectionFinder = new StandardCollectionFinder(Implementation.getStandardCollectionFinder());
         }
 
         /// <summary>
@@ -44,9 +47,9 @@ namespace Saxon.Api {
         public Processor() {
             jProcessor = new net.sf.saxon.s9api.Processor(false);
             jProcessor.getUnderlyingConfiguration().setProcessor(this);
-            jProcessor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
+            //jProcessor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
             collectionFinder = new StandardCollectionFinder(Implementation.getCollectionFinder());
-            standardCollectionFinder = new StandardCollectionFinder(Implementation.getStandardCollectionFinder());
+            //standardCollectionFinder = new StandardCollectionFinder(Implementation.getStandardCollectionFinder());
         }
 
         /// <summary>
@@ -73,7 +76,7 @@ namespace Saxon.Api {
         /// <param name="loadLocally">This option has no effect at this release.</param>
         public Processor(bool licensedEdition, bool loadLocally) {
             jProcessor = new net.sf.saxon.s9api.Processor(licensedEdition);
-            jProcessor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
+            //jProcessor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
         }
 
         /// <summary>
@@ -85,7 +88,7 @@ namespace Saxon.Api {
         public Processor(Stream configurationFile) {
             StreamSource ss = new StreamSource(configurationFile);
             Configuration config = Configuration.readConfiguration(ss);
-            config.registerExternalObjectModel(new DotNetObjectModelDefinition());
+            //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
             jProcessor = new net.sf.saxon.s9api.Processor(config);
         }
 
@@ -98,31 +101,31 @@ namespace Saxon.Api {
         public Processor(Stream configurationFile, Uri baseUri) {
             StreamSource ss = new StreamSource(configurationFile, baseUri.AbsoluteUri);
             Configuration config = Configuration.readConfiguration(ss);
-            config.registerExternalObjectModel(new DotNetObjectModelDefinition());
+            //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
             jProcessor = new net.sf.saxon.s9api.Processor(config);
         }
 
-        public ICollectionFinder CollectionFinder {
-            set {
-                if (value != null) {
-                    collectionFinder = value;
-                    Implementation.setCollectionFinder(new CollectionFinderWrapper(collectionFinder));
-                }
-            }
-            get { return collectionFinder; }
-        }
+        // public ICollectionFinder CollectionFinder {
+        //     set {
+        //         if (value != null) {
+        //             collectionFinder = value;
+        //             Implementation.setCollectionFinder(new CollectionFinderWrapper(collectionFinder));
+        //         }
+        //     }
+        //     get { return collectionFinder; }
+        // }
 
 
-        public StandardCollectionFinder StandardCollectionFinder {
-            get { return standardCollectionFinder; }
-        }
-
-        public void RegisterCollection(String collectionURI, IResourceCollection collection) {
-            StandardCollectionFinder.RegisterCollection(collectionURI, collection);
-            if (CollectionFinder is StandardCollectionFinder && collectionFinder != standardCollectionFinder) {
-                ((StandardCollectionFinder) collectionFinder).RegisterCollection(collectionURI, collection);
-            }
-        }
+        // public StandardCollectionFinder StandardCollectionFinder {
+        //     get { return standardCollectionFinder; }
+        // }
+        //
+        // public void RegisterCollection(String collectionURI, IResourceCollection collection) {
+        //     StandardCollectionFinder.RegisterCollection(collectionURI, collection);
+        //     if (CollectionFinder is StandardCollectionFinder && collectionFinder != standardCollectionFinder) {
+        //         ((StandardCollectionFinder) collectionFinder).RegisterCollection(collectionURI, collection);
+        //     }
+        // }
 
 
         /// <summary>
@@ -163,12 +166,12 @@ namespace Saxon.Api {
         }
 
 
-        /// <summary>
-        /// Gets the <c>SchemaManager</c> for the <c>Processor</c>. Returns null
-        /// if the <c>Processor</c> is not schema-aware.
-        /// </summary>
-
-        public SchemaManager SchemaManager => null; // pro tem
+        // /// <summary>
+        // /// Gets the <c>SchemaManager</c> for the <c>Processor</c>. Returns null
+        // /// if the <c>Processor</c> is not schema-aware.
+        // /// </summary>
+        //
+        // public SchemaManager SchemaManager => null; // pro tem
 
         // get {
         //     if (schemaManager == null) {
@@ -193,14 +196,14 @@ namespace Saxon.Api {
         public XmlResolver XmlResolver {
             get {
                 javax.xml.transform.URIResolver resolver = jProcessor.getUnderlyingConfiguration().getURIResolver();
-                if (resolver is JDotNetURIResolver) {
-                    return ((JDotNetURIResolver) resolver).getXmlResolver();
+                if (resolver is StandardURIResolver uriResolver) {
+                    return uriResolver.getXmlResolver();
                 }
-                else {
-                    return new XmlUrlResolver();
-                }
+
+                return new XmlUrlResolver();
             }
-            set { jProcessor.getUnderlyingConfiguration().setURIResolver(new JDotNetURIResolver(value)); }
+            set => jProcessor.getUnderlyingConfiguration().setURIResolver(
+                                new StandardURIResolver(value));
         }
 
 
@@ -335,51 +338,57 @@ namespace Saxon.Api {
         /// <param name="options">Options to be used in performing comparisons, for example
         /// whether they are to be case-blind and/or accent-blind</param>
         public void DeclareCollation(Uri uri, CompareInfo compareInfo, CompareOptions options) {
-            JDotNetComparator comparator = new JDotNetComparator(uri.ToString(), compareInfo, options);
-            Implementation.registerCollation(uri.ToString(), comparator);
+            ComparingCollation collator = new ComparingCollation(uri.ToString(), compareInfo, options);
+            Implementation.registerCollation(uri.ToString(), collator);
         }
 
-        /// <summary>
-        /// Register a named collection. A collection is identified by a URI (the collection URI),
-        /// and its content is represented by an <c>IEnumerable</c> that enumerates the contents
-        /// of the collection. The values delivered by this enumeration are Uri values, which 
-        /// can be mapped to nodes using the registered <c>XmlResolver</c>.
-        /// </summary>
-        /// <param name="collectionUri">The URI used to identify the collection in a call
-        /// of the XPath <c>collection()</c> function. The default collection is registered
-        /// by supplying null as the value of this argument (this is the collection returned
-        /// when the XPath <c>collection()</c> function is called with no arguments).</param> 
-        /// <param name="contents">An enumerable object that represents the contents of the
-        /// collection, as a sequence of document URIs. The enumerator returned by this
-        /// IEnumerable object must return instances of the Uri class.</param>
-        /// <remarks>
-        /// <para>Collections should be stable: that is, two calls to retrieve the same collection URI
-        /// should return the same sequence of document URIs. This requirement is imposed by the
-        /// W3C specifications, but in the case of a user-defined collection it is not enforced by
-        /// the Saxon product.</para>
-        /// <para>A collection may be replaced by specifying the URI of an existing
-        /// collection.</para>
-        /// <para>Collections registered with a processor are available to all queries and stylesheets
-        /// running under the control of that processor. Collections should not normally be registered
-        /// while queries and transformations are in progress.</para>
-        /// </remarks>
-        /// 
-        public void RegisterCollection(Uri collectionUri, IEnumerable contents) {
-            String u = (collectionUri == null ? null : collectionUri.ToString());
-            Configuration config = jProcessor.getUnderlyingConfiguration();
-            config.registerCollection(u, new JDotNetEnumerableCollection(config, contents));
-        }
+        // /// <summary>
+        // /// Register a named collection. A collection is identified by a URI (the collection URI),
+        // /// and its content is represented by an <c>IEnumerable</c> that enumerates the contents
+        // /// of the collection. The values delivered by this enumeration are Uri values, which 
+        // /// can be mapped to nodes using the registered <c>XmlResolver</c>.
+        // /// </summary>
+        // /// <param name="collectionUri">The URI used to identify the collection in a call
+        // /// of the XPath <c>collection()</c> function. The default collection is registered
+        // /// by supplying null as the value of this argument (this is the collection returned
+        // /// when the XPath <c>collection()</c> function is called with no arguments).</param> 
+        // /// <param name="contents">An enumerable object that represents the contents of the
+        // /// collection, as a sequence of document URIs. The enumerator returned by this
+        // /// IEnumerable object must return instances of the Uri class.</param>
+        // /// <remarks>
+        // /// <para>Collections should be stable: that is, two calls to retrieve the same collection URI
+        // /// should return the same sequence of document URIs. This requirement is imposed by the
+        // /// W3C specifications, but in the case of a user-defined collection it is not enforced by
+        // /// the Saxon product.</para>
+        // /// <para>A collection may be replaced by specifying the URI of an existing
+        // /// collection.</para>
+        // /// <para>Collections registered with a processor are available to all queries and stylesheets
+        // /// running under the control of that processor. Collections should not normally be registered
+        // /// while queries and transformations are in progress.</para>
+        // /// </remarks>
+        // /// 
+        // public void RegisterCollection(Uri collectionUri, IEnumerable contents) {
+        //     String u = (collectionUri == null ? null : collectionUri.ToString());
+        //     Configuration config = jProcessor.getUnderlyingConfiguration();
+        //     config.registerCollection(u, new JDotNetEnumerableCollection(config, contents));
+        // }
 
         /// <summary>
-        /// Register an extension function with the <c>Processor</c>
+        /// Register an extension function with the <c>Processor</c>. This interface provides
+        /// rich capability for defining extension functions with complex requirements, for
+        /// example accessing information in the static and dynamic context, and declaring
+        /// the presence of side-effects. For simpler extension functions use an
+        /// <c>ExtensionFunction</c> in preference.
         /// </summary>
         /// <param name="function">
         /// An object that defines the extension function, including its name, arity, arguments types, and
-        /// a reference to the class that implements the extension function call.
+        /// a reference to the class that implements the extension function call. This function
+        /// becomes available for use in all queries, stylesheets, and XPath expressions
+        /// compiled under the control of this Processor.
         /// </param>
         public void RegisterExtensionFunction(ExtensionFunctionDefinition function) {
-            WrappedExtensionFunctionDefinition f = new WrappedExtensionFunctionDefinition(function);
-            jProcessor.registerExtensionFunction(f);
+            Configuration config = jProcessor.getUnderlyingConfiguration();
+            config.registerExtensionFunction(new ExtensionFunctionDefinitionWrapper(function));
         }
 
         /// <summary>
@@ -391,10 +400,9 @@ namespace Saxon.Api {
         /// dependencies on the static or dynamic context.
         /// </param>
         public void RegisterExtensionFunction(ExtensionFunction function) {
-            WrappedExtensionFunction f = new WrappedExtensionFunction(function);
-            jProcessor.registerExtensionFunction(f);
+            Configuration config = jProcessor.getUnderlyingConfiguration();
+            config.registerExtensionFunction(new SimpleExtensionFunctionWrapper(function));
         }
-
 
         /// <summary>
         /// Set the media type to be associated with a file extension by  the standard collection handler
@@ -408,15 +416,15 @@ namespace Saxon.Api {
             Implementation.registerFileExtension(extension, mediaType);
         }
 
-        /// <summary>
-        /// Associated a media type with a resource factory. This methodm may be called
-        /// to customize the behaviour of a collection to recognize different file extensions
-        /// </summary>
-        /// <param name="contentType">a media type or MIME type, for example application/xsd+xml</param>
-        /// <param name="factory">a ResourceFactory used to parse (or otherweise process) resource of that type</param>
-        public void RegisterMediaType(String contentType, IResourceFactory factory) {
-            Implementation.registerMediaType(contentType, new ResourceFactoryWrapper(factory, this));
-        }
+        // /// <summary>
+        // /// Associated a media type with a resource factory. This methodm may be called
+        // /// to customize the behaviour of a collection to recognize different file extensions
+        // /// </summary>
+        // /// <param name="contentType">a media type or MIME type, for example application/xsd+xml</param>
+        // /// <param name="factory">a ResourceFactory used to parse (or otherweise process) resource of that type</param>
+        // public void RegisterMediaType(String contentType, IResourceFactory factory) {
+        //     Implementation.registerMediaType(contentType, new ResourceFactoryWrapper(factory, this));
+        // }
 
 
         /// <summary>
@@ -493,7 +501,8 @@ namespace Saxon.Api {
             set {
                 moduleResolver = value;
                 jProcessor.getUnderlyingConfiguration()
-                    .setModuleURIResolver((value == null ? null : new DotNetModuleURIResolver(value)));
+                    .setModuleURIResolver((value == null ? null : 
+                        new QueryResolverWrapper(value, this.XmlResolver)));
             }
         }
 
@@ -520,27 +529,18 @@ namespace Saxon.Api {
         /// <param name="name">The property name</param>
         /// <param name="value">The property value</param>
         public void SetProperty(String name, String value) {
-            if (name.Equals("http://saxonica.com/oem-data")) {
-                jProcessor.setConfigurationProperty("http://saxonica.com/oem-data", value);
-            }
-            else {
-                jProcessor.setConfigurationProperty(name, value);
-            }
+            Implementation.setConfigurationProperty(name, value);
         }
 
         /// <summary>
-        /// Set a configuration property
+        /// Set a configuration property. This method provides a type-safe way of
+        /// setting properties of any type: for example a boolean property can be
+        /// set by calling <code>SetProperty(Feature&lt;bool&gt;.ALLOW_SYNTAX_EXTENSIONS, true)</code>.
         /// </summary>
         /// <param name="feature">The property feature</param>
         /// <param name="value">The property value</param>
         public void SetProperty<T>(Feature<T> feature, T value) {
-            Implementation.setConfigurationProperty(feature);
-            if (value.GetType() == typeof(Boolean)) {
-                jProcessor.setFeature(feature.JFeature.code, value);
-            }
-            else {
-                jProcessor.setConfigurationProperty(feature.JFeature, (object) value);
-            }
+            Implementation.setFeature(FeatureIndex.getData(feature.Code), value);
         }
 
         /// <summary>
@@ -556,21 +556,25 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="name">The property name</param>
         /// <returns>The property value, as a string; or null if the property is unset.</returns>
-        public String GetProperty(String name) {
-            Object obj = jProcessor.getConfigurationProperty(net.sf.saxon.lib.Feature.byName(name));
-            return (obj == null ? null : obj.ToString());
+        public string GetProperty(string name) {
+            Object obj = Implementation.getConfigurationProperty(name);
+            return obj?.ToString();
         }
 
-
         /// <summary>
-        /// Get a property of the configuration
+        /// Get a property of the configuration.
         /// </summary>
+        /// <remarks>
+        /// <para>This method provides a type-safe way of getting the value of a configuration
+        /// property of any type: for example, <code>GetProperty(Feature&lt;bool>.XQUERY_ALLOW_UPDATE)</code>
+        /// returns a boolean property as a boolean. 
+        /// </remarks>
         /// <typeparam name="T">See the class <c>Feature</c> for constants 
         /// representing the properties that can be requested.</typeparam>
         /// <param name="feature">the required property. </param>
         /// <returns>the value of the property</returns>
         public T GetProperty<T>(Feature<T> feature) {
-            return (T) jProcessor.getConfigurationProperty(feature.JFeature);
+            return (T)Implementation.getFeature(FeatureIndex.getData(feature.Code));
         }
     }
 }

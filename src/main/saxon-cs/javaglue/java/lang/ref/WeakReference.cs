@@ -1,14 +1,15 @@
-using Sys = System
+using Sys = System;
 namespace java.lang.@ref {
-    public class WeakReference<T> {
-        private Sys.WeakReference<T> _inner;
+    public class WeakReference<T> where T : class {
+        private readonly Sys.WeakReference<T> _inner;
 
         public WeakReference(T o) {
-            _inner = new Sys.WeakReference<>(o);
+            _inner = new Sys.WeakReference<T>(o);
         }
 
         public T get() {
-            return _inner
+            bool exists = _inner.TryGetTarget(out var target);
+            return exists ? target : null;
         }
     }
 }

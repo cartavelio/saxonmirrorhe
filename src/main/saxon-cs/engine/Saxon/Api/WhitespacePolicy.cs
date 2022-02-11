@@ -1,7 +1,12 @@
 using System;
+using System.Runtime.CompilerServices;
+using java.lang;
+using net.sf.saxon.@event;
 using net.sf.saxon.s9api;
 using net.sf.saxon.value;
 using net.sf.saxon.om;
+using net.sf.saxon.trace;
+using net.sf.saxon.type;
 
 namespace Saxon.Api {
     /// <summary>
@@ -34,9 +39,24 @@ namespace Saxon.Api {
             this.stripperRules = stripperRules;
         }
 
-        internal WhitespacePolicy(net.sf.saxon.s9api.XsltExecutable executable) {
+        /// <summary>
+        /// Construct the whitespace-stripping policy for a particular XSLT package,
+        /// as defined by its <c>xsl:strip-space</c> and <c>xsl:preserve-space</c>
+        /// declarations
+        /// </summary>
+        /// <param name="pack">The package containing the relevant
+        /// <c>xsl:strip-space</c> and <c>xsl:preserve-space</c> declarations</param>
+        
+        public WhitespacePolicy(Saxon.Api.XsltPackage pack) {
             this.policy = Whitespace.XSLT;
-            this.stripperRules = executable.getWhitespaceStrippingPolicy();
+            this.stripperRules = pack.getUnderlyingPreparedPackage().getStripperRules();
+        }
+        
+        // For internal use
+        // TODO: do this properly
+        public WhitespacePolicy(net.sf.saxon.style.StylesheetPackage pack) {
+            this.policy = Whitespace.XSLT;
+            this.stripperRules = pack.getStripperRules();
         }
 
         /// <summary>
@@ -46,19 +66,42 @@ namespace Saxon.Api {
         /// text node children of the element are to be stripped, false if they are to be retained.</param>
         /// <returns>A <c>WhitespacePolicy</c> object</returns>
         public static WhitespacePolicy MakeCustomPolicy(System.Predicate<QName> elementTest) {
-            WhitespaceStrippingPolicy policy =
-                WhitespaceStrippingPolicy.makeCustomPolicy(new JPredicateImpl(elementTest));
-            WhitespacePolicy wsp = new WhitespacePolicy(Whitespace.XSLT, null);
-            wsp.strippingPolicy = policy;
-            return wsp;
+            SpaceStrippingRule rule = new CustomSpaceStrippingRule(elementTest);
+            return new WhitespacePolicy(Whitespace.XSLT, rule);
         }
 
-        internal int ordinal() {
+        internal int Ordinal() {
             return policy;
         }
 
-        /*internal net.sf.saxon.@event.FilterFactory makeStripper() {
-            return new FilterFactory(strippingPolicy);
-        }      */
+        /// Escape-hatch property to get the space stripping rules that
+        /// implement this policy internally.
+        
+        public SpaceStrippingRule Implementation => stripperRules;
+        
     }
+
+    internal class CustomSpaceStrippingRule : SpaceStrippingRule {
+
+        private readonly System.Predicate<Saxon.Api.QName> preserveTest;
+
+        public CustomSpaceStrippingRule(System.Predicate<Saxon.Api.QName> preserveTest) {
+            this.preserveTest = preserveTest;
+        }
+        
+        public int isSpacePreserving(NodeName nodeName, SchemaType schemaType) {
+            return preserveTest(new QName(nodeName.getStructuredQName()))
+            ? Stripper.ALWAYS_STRIP
+            : Stripper.ALWAYS_PRESERVE;
+        }
+        
+        public ProxyReceiver makeStripper(Receiver next) {
+            return new Stripper(this, next);
+        }
+        
+        public void export(ExpressionPresenter presenter) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
 }

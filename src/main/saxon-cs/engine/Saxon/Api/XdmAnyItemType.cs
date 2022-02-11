@@ -12,8 +12,7 @@ namespace Saxon.Api {
         /// </summary>
         public static readonly XdmAnyItemType Instance = new XdmAnyItemType();
 
-        private XdmAnyItemType() {
-            this.type = AnyItemType.getInstance();
+        private XdmAnyItemType() : base (AnyItemType.getInstance()) {
         }
 
         /// <summary>

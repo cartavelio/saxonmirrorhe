@@ -46,6 +46,10 @@ namespace java.util
         public static void sort<T>(T[] array, SysColl.IComparer comparer) {
             SysArray.Sort(array, comparer);
         }
+        
+        public static void sort<T>(T[] array, int start, int end, SysColl.IComparer comparer) {
+            SysArray.Sort(array, start, end, comparer);
+        }
 
         public static int binarySearch<T>(T[] array, T value) {
             return SysArray.BinarySearch(array, value);
