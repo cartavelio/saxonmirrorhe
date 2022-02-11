@@ -23,11 +23,13 @@
             </head>
             <body class="main">
                 <h1>Saxon <xsl:value-of select="$version"/> product comparison (Feature Matrix)</h1>
-                <p>This chart describes the features present in each edition of Saxon 11.</p>
+                <p>This chart describes the features present in each edition of Saxon <xsl:value-of
+                    select="$version"/> available for Java and .NET, and in each edition for the
+                    latest releases of Saxon/C and Saxon-JS.</p>
                 <p><b>At the time of publication, not all editions of Saxon 11 are available. The information
                 for editions that are not yet available is provisional and subject to change.</b></p>
                 <p>
-                    <i>For features in older versions of the products, see the relevant Feature Matrix:
+                    <i>For features in older versions of the products, see the relevant Feature Matrix:<br />
                         <xsl:for-each select="(10, 9.9, 9.8, 9.7, 9.6)[number($version) ge .]">
                             <a class="bodylink" href="feature-matrix-{string(.)}.xml">Saxon <xsl:value-of select="string(.)"/></a>
                             <xsl:if test="not(position()=last())">
@@ -37,31 +39,13 @@
                         <xsl:text>.</xsl:text>
                     </i>
                 </p>
-                    <p>The table below lists product features and indicates which features are
-                        present in which product package.</p>
-                    <table class="feature-matrix" id="overview">
-                        <xsl:if test="number($version) le 9.7">
-                        <thead>
-                            <tr class="feature-heading">
-                                <td style="text-align:left;">
-                                    <xsl:value-of select="'Language Support'"/> 
-                                </td>
-                                <td>HE</td>
-                                <td>PE</td>
-                                <td>EE</td>
-                                <td>EE&#8209;T</td>
-                                <td>EE&#8209;Q</td>
-                                <td>EE&#8209;V</td>
-                                <td>CS</td>
-                                <xsl:if test="number($version) ge 9.8 and number($version) lt 10">
-                                    <td>JS</td>
-                                </xsl:if>
-                                <xsl:if test="number($version) ge 10">
-                                    <td>JS2</td>
-                                </xsl:if>
-                            </tr>
-                        </thead>
-                        </xsl:if>
+                <p>The table below lists product features and indicates which features are available for
+                    products on the different platforms. If the feature is restricted to certain packages on
+                    a platform, then the table shows the <b>minimal</b> product package(s) required. The
+                    product packages are ordered as: PE &#x2282; EE-V &#x2282; (EE-T | EE-Q) &#x2282; EE. For
+                    instance, this means all PE and EE-V features are available with all EE packages.</p>
+                <p>'&#x25cf;' means the feature is available for all editions on that platform.</p>
+                <table class="feature-matrix feature-matrix-11" id="overview">
                         <tbody>
                             <xsl:for-each select="feature">
                                 <xsl:variable name="feature-desc" select="description"/>
@@ -71,19 +55,10 @@
                                             <td style="text-align:left;">
                                                 <xsl:value-of select="shortName"/> 
                                             </td>
-                                            <td>HE</td>
-                                            <td>PE</td>
-                                            <td>EE</td>
-                                            <td>EE&#8209;T</td>
-                                            <td>EE&#8209;Q</td>
-                                            <td>EE&#8209;V</td>
-                                            <td>CS</td>
-                                            <xsl:if test="number($version) ge 9.8 and number($version) lt 10">
-                                                <td>JS</td>
-                                            </xsl:if>
-                                            <xsl:if test="number($version) ge 10">
-                                                <td>JS2</td>
-                                            </xsl:if>
+                                            <td>Java Saxon/J</td>
+                                            <td>.NET Saxon-CS</td>
+                                            <td>Native Saxon/C</td>
+                                            <td>JavaScript Saxon-JS</td>
                                         </tr>
                                     </xsl:when>
                                     <xsl:otherwise>
@@ -108,13 +83,13 @@
                                             <td class="topic">
                                                 <xsl:variable name="feature-with-level" as="xs:string" 
                                                     select="concat($topic-shortName, if (exists(@level) and @level ne 'Inc') then concat(' (',f:prod-desc-level(@level),')') else '')"/>
-                                                <div class="{if (number($version) ge 9.8) then 'popup2' else 'popup'}"> 
+                                                <div class="popup2"> 
                                                     <xsl:value-of select="$feature-with-level"/>  
                                                     <span>
                                                         <h2><xsl:value-of select="$feature-with-level"/></h2>
                                                         <xsl:choose>
-                                                            <xsl:when test="exists(./*)">
-                                                                <xsl:copy-of select="./*"/>
+                                                            <xsl:when test="exists(description)">
+                                                                <xsl:copy-of select="description/*"/>
                                                             </xsl:when>
                                                             <xsl:otherwise>
                                                                 <xsl:copy-of select="$feature-desc/*"/>
@@ -149,53 +124,24 @@
                                             </td>
                                             <td>
                                                 <p>                                                    
-                                                  <xsl:sequence select="f:dot($editions,'HE')"/>
+                                                  <xsl:sequence select="f:license(java)"/>
                                                 </p>
                                             </td>
                                             <td>
                                                 <p>
-                                                    <xsl:sequence select="f:dot($editions,'PE')"/>
+                                                    <xsl:sequence select="f:licenseCS(cs)"/>
                                                 </p>
                                             </td>
                                             <td>
                                                 <p>
-                                                    <xsl:sequence select="f:dot($editions,'EE')"/>
+                                                    <xsl:sequence select="f:license(c)"/>
                                                 </p>
                                             </td>
                                             <td>
                                                 <p>
-                                                    <xsl:sequence select="f:dot($editions,'EE-T')"/>
+                                                    <xsl:sequence select="f:licenseJS(js)"/>
                                                 </p>
                                             </td>
-                                            <td>
-                                                <p>
-                                                    <xsl:sequence select="f:dot($editions,'EE-Q')"/>
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <p>
-                                                    <xsl:sequence select="f:dot($editions,'EE-V')"/>
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <p>
-                                                    <xsl:sequence select="f:dot($editions,'CS')"/>
-                                                </p>
-                                            </td>
-                                            <xsl:if test="number($version) ge 9.8 and number($version) lt 10">
-                                                <td>
-                                                    <p>
-                                                        <xsl:sequence select="f:dot($editions,'JS')"/>
-                                                    </p>
-                                                </td>
-                                            </xsl:if>
-                                            <xsl:if test="number($version) ge 10">
-                                                <td>
-                                                    <p>
-                                                        <xsl:sequence select="f:dot($editions,'JS2')"/>
-                                                    </p>
-                                                </td>
-                                            </xsl:if>
                                         </tr>
                                         </xsl:for-each>
                                     </xsl:otherwise>
@@ -213,9 +159,9 @@
     </xsl:template>
     
     <xsl:template name="aside">
-        <div id="aside">
-            <xsl:choose>
-                <xsl:when test="$version = ('9.6', '9.7', '9.8', '9.9', '10', '11')">
+        <xsl:choose>
+            <xsl:when test="$version = ('10')">
+                <div id="aside">
                     <h2>View the full product descriptions</h2>
                     <ul>
                         <li><a class="title" target="_blank"
@@ -239,21 +185,30 @@
                             Schema processing only)</a></li>
                         <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/CS.pdf">
                             <b>CS: </b>Saxon Enterprise Edition for .NET 5</a></li>
-                        <xsl:if test="number($version) ge 9.8 and number($version) lt 10">
-                            <li><a class="title" href="../saxon-js/archive.xml"><b>JS: </b>Saxon-JS, JavaScript run-time</a></li>
-                        </xsl:if>
-                        <xsl:if test="number($version) ge 10">
-                            <li><a class="title" href="../saxon-js/index.xml"><b>JS2: </b>Saxon-JS 2, JavaScript processor</a></li>
-                        </xsl:if>
+                        <li><a class="title" href="../saxon-js/index.xml"><b>JS2: </b>Saxon-JS 2, JavaScript processor</a></li>
                     </ul>
-                </xsl:when>
-                <xsl:otherwise>
+                </div>
+            </xsl:when>
+            <xsl:otherwise>
+                <div id="aside">
+                    <h2>Packages by platform</h2>
+                    <p><b>Java: Note that Saxon 11 for Java is not yet released.</b></p>
+                    <p><b>.NET: Saxon-CS for .NET 5 is only available as the Enterprise Edition.</b></p>
+                    <p><b>Native:</b> The latest version is Saxon/C 1.2 built from Saxon 9.9.1.</p>
+                    <p><b>JavaScript:</b> Saxon-JS 2 does not require a commercial license.</p>
+                </div>
+                
+                <div id="aside">
                     <h2>Product packages</h2>
+                    <p>Editions available for Saxon 11 for Java, and Saxon/C:</p>
                     <ul>
                         <li>
                             <b>HE: </b>Saxon Home Edition (open source)</li>
                         <li>
                             <b>PE: </b>Saxon Professional Edition</li>
+                    </ul>
+                    <p>Enterprise Edition packages for Java, Saxon-CS, and Saxon/C:</p>
+                    <ul>
                         <li>
                             <b>EE: </b>Saxon Enterprise Edition</li>
                         <li>
@@ -268,57 +223,51 @@
                             <b>EE-V: </b>Saxon Enterprise Edition, Validation package
                             (restricted license allowing
                             Schema processing only)</li>
-                        <li>
-                            <b>CS: </b>Saxon Enterprise Edition for .NET 5</li>
-                        <xsl:if test="number($version) ge 9.8 and number($version) lt 10">
-                            <li>
-                                <b>JS: </b>Saxon-JS, JavaScript run-time</li>
-                        </xsl:if>
-                        <xsl:if test="number($version) ge 10">
-                            <li>
-                                <b>JS2: </b>Saxon-JS 2, JavaScript processor</li>
-                        </xsl:if>
                     </ul>
-                </xsl:otherwise>
-            </xsl:choose>
-        </div>
+                </div>
+            </xsl:otherwise>
+        </xsl:choose>
+        
     </xsl:template>
     
-    <xsl:function name="f:dot">
-        <xsl:param name="editions" as="xs:string*"/>
-        <xsl:param name="product" as="xs:string"/>
+    <xsl:function name="f:license" as="xs:string">
+        <xsl:param name="platform" as="element()?"/>
         <xsl:choose>
-            <xsl:when test="$product = $editions">                
-                <xsl:value-of select="'&#x25cf;'"/> <!-- &#8729; bullet operator. &#x25cf; black circle-->
-                <!--<img border="0" src="../img/tick-dark-blue-white-bkgd.png" width="25px"/>-->                
-            </xsl:when>            
-            <xsl:otherwise>
+            <xsl:when test="empty($platform)">
                 <xsl:value-of select="'&#xa0;'"/>
+            </xsl:when>
+            <xsl:when test="$platform/@editions = 'HE'">
+                <xsl:value-of select="'&#x25cf;'"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$platform/@editions"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
-
-    <xsl:function name="f:tick">
-        <xsl:param name="node" as="node()?"/>
+    
+    <xsl:function name="f:licenseCS" as="xs:string">
+        <xsl:param name="platform" as="element()?"/>
         <xsl:choose>
-            <xsl:when test="exists($node)">
-                <xsl:choose>
-                    <xsl:when test="$node/@level eq 'Inc'">
-                        <img border="0" src="../img/tick-dark-blue-white-bkgd.png" width="25px"/>
-                    </xsl:when>
-                    <xsl:when test="$node/@level eq 'Open'">
-                        <xsl:value-of select="'&#xa0;'"/>
-                    </xsl:when>
-                    <xsl:when test="exists($node/@level)">
-                        <xsl:value-of select="$node/@level"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <img border="0" src="../img/tick-dark-blue-white-bkgd.png" width="25px"/>
-                    </xsl:otherwise>
-                </xsl:choose>
+            <xsl:when test="empty($platform)">
+                <xsl:value-of select="'&#xa0;'"/>
+            </xsl:when>
+            <xsl:when test="$platform/@editions = ('HE','PE','EE-V')">
+                <xsl:value-of select="'&#x25cf;'"/>
             </xsl:when>
             <xsl:otherwise>
+                <xsl:value-of select="$platform/@editions"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+    
+    <xsl:function name="f:licenseJS">
+        <xsl:param name="platform" as="element()?"/>
+        <xsl:choose>
+            <xsl:when test="empty($platform)">
                 <xsl:value-of select="'&#xa0;'"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="'&#x25cf;'"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>

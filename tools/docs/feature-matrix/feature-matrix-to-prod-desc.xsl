@@ -111,8 +111,8 @@
                     the Feature Matrix. (e.g. used to add info for 'Import stylesheet packages' when
                     product does not also have 'Export' feature) -->
                 <xsl:choose>
-                    <xsl:when test="exists(./*)">
-                        <xsl:copy-of select="./*"/>
+                    <xsl:when test="exists(description)">
+                        <xsl:copy-of select="description/*"/>
                     </xsl:when>
                     <xsl:when test="ancestor::feature/description/@editions">
                         <xsl:variable name="feature" select="ancestor::feature"/>
