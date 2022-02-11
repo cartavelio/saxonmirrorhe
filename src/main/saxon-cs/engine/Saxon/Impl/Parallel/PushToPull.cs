@@ -1,4 +1,5 @@
 using Saxon.Eej.config;
+using Saxon.Eej.ee.parallel;
 using Saxon.Eej.ee.trans;
 using Saxon.Hej.expr;
 
@@ -25,18 +26,14 @@ namespace Saxon.Impl.Parallel {
     public class PushToPull {
         // The stopper item is placed on the channel to indicate that the input is complete
         private static readonly Item STOPPER = new StringValue("stopper");
-        private readonly PushToPull.Pusher pusher;
+        private readonly Pusher pusher;
         private readonly XPathContext context;
         private readonly Channel<Outcome<Item>> channel = Channel.CreateBounded<Outcome<Item>>(50);
 
-        public PushToPull(PushToPull.Pusher pusher,
+        public PushToPull(Pusher pusher,
             Saxon.Hej.expr.XPathContext context) {
             this.pusher = pusher;
             this.context = context;
-        }
-
-        public interface Pusher {
-            void push(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context);
         }
 
         private class QueueWriter : Saxon.Hej.@event.SequenceWriter {
@@ -73,9 +70,9 @@ namespace Saxon.Impl.Parallel {
         private class Provider  {
             private readonly XPathContext context;
             private readonly Channel<Outcome<Saxon.Hej.om.Item>> queue;
-            private readonly PushToPull.Pusher pusher;
+            private readonly Pusher pusher;
 
-            public Provider(PushToPull.Pusher pusher,
+            public Provider(Pusher pusher,
                 Channel<Outcome<Item>> queue, XPathContext context) {
                 this.pusher = pusher;
                 this.queue = queue;
