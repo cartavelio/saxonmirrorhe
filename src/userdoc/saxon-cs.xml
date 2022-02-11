@@ -67,8 +67,7 @@ platform. This is available from any .NET-supported language, although the examp
 available in the <a href="/dotnetdoc" class="bodylink">.NET API</a>.</p>
 
       <p>An example C# program illustrating various use cases for the API is available in the <code>samples/cs</code>
-          directory, see <a class="bodylink" href="/samples/dotnetsamples">Example applications for
-              .NET</a> for further information.</p>
+         directory, see <a class="bodylink" href="/samples/dotnetsamples">API Examples for .NET</a> for further information</p>
 
       <p>All the classes referred to below are in the namespace <code>Saxon.Api</code>.</p>
 
@@ -158,13 +157,15 @@ constructed as the output of a transformation, query, or validation episode. Var
       <p>These classes are designed to be combined in arbitrary ways. For example, you might run an XQuery whose result is
 a sequence of newly-constructed document nodes. You could then iterate over these nodes, and for each one, apply
 an XSLT transformation whose result is then serialized.</p>
+      
+      <h2 class="subtitle">Underlying Java implementation classes</h2>
 
       <p>There are several places where the classes in the <code>Saxon.Api</code> package provide an "escape hatch" into
 the underlying implementation classes. These are provided for the benefit of applications that for some reason 
 need to mix use of the .NET API with the internal classes converted from the original Java code.</p>
       
-      <p>We do not publish API documentation for the C# version of these implementation classes. However, the Javadoc
-         documentation for the original Java classes will generally provide a useful guide. To find the relevant class,
+      <p>We do not publish API documentation for the C# version of these implementation classes. However, the
+         <a class="bodylink" href="/javadoc">Java API</a> documentation for the original Java classes will generally provide a useful guide. To find the relevant class,
          you need to be aware of the mapping from C# type names to Java class names, specifically:</p>
       
       <ul>
@@ -197,46 +198,46 @@ need to mix use of the .NET API with the internal classes converted from the ori
          <tbody>
             <tr>
                <td>
-                  <p><a class="cslink" href="Saxon.Api.Processor"><code>Saxon.Api.Processor</code></a></p>
+                  <p><a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a></p>
                </td>
                <td>
                   <p>Implementation</p>
                </td>
                <td>
-                  <p><a class="javalink" href="net.sf.saxon.Configuration"><code>net.sf.saxon.Configuration</code> (<code>Saxon.Hej.Configuration</code>)</a></p>
+                  <p><a class="javalink" href="net.sf.saxon.Configuration">net.sf.saxon.Configuration</a> (<code>Saxon.Hej.Configuration</code>)</p>
                </td>
             </tr>
             <tr>
                <td>
-                  <p><a class="cslink" href="Saxon.Api.XdmNode"><code>Saxon.Api.XdmNode</code></a></p>
+                  <p><a class="cslink" href="Saxon.Api.XdmNode">Saxon.Api.XdmNode</a></p>
                </td>
                <td>
                   <p>Implementation</p>
                </td>
                <td>
-                  <p><a class="javalink" href="net.sf.saxon.om.NodeInfo"><code>net.sf.saxon.om.NodeInfo</code> (<code>Saxon.Hej.om.NodeInfo</code>)</a></p>
+                  <p><a class="javalink" href="net.sf.saxon.om.NodeInfo">net.sf.saxon.om.NodeInfo</a> (<code>Saxon.Hej.om.NodeInfo</code>)</p>
                </td>
             </tr>
             <tr>
                <td>
-                  <p><a class="cslink" href="Saxon.Api.XsltTransformer"><code>Saxon.Api.XsltTransformer</code></a></p>
+                  <p><a class="cslink" href="Saxon.Api.XsltTransformer">Saxon.Api.XsltTransformer</a></p>
                </td>
                <td>
                   <p>Implementation</p>
                </td>
                <td>
-                  <p><a class="javalink" href="net.sf.saxon.Controller"><code>net.sf.saxon.Controller</code> (<code>Saxon.Hej.Controller</code>)</a></p>
+                  <p><a class="javalink" href="net.sf.saxon.Controller">net.sf.saxon.Controller</a> (<code>Saxon.Hej.Controller</code>)</p>
                </td>
             </tr>
             <tr>
                <td>
-                  <p><a class="cslink" href="Saxon.Api.XQueryCompiler"><code>Saxon.Api.XQueryCompiler</code></a></p>
+                  <p><a class="cslink" href="Saxon.Api.XQueryCompiler">Saxon.Api.XQueryCompiler</a></p>
                </td>
                <td>
                   <p>Implementation</p>
                </td>
                <td>
-                  <p><a class="javalink" href="net.sf.saxon.query.StaticQueryContext"><code>net.sf.saxon.query.StaticQueryContext</code> (<code>Saxon.Hej.query.StaticQueryContext</code>)</a></p>
+                  <p><a class="javalink" href="net.sf.saxon.query.StaticQueryContext">net.sf.saxon.query.StaticQueryContext</a> (<code>Saxon.Hej.query.StaticQueryContext</code>)</p>
                </td>
             </tr>
          </tbody>
@@ -311,7 +312,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
       
       <h2>HTML Parsing</h2>
       
-      <p>The <code>saxon:parse-html()</code> extension function is available. It parses the supplied
+      <p>The <a class="bodylink code" href="/functions/saxon/parse-html">saxon:parse-html()</a> extension function is available. It parses the supplied
       HTML content using HTML Agility Pack, returning a Saxon wrapper around the resulting
       <code>HtmlDocument</code> node, from which XPath navigation is possible.</p>
       
@@ -327,11 +328,11 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <p>There are two interfaces that allow extension functions to be written: a simple interface where the function
       is written as a lambda expression, and a richer interface that gives access to the static and dynamic processing
       context of the function call. Both interfaces are described at 
-         <a class="bodylink" href="/extensibility/extension-functions-CS">Writing Extension Functions in C#</a>.</p>
+         <a class="bodylink" href="/extensibility/extension-functions-CS">Extension Functions (C#)</a>.</p>
    </section>
    <section id="saxon-extensions" title="Built-in Extensions" class="csonly">
       <h1>Built-in Extensions</h1>
-      <p>Nearly all the extension functions provided in the Java product in the <code>saxon</code> namespace are available.
+      <p>Nearly all the <a class="bodylink" href="/extensions/functions">extension functions</a> provided in the Java product in the <code>saxon</code> namespace are available.
          The exceptions are:</p>
       <ul>
          <li><code>saxon:key-map</code></li>
@@ -345,15 +346,21 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <p>It is possible to wrap an external C# object in an <code>XdmExternalObject</code>. However, the external object lookup 
          expression (a Saxon extension) is not available.</p>
       
-      <p>The EXPath File and Binary modules ARE available</p>
+      <p>Status for extension functions in other namespaces:</p>
       
-      <p>The EXPath Archive module is NOT available</p>
+      <ul>
+         <li>The EXPath <a class="bodylink" href="/functions/expath-file">File</a> and <a class="bodylink"
+            href="/functions/expath-binary">Binary</a> modules ARE available.</li>
+         
+         <li>The EXPath Archive module is NOT available.</li>
+         
+         <li>The EXSLT modules Sets, Math, Date, and Random are NOT available.</li>
+         
+         <li>The EXSLT module <a class="bodylink" href="/functions/exslt-common">Common</a> IS available.</li>
+         
+         <li>The SQL extension is NOT available.</li>
+      </ul>
       
-      <p>The EXSLT modules Sets, Math, Date, and Random are NOT available.</p>
-      
-      <p>The EXSLT module Common IS available.</p>
-      
-      <p>The SQL extension is NOT available.</p>
    </section>
    <section id="localization" title="Localization" class="csonly">
       <h1>Localization</h1>
@@ -370,6 +377,9 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <p>Spelled-out formatting of numbers ("one", "two", "three"), which can be requested using <code>&lt;xsl:number&gt;</code>,
       <code>format-integer()</code>, or <code>format-date()</code>, is not available for languages other than English.
       (We have not been able to find a .NET library that provides this capability).</p>
+      
+      <p>For more general information about theses localization features, see the <a class="bodylink"
+         href="/localization">Localization</a> section.</p>
    </section>
    <section id="restrictions" title="Restrictions" class="csonly">
       <h1>Restrictions</h1>
@@ -377,11 +387,11 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <p>Absolute URIs with single-character scheme names (for example, <code>a:/x/y/z</code>) are not handled correctly. 
          (This is a limitation of the .NET <code>System.Uri</code> class - it treates such names as DOS filenames).</p>
       
-      <h2>Restrictions Relative to Saxon-EE 11 on Java</h2>
+      <h2>Restrictions relative to Saxon-EE 11 on Java</h2>
       
       <p>The <code>xsl:result-document</code> instruction is executed synchronously.</p>
       
-      <h2>Restrictions and Changes Relative to Saxon-EE 10 on .NET</h2>
+      <h2>Restrictions and changes relative to Saxon-EE 10 on .NET</h2>
       
       <p>The only supported parser is the Microsoft System.Xml parser. (Saxon 10 on .NET also worked with
          a port of Apache Xerces.) See <a href="../xmlparsing" class="bodylink">XML Parsing in SaxonCS</a>.</p>
