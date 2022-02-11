@@ -373,11 +373,12 @@ public class JsonParser {
     }
 
     /**
-     * Unescape a JSON string literal,
+     * Unescape a JSON string literal
      *
-     * @param literal   the string literal to be processed
-     * @param flags     parsing options
-     * @param errorCode Error code
+     * @param literal    the string literal to be processed
+     * @param flags      parsing options
+     * @param errorCode  Error code
+     * @param lineNumber the line number
      * @return the result of parsing and conversion to XDM
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs (such as invalid JSON input)
      */

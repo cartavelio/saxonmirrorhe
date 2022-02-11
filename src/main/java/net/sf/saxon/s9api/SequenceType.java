@@ -111,6 +111,9 @@ public class SequenceType {
     /**
      * Factory method to construct a s9api {@code SequenceType} from an underlying
      *  instance of {@link net.sf.saxon.value.SequenceType}
+     * @param processor the processor
+     * @param st the internal SequenceType
+     * @return the s9api SequenceType
      * @since 10.0
      */
 

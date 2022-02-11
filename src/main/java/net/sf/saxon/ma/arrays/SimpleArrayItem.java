@@ -82,6 +82,8 @@ public class SimpleArrayItem extends AbstractArrayItem {
      * Ensure that all the members are grounded. The idea is that a member may
      * initially be a reference to a lazily-evaluated sequence, but once computed, the
      * reference will be replaced with the actual value
+     *
+     * @throws XPathException if an error is detected
      */
 
     public void makeGrounded() throws XPathException {

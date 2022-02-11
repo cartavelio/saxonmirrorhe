@@ -52,7 +52,7 @@ public class SAXDestination extends AbstractDestination {
      * @param pipe The Saxon configuration. This is supplied so that the destination can
      *               use information from the configuration (for example, a reference to the name pool)
      *               to construct or configure the returned Receiver.
-     * @param params Seriaization properties. Since this destination is not a serializing destination.
+     * @param params Serialization properties. Since this destination is not a serializing destination.
      *               the main property of interest is {@code item-separator}.
      * @return the Receiver to which events are to be sent.
      */

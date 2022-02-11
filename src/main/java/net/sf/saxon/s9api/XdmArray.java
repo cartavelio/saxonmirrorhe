@@ -185,6 +185,7 @@ public class XdmArray extends XdmFunctionItem {
      * is converted to a single member in the result array using the method
      * {@link XdmValue#makeValue(Object)}
      *
+     * @param input the Java array
      * @return the result of the conversion if successful
      * @throws IllegalArgumentException if conversion is not possible
      */

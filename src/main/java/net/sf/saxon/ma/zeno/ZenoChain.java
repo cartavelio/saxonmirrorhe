@@ -176,6 +176,7 @@ public class ZenoChain<T> implements Iterable<T> {
 
     /**
      * Get the item at position n, zero-based
+     * @param n the requested index
      * @return the item at position n
      * @throws IndexOutOfBoundsException if n is negative or beyond the end of the list
      */

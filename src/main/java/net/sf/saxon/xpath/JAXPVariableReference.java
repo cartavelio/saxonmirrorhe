@@ -39,6 +39,8 @@ public class JAXPVariableReference extends Expression implements Callable {
 
     /**
      * Create the expression
+     * @param name the name of the expression
+     * @param resolver the JAXP XPathVariableResolver
      */
 
     public JAXPVariableReference(StructuredQName name, XPathVariableResolver resolver) {
@@ -63,7 +65,7 @@ public class JAXPVariableReference extends Expression implements Callable {
      * Create a clone copy of this expression
      *
      * @return a copy of this expression
-     * @param rebindings
+     * @param rebindings the rebinding map
      */
 
     /*@NotNull*/

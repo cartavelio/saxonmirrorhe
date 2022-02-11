@@ -97,6 +97,7 @@ public class XdmValue implements Iterable<XdmItem> {
     /**
      * Create an XdmValue containing the results of reading a Stream
      * @param stream the stream to be read
+     * @throws SaxonApiException if an error occurs reading values from the supplied stream
      */
 
     public XdmValue(Stream<? extends XdmItem> stream) throws SaxonApiException {
@@ -334,6 +335,7 @@ public class XdmValue implements Iterable<XdmItem> {
      * is first converted to an XDM value using the {@link #makeValue(Object)} method;
      * if the result is anything other than a single XDM item, it is then wrapped in an
      * {@link XdmArray}.
+     * @param list the Java iterable
      * @return the result of the conversion if successful
      * @throws IllegalArgumentException if conversion is not possible
      */
@@ -370,6 +372,7 @@ public class XdmValue implements Iterable<XdmItem> {
      * method {@link XdmAtomicValue#makeAtomicValue(Object)}</li>
      * </ul>
      *
+     * @param o the Java object
      * @return the result of the conversion if successful
      * @throws IllegalArgumentException if conversion is not possible
      */

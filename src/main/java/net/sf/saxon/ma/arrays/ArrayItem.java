@@ -142,7 +142,7 @@ public abstract class ArrayItem implements Function {
 
     /**
      * Get the lowest common item type of the members of the array
-     *
+     * @param th the type hierarchy
      * @return the most specific type to which all the members belong.
      */
 
