@@ -25,7 +25,7 @@ import net.sf.saxon.type.Type;
  */
 public class ShallowSkipRuleSet implements BuiltInRuleSet {
 
-    private static ShallowSkipRuleSet THE_INSTANCE = new ShallowSkipRuleSet();
+    private static final ShallowSkipRuleSet THE_INSTANCE = new ShallowSkipRuleSet();
 
     /**
      * Get the singleton instance of this class

@@ -16,7 +16,7 @@ import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -24,7 +24,7 @@ import net.sf.saxon.value.StringValue;
  */
 public class ExsltCommonFunctionSet extends BuiltInFunctionSet {
 
-    private static ExsltCommonFunctionSet THE_INSTANCE = new ExsltCommonFunctionSet();
+    private static final ExsltCommonFunctionSet THE_INSTANCE = new ExsltCommonFunctionSet();
 
     public static ExsltCommonFunctionSet getInstance() {
         return THE_INSTANCE;
@@ -76,15 +76,15 @@ public class ExsltCommonFunctionSet extends BuiltInFunctionSet {
             Item value = arguments[0].head();
             ItemType type = SequenceTool.getItemType(value, th);
             if (th.isSubType(type, AnyNodeTest.getInstance())) {
-                return new StringValue("node-set");
+                return StringItem.bmp("node-set");
             } else if (th.isSubType(type, BuiltInAtomicType.STRING)) {
-                return new StringValue("string");
+                return StringItem.bmp("string");
             } else if (NumericType.isNumericType(type)) {
-                return new StringValue("number");
+                return StringItem.bmp("number");
             } else if (th.isSubType(type, BuiltInAtomicType.BOOLEAN)) {
-                return new StringValue("boolean");
+                return StringItem.bmp("boolean");
             } else {
-                return new StringValue(type.toString());
+                return new StringItem(type.toString());
             }
         }
     }

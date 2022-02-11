@@ -7,8 +7,9 @@
 
 package net.sf.saxon.expr.number;
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.value.DateTimeValue;
+import net.sf.saxon.str.UnicodeBuilder;
 
 import java.util.*;
 
@@ -363,7 +364,7 @@ public class NamedTimeZone {
      */
 
     public static String formatTimeZoneOffset(DateTimeValue timeValue) {
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
+        UnicodeBuilder sb = new UnicodeBuilder();
         DateTimeValue.appendTimezone(timeValue.getTimezoneInMinutes(), sb);
         return sb.toString();
     }

@@ -20,9 +20,9 @@ import net.sf.saxon.trans.XPathException;
 
 public class ReturnClauseIterator implements SequenceIterator {
 
-    private TuplePull base;
-    private Expression action;
-    private XPathContext context;
+    private final TuplePull base;
+    private final Expression action;
+    private final XPathContext context;
     private SequenceIterator results = null;
 
     /**

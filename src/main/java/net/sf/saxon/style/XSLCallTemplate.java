@@ -26,7 +26,7 @@ import java.util.List;
 
 public class XSLCallTemplate extends StyleElement {
 
-    private static StructuredQName ERROR_TEMPLATE_NAME =
+    private static final StructuredQName ERROR_TEMPLATE_NAME =
             new StructuredQName("saxon", NamespaceConstant.SAXON, "error-template");
 
     private StructuredQName calledTemplateName;   // the name of the called template
@@ -78,7 +78,7 @@ public class XSLCallTemplate extends StyleElement {
                 // xsl:fallback is not allowed on xsl:call-template, but is allowed on saxon:call-template (cheat!)
             } else if (child.getNodeKind() == Type.TEXT) {
                 // with xml:space=preserve, white space nodes may still be there
-                if (!Whitespace.isWhite(child.getStringValueCS())) {
+                if (!Whitespace.isAllWhite(child.getUnicodeStringValue())) {
                     compileError("No character data is allowed within xsl:call-template", "XTSE0010");
                 }
             } else {

@@ -26,8 +26,8 @@ import net.sf.saxon.value.SequenceType;
 public class SortExpression extends Expression
         implements SortKeyEvaluator {
 
-    private Operand selectOp;
-    private Operand sortOp;
+    private final Operand selectOp;
+    private final Operand sortOp;
     private transient AtomicComparer[] comparators = null;
     // created early if all comparators can be created statically
     // transient because Java RuleBasedCollator is not serializable

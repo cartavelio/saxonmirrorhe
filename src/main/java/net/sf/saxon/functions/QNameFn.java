@@ -14,7 +14,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -24,7 +24,7 @@ import net.sf.saxon.value.StringValue;
 public class QNameFn extends SystemFunction {
 
 
-    public static QNameValue expandedQName(StringValue namespace, StringValue lexical) throws XPathException {
+    public static QNameValue expandedQName(StringItem namespace, StringItem lexical) throws XPathException {
 
         String uri;
         if (namespace == null) {
@@ -34,8 +34,7 @@ public class QNameFn extends SystemFunction {
         }
 
         try {
-            final String lex = lexical.getStringValue();
-            final String[] parts = NameChecker.getQNameParts(lex);
+            final String[] parts = NameChecker.getQNameParts(lexical.getStringValue());
             // The QNameValue constructor does not check the prefix
             if (!parts[0].isEmpty() && !NameChecker.isValidNCName(parts[0])) {
                 XPathException err = new XPathException("Malformed prefix in QName: '" + parts[0] + '\'');
@@ -65,8 +64,8 @@ public class QNameFn extends SystemFunction {
     @Override
     public QNameValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return expandedQName(
-                (StringValue) arguments[0].head(),
-                (StringValue) arguments[1].head()
+                (StringItem) arguments[0].head(),
+                (StringItem) arguments[1].head()
         );
     }
 

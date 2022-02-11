@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class SortKeyDefinitionList extends PseudoExpression implements Iterable<SortKeyDefinition> {
 
-    private SortKeyDefinition[] sortKeyDefinitions;
+    private final SortKeyDefinition[] sortKeyDefinitions;
 
     /**
      * Create a list of sort key definitions

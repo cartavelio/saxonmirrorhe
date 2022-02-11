@@ -20,8 +20,8 @@ import java.util.Objects;
 
 class ConstructedItemType extends ItemType {
 
-    private net.sf.saxon.type.ItemType underlyingType;
-    private Processor processor;
+    private final net.sf.saxon.type.ItemType underlyingType;
+    private final Processor processor;
 
     /**
      * Protected constructor

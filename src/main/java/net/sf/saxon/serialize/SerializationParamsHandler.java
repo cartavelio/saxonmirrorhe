@@ -8,17 +8,17 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.expr.instruct.ResultDocument;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.regex.UnicodeString;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.z.IntHashMap;
 
 import java.util.Arrays;
@@ -106,13 +106,13 @@ public class SerializationParamsHandler {
                     }
                     String ch = getAttribute(gChild, "character");
                     String str = getAttribute(gChild, "map-string");
-                    UnicodeString chValue = UnicodeString.makeUnicodeString(ch);
+                    StringItem chValue = new StringItem(ch);
 
-                    if (chValue.uLength() != 1) {
+                    if (chValue.length() != 1) {
                         throw new XPathException("In the serialization parameters, the value of @character in the character map " +
                             "must be a single Unicode character", "SEPM0017");
                     }
-                    int code = chValue.uCharAt(0);
+                    int code = chValue.getContent().codePointAt(0);
                     String prev = map.put(code, str);
                     if (prev != null) {
                         throw new XPathException("In the serialization parameters, the character map contains two entries for the character \\u" +

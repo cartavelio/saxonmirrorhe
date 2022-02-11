@@ -50,9 +50,10 @@ public class TestSecondaryDestination {
         }
 
         private final Configuration myConfig;
-        private Map<Result, String> expected = new HashMap<Result, String>();
+        private final Map<Result, String> expected = new HashMap<Result, String>();
 
 
+        @Override
         public OutputURIResolver newInstance() {
             return new MyOutputResolver(myConfig);
         }
@@ -67,6 +68,7 @@ public class TestSecondaryDestination {
         }
 
 
+        @Override
         public Result resolve(String href, String base)
                 throws TransformerException {
             String uri = resolveUri(href, base);
@@ -83,6 +85,7 @@ public class TestSecondaryDestination {
 //            }
         }
 
+        @Override
         public void close(Result result) {
             assertTrue(expected.get(result) != null);
         }

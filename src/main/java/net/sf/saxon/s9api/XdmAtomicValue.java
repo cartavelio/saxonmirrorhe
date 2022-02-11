@@ -8,6 +8,7 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -119,7 +120,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(String value) {
-        this(new StringValue(value), true);
+        this(new StringItem(value), true);
     }
 
     /**
@@ -129,7 +130,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(URI value) {
-        this(new AnyURIValue(value.toString()), true);
+        this(new AnyURIValue((value.toString())), true);
     }
 
     /**
@@ -232,7 +233,7 @@ public class XdmAtomicValue extends XdmItem {
         }
         try {
             StringConverter converter = ((AtomicType)it).getStringConverter(type.getConversionRules());
-            setValue(converter.convertString(lexicalForm).asAtomic());
+            setValue(converter.convertString(StringView.of(lexicalForm).tidy()).asAtomic());
         } catch (ValidationException e) {
             throw new SaxonApiException(e);
         }
@@ -369,8 +370,8 @@ public class XdmAtomicValue extends XdmItem {
     @SuppressWarnings({"AutoBoxing"})
     public Object getValue() {
         AtomicValue av = getUnderlyingValue();
-        if (av instanceof StringValue) {
-            return av.getStringValue();
+        if (av instanceof StringItem) {
+            return av.getUnicodeStringValue();
         } else if (av instanceof IntegerValue) {
             return ((IntegerValue) av).asBigInteger();
         } else if (av instanceof DoubleValue) {
@@ -393,7 +394,7 @@ public class XdmAtomicValue extends XdmItem {
             QNameValue q = (QNameValue) av;
             return new QName(q.getPrefix(), q.getNamespaceURI(), q.getLocalName());
         } else {
-            return av.getStringValue();
+            return av.getUnicodeStringValue();
         }
     }
 
@@ -411,8 +412,8 @@ public class XdmAtomicValue extends XdmItem {
             return ((BooleanValue) av).getBooleanValue();
         } else if (av instanceof NumericValue) {
             return !av.isNaN() && ((NumericValue) av).signum() != 0;
-        } else if (av instanceof StringValue) {
-            String s = av.getStringValue().trim();
+        } else if (av instanceof StringItem) {
+            String s = Whitespace.trim(av.getUnicodeStringValue().tidy()).toString();
             return "1".equals(s) || "true".equals(s);
         } else {
             throw new SaxonApiException("Cannot cast item to a boolean");
@@ -436,9 +437,9 @@ public class XdmAtomicValue extends XdmItem {
             } catch (XPathException e) {
                 throw new SaxonApiException("Cannot cast item to an integer");
             }
-        } else if (av instanceof StringValue) {
+        } else if (av instanceof StringItem) {
             StringToDouble converter = StringToDouble.getInstance();
-            return (long) converter.stringToNumber(av.getStringValueCS());
+            return (long) converter.stringToNumber(av.getUnicodeStringValue().tidy());
         } else {
             throw new SaxonApiException("Cannot cast item to an integer");
         }
@@ -459,10 +460,10 @@ public class XdmAtomicValue extends XdmItem {
             return ((BooleanValue) av).getBooleanValue() ? 0.0 : 1.0;
         } else if (av instanceof NumericValue) {
             return ((NumericValue) av).getDoubleValue();
-        } else if (av instanceof StringValue) {
+        } else if (av instanceof StringItem) {
             try {
                 StringToDouble converter = StringToDouble11.getInstance();
-                return converter.stringToNumber(av.getStringValueCS());
+                return converter.stringToNumber(av.getUnicodeStringValue().tidy());
             } catch (NumberFormatException e) {
                 throw new SaxonApiException(e.getMessage());
             }
@@ -488,8 +489,8 @@ public class XdmAtomicValue extends XdmItem {
             } catch (XPathException e) {
                 throw new SaxonApiException("Cannot cast item to a decimal");
             }
-        } else if (av instanceof StringValue) {
-            return new BigDecimal(av.getStringValueCS().toString());
+        } else if (av instanceof StringItem) {
+            return new BigDecimal(av.getStringValue());
         } else {
             throw new SaxonApiException("Cannot cast item to a decimal");
         }

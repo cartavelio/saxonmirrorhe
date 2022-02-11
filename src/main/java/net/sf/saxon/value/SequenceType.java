@@ -30,8 +30,8 @@ import java.util.Optional;
 public final class SequenceType {
 
 
-    private ItemType primaryType;    // the primary type of the item, e.g. "element", "comment", or "integer"
-    private int cardinality;    // the required cardinality
+    private final ItemType primaryType;    // the primary type of the item, e.g. "element", "comment", or "integer"
+    private final int cardinality;    // the required cardinality
 
     /**
      * A type that allows any sequence of items

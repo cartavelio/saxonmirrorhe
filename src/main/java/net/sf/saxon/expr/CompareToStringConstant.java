@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollatingComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 
@@ -24,7 +25,7 @@ import net.sf.saxon.trans.XPathException;
 
 public class CompareToStringConstant extends CompareToConstant {
 
-    private String comparand;
+    private final UnicodeString comparand;
 
     /**
      * Create the expression
@@ -37,20 +38,20 @@ public class CompareToStringConstant extends CompareToConstant {
      * @param comparand the integer constant
      */
 
-    public CompareToStringConstant(Expression operand, int operator, String comparand) {
+    public CompareToStringConstant(Expression operand, int operator, UnicodeString comparand) {
         super(operand);
         this.operator = operator;
         this.comparand = comparand;
     }
 
     /**
-     * Get the integer value on the rhs of the expression
+     * Get the string value on the rhs of the expression
      *
      * @return the integer constant
      */
 
 
-    public String getComparand() {
+    public UnicodeString getComparand() {
         return comparand;
     }
 
@@ -118,8 +119,8 @@ public class CompareToStringConstant extends CompareToConstant {
 
     @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
-        CharSequence s = getLhsExpression().evaluateAsString(context);
-        int c = CodepointCollator.compareCS(s, comparand);
+        UnicodeString s = getLhsExpression().evaluateItem(context).getUnicodeStringValue();
+        int c = CodepointCollator.getInstance().compareStrings(s, comparand);
         return interpretComparisonResult(c);
     }
 
@@ -152,7 +153,7 @@ public class CompareToStringConstant extends CompareToConstant {
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("compareToString", this);
         destination.emitAttribute("op", Token.tokens[operator]);
-        destination.emitAttribute("val", comparand);
+        destination.emitAttribute("val", getComparand().toString());
         getLhsExpression().export(destination);
         destination.endElement();
     }
@@ -168,7 +169,7 @@ public class CompareToStringConstant extends CompareToConstant {
     @Override
     public String toString() {
         return ExpressionTool.parenthesize(getLhsExpression()) + " " +
-                Token.tokens[operator] + " \"" + comparand + "\"";
+                Token.tokens[operator] + " " + comparand.toString();
     }
 
     /**

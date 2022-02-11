@@ -30,7 +30,7 @@ import net.sf.saxon.value.NumericValue;
  */
 public class GeneralPositionalPattern extends Pattern {
 
-    private NodeTest nodeTest;
+    private final NodeTest nodeTest;
     private Expression positionExpr;
     private boolean usesPosition = true;
 

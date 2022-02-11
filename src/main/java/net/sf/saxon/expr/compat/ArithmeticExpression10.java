@@ -124,7 +124,7 @@ public class ArithmeticExpression10 extends ArithmeticExpression implements Call
 
         if (operator == Token.NEGATE) {
             if (getRhsExpression() instanceof Literal) {
-                GroundedValue v = ((Literal) getRhsExpression()).getValue();
+                GroundedValue v = ((Literal) getRhsExpression()).getGroundedValue();
                 if (v instanceof NumericValue) {
                     return Literal.makeLiteral(((NumericValue) v).negate(), this);
                 }
@@ -201,7 +201,7 @@ public class ArithmeticExpression10 extends ArithmeticExpression implements Call
                 th.isSubType(type, BuiltInAtomicType.FLOAT) ||
                 th.isSubType(type, BuiltInAtomicType.DECIMAL)) {
             if (operand instanceof Literal) {
-                GroundedValue val = ((Literal) operand).getValue();
+                GroundedValue val = ((Literal) operand).getGroundedValue();
                 return Literal.makeLiteral(Number_1.convert((AtomicValue) val, config), this);
             } else {
                 return SystemFunction.makeCall("number", getRetainedStaticContext(), operand);

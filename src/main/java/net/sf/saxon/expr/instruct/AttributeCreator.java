@@ -15,10 +15,9 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.NameOfNode;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -183,7 +182,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
      */
 
     @Override
-    public void processValue(CharSequence value, Outputter output, XPathContext context) throws XPathException {
+    public void processValue(UnicodeString value, Outputter output, XPathContext context) throws XPathException {
         NodeName attName = evaluateNodeName(context);
         int opt = getOptions();
         SimpleType ann;
@@ -230,7 +229,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
         }
 
         try {
-            output.attribute(attName, ann, value, getLocation(), opt);
+            output.attribute(attName, ann, value.toString(), getLocation(), opt);
         } catch (XPathException err) {
             throw dynamicError(getLocation(), err, context);
         }
@@ -252,9 +251,9 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
         int validationAction = getValidationAction();
         if (schemaType != null) {
             ValidationFailure err = schemaType.validateContent(
-                    orphan.getStringValueCS(), DummyNamespaceResolver.getInstance(), rules);
+                    orphan.getUnicodeStringValue(), DummyNamespaceResolver.getInstance(), rules);
             if (err != null) {
-                err.setMessage("Attribute value " + Err.wrap(orphan.getStringValueCS(), Err.VALUE) +
+                err.setMessage("Attribute value " + Err.wrap(orphan.getUnicodeStringValue(), Err.VALUE) +
                                        " does not the match the required type " +
                                        schemaType.getDescription() + ". " +
                                        err.getMessage());
@@ -271,7 +270,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
                 final Controller controller = context.getController();
                 assert controller != null;
                 SimpleType ann = controller.getConfiguration().validateAttribute(
-                        NameOfNode.makeName(orphan).getStructuredQName(), orphan.getStringValueCS(), validationAction);
+                        NameOfNode.makeName(orphan).getStructuredQName(), orphan.getUnicodeStringValue(), validationAction);
                 orphan.setTypeAnnotation(ann);
             } catch (ValidationException e) {
                 XPathException err = XPathException.makeXPathException(e);

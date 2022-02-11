@@ -20,7 +20,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 /**
@@ -84,7 +84,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
         }
 
         if (attributeName instanceof StringLiteral) {
-            if (!NameChecker.isQName(((StringLiteral) attributeName).getStringValue())) {
+            if (!NameChecker.isQName(((StringLiteral) attributeName).getGroundedValue().codePoints())) {
                 invalidAttributeName("Attribute name " + Err.wrap(nameAtt) + " is not a valid QName");
             }
             if (nameAtt.equals("xmlns")) {
@@ -106,7 +106,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
 
         if (namespaceAtt != null) {
             if (namespace instanceof StringLiteral) {
-                if (!StandardURIChecker.getInstance().isValidURI(((StringLiteral) namespace).getStringValue())) {
+                if (!StandardURIChecker.getInstance().isValidURI(((StringLiteral) namespace).stringify())) {
                     compileError("The value of the namespace attribute must be a valid URI", "XTDE0865");
                 }
             }
@@ -114,9 +114,9 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
 
         if (separatorAtt == null) {
             if (selectAtt == null) {
-                separator = new StringLiteral(StringValue.EMPTY_STRING);
+                separator = new StringLiteral(StringItem.EMPTY_STRING);
             } else {
-                separator = new StringLiteral(StringValue.SINGLE_SPACE);
+                separator = new StringLiteral(StringItem.SINGLE_SPACE);
             }
         }
 
@@ -194,7 +194,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
         // deal specially with the case where the attribute name is known statically
 
         if (attributeName instanceof StringLiteral /*&& onEmpty == null*/) {
-            String qName = Whitespace.trim(((StringLiteral) attributeName).getStringValue());
+            String qName = Whitespace.trim(((StringLiteral) attributeName).stringify());
             String[] parts;
             try {
                 parts = NameChecker.getQNameParts(qName);
@@ -222,7 +222,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                 compileContent(compilation, decl, inst, separator);
                 return inst;
             } else if (namespace instanceof StringLiteral) {
-                String nsuri = ((StringLiteral) namespace).getStringValue();
+                String nsuri = ((StringLiteral) namespace).stringify();
                 if (nsuri.equals("")) {
                     parts[0] = "";
                 } else if (parts[0].equals("")) {
@@ -231,7 +231,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                     AxisIterator iter = iterateAxis(AxisInfo.NAMESPACE);
                     NodeInfo ns;
                     while ((ns = iter.next()) != null) {
-                        if (ns.getStringValue().equals(nsuri)) {
+                        if (ns.getUnicodeStringValue().equals(nsuri)) {
                             parts[0] = ns.getLocalPart();
                             break;
                         }
@@ -239,7 +239,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                     // Otherwise see the URI is known to the namepool
                     if (parts[0].equals("")) {
                         String p = getNamePool().suggestPrefixForURI(
-                                ((StringLiteral) namespace).getStringValue());
+                                ((StringLiteral) namespace).stringify());
                         if (p != null) {
                             parts[0] = p;
                         }

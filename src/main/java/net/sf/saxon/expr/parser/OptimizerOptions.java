@@ -30,7 +30,7 @@ public class OptimizerOptions {
     public static final int TAIL_CALLS = 16384;
     public static final int CONSTANT_FOLDING = 32768;
 
-    private int options;
+    private final int options;
 
     public final static OptimizerOptions FULL_HE_OPTIMIZATION = new OptimizerOptions("lvmt");
     public final static OptimizerOptions FULL_EE_OPTIMIZATION = new OptimizerOptions(-1);

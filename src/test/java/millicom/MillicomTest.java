@@ -1,10 +1,8 @@
 package millicom;
 
-import net.sf.saxon.Platform;
 import net.sf.saxon.Version;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.value.DateTimeValue;
-import net.sf.saxon.value.DurationValue;
 import org.xml.sax.InputSource;
 
 import javax.xml.stream.XMLStreamException;
@@ -13,12 +11,9 @@ import javax.xml.transform.ErrorListener;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.lang.reflect.Array;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -90,7 +85,7 @@ public class MillicomTest {
         start = getDateTime();
         if (verbose) {
             System.out.println("Running with " + Version.getProductName() + ", " + Version.getProductVersion() + ", " + Version.getProductVendor());
-            System.out.println("Start time: " + start.getStringValue());
+            System.out.println("Start time: " + start.getUnicodeStringValue());
         }
         FileOutputStream out = null;
 
@@ -185,7 +180,7 @@ public class MillicomTest {
                     end = getDateTime();
                     errors = ((MyErrorListener) listener).getErrorCount();
                     warnings = ((MyErrorListener) listener).getWarningCount();
-                    addExtraInfo2ValidationOutput(xmlFile, outFile, (errors > 0 || warnings > 0 ? false : true));
+                    addExtraInfo2ValidationOutput(xmlFile, outFile, (errors <= 0 && warnings <= 0));
 
 					// delete temporary file
                     File file = new File(outFile + "_temp");
@@ -211,7 +206,7 @@ public class MillicomTest {
 
 				if (verbose)
 				{
-					 System.out.println("End time: "+ getDateTime().getStringValue());
+					 System.out.println("End time: "+ getDateTime().getUnicodeStringValue());
 					 System.out.println("Validation process completed");
 				}
             }
@@ -247,8 +242,8 @@ public class MillicomTest {
                     "<result>" + (result ? "true" : "false") + "</result>\n" +
                     "<errors>" + errors + "</errors>\n" +
                     "<warnings>" + warnings + "</warnings>" +
-                    "<startTime>" + start.getStringValue() + "</startTime>\n" +
-                    "<endTime>" + end.getStringValue() + "</endTime>\n" +
+                    "<startTime>" + start.getUnicodeStringValue() + "</startTime>\n" +
+                    "<endTime>" + end.getUnicodeStringValue() + "</endTime>\n" +
                     "<xmlFile>" + xmlFile.replace('/', '\\') + "</xmlFile>\n" +
                     "<xsdFile>" + xsd.replace('/', '\\') + "</xsdFile>\n" +
                     "<xsdProcessor>" + Version.getProductName() + " " + Version.getProductVersion() + ", " + proc.getSaxonEdition() + "-Java, " + Version.getProductVendor() + "</xsdProcessor>\n" +
@@ -298,7 +293,7 @@ public class MillicomTest {
     }
 
 
-    public static void main(String args[]) throws IOException, SaxonApiException {
+    public static void main(String[] args) throws IOException, SaxonApiException {
 
         MillicomTest test = new MillicomTest(args);
 

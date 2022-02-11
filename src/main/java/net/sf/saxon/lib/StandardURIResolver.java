@@ -20,6 +20,7 @@ import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.resource.BinaryResource;
 import net.sf.saxon.resource.DataURIScheme;
+import net.sf.saxon.resource.Loader;
 import net.sf.saxon.resource.UnparsedTextResource;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.Maker;
@@ -31,11 +32,13 @@ import org.xml.sax.XMLReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.function.Predicate;
 
 
@@ -352,9 +355,15 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
                 return;
             }
         }
-        source.setInputSource(new InputSource(uriString));
-        source.setSystemId(uriString);
-    }
 
+        try {
+            InputStream is = Loader.urlStream(new URL(uriString));
+            source.setInputSource(new InputSource(is));
+            source.setSystemId(uriString);
+        } catch (IOException e) {
+            source.setInputSource(new InputSource(uriString));
+            source.setSystemId(uriString);
+        }
+    }
 }
 

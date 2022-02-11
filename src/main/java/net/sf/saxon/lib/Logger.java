@@ -105,6 +105,7 @@ public abstract class Logger {
     /**
      * Get a {@link Writer} whose effect is to send each line of written output as
      * a separate INFO message to this Logger
+     *
      * @return a suitable {@code Writer}
      */
 

@@ -20,7 +20,7 @@ import javax.xml.transform.TransformerException;
  */
 public class InvalidityHandlerWrappingErrorListener implements InvalidityHandler {
 
-    private ErrorListener errorListener;
+    private final ErrorListener errorListener;
 
     public InvalidityHandlerWrappingErrorListener(ErrorListener errorListener) {
         this.errorListener = errorListener;

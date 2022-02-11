@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public class History {
 
-    private Map<Operation, IntSet> zeroLengthMatches = new HashMap<Operation, IntSet>();
+    private final Map<Operation, IntSet> zeroLengthMatches = new HashMap<Operation, IntSet>();
 
     public boolean isDuplicateZeroLengthMatch(Operation op, int position) {
         IntSet positions = zeroLengthMatches.get(op);

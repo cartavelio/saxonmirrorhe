@@ -67,8 +67,8 @@ public class DocumentKey {
     public boolean equals(Object obj) {
         return obj instanceof DocumentKey
                 && normalizedValue.equals(((DocumentKey) obj).normalizedValue)
-                && packageName.equals(((DocumentKey)obj).packageName)
-                && packageVersion.equals(((DocumentKey)obj).packageVersion);
+                && packageName.equals(((DocumentKey) obj).packageName)
+                && packageVersion.equals(((DocumentKey) obj).packageVersion);
     }
 
     @Override

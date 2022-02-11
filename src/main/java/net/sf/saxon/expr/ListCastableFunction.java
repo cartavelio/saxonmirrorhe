@@ -12,6 +12,7 @@ import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -74,12 +75,12 @@ public class ListCastableFunction extends ListConstructorFunction {
         if (iter.next() != null) {
             return BooleanValue.FALSE;
         }
-        if (!(val instanceof StringValue) || val instanceof AnyURIValue) {
+        if (!(val instanceof StringItem) || val instanceof AnyURIValue) {
             return BooleanValue.FALSE;
         }
 
         ConversionRules rules = context.getConfiguration().getConversionRules();
-        CharSequence cs = val.getStringValueCS();
+        UnicodeString cs = val.getUnicodeStringValue();
         ValidationFailure failure = targetType.validateContent(cs, nsResolver, rules);
         return BooleanValue.get(failure == null);
     }

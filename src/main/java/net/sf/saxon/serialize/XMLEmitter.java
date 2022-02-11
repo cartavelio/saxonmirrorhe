@@ -9,22 +9,23 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.tiny.CharSlice;
-import net.sf.saxon.tree.tiny.CompressedWhitespace;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.z.IntIterator;
 
 import javax.xml.transform.OutputKeys;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.Stack;
+import java.util.function.IntPredicate;
 
 /**
  * XMLEmitter is an Emitter that generates XML output
@@ -106,6 +107,9 @@ public class XMLEmitter extends Emitter {
         specialInAttSingle['\''] = true;
     }
 
+    IntPredicate isSpecialInText;
+    IntPredicate isSpecialInAttribute;
+
     /**
      * Set the character reference generator to be used for generating hexadecimal or decimal
      * character references
@@ -186,6 +190,15 @@ public class XMLEmitter extends Emitter {
             delimiter = '\'';
             attSpecials = specialInAttSingle;
         }
+
+        if (allCharactersEncodable) {
+            isSpecialInText = c -> (c < 127 ? specialInText[c] : (c < 160 || c == 0x2028 || c > 65535));
+            isSpecialInAttribute = c -> (c < 127 ? attSpecials[c] : (c < 160 || c == 0x2028 || c > 65535));
+        } else {
+            isSpecialInText = c -> (c < 127 ? specialInText[c] : (c < 160 || c == 0x2028 || c > 65535 || !characterSet.inCharset(c)));
+            isSpecialInAttribute = c -> (c < 127 ? attSpecials[c] : (c < 160 || c == 0x2028 || c > 65535 || !characterSet.inCharset(c)));
+        }
+
         writeDeclaration();
     }
 
@@ -371,7 +384,7 @@ public class XMLEmitter extends Emitter {
 
         String displayName = elemName.getDisplayName();
         if (!allCharactersEncodable) {
-            int badchar = testCharacters(displayName);
+            int badchar = testCharacters(StringView.of(displayName));
             if (badchar != 0) {
                 XPathException err = new XPathException("Element name contains a character (decimal + " +
                                                                 badchar + ") not available in the selected encoding");
@@ -447,7 +460,7 @@ public class XMLEmitter extends Emitter {
             } else if (nsprefix.equals("xml")) {
                 //return;
             } else {
-                int badchar = testCharacters(nsprefix);
+                int badchar = testCharacters(StringView.of(nsprefix));
                 if (badchar != 0) {
                     XPathException err = new XPathException("Namespace prefix contains a character (decimal + " +
                                                                     badchar + ") not available in the selected encoding");
@@ -475,15 +488,15 @@ public class XMLEmitter extends Emitter {
         indentForNextAttribute = indent;
     }
 
-    private void attribute(NodeName nameCode, CharSequence value, int properties, boolean isFirst)
+    private void attribute(NodeName nameCode, String value, int properties, boolean isFirst)
             throws XPathException {
 
         String displayName = nameCode.getDisplayName();
         if (!allCharactersEncodable) {
-            int badchar = testCharacters(displayName);
+            int badchar = testCharacters(StringView.of(displayName));
             if (badchar != 0) {
                 if (unfailing) {
-                    displayName = convertToAscii(displayName);
+                    displayName = convertToAscii(StringView.of(displayName)).toString();
                 } else {
                     XPathException err = new XPathException("Attribute name contains a character (decimal + " +
                                                                     badchar + ") not available in the selected encoding");
@@ -563,27 +576,26 @@ public class XMLEmitter extends Emitter {
      * @throws net.sf.saxon.trans.XPathException if an error occurs
      */
 
-    protected void writeAttribute(NodeName elCode, String attname, CharSequence value, int properties) throws XPathException {
+    protected void writeAttribute(NodeName elCode, String attname, String value, int properties) throws XPathException {
         try {
-            String val = value.toString();
             writer.write(attname);
             if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
                 writer.write('=');
                 writer.write(delimiter);
-                writer.write(val);
+                writer.write(value);
                 writer.write(delimiter);
             } else if (ReceiverOption.contains(properties, ReceiverOption.USE_NULL_MARKERS)) {
                 // null (0) characters will be used before and after any section of
                 // the value generated from a character map
                 writer.write('=');
-                char delim = val.indexOf('"') >= 0 && val.indexOf('\'') < 0 ? '\'' : delimiter;
+                char delim = value.indexOf('"') >= 0 && value.indexOf('\'') < 0 ? '\'' : delimiter;
                 writer.write(delim);
-                writeEscape(value, true);
+                writeEscape(StringView.tidy(value), true);
                 writer.write(delim);
             } else {
                 writer.write("=");
                 writer.write(delimiter);
-                writeEscape(value, true);
+                writeEscape(StringView.tidy(value), true);
                 writer.write(delimiter);
             }
         } catch (java.io.IOException err) {
@@ -600,18 +612,12 @@ public class XMLEmitter extends Emitter {
      * first offending character if not
      */
 
-    protected int testCharacters(CharSequence chars) {
-        for (int i = 0; i < chars.length(); i++) {
-            char c = chars.charAt(i);
-            if (c > 127) {
-                if (UTF16CharacterSet.isHighSurrogate(c)) {
-                    int cc = UTF16CharacterSet.combinePair(c, chars.charAt(++i));
-                    if (!characterSet.inCharset(cc)) {
-                        return cc;
-                    }
-                } else if (!characterSet.inCharset(c)) {
-                    return c;
-                }
+    protected int testCharacters(CodePoints chars) {
+        IntIterator iter = chars.codePoints();
+        while (iter.hasNext()) {
+            int ch = iter.next();
+            if (ch > 127 && !characterSet.inCharset(ch)) {
+                return ch;
             }
         }
         return 0;
@@ -621,17 +627,18 @@ public class XMLEmitter extends Emitter {
      * Where characters are not available in the selected encoding, substitute them
      */
 
-    protected String convertToAscii(CharSequence chars) {
-        FastStringBuffer buff = new FastStringBuffer(chars.length());
-        for (int i = 0; i < chars.length(); i++) {
-            char c = chars.charAt(i);
+    protected CodePoints convertToAscii(CodePoints chars) {
+        UnicodeBuilder buff = new UnicodeBuilder();
+        IntIterator iter = chars.codePoints();
+        while (iter.hasNext()) {
+            int c = iter.next();
             if (c >= 20 && c < 127) {
-                buff.cat(c);
+                buff.append(c);
             } else {
                 buff.append("_" + (int) c + "_");
             }
         }
-        return buff.toString();
+        return buff.toUnicodeString();
     }
 
     /**
@@ -660,12 +667,12 @@ public class XMLEmitter extends Emitter {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (!started) {
             openDocument();
         }
 
-        if (requireWellFormed && elementStack.isEmpty() && !Whitespace.isWhite(chars) && !unfailing) {
+        if (requireWellFormed && elementStack.isEmpty() && !Whitespace.isAllWhite(chars) && !unfailing) {
             XPathException err = new XPathException("When 'standalone' or 'doctype-system' is specified, " +
                                                             "the document must be well-formed; but this document contains a top-level text node");
             err.setErrorCode("SEPM0004");
@@ -678,23 +685,26 @@ public class XMLEmitter extends Emitter {
             }
 
             if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
-                writeCharSequence(chars);
+                chars.write(writer);
+            } else if (chars instanceof CompressedWhitespace) {
+                chars.write(writer);
             } else if (!ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
-                writeEscape(chars, false);
+                writeEscape(chars.tidy(), false);
             } else {
                 // disable-output-escaping="yes"
                 if (testCharacters(chars) == 0) {
                     if (!ReceiverOption.contains(properties, ReceiverOption.USE_NULL_MARKERS)) {
                         // null (0) characters will be used before and after any section of
                         // the value generated from a character map
-                        writeCharSequence(chars);
+                        chars.write(writer);
                     } else {
                         // Need to strip out any null markers. See test output-html109
-                        final int len = chars.length();
-                        for (int i = 0; i < len; i++) {
-                            char c = chars.charAt(i);
+                        IntIterator iter = chars.codePoints();
+                        while (iter.hasNext()) {
+                            int c = iter.next();
                             if (c != 0) {
-                                writer.write(c);
+                                writeCodePoint(c);
+                                //writer.write(c);
                             }
                         }
                     }
@@ -703,27 +713,16 @@ public class XMLEmitter extends Emitter {
                     // that are not available in the target encoding
                     // The required action is to ignore d-o-e in respect of those characters that are
                     // not available in the encoding. This is slow...
-                    final int len = chars.length();
-                    for (int i = 0; i < len; i++) {
-                        char c = chars.charAt(i);
+                    IntIterator iter = chars.codePoints();
+                    while (iter.hasNext()) {
+                        int c = iter.next();
                         if (c != 0) {
-                            if (c > 127 && UTF16CharacterSet.isHighSurrogate(c)) {
-                                char[] pair = new char[2];
-                                pair[0] = c;
-                                pair[1] = chars.charAt(++i);
-                                int cc = UTF16CharacterSet.combinePair(c, pair[1]);
-                                if (!characterSet.inCharset(cc)) {
-                                    writeEscape(new CharSlice(pair), false);
-                                } else {
-                                    writeCharSequence(new CharSlice(pair));
-                                }
+                            if (characterSet.inCharset(c)) {
+                                writeCodePoint(c);
                             } else {
-                                char[] ca = {c};
-                                if (!characterSet.inCharset(c)) {
-                                    writeEscape(new CharSlice(ca), false);
-                                } else {
-                                    writeCharSequence(new CharSlice(ca));
-                                }
+                                UnicodeBuilder ub = new UnicodeBuilder();
+                                ub.append(c);
+                                writeEscape(ub.toUnicodeString(), false);
                             }
                         }
                     }
@@ -735,41 +734,19 @@ public class XMLEmitter extends Emitter {
     }
 
     /**
-     * Write a CharSequence (without any escaping of special characters): various implementations
-     *
-     * @param s the character sequence to be written
-     * @throws java.io.IOException in the event of a failure to write to the output file
-     */
-
-    public void writeCharSequence(CharSequence s) throws java.io.IOException {
-        if (s instanceof String) {
-            writer.write((String) s);
-        } else if (s instanceof CharSlice) {
-            ((CharSlice) s).write(writer);
-        } else if (s instanceof FastStringBuffer) {
-            ((FastStringBuffer) s).write(writer);
-        } else if (s instanceof CompressedWhitespace) {
-            ((CompressedWhitespace) s).write(writer);
-        } else {
-            writer.write(s.toString());
-        }
-    }
-
-
-    /**
      * Handle a processing instruction.
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
             throws XPathException {
         if (!started) {
             openDocument();
         }
-        int x = testCharacters(target);
+        int x = testCharacters(StringView.of(target));
         if (x != 0) {
             if (unfailing) {
-                target = convertToAscii(target);
+                target = convertToAscii(StringView.of(target)).toString();
             } else {
                 XPathException err = new XPathException("Character in processing instruction name cannot be represented " +
                                                                 "in the selected encoding (code " + x + ')');
@@ -792,7 +769,7 @@ public class XMLEmitter extends Emitter {
             if (openStartTag) {
                 closeStartTag();
             }
-            writer.write("<?" + target + (data.length() > 0 ? ' ' + data.toString() : "") + "?>");
+            writer.write("<?" + target + (data.isEmpty() ? "" : ' ' + data.toString()) + "?>");
         } catch (java.io.IOException err) {
             throw new XPathException("Failure writing to " + getSystemId(), err);
         }
@@ -802,14 +779,13 @@ public class XMLEmitter extends Emitter {
      * Write contents of array to current writer, after escaping special characters.
      * This method converts the XML special characters (such as &lt; and &amp;) into their
      * predefined entities.
-     *
      * @param chars       The character sequence containing the string
      * @param inAttribute Set to true if the text is in an attribute value
      */
 
-    protected void writeEscape(final CharSequence chars, final boolean inAttribute)
+    protected void writeEscape(UnicodeString chars, final boolean inAttribute)
             throws java.io.IOException, XPathException {
-        int segstart = 0;
+        long segstart = 0;
         boolean disabled = false;
         final boolean[] specialChars = inAttribute ? attSpecials : specialInText;
 
@@ -818,69 +794,36 @@ public class XMLEmitter extends Emitter {
             return;
         }
 
-        final int clength = chars.length();
+        IntPredicate special = inAttribute ? isSpecialInAttribute : isSpecialInText;
+        final long clength = chars.length();
         while (segstart < clength) {
-            int i = segstart;
             // find a maximal sequence of "ordinary" characters
-            while (i < clength) {
-                final char c = chars.charAt(i);
-                if (c < 127) {
-                    if (specialChars[c]) {
-                        break;
-                    } else {
-                        i++;
-                    }
-                } else if (c < 160) {
-                    break;
-                } else if (c == 0x2028) {
-                    break;
-                } else if (UTF16CharacterSet.isHighSurrogate(c)) {
-                    break;
-                } else if (!characterSet.inCharset(c)) {
-                    break;
-                } else {
-                    i++;
-                }
-            }
+            long found = chars.writeUntil(writer, segstart, clength, special);
+            long i = found == -1 ? clength : found;
 
             // if this was the whole string write it out and exit
-            if (i >= clength) {
-                if (segstart == 0) {
-                    writeCharSequence(chars);
-                } else {
-                    writeCharSequence(chars.subSequence(segstart, i));
-                }
+            if (found < 0) {
                 return;
             }
 
-            // otherwise write out this sequence
-            if (i > segstart) {
-                writeCharSequence(chars.subSequence(segstart, i));
-            }
+//            // otherwise write out this sequence
+//            if (i > segstart) {
+//                chars.write(writer, segstart, i - segstart);
+//            }
 
             // examine the special character that interrupted the scan
-            final char c = chars.charAt(i);
+            final int c = chars.codePointAt(i);
             if (c == 0) {
                 // used to switch escaping on and off
                 disabled = !disabled;
             } else if (disabled) {
-                if (c > 127) {
-                    if (UTF16CharacterSet.isHighSurrogate(c)) {
-                        int cc = UTF16CharacterSet.combinePair(c, chars.charAt(i + 1));
-                        if (!characterSet.inCharset(cc)) {
-                            XPathException de = new XPathException("Character x" + Integer.toHexString(cc) +
-                                                                           " is not available in the chosen encoding");
-                            de.setErrorCode("SERE0008");
-                            throw de;
-                        }
-                    } else if (!characterSet.inCharset(c)) {
-                        XPathException de = new XPathException("Character " + c + " (x" + Integer.toHexString((int) c) +
-                                                                       ") is not available in the chosen encoding");
-                        de.setErrorCode("SERE0008");
-                        throw de;
-                    }
+                if (c > 127 && !characterSet.inCharset(c)) {
+                    XPathException de = new XPathException("Character " + c + " (x" + Integer.toHexString(c) +
+                                                                   ") is not available in the chosen encoding");
+                    de.setErrorCode("SERE0008");
+                    throw de;
                 }
-                writer.write(c);
+                writeCodePoint(c);
             } else if (c < 127) {
                 // process special ASCII characters
                 switch (c) {
@@ -916,14 +859,11 @@ public class XMLEmitter extends Emitter {
             } else if (c < 160 || c == 0x2028) {
                 // XML 1.1 requires these characters to be written as character references
                 characterReferenceGenerator.outputCharacterReference(c, writer);
-            } else if (UTF16CharacterSet.isHighSurrogate(c)) {
-                char d = chars.charAt(++i);
-                int charval = UTF16CharacterSet.combinePair(c, d);
-                if (characterSet.inCharset(charval)) {
-                    writer.write(c);
-                    writer.write(d);
+            } else if (c > 65535) {
+                if (characterSet.inCharset(c)) {
+                    writeCodePoint(c);
                 } else {
-                    characterReferenceGenerator.outputCharacterReference(charval, writer);
+                    characterReferenceGenerator.outputCharacterReference(c, writer);
                 }
             } else {
                 // process characters not available in the current encoding
@@ -933,13 +873,22 @@ public class XMLEmitter extends Emitter {
         }
     }
 
+    protected void writeCodePoint(int c) throws IOException {
+        if (c < 65536) {
+            writer.write((char)c);
+        } else {
+            writer.write(UTF16CharacterSet.highSurrogate(c));
+            writer.write(UTF16CharacterSet.lowSurrogate(c));
+        }
+    }
+
 
     /**
      * Handle a comment.
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (!started) {
             openDocument();
         }

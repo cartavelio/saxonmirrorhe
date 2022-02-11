@@ -25,7 +25,7 @@ import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.VersionedPackageName;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import org.xml.sax.*;
 
 import javax.xml.transform.Source;
@@ -47,12 +47,12 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
     private int level = 0;
     private String section = null;
     private String subsection = null;
-    private FastStringBuffer buffer = new FastStringBuffer(100);
+    private final StringBuilder buffer = new StringBuilder(100);
     protected Configuration config;
     private ClassLoader classLoader = null;
-    private List<XmlProcessingError> errors = new ArrayList<>();
+    private final List<XmlProcessingError> errors = new ArrayList<>();
     private Locator locator;
-    private Stack<List<String[]>> namespaceStack = new Stack<>();
+    private final Stack<List<String[]>> namespaceStack = new Stack<>();
     private PackageLibrary packageLibrary;
     private PackageDetails currentPackage;
     private Configuration baseConfiguration;
@@ -800,12 +800,12 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
     }
 
     @Override
-    public void characters(char ch[], int start, int length) {
+    public void characters(char[] ch, int start, int length) {
         buffer.append(ch, start, length);
     }
 
     @Override
-    public void ignorableWhitespace(char ch[], int start, int length) {
+    public void ignorableWhitespace(char[] ch, int start, int length) {
 
     }
 

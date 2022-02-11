@@ -8,6 +8,8 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ConstrainedIterator;
 import net.sf.saxon.value.EmptySequence;
@@ -18,10 +20,10 @@ import net.sf.saxon.value.EmptySequence;
 
 public class ZeroOrOne<T extends Item> implements GroundedValue {
 
-    private T item; // may be null, to represent an empty sequence
+    private final T item; // may be null, to represent an empty sequence
 
     @SuppressWarnings("rawtypes")
-    private static ZeroOrOne EMPTY = new ZeroOrOne<>(null);
+    private static final ZeroOrOne EMPTY = new ZeroOrOne<>(null);
 
     /**
      * Return the instance of ZeroOrOne that represents the empty sequence
@@ -45,25 +47,19 @@ public class ZeroOrOne<T extends Item> implements GroundedValue {
     }
 
     /**
-     * Get the string value of this sequence. The string value of an item is the result of applying the string()
-     * function. The string value of an empty sequence is the zero-length string.
-     *
-     * @return the string value of the sequence.
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
-        return item == null ? "" : item.getStringValueCS();
-    }
-
-    /**
      * Convert the value to a string, using the serialization rules.
      * For atomic values this is the same as a cast; for sequence values
      * it gives a space-separated list. For QNames and NOTATIONS, or lists
      * containing them, it fails.
+     * @return the string value
      */
 
     /*@NotNull*/
+    @Override
+    public UnicodeString getUnicodeStringValue() {
+        return item == null ? EmptyUniString.getInstance() : item.getUnicodeStringValue();
+    }
+
     @Override
     public String getStringValue() {
         return item == null ? "" : item.getStringValue();

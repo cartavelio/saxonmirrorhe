@@ -18,7 +18,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +99,7 @@ public abstract class AttributeValueTemplate {
                 } else {
                     components.add(XSLLeafNodeConstructor.makeSimpleContentConstructor(
                             exp,
-                            new StringLiteral(StringValue.SINGLE_SPACE), env).simplify());
+                            new StringLiteral(StringItem.SINGLE_SPACE), env).simplify());
                 }
 
             } else {
@@ -112,7 +112,7 @@ public abstract class AttributeValueTemplate {
         // is it empty?
 
         if (components.isEmpty()) {
-            result = new StringLiteral(StringValue.EMPTY_STRING);
+            result = new StringLiteral(StringItem.EMPTY_STRING);
         }
 
         // is it a single component?
@@ -144,7 +144,7 @@ public abstract class AttributeValueTemplate {
 
     private static boolean isIntegerOrIntegerPair(Expression exp) {
         if (exp instanceof Literal) {
-            GroundedValue val = ((Literal) exp).getValue();
+            GroundedValue val = ((Literal) exp).getGroundedValue();
             if (val instanceof IntegerValue) {
                 return true;
             }
@@ -164,7 +164,7 @@ public abstract class AttributeValueTemplate {
 
     private static String showIntegers(Expression exp) {
         if (exp instanceof Literal) {
-            GroundedValue val = ((Literal) exp).getValue();
+            GroundedValue val = ((Literal) exp).getGroundedValue();
             if (val instanceof IntegerValue) {
                 return val.toString();
             }

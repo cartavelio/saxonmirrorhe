@@ -12,8 +12,9 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
 import org.dom4j.*;
@@ -29,11 +30,11 @@ import java.util.Stack;
 public class DOM4JWriter extends net.sf.saxon.event.Builder {
 
     private Document document;
-    private Stack<Branch> ancestors = new Stack<>();
-    private Stack<NamespaceMap> nsStack = new Stack<>();
+    private final Stack<Branch> ancestors = new Stack<>();
+    private final Stack<NamespaceMap> nsStack = new Stack<>();
     private boolean implicitDocumentNode = false;
-    private FastStringBuffer textBuffer = new FastStringBuffer(FastStringBuffer.C256);
-    private HashMap<String, Element> idIndex = new HashMap<>();
+    private final StringBuilder textBuffer = new StringBuilder(256);
+    private final HashMap<String, Element> idIndex = new HashMap<>();
 
     /**
      * Create a JDOMWriter using the default node factory
@@ -168,8 +169,8 @@ public class DOM4JWriter extends net.sf.saxon.event.Builder {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        textBuffer.cat(chars);
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        textBuffer.append(chars);
     }
 
     private void flush() {
@@ -186,7 +187,7 @@ public class DOM4JWriter extends net.sf.saxon.event.Builder {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
             throws XPathException {
         flush();
         ProcessingInstruction pi = new DefaultProcessingInstruction(target, data.toString());
@@ -198,7 +199,7 @@ public class DOM4JWriter extends net.sf.saxon.event.Builder {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         flush();
         Comment comment = new DefaultComment(chars.toString());
         ancestors.peek().add(comment);

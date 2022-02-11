@@ -23,6 +23,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.UsePack;
@@ -57,16 +58,16 @@ public class UseWhenFilter extends ProxyReceiver {
 
     private int depthOfHole = 0;
     private boolean emptyStylesheetElement = false;
-    private Stack<String> defaultNamespaceStack = new Stack<>();
-    private Stack<Integer> versionStack = new Stack<>();
-    private DateTimeValue currentDateTime = DateTimeValue.getCurrentDateTime(null);
-    private Compilation compilation;
-    private Stack<String> systemIdStack = new Stack<>();
-    private Stack<URI> baseUriStack = new Stack<>();
-    private NestedIntegerValue precedence;
+    private final Stack<String> defaultNamespaceStack = new Stack<>();
+    private final Stack<Integer> versionStack = new Stack<>();
+    private final DateTimeValue currentDateTime = DateTimeValue.getCurrentDateTime(null);
+    private final Compilation compilation;
+    private final Stack<String> systemIdStack = new Stack<>();
+    private final Stack<URI> baseUriStack = new Stack<>();
+    private final NestedIntegerValue precedence;
     private int importCount = 0;
     private boolean dropUnderscoredAttributes;
-    private LinkedTreeBuilder treeBuilder;
+    private final LinkedTreeBuilder treeBuilder;
 
 
 
@@ -355,7 +356,7 @@ public class UseWhenFilter extends ProxyReceiver {
 
         StructuredQName varName;
         try {
-            varName = StructuredQName.fromLexicalQName(nameStr, false, true, nsResolver);
+            varName = StructuredQName.fromLexicalQName((nameStr), false, true, nsResolver);
         } catch (XPathException err) {
             throw createXPathException(
                     "Invalid variable name:" + nameStr + ". " + err.getMessage(),
@@ -400,7 +401,7 @@ public class UseWhenFilter extends ProxyReceiver {
                     throw createXPathException("The parameter is implicitly required because it does not accept an "
                                                        + "empty sequence, but no value has been supplied", "XTDE0700", location);
                 } else {
-                    value = asStr == null ? StringValue.EMPTY_STRING : EmptySequence.getInstance();
+                    value = asStr == null ? StringItem.EMPTY_STRING : EmptySequence.getInstance();
                     compilation.declareStaticVariable(varName, value, precedence, isParam);
                 }
 
@@ -554,7 +555,7 @@ public class UseWhenFilter extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (depthOfHole == 0) {
             nextReceiver.characters(chars, locationId, properties);
         }
@@ -565,7 +566,7 @@ public class UseWhenFilter extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) {
         // these are ignored in a stylesheet
     }
 
@@ -574,7 +575,7 @@ public class UseWhenFilter extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         // these are ignored in a stylesheet
     }
 

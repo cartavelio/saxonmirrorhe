@@ -12,7 +12,7 @@ package net.sf.saxon.z;
  */
 public class IntUniversalSet implements IntSet {
 
-    private static IntUniversalSet THE_INSTANCE = new IntUniversalSet();
+    private static final IntUniversalSet THE_INSTANCE = new IntUniversalSet();
 
     public static IntUniversalSet getInstance() {
         return THE_INSTANCE;

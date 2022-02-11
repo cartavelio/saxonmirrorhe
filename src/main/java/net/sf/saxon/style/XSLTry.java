@@ -31,8 +31,8 @@ public class XSLTry extends StyleElement {
 
     private Expression select;
     private boolean rollbackOutput = true;
-    private List<QNameTest> catchTests = new ArrayList<>();
-    private List<Expression> catchExprs = new ArrayList<>();
+    private final List<QNameTest> catchTests = new ArrayList<>();
+    private final List<Expression> catchExprs = new ArrayList<>();
 
     /**
      * Determine whether this node is an instruction.

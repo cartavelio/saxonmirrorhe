@@ -22,7 +22,7 @@ import java.util.Collections;
 
 public class XdmEmptySequence extends XdmValue {
 
-    private static XdmEmptySequence THE_INSTANCE = new XdmEmptySequence();
+    private static final XdmEmptySequence THE_INSTANCE = new XdmEmptySequence();
 
     /**
      * Return the singleton instance of this class

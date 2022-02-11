@@ -308,7 +308,7 @@ public class XPathContextMajor extends XPathContextMinor {
                         "Attempting to set more local variables (" + variables.length +
                                 ") than the stackframe can accommodate (" + map.getNumberOfVariables() + ")");
             }
-            stackFrame.slots = (Sequence[])new Sequence[map.getNumberOfVariables()];
+            stackFrame.slots = new Sequence[map.getNumberOfVariables()];
             System.arraycopy(variables, 0, stackFrame.slots, 0, variables.length);
         }
     }
@@ -325,7 +325,7 @@ public class XPathContextMajor extends XPathContextMinor {
         stackFrame.map = map;
         if (stackFrame.slots.length != map.getNumberOfVariables()) {
             Sequence[] v2 =
-                    (Sequence[])new Sequence[map.getNumberOfVariables()];
+                    new Sequence[map.getNumberOfVariables()];
             System.arraycopy(stackFrame.slots, 0, v2, 0, numberOfParams);
             stackFrame.slots = v2;
         } else {

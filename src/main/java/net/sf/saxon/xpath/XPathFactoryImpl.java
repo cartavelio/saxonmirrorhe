@@ -213,7 +213,7 @@ public class XPathFactoryImpl extends XPathFactory implements Configuration.ApiP
         return xpath;
     }
 
-    private static String FEATURE_SECURE_PROCESSING = XMLConstants.FEATURE_SECURE_PROCESSING;
+    private static final String FEATURE_SECURE_PROCESSING = XMLConstants.FEATURE_SECURE_PROCESSING;
     // "http://javax.xml.XMLConstants/feature/secure-processing";
 
 }

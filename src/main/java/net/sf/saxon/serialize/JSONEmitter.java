@@ -10,10 +10,10 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.json.JsonReceiver;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.serialize.codenorm.Normalizer;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.IntegerValue;
@@ -36,7 +36,7 @@ import java.util.Stack;
 
 public class JSONEmitter {
 
-    private ExpandedStreamResult result;
+    private final ExpandedStreamResult result;
 
     private Writer writer;
     private Normalizer normalizer;
@@ -49,7 +49,7 @@ public class JSONEmitter {
     private boolean first = true;
     private boolean afterKey = false;
     private int level;
-    private Stack<Boolean> oneLinerStack = new Stack<>();
+    private final Stack<Boolean> oneLinerStack = new Stack<>();
 
     private boolean unfailing = false;
 
@@ -282,30 +282,29 @@ public class JSONEmitter {
         }
     }
 
-    private CharSequence escape(CharSequence cs) throws XPathException {
+    private String escape(String cs) throws XPathException {
         if (characterMap != null) {
-            FastStringBuffer out = new FastStringBuffer(cs.length());
-            cs = characterMap.map(cs, true);
-            String s = cs.toString();
+            StringBuilder out = new StringBuilder(cs.length());
+            String s = characterMap.map(StringView.of(cs).tidy(), true).toString();
             int prev = 0;
             while (true) {
                 int start = s.indexOf(0, prev);
                 if (start >= 0) {
-                    out.cat(simpleEscape(s.substring(prev, start)));
+                    out.append(simpleEscape(s.substring(prev, start)));
                     int end = s.indexOf(0, start + 1);
                     out.append(s.substring(start + 1, end));
                     prev = end + 1;
                 } else {
-                    out.cat(simpleEscape(s.substring(prev)));
-                    return out;
+                    out.append(simpleEscape(s.substring(prev)));
+                    return out.toString();
                 }
             }
         } else {
-            return simpleEscape(cs);
+            return simpleEscape(cs).toString();
         }
     }
 
-    private CharSequence simpleEscape(CharSequence cs) throws XPathException {
+    private String simpleEscape(String cs) throws XPathException {
         if (normalizer != null) {
             cs = normalizer.normalize(cs);
         }

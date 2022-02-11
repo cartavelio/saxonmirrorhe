@@ -69,7 +69,7 @@ public class OperandRole {
     ;
 
     int properties;
-    private OperandUsage usage;
+    private final OperandUsage usage;
     private SequenceType requiredType = SequenceType.ANY_SEQUENCE;
     private Predicate<Expression> constraint;
 

@@ -30,7 +30,7 @@ import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.tree.linked.TextImpl;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BigDecimalValue;
@@ -346,7 +346,7 @@ public abstract class StyleElement extends ElementImpl {
 
         StructuredQName qName;
         try {
-            qName = StructuredQName.fromLexicalQName(lexicalQName, false,
+            qName = StructuredQName.fromLexicalQName((lexicalQName), false,
                                                      true, this);
         } catch (XPathException e) {
             e.setIsStaticError(true);
@@ -365,7 +365,7 @@ public abstract class StyleElement extends ElementImpl {
             if (attributeName == null) {
                 e.setLocator(this);
             } else {
-                e.setLocator(new AttributeLocation(this, StructuredQName.fromEQName(attributeName)));
+                e.setLocator(new AttributeLocation(this, StructuredQName.fromEQName((attributeName))));
             }
             compileError(e);
             qName = new StructuredQName("saxon", NamespaceConstant.SAXON, "error-name");
@@ -531,7 +531,7 @@ public abstract class StyleElement extends ElementImpl {
         processAttributes();
         for (NodeInfo child : children(StyleElement.class::isInstance)) {
             ((StyleElement) child).processAllAttributes();
-        };
+        }
     }
 
     /**
@@ -717,7 +717,6 @@ public abstract class StyleElement extends ElementImpl {
         try {
             StaticContext env = getStaticContext(new StructuredQName("", "", attributeName));
             Pattern p = Pattern.make(pattern, env, getCompilation().getPackageData());
-            p.setOriginalText(pattern);
             p.setLocation(allocateLocation());
             return p;
         } catch (XPathException err) {
@@ -772,7 +771,7 @@ public abstract class StyleElement extends ElementImpl {
             return;
         }
         if (Arrays.binarySearch(allowed, value) < 0) {
-            FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder sb = new StringBuilder(64);
             sb.append("Invalid value for ");
             sb.append("@");
             sb.append(name);
@@ -1809,7 +1808,7 @@ public abstract class StyleElement extends ElementImpl {
                 sortFound = true;
             } else if (child.getNodeKind() == Type.TEXT) {
                 // with xml:space=preserve, white space nodes may still be there
-                if (!Whitespace.isWhite(child.getStringValueCS())) {
+                if (!Whitespace.isAllWhite(child.getUnicodeStringValue())) {
                     nonSortFound = true;
                 }
             } else {
@@ -1890,7 +1889,7 @@ public abstract class StyleElement extends ElementImpl {
     }
 
     protected String generateId() {
-        FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C16);
+        StringBuilder buff = new StringBuilder(16);
         generateId(buff);
         return buff.toString();
     }
@@ -1997,7 +1996,7 @@ public abstract class StyleElement extends ElementImpl {
                                   || sibling instanceof XSLContextItem || sibling instanceof XSLOnCompletion)) {
                         // The test for XSLParam and XSLSort is to eliminate whitespace nodes that have been retained
                         // because of xml:space="preserve"
-                        Expression text = new ValueOf(new StringLiteral(node.getStringValue()), false, false);
+                        Expression text = new ValueOf(new StringLiteral(node.getUnicodeStringValue()), false, false);
                         text.setLocation(allocateLocation());
 
 //                        CodeInjector injector = getCompilation().getCompilerInfo().getCodeInjector();
@@ -2107,7 +2106,7 @@ public abstract class StyleElement extends ElementImpl {
             }
             contents.add(exp);
         } else {
-            contents.add(new StringLiteral(node.getStringValue()));
+            contents.add(new StringLiteral(node.getUnicodeStringValue()));
         }
     }
 

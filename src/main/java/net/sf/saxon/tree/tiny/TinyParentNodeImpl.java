@@ -7,7 +7,9 @@
 
 package net.sf.saxon.tree.tiny;
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.type.Type;
 
 /**
@@ -38,18 +40,8 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
      */
 
     @Override
-    public String getStringValue() {
-        return getStringValueCS(tree, nodeNr).toString();
-    }
-
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
-        return getStringValueCS(tree, nodeNr);
+    public UnicodeString getUnicodeStringValue() {
+        return getStringValue(tree, nodeNr);
     }
 
     /**
@@ -64,7 +56,7 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
      * @return the string value of the node, as a CharSequence
      */
 
-    public static CharSequence getStringValueCS(/*@NotNull*/ TinyTree tree, int nodeNr) {
+    public static UnicodeString getStringValue(/*@NotNull*/ TinyTree tree, int nodeNr) {
         int level = tree.depth[nodeNr];
 
         // note, we can't rely on the value being contiguously stored because of whitespace
@@ -79,7 +71,7 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
             return TinyTextImpl.getStringValue(tree, nodeNr);
         } else if (next < tree.numberOfNodes) {    // bug 4445
             if (tree.depth[next] <= level) {
-                return "";
+                return EmptyUniString.getInstance();
             } else if (tree.nodeKind[next] == Type.TEXT && (next + 1 >= tree.numberOfNodes || tree.depth[next + 1] <= level)) {
                 return TinyTextImpl.getStringValue(tree, next);
             }
@@ -87,26 +79,26 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
 
         // now handle the general case
 
-        FastStringBuffer sb = null;
+        UnicodeBuilder sb = null;
         while (next < tree.numberOfNodes && tree.depth[next] > level) {
             final byte kind = tree.nodeKind[next];
             if (kind == Type.TEXT || kind == Type.TEXTUAL_ELEMENT) {
                 if (sb == null) {
-                    sb = new FastStringBuffer(FastStringBuffer.C256);
+                    sb = new UnicodeBuilder();
                 }
-                sb.cat(TinyTextImpl.getStringValue(tree, next));
+                sb.append(TinyTextImpl.getStringValue(tree, next));
             } else if (kind == Type.WHITESPACE_TEXT) {
                 if (sb == null) {
-                    sb = new FastStringBuffer(FastStringBuffer.C256);
+                    sb = new UnicodeBuilder();
                 }
                 WhitespaceTextImpl.appendStringValue(tree, next, sb);
             }
             next++;
         }
         if (sb == null) {
-            return "";
+            return EmptyUniString.getInstance();
         }
-        return sb.condense();
+        return sb.toUnicodeString();
     }
 
 }

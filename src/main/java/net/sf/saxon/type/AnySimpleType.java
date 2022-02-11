@@ -12,6 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.UntypedAtomicValue;
 import net.sf.saxon.value.Whitespace;
 
@@ -247,7 +248,7 @@ public enum AnySimpleType implements SimpleType {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize(/*@NotNull*/ NodeInfo node) {
-        return new UntypedAtomicValue(node.getStringValueCS());
+        return new UntypedAtomicValue(node.getUnicodeStringValue());
     }
 
     /**
@@ -329,7 +330,7 @@ public enum AnySimpleType implements SimpleType {
 
     /*@NotNull*/
     @Override
-    public AtomicSequence getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules) {
+    public AtomicSequence getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules) {
         return new UntypedAtomicValue(value);
     }
 
@@ -347,7 +348,7 @@ public enum AnySimpleType implements SimpleType {
      */
     /*@Nullable*/
     @Override
-    public ValidationFailure validateContent(/*@NotNull*/ CharSequence value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
+    public ValidationFailure validateContent(/*@NotNull*/ UnicodeString value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
         return null;
     }
 
@@ -444,7 +445,7 @@ public enum AnySimpleType implements SimpleType {
      */
 
     @Override
-    public CharSequence preprocess(CharSequence input) {
+    public UnicodeString preprocess(UnicodeString input) {
         return input;
     }
 
@@ -459,7 +460,7 @@ public enum AnySimpleType implements SimpleType {
      */
 
     @Override
-    public CharSequence postprocess(CharSequence input) throws ValidationException {
+    public UnicodeString postprocess(UnicodeString input) throws ValidationException {
         return input;
     }
 

@@ -32,7 +32,7 @@ import java.util.Map;
  */
 public class ItemTypeFactory {
 
-    private Processor processor;
+    private final Processor processor;
 
     /**
      * Create an ItemTypeFactory

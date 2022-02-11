@@ -21,7 +21,7 @@ package net.sf.saxon.trans;
 
 public class UncheckedXPathException extends RuntimeException {
 
-    private XPathException cause;
+    private final XPathException cause;
 
     public UncheckedXPathException(XPathException cause) {
         this.cause = cause;

@@ -22,12 +22,12 @@ import net.sf.saxon.trans.XPathException;
 public class DifferenceEnumeration implements SequenceIterator {
 
 
-    private SequenceIterator p1;
-    private SequenceIterator p2;
+    private final SequenceIterator p1;
+    private final SequenceIterator p2;
 
     /*@Nullable*/ private NodeInfo nextNode1 = null;
     private NodeInfo nextNode2 = null;
-    private ItemOrderComparer comparer;
+    private final ItemOrderComparer comparer;
 
     /**
      * Form an enumeration of the difference of two nodesets, that is, the nodes

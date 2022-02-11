@@ -12,10 +12,11 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -307,11 +308,11 @@ public final class DateTimeValue extends CalendarValue
      */
 
     /*@NotNull*/
-    public static ConversionResult makeDateTimeValue(CharSequence s, /*@NotNull*/ ConversionRules rules) {
+    public static ConversionResult makeDateTimeValue(UnicodeString s, /*@NotNull*/ ConversionRules rules) {
         // input must have format [-]yyyy-mm-ddThh:mm:ss[.fff*][([+|-]hh:mm | Z)]
         DateTimeValue dt = new DateTimeValue();
         dt.hasNoYearZero = !rules.isAllowYearZero();
-        StringTokenizer tok = new StringTokenizer(Whitespace.trimWhitespace(s).toString(), "-:.+TZ", true);
+        StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-:.+TZ", true);
 
         if (!tok.hasMoreElements()) {
             return badDate("too short", s);
@@ -605,23 +606,23 @@ public final class DateTimeValue extends CalendarValue
      * @since 9.9
      */
 
-    public static DateTimeValue parse(CharSequence s) throws DateTimeParseException {
+    public static DateTimeValue parse(UnicodeString s) throws DateTimeParseException {
         ConversionResult result = makeDateTimeValue(s, ConversionRules.DEFAULT);
         if (result instanceof ValidationFailure) {
-            throw new DateTimeParseException(((ValidationFailure) result).getMessage(), s, 0);
+            throw new DateTimeParseException(((ValidationFailure) result).getMessage(), s.toString(), 0);
         } else {
             return (DateTimeValue)result;
         }
     }
 
-    private static ValidationFailure badDate(String msg, CharSequence value) {
+    private static ValidationFailure badDate(String msg, UnicodeString value) {
         ValidationFailure err = new ValidationFailure(
                 "Invalid dateTime value " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
         err.setErrorCode("FORG0001");
         return err;
     }
 
-    private static ValidationFailure badDate(String msg, CharSequence value, String errorCode) {
+    private static ValidationFailure badDate(String msg, UnicodeString value, String errorCode) {
         ValidationFailure err = new ValidationFailure(
                 "Invalid dateTime value " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
         err.setErrorCode(errorCode);
@@ -1013,34 +1014,34 @@ public final class DateTimeValue extends CalendarValue
 
     /*@NotNull*/
     @Override
-    public CharSequence getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
 
-        FastStringBuffer sb = new FastStringBuffer(30);
+        UnicodeBuilder sb = new UnicodeBuilder();
         int yr = year;
         if (year <= 0) {
             yr = -yr + (hasNoYearZero ? 1 : 0);    // no year zero in lexical space for XSD 1.0
             if (yr != 0) {
-                sb.cat('-');
+                sb.append('-');
             }
         }
         appendString(sb, yr, yr > 9999 ? (yr + "").length() : 4);
-        sb.cat('-');
+        sb.append('-');
         appendTwoDigits(sb, month);
-        sb.cat('-');
+        sb.append('-');
         appendTwoDigits(sb, day);
-        sb.cat('T');
+        sb.append('T');
         appendTwoDigits(sb, hour);
-        sb.cat(':');
+        sb.append(':');
         appendTwoDigits(sb, minute);
-        sb.cat(':');
+        sb.append(':');
         appendTwoDigits(sb, second);
         if (nanosecond != 0) {
-            sb.cat('.');
+            sb.append('.');
             int ms = nanosecond;
             int div = 100_000_000;
             while (ms > 0) {
                 int d = ms / div;
-                sb.cat((char) (d + '0'));
+                sb.append((char) (d + '0'));
                 ms = ms % div;
                 div /= 10;
             }
@@ -1050,7 +1051,7 @@ public final class DateTimeValue extends CalendarValue
             appendTimezone(sb);
         }
 
-        return sb;
+        return sb.toUnicodeString();
 
     }
 
@@ -1086,11 +1087,11 @@ public final class DateTimeValue extends CalendarValue
      */
 
     @Override
-    public CharSequence getCanonicalLexicalRepresentation() {
+    public UnicodeString getCanonicalLexicalRepresentation() {
         if (hasTimezone() && getTimezoneInMinutes() != 0) {
-            return adjustTimezone(0).getStringValueCS();
+            return adjustTimezone(0).getUnicodeStringValue();
         } else {
-            return getStringValueCS();
+            return this.getUnicodeStringValue();
         }
     }
 
@@ -1181,7 +1182,7 @@ public final class DateTimeValue extends CalendarValue
     @Override
     public DateTimeValue add(/*@NotNull*/ DurationValue duration) throws XPathException {
         if (duration instanceof DayTimeDurationValue) {
-            BigDecimal seconds = ((DayTimeDurationValue) duration).getTotalSeconds();
+            BigDecimal seconds = duration.getTotalSeconds();
             BigDecimal julian = toJulianInstant();
             julian = julian.add(seconds);
             DateTimeValue dt = fromJulianInstant(julian);

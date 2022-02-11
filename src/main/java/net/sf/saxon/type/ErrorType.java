@@ -13,11 +13,9 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.UntypedAtomicValue;
-import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.value.*;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -31,7 +29,7 @@ import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
 
 public final class ErrorType extends NodeTest implements AtomicType, UnionType, PlainType {
 
-    /*@NotNull*/ private static ErrorType theInstance = new ErrorType();
+    /*@NotNull*/ private static final ErrorType theInstance = new ErrorType();
 
     /**
      * Private constructor
@@ -276,7 +274,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
     /*@NotNull*/
     @Override
     public AtomicSequence atomize(/*@NotNull*/ NodeInfo node) {
-        return new UntypedAtomicValue(node.getStringValueCS());
+        return new UntypedAtomicValue(node.getUnicodeStringValue());
     }
 
     /**
@@ -385,7 +383,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
 
     /*@NotNull*/
     @Override
-    public AtomicSequence getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules) throws ValidationException {
+    public AtomicSequence getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules) throws ValidationException {
         throw new ValidationFailure("Cast to xs:error always fails").makeException();
     }
 
@@ -414,7 +412,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
     /*@NotNull*/
     @Override
-    public ValidationFailure validateContent(/*@NotNull*/ CharSequence value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
+    public ValidationFailure validateContent(/*@NotNull*/ UnicodeString value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
         return new ValidationFailure("No content is ever valid against the type xs:error");
     }
 
@@ -512,7 +510,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
 
     @Override
-    public CharSequence preprocess(CharSequence input) {
+    public UnicodeString preprocess(UnicodeString input) {
         return input;
     }
 
@@ -527,7 +525,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      */
 
     @Override
-    public CharSequence postprocess(CharSequence input) {
+    public UnicodeString postprocess(UnicodeString input) {
         return input;
     }
 
@@ -610,7 +608,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      * @throws UnsupportedOperationException in the case of an external object type
      */
     @Override
-    public ValidationFailure validate(AtomicValue primValue, CharSequence lexicalValue, ConversionRules rules) {
+    public ValidationFailure validate(AtomicValue primValue, UnicodeString lexicalValue, ConversionRules rules) {
         return new ValidationFailure("No value is valid against type xs:error");
     }
 

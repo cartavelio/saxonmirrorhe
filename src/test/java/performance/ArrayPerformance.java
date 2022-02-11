@@ -7,6 +7,7 @@ import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class ArrayPerformance extends PerformanceTestCase {
             final SimpleArrayItem array = SimpleArrayItem.makeSimpleArrayItem(new ListIterator<>(numbers));
             measure(new Measurable() {
 
-                ArrayItem a = array;
+                final ArrayItem a = array;
                 @Override
                 public void run() {
                     ArrayItem a = array;
@@ -51,16 +52,19 @@ public class ArrayPerformance extends PerformanceTestCase {
     }
 
     @Test
+    @Tag("performance")
     public void testPut1K() {
         measurePut(500);
     }
 
     @Test
+    @Tag("performance")
     public void testPut10K() {
         measurePut(5000);
     }
 
     @Test
+    @Tag("performance")
     public void testPut100K() {
         measurePut(50000);
     }

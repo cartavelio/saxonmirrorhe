@@ -32,8 +32,8 @@ import java.util.Map;
  */
 public class StreamingTransformerImpl extends AbstractTransformerImpl {
 
-    private Xslt30Transformer xsltTransformer;
-    private Map<QName, XdmValue> convertedParameters = new HashMap<>();
+    private final Xslt30Transformer xsltTransformer;
+    private final Map<QName, XdmValue> convertedParameters = new HashMap<>();
 
     protected StreamingTransformerImpl(XsltExecutable e, Xslt30Transformer t) {
         super(e);
@@ -181,7 +181,7 @@ public class StreamingTransformerImpl extends AbstractTransformerImpl {
 
     public class StreamingTransformerHandler extends ReceivingContentHandler implements TransformerHandler {
 
-        private XsltController controller;
+        private final XsltController controller;
         private String systemId;
         //private ProxyReceiver proxy;
 

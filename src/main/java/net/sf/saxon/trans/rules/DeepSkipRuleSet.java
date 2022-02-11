@@ -23,7 +23,7 @@ import net.sf.saxon.type.Type;
  */
 public class DeepSkipRuleSet implements BuiltInRuleSet {
 
-    private static DeepSkipRuleSet THE_INSTANCE = new DeepSkipRuleSet();
+    private static final DeepSkipRuleSet THE_INSTANCE = new DeepSkipRuleSet();
 
     /**
      * Get the singleton instance of this class

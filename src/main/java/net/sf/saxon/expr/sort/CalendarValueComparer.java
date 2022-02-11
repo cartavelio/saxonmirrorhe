@@ -18,7 +18,7 @@ import net.sf.saxon.value.CalendarValue;
  */
 public class CalendarValueComparer implements AtomicComparer {
 
-    private transient XPathContext context;
+    private final transient XPathContext context;
 
     public CalendarValueComparer(XPathContext context) {
         this.context = context;

@@ -21,13 +21,15 @@ import net.sf.saxon.pattern.NodeSetPattern;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.jiter.MonoIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
@@ -913,13 +915,12 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      *                            expression is not xs:string?, xs:untypedAtomic?, or xs:anyURI?
      */
 
-    public CharSequence evaluateAsString(XPathContext context) throws XPathException {
+    public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
         Item o = evaluateItem(context);
-        StringValue value = (StringValue) o;  // the ClassCastException is deliberate
-        if (value == null) {
-            return "";
+        if (o == null) {
+            return EmptyUniString.getInstance();
         }
-        return value.getStringValueCS();
+        return o.getUnicodeStringValue();
     }
 
     /**
@@ -993,7 +994,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
 
     public String toString() {
         // fallback implementation
-        FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder buff = new StringBuilder(64);
         String className = getClass().getName();
         while (true) {
             int dot = className.indexOf('.');

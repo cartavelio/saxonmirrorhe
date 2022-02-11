@@ -99,7 +99,8 @@ public class StandardLogger extends Logger {
     }
 
     /**
-     * Get a JAXP Result object allowing serialized XML to be written to this Logger
+     * Get a JAXP Result object allowing serialized XML to be written to
+     * the output destination of this Logger
      *
      * @return a Result that serializes XML to this Logger
      */

@@ -17,6 +17,9 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
@@ -81,11 +84,11 @@ public class AnalyzeStringFn extends RegexFunction {
     @Override
     public NodeInfo call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item inputItem = arguments[0].head();
-        CharSequence input;
+        UnicodeString input;
         if (inputItem == null) {
-            input = "";
+            input = EmptyUniString.getInstance();
         } else {
-            input = inputItem.getStringValueCS();
+            input = inputItem.getUnicodeStringValue();
         }
         RegularExpression re = getRegularExpression(arguments);
         RegexIterator iter = re.analyze(input);
@@ -123,7 +126,7 @@ public class AnalyzeStringFn extends RegexFunction {
                 out.startContent();
                 iter.processMatchingSubstring(new RegexIterator.MatchHandler() {
                     @Override
-                    public void characters(CharSequence s) throws XPathException {
+                    public void characters(CodePoints s) throws XPathException {
                         out.characters(s, Loc.NONE, ReceiverOption.NONE);
                     }
 
@@ -145,7 +148,7 @@ public class AnalyzeStringFn extends RegexFunction {
             } else {
                 out.startElement(nonMatchName, nonMatchType, Loc.NONE, ReceiverOption.NONE);
                 out.startContent();
-                out.characters(item.getStringValueCS(), Loc.NONE, ReceiverOption.NONE);
+                out.characters(item.getUnicodeStringValue(), Loc.NONE, ReceiverOption.NONE);
                 out.endElement();
             }
         }

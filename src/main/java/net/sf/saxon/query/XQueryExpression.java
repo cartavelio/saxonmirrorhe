@@ -760,8 +760,8 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
      */
 
     private class ErrorReportingIterator implements SequenceIterator {
-        private SequenceIterator base;
-        private ErrorReporter reporter;
+        private final SequenceIterator base;
+        private final ErrorReporter reporter;
 
         public ErrorReportingIterator(SequenceIterator base, ErrorReporter reporter) {
             this.base = base;

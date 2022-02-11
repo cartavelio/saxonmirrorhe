@@ -12,7 +12,7 @@ import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.function.IntPredicate;
 
@@ -21,13 +21,13 @@ import java.io.LineNumberReader;
 import java.net.URI;
 
 /**
- * An iterator that iterates over a file line by line, returning each line as a {@link StringValue}
+ * An iterator that iterates over a file line by line, returning each line as a {@link StringItem}
  */
 public abstract class TextLinesIterator implements SequenceIterator {
 
     protected LineNumberReader reader;
     protected IntPredicate checker;
-    StringValue current = null;
+    StringItem current = null;
     int position = 0;
     protected Location location;
     protected URI uri;
@@ -63,7 +63,7 @@ public abstract class TextLinesIterator implements SequenceIterator {
 
     /*@Nullable*/
     @Override
-    public StringValue next() throws XPathException {
+    public StringItem next() throws XPathException {
         if (position < 0) {
             // input already exhausted
             close();
@@ -82,7 +82,7 @@ public abstract class TextLinesIterator implements SequenceIterator {
                 s = s.substring(1);
             }
             checkLine(checker, s);
-            current = new StringValue(s);
+            current = new StringItem(s);
             position++;
             return current;
         } catch (IOException err) {

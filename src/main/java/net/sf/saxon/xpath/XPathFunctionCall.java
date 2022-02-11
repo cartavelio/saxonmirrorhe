@@ -32,7 +32,7 @@ import java.util.List;
 public class XPathFunctionCall extends FunctionCall implements Callable {
 
     private StructuredQName name;
-    private XPathFunction function;
+    private final XPathFunction function;
 
     /**
      * Default constructor

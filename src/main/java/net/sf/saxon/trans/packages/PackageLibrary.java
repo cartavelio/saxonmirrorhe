@@ -14,7 +14,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.*;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import javax.xml.transform.Source;
 import java.io.File;
@@ -300,7 +300,7 @@ public class PackageLibrary {
     private void testForCycles(PackageDetails details, List<VersionedPackageName> disallowed) throws XPathException {
         if (details.beingProcessed == Thread.currentThread()) {
             // Report a cycle of package dependencies
-            FastStringBuffer buffer = new FastStringBuffer(1024);
+            StringBuilder buffer = new StringBuilder(1024);
             for (VersionedPackageName n : disallowed) {
                 buffer.append(n.packageName);
                 buffer.append(", ");

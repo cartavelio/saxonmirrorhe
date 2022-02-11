@@ -7,8 +7,7 @@
 
 package net.sf.saxon.serialize.charcode;
 
-import net.sf.saxon.tree.tiny.CharSlice;
-
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.util.HashMap;
@@ -24,13 +23,13 @@ public class JavaCharacterSet implements CharacterSet {
 
     public static HashMap<Charset, JavaCharacterSet> map;
 
-    private CharsetEncoder encoder;
+    private final CharsetEncoder encoder;
 
     // This class is written on the assumption that the CharsetEncoder.canEncode()
     // method may be expensive. For BMP characters, it therefore remembers the results
     // so each character is only looked up the first time it is encountered.
 
-    private byte[] charinfo = new byte[65536];
+    private final byte[] charinfo = new byte[65536];
     // rely on initialization to zeroes
 
     //private final static byte UNKNOWN = 0;
@@ -77,7 +76,8 @@ public class JavaCharacterSet implements CharacterSet {
             char[] cc = new char[2];
             cc[0] = UTF16CharacterSet.highSurrogate(c);
             cc[1] = UTF16CharacterSet.lowSurrogate(c);
-            return encoder.canEncode(new CharSlice(cc));
+            CharBuffer cb = CharBuffer.wrap(cc);
+            return encoder.canEncode(cb);
         }
 
     }

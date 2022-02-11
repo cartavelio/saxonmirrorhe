@@ -22,12 +22,13 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import javax.xml.transform.stream.StreamSource;
@@ -57,14 +58,14 @@ public class TestOutcome {
         }
     }
 
-    private TestDriver driver;
-    private SingleResultDoc principalResult = new SingleResultDoc();
+    private final TestDriver driver;
+    private final SingleResultDoc principalResult = new SingleResultDoc();
     private Set<String> errorsReported;
     private boolean warningsReported;
     private QName exception;
     private String comment;
-    private Set<XdmNode> xslMessages = new HashSet<>(4);
-    private Map<URI, SingleResultDoc> xslResultDocuments = new HashMap<>(4);
+    private final Set<XdmNode> xslMessages = new HashSet<>(4);
+    private final Map<URI, SingleResultDoc> xslResultDocuments = new HashMap<>(4);
     private String wrongError;
     private String resultVar = "result";
     private String baseOutputUri;
@@ -324,7 +325,7 @@ public class TestOutcome {
                         driver.println("Expected error " + assertion.attribute("code") + "; got success");
                     }
                 } else if (!success && isException()) {
-                    FastStringBuffer fsb = new FastStringBuffer(32);
+                    StringBuilder fsb = new StringBuilder(32);
                     fsb.append("Expected success, got error ");
                     if (errorsReported != null) {
                         for (String e : errorsReported) {
@@ -507,17 +508,17 @@ public class TestOutcome {
             return false;
         } else {
             String resultString;
-            String assertionString = assertion.getStringValue();
+            String assertionString = assertion.getUnderlyingNode().getStringValue();
             if (result.value instanceof XdmItem) {
                 resultString = ((XdmItem) result.value).getStringValue();
             } else {
                 boolean first = true;
-                FastStringBuffer fsb = new FastStringBuffer(256);
+                StringBuilder fsb = new StringBuilder(256);
                 for (XdmItem item : result.value) {
                     if (first) {
                         first = false;
                     } else {
-                        fsb.cat(' ');
+                        fsb.append(' ');
                     }
                     fsb.append(item.getStringValue());
                 }
@@ -529,8 +530,8 @@ public class TestOutcome {
                 normalizeAtt = "true";
             }
             if (normalizeAtt != null && (normalizeAtt.trim().equals("true") || normalizeAtt.trim().equals("1"))) {
-                assertionString = Whitespace.collapseWhitespace(assertionString).toString();
-                resultString = Whitespace.collapseWhitespace(resultString).toString();
+                assertionString = Whitespace.collapseWhitespace(assertionString);
+                resultString = Whitespace.collapseWhitespace(resultString);
             }
             if (resultString.equals(assertionString)) {
                 return true;
@@ -542,10 +543,10 @@ public class TestOutcome {
                     int len = Math.min(resultString.length(), assertionString.length());
                     for (int i = 0; i < len; i++) {
                         if (resultString.charAt(i) != assertionString.charAt(i)) {
-                            driver.println("Actual:'" + StringValue.diagnosticDisplay(resultString) + "'");
+                            driver.println("Actual:'" + StringTool.diagnosticDisplay(resultString) + "'");
                             driver.println("Results differ at index " + i +
-                                "(\"" + StringValue.diagnosticDisplay(resultString.substring(i, i + 10 > len ? len : i + 10)) + "\") vs (\"" +
-                                StringValue.diagnosticDisplay(assertionString.substring(i, i + 10 > len ? len : i + 10)) + "\")");
+                                "(\"" + StringTool.diagnosticDisplay(resultString.substring(i, Math.min(i + 10, len))) + "\") vs (\"" +
+                                StringTool.diagnosticDisplay(assertionString.substring(i, Math.min(i + 10, len))) + "\")");
                             break;
                         }
                     }
@@ -592,8 +593,8 @@ public class TestOutcome {
                 normalize = normalizeAtt != null && (normalizeAtt.trim().equals("true") || normalizeAtt.trim().equals("1"));
             }
             if (normalize) {
-                comparand = Whitespace.collapseWhitespace(comparand).toString();
-                resultString = Whitespace.collapseWhitespace(resultString).toString();
+                comparand = Whitespace.collapseWhitespace(comparand);
+                resultString = Whitespace.collapseWhitespace(resultString);
             } else if (resultString.endsWith("\n")) {
                 resultString = resultString.substring(0, resultString.length() - 1);
             }
@@ -617,8 +618,8 @@ public class TestOutcome {
                             int start = i < 20 ? 0 : i-20;
                             int end = i + 20 > len ? len : i+20;
                             driver.println("Serialized results differ at index " + i +
-                                "(\"" + StringValue.diagnosticDisplay(resultString.substring(start, end)) + "\"), expected (\"" +
-                                StringValue.diagnosticDisplay(comparand.substring(start, end)) + "\")");
+                                "(\"" + StringTool.diagnosticDisplay(resultString.substring(start, end)) + "\"), expected (\"" +
+                                StringTool.diagnosticDisplay(comparand.substring(start, end)) + "\")");
                             break;
                         }
                     }
@@ -750,7 +751,7 @@ public class TestOutcome {
             if (regex.endsWith("\n")) {
                 regex = regex.substring(0, regex.length() - 1);
             }*/
-            String regex = assertion.getStringValue();
+            UnicodeString regex = assertion.getUnderlyingNode().getUnicodeStringValue();
             List<String> warnings = new ArrayList<>(1);
             try {
                 String principalSerializedResult = result.serialization;
@@ -760,7 +761,7 @@ public class TestOutcome {
                 }
                 RegularExpression re = xpath.getProcessor().getUnderlyingConfiguration().compileRegularExpression(
                         regex, flagsAtt, "XP30", warnings);
-                if (re.containsMatch(principalSerializedResult)) {
+                if (re.containsMatch(StringView.of(principalSerializedResult).tidy())) {
                     return true;
                 } else {
                     driver.println("Serialized result:");
@@ -797,7 +798,7 @@ public class TestOutcome {
             comparand = comparand.trim();
             comparand = comparand.replace("\r\n", "\n");
             if (normalize) {
-                comparand = Whitespace.collapseWhitespace(comparand).toString();
+                comparand = Whitespace.collapseWhitespace(comparand);
             }
 
             if (comparand.equals(serialize(assertXpc.getProcessor(), result))) {
@@ -829,10 +830,6 @@ public class TestOutcome {
             }
             try {
                 SequenceIterator iter0;
-                if (result == null) {
-                    System.err.println("Result value is null");
-                    return false;
-                }
                 XdmValue value = result.value;
                 if (value == null) {
                     System.err.println("Result value is null (perhaps serialized?)");
@@ -893,7 +890,7 @@ public class TestOutcome {
     private static class RemoveWhitespace implements ItemMappingFunction {
         @Override
         public NodeInfo mapItem(Item item) {
-            boolean isWhite = ((NodeInfo)item).getNodeKind() == Type.TEXT && Whitespace.isWhite(item.getStringValueCS());
+            boolean isWhite = ((NodeInfo)item).getNodeKind() == Type.TEXT && Whitespace.isAllWhite(item.getUnicodeStringValue());
             return isWhite ? null : (NodeInfo)item;
         }
     }
@@ -976,7 +973,7 @@ public class TestOutcome {
         } else if (expectedError.contains(":")) {
             try {
                 NamespaceResolver resolver = assertion.getUnderlyingNode().getAllNamespaces();
-                StructuredQName sq = StructuredQName.fromLexicalQName(expectedError, false, false, resolver);
+                StructuredQName sq = StructuredQName.fromLexicalQName((expectedError), false, false, resolver);
                 expectedErrorQ = new QName(sq);
             } catch (XPathException e) {
                 expectedErrorQ = new QName("", "", "unknown-prefix-in-lexical-QName");
@@ -991,8 +988,8 @@ public class TestOutcome {
                 hasReportedError(expectedError);
         if (ok) {
             wrongError = null;
-        } else if (expectedErrorQ != null && errorsReported != null && !errorsReported.isEmpty()) {
-            FastStringBuffer fsb = new FastStringBuffer(100);
+        } else if (errorsReported != null && !errorsReported.isEmpty()) {
+            StringBuilder fsb = new StringBuilder(100);
             fsb.append("Expected ");
             fsb.append(expectedErrorQ.getLocalName());
             fsb.append("; got ");

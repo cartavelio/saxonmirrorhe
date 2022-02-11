@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Tests for saxon:import-query
  */
-public class TransformCallingQueryTest {
+public class TransformCallingQueryTest  {
 
     @Test
     public void testTransformCallingQuery()
@@ -28,6 +28,7 @@ public class TransformCallingQueryTest {
             transformerFactory.setAttribute(FeatureKeys.GENERATE_BYTE_CODE, false);
             Transformer transformer = transformerFactory.newTransformer(new StreamSource(ConfigTest.BUGS_DIR + "hedenus/bug.xslt"));
             transformer.setParameter("myparam", "london");
+
 
             StringWriter writer = new StringWriter();
             transformer.transform(new StreamSource(ConfigTest.BUGS_DIR +"hedenus/bug.xslt"), new StreamResult(writer));

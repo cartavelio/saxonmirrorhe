@@ -67,7 +67,7 @@ public final class Atomizer extends UnaryExpression {
      */
 
     public static Expression makeAtomizer(Expression sequence, RoleDiagnostic role) {
-        if (sequence instanceof Literal && ((Literal) sequence).getValue() instanceof AtomicSequence) {
+        if (sequence instanceof Literal && ((Literal) sequence).getGroundedValue() instanceof AtomicSequence) {
             return sequence;
         } else {
             return new Atomizer(sequence, role);
@@ -117,7 +117,7 @@ public final class Atomizer extends UnaryExpression {
         computeSingleValued(getConfiguration().getTypeHierarchy());
         Expression operand = getBaseExpression().simplify();
         if (operand instanceof Literal) {
-            GroundedValue val = ((Literal) operand).getValue();
+            GroundedValue val = ((Literal) operand).getGroundedValue();
 
             if (val instanceof AtomicValue) {
                 return operand;

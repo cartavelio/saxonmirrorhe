@@ -178,7 +178,7 @@ public class DocumentFn extends SystemFunction implements Callable {
         String fragmentId = null;
         if (hash >= 0) {
             if (hash == href.length() - 1) {
-                // # sign at end - just ignore it
+                // If there's a # sign at end - just ignore it
                 href = href.substring(0, hash);
             } else {
                 fragmentId = href.substring(hash + 1);
@@ -438,7 +438,6 @@ public class DocumentFn extends SystemFunction implements Callable {
      * @param strip true if the document is subject to whitespace stripping (typically a source document), false
      *              otherwise (typically a stylesheet module)
      */
-
     public static DocumentKey computeDocumentKey(
             String href, String baseURI, PackageData packageData, URIResolver resolver, boolean strip) {
         String absURI;

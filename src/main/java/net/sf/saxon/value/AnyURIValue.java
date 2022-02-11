@@ -7,12 +7,13 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.*;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 
 /**
@@ -25,9 +26,9 @@ import java.nio.charset.Charset;
  * before constructing the AnyURIValue.</p>
  */
 
-public final class AnyURIValue extends StringValue {
+public final class AnyURIValue extends StringItem {
 
-    /*@NotNull*/ public static final AnyURIValue EMPTY_URI = new AnyURIValue("");
+    /*@NotNull*/ public static final AnyURIValue EMPTY_URI = new AnyURIValue(EmptyUniString.getInstance());
 
 
     /**
@@ -38,9 +39,13 @@ public final class AnyURIValue extends StringValue {
      *              perform whitespace normalization.
      */
 
-    public AnyURIValue(/*@Nullable*/ CharSequence value) {
-        this.value = value == null ? "" : Whitespace.collapseWhitespace(value).toString();
+    public AnyURIValue(UnicodeString value) {
+        super(value == null ? (UnicodeString) EmptyUniString.getInstance() : Whitespace.collapseWhitespace(value));
         typeLabel = BuiltInAtomicType.ANY_URI;
+    }
+
+    public AnyURIValue(String value) {
+        this(StringView.tidy(value));
     }
 
     /**
@@ -52,9 +57,8 @@ public final class AnyURIValue extends StringValue {
      *              to the definition of this type.
      */
 
-    public AnyURIValue(/*@Nullable*/ CharSequence value, AtomicType type) {
-        this.value = value == null ? "" : Whitespace.collapseWhitespace(value).toString();
-        typeLabel = type;
+    public AnyURIValue(UnicodeString value, AtomicType type) {
+        super(value == null ? "" : Whitespace.collapseWhitespace(value).toString(), type);
     }
 
 
@@ -67,10 +71,14 @@ public final class AnyURIValue extends StringValue {
 
     /*@NotNull*/
     @Override
-    public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        AnyURIValue v = new AnyURIValue(value);
+    public AnyURIValue copyAsSubType(AtomicType typeLabel) {
+        AnyURIValue v = new AnyURIValue(this.getUnicodeStringValue());
         v.typeLabel = typeLabel;
         return v;
+    }
+
+    public StringItem convertToString() {
+        return new StringItem(getContent(), BuiltInAtomicType.STRING);
     }
 
     /*@NotNull*/
@@ -101,9 +109,9 @@ public final class AnyURIValue extends StringValue {
             return s;
         }
 
-        FastStringBuffer sb = new FastStringBuffer(n);
+        StringBuilder sb = new StringBuilder(n);
         ByteBuffer bb = ByteBuffer.allocate(n);
-        Charset utf8 = Charset.forName("UTF-8");
+        Charset utf8 = StandardCharsets.UTF_8;
 
         // This is not horribly efficient, but it will do for now
         char c = s.charAt(0);
@@ -117,7 +125,7 @@ public final class AnyURIValue extends StringValue {
                 betweenBrackets = false;
             }
             if (c != '%' || betweenBrackets) {
-                sb.cat(c);
+                sb.append(c);
                 if (++i >= n) {
                     break;
                 }
@@ -137,7 +145,7 @@ public final class AnyURIValue extends StringValue {
                 }
             }
             bb.flip();
-            sb.cat(utf8.decode(bb));
+            sb.append(utf8.decode(bb));
         }
 
         return sb.toString();

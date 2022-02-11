@@ -11,6 +11,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
@@ -25,10 +26,10 @@ import net.sf.saxon.value.AtomicValue;
 
 public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
 
-    private String separator;
+    private final CodePoints separator;
     private boolean first = true;
 
-    public SequenceNormalizerWithItemSeparator(Receiver next, String separator) {
+    public SequenceNormalizerWithItemSeparator(Receiver next, CodePoints separator) {
         super(next);
         this.separator = separator;
     }
@@ -67,7 +68,7 @@ public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
      * Character data
      */
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         sep();
         super.characters(chars, locationId, properties);
     }
@@ -76,7 +77,7 @@ public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
      * Processing Instruction
      */
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         sep();
         super.processingInstruction(target, data, locationId, properties);
     }
@@ -85,7 +86,7 @@ public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
      * Output a comment
      */
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         sep();
         super.comment(chars, locationId, properties);
     }
@@ -104,7 +105,7 @@ public class SequenceNormalizerWithItemSeparator extends SequenceNormalizer {
         } else {
             if (item instanceof AtomicValue) {
                 sep();
-                nextReceiver.characters(item.getStringValueCS(), locationId, ReceiverOption.NONE);
+                nextReceiver.characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
             } else {
                 decompose(item, locationId, copyNamespaces);
             }

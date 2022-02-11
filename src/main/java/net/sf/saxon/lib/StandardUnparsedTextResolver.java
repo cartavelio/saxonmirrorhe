@@ -10,9 +10,10 @@ package net.sf.saxon.lib;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.resource.BinaryResource;
 import net.sf.saxon.resource.DataURIScheme;
+import net.sf.saxon.resource.Loader;
 import net.sf.saxon.resource.UnparsedTextResource;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -123,11 +124,9 @@ public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
                 throw e;
             }
             try {
-
-                URLConnection connection = absoluteURL.openConnection();
-                connection.setRequestProperty("Accept-Encoding", "gzip");
+                URLConnection connection = null;
                 try {
-                    connection.connect();
+                    connection = Loader.urlConnection(absoluteURL);
                 } catch (IOException ioe) {
                     if (debug) {
                         err.error("unparsed-text(): connection failure on " + absoluteURL
@@ -295,9 +294,9 @@ public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
                 if (debug) {
                     logger.info("unparsed-text(): found XML declaration");
                 }
-                FastStringBuffer sb = new FastStringBuffer(read);
+                StringBuilder sb = new StringBuilder(read);
                 for (int b = 0; b < read; b++) {
-                    sb.cat((char) start[b]);
+                    sb.append((char) start[b]);
                 }
                 String p = sb.toString();
                 int v = p.indexOf("encoding");
@@ -308,7 +307,7 @@ public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
                     }
                     sb.setLength(0);
                     while (v < p.length() && p.charAt(v) != '"' && p.charAt(v) != '\'') {
-                        sb.cat(p.charAt(v++));
+                        sb.append(p.charAt(v++));
                     }
                     if (debug) {
                         logger.info("unparsed-text(): encoding in XML declaration = " + sb.toString());

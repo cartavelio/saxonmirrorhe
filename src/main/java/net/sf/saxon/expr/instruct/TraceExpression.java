@@ -28,7 +28,7 @@ import java.util.Iterator;
 
 public class TraceExpression extends Instruction implements Traceable {
 
-    private Operand baseOp;
+    private final Operand baseOp;
     private HashMap<String, Object> properties = new HashMap<>(10);
 
     /**

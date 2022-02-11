@@ -196,13 +196,13 @@ public abstract class Minimax extends CollatingFunctionFixed {
                 return null;
             }
             prim = min;
-            if (min instanceof UntypedAtomicValue) {
+            if (min.isUntypedAtomic()) {
                 try {
-                    min = new DoubleValue(converter.stringToNumber(min.getStringValueCS()));
+                    min = new DoubleValue(converter.stringToNumber(min.getUnicodeStringValue()));
                     prim = min;
                     foundDouble = true;
                 } catch (NumberFormatException e) {
-                    XPathException de = new XPathException("Failure converting " + Err.wrap(min.getStringValueCS()) + " to a number");
+                    XPathException de = new XPathException("Failure converting " + Err.wrap(min.getUnicodeStringValue()) + " to a number");
                     de.setErrorCode("FORG0001");
                     de.setXPathContext(context);
                     throw de;
@@ -212,7 +212,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
                     foundDouble = true;
                 } else if (prim instanceof FloatValue) {
                     foundFloat = true;
-                } else if (prim instanceof StringValue && !(prim instanceof AnyURIValue)) {
+                } else if (prim instanceof StringItem && !(prim instanceof AnyURIValue)) {
                     foundString = true;
                 }
             }
@@ -247,16 +247,16 @@ public abstract class Minimax extends CollatingFunctionFixed {
             }
             AtomicValue test2 = test;
             prim = test2;
-            if (test instanceof UntypedAtomicValue) {
+            if (test.isUntypedAtomic()) {
                 try {
-                    test2 = new DoubleValue(converter.stringToNumber(test.getStringValueCS()));
+                    test2 = new DoubleValue(converter.stringToNumber(test.getUnicodeStringValue()));
                     if (foundNaN) {
                         return DoubleValue.NaN;
                     }
                     prim = test2;
                     foundDouble = true;
                 } catch (NumberFormatException e) {
-                    XPathException de = new XPathException("Failure converting " + Err.wrap(test.getStringValueCS()) + " to a number");
+                    XPathException de = new XPathException("Failure converting " + Err.wrap(test.getStringValue()) + " to a number");
                     de.setErrorCode("FORG0001");
                     de.setXPathContext(context);
                     throw de;
@@ -269,7 +269,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
                     foundDouble = true;
                 } else if (prim instanceof FloatValue) {
                     foundFloat = true;
-                } else if (prim instanceof StringValue && !(prim instanceof AnyURIValue)) {
+                } else if (prim instanceof StringItem && !(prim instanceof AnyURIValue)) {
                     foundString = true;
                 }
             }

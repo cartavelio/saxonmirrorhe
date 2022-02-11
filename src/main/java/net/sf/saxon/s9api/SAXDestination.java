@@ -30,7 +30,7 @@ import org.xml.sax.ContentHandler;
 
 public class SAXDestination extends AbstractDestination {
 
-    private ContentHandler contentHandler;
+    private final ContentHandler contentHandler;
 
     /**
      * Create a SAXDestination, supplying a SAX ContentHandler to which

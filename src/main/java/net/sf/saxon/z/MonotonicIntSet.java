@@ -8,7 +8,7 @@
 package net.sf.saxon.z;
 
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import java.util.Arrays;
 
@@ -197,7 +197,7 @@ public class MonotonicIntSet implements IntSet {
     }
 
     public String toString() {
-        FastStringBuffer sb = new FastStringBuffer(used * 4);
+        StringBuilder sb = new StringBuilder(used * 4);
         for (int i = 0; i < used; i++) {
             if (i == used - 1) {
                 sb.append(contents[i] + "");

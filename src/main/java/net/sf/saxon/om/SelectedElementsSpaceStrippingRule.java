@@ -16,7 +16,7 @@ import net.sf.saxon.style.StylesheetModule;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AlphaCode;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -37,9 +37,9 @@ public class SelectedElementsSpaceStrippingRule implements SpaceStrippingRule {
 
     private Rule anyElementRule = null;
     private Rule unnamedElementRuleChain = null;
-    private HashMap<NodeName, Rule> namedElementRules = new HashMap<NodeName, Rule>(32);
+    private final HashMap<NodeName, Rule> namedElementRules = new HashMap<NodeName, Rule>(32);
     private int sequence = 0;
-    private boolean rejectDuplicates; // in XSLT 3.0, duplicate conflicting rules are a static error
+    private final boolean rejectDuplicates; // in XSLT 3.0, duplicate conflicting rules are a static error
 
     /**
      * Create the ruleset
@@ -310,7 +310,7 @@ public class SelectedElementsSpaceStrippingRule implements SpaceStrippingRule {
         presenter.endElement();
     }
 
-    private static void exportRuleJS(Rule rule, FastStringBuffer fsb) {
+    private static void exportRuleJS(Rule rule, StringBuilder fsb) {
         String which = rule.getAction() == Stripper.STRIP ? "true" : "false";
         NodeTest test = (NodeTest)rule.getPattern().getItemType();
         if (test instanceof NodeKindTest) {

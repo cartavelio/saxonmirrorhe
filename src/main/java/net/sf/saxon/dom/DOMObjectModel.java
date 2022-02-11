@@ -134,7 +134,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
         if (Node.class.isAssignableFrom(sourceClass) && !NodeOverNodeInfo.class.isAssignableFrom(sourceClass)) {
             return new JPConverter() {
                 @Override
-                public Sequence convert(Object obj, XPathContext context) {
+                public GroundedValue convert(Object obj, XPathContext context) {
                     return wrapOrUnwrapNode((Node) obj, context.getConfiguration());
                 }
 
@@ -146,7 +146,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
         } else if (NodeList.class.isAssignableFrom(sourceClass)) {
             return new JPConverter() {
                 @Override
-                public Sequence convert(Object obj, XPathContext context) {
+                public GroundedValue convert(Object obj, XPathContext context) {
                     Configuration config = context.getConfiguration();
                     NodeList list = (NodeList) obj;
                     final int len = list.getLength();
@@ -170,7 +170,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
         } else if (DOMSource.class.isAssignableFrom(sourceClass)) {
             return new JPConverter() {
                 @Override
-                public Sequence convert(Object obj, XPathContext context) {
+                public GroundedValue convert(Object obj, XPathContext context) {
                     return unravel((DOMSource) obj, context.getConfiguration());
                 }
 
@@ -182,7 +182,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
         } else if (DocumentWrapper.class == sourceClass) {
             return new JPConverter() {
                 @Override
-                public Sequence convert(Object obj, XPathContext context) {
+                public GroundedValue convert(Object obj, XPathContext context) {
                     return ((DocumentWrapper) obj).getRootNode();
                 }
 

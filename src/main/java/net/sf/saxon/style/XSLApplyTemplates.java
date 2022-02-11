@@ -143,7 +143,7 @@ public class XSLApplyTemplates extends StyleElement {
         for (NodeInfo child : children()) {
             if (child.getNodeKind() == Type.TEXT) {
                 // with xml:space=preserve, white space nodes may still be there
-                if (!Whitespace.isWhite(child.getStringValueCS())) {
+                if (!Whitespace.isAllWhite(child.getUnicodeStringValue())) {
                     compileError("No character data is allowed within xsl:apply-templates", "XTSE0010");
                 }
             } else if (!(child instanceof XSLSort || child instanceof XSLWithParam)){

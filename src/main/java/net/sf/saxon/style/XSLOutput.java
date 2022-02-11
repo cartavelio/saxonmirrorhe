@@ -30,11 +30,11 @@ import java.util.StringTokenizer;
 public class XSLOutput extends StyleElement {
 
     private StructuredQName outputFormatName;
-    /*@Nullable*/ private String method = null;
-    private String outputVersion = null;
+    /*@Nullable*/ private final String method = null;
+    private final String outputVersion = null;
 
     private String useCharacterMaps = null;
-    private Map<String, String> serializationAttributes = new HashMap<String, String>(10);
+    private final Map<String, String> serializationAttributes = new HashMap<String, String>(10);
 
     private HashMap<String, String> userAttributes = null;
 
@@ -72,7 +72,6 @@ public class XSLOutput extends StyleElement {
                     compileError(XPathException.makeXPathException(e));
                 }
                 serializationAttributes.put(f, val);
-                //serializationAttributes.put(SaxonOutputKeys.PARAMETER_DOCUMENT_BASE_URI, getBaseURI());
             } else if (XSLResultDocument.fans.contains(f) && !f.equals("output-version")) {
                 String val = value;
                 if (!f.equals(SaxonOutputKeys.ITEM_SEPARATOR) && !f.equals(SaxonOutputKeys.NEWLINE)) {

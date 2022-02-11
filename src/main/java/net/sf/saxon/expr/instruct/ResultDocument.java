@@ -26,8 +26,8 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.style.XSLResultDocument;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
@@ -438,7 +438,6 @@ public class ResultDocument extends Instruction
             } catch (URISyntaxException e) {
                 throw XPathException.makeXPathException(e);
             }
-            //computedLocalProps.setProperty(SaxonOutputKeys.PARAMETER_DOCUMENT_BASE_URI, getStaticBaseURIString());
         }
         SerializationProperties serParams = new SerializationProperties(computedLocalProps, characterMapIndex);
 

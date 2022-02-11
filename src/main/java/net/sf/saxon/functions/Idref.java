@@ -15,7 +15,7 @@ import net.sf.saxon.trans.KeyDefinitionSet;
 import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 public class Idref extends SystemFunction {
@@ -93,7 +93,7 @@ public class Idref extends SystemFunction {
 
         @Override
         public SequenceIterator map(Item item) throws XPathException {
-            return keyManager.selectByKey(keySet, document, (StringValue)item, keyContext);
+            return keyManager.selectByKey(keySet, document, (StringItem)item, keyContext);
         }
     }
 

@@ -46,8 +46,8 @@ public class FunctionLiteral extends Literal {
      */
 
     @Override
-    public Function getValue() {
-        return (Function) super.getValue();
+    public Function getGroundedValue() {
+        return (Function) super.getGroundedValue();
     }
 
 
@@ -62,8 +62,8 @@ public class FunctionLiteral extends Literal {
     /*@NotNull*/
     @Override
     public Expression simplify() throws XPathException {
-        if (getValue() instanceof AbstractFunction) {
-            ((AbstractFunction) getValue()).simplify();
+        if (getGroundedValue() instanceof AbstractFunction) {
+            ((AbstractFunction) getGroundedValue()).simplify();
         }
         return this;
     }
@@ -77,8 +77,8 @@ public class FunctionLiteral extends Literal {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        if (getValue() instanceof AbstractFunction) {
-            ((AbstractFunction) getValue()).typeCheck(visitor, contextInfo);
+        if (getGroundedValue() instanceof AbstractFunction) {
+            ((AbstractFunction) getGroundedValue()).typeCheck(visitor, contextInfo);
         }
         return this;
     }
@@ -92,7 +92,7 @@ public class FunctionLiteral extends Literal {
     /*@NotNull*/
     @Override
     public FunctionItemType getItemType() {
-        return getValue().getFunctionItemType();
+        return getGroundedValue().getFunctionItemType();
     }
 
     /**
@@ -138,7 +138,7 @@ public class FunctionLiteral extends Literal {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        FunctionLiteral fl2 = new FunctionLiteral(getValue());
+        FunctionLiteral fl2 = new FunctionLiteral(getGroundedValue());
         ExpressionTool.copyLocationInfo(this, fl2);
         return fl2;
     }
@@ -164,7 +164,7 @@ public class FunctionLiteral extends Literal {
      */
 
     public boolean equals(Object obj) {
-        return obj instanceof FunctionLiteral && ((FunctionLiteral) obj).getValue() == getValue();
+        return obj instanceof FunctionLiteral && ((FunctionLiteral) obj).getGroundedValue() == getGroundedValue();
 
     }
 
@@ -174,7 +174,7 @@ public class FunctionLiteral extends Literal {
 
     @Override
     public int computeHashCode() {
-        return getValue().hashCode();
+        return getGroundedValue().hashCode();
     }
 
     /**
@@ -197,7 +197,7 @@ public class FunctionLiteral extends Literal {
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        Function f = getValue();
+        Function f = getGroundedValue();
         if (f instanceof UserFunction) {
             new UserFunctionReference((UserFunction) f).export(out);
         } else {

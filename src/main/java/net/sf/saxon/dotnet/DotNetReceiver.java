@@ -10,6 +10,7 @@ package net.sf.saxon.dotnet;
 import cli.System.Xml.XmlWriter;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
@@ -55,6 +56,7 @@ public class DotNetReceiver extends Outputter {
      * @param nameCode   The name of the attribute
      * @param typeCode   The type of the attribute. The additional bit
      *                   NodeInfo.IS_DTD_TYPE may be set to indicate a DTD-derived type.
+     * @param value
      * @param locationId an integer which can be interpreted using a LocationMap to return
      *                   information such as line number and system ID. If no location information is available,
      *                   the value zero is supplied.
@@ -68,7 +70,7 @@ public class DotNetReceiver extends Outputter {
      */
 
     @Override
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
+    public void attribute(NodeName nameCode, SimpleType typeCode, String value, Location locationId, int properties) throws XPathException {
         writer.WriteAttributeString(
                 nameCode.getPrefix(),
                 nameCode.getLocalPart(),
@@ -88,7 +90,7 @@ public class DotNetReceiver extends Outputter {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         writer.WriteString(chars.toString());
     }
 
@@ -121,7 +123,7 @@ public class DotNetReceiver extends Outputter {
      */
 
     @Override
-    public void comment(CharSequence content, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints content, Location locationId, int properties) throws XPathException {
         writer.WriteComment(content.toString());
     }
 
@@ -201,7 +203,7 @@ public class DotNetReceiver extends Outputter {
      */
 
     @Override
-    public void processingInstruction(String name, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String name, CodePoints data, Location locationId, int properties) throws XPathException {
         writer.WriteProcessingInstruction(name, data.toString());
     }
 

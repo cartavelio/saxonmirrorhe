@@ -11,7 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.ProcessingInstruction;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * An xsl:processing-instruction element in the stylesheet.
@@ -47,7 +47,7 @@ public class XSLProcessingInstruction extends XSLLeafNodeConstructor {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         ProcessingInstruction inst = new ProcessingInstruction(name);
-        compileContent(exec, decl, inst, new StringLiteral(StringValue.SINGLE_SPACE));
+        compileContent(exec, decl, inst, new StringLiteral(StringItem.SINGLE_SPACE));
         return inst;
     }
 

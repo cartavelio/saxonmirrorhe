@@ -149,7 +149,7 @@ public class TraceEventMulticaster implements TraceListener {
      * @param b trace-listener-b
      */
     public static TraceListener add(TraceListener a, TraceListener b) {
-        return (TraceListener) addInternal(a, b);
+        return addInternal(a, b);
     }
 
     /**
@@ -160,7 +160,7 @@ public class TraceEventMulticaster implements TraceListener {
      * @param oldl the trace-listener being removed
      */
     public static TraceListener remove(TraceListener l, TraceListener oldl) {
-        return (TraceListener) removeInternal(l, oldl);
+        return removeInternal(l, oldl);
     }
 
     /**

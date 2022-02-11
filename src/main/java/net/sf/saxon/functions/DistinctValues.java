@@ -37,10 +37,10 @@ public class DistinctValues extends CollatingFunctionFixed {
 
     public static class DistinctIterator implements SequenceIterator {
 
-        private SequenceIterator base;
-        private StringCollator collator;
-        private XPathContext context;
-        private HashSet<AtomicMatchKey> lookup = new HashSet<>(40);
+        private final SequenceIterator base;
+        private final StringCollator collator;
+        private final XPathContext context;
+        private final HashSet<AtomicMatchKey> lookup = new HashSet<>(40);
 
         /**
          * Create an iterator over the distinct values in a sequence

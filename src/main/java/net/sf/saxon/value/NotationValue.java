@@ -164,13 +164,13 @@ public final class NotationValue extends QualifiedNameValue {
     }
 
     /**
-     * The toString() method returns the name in the form QName("uri", "local")
+     * The show() method returns the name in the form <code>NOTATION({uri}local)</code>
      *
      * @return the name in Clark notation: {uri}local
      */
 
-    /*@NotNull*/
-    public String toString() {
+    @Override
+    public String show() {
         return "NOTATION(" + getClarkName() + ')';
     }
 

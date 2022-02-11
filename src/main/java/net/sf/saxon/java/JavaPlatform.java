@@ -21,6 +21,7 @@ import net.sf.saxon.lib.ModuleURIResolver;
 import net.sf.saxon.lib.StandardModuleURIResolver;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.JavaRegularExpression;
 import net.sf.saxon.regex.RegularExpression;
@@ -337,7 +338,7 @@ public class JavaPlatform implements Platform {
      * @throws net.sf.saxon.trans.XPathException if the regular expression or the flags are invalid
      */
     @Override
-    public RegularExpression compileRegularExpression(Configuration config, CharSequence regex, String flags, String hostLanguage, List<String> warnings) throws XPathException {
+    public RegularExpression compileRegularExpression(Configuration config, UnicodeString regex, String flags, String hostLanguage, List<String> warnings) throws XPathException {
         // recognize "!" as a flag to mean: use native Java regex syntax
         if (flags.contains("!")) {
             // undocumented
@@ -429,7 +430,7 @@ public class JavaPlatform implements Platform {
     }
 
 
-//#if BYTECODE==true
+//#if EE==true
 
     /**
      * Return the class loader required to load the bytecode generated classes

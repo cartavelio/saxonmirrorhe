@@ -23,7 +23,7 @@ import java.util.Iterator;
 
 public abstract class UnaryExpression extends Expression {
 
-    private Operand operand;
+    private final Operand operand;
 
     public UnaryExpression(Expression p0) {
         operand = new Operand(this, p0, getOperandRole());

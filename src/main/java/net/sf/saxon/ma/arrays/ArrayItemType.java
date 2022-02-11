@@ -16,7 +16,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
 
@@ -34,7 +34,7 @@ public class ArrayItemType extends AnyFunctionType {
     public final static SequenceType SINGLE_ARRAY =
             SequenceType.makeSequenceType(ArrayItemType.ANY_ARRAY_TYPE, StaticProperty.EXACTLY_ONE);
 
-    private SequenceType memberType;
+    private final SequenceType memberType;
 
     public ArrayItemType(SequenceType memberType) {
         this.memberType = memberType;
@@ -198,7 +198,7 @@ public class ArrayItemType extends AnyFunctionType {
         if (this.equals(ANY_ARRAY_TYPE)) {
             return "array(*)";
         } else {
-            FastStringBuffer sb = new FastStringBuffer(100);
+            StringBuilder sb = new StringBuilder(100);
             sb.append("array(");
             sb.append(show.apply(memberType));
             sb.append(")");

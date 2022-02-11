@@ -11,8 +11,10 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -170,6 +172,11 @@ public class AttributeImpl extends NodeImpl {
      */
 
     @Override
+    public UnicodeString getUnicodeStringValue() {
+        return StringView.tidy(getAttributeInfo().getValue());
+    }
+
+    @Override
     public String getStringValue() {
         return getAttributeInfo().getValue();
     }
@@ -222,9 +229,9 @@ public class AttributeImpl extends NodeImpl {
      */
 
     @Override
-    public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
+    public void generateId(/*@NotNull*/ StringBuilder buffer) {
         getParent().generateId(buffer);
-        buffer.cat('a');
+        buffer.append('a');
         buffer.append(Integer.toString(getSiblingPosition()));
     }
 
@@ -334,7 +341,7 @@ public class AttributeImpl extends NodeImpl {
     }
 
     @Override
-    public void replaceStringValue(CharSequence stringValue) {
+    public void replaceStringValue(UnicodeString stringValue) {
         ElementImpl owner = (ElementImpl)getRawParent();
         if (owner != null && !isDeleted()) {
             AttributeInfo att = getAttributeInfo();

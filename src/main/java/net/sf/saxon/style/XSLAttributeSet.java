@@ -42,12 +42,12 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
     private SlotManager stackFrameMap;
     // needed if variables are used
 
-    private List<ComponentDeclaration> attributeSetElements = new ArrayList<ComponentDeclaration>();
+    private final List<ComponentDeclaration> attributeSetElements = new ArrayList<ComponentDeclaration>();
     // list of Declarations of XSLAttributeSet objects referenced by this one, within the same package
 
     private StructuredQName[] useAttributeSetNames;
 
-    private List<Expression> containedInstructions = new ArrayList<Expression>();
+    private final List<Expression> containedInstructions = new ArrayList<Expression>();
     // the compiled form of this attribute set
 
     private boolean validated = false;

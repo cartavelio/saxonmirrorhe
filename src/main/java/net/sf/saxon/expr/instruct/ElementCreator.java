@@ -195,7 +195,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
                     // in an XQuery construct like <a>{@x}{@y}</b>
                     if (component instanceof ValueOf &&
                             ((ValueOf) component).getSelect() instanceof StringLiteral) {
-                        String value = ((StringLiteral) ((ValueOf) component).getSelect()).getStringValue();
+                        String value = ((StringLiteral) ((ValueOf) component).getSelect()).stringify();
                         if (value.isEmpty()) {
                             // continue;  // not an error
                         } else {

@@ -30,7 +30,7 @@ public class PublicStylesheetFunctionLibrary implements FunctionLibrary {
 
 
 
-    private FunctionLibrary base;
+    private final FunctionLibrary base;
 
     /**
      * Create a FunctionLibrary that provides access to public stylesheet functions

@@ -28,11 +28,11 @@ import java.util.List;
  */
 public class GroupByClausePush extends TuplePush {
 
-    private TuplePush destination;
-    private GroupByClause groupByClause;
-    private HashMap<Object, List<GroupByClause.ObjectToBeGrouped>> map = new HashMap<>();
-    private XPathContext context;
-    private GenericAtomicComparer[] comparers;
+    private final TuplePush destination;
+    private final GroupByClause groupByClause;
+    private final HashMap<Object, List<GroupByClause.ObjectToBeGrouped>> map = new HashMap<>();
+    private final XPathContext context;
+    private final GenericAtomicComparer[] comparers;
 
     public GroupByClausePush(Outputter outputter, TuplePush destination, GroupByClause groupBy, XPathContext context) {
         super(outputter);

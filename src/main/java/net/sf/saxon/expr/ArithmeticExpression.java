@@ -7,8 +7,8 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.compat.ArithmeticExpression10;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StandardNames;
@@ -167,8 +167,8 @@ public class ArithmeticExpression extends BinaryExpression {
 
 
         if (operator == Token.NEGATE) {
-            if (getRhsExpression() instanceof Literal && ((Literal) getRhsExpression()).getValue() instanceof NumericValue) {
-                NumericValue nv = (NumericValue) ((Literal) getRhsExpression()).getValue();
+            if (getRhsExpression() instanceof Literal && ((Literal) getRhsExpression()).getGroundedValue() instanceof NumericValue) {
+                NumericValue nv = (NumericValue) ((Literal) getRhsExpression()).getGroundedValue();
                 return Literal.makeLiteral(nv.negate(), this);
             } else {
                 NegateExpression ne = new NegateExpression(getRhsExpression());
@@ -200,13 +200,13 @@ public class ArithmeticExpression extends BinaryExpression {
         // (Could generalize this, but this is the common case)
         if (calculator.code().matches("d.d")) {
             if (getLhsExpression() instanceof Literal && !type0.equals(BuiltInAtomicType.DOUBLE)) {
-                GroundedValue value = ((Literal) getLhsExpression()).getValue();
+                GroundedValue value = ((Literal) getLhsExpression()).getGroundedValue();
                 if (value instanceof NumericValue) {
                     setLhsExpression(Literal.makeLiteral(new DoubleValue(((NumericValue) value).getDoubleValue()), this));
                 }
             }
             if (getRhsExpression() instanceof Literal && !type1.equals(BuiltInAtomicType.DOUBLE)) {
-                GroundedValue value = ((Literal) getRhsExpression()).getValue();
+                GroundedValue value = ((Literal) getRhsExpression()).getGroundedValue();
                 if (value instanceof NumericValue) {
                     setRhsExpression(Literal.makeLiteral(new DoubleValue(((NumericValue) value).getDoubleValue()), this));
                 }
@@ -425,6 +425,7 @@ public class ArithmeticExpression extends BinaryExpression {
 
     @Override
     public AtomicValue evaluateItem(XPathContext context) throws XPathException {
+
         AtomicValue v0 = (AtomicValue) getLhsExpression().evaluateItem(context);
         if (v0 == null) {
             return null;

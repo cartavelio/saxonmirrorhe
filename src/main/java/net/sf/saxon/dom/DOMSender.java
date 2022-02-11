@@ -15,6 +15,7 @@ import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
@@ -39,7 +40,7 @@ public class DOMSender {
     private final Receiver receiver;
     protected Node root;
     protected String systemId;
-    private Stack<NamespaceMap> namespaces = new Stack<>();
+    private final Stack<NamespaceMap> namespaces = new Stack<>();
     private Node currentNode;
 
     /**
@@ -103,15 +104,15 @@ public class DOMSender {
                 break;
             case Node.TEXT_NODE:
             case Node.CDATA_SECTION_NODE:
-                receiver.characters(((CharacterData) root).getData(), loc, ReceiverOption.NONE);
+                receiver.characters(StringView.of(((CharacterData) root).getData()), loc, ReceiverOption.NONE);
                 break;
             case Node.COMMENT_NODE:
-                receiver.comment(((Comment) root).getData(), loc, ReceiverOption.NONE);
+                receiver.comment(StringView.of(((Comment) root).getData()), loc, ReceiverOption.NONE);
                 break;
             case Node.PROCESSING_INSTRUCTION_NODE:
                 receiver.processingInstruction(
                         ((ProcessingInstruction) root).getTarget(),
-                        ((ProcessingInstruction) root).getData(), loc, ReceiverOption.NONE);
+                        StringView.of(((ProcessingInstruction) root).getData()), loc, ReceiverOption.NONE);
                 break;
             default:
                 throw new IllegalStateException("DOMSender: unsupported kind of start node (" + root.getNodeType() + ")");
@@ -240,13 +241,13 @@ public class DOMSender {
                     case Node.PROCESSING_INSTRUCTION_NODE:
                         receiver.processingInstruction(
                                 ((ProcessingInstruction) child).getTarget(),
-                                ((ProcessingInstruction) child).getData(),
+                                StringView.of(((ProcessingInstruction) child).getData()),
                                 loc, ReceiverOption.NONE);
                         break;
                     case Node.COMMENT_NODE: {
                         String text = ((Comment) child).getData();
                         if (text != null) {
-                            receiver.comment(text, loc, ReceiverOption.NONE);
+                            receiver.comment(StringView.of(text), loc, ReceiverOption.NONE);
                         }
                         break;
                     }
@@ -254,7 +255,7 @@ public class DOMSender {
                     case Node.CDATA_SECTION_NODE: {
                         String text = ((CharacterData) child).getData();
                         if (text != null) {
-                            receiver.characters(text, loc, ReceiverOption.NONE);
+                            receiver.characters(StringView.of(text), loc, ReceiverOption.NONE);
                         }
                         break;
                     }

@@ -17,7 +17,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
@@ -38,8 +38,8 @@ import java.util.function.Function;
  */
 public class TupleItemType extends AnyFunctionType implements TupleType {
 
-    private Map<String, SequenceType> fields = new HashMap<>();
-    private boolean extensible;
+    private final Map<String, SequenceType> fields = new HashMap<>();
+    private final boolean extensible;
 
     public TupleItemType(List<String> names, List<SequenceType> types, boolean extensible) {
         for (int i=0; i<names.size(); i++) {
@@ -125,7 +125,7 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
         }
         MapItem map = (MapItem)item;
         for (Map.Entry<String, SequenceType> field : fields.entrySet()) {
-            Sequence val = map.get(new StringValue(field.getKey()));
+            Sequence val = map.get(new StringItem(field.getKey()));
             if (val == null) {
                 val = EmptySequence.getInstance();
             }
@@ -137,7 +137,7 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
             AtomicIterator<? extends AtomicValue> keyIter = map.keys();
             AtomicValue key;
             while ((key = keyIter.next()) != null) {
-                if (!(key instanceof StringValue) || !fields.containsKey(key.getStringValue())) {
+                if (!(key instanceof StringItem) || !fields.containsKey(key.getUnicodeStringValue())) {
                     return false;
                 }
             }
@@ -250,7 +250,7 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
      */
 
     private String makeString(Function<SequenceType, String> show) {
-        FastStringBuffer sb = new FastStringBuffer(100);
+        StringBuilder sb = new StringBuilder(100);
         sb.append("tuple(");
         boolean first = true;
         for (Map.Entry<String, SequenceType> field : fields.entrySet()) {
@@ -417,7 +417,7 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
             for (Map.Entry<String, SequenceType> entry : fields.entrySet()) {
                 String key = entry.getKey();
                 SequenceType required = entry.getValue();
-                GroundedValue value = ((MapItem) item).get(new StringValue(key));
+                GroundedValue value = ((MapItem) item).get(new StringItem(key));
                 if (value == null) {
                     if (!Cardinality.allowsZero(required.getCardinality())) {
                         return Optional.of("Field " + key + " is absent; it must have a value");
@@ -445,9 +445,9 @@ public class TupleItemType extends AnyFunctionType implements TupleType {
                 AtomicIterator<? extends AtomicValue> keyIter = ((MapItem)item).keys();
                 AtomicValue key;
                 while ((key = keyIter.next()) != null) {
-                    if (!(key instanceof StringValue)) {
+                    if (!(key instanceof StringItem)) {
                         return Optional.of("Undeclared field " + key + " is present, but it is not a string, and the tuple type is not extensible");
-                    } else if (!fields.containsKey(key.getStringValue())) {
+                    } else if (!fields.containsKey(key.getUnicodeStringValue())) {
                         return Optional.of("Undeclared field " + key + " is present, but the tuple type is not extensible");
                     }
                 }

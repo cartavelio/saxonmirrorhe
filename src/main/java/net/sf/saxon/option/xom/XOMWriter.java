@@ -11,8 +11,9 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.SchemaType;
 import nu.xom.*;
 
@@ -27,11 +28,11 @@ import java.util.Stack;
 public class XOMWriter extends net.sf.saxon.event.Builder {
 
     private Document document;
-    private Stack<ParentNode> ancestors = new Stack<>();
-    private Stack<NamespaceMap> nsStack = new Stack<>();
-    private NodeFactory nodeFactory;
+    private final Stack<ParentNode> ancestors = new Stack<>();
+    private final Stack<NamespaceMap> nsStack = new Stack<>();
+    private final NodeFactory nodeFactory;
     private boolean implicitDocumentNode = false;
-    private FastStringBuffer textBuffer = new FastStringBuffer(FastStringBuffer.C64);
+    private final StringBuilder textBuffer = new StringBuilder(64);
 
     /**
      * Create a XOMWriter using the default node factory
@@ -222,8 +223,8 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        textBuffer.cat(chars);
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        textBuffer.append(chars);
     }
 
     private void flush() {
@@ -247,7 +248,7 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
             throws XPathException {
         flush();
         Nodes nodes = nodeFactory.makeProcessingInstruction(target, data.toString());
@@ -266,7 +267,7 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         flush();
         Nodes nodes = nodeFactory.makeComment(chars.toString());
         for (int n = 0; n < nodes.size(); n++) {

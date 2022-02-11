@@ -26,6 +26,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.query.QueryModule;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ExpressionContext;
 import net.sf.saxon.style.ScopedBindingElement;
@@ -33,7 +34,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.*;
@@ -256,7 +257,7 @@ public class ExpressionTool {
      */
 
     public static Evaluator eagerEvaluator(Expression exp) {
-        if (exp instanceof Literal && !(((Literal) exp).getValue() instanceof Closure)) {
+        if (exp instanceof Literal && !(((Literal) exp).getGroundedValue() instanceof Closure)) {
             return Evaluator.LITERAL;
         }
         if (exp instanceof VariableReference) {
@@ -341,7 +342,7 @@ public class ExpressionTool {
      */
 
     public static String indent(int level) {
-        FastStringBuffer fsb = new FastStringBuffer(level);
+        StringBuilder fsb = new StringBuilder(level);
         for (int i = 0; i < level; i++) {
             fsb.append("  ");
         }
@@ -772,12 +773,12 @@ public class ExpressionTool {
                 }
                 iterator.close();
                 return ((BooleanValue) first).getBooleanValue();
-            } else if (first instanceof StringValue) {   // includes anyURI value
+            } else if (first instanceof StringItem) {   // includes anyURI value
                 if (iterator.next() != null) {
                     iterator.close();
                     ebvError("a sequence of two or more items starting with a string");
                 }
-                return !((StringValue) first).isZeroLength();
+                return !((StringItem) first).isEmpty();
             } else if (first instanceof NumericValue) {
                 if (iterator.next() != null) {
                     iterator.close();
@@ -829,8 +830,8 @@ public class ExpressionTool {
         } else if (item instanceof AtomicValue){
             if (item instanceof BooleanValue) {
                 return ((BooleanValue) item).getBooleanValue();
-            } else if (item instanceof StringValue) {   // includes anyURI value
-                return !((StringValue) item).isZeroLength();
+            } else if (item instanceof StringItem) {   // includes anyURI value
+                return !((StringItem) item).isEmpty();
             } else if (item instanceof NumericValue) {
                 final NumericValue n = (NumericValue) item;
                 return (n.compareTo(0) != 0) && !n.isNaN();
@@ -1738,7 +1739,7 @@ public class ExpressionTool {
         } catch (URISyntaxException e) {
             // perhaps escaping special characters will fix the problem
 
-            String esc = IriToUri.iriToUri(base).toString();
+            String esc = IriToUri.iriToUri(StringView.tidy(base)).toString();
             try {
                 expressionBaseURI = new URI(esc);
             } catch (URISyntaxException e2) {

@@ -14,7 +14,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.z.IntSet;
 
@@ -285,7 +285,7 @@ public class SimpleArrayItem extends AbstractArrayItem implements ArrayItem {
         } else if (size > 5) {
             return "[(:size " + size + ":)]";
         } else {
-            FastStringBuffer buff = new FastStringBuffer(256);
+            StringBuilder buff = new StringBuilder(256);
             buff.append("[");
             for (GroundedValue entry : members()) {
                 buff.append(Err.depictSequence(entry).toString().trim());

@@ -9,8 +9,8 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Subclass of Literal used specifically for string literals, as this is a common case
@@ -23,8 +23,8 @@ public class StringLiteral extends Literal {
      * @param value     the StringValue
      */
 
-    public StringLiteral(StringValue value) {
-        super((GroundedValue)value);
+    public StringLiteral(StringItem value) {
+        super(value);
     }
 
     /**
@@ -33,8 +33,18 @@ public class StringLiteral extends Literal {
      * @param value     the CharSequence to be wrapped
      */
 
-    public StringLiteral(CharSequence value) {
-        this(StringValue.makeStringValue(value));
+    public StringLiteral(UnicodeString value) {
+        this(new StringItem(value));
+    }
+
+    /**
+     * Create a StringLiteral that wraps any CharSequence (including, of course, a String)
+     *
+     * @param value the CharSequence to be wrapped
+     */
+
+    public StringLiteral(String value) {
+        this(new StringItem(value));
     }
 
     /**
@@ -43,25 +53,34 @@ public class StringLiteral extends Literal {
      * @return the constant value
      */
     @Override
-    public StringValue getValue() {
-        return (StringValue)super.getValue();
+    public StringItem getGroundedValue() {
+        return (StringItem)super.getGroundedValue();
     }
 
     /**
-     * Get the string represented by this StringLiteral
+     * Get the string represented by this StringLiteral, as a UniString
      *
      * @return the underlying string
      */
 
-    public String getStringValue() {
-        //noinspection RedundantCast
-        return ((StringValue) getValue()).getStringValue();
+    public UnicodeString getString() {
+        return ((StringItem) getGroundedValue()).getUnicodeStringValue();
+    }
+
+    /**
+     * Get the string represented by this StringLiteral, as a String
+     *
+     * @return the underlying string
+     */
+
+    public String stringify() {
+        return ((StringItem) getGroundedValue()).getStringValue();
     }
 
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        StringLiteral stringLiteral = new StringLiteral(getValue());
+        StringLiteral stringLiteral = new StringLiteral(getGroundedValue());
         ExpressionTool.copyLocationInfo(this, stringLiteral);
         return stringLiteral;
     }

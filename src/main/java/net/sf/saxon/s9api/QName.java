@@ -27,7 +27,7 @@ import java.util.Objects;
  */
 public class QName {
 
-    private StructuredQName sqName;
+    private final StructuredQName sqName;
 
     /**
      * Construct a QName using a namespace prefix, a namespace URI, and a local name (in that order).
@@ -103,9 +103,9 @@ public class QName {
             lexicalQName = "Q" + lexicalQName;
         }
         try {
-            NodeInfo node = (NodeInfo) element.getUnderlyingValue();
-            sqName = StructuredQName.fromLexicalQName(lexicalQName, true,
-                    true, node.getAllNamespaces());
+            NodeInfo node = element.getUnderlyingValue();
+            sqName = StructuredQName.fromLexicalQName((lexicalQName), true,
+                                                      true, node.getAllNamespaces());
 
         } catch (XPathException err) {
             throw new IllegalArgumentException(err);
@@ -215,10 +215,8 @@ public class QName {
 
     public boolean isValid(Processor processor) {
         String prefix = getPrefix();
-        if (prefix.length() > 0) {
-            if (!NameChecker.isValidNCName(prefix)) {
-                return false;
-            }
+        if (!prefix.isEmpty() && !NameChecker.isValidNCName(prefix)) {
+            return false;
         }
         return NameChecker.isValidNCName(getLocalName());
     }

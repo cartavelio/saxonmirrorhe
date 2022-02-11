@@ -15,8 +15,8 @@ import java.util.NoSuchElementException;
  */
 public class PairIterator<T> implements Iterator<T> {
 
-    private T one;
-    private T two;
+    private final T one;
+    private final T two;
     private int pos = 0;
 
     /**

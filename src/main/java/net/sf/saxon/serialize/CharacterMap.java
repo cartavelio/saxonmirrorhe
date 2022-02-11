@@ -8,10 +8,10 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.str.CompressedWhitespace;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.tree.tiny.CompressedWhitespace;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntIterator;
@@ -23,7 +23,7 @@ import net.sf.saxon.z.IntIterator;
 public class CharacterMap {
 
     private StructuredQName name;
-    private IntHashMap<String> charMap;
+    private final IntHashMap<String> charMap;
     private int min = Integer.MAX_VALUE;    // the lowest mapped character
     private int max = 0;                    // the highest mapped character
     private boolean mapsWhitespace = false;
@@ -49,7 +49,7 @@ public class CharacterMap {
      */
 
     public CharacterMap(Iterable<CharacterMap> list) {
-        charMap = new IntHashMap<String>(64);
+        charMap = new IntHashMap<>(64);
         for (CharacterMap map : list) {
             IntIterator keys = map.charMap.keyIterator();
             while (keys.hasNext()) {
@@ -70,7 +70,7 @@ public class CharacterMap {
             if (next > max) {
                 max = next;
             }
-            if (!mapsWhitespace && Whitespace.isWhitespace(next)) {
+            if (!mapsWhitespace && Whitespace.isWhite(next)) {
                 mapsWhitespace = true;
             }
         }
@@ -102,7 +102,7 @@ public class CharacterMap {
      */
 
     /*@NotNull*/
-    public CharSequence map(CharSequence in, boolean insertNulls) {
+    public UnicodeString map(UnicodeString in, boolean insertNulls) {
 
         if (!mapsWhitespace && in instanceof CompressedWhitespace) {
             return in;
@@ -112,8 +112,9 @@ public class CharacterMap {
         // characters; if not, don't bother creating the new buffer
 
         boolean move = false;
-        for (int i = 0; i < in.length(); ) {
-            char c = in.charAt(i++);
+        IntIterator iter = in.codePoints();
+        while (iter.hasNext()) {
+            int c = iter.next();
             if (c >= min && c <= max) {
                 move = true;
                 break;
@@ -123,47 +124,28 @@ public class CharacterMap {
             return in;
         }
 
-        FastStringBuffer buffer = new FastStringBuffer(in.length() * 2);
-        int i = 0;
-        while (i < in.length()) {
-            char c = in.charAt(i++);
+        UnicodeBuilder buffer = new UnicodeBuilder();
+        iter = in.codePoints();
+        while (iter.hasNext()) {
+            int c = iter.next();
             if (c >= min && c <= max) {
-                if (UTF16CharacterSet.isHighSurrogate(c)) {
-                    // assume the string is properly formed
-                    char d = in.charAt(i++);
-                    int s = UTF16CharacterSet.combinePair(c, d);
-                    String rep = charMap.get(s);
-                    if (rep == null) {
-                        buffer.cat(c);
-                        buffer.cat(d);
-                    } else {
-                        if (insertNulls) {
-                            buffer.cat((char) 0);
-                            buffer.append(rep);
-                            buffer.cat((char) 0);
-                        } else {
-                            buffer.append(rep);
-                        }
-                    }
+                String rep = charMap.get(c);
+                if (rep == null) {
+                    buffer.append(c);
                 } else {
-                    String rep = charMap.get(c);
-                    if (rep == null) {
-                        buffer.cat(c);
+                    if (insertNulls) {
+                        buffer.append((char) 0);
+                        buffer.append(rep);
+                        buffer.append((char) 0);
                     } else {
-                        if (insertNulls) {
-                            buffer.cat((char) 0);
-                            buffer.append(rep);
-                            buffer.cat((char) 0);
-                        } else {
-                            buffer.append(rep);
-                        }
+                        buffer.append(rep);
                     }
                 }
             } else {
-                buffer.cat(c);
+                buffer.append(c);
             }
         }
-        return buffer;
+        return buffer.toUnicodeString();
     }
 
     /**

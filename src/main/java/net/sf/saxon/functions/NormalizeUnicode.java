@@ -9,11 +9,12 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.serialize.codenorm.Normalizer;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.tiny.CompressedWhitespace;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.z.IntIterator;
 
 /**
  * Implement the XPath normalize-unicode() function (both the 1-argument and 2-argument versions)
@@ -31,16 +32,16 @@ public class NormalizeUnicode extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue sv = (StringValue) arguments[0].head();
+    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+        StringItem sv = (StringItem) arguments[0].head();
         if (sv == null) {
-            return StringValue.EMPTY_STRING;
+            return StringItem.EMPTY_STRING;
         }
         String nf = arguments.length == 1 ? "NFC" : Whitespace.trim(arguments[1].head().getStringValue());
-        return normalize(sv, nf, context);
+        return new StringItem(normalize(sv.getStringValue(), nf, context));
     }
 
-    public static StringValue normalize(StringValue sv, String form, XPathContext c) throws XPathException {
+    public static String normalize(String sv, String form, XPathContext c) throws XPathException {
         byte fb;
 
         if (form.equalsIgnoreCase("NFC")) {
@@ -63,12 +64,10 @@ public class NormalizeUnicode extends SystemFunction {
 
         // fast path for ASCII strings: normalization is a no-op
         boolean allASCII = true;
-        CharSequence chars = sv.getStringValueCS();
-        if (chars instanceof CompressedWhitespace) {
-            return sv;
-        }
-        for (int i = chars.length() - 1; i >= 0; i--) {
-            if (chars.charAt(i) > 127) {
+
+        IntIterator iter = StringTool.codePoints(sv);
+        while (iter.hasNext()) {
+            if (iter.next() > 127) {
                 allASCII = false;
                 break;
             }
@@ -78,8 +77,7 @@ public class NormalizeUnicode extends SystemFunction {
         }
 
         Normalizer norm = Normalizer.make(fb, c.getConfiguration());
-        CharSequence result = norm.normalize(sv.getStringValueCS());
-        return StringValue.makeStringValue(result);
+        return norm.normalize(sv);
     }
 
 }

@@ -45,11 +45,13 @@ public class TestXPathErrorCode {
 
 	static NamespaceResolver voidNamespaceResolver = new NamespaceResolver() {
 
-		public String getURIForPrefix(String prefix, boolean useDefault) {
+		@Override
+        public String getURIForPrefix(String prefix, boolean useDefault) {
 			return null;
 		}
 
-		public Iterator<String> iteratePrefixes() {
+		@Override
+        public Iterator<String> iteratePrefixes() {
 			return null;
 		}}
 	;

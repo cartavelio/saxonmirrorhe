@@ -20,12 +20,12 @@ import java.util.ArrayList;
  */
 public class OrderByClausePull extends TuplePull {
 
-    private TuplePull base;
-    private OrderByClause orderByClause;
-    private TupleExpression tupleExpr;
+    private final TuplePull base;
+    private final OrderByClause orderByClause;
+    private final TupleExpression tupleExpr;
     private int currentPosition = -1;
-    private AtomicComparer[] comparers;
-    private ArrayList<ItemToBeSorted> tupleArray = new ArrayList<ItemToBeSorted>(100);
+    private final AtomicComparer[] comparers;
+    private final ArrayList<ItemToBeSorted> tupleArray = new ArrayList<ItemToBeSorted>(100);
 
     public OrderByClausePull(TuplePull base, TupleExpression tupleExpr, OrderByClause orderBy, XPathContext context) {
         this.base = base;

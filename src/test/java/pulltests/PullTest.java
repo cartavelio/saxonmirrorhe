@@ -9,11 +9,9 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.StandardURIResolver;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.EmptyAttributeMap;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NoNamespaceName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.str.BMPString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Untyped;
 import org.junit.jupiter.api.Test;
@@ -99,7 +97,7 @@ public class PullTest {
                         receiver.startElement(new NoNamespaceName("a"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
                         receiver.startElement(new NoNamespaceName("b"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
                         receiver.startElement(new NoNamespaceName("c"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
-                        receiver.characters("X", LOCATION, ReceiverOption.NONE);
+                        receiver.characters(BMPString.of("X"), LOCATION, ReceiverOption.NONE);
                         receiver.endElement();
                         receiver.endElement();
                         receiver.endElement();
@@ -122,22 +120,27 @@ public class PullTest {
 //	private static final int LOCATION = 0; // for 9.6
 
     private static final Location LOCATION = new Location() {
+        @Override
         public int getColumnNumber() {
             return 0;
         }
 
+        @Override
         public int getLineNumber() {
             return 0;
         }
 
+        @Override
         public String getPublicId() {
             return null;
         }
 
+        @Override
         public String getSystemId() {
             return null;
         }
 
+        @Override
         public Location saveLocation() {
             return this;
         }

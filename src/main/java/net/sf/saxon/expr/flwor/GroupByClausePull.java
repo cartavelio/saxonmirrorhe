@@ -24,10 +24,10 @@ import java.util.List;
  */
 public class GroupByClausePull extends TuplePull {
 
-    private TuplePull base;
-    private GroupByClause groupByClause;
+    private final TuplePull base;
+    private final GroupByClause groupByClause;
     /*@Nullable*/ Iterator<List<GroupByClause.ObjectToBeGrouped>> groupIterator;
-    private GenericAtomicComparer[] comparers;
+    private final GenericAtomicComparer[] comparers;
 
 
     public GroupByClausePull(TuplePull base, GroupByClause groupBy, XPathContext context) {

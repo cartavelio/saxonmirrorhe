@@ -9,6 +9,7 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.om.NamespaceMap;
@@ -38,7 +39,7 @@ public class PIGrabber extends ProxyReceiver {
     private String reqTitle = null;
     private String baseURI = null;
     private URIResolver uriResolver = null;
-    private List<String> stylesheets = new ArrayList<>();
+    private final List<String> stylesheets = new ArrayList<>();
     private boolean terminated = false;
 
     public PIGrabber(Receiver next) {
@@ -113,7 +114,7 @@ public class PIGrabber extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
             throws XPathException {
         if (target.equals("xml-stylesheet")) {
 

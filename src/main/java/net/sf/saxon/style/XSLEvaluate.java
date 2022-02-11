@@ -18,10 +18,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
@@ -204,14 +201,14 @@ public class XSLEvaluate extends StyleElement {
                 hasFallbackChildren = true;
             } else if (child.getNodeKind() == Type.TEXT) {
                 // with xml:space=preserve, white space nodes may still be there
-                if (!Whitespace.isWhite(child.getStringValueCS())) {
+                if (!Whitespace.isAllWhite(child.getUnicodeStringValue())) {
                     compileError("No character data is allowed within xsl:evaluate", "XTSE0010");
                 }
             } else {
                 compileError("Child element " + Err.wrap(child.getDisplayName(), Err.ELEMENT) +
                                      " is not allowed as a child of xsl:evaluate", "XTSE0010");
             }
-        };
+        }
 
         try {
             ExpressionVisitor visitor = makeExpressionVisitor();

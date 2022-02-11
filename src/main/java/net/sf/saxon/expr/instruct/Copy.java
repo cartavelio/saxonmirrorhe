@@ -19,6 +19,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -441,17 +442,17 @@ public class Copy extends ElementCreator {
                 break;
 
             case Type.TEXT:
-                CharSequence tval = source.getStringValueCS();
+                UnicodeString tval = source.getUnicodeStringValue();
                 out.characters(tval, getLocation(), ReceiverOption.NONE);
                 break;
 
             case Type.PROCESSING_INSTRUCTION:
-                CharSequence pval = source.getStringValueCS();
+                UnicodeString pval = source.getUnicodeStringValue();
                 out.processingInstruction(source.getDisplayName(), pval, getLocation(), ReceiverOption.NONE);
                 break;
 
             case Type.COMMENT:
-                CharSequence cval = source.getStringValueCS();
+                UnicodeString cval = source.getUnicodeStringValue();
                 out.comment(cval, getLocation(), ReceiverOption.NONE);
                 break;
 

@@ -13,6 +13,8 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
@@ -174,9 +176,9 @@ public abstract class SequenceReceiver implements Receiver {
         if (item != null) {
             if (item instanceof AtomicValue || item instanceof ExternalObject) {
                 if (previousAtomic) {
-                    characters(" ", locationId, ReceiverOption.NONE);
+                    characters(SINGLE_SPACE, locationId, ReceiverOption.NONE);
                 }
-                characters(item.getStringValueCS(), locationId, ReceiverOption.NONE);
+                characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                 previousAtomic = true;
             } else if (item instanceof ArrayItem) {
                 flatten((ArrayItem)item, locationId, copyNamespaces);
@@ -193,7 +195,7 @@ public abstract class SequenceReceiver implements Receiver {
                 int kind = node.getNodeKind();
                 if (node instanceof Orphan && ((Orphan) node).isDisableOutputEscaping()) {
                     // see test case doe-0801, -2 -3 - needed for output buffered within try/catch, xsl:fork etc
-                    characters(item.getStringValueCS(), locationId, ReceiverOption.DISABLE_ESCAPING);
+                    characters(item.getUnicodeStringValue(), locationId, ReceiverOption.DISABLE_ESCAPING);
                     previousAtomic = false;
                 } else if (kind == Type.DOCUMENT) {
                     startDocument(ReceiverOption.NONE); // needed to ensure that illegal namespaces or attributes in the content are caught
@@ -217,6 +219,8 @@ public abstract class SequenceReceiver implements Receiver {
             }
         }
     }
+
+    private static final CodePoints SINGLE_SPACE = BMPString.of(" ");
 
     protected String getErrorCodeForDecomposingFunctionItems() {
         return getPipelineConfiguration().isXSLT() ? "XTDE0450" : "XQTY0105";

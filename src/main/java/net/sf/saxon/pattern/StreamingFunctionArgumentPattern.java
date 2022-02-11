@@ -26,7 +26,7 @@ import net.sf.saxon.type.UType;
  */
 public class StreamingFunctionArgumentPattern extends Pattern {
 
-    private static StreamingFunctionArgumentPattern THE_INSTANCE = new StreamingFunctionArgumentPattern();
+    private static final StreamingFunctionArgumentPattern THE_INSTANCE = new StreamingFunctionArgumentPattern();
 
     public static StreamingFunctionArgumentPattern getInstance() {
         return THE_INSTANCE;
@@ -105,7 +105,7 @@ public class StreamingFunctionArgumentPattern extends Pattern {
     }
 
     /**
-     * Copy an AnchorPattern.
+     * Copy the pattern.
      * Since there is only one, return the same.
      *
      * @param rebindings variables that need to be rebound

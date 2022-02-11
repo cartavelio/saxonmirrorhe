@@ -41,7 +41,7 @@ import java.util.List;
  */
 public abstract class PJConverter {
 
-    private static HashMap<Class, SequenceType> jpmap = new HashMap<>();
+    private static final HashMap<Class, SequenceType> jpmap = new HashMap<>();
 
     static {
         jpmap.put(boolean.class, SequenceType.SINGLE_BOOLEAN);
@@ -67,7 +67,7 @@ public abstract class PJConverter {
         jpmap.put(BigInteger.class, SequenceType.OPTIONAL_INTEGER);
         jpmap.put(BigDecimal.class, SequenceType.OPTIONAL_DECIMAL);
 
-        jpmap.put(StringValue.class, SequenceType.OPTIONAL_STRING);
+        jpmap.put(StringItem.class, SequenceType.OPTIONAL_STRING);
         jpmap.put(BooleanValue.class, SequenceType.OPTIONAL_BOOLEAN);
         jpmap.put(DoubleValue.class, SequenceType.OPTIONAL_DOUBLE);
         jpmap.put(FloatValue.class, SequenceType.OPTIONAL_FLOAT);
@@ -240,21 +240,21 @@ public abstract class PJConverter {
             if (itemType.isPlainType()) {
                 if (itemType == ErrorType.getInstance()) {
                     // supplied value is (); we need to convert it to null; this converter does the job.
-                    return StringValueToString.INSTANCE;
+                    return StringItemToString.INSTANCE;
                 } else if (th.isSubType(itemType, BuiltInAtomicType.STRING)) {
                     if (targetClass == Object.class || targetClass == String.class || targetClass == CharSequence.class) {
-                        return StringValueToString.INSTANCE;
-                    } else if (targetClass.isAssignableFrom(StringValue.class)) {
+                        return StringItemToString.INSTANCE;
+                    } else if (targetClass.isAssignableFrom(StringItem.class)) {
                         return Identity.INSTANCE;
                     } else if (targetClass == char.class || targetClass == Character.class) {
-                        return StringValueToChar.INSTANCE;
+                        return StringItemToChar.INSTANCE;
                     } else {
                         throw cannotConvert(itemType, targetClass, config);
                     }
                 } else if (itemType == BuiltInAtomicType.UNTYPED_ATOMIC) {
                     if (targetClass == Object.class || targetClass == String.class || targetClass == CharSequence.class) {
-                        return StringValueToString.INSTANCE;
-                    } else if (targetClass.isAssignableFrom(UntypedAtomicValue.class)) {
+                        return StringItemToString.INSTANCE;
+                    } else if (targetClass.isAssignableFrom(StringItem.class)) {
                         return Identity.INSTANCE;
                     } else {
                         try {
@@ -263,7 +263,7 @@ public abstract class PJConverter {
                                 @Override
                                 public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
                                     try {
-                                        return constructor.newInstance(value.head().getStringValue());
+                                        return constructor.newInstance(value.head().getUnicodeStringValue());
                                     } catch (InstantiationException | IllegalAccessException e) {
                                         throw new XPathException(e);
                                     } catch (InvocationTargetException e) {
@@ -345,7 +345,7 @@ public abstract class PJConverter {
                     } else if (URL.class.isAssignableFrom(targetClass)) {
                         return AnyURIValueToURL.INSTANCE;
                     } else if (targetClass == String.class || targetClass == CharSequence.class) {
-                        return StringValueToString.INSTANCE;
+                        return StringItemToString.INSTANCE;
                     } else if (targetClass.isAssignableFrom(AnyURIValue.class)) {
                         return Identity.INSTANCE;
                     } else {
@@ -603,7 +603,7 @@ public abstract class PJConverter {
 
     public static class ToArray extends PJConverter {
 
-        private PJConverter itemConverter;
+        private final PJConverter itemConverter;
 
         public ToArray(PJConverter itemConverter) {
             this.itemConverter = itemConverter;
@@ -771,9 +771,9 @@ public abstract class PJConverter {
 
     }
 
-    public static class StringValueToString extends PJConverter {
+    public static class StringItemToString extends PJConverter {
 
-        public static final StringValueToString INSTANCE = new StringValueToString();
+        public static final StringItemToString INSTANCE = new StringItemToString();
 
         @Override
         public String convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
@@ -783,9 +783,9 @@ public abstract class PJConverter {
 
     }
 
-    public static class StringValueToChar extends PJConverter {
+    public static class StringItemToChar extends PJConverter {
 
-        public static final StringValueToChar INSTANCE = new StringValueToChar();
+        public static final StringItemToChar INSTANCE = new StringItemToChar();
 
         @Override
         public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {

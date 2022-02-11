@@ -10,6 +10,7 @@ import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.pattern.NodeKindTest;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -95,7 +97,10 @@ public class TraxTest {
 
     @Test
     public void testExampleSimple2() {
+
+
         try {
+
             // Create a transform factory instance.
             TransformerFactory tfactory = TransformerFactory.newInstance();
 
@@ -121,14 +126,17 @@ public class TraxTest {
         try {
             TransformerFactory tfactory = TransformerFactory.newInstance();
             tfactory.setErrorListener(new ErrorListener() {
+                @Override
                 public void error(TransformerException exception) throws TransformerException {
                     throw exception;
                 }
 
+                @Override
                 public void warning(TransformerException exception) throws TransformerException {
                     fail();
                 }
 
+                @Override
                 public void fatalError(TransformerException exception) throws TransformerException {
                     throw exception;
                 }
@@ -1296,17 +1304,20 @@ public class TraxTest {
 
 
     private class ModifyStylesheetFilter extends XMLFilterImpl {
+        @Override
         public void startDocument() throws SAXException {
             System.err.println("ModifyStylesheetFilter#startDocument");
             super.startDocument();
         }
 
+        @Override
         public void startElement(String namespaceURI, String localName,
                                  String qName, Attributes atts) throws SAXException {
             String lname = (qName.startsWith("xsl:") ? localName : ("XX" + localName));
             super.startElement(namespaceURI, lname, qName, atts);
         }
 
+        @Override
         public void endElement(String namespaceURI, String localName,
                                String qName) throws SAXException {
             String lname = (qName.startsWith("xsl:") ? localName : ("XX" + localName));
@@ -1382,6 +1393,7 @@ public class TraxTest {
          * @return a Source object representing an XML document
          */
 
+        @Override
         public Source resolve(String href, String base)
                 throws TransformerException {
             if (href.endsWith(".txt")) {
@@ -1389,7 +1401,7 @@ public class TraxTest {
                     URL url = new URL(new URL(base), href);
                     java.io.InputStream in = url.openConnection().getInputStream();
                     java.io.InputStreamReader reader =
-                            new java.io.InputStreamReader(in, "iso-8859-1");
+                            new java.io.InputStreamReader(in, StandardCharsets.ISO_8859_1);
 
                     // this could be vastly more efficient, but it doesn't matter here
 
@@ -1400,8 +1412,8 @@ public class TraxTest {
                         sb.append((char) c);
                     }
                     return new net.sf.saxon.value.TextFragmentValue(
-                                ((TransformerImpl) transformer).getConfiguration(),
-                                    sb.toString(), url.toString());
+                            ((TransformerImpl) transformer).getConfiguration(),
+                            StringView.tidy(sb.toString()), url.toString());
                 } catch (Exception err) {
                     throw new TransformerException(err);
                 }
@@ -1431,6 +1443,7 @@ public class TraxTest {
          * @return a Source object representing an XML document
          */
 
+        @Override
         public Result resolve(String href, String base)
                 throws TransformerException {
             if (href.endsWith(".out")) {
@@ -1450,6 +1463,7 @@ public class TraxTest {
             }
         }
 
+        @Override
         public void close(Result result) throws TransformerException {
             System.out.println("** End " + result.getSystemId() + " **");
         }
@@ -1465,6 +1479,7 @@ public class TraxTest {
          * thread-safe (handling multiple invocations of xsl:result-document concurrently),
          * or it must return a fresh instance of itself for each call.</p>
          */
+        @Override
         public OutputURIResolver newInstance() {
             return this;
         }
@@ -1565,27 +1580,33 @@ public class TraxTest {
             return printStream;
         }
 
+        @Override
         public void setDocumentLocator(Locator locator) {
             printStream.println("setDocumentLocator");
         }
 
+        @Override
         public void startDocument() throws SAXException {
             printStream.println("startDocument");
         }
 
+        @Override
         public void endDocument() throws SAXException {
             printStream.println("endDocument");
         }
 
+        @Override
         public void startPrefixMapping(String prefix, String uri)
                 throws SAXException {
             printStream.println("startPrefixMapping: " + prefix + ", " + uri);
         }
 
+        @Override
         public void endPrefixMapping(String prefix) throws SAXException {
             printStream.println("endPrefixMapping: " + prefix);
         }
 
+        @Override
         public void startElement(
                 String namespaceURI, String localName, String qName, Attributes atts)
                 throws SAXException {
@@ -1599,9 +1620,10 @@ public class TraxTest {
                 printStream.print(", " + atts.getQName(i) + "='" + atts.getValue(i) + "'");
             }
 
-            printStream.println("");
+            printStream.println();
         }
 
+        @Override
         public void endElement(
                 String namespaceURI, String localName, String qName)
                 throws SAXException {
@@ -1609,7 +1631,8 @@ public class TraxTest {
                     + localName + ", " + qName);
         }
 
-        public void characters(char ch[], int start, int length)
+        @Override
+        public void characters(char[] ch, int start, int length)
                 throws SAXException {
 
             String s = new String(ch, start, (length > 30)
@@ -1623,17 +1646,20 @@ public class TraxTest {
             }
         }
 
-        public void ignorableWhitespace(char ch[], int start, int length)
+        @Override
+        public void ignorableWhitespace(char[] ch, int start, int length)
                 throws SAXException {
             printStream.println("ignorableWhitespace");
         }
 
+        @Override
         public void processingInstruction(String target, String data)
                 throws SAXException {
             printStream.println("processingInstruction: " + target + ", "
                     + data);
         }
 
+        @Override
         public void skippedEntity(String name) throws SAXException {
             printStream.println("skippedEntity: " + name);
         }

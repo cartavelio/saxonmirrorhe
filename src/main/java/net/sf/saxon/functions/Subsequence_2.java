@@ -8,7 +8,6 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -116,7 +115,7 @@ public class Subsequence_2 extends SystemFunction implements Callable {
         // Handle the case where the second argument is known statically
         try {
             if (Literal.isAtomic(arguments[1]) && !(arguments[0] instanceof ErrorExpression)) {
-                NumericValue start = (NumericValue) ((Literal) arguments[1]).getValue();
+                NumericValue start = (NumericValue) ((Literal) arguments[1]).getGroundedValue();
                 start = start.round(0);
                 long intStart = start.longValue();
                 if (intStart > Integer.MAX_VALUE) {

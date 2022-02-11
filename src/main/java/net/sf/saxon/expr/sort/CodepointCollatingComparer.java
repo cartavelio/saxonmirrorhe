@@ -10,7 +10,7 @@ package net.sf.saxon.expr.sort;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * An AtomicComparer used for comparing strings, untypedAtomic values, and URIs using the Unicode codepoint
@@ -29,9 +29,9 @@ import net.sf.saxon.value.StringValue;
 
 public class CodepointCollatingComparer implements AtomicComparer {
 
-    private static CodepointCollator collator = CodepointCollator.getInstance();
+    private static final CodepointCollator collator = CodepointCollator.getInstance();
 
-    private static CodepointCollatingComparer THE_INSTANCE = new CodepointCollatingComparer();
+    private static final CodepointCollatingComparer THE_INSTANCE = new CodepointCollatingComparer();
 
     /**
      * Get the singular instance of this class
@@ -84,10 +84,10 @@ public class CodepointCollatingComparer implements AtomicComparer {
         } else if (b == null) {
             return +1;
         }
-        StringValue as = (StringValue) a;
-        StringValue bs = (StringValue) b;
+        StringItem as = (StringItem) a;
+        StringItem bs = (StringItem) b;
         //if (as.containsSurrogatePairs() || bs.containsSurrogatePairs()) {
-        return CodepointCollator.compareCS(as.getStringValueCS(), bs.getStringValueCS());
+        return collator.compareStrings(as.getUnicodeStringValue(), bs.getUnicodeStringValue());
         //} else {
         // optimize to use UTF-16 binary comparison
         //    return as.getStringValue().compareTo(bs.getStringValue());
@@ -106,7 +106,7 @@ public class CodepointCollatingComparer implements AtomicComparer {
 
     @Override
     public boolean comparesEqual(AtomicValue a, AtomicValue b) {
-        return ((StringValue)a).codepointEquals((StringValue)b);
+        return ((StringItem)a).equals((StringItem)b);
     }
 
     /**

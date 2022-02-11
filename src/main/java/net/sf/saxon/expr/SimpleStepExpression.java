@@ -38,7 +38,7 @@ public final class SimpleStepExpression extends SlashExpression {
         }
     }
 
-    private static OperandRole STEP_ROLE = new OperandRole(OperandRole.USES_NEW_FOCUS | OperandRole.HIGHER_ORDER, OperandUsage.TRANSMISSION, SequenceType.ANY_SEQUENCE);
+    private static final OperandRole STEP_ROLE = new OperandRole(OperandRole.USES_NEW_FOCUS | OperandRole.HIGHER_ORDER, OperandUsage.TRANSMISSION, SequenceType.ANY_SEQUENCE);
 
     @Override
     protected OperandRole getOperandRole(int arg) {

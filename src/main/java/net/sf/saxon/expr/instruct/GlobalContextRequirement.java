@@ -30,7 +30,7 @@ public class GlobalContextRequirement {
     private boolean mayBeOmitted = true;
     private boolean absentFocus;
     private boolean external;   // XQuery only
-    private List<ItemType> requiredItemTypes = new ArrayList<>();
+    private final List<ItemType> requiredItemTypes = new ArrayList<>();
     private Expression defaultValue = null;  // Used in XQuery only
 
     /**

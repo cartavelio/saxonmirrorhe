@@ -152,7 +152,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
 
         refineTypeInformation(actualItemType,
                               getSequence().getCardinality(),
-                              getSequence() instanceof Literal ? ((Literal) getSequence()).getValue() : null,
+                              getSequence() instanceof Literal ? ((Literal) getSequence()).getGroundedValue() : null,
                               getSequence().getSpecialProperties(), this);
 
         getActionOp().typeCheck(visitor, contextInfo);

@@ -8,6 +8,7 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
@@ -93,7 +94,7 @@ public abstract class SequenceNormalizer extends ProxyReceiver {
      * Character data
      */
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         try {
             super.characters(chars, locationId, properties);
             previousAtomic = false;
@@ -107,7 +108,7 @@ public abstract class SequenceNormalizer extends ProxyReceiver {
      * Processing Instruction
      */
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         try {
             super.processingInstruction(target, data, locationId, properties);
             previousAtomic = false;
@@ -121,7 +122,7 @@ public abstract class SequenceNormalizer extends ProxyReceiver {
      * Output a comment
      */
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         try {
             super.comment(chars, locationId, properties);
             previousAtomic = false;

@@ -27,8 +27,8 @@ import java.net.URLConnection;
 
 public class BinaryResource implements Resource {
 
-    private String href;
-    private String contentType;
+    private final String href;
+    private final String contentType;
     private byte[] data;
     private URLConnection connection = null;
 
@@ -158,8 +158,7 @@ public class BinaryResource implements Resource {
             return new Base64BinaryValue(data);
         } else {
             try {
-                URL url = new URI(href).toURL();
-                connection = url.openConnection();
+                connection = Loader.urlConnection(new URI(href).toURL());
                 data = readBinaryFromConn(connection);
                 return new Base64BinaryValue(data);
             } catch (URISyntaxException | IOException e) {

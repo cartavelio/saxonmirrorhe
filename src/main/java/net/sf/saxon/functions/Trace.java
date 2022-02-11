@@ -17,6 +17,7 @@ import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -82,7 +83,7 @@ public class Trace extends SystemFunction implements Traceable {
                     + Navigator.getPath((NodeInfo) val));
             } else if (val instanceof AtomicValue) {
                 out.info(label + ": " + Type.displayTypeName(val) + ": "
-                        + val.getStringValue());
+                        + val.getUnicodeStringValue());
             } else if (val instanceof ArrayItem || val instanceof MapItem) {
                 out.info(label + ": " + val.toShortString());
             } else if (val instanceof Function) {
@@ -90,7 +91,7 @@ public class Trace extends SystemFunction implements Traceable {
                 out.info(label + ": function " + (name==null ? "(anon)" : name.getDisplayName()) + "#" + ((Function)val).getArity());
             } else if (val instanceof ObjectValue) {
                 Object obj = ((ObjectValue)val).getObject();
-                out.info(label + ": " + obj.getClass().getName() + " = " + Err.truncate30(obj.toString()));
+                out.info(label + ": " + obj.getClass().getName() + " = " + Err.truncate30(StringView.tidy(obj.toString())));
             } else {
                 out.info(label + ": " + val.toShortString());
             }
@@ -147,9 +148,9 @@ public class Trace extends SystemFunction implements Traceable {
 
     private class TracingIterator implements SequenceIterator {
 
-        private SequenceIterator base;
-        private String label;
-        private Logger out;
+        private final SequenceIterator base;
+        private final String label;
+        private final Logger out;
         private boolean empty = true;
         private int position = 0;
 

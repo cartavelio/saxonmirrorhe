@@ -27,7 +27,7 @@ import net.sf.saxon.type.Type;
  */
 public class ShallowCopyRuleSet implements BuiltInRuleSet {
 
-    private static ShallowCopyRuleSet THE_INSTANCE = new ShallowCopyRuleSet();
+    private static final ShallowCopyRuleSet THE_INSTANCE = new ShallowCopyRuleSet();
 
     /**
      * Get the singleton instance of this class
@@ -116,15 +116,15 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                     return;
                 }
                 case Type.TEXT:
-                    out.characters(node.getStringValueCS(), locationId, ReceiverOption.NONE);
+                    out.characters(node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                     return;
 
                 case Type.COMMENT:
-                    out.comment(node.getStringValueCS(), locationId, ReceiverOption.NONE);
+                    out.comment(node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                     return;
 
                 case Type.PROCESSING_INSTRUCTION:
-                    out.processingInstruction(node.getLocalPart(), node.getStringValue(), locationId, ReceiverOption.NONE);
+                    out.processingInstruction(node.getLocalPart(), node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                     return;
 
                 case Type.ATTRIBUTE:

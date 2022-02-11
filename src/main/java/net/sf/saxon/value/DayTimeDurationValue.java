@@ -9,8 +9,9 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
 
 import java.math.BigDecimal;
@@ -44,7 +45,7 @@ public final class DayTimeDurationValue extends DurationValue
      * @return a {@code DayTimeDurationValue} if the format is correct, or a {@link ValidationFailure} if not
      */
 
-    public static ConversionResult makeDayTimeDurationValue(CharSequence s) {
+    public static ConversionResult makeDayTimeDurationValue(UnicodeString s) {
         ConversionResult d = DurationValue.makeDuration(s, false, true);
         if (d instanceof ValidationFailure) {
             return d;
@@ -58,7 +59,7 @@ public final class DayTimeDurationValue extends DurationValue
      * constructor performs limited validation. The components (apart from sign) must all be non-negative
      * integers; they need not be normalized (for example, 36 hours is acceptable)
      * <p>Note: for historic reasons this constructor only supports microsecond precision. For nanosecond
-     * precision, use the constructor {@link #DayTimeDurationValue(int, int, int, long, int)}</p>
+     * precision, use the constructor {@link DayTimeDurationValue#DayTimeDurationValue(int, int, int, long, int)}</p>
      *
      * @param sign         positive number for positive durations, negative for negative duratoins
      * @param days         number of days
@@ -179,11 +180,11 @@ public final class DayTimeDurationValue extends DurationValue
      */
 
     @Override
-    public CharSequence getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
 
-        FastStringBuffer sb = new FastStringBuffer(32);
+        UnicodeBuilder sb = new UnicodeBuilder();
         if (negative) {
-            sb.cat('-');
+            sb.append('-');
         }
 
         int days = getDays();
@@ -191,12 +192,12 @@ public final class DayTimeDurationValue extends DurationValue
         int minutes = getMinutes();
         int seconds = getSeconds();
 
-        sb.cat('P');
+        sb.append('P');
         if (days != 0) {
             sb.append(days + "D");
         }
         if (days == 0 || hours != 0 || minutes != 0 || seconds != 0 || nanoseconds != 0) {
-            sb.cat('T');
+            sb.append('T');
         }
         if (hours != 0) {
             sb.append(hours + "H");
@@ -211,7 +212,7 @@ public final class DayTimeDurationValue extends DurationValue
                 formatFractionalSeconds(sb, seconds, (seconds * 1_000_000_000L) + nanoseconds);
             }
         }
-        return sb;
+        return sb.toUnicodeString();
     }
 
     /**
@@ -573,7 +574,7 @@ public final class DayTimeDurationValue extends DurationValue
      * @param other The other dateTime value
      * @return negative value if this one is the smaller, 0 if they are equal,
      *         positive value if this one is the greater.
-     * @throws NullPointerException if the other value is null
+     * @throws ClassCastException if the other value is not a DayTimeDurationValue
      */
 
     @Override

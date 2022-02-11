@@ -10,10 +10,11 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.Calculator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
 
 import java.math.BigDecimal;
@@ -27,7 +28,7 @@ import java.math.BigInteger;
 
 public final class BigIntegerValue extends IntegerValue {
 
-    private BigInteger value;
+    private final BigInteger value;
 
     private static final BigInteger MAX_INT = BigInteger.valueOf(Integer.MAX_VALUE);
     private static final BigInteger MIN_INT = BigInteger.valueOf(Integer.MIN_VALUE);
@@ -254,8 +255,8 @@ public final class BigIntegerValue extends IntegerValue {
      */
 
     @Override
-    public String getPrimitiveStringValue() {
-        return value.toString();
+    public UnicodeString getPrimitiveStringValue() {
+        return BMPString.of(value.toString());
     }
 
     /**
@@ -642,10 +643,7 @@ public final class BigIntegerValue extends IntegerValue {
 //        }
 //    }
 
-    @Override
-    public BigIntegerValue asAtomic() {
-        return this;
-    }
+
 
 
 }

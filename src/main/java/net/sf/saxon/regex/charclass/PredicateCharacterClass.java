@@ -20,7 +20,7 @@ import java.util.function.IntPredicate;
 
 public class PredicateCharacterClass implements CharacterClass {
 
-    private IntPredicate predicate;
+    private final IntPredicate predicate;
 
     public PredicateCharacterClass(IntPredicate predicate) {
         this.predicate = predicate;

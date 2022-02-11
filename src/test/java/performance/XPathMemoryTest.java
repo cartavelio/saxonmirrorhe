@@ -29,6 +29,7 @@ public class XPathMemoryTest {
         for (int i = 0; i < 20; i++) {
 
             new Thread() {
+                @Override
                 public void run() {
 
                     try {
@@ -53,7 +54,6 @@ public class XPathMemoryTest {
 
                 }
 
-                ;
             }.start();
         }
 

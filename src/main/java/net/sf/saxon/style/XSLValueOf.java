@@ -15,7 +15,7 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 
@@ -97,9 +97,9 @@ public final class XSLValueOf extends XSLLeafNodeConstructor {
         } else {
             if (separator == null) {
                 if (select == null) {
-                    separator = new StringLiteral(StringValue.EMPTY_STRING);
+                    separator = new StringLiteral(StringItem.EMPTY_STRING);
                 } else {
-                    separator = new StringLiteral(StringValue.SINGLE_SPACE);
+                    separator = new StringLiteral(StringItem.SINGLE_SPACE);
                 }
             }
         }

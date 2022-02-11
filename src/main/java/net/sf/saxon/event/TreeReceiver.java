@@ -9,6 +9,7 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -31,7 +32,7 @@ import java.util.Arrays;
  */
 
 public class TreeReceiver extends SequenceReceiver {
-    private Receiver nextReceiver;
+    private final Receiver nextReceiver;
     private int level = 0;
     private boolean[] isDocumentLevel = new boolean[20];
     // The sequence of events can include startElement/endElement pairs or startDocument/endDocument
@@ -170,8 +171,8 @@ public class TreeReceiver extends SequenceReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        if (chars.length() > 0) {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        if (!chars.isEmpty()) {
             nextReceiver.characters(chars, locationId, properties);
         }
         previousAtomic = false;
@@ -183,7 +184,7 @@ public class TreeReceiver extends SequenceReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         nextReceiver.processingInstruction(target, data, locationId, properties);
         previousAtomic = false;
     }
@@ -193,7 +194,7 @@ public class TreeReceiver extends SequenceReceiver {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         nextReceiver.comment(chars, locationId, properties);
         previousAtomic = false;
     }

@@ -29,7 +29,7 @@ import javax.xml.transform.dom.DOMLocator;
 
 public class StandardInvalidityHandler extends StandardDiagnostics implements InvalidityHandler {
 
-    private Configuration config;
+    private final Configuration config;
     private Logger logger;
 
     /**

@@ -31,7 +31,7 @@ import java.net.*;
 
 public class StandardResultDocumentResolver implements ResultDocumentResolver {
 
-    private static StandardResultDocumentResolver theInstance = new StandardResultDocumentResolver();
+    private static final StandardResultDocumentResolver theInstance = new StandardResultDocumentResolver();
 
     /**
      * Get a singular instance

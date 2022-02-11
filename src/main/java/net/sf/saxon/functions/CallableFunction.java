@@ -28,7 +28,7 @@ import net.sf.saxon.type.FunctionItemType;
 public class CallableFunction extends AbstractFunction {
 
     private Callable callable;
-    private SymbolicName.F name;
+    private final SymbolicName.F name;
     private FunctionItemType type;
     private AnnotationList annotations;
 

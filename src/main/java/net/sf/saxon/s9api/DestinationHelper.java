@@ -16,9 +16,9 @@ import java.util.function.Consumer;
  */
 public class DestinationHelper {
 
-    private Destination helpee;
+    private final Destination helpee;
 
-    private List<Action> listeners = new ArrayList<>();
+    private final List<Action> listeners = new ArrayList<>();
 
     public DestinationHelper(Destination helpee) {
         this.helpee = helpee;

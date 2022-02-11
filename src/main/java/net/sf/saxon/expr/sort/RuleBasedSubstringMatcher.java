@@ -8,7 +8,8 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.lib.SubstringMatcher;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 
 import java.text.CollationElementIterator;
 import java.text.RuleBasedCollator;
@@ -45,10 +46,10 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      */
 
     @Override
-    public boolean contains(String s1, String s2) {
+    public boolean contains(UnicodeString s1, UnicodeString s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
-        CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
-        CollationElementIterator iter2 = collator.getCollationElementIterator(s2);
+        CollationElementIterator iter1 = collator.getCollationElementIterator(s1.toString());
+        CollationElementIterator iter2 = collator.getCollationElementIterator(s2.toString());
         return collationContains(iter1, iter2, null, false);
     }
 
@@ -62,10 +63,10 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      */
 
     @Override
-    public boolean endsWith(String s1, String s2) {
+    public boolean endsWith(UnicodeString s1, UnicodeString s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
-        CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
-        CollationElementIterator iter2 = collator.getCollationElementIterator(s2);
+        CollationElementIterator iter1 = collator.getCollationElementIterator(s1.toString());
+        CollationElementIterator iter2 = collator.getCollationElementIterator(s2.toString());
         return collationContains(iter1, iter2, null, true);
     }
 
@@ -79,10 +80,10 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      */
 
     @Override
-    public boolean startsWith(String s1, String s2) {
+    public boolean startsWith(UnicodeString s1, UnicodeString s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
-        CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
-        CollationElementIterator iter2 = collator.getCollationElementIterator(s2);
+        CollationElementIterator iter1 = collator.getCollationElementIterator(s1.toString());
+        CollationElementIterator iter2 = collator.getCollationElementIterator(s2.toString());
         return collationStartsWith(iter1, iter2);
     }
 
@@ -96,16 +97,18 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      */
 
     @Override
-    public String substringAfter(String s1, String s2) {
+    public UnicodeString substringAfter(UnicodeString s1, UnicodeString s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
-        CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
-        CollationElementIterator iter2 = collator.getCollationElementIterator(s2);
+        final String g1 = s1.toString();
+        final String g2 = s2.toString();
+        CollationElementIterator iter1 = collator.getCollationElementIterator(g1);
+        CollationElementIterator iter2 = collator.getCollationElementIterator(g2);
         int[] ia = new int[2];
         boolean ba = collationContains(iter1, iter2, ia, false);
         if (ba) {
             return s1.substring(ia[1]);
         } else {
-            return "";
+            return EmptyUniString.getInstance();
         }
     }
 
@@ -119,16 +122,18 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      */
 
     @Override
-    public String substringBefore(String s1, String s2) {
+    public UnicodeString substringBefore(UnicodeString s1, UnicodeString s2) {
         RuleBasedCollator collator = getRuleBasedCollator();
-        CollationElementIterator iter1 = collator.getCollationElementIterator(s1);
-        CollationElementIterator iter2 = collator.getCollationElementIterator(s2);
+        final String g1 = s1.toString();
+        final String g2 = s2.toString();
+        CollationElementIterator iter1 = collator.getCollationElementIterator(g1);
+        CollationElementIterator iter2 = collator.getCollationElementIterator(g2);
         int[] ib = new int[2];
         boolean bb = collationContains(iter1, iter2, ib, false);
         if (bb) {
             return s1.substring(0, ib[0]);
         } else {
-            return "";
+            return EmptyUniString.getInstance();
         }
     }
 
@@ -244,7 +249,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      */
 
     @Override
-    public AtomicMatchKey getCollationKey(CharSequence s) {
+    public AtomicMatchKey getCollationKey(UnicodeString s) {
         return new CollationMatchKey(getRuleBasedCollator().getCollationKey(s.toString()));
     }
 
@@ -260,7 +265,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
 
         for (int i = 0; i < args.length; i++) {
             System.err.println(args[i]);
-            FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C256);
+            StringBuilder sb = new StringBuilder(256);
             CollationElementIterator iter = collator.getCollationElementIterator(args[i]);
             while (true) {
                 int e = iter.next();

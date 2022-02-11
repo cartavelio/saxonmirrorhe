@@ -12,7 +12,7 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.DayTimeDurationValue;
 import net.sf.saxon.value.NumericValue;
@@ -48,17 +48,17 @@ public class CommandLineOptions {
     public static final int VALUE_REQUIRED = 1 << 8;
     public static final int VALUE_PROHIBITED = 2 << 8;
 
-    private HashMap<String, Integer> recognizedOptions = new HashMap<>();
-    private HashMap<String, String> optionHelp = new HashMap<>();
-    private Properties namedOptions = new Properties();
-    private Properties configOptions = new Properties();
-    private Map<String, Set<String>> permittedValues = new HashMap<>();
-    private Map<String, String> defaultValues = new HashMap<>();
-    private List<String> positionalOptions = new ArrayList<>();
-    private Properties paramValues = new Properties();
-    private Properties paramExpressions = new Properties();
-    private Properties paramFiles = new Properties();
-    private Properties serializationParams = new Properties();
+    private final HashMap<String, Integer> recognizedOptions = new HashMap<>();
+    private final HashMap<String, String> optionHelp = new HashMap<>();
+    private final Properties namedOptions = new Properties();
+    private final Properties configOptions = new Properties();
+    private final Map<String, Set<String>> permittedValues = new HashMap<>();
+    private final Map<String, String> defaultValues = new HashMap<>();
+    private final List<String> positionalOptions = new ArrayList<>();
+    private final Properties paramValues = new Properties();
+    private final Properties paramExpressions = new Properties();
+    private final Properties paramFiles = new Properties();
+    private final Properties serializationParams = new Properties();
 
     /**
      * Set the permitted options.
@@ -101,14 +101,14 @@ public class CommandLineOptions {
      */
 
     private static String displayPermittedValues(/*@NotNull*/ Set<String> permittedValues) {
-        FastStringBuffer sb = new FastStringBuffer(20);
+        StringBuilder sb = new StringBuilder(20);
         for (String val : permittedValues) {
             if ("".equals(val)) {
                 sb.append("\"\"");
             } else {
                 sb.append(val);
             }
-            sb.cat('|');
+            sb.append('|');
         }
         sb.setLength(sb.length() - 1);
         return sb.toString();
@@ -494,7 +494,7 @@ public class CommandLineOptions {
         String[] options = new String[recognizedOptions.size()];
         options = new ArrayList<>(recognizedOptions.keySet()).toArray(options);
         Arrays.sort(options, Collator.getInstance());
-        FastStringBuffer sb = new FastStringBuffer(100);
+        StringBuilder sb = new StringBuilder(100);
         for (String opt : options) {
             sb.append(" -");
             sb.append(opt);
@@ -795,7 +795,7 @@ public class CommandLineOptions {
         return sb.toString();
     }
 
-    private static DayTimeDurationValue milliSecond = new DayTimeDurationValue(1, 0, 0, 0, 0, 1000);
+    private static final DayTimeDurationValue milliSecond = new DayTimeDurationValue(1, 0, 0, 0, 0, 1000);
 
     public static String showExecutionTimeNano(long nanosecs) {
         if (nanosecs < 1e9) {
@@ -809,7 +809,7 @@ public class CommandLineOptions {
                 long hours = ((NumericValue) d.getComponent(AccessorFn.Component.HOURS)).longValue();
                 long minutes = ((NumericValue) d.getComponent(AccessorFn.Component.MINUTES)).longValue();
                 BigDecimal seconds = ((NumericValue) d.getComponent(AccessorFn.Component.SECONDS)).getDecimalValue();
-                FastStringBuffer fsb = new FastStringBuffer(256);
+                StringBuilder fsb = new StringBuilder(256);
                 if (days > 0) {
                     fsb.append(days + "days ");
                 }

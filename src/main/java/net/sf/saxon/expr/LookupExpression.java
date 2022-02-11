@@ -85,7 +85,7 @@ public class LookupExpression extends BinaryExpression {
             } else if (isMapLookup) {
                 ItemType mapType = getLhsExpression().getItemType();
                 if (mapType instanceof TupleItemType && getRhsExpression() instanceof StringLiteral) {
-                    String fieldName = ((StringLiteral) getRhsExpression()).getStringValue();
+                    String fieldName = ((StringLiteral) getRhsExpression()).stringify();
                     SequenceType fieldType = ((TupleItemType) mapType).getFieldType(fieldName);
                     if (fieldType == null) {
                         return ((TupleItemType) mapType).isExtensible() ? AnyItemType.getInstance() : ErrorType.getInstance();
@@ -168,7 +168,7 @@ public class LookupExpression extends BinaryExpression {
         if (isTupleLookup && getRhsExpression() instanceof StringLiteral) {
             TupleType tt = (TupleType)(containerType instanceof TupleType ? containerType : originalType);
             if (!tt.isExtensible()) {
-                String fieldName = ((StringLiteral) getRhsExpression()).getStringValue();
+                String fieldName = ((StringLiteral) getRhsExpression()).stringify();
                 if (tt.getFieldType(fieldName) == null) {
                     XPathException err = new XPathException("Field " + fieldName + " is not defined in the tuple type", "XPTY0004");
                     err.setIsTypeError(true);
@@ -255,7 +255,7 @@ public class LookupExpression extends BinaryExpression {
             } else if (isMapLookup) {
                 ItemType mapType = getLhsExpression().getItemType();
                 if (mapType instanceof TupleItemType && getRhsExpression() instanceof StringLiteral) {
-                    String fieldName = ((StringLiteral) getRhsExpression()).getStringValue();
+                    String fieldName = ((StringLiteral) getRhsExpression()).stringify();
                     SequenceType fieldType = ((TupleItemType) mapType).getFieldType(fieldName);
                     if (fieldType == null) {
                         return ((TupleItemType) mapType).isExtensible() ? StaticProperty.ALLOWS_ZERO_OR_MORE : StaticProperty.ALLOWS_ZERO;
@@ -384,7 +384,7 @@ public class LookupExpression extends BinaryExpression {
                         return value == null ? EmptyIterator.emptyIterator() : value.iterate();
                     });
                 } else if (baseItem instanceof ObjectValue) {
-                    if (!(rhs instanceof StringValue)) {
+                    if (!(rhs instanceof StringItem)) {
                         XPathException exception = new XPathException(
                                 "An item on the LHS of the '?' operator is an external object, but a value on the RHS of the operator (" +
                                         baseItem.toShortString() + ") is not a singleton string", "XPTY0004");
@@ -393,8 +393,8 @@ public class LookupExpression extends BinaryExpression {
                         exception.setFailingExpression(LookupExpression.this);
                         throw exception;
                     }
-                    String key = rhs.getStringValue();
-                    return config.externalObjectAsMap((ObjectValue) baseItem, key).get((StringValue) rhs).iterate();
+                    String key = ((StringItem) rhs).getStringValue();
+                    return config.externalObjectAsMap((ObjectValue) baseItem, key).get((StringItem) rhs).iterate();
                 } else {
                     mustBeArrayOrMap(this, baseItem);
                     return null;
@@ -440,10 +440,10 @@ public class LookupExpression extends BinaryExpression {
         String rhs;
         if (getRhsExpression() instanceof Literal) {
             Literal lit = (Literal) getRhsExpression();
-            if (lit instanceof StringLiteral && NameChecker.isValidNCName(((StringLiteral) lit).getStringValue())) {
-                rhs = ((StringLiteral) lit).getStringValue();
-            } else if (lit.getValue() instanceof Int64Value) {
-                rhs = lit.getValue().toString();
+            if (lit instanceof StringLiteral && NameChecker.isValidNCName(((StringLiteral) lit).getGroundedValue().codePoints())) {
+                rhs = ((StringLiteral) lit).stringify();
+            } else if (lit.getGroundedValue() instanceof Int64Value) {
+                rhs = lit.getGroundedValue().toString();
             } else {
                 rhs = ExpressionTool.parenthesize(lit);
             }

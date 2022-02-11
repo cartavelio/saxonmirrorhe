@@ -95,7 +95,7 @@ public abstract class AccumulatorFn extends SystemFunction {
         try {
             if (args[0] instanceof StringLiteral) {
                 AccumulatorRegistry registry = getRetainedStaticContext().getPackageData().getAccumulatorRegistry();
-                Accumulator accumulator = getAccumulator(((StringLiteral) args[0]).getStringValue(), registry);
+                Accumulator accumulator = getAccumulator(((StringLiteral) args[0]).stringify(), registry);
                 return accumulator.getType().getPrimaryType();
             }
         } catch (Exception e) {
@@ -115,7 +115,7 @@ public abstract class AccumulatorFn extends SystemFunction {
         try {
             if (args[0] instanceof StringLiteral) {
                 AccumulatorRegistry registry = getRetainedStaticContext().getPackageData().getAccumulatorRegistry();
-                Accumulator accumulator = getAccumulator(((StringLiteral) args[0]).getStringValue(), registry);
+                Accumulator accumulator = getAccumulator(((StringLiteral) args[0]).stringify(), registry);
                 return accumulator.getType().getCardinality();
             }
         } catch (Exception e) {

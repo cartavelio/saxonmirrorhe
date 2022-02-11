@@ -27,7 +27,7 @@ import net.sf.saxon.value.AtomicValue;
  */
 public class TextOnlyCopyRuleSet implements BuiltInRuleSet {
 
-    private static TextOnlyCopyRuleSet THE_INSTANCE = new TextOnlyCopyRuleSet();
+    private static final TextOnlyCopyRuleSet THE_INSTANCE = new TextOnlyCopyRuleSet();
 
     /**
      * Get the singleton instance of this class
@@ -78,7 +78,7 @@ public class TextOnlyCopyRuleSet implements BuiltInRuleSet {
                     // NOTE: I tried changing this to use the text node's copy() method, but
                     // performance was worse
                 case Type.ATTRIBUTE:
-                    output.characters(item.getStringValueCS(), locationId, ReceiverOption.NONE);
+                    output.characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                     return;
                 case Type.COMMENT:
                 case Type.PROCESSING_INSTRUCTION:
@@ -97,7 +97,7 @@ public class TextOnlyCopyRuleSet implements BuiltInRuleSet {
                 tc = tc.processLeavingTail();
             }
         } else if (item instanceof AtomicValue) {
-            output.characters(item.getStringValueCS(), locationId, ReceiverOption.NONE);
+            output.characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
         } else {
             // no action (e.g. for function items
         }

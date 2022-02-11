@@ -17,7 +17,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class AvailableEnvironmentVariables extends SystemFunction {
         List<Item> myList = new ArrayList<>();
         if (context.getConfiguration().getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
             for (java.lang.String s : resolver.getAvailableEnvironmentVariables()) {
-                myList.add(new StringValue(s));
+                myList.add(new StringItem(s));
             }
         }
         return new SequenceExtent(myList);

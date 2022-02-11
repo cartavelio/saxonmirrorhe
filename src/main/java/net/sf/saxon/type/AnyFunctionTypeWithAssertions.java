@@ -21,8 +21,8 @@ import net.sf.saxon.trans.XPathException;
  */
 public class AnyFunctionTypeWithAssertions extends AnyFunctionType {
 
-    private AnnotationList assertions;
-    private Configuration config;
+    private final AnnotationList assertions;
+    private final Configuration config;
 
     /**
      * Construct an item type representing the item type function(*) with a list of annotation assertions

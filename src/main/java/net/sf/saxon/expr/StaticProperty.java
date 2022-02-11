@@ -7,7 +7,7 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.value.Cardinality;
 
 /**
@@ -353,7 +353,7 @@ public abstract class StaticProperty {
 
     // For diagnostic display of static properties
     public static String display(int props) {
-        FastStringBuffer s = new FastStringBuffer(128);
+        StringBuilder s = new StringBuilder(128);
         s.append("D(");
         if ((props & DEPENDS_ON_CURRENT_ITEM) != 0) {
             s.append("U");

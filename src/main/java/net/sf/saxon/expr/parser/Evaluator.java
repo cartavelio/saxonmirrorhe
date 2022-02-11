@@ -70,7 +70,7 @@ public abstract class Evaluator {
     public final static Evaluator LITERAL = new Evaluator() {
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) {
-            return ((Literal)expr).getValue();
+            return ((Literal)expr).getGroundedValue();
         }
 
         /**

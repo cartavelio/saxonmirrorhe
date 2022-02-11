@@ -25,8 +25,8 @@ import net.sf.saxon.type.SchemaType;
 public class Valve extends ProxyReceiver {
 
     private boolean started = false;
-    private String testNamespace;
-    private Receiver alternativeReceiver;
+    private final String testNamespace;
+    private final Receiver alternativeReceiver;
 
     /**
      * Create a {@code Valve}. Events sent to this {@code Valve} will be forwarded

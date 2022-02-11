@@ -29,8 +29,8 @@ import java.util.HashMap;
 public class ComponentTracer extends Instruction {
 
     private Operand baseOp;
-    private HashMap<String, Object> properties = new HashMap<>(10);
-    private TraceableComponent component;
+    private final HashMap<String, Object> properties = new HashMap<>(10);
+    private final TraceableComponent component;
 
     /**
      * Create a trace expression that traces execution of a given child expression

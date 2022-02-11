@@ -34,7 +34,7 @@ import javax.xml.transform.Source;
 
 public class DOM4JObjectModel extends TreeModel implements ExternalObjectModel {
 
-    private final static DOM4JObjectModel THE_INSTANCE = new DOM4JObjectModel();
+    private static final DOM4JObjectModel THE_INSTANCE = new DOM4JObjectModel();
 
     /**
      * Get a singular instance of this class
@@ -88,7 +88,7 @@ public class DOM4JObjectModel extends TreeModel implements ExternalObjectModel {
         if (isRecognizedNodeClass(targetClass)) {
             return new PJConverter() {
                 @Override
-                public Object convert(Sequence value, Class<?> targetClass, XPathContext context) {
+                public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
                     return convertXPathValueToObject(value, targetClass);
                 }
             };
@@ -102,7 +102,7 @@ public class DOM4JObjectModel extends TreeModel implements ExternalObjectModel {
         if (isRecognizedNodeClass(sourceClass)) {
             return new JPConverter() {
                 @Override
-                public Sequence convert(Object object, XPathContext context) throws XPathException {
+                public GroundedValue convert(Object object, XPathContext context) throws XPathException {
                     return convertObjectToXPathValue((Node) object, context.getConfiguration());
                 }
 
@@ -172,7 +172,7 @@ public class DOM4JObjectModel extends TreeModel implements ExternalObjectModel {
      * Test whether this object model recognizes a particular kind of JAXP Result object,
      * and if it does, return a Receiver that builds an instance of this data model from
      * a sequence of events. If the Result is not recognised, return null.
-     * @return always null
+     * @return
      */
 
     @Override
@@ -181,12 +181,13 @@ public class DOM4JObjectModel extends TreeModel implements ExternalObjectModel {
     }
 
     /**
-     * Test whether this object model recognizes a particular kind of JAXP Source object.
-     * @return always false
+     * Test whether this object model recognizes a particular kind of JAXP Source object,
+     * and if it does, send the contents of the document to a supplied Receiver, and return true.
+     * Otherwise, return false.
      */
 
     @Override
-    public boolean sendSource(Source source, Receiver receiver)  {
+    public boolean sendSource(Source source, Receiver receiver) throws XPathException {
         return false;
     }
 
@@ -209,9 +210,12 @@ public class DOM4JObjectModel extends TreeModel implements ExternalObjectModel {
      * @param object the node to be converted
      * @param config the Saxon configuration
      * @return the resulting XPath value, or null
+     * @throws net.sf.saxon.trans.XPathException
+     *          if the object is recognized as a DOM4J node but cannot be
+     *          wrapped
      */
 
-    private Sequence convertObjectToXPathValue(Node object, Configuration config) {
+    private GroundedValue convertObjectToXPathValue(Node object, Configuration config) throws XPathException {
         if (isRecognizedNode(object)) {
             if (object instanceof Document) {
                 return wrapDocument(object, "", config).getRootNode();

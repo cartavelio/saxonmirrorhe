@@ -8,15 +8,13 @@
 package net.sf.saxon.option.jdom2;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.str.*;
 import net.sf.saxon.tree.iter.*;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
@@ -172,19 +170,20 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     /**
      * Get the value of the item as a CharSequence. This is in some cases more efficient than
      * the version of the method that returns a String.
+     * @return
      */
 
     @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         if (node instanceof List) {
             // This wrapper is mapped to a list of adjacent text nodes
             List nodes = (List) node;
-            FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+            UnicodeBuilder fsb = new UnicodeBuilder();
             for (Object node1 : nodes) {
                 Text o = (Text) node1;
                 fsb.append(getStringValue(o));
             }
-            return fsb;
+            return fsb.toUnicodeString();
         } else {
             return getStringValue(node);
         }
@@ -216,28 +215,28 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @return the XPath string value of the node
      */
 
-    private static String getStringValue(Object node) {
+    private static UnicodeString getStringValue(Object node) {
         if (node instanceof Document) {
             List<Content> children1 = ((Document) node).getContent();
-            FastStringBuffer sb1 = new FastStringBuffer(FastStringBuffer.C256);
+            UnicodeBuilder sb1 = new UnicodeBuilder();
             expandStringValue(children1, sb1);
-            return sb1.toString();
+            return sb1.toUnicodeString();
         } else if (node instanceof Element) {
-            return ((Element) node).getValue();
+            return StringView.tidy(((Element) node).getValue());
         } else if (node instanceof Attribute) {
-            return ((Attribute) node).getValue();
+            return StringView.tidy(((Attribute) node).getValue());
         } else if (node instanceof Text) {
-            return ((Text) node).getText();
+            return StringView.tidy(((Text) node).getText());
         } else if (node instanceof String) {
-            return (String) node;
+            return StringView.tidy((String) node);
         } else if (node instanceof Comment) {
-            return ((Comment) node).getText();
+            return StringView.tidy(((Comment) node).getText());
         } else if (node instanceof ProcessingInstruction) {
-            return ((ProcessingInstruction) node).getData();
+            return StringView.tidy(((ProcessingInstruction) node).getData());
         } else if (node instanceof Namespace) {
-            return ((Namespace) node).getURI();
+            return StringView.tidy(((Namespace) node).getURI());
         } else {
-            return "";
+            return EmptyUniString.getInstance();
         }
     }
 
@@ -248,7 +247,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * @param list the list containing the nodes
      * @param sb   the StringBuffer to contain the result
      */
-    private static void expandStringValue(List<Content> list, FastStringBuffer sb) {
+    private static void expandStringValue(List<Content> list, UnicodeBuilder sb) {
         for (Content obj : list) {
             if (obj instanceof Element) {
                 sb.append(obj.getValue());
@@ -581,7 +580,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      */
 
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
         //buffer.append(Navigator.getSequentialKey(this));
     }
@@ -695,9 +694,9 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 
     private final class AttributeEnumeration implements AxisIterator {
 
-        private Iterator<Attribute> atts;
+        private final Iterator<Attribute> atts;
         private int ix = 0;
-        private JDOM2NodeWrapper start;
+        private final JDOM2NodeWrapper start;
 
         AttributeEnumeration(JDOM2NodeWrapper start) {
             this.start = start;
@@ -725,10 +724,10 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 
     private final class ChildEnumeration implements AxisIterator {
 
-        private JDOM2NodeWrapper commonParent;
-        private ListIterator children;
+        private final JDOM2NodeWrapper commonParent;
+        private final ListIterator children;
         private int ix = 0;
-        private boolean forwards;   // iterate in document order (not reverse order)
+        private final boolean forwards;   // iterate in document order (not reverse order)
 
         public ChildEnumeration(JDOM2NodeWrapper start,
                                 boolean downwards, boolean forwards) {

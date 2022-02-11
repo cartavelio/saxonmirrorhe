@@ -24,7 +24,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -37,9 +37,9 @@ import java.util.Optional;
  */
 public class SpecificFunctionType extends AnyFunctionType {
 
-    private SequenceType[] argTypes;
-    private SequenceType resultType;
-    private AnnotationList annotations;
+    private final SequenceType[] argTypes;
+    private final SequenceType resultType;
+    private final AnnotationList annotations;
     private Configuration config;
 
     public SpecificFunctionType(SequenceType[] argTypes, SequenceType resultType) {
@@ -122,7 +122,7 @@ public class SpecificFunctionType extends AnyFunctionType {
      *         identical to XPath syntax
      */
     public String toString() {
-        FastStringBuffer sb = new FastStringBuffer(100);
+        StringBuilder sb = new StringBuilder(100);
         sb.append("(function(");
         for (int i = 0; i < argTypes.length; i++) {
             sb.append(argTypes[i].toString());
@@ -132,13 +132,13 @@ public class SpecificFunctionType extends AnyFunctionType {
         }
         sb.append(") as ");
         sb.append(resultType.toString());
-        sb.cat(')');
+        sb.append(')');
         return sb.toString();
     }
 
     @Override
     public String toExportString() {
-        FastStringBuffer sb = new FastStringBuffer(100);
+        StringBuilder sb = new StringBuilder(100);
         sb.append("(function(");
         for (int i = 0; i < argTypes.length; i++) {
             sb.append(argTypes[i].toExportString());
@@ -148,7 +148,7 @@ public class SpecificFunctionType extends AnyFunctionType {
         }
         sb.append(") as ");
         sb.append(resultType.toExportString());
-        sb.cat(')');
+        sb.append(')');
         return sb.toString();
     }
 
@@ -309,7 +309,7 @@ public class SpecificFunctionType extends AnyFunctionType {
         if (item instanceof MapItem) {
             // Bug 2938: Essentially a map is an instance of function(X) as Y
             // if (a) X is a subtype of xs:anyAtomicType, and (b) all the values in the map are instances of Y
-            // Bug 4692: adds the condition (c) the empty sequence is an instance of Y
+            // Bug 4692: Adds the condition that the empty sequence must be an instance of Y.
             if (getArity() == 1 &&
                     argTypes[0].getCardinality() == StaticProperty.EXACTLY_ONE &&
                     argTypes[0].getPrimaryType().isPlainType() &&

@@ -7,7 +7,7 @@
 
 package net.sf.saxon.z;
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 /**
  * A hash table that maps int keys to int values.
@@ -187,7 +187,7 @@ public class IntToIntHashMap implements IntToIntMap {
 
     private static final int NBIT = 30; // NMAX = 2^NBIT
     private static final int NMAX = 1 << NBIT; // maximum number of keys mapped
-    private double _factor; // 0.0 <= _factor <= 1.0
+    private final double _factor; // 0.0 <= _factor <= 1.0
     private int _defaultValue = Integer.MAX_VALUE;
     private int _nmax; // 0 <= _nmax = 2^nbit <= 2^NBIT = NMAX
     private int _n; // 0 <= _n <= _nmax <= NMAX
@@ -273,7 +273,7 @@ public class IntToIntHashMap implements IntToIntMap {
     @Override
     public String toString() {
         // For diagnostics
-        FastStringBuffer buffer = new FastStringBuffer(256);
+        StringBuilder buffer = new StringBuilder(256);
         buffer.append("{");
         IntIterator keys = keyIterator();
         int count = 0;

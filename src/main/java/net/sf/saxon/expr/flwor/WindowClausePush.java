@@ -24,8 +24,8 @@ import java.util.List;
  */
 public class WindowClausePush extends TuplePush {
 
-    private WindowClause windowClause;
-    private TuplePush destination;
+    private final WindowClause windowClause;
+    private final TuplePush destination;
     /*@Nullable*/ List<WindowClause.Window> currentWindows = new ArrayList<>();
 
     public WindowClausePush(Outputter outputter, TuplePush destination, WindowClause windowClause) {

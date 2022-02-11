@@ -2,6 +2,7 @@ package jstests;
 
 //import com.saxonica.ee.extfn.IxslFunctionLibrary;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.ee.extfn.js.IXSLFunctionSet;
 import net.sf.saxon.functions.FunctionLibrary;
@@ -76,6 +77,8 @@ public class IxslExtensionTest {
                     + "    \n"
                     + "</xsl:stylesheet>";
             Processor p = new Processor(true);
+            EnterpriseConfiguration config = (EnterpriseConfiguration) p.getUnderlyingConfiguration();
+            FunctionLibrary lib = IXSLFunctionSet.getInstance();
             XsltCompiler comp = p.newXsltCompiler();
             comp.setTargetEdition(target);
             XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));

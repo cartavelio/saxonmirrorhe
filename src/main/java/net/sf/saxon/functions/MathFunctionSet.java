@@ -27,7 +27,7 @@ import net.sf.saxon.value.NumericValue;
  */
 public class MathFunctionSet extends BuiltInFunctionSet {
 
-    private static MathFunctionSet THE_INSTANCE = new MathFunctionSet();
+    private static final MathFunctionSet THE_INSTANCE = new MathFunctionSet();
 
     public static MathFunctionSet getInstance() {
         return THE_INSTANCE;

@@ -20,10 +20,10 @@ import net.sf.saxon.trans.XPathException;
 
 public class BlockIterator implements SequenceIterator {
 
-    private Operand[] operanda;
+    private final Operand[] operanda;
     private int currentChildExpr = 0;
     private SequenceIterator currentIter;
-    private XPathContext context;
+    private final XPathContext context;
     private int position = 0;
 
     public BlockIterator(Operand[] operanda, XPathContext context) {

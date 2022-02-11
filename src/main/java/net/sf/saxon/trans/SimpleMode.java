@@ -14,6 +14,7 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.TemplateRule;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.StylesheetModule;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -62,8 +63,8 @@ public class SimpleMode extends Mode {
     private int highestRank;
 
 
-    private Map<String, Integer> explicitPropertyPrecedences = new HashMap<>();
-    private Map<String, String> explicitPropertyValues = new HashMap<>();
+    private final Map<String, Integer> explicitPropertyPrecedences = new HashMap<>();
+    private final Map<String, String> explicitPropertyValues = new HashMap<>();
 
 
 
@@ -926,7 +927,7 @@ public class SimpleMode extends Mode {
 
     private static String showPattern(Pattern p) {
         // Complex patterns can be laid out with lots of whitespace, which looks messy in the error message
-        return Whitespace.collapseWhitespace(p.toString()).toString();
+        return Whitespace.collapseWhitespace(StringView.of(p.toString()).tidy()).toString();
     }
 
     /**
@@ -1229,7 +1230,7 @@ public class SimpleMode extends Mode {
 
     private static class RuleSorter {
         public ArrayList<Rule> rules = new ArrayList<>(100);
-        private int start;
+        private final int start;
 
         public RuleSorter(int start) {
             this.start = start;

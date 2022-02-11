@@ -40,7 +40,7 @@ import net.sf.saxon.value.NumericValue;
 @SuppressWarnings("WeakerAccess")
 public abstract class ItemType {
 
-    private static ConversionRules defaultConversionRules = new ConversionRules();
+    private static final ConversionRules defaultConversionRules = new ConversionRules();
 
     static {
         defaultConversionRules.setStringToDoubleConverter(StringToDouble.getInstance());
@@ -383,8 +383,8 @@ public abstract class ItemType {
 
     static class BuiltInAtomicItemType extends ItemType {
 
-        private BuiltInAtomicType underlyingType;
-        private ConversionRules conversionRules;
+        private final BuiltInAtomicType underlyingType;
+        private final ConversionRules conversionRules;
 
         public BuiltInAtomicItemType(BuiltInAtomicType underlyingType, ConversionRules conversionRules) {
             this.underlyingType = underlyingType;

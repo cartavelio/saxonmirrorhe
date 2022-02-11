@@ -52,6 +52,7 @@ public class ThreadedKeyTest {
             for (int i = 0; i < 100; i++) {
                 executor.execute(new Runnable() {
 
+                    @Override
                     public void run() {
                         try {
                             Transformer transformer = templates.newTransformer();

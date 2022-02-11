@@ -15,7 +15,7 @@ import java.util.NoSuchElementException;
  */
 public class MonoIterator<T> implements Iterator<T> {
 
-    private T thing;  // the single object in the collection
+    private final T thing;  // the single object in the collection
     private boolean gone;  // true if the single object has already been returned
 
     /**

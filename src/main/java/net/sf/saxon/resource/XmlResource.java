@@ -32,7 +32,7 @@ public class XmlResource implements Resource {
     //    private Source source;
 //    private ParseOptions options;
     private NodeInfo doc;
-    private Configuration config;
+    private final Configuration config;
     private AbstractResourceCollection.InputDetails details;
     //private int onError = URIQueryParameters.ON_ERROR_FAIL;
 

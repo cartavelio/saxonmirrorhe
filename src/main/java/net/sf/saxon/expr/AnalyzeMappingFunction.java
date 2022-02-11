@@ -20,10 +20,10 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 
 public class AnalyzeMappingFunction implements ContextMappingFunction {
 
-    private RegexIterator base;
-    private XPathContext c2;
-    private Expression nonMatchExpr;
-    private Expression matchingExpr;
+    private final RegexIterator base;
+    private final XPathContext c2;
+    private final Expression nonMatchExpr;
+    private final Expression matchingExpr;
 
     public AnalyzeMappingFunction(RegexIterator base, XPathContext c2, Expression nonMatchExpr, Expression matchingExpr) {
         this.base = base;

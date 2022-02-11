@@ -30,7 +30,7 @@ import java.util.List;
 
 public class XQueryFunction implements Declaration, Location {
     private StructuredQName functionName;
-    private List<UserFunctionParameter> arguments;
+    private final List<UserFunctionParameter> arguments;
     private SequenceType resultType;
     private Expression body = null;
     private List<UserFunctionResolvable> references = new ArrayList<>(10);

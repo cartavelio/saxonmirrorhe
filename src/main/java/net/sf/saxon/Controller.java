@@ -79,7 +79,7 @@ import java.util.function.Function;
 
 public class Controller implements ContextOriginator {
 
-    private Configuration config;
+    private final Configuration config;
     protected Executable executable;
 
     protected Item globalContextItem;
@@ -87,7 +87,7 @@ public class Controller implements ContextOriginator {
     private Map<PackageData, Bindery> binderies;
     private GlobalParameterSet globalParameters;
     private boolean convertParameters = true;
-    private Map<GlobalVariable, Set<GlobalVariable>> globalVariableDependencies = new HashMap<>();
+    private final Map<GlobalVariable, Set<GlobalVariable>> globalVariableDependencies = new HashMap<>();
     protected TraceListener traceListener;
     private boolean tracingPaused;
     private Logger traceFunctionDestination;
@@ -284,9 +284,10 @@ public class Controller implements ContextOriginator {
                 String systemId = ((NodeInfo) val).getRoot().getSystemId();
                 try {
                     if (systemId != null && new URI(systemId).isAbsolute()) {
+                        DocumentKey key = new DocumentKey(systemId);
                         DocumentPool pool = getDocumentPool();
-                        if (pool.find(systemId) == null) {
-                            pool.add(((NodeInfo) val).getTreeInfo(), systemId);
+                        if (pool.find(key) == null) {
+                            pool.add(((NodeInfo) val).getTreeInfo(), key);
                         }
                     }
                 } catch (URISyntaxException err) {

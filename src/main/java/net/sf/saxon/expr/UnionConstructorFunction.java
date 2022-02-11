@@ -15,7 +15,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Function to perform a cast to a union type
@@ -140,9 +140,9 @@ public class UnionConstructorFunction extends AbstractFunction {
 
         // 1. If the value is a string or untypedAtomic, try casting to each of the member types
 
-        if (value instanceof StringValue && !(value instanceof AnyURIValue)) {
+        if (value instanceof StringItem && !(value instanceof AnyURIValue)) {
             try {
-                return targetType.getTypedValue(value.getStringValueCS(), resolver, rules);
+                return targetType.getTypedValue(value.getUnicodeStringValue(), resolver, rules);
             } catch (ValidationException e) {
                 e.setErrorCode("FORG0001");
                 throw e;
@@ -155,7 +155,7 @@ public class UnionConstructorFunction extends AbstractFunction {
         Iterable<? extends PlainType> memberTypes = ((UnionType)targetType).getPlainMemberTypes();
 
         // 2a. Is the type annotation itself a member type of the union, and of the union type itself?
-        if (((UnionType)targetType).isPlainType()) {
+        if (targetType.isPlainType()) {
             for (PlainType member : memberTypes) {
                 if (label.equals(member)) {
                     return value;
@@ -243,9 +243,9 @@ public class UnionConstructorFunction extends AbstractFunction {
 
         // 1. If the value is a string or untypedAtomic, try casting to each of the member types
 
-        if (value instanceof StringValue && !(value instanceof AnyURIValue)) {
+        if (value instanceof StringItem && !(value instanceof AnyURIValue)) {
             try {
-                return targetType.getTypedValue(value.getStringValueCS(), nsResolver, rules);
+                return targetType.getTypedValue(value.getUnicodeStringValue(), nsResolver, rules);
             } catch (ValidationException e) {
                 e.setErrorCode("FORG0001");
                 throw e;

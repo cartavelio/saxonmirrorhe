@@ -5,7 +5,6 @@ import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.config.ProfessionalTransformerFactory;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.number.Numberer_en;
-import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.LocalizerFactory;
 import net.sf.saxon.lib.Numberer;
 import net.sf.saxon.s9api.Processor;
@@ -24,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- *  Test various aspects of setting the Saxon Configuration from Java code
+ * Test various aspects of setting the Saxon Configuration from Java code
  */
 public class ConfigurationTest {
 
@@ -32,7 +31,6 @@ public class ConfigurationTest {
      * Demonstrate use of a user-written LocalizerFactory to customize numbering
      */
 
-    @Test
     public void testCustomizedNumbering() {
         try {
             Configuration config = new ProfessionalConfiguration();
@@ -42,7 +40,7 @@ public class ConfigurationTest {
                     Numberer n = super.getNumberer(language, country);
                     if (n instanceof Numberer_en) {
                         // request "twenty-six" rather than "twenty six"
-                        ((Numberer_en)n).setTensUnitsSeparatorCardinal("-");
+                        ((Numberer_en) n).setTensUnitsSeparatorCardinal("-");
                     }
                     return n;
                 }
@@ -61,10 +59,8 @@ public class ConfigurationTest {
     @Test
     public void testBug4650() {
         try {
-            Configuration configuration = Configuration.readConfiguration(new StreamSource(new File("/Users/mike/bugs/2020/4650-Nadolu/SaxonTest-2/resources/saxonEEConfig.xml")));
+            Configuration configuration = Configuration.readConfiguration(new StreamSource(new File("/Users/mike/bugs/2020/4650-Nadolu/SaxonTest-2/resources/saxonPEConfig.xml")));
             ProfessionalTransformerFactory factory = new ProfessionalTransformerFactory((ProfessionalConfiguration) configuration);
-            //configuration.getDefaultXsltCompilerInfo().setJustInTimeCompilation(false);
-            configuration.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, "-j");
             factory.setErrorListener(new ErrorListener() {
                 @Override
                 public void warning(TransformerException exception) throws TransformerException {
@@ -81,7 +77,7 @@ public class ConfigurationTest {
                     exception.printStackTrace(System.out);
                 }
             });
-            factory.newTransformer(new StreamSource(new File("/Users/mike/bugs/2020/4650-Nadolu/SaxonTest-2/resources/test-xsl-validation.xsl")));
+            factory.newTransformer(new StreamSource(new File("resources/test-xsl-validation.xsl")));
         } catch (TransformerConfigurationException e) {
             e.printStackTrace(System.out);
         } catch (XPathException e) {

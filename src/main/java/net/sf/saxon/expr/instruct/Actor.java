@@ -217,7 +217,7 @@ public abstract class Actor implements ExpressionOwner, Location {
     }
 
     public Location getLocation() {
-        return (Location)this;
+        return this;
     }
 
     @Override
@@ -243,7 +243,7 @@ public abstract class Actor implements ExpressionOwner, Location {
 
     @Override
     public Location saveLocation() {
-        return (Location)this;
+        return this;
     }
 
     public void setRetainedStaticContext(RetainedStaticContext rsc) {

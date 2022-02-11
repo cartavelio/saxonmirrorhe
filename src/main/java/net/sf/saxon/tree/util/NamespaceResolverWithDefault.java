@@ -19,8 +19,8 @@ import java.util.Iterator;
  */
 public class NamespaceResolverWithDefault implements NamespaceResolver {
 
-    private NamespaceResolver baseResolver;
-    private String defaultNamespace;
+    private final NamespaceResolver baseResolver;
+    private final String defaultNamespace;
 
     public NamespaceResolverWithDefault(NamespaceResolver base, String defaultNamespace) {
         this.baseResolver = base;

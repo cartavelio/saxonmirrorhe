@@ -32,9 +32,9 @@ import java.util.List;
 
 public class OnDemandFunctionSet implements FunctionLibrary {
 
-    private Configuration config;
-    private String namespace;
-    private String libraryClass;
+    private final Configuration config;
+    private final String namespace;
+    private final String libraryClass;
     private FunctionLibrary library;
 
     public OnDemandFunctionSet(Configuration config, String namespace, String libraryClass) {

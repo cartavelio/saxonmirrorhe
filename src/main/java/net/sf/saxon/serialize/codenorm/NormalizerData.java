@@ -7,7 +7,6 @@
 
 package net.sf.saxon.serialize.codenorm;
 
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntToIntMap;
 
@@ -67,14 +66,14 @@ public class NormalizerData {
      * @param ch        the source character
      * @param buffer    buffer to be filled with the decomposition
      */
-    public void getRecursiveDecomposition(boolean canonical, int ch, FastStringBuffer buffer) {
+    public void getRecursiveDecomposition(boolean canonical, int ch, StringBuilder buffer) {
         String decomp = (String) decompose.get(ch);
         if (decomp != null && !(canonical && isCompatibility.get(ch))) {
             for (int i = 0; i < decomp.length(); ++i) {
                 getRecursiveDecomposition(canonical, decomp.charAt(i), buffer);
             }
         } else {                    // if no decomp, append
-            buffer.appendWideChar(ch);
+            buffer.appendCodePoint(ch);
         }
     }
 
@@ -112,7 +111,7 @@ public class NormalizerData {
      * For now, just use IntHashtable
      * Two-stage tables would be used in an optimized implementation.
      */
-    private IntToIntMap canonicalClass;
+    private final IntToIntMap canonicalClass;
 
     /**
      * The main data table maps chars to a 32-bit int.
@@ -123,25 +122,25 @@ public class NormalizerData {
      * An optimization could also map chars to a small index, then use that
      * index in a small array of ints.
      */
-    private IntHashMap decompose;
+    private final IntHashMap decompose;
 
     /**
      * Maps from pairs of characters to single.
      * If there is no decomposition, the value is NOT_COMPOSITE.
      */
-    private IntToIntMap compose;
+    private final IntToIntMap compose;
 
     /**
      * Tells whether decomposition is canonical or not.
      */
-    private BitSet isCompatibility;
+    private final BitSet isCompatibility;
 
     /**
      * Tells whether character is script-excluded or not.
      * Used only while building, and for testing.
      */
 
-    private BitSet isExcluded;
+    private final BitSet isExcluded;
 }
 
 // * The class is derived from the sample program NormalizerData.java published by the

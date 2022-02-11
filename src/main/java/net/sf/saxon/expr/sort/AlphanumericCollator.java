@@ -8,8 +8,8 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.regex.UnicodeString;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.*;
+import net.sf.saxon.value.StringItem;
 
 import java.math.BigInteger;
 import java.util.regex.Matcher;
@@ -26,8 +26,8 @@ import java.util.regex.Pattern;
 
 public class AlphanumericCollator implements StringCollator {
 
-    private StringCollator baseCollator;
-    private static Pattern pattern = Pattern.compile("\\d+");
+    private final StringCollator baseCollator;
+    private static final Pattern pattern = Pattern.compile("\\d+");
     public final static String PREFIX = "http://saxon.sf.net/collation/alphaNumeric?base=";
 
     /**
@@ -56,10 +56,12 @@ public class AlphanumericCollator implements StringCollator {
      * Compare two objects.
      *
      * @return &lt;0 if a&lt;b, 0 if a=b, &gt;0 if a&gt;b
+     * @param cs1
+     * @param cs2
      */
 
     @Override
-    public int compareStrings(CharSequence cs1, CharSequence cs2) {
+    public int compareStrings(UnicodeString cs1, UnicodeString cs2) {
         String s1 = cs1.toString();
         String s2 = cs2.toString();
         int pos1 = 0;
@@ -77,7 +79,8 @@ public class AlphanumericCollator implements StringCollator {
 
             // compare an alphabetic pair (even if zero-length)
 
-            int c = baseCollator.compareStrings(s1.substring(pos1, m1start), s2.substring(pos2, m2start));
+            int c = baseCollator.compareStrings(StringView.tidy(s1.substring(pos1, m1start)),
+                                                StringView.tidy(s2.substring(pos2, m2start)));
             if (c != 0) {
                 return c;
             }
@@ -118,7 +121,7 @@ public class AlphanumericCollator implements StringCollator {
      */
 
     @Override
-    public boolean comparesEqual(CharSequence s1, CharSequence s2) {
+    public boolean comparesEqual(UnicodeString s1, UnicodeString s2) {
         return compareStrings(s1, s2) == 0;
     }
 
@@ -130,10 +133,10 @@ public class AlphanumericCollator implements StringCollator {
      */
 
     @Override
-    public AtomicMatchKey getCollationKey(/*@NotNull*/ CharSequence cs) {
+    public AtomicMatchKey getCollationKey(/*@NotNull*/ UnicodeString cs) {
         // The string is normalized by removing leading zeros in a numeric component
         String s = cs.toString();
-        FastStringBuffer sb = new FastStringBuffer(s.length() * 2);
+        UnicodeString sb = EmptyUniString.getInstance();
         int pos1 = 0;
         Matcher m1 = pattern.matcher(s);
         while (true) {
@@ -145,18 +148,20 @@ public class AlphanumericCollator implements StringCollator {
 
             // handle an alphabetic part (even if zero-length)
 
-            sb.append(baseCollator.getCollationKey(s.substring(pos1, m1start)).toString());
+            AtomicMatchKey part = baseCollator.getCollationKey(cs.substring(pos1, m1start));
+            sb = sb.concat(((StringItem) part).getContent());
+
 
             // reached end?
 
             if (!b1) {
-                return UnicodeString.makeUnicodeString(sb);
+                return sb;
             }
 
             // handle a numeric part
 
             int n1 = Integer.parseInt(s.substring(m1start, m1.end()));
-            sb.append(n1 + "");
+            sb = sb.concat(StringItem.bmp(n1 + "").getContent());
 
             // move on to the next part of the string
 

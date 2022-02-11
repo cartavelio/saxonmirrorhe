@@ -206,7 +206,7 @@ public class QT3TestDriverHE extends TestDriver {
             // SAXON has a problem here - we don't support stable collections
             return "false".equals(value) != inverse;
         } else if ("default-language".equals(type)) {
-            final String old = (String) env.processor.getConfigurationProperty(Feature.DEFAULT_LANGUAGE);
+            final String old = env.processor.getConfigurationProperty(Feature.DEFAULT_LANGUAGE);
             if (!value.equals(old)){
                 env.processor.setConfigurationProperty(Feature.DEFAULT_LANGUAGE, value);
                 env.resetActions.add(new Environment.ResetAction() {
@@ -353,7 +353,6 @@ public class QT3TestDriverHE extends TestDriver {
         env.processor.setXmlVersion("1.0");
         env.processor.setConfigurationProperty(Feature.XQUERY_MULTIPLE_MODULE_IMPORTS, true);
 
-
         List<XdmNode> dependencies = testCase.getParent().select(child("dependency")).asList();
         dependencies.addAll(testCase.select(child("dependency")).asList());
         for (XdmNode dependency : dependencies) {
@@ -462,6 +461,7 @@ public class QT3TestDriverHE extends TestDriver {
             TestOutcome outcome = new TestOutcome(this);
             String exp = null;
             try {
+                //XdmNode testNode = (XdmNode)testCase.children("test").iterator().next();
                 exp = xpc.evaluate("if (test/@file) then unparsed-text(resolve-uri(test/@file, base-uri(.))) else string(test)", testCase).toString();
             } catch (SaxonApiException err) {
                 println("*** Failed to read query: " + err.getMessage());
@@ -840,13 +840,13 @@ public class QT3TestDriverHE extends TestDriver {
             } else {
                 try {
                     StreamSource[] ss = new StreamSource[locations.length];
-                    for (int i=0; i<locations.length; i++) {
+                    for (int i = 0; i < locations.length; i++) {
                         String loc = locations[i];
                         URI hint = new URI(baseURI).resolve(loc);
                         Predicate<XdmNode> matching = n ->
-                            n.attribute("uri").equals(moduleURI)
-                                    && n.attribute("location") != null
-                                    && testCase.getBaseURI().resolve(n.attribute("location")).equals(hint);
+                                n.attribute("uri").equals(moduleURI)
+                                        && n.attribute("location") != null
+                                        && testCase.getBaseURI().resolve(n.attribute("location")).equals(hint);
 
                         XdmValue files = testCase.select(
                                 child("module").where(matching).then(attribute("file")).then(atomize())).asXdmValue();
@@ -863,7 +863,7 @@ public class QT3TestDriverHE extends TestDriver {
             }
         }
     }
-
+    
     public static class TestURIResolver implements URIResolver {
         Environment env;
 
@@ -942,7 +942,7 @@ public class QT3TestDriverHE extends TestDriver {
         public boolean satisfied;
     }
 
-    private Map<String, Dependency> dependencyMap = new HashMap<String, Dependency>();
+    private final Map<String, Dependency> dependencyMap = new HashMap<String, Dependency>();
 
     public void addDependency(String depStr, String value, boolean satisfied) {
         if (!dependencyMap.containsKey(value)) {

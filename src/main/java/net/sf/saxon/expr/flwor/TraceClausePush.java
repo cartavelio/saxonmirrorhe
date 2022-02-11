@@ -21,9 +21,9 @@ import java.util.Collections;
  */
 public class TraceClausePush extends TuplePush {
 
-    private TuplePush destination;
+    private final TuplePush destination;
     TraceClause traceClause;
-    private Clause baseClause;
+    private final Clause baseClause;
 
     public TraceClausePush(Outputter outputter, TuplePush destination, TraceClause traceClause, Clause baseClause) {
         super(outputter);

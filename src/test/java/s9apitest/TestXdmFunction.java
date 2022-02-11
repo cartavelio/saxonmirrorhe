@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -52,7 +53,7 @@ public class TestXdmFunction {
     @Test
     public void testCallSystemFunctionArray() {
         try {
-            Processor proc = new Processor(true);
+            Processor proc = new Processor(false);
             XdmFunctionItem fi = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.ARRAY_FUNCTIONS, "sort"), 1);
             assertNotNull(fi);
             XdmArray result = (XdmArray) fi.call(
@@ -89,6 +90,22 @@ public class TestXdmFunction {
             fail("Unexpected success");
         } catch (SaxonApiException e) {
             assertEquals("XPTY0004", e.getErrorCode().getLocalName());
+        }
+    }
+
+    @Test
+    public void testCallSystemFunctionFailIfUnlicensed() {
+        try {
+            Processor proc = new Processor(false);
+            XdmFunctionItem fi = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.SAXON, "in-summer-time"), 2);
+            assertNull(fi);
+//            XdmAtomicValue arg1 = new XdmAtomicValue("2016-08-20T12:00:00", ItemType.DATE_TIME);
+//            XdmAtomicValue arg2 = new XdmAtomicValue("Europe/London");
+//            XdmAtomicValue result = (XdmAtomicValue) fi.call(proc, arg1, arg2);
+//            assertTrue(result.getBooleanValue());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
         }
     }
 
@@ -215,7 +232,7 @@ public class TestXdmFunction {
     @Test
     public void testFunctionReturnedByFunctionLookup() {
         try {
-            Processor proc = new Processor(false);
+            Processor proc = new Processor(true);
             XPathCompiler comp = proc.newXPathCompiler();
             XdmItem value = comp.evaluateSingle("function-lookup(QName('http://www.w3.org/2005/xpath-functions', 'round'), 2)", null);
             XdmValue result = ((XdmFunctionItem) value).call(proc,
@@ -259,7 +276,7 @@ public class TestXdmFunction {
     @Test
     public void testContextDependentFunctionReturnedByFunctionLookup() {
         try {
-            Processor proc = new Processor(false);
+            Processor proc = new Processor(true);
             XPathCompiler comp = proc.newXPathCompiler();
             XdmItem value = comp.evaluateSingle("function-lookup(QName('http://www.w3.org/2005/xpath-functions', 'string'), 0)",
                                                 new XdmAtomicValue(3.14159));

@@ -35,6 +35,7 @@ public class TestXQueryUpdate {
         try {
             final EnterpriseConfiguration config = new EnterpriseConfiguration();
             config.setURIResolver(new URIResolver() {
+                 @Override
                  public Source resolve(String href, String base) throws TransformerException {
                      Source s = new StreamSource(new StringReader(xml));
                      s.setSystemId(href);

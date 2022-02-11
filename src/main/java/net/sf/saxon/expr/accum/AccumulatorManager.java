@@ -37,10 +37,10 @@ import java.util.WeakHashMap;
 public class AccumulatorManager {
 
 
-    private transient WeakHashMap<TreeInfo, Map<Accumulator, IAccumulatorData>> accumulatorDataIndex =
+    private final transient WeakHashMap<TreeInfo, Map<Accumulator, IAccumulatorData>> accumulatorDataIndex =
         new WeakHashMap<TreeInfo, Map<Accumulator, IAccumulatorData>>();
 
-    private transient WeakHashMap<TreeInfo, Set<? extends Accumulator>> applicableAccumulators =
+    private final transient WeakHashMap<TreeInfo, Set<? extends Accumulator>> applicableAccumulators =
             new WeakHashMap<TreeInfo, Set<? extends Accumulator>>();
 
     public AccumulatorManager() {
@@ -69,7 +69,7 @@ public class AccumulatorManager {
         return accSet == null || accSet.contains(accumulator);
     }
 
-    private static AccumulatorData MARKER = new AccumulatorData(null);
+    private static final AccumulatorData MARKER = new AccumulatorData(null);
 
     /**
      * Get the data relating to a particular accumulator for a particular unstreamed document tree

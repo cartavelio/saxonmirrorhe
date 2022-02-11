@@ -10,6 +10,8 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.Calculator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -46,7 +48,7 @@ public final class Int64Value extends IntegerValue {
      * IntegerValue representing the minimum value for a long
      */
     public static final Int64Value MIN_LONG = new Int64Value(Long.MIN_VALUE);
-    private long value;
+    private final long value;
 
     /**
      * Array of small integer values
@@ -402,8 +404,8 @@ public final class Int64Value extends IntegerValue {
      */
 
     @Override
-    public String getPrimitiveStringValue() {
-        return Long.toString(value);
+    public UnicodeString getPrimitiveStringValue() {
+        return BMPString.of(Long.toString(value));
     }
 
     /**

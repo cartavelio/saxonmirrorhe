@@ -16,7 +16,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.CalendarValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * An AtomicComparer used for comparing atomic values of arbitrary item types. It encapsulates
@@ -29,7 +29,7 @@ import net.sf.saxon.value.StringValue;
 public class GenericAtomicComparer implements AtomicComparer {
 
     private StringCollator collator;
-    private transient XPathContext context;
+    private final transient XPathContext context;
 
     /**
      * Create an GenericAtomicComparer
@@ -167,22 +167,18 @@ public class GenericAtomicComparer implements AtomicComparer {
             return +1;
         }
 
-        if (a instanceof StringValue && b instanceof StringValue) {
-            if (collator instanceof CodepointCollator) {
-                return CodepointCollator.compareCS(a.getStringValueCS(), b.getStringValueCS());
-            } else {
-                return collator.compareStrings(a.getStringValue(), b.getStringValue());
-            }
+        if (a instanceof StringItem && b instanceof StringItem) {
+            return collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
         } else {
             int implicitTimezone = context.getImplicitTimezone();
-            Comparable ac = (Comparable) a.getXPathComparable(true, collator, implicitTimezone);
-            Comparable bc = (Comparable) b.getXPathComparable(true, collator, implicitTimezone);
+            AtomicMatchKey ac = a.getXPathComparable(true, collator, implicitTimezone);
+            AtomicMatchKey bc = b.getXPathComparable(true, collator, implicitTimezone);
             if (ac == null || bc == null) {
                 XPathException e = new XPathException("Objects are not comparable (" +
                         Type.displayTypeName(a) + ", " + Type.displayTypeName(b) + ')', "XPTY0004");
                 throw new ComparisonException(e);
             } else {
-                return ac.compareTo(bc);
+                return ((Comparable<AtomicMatchKey>)ac).compareTo(bc);
             }
         }
     }
@@ -203,8 +199,8 @@ public class GenericAtomicComparer implements AtomicComparer {
     @Override
     public boolean comparesEqual(AtomicValue a, AtomicValue b) throws NoDynamicContextException {
         // System.err.println("Comparing " + a.getClass() + ": " + a + " with " + b.getClass() + ": " + b);
-        if (a instanceof StringValue && b instanceof StringValue) {
-            return collator.comparesEqual(a.getStringValue(), b.getStringValue());
+        if (a instanceof StringItem && b instanceof StringItem) {
+            return collator.comparesEqual(a.getUnicodeStringValue(), b.getUnicodeStringValue());
         } else if (a instanceof CalendarValue && b instanceof CalendarValue) {
             return ((CalendarValue) a).compareTo((CalendarValue) b, context.getImplicitTimezone()) == 0;
         } else {

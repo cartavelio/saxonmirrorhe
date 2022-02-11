@@ -14,7 +14,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.tree.jiter.MappingJavaIterator;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.*;
 
@@ -295,7 +295,7 @@ public class XdmMap extends XdmFunctionItem {
         if (key == null) {
             throw new NullPointerException();
         }
-        GroundedValue v = getUnderlyingValue().get(new StringValue(key));
+        GroundedValue v = getUnderlyingValue().get(new StringItem(key));
         return v == null ? null : XdmValue.wrap(v);
     }
 

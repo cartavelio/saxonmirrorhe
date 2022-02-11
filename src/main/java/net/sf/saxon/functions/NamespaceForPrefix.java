@@ -12,7 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AnyURIValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -32,7 +32,7 @@ public class NamespaceForPrefix extends SystemFunction implements Callable {
      */
     @Override
     public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
-        AnyURIValue result = namespaceUriForPrefix((StringValue) arguments[0].head(), (NodeInfo) arguments[1].head());
+        AnyURIValue result = namespaceUriForPrefix((StringItem) arguments[0].head(), (NodeInfo) arguments[1].head());
         return new ZeroOrOne(result);
     }
 
@@ -45,7 +45,7 @@ public class NamespaceForPrefix extends SystemFunction implements Callable {
      */
 
     /*@Nullable*/
-    private static AnyURIValue namespaceUriForPrefix(StringValue p, NodeInfo element) {
+    private static AnyURIValue namespaceUriForPrefix(StringItem p, NodeInfo element) {
         String prefix;
         if (p == null) {
             prefix = "";

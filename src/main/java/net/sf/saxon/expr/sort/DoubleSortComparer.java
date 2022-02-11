@@ -21,7 +21,7 @@ import net.sf.saxon.value.NumericValue;
 
 public class DoubleSortComparer implements AtomicComparer {
 
-    private static DoubleSortComparer THE_INSTANCE = new DoubleSortComparer();
+    private static final DoubleSortComparer THE_INSTANCE = new DoubleSortComparer();
 
     /**
      * Get the singular instance of this class

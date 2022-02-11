@@ -19,14 +19,11 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.CharSequenceConsumer;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.*;
 
 import java.util.Map;
 
@@ -52,9 +49,9 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
 
         PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
         pipe.setXPathContext(context);
-        FastStringBuffer stringBuffer = new FastStringBuffer(2048);
-        convertToJson(xml, stringBuffer, indent, context);
-        return new StringValue(stringBuffer.condense());
+        UnicodeBuilder uniBuffer = new UnicodeBuilder();
+        convertToJson(xml, uniBuffer, indent, context);
+        return new StringItem(uniBuffer.toUnicodeString());
     }
 
     private boolean isindentingRequested(XPathContext context, Sequence[] arguments) throws XPathException {
@@ -77,7 +74,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
         }
     }
 
-    private void convertToJson(NodeInfo xml, CharSequenceConsumer output, boolean indent, XPathContext context) throws XPathException {
+    private void convertToJson(NodeInfo xml, UniStringConsumer output, boolean indent, XPathContext context) throws XPathException {
         PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
         pipe.setXPathContext(context);
         JsonReceiver receiver = new JsonReceiver(pipe, output);

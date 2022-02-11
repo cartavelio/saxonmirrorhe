@@ -20,7 +20,7 @@ import net.sf.saxon.trans.XPathException;
  */
 public class ReturnClausePush extends TuplePush {
 
-    private Expression returnExpr;
+    private final Expression returnExpr;
 
     public ReturnClausePush(Outputter outputter, Expression returnExpr) {
         super(outputter);

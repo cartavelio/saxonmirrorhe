@@ -18,9 +18,9 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Mode;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.Map;
@@ -35,7 +35,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     protected int indent = 0;
     private int detail = 2; // none=0; low=1; normal=2; high=3
     protected Logger out = new StandardLogger();
-    /*@NotNull*/ private static StringBuffer spaceBuffer = new StringBuffer("                ");
+    /*@NotNull*/ private static final StringBuffer spaceBuffer = new StringBuffer("                ");
 
     /**
      * Get the associated CodeInjector to be used at compile time to generate the tracing calls
@@ -93,8 +93,8 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
                 Object val = entry.getValue();
                 if (val instanceof StructuredQName) {
                     val = ((StructuredQName)val).getDisplayName();
-                } else if (val instanceof StringValue) {
-                    val = ((StringValue)val).getStringValue();
+                } else if (val instanceof StringItem) {
+                    val = ((StringItem)val).getUnicodeStringValue();
                 }
                 if (val != null) {
                     msg.append(' ').append(entry.getKey()).append("=\"").append(escape(val.toString())).append('"');
@@ -125,8 +125,8 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
         if (in == null) {
             return "";
         }
-        CharSequence collapsed = Whitespace.collapseWhitespace(in);
-        FastStringBuffer sb = new FastStringBuffer(collapsed.length() + 10);
+        String collapsed = Whitespace.collapseWhitespace(in);
+        StringBuilder sb = new StringBuilder(collapsed.length() + 10);
         for (int i = 0; i < collapsed.length(); i++) {
             char c = collapsed.charAt(i);
             if (c == '<') {
@@ -144,7 +144,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
             } else if (c == '\t') {
                 sb.append("&#x9;");
             } else {
-                sb.cat(c);
+                sb.append(c);
             }
         }
         return sb.toString();

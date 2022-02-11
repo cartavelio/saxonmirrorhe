@@ -267,7 +267,6 @@ public class TestXQueryUsingXQJ {
 
     // Some additional tests of getItemAsStream()
 
-    @Test
     public void testGetItemAsStream() throws XQException {
         XQDataSource ds = new SaxonXQDataSource();
         XQConnection xqc = ds.getConnection();

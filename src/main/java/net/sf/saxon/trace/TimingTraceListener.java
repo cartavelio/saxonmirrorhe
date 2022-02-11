@@ -28,7 +28,7 @@ import net.sf.saxon.style.Compilation;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
@@ -55,11 +55,11 @@ public class TimingTraceListener implements TraceListener {
 
     private Logger out = new StandardLogger();
     private long t_total;
-    private Stack<ComponentMetrics> metrics = new Stack<>();
-    private HashMap<Traceable, ComponentMetrics> instructMap = new HashMap<>();
+    private final Stack<ComponentMetrics> metrics = new Stack<>();
+    private final HashMap<Traceable, ComponentMetrics> instructMap = new HashMap<>();
     protected Configuration config = null;
 
-    private Map<Traceable, Integer> recursionDepth = new HashMap<>();
+    private final Map<Traceable, Integer> recursionDepth = new HashMap<>();
     private HostLanguage lang = HostLanguage.XSLT;
 
     /**
@@ -237,7 +237,7 @@ public class TimingTraceListener implements TraceListener {
         StreamSource ss = new StreamSource(in, "profile.xsl");
         CompilerInfo info = config.getDefaultXsltCompilerInfo();
         info.setParameter(new StructuredQName("", "", "lang"),
-                          new StringValue(this.lang == HostLanguage.XSLT ? "XSLT" : "XQuery"));
+                          StringItem.bmp(this.lang == HostLanguage.XSLT ? "XSLT" : "XQuery"));
         return Compilation.compileSingletonPackage(config, info, ss);
     }
 

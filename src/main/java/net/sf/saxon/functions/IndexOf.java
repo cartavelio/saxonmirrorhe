@@ -62,10 +62,10 @@ public class IndexOf extends CollatingFunctionFixed  {
 
     private static class IndexIterator implements SequenceIterator {
         private int index = 0;
-        private SequenceIterator base;
-        private BuiltInAtomicType searchType;
-        private AtomicComparer comparer;
-        private AtomicValue key;
+        private final SequenceIterator base;
+        private final BuiltInAtomicType searchType;
+        private final AtomicComparer comparer;
+        private final AtomicValue key;
 
         public IndexIterator(SequenceIterator base, BuiltInAtomicType searchType, AtomicValue key, AtomicComparer comparer) {
             this.base = base;

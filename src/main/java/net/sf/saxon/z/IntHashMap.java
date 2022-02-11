@@ -147,7 +147,7 @@ public class IntHashMap<T> {
 
     private static final int NBIT = 30; // NMAX = 2^NBIT
     private static final int NMAX = 1 << NBIT; // maximum number of keys mapped
-    private double _factor; // 0.0 <= _factor <= 1.0
+    private final double _factor; // 0.0 <= _factor <= 1.0
     private int _nmax; // 0 <= _nmax = 2^nbit <= 2^NBIT = NMAX
     private int _n; // 0 <= _n <= _nmax <= NMAX
     private int _nlo; // _nmax*_factor (_n<=_nlo, if possible)

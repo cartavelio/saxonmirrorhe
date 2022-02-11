@@ -27,7 +27,7 @@ import java.io.IOException;
 
 public class FilterImpl extends AbstractXMLFilter {
 
-    private TransformerImpl transformer;
+    private final TransformerImpl transformer;
 
     FilterImpl(TransformerImpl transformer) {
         this.transformer = transformer;

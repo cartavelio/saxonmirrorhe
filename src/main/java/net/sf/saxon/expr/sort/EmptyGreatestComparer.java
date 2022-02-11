@@ -19,7 +19,7 @@ import net.sf.saxon.value.AtomicValue;
 
 public class EmptyGreatestComparer implements AtomicComparer {
 
-    private AtomicComparer baseComparer;
+    private final AtomicComparer baseComparer;
 
     /**
      * Create an EmptyGreatestComparer

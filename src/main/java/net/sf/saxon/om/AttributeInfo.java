@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.value.StringItem;
 
 /**
  * This class contains immutable information about an attribute. An {@code AttributeInfo} is not a node:
@@ -21,11 +22,11 @@ import net.sf.saxon.type.SimpleType;
 
 public class AttributeInfo {
 
-    private NodeName nodeName;
-    private SimpleType type;
-    private String value;
-    private Location location;
-    private int properties;
+    private final NodeName nodeName;
+    private final SimpleType type;
+    private final String value;
+    private final Location location;
+    private final int properties;
 
     /**
      * Create an immutable AttributeInfo object
@@ -74,6 +75,16 @@ public class AttributeInfo {
 
     public String getValue() {
         return value;
+    }
+
+    /**
+     * Get the string value of the attribute as an XDM string value
+     *
+     * @return the string value
+     */
+
+    public StringItem getXdmStringValue() {
+        return new StringItem(value);
     }
 
     /**

@@ -15,12 +15,13 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 import java.net.URI;
@@ -70,7 +71,7 @@ public class SortKeyDefinition extends PseudoExpression {
     public SortKeyDefinition() {
         order = new Operand(this, new StringLiteral("ascending"), OperandRole.SINGLE_ATOMIC);
         caseOrder = new Operand(this, new StringLiteral("#default"), OperandRole.SINGLE_ATOMIC);
-        language = new Operand(this, new StringLiteral(StringValue.EMPTY_STRING), OperandRole.SINGLE_ATOMIC);
+        language = new Operand(this, new StringLiteral(StringItem.EMPTY_STRING), OperandRole.SINGLE_ATOMIC);
     }
 
     /**
@@ -439,8 +440,9 @@ public class SortKeyDefinition extends PseudoExpression {
             // Otherwise rely on the containing SortExpression to type-check the sort key
         }
         Expression lang = getLanguage();
-        if (lang instanceof StringLiteral && !((StringLiteral) lang).getStringValue().isEmpty()) {
-            ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(((StringLiteral) lang).getStringValue());
+        if (lang instanceof StringLiteral && !((StringLiteral) lang).getString().isEmpty()) {
+            ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(
+                    ((StringLiteral) lang).getGroundedValue().getUnicodeStringValue());
             if (vf != null) {
                 throw new XPathException("The lang attribute of xsl:sort must be a valid language code", "XTDE0030");
             }
@@ -530,7 +532,7 @@ public class SortKeyDefinition extends PseudoExpression {
             boolean firstParam = true;
             Properties props = new Properties();
             if (!languageX.isEmpty()) {
-                ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(languageX);
+                ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(StringView.of(languageX).tidy());
                 if (vf != null) {
                     throw new XPathException("The lang attribute of xsl:sort must be a valid language code", "XTDE0030");
                 }
@@ -574,7 +576,7 @@ public class SortKeyDefinition extends PseudoExpression {
         }
 
         if (stable != null) {
-            StringValue stableVal = (StringValue) stable.getChildExpression().evaluateItem(context);
+            StringItem stableVal = (StringItem) stable.getChildExpression().evaluateItem(context);
             String s = Whitespace.trim(stableVal.getStringValue());
             if (s.equals("yes") || s.equals("no") || s.equals("true") || s.equals("false") || s.equals("1") || s.equals("0")) {
                 // no action

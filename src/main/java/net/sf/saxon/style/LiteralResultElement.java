@@ -48,7 +48,7 @@ public class LiteralResultElement extends StyleElement {
     private int validation = Validation.STRIP;
     private boolean inheritNamespaces = true;
 
-    private static IntHashSet STANDARD_ATTRIBUTES = IntHashSet.of(
+    private static final IntHashSet STANDARD_ATTRIBUTES = IntHashSet.of(
             StandardNames.XSL_USE_ATTRIBUTE_SETS,
             StandardNames.XSL_DEFAULT_COLLATION,
             StandardNames.XSL_DEFAULT_MODE,

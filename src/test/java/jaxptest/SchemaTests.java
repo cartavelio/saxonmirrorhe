@@ -144,14 +144,17 @@ public class SchemaTests {
             SchemaFactoryImpl schemaFactory = new com.saxonica.ee.jaxp.SchemaFactoryImpl();
 
             schemaFactory.setErrorHandler(new ErrorHandler() {
+                @Override
                 public void warning(SAXParseException exception) throws SAXException {
                     reports.add("W: " + exception.getMessage());
                 }
 
+                @Override
                 public void error(SAXParseException exception) throws SAXException {
                     reports.add("E: " + exception.getMessage());
                 }
 
+                @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
                     reports.add("F: " + exception.getMessage());
                 }
@@ -182,14 +185,17 @@ public class SchemaTests {
             SchemaFactoryImpl schemaFactory = new com.saxonica.ee.jaxp.SchemaFactoryImpl();
 
             schemaFactory.setErrorHandler(new ErrorHandler() {
+                @Override
                 public void warning(SAXParseException exception) throws SAXException {
                     reports.add("W: " + exception.getMessage());
                 }
 
+                @Override
                 public void error(SAXParseException exception) throws SAXException {
                     reports.add("E: " + exception.getMessage());
                 }
 
+                @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
                     reports.add("F: " + exception.getMessage());
                 }
@@ -239,6 +245,7 @@ public class SchemaTests {
             SchemaManager mgr = proc.getSchemaManager();
             mgr.setXsdVersion("1.1");
             mgr.setSchemaURIResolver(new SchemaURIResolver() {
+                @Override
                 public Source[] resolve(String targetNamespace, String baseURI, String[] locations) throws XPathException {
                     if (locations[0].equals("urn:a.b.c")) {
                         return new Source[]{new StreamSource(new StringReader(in), "http://dummy/in")};
@@ -249,6 +256,7 @@ public class SchemaTests {
                     }
                 }
 
+                @Override
                 public void setConfiguration(Configuration config) {
 
                 }

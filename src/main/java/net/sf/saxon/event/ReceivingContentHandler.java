@@ -13,11 +13,13 @@ import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.QuitParsingException;
-import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.tiny.CharSlice;
-import net.sf.saxon.tree.tiny.CompressedWhitespace;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Whitespace;
 import org.xml.sax.*;
@@ -60,7 +62,7 @@ public class ReceivingContentHandler
 
     private char[] buffer = new char[512];
     private int charsUsed = 0;
-    private CharSlice slice = new CharSlice(buffer, 0, 0);
+    //private CharSlice slice = new CharSlice(buffer, 0, 0);
 
     // stack for accumulating namespace information
 
@@ -128,7 +130,6 @@ public class ReceivingContentHandler
         ignoreIgnorable = false;
         retainDTDAttributeTypes = false;
         charsUsed = 0;
-        slice.setLength(0);
         namespaceStack = new Stack<>();
         currentNamespaceMap = NamespaceMap.emptyMap();
         namespaceStack.push(currentNamespaceMap);
@@ -567,7 +568,7 @@ public class ReceivingContentHandler
 
         while (charsUsed + length > buffer.length) {
             buffer = Arrays.copyOf(buffer, buffer.length*2);
-            slice = new CharSlice(buffer, 0, 0);
+            //slice = new CharSlice(buffer, 0, 0);
         }
         System.arraycopy(ch, start, buffer, charsUsed, length);
         charsUsed += length;
@@ -616,13 +617,13 @@ public class ReceivingContentHandler
                             return;
                         }
                     }
-                    CharSequence data;
+                    CodePoints data;
                     if (remainder == null) {
                         // allowed by the spec but rarely seen: see Saxon bug 2491
-                        data = "";
+                        data = EmptyUniString.getInstance();
                     } else {
                         // not strictly necessary (the parser should have done this) but needed in practice
-                        data = Whitespace.removeLeadingWhitespace(remainder);
+                        data = Whitespace.removeLeadingWhitespace(StringView.tidy(remainder));
                     }
                     receiver.processingInstruction(name, data, localLocator, ReceiverOption.NONE);
                 }
@@ -642,7 +643,7 @@ public class ReceivingContentHandler
         try {
             flush(true);
             if (!inDTD) {
-                receiver.comment(new CharSlice(ch, start, length), localLocator, ReceiverOption.NONE);
+                receiver.comment(StringView.of(new String(ch, start, length)), localLocator, ReceiverOption.NONE);
             }
         } catch (XPathException err) {
             throw new SAXException(err);
@@ -660,9 +661,9 @@ public class ReceivingContentHandler
 
     private void flush(boolean compress) throws XPathException {
         if (charsUsed > 0) {
-            slice.setLength(charsUsed);
-            CharSequence cs = compress ? CompressedWhitespace.compress(slice) : slice;
-            receiver.characters(cs, lastTextNodeLocator,
+            //CharSlice slice = new CharSlice(buffer, 0, charsUsed);
+            CodePoints content = StringTool.compress(buffer, 0, charsUsed, compress);
+            receiver.characters(content, lastTextNodeLocator,
                     escapingDisabled ? ReceiverOption.DISABLE_ESCAPING : ReceiverOption.WHOLE_TEXT_NODE);
             charsUsed = 0;
             escapingDisabled = false;

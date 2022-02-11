@@ -33,12 +33,12 @@ import java.util.List;
 
 public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder, LookaheadIterator {
 
-    private Expression select;
-    private FocusIterator population;
-    private Expression keyExpression;
-    private StringCollator collator;
-    private XPathContext baseContext;
-    private XPathContext runningContext;
+    private final Expression select;
+    private final FocusIterator population;
+    private final Expression keyExpression;
+    private final StringCollator collator;
+    private final XPathContext baseContext;
+    private final XPathContext runningContext;
     private List<AtomicMatchKey> currentComparisonKey;
     private AtomicSequence currentKey;
     private List<Item> currentMembers;
@@ -174,8 +174,8 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
-     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
+     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+     *         and {@link Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */

@@ -13,10 +13,11 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
@@ -693,7 +694,7 @@ public final class Navigator {
 //                return;
             }
             case Type.TEXT: {
-                CharSequence value = node.getStringValueCS();
+                UnicodeString value = node.getUnicodeStringValue();
                 if (value.length() != 0) {
                     // zero-length text nodes can arise from external model wrappers
                     out.characters(value, locationId, ReceiverOption.NONE);
@@ -701,11 +702,11 @@ public final class Navigator {
                 return;
             }
             case Type.COMMENT: {
-                out.comment(node.getStringValueCS(), locationId, ReceiverOption.NONE);
+                out.comment(node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                 return;
             }
             case Type.PROCESSING_INSTRUCTION: {
-                out.processingInstruction(node.getLocalPart(), node.getStringValueCS(), locationId, ReceiverOption.NONE);
+                out.processingInstruction(node.getLocalPart(), node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                 return;
             }
             case Type.NAMESPACE: {
@@ -773,11 +774,11 @@ public final class Navigator {
             }
             case Type.ATTRIBUTE: {
                 SimpleType attType = keepTypes ? (SimpleType)node.getSchemaType() : BuiltInAtomicType.UNTYPED_ATOMIC;
-                out.attribute(NameOfNode.makeName(node), attType, node.getStringValueCS(), locationId, ReceiverOption.NONE);
+                out.attribute(NameOfNode.makeName(node), attType, node.getStringValue(), locationId, ReceiverOption.NONE);
                 return;
             }
             case Type.TEXT: {
-                CharSequence value = node.getStringValueCS();
+                UnicodeString value = node.getUnicodeStringValue();
                 if (value.length() != 0) {
                     // zero-length text nodes can arise from external model wrappers
                     out.characters(value, locationId, ReceiverOption.NONE);
@@ -785,11 +786,11 @@ public final class Navigator {
                 return;
             }
             case Type.COMMENT: {
-                out.comment(node.getStringValueCS(), locationId, ReceiverOption.NONE);
+                out.comment(node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                 return;
             }
             case Type.PROCESSING_INSTRUCTION: {
-                out.processingInstruction(node.getLocalPart(), node.getStringValueCS(), locationId, ReceiverOption.NONE);
+                out.processingInstruction(node.getLocalPart(), node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                 return;
             }
             case Type.NAMESPACE: {
@@ -995,7 +996,7 @@ public final class Navigator {
      * 0 = document, 1 = namespace, 2 = attribute, 3 = (element, text, comment, pi)
      */
 
-    /*@NotNull*/ private static int[] nodeCategories = {
+    /*@NotNull*/ private static final int[] nodeCategories = {
             -1, //0 = not used
             3, //1 = element
             2, //2 = attribute
@@ -1017,9 +1018,9 @@ public final class Navigator {
      * @param addDocNr true if a unique document number is to be included in the information
      */
 
-    public static void appendSequentialKey(/*@NotNull*/ SiblingCountingNode node, /*@NotNull*/ FastStringBuffer sb, boolean addDocNr) {
+    public static void appendSequentialKey(/*@NotNull*/ SiblingCountingNode node, /*@NotNull*/ StringBuilder sb, boolean addDocNr) {
         if (addDocNr) {
-            sb.cat('w');
+            sb.append('w');
             sb.append(Long.toString(node.getTreeInfo().getDocumentNumber()));
         }
         if (node.getNodeKind() != Type.DOCUMENT) {
@@ -1028,7 +1029,7 @@ public final class Navigator {
                 appendSequentialKey((SiblingCountingNode) parent, sb, false);
             }
             if (node.getNodeKind() == Type.ATTRIBUTE) {
-                sb.cat('A');
+                sb.append('A');
             }
         }
         sb.append(alphaKey(node.getSiblingPosition()));
@@ -1170,8 +1171,8 @@ public final class Navigator {
      */
 
     public static class AxisFilter implements AxisIterator {
-        private AxisIterator base;
-        private Predicate<? super NodeInfo> nodeTest;
+        private final AxisIterator base;
+        private final Predicate<? super NodeInfo> nodeTest;
 
         /**
          * Construct a AxisFilter
@@ -1210,7 +1211,7 @@ public final class Navigator {
      */
 
     public static class EmptyTextFilter implements AxisIterator {
-        private AxisIterator base;
+        private final AxisIterator base;
 
         /**
          * Construct an EmptyTextFilter
@@ -1231,7 +1232,7 @@ public final class Navigator {
                 if (next == null) {
                     return null;
                 }
-                if (!(next.getNodeKind() == Type.TEXT && next.getStringValueCS().length() == 0)) {
+                if (!(next.getNodeKind() == Type.TEXT && next.getUnicodeStringValue().length() == 0)) {
                     return next;
                 }
             }
@@ -1246,7 +1247,7 @@ public final class Navigator {
 
     public static final class AncestorEnumeration implements AxisIterator {
 
-        private boolean includeSelf;
+        private final boolean includeSelf;
         private boolean atStart;
         private NodeInfo current;
 
@@ -1289,9 +1290,9 @@ public final class Navigator {
 
         /*@Nullable*/ private AxisIterator children = null;
         /*@Nullable*/ private AxisIterator descendants = null;
-        private NodeInfo start;
-        private boolean includeSelf;
-        private boolean forwards;
+        private final NodeInfo start;
+        private final boolean includeSelf;
+        private final boolean forwards;
         private boolean atEnd = false;
 
         /**
@@ -1386,7 +1387,7 @@ public final class Navigator {
      */
 
     public static final class FollowingEnumeration implements AxisIterator {
-        /*@NotNull*/ private AxisIterator ancestorEnum;
+        /*@NotNull*/ private final AxisIterator ancestorEnum;
         /*@Nullable*/ private AxisIterator siblingEnum;
         /*@Nullable*/ private AxisIterator descendEnum = null;
 
@@ -1471,10 +1472,10 @@ public final class Navigator {
 
     public static final class PrecedingEnumeration implements AxisIterator {
 
-        /*@NotNull*/ private AxisIterator ancestorEnum;
+        /*@NotNull*/ private final AxisIterator ancestorEnum;
         /*@Nullable*/ private AxisIterator siblingEnum;
         /*@Nullable*/ private AxisIterator descendEnum = null;
-        private boolean includeAncestors;
+        private final boolean includeAncestors;
 
         /**
          * Create an iterator for the preceding or "preceding-or-ancestor" axis (the latter being

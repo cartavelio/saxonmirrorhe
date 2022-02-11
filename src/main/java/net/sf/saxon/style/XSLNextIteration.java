@@ -13,9 +13,7 @@ import net.sf.saxon.expr.VariableReference;
 import net.sf.saxon.expr.instruct.LocalParam;
 import net.sf.saxon.expr.instruct.NextIteration;
 import net.sf.saxon.expr.instruct.WithParam;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -42,14 +40,14 @@ public class XSLNextIteration extends XSLBreakOrContinue {
                 }
             } else if (child.getNodeKind() == Type.TEXT) {
                 // with xml:space=preserve, white space nodes may still be there
-                if (!Whitespace.isWhite(child.getStringValueCS())) {
+                if (!Whitespace.isAllWhite(child.getUnicodeStringValue())) {
                     compileError("No character data is allowed within xsl:next-iteration", "XTSE0010");
                 }
             } else {
                 compileError("Child element " + Err.wrap(child.getDisplayName(), Err.ELEMENT) +
                                      " is not allowed as a child of xsl:next-iteration", "XTSE0010");
             }
-        };
+        }
     }
 
     @Override

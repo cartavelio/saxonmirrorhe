@@ -15,7 +15,7 @@ package net.sf.saxon.om;
  */
 public class FingerprintedQName implements NodeName {
 
-    private StructuredQName qName;
+    private final StructuredQName qName;
     private int fingerprint = -1;
 
     public FingerprintedQName(String prefix, String uri, String localName) {

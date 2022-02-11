@@ -200,10 +200,10 @@ public abstract class SteppingNavigator {
 
     public static class DescendantAxisIterator<N extends SteppingNode<N>> implements AxisIterator {
 
-        private N start;
+        private final N start;
         private N current;
 
-        private Stepper<N> stepper;
+        private final Stepper<N> stepper;
 
         /**
          * Create an iterator over the descendant or descendant-or-self axis

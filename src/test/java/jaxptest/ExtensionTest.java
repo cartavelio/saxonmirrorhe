@@ -13,9 +13,8 @@ import net.sf.saxon.option.jdom2.JDOM2DocumentWrapper;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.xpath.XPathFactoryImpl;
 import org.jdom2.input.SAXBuilder;
 import org.junit.jupiter.api.Test;
@@ -36,9 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * tests for mapping of Java types to XPath types
@@ -85,13 +82,14 @@ public class ExtensionTest {
         XPathFactory factory = new XPathFactoryImpl();
         XPath x = factory.newXPath();
         x.setXPathVariableResolver(new XPathVariableResolver() {
+            @Override
             public Object resolveVariable(javax.xml.namespace.QName variableName) {
                 if (variableName.getLocalPart().equals("x")) {
                     return XdmMap.makeMap(map);
                 } else {
                     return null;
                 }
-            };
+            }
         });
         try {
             String result = x.evaluate("$x('def')", new InputSource(new StringReader("<dummy/>")));
@@ -221,7 +219,7 @@ public class ExtensionTest {
 
 
     public static String format(String t, String... args) {
-        FastStringBuffer f = new FastStringBuffer(16);
+        StringBuilder f = new StringBuilder(16);
         for (String s : args) {
              f.append(s);
              f.append(t);
@@ -339,35 +337,43 @@ public class ExtensionTest {
 
 
     public class DateExtensionFunction extends ExtensionFunctionDefinition {
+        @Override
         public StructuredQName getFunctionQName() {
             return new StructuredQName("", "http://date.com", "getFormattedNow");
         }
 
+        @Override
         public net.sf.saxon.value.SequenceType[] getArgumentTypes() {
             return new net.sf.saxon.value.SequenceType[]{net.sf.saxon.value.SequenceType.OPTIONAL_STRING};
         }
 
+        @Override
         public net.sf.saxon.value.SequenceType getResultType(net.sf.saxon.value.SequenceType[] sequenceTypes) {
             return net.sf.saxon.value.SequenceType.SINGLE_STRING;
         }
 
+        @Override
         public boolean trustResultType() {
             return true;
         }
 
+        @Override
         public int getMinimumNumberOfArguments() {
             return 0;
         }
 
+        @Override
         public int getMaximumNumberOfArguments() {
             return 1;
         }
 
+        @Override
         public ExtensionFunctionCall makeCallExpression() {
             return new ExtensionFunctionCall() {
 
+                @Override
                 public Sequence call(XPathContext context, Sequence[] arguments) {
-                    return new StringValue("TEST");
+                    return StringItem.bmp("TEST");
                 }
             };
         }
@@ -392,7 +398,6 @@ public class ExtensionTest {
             fail();
         }
     }
-
 
     public static org.jdom2.Document parseToJdom(String content) throws Exception {
         SAXBuilder builder = new SAXBuilder();
@@ -434,6 +439,5 @@ public class ExtensionTest {
             fail();
         }
     }
-
 
 }

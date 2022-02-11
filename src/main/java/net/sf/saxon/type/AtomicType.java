@@ -11,6 +11,7 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.Optional;
@@ -46,7 +47,7 @@ public interface AtomicType extends SimpleType, PlainType, CastingTarget {
      * @throws UnsupportedOperationException in the case of an external object type
      */
 
-    ValidationFailure validate(AtomicValue primValue, CharSequence lexicalValue, ConversionRules rules);
+    ValidationFailure validate(AtomicValue primValue, UnicodeString lexicalValue, ConversionRules rules);
 
     /**
      * Determine whether the atomic type is ordered, that is, whether less-than and greater-than comparisons

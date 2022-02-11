@@ -9,7 +9,7 @@ package net.sf.saxon.om;
 
 
 import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -184,12 +184,9 @@ public class LargeAttributeMap implements AttributeMap {
 
     @Override
     public String toString() {
-        FastStringBuffer sb = new FastStringBuffer(256);
+        StringBuilder sb = new StringBuilder(256);
         for (AttributeInfo att : this) {
-            sb.cat(att.getNodeName().getDisplayName())
-                    .cat("=\"")
-                    .cat(att.getValue())
-                    .cat("\" ");
+            sb.append(att.getNodeName().getDisplayName()).append("=\"").append(att.getValue()).append("\" ");
         }
         return sb.toString().trim();
     }

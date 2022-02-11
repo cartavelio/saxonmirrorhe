@@ -18,7 +18,7 @@ import net.sf.saxon.z.IntSet;
 
 public class IntSetCharacterClass implements CharacterClass {
 
-    private IntSet intSet;
+    private final IntSet intSet;
 
     public IntSetCharacterClass(IntSet intSet) {
         this.intSet = intSet;

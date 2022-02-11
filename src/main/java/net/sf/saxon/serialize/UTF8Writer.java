@@ -10,6 +10,7 @@ package net.sf.saxon.serialize;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.Arrays;
 
 /**
  * Specialized buffering UTF-8 writer.
@@ -207,6 +208,112 @@ public final class UTF8Writer
         }
         _outPtr = outPtr;
     }
+
+    public void writeLatin1(byte[] bytes, int off, int len) throws IOException {
+
+        int outPtr = _outPtr;
+        byte[] outBuf = _outBuffer;
+        int outBufLast = _outBufferLast; // has 4 'spare' bytes
+
+        // All right; can just loop it nice and easy now:
+        len += off; // len will now be the end of input buffer
+
+        output_loop:
+        while (off < len) {
+            /* First, let's ensure we can output at least 4 bytes
+             * (longest UTF-8 encoded codepoint):
+             */
+            if (outPtr >= outBufLast) {
+                _out.write(outBuf, 0, outPtr);
+                outPtr = 0;
+            }
+
+            int c = bytes[off++]&0xff;
+            // And then see if we have an Ascii char:
+            if (c < 0x80) { // If so, can do a tight inner loop:
+                outBuf[outPtr++] = (byte) c;
+                // Let's calc how many ascii chars we can copy at most:
+                int maxInCount = (len - off);
+                int maxOutCount = (outBufLast - outPtr);
+
+                if (maxInCount > maxOutCount) {
+                    maxInCount = maxOutCount;
+                }
+                maxInCount += off;
+                ascii_loop:
+                while (true) {
+                    if (off >= maxInCount) { // done with max. ascii seq
+                        continue output_loop;
+                    }
+                    c = bytes[off++]&0xff;
+                    if (c >= 0x80) {
+                        break ascii_loop;
+                    }
+                    outBuf[outPtr++] = (byte) c;
+                }
+            }
+
+            outBuf[outPtr++] = (byte) (0xc0 | (c >> 6));
+            outBuf[outPtr++] = (byte) (0x80 | (c & 0x3f));
+        }
+        _outPtr = outPtr;
+    }
+
+    /**
+     * Write a sequence of ASCII characters.
+     */
+    public void writeAscii(byte[] chars, int off, int len) throws IOException {
+
+        int outPtr = _outPtr;
+        byte[] outBuf = _outBuffer;
+        int outBufLast = _outBufferLast; // has 4 'spare' bytes
+
+        while (len > 0) {
+            if (outPtr >= outBufLast) {
+                _out.write(outBuf, 0, outPtr);
+                outPtr = 0;
+            }
+
+            int available = outBufLast - outPtr;
+            int count = Integer.min(len, available);
+
+            System.arraycopy(chars, off, outBuf, outPtr, count);
+            outPtr += count;
+            off += count;
+            len -= count;
+        }
+        _outPtr = outPtr;
+    }
+
+
+    /**
+     * Write an ASCII character repeatedly. Used for serializing whitespace.
+     * @param ch the ASCII character to be serialized (must be less than 0x7f)
+     * @param repeat the number of occurrences to output
+     * @throws IOException if it fails
+     */
+    public void writeRepeatedAscii(byte ch, int repeat) throws IOException {
+
+        int outPtr = _outPtr;
+        byte[] outBuf = _outBuffer;
+        int outBufLast = _outBufferLast; // has 4 'spare' bytes
+
+        while (repeat > 0) {
+            if (outPtr >= outBufLast) {
+                _out.write(outBuf, 0, outPtr);
+                outPtr = 0;
+            }
+
+            int available = outBufLast - outPtr;
+            int count = Integer.min(repeat, available);
+
+            Arrays.fill(outBuf, outPtr, outPtr+count, ch);
+            outPtr += count;
+            repeat -= count;
+        }
+        _outPtr = outPtr;
+    }
+
 
     @Override
     public void write(int c)

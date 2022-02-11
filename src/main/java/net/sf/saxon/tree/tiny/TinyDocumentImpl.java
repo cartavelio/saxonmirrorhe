@@ -17,7 +17,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -178,8 +178,8 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      */
 
     @Override
-    public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
-        buffer.cat('d');
+    public void generateId(/*@NotNull*/ StringBuilder buffer) {
+        buffer.append('d');
         buffer.append(Long.toString(getTreeInfo().getDocumentNumber()));
     }
 
@@ -192,8 +192,8 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
 
     /*@NotNull*/
     @Override
-    public AtomicSequence atomize() throws XPathException {
-        return new UntypedAtomicValue(getStringValueCS());
+    public AtomicSequence atomize() {
+        return new UntypedAtomicValue(getUnicodeStringValue());
     }
 
     /**

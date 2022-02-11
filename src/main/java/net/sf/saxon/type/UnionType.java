@@ -9,11 +9,9 @@ package net.sf.saxon.type;
 
 
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.om.*;
+
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
@@ -80,7 +78,7 @@ public interface UnionType extends ItemType, CastingTarget {
      * @throws ValidationException if the supplied value is not in the lexical space of the data type
      */
 
-    AtomicSequence getTypedValue(CharSequence value, /*@Nullable*/ NamespaceResolver resolver, ConversionRules rules)
+    AtomicSequence getTypedValue(UnicodeString value, /*@Nullable*/ NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException;
 
     /**
@@ -107,7 +105,7 @@ public interface UnionType extends ItemType, CastingTarget {
     @Override
     default Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (item.getGenre() == ATOMIC) {
-            FastStringBuffer message = new FastStringBuffer(256);
+            StringBuilder message = new StringBuilder(256);
             message.append("The required type is a union type allowing any of ");
 
             String punctuation = "(";

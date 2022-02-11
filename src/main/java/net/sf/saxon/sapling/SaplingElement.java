@@ -54,7 +54,7 @@ import java.util.Objects;
 
 public class SaplingElement extends SaplingNode {
 
-    private StructuredQName nodeName;
+    private final StructuredQName nodeName;
     private ImmutableList<SaplingNode> reversedChildren = ImmutableList.empty();
     private ImmutableMap<StructuredQName, String> attributes = ImmutableHashTrieMap.empty();
     private NamespaceMap namespaces = NamespaceMap.emptyMap();
@@ -67,7 +67,7 @@ public class SaplingElement extends SaplingNode {
 
     public SaplingElement(String name) {
         Objects.requireNonNull(name);
-        nodeName = StructuredQName.fromEQName(name);
+        nodeName = StructuredQName.fromEQName((name));
     }
 
     /**

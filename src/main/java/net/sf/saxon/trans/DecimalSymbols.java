@@ -7,9 +7,10 @@
 
 package net.sf.saxon.trans;
 
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.regex.UnicodeString;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.z.IntHashMap;
 
@@ -39,8 +40,8 @@ public class DecimalSymbols {
     private static final int ERR_SAME_CHAR_IN_TWO_ROLES = 2;
     private static final int ERR_TWO_VALUES_FOR_SAME_PROPERTY = 3;
 
-    private static String[] XSLT_CODES = {"XTSE0020", "XTSE1295", "XTSE1300", "XTSE1290"};
-    private static String[] XQUERY_CODES = {"XQST0097", "XQST0097", "XQST0098", "XQST0114"};
+    private static final String[] XSLT_CODES = {"XTSE0020", "XTSE1295", "XTSE1300", "XTSE1290"};
+    private static final String[] XQUERY_CODES = {"XQST0097", "XQST0097", "XQST0098", "XQST0114"};
     private String[] errorCodes = XSLT_CODES;
 
 
@@ -61,9 +62,9 @@ public class DecimalSymbols {
         "NaN"
     };
 
-    private int[] intValues = new int[propertyNames.length - 2];
-    private int[] precedences = new int[propertyNames.length];
-    private boolean[] inconsistent = new boolean[propertyNames.length];
+    private final int[] intValues = new int[propertyNames.length - 2];
+    private final int[] precedences = new int[propertyNames.length];
+    private final boolean[] inconsistent = new boolean[propertyNames.length];
 
     /**
      * Create a DecimalSymbols object with default values for all properties
@@ -424,14 +425,14 @@ public class DecimalSymbols {
      * @throws XPathException if the supplied string is not a single character
      */
     private int singleChar(String name, String value) throws XPathException {
-        UnicodeString us = UnicodeString.makeUnicodeString(value);
-        if (us.uLength() != 1) {
+        UnicodeString us = StringView.of(value).tidy();
+        if (us.length() != 1) {
             XPathException err = new XPathException("Attribute " + name + " should be a single character",
                     errorCodes[ERR_NOT_SINGLE_CHAR]);
             err.setIsStaticError(true);
             throw err;
         }
-        return us.uCharAt(0);
+        return us.codePointAt(0);
     }
 
 

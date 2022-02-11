@@ -24,21 +24,21 @@ public class Numberer_it extends AbstractNumberer {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] italianOrdinalUnits = {
+    private static final String[] italianOrdinalUnits = {
             "", "primo", "secondo", "terzo", "quarto", "quinto", "sesto", "settimo", "ottavo", "nono",
             "decimo", "undicesimo ", "dodicesimo", "tredicesimo", "quattordicesimo", "quindiczesimo", "sedicesimo",
             "diciassettesimo", "diciottesimo", "novantesimo"};
 
-    private static String[] italianOrdinalTens = {
+    private static final String[] italianOrdinalTens = {
             "", "decimo", "ventesimo", "trentesimo", "quarantesimo", "cinquantesimo",
             "sessantesimo", "settantesimo", "ottantesimo", "novantesimo"};
 
-    private static String[] italianUnits = {
+    private static final String[] italianUnits = {
             "", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove",
             "dieci", "undici", "dodici", "tredici", "quattordici", "quindici", "sedici",
             "diciassette", "diciotto", "diciannove"};
 
-    private static String[] italianTens = {
+    private static final String[] italianTens = {
             "", "dieci", "venti", "trenta", "quaranta", "cinquanta",
             "sessanta", "settanta", "ottanta", "novanta"};
 
@@ -173,12 +173,12 @@ public class Numberer_it extends AbstractNumberer {
     }
 
 
-    private static String[] italianMonths = {
+    private static final String[] italianMonths = {
             "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
             "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"
     };
 
-    private static String[] italianMonthAbbreviations = {
+    private static final String[] italianMonthAbbreviations = {
             "gen", "feb", "mar", "apr", "mag", "giu",
             "lug", "ago", "set", "ott", "nov", "dic"
     };
@@ -240,15 +240,15 @@ public class Numberer_it extends AbstractNumberer {
         return name;
     }
 
-    private static String[] italianDays = {
+    private static final String[] italianDays = {
             "luned\u00ec", "marted\u00ec ", "mercoled\u00ec", "gioved\u00ec", "venerd\u00ec", "sabato", "domenica"
     };
 
-    private static String[] italianDayAbbreviations = {
+    private static final String[] italianDayAbbreviations = {
             "lun", "mar", "mer", "gio", "ven", "sab", "dom"
     };
 
-    /*@NotNull*/ private static int[] minUniqueDayLength = {
+    /*@NotNull*/ private static final int[] minUniqueDayLength = {
             1, 2, 2, 1, 1, 1, 1
     };
 

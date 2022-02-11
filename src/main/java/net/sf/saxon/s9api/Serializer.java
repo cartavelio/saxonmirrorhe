@@ -62,14 +62,14 @@ import java.util.Properties;
 public class Serializer extends AbstractDestination {
 
     private Processor processor; // never null
-    private Map<StructuredQName, String> properties = new HashMap<>(10);
-    private StreamResult result = new StreamResult();
+    private final Map<StructuredQName, String> properties = new HashMap<>(10);
+    private final StreamResult result = new StreamResult();
     private CharacterMapIndex characterMap = null;
     private boolean mustClose = false;
 
     // Index of permitted property names
 
-    private static Map<String, Property> standardProperties = new HashMap<>();
+    private static final Map<String, Property> standardProperties = new HashMap<>();
 
 //    private static void z(Property prop) {
 //        standardProperties.put(prop.name, prop);
@@ -248,7 +248,7 @@ public class Serializer extends AbstractDestination {
          */
         SAXON_SUPPLY_SOURCE_LOCATOR(SaxonOutputKeys.SUPPLY_SOURCE_LOCATOR);
 
-        private String name;
+        private final String name;
 
         Property(String name) {
             this.name = name;

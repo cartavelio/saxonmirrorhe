@@ -8,13 +8,14 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.str.UnicodeBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,10 +30,10 @@ import java.util.List;
  */
 public class AtomicArray implements AtomicSequence {
 
-    private static List<AtomicValue> emptyAtomicList = Collections.emptyList();
+    private static final List<AtomicValue> emptyAtomicList = Collections.emptyList();
     public static AtomicArray EMPTY_ATOMIC_ARRAY = new AtomicArray(emptyAtomicList);
 
-    private List<AtomicValue> content;
+    private final List<AtomicValue> content;
 
     /**
      * Create an AtomicArray over a supplied arrayList of atomic values
@@ -129,34 +130,53 @@ public class AtomicArray implements AtomicSequence {
      */
 
     @Override
-    public CharSequence getCanonicalLexicalRepresentation() {
-        return getStringValueCS();
+    public UnicodeString getCanonicalLexicalRepresentation() {
+        return getUnicodeStringValue();
     }
 
     /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
+     * Get the value of the item as a UniString. This is in some cases more efficient than
      * the version of the method that returns a String.
+     * @return the string value, as a UniString
      */
 
     @Override
-    public CharSequence getStringValueCS() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+    public UnicodeString getUnicodeStringValue() {
+        UnicodeBuilder ub = new UnicodeBuilder();
         boolean first = true;
         for (AtomicValue av : content) {
             if (!first) {
-                fsb.cat(' ');
+                ub.append(' ');
             } else {
                 first = false;
             }
-            fsb.cat(av.getStringValueCS());
+            ub.append(av.getUnicodeStringValue());
         }
-        return fsb.condense();
+        return ub.toUnicodeString();
     }
+
+    /**
+     * Get the value of the item as a UniString. This is in some cases more efficient than
+     * the version of the method that returns a String.
+     *
+     * @return the string value, as a UniString
+     */
 
     @Override
     public String getStringValue() {
-        return getStringValueCS().toString();
+        StringBuilder sb = new StringBuilder(64);
+        boolean first = true;
+        for (AtomicValue av : content) {
+            if (!first) {
+                sb.append(' ');
+            } else {
+                first = false;
+            }
+            sb.append(av.getStringValue());
+        }
+        return sb.toString();
     }
+
 
     @Override
     public boolean effectiveBooleanValue() throws XPathException {
@@ -251,7 +271,7 @@ public class AtomicArray implements AtomicSequence {
         if (len == 0) {
             return EmptySequence.getInstance();
         } else if (len == 1) {
-            return (AtomicValue)itemAt(0);
+            return itemAt(0);
         } else {
             return this;
         }

@@ -32,7 +32,7 @@ import java.util.Arrays;
 
 public class AttributeCollectionImpl implements Attributes {
 
-    private Configuration config;
+    private final Configuration config;
     // Following fields can be null ONLY if used==0. We avoid allocating the arrays for the common
     // case of an empty attribute collection.
     private NodeName[] names = null;
@@ -56,7 +56,7 @@ public class AttributeCollectionImpl implements Attributes {
 
     /**
      * Add an attribute to an attribute list. The parameters correspond
-     * to the parameters of the {@link Outputter#attribute(NodeName, SimpleType, CharSequence, Location, int)}
+     * to the parameters of the {@link Outputter#attribute(NodeName, SimpleType, String, Location, int)}
      * method. There is no check that the name of the attribute is distinct from other attributes
      * already in the collection: this check must be made by the caller.
      *
@@ -98,7 +98,7 @@ public class AttributeCollectionImpl implements Attributes {
 
     /**
      * Set (overwrite) an attribute in the attribute list. The parameters correspond
-     * to the parameters of the {@link Outputter#attribute(NodeName, SimpleType, CharSequence, Location, int)}
+     * to the parameters of the {@link Outputter#attribute(NodeName, SimpleType, String, Location, int)}
      * method.
      *  @param index      Identifies the entry to be replaced. Must be in range (nasty things happen if not)
      * @param nodeName   representing the attribute name.

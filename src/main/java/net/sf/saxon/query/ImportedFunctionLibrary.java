@@ -28,8 +28,8 @@ import java.util.List;
 public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionBinder {
 
     private transient QueryModule importingModule;
-    private XQueryFunctionLibrary baseLibrary;
-    private HashSet<String> namespaces = new HashSet<>(5);
+    private final XQueryFunctionLibrary baseLibrary;
+    private final HashSet<String> namespaces = new HashSet<>(5);
 
     /**
      * Create an imported function library

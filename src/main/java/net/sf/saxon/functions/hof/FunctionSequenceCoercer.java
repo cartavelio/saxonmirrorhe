@@ -35,8 +35,8 @@ import net.sf.saxon.value.SequenceType;
 
 public final class FunctionSequenceCoercer extends UnaryExpression {
 
-    private SpecificFunctionType requiredItemType;
-    private RoleDiagnostic role;
+    private final SpecificFunctionType requiredItemType;
+    private final RoleDiagnostic role;
 
     /**
      * Constructor
@@ -245,9 +245,9 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
 
     public static class Coercer implements ItemMappingFunction {
 
-        private SpecificFunctionType requiredItemType;
-        private Configuration config;
-        private Location locator;
+        private final SpecificFunctionType requiredItemType;
+        private final Configuration config;
+        private final Location locator;
 
         public Coercer(SpecificFunctionType requiredItemType, Configuration config, Location locator) {
             this.requiredItemType = requiredItemType;

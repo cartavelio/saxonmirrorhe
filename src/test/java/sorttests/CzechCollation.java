@@ -41,17 +41,17 @@ public class CzechCollation {
             super(traditionalCzechRules);
         }
 
-        private static String upperAcuteA = "\u00c1";
+        private static final String upperAcuteA = "\u00c1";
 
-        private static String lowerAcuteA = "\u00e1";
+        private static final String lowerAcuteA = "\u00e1";
 
-        private static String upperUmlatA = "\u00c4";
+        private static final String upperUmlatA = "\u00c4";
 
-        private static String upperHacekZ = "\u017d";
+        private static final String upperHacekZ = "\u017d";
 
-        private static String lowerHacekZ = "\u017e";
+        private static final String lowerHacekZ = "\u017e";
 
-        private static String traditionalCzechRules =
+        private static final String traditionalCzechRules =
 
                 ("< A=a=" + upperAcuteA + "=" + lowerAcuteA + "=" + upperUmlatA +
                         "< Z=z <" + upperHacekZ + "=" + lowerHacekZ);

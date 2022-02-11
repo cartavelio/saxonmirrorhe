@@ -33,8 +33,8 @@ import java.util.List;
 
 public final class ItemChecker extends UnaryExpression {
 
-    private ItemType requiredItemType;
-    private RoleDiagnostic role;
+    private final ItemType requiredItemType;
+    private final RoleDiagnostic role;
 
     /**
      * Constructor

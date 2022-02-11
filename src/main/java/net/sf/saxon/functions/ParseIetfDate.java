@@ -34,14 +34,14 @@ public class ParseIetfDate extends SystemFunction implements Callable {
      */
     @Override
     public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue stringValue = (StringValue) arguments[0].head();
+        StringItem stringValue = (StringItem) arguments[0].head();
         if (stringValue == null) {
             return ZeroOrOne.empty();
         }
         return new ZeroOrOne(parse(stringValue.getStringValue(), context));
     }
 
-    private String[] dayNames = new String[]{
+    private final String[] dayNames = new String[]{
         "Mon","Tue","Wed","Thu","Fri","Sat","Sun","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"
     };
 
@@ -54,7 +54,7 @@ public class ParseIetfDate extends SystemFunction implements Callable {
         return false;
     }
 
-    private String[] monthNames = new String[]{
+    private final String[] monthNames = new String[]{
             "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
     };
 
@@ -123,7 +123,7 @@ public class ParseIetfDate extends SystemFunction implements Callable {
         throw err;
     }
 
-    private String[] timezoneNames = new String[]{
+    private final String[] timezoneNames = new String[]{
             "UT","UTC","GMT","EST","EDT","CST","CDT","MST","MDT","PST","PDT"
     };
 

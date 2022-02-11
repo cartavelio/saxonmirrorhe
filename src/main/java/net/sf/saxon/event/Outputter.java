@@ -9,14 +9,15 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.CharSequenceConsumer;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
+import net.sf.saxon.str.UnicodeBuilder;
 
 /**
  * Outputter: This interface represents a recipient of XML tree-walking (push) events. It was
@@ -139,7 +140,7 @@ public abstract class Outputter implements Receiver {
 
     /**
      * Notify the start of an element. This version of <code>startElement()</code> must be followed
-     * by calls on {@link #attribute(NodeName, SimpleType, CharSequence, Location, int)} and
+     * by calls on {@link #attribute(NodeName, SimpleType, String, Location, int)} and
      * {@link #namespace(String, String, int)} to supply the attributes and namespaces; these calls
      * may be terminated by a call on {@link #startContent()} but this is not mandatory.
      *
@@ -241,7 +242,7 @@ public abstract class Outputter implements Receiver {
      * @throws XPathException         if an error occurs
      */
 
-    abstract public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties)
+    abstract public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties)
             throws XPathException;
 
     /**
@@ -280,7 +281,7 @@ public abstract class Outputter implements Receiver {
      */
 
     @Override
-    abstract public void characters(CharSequence chars, Location location, int properties)
+    abstract public void characters(CodePoints chars, Location location, int properties)
             throws XPathException;
 
     /**
@@ -295,7 +296,7 @@ public abstract class Outputter implements Receiver {
      */
 
     @Override
-    abstract public void processingInstruction(String name, CharSequence data, Location location, int properties)
+    abstract public void processingInstruction(String name, CodePoints data, Location location, int properties)
             throws XPathException;
 
     /**
@@ -309,7 +310,7 @@ public abstract class Outputter implements Receiver {
      */
 
     @Override
-    abstract public void comment(CharSequence content, Location location, int properties) throws XPathException;
+    abstract public void comment(CodePoints content, Location location, int properties) throws XPathException;
 
     /**
      * Append an arbitrary item (node, atomic value, or function) to the output. The default
@@ -351,26 +352,22 @@ public abstract class Outputter implements Receiver {
      *                   as a text node item rather than a string
      */
 
-    public CharSequenceConsumer getStringReceiver(boolean asTextNode) {
-        return new CharSequenceConsumer() {
+    public UniStringConsumer getStringReceiver(boolean asTextNode) {
+        return new UniStringConsumer() {
 
-            FastStringBuffer buffer = new FastStringBuffer(256);
+            final UnicodeBuilder buffer = new UnicodeBuilder();
             @Override
-            public CharSequenceConsumer cat(CharSequence chars) {
-                return buffer.cat(chars);
-            }
-
-            @Override
-            public CharSequenceConsumer cat(char c) {
-                return buffer.cat(c);
+            public UniStringConsumer append(CodePoints chars) {
+                buffer.append(chars);
+                return this;
             }
 
             @Override
             public void close() throws XPathException {
                 if (asTextNode) {
-                    Outputter.this.characters(buffer, Loc.NONE, ReceiverOption.NONE);
+                    Outputter.this.characters(buffer.toUnicodeString(), Loc.NONE, ReceiverOption.NONE);
                 } else {
-                    Outputter.this.append(new StringValue(buffer.condense()));
+                    Outputter.this.append(new StringItem(buffer.toUnicodeString()));
                 }
             }
         };

@@ -506,6 +506,7 @@ public class TestDocumentBuilder {
             SAXSource source = new SAXSource(new InputSource(sr));
             builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.makeCustomPolicy(
                 new Predicate<QName>() {
+                    @Override
                     public boolean test(QName value) {
                         return value.getLocalName().equals("doc") || value.getLocalName().equals("i");
                     }
@@ -520,6 +521,35 @@ public class TestDocumentBuilder {
             serializer.serializeXdmValue(doc);
             assertTrue(sw.toString().contains("<doc><b> </b><i/></doc>"));
 
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseFromSax() {
+        try {
+            Processor proc = new Processor(false);
+            StringReader sr = new StringReader("<doc> <a/> </doc>");
+            SAXSource source = new SAXSource(new InputSource(sr));
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.ALL);
+            StringWriter sw = new StringWriter();
+            builder.parse(source, proc.newSerializer(sw));
+            assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><doc><a/></doc>", sw.toString(), "serialization");
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseFromFile() {
+        try {
+            Processor proc = new Processor(false);
+            StringWriter sw = new StringWriter();
+            File file = new File(ConfigTest.DATA_DIR + "books.xml");
+            proc.newDocumentBuilder().parse(file, proc.newSerializer(sw));
+            assertTrue(sw.toString().startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><?xml-stylesheet"), "serialization");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }

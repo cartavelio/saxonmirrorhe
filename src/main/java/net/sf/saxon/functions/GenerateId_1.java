@@ -15,9 +15,9 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.One;
 import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * This class supports the generate-id() function with one argument
@@ -49,11 +49,10 @@ public class GenerateId_1 extends ScalarSystemFunction {
         return generateId((NodeInfo)arg);
     }
 
-    public static StringValue generateId(NodeInfo node) {
-        FastStringBuffer buffer = new FastStringBuffer(FastStringBuffer.C16);
+    public static StringItem generateId(NodeInfo node) {
+        StringBuilder buffer = new StringBuilder(16);
         node.generateId(buffer);
-        buffer.condense();
-        return new StringValue(buffer);
+        return new StringItem(buffer.toString());
 
     }
 

@@ -35,7 +35,7 @@ import net.sf.saxon.value.SequenceType;
 
 public class NodeSetPattern extends Pattern {
 
-    private Operand selectionOp;
+    private final Operand selectionOp;
     private ItemType itemType;
 
 

@@ -36,7 +36,7 @@ import net.sf.saxon.value.AtomicValue;
 public class UserFunctionReference extends Expression
         implements ComponentInvocation, UserFunctionResolvable, Callable {
 
-    private SymbolicName functionName;
+    private final SymbolicName functionName;
     private UserFunction nominalTarget;
     private int bindingSlot = -1;
     private int optimizeCounter = 0;
@@ -365,10 +365,10 @@ public class UserFunctionReference extends Expression
 
     public static class BoundUserFunction extends AbstractFunction implements ContextOriginator {
 
-        private ExportAgent agent;
-        private Function function;
-        private Component component;
-        private Controller controller; // retained in case a function is returned from a query or stylesheet
+        private final ExportAgent agent;
+        private final Function function;
+        private final Component component;
+        private final Controller controller; // retained in case a function is returned from a query or stylesheet
 
 
         public BoundUserFunction(ExportAgent agent, Function function, Component component, Controller controller)  {

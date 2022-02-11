@@ -3,15 +3,15 @@ package commands;
 import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Transform;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.Initializer;
+import net.sf.saxon.lib.Logger;
+import net.sf.saxon.lib.SourceResolver;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,6 @@ public class TransformTests {
     private class VerifyingTransform extends Transform {
 
         private RetentiveLogger logger;
-
         public VerifyingTransform() {
             this.logger = new RetentiveLogger();
         }
@@ -58,11 +57,15 @@ public class TransformTests {
 
     }
 
-
     @Test
     public void testTransformation() {
 
-        String[] args = {"-t", "-xsl:" + ConfigTest.DATA_DIR + "play.xsl", "-s:" + ConfigTest.DATA_DIR + "othello.xml", "dir=" + ConfigTest.DATA_DIR + "samples/output"};
+        String[] args = {
+                "-t",
+                "-xsl:" + ConfigTest.DATA_DIR + "play.xsl",
+                "-s:" + ConfigTest.DATA_DIR + "othello.xml",
+                "-quit:off",
+                "dir=" + ConfigTest.DATA_DIR + "samples/output"};
         try {
             Transform.main(args);
         } catch (Exception e) {
@@ -97,11 +100,32 @@ public class TransformTests {
         assertEquals(16, new File(ConfigTest.DATA_DIR + "samples/output").listFiles().length);
     }
 
+    @Test
+    public void testJsonTransformation() {
+
+        String[] args = {
+                "-t",
+                "-xsl:" + ConfigTest.DATA_DIR + "transform-json.xsl",
+                "-json:" + ConfigTest.DATA_DIR + "sample.json",
+                "-quit:off"};
+        try {
+            Transform.main(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+        assertEquals(16, new File(ConfigTest.DATA_DIR + "samples/output").listFiles().length);
+    }
 
     @Test
     public void testThreadTransformation() {
 
-        String[] args = {"-xsl:" + ConfigTest.DATA_DIR + "threads/test.xsl", "-s:" + ConfigTest.DATA_DIR + "threads/input", "-o:" + ConfigTest.DATA_DIR + "threads/output", "-threads:2"};
+        String[] args = {
+                "-xsl:" + ConfigTest.DATA_DIR + "threads/test.xsl",
+                "-s:" + ConfigTest.DATA_DIR + "threads/input",
+                "-o:" + ConfigTest.DATA_DIR + "threads/output",
+                "-quit:off",
+                "-threads:2"};
         try {
             Transform.main(args);
         } catch (Exception e) {
@@ -186,6 +210,7 @@ public class TransformTests {
         String[] args = {
                 "-xsl:" + ConfigTest.DATA_DIR + "use-static.xsl",
                 "-s:" + ConfigTest.DATA_DIR + "bills.xml",
+                "-quit:off",
                 "date=2013-01-01",
                 "?now=current-time()"};
         try {
@@ -217,6 +242,7 @@ public class TransformTests {
                 "-a:on",
                 "--version-warning:off",
                 "-s:" + ConfigTest.DATA_DIR + "bills.xml",
+                "-quit:off",
                 "s=s-actual",
                 "d=d-actual"};
         try {
@@ -260,7 +286,8 @@ public class TransformTests {
                 "-TP:" + ConfigTest.DATA_DIR + "temp/profile.html",
                 "-o:" + ConfigTest.DATA_DIR + "temp/books.html",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "books.xsl"
+                "-xsl:" + ConfigTest.DATA_DIR + "books.xsl",
+                "-quit:off",
         };
         try {
             Transform.main(args);
@@ -275,7 +302,8 @@ public class TransformTests {
                 "-ext:off",
                 "-o:" + ConfigTest.DATA_DIR + "temp/books.json",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "books-to-json.xsl"
+                "-xsl:" + ConfigTest.DATA_DIR + "books-to-json.xsl",
+                "-quit:off"
         };
         try {
             Transform.main(args);
@@ -294,7 +322,8 @@ public class TransformTests {
                 "-o:" + ConfigTest.DATA_DIR + "temp/packs-out.xml",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
                 "-lib:" + ConfigTest.DATA_DIR + "packages/pack-002.xsl",
-                "-xsl:" + ConfigTest.DATA_DIR + "packages/pack-001.xsl"
+                "-xsl:" + ConfigTest.DATA_DIR + "packages/pack-001.xsl",
+                "-quit:off",
         };
         try {
             Transform.main(args);
@@ -313,7 +342,8 @@ public class TransformTests {
                 "-o:" + ConfigTest.DATA_DIR + "temp/packs-out.xml",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
                 "-lib:" + ConfigTest.DATA_DIR + "packages/pack-001.xsl",
-                "-xsl:" + ConfigTest.DATA_DIR + "packages/pack-002.xsl"
+                "-xsl:" + ConfigTest.DATA_DIR + "packages/pack-002.xsl",
+                "-quit:off",
         };
         try {
             Transform.main(args);
@@ -331,7 +361,8 @@ public class TransformTests {
                 "-t",
                 "-o:" + ConfigTest.DATA_DIR + "temp/chain-out.xml",
                 "-s:" + ConfigTest.DATA_DIR + "next-in-chain/test.xml",
-                "-xsl:" + ConfigTest.DATA_DIR + "next-in-chain/main.xsl"
+                "-xsl:" + ConfigTest.DATA_DIR + "next-in-chain/main.xsl",
+                "-quit:off",
         };
         try {
             Transform.main(args);
@@ -340,6 +371,9 @@ public class TransformTests {
         }
     }
 
+    /**
+     * Command line, test processing of a directory
+     */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void testDirectory() {
@@ -354,7 +388,8 @@ public class TransformTests {
                 "-t",
                 "-o:" + ConfigTest.DATA_DIR + "welch-ser/out",
                 "-s:" + ConfigTest.DATA_DIR + "welch-ser",
-                "-xsl:" + ConfigTest.DATA_DIR + "identity.xsl"
+                "-xsl:" + ConfigTest.DATA_DIR + "identity.xsl",
+                "-quit:off",
         };
         try {
             Transform.main(args);
@@ -364,6 +399,7 @@ public class TransformTests {
             fail();
         }
     }
+
 
     public static class RequireStreaming implements Initializer {
         @Override
@@ -389,7 +425,8 @@ public class TransformTests {
                 "-s:" + ConfigTest.DATA_DIR + "caffo/Input.xml",
                 "-xsl:" + ConfigTest.DATA_DIR + "caffo/Transform2Streamable.xslt",
                 "-o:" + ConfigTest.DATA_DIR + "sandpit/caffoOut.xml",
-                "-init:commands.TransformTests$RequireStreaming"
+                "-init:commands.TransformTests$RequireStreaming",
+                "-quit:off",
         };
         try {
             Transform.main(args);
@@ -409,7 +446,8 @@ public class TransformTests {
                 "-s:" + ConfigTest.DATA_DIR + "caffo/Input.xml",
                 "-xsl:" + ConfigTest.DATA_DIR + "caffo/Transform2Streamable.xslt",
                 "-export:" + ConfigTest.DATA_DIR + "sandpit/caffo.xsl.sef",
-                "-nogo"};
+                "-nogo",
+                "-quit:off",};
         try {
             Transform.main(args);
         } catch (Exception e) {
@@ -423,7 +461,8 @@ public class TransformTests {
                 "-s:" + ConfigTest.DATA_DIR + "caffo/Input.xml",
                 "-xsl:" + ConfigTest.DATA_DIR + "sandpit/caffo.xsl.sef",
                 "-o:" + ConfigTest.DATA_DIR + "sandpit/caffoOut.xml",
-                "-init:commands.TransformTests$RequireStreaming"};
+                "-init:commands.TransformTests$RequireStreaming",
+                "-quit:off",};
         try {
             Transform.main(args2);
         } catch (Exception e) {
@@ -432,33 +471,6 @@ public class TransformTests {
         }
         assertTrue(new File(ConfigTest.DATA_DIR + "sandpit/caffoOut.xml").exists(), "Streaming output exists");
     }
-
-    @Test
-    public void testMessageToLogger() {
-        try {
-            String xsl =
-                    "<xsl:transform version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
-                            "<xsl:template name='main'>" +
-                            "<xsl:for-each select='1 to 5'>" +
-                            "<xsl:message><a nr='{.}'/></xsl:message>" +
-                            "</xsl:for-each>" +
-                            "</xsl:template>" +
-                            "</xsl:transform>";
-            Processor p = new Processor(false);
-            p.getUnderlyingConfiguration().setLogger(new SystemLogger(java.util.logging.Logger.getAnonymousLogger()));
-            p.setConfigurationProperty(Feature.TIMING, true);
-            XsltCompiler c = p.newXsltCompiler();
-            XsltExecutable e = c.compile(new StreamSource(new StringReader(xsl)));
-            XsltTransformer t = e.load();
-            t.setInitialTemplate(new QName("main"));
-            t.setDestination(p.newSerializer(System.out));
-            t.transform();
-        } catch (SaxonApiException e1) {
-            e1.printStackTrace();
-            fail();
-        }
-    }
-
 
 }
 

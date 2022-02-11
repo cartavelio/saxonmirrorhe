@@ -25,8 +25,8 @@ import java.util.List;
 
 public abstract class Assignation extends Expression implements LocalBinding {
 
-    private Operand sequenceOp;
-    private Operand actionOp;
+    private final Operand sequenceOp;
+    private final Operand actionOp;
     protected int slotNumber = -999;     // slot number for range variable
     // (initialized to ensure a crash if no real slot is allocated)
     protected StructuredQName variableName;

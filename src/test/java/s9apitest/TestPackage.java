@@ -10,6 +10,7 @@ import net.sf.saxon.style.PrincipalStylesheetModule;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -87,7 +88,7 @@ public class TestPackage {
     }
 
     @Test
-    public void testSaveAndRestorePackage01() {
+    public void testSavePackage01() {
         try {
             Processor processor = new Processor(true);
             XsltCompiler compiler = processor.newXsltCompiler();
@@ -286,6 +287,7 @@ public class TestPackage {
     }
 
     @Test
+    @Tag("bytecode")
     public void testImportingWithoutLicenseOptimizedCode() {
         try {
             Processor processor1 = new Processor(true);
@@ -414,6 +416,9 @@ public class TestPackage {
             e.printStackTrace();
             fail();
         }
+
+
+
     }
 
     @Test

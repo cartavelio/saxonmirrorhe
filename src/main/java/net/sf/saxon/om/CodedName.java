@@ -13,9 +13,9 @@ package net.sf.saxon.om;
  */
 public class CodedName implements NodeName {
 
-    private int fingerprint;
-    private String prefix;
-    private NamePool pool;
+    private final int fingerprint;
+    private final String prefix;
+    private final NamePool pool;
 
     public CodedName(int fingerprint, String prefix, NamePool pool) {
 //        if (fingerprint >> 20 != 0) {

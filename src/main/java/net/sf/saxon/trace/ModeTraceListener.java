@@ -21,7 +21,7 @@ import java.util.Stack;
 
 public class ModeTraceListener extends AbstractTraceListener {
 
-    private Stack<Item> stack = new Stack<>();
+    private final Stack<Item> stack = new Stack<>();
 
     /**
      * Generate attributes to be included in the opening trace element

@@ -8,7 +8,7 @@
 package net.sf.saxon.z;
 
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 /**
  * Set of int values. This class is modelled on the java.net.Set interface, but it does
@@ -306,12 +306,12 @@ public class IntHashSet implements IntSet {
     }
 
     public static String toString(IntIterator it) {
-        FastStringBuffer sb = new FastStringBuffer(100);
+        StringBuilder sb = new StringBuilder(100);
         while (it.hasNext()) {
-            if (sb.isEmpty()) {
-                sb.append("" + it.next());
+            if (sb.length() == 0) {
+                sb.appendCodePoint(it.next());
             } else {
-                sb.append(" " + it.next());
+                sb.append(' ').appendCodePoint(it.next());
             }
         }
         return sb.toString();
@@ -323,7 +323,7 @@ public class IntHashSet implements IntSet {
 
     public void diagnosticDump() {
         System.err.println("Contents of IntHashSet");
-        FastStringBuffer sb = new FastStringBuffer(100);
+        StringBuilder sb = new StringBuilder(100);
         for (int i = 0; i < _values.length; i++) {
             if (i % 10 == 0) {
                 System.err.println(sb.toString());

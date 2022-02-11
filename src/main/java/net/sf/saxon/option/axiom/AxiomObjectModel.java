@@ -16,10 +16,12 @@ import net.sf.saxon.expr.PJConverter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ExternalObjectModel;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.ItemType;
 import org.apache.axiom.om.*;
@@ -36,7 +38,7 @@ import javax.xml.transform.Source;
 
 public class AxiomObjectModel extends TreeModel implements ExternalObjectModel {
 
-    private final static AxiomObjectModel THE_INSTANCE = new AxiomObjectModel();
+    private static final AxiomObjectModel THE_INSTANCE = new AxiomObjectModel();
 
     public static AxiomObjectModel getInstance() {
         return THE_INSTANCE;
@@ -120,7 +122,7 @@ public class AxiomObjectModel extends TreeModel implements ExternalObjectModel {
         if (isRecognizedNodeClass(sourceClass)) {
             return new JPConverter() {
                 @Override
-                public Sequence convert(Object object, XPathContext context) {
+                public GroundedValue convert(Object object, XPathContext context) throws XPathException {
                     return convertObjectToXPathValue(object, context.getConfiguration());
                 }
 
@@ -171,7 +173,7 @@ public class AxiomObjectModel extends TreeModel implements ExternalObjectModel {
      * Test whether this object model recognizes a particular kind of JAXP Result object,
      * and if it does, return a Receiver that builds an instance of this data model from
      * a sequence of events. If the Result is not recognised, return null.
-     * @return always null
+     * @return
      */
 
     @Override
@@ -212,7 +214,7 @@ public class AxiomObjectModel extends TreeModel implements ExternalObjectModel {
      */
 
     /*@Nullable*/
-    private Sequence convertObjectToXPathValue(Object object, Configuration config) {
+    private GroundedValue convertObjectToXPathValue(Object object, Configuration config) {
         if (isRecognizedNode(object)) {
             if (object instanceof OMDocument) {
                 return new AxiomDocument((OMDocument) object, "", config).getRootNode();

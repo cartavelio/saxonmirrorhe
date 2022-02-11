@@ -25,8 +25,8 @@ import java.util.StringTokenizer;
  */
 public abstract class XSLAcceptExpose extends StyleElement {
 
-    private Set<ComponentTest> explicitComponentTests = new HashSet<>();
-    private Set<ComponentTest> wildcardComponentTests = new HashSet<>();
+    private final Set<ComponentTest> explicitComponentTests = new HashSet<>();
+    private final Set<ComponentTest> wildcardComponentTests = new HashSet<>();
     private Visibility visibility;
 
     @Override

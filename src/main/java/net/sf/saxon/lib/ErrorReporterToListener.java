@@ -33,7 +33,7 @@ import java.util.Objects;
 
 public class ErrorReporterToListener implements ErrorReporter {
 
-    private ErrorListener listener;
+    private final ErrorListener listener;
 
     /**
      * Create an error reporter that wraps a JAXP {@code ErrorListener}

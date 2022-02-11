@@ -31,12 +31,15 @@
 package net.sf.saxon.regex;
 
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 
@@ -159,7 +162,7 @@ public class REMatcher {
 
     // State of current program
     REProgram program;                            // Compiled regular expression 'program'
-    UnicodeString search;               // The string being matched against
+    UnicodeString search;                           // The string being matched against
     History history = new History();
     int maxParen = MAX_PAREN;
 
@@ -230,7 +233,7 @@ public class REMatcher {
     public UnicodeString getParen(int which) {
         int start;
         if (which < captureState.parenCount && (start = getParenStart(which)) >= 0) {
-            return search.uSubstring(start, getParenEnd(which));
+            return search.substring(start, getParenEnd(which));
         }
         return null;
     }
@@ -371,9 +374,9 @@ public class REMatcher {
      */
     public boolean match(UnicodeString search, int i) {
         //System.err.println("Matching '" + search + "'");
-
+        Objects.requireNonNull(search);
         // Save string to search
-        this.search = search;
+        this.search = search.tidy();
 
         // Clear the captured group state
         captureState = new State();
@@ -391,8 +394,8 @@ public class REMatcher {
                 return true;
             }
             while (true) {
-                nl = search.uIndexOf('\n', nl) + 1;
-                if (nl >= search.uLength() || nl <= 0) {
+                nl = (int)search.indexOf('\n', nl) + 1;
+                if (nl >= search.length() || nl <= 0) {
                     return false; // "^" does not match a NL at the end of the string
                 } else {
                     if (matchAt(nl, false)) {
@@ -403,7 +406,7 @@ public class REMatcher {
         }
 
         // Is the string long enough to match?
-        int actualLength = search.uLength() - i;
+        int actualLength = search.length32() - i;
         if (actualLength < program.minimumLength) {
             return false;
         }
@@ -413,8 +416,8 @@ public class REMatcher {
             if (program.initialCharClass != null) {
                 // no prefix known; but the first character must match a predicate
                 IntPredicate pred = program.initialCharClass;
-                for (; !search.isEnd(i); i++) {
-                    if (pred.test(search.uCharAt(i))) {
+                for (; !(i >= search.length32()); i++) {
+                    if (pred.test(search.codePointAt(i))) {
                         if (matchAt(i, false)) {
                             return true;
                         }
@@ -427,7 +430,7 @@ public class REMatcher {
                 return false;
             }
             // Unprefixed matching must try for a match at each character
-            for (; !search.isEnd(i - 1); i++) {
+            for (; !(i - 1 >= search.length32()); i++) {
                 // Try a match at index i
                 if (matchAt(i, false)) {
                     return true;
@@ -437,20 +440,20 @@ public class REMatcher {
         } else {
             // Prefix-anchored matching is possible
             UnicodeString prefix = program.prefix;
-            int prefixLength = prefix.uLength();
+            int prefixLength = prefix.length32();
             boolean ignoreCase = program.flags.isCaseIndependent();
-            for (; !search.isEnd(i + prefixLength - 1); i++) {
+            for (; !(i + prefixLength - 1 >= search.length()); i++) {
                 boolean prefixOK = true;
                 if (ignoreCase) {
                     for (int j = i, k = 0; k < prefixLength; j++, k++) {
-                        if (!equalCaseBlind(search.uCharAt(j), prefix.uCharAt(k))) {
+                        if (!equalCaseBlind(search.codePointAt(j), prefix.codePointAt(k))) {
                             prefixOK = false;
                             break;
                         }
                     }
                 } else {
                     for (int j = i, k=0; k < prefixLength; j++, k++) {
-                        if (search.uCharAt(j) != prefix.uCharAt(k)) {
+                        if (search.codePointAt(j) != prefix.codePointAt(k)) {
                             prefixOK = false;
                             break;
                         }
@@ -489,7 +492,7 @@ public class REMatcher {
                     i = condition.minPosition;
                 }
                 boolean found = false;
-                for (; !search.isEnd(i); i++) {
+                for (; !(i >= search.length()); i++) {
                     if ((condition.fixedPosition == -1 || condition.fixedPosition == i) &&
                         condition.operation.iterateMatches(this, i).hasNext()) {
                         found = true;
@@ -511,8 +514,7 @@ public class REMatcher {
      * @return True if string matched
      */
     public boolean match(String search) {
-        UnicodeString uString = UnicodeString.makeUnicodeString(search);
-        return match(uString, 0);
+        return match(StringView.of(search).tidy(), 0);
     }
 
     /**
@@ -530,11 +532,11 @@ public class REMatcher {
      */
     public List<UnicodeString> split(UnicodeString s) {
         // Create new vector
-        List<UnicodeString> v = new ArrayList<UnicodeString>();
+        List<UnicodeString> v = new ArrayList<>();
 
         // Start at position 0 and search the whole string
         int pos = 0;
-        int len = s.uLength();
+        int len = s.length32();
 
         // Try a match at each position
         while (pos < len && match(s, pos)) {
@@ -546,10 +548,10 @@ public class REMatcher {
 
             // Check if no progress was made
             if (newpos == pos) {
-                v.add(s.uSubstring(pos, start + 1));
+                v.add(s.substring(pos, start + 1));
                 newpos++;
             } else {
-                v.add(s.uSubstring(pos, start));
+                v.add(s.substring(pos, start));
             }
 
             // Move to new position
@@ -557,7 +559,7 @@ public class REMatcher {
         }
 
         // Push remainder even if it's empty
-        UnicodeString remainder = s.uSubstring(pos, len);
+        UnicodeString remainder = s.substring(pos, len);
         v.add(remainder);
 
         // Return the list
@@ -585,36 +587,38 @@ public class REMatcher {
      *         expression object doesn't match at any position, the original String is returned
      *         unchanged).
      */
-    public CharSequence replace(UnicodeString in, UnicodeString replacement) {
+    public UnicodeString replace(UnicodeString in, UnicodeString replacement) {
         // String to return
-        FastStringBuffer sb = new FastStringBuffer(in.uLength() * 2);
+        UnicodeBuilder sb = new UnicodeBuilder();
 
         // Start at position 0 and search the whole string
         int pos = 0;
-        int len = in.uLength();
+        int len = in.length32();
 
         // Try a match at each position
         while (pos < len && match(in, pos)) {
             // Append chars from input string before match
             for (int i = pos; i < getParenStart(0); i++) {
-                sb.appendWideChar(in.uCharAt(i));
+                sb.append(in.codePointAt(i));
             }
 
             if (!program.flags.isLiteral()) {
                 // Process references to captured substrings
                 int maxCapture = program.maxParens - 1;
 
-                for (int i = 0; i < replacement.uLength(); i++) {
-                    int ch = replacement.uCharAt(i);
+                for (int i = 0; i < replacement.length(); i++) {
+                    int ch = replacement.codePointAt(i);
                     if (ch == '\\') {
-                        ch = replacement.uCharAt(++i);
+                        int index = ++i;
+                        ch = replacement.codePointAt(index);
                         if (ch == '\\' || ch == '$') {
-                            sb.cat((char) ch);
+                            sb.append((char) ch);
                         } else {
                             throw new RESyntaxException("Invalid escape '" + ch + "' in replacement string");
                         }
                     } else if (ch == '$') {
-                        ch = replacement.uCharAt(++i);
+                        int index = ++i;
+                        ch = replacement.codePointAt(index);
                         if (!(ch >= '0' && ch <= '9')) {
                             throw new RESyntaxException("$ in replacement string must be followed by a digit");
                         }
@@ -623,8 +627,8 @@ public class REMatcher {
                             if (maxCapture >= n) {
                                 UnicodeString captured = getParen(n);
                                 if (captured != null) {
-                                    for (int j = 0; j < captured.uLength(); j++) {
-                                        sb.appendWideChar(captured.uCharAt(j));
+                                    for (int j = 0; j < captured.length(); j++) {
+                                        sb.append(captured.codePointAt(j));
                                     }
                                 }
                             } else {
@@ -632,10 +636,10 @@ public class REMatcher {
                             }
                         } else {
                             while (true) {
-                                if (++i >= replacement.uLength()) {
+                                if (++i >= replacement.length()) {
                                     break;
                                 }
-                                ch = replacement.uCharAt(i);
+                                ch = replacement.codePointAt(i);
                                 if (ch >= '0' && ch <= '9') {
                                     int m = n * 10 + (ch - '0');
                                     if (m > maxCapture) {
@@ -651,20 +655,20 @@ public class REMatcher {
                             }
                             UnicodeString captured = getParen(n);
                             if (captured != null) {
-                                for (int j = 0; j < captured.uLength(); j++) {
-                                    sb.appendWideChar(captured.uCharAt(j));
+                                for (int j = 0; j < captured.length(); j++) {
+                                    sb.append(captured.codePointAt(j));
                                 }
                             }
                         }
                     } else {
-                        sb.appendWideChar(ch);
+                        sb.append(ch);
                     }
                 }
 
             } else {
                 // Append substitution without processing backreferences
-                for (int i = 0; i < replacement.uLength(); i++) {
-                    sb.appendWideChar(replacement.uCharAt(i));
+                for (int i = 0; i < replacement.length(); i++) {
+                    sb.append(replacement.codePointAt(i));
                 }
             }
 
@@ -683,11 +687,11 @@ public class REMatcher {
 
         // If there's remaining input, append it
         for (int i = pos; i < len; i++) {
-            sb.appendWideChar(in.uCharAt(i));
+            sb.append(in.codePointAt(i));
         }
 
         // Return string buffer
-        return sb.condense();
+        return sb.toUnicodeString();
     }
 
     /**
@@ -711,23 +715,26 @@ public class REMatcher {
      * expression object doesn't match at any position, the original String is returned
      * unchanged).
      */
-    public CharSequence replaceWith(UnicodeString in, Function<CharSequence, CharSequence> replacer) {
+    public UnicodeString replaceWith(UnicodeString in, Function<UnicodeString, UnicodeString> replacer) {
         // String to return
-        FastStringBuffer sb = new FastStringBuffer(in.uLength() * 2);
+        UnicodeBuilder sb = new UnicodeBuilder();
 
         // Start at position 0 and search the whole string
         int pos = 0;
-        int len = in.uLength();
+        int len = in.length32();
 
         // Try a match at each position
         while (pos < len && match(in, pos)) {
             // Append chars from input string before match
-            for (int i = pos; i < getParenStart(0); i++) {
-                sb.appendWideChar(in.uCharAt(i));
+            for (long i = pos; i < getParenStart(0); i++) {
+                sb.append(in.codePointAt(i));
             }
-            CharSequence matchingSubstring = in.subSequence(getParenStart(0), getParenEnd(0));
-            CharSequence replacement = replacer.apply(matchingSubstring);
-            sb.append(replacement);
+            UnicodeString matchingSubstring = in.substring(getParenStart(0), getParenEnd(0));
+            UnicodeString replacement = replacer.apply(matchingSubstring);
+            IntIterator iter = replacement.codePoints();
+            while (iter.hasNext()) {
+                sb.append(iter.next());
+            }
 
             // Move forward, skipping past match
             int newpos = getParenEnd(0);
@@ -744,11 +751,11 @@ public class REMatcher {
 
         // If there's remaining input, append it
         for (int i = pos; i < len; i++) {
-            sb.appendWideChar(in.uCharAt(i));
+            sb.append(in.codePointAt(i));
         }
 
         // Return string buffer
-        return sb.condense();
+        return sb.toUnicodeString();
     }
 
 
@@ -759,7 +766,7 @@ public class REMatcher {
      * @return true if character at i-th position in the <code>search</code> string is a newline
      */
     boolean isNewline(int i) {
-        return search.uCharAt(i) == '\n';
+        return search.codePointAt(i) == '\n';
     }
 
     /**
@@ -807,5 +814,5 @@ public class REMatcher {
             startn = Arrays.copyOf(s.startn, s.startn.length);
             endn = Arrays.copyOf(s.endn, s.endn.length);
         }
-    };
+    }
 }

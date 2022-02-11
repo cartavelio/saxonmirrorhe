@@ -32,7 +32,7 @@ import java.util.List;
 
 public class ConstructorFunctionLibrary implements FunctionLibrary {
 
-    private Configuration config;
+    private final Configuration config;
 
     /**
      * Create a SystemFunctionLibrary

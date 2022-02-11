@@ -12,7 +12,7 @@ package net.sf.saxon.z;
  */
 public class IntComplementSet implements IntSet {
 
-    private IntSet exclusions;
+    private final IntSet exclusions;
 
     public IntComplementSet(IntSet exclusions) {
         this.exclusions = exclusions.copy();

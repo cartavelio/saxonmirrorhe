@@ -9,6 +9,7 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.*;
 
 import java.math.BigDecimal;
@@ -216,7 +217,7 @@ public abstract class Converter {
             return convert(input, input.getCanonicalLexicalRepresentation());
         }
 
-        public ConversionResult convert(AtomicValue input, CharSequence lexicalForm) {
+        public ConversionResult convert(AtomicValue input, UnicodeString lexicalForm) {
             ValidationFailure f = newType.validate(input, lexicalForm, getConversionRules());
             if (f == null) {
                 // success
@@ -227,7 +228,7 @@ public abstract class Converter {
             }
         }
 
-        public ValidationFailure validate(AtomicValue input, CharSequence lexicalForm) {
+        public ValidationFailure validate(AtomicValue input, UnicodeString lexicalForm) {
             return newType.validate(input, lexicalForm, getConversionRules());
         }
     }
@@ -282,8 +283,8 @@ public abstract class Converter {
     public static class ToUntypedAtomicConverter extends UnfailingConverter {
         public static final ToUntypedAtomicConverter INSTANCE = new ToUntypedAtomicConverter();
         @Override
-        public UntypedAtomicValue convert(AtomicValue input) {
-            return new UntypedAtomicValue(input.getStringValueCS());
+        public StringItem convert(AtomicValue input) {
+            return new UntypedAtomicValue(input.getUnicodeStringValue());
         }
     }
 
@@ -294,8 +295,8 @@ public abstract class Converter {
     public static class ToStringConverter extends UnfailingConverter {
         public static final ToStringConverter INSTANCE = new ToStringConverter();
         @Override
-        public StringValue convert(AtomicValue input) {
-            return new StringValue(input.getStringValueCS());
+        public StringItem convert(AtomicValue input) {
+            return new StringItem(input.getUnicodeStringValue().tidy());
         }
     }
 
@@ -714,7 +715,7 @@ public abstract class Converter {
                 return input;
             } else if (input instanceof NumericValue) {
                 return new DoubleValue(((NumericValue) input).getDoubleValue());
-            } else if (input instanceof UntypedAtomicValue) {
+            } else if (input.isUntypedAtomic()) {
                 if (stringToDouble == null) {
                     stringToDouble = BuiltInAtomicType.DOUBLE.getStringConverter(getConversionRules());
                 }
@@ -748,7 +749,7 @@ public abstract class Converter {
                 return err;
             } else if (input instanceof NumericValue) {
                 return new FloatValue((float) ((NumericValue) input).getDoubleValue());
-            } else if (input instanceof UntypedAtomicValue) {
+            } else if (input.isUntypedAtomic()) {
                 if (stringToFloat == null) {
                     stringToFloat = BuiltInAtomicType.FLOAT.getStringConverter(getConversionRules());
                 }

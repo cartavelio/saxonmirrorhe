@@ -16,8 +16,8 @@ import net.sf.saxon.om.StructuredQName;
  */
 public class SymbolicName {
 
-    private int kind;
-    private StructuredQName name;
+    private final int kind;
+    private final StructuredQName name;
 
     /**
      * Create a symbolic name for a component other than a function.

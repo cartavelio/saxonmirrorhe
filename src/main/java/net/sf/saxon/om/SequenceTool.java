@@ -9,13 +9,17 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.expr.*;
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.expr.LastPositionFinder;
+import net.sf.saxon.expr.RangeIterator;
+import net.sf.saxon.expr.ReverseRangeIterator;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.Count;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -248,6 +252,7 @@ public class SequenceTool {
                 case StandardNames.XS_UNTYPED_ATOMIC:
                 case StandardNames.XS_ANY_URI:
                 case StandardNames.XS_DURATION:
+                case StandardNames.XS_TIME:
                     return value.getStringValue();
                 case StandardNames.XS_BOOLEAN:
                     return ((BooleanValue) value).getBooleanValue() ? Boolean.TRUE : Boolean.FALSE;
@@ -263,8 +268,6 @@ public class SequenceTool {
                     return ((DateTimeValue) value).getCalendar().getTime();
                 case StandardNames.XS_DATE:
                     return ((DateValue) value).getCalendar().getTime();
-                case StandardNames.XS_TIME:
-                    return value.getStringValue();
                 case StandardNames.XS_BASE64_BINARY:
                     return ((Base64BinaryValue) value).getBinaryValue();
                 case StandardNames.XS_HEX_BINARY:
@@ -287,15 +290,38 @@ public class SequenceTool {
      *                        for example a function item
      */
 
-    public static String getStringValue(Sequence sequence) throws XPathException {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+    public static UnicodeString getStringValue(Sequence sequence) throws XPathException {
+        UnicodeBuilder ub = new UnicodeBuilder();
         sequence.iterate().forEachOrFail(item -> {
-            if (!fsb.isEmpty()) {
-                fsb.cat(' ');
+            if (!ub.isEmpty()) {
+                ub.append(' ');
             }
-            fsb.cat(item.getStringValueCS());
+            ub.append(item.getUnicodeStringValue());
         });
-        return fsb.toString();
+        return ub.toUnicodeString();
+    }
+
+    /**
+     * Get the string value of a sequence. For an item, this is same as the result
+     * of calling the XPath string() function. For a sequence of more than one item,
+     * it is the concatenation of the individual string values of the items in the sequence,
+     * space-separated.
+     *
+     * @param sequence the input sequence
+     * @return a string representation of the items in the supplied sequence
+     * @throws XPathException if the sequence contains an item with no string value,
+     *                        for example a function item
+     */
+
+    public static String stringify(Sequence sequence) throws XPathException {
+        StringBuilder sb = new StringBuilder(64);
+        sequence.iterate().forEachOrFail(item -> {
+            if (sb.length() != 0) {
+                sb.append(' ');
+            }
+            sb.append(item.getStringValue());
+        });
+        return sb.toString();
     }
 
     /**
@@ -423,7 +449,7 @@ public class SequenceTool {
      */
 
     public static Sequence[] makeSequenceArray(int length) {
-        return (Sequence[])new Sequence[length];
+        return new Sequence[length];
     }
 
     /**
@@ -431,7 +457,7 @@ public class SequenceTool {
      */
 
     public static Sequence[] fromItems(Item... items) {
-        Sequence[] seq = (Sequence[]) new Sequence[items.length];
+        Sequence[] seq = new Sequence[items.length];
         System.arraycopy(items, 0, seq, 0, items.length);
         return seq;
     }

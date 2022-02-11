@@ -824,7 +824,7 @@ public final class Tokenizer {
                             throw new XPathException("Missing closing brace in EQName");
                         }
                         String uri = input.substring(inputOffset, close);
-                        uri = Whitespace.collapseWhitespace(uri).toString(); // Bug 29708
+                        uri = Whitespace.collapseWhitespace(uri); // Bug 29708
                         if (uri.contains("{")) {
                             throw new XPathException("EQName must not contain opening brace");
                         }
@@ -854,7 +854,7 @@ public final class Tokenizer {
                     /* else fall through */
                 default:
                     if (c < 0x80 && !Character.isLetter(c)) {
-                        throw new XPathException("Invalid character '" + c + "' in expression");
+                        throw new XPathException("Invalid character '" + c + "' (x" + Integer.toHexString((int)c) + ") in expression");
                     }
                     /* fall through */
                 case '_':
@@ -1142,7 +1142,7 @@ public final class Tokenizer {
                 return input.substring(0, inputOffset);
             } else {
                 return Whitespace.collapseWhitespace(
-                        "..." + input.substring(inputOffset - 30, inputOffset)).toString();
+                        "..." + input.substring(inputOffset - 30, inputOffset));
             }
         } else {
             // if a specific offset was supplied, we want the text *starting* at that offset
@@ -1152,7 +1152,7 @@ public final class Tokenizer {
             }
             return Whitespace.collapseWhitespace(
                     (offset > 0 ? "..." : "") +
-                            input.substring(offset, end)).toString();
+                            input.substring(offset, end));
         }
     }
 

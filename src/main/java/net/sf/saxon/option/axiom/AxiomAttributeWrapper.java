@@ -10,10 +10,12 @@ package net.sf.saxon.option.axiom;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.PrependAxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualNode;
@@ -43,7 +45,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
 
     protected OMAttribute node;
 
-    private AxiomParentNodeWrapper parent; // null means unknown
+    private final AxiomParentNodeWrapper parent; // null means unknown
 
     protected int index; // -1 means unknown
 
@@ -159,7 +161,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
 
     @Override
     public AtomicSequence atomize() {
-        return new UntypedAtomicValue(getStringValueCS());
+        return new UntypedAtomicValue(getUnicodeStringValue());
     }
 
     /**
@@ -292,18 +294,8 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
      */
 
     @Override
-    public String getStringValue() {
-        return node.getAttributeValue();
-    }
-
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
-        return node.getAttributeValue();
+    public UnicodeString getUnicodeStringValue() {
+        return StringView.tidy(node.getAttributeValue());
     }
 
     /**
@@ -494,7 +486,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
      */
 
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
         //buffer.append(Navigator.getSequentialKey(this));
     }

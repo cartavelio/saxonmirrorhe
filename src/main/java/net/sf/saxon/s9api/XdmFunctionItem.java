@@ -72,10 +72,10 @@ public class XdmFunctionItem extends XdmItem {
      * function, provided a licensed Processor is used.
      * @return the requested function, or null if there is no such function. Note that some functions
      * (those with particular context dependencies) may be unsuitable for dynamic calling.
-     * @throws SaxonApiException no longer thrown, but retained in the declaration for backwards compatibility
+     * @throws SaxonApiException No longer thrown, but remains in the method signature for backwards compatibility
      */
 
-    public static XdmFunctionItem getSystemFunction(Processor processor, QName name, int arity) throws SaxonApiException {
+    public static XdmFunctionItem getSystemFunction(Processor processor, QName name, int arity) throws SaxonApiException{
         Configuration config = processor.getUnderlyingConfiguration();
         Function f = config.getSystemFunction(name.getStructuredQName(), arity);
         return f==null ? null : new XdmFunctionItem(f);

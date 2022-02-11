@@ -333,7 +333,7 @@ public abstract class Emitter extends SequenceReceiver implements ReceiverWithOu
         if (item instanceof NodeInfo) {
             decompose(item, locationId, copyNamespaces);
         } else {
-            characters(item.getStringValueCS(), locationId, ReceiverOption.NONE);
+            characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
         }
     }
 

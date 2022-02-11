@@ -10,17 +10,13 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.om.One;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
-import net.sf.saxon.regex.EmptyString;
-import net.sf.saxon.regex.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * This class implements the XPath substring() function
@@ -66,16 +62,15 @@ public class Substring extends SystemFunction implements Callable {
      * @return the substring starting at this position.
      */
 
-    public static UnicodeString substring(StringValue sv, NumericValue start) {
-        UnicodeString s = sv.getUnicodeString();
-        int slength = s.uLength();
+    public static StringItem substring(StringItem sv, NumericValue start) {
+        long slength = sv.length();
 
         long lstart;
         if (start instanceof Int64Value) {
             //noinspection RedundantCast
             lstart = ((Int64Value) start).longValue();
             if (lstart > slength) {
-                return EmptyString.THE_INSTANCE;
+                return StringItem.EMPTY_STRING;
             } else if (lstart <= 0) {
                 lstart = 1;
             }
@@ -83,22 +78,20 @@ public class Substring extends SystemFunction implements Callable {
             //NumericValue rstart = start.round();
             // We need to be careful to handle cases such as plus/minus infinity
             if (start.isNaN()) {
-                return EmptyString.THE_INSTANCE;
+                return StringItem.EMPTY_STRING;
             } else if (start.signum() <= 0) {
-                return s;
+                return sv;
             } else if (start.compareTo(slength) > 0) {
-                // this works even where the string contains surrogate pairs,
-                // because the Java length is always >= the XPath length
-                return EmptyString.THE_INSTANCE;
+                return StringItem.EMPTY_STRING;
             } else {
                 lstart = Math.round(start.getDoubleValue());
             }
         }
 
-        if (lstart > s.uLength()) {
-            return EmptyString.THE_INSTANCE;
+        if (lstart > slength) {
+            return StringItem.EMPTY_STRING;
         }
-        return s.uSubstring((int) lstart - 1, s.uLength());
+        return new StringItem(sv.getContent().substring((int) lstart - 1, slength));
     }
 
     /**
@@ -112,25 +105,25 @@ public class Substring extends SystemFunction implements Callable {
      * @return the substring starting at this position.
      */
 
-    public static UnicodeString substring(StringValue sv, NumericValue start, /*@NotNull*/ NumericValue len) {
+    public static StringItem substring(StringItem sv, NumericValue start, /*@NotNull*/ NumericValue len) {
 
-        int slength = sv.getStringLengthUpperBound();
+        long slength = sv.length();
 
         long lstart;
         if (start instanceof Int64Value) {
             //noinspection RedundantCast
             lstart = ((Int64Value) start).longValue();
             if (lstart > slength) {
-                return EmptyString.THE_INSTANCE;
+                return StringItem.EMPTY_STRING;
             }
         } else {
             // We need to be careful to handle cases such as plus/minus infinity and NaN
             if (start.isNaN()) {
-                return EmptyString.THE_INSTANCE;
+                return StringItem.EMPTY_STRING;
             } else if (start.compareTo(slength) > 0) {
                 // this works even where the string contains surrogate pairs,
                 // because the Java length is always >= the XPath length
-                return EmptyString.THE_INSTANCE;
+                return StringItem.EMPTY_STRING;
             } else {
                 double dstart = start.getDoubleValue();
                 lstart = Double.isInfinite(dstart) ? -Integer.MAX_VALUE : Math.round(dstart);
@@ -141,14 +134,14 @@ public class Substring extends SystemFunction implements Callable {
         if (len instanceof Int64Value) {
             llen = ((Int64Value) len).longValue();
             if (llen <= 0) {
-                return EmptyString.THE_INSTANCE;
+                return StringItem.EMPTY_STRING;
             }
         } else {
             if (len.isNaN()) {
-                return EmptyString.THE_INSTANCE;
+                return StringItem.EMPTY_STRING;
             }
             if (len.signum() <= 0) {
-                return EmptyString.THE_INSTANCE;
+                return StringItem.EMPTY_STRING;
             }
             double dlen = len.getDoubleValue();
             if (Double.isInfinite(dlen)) {
@@ -159,24 +152,22 @@ public class Substring extends SystemFunction implements Callable {
         }
         long lend = lstart + llen;
         if (lend < lstart) {
-            return EmptyString.THE_INSTANCE;
+            return StringItem.EMPTY_STRING;
         }
 
-        UnicodeString us = sv.getUnicodeString();
-        int clength = us.uLength();
         int a1 = (int) lstart - 1;
-        if (a1 >= clength) {
-            return EmptyString.THE_INSTANCE;
+        if (a1 >= slength) {
+            return StringItem.EMPTY_STRING;
         }
-        int a2 = Math.min(clength, (int) lend - 1);
+        long a2 = Math.min(slength, (int) lend - 1);
         if (a1 < 0) {
             if (a2 < 0) {
-                return EmptyString.THE_INSTANCE;
+                return StringItem.EMPTY_STRING;
             } else {
                 a1 = 0;
             }
         }
-        return us.uSubstring(a1, a2);
+        return new StringItem(sv.getContent().substring(a1, a2));
     }
 
     /**
@@ -189,17 +180,17 @@ public class Substring extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue arg0 = (StringValue) arguments[0].head();
+    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+        StringItem arg0 = (StringItem) arguments[0].head();
         if (arg0 == null) {
-            return One.string("");
+            return StringItem.EMPTY_STRING;
         }
         NumericValue arg1 = (NumericValue) arguments[1].head();
         if (arguments.length == 2) {
-            return new ZeroOrOne(StringValue.makeStringValue(substring(arg0, arg1)));
+            return substring(arg0, arg1);
         } else {
             NumericValue arg2 = (NumericValue) arguments[2].head();
-            return new ZeroOrOne(StringValue.makeStringValue(substring(arg0, arg1, arg2)));
+            return substring(arg0, arg1, arg2);
         }
     }
 

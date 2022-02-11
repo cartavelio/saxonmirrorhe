@@ -20,7 +20,7 @@ import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 
 import java.util.function.BiConsumer;
@@ -35,7 +35,7 @@ import java.util.function.BiConsumer;
 
 public class FixedElement extends ElementCreator {
 
-    private NodeName elementName;
+    private final NodeName elementName;
     /*@NotNull*/ protected NamespaceMap namespaceBindings;
     private ItemType itemType;
 
@@ -436,7 +436,7 @@ public class FixedElement extends ElementCreator {
             if (attValue instanceof StringLiteral) {
                 try {
                     String[] parts = NameChecker.getQNameParts(
-                            ((StringLiteral) attValue).getStringValue());
+                            ((StringLiteral) attValue).stringify());
                     // The only namespace bindings we can trust are those declared on this element
                     // We could also trust those on enclosing LREs in the same function/template,
                     // but it's not a big win to go looking for them.
@@ -558,17 +558,17 @@ public class FixedElement extends ElementCreator {
         if (!flags.isEmpty()) {
             out.emitAttribute("flags", flags);
         }
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         if (!namespaceBindings.isEmpty()) {
             for (NamespaceBinding ns : namespaceBindings) {
                 String prefix = ns.getPrefix();
                 if (!prefix.equals("xml")) {
                     fsb.append(prefix.isEmpty() ? "#" : prefix);
                     if (!ns.getURI().equals(getRetainedStaticContext().getURIForPrefix(prefix, true))) {
-                        fsb.cat('=');
+                        fsb.append('=');
                         fsb.append(ns.getURI());
                     }
-                    fsb.cat(' ');
+                    fsb.append(' ');
                 }
             }
             fsb.setLength(fsb.length() - 1);

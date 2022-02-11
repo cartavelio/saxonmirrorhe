@@ -24,8 +24,8 @@ import net.sf.saxon.value.SequenceType;
  */
 public class ConditionalSorter extends Expression {
 
-    private Operand conditionOp;
-    private Operand sorterOp;
+    private final Operand conditionOp;
+    private final Operand sorterOp;
 
     /**
      * Generalized abstraction of the simplify(), typeCheck(), and optimize() methods, which
@@ -173,7 +173,7 @@ public class ConditionalSorter extends Expression {
         }
         Expression cond = rewriter.rewrite(getCondition());
         if (cond instanceof Literal) {
-            boolean b = ((Literal) cond).getValue().effectiveBooleanValue();
+            boolean b = ((Literal) cond).getGroundedValue().effectiveBooleanValue();
             if (b) {
                 return base;
             } else {

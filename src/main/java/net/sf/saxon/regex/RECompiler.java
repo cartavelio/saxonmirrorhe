@@ -30,16 +30,15 @@
 
 package net.sf.saxon.regex;
 
+import net.sf.saxon.str.*;
 import net.sf.saxon.regex.charclass.*;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.*;
-
-import java.util.function.IntPredicate;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.IntPredicate;
 
 /**
  * A regular expression compiler class.  This class compiles a pattern string into a
@@ -201,19 +200,19 @@ public class RECompiler {
      */
     void bracket() throws RESyntaxException {
         // Current character must be a '{'
-        if (idx >= len || pattern.uCharAt(idx++) != '{') {
+        if (idx >= len || pattern.codePointAt(idx++) != '{') {
             internalError();
         }
 
         // Next char must be a digit
-        if (idx >= len || !isAsciiDigit(pattern.uCharAt(idx))) {
+        if (idx >= len || !isAsciiDigit(pattern.codePointAt(idx))) {
             syntaxError("Expected digit");
         }
 
         // Get min ('m' of {m,n}) number
-        FastStringBuffer number = new FastStringBuffer(16);
-        while (idx < len && isAsciiDigit(pattern.uCharAt(idx))) {
-            number.cat((char) pattern.uCharAt(idx++));
+        StringBuilder number = new StringBuilder(16);
+        while (idx < len && isAsciiDigit(pattern.codePointAt(idx))) {
+            number.appendCodePoint(pattern.codePointAt(idx++));
         }
         try {
             bracketMin = Integer.parseInt(number.toString());
@@ -227,14 +226,14 @@ public class RECompiler {
         }
 
         // If end of expr, optional limit is 0
-        if (pattern.uCharAt(idx) == '}') {
+        if (pattern.codePointAt(idx) == '}') {
             idx++;
             bracketMax = bracketMin;
             return;
         }
 
         // Must have at least {m,} and maybe {m,n}.
-        if (idx >= len || pattern.uCharAt(idx++) != ',') {
+        if (idx >= len || pattern.codePointAt(idx++) != ',') {
             syntaxError("Expected comma");
         }
 
@@ -244,21 +243,21 @@ public class RECompiler {
         }
 
         // If {m,} max is unlimited
-        if (pattern.uCharAt(idx) == '}') {
+        if (pattern.codePointAt(idx) == '}') {
             idx++;
             bracketMax = Integer.MAX_VALUE;
             return;
         }
 
         // Next char must be a digit
-        if (idx >= len || !isAsciiDigit(pattern.uCharAt(idx))) {
+        if (idx >= len || !isAsciiDigit(pattern.codePointAt(idx))) {
             syntaxError("Expected digit");
         }
 
         // Get max number
         number.setLength(0);
-        while (idx < len && isAsciiDigit(pattern.uCharAt(idx))) {
-            number.cat((char) pattern.uCharAt(idx++));
+        while (idx < len && isAsciiDigit(pattern.codePointAt(idx))) {
+            number.appendCodePoint(pattern.codePointAt(idx++));
         }
         try {
             bracketMax = Integer.parseInt(number.toString());
@@ -272,7 +271,7 @@ public class RECompiler {
         }
 
         // Must have close brace
-        if (idx >= len || pattern.uCharAt(idx++) != '}') {
+        if (idx >= len || pattern.codePointAt(idx++) != '}') {
             syntaxError("Missing close brace");
         }
     }
@@ -302,7 +301,7 @@ public class RECompiler {
      */
     CharacterClass escape(boolean inSquareBrackets) throws RESyntaxException {
         // "Shouldn't" happen
-        if (pattern.uCharAt(idx) != '\\') {
+        if (pattern.codePointAt(idx) != '\\') {
             internalError();
         }
 
@@ -313,7 +312,7 @@ public class RECompiler {
 
         // Switch on character after backslash
         idx += 2;
-        int escapeChar = pattern.uCharAt(idx - 1);
+        int escapeChar = pattern.codePointAt(idx - 1);
         switch (escapeChar) {
 
             case 'n':
@@ -383,18 +382,19 @@ public class RECompiler {
                 if (idx == len) {
                     syntaxError("Expected '{' after \\" + escapeChar);
                 }
-                if (pattern.uCharAt(idx) != '{') {
+                if (pattern.codePointAt(idx) != '{') {
                     syntaxError("Expected '{' after \\" + escapeChar);
                 }
-                int close = pattern.uIndexOf('}', idx++);
+                int from = idx++;
+                int close = (int)pattern.indexOf('}', from);
                 if (close == -1) {
                     syntaxError("No closing '}' after \\" + escapeChar);
                 }
-                UnicodeString block = pattern.uSubstring(idx, close);
-                if (block.uLength() == 1 || block.uLength() == 2) {
-                    CharacterClass primary = Categories.getCategory(block.toString());
+                String block = pattern.substring(idx, close).toString();
+                if (block.length() == 1 || block.length() == 2) {
+                    CharacterClass primary = Categories.getCategory(block);
                     if (primary == null) {
-                        syntaxError("Unknown character category " + block.toString());
+                        syntaxError("Unknown character category " + block);
                     }
                     idx = close + 1;
                     if (escapeChar == 'p') {
@@ -402,8 +402,8 @@ public class RECompiler {
                     } else {
                         return makeComplement(primary);
                     }
-                } else if (block.toString().startsWith("Is")) {
-                    String blockName = block.toString().substring(2);
+                } else if (block.startsWith("Is")) {
+                    String blockName = block.substring(2);
                     IntSet uniBlock = UnicodeBlocks.getBlock(blockName);
                     if (uniBlock == null) {
                         // XSD 1.1 says this is not an error, but by default we reject it
@@ -444,7 +444,7 @@ public class RECompiler {
                 } else if (isXPath) {
                     int backRef = escapeChar - '0';
                     while (idx < len) {
-                        int c1 = "0123456789".indexOf(pattern.uCharAt(idx));
+                        int c1 = "0123456789".indexOf(pattern.codePointAt(idx));
                         if (c1 < 0) {
                             break;
                         } else {
@@ -496,12 +496,13 @@ public class RECompiler {
      */
     CharacterClass parseCharacterClass() throws RESyntaxException {
         // Check for bad calling or empty class
-        if (pattern.uCharAt(idx) != '[') {
+        if (pattern.codePointAt(idx) != '[') {
             internalError();
         }
 
         // Check for unterminated or empty class
-        if ((idx + 1) >= len || pattern.uCharAt(++idx) == ']') {
+        int index = ++idx;
+        if ((idx + 1) >= len || pattern.codePointAt(index) == ']') {
             syntaxError("Missing ']'");
         }
 
@@ -526,8 +527,8 @@ public class RECompiler {
         } else if (thereFollows("-[")) {
             syntaxError("Nothing before subtraction operator");
         }
-        while (idx < len && pattern.uCharAt(idx) != ']') {
-            int ch = pattern.uCharAt(idx);
+        while (idx < len && pattern.codePointAt(idx) != ']') {
+            int ch = pattern.codePointAt(idx);
             simpleChar = -1;
             switch (ch) {
                 case '[':
@@ -568,7 +569,7 @@ public class RECompiler {
                         syntaxError("Bad range");
                     } else if (thereFollows("--") && !thereFollows("--[")) {
                         syntaxError("Unescaped hyphen as start of range");
-                    } else if (!isXSD11 && pattern.uCharAt(idx - 1) != '[' && pattern.uCharAt(idx - 1) != '^' && !thereFollows("]") && !thereFollows("-[")) {
+                    } else if (!isXSD11 && pattern.codePointAt(idx - 1) != '[' && pattern.codePointAt(idx - 1) != '^' && !thereFollows("]") && !thereFollows("-[")) {
                         syntaxError("In XSD 1.0, hyphen is allowed only at the beginning or end of a positive character group");
                     } else {
                         simpleChar = '-';
@@ -675,7 +676,7 @@ public class RECompiler {
 
     private boolean thereFollows(String s) {
         return idx + s.length() <= len &&
-                pattern.uSubstring(idx, idx + s.length()).toString().equals(s);
+                pattern.substring(idx, idx + s.length()).equals(BMPString.of(s));
     }
 
     /**
@@ -758,21 +759,21 @@ public class RECompiler {
 
         // Loop while we've got input
 
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        UnicodeBuilder ub = new UnicodeBuilder();
 
         atomLoop:
 
         while (idx < len) {
             // Is there a next char?
             if ((idx + 1) < len) {
-                int c = pattern.uCharAt(idx + 1);
+                int c = pattern.codePointAt(idx + 1);
 
                 // If the next 'char' is an escape, look past the whole escape
-                if (pattern.uCharAt(idx) == '\\') {
+                if (pattern.codePointAt(idx) == '\\') {
                     int idxEscape = idx;
                     escape(false);
                     if (idx < len) {
-                        c = pattern.uCharAt(idx);
+                        c = pattern.codePointAt(idx);
                     }
                     idx = idxEscape;
                 }
@@ -793,7 +794,7 @@ public class RECompiler {
             }
 
             // Switch on current char
-            switch (pattern.uCharAt(idx)) {
+            switch (pattern.codePointAt(idx)) {
                 case ']':
                 case '.':
                 case '[':
@@ -831,7 +832,7 @@ public class RECompiler {
                     }
 
                     // Add escaped char to atom
-                    fsb.appendWideChar(((IntValuePredicate) charClass).getTarget());
+                    ub.append(((IntValuePredicate) charClass).getTarget());
                     lenAtom++;
                     break;
                 }
@@ -846,19 +847,20 @@ public class RECompiler {
                 default:
 
                     // Add normal character to atom
-                    fsb.appendWideChar(pattern.uCharAt(idx++));
+                    int index = idx++;
+                    ub.append(pattern.codePointAt(index));
                     lenAtom++;
                     break;
             }
         }
 
         // This shouldn't happen
-        if (fsb.isEmpty()) {
+        if (ub.isEmpty()) {
             internalError();
         }
 
         // Return the instruction
-        return trace(new Operation.OpAtom(UnicodeString.makeUnicodeString(fsb.condense())));
+        return trace(new Operation.OpAtom(ub.toUnicodeString()));
     }
 
 
@@ -871,7 +873,7 @@ public class RECompiler {
      *          Thrown if the regular expression has invalid syntax.
      */
     Operation parseTerminal(int[] flags) throws RESyntaxException {
-        switch (pattern.uCharAt(idx)) {
+        switch (pattern.codePointAt(idx)) {
             case '$':
                 if (isXPath) {
                     idx++;
@@ -979,7 +981,7 @@ public class RECompiler {
         }
 
         boolean greedy = true;
-        int quantifierType = pattern.uCharAt(idx);
+        int quantifierType = pattern.codePointAt(idx);
         switch (quantifierType) {
             case '?':
             case '*':
@@ -1023,7 +1025,7 @@ public class RECompiler {
         }
 
         // If the next character is a '?', make the quantifier non-greedy (reluctant)
-        if (idx < len && pattern.uCharAt(idx) == '?') {
+        if (idx < len && pattern.codePointAt(idx) == '?') {
             if (!isXPath) {
                 syntaxError("Reluctant quantifiers are not allowed in XSD");
             }
@@ -1085,7 +1087,7 @@ public class RECompiler {
         // Get each possibly qnatified piece and concat
         Operation current = null;
         int[] quantifierFlags = new int[1];
-        while (idx < len && pattern.uCharAt(idx) != '|' && pattern.uCharAt(idx) != ')') {
+        while (idx < len && pattern.codePointAt(idx) != '|' && pattern.codePointAt(idx) != ')') {
             // Get new node
             quantifierFlags[0] = NODE_NORMAL;
             Operation op = piece(quantifierFlags);
@@ -1120,9 +1122,9 @@ public class RECompiler {
         List<Operation> branches = new ArrayList<>();
         int closeParens = capturingOpenParenCount;
         boolean capturing = true;
-        if ((compilerFlags[0] & NODE_TOPLEVEL) == 0 && pattern.uCharAt(idx) == '(') {
+        if ((compilerFlags[0] & NODE_TOPLEVEL) == 0 && pattern.codePointAt(idx) == '(') {
             // if its a cluster ( rather than a proper subexpression ie with backrefs )
-            if (idx + 2 < len && pattern.uCharAt(idx + 1) == '?' && pattern.uCharAt(idx + 2) == ':') {
+            if (idx + 2 < len && pattern.codePointAt(idx + 1) == '?' && pattern.codePointAt(idx + 2) == ':') {
                 if (!isXPath30) {
                     syntaxError("Non-capturing groups allowed only in XPath3.0");
                 }
@@ -1141,7 +1143,7 @@ public class RECompiler {
         branches.add(parseBranch());
 
         // Loop through branches
-        while (idx < len && pattern.uCharAt(idx) == '|') {
+        while (idx < len && pattern.codePointAt(idx) == '|') {
             idx++;
             branches.add(parseBranch());
         }
@@ -1155,7 +1157,7 @@ public class RECompiler {
 
         // Create an ending node (either a close paren or an OP_END)
         if (paren > 0) {
-            if (idx < len && pattern.uCharAt(idx) == ')') {
+            if (idx < len && pattern.codePointAt(idx) == ')') {
                 idx++;
             } else {
                 syntaxError("Missing close paren");
@@ -1213,9 +1215,9 @@ public class RECompiler {
         // Initialize variables for compilation
         //System.err.println("Compiling regex " + pattern);
         this.pattern = pattern;                         // Save pattern in instance variable
-        len = pattern.uLength();                         // Precompute pattern length for speed
+        len = this.pattern.length32();                  // Precompute pattern length for speed
         idx = 0;                                        // Set parsing index to the first character
-        capturingOpenParenCount = 1;                                     // Set paren level to 1 (the implicit outer parens)
+        capturingOpenParenCount = 1;                    // Set paren level to 1 (the implicit outer parens)
 
         if (reFlags.isLiteral()) {
 
@@ -1231,40 +1233,32 @@ public class RECompiler {
             if (reFlags.isAllowWhitespace()) {
                 // 'x' flag is set. Preprocess the expression to strip whitespace, other than between
                 // square brackets
-                FastStringBuffer sb = new FastStringBuffer(pattern.uLength());
+                UnicodeBuilder sb = new UnicodeBuilder();
                 int nesting = 0;
-                boolean astral = false;
                 boolean escaped = false;
-                for (int i = 0; i < pattern.uLength(); i++) {
-                    int ch = pattern.uCharAt(i);
-                    if (ch > 65535) {
-                        astral = true;
-                    }
+                IntIterator iter = pattern.codePoints();
+                while (iter.hasNext()) {
+                    int ch = iter.next();
                     if (ch == '\\' && !escaped) {
                         escaped = true;
-                        sb.appendWideChar(ch);
+                        sb.append(ch);
                     } else if (ch == '[' && !escaped) {
                         nesting++;
                         escaped = false;
-                        sb.appendWideChar(ch);
+                        sb.append(ch);
                     } else if (ch == ']' && !escaped) {
                         nesting--;
                         escaped = false;
-                        sb.appendWideChar(ch);
-                    } else if (nesting == 0 && Whitespace.isWhitespace(ch)) {
+                        sb.append(ch);
+                    } else if (nesting == 0 && Whitespace.isWhite(ch)) {
                         // no action
                     } else {
                         escaped = false;
-                        sb.appendWideChar(ch);
+                        sb.append(ch);
                     }
                 }
-                if (astral) {
-                    pattern = new GeneralUnicodeString(sb);
-                } else {
-                    pattern = new BMPString(sb);
-                }
-                this.pattern = pattern;
-                this.len = pattern.uLength();
+                this.pattern = sb.toUnicodeString();
+                this.len = this.pattern.length32();
             }
 
             // Initialize pass by reference flags value
@@ -1275,7 +1269,7 @@ public class RECompiler {
 
             // Should be at end of input
             if (idx != len) {
-                if (pattern.uCharAt(idx) == ')') {
+                if (pattern.codePointAt(idx) == ')') {
                     syntaxError("Unmatched close paren");
                 }
                 syntaxError("Unexpected input remains");

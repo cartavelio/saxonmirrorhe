@@ -21,7 +21,7 @@ import net.sf.saxon.value.StringToDouble11;
 
 public class NumericComparer11 extends NumericComparer {
 
-    private static NumericComparer11 THE_INSTANCE = new NumericComparer11();
+    private static final NumericComparer11 THE_INSTANCE = new NumericComparer11();
 
     /*@NotNull*/
     public static NumericComparer getInstance() {

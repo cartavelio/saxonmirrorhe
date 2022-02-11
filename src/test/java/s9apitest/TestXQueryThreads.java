@@ -4,7 +4,6 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
@@ -20,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class TestXQueryThreads {
     @Test
-    @Tag("skip") // This test fails for what appear to be timing-related reasons; unclear of the significance
     public void testForOpenThreads() throws Exception {
         EnterpriseConfiguration configuration = new EnterpriseConfiguration();
         Processor saxonProcessor = new Processor(configuration);

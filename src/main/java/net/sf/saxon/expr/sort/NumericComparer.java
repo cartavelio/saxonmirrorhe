@@ -23,7 +23,7 @@ import net.sf.saxon.value.NumericValue;
 
 public class NumericComparer implements AtomicComparer {
 
-    private static NumericComparer THE_INSTANCE = new NumericComparer();
+    private static final NumericComparer THE_INSTANCE = new NumericComparer();
     protected StringToDouble converter = StringToDouble.getInstance();
 
     public static NumericComparer getInstance() {
@@ -73,7 +73,7 @@ public class NumericComparer implements AtomicComparer {
             d1 = Double.NaN;
         } else {
             try {
-                d1 = converter.stringToNumber(a.getStringValueCS());
+                d1 = converter.stringToNumber(a.getUnicodeStringValue());
             } catch (NumberFormatException err) {
                 d1 = Double.NaN;
             }
@@ -85,7 +85,7 @@ public class NumericComparer implements AtomicComparer {
             d2 = Double.NaN;
         } else {
             try {
-                d2 = converter.stringToNumber(b.getStringValueCS());
+                d2 = converter.stringToNumber(b.getUnicodeStringValue());
             } catch (NumberFormatException err) {
                 d2 = Double.NaN;
             }

@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
  */
 public class ErrorIterator implements SequenceIterator {
 
-    private XPathException exception;
+    private final XPathException exception;
 
     public ErrorIterator(XPathException exception) {
         this.exception = exception;

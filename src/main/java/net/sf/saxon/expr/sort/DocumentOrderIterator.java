@@ -26,9 +26,9 @@ import java.util.List;
 
 public final class DocumentOrderIterator implements SequenceIterator {
 
-    private SequenceIterator iterator;
-    private List<NodeInfo> sequence;
-    private ItemOrderComparer comparer;
+    private final SequenceIterator iterator;
+    private final List<NodeInfo> sequence;
+    private final ItemOrderComparer comparer;
     private NodeInfo current = null;
 
     /**

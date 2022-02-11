@@ -15,6 +15,7 @@ import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceCollection;
 import net.sf.saxon.om.*;
 import net.sf.saxon.resource.AbstractResourceCollection;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -27,7 +28,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 /**
@@ -54,7 +55,7 @@ public class CollectionFn extends SystemFunction implements Callable {
      */
 
     private static class EmptyCollection implements ResourceCollection {
-        private String collectionUri;
+        private final String collectionUri;
 
         EmptyCollection(String cUri) {
             collectionUri = cUri;
@@ -67,12 +68,12 @@ public class CollectionFn extends SystemFunction implements Callable {
 
         @Override
         public Iterator<String> getResourceURIs(XPathContext context) {
-            return new ArrayList<String>().iterator();
+            return Collections.emptyIterator();
         }
 
         @Override
         public Iterator<Resource> getResources(XPathContext context) {
-            return new ArrayList<Resource>().iterator();
+            return Collections.emptyIterator();
         }
 
         @Override
@@ -102,7 +103,7 @@ public class CollectionFn extends SystemFunction implements Callable {
             try {
                 uri = new URI(href);
             } catch (URISyntaxException e) {
-                href = IriToUri.iriToUri(href).toString();
+                href = IriToUri.iriToUri(StringView.tidy(href)).toString();
                 try {
                     uri = new URI(href);
                 } catch (URISyntaxException e2) {

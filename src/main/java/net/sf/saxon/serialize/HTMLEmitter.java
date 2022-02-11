@@ -8,13 +8,16 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.SaxonOutputKeys;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CompressedWhitespace;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.tiny.CompressedWhitespace;
 import net.sf.saxon.type.SchemaType;
 
 import javax.xml.transform.OutputKeys;
@@ -35,15 +38,15 @@ public abstract class HTMLEmitter extends XMLEmitter {
     private static final int REP_DECIMAL = 2;
     private static final int REP_HEX = 3;
 
-    private int nonASCIIRepresentation = REP_NATIVE;
-    private int excludedRepresentation = REP_ENTITY;
+    private final int nonASCIIRepresentation = REP_NATIVE;
+    private final int excludedRepresentation = REP_ENTITY;
 
     private int inScript;
     protected int version = 5;
     private String parentElement;
     private String uri;
     private boolean escapeNonAscii = false;
-    private Stack<NodeName> nodeNameStack = new Stack<>();
+    private final Stack<NodeName> nodeNameStack = new Stack<>();
 
     /**
      * Decode preferred representation
@@ -90,8 +93,8 @@ public abstract class HTMLEmitter extends XMLEmitter {
     // we use two HashMaps to avoid unnecessary string concatenations
 
     // Sizes must be large enough: this hash set cannot grow beyond the initial size
-    private static HTMLTagHashSet booleanAttributes = new HTMLTagHashSet(43);
-    private static HTMLTagHashSet booleanCombinations = new HTMLTagHashSet(57);
+    private static final HTMLTagHashSet booleanAttributes = new HTMLTagHashSet(43);
+    private static final HTMLTagHashSet booleanCombinations = new HTMLTagHashSet(57);
 
     // See http://www.w3.org/TR/html5/index.html#attributes-1 (checked 2014-01-07)
 
@@ -269,7 +272,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
      */
 
     @Override
-    protected void writeAttribute(NodeName elCode, String attname, CharSequence value, int properties) throws XPathException {
+    protected void writeAttribute(NodeName elCode, String attname, String value, int properties) throws XPathException {
         try {
             if (uri.isEmpty()) {
                 if (isBooleanAttribute(elCode.getLocalPart(), attname, value.toString())) {
@@ -289,7 +292,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
      */
 
     @Override
-    protected void writeEscape(final CharSequence chars, final boolean inAttribute)
+    protected void writeEscape(UnicodeString chars, final boolean inAttribute)
             throws java.io.IOException, XPathException {
 
         int segstart = 0;
@@ -300,49 +303,44 @@ public abstract class HTMLEmitter extends XMLEmitter {
             return;
         }
         boolean disabled = false;
-
-        while (segstart < chars.length()) {
+        chars = chars.tidy();
+        int[] codePoints = StringTool.expand(chars);
+        while (segstart < codePoints.length) {
             int i = segstart;
 
             // find a maximal sequence of "ordinary" characters
 
             if (escapeNonAscii) {
-                char c;
-                while (i < chars.length() && (c = chars.charAt(i)) < 127 && !specialChars[c]) {
+                int c;
+                while (i < codePoints.length && (c = codePoints[i]) < 127 && !specialChars[c]) {
                     i++;
                 }
             } else {
-                char c;
-                while (i < chars.length() &&
-                        ((c = chars.charAt(i)) < 127 ? !specialChars[c] : (characterSet.inCharset(c) && c > 160)
-                        )
-                        ) {
+                int c;
+                while (i < codePoints.length &&
+                        ((c = codePoints[i]) < 127 ? !specialChars[c] : (characterSet.inCharset(c) && c > 160))) {
                     i++;
                 }
             }
 
             // if this was the whole string, output the string and quit
 
-            if (i == chars.length()) {
-                if (segstart == 0) {
-                    writeCharSequence(chars);
-                } else {
-                    writeCharSequence(chars.subSequence(segstart, i));
-                }
+            if (i == codePoints.length) {
+                chars.write(writer, segstart, i - segstart);
                 return;
             }
 
             // otherwise, output this sequence and continue
             if (i > segstart) {
-                writeCharSequence(chars.subSequence(segstart, i));
+                chars.write(writer, segstart, i - segstart);
             }
 
-            final char c = chars.charAt(i);
+            final int c = codePoints[i];
             if (c == 0) {
                 // used to switch escaping on and off
                 disabled = !disabled;
             } else if (disabled) {
-                writer.write(c);
+                writeCodePoint(c);
             } else if (c <= 127) {
                 // handle a special ASCII character
                 if (inAttribute) {
@@ -351,7 +349,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
                     } else if (c == '>') {
                         writer.write("&gt;");   // recommended for older browsers
                     } else if (c == '&') {
-                        if (i + 1 < chars.length() && chars.charAt(i + 1) == '{') {
+                        if (i + 1 < codePoints.length && codePoints[i + 1] == '{') {
                             writer.write('&');                   // not escaped if followed by '{'
                         } else {
                             writer.write("&amp;");
@@ -393,20 +391,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
                 // always output NBSP as an entity reference
                 writer.write("&nbsp;");
 
-            } else if (c >= 55296 && c <= 56319) {  //handle surrogate pair
-
-                //A surrogate pair is two consecutive Unicode characters.  The first
-                //is in the range D800 to DBFF, the second is in the range DC00 to DFFF.
-                //To compute the numeric value of the character corresponding to a surrogate
-                //pair, use this formula (all numbers are hex):
-                //(FirstChar - D800) * 400 + (SecondChar - DC00) + 10000
-
-                // we'll trust the data to be sound
-                int charval = (((int) c - 55296) * 1024) + ((int) chars.charAt(i + 1) - 56320) + 65536;
-                characterReferenceGenerator.outputCharacterReference(charval, writer);
-                i++;
-
-            } else if (escapeNonAscii || !characterSet.inCharset(c)) {
+            } else if (c > 65535 || escapeNonAscii || !characterSet.inCharset(c)) {
                 characterReferenceGenerator.outputCharacterReference(c, writer);
             } else {
                 writer.write(c);
@@ -463,7 +448,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties)
+    public void characters(CodePoints chars, Location locationId, int properties)
             throws XPathException {
         if (inScript > 0) {
             properties |= ReceiverOption.DISABLE_ESCAPING;
@@ -476,17 +461,16 @@ public abstract class HTMLEmitter extends XMLEmitter {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
             throws XPathException {
         if (!started) {
             openDocument();
         }
-        for (int i = 0; i < data.length(); i++) {
-            if (data.charAt(i) == '>') {
-                XPathException err = new XPathException("A processing instruction in HTML must not contain a > character");
-                err.setErrorCode("SERE0015");
-                throw err;
-            }
+        UnicodeString t = data.tidy();
+        if (t.indexOf('>') >= 0) {
+            XPathException err = new XPathException("A processing instruction in HTML must not contain a > character");
+            err.setErrorCode("SERE0015");
+            throw err;
         }
         try {
             if (openStartTag) {
@@ -495,7 +479,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
             writer.write("<?");
             writer.write(target);
             writer.write(' ');
-            writeCharSequence(data);
+            data.write(writer);
             writer.write('>');
         } catch (java.io.IOException err) {
             throw new XPathException(err);

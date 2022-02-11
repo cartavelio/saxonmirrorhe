@@ -16,6 +16,9 @@ import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -24,7 +27,7 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 /**
@@ -33,9 +36,9 @@ import net.sf.saxon.value.Whitespace;
 
 public class Message extends Instruction {
 
-    private Operand selectOp;
-    private Operand terminateOp;
-    private Operand errorCodeOp;
+    private final Operand selectOp;
+    private final Operand terminateOp;
+    private final Operand errorCodeOp;
 
     private boolean isAssert;
 
@@ -50,7 +53,7 @@ public class Message extends Instruction {
 
     public Message(Expression select, Expression terminate, Expression errorCode) {
         if (errorCode == null) {
-            errorCode = new StringLiteral("Q{" + NamespaceConstant.ERR + "}XTMM9000");
+            errorCode = new StringLiteral(BMPString.of("Q{" + NamespaceConstant.ERR + "}XTMM9000"));
         }
         selectOp = new Operand(this, select, OperandRole.SINGLE_ATOMIC);
         terminateOp = new Operand(this, terminate, OperandRole.SINGLE_ATOMIC);
@@ -193,7 +196,7 @@ public class Message extends Instruction {
         }
 
         boolean abort = false;
-        String term = Whitespace.trim(getTerminate().evaluateAsString(context));
+        String term = Whitespace.trim(getTerminate().evaluateAsString(context)).toString();
         switch (term) {
             case "no":
             case "false":
@@ -259,7 +262,7 @@ public class Message extends Instruction {
 //                rec.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
 //            }
         } catch (XPathException e) {
-            cco.append(new StringValue("Error " + e.getErrorCodeLocalPart() +
+            cco.append(StringItem.bmp("Error " + e.getErrorCodeLocalPart() +
                                                " while evaluating xsl:message at line "
                                                + getLocation().getLineNumber() + " of " + getLocation().getSystemId() +
                                                ": " + e.getMessage()));
@@ -319,12 +322,12 @@ public class Message extends Instruction {
      */
 
     private static class MessageAdapter extends ProxyReceiver {
-        private String errorCode;
-        private Location location;
+        private final CodePoints errorCode;
+        private final Location location;
 
         public MessageAdapter(SequenceReceiver next, String errorCode, Location location) {
             super(next);
-            this.errorCode = errorCode;
+            this.errorCode = StringView.of(errorCode);
             this.location = location;
         }
 
@@ -347,16 +350,16 @@ public class Message extends Instruction {
                 int kind = ((NodeInfo) item).getNodeKind();
                 if (kind == Type.ATTRIBUTE) {
                     String attName = ((NodeInfo)item).getDisplayName();
-                    processingInstruction("attribute", "name=\"" + attName + "\" value=\"" + item.getStringValue() + "\"", locationId, ReceiverOption.NONE);
+                    processingInstruction("attribute", StringView.of("name=\"" + attName + "\" value=\"" + item.getUnicodeStringValue() + "\""), locationId, ReceiverOption.NONE);
                     return;
                 } else if (kind == Type.NAMESPACE) {
                     String prefix = ((NodeInfo) item).getLocalPart();
-                    processingInstruction("namespace", "prefix=\"" + prefix + "\" uri=\"" + item.getStringValue() + "\"", Loc.NONE, ReceiverOption.NONE);
+                    processingInstruction("namespace", StringView.of("prefix=\"" + prefix + "\" uri=\"" + item.getUnicodeStringValue() + "\""), Loc.NONE, ReceiverOption.NONE);
                     return;
                 }
             } else if (item instanceof Function && !((Function) item).isArray()) {
-                CharSequence representation = ((Function) item).isMap() ? Err.depict(item) : "Function " + Err.depict(item);
-                nextReceiver.characters(representation, locationId, ReceiverOption.NONE);
+                String representation = ((Function) item).isMap() ? Err.depict(item) : "Function " + Err.depict(item);
+                nextReceiver.characters(StringView.of(representation), locationId, ReceiverOption.NONE);
                 return;
             }
             nextReceiver.append(item, locationId, copyNamespaces);

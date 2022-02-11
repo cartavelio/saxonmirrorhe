@@ -21,7 +21,7 @@ import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,7 +59,7 @@ public class SQLDelete extends ExtensionInstruction {
 
         AttributeInfo dbWhere = atts.get("", "where");
         if (dbWhere == null) {
-            where = new StringLiteral(StringValue.EMPTY_STRING);
+            where = new StringLiteral(StringItem.EMPTY_STRING);
         } else {
             where = makeAttributeValueTemplate(dbWhere.getValue(), dbWhere);
         }

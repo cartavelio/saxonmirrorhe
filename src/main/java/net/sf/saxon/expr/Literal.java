@@ -20,6 +20,8 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.query.QueryResult;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -40,7 +42,7 @@ import java.util.Properties;
 
 public class Literal extends Expression {
 
-    private GroundedValue value;
+    private final GroundedValue value;
 
     /**
      * Create a literal as a wrapper around a Value
@@ -59,9 +61,9 @@ public class Literal extends Expression {
      * @return a Literal of the string sequence
      */
     public static Literal makeStringsLiteral(List<String> strings) {
-        List<StringValue> values = new ArrayList<>();
+        List<StringItem> values = new ArrayList<>();
         for (String s : strings) {
-            values.add(new StringValue(s));
+            values.add(new StringItem(s));
         }
         GroundedValue gv = SequenceExtent.makeSequenceExtent(values);
         return makeLiteral(gv);
@@ -73,7 +75,7 @@ public class Literal extends Expression {
      * @return the constant value
      */
 
-    public GroundedValue getValue() {
+    public GroundedValue getGroundedValue() {
         return value;
     }
 
@@ -392,12 +394,12 @@ public class Literal extends Expression {
       */
 
     @Override
-    public CharSequence evaluateAsString(XPathContext context) throws XPathException {
+    public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
         AtomicValue value = (AtomicValue) evaluateItem(context);
         if (value == null) {
-            return "";
+            return EmptyUniString.getInstance();
         }
-        return value.getStringValueCS();
+        return value.getUnicodeStringValue();
     }
 
 
@@ -701,7 +703,7 @@ public class Literal extends Expression {
      */
 
     public static boolean isAtomic(Expression exp) {
-        return exp instanceof Literal && ((Literal) exp).getValue() instanceof AtomicValue;
+        return exp instanceof Literal && ((Literal) exp).getGroundedValue() instanceof AtomicValue;
     }
 
     /**
@@ -713,7 +715,7 @@ public class Literal extends Expression {
      */
 
     public static boolean isEmptySequence(Expression exp) {
-        return exp instanceof Literal && ((Literal) exp).getValue().getLength() == 0;
+        return exp instanceof Literal && ((Literal) exp).getGroundedValue().getLength() == 0;
     }
 
     /**
@@ -727,7 +729,7 @@ public class Literal extends Expression {
 
     public static boolean isConstantBoolean(Expression exp, boolean value) {
         if (exp instanceof Literal) {
-            GroundedValue b = ((Literal) exp).getValue();
+            GroundedValue b = ((Literal) exp).getGroundedValue();
             return b instanceof BooleanValue && ((BooleanValue) b).getBooleanValue() == value;
         }
         return false;
@@ -745,7 +747,7 @@ public class Literal extends Expression {
     public static boolean hasEffectiveBooleanValue(Expression exp, boolean value) {
         if (exp instanceof Literal) {
             try {
-                return value == ((Literal) exp).getValue().effectiveBooleanValue();
+                return value == ((Literal) exp).getGroundedValue().effectiveBooleanValue();
             } catch (XPathException err) {
                 return false;
             }
@@ -762,7 +764,7 @@ public class Literal extends Expression {
 
     public static boolean isConstantOne(Expression exp) {
         if (exp instanceof Literal) {
-            GroundedValue v = ((Literal) exp).getValue();
+            GroundedValue v = ((Literal) exp).getGroundedValue();
             return v instanceof Int64Value && ((Int64Value) v).longValue() == 1;
         }
         return false;
@@ -802,8 +804,8 @@ public class Literal extends Expression {
 
     public static <T extends Item> Literal makeLiteral(GroundedValue value) {
         value = value.reduce();
-        if (value instanceof StringValue) {
-            return new StringLiteral((StringValue) value);
+        if (value instanceof StringItem) {
+            return new StringLiteral((StringItem) value);
         } else if (value instanceof Function && !(value instanceof MapItem || value instanceof ArrayItem)) {
             return new FunctionLiteral((Function) value);
         } else {

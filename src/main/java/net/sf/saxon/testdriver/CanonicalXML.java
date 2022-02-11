@@ -38,10 +38,10 @@ import java.net.URISyntaxException;
 public class CanonicalXML extends DefaultHandler implements LexicalHandler {
 
     private StringWriter out;
-    private StringBuffer buf = new StringBuffer();
+    private final StringBuffer buf = new StringBuffer();
     private boolean strip = false;
     private boolean isWhite = true;
-    private AttributesImpl namespaces = new AttributesImpl();
+    private final AttributesImpl namespaces = new AttributesImpl();
 
     public String toCanonicalXML(XMLReader parser, InputSource inputSource, boolean stripSpace) {
 
@@ -403,7 +403,7 @@ public class CanonicalXML extends DefaultHandler implements LexicalHandler {
     }
 
     @Override
-    public void comment(char ch[], int start, int length) throws SAXException {
+    public void comment(char[] ch, int start, int length) throws SAXException {
         flushChars();
         write("<!--");
         write(new String(ch, start, length));

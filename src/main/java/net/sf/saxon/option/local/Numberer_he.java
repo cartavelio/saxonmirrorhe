@@ -9,8 +9,7 @@ package net.sf.saxon.option.local;
 
 import net.sf.saxon.expr.number.Numberer_en;
 import net.sf.saxon.expr.number.NumericGroupFormatter;
-import net.sf.saxon.regex.UnicodeString;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.UnicodeString;
 
 
 /**
@@ -43,8 +42,8 @@ public class Numberer_he extends Numberer_en {
                          String letterValue,
                          String ordinal) {
 
-        FastStringBuffer sb = new FastStringBuffer(16);
-        int formchar = picture.uCharAt(0);
+        StringBuilder sb = new StringBuilder(16);
+        int formchar = picture.codePointAt(0);
 
         /* only catch traditional formatting. */
         if (!"traditional".equals(letterValue)) {
@@ -125,15 +124,15 @@ public class Numberer_he extends Numberer_en {
 
     }
 
-    private static String[] hebrewUnits = {
+    private static final String[] hebrewUnits = {
             "", "\u05d0", "\u05d1", "\u05d2", "\u05d3", "\u05d4", "\u05d5", "\u05d6", "\u05d7", "\u05d8",
             "\u05d9"};
 
-    private static String[] hebrewTens = {
+    private static final String[] hebrewTens = {
             "", "\u05d9", "\u05db", "\u05dc", "\u05de", "\u05e0", "\u05e1",
             "\u05e2", "\u05e4", "\u05e6"};
 
-    private static String[] hebrewHundreds = {
+    private static final String[] hebrewHundreds = {
             "", "\u05e7", "\u05e8", "\u05e9", "\u05ea", "\u05ea\u05e7",
             "\u05ea\u05e8", "\u05ea\u05e9", "\u05ea\u05ea", "\u05ea\u05ea\u05e7"};
 

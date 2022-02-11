@@ -7,8 +7,7 @@
 
 package net.sf.saxon.expr.number;
 
-import net.sf.saxon.regex.UnicodeString;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.UnicodeString;
 
 
 /**
@@ -37,7 +36,7 @@ public abstract class NumericGroupFormatter {
      * @return the reformatted number
      */
 
-    public abstract String format(FastStringBuffer value);
+    public abstract String format(String value);
 
     /**
      * Get the grouping separator to be used, as a Unicode codepoint. If more than one is used, return the last.

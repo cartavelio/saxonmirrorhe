@@ -18,7 +18,7 @@ import java.text.CollationKey;
  */
 public class CollationMatchKey implements AtomicMatchKey, Comparable {
 
-    private CollationKey key;
+    private final CollationKey key;
 
     public CollationMatchKey(CollationKey key) {
         this.key = key;

@@ -7,7 +7,7 @@
 
 package internaltests;
 
-import net.sf.saxon.regex.LatinString;
+import net.sf.saxon.str.BMPString;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,32 +20,27 @@ public class LatinStringTests {
 
     @Test
     public void testToString() {
-        assertTrue(new LatinString("abc123").toString().equals("abc123"));
+        assertTrue(BMPString.of("abc123").toString().equals("abc123"));
     }
 
     @Test
     public void testEquals() {
-        assertTrue(new LatinString("abc123").equals(new LatinString("abc123")));
+        assertTrue(BMPString.of("abc123").equals(BMPString.of("abc123")));
     }
 
     @Test
     public void testLength() {
-        assertEquals(6, new LatinString("abc123").length());
+        assertEquals(6, BMPString.of("abc123").length());
     }
 
     @Test
     public void testCharAt() {
-        assertEquals(new LatinString("abc123").charAt(3), '1');
-    }
-
-    @Test
-    public void testIsEnd() {
-        assertEquals(false, new LatinString("abc123").isEnd(3));
+        assertEquals('1', BMPString.of("abc123").codePointAt(3));
     }
 
     @Test
     public void testSubsequence() {
-        assertEquals(new LatinString("abc123").subSequence(1, 6).toString(), "bc123");
+        assertEquals("bc123", BMPString.of("abc123").substring(1, 6).toString());
     }
 
 

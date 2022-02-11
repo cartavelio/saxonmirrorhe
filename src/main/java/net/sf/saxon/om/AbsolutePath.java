@@ -9,7 +9,7 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 
@@ -23,7 +23,7 @@ import java.util.List;
 
 public class AbsolutePath {
 
-    private List<PathElement> path;
+    private final List<PathElement> path;
     private String systemId;
 
 
@@ -76,9 +76,9 @@ public class AbsolutePath {
      */
 
     public String getPathUsingPrefixes() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         for (AbsolutePath.PathElement pe : path) {
-            fsb.cat('/');
+            fsb.append('/');
             pe.toString(fsb, 'p');
         }
         return fsb.toString();
@@ -91,9 +91,9 @@ public class AbsolutePath {
      */
 
     public String getPathUsingUris() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         for (AbsolutePath.PathElement pe : path) {
-            fsb.cat('/');
+            fsb.append('/');
             pe.toString(fsb, 'u');
         }
         return fsb.toString();
@@ -106,9 +106,9 @@ public class AbsolutePath {
      */
 
     public String getPathUsingAbbreviatedUris() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         for (AbsolutePath.PathElement pe : path) {
-            fsb.cat('/');
+            fsb.append('/');
             pe.toString(fsb, 's');
         }
         return fsb.toString();
@@ -199,13 +199,13 @@ public class AbsolutePath {
          *               'p': use namepace prefix. 'u': use full URI. 's': use abbreviated URI
          */
 
-        public void toString(FastStringBuffer fsb, char option) {
+        public void toString(StringBuilder fsb, char option) {
             switch (nodeKind) {
                 case Type.DOCUMENT:
                     fsb.append("(/)");
                     break;
                 case Type.ATTRIBUTE:
-                    fsb.cat('@');
+                    fsb.append('@');
                     if (!name.getURI().isEmpty()) {
                         if (option == 'u') {
                             fsb.append("Q{");
@@ -215,7 +215,7 @@ public class AbsolutePath {
                             String prefix = name.getPrefix();
                             if (!prefix.isEmpty()) {
                                 fsb.append(prefix);
-                                fsb.cat(':');
+                                fsb.append(':');
                             }
                         } else if (option == 's') {
                             fsb.append("Q{");
@@ -234,7 +234,7 @@ public class AbsolutePath {
                         String prefix = name.getPrefix();
                         if (!prefix.isEmpty()) {
                             fsb.append(prefix);
-                            fsb.cat(':');
+                            fsb.append(':');
                         }
                     } else if (option == 's') {
                         if (!name.getURI().isEmpty()) {
@@ -271,12 +271,12 @@ public class AbsolutePath {
             }
         }
 
-        private void appendPredicate(FastStringBuffer fsb) {
+        private void appendPredicate(StringBuilder fsb) {
             int index = getIndex();
             if (index != -1) {
-                fsb.cat('[');
+                fsb.append('[');
                 fsb.append(getIndex() + "");
-                fsb.cat(']');
+                fsb.append(']');
             }
         }
     }

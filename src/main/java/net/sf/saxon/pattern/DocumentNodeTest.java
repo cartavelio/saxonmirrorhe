@@ -28,7 +28,7 @@ import java.util.Optional;
 public class DocumentNodeTest extends NodeTest {
 
 
-    private NodeTest elementTest;
+    private final NodeTest elementTest;
 
     public DocumentNodeTest(NodeTest elementTest) {
         this.elementTest = elementTest;

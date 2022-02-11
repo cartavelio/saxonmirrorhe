@@ -14,7 +14,6 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -146,7 +145,6 @@ public class TestCollections {
     }
 
     @Test
-    @Tag("performance")
     public void testParallelSpeed() {
         try {
             for (int i = 0; i < 5; i++) {
@@ -262,6 +260,7 @@ public class TestCollections {
             Configuration config = p.getUnderlyingConfiguration();
             config.registerFileExtension("json", "personal/plain");
             config.registerMediaType("personal/plain", new ResourceFactory() {
+                @Override
                 public Resource makeResource(Configuration config, AbstractResourceCollection.InputDetails details) throws XPathException {
                     return new JSONResource(details);
                 }
@@ -520,6 +519,7 @@ public class TestCollections {
             Processor p = new Processor(true);
             final Configuration config = p.getUnderlyingConfiguration();
             config.setCollectionFinder(new CollectionFinder() {
+                @Override
                 public ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException {
                     return new DirectoryCollection(config, "http://example.com/collection", new File(ConfigTest.DATA_DIR + "trax/"),
                         new URIQueryParameters("select=*.xml;recurse=yes", context.getConfiguration()));
@@ -632,6 +632,7 @@ public class TestCollections {
             fail(e.getMessage());
         }
     }
+
 
     public static class Finder implements CollectionFinder {
         @Override

@@ -152,9 +152,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
         public int onError = URIQueryParameters.ON_ERROR_FAIL;
 
         public InputStream getInputStream() throws IOException {
-            URL url = new URL(resourceUri);
-            URLConnection connection = url.openConnection();
-            return connection.getInputStream();
+            return Loader.urlStream(new URL(resourceUri));
         }
 
         public byte[] obtainBinaryContent() throws XPathException {
@@ -214,9 +212,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                     inputDetails.contentType = guessContentTypeFromName(resourceURI);
                 }
             } else {
-                URL url = uri.toURL();
-                URLConnection connection = url.openConnection();
-                //inputDetails.inputStream = connection.getInputStream();
+                URLConnection connection = Loader.urlConnection(uri.toURL());
                 inputDetails.contentType = connection.getContentType();
                 inputDetails.encoding = connection.getContentEncoding();
                 for (String param : inputDetails.contentType.replace(" ", "").split(";")) {
@@ -240,9 +236,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                         stream = new ByteArrayInputStream(inputDetails.binaryContent);
                     }
                 } else {
-                    URL url = uri.toURL();
-                    URLConnection connection = url.openConnection();
-                    stream = connection.getInputStream();
+                    stream = Loader.urlStream(uri.toURL());
                 }
                 inputDetails.contentType = guessContentTypeFromContent(stream);
                 stream.close();

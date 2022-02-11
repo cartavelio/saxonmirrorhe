@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class GizmoCompleterTests {
 
-    private static String[] keywords = new String[]{
+    private static final String[] keywords = new String[]{
             "ancestor::", "ancestor-or-self::", "array", "attribute", "cast as", "castable as", "child::",
             "comment()", "descendant::", "descendant-or-self::", "document-node()", "element()", "else",
             "empty-sequence()", "every", "except", "following::", "following-sibling::", "function",
@@ -35,7 +35,7 @@ public class GizmoCompleterTests {
             "union"
     };
 
-    private static String[] names = new String[]{"BOOKLIST", "BOOKS", "ITEM", "TITLE", "AUTHOR", "PUBLISHER",
+    private static final String[] names = new String[]{"BOOKLIST", "BOOKS", "ITEM", "TITLE", "AUTHOR", "PUBLISHER",
             "PRICE", "DIMENSIONS", "CATEGORY", "CATEGORIES", "@CAT", "@GENRE"};
 
     public static String cwd = null;
@@ -131,6 +131,8 @@ public class GizmoCompleterTests {
     }
 
     @Test
+    // Assume the repo/tests/junit/testdata directory is the current directory
+
     public void testFileCompletion001() {
         List<String> options = new ArrayList<>();
         int pos = go("load trax/xml/cit", options);

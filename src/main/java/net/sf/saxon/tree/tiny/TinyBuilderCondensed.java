@@ -9,11 +9,9 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Type;
 import net.sf.saxon.z.IntHashMap;
-
-import java.util.Arrays;
 
 /**
  * Variant of the TinyBuilder to create a tiny tree in which multiple text nodes or attribute
@@ -49,49 +47,49 @@ public class TinyBuilderCondensed extends TinyBuilder {
         // This might have created a TEXTUAL_ELEMENT node
         int last = tree.numberOfNodes - 1;
         boolean sameDepth = tree.depth[last] == getCurrentDepth();
-        if (sameDepth) {
-            boolean isTextualElement = tree.nodeKind[last] == Type.TEXTUAL_ELEMENT;
-
-            // Alternatively, see if there was a final text node
-            boolean hasFinalTextNode = tree.nodeKind[last] == Type.TEXT;
-            if ((isTextualElement || hasFinalTextNode) && (tree.beta[last] <= 256)) {
-                // Get the string value of this final node: works both for text nodes and textual element nodes
-                CharSequence chars = TinyTextImpl.getStringValue(tree, last);
-                // We rely on all relevant implementations of CharSequence having compatible hashcodes (but if they
-                // don't, the only consequence is that we get less compression)
-                int hash = chars.hashCode();
-                int[] nodes = textValues.get(hash);
-                if (nodes != null) {
-                    // We've seen a previous node with this hash value
-                    int used = nodes[0];
-                    for (int i = 1; i < used; i++) {
-                        int nodeNr = nodes[i];
-                        if (nodeNr == 0) {
-                            break;
-                        } else if (isEqual(chars, TinyTextImpl.getStringValue(tree, nodeNr))) {
-                            // the latest text node is equal to some previous text node
-                            int length = tree.alpha[last];
-                            tree.alpha[last] = tree.alpha[nodeNr];
-                            tree.beta[last] = tree.beta[nodeNr];
-                            tree.getCharacterBuffer().setLength(length);
-                            return;
-                        }
-                    }
-                } else {
-                    // Haven't seen this value before; add an entry to the hash table
-                    nodes = new int[4];
-                    nodes[0] = 1;
-                    textValues.put(hash, nodes);
-                }
-                if (nodes[0] + 1 > nodes.length) {
-                    int[] n2 = Arrays.copyOf(nodes, nodes.length * 2);
-                    textValues.put(hash, n2);
-                    nodes = n2;
-                }
-                // Add this node to the list of distinct nodes with this hash code
-                nodes[nodes[0]++] = last;
-            }
-        }
+//        if (sameDepth) {
+//            boolean isTextualElement = tree.nodeKind[last] == Type.TEXTUAL_ELEMENT;
+//
+//            // Alternatively, see if there was a final text node
+//            boolean hasFinalTextNode = tree.nodeKind[last] == Type.TEXT;
+//            if ((isTextualElement || hasFinalTextNode) && (tree.beta[last] <= 256)) {
+//                // Get the string value of this final node: works both for text nodes and textual element nodes
+//                CodePoints chars = TinyTextImpl.getStringValue(tree, last);
+//                // We rely on all relevant implementations of UniString having compatible hashcodes (but if they
+//                // don't, the only consequence is that we get less compression)
+//                int hash = chars.hashCode();
+//                int[] nodes = textValues.get(hash);
+//                if (nodes != null) {
+//                    // We've seen a previous node with this hash value
+//                    int used = nodes[0];
+//                    for (int i = 1; i < used; i++) {
+//                        int nodeNr = nodes[i];
+//                        if (nodeNr == 0) {
+//                            break;
+//                        } else if (isEqual(chars, TinyTextImpl.getStringValue(tree, nodeNr))) {
+//                            // the latest text node is equal to some previous text node
+//                            int length = tree.alpha[last];
+//                            tree.alpha[last] = tree.alpha[nodeNr];
+//                            tree.beta[last] = tree.beta[nodeNr];
+//                            tree.getCharacterBuffer().setLength(length);
+//                            return;
+//                        }
+//                    }
+//                } else {
+//                    // Haven't seen this value before; add an entry to the hash table
+//                    nodes = new int[4];
+//                    nodes[0] = 1;
+//                    textValues.put(hash, nodes);
+//                }
+//                if (nodes[0] + 1 > nodes.length) {
+//                    int[] n2 = Arrays.copyOf(nodes, nodes.length * 2);
+//                    textValues.put(hash, n2);
+//                    nodes = n2;
+//                }
+//                // Add this node to the list of distinct nodes with this hash code
+//                nodes[nodes[0]++] = last;
+//            }
+//        }
     }
 
     /**
@@ -112,12 +110,8 @@ public class TinyBuilderCondensed extends TinyBuilder {
      * @return true if a and b contain the same characters
      */
 
-    private static boolean isEqual(CharSequence a, /*@NotNull*/ CharSequence b) {
-        if (a.getClass() == b.getClass()) {
-            return a.equals(b);
-        } else {
-            return a.toString().equals(b.toString());
-        }
+    private static boolean isEqual(CodePoints a, CodePoints b) {
+        return a.equals(b);
     }
 
 }

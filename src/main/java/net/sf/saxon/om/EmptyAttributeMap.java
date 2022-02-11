@@ -17,7 +17,7 @@ import java.util.Iterator;
 
 public class EmptyAttributeMap implements AttributeMap {
 
-    private static EmptyAttributeMap THE_INSTANCE = new EmptyAttributeMap();
+    private static final EmptyAttributeMap THE_INSTANCE = new EmptyAttributeMap();
 
     private EmptyAttributeMap(){}
 

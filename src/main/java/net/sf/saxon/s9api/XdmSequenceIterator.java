@@ -78,7 +78,8 @@ public class XdmSequenceIterator<T extends XdmItem> implements Iterator<T> {
      * return each element in the underlying collection exactly once.
      *
      * @return the next element in the iteration.
-     * @throws java.util.NoSuchElementException iteration has no more elements.
+     * @throws java.util.NoSuchElementException
+     *          iteration has no more elements.
      */
     @Override
     public T next() {
@@ -110,7 +111,6 @@ public class XdmSequenceIterator<T extends XdmItem> implements Iterator<T> {
      * data before reaching the end. This is particularly relevant if the query uses saxon:stream()
      * to read its input, since there will then be another thread supplying data, which will be left
      * in suspended animation if no-one is consuming the data.
-     *
      * @since 9.5.1.5 (see bug 2016)
      */
 
@@ -129,13 +129,8 @@ public class XdmSequenceIterator<T extends XdmItem> implements Iterator<T> {
     public XdmStream<T> stream() {
         Stream<T> base = StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                 this, Spliterator.ORDERED), false);
-        base = base.onClose(new Runnable() {
-            @Override
-            public void run() {
-                XdmSequenceIterator.this.close();
-            }
-        });
-        return new XdmStream<T>(base);
+        base = base.onClose(XdmSequenceIterator.this::close);
+        return new XdmStream<>(base);
     }
 
 }

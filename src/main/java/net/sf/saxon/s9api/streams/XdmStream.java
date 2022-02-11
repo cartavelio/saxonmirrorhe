@@ -75,26 +75,98 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
         return new XdmStream<>(base.filter(predicate));
     }
 
+    /**
+     * Returns a stream consisting of the results of applying the given
+     * function to the elements of this stream.
+     *
+     * <p>This is an <a href="package-summary.html#StreamOps">intermediate
+     * operation</a>.
+     *
+     * @param <R>    The element type of the new stream
+     * @param mapper a <a href="package-summary.html#NonInterference">non-interfering</a>,
+     *               <a href="package-summary.html#Statelessness">stateless</a>
+     *               function to apply to each element
+     * @return the new stream
+     */
+
     @Override
     public <R> Stream<R> map(Function<? super T, ? extends R> mapper) {
         return base.map(mapper);
     }
 
+    /**
+     * Returns an {@code IntStream} consisting of the results of applying the
+     * given function to the elements of this stream.
+     *
+     * <p>This is an <a href="package-summary.html#StreamOps">
+     * intermediate operation</a>.
+     *
+     * @param mapper a <a href="package-summary.html#NonInterference">non-interfering</a>,
+     *               <a href="package-summary.html#Statelessness">stateless</a>
+     *               function to apply to each element
+     * @return the new stream
+     */
     @Override
     public IntStream mapToInt(ToIntFunction<? super T> mapper) {
         return base.mapToInt(mapper);
     }
 
+    /**
+     * Returns a {@code LongStream} consisting of the results of applying the
+     * given function to the elements of this stream.
+     *
+     * <p>This is an <a href="package-summary.html#StreamOps">intermediate
+     * operation</a>.
+     *
+     * @param mapper a <a href="package-summary.html#NonInterference">non-interfering</a>,
+     *               <a href="package-summary.html#Statelessness">stateless</a>
+     *               function to apply to each element
+     * @return the new stream
+     */
     @Override
     public LongStream mapToLong(ToLongFunction<? super T> mapper) {
         return base.mapToLong(mapper);
     }
 
+    /**
+     * Returns a {@code DoubleStream} consisting of the results of applying the
+     * given function to the elements of this stream.
+     *
+     * <p>This is an <a href="package-summary.html#StreamOps">intermediate
+     * operation</a>.
+     *
+     * @param mapper a <a href="package-summary.html#NonInterference">non-interfering</a>,
+     *               <a href="package-summary.html#Statelessness">stateless</a>
+     *               function to apply to each element
+     * @return the new stream
+     */
     @Override
     public DoubleStream mapToDouble(ToDoubleFunction<? super T> mapper) {
         return base.mapToDouble(mapper);
     }
 
+    /**
+     * Returns a stream consisting of the results of replacing each element of
+     * this stream with the contents of a mapped stream produced by applying
+     * the provided mapping function to each element.  Each mapped stream is
+     * {@link java.util.stream.BaseStream#close() closed} after its contents
+     * have been placed into this stream.  (If a mapped stream is {@code null}
+     * an empty stream is used, instead.)
+     *
+     * <p>This is an <a href="package-summary.html#StreamOps">intermediate
+     * operation</a>.
+     *
+     * @param <R>    The element type of the new stream
+     * @param mapper a <a href="package-summary.html#NonInterference">non-interfering</a>,
+     *               <a href="package-summary.html#Statelessness">stateless</a>
+     *               function to apply to each element which produces a stream
+     *               of new values
+     * @return the new stream
+     * @apiNote The {@code flatMap()} operation has the effect of applying a one-to-many
+     * transformation to the elements of the stream, and then flattening the
+     * resulting elements into a new stream. This corresponds to the action
+     * of the "!" operator in XPath.
+     */
     @Override
     public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
         return base.flatMap(mapper);
@@ -113,31 +185,100 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
         return new XdmStream<>(base.flatMap(mapper));
     }
 
+    /**
+     * Returns an {@code IntStream} consisting of the results of replacing each
+     * element of this stream with the contents of a mapped stream produced by
+     * applying the provided mapping function to each element.  Each mapped
+     * stream is {@link java.util.stream.BaseStream#close() closed} after its
+     * contents have been placed into this stream.  (If a mapped stream is
+     * {@code null} an empty stream is used, instead.)
+     *
+     * <p>This is an <a href="package-summary.html#StreamOps">intermediate
+     * operation</a>.
+     *
+     * @param mapper a <a href="package-summary.html#NonInterference">non-interfering</a>,
+     *               <a href="package-summary.html#Statelessness">stateless</a>
+     *               function to apply to each element which produces a stream
+     *               of new values
+     * @return the new stream
+     * @see #flatMap(Function)
+     */
+
     @Override
     public IntStream flatMapToInt(Function<? super T, ? extends IntStream> mapper) {
         return base.flatMapToInt(mapper);
     }
+
+    /**
+     * Returns an {@code LongStream} consisting of the results of replacing each
+     * element of this stream with the contents of a mapped stream produced by
+     * applying the provided mapping function to each element.  Each mapped
+     * stream is {@link java.util.stream.BaseStream#close() closed} after its
+     * contents have been placed into this stream.  (If a mapped stream is
+     * {@code null} an empty stream is used, instead.)
+     *
+     * <p>This is an <a href="package-summary.html#StreamOps">intermediate
+     * operation</a>.
+     *
+     * @param mapper a <a href="package-summary.html#NonInterference">non-interfering</a>,
+     *               <a href="package-summary.html#Statelessness">stateless</a>
+     *               function to apply to each element which produces a stream
+     *               of new values
+     * @return the new stream
+     * @see #flatMap(Function)
+     */
 
     @Override
     public LongStream flatMapToLong(Function<? super T, ? extends LongStream> mapper) {
         return base.flatMapToLong(mapper);
     }
 
+    /**
+     * Returns an {@code DoubleStream} consisting of the results of replacing
+     * each element of this stream with the contents of a mapped stream produced
+     * by applying the provided mapping function to each element.  Each mapped
+     * stream is {@link java.util.stream.BaseStream#close() closed} after its
+     * contents have placed been into this stream.  (If a mapped stream is
+     * {@code null} an empty stream is used, instead.)
+     *
+     * <p>This is an <a href="package-summary.html#StreamOps">intermediate
+     * operation</a>.
+     *
+     * @param mapper a <a href="package-summary.html#NonInterference">non-interfering</a>,
+     *               <a href="package-summary.html#Statelessness">stateless</a>
+     *               function to apply to each element which produces a stream
+     *               of new values
+     * @return the new stream
+     * @see #flatMap(Function)
+     */
+
     @Override
     public DoubleStream flatMapToDouble(Function<? super T, ? extends DoubleStream> mapper) {
         return base.flatMapToDouble(mapper);
     }
 
+    /**
+     * Returns a stream consisting of the distinct elements of this stream.
+     * @return the new stream, obtained by applying {@link Stream#distinct()} to the underlying stream
+     */
     @Override
     public XdmStream<T> distinct() {
         return new XdmStream<>(base.distinct());
     }
 
+    /**
+     * Returns a stream consisting of the elements of this stream, in sorted order.
+     * @return the new stream, obtained by applying {@link Stream#sorted()} to the underlying stream
+     */
     @Override
     public XdmStream<T> sorted() {
         return new XdmStream<>(base.sorted());
     }
 
+    /**
+     * Returns a stream consisting of the elements of this stream, in sorted order using a supplied Comparator.
+     * @return the new stream, obtained by applying {@link Stream#sorted(Comparator)} to the underlying stream
+     */
     @Override
     public XdmStream<T> sorted(Comparator<? super T> comparator) {
         return new XdmStream<>(base.sorted(comparator));

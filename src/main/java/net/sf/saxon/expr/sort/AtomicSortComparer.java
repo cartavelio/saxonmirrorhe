@@ -13,10 +13,7 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringValue;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.*;
 
 /**
  * An AtomicComparer used for comparing atomic values of arbitrary item types. It encapsulates
@@ -31,8 +28,8 @@ import net.sf.saxon.value.UntypedAtomicValue;
 public class AtomicSortComparer implements AtomicComparer {
 
     private StringCollator collator;
-    private transient XPathContext context;
-    private int itemType;
+    private final transient XPathContext context;
+    private final int itemType;
 
     /**
      * Factory method to get an atomic comparer suitable for sorting or for grouping (operations in which
@@ -163,12 +160,8 @@ public class AtomicSortComparer implements AtomicComparer {
             return b.isNaN() ? 0 : -1;
         } else if (b.isNaN()) {
             return +1;
-        } else if (a instanceof StringValue && b instanceof StringValue) {
-            if (collator instanceof CodepointCollator) {
-                return CodepointCollator.compareCS(a.getStringValueCS(), b.getStringValueCS());
-            } else {
-                return collator.compareStrings(a.getStringValue(), b.getStringValue());
-            }
+        } else if (a instanceof StringItem && b instanceof StringItem) {
+            return collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
         } else {
             int implicitTimezone = context.getImplicitTimezone();
             Comparable ac = (Comparable) a.getXPathComparable(true, collator, implicitTimezone);
@@ -183,7 +176,7 @@ public class AtomicSortComparer implements AtomicComparer {
                             " with " + b.getPrimitiveType().getDisplayName();
                     // Direct users to bug 3450 which explains a 2017 bug fix that may cause previously
                     // working applications to fail
-                    if (a instanceof UntypedAtomicValue || b instanceof UntypedAtomicValue) {
+                    if (a.isUntypedAtomic() || b.isUntypedAtomic()) {
                         message += ". Further information: see http://saxonica.plan.io/issues/3450";
                     }
                     throw new ClassCastException(message);

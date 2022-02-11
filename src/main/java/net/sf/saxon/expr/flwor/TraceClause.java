@@ -23,7 +23,7 @@ import static net.sf.saxon.expr.flwor.Clause.ClauseName.TRACE;
  */
 public class TraceClause extends Clause {
 
-    private Clause target;
+    private final Clause target;
     private NamespaceResolver nsResolver;
 
     /**

@@ -191,6 +191,7 @@ public class Doc_2 extends SystemFunction implements Callable {
             if (b instanceof TinyBuilder) {
                 ((TinyBuilder) b).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
             }
+
             b.setPipelineConfiguration(b.getPipelineConfiguration());
             try {
                 Sender.send(source, b, options);

@@ -19,7 +19,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Cardinality;
@@ -34,7 +34,7 @@ import net.sf.saxon.value.IntegerValue;
 public final class CardinalityChecker extends UnaryExpression {
 
     private int requiredCardinality = -1;
-    private RoleDiagnostic role;
+    private final RoleDiagnostic role;
 
     /**
      * Private Constructor: use factory method
@@ -64,7 +64,7 @@ public final class CardinalityChecker extends UnaryExpression {
 
     public static Expression makeCardinalityChecker(Expression sequence, int cardinality, RoleDiagnostic role) {
         Expression result;
-        if (sequence instanceof Literal && Cardinality.subsumes(cardinality, SequenceTool.getCardinality(((Literal) sequence).getValue()))) {
+        if (sequence instanceof Literal && Cardinality.subsumes(cardinality, SequenceTool.getCardinality(((Literal) sequence).getGroundedValue()))) {
             return sequence;
         }
         if (sequence instanceof Atomizer && !Cardinality.allowsMany(cardinality)) {
@@ -250,7 +250,7 @@ public final class CardinalityChecker extends UnaryExpression {
 
     public static String depictSequenceStart(SequenceIterator seq, int max) {
         try {
-            FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder sb = new StringBuilder(64);
             int count = 0;
             sb.append(" (");
             Item next;
@@ -263,7 +263,7 @@ public final class CardinalityChecker extends UnaryExpression {
                     return sb.toString();
                 }
 
-                sb.cat(Err.depict(next));
+                sb.append(Err.depict(next));
             }
             sb.append(") ");
             return sb.toString();

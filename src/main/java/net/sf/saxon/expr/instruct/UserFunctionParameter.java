@@ -25,7 +25,7 @@ public class UserFunctionParameter implements LocalBinding {
     private SequenceType requiredType;
     private StructuredQName variableQName;
     private int slotNumber;
-    private int referenceCount = 999;
+    private final int referenceCount = 999;
     // The initial value is deliberately set to indicate "many" so that it will be assumed a parameter
     // is referenced repeatedly until proved otherwise
     private boolean isIndexed = false;

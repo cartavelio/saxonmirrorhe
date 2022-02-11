@@ -13,7 +13,7 @@ import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * This class implements any of the functions matches(), replace(), tokenize(), analyze-string(), in which the
@@ -60,7 +60,7 @@ public class RegexFunctionSansFlags extends SystemFunction {
         SystemFunction withFlags = addFlagsArgument();
         Sequence[] newArgs = new Sequence[args.length + 1];
         System.arraycopy(args, 0, newArgs, 0, args.length);
-        newArgs[args.length] = StringValue.EMPTY_STRING;
+        newArgs[args.length] = StringItem.EMPTY_STRING;
         return withFlags.call(context, newArgs);
     }
 }

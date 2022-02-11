@@ -31,9 +31,9 @@ import java.util.function.Function;
 
 public class RebasedDocument extends GenericTreeInfo {
 
-    private TreeInfo underlyingTree;
-    private Function<NodeInfo, String> baseUriMapper;
-    private Function<NodeInfo, String> systemIdMapper;
+    private final TreeInfo underlyingTree;
+    private final Function<NodeInfo, String> baseUriMapper;
+    private final Function<NodeInfo, String> systemIdMapper;
 
 
     /**

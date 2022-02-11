@@ -8,16 +8,14 @@
 package net.sf.saxon.dom;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.str.*;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
 import net.sf.saxon.tree.util.SteppingNode;
@@ -247,41 +245,42 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     /**
      * Get the value of the item as a CharSequence. This is in some cases more efficient than
      * the version of the method that returns a String.
+     * @return
      */
 
     @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         synchronized (docWrapper.docNode) {
             switch (nodeKind) {
                 case Type.DOCUMENT:
                 case Type.ELEMENT:
                     NodeList children1 = node.getChildNodes();
-                    FastStringBuffer sb1 = new FastStringBuffer(16);
+                    UnicodeBuilder sb1 = new UnicodeBuilder();
                     expandStringValue(children1, sb1);
-                    return sb1;
+                    return sb1.toUnicodeString();
 
                 case Type.ATTRIBUTE:
-                    return emptyIfNull(((Attr) node).getValue());
+                    return emptyIfNull(((Attr) node).getValue()).tidy();
 
                 case Type.TEXT:
                     if (span == 1) {
-                        return emptyIfNull(node.getNodeValue());
+                        return emptyIfNull(node.getNodeValue()).tidy();
                     } else {
-                        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+                        UnicodeBuilder fsb = new UnicodeBuilder();
                         Node textNode = node;
                         for (int i = 0; i < span; i++) {
                             fsb.append(emptyIfNull(textNode.getNodeValue()));
                             textNode = textNode.getNextSibling();
                         }
-                        return fsb.condense();
+                        return fsb.toUnicodeString();
                     }
 
                 case Type.COMMENT:
                 case Type.PROCESSING_INSTRUCTION:
-                    return emptyIfNull(node.getNodeValue());
+                    return emptyIfNull(node.getNodeValue()).tidy();
 
                 default:
-                    return "";
+                    return EmptyUniString.getInstance();
             }
         }
     }
@@ -293,11 +292,11 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * @return a zero-length string if s is null, otherwise s
      */
 
-    private static String emptyIfNull(String s) {
-        return s == null ? "" : s;
+    private static CodePoints emptyIfNull(String s) {
+        return s == null ? EmptyUniString.getInstance() : StringView.of(s);
     }
 
-    public static void expandStringValue(NodeList list, FastStringBuffer sb) {
+    public static void expandStringValue(NodeList list, UnicodeBuilder sb) {
         final int len = list.getLength();
         for (int i = 0; i < len; i++) {
             Node child = list.item(i);
@@ -691,7 +690,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
 
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
     }
 
@@ -997,9 +996,8 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED},
-         *         {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
-         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
+         *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+         *         and {@link Property#LOOKAHEAD}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          *         It is acceptable for the properties of the iterator to change depending on its state.
          */
@@ -1026,7 +1024,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         private final boolean forwards;   // iterate in document order (not reverse order)
         private final boolean elementsOnly;
         NodeList childNodes;
-        private int childNodesLength;
+        private final int childNodesLength;
         private int ix;             // index of the current DOM node within childNodes;
         // in the case of adjacent text nodes, index of the first in the group
         private int currentSpan;    // number of DOM nodes mapping to the current XPath node
@@ -1187,9 +1185,8 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED},
-         *         {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
-         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
+         *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+         *         and {@link Property#LOOKAHEAD}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          *         It is acceptable for the properties of the iterator to change depending on its state.
          */

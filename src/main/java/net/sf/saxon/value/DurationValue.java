@@ -11,8 +11,10 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -45,7 +47,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * that the values are normalized, for example it is acceptable to specify months=18. The values of
      * the individual components must all be non-negative.
      * <p>Note: For historic reasons this constructor only supports microsecond precision. To get nanosecond
-     * precision, use the constructor {@link #DurationValue(int, int, int, int, int, long, int, AtomicType)}.</p>
+     * precision, use the constructor {@link DurationValue#DurationValue(int, int, int, int, int, long, int, AtomicType)}.</p>
      *
      * @param positive     true if the duration is positive, false if negative. For a negative duration
      *                     the components are all supplied as positive integers (or zero).
@@ -74,7 +76,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * the individual components must all be non-negative.
      * <p>Note: for historic reasons this constructor was written to expect microseconds rather than nanoseconds.
      * To supply nanoseconds, use the alternative constructor
-     * {@link #DurationValue(int, int, int, int, int, long, int, AtomicType)}.</p>
+     * {@link DurationValue#DurationValue(int, int, int, int, int, long, int, AtomicType)}.</p>
      *
      * @param positive     true if the duration is positive, false if negative. For a negative duration
      *                     the components are all supplied as positive integers (or zero).
@@ -169,20 +171,20 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         typeLabel = type;
     }
 
-    protected static void formatFractionalSeconds(FastStringBuffer sb, int seconds, long nanosecs) {
+    protected static void formatFractionalSeconds(UnicodeBuilder sb, int seconds, long nanosecs) {
         String mss = nanosecs + "";
         if (seconds == 0) {
             mss = "0000000000" + mss;
             mss = mss.substring(mss.length() - 10);
         }
         sb.append(mss.substring(0, mss.length() - 9));
-        sb.cat('.');
+        sb.append('.');
         int lastSigDigit = mss.length() - 1;
         while (mss.charAt(lastSigDigit) == '0') {
             lastSigDigit--;
         }
         sb.append(mss.substring(mss.length() - 9, lastSigDigit + 1));
-        sb.cat('S');
+        sb.append('S');
     }
 
 
@@ -206,15 +208,15 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     /*@NotNull*/
-    public static ConversionResult makeDuration(CharSequence s) {
+    public static ConversionResult makeDuration(UnicodeString s) {
         return makeDuration(s, true, true);
     }
 
     /*@NotNull*/
-    protected static ConversionResult makeDuration(CharSequence s, boolean allowYM, boolean allowDT) {
+    protected static ConversionResult makeDuration(UnicodeString s, boolean allowYM, boolean allowDT) {
         int years = 0, months = 0, days = 0, hours = 0, minutes = 0, seconds = 0, nanoseconds = 0;
         boolean negative = false;
-        StringTokenizer tok = new StringTokenizer(Whitespace.trimWhitespace(s).toString(), "-+.PYMDTHS", true);
+        StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-+.PYMDTHS", true);
         int components = 0;
         if (!tok.hasMoreElements()) {
             return badDuration("empty string", s);
@@ -367,13 +369,13 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         }
     }
 
-    protected static ValidationFailure badDuration(String msg, CharSequence s) {
+    protected static ValidationFailure badDuration(String msg, UnicodeString s) {
         ValidationFailure err = new ValidationFailure("Invalid duration value '" + s + "' (" + msg + ')');
         err.setErrorCode("FORG0001");
         return err;
     }
 
-    protected static ValidationFailure badDuration(String msg, CharSequence s, String errorCode) {
+    protected static ValidationFailure badDuration(String msg, UnicodeString s, String errorCode) {
         ValidationFailure err = new ValidationFailure("Invalid duration value '" + s + "' (" + msg + ')');
         err.setErrorCode(errorCode);
         return err;
@@ -570,18 +572,18 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     @Override
-    public CharSequence getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
 
         // Note, Schema does not define a canonical representation. We omit all zero components, unless
         // the duration is zero-length, in which case we output PT0S.
 
         if (months == 0 && seconds == 0L && nanoseconds == 0) {
-            return "PT0S";
+            return BMPString.of("PT0S");
         }
 
-        FastStringBuffer sb = new FastStringBuffer(32);
+        UnicodeBuilder sb = new UnicodeBuilder();
         if (negative) {
-            sb.cat('-');
+            sb.append('-');
         }
         int years = getYears();
         int months = getMonths();
@@ -617,7 +619,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
             }
         }
 
-        return sb;
+        return sb.toUnicodeString();
 
     }
 
@@ -654,7 +656,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
             case MINUTES:
                 return Int64Value.makeIntegerValue(negative ? -getMinutes() : getMinutes());
             case SECONDS:
-                FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
+                StringBuilder sb = new StringBuilder(16);
                 String ms = "000000000" + nanoseconds;
                 ms = ms.substring(ms.length() - 9);
                 sb.append((negative ? "-" : "") + getSeconds() + '.' + ms);
@@ -855,9 +857,9 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
 
     private static class DurationComparable implements Comparable<DurationComparable> {
 
-        private int months;
-        private long seconds;
-        private int nanoseconds;
+        private final int months;
+        private final long seconds;
+        private final int nanoseconds;
 
         public DurationComparable(int m, long s, int nanos) {
             months = m;

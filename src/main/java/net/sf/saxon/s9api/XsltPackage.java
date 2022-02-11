@@ -30,8 +30,8 @@ import java.io.IOException;
 
 public class XsltPackage {
 
-    private XsltCompiler compiler;
-    private StylesheetPackage stylesheetPackage;
+    private final XsltCompiler compiler;
+    private final StylesheetPackage stylesheetPackage;
 
     protected XsltPackage(XsltCompiler compiler, StylesheetPackage pp) {
         this.compiler = compiler;

@@ -25,9 +25,9 @@ import net.sf.saxon.value.*;
 
 public class IntegerRangeTest extends Expression {
 
-    private Operand valueOp;
-    private Operand minOp;
-    private Operand maxOp;
+    private final Operand valueOp;
+    private final Operand minOp;
+    private final Operand maxOp;
 
     /**
      * Construct a IntegerRangeTest
@@ -206,14 +206,14 @@ public class IntegerRangeTest extends Expression {
                 }
             }
             NumericValue v;
-            if (atom instanceof UntypedAtomicValue) {
+            if (atom.isUntypedAtomic()) {
                 if (toDouble == null) {
                     toDouble = BuiltInAtomicType.DOUBLE.getStringConverter(c.getConfiguration().getConversionRules());
                 }
-                ConversionResult result = toDouble.convertString(atom.getStringValueCS());
+                ConversionResult result = toDouble.convertString(atom.getUnicodeStringValue());
                 if (result instanceof ValidationFailure) {
                     XPathException e = new XPathException("Failed to convert untypedAtomic value {" +
-                            atom.getStringValueCS() + "}  to xs:integer", "FORG0001");
+                                                                  atom.getUnicodeStringValue() + "}  to xs:integer", "FORG0001");
                     e.setLocation(getLocation());
                     throw e;
                 } else {

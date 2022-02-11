@@ -29,7 +29,7 @@ import java.util.List;
 public class RawResult implements Result {
 
     private String systemId;
-    private List<Item> content = new ArrayList<Item>();
+    private final List<Item> content = new ArrayList<Item>();
 
     /**
      * Set the system identifier for this Result.

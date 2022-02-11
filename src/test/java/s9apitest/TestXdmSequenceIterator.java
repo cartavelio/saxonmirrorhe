@@ -198,6 +198,7 @@ public class TestXdmSequenceIterator {
 
     }
 
+
     @Test
     public void testValueIterator() {
         XdmValue value = new XdmAtomicValue("banana");
@@ -215,6 +216,7 @@ public class TestXdmSequenceIterator {
         XdmSequenceIterator<?> iter = XdmEmptySequence.getInstance().iterator();
         assertFalse(iter.hasNext());
     }
+
 }
 
 

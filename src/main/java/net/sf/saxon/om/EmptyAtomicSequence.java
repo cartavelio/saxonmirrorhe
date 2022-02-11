@@ -7,6 +7,8 @@
 
 package net.sf.saxon.om;
 
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.value.AtomicValue;
@@ -54,8 +56,8 @@ public enum EmptyAtomicSequence implements AtomicSequence {
      *         of casting to string according to the XPath 2.0 rules
      */
     @Override
-    public CharSequence getCanonicalLexicalRepresentation() {
-        return "";
+    public UnicodeString getCanonicalLexicalRepresentation() {
+        return EmptyUniString.getInstance();
     }
 
     /**
@@ -74,8 +76,8 @@ public enum EmptyAtomicSequence implements AtomicSequence {
     }
 
     @Override
-    public CharSequence getStringValueCS() {
-        return "";
+    public UnicodeString getUnicodeStringValue() {
+        return EmptyUniString.getInstance();
     }
 
     @Override
@@ -125,7 +127,7 @@ public enum EmptyAtomicSequence implements AtomicSequence {
 
     @Override
     public Iterator<AtomicValue> iterator() {
-        return Collections.<AtomicValue>emptyList().iterator();
+        return Collections.emptyIterator();
     }
 }
 

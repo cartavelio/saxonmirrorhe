@@ -16,6 +16,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.JavaExternalObjectType;
@@ -48,8 +49,8 @@ import java.util.Properties;
  */
 abstract class AbstractTransformerImpl extends IdentityTransformer {
 
-    private XsltExecutable xsltExecutable;
-    private Map<String, Object> parameters = new HashMap<>(8);
+    private final XsltExecutable xsltExecutable;
+    private final Map<String, Object> parameters = new HashMap<>(8);
 
     AbstractTransformerImpl(XsltExecutable e) {
         super(e.getProcessor().getUnderlyingConfiguration());
@@ -178,7 +179,7 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
             if (value instanceof Sequence) {
                 converted = (Sequence)value;
             } else if (value instanceof String) {
-                converted = new UntypedAtomicValue((String) value);
+                converted = new UntypedAtomicValue(StringView.tidy((String) value));
             } else if (required.getPrimaryType() instanceof JavaExternalObjectType) {
                 converted = new ObjectValue<>(value);
             } else {

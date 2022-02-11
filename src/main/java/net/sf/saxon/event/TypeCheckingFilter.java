@@ -17,6 +17,7 @@ import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
@@ -41,10 +42,10 @@ public class TypeCheckingFilter extends ProxyOutputter {
     private Location locator;
     private int count = 0;
     private int level = 0;
-    private HashSet<Long> checkedElements = new HashSet<>(10);
+    private final HashSet<Long> checkedElements = new HashSet<>(10);
     // used to avoid repeated checking when a template creates large numbers of elements of the same type
     // The key is a (namecode, typecode) pair, packed into a single long
-    private TypeHierarchy typeHierarchy;
+    private final TypeHierarchy typeHierarchy;
 
     public TypeCheckingFilter(Outputter next) {
         super(next);
@@ -76,7 +77,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
      * Notify an attribute.
      */
     @Override
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+    public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
         if (level == 0) {
             if (++count == 2) {
                 checkAllowsMany(location);
@@ -85,7 +86,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
                     new NameTest(Type.ATTRIBUTE, attName, getConfiguration().getNamePool()),
                     Token.INTERSECT,
                     new ContentTypeTest(Type.ATTRIBUTE, typeCode, getConfiguration(), false));
-            checkItemType(type, nodeSupplier(Type.ATTRIBUTE, attName, typeCode, value), location);
+            checkItemType(type, nodeSupplier(Type.ATTRIBUTE, attName, typeCode, StringView.tidy(value)), location);
         }
         getNextOutputter().attribute(attName, typeCode, value, location, properties);
     }
@@ -95,12 +96,12 @@ public class TypeCheckingFilter extends ProxyOutputter {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             if (++count == 2) {
                 checkAllowsMany(locationId);
             }
-            checkItemType(NodeKindTest.TEXT, nodeSupplier(Type.TEXT, null, null, chars), locationId);
+            checkItemType(NodeKindTest.TEXT, nodeSupplier(Type.TEXT, null, null, chars.tidy()), locationId);
         }
         getNextOutputter().characters(chars, locationId, properties);
     }
@@ -110,12 +111,12 @@ public class TypeCheckingFilter extends ProxyOutputter {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             if (++count == 2) {
                 checkAllowsMany(locationId);
             }
-            checkItemType(NodeKindTest.COMMENT, nodeSupplier(Type.COMMENT, null, null, chars), locationId);
+            checkItemType(NodeKindTest.COMMENT, nodeSupplier(Type.COMMENT, null, null, chars.tidy()), locationId);
         }
         getNextOutputter().comment(chars, locationId, properties);
     }
@@ -125,13 +126,13 @@ public class TypeCheckingFilter extends ProxyOutputter {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             if (++count == 2) {
                 checkAllowsMany(locationId);
             }
             checkItemType(NodeKindTest.PROCESSING_INSTRUCTION,
-                          nodeSupplier(Type.PROCESSING_INSTRUCTION, new NoNamespaceName(target), null, data), locationId);
+                          nodeSupplier(Type.PROCESSING_INSTRUCTION, new NoNamespaceName(target), null, data.tidy()), locationId);
         }
         getNextOutputter().processingInstruction(target, data, locationId, properties);
     }
@@ -147,7 +148,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
                 checkAllowsMany(Loc.NONE);
             }
             checkItemType(NodeKindTest.DOCUMENT,
-                          nodeSupplier(Type.DOCUMENT, null, null, ""), Loc.NONE);
+                          nodeSupplier(Type.DOCUMENT, null, null, EmptyUniString.getInstance()), Loc.NONE);
         }
         level++;
         getNextOutputter().startDocument(properties);
@@ -193,7 +194,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
                         new NameTest(Type.ELEMENT, elemName, namePool),
                         Token.INTERSECT,
                         new ContentTypeTest(Type.ELEMENT, elemType, config, false));
-                checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, ""), location);
+                checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUniString.getInstance()), location);
             } else {
                 if (count == 2) {
                     checkAllowsMany(location);
@@ -204,7 +205,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
                             new NameTest(Type.ELEMENT, elemName, namePool),
                             Token.INTERSECT,
                             new ContentTypeTest(Type.ELEMENT, elemType, config, false));
-                    checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, ""), location);
+                    checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUniString.getInstance()), location);
                     checkedElements.add(key);
                 }
             }
@@ -255,7 +256,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
         }
     }
 
-    private Supplier<NodeInfo> nodeSupplier(short nodeKind, NodeName name, SchemaType type, CharSequence value) {
+    private Supplier<NodeInfo> nodeSupplier(short nodeKind, NodeName name, SchemaType type, UnicodeString value) {
         return () -> {
             Orphan o = new Orphan(getPipelineConfiguration().getConfiguration());
             o.setNodeKind(nodeKind);

@@ -24,7 +24,7 @@ import java.util.Vector;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ImportFunctionTest {
-    private static Processor processor = new Processor(true);
+    private static final Processor processor = new Processor(true);
 
     public static void main(String[] args) throws SaxonApiException, IOException, URISyntaxException {
         ImportFunctionTest main = new ImportFunctionTest();

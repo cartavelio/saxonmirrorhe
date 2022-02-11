@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 
 final class AncestorEnumeration extends TreeEnumeration {
 
-    private boolean includeSelf;
+    private final boolean includeSelf;
 
     public AncestorEnumeration(NodeImpl node, Predicate<? super NodeInfo> nodeTest, boolean includeSelf) {
         super(node, nodeTest);

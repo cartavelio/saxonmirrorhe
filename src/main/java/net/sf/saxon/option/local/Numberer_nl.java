@@ -28,21 +28,21 @@ public class Numberer_nl extends AbstractNumberer {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] dutchOrdinalUnits = {
+    private static final String[] dutchOrdinalUnits = {
             "", "Eenste", "Tweede", "Derde", "Vierde", "Vijfde", "Zesde", "Zevende", "Achtste", "Negende",
             "Tiende", "Elfde ", "Twaalfde", "Dertiende", "Veertiende", "Vijftiende", "Zestiende",
             "Zeventiende", "Achtiende", "Negentiende"};
 
-    private static String[] dutchOrdinalTens = {
+    private static final String[] dutchOrdinalTens = {
             "", "Tiende", "Twintigste", "Dertigste", "Veertigste", "Vijftigste",
             "Zestigste", "Zeventigste", "Tachtigste", "Negentigste"};
 
-    private static String[] dutchUnits = {
+    private static final String[] dutchUnits = {
             "", "Een", "Twee", "Drie", "Vier", "Vijf", "Zes", "Zeven", "Acht", "Negen",
             "Tien", "Elf", "Twaalf", "Dertien", "Veertien", "Vijftien", "Zestien",
             "Zeventien", "Achtien", "Negentien"};
 
-    private static String[] dutchTens = {
+    private static final String[] dutchTens = {
             "", "Tien", "Twintig", "Dertig", "Veertig", "Vijftig",
             "Zestig", "Zeventig", "Tachtig", "Negentig"};
 
@@ -153,7 +153,7 @@ public class Numberer_nl extends AbstractNumberer {
     }
 
 
-    private static String[] dutchMonths = {
+    private static final String[] dutchMonths = {
             "Januari", "Februari", "Maart", "April", "Mei", "Juni",
             "Juli", "Augustus", "September", "Oktober", "November", "December"
     };
@@ -212,15 +212,15 @@ public class Numberer_nl extends AbstractNumberer {
         return name;
     }
 
-    private static String[] dutchDays = {
+    private static final String[] dutchDays = {
             "Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag"
     };
 
-    private static String[] dutchDayAbbreviations = {
+    private static final String[] dutchDayAbbreviations = {
             "Ma", "Di", "Woe", "Do", "Vrij", "Zat", "Zon"
     };
 
-    private static int[] minUniqueDayLength = {
+    private static final int[] minUniqueDayLength = {
             1, 2, 1, 2, 1, 2, 2
     };
 

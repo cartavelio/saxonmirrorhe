@@ -96,7 +96,7 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
 
     public static class SubtreeFilter implements ItemMappingFunction {
 
-        private NodeInfo origin;
+        private final NodeInfo origin;
 
         public SubtreeFilter(NodeInfo origin) {
             this.origin = origin;
@@ -127,7 +127,7 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
     public Expression fixArguments(final Expression... arguments) throws XPathException {
         if (arguments[0] instanceof StringLiteral && staticKeySet == null) {
             KeyManager keyManager = getKeyManager();
-            String keyName = ((StringLiteral) arguments[0]).getStringValue();
+            String keyName = ((StringLiteral) arguments[0]).stringify();
             staticKeySet = getKeyDefinitionSet(keyManager, keyName);
         }
         return null;
@@ -277,7 +277,7 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
             SequenceIterator keys = sought.iterate();
             AtomicValue keyValue;
             List<SequenceIterator> allKeyIterators = new ArrayList<>();
-            while ((keyValue = (AtomicValue)keys.next()) != null) {
+            while ((keyValue = (AtomicValue) keys.next()) != null) {
                 SequenceIterator someResults = keyManager.selectByKey(selectedKeySet, doc.getTreeInfo(), keyValue, context);
                 allKeyIterators.add(someResults);
             }

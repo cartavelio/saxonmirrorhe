@@ -39,7 +39,7 @@ import javax.xml.transform.SourceLocator;
  */
 public class VendorFunctionSetHE extends BuiltInFunctionSet {
 
-    private final static VendorFunctionSetHE THE_INSTANCE = new VendorFunctionSetHE();
+    private static final VendorFunctionSetHE THE_INSTANCE = new VendorFunctionSetHE();
 
     public static VendorFunctionSetHE getInstance() {
         return THE_INSTANCE;
@@ -225,7 +225,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     if (error.getCause() != null) {
                         s += "(" + error.getCause().getMessage() + ")";
                     }
-                    return new StringValue(s);
+                    return new StringItem(s);
                 case "value":
                     Sequence value = error.getErrorObject();
                     if (value == null) {
@@ -238,7 +238,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     if (module == null) {
                         return EmptySequence.getInstance();
                     } else {
-                        return new StringValue(module);
+                        return new StringItem(module);
                     }
                 case "line-number":
                     int line = locator == null ? -1 : locator.getLineNumber();

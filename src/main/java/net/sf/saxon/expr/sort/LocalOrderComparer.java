@@ -19,7 +19,7 @@ import net.sf.saxon.om.NodeInfo;
 
 public final class LocalOrderComparer implements ItemOrderComparer {
 
-    private static LocalOrderComparer instance = new LocalOrderComparer();
+    private static final LocalOrderComparer instance = new LocalOrderComparer();
 
     /**
      * Get an instance of a LocalOrderComparer. The class maintains no state

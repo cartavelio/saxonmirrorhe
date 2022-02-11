@@ -15,7 +15,8 @@ import net.sf.saxon.om.Function;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.regex.UnicodeString;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -37,13 +38,13 @@ import java.util.TreeMap;
 
 public class RangeKey implements MapItem {
 
-    private UnicodeString min;
-    private UnicodeString max;
-    private TreeMap<AtomicMatchKey, Object> index;
+    private final UnicodeString min;
+    private final UnicodeString max;
+    private final TreeMap<AtomicMatchKey, Object> index;
 
     public RangeKey(String min, String max, TreeMap<AtomicMatchKey, Object> index) {
-        this.min = min == null ? null : UnicodeString.makeUnicodeString(min);
-        this.max = max == null ? null : UnicodeString.makeUnicodeString(max);
+        this.min = min == null ? null : StringView.tidy(min);
+        this.max = max == null ? null : StringView.tidy(max);
         this.index = index;
     }
 
@@ -54,7 +55,7 @@ public class RangeKey implements MapItem {
      */
     @Override
     public GroundedValue get(AtomicValue key)  {
-        UnicodeString k = UnicodeString.makeUnicodeString(key.getStringValueCS());
+        UnicodeString k = key.getUnicodeStringValue();
         if ((min == null || min.compareTo(k) <= 0) &&
                 (max == null || max.compareTo(k) >= 0)) {
             Object value = index.get(k);
@@ -277,11 +278,15 @@ public class RangeKey implements MapItem {
     private class RangeKeyIterator implements AtomicIterator {
 
         int pos = 0;
-        UnicodeString curr = null;
-        UnicodeString top;
+        StringItem curr = null;
+        StringItem top;
 
         public RangeKeyIterator() {
-            top = (UnicodeString) (max == null ? index.lastKey() : index.floorKey(max));
+            top = new StringItem((UnicodeString) (max == null ? index.lastKey() : index.floorKey(max)));
+        }
+
+        private StringItem toStringItem(UnicodeString s) {
+            return new StringItem(s);
         }
 
         /**
@@ -290,30 +295,32 @@ public class RangeKey implements MapItem {
          * @return the next Item. If there are no more nodes, return null.
          */
         @Override
-        public StringValue next() {
+        public StringItem next() {
             if (pos <= 0) {
                 if (pos < 0) {
                     return null;
                 }
                 if (min == null) {
-                    curr = (UnicodeString) index.firstKey();
+                    curr = new StringItem ((UnicodeString) index.firstKey());
                 } else {
-                    curr = (UnicodeString) index.ceilingKey(min);
-                    if(curr != null && max != null && curr.compareTo(max) > 0) {
+                    UnicodeString c = (UnicodeString) index.ceilingKey(min);
+                    if (c == null || (max != null && c.compareTo(max) > 0)) {
                         curr = null;
+                    } else {
+                        curr = new StringItem(c);
                     }
                 }
             } else if (curr.equals(top)) {
                 curr = null;
             } else {
-                curr = (UnicodeString) index.higherKey(curr);
+                curr = new StringItem( (UnicodeString) index.higherKey(curr.getUnicodeStringValue()));
             }
             if (curr == null) {
                 pos = -1;
                 return null;
             } else {
                 pos++;
-                return new StringValue(curr);
+                return curr;
             }
         }
 

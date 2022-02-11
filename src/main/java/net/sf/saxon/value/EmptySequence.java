@@ -9,20 +9,21 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 
-import java.util.Collections;
-
 /**
  * An EmptySequence object represents a sequence containing no members.
+ * @since 9.5.  Generified in 9.9.  Generification reverted in 11.0.
  */
 
 
-public final class EmptySequence<T extends Item> implements GroundedValue {
+public final class EmptySequence implements GroundedValue {
 
     // This class has a single instance
-    /*@NotNull*/ private static EmptySequence THE_INSTANCE = new EmptySequence();
+    private static final EmptySequence THE_INSTANCE = new EmptySequence();
 
 
     /**
@@ -38,20 +39,17 @@ public final class EmptySequence<T extends Item> implements GroundedValue {
      * @return the singular instances of this class: an empty sequence
      */
 
-    @SuppressWarnings("unchecked")
-    public static <T extends Item> EmptySequence<T> getInstance() {
-        return (EmptySequence<T>)THE_INSTANCE;
+    public static EmptySequence getInstance() {
+        return THE_INSTANCE;
+    }
+
+    @Override
+    public UnicodeString getUnicodeStringValue() {
+        return EmptyUniString.getInstance();
     }
 
     @Override
     public String getStringValue() {
-        return "";
-    }
-
-    public Collections a;
-
-    @Override
-    public CharSequence getStringValueCS() {
         return "";
     }
 
@@ -62,7 +60,7 @@ public final class EmptySequence<T extends Item> implements GroundedValue {
      *         is empty
      */
     @Override
-    public T head() {
+    public Item head() {
         return null;
     }
 
@@ -74,17 +72,6 @@ public final class EmptySequence<T extends Item> implements GroundedValue {
     @Override
     public UnfailingIterator iterate() {
         return EmptyIterator.emptyIterator();
-    }
-
-    /**
-     * Return the value in the form of an Item
-     *
-     * @return the value in the form of an Item
-     */
-
-    /*@Nullable*/
-    public Item asItem() {
-        return null;
     }
 
     /**
@@ -137,7 +124,7 @@ public final class EmptySequence<T extends Item> implements GroundedValue {
 
     /*@Nullable*/
     @Override
-    public T itemAt(int n) {
+    public Item itemAt(int n) {
         return null;
     }
 

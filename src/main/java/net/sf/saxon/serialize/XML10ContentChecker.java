@@ -12,10 +12,12 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.z.IntIterator;
 
 /**
  * This class is used on the serialization pipeline to check that the document conforms
@@ -49,7 +51,7 @@ public class XML10ContentChecker extends ProxyReceiver {
     @Override
     public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
         for (AttributeInfo att : attributes) {
-            checkString(att.getValue(), att.getLocation());
+            checkString(StringView.of(att.getValue()), att.getLocation());
         }
         nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
     }
@@ -80,7 +82,7 @@ public class XML10ContentChecker extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         checkString(chars, locationId);
         nextReceiver.characters(chars, locationId, properties);
     }
@@ -90,7 +92,7 @@ public class XML10ContentChecker extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         checkString(chars, locationId);
         nextReceiver.comment(chars, locationId, properties);
     }
@@ -100,7 +102,7 @@ public class XML10ContentChecker extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, /*@NotNull*/ CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, /*@NotNull*/ CodePoints data, Location locationId, int properties) throws XPathException {
         checkString(data, locationId);
         nextReceiver.processingInstruction(target, data, locationId, properties);
     }
@@ -112,14 +114,10 @@ public class XML10ContentChecker extends ProxyReceiver {
      * @param locationId the location of the string
      */
 
-    private void checkString(CharSequence in, Location locationId) throws XPathException {
-        final int len = in.length();
-        for (int c = 0; c < len; c++) {
-            int ch32 = in.charAt(c);
-            if (UTF16CharacterSet.isHighSurrogate(ch32)) {
-                char low = in.charAt(++c);
-                ch32 = UTF16CharacterSet.combinePair((char) ch32, low);
-            }
+    private void checkString(CodePoints in, Location locationId) throws XPathException {
+        IntIterator iter = in.codePoints();
+        while (iter.hasNext()) {
+            int ch32 = iter.next();
             if (!XMLCharacterData.isValid10(ch32)) {
                 XPathException err = new XPathException("The result tree contains a character not allowed by XML 1.0 (hex " +
                         Integer.toHexString(ch32) + ')');

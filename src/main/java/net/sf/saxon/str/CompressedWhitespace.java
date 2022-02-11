@@ -5,11 +5,14 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.tree.tiny;
+package net.sf.saxon.str;
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.serialize.UTF8Writer;
+import net.sf.saxon.z.IntIterator;
 
+import java.io.IOException;
 import java.io.Writer;
+import java.util.function.IntPredicate;
 
 /**
  * This class provides a compressed representation of a sequence of whitespace characters. The representation
@@ -19,57 +22,45 @@ import java.io.Writer;
  * in the TinyTree arrays.
  */
 
-public class CompressedWhitespace implements CharSequence {
+public class CompressedWhitespace extends UnicodeString {
 
-    /*@NotNull*/ private static char[] WHITE_CHARS = {0x09, 0x0A, 0x0D, 0x20};
-    /*@NotNull*/ private static int[] CODES =
+    /*@NotNull*/ private static final char[] WHITE_CHARS = {0x09, 0x0A, 0x0D, 0x20};
+    /*@NotNull*/ private static final int[] CODES =
             {-1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, -1, -1, 2, -1, -1,
                     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                     3};
 
-    private long value;
+    private final long value;
 
     public CompressedWhitespace(long compressedValue) {
         value = compressedValue;
     }
 
-    /**
-     * Attempt to compress a CharSequence
-     *
-     * @param in the CharSequence to be compressed
-     * @return the compressed sequence if it can be compressed; or the original CharSequence otherwise
-     */
-
-    /*@NotNull*/
-    public static CharSequence compress(/*@NotNull*/ CharSequence in) {
-        final int inlen = in.length();
-        if (inlen == 0) {
-            return in;
-        }
+    public static UnicodeString compressWS(char[] in, int start, int len) {
         int runlength = 1;
         int outlength = 0;
-        for (int i = 0; i < inlen; i++) {
-            final char c = in.charAt(i);
+        for (int i = 0; i < len; i++) {
+            final char c = in[i];
             if (c <= 32 && CODES[c] >= 0) {
-                if (i == inlen - 1 || c != in.charAt(i + 1) || runlength == 63) {
+                if (i == len - 1 || c != in[i + 1] || runlength == 63) {
                     runlength = 1;
                     outlength++;
                     if (outlength > 8) {
-                        return in;
+                        return StringTool.compress(in, start, len, false);
                     }
                 } else {
                     runlength++;
                 }
             } else {
-                return in;
+                return StringTool.compress(in, start, len, false);
             }
         }
         int ix = 0;
         runlength = 1;
         int[] out = new int[outlength];
-        for (int i = 0; i < inlen; i++) {
-            final char c = in.charAt(i);
-            if (i == inlen - 1 || c != in.charAt(i + 1) || runlength == 63) {
+        for (int i = 0; i < len; i++) {
+            final char c = in[i];
+            if (i == len - 1 || c != in[i + 1] || runlength == 63) {
                 out[ix++] = (CODES[c] << 6) | runlength;
                 runlength = 1;
             } else {
@@ -85,23 +76,51 @@ public class CompressedWhitespace implements CharSequence {
     }
 
     /**
-     * Uncompress the whitespace to a FastStringBuffer
-     *
-     * @param buffer the buffer to which the whitespace is to be appended. The parameter may be
-     *               null, in which case a new buffer is created.
-     * @return the FastStringBuffer to which the whitespace has been appended. If a buffer was
-     *         supplied in the argument, this will be the same buffer.
+     * Make a compressed whitespace text node suitable for inserting indentation into
+     * serialized output. (When the output is UTF8, the output writer has a method for
+     * outputting repeated characters that uses {@code Arrays.fill()} to directly
+     * populate the output buffer.)
+     * @param newlines the number of newlines to include at the start (generally zero or one)
+     * @param spaces the number of spaces to include
+     * @return a {@link UnicodeString} representing the whitespace
      */
+    public static CompressedWhitespace makeIndent(int newlines, int spaces) {
+        newlines = Math.min(newlines, 63);
+        spaces = Math.min(spaces, 63*7);
+        int outlength = 0;
+        long result = 0L;
 
-    public FastStringBuffer uncompress(/*@Nullable*/ FastStringBuffer buffer) {
-        if (buffer == null) {
-            buffer = new FastStringBuffer(length());
+        if (newlines > 0) {
+            result = CODES[10]<<6 | newlines;
+            outlength++;
         }
-        uncompress(value, buffer);
-        return buffer;
+        while (spaces > 0) {
+            int run = spaces % 63;
+            result = (result << 8) | (CODES[32] << 6) | run;
+            spaces -= run;
+            outlength++;
+        }
+        result <<= 8 * (8 - outlength);
+        return new CompressedWhitespace(result);
     }
 
-    public static void uncompress(long value, /*@NotNull*/ FastStringBuffer buffer) {
+    /**
+     * Uncompress the whitespace to a (normal) UniString
+     * @return the uncompressed value
+     */
+
+    public UnicodeString uncompress() {
+        return uncompress(value);
+    }
+
+    public static UnicodeString uncompress(long value) {
+        UnicodeBuilder buffer = new UnicodeBuilder();
+        uncompress(value, buffer);
+        return buffer.toUnicodeString();
+    }
+
+
+    public static void uncompress(long value, UnicodeBuilder buffer) {
         for (int s = 56; s >= 0; s -= 8) {
             byte b = (byte) ((value >>> s) & 0xff);
             if (b == 0) {
@@ -109,9 +128,8 @@ public class CompressedWhitespace implements CharSequence {
             }
             char c = WHITE_CHARS[b >>> 6 & 0x3];
             int len = b & 0x3f;
-            buffer.ensureCapacity(len);
             for (int j = 0; j < len; j++) {
-                buffer.cat(c);
+                buffer.append(c);
             }
         }
     }
@@ -121,17 +139,30 @@ public class CompressedWhitespace implements CharSequence {
     }
 
     @Override
-    public int length() {
+    public long length() {
+        return length(value);
+    }
+
+    @Override
+    public int length32() {
+        return length(value);
+    }
+
+    public static int length(long value) {
         int count = 0;
-        long val = value;
         for (int s = 56; s >= 0; s -= 8) {
-            int c = (int) ((val >>> s) & 0x3f);
+            int c = (int) ((value >>> s) & 0x3f);
             if (c == 0) {
                 break;
             }
             count += c;
         }
         return count;
+    }
+
+    @Override
+    public int getWidth() {
+        return 7;
     }
 
     /**
@@ -149,11 +180,10 @@ public class CompressedWhitespace implements CharSequence {
      *                                   <tt>length()</tt>
      */
     @Override
-    public char charAt(int index) {
+    public int codePointAt(long index) {
         int count = 0;
-        final long val = value;
         for (int s = 56; s >= 0; s -= 8) {
-            byte b = (byte) ((val >>> s) & 0xff);
+            byte b = (byte) ((value >>> s) & 0xff);
             if (b == 0) {
                 break;
             }
@@ -181,8 +211,23 @@ public class CompressedWhitespace implements CharSequence {
      *                                   or if <tt>start</tt> is greater than <tt>end</tt>
      */
     @Override
-    public CharSequence subSequence(int start, int end) {
-        return uncompress(null).subSequence(start, end);
+    public UnicodeString substring(long start, long end) {
+        return uncompress().substring(start, end);
+    }
+
+    @Override
+    public UnicodeString tidy() {
+        return uncompress();
+    }
+
+    @Override
+    public IntIterator codePoints() {
+        return uncompress().codePoints();
+    }
+
+    @Override
+    public long indexOf(int codePoint, long from) {
+        return uncompress().indexOf(codePoint, from);
     }
 
     /**
@@ -192,21 +237,21 @@ public class CompressedWhitespace implements CharSequence {
         if (obj instanceof CompressedWhitespace) {
             return value == ((CompressedWhitespace) obj).value;
         }
-        return uncompress(null).equals(obj);
+        return uncompress().equals(obj);
     }
 
     /**
      * Returns a hash code value for the object.
      */
     public int hashCode() {
-        return uncompress(null).hashCode();
+        return uncompress().hashCode();
     }
 
     /**
      * Returns a string representation of the object.
      */
     public String toString() {
-        return uncompress(null).toString();
+        return uncompress().toString();
     }
 
     /**
@@ -216,19 +261,47 @@ public class CompressedWhitespace implements CharSequence {
      * @throws java.io.IOException if an error occurs downstream
      */
 
+    @Override
     public void write(/*@NotNull*/ Writer writer) throws java.io.IOException {
-        final long val = value;
-        for (int s = 56; s >= 0; s -= 8) {
-            final byte b = (byte) ((val >>> s) & 0xff);
-            if (b == 0) {
-                break;
+        if (writer instanceof UTF8Writer) {
+            UTF8Writer uw = (UTF8Writer)writer;
+            for (int s = 56; s >= 0; s -= 8) {
+                final byte b = (byte) ((value >>> s) & 0xff);
+                if (b == 0) {
+                    break;
+                }
+                final char c = WHITE_CHARS[b >>> 6 & 0x3];
+                final int len = b & 0x3f;
+                uw.writeRepeatedAscii((byte) c, len);
             }
-            final char c = WHITE_CHARS[b >>> 6 & 0x3];
-            final int len = b & 0x3f;
-            for (int j = 0; j < len; j++) {
-                writer.write(c);
+        } else {
+            for (int s = 56; s >= 0; s -= 8) {
+                final byte b = (byte) ((value >>> s) & 0xff);
+                if (b == 0) {
+                    break;
+                }
+                final char c = WHITE_CHARS[b >>> 6 & 0x3];
+                final int len = b & 0x3f;
+                for (int j = 0; j < len; j++) {
+                    writer.write(c);
+                }
             }
         }
+    }
+
+    @Override
+    public void supplyContent(LargeTextBuffer consumer, long start, long length) {
+        uncompress().supplyContent(consumer, start, length);
+    }
+
+    @Override
+    public void write(Writer writer, long start, long len) throws IOException {
+        uncompress().write(writer, start, len);
+    }
+
+    @Override
+    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
+        return uncompress().writeUntil(writer, start, limit, stop);
     }
 
     /**
@@ -240,9 +313,8 @@ public class CompressedWhitespace implements CharSequence {
      */
 
     public void writeEscape(boolean[] specialChars, Writer writer) throws java.io.IOException {
-        final long val = value;
         for (int s = 56; s >= 0; s -= 8) {
-            final byte b = (byte) ((val >>> s) & 0xff);
+            final byte b = (byte) ((value >>> s) & 0xff);
             if (b == 0) {
                 break;
             }

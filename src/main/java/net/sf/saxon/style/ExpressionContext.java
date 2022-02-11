@@ -38,8 +38,8 @@ import java.util.Set;
 
 public class ExpressionContext implements StaticContext {
 
-    private StyleElement element;
-    private StructuredQName attributeName;
+    private final StyleElement element;
+    private final StructuredQName attributeName;
     private Location containingLocation = null;
     private RetainedStaticContext retainedStaticContext = null;
 

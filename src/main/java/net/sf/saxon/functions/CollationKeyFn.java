@@ -10,9 +10,11 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Base64BinaryValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Implements the collation-key function defined in the XSLT 3.0 and XPath 3.1 specifications
@@ -20,10 +22,12 @@ import net.sf.saxon.value.Base64BinaryValue;
 public class CollationKeyFn extends CollatingFunctionFixed {
 
 
-    private static Base64BinaryValue getCollationKey(String s, StringCollator collator) {
+    private static Base64BinaryValue getCollationKey(UnicodeString s, StringCollator collator) {
         AtomicValue val = collator.getCollationKey(s).asAtomic();
         if (val instanceof Base64BinaryValue) {
             return (Base64BinaryValue) val;
+        } else if (val instanceof StringItem) {
+            return ((StringItem) val).getCodepointCollationKey();
         } else {
             throw new IllegalStateException("Collation key must be Base64Binary");
         }
@@ -52,9 +56,9 @@ public class CollationKeyFn extends CollatingFunctionFixed {
      */
     @Override
     public Base64BinaryValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        String in = arguments[0].head().getStringValue();
+        StringItem in = (StringItem)arguments[0].head();
         StringCollator collator = getStringCollator();
-        return getCollationKey(in, collator);
+        return getCollationKey(in.getUnicodeStringValue(), collator);
     }
 }
 

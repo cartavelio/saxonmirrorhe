@@ -11,15 +11,11 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.regex.BMPString;
-import net.sf.saxon.regex.GeneralUnicodeString;
-import net.sf.saxon.regex.LatinString;
-import net.sf.saxon.regex.UnicodeString;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.KeyDefinition;
@@ -27,11 +23,13 @@ import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.rules.BuiltInRuleSet;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.tree.AttributeLocation;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
+import net.sf.saxon.value.StringItem;
+import net.sf.saxon.z.IntIterator;
 
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.dom.DOMLocator;
@@ -266,7 +264,7 @@ public class StandardDiagnostics {
                             out.error(sb.toString());
                         }
                     } else {
-                        out.error(getLocationMessageText((Location)component.getActor()).replace("$at ", "In "));
+                        out.error(getLocationMessageText(component.getActor()).replace("$at ", "In "));
                     }
                 }
                 try {
@@ -358,7 +356,7 @@ public class StandardDiagnostics {
             for (NodeInfo offender : offendingNodes) {
                 String nodeDesc = Type.displayTypeName(offender);
                 if (offender.getNodeKind() == Type.TEXT) {
-                    nodeDesc += " " + Err.wrap(offender.getStringValueCS(), Err.VALUE);
+                    nodeDesc += " " + Err.wrap(offender.getUnicodeStringValue(), Err.VALUE);
                 }
                 if (offender.getLineNumber() != -1) {
                     nodeDesc += " on line " + offender.getLineNumber();
@@ -497,32 +495,13 @@ public class StandardDiagnostics {
         if (threshold >= UTF16CharacterSet.NONBMP_MAX) {
             return in;
         }
-        int max = 0;
-        boolean isAstral = false;
-        for (int i = 0; i < in.length(); i++) {
-            char c = in.charAt(i);
-            if (c > max) {
-                max = c;
-            }
-            if (UTF16CharacterSet.isSurrogate(c)) {
-                isAstral = true;
-            }
-        }
-        if (max <= threshold && !isAstral) {
-            return in;
-        }
-        UnicodeString str;
-        if (max <= 255) {
-            str = new LatinString(in);
-        } else if (!isAstral) {
-            str = new BMPString(in);
-        } else {
-            str = new GeneralUnicodeString(in);
-        }
-        FastStringBuffer fsb = new FastStringBuffer(str.uLength() * 2);
-        for (int i = 0; i < str.uLength(); i++) {
-            int ch = str.uCharAt(i);
-            fsb.appendWideChar(ch);
+        StringItem str = new StringItem(in);
+
+        StringBuilder fsb = new StringBuilder(str.length32() * 2);
+        IntIterator iter = str.codePoints();
+        while (iter.hasNext()) {
+            int ch = iter.next();
+            fsb.appendCodePoint(ch);
             if (ch > threshold) {
                 fsb.append("[x");
                 fsb.append(Integer.toHexString(ch));

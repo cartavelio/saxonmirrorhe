@@ -565,10 +565,12 @@ public class TestXPathCompiler {
 
             sc2.setNamespaceResolver(new NamespaceResolver() {
 
+                @Override
                 public Iterator<String> iteratePrefixes() {
                     return null;
                 }
 
+                @Override
                 public String getURIForPrefix(String prefix, boolean useDefault) {
                     if ("xfi".equals(prefix)) {
                         return "http://www.xbrl.org/2008/function/instance";
@@ -777,15 +779,19 @@ public class TestXPathCompiler {
         XPathCompiler newXPathCompiler = processor.newXPathCompiler();
         processor.getUnderlyingConfiguration().setTraceListener(new TraceListener() {
 
+            @Override
             public void startCurrentItem(Item currentItem) {
             }
 
+            @Override
             public void setOutputDestination(Logger stream) {
             }
 
+            @Override
             public void open(Controller controller) {
             }
 
+            @Override
             public void leave(Traceable instruction) {
             }
 
@@ -793,9 +799,11 @@ public class TestXPathCompiler {
                 assertTrue(instruction.getLocation().getLineNumber() > 0);
             }
 
+            @Override
             public void endCurrentItem(Item currentItem) {
             }
 
+            @Override
             public void close() {
             }
         });

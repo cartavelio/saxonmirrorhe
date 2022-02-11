@@ -31,7 +31,7 @@ import java.util.Iterator;
 
 public class EarlyEvaluationContext implements XPathContext {
 
-    private Configuration config;
+    private final Configuration config;
 
     /**
      * Create an early evaluation context, used for evaluating constant expressions at compile time

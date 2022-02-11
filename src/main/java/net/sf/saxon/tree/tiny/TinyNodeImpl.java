@@ -15,7 +15,7 @@ import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.*;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -77,16 +77,6 @@ public abstract class TinyNodeImpl implements NodeInfo {
     @Override
     public NodeInfo head() {
         return this;
-    }
-
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
-        return getStringValue();
     }
 
     /**
@@ -672,10 +662,10 @@ public abstract class TinyNodeImpl implements NodeInfo {
      */
 
     @Override
-    public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
+    public void generateId(/*@NotNull*/ StringBuilder buffer) {
         buffer.append("d");
         buffer.append(Long.toString(tree.getDocumentNumber()));
-        buffer.cat(NODE_LETTER[getNodeKind()]);
+        buffer.append(NODE_LETTER[getNodeKind()]);
         buffer.append(Integer.toString(nodeNr));
     }
 

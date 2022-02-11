@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class MultiIterator<T> implements Iterator<T> {
 
-    private List<Iterator<T>> array;
+    private final List<Iterator<T>> array;
     private int current;
 
     /**

@@ -21,7 +21,7 @@ import net.sf.saxon.value.AtomicValue;
 
 public class CollatingAtomicComparer implements AtomicComparer {
 
-    private StringCollator collator;
+    private final StringCollator collator;
 
     /**
      * Create an GenericAtomicComparer
@@ -86,7 +86,7 @@ public class CollatingAtomicComparer implements AtomicComparer {
             return +1;
         }
 
-        return collator.compareStrings(a.getStringValue(), b.getStringValue());
+        return collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
     }
 
     /**

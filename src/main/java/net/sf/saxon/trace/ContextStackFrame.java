@@ -173,7 +173,7 @@ public abstract class ContextStackFrame {
      */
 
     public static class BuiltInTemplateRule extends ContextStackFrame {
-        private XPathContext context;
+        private final XPathContext context;
         public BuiltInTemplateRule(XPathContext context) {
             this.context = context;
         }

@@ -48,6 +48,7 @@ public class XPathDomVariableTest {
 
         // Initialize various resolvers
         xpe.setXPathVariableResolver(new XPathVariableResolver() {
+            @Override
             public Object resolveVariable(QName variableName) {
                 if ("Y".equals(variableName.getLocalPart())) {
                     return node;
@@ -56,9 +57,11 @@ public class XPathDomVariableTest {
             }
         });
         xpe.setXPathFunctionResolver(new XPathFunctionResolver() {
+            @Override
             public XPathFunction resolveFunction(QName functionName, int arity) {
                 if ("X".equals(functionName.getLocalPart())) {
                     return new XPathFunction() {
+                        @Override
                         public Object evaluate(List args)
                                 throws XPathFunctionException {
                             if (args.size() == 1) {
@@ -77,6 +80,7 @@ public class XPathDomVariableTest {
             }
         });
         xpe.setNamespaceContext(new NamespaceContext() {
+            @Override
             public String getNamespaceURI(String prefix) {
                 if (prefix.equals("saxon")) {
                     return "http://saxon.sf.net/";
@@ -89,10 +93,12 @@ public class XPathDomVariableTest {
                 }
             }
 
+            @Override
             public String getPrefix(String uri) {
                 return null;
             }
 
+            @Override
             public Iterator getPrefixes(String uri) {
                 return null;
             }
@@ -156,6 +162,7 @@ public class XPathDomVariableTest {
 
         // Initialize various resolvers
         xpe.setXPathVariableResolver(new XPathVariableResolver() {
+            @Override
             public Object resolveVariable(QName variableName) {
                 if ("S".equals(variableName.getLocalPart())) {
                     return "banana custard";
@@ -164,9 +171,11 @@ public class XPathDomVariableTest {
             }
         });
         xpe.setXPathFunctionResolver(new XPathFunctionResolver() {
+            @Override
             public XPathFunction resolveFunction(QName functionName, int arity) {
                 if ("F".equals(functionName.getLocalPart())) {
                     return new XPathFunction() {
+                        @Override
                         public Object evaluate(List args)
                                 throws XPathFunctionException {
                             if (args.size() == 1) {
@@ -185,6 +194,7 @@ public class XPathDomVariableTest {
             }
         });
         xpe.setNamespaceContext(new NamespaceContext() {
+            @Override
             public String getNamespaceURI(String prefix) {
                 if (prefix.equals("saxon")) {
                     return "http://saxon.sf.net/";
@@ -197,10 +207,12 @@ public class XPathDomVariableTest {
                 }
             }
 
+            @Override
             public String getPrefix(String uri) {
                 return null;
             }
 
+            @Override
             public Iterator getPrefixes(String uri) {
                 return null;
             }

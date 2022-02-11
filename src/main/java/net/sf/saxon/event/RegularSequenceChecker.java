@@ -9,6 +9,7 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -39,12 +40,12 @@ import java.util.Stack;
  *         <tr><td>initial</td><td>{@link #open()}</td><td>open</td></tr>
  *         <tr><td>open</td><td>{@link #open()}</td><td>open</td></tr>
  *         <tr><td>open</td><td>{@link Outputter#append(Item, Location, int)}, {@link #append(Item)},
- *         {@link Outputter#characters(CharSequence, Location, int)}, {@link Outputter#comment(CharSequence, Location, int)},
- *         {@link Outputter#processingInstruction(String, CharSequence, Location, int)}</td><td>open</td></tr>
+ *         {@link Receiver#characters(CodePoints, Location, int)}, {@link Receiver#comment(CodePoints, Location, int)},
+ *         {@link Receiver#processingInstruction(String, CodePoints, Location, int)}</td><td>open</td></tr>
  *         <tr><td>open</td><td>{@link Outputter#startDocument(int)}</td><td>content</td></tr>
  *         <tr><td>open</td><td>{@link Outputter#startElement(NodeName, SchemaType, Location, int)}</td><td>content</td></tr>
- *         <tr><td>content</td><td>{@link Outputter#characters(CharSequence, Location, int)}, {@link Outputter#comment(CharSequence, Location, int)},
- *         {@link Outputter#processingInstruction(String, CharSequence, Location, int)}</td><td>content</td></tr>
+ *         <tr><td>content</td><td>{@link Receiver#characters(CodePoints, Location, int)}, {@link Receiver#comment(CodePoints, Location, int)},
+ *         {@link Receiver#processingInstruction(String, CodePoints, Location, int)}</td><td>content</td></tr>
  *         <tr><td>content</td><td>{@link Outputter#startElement(NodeName, SchemaType, Location, int)}</td><td>startTag</td></tr>
  *         <tr><td>content</td><td>{@link #endDocument()}, {@link #endElement()}</td><td>if the stack is empty, then content, otherwise open</td></tr>
  *         <tr><td>(any)</td><td>close</td><td>final</td></tr>
@@ -76,7 +77,7 @@ import java.util.Stack;
  */
 public class RegularSequenceChecker extends ProxyReceiver {
 
-    private Stack<Short> stack = new Stack<>();
+    private final Stack<Short> stack = new Stack<>();
 
     public enum State {Initial, Open, StartTag, Content, Final, Failed}
     // StartTag is used only in an incremental Receiver where attributes and namespaces are notified separately
@@ -86,7 +87,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
 
     private State state;
     private boolean fullChecking = false;
-    private static Map<State, Map<Transition, State>> machine = new HashMap<>();
+    private static final Map<State, Map<Transition, State>> machine = new HashMap<>();
 
     private static void edge(State from, Transition event, State to) {
         Map<Transition, State> edges = machine.computeIfAbsent(from, s -> new HashMap<>());
@@ -167,9 +168,9 @@ public class RegularSequenceChecker extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         transition(Transition.TEXT);
-        if (chars.length() == 0 && !stack.isEmpty()) {
+        if (chars.isEmpty() && !stack.isEmpty()) {
             throw new IllegalStateException("Zero-length text nodes not allowed within document/element content");
         }
         try {
@@ -200,7 +201,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         transition(Transition.COMMENT);
         try {
             nextReceiver.comment(chars, locationId, properties);
@@ -269,7 +270,7 @@ public class RegularSequenceChecker extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         transition(Transition.PI);
         try {
             nextReceiver.processingInstruction(target, data, locationId, properties);

@@ -12,6 +12,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
@@ -83,18 +84,19 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
     }
 
     /**
-     * Get the value of the item as a CharSequence. The string value for a node below the pivot is the same
+     * Get the string value of the item. The string value for a node below the pivot is the same
      * as the string value for the corresponding node in the source tree; the string value for a node above the pivot
      * is the same as the string value of the pivot. For attributes and namespaces the string value is the same
      * as in the original tree.
+     * @return
      */
 
     @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         if (Navigator.isAncestorOrSelf(original, pivot)) {
-            return pivot.getStringValueCS();
+            return pivot.getUnicodeStringValue();
         } else {
-            return original.getStringValueCS();
+            return original.getUnicodeStringValue();
         }
     }
 
@@ -160,7 +162,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
                 } else {
                     // Ancestors of the pivot node have type xs:anyType. The typed value is therefore the
                     // string value as an instance of xs:untypedAtomic
-                    return new UntypedAtomicValue(pivot.getStringValueCS());
+                    return new UntypedAtomicValue(pivot.getUnicodeStringValue());
                 }
         }
     }

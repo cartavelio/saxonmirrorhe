@@ -7,9 +7,10 @@
 
 package internaltests;
 
-
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * or drop type information, so the bytecode path doesn't get tested
  */
 
+@Tag("bytecode")
 public class CompiledConversionTest {
 
     private void test(XdmAtomicValue from, String query, XdmAtomicValue expected) {

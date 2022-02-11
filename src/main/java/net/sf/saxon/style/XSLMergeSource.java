@@ -278,7 +278,7 @@ public class XSLMergeSource extends StyleElement {
                 mergeKeyCount++;
             } else if (child.getNodeKind() == Type.TEXT) {
                 // with xml:space=preserve, white space nodes may still be there
-                if (!Whitespace.isWhite(child.getStringValueCS())) {
+                if (!Whitespace.isAllWhite(child.getUnicodeStringValue())) {
                     compileError("No character data is allowed within xsl:merge-source", "XTSE0010");
                 }
             } else if (child instanceof StyleElement) {
