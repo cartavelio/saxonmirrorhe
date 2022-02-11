@@ -938,7 +938,7 @@ public class Steps {
      *              is a document node</li>
      *              <li>The string ".." selects the parent node</li>
      *              <li>The string "//" selects all descendant-or-self nodes (note,
-     *              this does not involve finding the root of the tree: it correspondings to a binary
+     *              this does not involve finding the root of the tree: it corresponds to a binary
      *              '//' operator in XPath, not to an initial '//')</li>
      *              </ul>.
      *              <p>For more complex paths, see {@link #path(Step...)}</p>
