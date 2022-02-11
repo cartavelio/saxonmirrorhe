@@ -636,7 +636,7 @@
                     items in the sequence are output space-separated.</attribute>
                 <attribute name="separator" use="optional">String used to specify an alternative
                     separator. </attribute>
-                <attribute name="type" use="optional">New in XSLT 2.0. Indicates the data type of
+                <attribute name="type" use="optional">Indicates the data type of
                     the value of the attribute. The value must either be a built-in type defined in
                     XML Schema, for example <code>xs:integer</code> or <code>xs:date</code>, or a
                     user-defined type defined in a schema imported using
@@ -646,7 +646,10 @@
                     a string that conforms to the rules for the data type, as defined in XML
                     Schema.</attribute>
                 <attribute name="validation" use="optional">Invokes validation of the contents of
-                    the attribute. </attribute>
+                    the attribute, by locating a global schema declaration matching the name
+                    of the attribute. (Note that attributes often have no global declaration
+                    in the schema, in which case this option is not useful. It is more common to
+                    validate attributes implicitly by validating their parent element node.)</attribute>
                 
             </attributes>
             <details>
@@ -692,7 +695,7 @@
             <in-spec>xslt30</in-spec>
             <saxon-edition>ALL</saxon-edition>
             <status>
-                <p>Modivated by streaming, the <code>on-empty</code> attribute was introduced in an
+                <p>Motivated by streaming, the <code>on-empty</code> attribute was introduced in an
                     early Working Draft for XSLT 3.0, but later removed and replaced by the new <a
                         class="bodylink code" href="../on-empty">xsl:on-empty</a>, <a
                         class="bodylink code" href="../on-non-empty">xsl:on-non-empty</a> and <a
@@ -1130,8 +1133,12 @@
                     attribute sets, provided as a whitespace-separated list. They are applied in the
                     order given: if the same attribute is generated more than once, the later value
                     always takes precedence.</attribute>
-                <attribute name="type" use="optional"/>
-                <attribute name="validation" use="optional"/>
+                <attribute name="type" use="optional">Requests validation of the constructed node
+                    against a specified XSD type. The value will typically be a user-defined complex
+                    type defined in  an imported schema.</attribute>
+                <attribute name="validation" use="optional">Requests strict or lax validation of the
+                    contents of the constructed node against the element declaration of its top-level
+                    element.</attribute>
 
             </attributes>
             <details>
@@ -1193,8 +1200,13 @@
                 <attribute name="copy-accumulators" use="optional">New in XSLT 3.0. Used to copy the
                     pre-descent and post-descent values of accumulators on source nodes to the new
                     copies.</attribute>
-                <attribute name="type" use="optional"/>
-                <attribute name="validation" use="optional"/>
+                <attribute name="type" use="optional">Requests validation of the copied node
+                    against a specified XSD type. The value will typically be a user-defined complex
+                    type defined in  an imported schema.</attribute>
+                <attribute name="validation" use="optional">Requests strict or lax validation of the
+                    contents of the document against the element declaration of its top-level
+                    element; or requests that type annotations present on the source node should
+                    be retained in the result.</attribute>
             </attributes>
             <details>
                 <p>Making a deep copy of an element is particularly useful during streaming. For
@@ -1291,10 +1303,9 @@
             </description>
             <attributes>
                 <attribute name="validation" use="optional">Used to perform document-level
-                    validation. Requires Saxon-PE or Saxon-EE.</attribute>
+                    validation. Requires Saxon-EE.</attribute>
                 <attribute name="type" use="optional">Determines what happens to any type
-                    annotations on element or attribute nodes. Requires Saxon-PE or
-                    Saxon-EE.</attribute>
+                    annotations on element or attribute nodes. Requires Saxon-EE.</attribute>
             </attributes>
             <details>
                 <p>The content of the new document node is created using the contained instructions
@@ -1343,7 +1354,7 @@
                     whitespace-separated list. They are applied in the order given: if the same
                     attribute is generated more than once, the later value always takes
                     precedence.</attribute>
-                <attribute name="type" use="optional">Added in XSLT 2.0. Indicates the data type of
+                <attribute name="type" use="optional">Indicates the data type of
                     the value of the element. The value may be a built-in type defined in XML
                     Schema, for example <code>xs:integer</code> or <code>xs:date</code>, or a
                     user-defined type defined in a schema imported using
@@ -1352,7 +1363,9 @@
                         <code>type-information="preserve"</code>. The attribute causes the content
                     of the element to be validated against the schema definition of the type, and
                     will cause a fatal dynamic error if validation fails.</attribute>
-                <attribute name="validation" use="optional"/>
+                <attribute name="validation" use="optional">Requests strict or lax validation of the
+                    contents of the new element node against the corresponding global element declaration
+                    in the schema.</attribute>
  
             </attributes>
             <details>
@@ -3261,6 +3274,12 @@
                 instruction can also be handy irrespective of streaming to avoid evaluating complex conditions
                 more than once.</p>
             </description>
+            <attributes>
+                <attribute name="select" use="optional">The value to be output when the containing
+                sequence constructor would otherwise deliver an empty result. This may be computed
+                using either a <code>select</code> attribute or using child instructions of
+                the <code>xsl:on-empty</code> element.</attribute>
+            </attributes>
             <examples>
                 <example>
                     <p>The following code generates substitute text when there is no content,
@@ -3303,6 +3322,12 @@
                     instruction can also be handy irrespective of streaming to avoid evaluating complex conditions
                     more than once.</p>
             </description>
+            <attributes>
+                <attribute name="select" use="optional">The value to be output when the containing
+                    sequence constructor delivers a non-empty result. This may be computed
+                    using either a <code>select</code> attribute or using child instructions of
+                    the <code>xsl:on-non-empty</code> element.</attribute>
+            </attributes>
             <examples>
                 <example>
                     <p>The following code generates a header and footer only if there is content,
@@ -3551,7 +3576,8 @@
                 <p>Defines a set of stylesheet modules that can be compiled as a unit, independently of other packages. </p>
             </description>
             <attributes>
-                <attribute name="id"/>
+                <attribute name="id">Optional identifier, not used by the XSLT processor; may be used
+                        to identify a package within a larger XML document.</attribute>
                 <attribute name="name">The name of the package, as an absolute URI, to be used by
                         <code>xsl:use-package</code> declarations. </attribute>
                 <attribute name="package-version">Version identifier, used to distinguish between
@@ -3563,6 +3589,52 @@
                 <attribute name="declared-modes"> Determines whether of not modes that are
                     referenced within the package must be explicitly declared. The default is
                         <code>yes</code>. </attribute>
+                <attribute name="default-mode" use="optional">Standard attribute that may appear on
+                    any XSLT element. Defines the default value for the <code>mode</code> attribute
+                    of all <code>xsl:template</code> and <code>xsl:apply-templates</code> elements
+                    within its scope.</attribute>
+                <attribute name="default-validation" use="optional">Standard attribute that may
+                    appear on any XSLT element. Defines the default value for the
+                    <code>validation</code> attribute of all relevant instructions appearing
+                    within its scope. The default is <code>strip</code>.</attribute>
+                <attribute name="input-type-annotations" use="optional">Used to request stripping of
+                    type annotations. The default is <code>unspecified</code>.</attribute>
+                <attribute name="default-collation" use="optional">Standard attribute that may
+                    appear on any XSLT element. Specifies the default collation used by all XPath
+                    expressions appearing in attributes or text value templates within its scope
+                    (unless overridden by another <code>default-collation</code> attribute on a
+                    descendant); and used by certain XSLT constructs within its scope. If present it
+                    must be a whitespace-separated list of collation URIs, that use the scheme and
+                    path <code>http://www.w3.org/2013/collation/UCA</code> (to request use of the <a
+                        class="bodylink" href="/extensibility/collation/UCA">Unicode
+                        Collation Algorithm</a>), or collations otherwise recognized by Saxon (see
+                    <a class="bodylink"
+                        href="/extensibility/collation"
+                        >Collation</a>).</attribute>
+                <attribute name="extension-element-prefixes" use="optional">Standard attribute that
+                    may appear on any XSLT element. Used to declare the use of extension
+                    instructions in a particular namespace.</attribute>
+                <attribute name="exclude-result-prefixes" use="optional">Standard attribute that may
+                    appear on any XSLT element. Used to designate namespaces as
+                    excluded.</attribute>
+                <attribute name="expand-text" use="optional">Standard attribute that may appear on
+                    any XSLT element. New in XSLT 3.0. If set to <code>yes</code>,
+                    enables the use of <i>text value templates</i> - expressions enclosed in curly
+                    braces within text nodes, behaving the same way as attribute value templates in
+                    attribute nodes - for descendant text nodes (unless overridden by another
+                    <code>expand-text</code> attribute on a descendant). The default is
+                    <code>no</code>.</attribute>
+                <attribute name="use-when" use="optional">Standard attribute that may appear on any
+                    XSLT element. Used to conditionally include or exclude elements. The value is an
+                    XPath expression that can be evaluated statically. If the effective boolean
+                    value is false, then the element and all its descendants are effectively
+                    excluded from the stylesheet module.</attribute>
+                <attribute name="xpath-default-namespace" use="optional">Standard attribute that may
+                    appear on any XSLT element. Determines the namespace used for any unprefixed
+                    element name or type name within an XPath expression. The value may be
+                    overridden by another <code>xpath-default-namespace</code> attribute on a
+                    descendant. The default is a zero-length string, for names in no
+                    namespace.</attribute>
             </attributes>
             <in-spec>xslt30</in-spec>
             <saxon-edition>ALL_SINCE_9.8 PE/EE_9.7</saxon-edition>
@@ -3822,15 +3894,13 @@
                         <code>xsl:result-document</code> instruction with the <code>href</code>
                         attribute is disallowed.</p>
                 </attribute>
-                <attribute name="validation" use="optional">Requires Saxon-PE or
-                    Saxon-EE.</attribute>
-                <attribute name="type" use="optional">Determines what happens to any type
-                    annotations on element or attribute nodes. Requires Saxon-PE or
-                    Saxon-EE.</attribute>
-                <!--<attribute name="method" use="optional">Serialization attribute. May be an AVT, so
-                    the values can be decided at run-time. Any values specified on the
-                        <code>xsl:result-document</code> instruction override the values specified
-                    on the <code>xsl:output</code> declaration.</attribute>-->
+                <attribute name="type" use="optional">Requests validation of the constructed document
+                    against a specified XSD type. The value will typically be a user-defined complex
+                    type defined in  an imported schema.</attribute>
+                <attribute name="validation" use="optional">Requests strict or lax validation of the
+                    contents of the document against the element declaration of its top-level
+                    element; this also invokes document-level validation (for example, checking
+                    uniqueness of ID attributes).</attribute>
                 <attribute name="method" use="optional">Serialization attribute, see Details for
                     more information.</attribute>
                 <attribute name="allow-duplicate-names" use="optional">Serialization attribute, see
@@ -4329,99 +4399,7 @@
         </xsl-element>
     </section>
 
-    <section id="stream" title="xsl:stream">
-        <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
-            <name>stream</name>
-            <description>
-                <p>Used to initiate streamed processing of a source document. (In later drafts of
-                    the XSLT 3.0 specification, the instruction is renamed <a class="bodylink code"
-                        href="../source-document">xsl:source-document</a>, which is available since
-                    Saxon 9.7.0.8, while <code>xsl:stream</code> is retained for the time being as a synonym.)</p>
-            </description>
-            <attributes>
-                <attribute name="href" use="mandatory">The URI of a source document. It can be
-                    written as an attribute value template if the URI is not known
-                    statically.</attribute>
-                <attribute name="streamable" use="optional">Allowed since 9.7.0.8. 
-                    Used to specifically request streamed processing. The default is
-                    <code>yes</code>.</attribute>
-                <attribute name="use-accumulators" use="optional">Defines the set of accumulators
-                    that are applicable to the document.</attribute>
-            </attributes>
-            <details>
-
-                <p>The body of the instruction is a sequence constructor, which is evaluated with
-                    the root node of the selected document as the context node. For streaming to
-                    work, this must be written as a streamable sequence constructor. Expressed very
-                    informally, this means it must only make downward selections in the document,
-                    and no instruction or expression may make more than one downward selection. The
-                        <a href="http://www.w3.org/TR/xslt-30/#stream-examples" class="bodylink"
-                        >examples</a> in the W3C specification illustrate some of the possibilities;
-                    these examples all work with Saxon.</p>
-
-                <p>Some of the things that the instruction might do are:</p>
-                <ol>
-                    <li>
-                        <p>Compute an aggregate such as a total or average (see the example below).
-                        </p>
-                    </li>
-                    <li>
-                        <p>Initiate processing of the document using template rules, by calling <a
-                                class="bodylink code" href="../apply-templates"
-                                >xsl:apply-templates</a> using a streamable mode. </p>
-                    </li>
-                    <li>
-                        <p>Iterate over the contents of the document using <a class="bodylink code"
-                                href="../for-each">xsl:for-each</a> or (if there is a need to
-                            "remember" information from one element to the next) using <a
-                                class="bodylink code" href="../iterate">xsl:iterate</a>. </p>
-                    </li>
-                    <li>
-                        <p>Perform grouping of the document contents using <a class="bodylink code"
-                                href="../for-each-group">xsl:for-each-group</a>. Saxon only has
-                            limited ability to do streamed grouping, but simple cases should work.
-                            It is necessary to use one of the attributes
-                            <code>group-adjacent</code>, <code>group-starting-with</code>, or
-                                <code>group-ending-with</code>, and to use the new XSLT 3.0 binding
-                            variables for current group and current-grouping-key, rather than the
-                            XSLT 2.0 function. </p>
-                    </li>
-                </ol>
-
-
-                <p>For more details on streaming, see <a class="bodylink"
-                        href="/sourcedocs/streaming">Streaming of Large Documents</a>.</p>
-            </details>
-            <examples>
-                <example>
-                    <p>A simple example:</p>
-
-                    <samp><![CDATA[<xsl:stream href="transactions.xml">
-    <out><xsl:value-of select="sum(*/transaction/value)"/></out>
-</xsl:stream>
-]]></samp>
-                </example>
-                <example>
-                    <p>See further <a href="http://www.w3.org/TR/xslt-30/#stream-examples"
-                            class="bodylink">examples</a> in the W3C specification; these examples
-                        all work with Saxon 9.5 onwards.</p>
-                </example>
-            </examples>
-            <in-spec>xslt30</in-spec>
-            <saxon-edition>ALL_SINCE_9.8 EE_9.6</saxon-edition>
-            <status>
-                <p>In later drafts of the XSLT 3.0 specification, the <code>xsl:stream</code>
-                    instruction is replaced by <a class="bodylink code"
-                        href="../source-document">xsl:source-document</a>, which is available since
-                    Saxon 9.7.0.8. The <code>xsl:stream</code> instruction is retained as a synonym.</p>
-                <p>The instruction is obsolete and will be dropped after Saxon 9.8.</p>
-            </status>
-            <see-also name="apply-templates" type="xsl-elements"/>
-            <see-also name="for-each" type="xsl-elements"/>
-            <see-also name="for-each-group" type="xsl-elements"/>
-            <see-also name="iterate" type="xsl-elements"/>
-        </xsl-element>
-    </section>
+    
 
     <section id="strip-space" title="xsl:strip-space">
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
