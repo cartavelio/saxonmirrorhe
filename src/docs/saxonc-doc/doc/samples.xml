@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="samples" title="SaxonC Samples">
-   <h1>SaxonC Samples</h1>
+<article id="samples" title="SaxonC samples">
+   <h1>SaxonC samples</h1>
 
    <p>This section of the documentation describes some example code in C/C++, PHP and Python to help
       get started using SaxonC. A number of samples and unit test code for C/C++ and PHP can be
@@ -11,8 +11,8 @@
       <ul/>
    </nav>
 
-   <section id="samples_c" title="C/C++ Samples">
-      <h1>C/C++ Samples</h1>
+   <section id="samples_c" title="C/C++ samples">
+      <h1>C/C++ samples</h1>
 
       <h2 class="subtitle">C programming</h2>
 
@@ -170,8 +170,8 @@ queryProc->runQueryToString();
 
    </section>
 
-   <section id="samples_php" title="PHP Samples">
-      <h1>PHP Samples</h1>
+   <section id="samples_php" title="PHP samples">
+      <h1>PHP samples</h1>
 
       <p>The <code>samples/php</code> directory in the SaxonC download contains various samples for
          XSLT, XQuery, XPath and Schema Validation (namely: <code>xsltExamples.php</code>,
@@ -189,7 +189,7 @@ queryProc->runQueryToString();
       <p>And to run a single unit test:</p>
       <kbd>./phpunit --filter testPipeline xslt30_PHPUnit.php</kbd>
 
-      <h2 class="subtitle">Example code</h2>
+      <h3 class="subtitle">Example code</h3>
 
       <p>Example using the new XSLT 3.0 API:</p>
       <samp><![CDATA[<?php
@@ -230,8 +230,8 @@ queryProc->runQueryToString();
 ?>]]></samp>
    </section>
 
-   <section id="samples_python" title="Python Samples">
-      <h1>Python Samples</h1>
+   <section id="samples_python" title="Python samples">
+      <h1>Python samples</h1>
 
       <p>The <code>Saxon.C.API/python-saxon</code> directory in the SaxonC download includes the
          unit test files <code>test_saxonc.py</code> and <code>test_saxon_Schema.py</code>, which

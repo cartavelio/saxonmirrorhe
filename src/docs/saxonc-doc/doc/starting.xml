@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<article id="starting" title="Getting Started">
-   <h1>Getting Started</h1>
+<article id="starting" title="Getting started">
+   <h1>Getting started</h1>
 
    <p>This section of the documentation describes how to get hold of SaxonC and the PHP and Python
       extensions, how to install on the different platforms, and how to get started using it.</p>
@@ -25,8 +25,8 @@
       </nav>
 
       <p>For information on installing the PHP and Python extensions see the <a
-            href="/starting/installingphp">PHP Extension</a> and <a
-            href="/starting/installingpython">Python Extension</a> sections.</p>
+            href="/starting/installingphp">PHP extension</a> and <a
+            href="/starting/installingpython">Python extension</a> sections.</p>
 
       <section id="installingLinux" title="Linux">
          <h1>Installing on Linux</h1>
@@ -296,7 +296,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
             <code>SaxonProcessor</code> and the other processors in SaxonC, see <a
             href="/configuration">Configuration</a>.</p>
 
-      <h2 class="subtitle">Command Line Interface</h2>
+      <h2 class="subtitle">Command line interface</h2>
 
       <p>SaxonC can be run from the command line in a similar way to its Java counterpart. See the
             <code>Transform.c</code> and <code>Query.c</code> files (and <code>Validate.c</code> for
@@ -315,18 +315,18 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <ul>
          <li>
             <a target="_blank"
-               href="https://www.saxonica.com/documentation11/index.html#!using-xsl/commandline">Running
-               XSLT from the Command Line</a>
+               href="https://www.saxonica.com/documentation11/index.html#!using-xsl/commandline">XSLT from the
+               command line</a>
          </li>
          <li>
             <a target="_blank"
                href="https://www.saxonica.com/documentation11/index.html#!using-xquery/commandline"
-               >Running XQuery from the Command Line</a>
+               >XQuery from the command line</a>
          </li>
          <li>
             <a target="_blank"
                href="https://www.saxonica.com/documentation11/index.html#!schema-processing/commandline"
-               >Running Validation from the Command Line</a>
+               >Validation from the command line</a>
          </li>
       </ul>
 
@@ -335,8 +335,8 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
    </section>
 
 
-   <section id="installingphp" title="PHP Extension">
-      <h1>PHP Extension</h1>
+   <section id="installingphp" title="PHP extension">
+      <h1>PHP extension</h1>
 
       <p>The PHP extension is an interface module that allows SaxonC to be invoked from PHP
          applications.</p>
@@ -440,12 +440,12 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
       <samp><![CDATA[$proc = new SaxonProcessor();]]></samp>
 
-      <p>in your PHP scripts (see the <a href="/samples/samples_php">PHP Samples</a> for an
+      <p>in your PHP scripts (see the <a href="/samples/samples_php">PHP samples</a> for an
          example). </p>
    </section>
 
-   <section id="installingpython" title="Python Extension">
-      <h1>Python Extension</h1>
+   <section id="installingpython" title="Python extension">
+      <h1>Python extension</h1>
 
       <p>The Python extension is an interface module that allows SaxonC to be invoked from Python
          applications.</p>
@@ -466,13 +466,13 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
       <p>The Python extension is held in the directory <code>Saxon.C.API/python-saxon</code>. </p>
 
-      <h3>Linux and Mac OS Platforms</h3>
+      <h3>Linux and Mac OS platforms</h3>
       <p>The Python extension on the Linux and Mac OS platforms can be built using the following
          command:</p>
 
       <kbd>python3 saxon-setup.py build_ext -if</kbd>
 
-      <h3>Windows Platform</h3>
+      <h3>Windows platform</h3>
 
       <p>The Python extension on the Windows platform can be built using the following instructions:</p>
        <p>Install Python 3.X (64-bit) with VS 2017 or 2019 which can then be run
