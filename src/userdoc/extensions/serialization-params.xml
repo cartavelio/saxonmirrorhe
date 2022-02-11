@@ -123,6 +123,19 @@
             </desc>
             <data-type name="integer"/>
         </attribute>
+        
+        <attribute name="saxon:internal-dtd-subset" required="no">
+            <desc>
+                <p>When the output method is XML, the
+                    <code>saxon:internal-dtd-subset</code> attribute may be used to generate an internal DTD.</p>
+                <p>The value is a string conforming to the XML grammar production <code>intSubset</code>; it is 
+                    included in the serialized document "as is", without checking. As with any string, special 
+                    characters will need to be escaped, for example "&lt;" is written as "&amp;lt;". 
+                    The square brackets that enclose the internal subset within the Document Type Declaration 
+                    should not be included in the value.</p>
+            </desc>
+            <data-type name="integer"/>
+        </attribute>
 
         <attribute name="saxon:line-length" required="no">
             <desc>
