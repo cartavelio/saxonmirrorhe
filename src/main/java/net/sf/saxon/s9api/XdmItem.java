@@ -34,10 +34,6 @@ import java.util.stream.Stream;
 @CSharpModifiers(code = {"abstract", "internal"})
 public abstract class XdmItem extends XdmValue {
 
-    // internal protected constructor
-
-    protected XdmItem() {
-    }
 
     /**
      * Construct an XdmItem as a wrapper around an existing Saxon Item object
@@ -49,8 +45,7 @@ public abstract class XdmItem extends XdmValue {
      */
 
     public XdmItem(Item item) {
-        super();
-        setValue(item);
+        super(item);
     }
 
     // internal factory mathod to wrap an Item

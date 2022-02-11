@@ -29,10 +29,16 @@ import java.time.*;
 @CSharpModifiers(code = {"internal"})
 public class XdmAtomicValue extends XdmItem {
 
-    private XdmAtomicValue(){}
-
-    protected XdmAtomicValue(AtomicValue value, boolean flag) {
-        setValue(value);
+    /**
+     * Create an XdmAtomicValue that wraps a supplied <code>AtomicValue</code>. This
+     * method is primarily for internal use, though it is also available to applications
+     * that manipulate data using lower-level Saxon interfaces.
+     *
+     * @param value the value to be wrapped.
+     */
+    
+    public XdmAtomicValue(AtomicValue value) {
+        super(value);
     }
 
     /**
@@ -42,7 +48,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(boolean value) {
-        this(BooleanValue.get(value), true);
+        this(BooleanValue.get(value));
     }
 
     /**
@@ -52,7 +58,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(long value) {
-        this(Int64Value.makeDerived(value, BuiltInAtomicType.LONG), true);
+        this(Int64Value.makeDerived(value, BuiltInAtomicType.LONG));
     }
 
     /**
@@ -62,7 +68,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(int value) {
-        this(Int64Value.makeDerived(value, BuiltInAtomicType.INT), true);
+        this(Int64Value.makeDerived(value, BuiltInAtomicType.INT));
     }
 
     /**
@@ -72,7 +78,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(short value) {
-        this(Int64Value.makeDerived(value, BuiltInAtomicType.SHORT), true);
+        this(Int64Value.makeDerived(value, BuiltInAtomicType.SHORT));
     }
 
     /**
@@ -82,7 +88,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(byte value) {
-        this(Int64Value.makeDerived(value, BuiltInAtomicType.BYTE), true);
+        this(Int64Value.makeDerived(value, BuiltInAtomicType.BYTE));
     }
 
     /**
@@ -92,7 +98,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(BigDecimal value) {
-        this(new BigDecimalValue(value), true);
+        this(new BigDecimalValue(value));
     }
 
     /**
@@ -102,7 +108,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(double value) {
-        this(new DoubleValue(value), true);
+        this(new DoubleValue(value));
     }
 
     /**
@@ -112,7 +118,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(float value) {
-        this(new FloatValue(value), true);
+        this(new FloatValue(value));
     }
 
     /**
@@ -122,7 +128,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(String value) {
-        this(new StringValue(value), true);
+        this(new StringValue(value));
     }
 
     /**
@@ -132,7 +138,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(URI value) {
-        this(new AnyURIValue((value.toString())), true);
+        this(new AnyURIValue((value.toString())));
     }
 
     /**
@@ -142,7 +148,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(QName value) {
-        this(new QNameValue(value.getStructuredQName(), BuiltInAtomicType.QNAME), true);
+        this(new QNameValue(value.getStructuredQName(), BuiltInAtomicType.QNAME));
     }
 
     //#if CSHARP==false
@@ -155,7 +161,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(Instant value) {
-        this(DateTimeValue.fromJavaInstant(value), true);
+        this(DateTimeValue.fromJavaInstant(value));
     }
 
     /**
@@ -168,7 +174,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(ZonedDateTime value) {
-        this(DateTimeValue.fromZonedDateTime(value), true);
+        this(DateTimeValue.fromZonedDateTime(value));
     }
 
     /**
@@ -180,7 +186,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(OffsetDateTime value) {
-        this(DateTimeValue.fromOffsetDateTime(value), true);
+        this(DateTimeValue.fromOffsetDateTime(value));
     }
 
     /**
@@ -192,7 +198,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(LocalDateTime value) {
-        this(DateTimeValue.fromLocalDateTime(value), true);
+        this(DateTimeValue.fromLocalDateTime(value));
     }
 
     /**
@@ -204,7 +210,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(LocalDate value) {
-        this(new DateValue(value), true);
+        this(new DateValue(value));
     }
 
     //#endif
@@ -225,6 +231,10 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(String lexicalForm, ItemType type) throws SaxonApiException {
+        super(fromLexicalForm(lexicalForm,type));
+    }
+
+    private static AtomicValue fromLexicalForm(String lexicalForm, ItemType type) throws SaxonApiException {
         net.sf.saxon.type.ItemType it = type.getUnderlyingItemType();
         if (!it.isPlainType()) {
             throw new SaxonApiException("Requested type is not atomic");
@@ -236,8 +246,8 @@ public class XdmAtomicValue extends XdmItem {
             throw new SaxonApiException("Requested type is namespace-sensitive");
         }
         try {
-            StringConverter converter = ((AtomicType)it).getStringConverter(type.getConversionRules());
-            setValue(converter.convertString(StringView.of(lexicalForm).tidy()).asAtomic());
+            StringConverter converter = ((AtomicType) it).getStringConverter(type.getConversionRules());
+            return converter.convertString(StringView.of(lexicalForm).tidy()).asAtomic();
         } catch (ValidationException e) {
             throw new SaxonApiException(e);
         }
@@ -259,7 +269,7 @@ public class XdmAtomicValue extends XdmItem {
 
     public static XdmAtomicValue makeAtomicValue(Object value) {
         if (value instanceof AtomicValue) {
-            return new XdmAtomicValue((AtomicValue)value, true);
+            return new XdmAtomicValue((AtomicValue)value);
         } else if (value instanceof Boolean) {
             return new XdmAtomicValue((Boolean)value);
         } else if (value instanceof Integer) {
@@ -281,7 +291,7 @@ public class XdmAtomicValue extends XdmItem {
         } else if (value instanceof BigDecimal) {
             return new XdmAtomicValue((BigDecimal) value);
         } else if (value instanceof BigInteger) {
-            return new XdmAtomicValue(IntegerValue.makeIntegerValue((BigInteger) value), true);
+            return new XdmAtomicValue(IntegerValue.makeIntegerValue((BigInteger) value));
         } else if (value instanceof URI) {
             return new XdmAtomicValue((URI) value);
         } else if (value instanceof QName) {

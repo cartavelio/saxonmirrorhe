@@ -28,10 +28,16 @@ import java.util.stream.Stream;
 @CSharpModifiers(code = {"internal"})
 public class XdmFunctionItem extends XdmItem {
 
-    protected XdmFunctionItem() {}
-
+    /**
+     * Create an XdmFunctionItem that wraps a supplied <code>Function</code>. This
+     * method is primarily for internal use, though it is also available to applications
+     * that manipulate data using lower-level Saxon interfaces.
+     *
+     * @param fi the function value to be wrapped.
+     */
+    
     public XdmFunctionItem(Function fi) {
-        setValue(fi);
+        super(fi);
     }
 
     /**

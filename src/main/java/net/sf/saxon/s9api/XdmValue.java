@@ -53,10 +53,21 @@ import java.util.stream.StreamSupport;
 @CSharpModifiers(code = {"internal"})
 public class XdmValue implements Iterable<XdmItem> {
 
-    private GroundedValue value;
+    private final GroundedValue value;
 
-    protected XdmValue() {
-        // must be followed by setValue()
+    /**
+     * Create an XdmValue that wraps a supplied <code>GroundedValue</code>. This
+     * method is primarily for internal use, though it is also available to applications
+     * that manipulate data using lower-level Saxon interfaces.
+     * <p>Note that this constructor necessarily produces an <code>XdmValue</code> regardless
+     * of the supplied value. To construct instances of subclasses of <code>XdmValue</code>,
+     * such as <code>XdmAtomicValue</code> or <code>XdmNode</code>, use the {@link #wrap} method,
+     * or use the overriding constructor on the required subclass.</p>
+     * @param value the value to be wrapped.
+     */
+
+    protected XdmValue(GroundedValue value) {
+        this.value = value;
     }
 
     /**
@@ -105,16 +116,6 @@ public class XdmValue implements Iterable<XdmItem> {
         this(stream.iterator());
     }
 
-    protected static XdmValue fromGroundedValue(GroundedValue value) {
-        XdmValue xv = new XdmValue();
-        xv.setValue(value);
-        return xv;
-    }
-
-    protected void setValue(GroundedValue value) {
-        this.value = value;
-    }
-
     /**
      * Create an XdmValue that wraps an existing Saxon Sequence
      *
@@ -151,7 +152,7 @@ public class XdmValue implements Iterable<XdmItem> {
             if (first instanceof NodeInfo) {
                 return new XdmNode((NodeInfo) first);
             } else if (first instanceof AtomicValue) {
-                return new XdmAtomicValue((AtomicValue) first, true);
+                return new XdmAtomicValue((AtomicValue) first);
             } else if (first instanceof MapItem) {
                 return new XdmMap((MapItem)first);
             } else if (first instanceof ArrayItem) {
@@ -164,7 +165,7 @@ public class XdmValue implements Iterable<XdmItem> {
                 throw new IllegalArgumentException("Unknown item type " + first.getClass());
             }
         } else {
-            return fromGroundedValue(gv);
+            return new XdmValue(gv);
         }
     }
 
@@ -173,9 +174,9 @@ public class XdmValue implements Iterable<XdmItem> {
             case 0:
                 return XdmEmptySequence.getInstance();
             case 1:
-                return new XdmAtomicValue(value.head(), true);
+                return new XdmAtomicValue(value.head());
             default:
-                return fromGroundedValue(value);
+                return new XdmValue(value);
         }
     }
 
@@ -200,7 +201,7 @@ public class XdmValue implements Iterable<XdmItem> {
             values.add(item.getUnderlyingValue());
         }
         GroundedValue gv = SequenceExtent.makeSequenceExtent(values);
-        return XdmValue.fromGroundedValue(gv);
+        return new XdmValue(gv);
     }
 
     /**
@@ -262,7 +263,7 @@ public class XdmValue implements Iterable<XdmItem> {
      */
 
     public XdmValue subsequence(int start, int length) {
-        return fromGroundedValue(value.subsequence(start, length));
+        return new XdmValue(value.subsequence(start, length));
     }
 
     /**
@@ -408,7 +409,7 @@ public class XdmValue implements Iterable<XdmItem> {
         try {
             SequenceIterator iter = value.iterate();
             SequenceIterator sorted = new DocumentOrderIterator(iter, GlobalOrderComparer.getInstance());
-            return XdmValue.fromGroundedValue(SequenceTool.toGroundedValue(sorted));
+            return new XdmValue(SequenceTool.toGroundedValue(sorted));
         } catch (UncheckedXPathException e) {
             throw new SaxonApiException(e);
         }
