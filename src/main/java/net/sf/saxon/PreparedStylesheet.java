@@ -84,10 +84,10 @@ public class PreparedStylesheet extends Executable {
         }
         defaultInitialMode = compilerInfo.getDefaultInitialMode();
         defaultInitialTemplate = compilerInfo.getDefaultInitialTemplate();
-        messageReceiverClassName = compilerInfo.getMessageReceiverClassName();
         compileTimeParams = compilation.getParameters();
 
         //#if CSHARP==false
+        messageReceiverClassName = compilerInfo.getMessageReceiverClassName();
         outputURIResolver = compilerInfo.getOutputURIResolver();
         //#endif
     }
@@ -103,8 +103,9 @@ public class PreparedStylesheet extends Executable {
     public XsltController newController() {
         Configuration config = getConfiguration();
         XsltController c = new XsltController(config, this);
-        c.setMessageReceiverClassName(messageReceiverClassName);
         //#if CSHARP==false
+        //noinspection deprecation
+        c.setMessageReceiverClassName(messageReceiverClassName);
         c.setOutputURIResolver(outputURIResolver);
         //#endif
         if (defaultInitialMode != null) {

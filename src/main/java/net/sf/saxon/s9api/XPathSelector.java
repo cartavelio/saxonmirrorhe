@@ -15,7 +15,6 @@ import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.URIResolver;
@@ -26,11 +25,11 @@ import java.util.Objects;
  * An XPathSelector represents a compiled and loaded XPath expression ready for execution.
  * The XPathSelector holds details of the dynamic evaluation context for the XPath expression.
  */
-@CSharpInjectMembers(code = {
-        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-                + "    }"
-})
+//@CSharpInjectMembers(code = {
+//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
+//                + "    }"
+//})
 @SuppressWarnings({"ForeachStatement"})
 public class XPathSelector implements Iterable<XdmItem> {
 

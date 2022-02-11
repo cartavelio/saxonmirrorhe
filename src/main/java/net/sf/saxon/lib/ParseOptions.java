@@ -16,7 +16,6 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationParams;
 import org.xml.sax.EntityResolver;
@@ -38,11 +37,11 @@ import java.util.*;
  */
 
 @SuppressWarnings("WeakerAccess")
-@CSharpInjectMembers(code = {
-        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-                + "    }"
-})
+//@CSharpInjectMembers(code = {
+//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
+//                + "    }"
+//})
 public class ParseOptions {
 
     private int schemaValidation = Validation.DEFAULT;

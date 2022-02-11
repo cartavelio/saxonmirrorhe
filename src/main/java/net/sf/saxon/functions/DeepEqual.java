@@ -287,24 +287,12 @@ public class DeepEqual extends CollatingFunctionFixed {
                         return false;
                     }
                 }
-                if ((flags & INCLUDE_NAMESPACES) != 0) {                // TODO: SIMPLIFY THIS!!!
-                    HashSet<NamespaceBinding> ns1 = new HashSet<>(10);
-                    HashSet<NamespaceBinding> ns2 = new HashSet<>(10);
-                    AxisIterator it1 = n1.iterateAxis(AxisInfo.NAMESPACE);
-                    NodeInfo nn1;
-                    while ((nn1 = it1.next()) != null) {
-                        NamespaceBinding nscode1 = new NamespaceBinding(nn1.getLocalPart(), nn1.getStringValue());
-                        ns1.add(nscode1);
-                    }
-                    AxisIterator it2 = n2.iterateAxis(AxisInfo.NAMESPACE);
-                    NodeInfo nn2;
-                    while ((nn2 = it2.next()) != null) {
-                        NamespaceBinding nscode2 = new NamespaceBinding(nn2.getLocalPart(), nn2.getStringValue());
-                        ns2.add(nscode2);
-                    }
-                    if (!ns1.equals(ns2)) {
+                if ((flags & INCLUDE_NAMESPACES) != 0) {
+                    NamespaceMap nm1 = n1.getAllNamespaces();
+                    NamespaceMap nm2 = n2.getAllNamespaces();
+                    if (!nm1.equals(nm2)) {
                         explain(reporter, "elements have different in-scope namespaces: " +
-                            showNamespaces(ns1) + " versus " + showNamespaces(ns2), flags, n1, n2);
+                                nm1 + " versus " + nm2, flags, n1, n2);
                         return false;
                     }
                 }

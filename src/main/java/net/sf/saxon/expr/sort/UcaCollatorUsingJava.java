@@ -213,7 +213,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
         } catch (URISyntaxException err) {
             throw new XPathException(err);
         }
-        ArrayList<String> unknownKeys = new ArrayList<String>();
+        ArrayList<String> unknownKeys = new ArrayList<>();
         Properties props = new Properties();
         String query = AnyURIValue.decode(uuri.getRawQuery());
         if (query != null && !query.isEmpty()) {

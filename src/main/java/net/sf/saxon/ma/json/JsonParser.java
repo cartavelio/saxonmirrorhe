@@ -42,6 +42,8 @@ public class JsonParser {
 
     public static final int DUPLICATES_SPECIFIED = DUPLICATES_FIRST | DUPLICATES_LAST | DUPLICATES_RETAINED | DUPLICATES_REJECTED;
 
+    public static final int NESTING_LIMIT = 10000;
+
     private static final String ERR_GRAMMAR = "FOJS0001";
     private static final String ERR_DUPLICATE = "FOJS0003";
     private static final String ERR_SCHEMA = "FOJS0004";
@@ -49,12 +51,14 @@ public class JsonParser {
     private static final String ERR_LIMITS = "FOJS0001";  // No specific code in spec
 
     private Function numberParser = null;
+    private int nesting;
 
     /**
      * Create a JSON parser
      */
 
     public JsonParser() {
+        nesting = 0;
     }
 
     /**
@@ -161,14 +165,22 @@ public class JsonParser {
         if (debug) {
             System.err.println("token:" + tokenizer.currentToken + " :" + tokenizer.currentTokenValue);
         }
+        if (nesting > NESTING_LIMIT) {
+            // Needed for C#, because we can't rely on catching StackOverflow
+            invalidJSON("Objects are too deeply nested", ERR_LIMITS, tokenizer.lineNumber);
+        }
         JsonToken tok = tokenizer.currentToken;
         switch (tok) {
             case LCURLY:
+                nesting++;
                 parseObject(handler, tokenizer, flags, context);
+                nesting--;
                 break;
 
             case LSQB:
+                nesting++;
                 parseArray(handler, tokenizer, flags, context);
+                nesting--;
                 break;
 
             case NUMERIC_LITERAL:

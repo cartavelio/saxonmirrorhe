@@ -144,7 +144,7 @@ public class RetainedStaticContext implements NamespaceResolver {
 
     public URI getStaticBaseUri() throws XPathException {
         if (staticBaseUri == null) {
-            if (staticBaseUriString == null) {
+            if (staticBaseUriString == null || staticBaseUriString.isEmpty()) {
                 return null;
             } else {
                 throw new XPathException("Supplied static base URI " + staticBaseUriString + " is not a valid URI");

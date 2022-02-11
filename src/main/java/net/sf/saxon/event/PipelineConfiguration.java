@@ -14,7 +14,6 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.s9api.HostLanguage;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 
 import javax.xml.transform.URIResolver;
 import java.util.HashMap;
@@ -25,11 +24,11 @@ import java.util.Map;
  * Unlike the global Configuration, these options are always local to a process.
  */
 
-@CSharpInjectMembers(code = {
-        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-                + "    }"
-})
+//@CSharpInjectMembers(code = {
+//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
+//                + "    }"
+//})
 public class PipelineConfiguration {
 
     /*@NotNull*/ private Configuration config;

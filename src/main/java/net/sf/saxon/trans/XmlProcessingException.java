@@ -117,7 +117,7 @@ public class XmlProcessingException implements XmlProcessingError {
      */
 
     @Override
-    public void setFatal(String message) {
+    public void setTerminationMessage(String message) {
         this.fatalErrorMessage = message;
     }
 
@@ -127,7 +127,7 @@ public class XmlProcessingException implements XmlProcessingError {
      * @return a non-null message if the error has been marked as a fatal error.
      */
     @Override
-    public String getFatalErrorMessage() {
+    public String getTerminationMessage() {
         return this.fatalErrorMessage;
     }
 
