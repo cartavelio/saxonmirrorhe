@@ -442,7 +442,8 @@ namespace TestDriver {
                 XdmValue files =
                     xpc.Evaluate("./module[@uri='" + moduleUri + "']/@file/string()", testCase);
                 if (files.Count == 0) {
-                    throw new Exception("Failed to find module entry for " + moduleUri);
+                    return null;
+                    //throw new Exception("Failed to find module entry for " + moduleUri);
                 }
 
                 TextResource[] sources = new TextResource[files.Count];
