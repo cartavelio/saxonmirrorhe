@@ -11,6 +11,7 @@ java_*.hprof
 /src/test/cstestrunner/TestDriver/bin
 /src/test/extra/qt3/expath/file/sandpit/temp/
 .DS_Store
+.vs/
 *.iml
 
 # Created by running the unit tests :-(
