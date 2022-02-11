@@ -42,9 +42,9 @@ public class TestMessageListener {
             XsltTransformer t = e.load();
             t.setInitialTemplate(new QName("main"));
             final StringBuilder sb = new StringBuilder();
-            t.setMessageListener(new MessageListener() {
+            t.setMessageListener(new MessageListener2() {
                 @Override
-                public void message(XdmNode content, boolean terminate, SourceLocator locator) {
+                public void message(XdmNode content, QName errorCode, boolean terminate, SourceLocator locator) {
                     sb.append(content.getStringValue());
                 }
             });
@@ -76,9 +76,9 @@ public class TestMessageListener {
             XsltTransformer t = e.load();
             t.setInitialTemplate(new QName("main"));
             final StringBuilder sb = new StringBuilder();
-            t.setMessageListener(new MessageListener() {
+            t.setMessageListener(new MessageListener2() {
                 @Override
-                public void message(XdmNode content, boolean terminate, SourceLocator locator) {
+                public void message(XdmNode content, QName errorCode, boolean terminate, SourceLocator locator) {
                     System.err.println(content.getStringValue() + terminate);
                     sb.append(content.getStringValue());
                     assertEquals(terminate, content.getStringValue().equals("GOTCHA5!"), "terminate");

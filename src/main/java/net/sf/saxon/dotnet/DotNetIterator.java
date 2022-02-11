@@ -26,15 +26,11 @@ public class DotNetIterator<T extends Object> implements Iterator<T> {
     private Mapper<T> mapper;
     private boolean moreToCome;
 
-
-<<<<<<< HEAD
-=======
     public DotNetIterator() {
         this.enumerator = null;
         moreToCome = false;
     }
 
->>>>>>> f75d0b15 (Bug fix relating to issue #4890)
     public DotNetIterator(IEnumerator enumerator) {
         this.enumerator = enumerator;
         this.moreToCome = enumerator.MoveNext();
