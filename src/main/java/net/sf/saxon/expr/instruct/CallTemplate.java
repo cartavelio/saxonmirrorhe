@@ -79,6 +79,15 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
     }
 
     /**
+     * Mark the instruction as tail-recursive (or not)
+     * @param tailRecursive true if the call appears in a tail position
+     */
+
+    public void setTailRecursive(boolean tailRecursive) {
+        this.useTailRecursion = tailRecursive;
+    }
+
+    /**
      * Get the name (QName) of the template being called
      * @return the name of the target template
      */

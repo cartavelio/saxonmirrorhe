@@ -7,9 +7,24 @@
 
 package net.sf.saxon.style;
 
+import net.sf.saxon.expr.AtomicSequenceConverter;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.instruct.CallTemplate;
+import net.sf.saxon.expr.instruct.NamedTemplate;
+import net.sf.saxon.expr.instruct.WithParam;
+import net.sf.saxon.functions.registry.VendorFunctionSetHE;
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.value.SequenceType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This element is a surrogate for an extension element (or indeed an xsl element)
@@ -17,6 +32,9 @@ import net.sf.saxon.trans.XPathException;
  */
 
 public class AbsentExtensionElement extends StyleElement {
+
+    CallTemplate instruction;
+    boolean useTailRecursion;
 
     @Override
     public boolean isInstruction() {
@@ -44,6 +62,61 @@ public class AbsentExtensionElement extends StyleElement {
         if (reportingCircumstances == OnFailure.REPORT_ALWAYS) {
             compileError(validationError);
         }
+
+        if (getEffectiveVersion() >= 40) {
+            PrincipalStylesheetModule pack = getPrincipalStylesheetModule();
+            NamedTemplate template = pack.getNamedTemplate(getNodeName().getStructuredQName());
+            if (template != null) {
+                CallTemplate insn = new CallTemplate(template, template.getTemplateName(), false, ((StyleElement)getParent()).isWithinDeclaredStreamableConstruct());
+                List<NamedTemplate.LocalParamInfo> declaredParams = template.getLocalParamDetails();
+
+                // Check that all the required parameters are supplied
+                for (NamedTemplate.LocalParamInfo param : declaredParams) {
+                    if (param.isRequired && !param.isTunnel) {
+                        if (attributes().get(param.name.getURI(), param.name.getLocalPart()) == null) {
+                            compileError("No value supplied for required parameter " +
+                                                 Err.wrap(param.name.getDisplayName(), Err.VARIABLE), "XTSE0690");
+                        }
+                    }
+                }
+
+                // check that all supplied parameters are declared, and handle the parameter type
+                List<WithParam> params = new ArrayList<>();
+                for (AttributeInfo att : attributes().asList()) {
+                    StructuredQName name = att.getNodeName().getStructuredQName();
+                    if (!name.hasURI(NamespaceConstant.XSLT) && !name.hasURI(NamespaceConstant.XML)) {
+                        for (NamedTemplate.LocalParamInfo param : declaredParams) {
+                            if (param.name.equals(name) && !param.isTunnel) {
+                                SequenceType required = param.requiredType;
+                                WithParam withParam = new WithParam();
+                                withParam.setVariableQName(name);
+                                withParam.setRequiredType(SequenceType.ANY_SEQUENCE);
+                                if (required.getCardinality() == StaticProperty.EXACTLY_ONE && required.getPrimaryType().isAtomicType()) {
+                                    if (required.getPrimaryType() == BuiltInAtomicType.BOOLEAN) {
+                                        Expression avt = makeAttributeValueTemplate(att.getValue(), att);
+                                        Expression toBool = VendorFunctionSetHE.getInstance().makeFunction("yes-no-boolean", 1).makeFunctionCall(avt);
+                                        withParam.setSelectExpression(insn, toBool);
+                                    } else {
+                                        Expression avt = makeAttributeValueTemplate(att.getValue(), att);
+                                        if (required.getPrimaryType() != BuiltInAtomicType.STRING) {
+                                            avt = new AtomicSequenceConverter(avt, BuiltInAtomicType.UNTYPED_ATOMIC);
+                                        }
+                                        withParam.setSelectExpression(insn, avt);
+                                    }
+                                } else {
+                                    Expression select = makeExpression(att.getValue(), att);
+                                    withParam.setSelectExpression(insn, select);
+                                }
+                                params.add(withParam);
+                            }
+                        }
+                    }
+                }
+                insn.setActualParameters(params.toArray(new WithParam[]{}), new WithParam[]{});
+                this.instruction = insn;
+            }
+        }
+
         if (isTopLevel() && forwardsCompatibleModeIsEnabled()) {
             // do nothing
         } else {
@@ -53,6 +126,20 @@ public class AbsentExtensionElement extends StyleElement {
 
     @Override
     public void prepareAttributes() {
+    }
+
+    /**
+     * Mark tail-recursive calls on templates and functions.
+     * For most instructions, this does nothing.
+     */
+
+    @Override
+    public boolean markTailCalls() {
+        useTailRecursion = true;
+        if (instruction != null) {
+            instruction.setTailRecursive(true);
+        }
+        return true;
     }
 
     /**
@@ -78,6 +165,10 @@ public class AbsentExtensionElement extends StyleElement {
     /*@Nullable*/
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
+
+        if (instruction != null) {
+            return instruction;
+        }
 
         if (isTopLevel() || reportingCircumstances == OnFailure.IGNORED_INSTRUCTION) {
             return null;
