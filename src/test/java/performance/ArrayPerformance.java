@@ -23,7 +23,7 @@ public class ArrayPerformance extends PerformanceTestCase {
             for (int i=0; i<n; i++) {
                 numbers.add(new Int64Value(i));
             }
-            final SimpleArrayItem array = SimpleArrayItem.makeSimpleArrayItem(new ListIterator<>(numbers));
+            final SimpleArrayItem array = SimpleArrayItem.makeSimpleArrayItem(new ListIterator(numbers));
             measure(new Measurable() {
 
                 final ArrayItem a = array;
