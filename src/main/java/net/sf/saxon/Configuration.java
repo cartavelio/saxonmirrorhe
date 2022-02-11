@@ -3881,7 +3881,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public synchronized JavaExternalObjectType getJavaExternalObjectType(Class<?> theClass) {
-        return new JavaExternalObjectType(this, theClass);
+        return new JavaExternalObjectType(theClass);
     }
 
     /**

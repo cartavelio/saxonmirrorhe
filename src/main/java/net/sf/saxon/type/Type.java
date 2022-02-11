@@ -347,10 +347,9 @@ public abstract class Type {
             return t1;
         }
         if (t1 instanceof JavaExternalObjectType && t2 instanceof JavaExternalObjectType) {
-            Configuration config = ((JavaExternalObjectType) t1).getConfiguration();
-            Class c1 = ((JavaExternalObjectType) t1).getJavaClass();
-            Class c2 = ((JavaExternalObjectType) t2).getJavaClass();
-            return config.getJavaExternalObjectType(leastCommonSuperClass(c1, c2));
+            Class<?> c1 = ((JavaExternalObjectType) t1).getJavaClass();
+            Class<?> c2 = ((JavaExternalObjectType) t2).getJavaClass();
+            return new JavaExternalObjectType(leastCommonSuperClass(c1, c2));
         }
         if (t1 instanceof MapType && t2 instanceof MapType) {
             if (t1 == MapType.EMPTY_MAP_TYPE) {
@@ -426,10 +425,9 @@ public abstract class Type {
             return AnyNodeTest.getInstance();
         }
         if (t1 instanceof JavaExternalObjectType && t2 instanceof JavaExternalObjectType) {
-            Configuration config = ((JavaExternalObjectType) t1).getConfiguration();
-            Class c1 = ((JavaExternalObjectType) t1).getJavaClass();
-            Class c2 = ((JavaExternalObjectType) t2).getJavaClass();
-            return config.getJavaExternalObjectType(leastCommonSuperClass(c1, c2));
+            Class<?> c1 = ((JavaExternalObjectType) t1).getJavaClass();
+            Class<?> c2 = ((JavaExternalObjectType) t2).getJavaClass();
+            return new JavaExternalObjectType(leastCommonSuperClass(c1, c2));
         }
         return AnyItemType.getInstance();
 
