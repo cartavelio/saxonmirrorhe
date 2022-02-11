@@ -15,6 +15,7 @@ if (csharpCompiler == null) {
   println("WARNING: Failed to find csc[.exe]!")
 }
 
+/*
 // Find nuget
 def nuget = null
 // Laboriously construct a search path that includes some default locations
@@ -40,7 +41,33 @@ spath.each { dir ->
 if (nuget == null) {
   println("WARNING: Failed to find nuget[.exe]!")
 }
+*/
 
+// Find dotnet
+def dotnet = null
+// Laboriously construct a search path that includes some default locations
+// plus the users actual path.
+def spath = ["/usr/local/share/dotnet"]
+System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
+  spath += [dir]
+}
+spath.each { dir ->
+  if (dotnet == null) {
+    def fn = new File(dir + "/dotnet")
+    if (fn.exists() && fn.canExecute()) {
+      dotnet = fn.toString()
+    } else {
+      fn = new File(dir + "/dotnet.exe")
+      if (fn.exists() && fn.canExecute()) {
+        dotnet = fn.toString()
+      }
+    }
+  }
+}
+
+if (dotnet == null) {
+  println("WARNING: Failed to find nuget[.exe]!")
+}
 
 task build_transpiler(
   type: JavaCompile,
@@ -497,15 +524,15 @@ task singulink(
   description: "Install the Singulink libraries"
 ) {
   doLast {
-    if (nuget == null) {
-      throw new GradleException("Cannot build: failed to find nuget[.exe] on path.")
+    if (dotnet == null) {
+      throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
     }
     
-    def args = [nuget,
-                "install",
+    def args = [dotnet,
+                "add", "package",
                 "Singulink.Numerics.BigDecimal"]
     exec {
-      workingDir = buildDir
+      workingDir = "${buildDir}/cs"
       commandLine args
     }
   }
@@ -518,37 +545,15 @@ task immutable(
   description: "Install System.Collections.Immutable libraries"
 ) {
   doLast {
-    if (nuget == null) {
-      throw new GradleException("Cannot build: failed to find nuget[.exe] on path.")
+    if (dotnet == null) {
+      throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
     }
     
-    def args = [nuget,
-                "install",
+    def args = [dotnet,
+                "add", "package",
                 "System.Collections.Immutable"]
     exec {
-      workingDir = buildDir
-      commandLine args
-    }
-  }
-  doFirst {
-    mkdir "${buildDir}"
-  }
-}
-
-task netstandard(
-  description: "Install .NET standard libraries"
-) {
-  doLast {
-    if (nuget == null) {
-      throw new GradleException("Cannot build: failed to find nuget[.exe] on path.")
-    }
-    
-    def args = [nuget,
-                "install",
-                "NETStandard.Library.Ref",
-                "-Version", "2.1.0"]
-    exec {
-      workingDir = buildDir
+      workingDir = "${buildDir}/cs"
       commandLine args
     }
   }
@@ -566,17 +571,18 @@ task hecs_project_files (
   into "${buildDir}/cs"
 }
 
-//dependsOn: ["hecs_project_files"],
-//'/usr/local/share/dotnet/dotnet'
-//src/main/saxon-cs/csproj/engine.csproj
 task hecs_dll(
-  //dependsOn: ["hecs_project_files"],
+  dependsOn: ["hecs_project_files", "singulink", "immutable"],
   description: "Compile Saxon-CS DLL for HE"
 ) {
   doLast {
+    if (dotnet == null) {
+      throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
+    }
+
     exec {
-        workingDir = buildDir
-        commandLine 'dotnet', 'build', '--nologo', '-o', 'csout', 'cs/engine.csproj'
+        workingDir = "${buildDir}/cs"
+        commandLine dotnet, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
     }
   }
 }
