@@ -307,7 +307,13 @@ public final class BigDecimalValue extends DecimalValue {
 
     public int hashCode() {
         BigDecimal round = value.setScale(0, RoundingMode.DOWN);
-        long longVal = round.longValue();
+        long longVal;
+        try {
+            longVal = round.longValue();
+        } catch (Exception e) {
+            // This path is for C#, where converting BigDecimal to long gives an OverflowException if out of range
+            longVal = Long.MAX_VALUE;
+        }
         if (longVal > Integer.MIN_VALUE && longVal < Integer.MAX_VALUE) {
             return (int) longVal;
         } else {

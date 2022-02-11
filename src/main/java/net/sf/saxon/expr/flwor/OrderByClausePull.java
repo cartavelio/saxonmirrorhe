@@ -8,9 +8,12 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.*;
+import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.ItemToBeSorted;
+import net.sf.saxon.expr.sort.SortKeyDefinitionList;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceException;
 
 import java.util.ArrayList;
 
@@ -49,6 +52,7 @@ public class OrderByClausePull extends TuplePull {
      *         are undefined.
      */
     @Override
+    @CSharpReplaceException(from="net.sf.saxon.transpile.CSharpUncheckedException", to="System.InvalidOperationException")
     public boolean nextTuple(XPathContext context) throws XPathException {
         if (currentPosition < 0) {
             currentPosition = 0;
@@ -85,7 +89,6 @@ public class OrderByClausePull extends TuplePull {
                     // TODO: unnecessary, we are now using a stable sort routine
                     return a.originalPosition - b.originalPosition;
                 });
-                //GenericSorter.quickSort(0, position, this);
             } catch (ClassCastException e) {
                 XPathException err = new XPathException("Non-comparable types found while sorting: " + e.getMessage());
                 err.setErrorCode("XPTY0004");

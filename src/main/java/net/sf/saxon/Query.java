@@ -583,7 +583,11 @@ public class Query {
 
         value = options.getOptionValue("repeat");
         if (value != null) {
-            repeat = Integer.parseInt(value);
+            try {
+                repeat = Integer.parseInt(value);
+            } catch (NumberFormatException err) {
+                badUsage("Bad number after -repeat");
+            }
         }
 
         sourceXmlFileName = options.getOptionValue("s");

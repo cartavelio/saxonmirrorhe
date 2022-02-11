@@ -137,7 +137,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
                     int arity = 0;
                     try {
                         arity = Integer.parseInt(tok.substring(hash + 1));
-                    } catch (Exception err) {
+                    } catch (NumberFormatException err) {
                         compileErrorInAttribute("Malformed function arity in '" + tok + "'", "XTSE0020", "names");
                     }
                     explicitComponentTests.add(new ComponentTest(componentTypeCode, test, arity));

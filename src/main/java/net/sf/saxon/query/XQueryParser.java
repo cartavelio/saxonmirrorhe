@@ -33,6 +33,7 @@ import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.AttributeValueTemplate;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.tree.util.NamespaceResolverWithDefault;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -4073,6 +4074,7 @@ public class XQueryParser extends XPathParser {
      */
 
     /*@NotNull*/
+    @CSharpReplaceException(from="System.StringIndexOutOfBoundsException", to="System.ArgumentOutOfRangeException")
     private Expression parsePseudoXML(boolean allowEndTag) throws XPathException {
         try {
             Expression exp;
