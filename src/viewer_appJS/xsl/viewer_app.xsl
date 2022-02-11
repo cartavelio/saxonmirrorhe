@@ -248,14 +248,14 @@
         
         <xsl:choose>
             <xsl:when test="$start eq 'javadoc'">
-                <ixsl:set-property name="document.title" select="'Saxon9 Java API Documentation'"/>
+                <ixsl:set-property name="document.title" select="'Saxon Java API Documentation'"/>
                 <xsl:call-template name="apidoc-page">
                     <xsl:with-param name="package-path" select="$jpackage-path"/>
                     <xsl:with-param name="hash-parts" select="$hash-parts"/>
                 </xsl:call-template>
             </xsl:when>
             <xsl:when test="$start eq 'dotnetdoc'">
-                <ixsl:set-property name="document.title" select="'Saxon9 .NET API Documentation'"/>
+                <ixsl:set-property name="document.title" select="'Saxon .NET API Documentation'"/>
                 <xsl:call-template name="apidoc-page">
                     <xsl:with-param name="package-path" select="$npackage-path"/>
                     <xsl:with-param name="hash-parts" select="$hash-parts"/>
