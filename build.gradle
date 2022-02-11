@@ -142,6 +142,49 @@ ext {
   pathSeparator = System.getProperty("file.separator")
 }
 
+public class DeleteFilesRecursively {
+  static void delete(File file){
+    for (File fspec : file.listFiles()) {
+      if (fspec.isDirectory()) {
+        delete(fspec);
+      } else {
+        fspec.delete();
+      }
+    }
+    file.delete();
+  }
+}
+
+// ============================================================
+// Have you switched branches?
+def branch = new ByteArrayOutputStream()
+def result = exec {
+  commandLine "git", "branch", "--show-current"
+  standardOutput = branch;
+}
+def currentBranch = branch.toString().trim()
+
+def builtBranch = "none";
+try {
+  def xbranch = new BufferedReader(new FileReader(new File("build/built-branch")))
+  builtBranch = "${xbranch.readLine().trim()}"
+} catch (FileNotFoundException foe) {
+  // nop
+}
+
+if (currentBranch != builtBranch
+    && (file("${buildDir}/src").exists()
+        || file("${buildDir}/preprocess").exists()
+        || file("${buildDir}/filtered").exists()
+        || file("${buildDir}/classes").exists())) {
+  println("You appear to have switched to the '${currentBranch}' branch.")
+  println("Deleting stale build sources...")
+  DeleteFilesRecursively.delete(new File("${buildDir}/src"))
+  DeleteFilesRecursively.delete(new File("${buildDir}/preprocess"))
+  DeleteFilesRecursively.delete(new File("${buildDir}/filtered"))
+  DeleteFilesRecursively.delete(new File("${buildDir}/classes"))
+}
+
 // ============================================================
 // Find jar files that need to be part of the build or release
 //
@@ -459,7 +502,7 @@ task hej_featureKeys(
 
 task hej_setupPreprocess(
   type: Copy,
-  dependsOn: ["hej_featureKeys"],
+  dependsOn: ["hej_featureKeys", "record_branch"],
   description: "Copy HE sources for preprocessing HE"
 ) {
   from "${projectDir}/src/main/java"
@@ -526,7 +569,7 @@ task eej_setupPreprocessForPej(
 }
 
 task pej_setupPreprocess(
-  dependsOn: ["hej_setupPreprocessForPej", "eej_setupPreprocessForPej"],
+  dependsOn: ["hej_setupPreprocessForPej", "eej_setupPreprocessForPej", "record_branch"],
   description: "Copy sources for preprocessing PE"
 ) {
   // Just a container to hang dependencies on
@@ -534,7 +577,7 @@ task pej_setupPreprocess(
 
 task hej_setupPreprocessForEej(
   type: Copy,
-  dependsOn: ["hej_featureKeys"],
+  dependsOn: ["hej_featureKeys", "record_branch"],
   description: "Copy HE sources for EE build"
 ) {
   from "${projectDir}/src/main/java"
@@ -568,7 +611,7 @@ task eej_setupPreprocessBytecode(
 // N.B. bytecode is explicitly excluded, see eej_setupPreprocessBytecode
 task eej_setupPreprocess(
   type: Copy,
-  dependsOn: ["hej_setupPreprocessForEej", "eej_setupPreprocessBytecode"],
+  dependsOn: ["hej_setupPreprocessForEej", "eej_setupPreprocessBytecode", "record_branch"],
   description: "Copy sources for preprocessing EE"
 ) {
   from "${projectDir}/src/main/java"
@@ -685,6 +728,20 @@ task eej_sources(
 }
 
 // ============================================================
+
+task record_branch(
+  type: Exec,
+  description: "Records the branch so we can detect switches."
+) {
+  def recordBranch = new ByteArrayOutputStream();
+  commandLine "git", "branch", "--show-current"
+  standardOutput = recordBranch
+  doLast {
+    def output = new FileWriter(new File("build/built-branch"))
+    output.write(recordBranch.toString("utf-8"))
+    output.close()
+  }
+}
 
 task hejCompile(
   type: JavaCompile,
