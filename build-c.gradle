@@ -280,6 +280,7 @@ task test_jetHome(
 
 task hec_featureKeys(
   type: JavaExec,
+  dependsOn: ["hej_featureKeys"],
   description: "Construct the feature keys for HE"
 ) {
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
@@ -317,6 +318,7 @@ task hec_setupPreprocess(
 
 task pec_setupPreprocess(
   type: Copy,
+  dependsOn: ["hec_featureKeys"],
   description: "Copy PE sources for preprocessing PE"
 ) {
   into "${buildDir}/filtered/pec"
@@ -361,6 +363,7 @@ task pec_setupPreprocess(
 
 task eec_setupPreprocess(
   type: Copy,
+  dependsOn: ["hec_featureKeys"],
   description: "Copy EE sources for preprocessing EE"
 ) {
   into "${buildDir}/filtered/eec"
