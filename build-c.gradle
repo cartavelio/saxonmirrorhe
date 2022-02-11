@@ -222,7 +222,6 @@ task rejar_Xerces(
         from("${projectDir}/src/main/c") {
           include "command/*.c"
           include "command/jni/**/*"
-          include "command/build${release}c-command.sh"
         }
       }
     }
@@ -245,6 +244,10 @@ task rejar_Xerces(
         copy {
           into "${buildDir}/c/${release}c/samples/cppTests"
           from("${projectDir}/src/main/c/samples/cppTests/build-windows.bat")
+        }
+        copy {
+          into "${buildDir}/c/${release}c/command"
+          from("${projectDir}/src/main/c/command/build${release}c-command.bat")
         }
 
       }
@@ -287,6 +290,10 @@ task rejar_Xerces(
         copy {
           into "${buildDir}/c/${release}c/samples/cTests"
           from("${projectDir}/src/main/c/samples/cTests/build64-mac.sh")
+        }
+        copy {
+          into "${buildDir}/c/${release}c/command"
+          from("${projectDir}/src/main/c/command/build${release}c-command.sh")
         }
       }
     }
@@ -331,6 +338,10 @@ task rejar_Xerces(
         copy {
           into "${buildDir}/c/${release}c/samples/cTests"
           from("${projectDir}/src/main/c/samples/cTests/build64-linux.sh")
+        }
+        copy {
+          into "${buildDir}/c/${release}c/command"
+          from("${projectDir}/src/main/c/command/build${release}c-command.sh")
         }
       }
     }
