@@ -615,15 +615,21 @@ def test_return_document_node(saxonproc):
 
 def testxQuery1(saxonproc, data_dir):
     query_proc = saxonproc.new_xquery_processor()
+    query_proc.set_cwd(os.getcwd())
+    saxonproc.set_cwd(os.getcwd())
     query_proc.clear_properties()
     query_proc.clear_parameters()
     xmlFile = data_dir+"cat.xml"
     query_proc.set_property("s", xmlFile)
     query_proc.set_property("qs", "<out>{count(/out/person)}</out>")
     result = query_proc.run_query_to_string()
-    assert not result == None
-    query_proc.set_cwd(os.getcwd())
+    assert not query_proc.exception_occurred
+    assert result is not None
+    print(result)
+
+    print(os.getcwd())
     query_proc.run_query_to_file(output_file_name="catOutput.xml")
+    assert not query_proc.exception_occurred
     assert os.path.exists("catOutput.xml")
     node = saxonproc.parse_xml(xml_file_name='catOutput.xml')
     assert node is not None

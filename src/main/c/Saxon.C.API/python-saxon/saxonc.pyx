@@ -41,16 +41,10 @@ cdef char * make_c_str2(str_value, encoding='utf-8'):
     line = py_string_string if str_value is not None else ""
 
     try:
-        print('checkpoint 2- make_c')
         out[0] = b'\x00' # keep C-strings null-terminated
-        print('checkpoint 3- make_c')
-
         incrlength = len(line)
-        print('checkpoint 5- make_c')
         out = <char *>realloc(out, length + incrlength + 1)
-        print('checkpoint 6- make_c')
         memcpy(out + length, line, incrlength)
-        print('checkpoint 7- make_c')
         length += incrlength
         out[length] = '\x00'  # keep C-strings null-terminated
         return out  # autoconversion back to a Python string
@@ -433,8 +427,8 @@ cdef class PySaxonProcessor:
         elif "xml_file_name" in kwds:
           py_value  = kwds["xml_file_name"]
 
-          if py_value  is None or isfile(py_value) == False or isfile(make_py_str(self.thisptr.getcwd())+py_value) == False:
-            raise Exception("XML file does not exist")
+          '''if py_value  is None or isfile(py_value) == False or isfile(make_py_str(self.thisptr.getcwd())+"/"+py_value) == False:
+            raise Exception("XML file does not exist")'''
           '''c_xml_string = make_c_str(py_value)'''
           py_value_string = py_value.encode('UTF-8') if py_value is not None else None
           c_xml_string = py_value_string if py_value is not None else ""
@@ -600,8 +594,8 @@ cdef class PyDocumentBuilder:
         elif "xml_file_name" in kwds:
           py_value = kwds["xml_file_name"]
           py_filename_string = py_value.encode('UTF-8') if py_value is not None else None
-          if py_filename_string  is None or isfile(py_filename_string) == False:
-            raise Exception("XML file does not exist")
+          '''if py_filename_string  is None or isfile(py_filename_string) == False:
+            raise Exception("XML file does not exist")'''
           c_xml_string = py_filename_string if py_value is not None else ""
           val = PyXdmNode()
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromFile(c_xml_string)
@@ -780,8 +774,8 @@ cdef class PyXslt30Processor:
             self.thisxptr.compileFromStringAndSave(c_stylesheet, c_outputfile)
           elif "stylesheet_file" in kwds:
             py_stylesheet_string = kwds["stylesheet_file"]
-            if py_stylesheet_string  is None or isfile(py_stylesheet_string) == False:
-              raise Exception("Stylesheet file does not exist")
+            '''if py_stylesheet_string  is None or isfile(py_stylesheet_string) == False:
+              raise Exception("Stylesheet file does not exist")'''
             '''c_stylesheet = make_c_str(py_stylesheet_string)'''
             py__string = py_stylesheet_string.encode('UTF-8') if py_stylesheet_string is not None else None
             c_stylesheet = py__string if py_stylesheet_string is not None else ""
@@ -1747,7 +1741,6 @@ cdef class PyXsltExecutable:
         py_template_name_str = None
         py_stylesheet_string = None
         cdef const char* c_string = NULL
-        print("test callingTemplateReturnStr")
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "source_file":
@@ -1932,8 +1925,8 @@ cdef class PyXsltExecutable:
               '''c_stylesheetfile = make_c_str(value)'''
               py_s_string = value.encode('UTF-8') if value is not None else None
               c_stylesheetfile = py_s_string if value is not None else ""
-              if isfile(value) == False:
-                raise Exception("Stylesheet file does not exist")
+              '''if isfile(value) == False:
+                raise Exception("Stylesheet file does not exist")'''
           elif key == "xdm_value":
             if isinstance(value, PyXdmValue):
               value_ = value;
@@ -2130,6 +2123,7 @@ cdef class PyXQueryProcessor:
         Args:
             output_file (str): Name of the output file
         """
+        cdef const char * c_outfile = NULL
         py_value_string = output_file.encode('UTF-8') if output_file is not None else None
         c_outfile = py_value_string if output_file is not None else ""
         self.thisxqptr.setOutputFile(c_outfile)
@@ -2542,23 +2536,19 @@ cdef class PyXPathProcessor:
             name (str): the name of the XPath parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name
             value (PyXdmValue): the value of the query parameter, or None to clear a previously set value
         """
-        cdef const char * c_str = NULL
+        cdef char * c_str = NULL
         cdef PyXdmAtomicValue avalue_
         cdef PyXdmItem ivalue_
         cdef PyXdmNode nvalue_
         cdef PyXdmValue value_
         '''make_c_str(name)'''
-        py_value_string = name.encode('utf-8') if name is not None else None
-        c_str_ = py_value_string if name is not None else ""
+        py_name_string = name.encode('utf-8') if name is not None else None
+        c_str = py_name_string if name is not None else ""
         if c_str is not NULL:
             if isinstance(value, PyXdmValue):
                 value_ = value
                 value_.thisvptr.incrementRefCount()
                 self.thisxpptr.setParameter(c_str, value_.thisvptr)
-            elif  isinstance(value, PyXdmItem):
-                ivalue_ = value
-                ivalue_.derivedptr.incrementRefCount()
-                self.thisxpptr.setParameter(c_str, <saxoncClasses.XdmValue *>  ivalue_.derivedptr)
             elif  isinstance(value, PyXdmNode):
                 nvalue_ = value
                 nvalue_.derivednptr.incrementRefCount()
@@ -2567,6 +2557,11 @@ cdef class PyXPathProcessor:
                 avalue_ = value
                 avalue_.derivedaptr.incrementRefCount()
                 self.thisxpptr.setParameter(c_str, <saxoncClasses.XdmValue *> avalue_.derivedaptr)
+            elif  isinstance(value, PyXdmItem):
+                ivalue_ = value
+                ivalue_.derivedptr.incrementRefCount()
+                self.thisxpptr.setParameter(c_str, <saxoncClasses.XdmValue *>  ivalue_.derivedptr)
+
             '''self.thisxpptr.setParameter(c_str, value.thisvptr)'''
      def remove_parameter(self, name):
         """
@@ -2816,8 +2811,8 @@ cdef class PySchemaValidator:
             py_value = kwds["file_name"]
             py_value_string = py_value.encode('UTF-8') if py_value is not None else None
             c_source = py_value_string if py_value is not None else ""
-            if isfile(py_value_string) == False:
-                raise Exception("Source file with name "+py_value_string+" does not exist")
+            '''if isfile(py_value_string) == False:
+                raise Exception("Source file with name "+py_value_string+" does not exist")'''
             xdmNode = self.thissvptr.validateToNode(c_source)
         elif "xdm_node" in kwds:
             xdm_node = kwds["xdm_node"]
