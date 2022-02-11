@@ -406,8 +406,6 @@ apply from: "run-samples.gradle"
         include "JAMESCLARK.txt"
         include "JLINE2.txt"
         include "LICENSE.txt"
-        include "THAI.txt"
-        include "UNICODE.txt"
       }
     }
     if (release == "pe" || release == "ee") {
