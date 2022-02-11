@@ -183,11 +183,11 @@ namespace SaxonCS_NUnit {
                 
                 Uri collectionUri = new Uri(ConfigTest.DataDirUri, "?select=*.xml;recurse=yes;on-error=ignore;stable=yes");
                 eval.ContextItem = new XdmAtomicValue(collectionUri);
-                long stableDocs = ((XdmAtomicValue)eval.Evaluate()).GetLongValue();
+                long stableDocs = ((XdmAtomicValue)eval.Evaluate()).AsLong();
                 
                 collectionUri = new Uri(ConfigTest.DataDirUri, "?select=*.xml;recurse=yes;on-error=ignore;stable=no");
                 eval.ContextItem = new XdmAtomicValue(collectionUri);
-                long unstableDocs = ((XdmAtomicValue)eval.Evaluate()).GetLongValue();
+                long unstableDocs = ((XdmAtomicValue)eval.Evaluate()).AsLong();
                 
                 Console.Error.WriteLine("Stable: " + stableDocs + " Unstable: " + unstableDocs);
                 
@@ -214,7 +214,7 @@ namespace SaxonCS_NUnit {
                 Uri collectionUri = new Uri(ConfigTest.DataDirUri, "?select=books.xml;recurse=no;validation=strict");
                 eval.ContextItem = new XdmAtomicValue(collectionUri);
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(false, ((XdmAtomicValue) val).GetBooleanValue());
+                Assert.AreEqual(false, ((XdmAtomicValue) val).AsBoolean());
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -231,7 +231,7 @@ namespace SaxonCS_NUnit {
                 eval.ContextItem = (new XdmAtomicValue(new Uri(ConfigTest.DataDirUri, 
                                                        "?select=books.xml;recurse=no;validation=skip")));
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(true, ((XdmAtomicValue) val).GetBooleanValue());
+                Assert.AreEqual(true, ((XdmAtomicValue) val).AsBoolean());
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -252,8 +252,8 @@ namespace SaxonCS_NUnit {
                 eval.ContextItem = (new XdmAtomicValue(collectionUri));
                 XdmValue val = eval.Evaluate();
                 Assert.AreEqual(2, val.Count);
-                Assert.AreEqual(1, ((XdmAtomicValue)val[0]).GetDoubleValue());
-                Assert.AreEqual("BOOKLIST", ((XdmAtomicValue)val[1]).GetStringValue());
+                Assert.AreEqual(1, ((XdmAtomicValue)val[0]).AsDouble());
+                Assert.AreEqual("BOOKLIST", ((XdmAtomicValue)val[1]).StringValue);
             }
             catch (Exception e) {
                 Console.Error.WriteLine(e.Message + "\n" + e.StackTrace);

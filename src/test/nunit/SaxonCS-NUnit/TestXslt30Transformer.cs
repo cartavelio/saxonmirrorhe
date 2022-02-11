@@ -8,6 +8,10 @@ using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
+using Saxon.Hej;
+using Saxon.Hej.functions;
+using Saxon.Hej.type;
+using Saxon.Hej.value;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
 using Location = Saxon.Api.Location;
 using Processor = Saxon.Api.Processor;
@@ -232,19 +236,18 @@ namespace SaxonCS_NUnit {
                 } */
 
         [Test]
-        public void TestExport() {
+        public void TestRelocatableExport() {
             try {
                 Processor p = new Processor(true);
                 XsltCompiler c = p.NewXsltCompiler();
-                XsltExecutable testXSLTP = c.Compile(new Uri(ConfigTest.NUNIT_DATA_DIR + "booksWithMain.sef"));
+                XsltExecutable executable = c.Compile(new Uri(ConfigTest.DATA_DIR + "booksWithMain10.sef"));
 
-                Xslt30Transformer exec = testXSLTP.Load30();
+                Xslt30Transformer exec = executable.Load30();
 
 
                 Serializer dest = p.NewSerializer();
                 dest.SetOutputProperty(Serializer.INDENT, "yes");
-                dest.SetOutputFile(ConfigTest.DATA_DIR + "OutputStep2.xml");
-                // exec.Run(dest);
+                dest.SetOutputFile(ConfigTest.DATA_DIR + "/sandpit/OutputStep2.xml");
                 exec.CallTemplate(new QName("main"), dest);
                 Assert.True(true);
             }
@@ -722,16 +725,15 @@ namespace SaxonCS_NUnit {
                 builder.BaseUri = new Uri("http://doc");
                 XdmNode node = builder.Build(source);
                 XsltCompiler xtComp = proc.NewXsltCompiler();
-                StringReader style = new StringReader(
+                StringReader style = new(
                     "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
                     "<xsl:variable name='x' select='.'/>" +
                     "<xsl:template match='/'>errorA</xsl:template>" +
                     "<xsl:template name='main'>[<xsl:value-of select='name($x)'/>]</xsl:template>" +
                     "</xsl:stylesheet>");
 
-                Xslt30Transformer trans = xtComp
-                    .Compile(new XmlTextReader(new Uri(ConfigTest.DataDirUri, "result-document.xsl").ToString())).Load30();
-                StringWriter os = new StringWriter();
+                Xslt30Transformer trans = xtComp.Compile(style).Load30();
+                StringWriter os = new();
                 Serializer serializer = proc.NewSerializer(os);
 
 
@@ -899,6 +901,16 @@ namespace SaxonCS_NUnit {
             try {
                 Processor proc = new Processor(true);
                 proc.SetProperty("http://saxon.sf.net/feature/timing", "true");
+                proc.RegisterExtensionFunction(new QName("java:s9apitest.TestXslt30Transformer", "isOptional"), 2,
+                    (args) => {
+                        XdmNode parent = (XdmNode) args[0];
+                        QName qName = ((XdmAtomicValue) args[1]).AsQName();
+                        Configuration config = proc.Implementation;
+                        SchemaType parentType = parent.Implementation.getSchemaType();
+                        int fp = config.getNamePool().allocateFingerprint(qName.Uri, qName.LocalName);
+                        int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, true);
+                        return new XdmAtomicValue(Cardinality.allowsZero(cardinality));
+                    });
                 XsltCompiler comp = proc.NewXsltCompiler();
                 comp.SchemaAware = true;
                 StringReader style = new StringReader(
@@ -913,16 +925,16 @@ namespace SaxonCS_NUnit {
                 sm.Compile(new XmlTextReader(ConfigTest.DATA_DIR + "books.xsd"));
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 SchemaValidator schemaValidator = sm.NewSchemaValidator();
-                schemaValidator.Validate(builder.Build(new Uri(ConfigTest.DataDirUri, "books.xml")));
-                // Create a serializer
-                //String outfile = @"C:/MyJava/users/caffo/Output.xml";
+                builder.SchemaValidator = schemaValidator;
+                XdmNode books = builder.Build(new Uri(ConfigTest.DataDirUri, "books.xml"));
+                
                 StringWriter sw = new StringWriter();
                 Serializer serializer = proc.NewSerializer(sw);
                 serializer.SetOutputProperty(Serializer.INDENT, "yes");
                 XdmDestination dest = new XdmDestination();
                 schemaValidator.SetDestination(dest);
 
-                transformer.ApplyTemplates(dest.XdmNode, serializer);
+                transformer.ApplyTemplates(books, serializer);
                 Assert.True(sw.ToString().Contains("TITLE"));
                 Assert.False(sw.ToString().Contains("AUTHOR"));
             }
@@ -1329,7 +1341,7 @@ namespace SaxonCS_NUnit {
                 Xslt30Transformer t = xsltExecutable.Load30();
                 XdmValue v = t.CallFunction(new QName("http://localhost/", "f:add"),
                     new XdmValue[] {new XdmAtomicValue(2), new XdmAtomicValue(3)});
-                Assert.AreEqual(((XdmAtomicValue) v).GetLongValue(), 5);
+                Assert.AreEqual(((XdmAtomicValue) v).AsLong(), 5);
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -1402,7 +1414,7 @@ namespace SaxonCS_NUnit {
                 Xslt30Transformer t = xsltExecutable.Load30();
                 XdmValue v = t.CallFunction(new QName("http://localhost/", "f:add"),
                     new XdmValue[] {new XdmAtomicValue(2), new XdmAtomicValue(3)});
-                Assert.AreEqual(((XdmAtomicValue) v).GetDoubleValue(), 5.0e0);
+                Assert.AreEqual(((XdmAtomicValue) v).AsDouble(), 5.0e0);
                 Assert.AreEqual((((XdmAtomicValue) v)).TypeName.LocalName, "double");
                 Assert.AreEqual((((XdmAtomicValue) v)).PrimitiveTypeName.LocalName, "double");
             }
@@ -1660,8 +1672,8 @@ namespace SaxonCS_NUnit {
                 t.SetInitialTemplateParameters(params1, false);
                 XdmValue val = t.CallTemplate(new QName("t"));
                 Assert.AreEqual(2, val.Count);
-                Assert.AreEqual(13, ((XdmAtomicValue) val[0]).GetLongValue());
-                Assert.AreEqual(6, ((XdmAtomicValue) val[1]).GetLongValue());
+                Assert.AreEqual(13, ((XdmAtomicValue) val[0]).AsLong());
+                Assert.AreEqual(6, ((XdmAtomicValue) val[1]).AsLong());
             }
             catch (Exception e) {
                 //Console.WriteLine(e.printStackTrace());
@@ -1705,8 +1717,8 @@ namespace SaxonCS_NUnit {
                 t.CallTemplate(new QName("t"), outi);
                 XdmValue val = outi.XdmValue;
                 Assert.AreEqual(2, val.Count);
-                Assert.AreEqual(13, ((XdmAtomicValue) val.ItemAt(0)).GetLongValue());
-                Assert.AreEqual(6, ((XdmAtomicValue) val.ItemAt(1)).GetLongValue());
+                Assert.AreEqual(13, ((XdmAtomicValue) val.ItemAt(0)).AsLong());
+                Assert.AreEqual(6, ((XdmAtomicValue) val.ItemAt(1)).AsLong());
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -1797,7 +1809,7 @@ namespace SaxonCS_NUnit {
             Assert.AreEqual(((XdmNode) first).NodeName.LocalName, "e");
             XdmItem second = result.ItemAt(1);
             Assert.True(second is XdmAtomicValue, "t2");
-            Assert.AreEqual(((XdmAtomicValue) second).GetDoubleValue(), 17e0);
+            Assert.AreEqual(((XdmAtomicValue) second).AsDouble(), 17e0);
         }
 
         
@@ -1842,7 +1854,7 @@ namespace SaxonCS_NUnit {
                 Assert.True(((XdmNode) first).NodeName.LocalName.Equals("e"));
                 XdmItem second = result.ItemAt(1);
                 Assert.True(second is XdmAtomicValue, "t2");
-                Assert.True(((XdmAtomicValue) second).GetDoubleValue() == 17e0, "v2");
+                Assert.True(((XdmAtomicValue) second).AsDouble() == 17e0, "v2");
             }
             catch (Exception err) {
                 Console.Error.WriteLine(err.StackTrace);
@@ -1979,7 +1991,7 @@ namespace SaxonCS_NUnit {
                 values[0] = new XdmAtomicValue(17);
                 XdmValue result = ((XdmFunctionItem) value).Invoke(values, proc);
                 Assert.True(result is XdmAtomicValue);
-                Assert.AreEqual(59, ((XdmAtomicValue) result).GetLongValue());
+                Assert.AreEqual(59, ((XdmAtomicValue) result).AsLong());
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);

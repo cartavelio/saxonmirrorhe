@@ -33,7 +33,7 @@ namespace SaxonCS_NUnit {
                 });
                 XQueryExecutable exec = c.Compile("import module namespace b = 'b.uri' at 'b.xq'; $b:b");
                 XdmValue val = exec.Load().Evaluate();
-                Assert.AreEqual(42L, ((XdmAtomicValue) val).GetLongValue());
+                Assert.AreEqual(42L, ((XdmAtomicValue) val).AsLong());
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -77,11 +77,11 @@ namespace SaxonCS_NUnit {
                 e1.ContextItem = (foo);
                 e1.SetExternalVariable(new QName("p"), new XdmAtomicValue(true));
                 XdmValue val = e1.Evaluate();
-                Assert.That(((XdmAtomicValue) val).GetBooleanValue());
+                Assert.That(((XdmAtomicValue) val).AsBoolean());
                 e2.ContextItem = (foo);
                 e2.SetExternalVariable(new QName("p"), new XdmAtomicValue(6));
                 val = e2.Evaluate();
-                Assert.AreEqual(18, ((XdmAtomicValue) val).GetLongValue());
+                Assert.AreEqual(18, ((XdmAtomicValue) val).AsLong());
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -324,7 +324,7 @@ namespace SaxonCS_NUnit {
                 );
 
                 XdmItem result = exp.Load().EvaluateSingle();
-                Assert.AreEqual("a!", result.GetStringValue());
+                Assert.AreEqual("a!", result.StringValue);
 
             }
             catch (SaxonApiException err) {
@@ -398,7 +398,7 @@ namespace SaxonCS_NUnit {
             // See bug 2429
             XQueryCompiler compiler = new Processor(true).NewXQueryCompiler();
             const string main = "" +
-                                "module namespace main = 'main_mod.xq';\n" +
+                                "module namespace main = 'https://example.com/main_mod.xq';\n" +
                                 "import module namespace vi_imp = 'https://example.com/imported_mod.xq';\n" +
                                 "declare %private variable $main:variableThatIsInstantiatedTwice as xs:integer := 123;";
 
@@ -411,7 +411,7 @@ namespace SaxonCS_NUnit {
                     _ => ""
                 };
 
-                return new[] {new XQueryModuleSource() {Content = module, BaseUri = new Uri("http://example.com/")}};
+                return new[] {new XQueryModuleSource() {Content = module, BaseUri = new Uri(moduleURI)}};
             };
             compiler.CompileLibrary(main);
         }

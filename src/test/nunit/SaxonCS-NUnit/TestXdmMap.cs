@@ -18,7 +18,7 @@ namespace SaxonCS_NUnit
             Assert.True(3== map.Size, "Map has correct size");
             try
             {
-                Assert.True(((XdmAtomicValue)map.Get(new XdmAtomicValue("b"))).GetLongValue()== 2);
+                Assert.True(((XdmAtomicValue)map.Get(new XdmAtomicValue("b"))).AsLong()== 2);
             }
             catch (Exception e)
             {
@@ -30,7 +30,7 @@ namespace SaxonCS_NUnit
             Assert.True(map.Size== 2);
             try
             {
-                Assert.True(((XdmAtomicValue)map.Get(new XdmAtomicValue("a"))).GetLongValue()== 4);
+                Assert.True(((XdmAtomicValue)map.Get(new XdmAtomicValue("a"))).AsLong()== 4);
             }
             catch (Exception e)
             {
@@ -50,7 +50,7 @@ namespace SaxonCS_NUnit
             Assert.AreEqual(3, map.Size);
             try
             {
-                Assert.AreEqual(2, ((XdmAtomicValue)map.Get(new XdmAtomicValue("b"))).GetLongValue());
+                Assert.AreEqual(2, ((XdmAtomicValue)map.Get(new XdmAtomicValue("b"))).AsLong());
             }
             catch (Exception e)
             {
@@ -62,7 +62,7 @@ namespace SaxonCS_NUnit
             Assert.True(map.Size== 2);
             try
             {
-                Assert.AreEqual(4, ((XdmAtomicValue)map.Get(new XdmAtomicValue("a"))).GetLongValue());
+                Assert.AreEqual(4, ((XdmAtomicValue)map.Get(new XdmAtomicValue("a"))).AsLong());
             }
             catch (Exception e)
             {
@@ -83,7 +83,7 @@ namespace SaxonCS_NUnit
             {
                 XdmValue result = map.Get(new XdmAtomicValue("c"));
                 Assert.True(result is XdmAtomicValue);
-                Assert.True(((XdmAtomicValue)result).GetLongValue() == 3);
+                Assert.True(((XdmAtomicValue)result).AsLong() == 3);
             }
             catch (Exception e)
             {
@@ -109,7 +109,7 @@ namespace SaxonCS_NUnit
                 XQueryEvaluator q = comp.Compile(query).Load();
                 q.SetExternalVariable(new QName("a"), map);
                 XdmAtomicValue result = (XdmAtomicValue)q.EvaluateSingle();
-                Assert.True(3 == result.GetLongValue());
+                Assert.True(3 == result.AsLong());
             }
             catch (Exception e)
             {
@@ -150,7 +150,7 @@ namespace SaxonCS_NUnit
                 Dictionary<XdmAtomicValue, XdmValue> jmap = result.AsDictionary();
                 Assert.True(3 == jmap.Count);
                 object output = jmap[new XdmAtomicValue(3)];
-                Assert.True(4 == ((XdmAtomicValue)output).GetLongValue());
+                Assert.True(4 == ((XdmAtomicValue)output).AsLong());
             }
             catch (Exception e)
             {

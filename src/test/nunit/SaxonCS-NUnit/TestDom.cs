@@ -568,10 +568,10 @@ namespace SaxonCS_NUnit {
                 XmlDocument doc = new();
                 XdmNode wrappedDoc = builder.Wrap(doc);
                 proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "makeElementList"), 3, args => {
-                    long repeat = ((XdmAtomicValue) args[2]).GetLongValue();
+                    long repeat = ((XdmAtomicValue) args[2]).AsLong();
                     XdmValue result = XdmEmptySequence.INSTANCE;
                     for (int i = 0; i < repeat; i++) {
-                        XmlElement e = doc.CreateElement(((XdmAtomicValue) args[0]).GetStringValue());
+                        XmlElement e = doc.CreateElement(((XdmAtomicValue) args[0]).StringValue);
                         result = result.Append(builder.Wrap(wrappedDoc, e));
                     }
 
@@ -619,7 +619,7 @@ namespace SaxonCS_NUnit {
                 proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest","sortArrayToNodeList"), 1, args => {
                     XdmItem[] array = args[0].ToArray();
                     Array.Sort(array, Comparer<XdmItem>.Create((x,y) => 
-                         StringComparer.InvariantCulture.Compare(x.GetStringValue(), y.GetStringValue())));
+                         StringComparer.InvariantCulture.Compare(x.StringValue, y.StringValue)));
                     return new XdmValue(array);
                 });
                 string xml = "<?xml version='1.0'?> \n" +
@@ -633,10 +633,10 @@ namespace SaxonCS_NUnit {
                 xpe.ContextItem = proc.NewDocumentBuilder().Wrap(doc);
                 XdmValue isList = xpe.Evaluate();
                 Assert.AreEqual(4, isList.Count, "length");
-                Assert.AreEqual("anne", isList[0].GetStringValue());
-                Assert.AreEqual("fred", isList[1].GetStringValue());
-                Assert.AreEqual("jane", isList[2].GetStringValue());
-                Assert.AreEqual("sue", isList[3].GetStringValue());
+                Assert.AreEqual("anne", isList[0].StringValue);
+                Assert.AreEqual("fred", isList[1].StringValue);
+                Assert.AreEqual("jane", isList[2].StringValue);
+                Assert.AreEqual("sue", isList[3].StringValue);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -1006,7 +1006,7 @@ namespace SaxonCS_NUnit {
                 XdmFunctionItem deepEqual = XdmFunctionItem.getSystemFunction(proc,
                     new QName("http://www.w3.org/2005/xpath-functions", "deep-equal"), 2);
                 XdmValue comparison = deepEqual.Invoke(new XdmValue[] {source, wrappedDocumentElement}, proc);
-                Assert.That(((XdmAtomicValue) comparison).GetBooleanValue(), "Copy is not deep-equal");
+                Assert.That(((XdmAtomicValue) comparison).AsBoolean(), "Copy is not deep-equal");
 
             }
             catch (Exception e) {
@@ -1311,7 +1311,7 @@ namespace SaxonCS_NUnit {
                 Processor proc = new();
                 proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "foo"), 1,
                     args => new XdmAtomicValue(((XdmNode) args[0])
-                        .Select(Steps.Child("test").Then(Steps.Attribute("width"))).First().GetStringValue()));
+                        .Select(Steps.Child("test").Then(Steps.Attribute("width"))).First().StringValue));
             
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 XmlDocument document = new();
