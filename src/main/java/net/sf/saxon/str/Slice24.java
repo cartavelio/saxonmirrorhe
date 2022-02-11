@@ -10,7 +10,7 @@ import java.util.function.IntPredicate;
  * of an underlying byte array holding three bytes per codepoint
  */
 
-class Slice24 extends UnicodeString {
+public class Slice24 extends UnicodeString {
 
     private byte[] bytes;
     private int start;
