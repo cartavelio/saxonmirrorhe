@@ -360,7 +360,7 @@ public class XQueryCompiler {
                 languageVersion = 40;
                 break;
             default:
-                throw new IllegalArgumentException("XQuery version must be 3.1 or 4.0");
+                throw new IllegalArgumentException("XQuery version must be 3.1 or 4.0 (not " + version + ")");
         }
         staticQueryContext.setLanguageVersion(languageVersion);
     }

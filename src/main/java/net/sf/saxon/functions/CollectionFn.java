@@ -274,7 +274,13 @@ public class CollectionFn extends SystemFunction implements Callable {
             while ((item = iter.next()) != null) {
                 if (item instanceof NodeInfo && ((NodeInfo)item).getNodeKind() == Type.DOCUMENT) {
                     String docUri = ((NodeInfo)item).getSystemId();
-                    DocumentKey docKey = new DocumentKey(docUri);
+                    DocumentKey docKey;
+                    if (packageData instanceof StylesheetPackage) {
+                        StylesheetPackage pack = (StylesheetPackage)packageData;
+                        docKey = new DocumentKey(docUri, pack.getPackageName(), pack.getPackageVersion());
+                    } else {
+                        docKey = new DocumentKey(docUri);
+                    }
                     TreeInfo info = item instanceof TreeInfo ? (TreeInfo)item : new GenericTreeInfo(controller.getConfiguration(), (NodeInfo)item);
                     docPool.add(info, docKey);
                 }
