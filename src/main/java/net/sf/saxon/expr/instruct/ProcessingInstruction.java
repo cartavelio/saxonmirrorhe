@@ -81,7 +81,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables to be re-bound
      */
 
     /*@NotNull*/
@@ -137,16 +137,14 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      * @param value   the string value of the new node
      * @param output the destination for the result
      * @param context the dynamic evaluation context
-     * @throws XPathException
+     * @throws XPathException if things go wrong
      */
 
     @Override
     public void processValue(UnicodeString value, Outputter output, XPathContext context) throws XPathException {
         String expandedName = evaluateName(context);
-        if (expandedName != null) {
-            CodePoints data = checkContent(value, context);
-            output.processingInstruction(expandedName, data, getLocation(), ReceiverOption.NONE);
-        }
+        CodePoints data = checkContent(value, context);
+        output.processingInstruction(expandedName, data, getLocation(), ReceiverOption.NONE);
     }
 
     /**
@@ -182,12 +180,12 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
     public static UnicodeString checkContentXSLT(UnicodeString data) {
         long hh;
         while ((hh = data.indexOf(DELIM, 0)) >= 0) {
-            data = data.substring(0, hh + 1).concat(UnicodeString.SINGLE_SPACE.concat(data.substring(hh + 1)));
+            data = data.substring(0, hh + 1).concat(StringConstants.SINGLE_SPACE.concat(data.substring(hh + 1)));
         }
         return Whitespace.removeLeadingWhitespace(data);
     }
 
-    private final static UnicodeString DELIM = BMPString.of("?>");
+    private final static UnicodeString DELIM = new Twine8(new byte[]{'?', '>'});
 
     /**
      * Check the content of the node, and adjust it if necessary, using the XQuery rules

@@ -19,7 +19,7 @@ public class StringTool {
     public static int getStringLength(/*@NotNull*/ CharSequence s) {
         int n = 0;
         for (int i = 0; i < s.length(); i++) {
-            int c = (int) s.charAt(i);
+            int c = s.charAt(i);
             if (c < 55296 || c > 56319) {
                 n++;    // don't count high surrogates, i.e. D800 to DBFF
             }
@@ -60,6 +60,23 @@ public class StringTool {
             sb.append(codes[i]);
         }
         return sb.toUnicodeString();
+    }
+
+    public static UnicodeString fromCharSequence(CharSequence chars) {
+        UnicodeBuilder sb = new UnicodeBuilder();
+        IntIterator iter = codePoints(chars);
+        while (iter.hasNext()) {
+            sb.append(iter.next());
+        }
+        return sb.toUnicodeString();
+    }
+
+    public static UnicodeString fromLatin1(String string) {
+        byte[] bytes = new byte[string.length()];
+        for (int i = 0; i<string.length(); i++) {
+            bytes[i] = (byte)(string.charAt(i) & 0xff);
+        }
+        return new Twine8(bytes);
     }
 
     public static IntIterator codePoints(CharSequence value) {

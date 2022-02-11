@@ -31,9 +31,7 @@
 package net.sf.saxon.regex;
 
 
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.*;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.ArrayList;
@@ -589,7 +587,7 @@ public class REMatcher {
      */
     public UnicodeString replace(UnicodeString in, UnicodeString replacement) {
         // String to return
-        UnicodeBuilder sb = new UnicodeBuilder();
+        UnicodeString result = EmptyUniString.getInstance();
 
         // Start at position 0 and search the whole string
         int pos = 0;
@@ -601,7 +599,7 @@ public class REMatcher {
         // Try a match at each position
         while (pos < len && match(in, pos)) {
             // Append chars from input string before match
-            sb.append(in.substring(pos, getParenStart(0)));
+            result = result.concat(in.substring(pos, getParenStart(0)));
 
             if (firstMatch) {
                 simpleReplacement = program.flags.isLiteral();
@@ -619,7 +617,7 @@ public class REMatcher {
                         int index = ++i;
                         ch = replacement.codePointAt(index);
                         if (ch == '\\' || ch == '$') {
-                            sb.append((char) ch);
+                            result = result.concat(BMPString.of("" + (char) ch));
                         } else {
                             throw new RESyntaxException("Invalid escape '" + ch + "' in replacement string");
                         }
@@ -635,12 +633,8 @@ public class REMatcher {
                             if (maxCapture >= n) {
                                 UnicodeString captured = getParen(n);
                                 if (captured != null) {
-                                    for (int j = 0; j < captured.length(); j++) {
-                                        sb.append(captured.codePointAt(j));
-                                    }
+                                    result = result.concat(captured);
                                 }
-                            } else {
-                                // append a zero-length string (no-op)
                             }
                         } else {
                             while (true) {
@@ -663,19 +657,17 @@ public class REMatcher {
                             }
                             UnicodeString captured = getParen(n);
                             if (captured != null) {
-                                for (int j = 0; j < captured.length(); j++) {
-                                    sb.append(captured.codePointAt(j));
-                                }
+                                result = result.concat(captured);
                             }
                         }
                     } else {
-                        sb.append(ch);
+                        result = result.concat(new UnicodeChar(ch));
                     }
                 }
 
             } else {
                 // Append substitution without processing backreferences
-                sb.append(replacement);
+                result = result.concat(replacement);
             }
 
             // Move forward, skipping past match
@@ -697,10 +689,10 @@ public class REMatcher {
         }
 
         // If there's remaining input, append it
-        sb.append(in.substring(pos, len));
+        result = result.concat(in.substring(pos, len));
 
         // Return string buffer
-        return sb.toUnicodeString();
+        return result.economize();
     }
 
     /**

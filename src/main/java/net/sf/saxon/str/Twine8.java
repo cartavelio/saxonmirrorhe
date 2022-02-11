@@ -33,14 +33,21 @@ public class Twine8 extends UnicodeString {
     protected int cachedHash = 0;
 
     /**
-     * Protected constructor
+     * Constructor
+     * @param bytes the byte array containing the characters in the range 0-255. The caller must ensure that
+     *              this array is immutable.
      */
 
-    protected Twine8(byte[] bytes) {
+    public Twine8(byte[] bytes) {
         this.bytes = bytes;
     }
 
-
+    /**
+     * Create a Twine8 from an array of characters that are known to be single byte chars
+     * @param chars character array, all characters in range must be <= 255
+     * @param start offset of first character to be used
+     * @param len number of characters to be used
+     */
     public Twine8(char[] chars, int start, int len) {
         bytes = new byte[len];
         for (int i = start; i < len; i++) {
@@ -72,6 +79,25 @@ public class Twine8 extends UnicodeString {
     @Override
     public int length32() {
         return bytes.length;
+    }
+
+    /**
+     * Concatenate another string
+     *
+     * @param other the string to be appended to this one
+     * @return the result of the concatenation (neither input string is altered)
+     */
+    @Override
+    public UnicodeString concat(UnicodeString other) {
+        if (other instanceof Twine8 && this.length32() + other.length32() < 4096) {
+            Twine8 t = (Twine8)other;
+            byte[] b2 = new byte[bytes.length + t.bytes.length];
+            System.arraycopy(bytes, 0, b2, 0, bytes.length);
+            System.arraycopy(t.bytes, 0, b2, bytes.length, t.bytes.length);
+            return new Twine8(b2);
+        } else {
+            return super.concat(other);
+        }
     }
 
     /**
@@ -333,7 +359,7 @@ public class Twine8 extends UnicodeString {
     public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
         int end = requireInt(limit);
         for (int i = requireInt(start); i < end; i++) {
-            if (stop.test((int) (bytes[i] & 0xff))) {
+            if (stop.test(bytes[i] & 0xff)) {
                 write(writer, start, i-start);
                 return i;
             }
@@ -343,7 +369,7 @@ public class Twine8 extends UnicodeString {
     }
 
     public String details() {
-        return new String("Twine8 bytes.length = " + bytes.length);
+        return "Twine8 bytes.length = " + bytes.length;
     }
 
 }

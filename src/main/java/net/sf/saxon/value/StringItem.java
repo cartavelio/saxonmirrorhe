@@ -33,10 +33,10 @@ public class StringItem extends AtomicValue {
 
     protected UnicodeString content;
 
-    public static final StringItem EMPTY_STRING = new StringItem();
-    public static final StringItem SINGLE_SPACE = StringItem.bmp(" ");
-    public static final StringItem TRUE = StringItem.bmp("true");
-    public static final StringItem FALSE = StringItem.bmp("false");
+    public static final StringItem EMPTY_STRING = new StringItem(EmptyUniString.getInstance());
+    public static final StringItem SINGLE_SPACE = new StringItem(StringConstants.SINGLE_SPACE);
+    public static final StringItem TRUE = new StringItem(StringConstants.TRUE);
+    public static final StringItem FALSE = new StringItem(StringConstants.FALSE);
 
     public static final StringItem ZERO_LENGTH_UNTYPED = new UntypedAtomicValue(EmptyUniString.getInstance());
 
@@ -394,7 +394,7 @@ public class StringItem extends AtomicValue {
         return v instanceof StringItem &&
                 (this instanceof AnyURIValue == v instanceof AnyURIValue) &&
                 (this.isUntypedAtomic() == v.isUntypedAtomic()) &&
-                equals((StringItem) v);
+                equals(v);
     }
 
     /**
