@@ -374,6 +374,13 @@ div.section h2{
    margin: 1em auto;
    border-color: #B3956F;
 }
+.conly {
+   padding: .5em;
+   border: .5em;
+   border-left-style: solid;
+   margin: 1em auto;
+   border-color: #688790;
+}
 .signature, .fullsignature {
     font-size:inherit;
     font-family:monospace;

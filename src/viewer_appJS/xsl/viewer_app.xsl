@@ -428,6 +428,7 @@
     <xsl:template name="platform-info">
         <xsl:variable name="csswitch" select="ixsl:page()//input[@id = 'cscheckbox']"/>
         <xsl:variable name="javaswitch" select="ixsl:page()//input[@id = 'javacheckbox']"/>
+        <xsl:variable name="cswitch" select="ixsl:page()//input[@id = 'ccheckbox']"/>
         
         <xsl:variable name="maindiv" select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main']"/>
         <xsl:variable name="platformdiv" select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id eq 'platform']"/>
@@ -448,6 +449,14 @@
                 else 'block' 
                 else 'none'"/>
         </xsl:for-each>
+        <xsl:for-each select="$maindiv//*[@class='conly']">
+            <ixsl:set-style name="display" 
+                select="if (ixsl:get($cswitch,'checked')) 
+                then if (self::tr) then 'table-row' 
+                else if (self::li) then 'list-item'
+                else 'block' 
+                else 'none'"/>
+        </xsl:for-each>
         
         <!-- Check whether there is anything displayed in the main div - if not, display info in the
             platform div with suggestion to switch platform checkboxes. -->
@@ -455,14 +464,21 @@
             <xsl:when test="not(ixsl:get($javaswitch,'checked')) and
                 empty($maindiv/*[not(@class='javaonly')])">
                 <xsl:call-template name="platform-warning">
-                    <xsl:with-param name="java-only" select="true()"/>
+                    <xsl:with-param name="platform" select="'Java'"/>
                 </xsl:call-template>
                 <ixsl:set-style name="display" select="'block'" object="$platformdiv"/>
             </xsl:when>
             <xsl:when test="not(ixsl:get($csswitch,'checked')) and
                 empty($maindiv/*[not(@class='csonly')])">
                 <xsl:call-template name="platform-warning">
-                    <xsl:with-param name="java-only" select="false()"/>
+                    <xsl:with-param name="platform" select="'C#'"/>
+                </xsl:call-template>
+                <ixsl:set-style name="display" select="'block'" object="$platformdiv"/>
+            </xsl:when>
+            <xsl:when test="not(ixsl:get($cswitch,'checked')) and
+                empty($maindiv/*[not(@class='conly')])">
+                <xsl:call-template name="platform-warning">
+                    <xsl:with-param name="platform" select="'C'"/>
                 </xsl:call-template>
                 <ixsl:set-style name="display" select="'block'" object="$platformdiv"/>
             </xsl:when>
@@ -473,12 +489,11 @@
     </xsl:template>
     
     <xsl:template name="platform-warning">
-        <xsl:param name="java-only" as="xs:boolean"/>
-        <xsl:variable name="platform-title" select="if ($java-only) then 'Java' else 'C#'"/>
+        <xsl:param name="platform" as="xs:string"/>
         <xsl:result-document href="#platform" method="ixsl:replace-content">
             <div class="warning">
-                <p><b>Page contains <xsl:value-of select="$platform-title"/> specific information only.</b></p>
-                <p>To switch to show the <xsl:value-of select="$platform-title"/> specific
+                <p><b>Page contains <xsl:value-of select="$platform"/> specific information only.</b></p>
+                <p>To switch to show the <xsl:value-of select="$platform"/> specific
                     information, use the checkbox below (or the checkbox in the footer).</p>
                 <label for="javacheckbox2"> Java: </label>
                 <input type="checkbox" id="javacheckbox2" name="platform" value="java">
@@ -489,6 +504,12 @@
                 <label for="cscheckbox2"> C#: </label>
                 <input type="checkbox" id="cscheckbox2" name="platform" value="cs">
                     <xsl:if test="ixsl:get(ixsl:page()//input[@id = 'cscheckbox'],'checked')">
+                        <xsl:attribute name="checked" select="'checked'"/>
+                    </xsl:if>
+                </input>
+                <label for="ccheckbox2"> C: </label>
+                <input type="checkbox" id="ccheckbox2" name="platform" value="c">
+                    <xsl:if test="ixsl:get(ixsl:page()//input[@id = 'ccheckbox'],'checked')">
                         <xsl:attribute name="checked" select="'checked'"/>
                     </xsl:if>
                 </input>
@@ -575,6 +596,13 @@
         <xsl:call-template name="platform-info"/>
     </xsl:template>
     
+    <xsl:template match="input[@id = 'ccheckbox']" mode="ixsl:onclick">
+        <xsl:for-each select="ixsl:page()//input[@id = 'ccheckbox2']">
+            <ixsl:set-property name="checked" select="ixsl:get(., 'checked')" object="."/>
+        </xsl:for-each>
+        <xsl:call-template name="platform-info"/>
+    </xsl:template>
+    
     <xsl:template match="input[@id = 'javacheckbox2']" mode="ixsl:onclick">
         <ixsl:set-property name="checked" select="ixsl:get(., 'checked')" 
             object="ixsl:page()//input[@id = 'javacheckbox']"/>
@@ -584,6 +612,12 @@
     <xsl:template match="input[@id = 'cscheckbox2']" mode="ixsl:onclick">
         <ixsl:set-property name="checked" select="ixsl:get(., 'checked')" 
             object="ixsl:page()//input[@id = 'cscheckbox']"/>
+        <xsl:call-template name="platform-info"/>
+    </xsl:template>
+    
+    <xsl:template match="input[@id = 'ccheckbox2']" mode="ixsl:onclick">
+        <ixsl:set-property name="checked" select="ixsl:get(., 'checked')" 
+            object="ixsl:page()//input[@id = 'ccheckbox']"/>
         <xsl:call-template name="platform-info"/>
     </xsl:template>
     
