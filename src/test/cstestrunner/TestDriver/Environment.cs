@@ -174,7 +174,7 @@ namespace TestRunner {
 
             // set any requested collations
 
-            RegisterCollations(xpc, (XdmNode) env, environment);
+            RegisterCollations(xpc, env, environment);
 
             // declare the requested namespaces
 
@@ -210,7 +210,7 @@ namespace TestRunner {
 
             // handle requested context item
             foreach (XdmItem param in xpc.Evaluate("context-item", env)) {
-                String select = ((XdmNode) param).GetAttributeValue(new QName("select"));
+                string select = ((XdmNode) param).GetAttributeValue(new QName("select"));
                 XdmValue value = xpc.Evaluate(select, null);
                 environment.contextItem = (XdmItem) value;
             }
@@ -224,7 +224,7 @@ namespace TestRunner {
                     XdmNode styleSource = builder1.Build(res.ResolveUri(((XdmNode) env).BaseUri, fileName));
                     environment.xsltExecutable = environment.xsltCompiler.Compile(styleSource);
                 }
-                catch (Exception e) {
+                catch (Exception) {
                     environment.failedToBuild = true;
                     environment.usable = false;
                     driver.println("**** failure while compiling environment-defined stylesheet " + fileName);
@@ -289,9 +289,9 @@ namespace TestRunner {
                 if (uri.Equals("http://www.w3.org/2010/09/qt-fots-catalog/collation/caseblind") ||
                     uri.Equals("http://www.w3.org/xslts/collation/caseblind")) {
                     try {
-                        JConfiguration config = xpc.Processor.Implementation;
-                        JStringCollator collator = config.getCollationURIResolver()
-                            .resolve("http://saxon.sf.net/collation?ignore-case=yes", config);
+                        // JConfiguration config = xpc.Processor.Implementation;
+                        // JStringCollator collator = config.getCollationURIResolver()
+                        //     .resolve("http://saxon.sf.net/collation?ignore-case=yes", config);
 
                         environment.processor.DeclareCollation(new Uri(uri), CultureInfo.CurrentCulture.CompareInfo,
                             CompareOptions.IgnoreCase);
@@ -808,11 +808,11 @@ namespace TestRunner {
         }
 
 
+        // Environment implements XmlResolver
+        
         public override object GetEntity(Uri href, string role, Type ofObjectToReturn) {
             XdmNode node = null;
             String hrefStr = href.ToString();
-            //hrefStr = hrefStr.Substring(hrefStr.LastIndexOf ('/')+1);
-
             bool foundDoc = sourceDocs.TryGetValue(hrefStr, out node);
 
             if (!foundDoc) {
@@ -849,7 +849,8 @@ namespace TestRunner {
                     return sourcei;
                 }
                 else {
-                    return null;
+                    // Some tests, notably catalog tests, don't declare the documents they use
+                    return new XmlUrlResolver().GetEntity(href, role, ofObjectToReturn);
                 }
             }
             else {
@@ -948,10 +949,10 @@ namespace TestRunner {
                                 ? new FileStream(fileLoc.ToString(), FileMode.Open, FileAccess.Read)
                                 : file);
 
-                            builder.BaseUri = new Uri(res.ResolveUri(((XdmNode) env).BaseUri, uri).AbsoluteUri);
+                            Uri absUri = builder.BaseUri = new Uri(res.ResolveUri(((XdmNode) env).BaseUri, uri).AbsoluteUri);
                             try {
                                 doc = builder.Build(ss);
-                                environment.sourceDocs.Add(uri, doc);
+                                environment.sourceDocs.Add(absUri.OriginalString, doc);
                             }
                             catch (Exception e) {
                                 Console.Error.WriteLine(e);
@@ -970,10 +971,10 @@ namespace TestRunner {
                         }
 
                         string content = xpc.Evaluate("string(content)", source).ToString();
-                        builder.BaseUri = new Uri(res.ResolveUri(((XdmNode) env).BaseUri, uri).AbsoluteUri);
+                        Uri absUri = builder.BaseUri = new Uri(res.ResolveUri(((XdmNode) env).BaseUri, uri).AbsoluteUri);
                         try {
                             doc = builder.Build(new StringReader(content));
-                            environment.sourceDocs.Add(uri, doc);
+                            environment.sourceDocs.Add(absUri.OriginalString, doc);
                         } catch (Exception e) {
                             driver.println("*** failed to parse inline source document, Exception:" + e.Message);
                             continue;
