@@ -27,7 +27,7 @@
 
    
       <p>Like other Saxon extensions, these extensions all require Saxon-PE or higher.
-      They are also available in Saxon-CS.</p>
+      They are also available in SaxonCS.</p>
    
    <p>Generally, Saxonica aims to avoid making incompatible changes except in major releases.
    But the features described in this section are experimental, so this policy does not apply: the aim
@@ -55,7 +55,7 @@
          <section id="union-types" title="Union Types">
             <h1>Union types</h1>
 
-            <aside>Requires Saxon-CS or Saxon-EE, with syntax extensions enabled.</aside>
+            <aside>Requires SaxonCS or Saxon-EE, with syntax extensions enabled.</aside>
 
             <p>A construct of the form <code class="bold"
                   >union(type1, type2, type3)</code> can be used to define simple 
@@ -850,7 +850,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
    <section id="xslt-syntax-extensions" title="XSLT 4.0 Extensions">
       <h1>Experimental XSLT 4.0 Extensions</h1>
 
-      <aside>Requires Saxon-PE or Saxon-EE. Available in Saxon-CS.</aside>
+      <aside>Requires Saxon-PE or Saxon-EE. Available in SaxonCS.</aside>
 
       <p>This section describes features proposed for XSLT 4.0, to the extent they are implemented in Saxon 11.</p>
 
@@ -993,8 +993,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
          
          <example><samp><![CDATA[
  <xsl:function name="f:days-in-month" as="xs:integer?">
-    <xsl:param name="month-number" as="xs:integer">
-    <xsl:param name="leap-year" as="xs:boolean">
+    <xsl:param name="month-number" as="xs:integer"/>
+    <xsl:param name="leap-year" as="xs:boolean"/>
     <xsl:switch select="$month-number">
       <xsl:when test="1, 3, 5, 7, 8, 10, 12" select="31"/>
       <xsl:when test="4, 6, 9, 11" select="30"/>
@@ -1006,6 +1006,49 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
          
          <p>For further details see <a class="bodylink" href="/xsl-elements/switch">xsl:switch</a>.</p>
          
+      </section>
+      <section id="ext-ins-call-template" title="Extension Instructions Calling Templates">
+         <h1>Extension Instructions Calling Named Templates</h1>
+         
+         <p>If the name of a named template uses a namespace listed in an <code>extension-element-prefixes</code>
+         attribute, then a call on the named template may be written as an extension instruction, as an alternative
+         to using <code>xsl:call-template</code>.</p>
+         
+         <p>For example, if the template is declared as:</p>
+         <example><samp><![CDATA[<xsl:template name="x:indent">
+   <xsl:param name="spaces" as="xs:integer"/>
+   <xsl:value-of select="'&#xa;' || string-join((1 to $spaces)!' ')"/>
+</xsl:template>]]></samp></example>
+         
+         <p>Then it may be invoked by writing:</p>
+         
+         <example><samp><![CDATA[<x:indent spaces="4"/>]]></samp></example>
+         
+         <p>which (assuming the presence of <code>extension-element-prefixes="x"</code>) is equivalent to:</p>
+         
+         <example><samp><![CDATA[<xsl:call-template name="x:indent">
+   <xsl:with-param name="spaces" select="4"/>
+</xsl:call-template>]]></samp></example>
+         
+         <p>Attributes on the extension instruction are mapped to parameters declared in the named template.
+            The rules for passing parameters are as follows:</p>
+         
+         <ul>
+            <li>If the parameter is declared with <code>as="xs:string"</code> then the attribute is interpreted 
+            as an attribute value template.</li>
+            <li>If the parameter is declared with <code>as="xs:boolean"</code> then the attribute is interpreted 
+               as an attribute value template, accepting the values "0", "false", or "no" for false, or
+            "1", "true", or "yes" for true.</li>
+            <li>In all other cases the value of the attribute is treated as an XPath expression, which must
+            evaluate to a value of the required type (after any conversion, using the function conversion rules).</li>
+           
+         </ul>
+         
+         <p>Parameters that may be omitted (and defaulted) in an <code>xsl:call-template</code> instruction
+         may similarly be omitted in the extension instruction.</p>
+         
+         <p>The extension instruction must have no children other than <code>xsl:fallback</code>.</p>
+         <p>There is no way to supply tunnel parameters.</p>
       </section>
       <section id="separator-attribute" title="Separator Attribute">
 
@@ -1024,6 +1067,21 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
       processing every item element in the input sequence, except the last</p>
 
    </section>
+      <section id="xsl-match" title="The xsl:match Instruction">
+         <h1>The <code>xsl:match</code> Instruction</h1>
+         <p>See <a class="bodylink code" href="/xsl-elements/match">xsl:match</a></p>
+         
+         <p>This instruction is most useful if wrapped in a stylesheet function. For example:</p>
+         <example><samp><![CDATA[
+  <xsl:function name="f:in-appendix" as="xs:boolean">
+    <xsl:param name="content" as="element(*)"/>
+    <xsl:match select="$content" pattern="chapter[@class='appendix']//* | addendum//*"/>
+  </xsl:function>
+  
+  ...
+  
+  <xsl:if test="f:in-appendix(.)">...</xsl:if>]]></samp></example>
+      </section>
       <section id="iteration-maps-arrays" title="Iterating over Maps and Arrays">
          <h1>Iterating over Maps and Arrays</h1>
          
@@ -1061,7 +1119,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
          causes a new group to be started whenever the date on the current item is earlier than the date on the
          last item in the previous group.</p>
          
-         <p>For more details see <a class="bodylink" href="/xsl-elements/for-each-group">xsl:map</a>.</p>
+         <p>For more details see <a class="bodylink" href="/xsl-elements/for-each-group">xsl:for-each-group</a>.</p>
       </section>
       
       <section id="xsl-map-duplicates" title="Controlling Duplicates on xsl:map">

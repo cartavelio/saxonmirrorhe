@@ -456,7 +456,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
     <section id="reflexive-functions" title="Reflexive Extension Functions" class="javaonly">
     <h1>Writing Reflexive Extension Functions in Java</h1>
 
-    <aside>This section applies to Saxon-PE and Saxon-EE only</aside>
+    <aside>This section applies to SaxonJ-PE and SaxonJ-EE only</aside>
 
     <p>Reflexive extension functions written in Java map the expanded name (namespace plus
       local-name) of the XPath function to a Java fully-qualified class name and method or field
@@ -494,7 +494,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
     <p>For example, with the help of the XPath 3.1 arrow operator, it makes it possible to chain function calls like this: 
       <code>let $x := c:myObject.new() => c:setLength(3) => c:setColor('blue')</code>.</p>
     
-    <aside>For compatibility with other products and previous Saxon releases, Saxon <strong>at user
+    <aside>For compatibility with other products and previous Saxon releases, SaxonJ <strong>at user
         request</strong> also supports certain other formats of URI. The URI may be a string
       containing a "/", in which the fully-qualified class name appears after the final "/" (for
       example <code>xmlns:date="http://www.jclark.com/xt/java/java.util.Date"</code>). The part of
@@ -1779,14 +1779,14 @@ public static int lineNumber(XPathContext c) {
         <a class="cslink" href="Saxon.Api.ExtensionFunctionDefinition">ExtensionFunctionDefinition</a>.</p></li>
     </ul>
     
-    <aside>Reflexive extension functions are not available in Saxon-CS. There are several reasons for this:
+    <aside>Reflexive extension functions are not available in SaxonCS. There are several reasons for this:
     the security risks; the complexity of dynamic loading in the .NET environment; and the complexity
     of mapping C# data types to XPath data types.</aside>
     
     <section id="ext-simple-N" title="Simple Interface" class="csonly">
         <h1>C# Extension Functions: Simple Interface</h1>
         
-        <p>A simple extension function can be registered in Saxon-CS by calling the method</p>
+        <p>A simple extension function can be registered in SaxonCS by calling the method</p>
         
         <samp>processor.RegisterExtensionFunction(QName, XdmItemType, Func&lt;XdmValue[], XdmValue&gt;)</samp>
       
@@ -2139,7 +2139,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
 
     <p>
       <aside>This feature is available in Saxon-PE and Saxon-EE only.<br/>
-        User-written extension instructions are not currently supported on Saxon-CS.</aside>
+        User-written extension instructions are not currently supported on SaxonCS.</aside>
     </p>
 
     <p>Saxon implements the element extensibility feature defined in the XSLT standard. This feature
@@ -2369,7 +2369,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
           Saxon-HE supports UCA collations only if fallback implementation is allowed (that is,
           if the option <code>fallback=no</code> is not present in the collation URI.</p>
           
-          <p class="csonly">Saxon-CS implements UCA collations using the ICU-N open source library;
+          <p class="csonly">SaxonCS implements UCA collations using the ICU-N open source library;
           this is an incomplete port of ICU-J to C#. At the time of publication, the ICU-N library 
           is at alpha release status, so it may not be fully complete and conformant.</p>
             

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<release number="11" date="2029-12-31" xmlns="http://www.saxonica.com/ns/doc/changes">
+<release number="11" date="2021-10-06" xmlns="http://www.saxonica.com/ns/doc/changes">
     
     <!--<category name="documentation">
         
@@ -98,7 +98,7 @@
     
     <category name="dotnet">
         <div class="csonly">
-            <p>In Saxon-CS, the broad structure of the API remains unchanged from the older .NET product, 
+            <p>In SaxonCS, the broad structure of the API remains unchanged from the older .NET product, 
                 including some features retained for legacy reasons, but the detail has been modernized and made
                 more consistent.</p>
             
@@ -174,7 +174,7 @@
     
     <category name="localization">
         <div class="javaonly">
-        <p>Saxon now uses the Java <code>java.time.ZoneId</code> class for handling timezones in place of the old
+        <p>SaxonJ now uses the Java <code>java.time.ZoneId</code> class for handling timezones in place of the old
             <code>java.util.Timezone</code>. This may affect the set of timezone names that are recognized.</p>
         
         <p>The new Java library is less US-focused and more international, and therefore deprecates use of ambiguous timezone
@@ -306,7 +306,7 @@
 
     <category name="documentation">
         
-        <p>Sections in the documentation that are specific to the Java or C# products are now tagged as such
+        <p>Sections in the documentation that are specific to the Java or C# products (SaxonJ, SaxonCS) are now tagged as such
         (using <code>class="javaonly"</code> or <code>class="csonly"</code> on the containing element).
         This causes the relevant text to be displayed with a colored side-bar; it also allows the text to
         be displayed or hidden based on a checkbox displayed in the page footer.</p>
@@ -366,10 +366,10 @@
         alternative spellings such as <code>saxon:printStack</code> for <code>saxon:print-stack</code>,
         or <code>saxon:stringToBase64Binary</code> for <code>saxon:string-to-base64Binary</code>.</p>
         
-        <p class="javaonly">On the Java platform, the functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> now accept
+        <p class="javaonly">In SaxonJ, the functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> now accept
         any encoding supported by the Java VM.</p>
         
-        <p class="csonly">On the Saxon-CS platform, the functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> accept
+        <p class="csonly">In SaxonCS, the functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> accept
             any encoding supported by the .NET method <code>Encoding.GetEncoding()</code>.</p>
         
         <h2>New Extension Functions</h2>
@@ -406,13 +406,13 @@
             been dropped. (The underlying methods in the <code java="net.sf.saxon.Controller">Controller</code> class remain
             available if required).</p>
         
-        <p class="csonly">A number of extension functions in the Saxon namespace have not been carried forward to the Saxon-CS
+        <p class="csonly">A number of extension functions in the Saxon namespace have not been carried forward to the SaxonCS
             product, either because they are obsolete, or because implementation is non-trivial. These include
             <code>saxon:compile-query</code>, <code>saxon:is-defaulted</code>, <code>saxon:key-map</code>,
             <code>saxon:last-modified</code>, <code>saxon:parse-dateTime</code>, <code>saxon:send-mail</code>,
             <code>saxon:query</code>, <code>saxon:unparsed-entities</code>.</p>
         
-        <p class="csonly">Some EXSLT and EXPath function libraries are not implemented in Saxon-CS, including the EXSLT date/time
+        <p class="csonly">Some EXSLT and EXPath function libraries are not implemented in SaxonCS, including the EXSLT date/time
             library and the EXPath archive library.</p>
         
  
@@ -456,7 +456,15 @@
  
         <h2>XSLT extensions</h2>
         
-        <p><i>These extensions are all experimental, and may change as a result of community standardisation efforts.</i></p>
+        <p><i>These extensions are all experimental, and may change as a result of community standardisation efforts.
+        They are based on proposals for an XSLT version 4.0, but they do not necessarily correspond precisely with the
+        current draft of that proposal.</i></p>
+        
+        <p>An extension instruction can be used to invoke a named template. For example, a template with name <code>x:error</code>
+        with declared parameters <code>message</code> and <code>code</code> might be called using the instruction
+        <code>&lt;x:error message="Intoxication detected" code="ABXZ9275"/></code>, in place of an <code>xsl:call-template</code>
+            instruction with multiple <code>xsl:with-param</code> children. For details, see 
+            <a class="bodylink" href="/v4extensions/xslt-syntax-extensions/ext-ins-call-template">Extension Instructions Calling Templates</a></p>
         
         
         <p>Implemented <code>xsl:for-each-group break-when="expression"</code>. For example, <code>&lt;xsl:for-each-group
@@ -466,6 +474,8 @@
         <p>Implemented the proposed <code>array</code> and <code>map</code> attributes as alternatives to <code>select</code>
         on <code>xsl:for-each</code>, <code>xsl:iterate</code>, and <code>xsl:for-each-group</code>, to allow these instructions
         to process maps and arrays as well as sequences.</p>
+        
+        <p>Implemented the proposed <code>xsl:match</code> instruction to match selected items against an XSLT pattern.</p>
         
         
         <p>In general, streamability of new constructs introduced beyond XSLT 3.0 has not been addressed in the specification or
@@ -482,7 +492,7 @@
     
     <category name="sql">
         
-        <p>It is no longer necessary, when establishing a SQL connection, to supply the name of the JDBC Driver class.</p>
+        <p class="javaonly">It is no longer necessary, when establishing a SQL connection, to supply the name of the JDBC Driver class.</p>
   
     </category>
     
@@ -490,7 +500,7 @@
     
     <category name="xquery-update">
         
-       <p class="csonly">Code supporting XQuery Update is included in Saxon-CS, but it is largely untested. (The same was true,
+       <p class="csonly">Code supporting XQuery Update is included in SaxonCS, but it is largely untested. (The same was true,
            but not acknowledged, in the old .NET product). Any user feedback indicating whether or not XQuery Update is required,
            and whether or not it works, will be appreciated.</p>
   
