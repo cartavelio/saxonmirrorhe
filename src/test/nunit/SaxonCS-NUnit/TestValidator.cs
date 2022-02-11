@@ -1181,6 +1181,39 @@ namespace SaxonCS_NUnit {
             }
         }
 
+ 
+    private void testSchemaLocationHints(bool useHints, bool withNS) {
+        try {
+            Processor processor = new ();
+            DocumentBuilder builder = processor.NewDocumentBuilder();
+            XdmNode source = builder.Build(new Uri(ConfigTest.DataDirUri, (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
+
+            SchemaManager manager = processor.SchemaManager;
+            SchemaValidator validator = manager.NewSchemaValidator();
+
+            validator.UseXsiSchemaLocation = useHints;
+
+            validator.Validate(source);
+
+            if (!useHints) {
+                Assert.Fail("Document should not have validated");
+            }
+        } catch (Exception ex) {
+            if (useHints) {
+                Assert.Fail("Validation should not have failed");
+            }
+        }
+    }
+
+    [Test]
+    public void testIgnoreSchemaLocationHints() {
+        testSchemaLocationHints(false, false);
+        testSchemaLocationHints(false, true);
+        testSchemaLocationHints(true, false);
+        testSchemaLocationHints(true, true);
+    }
+
+ 
 
 
  
