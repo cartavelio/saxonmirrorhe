@@ -139,7 +139,7 @@ public class Compilation {
         if (getPackageData() == null) {
             // Create a temporary PackageData for use during use-when processing
             PackageData pd = new PackageData(getConfiguration());
-            pd.setHostLanguage(HostLanguage.XSLT);
+            pd.setHostLanguage(HostLanguage.XSLT, compilerInfo.getXsltVersion());
             pd.setTargetEdition(compilerInfo.getTargetEdition());
             pd.setSchemaAware(schemaAware);
             packageData = pd;
@@ -268,11 +268,12 @@ public class Compilation {
         StyleNodeFactory factory = getStyleNodeFactory(true);
         PrincipalStylesheetModule psm = factory.newPrincipalModule(xslpackage);
         StylesheetPackage pack = psm.getStylesheetPackage();
-        pack.setVersion(xslpackage.getVersion());
+        pack.setLanguageVersion(xslpackage.getVersion());
         pack.setPackageVersion(xslpackage.getPackageVersion());
         pack.setPackageName(xslpackage.getName());
         pack.setSchemaAware(info.isSchemaAware() || isSchemaAware());
         pack.createFunctionLibrary();
+        pack.setLanguageVersion(info.getXsltVersion());
         psm.getRuleManager().setCompilerInfo(info);
         setPrincipalStylesheetModule(psm);
         packageData = null;

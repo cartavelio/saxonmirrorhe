@@ -2485,7 +2485,7 @@ public abstract class StyleElement extends ElementImpl {
      * @param attributeName the name of the attribute if relevant, or null if no specific attribute is concerned
      */
     protected void requireXslt40(String attributeName) {
-        if (compilation.getCompilerInfo().getLanguageVersion() != 40 || getEffectiveVersion() < 40) {
+        if (compilation.getCompilerInfo().getXsltVersion() != 40 || getEffectiveVersion() < 40) {
             if (attributeName == null) {
                 compileError("Element " + getDisplayName() + " is allowed only if XSLT 4.0 is enabled", "XTSE0010");
             } else {

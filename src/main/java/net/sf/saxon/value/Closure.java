@@ -125,7 +125,11 @@ public class Closure implements Sequence, ContextOriginator {
      */
     @Override
     public Item head() throws XPathException {
-        return iterate().next();
+        try {
+            return iterate().next();
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 
     public Expression getExpression() {

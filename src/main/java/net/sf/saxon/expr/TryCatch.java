@@ -22,6 +22,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.QNameTest;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
@@ -241,7 +242,11 @@ public class TryCatch extends Expression {
     public Item evaluateItem(XPathContext c) throws XPathException {
         XPathContext c1 = c.newMinorContext();
         try {
-            return ExpressionTool.eagerEvaluate(tryOp.getChildExpression(), c1).head();
+            try {
+                return ExpressionTool.eagerEvaluate(tryOp.getChildExpression(), c1).head();
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         } catch (XPathException err) {
             if (err.isGlobalError()) {
                 err.setIsGlobalError(false);

@@ -20,6 +20,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -608,6 +609,10 @@ public abstract class VariableReference extends Expression implements BindingRef
             SequenceIterator iter = evaluateVariable(c).iterate();
             Location loc = getLocation();
             SequenceTool.supply(iter, (ItemConsumer<? super Item>) item -> output.append(item, loc, ReceiverOption.ALL_NAMESPACES));
+        } catch (UncheckedXPathException uxe) {
+            XPathException xpe = uxe.getXPathException();
+            xpe.maybeSetLocation(getLocation());
+            throw xpe;
         } catch (XPathException err) {
             err.maybeSetLocation(getLocation());
             throw err;

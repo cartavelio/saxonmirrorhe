@@ -374,10 +374,10 @@ public class XsltCompiler {
     public void setXsltLanguageVersion(String version) {
         switch (version) {
             case "3.0":
-                compilerInfo.setLanguageVersion(30);
+                compilerInfo.setXsltVersion(30);
                 break;
             case "4.0":
-                compilerInfo.setLanguageVersion(40);
+                compilerInfo.setXsltVersion(40);
                 break;
             default:
                 throw new IllegalArgumentException("Language version must be 3.0|4.0");

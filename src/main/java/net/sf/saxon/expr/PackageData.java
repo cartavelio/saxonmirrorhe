@@ -27,6 +27,7 @@ public class PackageData {
 
     protected Configuration config;
     private HostLanguage hostLanguage;
+    protected int hostLanguageVersion;
     private boolean schemaAware;
     private DecimalFormatManager decimalFormatManager = null;
     protected KeyManager keyManager = null;
@@ -90,6 +91,15 @@ public class PackageData {
     }
 
     /**
+     * Get the version of the host language
+     * @return the host language version, as an integer: for example 31 represents 3.1.
+     */
+
+    public int getHostLanguageVersion() {
+        return hostLanguageVersion;
+    }
+
+    /**
      * Ask if the host language is XSLT
      * @return true if the host language is XSLT
      */
@@ -99,12 +109,16 @@ public class PackageData {
     }
 
     /**
-     * Set the language in which this package is written
-     * @param hostLanguage typically {@link HostLanguage#XSLT}, {@link HostLanguage#XQUERY}, or {@link HostLanguage#XPATH}
+     * Set the language and version in which this package is written
+     * @param hostLanguage typically {@link HostLanguage#XSLT}, {@link HostLanguage#XQUERY}, or
+     * {@link HostLanguage#XPATH}
+     * @param version the host language version, as an integer (for example 30 represents 3.0, 31
+     *                represents 3.1)
      */
 
-    public void setHostLanguage(HostLanguage hostLanguage) {
+    public void setHostLanguage(HostLanguage hostLanguage, int version) {
         this.hostLanguage = hostLanguage;
+        this.hostLanguageVersion = version;
     }
 
     /**

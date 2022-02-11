@@ -116,7 +116,7 @@ public class QueryModule implements StaticContext {
         init(sqc);
 
         PackageData pd = new PackageData(config);
-        pd.setHostLanguage(HostLanguage.XQUERY);
+        pd.setHostLanguage(HostLanguage.XQUERY, getXPathVersion());
         pd.setSchemaAware(isSchemaAware());
         packageData = pd;
 

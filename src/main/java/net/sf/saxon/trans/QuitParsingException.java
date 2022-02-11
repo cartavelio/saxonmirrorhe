@@ -25,7 +25,7 @@ public class QuitParsingException extends XPathException {
      *                           See bug 3080.
      */
     public QuitParsingException(boolean notifiedByConsumer) {
-        super("No more input required", "SXQP0001");
+        super("The input file has not been read to completion", "SXQP0001");
         this.notifiedByConsumer = notifiedByConsumer;
     }
 

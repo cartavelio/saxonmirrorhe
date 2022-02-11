@@ -122,15 +122,6 @@ public class CompilerInfo {
         return config;
     }
 
-
-    public void setLanguageVersion(int version) {
-        this.languageVersion = version;
-    }
-
-    public int getLanguageVersion() {
-        return this.languageVersion;
-    }
-
     /**
      * Say whether just-in-time compilation of template rules should be used for this XSLT compilation
      * <p>The same effect can be achieved by {@link #setOptimizerOptions(OptimizerOptions)} with the appropriate
@@ -628,7 +619,7 @@ public class CompilerInfo {
      * @param version The decimal version number times ten, for example 30 indicates
      *                XSLT 3.0.
      * @since 9.3. Changed in 9.7 to take an integer rather than a decimal. Ignored from 9.8.
-     * @deprecated since Saxon 9.8 (has no effect).
+     * Deprecated in Saxon 9.8 (has no effect). Reintroduced in 11 to support 40 = draft XSLT 4.0 specification.
      */
 
     public void setXsltVersion(int version) {
@@ -639,8 +630,8 @@ public class CompilerInfo {
      *
      * @return 30 (for XSLT 3.0)
      * @since 9.3  Changed in 9.7 to take an integer rather than a decimal. Changed in 9.8 to return the
-     * value 30 unconditionally.
-     * @deprecated since 9.8 (always returns 30)
+     * value 30 unconditionally. Deprecated in 9.8 (because only 30 was supported). Reintroduced in 11
+     * to support 40 = draft XSLT 4.0 specification.
      */
 
     public int getXsltVersion() {

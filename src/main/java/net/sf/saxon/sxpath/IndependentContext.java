@@ -79,7 +79,7 @@ public class IndependentContext extends AbstractStaticContext
         setDefaultCollationName(config.getDefaultCollationName());
         setOptimizerOptions(config.getOptimizerOptions());
         PackageData pd = new PackageData(config);
-        pd.setHostLanguage(HostLanguage.XPATH);
+        pd.setHostLanguage(HostLanguage.XPATH, 31);
         pd.setSchemaAware(false);
         setPackageData(pd);
     }

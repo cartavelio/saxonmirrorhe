@@ -21,6 +21,7 @@ import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.EmptyUniString;
 import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.Cardinality;
@@ -116,13 +117,17 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
         boolean first = true;
         SequenceIterator iter = arguments[0].iterate();
         Item it;
-        while ((it = iter.next()) != null) {
-            if (first) {
-                first = false;
-            } else {
-                output.accept(separator);
+        try {
+            while ((it = iter.next()) != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    output.accept(separator);
+                }
+                output.accept(it.getUnicodeStringValue());
             }
-            output.accept(it.getUnicodeStringValue());
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
         output.close();
     }
