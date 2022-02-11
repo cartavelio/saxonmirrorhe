@@ -23,6 +23,7 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
@@ -528,46 +529,50 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
     @Override
     public TailCall processLeavingTail(Outputter out, XPathContext context) throws XPathException {
 
-        if (copyAccumulators) {
-            // Try to create a virtual copy if we can. This is cheaper
-            if (mustPush()) {
-                // This typically happens with the combination copy-accumulators=yes, validation=strict
-                // Test case accumulators-070
-                // We have to create a physical copy because of the validation requirement, but this makes
-                // it difficult to copy the accumulator values.
+        try {
+            if (copyAccumulators) {
+                // Try to create a virtual copy if we can. This is cheaper
+                if (mustPush()) {
+                    // This typically happens with the combination copy-accumulators=yes, validation=strict
+                    // Test case accumulators-070
+                    // We have to create a physical copy because of the validation requirement, but this makes
+                    // it difficult to copy the accumulator values.
+                    SequenceTool.supply(getSelect().iterate(context), (ItemConsumer<? super Item>) item -> {
+                        if (item instanceof NodeInfo) {
+                            TinyBuilder builder = new TinyBuilder(out.getPipelineConfiguration());
+                            ComplexContentOutputter cco = new ComplexContentOutputter(builder);
+                            cco.open();
+                            copyOneNode(context, cco, (NodeInfo) item, CopyOptions.ALL_NAMESPACES);
+                            cco.close();
+                            TinyNodeImpl copy = (TinyNodeImpl) builder.getCurrentRoot();
+                            copy.getTree().setCopiedFrom((NodeInfo) item);
+                            out.append(copy);
+                        } else {
+                            out.append(item);
+                        }
+                    });
+                } else {
+                    // Use the iterate() method to create a virtual copy.
+                    SequenceTool.supply(iterate(context), (ItemConsumer<? super Item>)out::append);
+                }
+            } else {
+
+                int copyOptions =
+                        (validation == Validation.SKIP ? 0 : CopyOptions.TYPE_ANNOTATIONS)
+                        | (copyNamespaces ? CopyOptions.ALL_NAMESPACES : 0)
+                        | (copyForUpdate ? CopyOptions.FOR_UPDATE : 0);
+
                 SequenceTool.supply(getSelect().iterate(context), (ItemConsumer<? super Item>) item -> {
                     if (item instanceof NodeInfo) {
-                        TinyBuilder builder = new TinyBuilder(out.getPipelineConfiguration());
-                        ComplexContentOutputter cco = new ComplexContentOutputter(builder);
-                        cco.open();
-                        copyOneNode(context, cco, (NodeInfo) item, CopyOptions.ALL_NAMESPACES);
-                        cco.close();
-                        TinyNodeImpl copy = (TinyNodeImpl) builder.getCurrentRoot();
-                        copy.getTree().setCopiedFrom((NodeInfo) item);
-                        out.append(copy);
+                        copyOneNode(context, out, (NodeInfo) item, copyOptions);
                     } else {
-                        out.append(item);
+                        out.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
                     }
                 });
-            } else {
-                // Use the iterate() method to create a virtual copy.
-                SequenceTool.supply(iterate(context), (ItemConsumer<? super Item>)out::append);
+
             }
-        } else {
-
-            int copyOptions =
-                    (validation == Validation.SKIP ? 0 : CopyOptions.TYPE_ANNOTATIONS)
-                    | (copyNamespaces ? CopyOptions.ALL_NAMESPACES : 0)
-                    | (copyForUpdate ? CopyOptions.FOR_UPDATE : 0);
-
-            SequenceTool.supply(getSelect().iterate(context), (ItemConsumer<? super Item>) item -> {
-                if (item instanceof NodeInfo) {
-                    copyOneNode(context, out, (NodeInfo) item, copyOptions);
-                } else {
-                    out.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
-                }
-            });
-
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
         return null;
     }
