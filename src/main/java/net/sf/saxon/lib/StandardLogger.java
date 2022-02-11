@@ -7,8 +7,14 @@
 
 package net.sf.saxon.lib;
 
+import net.sf.saxon.functions.AccessorFn;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.DayTimeDurationValue;
+import net.sf.saxon.value.NumericValue;
+
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.math.BigDecimal;
 
 /**
  * The default Logger used by Saxon on the Java platform. All messages are written by default
@@ -62,6 +68,7 @@ public class StandardLogger extends Logger {
         setPrintStream(new PrintStream(fileName));
         mustClose = true;
     }
+
 
     /**
      * Set the output destination for messages
@@ -129,6 +136,7 @@ public class StandardLogger extends Logger {
     public StreamResult asStreamResult() {
         return new StreamResult(writer);
     }
+
 
     /**
      * Output a message with a specified severity.

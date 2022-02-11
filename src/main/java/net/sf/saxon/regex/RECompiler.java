@@ -187,8 +187,8 @@ public class RECompiler {
      */
 
     static Operation trace(Operation base) {
-        if (TRACING && !(base instanceof Operation.OpTrace)) {
-            return new Operation.OpTrace(base);
+        if (TRACING && !(base instanceof OpTrace)) {
+            return new OpTrace(base);
         } else {
             return base;
         }
@@ -888,7 +888,7 @@ public class RECompiler {
         }
 
         // Return the instruction
-        return trace(new Operation.OpAtom(ub.toUnicodeString()));
+        return trace(new OpAtom(ub.toUnicodeString()));
     }
 
 
@@ -905,14 +905,14 @@ public class RECompiler {
             case '$':
                 if (isXPath) {
                     idx++;
-                    return trace(new Operation.OpEOL());
+                    return trace(new OpEOL());
                 }
                 break;
 
             case '^':
                 if (isXPath) {
                     idx++;
-                    return trace(new Operation.OpBOL());
+                    return trace(new OpBOL());
                 }
                 break;
 
@@ -926,11 +926,11 @@ public class RECompiler {
                     // in XSD, "." matches everything except \n and \r. See also bug 15594.
                     predicate = IntPredicateLambda.of(value -> value != '\n' && value != '\r');
                 }
-                return trace(new Operation.OpCharClass(predicate));
+                return trace(new OpCharClass(predicate));
 
             case '[':
                 CharacterClass range = parseCharacterClass();
-                return trace(new Operation.OpCharClass(range));
+                return trace(new OpCharClass(range));
 
             case '(':
                 return parseExpr(flags);
@@ -970,7 +970,7 @@ public class RECompiler {
                     if (capturingOpenParenCount <= backreference) {
                         syntaxError("Bad backreference");
                     }
-                    return trace(new Operation.OpBackReference(backreference));
+                    return trace(new OpBackReference(backreference));
 
                 } else if (esc instanceof IntSingletonSet) {
                     // We had a simple escape and we want to have it end up in
@@ -978,7 +978,7 @@ public class RECompiler {
                     idx = idxBeforeEscape;
 
                 } else {
-                    return trace(new Operation.OpCharClass(esc));
+                    return trace(new OpCharClass(esc));
                 }
                 break;
 
@@ -1034,12 +1034,12 @@ public class RECompiler {
                 }
 
 
-                if (ret instanceof Operation.OpBOL || ret instanceof Operation.OpEOL) {
+                if (ret instanceof OpBOL || ret instanceof OpEOL) {
                     // Pretty meaningless, but legal. If the quantifier allows zero occurrences, ignore the instruction.
                     // Otherwise, ignore the quantifier
                     if (quantifierType == '?' || quantifierType == '*' ||
                             (quantifierType == '{' && bracketMin == 0)) {
-                        return new Operation.OpNothing();
+                        return new OpNothing();
                     } else {
                         quantifierType = 0;
                     }
@@ -1091,21 +1091,21 @@ public class RECompiler {
 
         Operation result;
         if (max == 0) {
-            result = new Operation.OpNothing();
+            result = new OpNothing();
         } else if (min == 1 && max == 1) {
             return ret;
         } else if (greedy) {
             // Actually do the quantifier now
             if (ret.getMatchLength() == -1) {
-                result = trace(new Operation.OpRepeat(ret, min, max, true));
+                result = trace(new OpRepeat(ret, min, max, true));
             } else {
-                result = new Operation.OpGreedyFixed(ret, min, max, ret.getMatchLength());
+                result = new OpGreedyFixed(ret, min, max, ret.getMatchLength());
             }
         } else {
             if (ret.getMatchLength() == -1) {
-                result = new Operation.OpRepeat(ret, min, max, false);
+                result = new OpRepeat(ret, min, max, false);
             } else {
-                result = new Operation.OpReluctantFixed(ret, min, max, ret.getMatchLength());
+                result = new OpReluctantFixed(ret, min, max, ret.getMatchLength());
             }
         }
         return trace(result);
@@ -1136,7 +1136,7 @@ public class RECompiler {
 
         // If we don't run loop, make a nothing node
         if (current == null) {
-            return new Operation.OpNothing();
+            return new OpNothing();
         }
 
         return current;
@@ -1188,7 +1188,7 @@ public class RECompiler {
         if (branches.size() == 1) {
             op = branches.get(0);
         } else {
-            op = new Operation.OpChoice(branches);
+            op = new OpChoice(branches);
         }
 
         // Create an ending node (either a close paren or an OP_END)
@@ -1199,11 +1199,11 @@ public class RECompiler {
                 syntaxError("Missing close paren");
             }
             if (capturing) {
-                op = new Operation.OpCapture(op, group);
+                op = new OpCapture(op, group);
                 captures.add(closeParens);
             }
         } else {
-            op = makeSequence(op, new Operation.OpEndProgram());
+            op = makeSequence(op, new OpEndProgram());
         }
 
         // Return the node list
@@ -1211,25 +1211,25 @@ public class RECompiler {
     }
 
     private static Operation makeSequence(Operation o1, Operation o2) {
-        if (o1 instanceof Operation.OpSequence) {
-            if (o2 instanceof Operation.OpSequence) {
-                List<Operation> list1 = ((Operation.OpSequence)o1).getOperations();
-                List<Operation> list2 = ((Operation.OpSequence)o2).getOperations();
+        if (o1 instanceof OpSequence) {
+            if (o2 instanceof OpSequence) {
+                List<Operation> list1 = ((OpSequence)o1).getOperations();
+                List<Operation> list2 = ((OpSequence)o2).getOperations();
                 list1.addAll(list2);
                 return o1;
             }
-            List<Operation> l1 = ((Operation.OpSequence)o1).getOperations();
+            List<Operation> l1 = ((OpSequence)o1).getOperations();
             l1.add(o2);
             return o1;
-        } else if (o2 instanceof Operation.OpSequence) {
-            List<Operation> l2 = ((Operation.OpSequence)o2).getOperations();
+        } else if (o2 instanceof OpSequence) {
+            List<Operation> l2 = ((OpSequence)o2).getOperations();
             l2.add(0, o1);
             return o2;
         } else {
             List<Operation> list = new ArrayList<>(4);
             list.add(o1);
             list.add(o2);
-            return trace(new Operation.OpSequence(list));
+            return trace(new OpSequence(list));
         }
     }
 
@@ -1257,8 +1257,8 @@ public class RECompiler {
 
             // 'q' flag is set
             // Create a string node
-            Operation ret = new Operation.OpAtom(this.pattern);
-            Operation endNode = new Operation.OpEndProgram();
+            Operation ret = new OpAtom(this.pattern);
+            Operation endNode = new OpEndProgram();
             Operation seq = makeSequence(ret, endNode);
             return new REProgram(seq, capturingOpenParenCount, reFlags);
 
@@ -1332,13 +1332,13 @@ public class RECompiler {
      */
 
     public static boolean noAmbiguity(Operation op0, Operation op1, boolean caseBlind, boolean reluctant) {
-        if (op1 instanceof Operation.OpEndProgram) {
+        if (op1 instanceof OpEndProgram) {
             return !reluctant;
         }
-        if (op1 instanceof Operation.OpBOL || op1 instanceof Operation.OpEOL) {
+        if (op1 instanceof OpBOL || op1 instanceof OpEOL) {
             return true;
         }
-        if (op1 instanceof Operation.OpRepeat && ((Operation.OpRepeat)op1).min == 0) {
+        if (op1 instanceof OpRepeat && ((OpRepeat)op1).min == 0) {
             return false; //Bug 3429
         }
         CharacterClass c0 = op0.getInitialCharacterClass(caseBlind);

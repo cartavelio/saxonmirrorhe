@@ -8,6 +8,7 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.UnparsedTextURIResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.sxpath.XPathDynamicContext;
@@ -138,6 +139,32 @@ public class XPathSelector implements Iterable<XdmItem> {
     public URIResolver getURIResolver() {
         return dynamicContext.getURIResolver();
     }
+
+    /**
+     * Set an object that will be used to resolve URIs used in
+     * <code>fn:unparsed-text()</code> and related functions.
+     *
+     * @param resolver An object that implements the UnparsedTextURIResolver interface, or
+     *                 null.
+     * @since 11
+     */
+
+    public void setUnparsedTextResolver(UnparsedTextURIResolver resolver) {
+        dynamicContext.setUnparsedTextURIResolver(resolver);
+    }
+
+    /**
+     * Get the URI resolver used for <code>fn:unparsed-text()</code> and related functions.
+     *
+     * @return the user-supplied URI resolver if there is one, or the
+     * system-defined one otherwise
+     * @since 11
+     */
+
+    public UnparsedTextURIResolver getUnparsedTextURIResolver() {
+        return dynamicContext.getUnparsedTextURIResolver();
+    }
+
 
     /**
      * Set a callback to be used for reporting of run-time errors and warnings.
