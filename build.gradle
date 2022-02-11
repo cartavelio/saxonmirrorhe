@@ -346,8 +346,14 @@ apply from: "run-samples.gradle"
   ) {
     doLast {
       copy {
-        into "${buildDir}/releases/${release}j"
+        into "${buildDir}/releases/${release}j/lib"
         from jlineJar
+      }
+    }
+    doLast {
+      copy {
+        into "${buildDir}/releases/${release}j/lib"
+        from resolverJar
       }
     }
     doLast {
@@ -378,7 +384,7 @@ apply from: "run-samples.gradle"
       doLast {
         copy {
           from "${icu4jJar}"
-          into "${buildDir}/releases/${release}j"
+          into "${buildDir}/releases/${release}j/lib"
         }
       }
     }
@@ -979,6 +985,13 @@ task compile_function_library(dependsOn: ["eejCompile", "processResources"]) {
 
 // ============================================================
 
+// The jar Class-Path allows the jar to find dependent libraries
+// locally. These are for the libraries we ship with the product.
+def heJarClassPath = "lib/xmlresolver-${xmlresolverVersion}.jar lib/xmlresolver.jar "
+heJarClassPath += "lib/jline-${jlineVersion}.jar lib/jline.jar "
+def peeeJarClassPath = heJarClassPath + "lib/icu4j-${icu4jVersion}.jar lib/icu4j.jar lib"
+heJarClassPath += "lib"
+
 task hejJar(
   type: Jar,
   dependsOn: ["hej_MetaInf", "hejCompile", "compile_function_library"],
@@ -988,6 +1001,7 @@ task hejJar(
   manifest {
     attributes "Project-Name": "Saxon-HE"
     attributes "Main-Class": "net.sf.saxon.Transform"
+    attributes "Class-Path": heJarClassPath
   }
   from ("${buildDir}/services/saxon-he") {
     include "META-INF/**"
@@ -1052,6 +1066,7 @@ task pejJar(
   manifest {
     attributes "Project-Name": "Saxon-PE"
     attributes "Main-Class": "net.sf.saxon.Transform"
+    attributes "Class-Path": peeeJarClassPath
   }
   from ("${buildDir}/services/saxon-pe") {
     include "META-INF/**"
@@ -1109,6 +1124,7 @@ task eejJar(
   manifest {
     attributes "Project-Name": "Saxon-EE"
     attributes "Main-Class": "net.sf.saxon.Transform"
+    attributes "Class-Path": peeeJarClassPath
   }
   from ("${buildDir}/services/saxon-ee") {
     include "META-INF/**"
