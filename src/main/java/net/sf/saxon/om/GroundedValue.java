@@ -13,10 +13,10 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.UnfailingIterator;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * A value that exists in memory and that can be directly addressed
@@ -160,8 +160,8 @@ public interface GroundedValue extends Sequence {
         return Err.depictSequence(this).toString();
     }
 
-    default Iterable<? extends Item> asIterable() {
-        return SequenceTool.groundedValueAsIterable(this);
+    default @NotNull Iterable<? extends Item> asIterable() {
+        return new GroundedValueAsIterable<Item>(this);
     }
 
     /**
@@ -183,7 +183,7 @@ public interface GroundedValue extends Sequence {
      */
 
     default GroundedValue concatenate(GroundedValue... others) {
-        List<GroundedValue> c = new ArrayList<>();
+        ArrayList<GroundedValue> c = new ArrayList<>();
         c.add(this);
         Collections.addAll(c, others);
         return new Chain(c);

@@ -12,6 +12,7 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.transpile.CSharpDelegate;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.DayTimeDurationValue;
 import net.sf.saxon.value.NumericValue;
@@ -639,6 +640,8 @@ public class CommandLineOptions {
         }
     }
 
+    @FunctionalInterface
+    @CSharpDelegate(true)
     public interface ParamSetter {
         void setParam(QName qName, XdmValue value);
     }
@@ -684,7 +687,8 @@ public class CommandLineOptions {
     public void applyFileParams(Processor processor, Xslt30Transformer transformer) throws SaxonApiException {
         if (!paramFiles.isEmpty()) {
             Map<QName, XdmValue> params = new HashMap<>();
-            applyFileParameters(processor, params::put);
+            //noinspection Convert2MethodRef
+            applyFileParameters(processor, (k, v) -> params.put(k, v));
             transformer.setStylesheetParameters(params);
         }
     }

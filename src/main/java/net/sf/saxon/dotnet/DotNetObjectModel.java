@@ -281,21 +281,6 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
 
 
     /**
-     * Test whether this object model recognizes a particular kind of JAXP Source object,
-     * and if it does, send the contents of the document to a supplied Receiver, and return true.
-     * Otherwise, return false.
-     *
-     * @param source   a JAXP Source object
-     * @param receiver the Receiver that is to receive the data from the Source
-     * @return true if the data from the Source has been sent to the Receiver, false otherwise
-     */
-
-    @Override
-    public boolean sendSource(Source source, Receiver receiver) throws XPathException {
-        return false;
-    }
-
-    /**
      * Wrap or unwrap a node using this object model to return the corresponding Saxon node. If the supplied
      * source does not belong to this object model, return null
      *

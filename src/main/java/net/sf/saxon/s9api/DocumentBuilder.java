@@ -334,8 +334,7 @@ public class DocumentBuilder {
             options.setSchemaValidationMode(schemaValidator.isLax() ? Validation.LAX : Validation.STRICT);
             if (schemaValidator.getDocumentElementName() != null) {
                 QName qn = schemaValidator.getDocumentElementName();
-                options.setTopLevelElement(new StructuredQName(
-                        qn.getPrefix(), qn.getNamespaceURI(), qn.getLocalName()));
+                options.setTopLevelElement(qn.getStructuredQName());
             }
             if (schemaValidator.getDocumentElementType() != null) {
                 options.setTopLevelType(schemaValidator.getDocumentElementType());

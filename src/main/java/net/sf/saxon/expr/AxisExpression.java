@@ -13,6 +13,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AxisIterator;
 
 import net.sf.saxon.type.*;
@@ -620,6 +621,7 @@ public final class AxisExpression extends Expression {
      * Get a string representation of a name to use in diagnostics
      */
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     private static String getDiagnosticName(StructuredQName name, StaticContext env) {
         String uri = name.getURI();
         if (uri.equals("")) {

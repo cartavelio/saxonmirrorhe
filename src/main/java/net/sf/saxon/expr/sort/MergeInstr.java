@@ -40,6 +40,7 @@ import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -736,15 +737,13 @@ public class MergeInstr extends Instruction {
     }
 
     @CSharpInnerClass(outer=false)
-    public ItemOrderComparer getComparer(final SortKeyDefinitionList sKeys, final AtomicComparer[] comps) {
+    public Comparator<ObjectValue<ItemWithMergeKeys>> getComparer(final SortKeyDefinitionList sKeys, final AtomicComparer[] comps) {
         //noinspection Convert2Lambda
-        return new ItemOrderComparer() {
+        return new Comparator<ObjectValue<ItemWithMergeKeys>>() {
             @Override
-            public int compare(Item a, Item b) {
-                ObjectValue<ItemWithMergeKeys> aObj = (ObjectValue<ItemWithMergeKeys>) a;
-                ObjectValue<ItemWithMergeKeys> bObj = (ObjectValue<ItemWithMergeKeys>) b;
-                ItemWithMergeKeys aItem = aObj.getObject();
-                ItemWithMergeKeys bItem = bObj.getObject();
+            public int compare(ObjectValue<ItemWithMergeKeys> a, ObjectValue<ItemWithMergeKeys> b) {
+                ItemWithMergeKeys aItem = a.getObject();
+                ItemWithMergeKeys bItem = b.getObject();
 
                 for (int i = 0; i < sKeys.size(); i++) {
                     int val;

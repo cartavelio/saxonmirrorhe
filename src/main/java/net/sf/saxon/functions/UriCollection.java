@@ -14,6 +14,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.value.AnyURIValue;
 
 import java.io.Closeable;
@@ -46,6 +47,7 @@ public class UriCollection extends SystemFunction {
 
             @Override
             @CSharpModifiers(code={"public", "override"})
+            @CSharpSuppressWarnings("UnsafeIteratorConversion")
             public AnyURIValue next() {
                 if (sources.hasNext()) {
                     return new AnyURIValue(sources.next());

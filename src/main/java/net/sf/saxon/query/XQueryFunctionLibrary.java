@@ -7,14 +7,16 @@
 
 package net.sf.saxon.query;
 
-import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
-import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.om.*;
+import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
+import net.sf.saxon.functions.hof.UserFunctionReference;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -22,7 +24,6 @@ import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -280,13 +281,13 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
     /**
      * Get an iterator over the Functions defined in this module
      *
-     * @return an Iterator, whose items are {@link XQueryFunction} objects. It returns
+     * @return an Iterable, whose items are {@link XQueryFunction} objects. It returns
      *         all function known to this module including those imported from elsewhere; they
      *         can be distinguished by their namespace.
      */
 
-    public Iterator<XQueryFunction> getFunctionDefinitions() {
-        return functions.values().iterator();
+    public Iterable<XQueryFunction> getFunctionDefinitions() {
+        return functions.values();
     }
 
     /**

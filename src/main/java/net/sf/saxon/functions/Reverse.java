@@ -8,16 +8,23 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.ReversibleIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
+import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.SequenceExtent;
+
+import java.util.List;
 
 /**
  * Implement XPath function fn:reverse()
@@ -81,7 +88,13 @@ public class Reverse extends SystemFunction {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return SequenceTool.toLazySequence(getReverseIterator(arguments[0].iterate()));
+        SequenceExtent input;
+        if (arguments[0] instanceof SequenceExtent) {
+            input = (SequenceExtent)arguments[0];
+        } else {
+            input = SequenceExtent.from(arguments[0].iterate());
+        }
+        return SequenceTool.toLazySequence(input.reverseIterate());
     }
 
     /**
@@ -111,6 +124,55 @@ public class Reverse extends SystemFunction {
     @Override
     public String getStreamerName() {
         return "Reverse";
+    }
+
+    public static class ReverseListIterator implements UnfailingIterator, LastPositionFinder, ReversibleIterator {
+
+        private final java.util.ListIterator<? extends Item> listIter;
+        private final List<? extends Item> list;
+
+        public <T extends Item> ReverseListIterator(List<T> list) {
+            this.list = list;
+            this.listIter = list.listIterator(list.size());
+        }
+
+        /**
+         * Get the last position (that is, the number of items in the sequence). This method is
+         * non-destructive: it does not change the state of the iterator.
+         * The result is undefined if the next() method of the iterator has already returned null.
+         * This method must not be called unless the result of getProperties() on the iterator
+         * includes the bit setting {@link SequenceIteratorProperty#LAST_POSITION_FINDER}
+         *
+         * @return the number of items in the sequence
+         * @throws XPathException if an error occurs evaluating the sequence in order to determine
+         *                        the number of items
+         */
+        @Override
+        public int getLength() throws XPathException {
+            return list.size();
+        }
+
+        /**
+         * Get the next item in the sequence.
+         *
+         * @return the next Item. If there are no more items, return null.
+         */
+        @Override
+        public Item next() {
+            return listIter.hasPrevious() ? listIter.previous() : null;
+        }
+
+        /**
+         * Get a new SequenceIterator that returns the same items in reverse order.
+         * If this SequenceIterator is an AxisIterator, then the returned SequenceIterator
+         * must also be an AxisIterator.
+         *
+         * @return an iterator over the items in reverse order
+         */
+        @Override
+        public SequenceIterator getReverseIterator() {
+            return new ListIterator.Of<>(list);
+        }
     }
 }
 

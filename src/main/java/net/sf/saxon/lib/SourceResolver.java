@@ -8,6 +8,8 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Source;
@@ -18,11 +20,9 @@ import javax.xml.transform.Source;
  * part of the Configuration, and enables new kinds of Source to be recognized
  * beyond those that are natively recognized by Saxon.
  * <p>The task of the SourceResolver is to take any Source as input, and to return
- * a Source that has native support in Saxon: that is, one of the classes
- * StreamSource, SAXSource, DOMSource, {@link net.sf.saxon.om.NodeInfo},
- * or {@link net.sf.saxon.pull.PullSource}</p>
- *
- * @author Michael H. Kay
+ * an {@link ActiveSource} that knows how to deliver itself to a {@link Receiver}.
+ * This allows new kinds of Source to be introduced, provided they implement the
+ * {@link ActiveSource} interface.
  */
 
 public interface SourceResolver {
@@ -45,7 +45,7 @@ public interface SourceResolver {
      */
 
     /*@Nullable*/
-    Source resolveSource(Source source, Configuration config) throws XPathException;
+    ActiveSource resolveSource(Source source, Configuration config) throws XPathException;
 
 }
 

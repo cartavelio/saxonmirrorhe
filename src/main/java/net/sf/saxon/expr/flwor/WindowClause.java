@@ -17,6 +17,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.ItemType;
@@ -120,7 +121,7 @@ public class WindowClause extends Clause {
         return endConditionOp == null ? null : endConditionOp.getChildExpression();
     }
 
-
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public void setVariableBinding(int role, LocalVariableBinding binding) throws XPathException {
         for (Iterator<LocalVariableBinding> iter = windowVars.valueIterator(); iter.hasNext(); ) {
             if (iter.next().getVariableQName().equals(binding.getVariableQName())) {

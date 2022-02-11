@@ -12,6 +12,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.jaxp.ReceivingDestination;
 import net.sf.saxon.lib.InvalidityHandler;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -363,7 +364,7 @@ public abstract class SchemaValidator extends AbstractDestination {
                 setSystemId(input.getSystemId());
             }
             @Override
-            public void send(Receiver out) throws XPathException {
+            public void deliver(Receiver out, ParseOptions options) throws XPathException {
                 setDestination(new ReceivingDestination(out));
                 try {
                     validate(input);

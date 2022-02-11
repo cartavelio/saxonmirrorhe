@@ -21,11 +21,15 @@ import net.sf.saxon.lib.ModuleURIResolver;
 import net.sf.saxon.lib.StandardModuleURIResolver;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.pull.ActiveStAXSource;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.JavaRegularExpression;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.resource.ActiveSAXSource;
+import net.sf.saxon.resource.ActiveSource;
+import net.sf.saxon.resource.ActiveStreamSource;
 import net.sf.saxon.resource.StandardCollectionFinder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ExternalObjectType;
 import net.sf.saxon.xpath.JAXPXPathStaticContext;
@@ -35,8 +39,13 @@ import org.xml.sax.XMLReader;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.Result;
 import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -301,6 +310,44 @@ public class JavaPlatform implements Platform {
     public Source getParserSource(PipelineConfiguration pipe, StreamSource input, int validation,
                                   boolean dtdValidation) {
         return input;
+    }
+
+    /**
+     * Convert a Source to an ActiveSource. This method is present in the Platform
+     * because different Platforms accept different kinds of Source object.
+     *
+     * @param source A source object, typically the source supplied as the first
+     *               argument to {@link Transformer#transform(Source, Result)}
+     *               or similar methods.
+     * @param config The Configuration. This provides the SourceResolver with access to
+     *               configuration information; it also allows the SourceResolver to invoke the
+     *               resolveSource() method on the Configuration object as a fallback implementation.
+     * @return a source object that Saxon knows how to process. Return null if the Source object is not
+     * recognized
+     * @throws XPathException if the Source object is recognized but cannot be processed
+     */
+    @Override
+    public ActiveSource resolveSource(Source source, Configuration config) throws XPathException {
+        if (source instanceof ActiveSource) {
+            return (ActiveSource)source;
+        }
+        if (source instanceof SAXSource) {
+            if (((SAXSource)source).getXMLReader() == null) {
+                ((SAXSource) source).setXMLReader(config.getSourceParser());
+            }
+            return new ActiveSAXSource((SAXSource)source);
+        }
+        if (source instanceof StreamSource) {
+            return new ActiveStreamSource((StreamSource)source);
+        }
+        if (source instanceof StAXSource) {
+            try {
+                return ActiveStAXSource.fromStAXSource((StAXSource) source);
+            } catch (XMLStreamException e) {
+                throw new XPathException(e);
+            }
+        }
+        return null;
     }
 
     /**

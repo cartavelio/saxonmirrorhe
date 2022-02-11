@@ -8,8 +8,11 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.resource.ActiveSource;
+import net.sf.saxon.trans.XPathException;
 
-import javax.xml.transform.Source;
 import java.util.Iterator;
 
 /**
@@ -31,7 +34,7 @@ import java.util.Iterator;
  * than a document node.
  */
 
-public interface TreeInfo extends Source {
+public interface TreeInfo extends ActiveSource {
 
     /**
      * Get the NodeInfo object representing the node at the root of the tree, which will often
@@ -173,6 +176,7 @@ public interface TreeInfo extends Source {
      */
 
     Object getUserData(String key);
+
 
 }
 

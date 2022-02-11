@@ -25,6 +25,7 @@ import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceCodeInjector;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
@@ -118,8 +119,7 @@ public class QueryModule implements StaticContext {
         pd.setSchemaAware(isSchemaAware());
         packageData = pd;
 
-        for (Iterator<GlobalVariable> vars = sqc.iterateDeclaredGlobalVariables(); vars.hasNext(); ) {
-            GlobalVariable var = vars.next();
+        for (GlobalVariable var : sqc.iterateDeclaredGlobalVariables()) {
             declareVariable(var);
             pd.addGlobalVariable(var);
             var.setPackageData(pd);
@@ -843,16 +843,15 @@ public class QueryModule implements StaticContext {
      * @throws XPathException if compiling a global variable definition fails
      */
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public List<GlobalVariable> fixupGlobalVariables(SlotManager globalVariableMap) throws XPathException {
         List<GlobalVariable> varDefinitions = new ArrayList<>(20);
-        List<Iterator<GlobalVariable>> iters = new ArrayList<>();
-        iters.add(variables.values().iterator());
-        iters.add(libraryVariables.values().iterator());
+        List<Iterable<GlobalVariable>> iters = new ArrayList<>();
+        iters.add(variables.values());
+        iters.add(libraryVariables.values());
 
-
-        for (Iterator<GlobalVariable> iter : iters) {
-            while (iter.hasNext()) {
-                GlobalVariable var = iter.next();
+        for (Iterable<GlobalVariable> iter : iters) {
+            for (GlobalVariable var : iter) {
                 if (!varDefinitions.contains(var)) {
                     int slot = globalVariableMap.allocateSlotNumber(var.getVariableQName());
                     var.compile(getExecutable(), slot);
@@ -935,10 +934,7 @@ public class QueryModule implements StaticContext {
                     }
                 }
             }
-            Iterator<XQueryFunction> fiter = getLocalFunctionLibrary().getFunctionDefinitions();
-            while (fiter.hasNext()) {
-                XQueryFunction gf = fiter.next();
-
+            for (XQueryFunction gf : getLocalFunctionLibrary().getFunctionDefinitions()) {
                 Expression body = gf.getUserFunction().getBody();
                 if (body != null) {
                     List<Binding> vList = new ArrayList<>(10);

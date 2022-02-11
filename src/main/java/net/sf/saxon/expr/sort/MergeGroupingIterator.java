@@ -10,10 +10,7 @@ package net.sf.saxon.expr.sort;
 import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.AtomicArray;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -37,7 +34,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     private ObjectValue<ItemWithMergeKeys> nextItem;
     private List<Item> currentMembers;
     private Map<String, List<Item>> currentSourceMembers;
-    private final ItemOrderComparer comparer;
+    private final Comparator<? super ObjectValue<ItemWithMergeKeys>> comparer;
     private int position = 0;
     List<AtomicValue> compositeMergeKey;
     private final LastPositionFinder lastPositionFinder;
@@ -45,11 +42,11 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
     public MergeGroupingIterator(
             SequenceIterator p1,
-            ItemOrderComparer comp, LastPositionFinder lpf) throws XPathException {
+            Comparator<? super ObjectValue<ItemWithMergeKeys>> comp, LastPositionFinder lpf) throws XPathException {
         this.baseItr = p1;
         nextItem = (ObjectValue<ItemWithMergeKeys>)p1.next();
         if (nextItem != null) {
-            compositeMergeKey = ((ObjectValue<ItemWithMergeKeys>) nextItem).getObject().sortKeyValues;
+            compositeMergeKey = nextItem.getObject().sortKeyValues;
         }
         this.comparer = comp;
         this.lastPositionFinder = lpf;

@@ -7,13 +7,13 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.sort.ItemOrderComparer;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
+import java.util.Comparator;
 import java.util.EnumSet;
 
 /**
@@ -28,7 +28,7 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
     private final SequenceIterator e2;
     /*@Nullable*/ private NodeInfo nextNode1 = null;
     private NodeInfo nextNode2 = null;
-    private final ItemOrderComparer comparer;
+    private final Comparator<? super NodeInfo> comparer;
 
     /**
      * Create the iterator. The two input iterators must return nodes in document
@@ -42,7 +42,7 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
      */
 
     public UnionEnumeration(SequenceIterator p1, SequenceIterator p2,
-                            ItemOrderComparer comparer) throws XPathException {
+                            Comparator<? super NodeInfo> comparer) throws XPathException {
         this.e1 = p1;
         this.e2 = p2;
         this.comparer = comparer;

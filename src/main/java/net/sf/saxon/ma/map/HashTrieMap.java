@@ -14,6 +14,7 @@ import net.sf.saxon.ma.trie.Tuple2;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -164,6 +165,7 @@ public class HashTrieMap extends MapItem {
      * @return true if and only if the size of the map is zero
      */
     @Override
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public boolean isEmpty() {
         return entries == 0 || !imap.iterator().hasNext();
     }
@@ -401,6 +403,7 @@ public class HashTrieMap extends MapItem {
             final Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> baseIter = imap.iterator();
 
             @Override
+            @CSharpSuppressWarnings("UnsafeIteratorConversion")
             public AtomicValue next() {
                 if (baseIter.hasNext()) {
                     return baseIter.next()._2.key;
@@ -423,6 +426,7 @@ public class HashTrieMap extends MapItem {
         //noinspection Convert2Lambda
         return new Iterable<KeyValuePair>() {
             @Override
+            @CSharpSuppressWarnings("UnsafeIteratorConversion")
             public Iterator<KeyValuePair> iterator() {
                 return new Iterator<KeyValuePair>() {
                     final Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> baseIter = imap.iterator();
@@ -442,7 +446,7 @@ public class HashTrieMap extends MapItem {
                         baseIter.remove();
                     }
                 };
-            };
+            }
         };
     }
 

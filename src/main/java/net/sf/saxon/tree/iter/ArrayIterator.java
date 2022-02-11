@@ -8,6 +8,7 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
+import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.om.*;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -224,7 +225,7 @@ public abstract class ArrayIterator implements UnfailingIterator,
 
         @Override
         public SequenceIterator getReverseIterator() {
-            return new ListIterator.Of<T>(ReverseList.of(Arrays.asList(items)));
+            return new Reverse.ReverseListIterator(Arrays.asList(items));
         }
 
         /**

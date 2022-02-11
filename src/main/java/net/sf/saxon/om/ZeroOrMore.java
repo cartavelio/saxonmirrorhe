@@ -9,6 +9,7 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -145,7 +146,7 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
 
     /*@NotNull*/
     public UnfailingIterator reverseIterate() {
-        return new ListIterator.Of<>(ReverseList.of(value));
+        return new Reverse.ReverseListIterator(value);
     }
 
     /**
@@ -226,18 +227,6 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
             return this;
         }
     }
-
-    /**
-     * Get the contents of this value in the form of a Java {@link Iterable},
-     * so that it can be used in a for-each expression
-     * @return an Iterable containing the same sequence of items
-     */
-
-    @Override
-    public Iterable<T> asIterable() {
-        return value;
-    }
-
 
     /**
      * Get an iterator (a Java {@link Iterator}) over the items in this sequence.

@@ -9,9 +9,11 @@ package net.sf.saxon.sapling;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.ma.trie.ImmutableList;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
+import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
@@ -34,7 +36,7 @@ import javax.xml.transform.Source;
  * stated to the contrary.</p>
  */
 
-public class SaplingDocument extends SaplingNode implements Source {
+public class SaplingDocument extends SaplingNode implements ActiveSource {
 
     private String baseUri;
     private ImmutableList<SaplingNode> reversedChildren = ImmutableList.empty();
@@ -120,14 +122,14 @@ public class SaplingDocument extends SaplingNode implements Source {
     }
 
     @Override
-    public void sendTo(Receiver receiver) throws XPathException {
+    public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
         receiver = new NamespaceReducer(receiver);
         receiver.open();
         receiver.setSystemId(baseUri);
         receiver.startDocument(ReceiverOption.NONE);
         ImmutableList<SaplingNode> children = reversedChildren.reverse();
         for (SaplingNode node : children) {
-            node.sendTo(receiver);
+            node.deliver(receiver, options);
         }
         receiver.endDocument();
         receiver.close();
@@ -147,7 +149,7 @@ public class SaplingDocument extends SaplingNode implements Source {
         TreeModel treeModel = config.getParseOptions().getModel();
         Builder builder = treeModel.makeBuilder(pipe);
         builder.open();
-        sendTo(builder);
+        deliver(builder, config.getParseOptions());
         builder.close();
         return builder.getCurrentRoot();
     }
@@ -192,7 +194,7 @@ public class SaplingDocument extends SaplingNode implements Source {
     public void send(Processor processor, Destination destination) throws SaxonApiException {
         try {
             PipelineConfiguration pipe = processor.getUnderlyingConfiguration().makePipelineConfiguration();
-            sendTo(destination.getReceiver(pipe, new SerializationProperties()));
+            deliver(destination.getReceiver(pipe, new SerializationProperties()), null);
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }

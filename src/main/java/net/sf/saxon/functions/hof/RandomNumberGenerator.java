@@ -27,7 +27,7 @@ import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -92,7 +92,7 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
             Sequence input = arguments[0];
             SequenceIterator iterator = input.iterate();
             Item item;
-            final List<Item> output = new LinkedList<>();
+            final List<Item> output = new ArrayList<>();
             Random random = new Random(nextSeed);
             while ((item = iterator.next()) != null) {
                 int p = random.nextInt(output.size()+1);

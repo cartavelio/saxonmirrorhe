@@ -11,9 +11,11 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -22,7 +24,6 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import org.xml.sax.Locator;
 
-import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
 
 /**
@@ -54,7 +55,7 @@ import javax.xml.transform.SourceLocator;
  * a new implementation of this interface.
  */
 
-public interface NodeInfo extends Source, Item, Location {
+public interface NodeInfo extends ActiveSource, Item, Location {
 
     /**
      * Get information about the tree to which this NodeInfo belongs
@@ -508,7 +509,7 @@ public interface NodeInfo extends Source, Item, Location {
      *                    (or that it is self-opening), and that it is closed after use.
      * @param copyOptions a selection of the options defined in {@link CopyOptions}
      * @param locationId  If non-null, identifies the location of the instruction
-     *                    that requested this copy. If zero, indicates that the location information
+     *                    that requested this copy. If null, indicates that the location information
      *                    is not available
      * @throws XPathException if any downstream error occurs
      * @throws IllegalArgumentException if the node is an attribute or namespace node
@@ -518,6 +519,16 @@ public interface NodeInfo extends Source, Item, Location {
         Navigator.copy(this, out, copyOptions, locationId);
     }
 
+    /**
+     * Implement the {@link ActiveSource} interface by delivering the document to a
+     * {@link Receiver}
+     * @throws XPathException if the receiver reports a failure, for example a validation failure
+     */
+
+    @Override
+    default void deliver(Receiver receiver, ParseOptions options) throws XPathException {
+        Navigator.copy(this, receiver, CopyOptions.ALL_NAMESPACES|CopyOptions.TYPE_ANNOTATIONS, Loc.NONE);
+    }
 
     /**
      * Get all namespace declarations and undeclarations defined on this element.

@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
@@ -92,6 +93,8 @@ public abstract class SequenceExtent implements GroundedValue {
         }
     }
 
+    public abstract UnfailingIterator reverseIterate();
+
 
     public static class Of<T extends Item> extends SequenceExtent {
 
@@ -132,56 +135,6 @@ public abstract class SequenceExtent implements GroundedValue {
             items = ext.items.subList(start, start+length);
         }
 
-
-
-
-
-        //    /**
-        //     * Factory method to make a GroundedValue holding the contents of any SequenceIterator.
-        //     *
-        //     * @param iter a Sequence iterator that may or may not be consumed to deliver the items in the sequence.
-        //     *             The iterator must be positioned at the start.
-        //     * @return a GroundedValue holding the items delivered by the SequenceIterator. If the
-        //     *         sequence is empty the result will be an instance of {@link EmptySequence}. If it is of length
-        //     *         one, the result will be an {@link Item}. In all other cases, it will be an instance of
-        //     *         {@link SequenceExtent}.
-        //     * @throws net.sf.saxon.trans.XPathException
-        //     *          if an error occurs processing the values from
-        //     *          the iterator.
-        //     * @deprecated since 9.9: use {@link SequenceIterator#materialize()}
-        //     */
-        //
-        //    public static GroundedValue makeSequenceExtent(SequenceIterator iter) throws XPathException {
-        //        return iter.materialize();
-        //    }
-
-        //    /**
-        //     * Factory method to make a GroundedValue holding the contents of any SequenceIterator.
-        //     *
-        //     * @param iter a Sequence iterator that may or may not be consumed to deliver the items in the sequence.
-        //     *             The iterator must be positioned at the start.
-        //     * @return a GroundedValue holding the items delivered by the SequenceIterator. If the
-        //     * sequence is empty the result will be an instance of {@link EmptySequence}. If it is of length
-        //     * one, the result will be an {@link Item}. In other cases, the actual implementation class
-        //     * is not defined.
-        //     * <p>This method is intended primarily for internal use. For external applications, calling
-        //     * {@link SequenceIterator#materialize()} is preferable, because it recognizes cases that can
-        //     * be optimized (notably, cases where the iterator is already backed by an array or list in memory).</p>
-        //     *
-        //     * @throws net.sf.saxon.trans.XPathException if an error occurs processing the values from
-        //     *                                           the iterator.
-        //     * @deprecated since 9.9: use {@link SequenceIterator#materialize()}
-        //     */
-        //
-        //    public static GroundedValue fromIterator(SequenceIterator iter) throws XPathException {
-        //        return new SequenceExtent(iter).reduce();
-        //    }
-
-
-
-
-
-
         /**
          * Return an iterator over this sequence.
          *
@@ -203,7 +156,7 @@ public abstract class SequenceExtent implements GroundedValue {
 
         /*@NotNull*/
         public UnfailingIterator reverseIterate() {
-            return new ListIterator.Of<>(ReverseList.of(items));
+            return new Reverse.ReverseListIterator(items);
         }
 
         /**
@@ -346,18 +299,6 @@ public abstract class SequenceExtent implements GroundedValue {
             } else {
                 return this;
             }
-        }
-
-        /**
-         * Get the contents of this value in the form of a Java {@link java.lang.Iterable},
-         * so that it can be used in a for-each expression
-         *
-         * @return an Iterable containing the same sequence of items
-         */
-
-        @Override
-        public Iterable<T> asIterable() {
-            return items;
         }
 
 

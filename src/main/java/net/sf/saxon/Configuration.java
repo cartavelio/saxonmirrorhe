@@ -25,7 +25,6 @@ import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.PatternParser;
-import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
@@ -35,7 +34,6 @@ import net.sf.saxon.resource.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.Xslt30Transformer;
-import net.sf.saxon.sapling.SaplingDocument;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.charcode.CharacterSetFactory;
@@ -67,10 +65,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stax.StAXSource;
-import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -2713,7 +2707,7 @@ public class Configuration implements SourceResolver, NotationSet {
             reportParserDetails(parser);
         }
         try {
-            Sender.configureParser(parser);
+            ActiveSAXSource.configureParser(parser);
         } catch (XPathException err) {
             throw new TransformerFactoryConfigurationError(err);
         }
@@ -2911,7 +2905,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws net.sf.saxon.type.SchemaException if an error occurs
      */
 
-    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, Collection<String> schemaLocations, String expected)
+    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, String expected)
             throws SchemaException {
         needEnterpriseEdition();
     }
@@ -3994,38 +3988,49 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /*@Nullable*/
     @Override
-    public Source resolveSource(Source source, Configuration config) throws XPathException {
+    public ActiveSource resolveSource(Source source, Configuration config) throws XPathException {
+        if (source instanceof ActiveSource) {
+            return (ActiveSource) source;
+        }
         if (source instanceof AugmentedSource) {
-            return source;
-        }
-        if (source instanceof StreamSource) {
-            return source;
-        }
-        if (source instanceof SAXSource) {
-            return source;
-        }
-        //#if CSHARP==false
-        if (source instanceof DOMSource) {
-            return source;
-        }
-        if (source instanceof StAXSource) {
-            return source;
-        }
-        if (source instanceof SaplingDocument) {
-            return source;
-        }
-        //#endif
-        if (source instanceof NodeInfo) {
-            return source;
-        }
-        if (source instanceof PullSource) {
-            return source;
-        }
-        if (source instanceof EventSource) {
-            return source;
+            return new ActiveSource() {
+                @Override
+                public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
+                    resolveSource(((AugmentedSource)source).getContainedSource(), config)
+                            .deliver(receiver, ((AugmentedSource) source).getParseOptions());
+                }
+
+                @Override
+                public void setSystemId(String systemId) {
+                    source.setSystemId(systemId);
+                }
+
+                @Override
+                public String getSystemId() {
+                    return source.getSystemId();
+                }
+            };
         }
 
+        // Try delegating to the Platform for platform-specific parsing strategies
+        ActiveSource activeSource = Version.platform.resolveSource(source, config);
+        if (activeSource != null) {
+            return activeSource;
+        }
+
+        // Try delegating to registered object models to see if the source is recognised
+        //#if CSHARP==false
+        List<ExternalObjectModel> externalObjectModels = config.getExternalObjectModels();
+        for (ExternalObjectModel model : externalObjectModels) {
+            ActiveSource a = model.getActiveSource(source);
+            if (a != null) {
+                return a;
+            }
+        }
+        //#endif
+
         return null;
+
     }
 
     /**

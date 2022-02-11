@@ -8,13 +8,14 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
 
+import java.util.Comparator;
 import java.util.EnumSet;
 
 /**
@@ -31,7 +32,7 @@ public class MergeIterator implements
     private final SequenceIterator e2;
     private ObjectValue<ItemWithMergeKeys> nextItem1 = null;
     private ObjectValue<ItemWithMergeKeys> nextItem2 = null;
-    private final ItemOrderComparer comparer;
+    private final Comparator<ObjectValue<ItemWithMergeKeys>> comparer;
 
     /**
      * Create the iterator. The two input iterators must return nodes in merge key
@@ -46,7 +47,7 @@ public class MergeIterator implements
 
     public MergeIterator(SequenceIterator /*<ObjectValue<ItemWithMergeKeys>>*/ p1,
                          SequenceIterator /*<ObjectValue<ItemWithMergeKeys>>*/ p2,
-                         ItemOrderComparer comparer) throws XPathException {
+                         Comparator<ObjectValue<ItemWithMergeKeys>> comparer) throws XPathException {
         this.e1 = p1;
         this.e2 = p2;
         this.comparer = comparer;
