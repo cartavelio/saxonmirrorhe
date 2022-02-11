@@ -1836,6 +1836,26 @@ public class PackageLoaderHE implements IPackageLoader {
                               actions.toArray(new Expression[0]));
         });
 
+        eMap.put("coercedFn", (loader, element) -> {
+            ItemType type = loader.parseItemTypeAttribute(element, "type");
+            Expression target = loader.getFirstChildExpression(element);
+            Function targetFn;
+            CoercedFunction coercedFn;
+            if (target instanceof UserFunctionReference) {
+                coercedFn = new CoercedFunction((SpecificFunctionType) type);
+                final CoercedFunction coercedFn2 = coercedFn;
+                final SymbolicName name = ((UserFunctionReference) target).getSymbolicName();
+                loader.completionActions.add(() -> coercedFn2.setTargetFunction(loader.userFunctions.get(name)));
+            } else if (target instanceof Literal) {
+                targetFn = (Function) ((Literal) target).getGroundedValue();
+                coercedFn = new CoercedFunction(targetFn, (SpecificFunctionType) type);
+            } else {
+                throw new AssertionError();
+            }
+            return Literal.makeLiteral(coercedFn);
+        });
+
+
         eMap.put("comment", (loader, element) -> {
             Expression select = loader.getFirstChildExpression(element);
             Comment inst = new Comment();
@@ -2062,7 +2082,7 @@ public class PackageLoaderHE implements IPackageLoader {
             String base = element.getAttributeValue("", "base");
             String constantText = element.getAttributeValue("", "text");
             Expression body = loader.getFirstChildExpression(element);
-            DocumentInstr inst = new DocumentInstr(textOnly, StringView.tidy(constantText));
+            DocumentInstr inst = new DocumentInstr(textOnly, constantText == null ? null : StringView.tidy(constantText));
             inst.setContentExpression(body);
             inst.setValidationAction(validation, schemaType);
             return inst;
@@ -3503,8 +3523,8 @@ public class PackageLoaderHE implements IPackageLoader {
         } else if (call instanceof UserFunctionCall) {
             ((UserFunctionCall) call).setFunction((UserFunction) c.getActor());
             ((UserFunctionCall) call).setStaticType(((UserFunction) c.getActor()).getResultType());
-//            } else if (call instanceof UserFunctionReference) {
-//                ((UserFunctionReference) call).setFunction((UserFunction) c.getActor());
+        } else if (call instanceof UserFunctionReference) {
+            ((UserFunctionReference) call).setFunction((UserFunction) c.getActor());
         } else if (call instanceof CallTemplate) {
             ((CallTemplate) call).setTargetTemplate((NamedTemplate) c.getActor());
         } else if (call instanceof UseAttributeSet) {

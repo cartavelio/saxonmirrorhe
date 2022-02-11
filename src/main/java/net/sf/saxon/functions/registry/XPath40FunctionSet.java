@@ -51,6 +51,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.SINGLE_BOOLEAN);
 
+        SpecificFunctionType ft = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ITEM},
+                SequenceType.ATOMIC_SEQUENCE);
+
         register("all", 2, SefFunction.class, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, predicate, ONE, null);
@@ -62,15 +66,17 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null);
 
-        SpecificFunctionType ft = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM},
-                SequenceType.ATOMIC_SEQUENCE);
-
         register("highest", 3, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null);
 
+        register("identity", 1, SefFunction.class, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null);
+
+        register("index-where", 2, SefFunction.class, BuiltInAtomicType.INTEGER, STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate, ONE, null);
 
         register("in-scope-namespaces", 1, SefFunction.class, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, NodeKindTest.ELEMENT, STAR, null);
@@ -105,6 +111,25 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null);
+
+        register("range", 2, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate, OPT, null);
+
+        register("range", 3, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate, OPT, null)
+                .arg(2, predicate, OPT, null);
+
+        register("range", 4, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate, OPT, null)
+                .arg(2, predicate, OPT, null)
+                .arg(3, MapType.ANY_MAP_TYPE,ONE, null);
+
+        register("slice", 2, SefFunction.class, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
+                .arg(1, MapType.ANY_MAP_TYPE, ONE, null);   // TODO: define a record type
 
         register("some", 2, SefFunction.class, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
