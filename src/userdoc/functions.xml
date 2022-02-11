@@ -5861,9 +5861,9 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.0.</p>
+        <p>Available since Saxon 9.0. Not available in Saxon-CS.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <details>
         <div>
           <p>This function takes as input a string containing an XQuery query, and produces as
@@ -6242,9 +6242,9 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 11.0</p>
+        <p>Available since Saxon 11.</p>
       </status>
-      <saxon-edition>EE</saxon-edition>
+      <saxon-edition>EE 11</saxon-edition>
       <details>
         <div>
           <p>If the supplied string is a valid NCName, it is returned unchanged.</p>
@@ -6268,6 +6268,7 @@
           
         </div>
       </details>
+      <see-also name="unescape-NCName" namespace="http://saxon.sf.net/"/>
     </function>
     
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -6940,7 +6941,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <status>
         <p>Available since Saxon 9.7. Not available in Saxon-CS.</p>
       </status>
-      <saxon-edition>EE 9.7</saxon-edition>
+      <saxon-edition platform="J">EE 9.7</saxon-edition>
       <details>
         <div>
           <p>This function tests whether a supplied attribute node is present as a result of
@@ -7222,9 +7223,9 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.5. Applicable to XSLT only.</p>
+        <p>Available since Saxon 9.5. Applicable to XSLT only. Not available in Saxon-CS.</p>
       </status>
-      <saxon-edition>PE/EE 9.5</saxon-edition>
+      <saxon-edition platform="J">PE/EE 9.5</saxon-edition>
       <details>
         <div>
           <p>To use this function, it is first necessary to declare a key as a range key, which can
@@ -7277,7 +7278,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <status>
         <p>Available since Saxon 9.0; revised in Saxon 9.2. Not available in Saxon-CS.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <details>
         <div>
 
@@ -8171,9 +8172,9 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 10. Not supported in Saxon-CS.</p>
+        <p>Available since Saxon 10. Not available in Saxon-CS.</p>
       </status>
-      <saxon-edition>PE/EE 10</saxon-edition>
+      <saxon-edition platform="J">PE/EE 10</saxon-edition>
       <details>
         <div>
           <p>If the <code>$input</code> argument is an empty sequence, the result is an empty sequence.</p>
@@ -8319,11 +8320,11 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
         </proto>
       </signatures>
       <status>
-        <p>Available since before Saxon 8.0. This function is obsolescent; applications should use
+        <p>Available since before Saxon 8.0. This function is dropped in Saxon 11; applications should use
           the XPath 3.0 <a href="/functions/fn/path" class="bodylink code">fn:path()</a> function in
           preference.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition>PE/EE REMOVED_SINCE_11</saxon-edition>
       <details>
         <div>
           <p>The first version of the function (with no arguments) is equivalent to supplying
@@ -8455,10 +8456,10 @@ return ....
       </signatures>
       <status>
         <p>Available since Saxon 9.1. The function is available both in XQuery and in XSLT.
-        Not available with Saxon-CS. The function is obsolescent, replaced by the new function
+        Not available in Saxon-CS. The function is obsolescent, replaced by the new function
         <code>saxon:xquery()</code>.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <details>
         <div>
           <p>This function takes as input a compiled XQuery query, and runs the query, returning the
@@ -10205,9 +10206,9 @@ return saxon:transform($splitter, $results)]]></samp>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 11.0</p>
+        <p>Available since Saxon 11.</p>
       </status>
-      <saxon-edition>EE</saxon-edition>
+      <saxon-edition>EE 11</saxon-edition>
       <details>
         <div>
           <p>If the supplied string is valid according to the escaping rules of the <code>saxon:escape-NCName</code>
@@ -10229,6 +10230,7 @@ return saxon:transform($splitter, $results)]]></samp>
           
         </div>
       </details>
+      <see-also name="escape-NCName" namespace="http://saxon.sf.net/"/>
     </function>
     
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -10466,7 +10468,7 @@ return saxon:transform($splitter, $results)]]></samp>
       <status>
         <p>Available since Saxon 11. The function is available both in XQuery and in XSLT.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition>PE/EE 11</saxon-edition>
       <details>
         <div>
           <p>This function takes as input an XQuery query, and returns a function item,

@@ -24,7 +24,7 @@
             name to be provided.</p>
       </status>
       <xpath>3.1</xpath>
-      <saxon-edition>9.9 PE/EE J</saxon-edition>
+      <saxon-edition platform="J">9.9 PE/EE</saxon-edition>
       <details>
          <p>Returns an external object representing a connection to a SQL database. This object is used as the first
             argument of other functions such as <code>sql:query</code>, <code>sql:insert</code>, etc.</p>
@@ -130,7 +130,7 @@
             are used.</p>
       </status>
       <xpath>3.1</xpath>
-      <saxon-edition>9.9 PE/EE J</saxon-edition>
+      <saxon-edition platform="J">9.9 PE/EE</saxon-edition>
       <details>
          <p>The function executes a SQL DELETE statement, and returns no result.</p>
          
@@ -167,7 +167,7 @@
             are used.</p>
       </status>
       <xpath>3.1</xpath>
-      <saxon-edition>9.9 PE/EE J</saxon-edition>
+      <saxon-edition platform="J">9.9 PE/EE</saxon-edition>
       <details>
          <p>The function executes a SQL statement, and returns no result.</p>
          
@@ -207,7 +207,7 @@
             are used.</p>
       </status>
       <xpath>3.1</xpath>
-      <saxon-edition>9.9 PE/EE J</saxon-edition>
+      <saxon-edition platform="J">9.9 PE/EE</saxon-edition>
       <details>
          <p>The function executes a SQL INSERT statement (adding a new row to a table), and returns no result.</p>
          
@@ -253,7 +253,7 @@
             returning no result.</p>
       </description>
       <xpath>3.1</xpath>
-      <saxon-edition>9.9 PE/EE J</saxon-edition>
+      <saxon-edition platform="J">9.9 PE/EE</saxon-edition>
       <details>
          <p>The function prepares a SQL statement for execution. The statement will typically be one that does not return
             a result, but which uses question marks as place-holders for parameters, for example <code>INSERT INTO EMP
@@ -296,7 +296,7 @@
          <p>Prepares a SQL query for execution, returning a function which can be called with parameters to execute the query.</p>
       </description>
       <xpath>3.1</xpath>
-      <saxon-edition>9.9 PE/EE J</saxon-edition>
+      <saxon-edition platform="J">9.9 PE/EE</saxon-edition>
       <details>
          <p>The function prepares a SQL query for execution. The query will typically be a SQL SELECT statement using question marks
             as place-holders for parameters, for example <code>SELECT * FROM EMP WHERE EMP-ID = ?</code>. A call on
@@ -361,7 +361,7 @@
             are used.</p>
       </status>
       <xpath>3.1</xpath>
-      <saxon-edition>9.9 PE/EE J</saxon-edition>
+      <saxon-edition platform="J">9.9 PE/EE</saxon-edition>
       <details>
          <p>The function executes a SQL query. For convenience the query is split across three arguments <code>$table</code>,
          <code>$columns</code> and <code>$predicate</code> but the function simply concatenates these together to form
@@ -416,7 +416,7 @@
             are used.</p>
       </status>
       <xpath>3.1</xpath>
-      <saxon-edition>9.9 PE/EE J</saxon-edition>
+      <saxon-edition platform="J">9.9 PE/EE</saxon-edition>
       <details>
          <p>The function executes a SQL UPDATE statement, and returns no result.</p>
          

@@ -80,7 +80,7 @@
                 
                 <aside>
                     <xsl:value-of select="fc:specs(in-spec)"/>
-                    <xsl:value-of select="fc:edition((../../saxon-edition,$default.saxon,'default')[1])"/>
+                    <xsl:value-of select="fc:edition((string-join((../../saxon-edition, ../../saxon-edition/@platform), ' '),$default.saxon,'default')[1])"/>
                 </aside>
                 
                 
