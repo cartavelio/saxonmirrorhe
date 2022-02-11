@@ -486,6 +486,26 @@ public class Processor implements Configuration.ApiProvider {
         }
     }
 
+    /**
+     * Register a specific URI and bind it to a specific ResourceCollection. A collection that is
+     * registered in this way will be returned prior to calling any registered {@link CollectionFinder}.
+     * This method should only be used while the configuration is being initialized for use;
+     * the effect of adding or replacing collections dynamically while a configuration is in use
+     * is undefined.
+     *
+     * <p>Registered collections take priority over any user-supplied <code>CollectionFinder</code>;
+     * if a collection URI has been registered, then it is used before the user-supplied
+     * <code>CollectionFinder</code> is invoked.</p>
+     *
+     * @param collectionURI the collection URI to be registered. Must not be null.
+     * @param collection    the ResourceCollection to be associated with this URI. Must not be null.
+     * @since 11.0
+     */
+
+    public void registerCollection(String collectionURI, ResourceCollection collection) {
+        config.registerCollection(collectionURI, collection);
+    }
+
 
     /**
      * Get the underlying {@link Configuration} object that underpins this Processor. This method

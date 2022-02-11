@@ -74,7 +74,7 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
     /**
      * Get the string value as a String. Returns the QName as a lexical QName, retaining the original
      * prefix if available.
-     * @return
+     * @return the value converted to a string
      */
 
     @Override
@@ -173,17 +173,6 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
     public int identityHashCode() {
         return qName.identityHashCode();
     }
-
-//    /**
-//     * The toString() method returns the name in the form QName("uri", "local")
-//     *
-//     * @return the name in in the form QName("uri", "local")
-//     */
-//
-//    /*@NotNull*/
-//    public String toString() {
-//        return "QName(\"" + getNamespaceURI() + "\", \"" + getLocalName() + "\")";
-//    }
 
     /**
      * The show() method returns the name in the form QName("uri", "local")
