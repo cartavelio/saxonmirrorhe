@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.str;
 
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
@@ -12,9 +19,9 @@ import java.util.function.IntPredicate;
 
 public class Slice24 extends UnicodeString {
 
-    private byte[] bytes;
-    private int start;
-    private int end;
+    private final byte[] bytes;
+    private final int start;
+    private final int end;
     private int cachedHash;
 
     /**
