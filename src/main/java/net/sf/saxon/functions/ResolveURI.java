@@ -275,11 +275,10 @@ public class ResolveURI extends SystemFunction {
                 } catch (URISyntaxException e) {
                     throw failure(base, "Invalid base URI: " + e.getMessage());
                 }
-                if (baseURI.getFragment() != null) {
-                    int hash = base.indexOf('#');
-                    if (hash >= 0) {
-                        base = base.substring(0, hash);
-                    }
+
+                int hash = base.indexOf('#');
+                if (hash >= 0) {
+                    base = base.substring(0, hash);
                     try {
                         baseURI = new URI(base);
                         checker.checkThoroughly(baseURI);
@@ -287,13 +286,19 @@ public class ResolveURI extends SystemFunction {
                         throw failure(base, "Invalid base URI: " + e.getMessage());
                     }
                 }
+
+                URI absOrRel;
                 try {
-                    URI uri = absoluteOrRelativeURI(relativeURI);   // for validation only
-                    checker.checkThoroughly(uri);
+                    absOrRel = absoluteOrRelativeURI(relativeURI);   // for validation only
+                    checker.checkThoroughly(absOrRel);
                 } catch (URISyntaxException e) {
                     throw failure(base, "Invalid relative URI: " + e.getMessage());
                 }
-                absoluteURI = relativeURI.isEmpty() ? baseURI : baseURI.resolve(relativeURI);
+                if (absOrRel.isAbsolute()) {
+                    absoluteURI = absOrRel;
+                } else {
+                    absoluteURI = relativeURI.isEmpty() ? baseURI : baseURI.resolve(relativeURI);
+                }
             }
         } catch (IllegalArgumentException err0) {
             // can be thrown by resolve() when given a bad URI

@@ -13,8 +13,9 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.type.ValidationException;
 import org.xml.sax.SAXParseException;
@@ -483,7 +484,7 @@ public class StandardErrorReporter
                 if (!(isSAXParseException(e))) {
                     if (e instanceof RuntimeException) {
                         StringWriter sw = new StringWriter();
-                        e.printStackTrace(new PrintWriter(sw));
+                        appendStackTrace(e, sw);
                         sb.append('\n').append(sw);
                     } else {
                         sb.append(". Caused by ").append(e.getClass().getName());
@@ -497,6 +498,11 @@ public class StandardErrorReporter
             }
             return sb.toString();
         }
+    }
+
+    @CSharpReplaceBody(code="sw.WriteLine(e.StackTrace);")
+    private void appendStackTrace(Throwable e, StringWriter sw) {
+        e.printStackTrace(new PrintWriter(sw));
     }
 
     @SuppressWarnings({"", "PointlessBooleanExpression"})
