@@ -8,7 +8,6 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.TypeHierarchy;
 
 import java.util.Objects;
@@ -61,13 +60,9 @@ class ConstructedItemType extends ItemType {
      */
 
     @Override
-    public boolean matches(XdmItem item) throws SaxonApiUncheckedException {
-        try {
-            TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
-            return underlyingType.matches(item.getUnderlyingValue(), th);
-        } catch (XPathException e) {
-            throw new SaxonApiUncheckedException(e);
-        }
+    public boolean matches(XdmItem item) {
+        TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
+        return underlyingType.matches(item.getUnderlyingValue(), th);
     }
 
     /**

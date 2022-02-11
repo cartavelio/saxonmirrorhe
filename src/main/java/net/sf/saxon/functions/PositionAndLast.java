@@ -16,6 +16,7 @@ import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.value.Int64Value;
@@ -151,7 +152,11 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
     public static class Last extends PositionAndLast {
         @Override
         public Int64Value evaluateItem(XPathContext c) throws XPathException {
-            return Int64Value.makeIntegerValue(c.getLast());
+            try {
+                return Int64Value.makeIntegerValue(c.getLast());
+            } catch (UncheckedXPathException e) {
+                throw XPathException.makeXPathException(e);
+            }
         }
 
         @Override

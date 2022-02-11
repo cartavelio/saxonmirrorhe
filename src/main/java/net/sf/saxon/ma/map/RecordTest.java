@@ -13,13 +13,14 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringItem;
 
 import java.util.*;
 import java.util.function.Function;
@@ -162,13 +163,13 @@ public class RecordTest extends AnyFunctionType implements TupleType {
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) throws XPathException {
+    public boolean matches(Item item, TypeHierarchy th) {
         if (!(item instanceof MapItem)) {
             return false;
         }
         MapItem map = (MapItem)item;
         for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
-            Sequence val = map.get(new StringItem(field.getKey()));
+            GroundedValue val = map.get(new StringItem(field.getKey()));
             if (val == null) {
                 if (!isOptionalField(field.getKey())) {
                     return false;
@@ -485,21 +486,16 @@ public class RecordTest extends AnyFunctionType implements TupleType {
                         return Optional.of("Field " + key + " is absent; it must have a value");
                     }
                 } else {
-                    try {
-                        if (!required.matches(value, th)) {
-                            String s = "Field " + key + " has value "
-                                    + Err.depictSequence(value)
-                                    + " which does not match the required type "
-                                    + required.toString();
-                            Optional<String> more = required.explainMismatch(value, th);
-                            if (more.isPresent()) {
-                                s += ". " + more.get();
-                            }
-                            return Optional.of(s);
+                    if (!required.matches(value, th)) {
+                        String s = "Field " + key + " has value "
+                                + Err.depictSequence(value)
+                                + " which does not match the required type "
+                                + required.toString();
+                        Optional<String> more = required.explainMismatch(value, th);
+                        if (more.isPresent()) {
+                            s += ". " + more.get();
                         }
-                    } catch (XPathException err) {
-                        // shouldn't happen
-                        return Optional.empty();
+                        return Optional.of(s);
                     }
                 }
             }

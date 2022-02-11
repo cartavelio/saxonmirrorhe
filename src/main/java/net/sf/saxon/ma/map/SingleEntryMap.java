@@ -9,7 +9,6 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SingleAtomicIterator;
 import net.sf.saxon.tree.jiter.MonoIterator;
@@ -129,12 +128,7 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public boolean conforms(AtomicType keyType, SequenceType valueType, TypeHierarchy th) {
-        try {
-            return keyType.matches(key, th) && valueType.matches(value, th);
-        } catch (XPathException e) {
-            throw new AssertionError(e);
-        }
-
+        return keyType.matches(key, th) && valueType.matches(value, th);
     }
 
     /**

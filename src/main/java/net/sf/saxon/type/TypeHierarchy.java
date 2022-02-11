@@ -82,7 +82,7 @@ public class TypeHierarchy {
      *          if the value cannot be converted to the required type
      */
 
-    public Sequence applyFunctionConversionRules(Sequence value, SequenceType requiredType, final RoleDiagnostic role, Location locator)
+    public GroundedValue applyFunctionConversionRules(Sequence value, SequenceType requiredType, final RoleDiagnostic role, Location locator)
             throws XPathException {
 
         GroundedValue groundedValue = value.materialize();
@@ -118,7 +118,7 @@ public class TypeHierarchy {
                 final boolean nsSensitive = ((SimpleType) requiredItemType).isNamespaceSensitive();
                 ItemMappingFunction converter;
                 if (nsSensitive) {
-                    converter = item -> {
+                    converter = ItemMapper.of(item -> {
                         if (item instanceof AtomicValue && ((AtomicValue)item).isUntypedAtomic()) {
                             ValidationFailure vf = new ValidationFailure(
                                     "Failed to convert the " + role.getMessage() + ": " +
@@ -129,10 +129,10 @@ public class TypeHierarchy {
                         } else {
                             return item;
                         }
-                    };
+                    });
                 } else if (((SimpleType) requiredItemType).isUnionType()) {
                     final ConversionRules rules = config.getConversionRules();
-                    converter = item -> {
+                    converter = ItemMapper.of(item -> {
                         if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
                             try {
                                 return ((SimpleType) requiredItemType).getTypedValue(
@@ -144,16 +144,16 @@ public class TypeHierarchy {
                         } else {
                             return item;
                         }
-                    };
+                    });
                 } else {
-                    converter = item -> {
+                    converter = ItemMapper.of(item -> {
                         if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
                             return Converter.convert(
                                     (StringItem) item, (AtomicType) requiredItemType, config.getConversionRules());
                         } else {
                             return item;
                         }
-                    };
+                    });
                 }
                 iterator = new ItemMappingIterator(iterator, converter, true);
             }
@@ -161,7 +161,7 @@ public class TypeHierarchy {
             // step 3: apply numeric promotion
 
             if (requiredItemType.equals(BuiltInAtomicType.DOUBLE)) {
-                ItemMappingFunction promoter = item -> {
+                ItemMappingFunction promoter = ItemMapper.of(item -> {
                     if (item instanceof NumericValue) {
                         return (DoubleValue) Converter.convert(
                                 (NumericValue)item, BuiltInAtomicType.DOUBLE, config.getConversionRules()).asAtomic();
@@ -170,10 +170,10 @@ public class TypeHierarchy {
                                 "Failed to convert the " + role.getMessage() + ": " +
                                 "Cannot promote non-numeric value to xs:double", "XPTY0004");
                     }
-                };
+                });
                 iterator = new ItemMappingIterator(iterator, promoter, true);
             } else if (requiredItemType.equals(BuiltInAtomicType.FLOAT)) {
-                ItemMappingFunction promoter = item -> {
+                ItemMappingFunction promoter = ItemMapper.of(item -> {
                     if (item instanceof DoubleValue) {
                         throw new XPathException(
                                 "Failed to convert the " + role.getMessage() + ": " +
@@ -186,7 +186,7 @@ public class TypeHierarchy {
                                 "Failed to convert the " + role.getMessage() + ": " +
                                 "Cannot promote non-numeric value to xs:float", "XPTY0004");
                     }
-                };
+                });
                 iterator = new ItemMappingIterator(iterator, promoter, true);
             }
 
@@ -194,13 +194,13 @@ public class TypeHierarchy {
 
             if (requiredItemType.equals(BuiltInAtomicType.STRING) &&
                     relationship(suppliedItemType, BuiltInAtomicType.ANY_URI) != DISJOINT) {
-                ItemMappingFunction promoter = item -> {
+                ItemMappingFunction promoter = ItemMapper.of(item -> {
                     if (item instanceof AnyURIValue) {
                         return ((AnyURIValue)item).convertToString();
                     } else {
                         return item;
                     }
-                };
+                });
                 iterator = new ItemMappingIterator(iterator, promoter, true);
             }
         }
@@ -223,7 +223,7 @@ public class TypeHierarchy {
             iterator = new CardinalityCheckingIterator(iterator, requiredType.getCardinality(), role, locator);
         }
 
-        return SequenceTool.toMemoSequence(iterator);
+        return SequenceTool.toGroundedValue(iterator);
 
     }
 

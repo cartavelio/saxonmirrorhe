@@ -14,7 +14,6 @@ import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
-import net.sf.saxon.trans.XPathException;
 
 /**
  * The item type function(*) when it is preceded by one or more annotation assertions
@@ -53,7 +52,7 @@ public class AnyFunctionTypeWithAssertions extends AnyFunctionType {
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) throws XPathException {
+    public boolean matches(Item item, TypeHierarchy th)  {
         return item instanceof Function && checkAnnotationAssertions(assertions, (Function) item, th.getConfiguration());
     }
 

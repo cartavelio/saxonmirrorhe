@@ -17,6 +17,7 @@ import net.sf.saxon.pattern.CombinedNodeTest;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -24,6 +25,7 @@ import net.sf.saxon.value.IntegerValue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 
 /**
@@ -228,22 +230,27 @@ public final class ItemChecker extends UnaryExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        SequenceIterator base = getBaseExpression().iterate(context);
-        return new ItemMappingIterator(base, getMappingFunction(context), true);
+        final Expression baseExpr = getBaseExpression();
+        SequenceIterator base = baseExpr.iterate(context);
+        final TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
+        Consumer<Item> checker = item -> {
+            if (requiredItemType.matches(item, th)) {
+                // OK, no action
+            } else if (requiredItemType.getUType().subsumes(UType.STRING) && BuiltInAtomicType.ANY_URI.matches(item, th)) {
+                // OK, no action
+            } else {
+                String message = role.composeErrorMessage(requiredItemType, item, th);
+                String errorCode = role.getErrorCode();
+                XPathException te = new XPathException(message, errorCode);
+                te.setFailingExpression(baseExpr);
+                te.setLocator(baseExpr.getLocation());
+                te.setIsTypeError(!"XPDY0050".equals(errorCode));
+                throw new UncheckedXPathException(te);
+            }
+        };
+        return new ItemCheckingIterator(base, checker);
     }
 
-    /**
-     * Get the mapping function used to implement this item check. This mapping function is applied
-     * to each item in the input sequence.
-     *
-     * @param context The dynamic context used to evaluate the mapping function
-     * @return the mapping function. This will be an identity mapping: the output sequence is the same
-     *         as the input sequence, unless the dynamic type checking reveals an error.
-     */
-
-    public ItemMappingFunction getMappingFunction(XPathContext context) {
-        return new ItemTypeCheckingFunction(requiredItemType, role, getBaseExpression(), context.getConfiguration());
-    }
 
     /**
      * Evaluate as an Item.

@@ -179,13 +179,13 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
 
     public static UnicodeString checkContentXSLT(UnicodeString data) {
         long hh;
-        while ((hh = data.indexOf(DELIM, 0)) >= 0) {
+        while ((hh = data.indexOf(PI_TERMINATOR, 0)) >= 0) {
             data = data.substring(0, hh + 1).concat(StringConstants.SINGLE_SPACE.concat(data.substring(hh + 1)));
         }
         return Whitespace.removeLeadingWhitespace(data);
     }
 
-    private final static UnicodeString DELIM = new Twine8(new byte[]{'?', '>'});
+    private final static UnicodeString PI_TERMINATOR = new Twine8(StringConstants.PI_END);
 
     /**
      * Check the content of the node, and adjust it if necessary, using the XQuery rules
@@ -196,7 +196,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      */
 
     public static UnicodeString checkContentXQuery(UnicodeString data) throws XPathException {
-        if (data.indexOf(DELIM, 0) >= 0) {
+        if (data.indexOf(PI_TERMINATOR, 0) >= 0) {
             throw new XPathException("Invalid characters (?>) in processing instruction", "XQDY0026");
         }
         return Whitespace.removeLeadingWhitespace(data);

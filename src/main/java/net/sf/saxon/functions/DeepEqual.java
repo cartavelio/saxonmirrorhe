@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.annotate.CSharp;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
@@ -358,6 +359,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                         return false;
                     }
                 }
+                CSharp.emitCode("goto case Type.DOCUMENT");
                 // fall through
             case Type.DOCUMENT:
                 AxisIterator c1 = n1.iterateAxis(AxisInfo.CHILD);

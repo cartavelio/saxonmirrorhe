@@ -14,7 +14,6 @@ import net.sf.saxon.functions.Count;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -190,13 +189,9 @@ public class RangeKey extends MapItem {
         AtomicIterator keyIter = keys();
         AtomicValue key;
         while ((key = keyIter.next()) != null) {
-            Sequence value = get(key);
-            try {
-                if (!valueType.matches(value, th)) {
-                    return false;
-                }
-            } catch (XPathException e) {
-                throw new AssertionError(e);
+            GroundedValue value = get(key);
+            if (!valueType.matches(value, th)) {
+                return false;
             }
         }
         return true;

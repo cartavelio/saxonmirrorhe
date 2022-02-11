@@ -1240,7 +1240,6 @@ public final class Navigator {
 
     }
 
-
     /**
      * General-purpose implementation of the ancestor and ancestor-or-self axes
      */

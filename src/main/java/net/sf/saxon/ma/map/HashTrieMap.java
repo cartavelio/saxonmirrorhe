@@ -14,7 +14,6 @@ import net.sf.saxon.ma.trie.Tuple2;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -223,13 +222,8 @@ public class HashTrieMap extends MapItem {
                 if (!requiredKeyType.matches(key, th)) {
                     return false;
                 }
-                Sequence val = get(key);
-                try {
-                    if (!requiredValueType.matches(val, th)) {
-                        return false;
-                    }
-                } catch (XPathException e) {
-                    throw new AssertionError(e); // cannot happen with a grounded sequence
+                if (!requiredValueType.matches(get(key), th)) {
+                    return false;
                 }
             }
         }

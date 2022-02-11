@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.parser;
 
+import net.sf.saxon.annotate.CSharp;
 import net.sf.saxon.expr.ForMemberExpression;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
@@ -730,6 +731,7 @@ public class XPathParser {
                 case Token.EOF:
                     // fall through
                 default:
+                    break;
             }
         }
         switch (t.currentToken) {
@@ -2143,9 +2145,11 @@ public class XPathParser {
                     exp = parseValidateExpression();
                     break;
                 }
+                CSharp.emitCode("goto default");
                 // else fall through
             default:
                 exp = parseSimpleMappingExpression();
+                break;
         }
         setLocation(exp);
         return exp;
@@ -2576,6 +2580,7 @@ public class XPathParser {
                     AnnotationList annotations = AnnotationList.EMPTY;
                     return parseInlineFunction(annotations);
                 }
+                CSharp.emitCode("goto case Token.NAME");
                 // fall through!
             case Token.NAME:
             case Token.PREFIX:
@@ -2658,6 +2663,7 @@ public class XPathParser {
                     case "_":
                         return parserExtension.parseUnderscoreFunction(this);
                 }
+                CSharp.emitCode("goto case Token.ELEMENT_NAME");
                 // else fall through
             case Token.ELEMENT_QNAME:
             case Token.ATTRIBUTE_QNAME:

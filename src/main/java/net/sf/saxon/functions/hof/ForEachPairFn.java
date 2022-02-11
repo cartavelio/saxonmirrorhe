@@ -7,10 +7,7 @@
 
 package net.sf.saxon.functions.hof;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.MappingFunction;
-import net.sf.saxon.expr.MappingIterator;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
@@ -54,10 +51,10 @@ public class ForEachPairFn extends SystemFunction {
                                           SequenceIterator seq1,
                                           final XPathContext context) {
         PairedSequenceIterator pairs = new PairedSequenceIterator(seq0, seq1);
-        MappingFunction map = item -> {
+        MappingFunction map = SequenceMapper.of(item -> {
             Sequence[] pair = (Sequence[]) ((ExternalObject)item).getObject();
             return dynamicCall(function, context, pair).iterate();
-        };
+        });
         return new MappingIterator(pairs, map);
     }
 

@@ -288,12 +288,11 @@ public class Choose extends Instruction implements ConditionalInstruction {
                 break;
             }
         }
-        int size = size();
-        boolean changed = false;
+        int count = size();
         if (compress) {
-            List<Expression> conditions = new ArrayList<>(size);
-            List<Expression> actions = new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
+            List<Expression> conditions = new ArrayList<>(count);
+            List<Expression> actions = new ArrayList<>(count);
+            for (int i = 0; i < count; i++) {
                 Expression condition = getCondition(i);
                 if (!Literal.hasEffectiveBooleanValue(condition, false)) {
                     conditions.add(condition);
@@ -309,7 +308,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
                 return lit;
             } else if (conditions.size() == 1 && Literal.hasEffectiveBooleanValue(conditions.get(0), true)) {
                 return actions.get(0);
-            } else if (conditions.size() != size) {
+            } else if (conditions.size() != count) {
                 Expression[] c = conditions.toArray(new Expression[conditions.size()]);
                 Expression[] a = actions.toArray(new Expression[actions.size()]);
                 Choose result = new Choose(c, a);
@@ -332,9 +331,9 @@ public class Choose extends Instruction implements ConditionalInstruction {
                 ExpressionTool.copyLocationInfo(this, lit);
                 return lit;
             } else {
-                Expression[] conditions = new Expression[size-1];
-                Expression[] actions = new Expression[size-1];
-                for (int i = 0; i < size-1; i++) {
+                Expression[] conditions = new Expression[count-1];
+                Expression[] actions = new Expression[count-1];
+                for (int i = 0; i < count-1; i++) {
                     conditions[i] = getCondition(i);
                     actions[i] = getAction(i);
                 }
@@ -344,26 +343,26 @@ public class Choose extends Instruction implements ConditionalInstruction {
 
         // Flatten an "else if"
 
-        if (Literal.hasEffectiveBooleanValue(getCondition(size - 1), true) &&
-                getAction(size - 1) instanceof Choose) {
-            Choose choose2 = (Choose) getAction(size - 1);
-            int newLen = size + choose2.size() - 1;
+        if (Literal.hasEffectiveBooleanValue(getCondition(count - 1), true) &&
+                getAction(count - 1) instanceof Choose) {
+            Choose choose2 = (Choose) getAction(count - 1);
+            int newLen = count + choose2.size() - 1;
             Expression[] c2 = new Expression[newLen];
             Expression[] a2 = new Expression[newLen];
-            for (int i=0; i<size-1; i++) {
+            for (int i=0; i<count-1; i++) {
                 c2[i] = getCondition(i);
                 a2[i] = getAction(i);
             }
             for (int i=0; i<choose2.size(); i++) {
-                c2[i + size - 1] = choose2.getCondition(i);
-                a2[i + size - 1] = choose2.getAction(i);
+                c2[i + count - 1] = choose2.getCondition(i);
+                a2[i + count - 1] = choose2.getAction(i);
             }
             return new Choose(c2, a2);
         }
 
         // Rewrite "if (EXP) then true() else false()" as boolean(EXP)
 
-        if (size == 2 &&
+        if (count == 2 &&
                 Literal.isConstantBoolean(getAction(0), true) &&
                 Literal.isConstantBoolean(getAction(1), false) &&
                 Literal.hasEffectiveBooleanValue(getCondition(1), true)) {
@@ -473,9 +472,9 @@ public class Choose extends Instruction implements ConditionalInstruction {
                                       boolean backwardsCompatible,
                                       RoleDiagnostic role, ExpressionVisitor visitor)
             throws XPathException {
-        int size = size();
+        int count = size();
         TypeChecker tc = getConfiguration().getTypeChecker(backwardsCompatible);
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < count; i++) {
             try {
                 setAction(i, tc.staticTypeCheck(getAction(i), req, role, visitor));
             } catch (XPathException err) {
@@ -493,22 +492,22 @@ public class Choose extends Instruction implements ConditionalInstruction {
         }
         // If the last condition isn't true(), then we need to consider the fall-through case, which returns
         // an empty sequence
-        if (!Literal.hasEffectiveBooleanValue(getCondition(size - 1), true) &&
+        if (!Literal.hasEffectiveBooleanValue(getCondition(count - 1), true) &&
                 !Cardinality.allowsZero(req.getCardinality())) {
-            Expression[] c = new Expression[size + 1];
-            Expression[] a = new Expression[size + 1];
-            for (int i=0; i<size; i++) {
+            Expression[] c = new Expression[count + 1];
+            Expression[] a = new Expression[count + 1];
+            for (int i=0; i<count; i++) {
                 c[i] = getCondition(i);
                 a[i] = getAction(i);
             }
-            c[size] = Literal.makeLiteral(BooleanValue.TRUE, this);
-            String cond = size == 1 ? "The condition is not" : "None of the conditions is";
+            c[count] = Literal.makeLiteral(BooleanValue.TRUE, this);
+            String cond = count == 1 ? "The condition is not" : "None of the conditions is";
             String message =
                     "Conditional expression: " + cond + " satisfied, so an empty sequence is returned, " +
                             "but this is not allowed as the " + role.getMessage();
             ErrorExpression errExp = new ErrorExpression(message, role.getErrorCode(), true);
             ExpressionTool.copyLocationInfo(this, errExp);
-            a[size] = errExp;
+            a[count] = errExp;
             return new Choose(c, a);
         }
         return this;
@@ -517,8 +516,8 @@ public class Choose extends Instruction implements ConditionalInstruction {
     /*@NotNull*/
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-        int size = size();
-        for (int i = 0; i < size; i++) {
+        int count = size();
+        for (int i = 0; i < count; i++) {
             conditionOps[i].optimize(visitor, contextItemType);
             Expression ebv = BooleanFn.rewriteEffectiveBooleanValue(getCondition(i), visitor, contextItemType);
             if (ebv != null && ebv != getCondition(i)) {
@@ -536,7 +535,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
                 setCondition(i, Literal.makeLiteral(BooleanValue.get(b), this));
             }
         }
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < count; i++) {
             if (Literal.hasEffectiveBooleanValue(getCondition(i), false)) {
                 // Don't bother with optimisation if the code won't be executed: bug 4537
                 continue;
@@ -567,7 +566,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
             }
         }
 
-        if (size == 0) {
+        if (count == 0) {
             return Literal.makeEmptySequence();
         }
         Optimizer opt = visitor.obtainOptimizer();
@@ -592,10 +591,10 @@ public class Choose extends Instruction implements ConditionalInstruction {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        int size = size();
-        Expression[] c2 = new Expression[size];
-        Expression[] a2 = new Expression[size];
-        for (int c = 0; c < size; c++) {
+        int count = size();
+        Expression[] c2 = new Expression[count];
+        Expression[] a2 = new Expression[count];
+        for (int c = 0; c < count; c++) {
             c2[c] = getCondition(c).copy(rebindings);
             a2[c] = getAction(c).copy(rebindings);
         }
@@ -959,8 +958,8 @@ public class Choose extends Instruction implements ConditionalInstruction {
      */
 
     private int choose(XPathContext context) throws XPathException {
-        int size = size();
-        for (int i = 0; i < size; i++) {
+        int count = size();
+        for (int i = 0; i < count; i++) {
             final boolean b;
             try {
                 b = getCondition(i).effectiveBooleanValue(context);

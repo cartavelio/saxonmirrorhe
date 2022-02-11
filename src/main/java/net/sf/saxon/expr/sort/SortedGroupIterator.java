@@ -102,12 +102,7 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
 
         ManualSortedGroupIterator() {
             super((Item) values[position - 1].value, position);
-            setLastPositionFinder(new LastPositionFinder() {
-                @Override
-                public int getLength() throws XPathException {
-                    return values.length;
-                }
-            });
+            setLengthFinder(() -> values.length);
         }
 
         @Override

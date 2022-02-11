@@ -350,19 +350,15 @@ public class MapType extends AnyFunctionType {
                             " that is not an instance of the required type " + keyType;
                     return Optional.of(s);
                 }
-                try {
-                    if (!valueType.matches(kvp.value, th)) {
-                        String s = "The map contains an entry with key (" + kvp.key.show() +
-                                ") whose corresponding value (" + Err.depictSequence(kvp.value) +
-                                ") is not an instance of the required type " + valueType;
-                        Optional<String> more = valueType.explainMismatch(kvp.value, th);
-                        if (more.isPresent()) {
-                            s = s + ". " + more.get();
-                        }
-                        return Optional.of(s);
+                if (!valueType.matches(kvp.value, th)) {
+                    String s = "The map contains an entry with key (" + kvp.key.show() +
+                            ") whose corresponding value (" + Err.depictSequence(kvp.value) +
+                            ") is not an instance of the required type " + valueType;
+                    Optional<String> more = valueType.explainMismatch(kvp.value, th);
+                    if (more.isPresent()) {
+                        s = s + ". " + more.get();
                     }
-                } catch (XPathException e) {
-                    // continue
+                    return Optional.of(s);
                 }
             }
         }

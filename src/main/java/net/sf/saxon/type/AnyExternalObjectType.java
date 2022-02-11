@@ -9,7 +9,6 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.ObjectValue;
 
 /**
@@ -28,7 +27,7 @@ public class AnyExternalObjectType implements ItemType {
     }
 
     @Override
-    public boolean matches(Item item, TypeHierarchy th) throws XPathException {
+    public boolean matches(Item item, TypeHierarchy th) {
         return item instanceof ObjectValue;
     }
 

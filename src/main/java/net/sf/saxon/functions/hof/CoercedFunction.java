@@ -10,11 +10,12 @@ package net.sf.saxon.functions.hof;
 import net.sf.saxon.expr.FunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.AbstractFunction;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -153,18 +154,15 @@ public class CoercedFunction extends AbstractFunction {
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         Sequence[] targetArgs = new Sequence[args.length];
         for (int i = 0; i < args.length; i++) {
-            args[i] = args[i].materialize();
-            if (argTypes[i].matches(args[i], th)) {
-                targetArgs[i] = args[i];
+            GroundedValue gVal = args[i].materialize();
+            if (argTypes[i].matches(gVal, th)) {
+                targetArgs[i] = gVal;
             } else {
                 RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, targetFunction.getDescription(), i);
-                targetArgs[i] = th.applyFunctionConversionRules(args[i], argTypes[i], role, Loc.NONE);
+                targetArgs[i] = th.applyFunctionConversionRules(gVal, argTypes[i], role, Loc.NONE);
             }
         }
-        Sequence rawResult = targetFunction.call(context, targetArgs);
-        rawResult = rawResult.materialize();
-            // Needed because we have to examine the value twice, once to check its type, and then to convert it.
-            // It would be better if applyFunctionConversionRules were a mapping function...
+        GroundedValue rawResult = targetFunction.call(context, targetArgs).materialize();
         if (req.getResultType().matches(rawResult, th)) {
             return rawResult;
         } else {

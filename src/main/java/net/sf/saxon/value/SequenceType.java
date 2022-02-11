@@ -11,11 +11,11 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.type.*;
 
 import java.util.Optional;
@@ -436,6 +436,7 @@ public final class SequenceType {
                 case StaticProperty.ALLOWS_ONE_OR_MORE:
                     return bat.oneOrMore();
                 default:
+                    break;
                     // fall through
             }
         }
@@ -471,13 +472,11 @@ public final class SequenceType {
      * @param value the value to be tested
      * @param th    the type hierarchy cache
      * @return true if the value is a valid instance of this type
-     * @throws XPathException if a dynamic error occurs while evaluating the Sequence (this
-     *                        won't happen if the sequence is grounded)
      */
 
-    public boolean matches(Sequence value, TypeHierarchy th) throws XPathException {
+    public boolean matches(GroundedValue value, TypeHierarchy th) {
         int count = 0;
-        SequenceIterator iter = value.iterate();
+        UnfailingIterator iter = value.iterate();
         Item item;
         while ((item = iter.next()) != null) {
             count++;

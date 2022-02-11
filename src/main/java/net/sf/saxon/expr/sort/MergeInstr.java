@@ -587,7 +587,7 @@ public class MergeInstr extends Instruction {
                 SequenceIterator uriIter = ms.getForEachSource().iterate(c1);
                 XsltController controller = (XsltController)context.getController();
                 final AccumulatorManager accumulatorManager = controller.getAccumulatorManager();
-                anchorsIter = new ItemMappingIterator(uriIter, baseItem -> {
+                anchorsIter = new ItemMappingIterator(uriIter, ItemMapper.of(baseItem -> {
                     String uri = baseItem.getStringValue();
                     NodeInfo node = DocumentFn.makeDoc(uri, getRetainedStaticContext().getStaticBaseUriString(),
                                                        getPackageData(), options, c1, getLocation(), true);
@@ -595,7 +595,7 @@ public class MergeInstr extends Instruction {
                         accumulatorManager.setApplicableAccumulators(node.getTreeInfo(), ms.accumulators);
                     }
                     return node;
-                });
+                }));
                 XPathContext c2 = c1.newMinorContext();
                 FocusIterator anchorsIterFocus = c2.trackFocus(anchorsIter);
                 while (anchorsIterFocus.next() != null) {

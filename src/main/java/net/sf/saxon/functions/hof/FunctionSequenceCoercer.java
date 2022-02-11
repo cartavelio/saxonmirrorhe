@@ -255,7 +255,6 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
             this.locator = locator;
         }
 
-        @Override
         public Function mapItem(Item item) throws XPathException {
             if (!(item instanceof Function)) {
                 throw new XPathException(

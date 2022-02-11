@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.parser;
 
+import net.sf.saxon.annotate.CSharp;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
@@ -678,6 +679,7 @@ public final class Tokenizer {
                         nextToken = Token.DOT;
                         return;
                     }
+                    CSharp.emitCode("goto case '0'");
                     // otherwise drop through: we have a number starting with a decimal point
                 case '0':
                 case '1':
@@ -832,7 +834,8 @@ public final class Tokenizer {
                     }
                 case '\n':
                     incrementLineNumber();
-                    // drop through
+                    CSharp.emitCode("goto case ' '");
+                    // fall through
                 case ' ':
                 case '\t':
                 case '\r':
@@ -875,11 +878,13 @@ public final class Tokenizer {
 
 
                     }
+                    CSharp.emitCode("goto default");
                     /* else fall through */
                 default:
                     if (c < 0x80 && !Character.isLetter(c)) {
                         throw new XPathException("Invalid character '" + c + "' (x" + Integer.toHexString((int)c) + ") in expression");
                     }
+                    CSharp.emitCode("goto case '_'");
                     /* fall through */
                 case '_':
                     boolean foundColon = false;
@@ -931,6 +936,7 @@ public final class Tokenizer {
                                     nextToken = getBinaryOp(input.substring(nextTokenStartOffset, inputOffset));
                                     return;
                                 }
+                                CSharp.emitCode("goto case '_'");
                                 // else fall through
                             case '_':
                                 break;
