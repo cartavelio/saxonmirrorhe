@@ -229,7 +229,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime011() {
-        externalProtocolsRunTime("data:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
                                  "<xsl:sequence select=\"document('data:text/xml;base64,PGRvYy8+')/*/local-name()\"/>",
                                  "file, data",
                                  true);
@@ -237,7 +237,7 @@ public class AllowedProtocolsTest {
 
     @Test
     public void testExternalProtocolsRunTime012() {
-        externalProtocolsRunTime("data:///" + ConfigTest.DATA_DIR + "dummy.xsl",
+        externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
                                  "<xsl:sequence select=\"document('data:text/xml;base64,PGRvYy8+')/*/local-name()\"/>",
                                  "file, http, https",
                                  false);
