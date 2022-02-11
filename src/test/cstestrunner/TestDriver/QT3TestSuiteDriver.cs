@@ -512,7 +512,7 @@ namespace TestDriver {
                     }
                 }
 
-                if (langVersion.Equals("3.0") || langVersion.Equals("3.1")) {
+                if (langVersion.StartsWith("3") || langVersion.StartsWith("4")) {
                     env.processor.Implementation.setConfigurationProperty(JFeatureKeys.ENVIRONMENT_VARIABLE_RESOLVER,
                         new EnvironmentVariableResolver());
                 }
