@@ -177,7 +177,7 @@ void testXPathOnFile(SaxonProcessor * processor, XPathProcessor * xpath, sResult
     	 cout<<endl<<"Test testXPath with file source:"<<endl;
   	xpath->clearParameters(true);
   	xpath->clearProperties(); 
-	xpath->setContextFile("cat.xml");
+	xpath->setContextFile("../data/cat.xml");
 
 	XdmValue * resultValues = xpath->evaluate("//person");
 	
@@ -212,7 +212,7 @@ void testXPathOnFile2(XPathProcessor * xpath, sResultCount *sresult){
     	 cout<<endl<<"Test testXPath with file source:"<<endl;
   	xpath->clearParameters();
   	xpath->clearProperties(); 
-	xpath->setContextFile("cat.xml");
+	xpath->setContextFile("../data/cat.xml");
 
 	XdmItem * result = xpath->evaluateSingle("//person[1]");
 	
