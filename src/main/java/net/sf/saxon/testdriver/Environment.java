@@ -111,10 +111,10 @@ public class Environment implements URIResolver {
         }
         environment.xsltCompiler.setRelocatable(testDriver.relocatable);
         if (spec == Spec.XT30) {
-            //environment.xsltCompiler.setXsltLanguageVersion("3.0");
+            environment.xsltCompiler.setXsltLanguageVersion("3.0");
             environment.xpathCompiler.setLanguageVersion("3.1");
         } else if (spec == Spec.XT40) {
-            //environment.xsltCompiler.setXsltLanguageVersion("3.0");
+            environment.xsltCompiler.setXsltLanguageVersion("4.0");
             environment.xpathCompiler.setLanguageVersion("4.0");
         } else if (spec == Spec.XT20) {
             throw new AssertionError("Unsupported spec: XSLT 2.0");
