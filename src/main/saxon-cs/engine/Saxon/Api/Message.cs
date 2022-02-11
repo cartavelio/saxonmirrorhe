@@ -30,6 +30,25 @@ namespace Saxon.Api {
         /// If the message has simple textual content, then <c>ToString</c> will extract this.
         /// </remarks>
         public XdmNode Content { get; }
+        
+        /// <summary>
+        /// The content of the message as a string. This is a shortcut for <c>Content.StringValue</c>.
+        /// It returns the content of the message as a string, without XML escaping, and ignoring any XML markup.
+        /// </summary>
+        /// 
+        public string StringValue => Content.StringValue;
+        
+        /// <summary>
+        /// Get the content of the message as a string, using XML serialization. This is a shortcut for
+        /// <c>Content.ToString()</c>.
+        /// It returns the content of the message serialized with options method="xml", indent="yes",
+        /// omit-xml-declaration="yes". There is no guarantee that the result will be a well-formed XML document
+        /// (it may be a document fragment).
+        /// </summary>
+        ///
+        public override string ToString() {
+            return Content.ToString();
+        }
 
         /// <summary>
         /// The error code associated with the message. Defaults to <c>err:XTMM9000</c> for
