@@ -1,4 +1,4 @@
-<featureMatrix version="10" release="Mar 2020">
+<featureMatrix version="11" release="Sep 2021">
   
   <feature class="heading">
     <shortName>XSLT Features</shortName>
@@ -8,80 +8,88 @@
     <shortName>XSLT 3.0 Basic Processor</shortName>
     <description>
       <p>Provides all mandatory features from the XSLT 3.0 specification (including try/catch, iterate,
-        accumulators, maps, named modes, content value templates, and extended patterns).</p>
+        accumulators, maps, named modes, content value templates, and extended patterns, as well
+        as features retained from XSLT 2.0).</p>
     </description>
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS"/>
     </products>
   </feature>
   
   <feature class="XSLT" lang="XSLT 3.0">
     <shortName>XSLT 3.0 Schema Awareness</shortName>
     <description>
-      <p>Provides a schema-aware XSLT 3.0 processor.</p>
+      <p>Provides a schema-aware XSLT 3.0 processor: specifically, the ability to import an XSD schema
+        when compiling a stylesheet, to use this for type-checking, and to process and create schema-validated
+        instance documents.</p>
     </description>
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="EE EE-T"/>
+      <product editions="EE EE-T CS"/>
     </products>
   </feature>
   
   <feature class="XSLT" lang="XSLT 3.0">
     <shortName>XSLT 3.0 Serialization</shortName>
     <description>
-      <p>Provides the serialization feature.</p>
+      <p>Provides the serialization feature: specifically, the ability to convert the result trees 
+        produced as output of an XSLT transformation to lexical XML, or other formats including HTML,
+        JSON, and plain text, under the control of serialization parameters defined in the stylesheet
+        or via an external API.</p>
     </description>
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS"/>
     </products>
   </feature>
   
   <feature class="XSLT" lang="XSLT 3.0">
     <shortName>XSLT 3.0 Compatibility</shortName>
     <description>
-      <p>Provides XSLT 1.0 compatibility mode.</p>
+      <p>Provides XSLT 1.0 compatibility mode as defined in the XSLT 3.0 specification. If a stylesheeet
+        specifies <code>version="1.0"</code>, this causes certain constructs to behave in a way that retains
+        the XSLT 1.0 behavior.</p>
     </description>
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS"/>
     </products>
   </feature>
   
   <feature class="XSLT" lang="XSLT 3.0">
     <shortName>XSLT 3.0 Streaming</shortName>
     <description>
-      <p>Includes additional features of the XSLT 3.0 specification, that enable
+      <p>Includes additional features of the XSLT 3.0 specification that enable
         streaming (processing of documents that are too large to fit in memory).</p>
     </description>
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="EE EE-T"/>
+      <product editions="EE EE-T CS"/>
     </products>
   </feature>
   
   <feature class="XSLT" lang="XSLT 3.0">
     <shortName>XSLT 3.0 Dynamic Evaluation</shortName>
     <description>
-      <p>Provides use of the XSLT 3.0 instruction <code>xsl:evaluate</code> which allows dynamic
+      <p>Provides use of the XSLT 3.0 instruction <code>xsl:evaluate</code>, which allows dynamic
         evaluation of XPath expressions.</p>
     </description>
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS"/>
     </products>
   </feature>
   
@@ -89,12 +97,14 @@
     <shortName>XSLT 3.0 XPath 3.1 Feature</shortName>
     <description>
       <p>Provides full use of XPath 3.1 features, including XPath 3.1 functions, and maps and arrays.</p>
+      <p><i>Note: Saxon supports XPath 3.1 unconditionally in XSLT 3.0 stylesheets, it does
+        not offer a processing mode in which XPath is restricted to version 3.0.</i></p>
     </description>
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS"/>
     </products>
   </feature>
   
@@ -102,14 +112,14 @@
     <shortName>XSLT 3.0 Higher-Order Functions</shortName>
     <description>
       <p>Provides higher-order functions: specifically, the ability to use functions as values,
-        including dynamic function calls, inline functions, partial function application, and the
-        XPath 3.1 higher-order functions.</p>
+        including dynamic function calls, inline functions, partial function application,
+        and the standard higher-order functions defined in the XPath 3.1 function library.</p>
     </description>
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS"/>
     </products>
   </feature>
   
@@ -121,13 +131,14 @@
     <shortName>XPath 3.1 Basic</shortName>
     <description>
       <p>Provides all XPath 3.1 features which do not require schema-awareness or higher-order
-        functions. This includes an implementation of maps and arrays, and support for JSON.</p>
+        functions. This includes an implementation of maps and arrays, and support for JSON,
+      as well as language constructs retained from earlier XPath versions.</p>
     </description>
     <spec name="XPath 3.1" level="Recommendation" date="21 March 2017"
       link="https://www.w3.org/TR/xpath-31/"/>
     <details link="conformance/xpath31" name="XPath 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS"/>
     </products>
   </feature>
   
@@ -142,7 +153,7 @@
       link="https://www.w3.org/TR/xpath-31/"/>
     <details link="conformance/xpath31" name="XPath 3.1 conformance"/>
     <products>
-      <product editions="EE EE-T EE-Q EE-V"/>
+      <product editions="EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
   
@@ -151,13 +162,13 @@
     <description>
       <p>Provides higher-order functions: specifically, the ability to use functions as values,
         including dynamic function calls, inline functions, partial function application, and
-        specific higher-order functions.</p>
+        a library of built-in higher-order functions.</p>
     </description>
     <spec name="XPath 3.1" level="Recommendation" date="21 March 2017"
       link="https://www.w3.org/TR/xpath-31/"/>
     <details link="conformance/xpath31" name="XPath 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS"/>
     </products>
   </feature>
   
@@ -168,40 +179,42 @@
   <feature class="XQuery" lang="XQuery 3.1">
     <shortName>XQuery 3.1 Minimal Conformance</shortName>
     <description>
-      <p>Provides Minimal Conformance (including try/catch and "group-by") as defined in section 5
-        of the XQuery 3.1 specification.</p>
+      <p>Provides Minimal Conformance (including try/catch and "group-by", as well as language features
+        retained from earlier XQuery versions) as defined in section 5 of the XQuery 3.1 specification.</p>
     </description>
     <spec name="XQuery 3.1" level="Recommendation" date="21 March 2017"
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
   
   <feature class="XQuery" lang="XQuery 3.1">
     <shortName>XQuery 3.1 Schema Aware</shortName>
     <description>
-      <p>Provides the Schema Aware feature.</p>
+      <p>Provides the Schema Aware feature. This enables a query to import an XSD schema and use it for
+        type checking, and to validate instance documents.</p>
     </description>
     <spec name="XQuery 3.1" level="Recommendation" date="21 March 2017"
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="EE EE-Q"/>
+      <product editions="EE EE-Q CS"/>
     </products>
   </feature>
   
   <feature class="XQuery" lang="XQuery 3.1">
     <shortName>XQuery 3.1 Typed Data</shortName>
     <description>
-      <p>Provides the Typed Data feature.</p>
+      <p>Provides the Typed Data feature. This enables a query to accept input data that has been validated
+        against a schema.</p>
     </description>
     <spec name="XQuery 3.1" level="Recommendation" date="21 March 2017"
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="EE EE-Q"/>
+      <product editions="EE EE-Q CS"/>
     </products>
   </feature>
   
@@ -209,6 +222,10 @@
     <shortName>XQuery 3.1 Static Typing</shortName>
     <description>
       <p>Saxon does not implement the Static Typing feature.</p>
+      <p><i>The static typing feature treats an expression as an error unless it
+      is guaranteed type-safe at compile time. Without this feature, type checking
+      is performed dynamically at run time. Saxon does compile time analysis to
+      minimize the amount of dynamic checking that is needed.</i></p>
     </description>
     <spec name="XQuery 3.1" level="Recommendation" date="21 March 2017"
       link="https://www.w3.org/TR/xquery-31/"/>
@@ -221,39 +238,43 @@
   <feature class="XQuery" lang="XQuery 3.1">
     <shortName>XQuery 3.1 Modules</shortName>
     <description>
-      <p>Provides the Module feature.</p>
+      <p>Provides the Module feature, which allows a query to be made up of multiple modules.</p>
     </description>
     <spec name="XQuery 3.1" level="Recommendation" date="21 March 2017"
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
   
   <feature class="XQuery" lang="XQuery 3.1">
     <shortName>XQuery 3.1 Serialization</shortName>
     <description>
-      <p>Provides the Serialization feature.</p>
+      <p>Provides the Serialization feature. This allows the output of a query to be serialized as lexical XML,
+        or in other formats including HTML, JSON, and plain text, under the control of serialization parameters
+        contained either in the query itself, or supplied externally.</p>
     </description>
     <spec name="XQuery 3.1" level="Recommendation" date="21 March 2017"
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
   
   <feature class="XQuery" lang="XQuery 3.1">
     <shortName>XQuery 3.1 Higher-Order Functions</shortName>
     <description>
-      <p>Provides the Higher-Order Function feature.</p>
+      <p>Provides the Higher-Order Function feature. This provides the ability to use functions as values,
+        including dynamic function calls, inline functions, partial function application,
+        and a library of built-in higher-order functions.</p>
     </description>
     <spec name="XQuery 3.1" level="Recommendation" date="21 March 2017"
       link="https://www.w3.org/TR/xquery-31/"/>
     <details link="conformance/xquery31" name="XQuery 3.1 conformance"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
 
@@ -263,11 +284,12 @@
       <p>Saxon provides all the features defined in the XQuery Update 1.0 specification. The
         implementation allows XQuery Update 1.0 syntax to be mixed with XQuery 3.1 syntax.
       </p>
+      <p><i>XQuery Update in Saxon-CS is offered "as is": the feature is present, but has not been extensively tested.</i></p>
     </description>
     <spec level="Recommendation" date="17 March 2011" link="http://www.w3.org/TR/xquery-update-10/"/>
     <details link="conformance/update" name="XQuery Update 1.0 conformance"/>
     <products>
-      <product editions="EE EE-Q"/>
+      <product editions="EE EE-Q CS"/>
     </products>
   </feature>
   
@@ -283,12 +305,16 @@
         Saxon does not expose the full PSVI, as required by the conformance rules in the XSD 1.0
         Recommendation. Also includes Saxon extension functions to provide access to a compiled
         schema.</p>
+      <p><i>From Saxon 10, the Saxon schema processor accepts XSD 1.1 syntax unconditionally. XSD 1.0 schemas
+        are processed according to the rules of the XSD 1.1 specification. This offers a very high level
+        of backwards compatibility, except in a few areas where the XSD 1.0 rules were unclear and have
+        been clarified in the XSD 1.1 recommendation.</i></p>
     </description>
     <spec level="Recommendation" date="28 October 2004" link="http://www.w3.org/TR/xmlschema-1/"
       name="XML Schema 1.0"/>
     <details link="conformance/schema" name="XML Schema 1.0 conformance"/>
     <products>
-      <product editions="EE EE-T EE-Q EE-V"/>
+      <product editions="EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
 
@@ -305,7 +331,7 @@
       name="XML Schema 1.1"/>
     <details link="conformance/schema11" name="XML Schema 1.1 conformance"/>
     <products>
-      <product editions="EE EE-T EE-Q EE-V"/>
+      <product editions="EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
 
@@ -316,8 +342,8 @@
   <feature class="Performance">
     <shortName>Byte code generation</shortName>
     <description>
-      <p>Allows hot-spot code generation for XSLT, XQuery, XPath, and XML Schema. Available for both
-        Java and .NET platforms, typically giving a 25% performance boost.</p>
+      <p>Allows hot-spot code generation for XSLT, XQuery, XPath, and XML Schema. Available only on the
+        Java platform, typically giving a 25% performance boost.</p>
     </description>
     <details link="using-xsl/compiling" name="Compiling a Stylesheet"/>
     <details link="using-xquery/querycompilation" name="Compiling Queries"/>
@@ -335,7 +361,7 @@
     </description>
     <details link="sourcedocs/projection" name="Document projection"/>
     <products>
-      <product editions="EE EE-Q"/>
+      <product editions="EE EE-Q CS"/>
     </products>
   </feature>
   
@@ -350,7 +376,7 @@
     </description>
     <details link="using-xsl/compiling" name="Compiling a Stylesheet"/>
     <products>
-      <product editions="EE EE-T JS2"/>
+      <product editions="EE EE-T JS2 CS"/>
     </products>
   </feature>
   
@@ -369,7 +395,7 @@
     </alt-description>
     <details link="using-xsl/compiling" name="Compiling a Stylesheet"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS"/>
     </products>
   </feature>
 
@@ -380,7 +406,7 @@
           <code>collection()</code> function.</p>
     </description>
     <products>
-      <product editions="EE EE-T EE-Q EE-V"/>
+      <product editions="EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
   
@@ -393,7 +419,7 @@
         instructions under the control of the stylesheet author.</p>
     </description>
     <products>
-      <product editions="EE EE-T"/>
+      <product editions="EE EE-T CS"/>
     </products>
   </feature>
 
@@ -401,18 +427,18 @@
     <shortName>Optimizer</shortName>
     <description>
       <p>The <i>Basic</i> optimizer provided with all Saxon editions provides a wide range of static
-        and dynamic optimizations including full pipelining of list operations, lazy evaluation of
+        and dynamic optimizations including full pipelining of sequence operations, lazy evaluation of
         variables, elimination of redundant sorting operations, etc. The <i>Advanced</i> optimizer
         additionally provides join optimization and inlining of variables and functions, where
         feasible.</p>
     </description>
     <products>
-      <product level="Basic" editions="HE PE EE-V JS2">
+      <product level="Basic" editions="HE PE EE-V JS2 CS">
         <p>The <i>Basic</i> optimizer provided with all Saxon editions provides a wide range of
           static and dynamic optimizations including full pipelining of list operations, lazy
           evaluation of variables, elimination of redundant sorting operations, etc.</p>
       </product>
-      <product level="Basic Adv" editions="EE EE-T EE-Q">
+      <product level="Basic Adv" editions="EE EE-T EE-Q CS">
         <p>The <i>Advanced</i> optimizer provides the wide range of static and dynamic optimizations
           featured in the <i>Basic</i> optimizer - including full pipelining of list operations,
           lazy evaluation of variables, elimination of redundant sorting operations, etc. - and
@@ -426,25 +452,25 @@
   <feature class="Performance">
     <shortName>Reading W3C schemas and DTDs</shortName>
     <description>
-      <p>The W3C web server now routinely rejects requests for commonly-referenced files such as the
+      <p>The W3C web server routinely rejects requests for commonly-referenced files such as the
         DTD for XHTML, causing parsing failures. In response to this, Saxon now includes copies of
-        these documents within the issued JAR file, and recognizes requests for these documents,
+        these documents within the issued JAR/DLL file, and recognizes requests for these documents,
         satisfying the request using the local copy.</p>
     </description>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
 
   <feature class="Performance">
-    <shortName>Streaming (XPath)</shortName>
+    <shortName>Streaming (XPath and XQuery)</shortName>
     <description>
       <p>Provides <code>saxon:stream()</code>, an extension function to allow large documents to be
         processed without holding the whole document in memory.</p>
     </description>
     <details link="sourcedocs/streaming" name="Streaming of Large Documents" subpages="has-subpages"/>
     <products>
-      <product editions="EE EE-Q EE-T EE-V"/>
+      <product editions="EE EE-Q EE-T EE-V CS"/>
     </products>
   </feature>
   
@@ -456,7 +482,7 @@
     </description>
     <details link="sourcedocs/streaming" name="Streaming of Large Documents" subpages="has-subpages"/>
     <products>
-      <product editions="EE EE-T"/>
+      <product editions="EE EE-T CS"/>
     </products>
   </feature>
 
@@ -470,6 +496,7 @@
     <description>
       <p>A selection of EXSLT extension functions are provided (in the modules Common, Dates and
         Times, Math, Random, and Sets), as listed in the documentation. </p>
+      <p>Only the <code>exslt:node-set</code> function is available in Saxon-CS.</p>
     </description>
     <details link="extensions/functions/exslt" name="EXSLT extensions"/>
     <products>
@@ -485,7 +512,7 @@
     </description>
     <details link="extensions/functions/expath" name="EXPath extensions"/>
     <products>
-      <product editions="PE EE EE-T EE-Q EE-V"/>
+      <product editions="PE EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
 
@@ -498,15 +525,15 @@
     </description>
     <details link="extensibility" name="Extensibility" subpages="has-subpages"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
 
 
   <feature class="Extensibility">
-    <shortName>Extensibility using reflexion (Java and .NET)</shortName>
+    <shortName>Extensibility using reflexion (Java)</shortName>
     <description>
-      <p>Ability to access existing Java or .NET methods dynamically and invoke them as extension
+      <p>Ability to access existing Java methods dynamically and invoke them as extension
         functions by means of dynamic loading and reflexion. </p>
     </description>
     <details link="extensibility" name="Extensibility" subpages="has-subpages"/>
@@ -544,6 +571,8 @@
           <i>Basic</i> level excludes extension functions that depend on streaming or
         schema-awareness (<code>saxon:schema()</code>, <code>saxon:stream()</code>, and
         <code>saxon:validate()</code>); these are included at the <i>Advanced</i> level.</p>
+      <p><i>Some extension functions such as <code>saxon:send-mail</code> are available
+      on the Java platform only.</i></p>
     </description>
     <details link="extensions/functions/saxon-extension-functions" name="Saxon extension functions"/>
     <products>
@@ -552,7 +581,7 @@
             <i>Basic</i> level excludes extension functions that depend on streaming or
           schema-awareness.</p>
       </product>
-      <product level="Basic Adv" editions="EE EE-T EE-Q EE-V">
+      <product level="Basic Adv" editions="EE EE-T EE-Q EE-V CS">
         <p>Extension functions, as listed in the documentation, in the Saxon namespace. The
           <i>Advanced</i> level includes those that depend on streaming or schema-awareness:
           <code>saxon:schema()</code>, <code>saxon:stream()</code>, and
@@ -565,7 +594,7 @@
     <shortName>SQL extension</shortName>
     <description>
       <p>XSLT extension functions and instructions providing access to SQL databases. Available on
-        the Java platform only (not .NET). </p>
+        the Java platform only. </p>
     </description>
     <details link="sql-extension" name="Saxon SQL extension" subpages="has-subpages"/>
     <products>
@@ -638,7 +667,7 @@
         slightly different forms on the Java and .NET platforms.</p>
     </description>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V CS"/>
     </products>
   </feature>
 
@@ -646,11 +675,11 @@
     <shortName>Support for DOM</shortName>
     <description>
       <p>Ability to use a DOM (Document Object Model) for the input and output of transformations
-        and queries. On the .NET platform this includes the System.XML DOM classes.</p>
+        and queries. On the .NET platform this includes the System.Xml DOM classes.</p>
     </description>
     <details link="sourcedocs/thirdparty" name="Object models"/>
     <products>
-      <product editions="HE PE EE EE-T EE-Q EE-V JS2"/>
+      <product editions="HE PE EE EE-T EE-Q EE-V JS2 CS"/>
     </products>
   </feature>
   
