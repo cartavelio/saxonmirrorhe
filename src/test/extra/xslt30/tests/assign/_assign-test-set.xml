@@ -136,4 +136,42 @@
          <assert>/out = "|2|4|8|16|32|64|128|256|512|1024|2048|4096|8192|16384|32768|65536|131072|262144|524288|1048576|2097152"</assert>
       </result>
    </test-case>
+   
+   <test-case name="assign-005">
+      <description>Assigned value is atomized based on declared type</description>
+      <created by="Michael Kay" on="2021-08-27"/>
+      <environment>
+         <source role="." file="assign-001.xml"/>
+         <saxon:property name="http://saxon.sf.net/feature/allow-multithreading" value="false" xmlns:saxon="http://saxon.sf.net/"/>
+      </environment>
+      <dependencies>
+         <spec value="XSLT20+"/>
+         <feature value="Saxon-PE"/>
+      </dependencies>
+      <test>
+         <stylesheet file="assign-005.xsl"/>
+      </test>
+      <result>
+         <assert>/out = "true"</assert>
+      </result>
+   </test-case>
+   
+   <test-case name="assign-006">
+      <description>Assigned value is incompatible with declared type</description>
+      <created by="Michael Kay" on="2021-08-27"/>
+      <environment>
+         <source role="." file="assign-001.xml"/>
+         <saxon:property name="http://saxon.sf.net/feature/allow-multithreading" value="false" xmlns:saxon="http://saxon.sf.net/"/>
+      </environment>
+      <dependencies>
+         <spec value="XSLT20+"/>
+         <feature value="Saxon-PE"/>
+      </dependencies>
+      <test>
+         <stylesheet file="assign-006.xsl"/>
+      </test>
+      <result>
+         <error code="FORG0001"/>
+      </result>
+   </test-case>
 </test-set>
