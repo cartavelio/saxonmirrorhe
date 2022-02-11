@@ -1812,16 +1812,6 @@
             </tr>
             <tr>
                <td>
-                  <code>void</code>
-               </td>
-               <td>
-                  <span class="signature">exportSchema(string filename)</span>
-                  <div class="fcomment">Export a precompiled Schema Component Model containing all the components (except built-in components) that have been loaded by using the register methods.
-                     The $filename argument is the file name where the exported schema will be stored.</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
                   <code>string</code>
                </td>
                <td>
@@ -1909,7 +1899,8 @@
                   <span class="signature">registerSchemaFromFile(string $fileName)</span>
                   <div class="fcomment">Register a schema file supplied as a file name as specified by the
                      $fileName argument. The document may be either a schema document in source XSD format, or a compiled
-                      schema in Saxon-defined SCM format (as produced using the method exportSchema)</div>
+                      schema in Saxon-defined SCM format (as produced using the <code>exportSchema()</code>
+                     method).</div>
                </td>
             </tr>
             <tr>
@@ -1919,6 +1910,17 @@
                <td>
                   <span class="signature">registerSchemaFromString(string $schemaStr)</span>
                   <div class="fcomment">Register a schema supplied as a string.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">exportSchema(string filename)</span>
+                  <div class="fcomment">Export a precompiled Schema Component Model containing all the
+                     components (except built-in components) that have been loaded by using the register methods.
+                     The $filename argument is the file name where the exported schema will be stored.</div>
                </td>
             </tr>
             <tr>
