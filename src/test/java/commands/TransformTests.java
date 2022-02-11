@@ -379,6 +379,9 @@ public class TransformTests {
     @Test
     public void testDirectory() {
 
+        if (!new File(ConfigTest.DATA_DIR + "welch-ser/out").exists()) {
+            new File(ConfigTest.DATA_DIR + "welch-ser/out").mkdir();
+        }
         if (new File(ConfigTest.DATA_DIR + "welch-ser/out/A.xsl.xml").exists()) {
             new File(ConfigTest.DATA_DIR + "welch-ser/out/A.xsl.xml").delete();
         }

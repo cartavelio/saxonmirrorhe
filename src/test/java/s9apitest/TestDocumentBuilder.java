@@ -231,9 +231,12 @@ public class TestDocumentBuilder {
             XdmNode e = builder.build(d.asSource());
             XPathCompiler xpc = processor.newXPathCompiler();
             XPathSelector s = xpc.compile("distinct-values(//*/base-uri())").load();
-            s.setContextItem(e);
+            s.setContextItem(d);
             XdmValue v = s.evaluate();
-            assertEquals(3, v.size(), "3 distinct base URIs");
+            assertEquals(3, v.size(), "3 distinct base URIs in d");
+            s.setContextItem(e);
+            v = s.evaluate();
+            assertEquals(3, v.size(), "3 distinct base URIs in e");
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
