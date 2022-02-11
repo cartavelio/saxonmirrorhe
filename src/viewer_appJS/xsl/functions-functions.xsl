@@ -125,7 +125,7 @@
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        <xsl:message>platforms: <xsl:value-of select="$platforms"/></xsl:message>
+        <!--<xsl:message>platforms: <xsl:value-of select="$platforms"/></xsl:message>-->
         
         <xsl:for-each select="$platforms">
             <xsl:value-of select="$implementation-doc/implement/saxon[@platform = current()]"/>
