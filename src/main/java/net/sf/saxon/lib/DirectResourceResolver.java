@@ -86,7 +86,15 @@ public class DirectResourceResolver implements ResourceResolver {
         if (ResourceRequest.XSLT_NATURE.equals(request.nature)) {
             InputStream stream;
             try {
-                stream = ResourceLoader.urlStream(new URL(request.uri));
+                if (request.uri.startsWith("classpath:")) {
+                    String s = request.uri.substring(10);
+                    if (s.startsWith("/")) {
+                        s = s.substring(1);
+                    }
+                    stream = ClassLoader.getSystemResourceAsStream(s);
+                } else {
+                    stream = ResourceLoader.urlStream(new URL(request.uri));
+                }
             } catch (IOException e) {
                 stream = null; // Carry on, the XML parser might know what to do with it.
             }
