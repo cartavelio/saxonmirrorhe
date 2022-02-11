@@ -18,6 +18,10 @@ task eejTestSuitesJava() {
   // Just somewhere to hang dependencies
 }
 
+task eejTestSuitesDotnet() {
+  // Just somewhere to hang dependencies
+}
+
 // This task will generate the test suite report from
 // whatever results are lying around
 task testSuiteReportsJava(
@@ -149,6 +153,10 @@ task qt3TestsJava() {
   // Just somewhere to hang dependencies
 }
 
+task qt3TestsDotnet() {
+  // Just somewhere to hang dependencies
+}
+
 ["he", "pe", "ee"].each { rel ->
   def languages = ["XP31", "XQ30", "XQ31"]
   if (rel == "ee") {
@@ -184,6 +192,22 @@ task qt3TestsJava() {
             }
           }
         }
+
+        if (rel == "ee" && bc == "off") {
+          testSuite.qt3 {
+            platform "dotnet"
+            dotnet dotnetex
+            language lang
+            release rel
+            directory testsuites.w3cQT3TestSuiteDir
+            if (bc != "" || rel == "ee") {
+              bytecode (bc == "on")
+            }
+            if (uoption != "") {
+              unfolded (uoption == "yes")
+            }
+          }
+        }
       }
     }
   }
@@ -193,6 +217,10 @@ task qt3TestsJava() {
 // Tasks to run QT3 extra test driver with a variety of options
 
 task qt3ExtraTestsJava() {
+  // Just somewhere to hang dependencies
+}
+
+task qt3ExtraTests() {
   // Just somewhere to hang dependencies
 }
 
@@ -216,6 +244,16 @@ task qt3ExtraTestsJava() {
         directory "${projectDir}/src/test/extra/qt3"
         if (bc != "" || rel == "ee") {
           bytecode (bc == "on")
+        }
+      }
+    
+      if (rel == "ee" && bc == "off" && lang != "XQ30") {
+        testSuite.qt3extra {
+          platform "dotnet"
+          dotnet dotnetex
+          language lang
+          release rel
+          directory "${projectDir}/src/test/extra/qt3"
         }
       }
     }
@@ -276,7 +314,15 @@ task xslt30TestsJava() {
   // Just somewhere to hang dependencies
 }
 
+task xslt30TestsDotnet() {
+  // Just somewhere to hang dependencies
+}
+
 task xslt30ExtraTestsJava() {
+  // Just somewhere to hang dependencies
+}
+
+task xslt30ExtraTestsDotnet() {
   // Just somewhere to hang dependencies
 }
 
@@ -311,6 +357,16 @@ task xslt30ExtraTestsJava() {
               }
               if (jitopt != "") {
                 jit (jitopt == "on")
+              }
+            }
+
+            if (rel == "ee" && bc == "off" && jitopt == "" && expopt == "") {
+              testSuite.xslt30 {
+                platform "dotnet"
+                dotnet dotnetex
+                language lang
+                release rel
+                directory testsuites.w3cXslt30TestSuiteDir
               }
             }
 
