@@ -15,10 +15,12 @@ def excelsiorJetHome = null
 task test_jetHome(
   description: "Test that excelsiorJetHome is configured"
 ) {
-  if (excelsiorJetHome == null) {
-    throw new GradleException("Cannot build SaxonC, cannot find ExcelsiorJet")
-  } else {
-    println("Running ExcelsiorJet from ${excelsiorJetHome}")
+  doLast {
+    if (excelsiorJetHome == null) {
+      throw new GradleException("Cannot build SaxonC, cannot find ExcelsiorJet")
+    } else {
+      println("Running ExcelsiorJet from ${excelsiorJetHome}")
+    }
   }
 }
 
