@@ -11,14 +11,14 @@ namespace Saxon.Api {
     {
 
         /// <summary>
-        /// The underlying <c>Destination</c> object in the Saxon implementation
+        /// The underlying <c>Saxon.Hej.s9api.Destination</c> object in the Saxon implementation
         /// </summary>
         /// <remarks>
-        /// <para>This property provides access to internal methods in the Saxon engine that are
-        /// not specifically exposed in the .NET API. In general these methods should be
-        /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
-        /// <para>The internal methods follow
-        /// Java naming conventions rather than .NET conventions.</para>
+        /// <para>This method must be implemented in any class that implements this interface,
+        /// that is, a class that provides a custom destination not based on those supplied
+        /// in the Saxon-CS product.</para> 
+        /// <para>Implementing this method requires familiarity with Saxon internals (which may
+        /// change from one release to another.</para>
         /// <para>Information about the returned <see cref="Saxon.Hej.s9api.Destination"/> object 
         /// (and the objects it provides access to) is included in the Saxon JavaDoc documentation.
         /// </para>

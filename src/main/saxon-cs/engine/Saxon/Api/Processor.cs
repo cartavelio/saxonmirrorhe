@@ -103,6 +103,17 @@ namespace Saxon.Api {
             init();
         }
 
+        /// <summary>
+        /// Create a <c>Processor</c>, wrapping an existing instance of the internal Saxon class <c>Configuration</c>
+        /// </summary>
+        /// <param name="config">The <c>Configuration</c> to be wrapped.</param>
+        /// <remarks>
+        /// <para>This method can be used to create two <c>Processor</c> objects that share the same underlying
+        /// <c>Configuration</c>, though this is not usually advisable, because most changes to one <c>Processor</c>
+        /// actually modify the <c>Configuration</c> and hence affect the other <c>Processor</c>.</para>
+        /// <para>As an alternative to this method, consider using the <c>Processor</c> that was originally used
+        /// to construct the <c>Configuration</c>, which will often be available via <c>Configuration.getProcessor()</c>.</para>
+        /// </remarks>
 		public Processor(Saxon.Hej.Configuration config) {
             JProcessor = new Saxon.Hej.s9api.Processor(config);
             config.setProcessor(this);

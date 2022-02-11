@@ -50,9 +50,10 @@ namespace Saxon.Api {
             this.stripperRules = pack.getUnderlyingPreparedPackage().getStripperRules();
         }
         
-        // For internal use
-        // TODO: do this properly
-        public WhitespacePolicy(Saxon.Hej.style.StylesheetPackage pack) {
+        // For internal use: construct the whitespace policy defined by xsl:strip-space and xsl:preserve-space
+        // declarations in a stylesheet
+        
+        internal WhitespacePolicy(Saxon.Hej.style.StylesheetPackage pack) {
             this.policy = Whitespace.XSLT;
             this.stripperRules = pack.getStripperRules();
         }
