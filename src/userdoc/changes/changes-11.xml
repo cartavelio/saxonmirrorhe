@@ -6,20 +6,20 @@
         
     </category>-->
     
-    <category name="xslt30">
+    <!--<category name="xslt30">
 
  
-    </category>
+    </category>-->
     
-    <category name="xpath31">
+    <!--<category name="xpath31">
 
  
-    </category>
+    </category>-->
     
-    <category name="functions31">
+    <!--<category name="functions31">
 
  
-    </category>
+    </category>-->
     
     <category name="s9api">
         
@@ -297,20 +297,20 @@
  
     </category>
     
-    <category name="extensibility">
+    <!--<category name="extensibility">
         
  
-    </category>
+    </category>-->
     
-    <category name="optimization">
+    <!--<category name="optimization">
       
   
-    </category>
+    </category>-->
 
-    <category name="installation">
+    <!--<category name="installation">
  
          
-    </category>
+    </category>-->
 
     <category name="serialization">
         
@@ -487,16 +487,16 @@
   
     </category>
     
-    <category name="sourcedocs">
+    <!--<category name="sourcedocs">
         
  
  
-    </category>
+    </category>-->
     
-    <category name="xsd11">
+    <!--<category name="xsd11">
  
         
-    </category>
+    </category>-->
     
     <category name="xquery-update">
         
@@ -508,7 +508,7 @@
     
     <!--<category name="xquery31">
         
- </category>-->
+    </category>-->
 
 
 
