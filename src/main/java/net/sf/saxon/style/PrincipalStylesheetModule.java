@@ -865,6 +865,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             StyleElement firstDecl = entry.getValue().get(0).getSourceElement();
             as.setSystemId(firstDecl.getSystemId());
             as.setLineNumber(firstDecl.getLineNumber());
+            as.setColumnNumber(firstDecl.getColumnNumber());
             index.put(entry.getKey(), as);
 
             Component declaringComponent = as.getDeclaringComponent();

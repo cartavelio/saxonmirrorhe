@@ -393,6 +393,7 @@ public class XQueryFunction implements Declaration, Location {
                 compiledFunction.setParameterDefinitions(params);
                 compiledFunction.setResultType(getResultType());
                 compiledFunction.setLineNumber(location.getLineNumber());
+                compiledFunction.setColumnNumber(location.getColumnNumber());
                 compiledFunction.setSystemId(location.getSystemId());
                 compiledFunction.setStackFrameMap(map);
                 compiledFunction.setUpdating(updating);

@@ -136,6 +136,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
             gv.setVariableQName(sourceBinding.getVariableQName());
             gv.setSystemId(getSystemId());
             gv.setLineNumber(getLineNumber());
+            gv.setColumnNumber(getColumnNumber());
             RetainedStaticContext rsc = makeRetainedStaticContext();
             gv.setRetainedStaticContext(rsc);
             if (gv.getBody() != null) {
