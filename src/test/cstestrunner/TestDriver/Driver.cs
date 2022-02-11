@@ -457,6 +457,11 @@ namespace TestDriver {
                         failingTestCases.Add(testCaseName);
                         return null;
                     }
+                    
+                    if (!env.usable) {
+                        System.Console.WriteLine("*** Environment " + envName +  " is unusable");
+                        return null;
+                    }
                 }
             }
 
