@@ -319,9 +319,9 @@ namespace Saxon.Api {
         /// which terminates the transformation.</para>
         /// </remarks>
 
-        public Consumer<Message> MessageListener {
-            get => s9Transformer.controller.getMessageHandler();
-            set => s9Transformer.controller.setMessageHandler(value);
+        public Action<Message> MessageListener {
+            get => msg => s9Transformer.controller.getMessageHandler().Invoke(msg);
+            set => s9Transformer.controller.setMessageHandler(value.Invoke);
         }
 
         /// <summary>
