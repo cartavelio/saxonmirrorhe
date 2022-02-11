@@ -1553,7 +1553,7 @@
       
       <p>Examples of Saxon.Api transformations are included in the <code>saxon-resources</code>
          download file, see the sample application <strong>Examples.cs</strong>, and <a
-            class="bodylink" href="/samples/Saxon.Api">Saxon API Examples</a> for more information.</p>
+            class="bodylink" href="/samples/dotnetsamples">API Examples for .NET</a> for more information.</p>
       
       <p>For instance, <code>XsltSimple2</code> in <code>Examples.cs</code> runs as follows:</p>
 

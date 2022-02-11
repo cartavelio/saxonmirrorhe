@@ -9709,37 +9709,47 @@ return saxon:serialize($x, <xsl:output method="xml"
       </details>
       <see-also namespace="http://www.w3.org/2005/xpath-functions" name="serialize"/>
     </function>
+    
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">sort</name>
+      <name namespace="http://saxon.sf.net/">slice</name>
       <description>
-        <p>Sorts a sequence of items.</p>
+        <p>Selects items from a sequence based on their position.</p>
       </description>
       <signatures>
         <proto return-type="item()*">
-          <arg name="seq" type="item()*" desc="The sequence to be sorted"/>
-        </proto>
-        <proto return-type="item()*">
-          <arg name="seq" type="item()*" desc="The sequence to be sorted"/>
-          <arg name="sort-key" type="function(item()) as xs:anyAtomicType"
-            desc="A function used to compute the sort key"/>
+          <arg name="seq" type="item()*" desc="The sequence to be filtered"/>
+          <arg name="positions" type="xs:integer*"
+            desc="The positions of the items to be selected"/>
         </proto>
       </signatures>
       <status>
-        <p>First available in Saxon 8.9. Dropped in Saxon 9.8; applications should use the
-          XPath 3.1 <a href="/functions/fn/sort" class="bodylink code">fn:sort()</a> function in
-          preference.</p>
+        <p>First available in Saxon 11</p>
       </status>
       <saxon-edition>PE/EE</saxon-edition>
       <details>
         <div>
-          <p>The function is no longer available.</p>
+          <p>For each integer <code>$i</code> in the value of <code>$positions</code>, the function returns:</p>
+          <ul>
+            <li>if the integer is between 1 and the length of <code>$seq</code> (inclusive), then <code>$seq[$i]</code></li>
+            <li>if the integer is negative and its absolute value is between 1 and the length of <code>$seq</code> (inclusive),
+            then <code>$seq[count($seq)-$i+1]</code></li>
+            <li>if the integer is zero, or if its absolute value exceeds the length of <code>$seq</code>, then nothing.</li>
+          </ul>
+          <p>For example:</p>
+          <ul>
+            <li><code>saxon:slice(10 to 20, 5)</code> returns <code>14</code></li>
+            <li><code>saxon:slice(10 to 20, 5 to 6)</code> returns <code>(14, 15)</code></li>
+            <li><code>saxon:slice(10 to 20, (5, 3, 1))</code> returns <code>(14, 12, 10)</code></li>
+            <li><code>saxon:slice(10 to 20, -1)</code> returns <code>20</code></li>
+            <li><code>saxon:slice(10 to 20, -3 to -1)</code> returns <code>18, 19, 20</code></li>
+            <li><code>saxon:slice(10 to 20, 1 by 3 to 7)</code> returns <code>10, 13, 16</code></li>
+            <li><code>saxon:slice(10 to 20, -1 by -1 to -4)</code> returns <code>20, 19, 18, 17</code></li>
+            <li><code>saxon:slice(10 to 20, 0)</code> returns <code>()</code></li>
+            <li><code>saxon:slice(10 to 20, -2 to +2)</code> returns <code>19, 20, 10, 11</code></li>
+          </ul>
         </div>
       </details>
-      <see-also namespace="http://www.w3.org/2005/xpath-functions" name="sort"/>
     </function>
-    
- 
-    
     
     
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
