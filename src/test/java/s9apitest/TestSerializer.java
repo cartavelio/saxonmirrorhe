@@ -8,8 +8,12 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.OutputURIResolver;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.serialize.CharacterMap;
+import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.stax.XMLStreamWriterDestination;
+import net.sf.saxon.z.IntHashMap;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -25,11 +29,16 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * JUnit tests for the s9api XQueryCompiler
@@ -142,6 +151,47 @@ public class TestSerializer {
             fail(e.getMessage());
         }
     }
+
+    @Test
+    public void testXsltCharacterMapsFromApi() {
+        try {
+            Processor proc = new Processor(false);
+            StringReader sr = new StringReader("<doc><e>text</e></doc>");
+            SAXSource source = new SAXSource(new InputSource(sr));
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode node = builder.build(source);
+            XsltCompiler xqcomp = proc.newXsltCompiler();
+            sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                                          "<xsl:output method='xml' use-character-maps='m'/>" +
+                                          "<xsl:character-map name='m'><xsl:output-character character='e' string='f'/></xsl:character-map>" +
+                                          "<xsl:template match='/'><xsl:copy-of select='.'/></xsl:template>" +
+                                          "</xsl:stylesheet>");
+            SAXSource style = new SAXSource(new InputSource(sr));
+            XsltTransformer trans = xqcomp.compile(style).load();
+
+            Serializer serializer = proc.newSerializer();
+            serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+            CharacterMapIndex mapIndex = new CharacterMapIndex();
+            IntHashMap<String> map = new IntHashMap<>();
+            map.put('e', "f");
+            CharacterMap namedMap = new CharacterMap(new StructuredQName("", "", "m"), map);
+            mapIndex.putCharacterMap(new StructuredQName("", "", "m"), namedMap);
+            serializer.setCharacterMap(mapIndex);
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            serializer.setOutputStream(os);
+
+            trans.setSource(node.asSource());
+            trans.setDestination(serializer);
+            trans.transform();
+
+            String result = os.toString();
+            assertTrue(result.contains("tfxt"), "Charmapped");
+
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
 
     @Test
     public void testSecondaryOutputDestination() {
