@@ -530,8 +530,12 @@ public abstract class StyleElement extends ElementImpl {
         processDefaultMode();
         staticContext = new ExpressionContext(this, null);
         processAttributes();
-        for (NodeInfo child : children(StyleElement.class::isInstance)) {
-            ((StyleElement) child).processAllAttributes();
+        for (NodeInfo child : children()) {
+            if (child instanceof StyleElement) {
+                ((StyleElement) child).processAllAttributes();
+            } else if (child instanceof TextValueTemplateNode) {
+                ((TextValueTemplateNode) child).parse();
+            }
         }
     }
 
