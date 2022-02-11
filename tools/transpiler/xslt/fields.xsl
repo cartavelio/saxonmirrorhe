@@ -209,7 +209,7 @@
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'net.sf.saxon.s9api.ItemType']" priority="20">
       <xsl:choose>
          <xsl:when test="name/@identifier=$upperAtomicTypes">
-            <xsl:text>Saxon.Api.XdmAtomicType.{f:toUpperWithUnderscore(name/@identifier)}</xsl:text>
+            <xsl:text>Saxon.Api.XdmAtomicType.{f:capitalize(lower-case(name/@identifier))}</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier=$nodeKinds">
             <xsl:text>Saxon.Api.XdmNodeKind.{f:capitalize(lower-case(name/@identifier)) => replace('_node', '')}</xsl:text>

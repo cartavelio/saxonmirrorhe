@@ -389,7 +389,7 @@
             <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'noneOf'">
-            <xsl:text>{arguments/argument[1]/type/@RESOLVED_TYPE}.NONE</xsl:text>
+            <xsl:text>{arguments/argument[1]/type/@RESOLVED_TYPE => f:adjustTypeNamespace()}.NONE</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'contains'">
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
@@ -586,10 +586,10 @@
          </xsl:when>
          <xsl:when test="name/@identifier='values' and @RESOLVED_TYPE = 'net.sf.saxon.type.PrimitiveUType'">
             <!-- TODO: avoid special-casing this! Needed for UType.decompose() method -->
-            <xsl:text>net.sf.saxon.type.PrimitiveUType.values()</xsl:text>
+            <xsl:text>Saxon.Hej.type.PrimitiveUType.values()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier='values'">
-            <xsl:text>System.Enum.GetValues(typeof({@RESOLVED_TYPE}))</xsl:text>
+            <xsl:text>System.Enum.GetValues(typeof({@RESOLVED_TYPE => f:adjustTypeNamespace()}))</xsl:text>
          </xsl:when>
       </xsl:choose>      
    </xsl:template>
@@ -603,7 +603,7 @@
                              or @nodeType='StringLiteralExpr']]
       [key('digestClassKey', @RESOLVED_TYPE, $digest)[self::enum][@simple='1']]" 
       priority="30" mode="methods">
-      <xsl:text>({@RESOLVED_TYPE})Enum.Parse(typeof({@RESOLVED_TYPE}), </xsl:text>
+      <xsl:text>({f:adjustTypeNamespace(@RESOLVED_TYPE)})Enum.Parse(typeof({f:adjustTypeNamespace(@RESOLVED_TYPE)}), </xsl:text>
       <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
       <xsl:text>)</xsl:text>
    </xsl:template>
@@ -650,7 +650,7 @@
             </xsl:variable>
             
             <xsl:if test="starts-with(@RESOLVED_TYPE, 'java.lang.Class&lt;? extends ')">
-               <xsl:text>({replace(@RESOLVED_TYPE, 'java\.lang\.Class&lt;\? extends ', '') => replace('>$', '')})</xsl:text>
+               <xsl:text>({replace(@RESOLVED_TYPE, 'java\.lang\.Class&lt;\? extends ', '') => replace('>$', '') => f:adjustTypeNamespace()})</xsl:text>
             </xsl:if>
             <xsl:text>System.Activator.CreateInstance({$classExpr})</xsl:text>
          </xsl:when>
@@ -1180,7 +1180,7 @@
    <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.s9api.XdmItem']" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'getUnderlyingValue#0':  '((net.sf.saxon.om.Item)%scope%.Unwrap())',
+         'getUnderlyingValue#0':  '((Saxon.Hej.om.Item)%scope%.Unwrap())',
          '*':                     '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
@@ -1188,7 +1188,7 @@
    <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.s9api.ItemType']" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'getUnderlyingItemType#0':  '((net.sf.saxon.type.ItemType)%scope%.Unwrap())',
+         'getUnderlyingItemType#0':  '((Saxon.Hej.type.ItemType)%scope%.Unwrap())',
          '*':                        '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
@@ -1207,7 +1207,7 @@
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
          'getSpaceStrippingRule#0':  '%scope%.Implementation',
-         'makeStripper#0':           '(next => (new net.sf.saxon.@event.Stripper(%scope%.Implementation, next)))',
+         'makeStripper#0':           '(next => (new Saxon.Hej.@event.Stripper(%scope%.Implementation, next)))',
          '*':                        '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
@@ -1215,7 +1215,7 @@
    <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.s9api.XdmMap']" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'getUnderlyingValue#0':  '((net.sf.saxon.ma.map.MapItem)%scope%.Unwrap())',
+         'getUnderlyingValue#0':  '((Saxon.Hej.ma.map.MapItem)%scope%.Unwrap())',
          '*':                     '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
@@ -1223,8 +1223,8 @@
    <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.s9api.XdmNode']" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'getUnderlyingNode#0':   '((net.sf.saxon.om.NodeInfo)%scope%.Unwrap())',
-         'getUnderlyingValue#0':  '((net.sf.saxon.om.NodeInfo)%scope%.Unwrap())',
+         'getUnderlyingNode#0':   '((Saxon.Hej.om.NodeInfo)%scope%.Unwrap())',
+         'getUnderlyingValue#0':  '((Saxon.Hej.om.NodeInfo)%scope%.Unwrap())',
          '*':                     '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
@@ -1232,7 +1232,7 @@
    <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.s9api.XdmValue']" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'getUnderlyingValue#0':  '((net.sf.saxon.om.GroundedValue)%scope%.Unwrap())',
+         'getUnderlyingValue#0':  '((Saxon.Hej.om.GroundedValue)%scope%.Unwrap())',
          'isEmpty#0':             '%scope%.Count==0',
          'size#0':                '%scope%.Count==0',
          '*':                     '%scope%.%Name%(%args%)'
@@ -1327,7 +1327,7 @@
       </xsl:variable>
       <xsl:choose>
          <xsl:when test="name/@identifier = ('empty', 'of') and $targetClass">
-            <xsl:text>java.util.Optional&lt;{f:renameGenericType($targetClass)}>.{name/@identifier}(</xsl:text>
+            <xsl:text>Saxon.Ejava.util.Optional&lt;{f:renameGenericType($targetClass)}>.{name/@identifier}(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>
          </xsl:when>
@@ -1427,12 +1427,13 @@
                  then f:renameGenericType($digestMethod/@returns) 
                  else ''"/>
       <!--<xsl:message> cast = {$optionalCast}</xsl:message>-->
-      <xsl:if test="$optionalCast">(({$optionalCast})</xsl:if>
+      <xsl:if test="$optionalCast">((/*1430*/{$optionalCast})</xsl:if>
+      
       <xsl:if test="scope">
          <xsl:choose>
            <xsl:when test="scope/name/@nodeType='SimpleName' and not (scope/@UNRESOLVED) and ends-with(f:degenerify(@RESOLVED_TYPE), '.'||scope/name/@identifier) and not(scope/scope)">
                <!-- A simple static method call -->
-               <xsl:text>{f:escapeDottedName(@RESOLVED_TYPE)}</xsl:text>
+               <xsl:text>{f:escapeDottedName(@RESOLVED_TYPE) => f:adjustTypeNamespace()}</xsl:text>
             </xsl:when>
             <xsl:otherwise>
                <xsl:apply-templates select="scope" mode="xml-to-cs"/>

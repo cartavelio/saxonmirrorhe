@@ -74,7 +74,7 @@
    </xsl:template>
 
    <xsl:template match="packageDeclaration">
-      <xsl:text>namespace {f:qualifiedName(name)} </xsl:text>
+      <xsl:text>namespace {f:qualifiedName(name) => replace('^com\.saxonica', 'Saxon.Eej') => replace('^net\.sf\.saxon', 'Saxon.Hej')} </xsl:text>
    </xsl:template>
    
    <xsl:template match="import"/>
@@ -117,7 +117,7 @@
             <xsl:text>{f:renameGenericType(../@RESOLVED_TYPE)}</xsl:text>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:text>{f:escapeDottedName(../@RESOLVED_TYPE)}</xsl:text>
+            <xsl:text>/*134*/{f:escapeDottedName(../@RESOLVED_TYPE) => f:adjustTypeNamespace()}</xsl:text>
          </xsl:otherwise>
       </xsl:choose>     
    </xsl:template>
@@ -151,7 +151,7 @@
    
    <xsl:template match="extendedType[@nodeType = 'ClassOrInterfaceType']
       [@RESOLVED_TYPE=('java.lang.Exception', 'java.lang.RuntimeException')]" priority="25">
-      <xsl:text>{@RESOLVED_TYPE}</xsl:text>
+      <xsl:text>{@RESOLVED_TYPE => replace('java\.lang', 'Saxon.Ejava.lang')}</xsl:text>
    </xsl:template>
    
    <xsl:template name="classOrInterface">
@@ -705,7 +705,7 @@
          <xsl:text> </xsl:text>
          <xsl:apply-templates select="name"/>
       </xsl:for-each>
-      <xsl:text>) {{ /*674*/ {$NL}</xsl:text>
+      <xsl:text>) {{ {$NL}</xsl:text>
       <xsl:for-each select="members/member[@nodeType='ConstructorDeclaration']/parameters/parameter">
          <xsl:call-template name="indent-plus-two"/>
          <xsl:text>this.{name/@identifier} = {name/@identifier};{$NL}</xsl:text>
@@ -721,7 +721,7 @@
          <xsl:with-param name="indent" select="$indent+4"/>
       </xsl:apply-templates>
       <xsl:call-template name="indent-extra"/>
-      <xsl:text>}} /*690*/ {$NL}</xsl:text>
+      <xsl:text>}} {$NL}</xsl:text>
       
       <xsl:for-each select="members/member[@nodeType='ConstructorDeclaration']/parameters/parameter
             [not(name/@identifier = $enumDecl/members/member[@nodeType='FieldDeclaration']/variables/variable/name/@identifier)]">
@@ -1507,7 +1507,7 @@
             <xsl:text>System.Collections.Generic.Comparer&lt;{f:extract-type-arguments($superclass)}&gt;</xsl:text>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:text>{f:escapeDottedName($superclass)}</xsl:text>
+            <xsl:text>{f:escapeDottedName($superclass) => f:adjustTypeNamespace()}</xsl:text>
          </xsl:otherwise>
       </xsl:choose>
       
@@ -1545,8 +1545,8 @@
          <xsl:for-each select="../arguments/argument">
             <xsl:variable name="declaredType" as="text()">
                <xsl:choose>
-                  <xsl:when test="@RESOLVED_TYPE">{f:escapeDottedName(@RESOLVED_TYPE)}</xsl:when>
-                  <xsl:when test="@RETURN">{f:escapeDottedName(@RETURN)}</xsl:when>
+                  <xsl:when test="@RESOLVED_TYPE">/*AA*/{f:escapeDottedName(@RESOLVED_TYPE) => f:adjustTypeNamespace()}</xsl:when>
+                  <xsl:when test="@RETURN">/*AB*/{f:escapeDottedName(@RETURN) => f:adjustTypeNamespace()}</xsl:when>
                   <xsl:when test="@nodeType='ThisExpr'">{$containingClass}{$containingClassParams}</xsl:when>
                   <xsl:otherwise>/* UNKNOWN ARG TYPE */ object</xsl:otherwise>
                </xsl:choose>
@@ -1757,7 +1757,7 @@
    </xsl:template>
    
    <xsl:template match="*[@nodeType='MethodReferenceExpr'][@identifier='isInstance']" priority="20">
-      <xsl:text>x => (x is {scope/type/@RESOLVED_TYPE})</xsl:text>
+      <xsl:text>x => (x is {scope/type/@RESOLVED_TYPE => f:adjustTypeNamespace()})</xsl:text>
    </xsl:template>
    
    <!--<argument nodeType="MethodReferenceExpr" identifier="isInstance">
@@ -1867,7 +1867,7 @@
    
    <!-- match enumeration constants and qualify them with the enumeration class name -->
    <xsl:template match="*[@nodeType='NameExpr'][@ENUM_TYPE][matches(name/@identifier, '^[A-Z0-9_]+$')]" priority="20">
-      <xsl:text>/*explicit enum*/ {f:escapeDottedName(@ENUM_TYPE)}.{name/@identifier}</xsl:text>
+      <xsl:text>/*explicit enum*/ {f:escapeDottedName(@ENUM_TYPE) => f:adjustTypeNamespace()}.{name/@identifier}</xsl:text>
    </xsl:template>
 
    <!-- some enumeration constants aren't marked with @ENUM_TYPE and qualify them with the enumeration class name -->
