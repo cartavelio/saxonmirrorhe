@@ -1,6 +1,8 @@
 // Find Excelsior Jet to build the Saxon/C releases
 def excelsiorJetHome = null
 ["${excelsiorJet}",
+ "/opt/jet15.3-ent-amd64",
+ "/usr/local/jet15.3-ent-amd64",
  "c:/jet15.3-ent-amd64"].each { jet ->
   if (excelsiorJetHome == null && pathExists(jet)) {
     excelsiorJetHome = jet
