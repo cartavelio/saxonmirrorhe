@@ -851,15 +851,13 @@ public class Environment implements URIResolver {
         }
 
         if (collections != null) {
-            environment.processor.getUnderlyingConfiguration().setCollectionFinder(new CollectionFinder() {
-                @Override
-                public ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException {
-                    if (collectionURI == null) {
-                        collectionURI = "";
-                    }
-                    return collections.get(collectionURI);
-                }
-            });
+            environment.processor.getUnderlyingConfiguration().setCollectionFinder(
+                    (context, collectionURI) -> {
+                        if (collectionURI == null) {
+                            collectionURI = "";
+                        }
+                        return collections.get(collectionURI);
+                    });
 
         }
 
