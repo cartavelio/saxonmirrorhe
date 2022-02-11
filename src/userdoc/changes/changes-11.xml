@@ -254,9 +254,7 @@
             <code java="net.sf.saxon.tree.iter.GroundedIterator">GroundedIterator</code> and <code
                 java="net.sf.saxon.expr.LastPositionFinder">LastPositionFinder</code>. For example:</p>
         
-        <example>
-            <samp>if (iter instanceof LookaheadIterator and ((LookaheadIterator)iter).supportsHasNext() and ((LookaheadIterator)iter).hasNext())...</samp>
-        </example>
+        <samp>if (iter instanceof LookaheadIterator and ((LookaheadIterator)iter).supportsHasNext() and ((LookaheadIterator)iter).hasNext())...</samp>
 
         <h2>NodeInfo</h2>
 
@@ -319,7 +317,8 @@
     <category name="serialization">
         
         <p>A new serialization property <code>saxon:internal-dtd-subset</code> is available with the XML output
-        method. The value is a string conforming to the XML grammar production <code>intSubset</code>; it is included
+            method (see <a class="bodylink" href="/extensions/output-extras/serialization-parameters">Serialization parameters</a>).
+            The value is a string conforming to the XML grammar production <code>intSubset</code>; it is included
         in the serialized document "as is", without checking. As with any string, special characters will need to
         be escaped, for example "<code>&lt;</code>" is written as "<code>&amp;lt;</code>". The square brackets that
         enclose the internal subset within the Document Type Declaration should not be included in the value.</p>
