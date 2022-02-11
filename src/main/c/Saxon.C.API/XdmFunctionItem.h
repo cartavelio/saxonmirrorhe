@@ -114,12 +114,12 @@ public:
         return XDM_FUNCTION_ITEM;
     }
 
-
-
+protected:
+    std::string fname; /*!< The name of the function item */
 
 private:
 
-    std::string fname; /*!< The name of the function item */
+
     int arity;/*!< The arity of this function */
 
 };

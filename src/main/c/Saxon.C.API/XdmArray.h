@@ -55,7 +55,6 @@ public:
 
     //! Get the number of members in the array
     /**
-     * Get the number of members in the array
      *
      * @return the number of members in the array. (Note that the <code>size()</code> method returns 1 (one),
      * because an XDM array is an item.)
