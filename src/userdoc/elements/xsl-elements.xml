@@ -585,6 +585,9 @@
                 (items of type <code>record(value, *)</code>) and each parcel becomes one member of the constructed
                 array. If the attribute is absent or has the value "no", then the sequence returned by the
                 sequence constructor is converted to an array, one item per array member.</attribute>
+                <attribute name="select" use="optional">The contents of the array may be given either by an
+                    expression in the <code>select</code> attribute, or by expanding the sequence constructor
+                    contained in the <code>xsl:array</code> element.</attribute>
             </attributes>
             <details>
                 <p>If every member of the array is to be a singleton item, then it is simplest to use
