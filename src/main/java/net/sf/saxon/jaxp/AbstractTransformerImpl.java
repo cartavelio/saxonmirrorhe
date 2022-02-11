@@ -23,7 +23,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 import org.w3c.dom.Node;
 import org.xml.sax.XMLFilter;
 
@@ -180,7 +180,7 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
             if (value instanceof Sequence) {
                 converted = ((Sequence)value).materialize();
             } else if (value instanceof String) {
-                converted = new UntypedAtomicValue(StringView.tidy((String) value));
+                converted = StringValue.makeUntypedAtomic(StringView.tidy((String) value));
             } else if (required.getPrimaryType() instanceof JavaExternalObjectType) {
                 converted = new ObjectValue<>(value);
             } else {

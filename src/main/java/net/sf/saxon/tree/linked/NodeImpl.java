@@ -24,7 +24,7 @@ import net.sf.saxon.tree.util.SteppingNavigator;
 import net.sf.saxon.tree.util.SteppingNode;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -138,7 +138,7 @@ public abstract class NodeImpl
     public AtomicSequence atomize() throws XPathException {
         SchemaType stype = getSchemaType();
         if (stype == Untyped.getInstance() || stype == BuiltInAtomicType.UNTYPED_ATOMIC) {
-            return new UntypedAtomicValue(getUnicodeStringValue());
+            return StringValue.makeUntypedAtomic(getUnicodeStringValue());
         } else {
             return stype.atomize(this);
         }

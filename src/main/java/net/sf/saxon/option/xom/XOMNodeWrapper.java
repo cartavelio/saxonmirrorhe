@@ -22,7 +22,6 @@ import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.value.UntypedAtomicValue;
 import nu.xom.*;
 
 import java.util.ArrayList;
@@ -185,7 +184,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
             case Type.PROCESSING_INSTRUCTION:
                 return new StringValue(getUnicodeStringValue());
             default:
-                return new UntypedAtomicValue(getUnicodeStringValue());
+                return StringValue.makeUntypedAtomic(getUnicodeStringValue());
         }
     }
 

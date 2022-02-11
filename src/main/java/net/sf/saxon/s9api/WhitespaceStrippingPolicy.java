@@ -57,8 +57,8 @@ public class WhitespaceStrippingPolicy {
 
     /**
      * Create a custom whitespace stripping policy, by supplying a predicate that indicates for any given element,
-     * whether whitespace text nodes among its children should be stripped or preserved. Note that this decision
-     * ignores any xml:space attributes that might be present, and the decision applies only to immediate children,
+     * whether whitespace text nodes among its children should be stripped or preserved. Note that xml:space
+     * attributes that might be present have no effect on the outcome, and the decision applies only to immediate children,
      * not to descendants.
      * <p>Changed in 9.9 to use the standard Java 8 Predicate class in place of Saxon's version.</p>
      * @param elementTest a predicate applied to element names, which should return true if whitespace-only

@@ -90,7 +90,6 @@ public class UntypedNumericComparer implements AtomicComparer {
             StringValue a0, NumericValue a1, ConversionRules rules)
             throws XPathException {
         double d1 = a1.getDoubleValue();
-
         UnicodeString cs = Whitespace.trim(a0.getUnicodeStringValue());
 
         boolean simple = true;
