@@ -57,8 +57,8 @@ XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {
     					"(Lnet/sf/saxon/s9api/XdmAtomicValue;)Lnet/sf/saxon/s9api/XdmValue;");
 
     }
-    if (!tbmapID) {
-    			std::cerr << "Error: Saxonc.XdmMap." << "get"
+    if (tbmapID == nullptr) {
+    			std::cerr << "Error: Saxonc.XdmMap." << "get(XdmAtomicValue)"
     				<< " not found\n" << std::endl;
     			return nullptr;
     } else {
@@ -128,7 +128,7 @@ XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {
 
         }
         if (!tbsmapID) {
-        			std::cerr << "Error: Saxonc.XdmMap." << "get"
+        			std::cerr << "Error: Saxonc.XdmMap." << "get(String)"
         				<< " not found\n" << std::endl;
         			return nullptr;
         } else {
@@ -195,15 +195,15 @@ XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {
 
         if(tbimapID == nullptr) {
         tbimapID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmMapClass, "get",
-        					"(I)Lnet/sf/saxon/s9api/XdmValue;");
+        					"(J)Lnet/sf/saxon/s9api/XdmValue;");
 
         }
-        if (!tbimapID) {
-        			std::cerr << "Error: Saxonc.XdmMap." << "get"
+        if (tbimapID == nullptr) {
+        			std::cerr << "Error: Saxonc.XdmMap." << "get(int)"
         				<< " not found\n" << std::endl;
         			return nullptr;
         } else {
-        		jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbimapID, key));
+        		jobject valueObj = (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, tbimapID, (long)key));
         		if(valueObj) {
                     jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env,
                                                            "net/sf/saxon/s9api/XdmAtomicValue");
@@ -269,7 +269,7 @@ XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {
 
         }
         if (!tbdmapID) {
-        			std::cerr << "Error: Saxonc.XdmMap." << "get"
+        			std::cerr << "Error: Saxonc.XdmMap." << "get(double)"
         				<< " not found\n" << std::endl;
         			return nullptr;
         } else {
@@ -339,7 +339,7 @@ XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {
 
         }
         if (!tbdmapID) {
-        			std::cerr << "Error: Saxonc.XdmMap." << "get"
+        			std::cerr << "Error: Saxonc.XdmMap." << "get(long)"
         				<< " not found\n" << std::endl;
         			return nullptr;
         } else {

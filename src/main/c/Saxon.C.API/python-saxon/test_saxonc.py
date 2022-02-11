@@ -988,9 +988,11 @@ def testMapAsFunction():
         mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2), "c":saxonproc.make_integer_value(3)}
         xdmdict = create_xdm_dict(saxonproc, mymap)
         map =saxonproc.make_map(xdmdict)
+
         assert map is not None
-        cVar = [saxonproc.make_integer_value(1)]
-        result = map.call(cVar)
+        cVar = saxonproc.make_string_value("c")
+        result = map.call(saxonproc, [cVar])
+        assert result is not None
         assert isinstance(result, PyXdmAtomicValue)
         assert result.integer_value == 3
 
@@ -1001,21 +1003,16 @@ def testMapAsQueryParameter():
         mymap = {saxonproc.make_string_value("a"):saxonproc.make_integer_value(1), saxonproc.make_string_value("b"):saxonproc.make_integer_value(2), saxonproc.make_string_value("c"):saxonproc.make_integer_value(3)}
         map =saxonproc.make_map(mymap)
         assert map is not None
-        cVar = [saxonproc.make_integer_value(1)]
-        result = map.call(cVar)
-        assert isinstance(result, PyXdmAtomicValue)
-        assert result.integer_value == 3
+
         query = """\
-        declare namespace m='http://www.w3.org/2005/xpath-functions/map';" +
-                                    "declare variable $a as map(*) external; " +
-                                    "m:size($a)
+        declare namespace m='http://www.w3.org/2005/xpath-functions/map';declare variable $a as map(*) external; m:size($a)
         """
-        query_proc = proc.new_xquery_processor()
+        query_proc = saxonproc.new_xquery_processor()
         query_proc.set_query_content(query)
         query_proc.set_parameter("a", map)
         result = query_proc.run_query_to_value()
         assert result is not None
-        assert result.integer_value == 3
+        assert result.head.integer_value == 3
 
 
 def testMapAsQueryResult():
@@ -1025,9 +1022,10 @@ def testMapAsQueryResult():
         query_proc.set_query_content(query)
         result = query_proc.run_query_to_value()
 
-        assert isinstance(result, PyXdmMap)
+        dvar = result.head
+        assert isinstance(dvar, PyXdmMap)
 
-        assert result.map_size == 3
+        assert dvar.map_size == 3
 
 def testMap2():
 
@@ -1046,8 +1044,8 @@ def testMap2():
         assert mmVar.map_size == 3
 
         avar = mmVar.get(3)
-
-        assert avar.integer_value == 4
+        assert avar is not None
+        assert avar.head.integer_value == 4
 
 
 
