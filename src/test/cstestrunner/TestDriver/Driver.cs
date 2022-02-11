@@ -26,6 +26,7 @@ namespace TestDriver {
         protected Regex testPattern = null;
         protected string requestedTestSet = null;
         protected string testSuiteDir;
+        protected string reportFilename = null;
         protected Processor driverProc = new Processor(true);
         protected Serializer driverSerializer;
         protected Spec requestedSpec;
@@ -169,6 +170,10 @@ namespace TestDriver {
 
                     if (args[i].StartsWith("-s:")) {
                         requestedTestSet = args[i].Substring(3);
+                    }
+
+                    if (args[i].StartsWith("-reportfilename:")) {
+                        reportFilename = args[i].Substring(16);
                     }
 
                     if (args[i].StartsWith("-debug")) {
