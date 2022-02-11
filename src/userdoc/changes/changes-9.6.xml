@@ -357,9 +357,9 @@
       rest of the file will not be detected.</p>
 
     <p>Two configuration options for streaming have been added. The option
-        <code>FeatureKeys.STREAMABILITY</code> controls whether streaming is used at all, and if so,
+      <a class="feature" href="STREAMABILITY"/> controls whether streaming is used at all, and if so,
       whether Saxon streaming extensions are enabled. The option
-        <code>FeatureKeys.STREAMING_FALLBACK</code> controls what happens when non-streamable
+      <a class="feature" href="STREAMING_FALLBACK"/> controls what happens when non-streamable
       constructs are encountered, the options being either to raise a compile-time error, or to
       attempt a non-streamed evaluation (which will produce the same result as a streamed
       evaluation, provided enough memory is available).</p>

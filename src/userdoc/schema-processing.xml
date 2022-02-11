@@ -17,21 +17,23 @@
 
    <p>Saxon-EE offers its own native API for schema validation.</p>
    
-   <p for="J">On the Java platform, Saxon-EE also supports the schema validation APIs in JAXP 1.3.</p>
+   <p class="javaonly">On the Java platform, Saxon-EE also supports the schema validation APIs in JAXP 1.3.</p>
    
    <section id="commandline" title="Running Validation from the Command Line">
       <h1>Running Validation from the Command Line</h1>
 
 
-      <p for="J">The Java class <a class="javalink" href="com.saxonica.Validate">com.saxonica.Validate</a>
-         allows you to validate a source XML document against a given schema, or simply to check a
-         schema for internal correctness.</p>
+      
 
-      <p for="J">To validate one or more source documents using the Java platform, write:</p>
+      <p class="javaonly">To validate one or more source documents using the Java platform, write:</p>
       <kbd>java  com.saxonica.Validate   [options]  source.xml...  </kbd>
 
-      <p for="CS">To validate one or more source documents using the .NET platform, write:</p>
+      <p class="csonly">To validate one or more source documents using the .NET platform, write:</p>
       <kbd>dotnet Saxon validate [options]  source.xml...  </kbd>
+      
+      <p>The command
+         allows you to validate one or more source XML documents against a given schema, or simply to check a
+         schema for internal correctness.</p>
 
       <p>It is possible to use glob syntax to process multiple files, for example <code>Validate
             *.xml</code>.</p>
@@ -54,21 +56,21 @@
 
       <p>If no instance documents are supplied, the effect of the command is simply to check a
          schema for internal correctness. So a schema can be verified using the command:</p>
-      <kbd for="J">java com.saxonica.Validate -xsd:schema.xsd</kbd>
-      <kbd for="CS">dotnet Saxon validate -xsd:schema.xsd</kbd>
+      <kbd class="javaonly">java com.saxonica.Validate -xsd:schema.xsd</kbd>
+      <kbd class="csonly">dotnet Saxon validate -xsd:schema.xsd</kbd>
 
       <p>More generally the syntax of the command is:</p>
-      <kbd for="J">java com.saxonica.Validate [options] [params] [filenames] </kbd>
-      <kbd for="CS">dotnet Saxon validate [options] [params] [filenames] </kbd>
+      <kbd class="javaonly">java com.saxonica.Validate [options] [params] [filenames] </kbd>
+      <kbd class="csonly">dotnet Saxon validate [options] [params] [filenames] </kbd>
 
-      <p>where options generally take the form <code>-code:value</code> and params take the form
+      <p>where options generally take the form <code>-name:value</code> and params take the form
             <code>keyword=value</code>.</p>      
       
       <h2 class="subtitle">Command line options</h2>
 
       <p>The options are as follows (in any order): </p>
       <table>
-         <tr>
+         <tr class="javaonly">
             <td>
                <p>-catalog:filenames</p>
             </td>
@@ -115,7 +117,7 @@
                   been carried out.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-ext:(on|off)</p>
             </td>
@@ -128,7 +130,7 @@
                   methods and thereby gain privileged access to resources on your machine. </p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-init:initializer</p>
             </td>
@@ -168,7 +170,7 @@
                   still cause the evaluation order to be not as expected.) </p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-quit:(on|off)</p>
             </td>
@@ -180,7 +182,7 @@
                   invoked from another Java application such as Ant. </p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-r:classname</p>
             </td>
@@ -225,8 +227,9 @@
                   input, in which case the base URI is taken from that of the current directory.</p>
                <p>
                   The validation of multiple source documents is done simultaneously (in parallel threads) by default.
-                  The number of threads used is set to the number of processors available on the machine. If the <code>Configuration</code>
-                  option <code>Feature.ALLOW_MULTITHREADING</code> is set to false, the source documents are validated synchronously in
+                  The number of threads used is set to the number of processors available on the machine. If the configuration
+                  property <a class="feature" href="ALLOW_MULTITHREADING"/> 
+                  is set to false, the source documents are validated synchronously in
                   a single thread.      
                </p>
             </td>
@@ -305,7 +308,7 @@
                   against, or if they have an <code>xsi:type</code> attribute.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-x:classname</p>
             </td>
@@ -321,7 +324,7 @@
                   parser (part of the Apache Commons project) must be on the classpath.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-xi:(on|off)</p>
             </td>
@@ -331,7 +334,7 @@
                   Xerces parser, which is the default in JDK 1.5 and later.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-xmlversion:(1.0|1.1)</p>
             </td>
@@ -385,7 +388,7 @@
                   available. If set to <code>off</code>, these attributes are ignored.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-y:classname</p>
             </td>
@@ -402,10 +405,8 @@
                <p>--<i>feature</i>:value</p>
             </td>
             <td>
-               <p>Set a feature defined in the <a class="javalink" href="net.sf.saxon.Configuration"
-                     >Configuration</a> interface. The names of features are defined in the Javadoc
-                  for class <a class="javalink" href="net.sf.saxon.lib.Feature">Feature</a>:
-                  the value used here is the part of the name after the last "/", for example
+               <p>Set a configuration feature: see <a class="bodylink" href="configuration/config-features">Configuration Features</a>.
+                  The value used here is the part of the name after the last "/", for example
                      <code>--allow-external-functions:off</code>. Only features accepting a string
                   or boolean may be set; for booleans the values
                      <code>true</code>/<code>false</code> or <code>on</code>/<code>off</code> are
@@ -428,7 +429,11 @@
                <p>Display a list of features that are available using the <code>--feature:value</code> syntax</p>
             </td>
          </tr>
-      </table>      
+      </table> 
+      
+      <p>The results of processing the schema, and of validating the source document against the
+         schema, are written to the standard error output. Unless the <code>-t</code> option is
+         used, successful processing of the source document and schema results in no output.</p>
       
       <h2 class="subtitle">Command line parameters</h2>
 
@@ -439,20 +444,17 @@
          supply a simple value; <code>+name=filename</code> to supply the contents of an XML
          document as the parameter value; or <code>?name=expression</code> to supply the result of
          evaluating an XPath expression (for example, <code>?date=current-date()</code>).</p>
-
-      <p>The results of processing the schema, and of validating the source document against the
-         schema, are written to the standard error output. Unless the <code>-t</code> option is
-         used, successful processing of the source document and schema results in no output.</p>
+      
    </section>
-   <section id="scm" title="Importing and Exporting Schema Component Models">
-      <h1>Importing and Exporting Schema Component Models</h1>
+   <section id="scm" title="Exporting Schema Component Models">
+      <h1>Exporting Schema Component Models</h1>
       
       
       <p>Saxon provides the ability to export or import a compiled schema. The export format is an
          XML file, known as an SCM file (for schema component model). Using SCM files has three benefits:</p>
       
       <ul>
-         <li><p>An SCM file is much faster load than the corresponding source schema documents.</p></li>
+         <li><p>An SCM file is faster to load than the corresponding source schema documents.</p></li>
          <li><p>An SCM file is much easier for applications to process that the corresponding source documents:
             whether written in Java, XSLT, or XQuery, applications that need access to schema information can find
             it much more readily in an SCM document than in the source schema.</p></li>
@@ -460,14 +462,18 @@
          a Saxon-EE configuration that does not have its own license.</p></li>
       </ul>
       
-      <p>The simplest way to create an SCM file is from the command line, using the
-         <code>com.saxonica.Validate</code> command with the <code>-export</code> option. This is
+      <p>The simplest way to create an SCM file is from the command line, as
          described in <a class="bodylink" href="../commandline">Running Validation from the Command
-            Line</a>. Alternatively, an SCM file can be generated programmatically using the
-         <code>exportComponents()</code> method of the <a class="javalink"
-            href="com.saxonica.config.EnterpriseConfiguration"
-            >com.saxonica.config.EnterpriseConfiguration</a> class, which is described in the
-         JavaDoc. The serializer is unselective: it will output an SCM containing all the schema
+            Line</a>: use the <code>-export</code> option. 
+         Alternatively, an SCM file can be generated programmatically:</p>
+      
+      <ul>
+         <li class="javaonly">From Java, use the <code>exportComponents()</code> method of the <a class="javalink"
+            href="net.sf.saxon.s9api.SchemaManager">net.sf.saxon.s9api.SchemaManager</a> class.</li>
+         <li class="csonly">From C#, use the <code>ExportComponents()</code> method of the <a class="cslink"
+            href="Saxon.Api.SchemaManager">Saxon.Api.SchemaManager</a> class.</li>
+      </ul>
+      <p>The export is unselective: it will output an SCM containing all the schema
          components that have been loaded into the <code>Configuration</code>, other than built-in
          schema components.</p>
       
@@ -475,22 +481,22 @@
       to be supplied, for example:</p>
       
       <ul>
-         <li><p>The <code>-xsd</code> option of the command-line <code>com.saxonica.Validate</code> command</p></li>
-         <li><p>The <code>load()</code> method of the s9api <code>SchemaManager</code></p></li>
-         <li><p>The JAXP <code>SchemaFactory.newSchema()</code> method</p></li>
+         <li><p>The <code>-xsd</code> option of the command-line <code>Validate</code> command</p></li>
+         <li class="javaonly"><p>The <code>load()</code> method of <a class="javalink"
+            href="net.sf.saxon.s9api.SchemaManager">net.sf.saxon.s9api.SchemaManager</a>.</p></li>
+         <li class="csonly"><p>The <code>Compile()</code> method of <a class="cslink"
+            href="Saxon.Api.SchemaManager">Saxon.Api.SchemaManager</a>.</p></li>
+         <li class="javaonly"><p>The JAXP <code>SchemaFactory.newSchema()</code> method</p></li>
          <li><p>The <code>xsi:schemaLocation</code> and <code>xsi:noNamespaceSchemaLocation</code> attributes in
          an instance document (the SCM file contains components for multiple namespaces, and it should only be loaded once)</p></li>
          <li><p>An <code>xsl:import-schema</code> declaration in XSLT, or an <code>import schema</code> declaration in XQuery.</p></li>
       </ul>
       
-      <p>A schema loaded in this way is then available for all tasks performed using this
+      <p>A schema loaded in this way is then available for all tasks performed using the same
          <code>Configuration</code>, including validation of source documents and compiling of
          schema-aware queries and stylesheets.</p>
       
-      <p>Schema Component Models can also be imported and exported using the
-         <code>importComponents()</code> and <code>exportComponents()</code> methods of the <a
-            class="javalink" href="net.sf.saxon.s9api.SchemaManager">SchemaManager</a> in the s9api
-         interface.</p>
+ 
       
       <p>An SCM file cannot be used as the target of <code>xs:include</code>, <code>xs:import</code>,
       <code>xs:redefine</code>, or <code>xs:override</code> declarations within a schema document. An 
@@ -522,7 +528,8 @@
          schemas. A variant of SCM in which the finite state machines can be omitted may be provided
          in a future release.</aside>
    </section>
-   <section id="validation-api" title="Controlling Validation from Java" for="J">
+   <section id="validation-api" title="Controlling Validation from Java">
+      <div class="javaonly">
       <h1>Controlling Validation from Java</h1>
 
 
@@ -534,8 +541,10 @@
       <nav>
          <ul/>
       </nav>
+      </div>
 
       <section id="schema-s9api" title="Schema Processing using s9api">
+         <div class="javaonly">
          <h1>Schema Processing using s9api</h1>
 
 
@@ -598,9 +607,11 @@
                <code>Destination</code>, for example an XSLT transformation or an XQuery query. The
             result of validation can also be sent to any <code>Destination</code>, for example an
             XSLT transformer.</p>
+         </div>
       </section>
 
       <section id="schema-jaxp" title="Schema Processing using JAXP">
+         <div class="javaonly">
          <h1>Schema Processing using JAXP</h1>
 
 
@@ -646,13 +657,7 @@
             </li>
          </ol>
 
-         <p>Saxon also provides the class <code>SchemaFactory11</code> which automatically enables
-            support for XSD 1.1. When the JAXP search mechanism is used, this schema factory will be
-            selected if the schema language required is set to
-               <code>http://www.w3.org/XML/XMLSchema/v1.1</code>. Saxon also recognizes the generic
-            language identifier <code>http://www.w3.org/XML/XMLSchema</code> and the XSD 1.0
-            identifier <code>http://www.w3.org/XML/XMLSchema/vX.Y</code> as requests for an XSD 1.0
-            processor.</p>
+
 
          <p>Note that additional schemas referenced from the <code>xsi:schemaLocation</code>
             attributes within the source documents will be loaded as necessary. A target namespace
@@ -749,12 +754,10 @@
             components for a given target namespace, and to inspect the compiled schema to establish
             its properties. See the JavaDoc documentation for further details.</p>
 
-         <p>
-            <i>Saxon currently implements its own API for access to the schema components. This API
-               should be regarded as temporary. In the longer term, it is possible that Saxon will
-               offer an API for schema access that has been proposed in a member submission to
-               W3C.</i>
-         </p>
+         <aside>
+            Saxon currently implements its own API for access to the schema components. This API
+               should be regarded as subject to change.
+         </aside>
 
          <p>The programming approach outlined above, of using an identity transformer, is suitable
             for a wide class of applications. For example, it enables you to insert a validation
@@ -770,6 +773,7 @@
                >ReceivingContentHandler</a> and <a class="javalink"
                href="net.sf.saxon.event.ContentHandlerProxy">ContentHandlerProxy</a>
             respectively.</p>
+         </div>
       </section>
    </section>
    <section id="parameterizing-schemas" title="Parameterizing Schemas">
@@ -819,11 +823,11 @@
             <code>?accepted-currencies=('USD','GBP','EUR')</code> or
             <code>+lookup-table=lookup-doc.xml</code>.</p>
 
-      <p for="J">Using the s9api interface from Java, parameter values can be supplied using the
+      <p class="javaonly">Using the s9api interface from Java, parameter values can be supplied using the
             <code>setParameter()</code> method on the <a class="javalink"
             href="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</a> object.</p>
 
-      <p for="CS">Using the Saxon.Api interface from C#, parameter values can be supplied using the
+      <p class="csonly">Using the Saxon.Api interface from C#, parameter values can be supplied using the
             <code>SetParameter()</code> method on the <a class="javalink"
             href="Saxon.Api.SchemaValidator">SchemaValidator</a> object.</p>
 
@@ -842,7 +846,7 @@
          the same as if empty maps were supplied for these arguments.</p>
 
    </section>
-   <section id="validation-from-ant" title="Running Validation from Ant" for="J">
+   <section id="validation-from-ant" title="Running Validation from Ant">
       <h1>Running Validation from Ant</h1>
 
 
@@ -1009,19 +1013,18 @@
          But this is only possible if the source code explicitly declares the types of parameters,
          template and function results, and match patterns.</p>
    </section>
-   <section id="satransformapi" title="Schema-Aware XSLT from Java" for="J">
+   <section id="satransformapi" title="Schema-Aware XSLT from Java">
+      <div  class="javaonly">
       <h1>Schema-Aware XSLT from Java</h1>
 
 
       <p>When transformations are controlled using the Java JAXP interfaces, the equivalent to the
-            <code>-val</code> option is to set the attribute
-         "http://saxon.sf.net/feature/schema-validation" on the <code>TransformerFactory</code> to
+         <code>-val</code> option is to set the configuration property <a class="feature" href="SCHEMA_VALIDATION"/>
+         (attribute
+         "http://saxon.sf.net/feature/schema-validation") on the <code>TransformerFactory</code> to
          the value <a class="javalink" href="net.sf.saxon.lib.Validation#STRICT"
-            >net.sf.saxon.lib.Validation.STRICT</a>. Alternatively, you can set the value to <a
-            class="javalink" href="net.sf.saxon.lib.Validation#STRICT">Validation.LAX</a>. This
-         attribute name is available as the constant <a class="javalink"
-            href="net.sf.saxon.lib.Feature#SCHEMA_VALIDATION"
-         >Feature.SCHEMA_VALIDATION.name</a>.</p>
+            >net.sf.saxon.lib.Validation.STRICT</a> or <a
+            class="javalink" href="net.sf.saxon.lib.Validation#STRICT">Validation.LAX</a>. </p>
 
       <p>This option switches validation on for all source documents used by any transformation
          under the control of this <code>TransformerFactory</code>. If you want finer control, so
@@ -1041,8 +1044,8 @@
             <code>document('source.xml?validation=strict')</code> requests the loading of the file
             <code>source.xml</code> with strict validation.</p>
 
-      <p>The attribute <a class="javalink" href="net.sf.saxon.lib.Feature#VALIDATION_WARNINGS"
-            >Feature.VALIDATION_WARNINGS.name</a> has the same effect as the <code>-outval:recover</code> option
+      <p>The configuration property <a class="feature" href="VALIDATION_WARNINGS"/> 
+         has the same effect as the <code>-outval:recover</code> option
          on the command line: validation errors encountered when processing the final result tree
          are reported to the <code>ErrorListener</code> as warnings, not as fatal errors.</p>
 
@@ -1071,6 +1074,7 @@
          transformation either a user-written <code>Receiver</code>, or a <code>DOMResult</code>
          that wraps a Saxon <a class="javalink" href="net.sf.saxon.om.NodeInfo">NodeInfo</a>
          object. Note that type annotations are supported only with the TinyTree implementation.</p>
+      </div>
    </section>
    <section id="saquerycmd" title="Schema-Aware XQuery from the Command Line">
       <h1>Schema-Aware XQuery from the Command Line</h1>
@@ -1144,7 +1148,8 @@
          possible if the source code explicitly declares the types of variables and of function
          arguments and results.</p>
    </section>
-   <section id="saqueryapi" title="Schema-Aware XQuery from Java" for="J">
+   <section id="saqueryapi" title="Schema-Aware XQuery from Java">
+      <div class="javaonly">
       <h1>Schema-Aware XQuery from Java</h1>
 
 
@@ -1198,6 +1203,7 @@
          document. If you want to force loading of a different schema document for an existing
          namespace, the only way to do it is to create a new
          <code>EnterpriseConfiguration</code>.</p>
+      </div>
    </section>
    <section id="schema11" title="XML Schema 1.1">
       <h1>XML Schema 1.1</h1>
@@ -1210,8 +1216,7 @@
 
       <p>From Saxon 9.8, use of XML Schema 1.1 features is enabled by default. To disable use of XML
          Schema 1.1 features, set the command line flag <code>-xsdversion:1.0</code> or the
-        equivalent in the API (<a class="javalink" href="net.sf.saxon.lib.Feature#XSD_VERSION"
-          >Feature.XSD_VERSION</a>).</p>
+         configuration property <a class="feature" href="XSD_VERSION"/>.</p>
       <nav>
          <ul/>
       </nav>
@@ -1232,7 +1237,7 @@
 
          <p>Saxon allows any XPath 2.0 expression to be used in the <code>test</code> attribute.
             This includes expressions that call Java or .NET extension functions. Support for XPath 3.0 or 3.1
-            can be configured using the configuration property <code>Feature.XPATH_VERSION_FOR_XSD</code>.</p>
+            can be configured using the configuration property <a class="feature" href="XPATH_VERSION_FOR_XSD"/>.</p>
 
          <p>For assertions on complex types, the context node supplied to the expression is the
             element being validated. The element being validated is presented as type
@@ -1490,8 +1495,7 @@
     </ul>
     <p>By default therefore, Saxon treats missing component references as a compile-time
     error in the schema.</p>
-    <p>A configuration option, <a class="javalink" href="net.sf.saxon.lib.Feature#ALLOW_UNRESOLVED_SCHEMA_COMPONENTS"
-      >Feature.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS.name</a>, is available to change this
+     <p>A configuration property, <a class="feature" href="ALLOW_UNRESOLVED_SCHEMA_COMPONENTS"/>, is available to change this
     behavior. If this option is set, the schema processor attempts to repair the schema
     to make it usable. For example, a reference to a missing type is replaced by a reference
     to <code>xs:error</code> (which has no valid instances); a reference to a missing
@@ -1987,7 +1991,7 @@
          <h1>Using XPath 3.1 in Assertions</h1>
          
          <p>From Saxon 9.9 the XPath version used can be configured using the configuration 
-            property <code>Feature.XPATH_VERSION_FOR_XSD</code>.</p>
+            property <a class="feature" href="XPATH_VERSION_FOR_XSD"/>.</p>
          
          <p>If the attribute <code>saxon:extensions="any-xpath-version"</code> is present on the <code>xs:schema</code>
          element of a schema document, then XPath expressions used within assertions and conditional type assignments

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="sql-extension" title="Saxon SQL Extension" for="J">
+<article id="sql-extension" title="Saxon SQL Extension" class="javaonly">
    <h1>Saxon SQL Extension</h1>
 
    <aside>Requires Saxon-PE or Saxon-EE. Not available in Saxon-CS.</aside>

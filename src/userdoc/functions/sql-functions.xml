@@ -88,7 +88,7 @@
 ]]></samp>
          <p>It will often be appropriate to bind the result of the call to a global variable.</p>
          <p>A dynamic error is thrown in the event of any connection failure. Improved diagnostics on the reason
-            for failure are output if the configuration option <code>Feature.TIMING</code> is set (<code>-t</code>
+            for failure are output if the configuration option <a class="feature" href="TIMING"/> is set (<code>-t</code>
             on the command line).</p>
          <p>The connection object acts as a map and it is possible to call methods as dynamic function calls using the entries
             in this map. For example <code>$connection?isClosed()</code> will return a boolean indicating whether
@@ -100,7 +100,7 @@
          <samp><![CDATA[<saxon:do action="$connection?close()"/>]]></samp>        
          
          <p>JDBC connections are not thread-safe. It is therefore advisable when using JDBC connections to
-            suppress Saxon multi-threading by setting the configuration option <code>Feature.ALLOW_MULTI_THREADING</code>
+            suppress Saxon multi-threading by setting the configuration option <a class="feature" href="ALLOW_MULTI_THREADING"/>
             to false. A warning is issued if this is not done.</p>
          
          <p>Note that the Saxon extension functions make no attempt to validate or verify the SQL statements being

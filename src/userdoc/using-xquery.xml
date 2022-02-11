@@ -37,7 +37,7 @@
       execute. (In this scenario, Saxon-EE is recommended, because it has a more powerful optimizer
       for complex joins.)</p>
 
-   <aside for="J">The memory available in the Java heap is controlled using the <code>-Xmx</code> option on
+   <aside class="javaonly">The memory available in the Java heap is controlled using the <code>-Xmx</code> option on
       the command line, for example <code>java -Xmx1024m net.sf.saxon.Query ...</code> allocates
       1Gb.</aside>
 
@@ -50,11 +50,11 @@
 
 
       <p>A command is available to run a query contained in a file.</p> 
-      <p for="J">The form of command on the Java
+      <p class="javaonly">The form of command on the Java
          platform is:</p>
       <kbd>java  net.sf.saxon.Query   [options]  [ <i>params...</i>] </kbd>
 
-      <p for="CS">On Saxon-CS, the command takes the form:</p>
+      <p class="csonly">On Saxon-CS, the command takes the form:</p>
       <kbd>dotnet Saxon query   [options]  [ <i>params...</i>] </kbd>
 
       <p>The options will generally include either <code>-q:queryFile</code> which takes the query from a file,
@@ -139,7 +139,7 @@
                   to the standard error stream. The output is a tree in XML format.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-ext:(on|off)</p>
             </td>
@@ -152,7 +152,7 @@
                   methods and thereby gain privileged access to resources on your machine. </p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-init:initializer</p>
             </td>
@@ -189,7 +189,7 @@
                   document.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-mr:classname</p>
             </td>
@@ -326,7 +326,7 @@
                   elements within the file <code>a.xml</code> in the current directory.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-quit:(on|off)</p>
             </td>
@@ -338,7 +338,7 @@
                   invoked from another Java application such as Ant. </p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-r:classname</p>
             </td>
@@ -460,7 +460,7 @@
                   to the time before A was compiled in its own right.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-TJ</p>
             </td>
@@ -589,7 +589,7 @@
                   way, notably free-standing attribute nodes.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-x:classname</p>
             </td>
@@ -601,7 +601,7 @@
                   instantiable using a zero-argument public constructor.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-xi:(on|off)</p>
             </td>
@@ -611,7 +611,7 @@
                   using the Xerces parser, which is the default in JDK 1.5 and later.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-xmlversion:(1.0|1.1)</p>
             </td>
@@ -747,7 +747,7 @@
          supported by Saxon, see <a class="bodylink" href="/extensions/output-extras">Additional
             serialization parameters</a>.</p>
    </section>
-   <section id="api-query" title="Running Queries from a Java Application" for="J">
+   <section id="api-query" title="Running Queries from a Java Application" class="javaonly">
       <h1>Running Queries from a Java Application</h1>
 
 
@@ -767,7 +767,7 @@
          </li>
       </ul>
 
-      <section id="s9api-query" title="Using s9api for XQuery" for="J">
+      <section id="s9api-query" title="Using s9api for XQuery" class="javaonly">
          <h1>Using s9api for XQuery</h1>
 
          <p>You can perform a query using the s9api interface as follows:</p>
@@ -847,7 +847,7 @@
             supplied, it will be ignored.</p>
       </section>
 
-      <section id="xqj" title="Invoking XQuery using the XQJ API" for="J">
+      <section id="xqj" title="Invoking XQuery using the XQJ API" class="javaonly">
          <h1>Invoking XQuery using the XQJ API</h1>
 
 
@@ -903,7 +903,7 @@
       </section>
    </section>
    
-   <section id="saxon-api-query" title="Using XQuery from C#" for="CS">
+   <section id="saxon-api-query" title="Using XQuery from C#" class="csonly">
       <h1>Using XQuery from C#</h1>
       
       <aside>The same classes and methods can be used from .NET languages other than C#, but
@@ -1039,7 +1039,7 @@
          present possible to update the Tiny Tree, nor external object models such as DOM, JDOM2, or
          XOM.</p>
    </section>
-   <section id="callingfunctions" title="Calling XQuery Functions from Java" for="J">
+   <section id="callingfunctions" title="Calling XQuery Functions from Java" class="javaonly">
       <h1>Calling XQuery Functions from Java</h1>
 
 
@@ -1089,7 +1089,7 @@ XdmValue result = ev.callFunction(new QName("http://www.w3.org/2005/xquery-local
          
  
    </section>
-   <section id="callingfunctions" title="Calling XQuery Functions from C#" for="CS">
+   <section id="callingfunctions-cs" title="Calling XQuery Functions from C#" class="csonly">
       <h1>Calling XQuery Functions from C#</h1>
       
       
@@ -1156,7 +1156,7 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
             <code>result:element</code> or <code>result:atomic-value</code>) according to its type.
          The sequence as a whole is wrapped in a <code>result:sequence</code> element.</p>
    </section>
-   <section id="querycompilation" title="Compiling Queries" for="J">
+   <section id="querycompilation" title="Compiling Queries" class="javaonly">
       <h1>Compiling Queries</h1>
 
       <aside>Bytecode generation requires Saxon-EE on the Java platform.</aside>
@@ -1215,12 +1215,12 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
       <h1>Extensibility</h1>
 
 
-      <p for="J">The Saxon XQuery implementation allows you to call Java methods as external functions. The
+      <p class="javaonly">The Saxon XQuery implementation allows you to call Java methods as external functions. The
          function does not need to be declared. Use a namespace declaration such as <code>declare
             namespace math="java:java.lang.Math"</code>, and invoke the method as
             <code>math:sqrt(2)</code>.</p>
 
-      <p for="J">More details of this mechanism are found in <a class="bodylink"
+      <p class="javaonly">More details of this mechanism are found in <a class="bodylink"
             href="/extensibility/functions">Writing Extension Functions</a>.</p>
 
       <p>Saxon recognizes the XQuery pragma syntax, but it currently defines only one pragma of its

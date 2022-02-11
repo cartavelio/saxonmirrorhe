@@ -7,9 +7,18 @@
             href="../help-system" class="bodylink">guide to the documentation system</a>.</i>
    </p>
 
-   <p>There are many changes in Saxon 10. These changes, together with a full history of changes in
-      previous releases are comprehensively listed in the <a class="bodylink" href="/changes">Change
+   <p>A full history of changes over successive releases appears in the <a class="bodylink" href="/changes">Change
          History</a>.</p>
+   
+   <p>The documentation includes information specific to the Java and C# versions of the Saxon product.</p>
+   
+   <p class="javaonly">Information specific to the Java product is highlighted like this, and can be hidden
+   using the "Java" checkbox at the bottom of the page. Although APIs are always described using Java syntax,
+   they can also be used from other JVM-based languages such as Scala.</p>
+   
+   <p class="csonly">Information specific to the C# product is highlighted like this, and can be hidden
+      using the "C#" checkbox at the bottom of the page. Although APIs are always described using C# syntax,
+      they can also be used from other .NET-based languages such as VB.NET.</p>
 
    <p>Saxon 10 includes highly conformant implementations of the current W3C Recommendations: XSLT
       3.0, XQuery 3.1, XPath 3.1, and XSD 1.1. See <a class="bodylink" href="/conformance">Standards
@@ -25,30 +34,36 @@
 
 
 
-   <p>This documentation covers three Saxon editions: home, professional, and enterprise (HE, PE,
+   <div class="javaonly">
+      <p>This documentation covers three Saxon editions: home, professional, and enterprise (HE, PE,
       and EE). The Home Edition remains open source (under the Mozilla Public License 2.0). An
       outline of what is present in each edition can be found in the <a class="bodylink"
          href="http://www.saxonica.com/products/feature-matrix-11.xml">feature matrix</a>. Broadly
       speaking:</p>
-  <ul>
-    <li>Saxon-HE includes support for published W3C recommendations at the minimum
-      conformance level;</li>
-    <li>Saxon-PE includes support for optional W3C features and for Saxon
-      extensions;</li>
-    <li>Saxon-EE includes features needed for advanced applications and high
-      performance.</li>
-  </ul> 
+      <ul>
+        <li>Saxon-HE includes support for published W3C recommendations at the minimum
+          conformance level;</li>
+        <li>Saxon-PE includes support for optional W3C features and for Saxon
+          extensions;</li>
+        <li>Saxon-EE includes features needed for advanced applications and high
+          performance.</li>
+      </ul> 
+   </div>
+   <p class="csonly">The functionality of Saxon-CS corresponds to the Enterprise Edition functionality
+   on the Java platform, so where a statement is made that a particular feature requires Saxon-EE or Saxon-PE,
+   you should assume that it works on Saxon-CS unless otherwise specified.
+   </p>
   <p>See also <a class="bodylink" href="packages">Choosing a software package</a>.</p>
 
 
-   <p>This documentation covers Saxon on both the Java and .NET platforms. Much of it is also applicable
+   <p>Much of this documentation is also applicable
    to the Saxon/C product, but you should check the Saxon/C documentation for aspects specific to that platform.
    The same applies to Saxon-JS.</p>
 
 
    <aside>This documentation (including full API documentation for both the Java and .NET platforms)
       is provided on the <a href="http://www.saxonica.com/" class="bodylink">Saxonica</a> website.
-      It is also included in the <code>saxon-resources-10.zip</code> file available for download
+      It is also included in the <code>saxon-resources-11.zip</code> file available for download
       either from <a href="http://sourceforge.net/project/showfiles.php?group_id=29872"
          class="bodylink">SourceForge</a> or from the <a
             href="http://www.saxonica.com/download/download_page.xml" class="bodylink">Saxonica
@@ -57,8 +72,8 @@
       and -EE) on both platforms. Saxon-HE source code for the latest release is also available for
       download from the SourceForge project page.</aside>
 
-   <p><a href="/javadoc" class="apilink">JavaDoc API specifications</a> and <a href="/dotnetdoc"
-         class="apilink">.NET API specifications</a> are also available.</p>
+   <p><a href="/javadoc" class="apilink">Java API specifications</a> and <a href="/dotnetdoc"
+         class="apilink">C# API specifications</a> are also available.</p>
 
    <p>A full <a class="bodylink" href="/changes">change log</a> is provided.</p>
 
@@ -66,7 +81,8 @@
    <section id="gettingstarted" title="Getting Started">
       <h1>Getting Started</h1>
 
-      <p>If you are new to Saxon, or to Java/.NET, or to XML, XSLT, and XQuery, this section provides a
+      <p>If you are new to Saxon, or to the Java or .NET platform, 
+         or to XML, XSLT, and XQuery, this section provides a
          quick checklist of the things you need to do before you can run your first application.</p>
 
       <p>First decide which platform you want to use. If you already use either the Java or .NET
@@ -79,7 +95,8 @@
          <ul/>
       </nav>
 
-      <section id="gettingstartedjava" title="Getting started with Saxon on the Java platform" for="J">
+      <section id="gettingstartedjava" title="Getting started with Saxon on the Java platform" class="javaonly">
+         <div class="javaonly">
          <h1>Getting started with Saxon on the Java platform</h1>
 
          <p>Saxon doesn't come with a graphical user interface: it's a library designed to be integrated into
@@ -189,9 +206,11 @@
 
          <p>For more details on installing Saxon on the Java platform, see <a class="bodylink"
                href="../../installationjava">Installing (Java)</a>.</p>
+         </div>
       </section>
 
-      <section id="gettingstarteddotnet" title="Getting started with Saxon on the .NET platform" for="CS">
+      <section id="gettingstarteddotnet" title="Getting started with Saxon on the .NET platform">
+         <div  class="csonly">
          <h1>Getting started with Saxon on the .NET platform</h1>
          
          <p>Saxon-CS is a new product for .NET Core, replacing the older Saxon/.NET product. The older
@@ -269,6 +288,7 @@
 
          <p>For more complete details on installing Saxon on the .NET platform, see <a
                class="bodylink" href="../../installationdotnet">Installing (.NET)</a></p>
+         </div>
       </section>
    </section>
    <section id="whatis" title="What is Saxon?">
@@ -304,7 +324,7 @@
                from the command line, or invoked from an application.</p>
          </li>
 
-         <li for="J">
+         <li class="javaonly">
             <p>On the Java platform, when using XSLT, XPath, XQuery, or XML schema validation, Saxon offers
                a choice of APIs. If you need portability across different vendors' tools, you can
                use the JAXP API for XSLT, XPath, and XML Schema processing, and the XQJ interface
@@ -315,14 +335,17 @@
                documented in the JavaDoc. Clearly, the deeper you go, the greater the risk of
                interfaces changing in future releases.</p>
          </li>
-         <li for="CS">
+         <li class="csonly">
             <p>On the .NET platform, Saxon offers an API that enables close integration with other
                services available from .NET, notably the XML-related classes in the
                   <code>System.Xml</code> namespace. It isn't possible to use Saxon as a transparent
-               plug-in replacement for the <code>System.Xml.Xsl</code> processor, because the API
-               for the Microsoft engine using concrete classes rather than abstract interfaces.
+               plug-in replacement for the <code>System.Xml.Xsl</code> processor.
                However, it is possible to use it as a functional replacement with minor changes to
                your application code.</p>
+            <p>The Saxon-CS product, available with Saxon 11, is a complete redesign. The previous
+            .NET product was built using the IKVM technology, which confined it to .NET Framework 4.x.
+            Saxon-CS is built by converting Java source code to C#, and runs on .NET 5, fitting
+            in with Microsoft's strategic direction.</p>
          </li>
       </ul>
 
@@ -339,7 +362,7 @@
             <strong>archive</strong>. Many of these extensions were pioneered in Saxon and have
          since become available in other products.</p>
 
-      <p>These extension libraries in most cases require Saxon-PE or higher, and in some cases require
+      <p class="javaonly">These extension libraries in most cases require Saxon-PE or higher, and in some cases require
          Saxon-EE.</p>
      
        <aside>Some Saxon extensions are described in the documentation as <b>experimental</b>. This
@@ -350,13 +373,13 @@
    <section id="packages" title="Choosing the Saxon Edition">
       <h1>Choosing the Saxon Edition</h1>
 
-      <p for="J">Saxon (on the Java platform) is distributed in three editions: Saxon-HE, Saxon-PE, and Saxon-EE, each of which is
+      <p class="javaonly">Saxon (on the Java platform) is distributed in three editions: Saxon-HE, Saxon-PE, and Saxon-EE, each of which is
          available for both the Java and .NET platforms. Saxon-HE is available under an open-source
          license (specifically, the Mozilla Public License 2.0), and all its features are available
          to all users. Saxon-PE and Saxon-EE are commercial products and require activation by a
          license key.</p>
       
-      <p for="CS">Saxon (on the .NET platform) currently offers only the Enterprise Edition Saxon-EE.
+      <p class="csonly">Saxon (on the .NET platform) currently offers only the Enterprise Edition Saxon-EE.
          Saxon-EE is a commercial product and requires activation by a
          license key.</p>
 
@@ -391,7 +414,8 @@
    </section>
 
 
-   <section id="installationjava" title="Installation: Java platform" for="J">
+   <section id="installationjava" title="Installation: Java platform">
+      <div class="javaonly">
       <h1>Installation: Java platform</h1>
 
 
@@ -402,8 +426,9 @@
       <nav>
          <ul/>
       </nav>
-
+       </div>
       <section id="prerequisites" title="Prerequisites">
+         <div class="javaonly">
          <h1>Prerequisites</h1>
 
          <p>The following software must be installed separately, it is not included with the Saxon
@@ -467,11 +492,12 @@
             However, the support for StAX provides the ability to supply input via a customized pull
             pipeline. Saxon is tested with Woodstox 3.0.0. Saxon's schema validation is available
             only with a SAX2 parser.</p>
-
+         </div>
       </section>
 
 
       <section id="installingjava" title="Installing the software">
+         <div class="javaonly">
          <h1>Installing the software</h1>
 
 
@@ -510,9 +536,11 @@
             JAR files via a graphical user interface or a text configuration file, or they might ask
             you to put the JAR files in a well known place (for example <code>WEB-INF/lib</code> in
             the case of tomcat). Follow the instructions for the environment you are using.</p>
+         </div>
       </section>
 
       <section id="jarfiles" title="JAR files included in the product">
+         <div class="javaonly">
          <h1>JAR files included in the product</h1>
 
 
@@ -781,8 +809,10 @@
          
          <p>Saxonica signs both the open-source and commercial JAR files. The signature does not prevent the JAR file being unpacked
             and modified, but it means that you can always distinguish a modified JAR file from the original.</p>
+         </div>
       </section>
       <section id="classloading-and-osgi" title="Class Loading and OSGi">
+         <div class="javaonly">
          <h1>Class Loading and OSGi</h1>
          <aside>This information is intended for advanced users only.</aside>
          
@@ -838,34 +868,35 @@
          
          <p>The area that tends to be most problematic in complex environments is loading of Saxon-generated bytecode. 
             The simplest workaround here is to switch off bytecode generation. This can be done using the configuration option
-         <code>Feature.GENERATE_BYTE_CODE</code>, or by an appropriate call on <code>XsltCompiler.getUnderlyingCompilerInfo().setOptimizerOptions()</code>.
+            <a class="feature" href="GENERATE_BYTE_CODE"/>, or by an appropriate call on <code>XsltCompiler.getUnderlyingCompilerInfo().setOptimizerOptions()</code>.
          The performance benefit of bytecode generation is typically in the range 10%-40%, so in many cases the performance hit will not be
          noticeable.</p>
          
          <p>See also <a class="bodylink"
             href="/about/license/licensefaq">Troubleshooting license file problems</a>.</p>
+         </div>
       </section>
-         
+       
    </section>
 
-   <section id="installationdotnet" title="Installation: .NET platform" for="CS">
+   <section id="installationdotnet" title="Installation: .NET platform">
+      <div  class="csonly">
       <h1>Installation: .NET platform</h1>
      
  
-      <p>This section explains in more detail how to install Saxon on the .NET platform. For a basic
+      <p>This section explains in more detail how to install Saxon-CS on the .NET platform. For a basic
          "quick start" guide, see <a class="bodylink"
             href="/about/gettingstarted/gettingstarteddotnet">Getting started with Saxon on the .NET
             platform</a>.</p>
 
       <aside>The source code of Saxon is written in Java. The version of the product that runs on
-         the .NET platform has been produced by cross-compiling the Java bytecode into CIL code,
-         which is then packaged as a .NET assembly. The cross-compiler is the open-source <a
-            href="http://www.ikvm.net/" class="bodylink">IKVMC</a> product. The code of course makes
-         many calls on classes provided by the Java run-time library. On the .NET platform, most of
-         these are provided by the OpenJDK product: Saxon comes with a version of the OpenJDK
-         library, itself cross-compiled as a .NET assembly. Other run-time services are obtained
-         from the .NET platform itself. These include XML parsing, handling of URI resolution, and
-         internationalized collation support. </aside>
+         the .NET platform has been produced by converting the Java source code into C# source code,
+         using a Saxonica-produced transpiler written primarily in XSLT. Calls from Saxon to
+         library classes in the JDK are generally mapped to equivalent classes in .NET; in a few
+         cases, Saxon emulates the Java class directly. Some functionality such as the interface
+         with the XML parser and the DOM is rewritten for Saxon-CS, and some third-party libraries
+         are used where appropriate, for example Singulink libraries for handled extended-precision
+         decimal and integer arithmetic.</aside>
 
 
       <p>For more information about Saxon on the .NET platform, see <a class="bodylink"
@@ -882,13 +913,11 @@
          </li>
       </ul>
 
-      <p>Because Saxon is run from the command line, you might find it useful (under Microsoft
-         Windows) to have a text editor with better command-line support than the standard DOS
-         console. For instance, <a href="http://www.ultraedit.com" class="bodylink"
-         >UltraEdit</a>.</p>
 
 
       <h2 class="subtitle">Installing the software</h2>
+         
+         <p>TODO: rewrite this</p>
 
       <p>The software is issued in the form of a .exe file containing an installation wizard: all
          you need to do is to run it, answering simple prompts such as the directory in which you
@@ -999,7 +1028,7 @@
          is exclusive to the .NET product, and is described in more detail in <a class="bodylink"
             href="/dotnet/dotnetapi">Saxon API for .NET</a>. These sample applications are described
          in <a class="bodylink" href="/samples/dotnetsamples">Example applications for .NET</a>.</p>
-
+      </div>
    </section>
 
    <section id="license" title="Saxon Licenses">
@@ -1016,7 +1045,7 @@
          <h1>Setting up a license key</h1>
 
          <p>The open-source Saxon-HE product does not require any license key. For Saxon-PE and
-            Saxon-EE, however, you need to obtain a license key from Saxonica. You can order a free
+            Saxon-EE, however (and for Saxon-CS), you need to obtain a license key from Saxonica. You can order a free
             license key for a 30-day evaluation, or purchase an unrestricted license key, from the
                <a href="http://www.saxonica.com/" class="bodylink">Saxonica</a> website.</p>
 
@@ -1030,8 +1059,7 @@
                outermost <code>configuration</code> element in this file.</p>
             </li>
             <li>
-               <p>The location specified using the configuration property <a class="bodylink code"
-                  href="/configuration/config-features">Feature.LICENSE_FILE_LOCATION</a>, as
+               <p>The location specified using the configuration property <a class="feature" href="LICENSE_FILE_LOCATION"/>, as
                   described below.</p>
             </li>
             <li>
@@ -1061,8 +1089,7 @@
          </ol>
 
          <p>It is also possible to force Saxon to read the license file from a specific location by
-            setting the Configuration property <code
-               java="net.sf.saxon.lib.Feature#LICENSE_FILE_LOCATION">Feature.LICENSE_FILE_LOCATION</code>.
+            setting the Configuration property <a class="feature" href="LICENSE_FILE_LOCATION"/>.
             When this property
             is set, the <code>Configuration</code> will immediately attempt to load the specified
             file, avoiding any subsequent attempt to search for it on the classpath and elsewhere.
@@ -1091,8 +1118,8 @@
          </p>
       </section>
 
-      <section id="verifylicense" title="Verifying a license" for="J">
-
+      <section id="verifylicense" title="Verifying a license">
+         <div class="javaonly">
          <h1>Verifying a license</h1>
 
          <p>For Saxon on the Java platform, to verify your license you can use one of the following
@@ -1103,6 +1130,7 @@
          <kbd>java -cp saxon-pe-10.0.jar com.saxonica.config.Verifier saxon-license.lic </kbd>
          <p>Similarly, for Saxon-EE 10.0:</p>
          <kbd>java -cp saxon-ee-10.0.jar com.saxonica.config.Verifier saxon-license.lic </kbd>
+         </div>
       </section>
       
       <section id="checklicense" title="Checking a license is found">
@@ -1111,10 +1139,12 @@
          
          <p>To check that a valid license for Saxon-PE or Saxon-EE has been found and Saxon is
             running with full functionality, try running one of the following simple commands.</p>
-         <p>On Java (for example, for Saxon-EE 10.0):</p>
+         <div class="javaonly"><p>On Java (for example, for Saxon-EE 10.0):</p>
          <kbd>java -cp saxon-ee-10.0.jar net.sf.saxon.Query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
-         <p>Similarly, on .NET:</p>
-         <kbd>Query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
+         </div>
+         <div class="csonly"><p>On .NET:</p>
+         <kbd>dotnet Saxon query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
+         </div>
          <p>Saxon will revert to Saxon-HE functionality if it cannot find a valid license file.
             The above query uses a Saxon extension function which requires Saxon-PE or -EE, so
             it will produce the correct answer ("7361786F6E") if the license is found, but return an
@@ -1171,22 +1201,22 @@
                   (in the latter case it will usually have produced a message to this effect: but
                   depending on your application, you might not see the message).</p>
                
-               <p>You can check what version of Saxon is on the classpath by calling the static method
+               <p class="javaonly">You can check what version of Saxon is on the classpath by calling the static method
                   <code>net.sf.saxon.Version.getProductTitle()</code> from your Java code.</p>
                
               
                
-              <p>If you are using the JAXP API, check that the <code>TransformerFactory</code>
+               <p class="javaonly">If you are using the JAXP API, check that the <code>TransformerFactory</code>
               that is instantiated is an instance of <code>ProfessionalTransformerFactory</code>
               or <code>EnterpriseTransformerFactory</code>. Remember that you don't have to rely
               on the JAXP search mechanism to find a <code>TransformerFactory</code>; you can 
               create an instance directly using (for example) <code>new ProfessionalTransformerFactory()</code>,
               which is not only more reliable, it is also much faster.</p>
                
-               <p>If you are using the s9api API, check that you created a <code>Processor</code>
+               <p class="javaonly">If you are using the s9api API, check that you created a <code>Processor</code>
                object using <code>new Processor(true)</code> rather than <code>new Processor(false)</code>.</p>
                
-               <p>You can check what Saxon edition you are effectively running by finding the <code>Configuration</code>
+               <p class="javaonly">You can check what Saxon edition you are effectively running by finding the <code>Configuration</code>
                   object (for example, by using <code>Processor.getUnderlyingConfiguration()</code>)
                   and calling its <code>getEditionCode()</code> method. </p>
                
@@ -1271,14 +1301,17 @@
          is not provided. The source code is the same between the Java and .NET platforms: both
          products are generated from the same source, though there are some modules that apply only
          to one platform or the other.</p>
+      
+      <p class="csonly">Source code for Saxon-CS is not available. (The bulk of the code
+      is generated from Java using proprietary tools, so it would be be useful anyway.)</p>
 
 
       <h2 class="subtitle">User documentation</h2>
 
       <p>User documentation (this documentation, together with API specifications for the Java and
-         .NET products) is also available for download from the SourceForge site. The resources
+         C# products) is also available for download from the SourceForge site. The resources
          download contains exactly the same information as the documentation section of the Saxonica
-         website. It also contains this documentation in its original XML form, together with the
+         website. It also contains this documentation in its original XHTML form, together with the
          schemas and stylesheets used to publish it. Note that online documentation is available
          only for a few recent Saxon versions; older versions can be downloaded from
          SourceForge.</p>
@@ -1287,8 +1320,7 @@
 
       <p>The resources download contains a number of sample applications, found in the directory
             <code>/samples</code>. They are described in the <a class="bodylink" href="/samples"
-            >Samples</a> section of the documentation. Most of the samples are equally applicable to
-         the Java and .NET platforms.</p>
+            >Samples</a> section of the documentation. </p>
    </section>
 
    <section id="historical" title="Historical Note">
@@ -1430,16 +1462,14 @@
          <p>Saxon-EE and Saxon-PE users are provided with an email address that allows bug reports
             to be sent to Saxonica privately if preferred.</p>
          
-         <p>The open source code of Saxon-HE is maintained in a Subversion repository on the
-            <a href="http://dev.saxonica.com/" class="bodylink">dev.saxonica.com</a> site. This
+         <p>The open source code of Saxon-HE is maintained in a GIT repository on the
+            <a href="http://saxonica.plan.io/" class="bodylink">http://saxonica.plan.io/</a> site. This
             exists solely to provide early access to source patches; it is
             not used to deliver incremental releases of new functionality. Building the
             JAR files is reasonably easy for an experienced Java programmer; an Ant script is
             provided to assist with this, but it is likely to require customization to local
-            requirements (for example, deleting the parts concerned only with Saxon-EE or Saxon on
-            .NET). Building the .NET product is considerably more complicated, and although scripts
-            are provided, you should only attempt it if you have a good knowledge of both
-            platforms.</p>
+            requirements (for example, deleting the parts concerned only with Saxon-EE or Saxon-CS). 
+            Building the Saxon-CS product requires proprietary Saxonica tooling.</p>
 
          <p>If you wish to contribute modifications to the open source code, you will need to be
             prepared to sign a contributor agreement defining the terms under which the code is made

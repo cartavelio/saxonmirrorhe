@@ -432,8 +432,7 @@ saxon:evaluate($expression)
           href="/xsl-elements/result-document">xsl:result-document</a> instruction. The default for
         Saxon-EE is <code>yes</code>, which causes the instruction to be evaluated in a separate
         thread, if there is a spare thread available (the maximum number of threads used is
-        configurable using <a class="bodylink code" href="/configuration/config-features"
-          >Feature.RESULT_DOCUMENT_THREADS</a>).</p>
+        configurable using <a class="feature" href="RESULT_DOCUMENT_THREADS"/>).</p>
 
       <p>A possible reason for setting the value to <code>no</code> is that the stylesheet calls
         extension functions with side-effects, where it is important for the calls to be in the
@@ -495,8 +494,8 @@ saxon:evaluate($expression)
         DTD validation takes place. The permitted values are: <code>yes|true|1</code> or
         <code>no|false|0</code>.</p>
       
-      <p>XInclude processing can also be enabled using the configuration option <a class="bodylink
-        code" href="/configuration/config-features">Feature.DTD_VALIDATION</a> or the command-line option
+      <p>DTD validation can also be enabled using the configuration property
+        <a class="feature" href="DTD_VALIDATION"/> or the command-line option
         <code>-dtd</code>.</p>
       
     </section>
@@ -569,12 +568,11 @@ saxon:evaluate($expression)
           href="/functions/saxon/line-number">saxon:line-number</a> and <a class="bodylink code"
             href="/functions/saxon/column-number">saxon:column-number</a> respectively.</p>
       
-      <p>Line numbering of source documents can also be enabled using the configuration option 
-        <a class="bodylink code"
-          href="/configuration/config-features">Feature.LINE_NUMBERING</a> or the command-line
+      <p>Line numbering of source documents can also be enabled using the configuration property
+        <a class="feature" href="LINE_NUMBERING"/> or the command-line
       option <code>-l</code> (letter ell).</p>
       
-      <p>Assuming the XML parser is conformant with the SAX specification, the line and column number reported for an 
+      <p>In the case of an XML parser that follows the SAX specification, the line and column number reported for an 
         element represent the position of the "&gt;" character at the end of the start tag.</p>
       
     </section>
@@ -702,9 +700,8 @@ saxon:evaluate($expression)
 
       <p><dfn>Multi-threaded processing</dfn> is available only with Saxon-EE. The attribute
           <code>saxon:threads</code> is ignored with a warning if Saxon-EE is not in use. Under
-        Saxon-EE it may also be disabled using the configuration option <a class="bodylink code"
-          href="/configuration/config-features">Feature.ALLOW_MULTITHREADING</a> or
-          <code>xslt/@allowMultiThreading='false'</code> in the configuration file. Multi-threaded
+        Saxon-EE it may also be disabled using the configuration property
+        <a class="feature" href="ALLOW_MULTITHREADING"/>. Multi-threaded
         processing is also disabled if code is compiled with tracing enabled, for example by using
         the <code>-T</code> option on the command line or by using an IDE debugger (this is because
         otherwise, the trace events would be hopelessly intermingled).</p>
@@ -754,8 +751,8 @@ saxon:evaluate($expression)
         XInclude processing takes place. The permitted values are: <code>yes|true|1</code> or
         <code>no|false|0</code>.</p>
       
-      <p>XInclude processing can also be enabled using the configuration option <a class="bodylink
-        code" href="/configuration/config-features">Feature.XINCLUDE</a> or the command-line option
+      <p>XInclude processing can also be enabled using the configuration property 
+        <a class="feature" href="XINCLUDE"/> or the command-line option
         <code>-xi</code>. For more information, see <a class="bodylink code"
           href="/sourcedocs/XInclude">XInclude processing</a>.</p>
       
@@ -767,9 +764,8 @@ saxon:evaluate($expression)
     <h1>XPath and XQuery Syntax Extensions</h1>
     
     <p>Saxon provides a number of extensions to XPath and XQuery syntax. Because use of these extensions makes your code non-conformant
-    with W3C specifications, these extensions are available only if explicitly enabled. This can be achieved using the configuration option
-      <a class="bodylink code"
-        href="/configuration/config-features">Feature.ALLOW_SYNTAX_EXTENSIONS</a> (use <code>--allowSyntaxExtensions:on</code> on the command line, 
+    with W3C specifications, these extensions are available only if explicitly enabled. This can be achieved using the configuration property
+      <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/> (use <code>--allowSyntaxExtensions:on</code> on the command line, 
       or <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</p>
     
     <aside>Extended type syntax is automatically enabled in the <code>saxon:as</code> attribute.</aside>
@@ -1239,9 +1235,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
     <p>A few experimental extensions have also been implemented by changing the native syntax. These
     are intended for usability evaluation, with a view to inclusion in some future version of the XSLT
     language. These extensions (described in this section) are available only if explicitly enabled.
-    This can be achieved using the configuration option
-      <a class="bodylink code"
-        href="/configuration/config-features">Feature.ALLOW_SYNTAX_EXTENSIONS</a> (use <code>--allowSyntaxExtensions:on</code> on the command line, 
+    This can be achieved using the configuration property <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/>
+      (use <code>--allowSyntaxExtensions:on</code> on the command line, 
       or <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</p>
     
     <aside>Use of forwards compatibility mode (by specifying <code>version="4.0"</code>, say), does not

@@ -4376,7 +4376,7 @@
         <p>The Saxon implementation is by default not deterministic: if the function is called twice
           with the same argument, it will read the external file twice, and may return different
           results if it has changed. If stable results are required, this can be achieved (from 9.8) by
-          setting the configuration option <code>Feature.STABLE_UNPARSED_TEXT</code>.</p>
+          setting the configuration option <a class="feature" href="STABLE_UNPARSED_TEXT"/>.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
@@ -4413,7 +4413,7 @@
         <p>The default implementation is inefficient: if a call on
             <code>unparsed-text-available()</code> is followed by a call on
             <code>unparsed-text()</code> to read the same file, the file will be read twice.
-          This is avoided if the <code>Feature.STABLE_UNPARSED_TEXT</code> option is set, but
+          This is avoided if the <a class="feature" href="STABLE_UNPARSED_TEXT"/> option is set, but
           at the cost of keeping the text in memory for the entire query or transformation.
         </p>
       </status>
@@ -4447,7 +4447,7 @@
         <p>The Saxon implementation is by default not deterministic: if the function is called twice
           with the same argument, it will read the external file twice, and may return different
           results if it has changed. If stable results are required, this can be achieved (from 9.8) by
-          setting the configuration option <code>Feature.STABLE_UNPARSED_TEXT</code>.
+          setting the configuration property <a class="feature" href="STABLE_UNPARSED_TEXT"/>.
           This makes the function much less efficient, since the entire file has to be read into memory
           and retained in memory just in case the same file is read again.
         </p>
@@ -9786,8 +9786,8 @@ return saxon:serialize($x, <xsl:output method="xml"
           
 
           <p>If the path expression cannot be evaluated in streaming mode, execution fails,
-            unless the configuration option <a class="javalink"
-              href="net.sf.saxon.lib.Feature#STREAMING_FALLBACK">Feature.STREAMING_FALLBACK</a> is set,
+            unless the configuration option 
+            <a class="feature" href="STREAMING_FALLBACK"/> is set,
             in which case it is executed in non-streaming mode (that is, the result is simply
             the result of evaluating the argument to the function).</p>
 

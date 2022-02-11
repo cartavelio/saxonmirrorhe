@@ -18,14 +18,12 @@
 
 
     <p>When Saxon (either XSLT or XQuery) is invoked from the command line, the source document will
-      normally be an XML 1.0 document. Supplying an XML 1.1 document will also work, provided that
-      (a) the selected parser is an XML 1.1 parser, and (b) the command line option
-        <code>-xmlversion:1.1</code> is set.</p>
+      normally be an XML 1.0 document. See also <a class="bodylink" href="xml11">XML 1.1</a>.</p>
 
-    <p>If a custom parser is specified using the <code>-x</code> option on the command line, then
-      the source document can be in any format accepted by this custom parser. The only constraint
-      is that the parser must behave as a SAX2 parser, delivering a stream of events that define a
-      virtual XML document. For example, the TagSoup parser from John Cowan can be used to feed an
+    <p class="javaonly">If a custom parser is specified using the <code>-x</code> option on the command line, then
+      the source document can be in any format accepted by this custom parser. The parser must behave as a 
+      SAX2 parser, delivering a stream of events that define a
+      virtual XML document. For example, the TagSoup parser can be used to feed an
       HTML document as input to Saxon.</p>
 
     <p>Non-standard input formats can also be handled by specifying a user-written
@@ -614,8 +612,7 @@
   </section>
   <section id="preloading" title="Preloading shared reference documents">
     <h1>Preloading shared reference documents</h1>
-    <p>An option is available (<a class="bodylink code" href="/configuration/config-features"
-        >Feature.PRE_EVALUATE_DOC_FUNCTION</a>) to indicate that calls to the <code>doc()</code>
+    <p>An option is available (<a class="feature" href="PRE_EVALUATE_DOC_FUNCTION"/>) to indicate that calls to the <code>doc()</code>
       or <code>document()</code> functions with constant string arguments should be evaluated when a
       query or stylesheet is compiled, rather than at run-time. This option is intended for use when
       a reference or lookup document is used by all queries and transformations. Using this option
@@ -638,9 +635,8 @@
           effect.</p>
       </li>
     </ol>
-    <p>The option is selected by using <code>Configuration.setConfigurationProperty()</code> or
-        <code>TransformerFactory.setAttribute()</code> with the property name
-        <code>Feature.PRE_EVALUATE_DOC_FUNCTION.name</code>. This option is not available from the
+    <p>The option is selected by setting the configuration property <a class="feature" href="PRE_EVALUATE_DOC_FUNCTION"/>
+      This option is not available from the
       command line because it has no useful effect with a single-shot compile-and-run interface.</p>
     <p>This option has no effect if the URI supplied to the <code>doc()</code> or
         <code>document()</code> function includes a fragment identifier.</p>
@@ -835,14 +831,13 @@
       to process the source files. This class must implement the SAX2 <code>XMLReader</code>
       interface, but it is not required to be a real XML parser; it can take the input from any kind
       of source file, so long as it presents it in the form of a stream of SAX events. When using
-      the JAXP API, the equivalent to the <code>-x</code> option is to call
-        <code>transformerFactory.setAttribute( net.sf.saxon.lib.Feature.SOURCE_PARSER_CLASS.name,
-        'com.example.package.Parser')</code></p>
+      the JAXP API, the equivalent to the <code>-x</code> option is to set the configuration property 
+      <a class="feature" href="SOURCE_PARSER_CLASS"/>.</p>
   </section>
   <section id="XInclude" title="XInclude processing">
     <h1>XInclude processing</h1>
 
-
+    <div  class="javaonly">
     <p>If you are using Xerces as your XML parser, you can have Xerces expand any XInclude
       directives.</p>
 
@@ -853,9 +848,7 @@
         <code>xs:include</code>.</p>
 
     <p>From the Java API, the equivalent is to call <code>setXInclude()</code> on the
-        <code>Configuration</code> object, or to set the attribute denoted by <a
-        class="bodylink code" href="/configuration/config-features">Feature.XINCLUDE.name</a> to
-        <code>Boolean.TRUE</code> on the <code>TransformerFactory</code>.</p>
+      <code>Configuration</code> object, or to set the configuration property <a class="feature" href="XINCLUDE"/> to true.</p>
 
     <p>XInclude processing can be requested at a per-document level by creating an <a
         class="javalink" href="net.sf.saxon.lib.AugmentedSource">AugmentedSource</a> and calling its
@@ -888,12 +881,16 @@
         class="bodylink">http://xincluder.sourceforge.net/</a>, and you can incorporate it into your
       application as described in <a class="bodylink" href="../input-filters">Writing Input
         Filters</a>.</p>
+    </div>
+    <div class="csonly">
 
     <p>On the .NET platform, there is a customized <code>XmlReader</code> that performs XInclude
-      processing available at <a href="http://mvpxml.codeplex.com" class="bodylink"
-        >http://mvpxml.codeplex.com</a>. You can supply this as an argument to the method
+      processing available at <a href="https://github.com/keimpema/Mvp.Xml.NetStandard" class="bodylink"
+        >GitHub project Mvp.Xml.NetStandard</a>. You can supply this as an argument to the method
         <code>Build(XmlReader parser)</code> in the <a class="javalink"
-        href="Saxon.Api.DocumentBuilder">DocumentBuilder</a> class of the .NET Saxon API.</p>
+        href="Saxon.Api.DocumentBuilder">DocumentBuilder</a> class of the .NET Saxon API. (Not tested).</p>
+    </div>
+  
 
     <p>For further information on using XInclude, see <a
         href="http://www.sagehill.net/docbookxsl/Xinclude.html" class="bodylink"
@@ -906,20 +903,21 @@
     <p>Saxon does not include its own XML parser. By default:</p>
 
     <ul>
-      <li>
+      <li class="javaonly">
         <p>On the Java platform, the default SAX parser provided as part of the JDK is used. With
           the Sun/Oracle JDK, this is a variant of the Apache Xerces parser customized by Sun.</p>
       </li>
       <li>
-        <p>On the .NET platform, Saxon includes a copy of the Apache Xerces parser cross-compiled to
-          run on .NET.</p>
+        <p class="csonly">On the .NET platform, Saxon uses the <code>System.Xml.XmlReader</code>
+        parser family.</p>
       </li>
     </ul>
 
     <p>An error reported by the XML parser is generally fatal. It is not possible to process
       ill-formed XML.</p>
 
-    <p>There are several ways you can cause a different XML parser to be used:</p>
+<div class="javaonly">
+    <p>On the Java platform, there are several ways you can cause a different XML parser to be used:</p>
 
     <ul>
       <li>
@@ -943,13 +941,6 @@
           used.</p>
       </li>
       <li>
-        <p>On .NET, the configuration option <code>PREFER_JAXP_PARSER</code> can be set to false, in
-          which case Saxon will use the Microsoft XML parser instead of the Apache parser. (This
-          parser is not used by default because it does not notify <code>ID</code> attributes to the
-          application, which means the XPath <code>id()</code> and <code>idref()</code> functions do
-          not work.)</p>
-      </li>
-      <li>
         <p>For a document read using the <code>doc()</code> or <code>document()</code> functions,
           the parser (XMLReader) to be used can be specified using the query parameter
           <code>?parser=full.class.name</code> in the document URI -- but only if the
@@ -962,8 +953,9 @@
     </ul>
 
     <p>Saxonica traditionally recommended use of the Xerces parser from Apache in preference to the version bundled
-      in the JDK, which was known to have some serious bugs. However, there is some evidence that the version bundled
-    in Java 8 is more reliable.</p>
+      in the JDK, which was known to have some serious bugs. However, the version bundled
+    in Java 8 appears to be more reliable.</p>
+</div>
 
     <p>By default, Saxon invokes the parser in non-validating mode (that is, without requested DTD
       validation). Note however, that the parser still needs to read the DTD if one is present,
@@ -997,8 +989,8 @@
 
 
   </section>
-  <section id="xml11" title="Saxon and XML 1.1">
-    <h1>Saxon and XML 1.1</h1>
+  <section id="xml11" title="XML 1.1">
+    <h1>XML 1.1</h1>
 
 
     <p>XML 1.1 (with XML Namespaces 1.1) originally extended XML 1.0 in three ways:</p>
@@ -1017,13 +1009,36 @@
     <p>The second change has subsequently been retrofitted to XML 1.0 Fifth Edition (XML 1.0e5).
       Saxon now uses the XML 1.1 and XML 1.0e5 rules unconditionally for all validation of XML
       names.</p>
+    
+    <aside>XML 1.1 has not been a great success; many parsers including the Microsoft
+      <code>System.Xml.XmlReader</code> parser do not support it. XML 1.0 therefore
+      gives better interoperability. Very few applications really need the extra features
+      in XML 1.1.</aside>
+    
+    
+    <h2>XML 1.1 Input Documents</h2>
 
-    <p>Saxon is capable of working with XML 1.1 input documents. If you want to use Saxon with XML
-      1.1, you should set the option <code>-xmlversion:1.1</code> on the Saxon command line, or call
+    <p>Saxon is capable of working with XML 1.1 input documents, provided that the XML
+      parser supports XML 1.1.</p>
+    
+    
+    <ul>
+      <li class="javaonly"><p>On Java, the built-in XML parser and the commonly-used Apache Xerces both
+      support XML 1.1</p></li>
+      <li class="csonly"><p>Saxon-CS works only with the Microsoft <code>System.Xml.XmlReader</code> parser,
+      which does not support XML 1.1</p></li>
+    </ul>
+    
+    <h2>Configuration</h2>
+    
+    <p>If you want to use Saxon with XML
+      1.1, you should set the option <code>-xmlversion:1.1</code> on the Saxon command line, or 
+      set the configuration option <a class="feature" href="XML_VERSION"/>.
+      <!--call
       the method <a class="javalink" href="net.sf.saxon.Configuration#setXMLVersion"
         >configuration.setXMLVersion(Configuration.XML11)</a> or, in the case of XSLT,
-        <code>transformerFactory.setAttribute(FeaturesKeys.XML_VERSION, "1.1")</code>.</p>
-
+      <code>transformerFactory.setAttribute(FeatureKeys.XML_VERSION, "1.1")</code>--></p>
+    
     <p>This configuration setting affects:</p>
     <ul>
       <li>
@@ -1031,7 +1046,7 @@
       </li>
       <li>
         <p>the characters considered valid in the result of the functions
-            <code>codepoints-to-string()</code> and <code>unparsed-text()</code></p>
+          <code>codepoints-to-string()</code> and <code>unparsed-text()</code></p>
       </li>
       <li>
         <p>the characters considered valid in the result of certain Saxon extension functions</p>
@@ -1043,7 +1058,7 @@
         <p>the default version used by the serializer (with output method XML)</p>
       </li>
     </ul>
-
+    
     <p>Since Saxon 9.4, the configuration setting no longer affects:</p>
     <ul>
       <li>
@@ -1056,22 +1071,42 @@
       </li>
       <li>
         <p>schema validation of values of type <code>xs:NCName</code>, <code>xs:QName</code>,
-            <code>xs:NOTATION</code>, and <code>xs:ID</code></p>
+          <code>xs:NOTATION</code>, and <code>xs:ID</code></p>
       </li>
       <li>
         <p>the permitted names of stylesheet objects such as keys, templates, decimal-formats,
-          output declarations, and output methods</p>
+          output declarations, and output methods.</p>
       </li>
     </ul>
-
-
+    
+    
+    
     <p>Note that if you use the default setting of "1.0", then supplying an XML 1.1 source document
       as input may cause undefined errors.</p>
-
+    
     <p>It is advisable to use an XML parser that supports XML 1.1 when the configuration is set to
       "1.1", and an XML parser that does not support XML 1.1 when the configuration is set to "1.0".
       However, Saxon does not enforce this.</p>
-
+    
+    <h2>Data Model</h2>
+    
+    <p>In the XDM data model for representation of XML documents, it is possible to have namespaces that are
+    in scope for a parent element, but not in scope for its children. This is supported by the native Saxon tree
+    models (the TinyTree and LinkedTree), but not by most third-party tree models (DOM, XOM, JDOM2, etc). It
+    is possible to create such trees using XSLT or XQuery, but they will never be produced by an XML 1.0 parser.
+    Such trees can be serialized either as XML 1.0 or XML 1.1: if XML 1.0 is chosen, the namespace undeclarations
+    used to indicate absent namespace bindings will simply be omitted from the output.</p>
+    
+    <p>The choice of XML 1.0 or 1.1 also affects the set of characters permitted in strings, and in XML text and attribute nodes.
+    Many (but not all) mechanisms for constructing strings check that if the configuration is set to XML 1.0,
+    only permitted XML 1.0 characters may appear. </p>
+    
+    <h2>Serialization</h2>
+    
+    <p>The serialization property <code>version="1.0 | 1.1"</code> may be set on the <code>xsl:output</code>
+    and <code>xsl:result-document</code> elements, and on various APIs. The default depends on the setting
+    in the Saxon <code>Configuration</code>.</p>
+    
     <p>You can set the configuration to allow XML 1.1, but still serialize result documents as XML
       1.0 by specifying the output property <code>version="1.0"</code>. In this case Saxon will
       check while serializing the document that it conforms to the XML 1.0 constraints (note that
@@ -1080,8 +1115,14 @@
 
     <p>If you want the serializer to output namespace undeclarations, use the output property
         <code>undeclare-namespaces="yes"</code> as well as <code>version="1.1"</code>.</p>
+    
+    <p>It is not possible to serialize an XDM document as XML 1.0
+    if it contains text or attribute nodes using characters that XML 1.0 disallows.</p>
+    
+    
   </section>
   <section id="jaxpsources" title="JAXP Source Types">
+    <div class="javaonly">
     <h1>JAXP Source Types</h1>
 
 
@@ -1206,9 +1247,11 @@
       recognize into a <code>Source</code> that it does recognize. For example, this may be done by
       building the document tree in memory and returning the <a class="javalink"
         href="net.sf.saxon.om.NodeInfo">NodeInfo</a> object representing the root of the tree.</p>
+    </div>
   </section>
   <section id="thirdparty"
     title="Third-party Object Models: Axiom, DOM, JDOM2, XOM, and DOM4J">
+    <div class="javaonly">
     <h1>Third-party Object Models: Axiom, DOM, JDOM2, XOM, and DOM4J</h1>
 
 
@@ -1300,6 +1343,8 @@
       a prefix that is in-scope for a parent element will always be in-scope for its child elements).
       None of the external object models support typed
       (schema-validated) data, and none support in-situ update using XQuery updates.</p>
+      
+    </div>
   </section>
   <section id="choosingmodel" title="Choosing a Tree Model">
     <h1>Choosing a Tree Model</h1>
@@ -1343,6 +1388,7 @@
     </p>
   </section>
   <section id="domino" title="The Domino Tree Model">
+    <div class="javaonly">
     <h1>The Domino Tree Model</h1>
     <p>The Domino tree model was introduced in Saxon 9.8 and is available in Saxon-EE only. It is a new approach
     to the handling of DOM source trees.</p>
@@ -1359,16 +1405,9 @@
     <p>The Domino model must not be used with a DOM tree that is subject to update, other than changes to the values of
     attribute or text nodes, which might work (but are still best avoided). Saxon has no way of preventing or detecting
     updates, so these will generally cause catastrophic failure.</p>
-    
+    </div> 
   </section>
-  <section id="ptree" title="The PTree File Format">
-    <h1>The PTree File Format</h1>
 
-    <p>The PTree (persistent tree) was a binary XML serialization supported by earlier Saxon
-    releases. It has been dropped from the product with effect from Saxon 10.0. Third-party
-    offerings such as EXI do the same job better.</p>
- 
-  </section>
   <section id="validation" title="Validation of Source Documents">
     <h1>Validation of Source Documents</h1>
 
@@ -1396,11 +1435,10 @@
       there is no declaration of the outermost element in any loaded schema, then it is left as an
       untyped document.</p>
 
-    <p>When invoking transformations or queries from the Java API, the equivalent of the
-        <code>-val:strict</code> option is to call the method
-        <code>setSchemaValidation(Validation.STRICT)</code> on the <code>Configuration</code>
-      object. The equivalent of <code>-val:lax</code> is
-        <code>setSchemaValidation(Validation.LAX)</code>.</p>
+    <p>It is also possible to set the configuration option <a class="feature" href="SCHEMA_VALIDATION"/> 
+      to the value <code>Validation.STRICT</code> (1) or <code>Validation.LAX</code> (2). However,
+      using a configuration-wide setting is not recommended because validation is usually applied
+      to some input documents and not others.</p>
 
     <p>When documents are built using the <a class="javalink"
         href="net.sf.saxon.s9api.DocumentBuilder">DocumentBuilder</a> in the s9api interface, or the
@@ -1408,14 +1446,14 @@
       interface on .NET, validation may be controlled by setting the appropriate options on the
         <code>DocumentBuilder</code>.</p>
 
-    <p>On Java interfaces that expect a JAXP <code>Source</code> object it is possible to request
+    <p class="javaonly">On Java interfaces that expect a JAXP <code>Source</code> object it is possible to request
       validation by supplying an <a class="javalink" href="net.sf.saxon.lib.AugmentedSource"
         >AugmentedSource</a>. This consists of a <code>Source</code> and a set of options, including
       validation options; since <code>AugmentedSource</code> implements the JAXP <code>Source</code>
       interface it is possible to use it anywhere that a <code>Source</code> is expected, including
       as the object returned by a user-written <code>URIResolver</code>.</p>
 
-    <p>Saxon's standard <code>URIResolver</code> uses this technique if it has been enabled (for
+    <p class="javaonly">Saxon's standard <code>URIResolver</code> uses this technique if it has been enabled (for
       example by using <code>-p</code> on the command line). With this option, any URI containing
       the query parameter <code>?validation=strict</code> (for example,
       <code>doc('source.xml?validation=strict')</code>) causes strict validation to be requested for that
@@ -1443,7 +1481,7 @@
     <p>It is possible to change this default behavior in several ways.</p>
     <ul>
       <li>
-        <p>From the <code>com.saxonica.Query</code> or <code>com.saxonica.Transform</code> command
+        <p>From the <code>Query</code> or <code>Transform</code> command
           line, options are available: <code>-strip:all</code> strips all whitespace text nodes,
             <code>-strip:none</code> strips no whitespace text nodes, and
             <code>-strip:ignorable</code> strips ignorable whitespace text nodes only (this is the
@@ -1477,14 +1515,14 @@
     <p>Saxon never modifies a supplied tree <i>in situ</i>: if a tree is supplied as input, and the stylesheet
       requests space stripping, then a virtual tree is created and whitespace is stripped on the fly as
       it is navigated. This is expensive (it can add 25% to processing time); it is therefore best to
-      supply a <code>SAXSource</code> or <code>StreamSource</code> as input to a transformation, so
+      supply lexical XML as input to a transformation, so
       that Saxon can strip unwanted whitespace while the tree is being parsed and built.
     </p>
   </section>
   <section id="streaming" title="Streaming of Large Documents">
     <h1>Streaming of Large Documents</h1>
 
-    <aside>Streaming is available only in Saxon-EE.</aside>
+    <aside>Streaming is available only in Saxon-EE (both Java and C#).</aside>
 
     <p>Sometimes source documents are too large to hold in memory. Saxon-EE provides a range of
       facilities for processing such documents in <i>streaming mode</i>: that is, processing data as
@@ -1509,7 +1547,7 @@
     <section id="xslt-streaming" title="Streaming using XSLT 3.0">
       <h1>Streaming using XSLT 3.0</h1>
 
-      <aside>Requires Saxon-EE.</aside>
+      <aside>Requires Saxon-EE (either Java or C#).</aside>
 
       <p>Saxon-EE (from Saxon 9.8) is fully conformant to the final XSLT 3.0 recommendation in terms of the
         streaming facilities it supports. A few gaps in coverage that were found after release were fixed for Saxon 9.9. 
@@ -1526,18 +1564,18 @@
         <li><p>By supplying a source document as input to a stylesheet whose initial mode is declared
           with <code>streamable="yes"</code> in an <a href="/xsl-elements/mode"
             class="bodylink code">xsl:mode</a> declaration. In this case the source document must be
-          supplied as a <code>StreamSource</code> or <code>SAXSource</code>, and not as an in-memory
+          supplied as a stream, and not as an in-memory
           tree. The details depend on which API is being used:</p>
           <ul>
-            <li><p>With the Java s9api API, compile the stylesheet to create an <code>XsltExecutable</code>,
+            <li class="javaonly"><p>With the Java s9api API, compile the stylesheet to create an <code>XsltExecutable</code>,
             and then use the <code>load30</code> method to create an <code>Xslt30Transformer</code>.
             Invoke the streamed transformation using the <code>applyTemplates</code> method of
             the <code>Xslt30Transformer</code>, supplying the input as a <code>StreamSource</code>
             or <code>SAXSource</code>.</p></li> 
-            <li><p>Similarly with the Saxon.Api interface on .NET, use the method
+            <li class="csonly"><p>Similarly with the Saxon.Api interface on .NET, use the method
             <code>Xslt30Transformer.ApplyTemplates()</code>, supplying a <code>Stream</code> 
             as input.</p></li>
-            <li><p>With the JAXP API, start by instantiating a <code>com.saxonica.config.StreamingTransformerFactory</code>.
+            <li class="javaonly><p">With the JAXP API, start by instantiating a <code>com.saxonica.config.StreamingTransformerFactory</code>.
             Invoke the transformation in the usual way by creating a <code>Transformer</code> (optionally via a
             <code>Templates</code> object). When the <code>transform()</code> method is called with a
             <code>StreamSource</code> or <code>SAXSource</code> as input, and when the initial mode
@@ -1591,7 +1629,7 @@
           disallowed navigation from those nodes (for example, you can't get all the descendants of
           an ancestor node).</li>
         <li>It's not permitted to bind a streamed node to a variable or parameter, or to pass it to
-          a function.</li>
+          a function, except in the special case of functions that are declared streamable.</li>
         <li>An expression such as <code>//section</code> is referred to as a crawling expression.
           Crawling expressions potentially contain nodes which overlap each other, which creates
           problems if you want to make further downward selections from such nodes. The XSLT 3.0
@@ -1785,8 +1823,8 @@
         are interpreted:</p>
       
       <ul>
-        <li>The configuration option <a class="bodylink code" href="/configuration/config-features"
-          >Feature.STREAMABILITY</a> may be set to one of the values "off" or "standard".
+        <li>The configuration property <a class="feature" href="STREAMABILITY"/>
+          may be set to one of the values "off" or "standard".
           (Releases prior to 9.8 supported a third option, "extended".) With a licensed Saxon-EE
         configuration, the default is "standard", which means that streaming will happen if it
         is requested and if it is feasible. Setting the value to "off" causes Saxon to behave
@@ -1794,8 +1832,7 @@
         ignored, and the stylesheet is executed in a non-streaming manner (which means that processing
         of a large document may fail if there is insufficient memory).</li>
         
-        <li>The configuration option <a class="bodylink code"
-          href="/configuration/config-features">Feature.STREAMING_FALLBACK</a> determines what
+        <li>The configuration property <a class="feature" href="STREAMING_FALLBACK"/> determines what
           Saxon does when streaming is requested, and a construct is found that is deemed
           non-streamable. This is a boolean option. If it is set to <code>true</code>, Saxon attempts a
           non-streaming implementation of the relevant construct. If sufficient memory is available
@@ -1803,8 +1840,7 @@
           evaluation. When the option is set to <code>false</code> (the default), the presence of a 
           construct that is deemed non-streamable causes a static (compile-time) error.</li>
         
-        <li>The configuration option <a class="bodylink code"
-          href="/configuration/config-features">Feature.STRICT_STREAMABILITY</a>
+        <li>The configuration property <a class="feature" href="STRICT_STREAMABILITY"/>
          determines how closely Saxon's streamability analysis follows the rules in the
         W3C specification. This is a boolean value (with the default <code>false</code>): the value <code>true</code> requests
         strict adherence to the W3C rules. In reality this option does not affect the rules
@@ -2295,7 +2331,7 @@ satisfies number($t/@value) lt 0
       document loaded how many nodes from the input document were retained and how many
       discarded.</p>
 
-    <p>From the s9api API, document projection can be invoked as an option on the <a
+    <p class="javaonly">From the s9api API, document projection can be invoked as an option on the <a
         class="javalink" href="net.sf.saxon.s9api.DocumentBuilder">DocumentBuilder</a>. The call
         <code>setDocumentProjectionQuery()</code> supplies as its argument a compiled query (an
         <code>XQueryExecutable</code>), and the document built by the document builder is then
@@ -3259,9 +3295,8 @@ satisfies number($t/@value) lt 0
       </tbody>
     </table>
 
-    <p>This Saxon feature can be disabled by setting the configuration property <a
-        class="bodylink code" href="/configuration/config-features"
-        >Feature.ENTITY_RESOLVER_CLASS</a> to null; it is also possible to set it to a different
+    <p>This Saxon feature can be disabled by setting the configuration property 
+      <a class="feature" href="ENTITY_RESOLVER_CLASS"/> to null; it is also possible to set it to a different
         <code>EntityResolver</code> class (perhaps a subclass of Saxon's
         <code>StandardEntityResolver</code>) that varies the behavior. If an
         <code>EntityResolver</code> is set in the relevant <code>ParseOptions</code> or in an
