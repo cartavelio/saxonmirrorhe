@@ -188,7 +188,7 @@
          'charAt#1':          '%scope%[%args%]',
          'equalsIgnoreCase#1':'Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(%scope%, %args%)',
          'getChars#4':        'Saxon.Impl.Helpers.StringUtils.stringToCharArray(%scope%, %args%)',
-         'getBytes#1':        'System.Text.Encoding.GetEncoding(%args%).GetBytes(%scope%)',
+         'getBytes#1':        'Saxon.Impl.Helpers.StringUtils.EncodingForName(%args%).GetBytes(%scope%)',
          'hashCode#0':        '%scope%.GetHashCode()',
          'intern#0':          'System.String.Intern(%scope%)',
          'isEmpty#0':         '%scope%.Length==0',
@@ -1400,7 +1400,7 @@
    <!-- java.nio.charset.StandardCharsets => System.Text.Encoding -->
    <xsl:template match="*[@RESOLVED_TYPE = 'java.nio.charset.StandardCharsets']" priority="20">
       <xsl:sequence select="f:applyFormat(., map{
-         'forName#1':      'System.Text.Encoding.GetEncoding(%args%)',
+         'forName#1':      'Saxon.Impl.Helpers.StringUtils.EncodingForName(%args%)',
          '*':              '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
@@ -1408,7 +1408,7 @@
    <!-- java.nio.charset.Charset => System.Text.Encoding -->
    <xsl:template match="*[@RESOLVED_TYPE = 'java.nio.charset.Charset']" priority="20">
       <xsl:sequence select="f:applyFormat(., map{
-         'forName#1':      'System.Text.Encoding.GetEncoding(%args%)',
+         'forName#1':      'Saxon.Impl.Helpers.StringUtils.EncodingForName(%args%)',
          '*':              '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
