@@ -307,7 +307,7 @@
   { "customer": "Jones the Baker",
     "orders" : [{ 
        "order-no": 123,
-       "date": 2017-02-03,
+       "date": "2017-02-03",
        "order-lines": [
           { "product": "flour, 25Kg"
             "quantity": 1
@@ -318,8 +318,16 @@
         ]   
      },
      {
-        "order-no: 456,
-        ....
+       "order-no": 456,
+       "date": "2017-05-12",
+       "order-lines": [
+          { "product": "butter, 10Kg"
+            "quantity": 2
+          },
+          { "product": "yeast, 100g"
+            "quantity": 5
+          }
+        ]   
      }]
   },
   { "customer": "Evans the Butcher",
@@ -328,7 +336,7 @@
 ]            
             ]]></samp>
           <p>And suppose we want to double the quantity of flour ordered by Jones. This can be done as follows:</p>
-          <samp><![CDATA[<xsl:variable name="in" select="parse-json('customers.json')"/>
+          <samp><![CDATA[<xsl:variable name="in" select="json-doc('customers.json')"/>
 <xsl:variable name="updated" as="array(*)">
   <saxon:deep-update
      root = "$in"
