@@ -129,7 +129,7 @@ public abstract class Pattern extends PseudoExpression {
      */
 
     public void setOriginalText(String text) {
-        /*originalText = text;*/
+        originalText = text;
     }
 
     /**
