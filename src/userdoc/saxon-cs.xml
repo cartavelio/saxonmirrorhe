@@ -317,10 +317,12 @@ class.)</p>
    <section id="restrictions">
       <h1>Restrictions</h1>
       
-      <p>Absolute URIs with single-character scheme names (for example, a:/x/y/z) are not handled correctly. 
-         (This is a limitation of Microsoft's System.Uri class - it treates such names as DOS filenames).</p>
+      <p>Absolute URIs with single-character scheme names (for example, <code>a:/x/y/z</code>) are not handled correctly. 
+         (This is a limitation of Microsoft's <code>System.Uri</code> class - it treates such names as DOS filenames).</p>
       
       <h2>Restrictions Relative to Saxon-EE 11 on Java</h2>
+      
+      <p>>The <code>xsl:result-document</code> instruction is executed synchronously.</p>
       
       <h2>Restrictions Relative to Saxon-EE 10 on .NET</h2>
       
@@ -337,14 +339,16 @@ class.)</p>
          It's now possible to use a lambda expression wherever a predicate was expected, 
          e.g. as the argument to <code>Step.Where()</code> or <code>XdmNode.Children()</code>.
       </p>
-      <p>It's no longer possible to combine predicates using P.And(Q) or P.Or(Q). Instead you can do 
-         Predicates.AllOf(P, Q, R, ...) or Predicates.AnyOf(P, Q, R, ...). 
-         Also it's no longer possible to define a subclass of Saxon.Api.Predicate, 
+      <p>It's no longer possible to combine predicates using <code>P.And(Q)</code> or <code>P.Or(Q)</code>. Instead you can do 
+         <code>Predicates.AllOf(P, Q, R, ...)</code> or <code>Predicates.AnyOf(P, Q, R, ...)</code>. 
+         Also it's no longer possible to define a subclass of <code>Saxon.Api.Predicate</code>, 
          but there's not much of a use case for doing that anyway.
       </p>
       <p>The <code>BaseUri</code> property of <code>Saxon.Api.XPathCompiler</code> and <code>Saxon.Api.XQueryCompiler</code>
       is now a <code>Uri</code> rather than a <code>string</code>, bringing these classes into line with
       <code>Saxon.Api.XsltCompiler</code>.</p>
+      
+      
    </section>
    
 </article>
