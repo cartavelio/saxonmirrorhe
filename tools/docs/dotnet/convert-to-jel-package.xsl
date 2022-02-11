@@ -123,6 +123,16 @@
         </interface>
     </xsl:template>
     
+    <xsl:template match="delegate">
+        <delegate id="{@name}" 
+            visibility="{if (@public='true') then 'public' else 'protected'}"
+            type="{f:shortName(@type)}" fulltype="{@fulltype}">
+            <xsl:apply-templates select="type"/>
+            <xsl:apply-templates select="comments"/>
+            <xsl:call-template name="gen-params"/>           
+        </delegate>
+    </xsl:template>
+    
     <xsl:template name="classes-implemented-by-interface">
         <xsl:if test="exists(key('class-by-base',./@name))">
             <implemented-by>

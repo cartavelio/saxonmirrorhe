@@ -370,7 +370,7 @@
                     <xsl:when test="$count gt 2">
                         <xsl:variable name="showclass"
                             select="if ($count eq 3) 
-                            then $packageDoc/package/(class|interface|enum)[@id eq $hpj]
+                            then $packageDoc/package/(class|interface|enum|delegate)[@id eq $hpj]
                             else $packageDoc/package/class/class[@id eq concat($hash-parts[$count - 1],'.',$hpj)]"/>
                         <xsl:if test="empty($showclass)">
                             <xsl:result-document href="#main" method="ixsl:replace-content">
