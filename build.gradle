@@ -757,12 +757,12 @@ task record_branch(
   commandLine "git", "rev-parse", "--abbrev-ref", "HEAD"
   standardOutput = recordBranch
   doLast {
-    def output = new FileWriter(new File("build/built-branch"))
+    def output = new FileWriter(new File("${buildDir}/built-branch"))
     output.write(recordBranch.toString("utf-8"))
     output.close()
   }
   doFirst {
-    mkdir("build")
+    mkdir(buildDir)
   }
 }
 
@@ -1142,7 +1142,7 @@ task eejJarSql(
 
 // ============================================================
 
-task hej_releaseSetup(
+task hejRelease(
   type: Copy,
   dependsOn: ["hejJar", "hejJarXqj", "hejJarTests", "hej_notices"],
   description: "Build the HE release for Java"
@@ -1153,23 +1153,10 @@ task hej_releaseSetup(
   include "saxon-he-xqj-${saxonVersion}.jar"
   include "saxon-he-test-${saxonVersion}.jar"
   rename { filename ->
-    if (filename.startsWith("saxon-he-xqj")) {
-      filename = "saxon9-xqj.jar"
-    } else if (filename.startsWith("saxon-he-test")) {
-      filename = "saxon9-test.jar"
-    } else {
-      filename = "saxon9he.jar"
+    if (filename.startsWith("saxon-he-test")) {
+      filename = "saxon-he-test-${saxonVersion}.jar"
     }
   }
-}
-
-task hejRelease(
-  type: Zip,
-  dependsOn: ["hej_releaseSetup"],
-  description: "Make the HE release ZIP file for Java"
-) {
-  from("${buildDir}/releases/hej")
-  archiveFileName = "SaxonHE${version_h}J.zip"
 }
 
 task pejRelease(
@@ -1210,85 +1197,21 @@ task eejRelease(
   }
 }
 
-task javaReleases(
-  dependsOn: ["hejRelease", "pejRelease", "eejRelease"],
-  description: "Build all of the Java releases"
-) {
-  // Just a container to hang dependencies on
-}
-
-// ============================================================
-
-task dockerCoreContainer(
-  type: Exec,
-  description: "Build the CentOS 8 core container"
-) {
-  inputs.files("${projectDir}/src/docker/centos8-core")
-  commandLine "docker", "build",
-    "-t", "${dockerCentos8Core}",
-    "${projectDir}/src/docker/centos8-core"
-}
-
-// In order to build this container, you must specify the location
-// of the JDK and the Jet software archive. Use
-// -PdockerJdk= to specify the location of the JDK RPM. Use
-// -PdockerJet= to specify the location of the Jet archive.
-task dockerBuilderContainer(
-  type: Exec,
-  dependsOn: ["docker_setupBuilder", "dockerCoreContainer"],
-  description: "Build the Saxonica builder container"
-) {
-  inputs.files("${buildDir}/docker/builder")
-  commandLine "docker", "build",
-    "-t", "${dockerBuildContainer}",
-    "${buildDir}/docker/builder"
-}
-
-task docker_setupBuilder(
-  type: Copy,
-  dependsOn: ["docker_setupJdk", "docker_setupJet"],
-  description: "Setup to build the builder container"
-) {
-  from "src/docker/builder"
-  into "${buildDir}/docker/builder"
-}
-
-task docker_testJdk(
-  description: "Test that the dockerJdk property has been specified"
-) {
-  doLast {
-    if (dockerJdk == "none") {
-      throw new GradleException("You must specify the JDK with -PdockerJdk=...")
-    }
+if (file("${projectDir}/src/main/java/com").exists()) {
+  task javaReleases(
+    dependsOn: ["hejRelease", "pejRelease", "eejRelease"],
+    description: "Build all of the Java releases"
+  ) {
+    // Just a container to hang dependencies on
   }
-}
-
-task docker_setupJdk(
-  type: Copy,
-  dependsOn: ["docker_testJdk"],
-  description: "Setup the JDK for the builder container"
-) {
-  from dockerJdk
-  into "${buildDir}/docker/builder"
-}
-
-task docker_testJet(
-  description: "Test that the dockerJet property has been specified"
-) {
-  doLast {
-    if (dockerJet == "none") {
-      throw new GradleException("You must specify Jet archive with -PdockerJet=...")
-    }
+} else {
+  // Ignore the EEJ and PEJ releases if the sources aren't available
+  task javaReleases(
+    dependsOn: ["hejRelease"],
+    description: "Build all of the Java releases"
+  ) {
+    // Just a container to hang dependencies on
   }
-}
-
-task docker_setupJet(
-  type: Copy,
-  dependsOn: ["docker_testJet"],
-  description: "Setup the Jet archive for the builder container"
-) {
-  from dockerJet
-  into "${buildDir}/docker/builder"
 }
 
 // ============================================================

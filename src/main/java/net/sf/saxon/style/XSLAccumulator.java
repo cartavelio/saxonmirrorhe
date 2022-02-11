@@ -30,7 +30,10 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.Pattern;
-import net.sf.saxon.trans.*;
+import net.sf.saxon.trans.SimpleMode;
+import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.Visibility;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
@@ -119,7 +122,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         //prepareSimpleAttributes();
 
