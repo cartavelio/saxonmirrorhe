@@ -558,6 +558,17 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
     }
 
     /**
+     * Return the first item of this stream, if there is one, discarding the remainder;
+     * return null if the stream is empty.
+     * This is a short-circuiting operation similar to {@link #findFirst}
+     * @return the first item in this stream, or null if the stream is empty.
+     */
+
+    public T firstItem() {
+        return base.findFirst().orElse(null);
+    }
+
+    /**
      * Return true if the stream is non-empty.
      * This is a short-circuiting terminal operation.
      * @return true if at least one item is present in the stream.
@@ -581,6 +592,18 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
     public XdmStream<T> last() {
         Optional<T> result = base.reduce((first, second) -> second);
         return new XdmStream<>(result);
+    }
+
+    /**
+     * Return the last item of this stream, if there is one, discarding the remainder;
+     * return null if the stream is empty.
+     * This is a short-circuiting operation similar to {@link #lastItem()}.
+     *
+     * @return the last item in the stream, or null if the input is empty.
+     */
+
+    public T lastItem() {
+        return base.reduce((first, second) -> second).orElse(null);
     }
 
     /**
