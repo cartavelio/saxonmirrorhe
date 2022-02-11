@@ -486,8 +486,9 @@ public abstract class HTMLEmitter extends XMLEmitter {
                 closeStartTag();
             }
             writer.writeAscii(StringConstants.PI_START);
+            writer.write(target);
             writer.writeCodePoint(' ');
-            writer.write(data);
+            writer.write(t);
             writer.writeCodePoint('>');
         } catch (java.io.IOException err) {
             throw new XPathException(err);

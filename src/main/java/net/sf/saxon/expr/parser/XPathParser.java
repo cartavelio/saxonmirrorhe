@@ -1689,10 +1689,10 @@ public class XPathParser {
                     primaryType = parseRecordTest(this);
                     break;
                 case "union":
-                    primaryType = parseUnionType(this);
+                    primaryType = parseUnionType();
                     break;
                 case "enum":
-                    primaryType = parseEnumType(this);
+                    primaryType = parseEnumType();
                     break;
                 case "empty-sequence":
                     nextToken();
@@ -1829,42 +1829,46 @@ public class XPathParser {
      * Syntax: "union" "(" qname ("," qname)* ")"
      */
 
-    public ItemType parseUnionType(XPathParser p) throws XPathException {
+    public ItemType parseUnionType() throws XPathException {
         // The initial "union(" has been read
         checkLanguageVersion40();
-        Tokenizer t = p.getTokenizer();
-        p.nextToken();
+        nextToken();
         List<AtomicType> memberTypes = new ArrayList<>(6);
 
         while (true) {
-            p.expect(Token.NAME);
-            StructuredQName member = p.getQNameParser().parse(
-                    t.currentTokenValue, p.getStaticContext().getDefaultElementNamespace());
-            ItemType type = p.getPlainType(member);
-            if (type instanceof AtomicType) {
-                memberTypes.add((AtomicType) type);
-            } else if (type instanceof PlainType) {
-                for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
-                    if (pt instanceof AtomicType) {
-                        memberTypes.add((AtomicType) pt);
-                    } else {
-                        p.grumble("Union type " + type + " has a non-atomic member type " + pt);
-                    }
-                }
+            if (t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("enum")) {
+                EnumerationType type = parseEnumType();
+                memberTypes.add(type);
             } else {
-                p.grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+                expect(Token.NAME);
+                StructuredQName member = getQNameParser().parse(
+                        t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
+                ItemType type = getPlainType(member);
+                if (type instanceof AtomicType) {
+                    memberTypes.add((AtomicType) type);
+                } else if (type instanceof PlainType) {
+                    for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
+                        if (pt instanceof AtomicType) {
+                            memberTypes.add((AtomicType) pt);
+                        } else {
+                            grumble("Union type " + type + " has a non-atomic member type " + pt);
+                        }
+                    }
+                } else {
+                    grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+                }
+                nextToken();
             }
-            p.nextToken();
             if (t.currentToken == Token.RPAR) {
                 break;
             } else if (t.currentToken == Token.COMMA) {
-                p.nextToken();
+                nextToken();
             } else {
-                p.grumble("Expected ',' or ')' after member name in union type, found '" +
+                grumble("Expected ',' or ')' after member name in union type, found '" +
                                   Token.tokens[t.currentToken] + '\'');
             }
         }
-        p.nextToken();
+        nextToken();
         return new LocalUnionType(memberTypes);
 
     }
@@ -1874,27 +1878,26 @@ public class XPathParser {
      * Syntax: "enum" "(" StringLiteral ("," StringLiteral)* ")"
      */
 
-    public ItemType parseEnumType(XPathParser p) throws XPathException {
-        // The initial "union(" has been read
+    public EnumerationType parseEnumType() throws XPathException {
+        // The initial "enum(" has been read
         checkLanguageVersion40();
-        Tokenizer t = p.getTokenizer();
-        p.nextToken();
-        Set<String> values = new HashSet<String>(6);
+        nextToken();
+        Set<String> values = new HashSet<>(6);
 
         while (true) {
-            p.expect(Token.STRING_LITERAL);
+            expect(Token.STRING_LITERAL);
             values.add(t.currentTokenValue);
-            p.nextToken();
+            nextToken();
             if (t.currentToken == Token.RPAR) {
                 break;
             } else if (t.currentToken == Token.COMMA) {
-                p.nextToken();
+                nextToken();
             } else {
-                p.grumble("Expected ',' or ')' after string literal in enum type, found '" +
+                grumble("Expected ',' or ')' after string literal in enum type, found '" +
                                   Token.tokens[t.currentToken] + '\'');
             }
         }
-        p.nextToken();
+        nextToken();
         return new EnumerationType(values);
 
     }
