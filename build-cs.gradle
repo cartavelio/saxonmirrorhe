@@ -181,6 +181,7 @@ task hecs_setupPreprocess(
   exclude "net/sf/saxon/tree/lib/StandardEntityResolver.java"
   exclude "net/sf/saxon/tree/lib/StandardErrorHandler.java"
   exclude "net/sf/saxon/tree/util/AttributeCollectionImpl.java"
+  exclude "net/sf/saxon/tree/util/ProcInstParser.java"
   exclude "net/sf/saxon/value/SaxonDuration.java"
   exclude "net/sf/saxon/value/SaxonXMLGregorianCalendar.java"
   
@@ -394,10 +395,12 @@ task hecs_sources(
         || line.contains("import net.sf.saxon.stax")
         || line.contains("import net.sf.saxon.jaxp")
         || line.contains("net.sf.saxon.xpath.JAXPXPathStaticContext")) {
-      null
+      null    
+    } else if (line.contains("//C#//")) {
+      line.replace("//C#//", "")
     } else {
       line
-    }
+    } 
   }
 }
 
