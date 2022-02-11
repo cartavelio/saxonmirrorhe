@@ -55,6 +55,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static java.lang.System.err;
 import static net.sf.saxon.s9api.streams.Predicates.isText;
 import static net.sf.saxon.s9api.streams.Steps.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -78,9 +79,9 @@ public class DOMTest {
     public void testCopyNamespaces() {
         try {
             String in = "<?xml version='1.0'?> \n" +
-                "<Document xmlns='http://lost.namespace.com/' \n" +
-                "xmlns:xsi='http://www.namespacexsi.com' " +
-                "xsi:value='some-value'/>";
+                    "<Document xmlns='http://lost.namespace.com/' \n" +
+                    "xmlns:xsi='http://www.namespacexsi.com' " +
+                    "xsi:value='some-value'/>";
 
             // Read an XML file to a DOM
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -182,9 +183,9 @@ public class DOMTest {
     private void testStringValueOfDoc(TransformerFactory tFactory) {
         try {
             String xml = "<!DOCTYPE test [\n" +
-                " <!ENTITY omega 'theta'>\n" +
-                "]>\n" +
-                "<test>[&omega;]</test>";
+                    " <!ENTITY omega 'theta'>\n" +
+                    "]>\n" +
+                    "<test>[&omega;]</test>";
 
             // Read an XML file to a DOM
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -194,12 +195,12 @@ public class DOMTest {
             Document doc = db.parse(is);
 
             String stylesheet =
-                "<?xml version=\"1.0\"?> \n" +
-                    "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
-                    "<xsl:template match='/'>\n" +
-                    "<out><xsl:value-of select='.'/></out>\n" +
-                    "</xsl:template>\n" +
-                    "</xsl:stylesheet>";
+                    "<?xml version=\"1.0\"?> \n" +
+                            "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
+                            "<xsl:template match='/'>\n" +
+                            "<out><xsl:value-of select='.'/></out>\n" +
+                            "</xsl:template>\n" +
+                            "</xsl:stylesheet>";
 
             Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(stylesheet)));
             Transformer transformer = templates.newTransformer();
@@ -234,7 +235,7 @@ public class DOMTest {
     private void testStripSpace(TransformerFactory tFactory) {
         try {
             String in = "<?xml version='1.0'?> \n" +
-                "<Document> <e> <f/><f/> </e> </Document>";
+                    "<Document> <e> <f/><f/> </e> </Document>";
 
             // Read an XML file to a DOM
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -246,20 +247,20 @@ public class DOMTest {
             // Create stylesheet with call to extension function
 
             String stylesheet =
-                "<?xml version=\"1.0\"?> \n" +
-                    "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
-                    "<xsl:strip-space elements='*'/>" +
-                    "<xsl:template match='/'>\n" +
-                    "<xsl:value-of select='ext:showDomNodes(//f)' xmlns:ext='java:jaxptest.DOMTest'/>\n" +
-                    "<xsl:value-of select='ext:showDomNode((//e)[1])' xmlns:ext='java:jaxptest.DOMTest'/>\n" +
-                    "<xsl:apply-templates/>\n" +
-                    "</xsl:template>\n" +
-                    "<xsl:template match=\"@*|node()\">\n" +
-                    "<xsl:copy>\n" +
-                    "  <xsl:apply-templates select=\"@*|node()\" /> \n" +
-                    "</xsl:copy>\n" +
-                    "</xsl:template>\n" +
-                    "</xsl:stylesheet>";
+                    "<?xml version=\"1.0\"?> \n" +
+                            "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
+                            "<xsl:strip-space elements='*'/>" +
+                            "<xsl:template match='/'>\n" +
+                            "<xsl:value-of select='ext:showDomNodes(//f)' xmlns:ext='java:jaxptest.DOMTest'/>\n" +
+                            "<xsl:value-of select='ext:showDomNode((//e)[1])' xmlns:ext='java:jaxptest.DOMTest'/>\n" +
+                            "<xsl:apply-templates/>\n" +
+                            "</xsl:template>\n" +
+                            "<xsl:template match=\"@*|node()\">\n" +
+                            "<xsl:copy>\n" +
+                            "  <xsl:apply-templates select=\"@*|node()\" /> \n" +
+                            "</xsl:copy>\n" +
+                            "</xsl:template>\n" +
+                            "</xsl:stylesheet>";
 
             Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(stylesheet)));
             Transformer transformer = templates.newTransformer();
@@ -303,7 +304,7 @@ public class DOMTest {
         // node is a Saxon XOMNodeWrapper and uses the generic Navigator.copy() method on the XOMNodeWrapper
         try {
             String in = "<?xml version='1.0'?> \n" +
-                "<Document> <e> <f/><f/> </e> </Document>";
+                    "<Document> <e> <f/><f/> </e> </Document>";
 
             // Read an XML file to a DOM
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -565,7 +566,6 @@ public class DOMTest {
     }
 
 
-
     /**
      * Test JAXP XPath API delivering a DOM NodeList given a DOM Node as input
      */
@@ -574,7 +574,7 @@ public class DOMTest {
     public void testXPathNodeList() {
         try {
             String in = "<?xml version='1.0'?> \n" +
-                "<Document><e/><f/><g/></Document>";
+                    "<Document><e/><f/><g/></Document>";
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             DocumentBuilder db = factory.newDocumentBuilder();
@@ -596,7 +596,7 @@ public class DOMTest {
     public void testXPathNodeListFromDOMSource() {
         try {
             String in = "<?xml version='1.0'?> \n" +
-                "<Document><e/><f/><g/></Document>";
+                    "<Document><e/><f/><g/></Document>";
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             DocumentBuilder db = factory.newDocumentBuilder();
@@ -619,7 +619,7 @@ public class DOMTest {
     public void testXPathNodeListFromWrapper() {
         try {
             String in = "<?xml version='1.0'?> \n" +
-                "<Document><e/><f/><g/></Document>";
+                    "<Document><e/><f/><g/></Document>";
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             DocumentBuilder db = factory.newDocumentBuilder();
@@ -637,15 +637,15 @@ public class DOMTest {
     @Test
     public void testNodeListFromXsltExtension() {
         String stylesheet =
-            "<?xml version=\"1.0\"?> \n" +
-                "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
-                "<xsl:strip-space elements='*'/>" +
-                "<xsl:template match='/'>\n" +
-                "<a><xsl:value-of select=\"count(ext:makeElementList('r', 'e', 5))\" xmlns:ext='java:jaxptest.DOMTest'/></a>\n" +
-                "<b><xsl:value-of select=\"count(ext:makeElementList('r', 'e', 5)/*)\" xmlns:ext='java:jaxptest.DOMTest'/></b>\n" +
-                "<c><xsl:value-of select=\"count(ext:makeElementList('r', 'e', 5)/node())\" xmlns:ext='java:jaxptest.DOMTest'/></c>\n" +
-                "</xsl:template>\n" +
-                "</xsl:stylesheet>";
+                "<?xml version=\"1.0\"?> \n" +
+                        "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
+                        "<xsl:strip-space elements='*'/>" +
+                        "<xsl:template match='/'>\n" +
+                        "<a><xsl:value-of select=\"count(ext:makeElementList('r', 'e', 5))\" xmlns:ext='java:jaxptest.DOMTest'/></a>\n" +
+                        "<b><xsl:value-of select=\"count(ext:makeElementList('r', 'e', 5)/*)\" xmlns:ext='java:jaxptest.DOMTest'/></b>\n" +
+                        "<c><xsl:value-of select=\"count(ext:makeElementList('r', 'e', 5)/node())\" xmlns:ext='java:jaxptest.DOMTest'/></c>\n" +
+                        "</xsl:template>\n" +
+                        "</xsl:stylesheet>";
 
         try {
             TransformerFactory tFactory = new EnterpriseTransformerFactory();
@@ -688,7 +688,7 @@ public class DOMTest {
     public void testXPathNodeListFromExtensionFunction() {
         try {
             String in = "<?xml version='1.0'?> \n" +
-                "<books><book>fred</book><book>jane</book><book>anne</book><book>sue</book></books>";
+                    "<books><book>fred</book><book>jane</book><book>anne</book><book>sue</book></books>";
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             DocumentBuilder db = factory.newDocumentBuilder();
@@ -729,16 +729,16 @@ public class DOMTest {
     public void testXPathNodeListFromJaxpExtensionFunction() {
         try {
             String in = "<?xml version='1.0'?> \n" +
-                "<books><book>fred</book><book>jane</book><book>anne</book><book>sue</book></books>";
+                    "<books><book>fred</book><book>jane</book><book>anne</book><book>sue</book></books>";
             DocumentBuilderFactory factory =
-                DocumentBuilderFactory.newInstance();
+                    DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             DocumentBuilder db = factory.newDocumentBuilder();
             InputSource is = new InputSource(new StringReader(in));
             Document doc = db.parse(is);
             XPath xpath = getXPath();
             NodeList isList = (NodeList) xpath.evaluate(
-                "ext:sortArrayToSequence(//book)", doc, XPathConstants.NODESET);
+                    "ext:sortArrayToSequence(//book)", doc, XPathConstants.NODESET);
             assertEquals(4, isList.getLength(), "length");
 
             isList = (NodeList) xpath.evaluate("ext:sortArrayToNodeList(//book)", doc, XPathConstants.NODESET);
@@ -790,7 +790,7 @@ public class DOMTest {
 
     public static NodeList sortArrayToNodeList(ArrayList source) throws Exception {
         DocumentBuilderFactory factory =
-            DocumentBuilderFactory.newInstance();
+                DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         DocumentBuilder db = factory.newDocumentBuilder();
         Document doc = db.newDocument();
@@ -846,7 +846,7 @@ public class DOMTest {
          * ExtensionHandler and function name.
          *
          * @param handler  Class that implements the function
-         * @param funcName  Name of the function
+         * @param funcName Name of the function
          */
         private XPathFunctionImpl(Class<?> handler, String funcName) {
             m_handler = handler;
@@ -877,13 +877,13 @@ public class DOMTest {
     public void testTopLevelWhitespaceText() throws Exception {
         // effect of adding top-level whitespace text node
         String stylesheet =
-            "<?xml version=\"1.0\"?> \n" +
-                "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
-                "<xsl:template match='/'>\n" +
-                "<a/>\n" +
-                "<xsl:text>   </xsl:text>" +
-                "</xsl:template>\n" +
-                "</xsl:stylesheet>";
+                "<?xml version=\"1.0\"?> \n" +
+                        "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
+                        "<xsl:template match='/'>\n" +
+                        "<a/>\n" +
+                        "<xsl:text>   </xsl:text>" +
+                        "</xsl:template>\n" +
+                        "</xsl:stylesheet>";
 
         try {
             TransformerFactory tFactory = new EnterpriseTransformerFactory();
@@ -905,13 +905,13 @@ public class DOMTest {
     public void testTopLevelNonWhitespaceText() throws Exception {
         // effect of adding top-level whitespace text node
         String stylesheet =
-            "<?xml version=\"1.0\"?> \n" +
-                "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
-                "<xsl:template match='/'>\n" +
-                "<a/>\n" +
-                "<xsl:text>foo</xsl:text>" +
-                "</xsl:template>\n" +
-                "</xsl:stylesheet>";
+                "<?xml version=\"1.0\"?> \n" +
+                        "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
+                        "<xsl:template match='/'>\n" +
+                        "<a/>\n" +
+                        "<xsl:text>foo</xsl:text>" +
+                        "</xsl:template>\n" +
+                        "</xsl:stylesheet>";
 
         try {
             TransformerFactory tFactory = new EnterpriseTransformerFactory();
@@ -948,7 +948,7 @@ public class DOMTest {
 
         StringWriter sw = new StringWriter();
         transformer.transform(new DOMSource(textNode), new StreamResult(sw));
-        assertEquals( "some text", sw.toString(),"text node");
+        assertEquals("some text", sw.toString(), "text node");
 
         sw = new StringWriter();
         transformer.transform(new DOMSource(commentNode), new StreamResult(sw));
@@ -970,11 +970,11 @@ public class DOMTest {
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         transformer.setOutputProperty(OutputKeys.METHOD, "xml");
         for (Source source : new Source[]{
-            new DOMSource(document),
-            new DOMSource(),
-            //new StreamSource(),
+                new DOMSource(document),
+                new DOMSource(),
+                //new StreamSource(),
         }) {
-            System.err.println("with DOMSource(" + ((DOMSource)source).getNode() + ")");
+            err.println("with DOMSource(" + ((DOMSource) source).getNode() + ")");
             StringWriter sw = new StringWriter();
             transformer.transform(source, new StreamResult(sw));
             assertTrue(sw.toString().isEmpty());
@@ -1009,60 +1009,60 @@ public class DOMTest {
 
         try {
             String prefixXml = "<n0:bar xmlns:n0=\"http://bar\">\n" +
-                "    <foo xmlns=\"http://foo\"></foo>\n" +
-                "</n0:bar>";
+                    "    <foo xmlns=\"http://foo\"></foo>\n" +
+                    "</n0:bar>";
 
             String noPrefixXml = "<bar xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                " xsi:schemaLocation=\"http://bar bar.xsd\"\n" +
-                " xmlns=\"http://bar\">\n" +
-                "    <foo xmlns=\"http://foo\"></foo>\n" +
-                "</bar>";
+                    " xsi:schemaLocation=\"http://bar bar.xsd\"\n" +
+                    " xmlns=\"http://bar\">\n" +
+                    "    <foo xmlns=\"http://foo\"></foo>\n" +
+                    "</bar>";
 
             String barXsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<schema \n" +
-                "    xmlns:foo=\"http://foo\"\n" +
-                "    xmlns:bar=\"http://bar\"\n" +
-                "    xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
-                "    xmlns=\"http://www.w3.org/2001/XMLSchema\"\n" +
-                "    attributeFormDefault=\"unqualified\"\n" +
-                "    blockDefault=\"\"\n" +
-                "    elementFormDefault=\"qualified\"\n" +
-                "    finalDefault=\"\"\n" +
-                "    targetNamespace=\"http://bar\"\n" +
-                "    version=\"0102\">\n" +
-                "\n" +
-                "    <xs:import namespace=\"http://foo\"/>\n" +
-                "\n" +
-                "\n" +
-                "    <xs:complexType abstract=\"false\" mixed=\"false\" name=\"Bar\">\n" +
-                "        <xs:sequence maxOccurs=\"1\" minOccurs=\"1\">\n" +
-                "            <xs:element maxOccurs=\"1\" minOccurs=\"0\" ref=\"foo:foo\">\n" +
-                "            </xs:element>\n" +
-                "        </xs:sequence>\n" +
-                "    </xs:complexType>\n" +
-                "    \n" +
-                "    <xs:element abstract=\"false\" name=\"bar\" type=\"bar:Bar\"/>\n" +
-                "    \n" +
-                "</schema>        ";
+                    "<schema \n" +
+                    "    xmlns:foo=\"http://foo\"\n" +
+                    "    xmlns:bar=\"http://bar\"\n" +
+                    "    xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                    "    xmlns=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                    "    attributeFormDefault=\"unqualified\"\n" +
+                    "    blockDefault=\"\"\n" +
+                    "    elementFormDefault=\"qualified\"\n" +
+                    "    finalDefault=\"\"\n" +
+                    "    targetNamespace=\"http://bar\"\n" +
+                    "    version=\"0102\">\n" +
+                    "\n" +
+                    "    <xs:import namespace=\"http://foo\"/>\n" +
+                    "\n" +
+                    "\n" +
+                    "    <xs:complexType abstract=\"false\" mixed=\"false\" name=\"Bar\">\n" +
+                    "        <xs:sequence maxOccurs=\"1\" minOccurs=\"1\">\n" +
+                    "            <xs:element maxOccurs=\"1\" minOccurs=\"0\" ref=\"foo:foo\">\n" +
+                    "            </xs:element>\n" +
+                    "        </xs:sequence>\n" +
+                    "    </xs:complexType>\n" +
+                    "    \n" +
+                    "    <xs:element abstract=\"false\" name=\"bar\" type=\"bar:Bar\"/>\n" +
+                    "    \n" +
+                    "</schema>        ";
 
             String fooXsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<schema \n" +
-                "    xmlns:foo=\"http://foo\"\n" +
-                "    xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
-                "    xmlns=\"http://www.w3.org/2001/XMLSchema\"\n" +
-                "    attributeFormDefault=\"unqualified\"\n" +
-                "    blockDefault=\"\"\n" +
-                "    elementFormDefault=\"qualified\"\n" +
-                "    finalDefault=\"\"\n" +
-                "    targetNamespace=\"http://foo\"\n" +
-                "    version=\"0102\">\n" +
-                "\n" +
-                "    <xs:complexType abstract=\"false\" mixed=\"false\" name=\"Foo\">\n" +
-                "    </xs:complexType>\n" +
-                "    \n" +
-                "    <xs:element abstract=\"false\" name=\"foo\" type=\"foo:Foo\"/>\n" +
-                "    \n" +
-                "</schema>        ";
+                    "<schema \n" +
+                    "    xmlns:foo=\"http://foo\"\n" +
+                    "    xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                    "    xmlns=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                    "    attributeFormDefault=\"unqualified\"\n" +
+                    "    blockDefault=\"\"\n" +
+                    "    elementFormDefault=\"qualified\"\n" +
+                    "    finalDefault=\"\"\n" +
+                    "    targetNamespace=\"http://foo\"\n" +
+                    "    version=\"0102\">\n" +
+                    "\n" +
+                    "    <xs:complexType abstract=\"false\" mixed=\"false\" name=\"Foo\">\n" +
+                    "    </xs:complexType>\n" +
+                    "    \n" +
+                    "    <xs:element abstract=\"false\" name=\"foo\" type=\"foo:Foo\"/>\n" +
+                    "    \n" +
+                    "</schema>        ";
 
 
             Configuration config = new EnterpriseConfiguration();
@@ -1151,21 +1151,21 @@ public class DOMTest {
 
         try {
             String prefixXml = "<n0:bar xmlns:n0=\"http://bar\">\n" +
-                "    <foo xmlns=\"http://foo\" a='1' n0:b='2'><zing/><n0:zang/></foo>\n" +
-                "</n0:bar>";
+                    "    <foo xmlns=\"http://foo\" a='1' n0:b='2'><zing/><n0:zang/></foo>\n" +
+                    "</n0:bar>";
 
             String noPrefixXml = "<bar xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                " xsi:schemaLocation=\"http://bar bar.xsd\"\n" +
-                " xmlns=\"http://bar\">\n" +
-                "    <foo xmlns=\"http://foo\" a='1' xsi:b='2'><zing/><xml:zang/></foo>\n" +
-                "</bar>";
+                    " xsi:schemaLocation=\"http://bar bar.xsd\"\n" +
+                    " xmlns=\"http://bar\">\n" +
+                    "    <foo xmlns=\"http://foo\" a='1' xsi:b='2'><zing/><xml:zang/></foo>\n" +
+                    "</bar>";
 
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(namespaceAware);
 
             // Assume we're running with Xerces, but if not, it doesn't really affect the test
-            assertEquals( "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl", factory.getClass().getName(), "xerces?");
+            assertEquals("org.apache.xerces.jaxp.DocumentBuilderFactoryImpl", factory.getClass().getName(), "xerces?");
 
             DocumentBuilder domBuilder = factory.newDocumentBuilder();
 
@@ -1185,10 +1185,10 @@ public class DOMTest {
 
             Configuration config = new Configuration();
             NodeInfo one = DOMObjectModel.getInstance().wrap(node, config);
-            NodeInfo two = DOMObjectModel.getInstance().wrap(((Document)result.getNode()).getDocumentElement(), config);
+            NodeInfo two = DOMObjectModel.getInstance().wrap(((Document) result.getNode()).getDocumentElement(), config);
             XPathContext context = config.getConversionContext();
             boolean comparison = net.sf.saxon.functions.DeepEqual.deepEqual(
-                one.iterate(), two.iterate(), CodepointCollatingComparer.getInstance(), context, 0);
+                    one.iterate(), two.iterate(), CodepointCollatingComparer.getInstance(), context, 0);
             assertTrue(comparison, "Copy is not deep-equal");
 
         } catch (Exception e) {
@@ -1292,18 +1292,18 @@ public class DOMTest {
         try {
             String xml =
 
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                    "<root xmlns=\"abc\">" +
-                    "<name xmlns=\"\">" +
-                    "<first>Joe</first>" +
-                    "<last>Blow</last>" +
-                    "</name>" +
-                    "</root>";
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                            "<root xmlns=\"abc\">" +
+                            "<name xmlns=\"\">" +
+                            "<first>Joe</first>" +
+                            "<last>Blow</last>" +
+                            "</name>" +
+                            "</root>";
 
             String path =
-                "/*[local-name(.)=\"root\" and namespace-uri(.)=\"abc\"]" +
-                    "/*[local-name(.)=\"name\" and namespace-uri(.)=\"\"]" +
-                    "/*[local-name(.)=\"first\" and namespace-uri(.)=\"\"]/text()";
+                    "/*[local-name(.)=\"root\" and namespace-uri(.)=\"abc\"]" +
+                            "/*[local-name(.)=\"name\" and namespace-uri(.)=\"\"]" +
+                            "/*[local-name(.)=\"first\" and namespace-uri(.)=\"\"]/text()";
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
@@ -1311,7 +1311,7 @@ public class DOMTest {
             Document doc = builder.parse(new InputSource(new StringReader(xml)));
 
             XPathFactory xPathFactory = //XPathFactory.newInstance();
-                new XPathFactoryImpl();
+                    new XPathFactoryImpl();
             if (!"net.sf.saxon.xpath.XPathFactoryImpl".equals(xPathFactory.getClass().getName())) {
                 throw new RuntimeException();
             }
@@ -1337,18 +1337,18 @@ public class DOMTest {
         try {
             String xml =
 
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                    "<root xmlns=\"abc\">" +
-                    "<name xmlns=\"\">" +
-                    "<first>Joe</first>" +
-                    "<last>Blow</last>" +
-                    "</name>" +
-                    "</root>";
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                            "<root xmlns=\"abc\">" +
+                            "<name xmlns=\"\">" +
+                            "<first>Joe</first>" +
+                            "<last>Blow</last>" +
+                            "</name>" +
+                            "</root>";
 
             String path =
-                "/*[local-name(.)=\"root\" and namespace-uri(.)=\"abc\"]" +
-                    "/*[local-name(.)=\"name\" and namespace-uri(.)=\"\"]" +
-                    "/*[local-name(.)=\"first\" and namespace-uri(.)=\"\"]/text()";
+                    "/*[local-name(.)=\"root\" and namespace-uri(.)=\"abc\"]" +
+                            "/*[local-name(.)=\"name\" and namespace-uri(.)=\"\"]" +
+                            "/*[local-name(.)=\"first\" and namespace-uri(.)=\"\"]/text()";
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(false);
@@ -1356,7 +1356,7 @@ public class DOMTest {
             Document doc = builder.parse(new InputSource(new StringReader(xml)));
 
             XPathFactory xPathFactory = //XPathFactory.newInstance();
-                new XPathFactoryImpl();
+                    new XPathFactoryImpl();
             if (!"net.sf.saxon.xpath.XPathFactoryImpl".equals(xPathFactory.getClass().getName())) {
                 throw new RuntimeException();
             }
@@ -1595,10 +1595,10 @@ public class DOMTest {
             net.sf.saxon.s9api.DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setTreeModel(DOMObjectModel.getInstance());
             XdmNode tree = builder.build(new StreamSource(new StringReader("<root xmlns='namespace'><a/><b/></root>")));
-            Document doc = (Document)((DOMNodeWrapper)tree.getUnderlyingNode()).getUnderlyingNode();
+            Document doc = (Document) ((DOMNodeWrapper) tree.getUnderlyingNode()).getUnderlyingNode();
             Element root = doc.getDocumentElement();
             assertTrue(root.hasAttribute("xmlns"));
-            Element a = (Element)root.getChildNodes().item(0);
+            Element a = (Element) root.getChildNodes().item(0);
             assertFalse(a.hasAttribute("xmlns"));
             assertEquals(0, a.getAttributes().getLength());
             Element b = (Element) root.getChildNodes().item(1);
@@ -1631,7 +1631,7 @@ public class DOMTest {
 
 
     @Test
-    public void testBug4509b () {
+    public void testBug4509b() {
         try {
             Processor processor = new Processor(false);
             net.sf.saxon.s9api.DocumentBuilder documentBuilder = processor.newDocumentBuilder();
@@ -1672,8 +1672,7 @@ public class DOMTest {
             System.out.println("element1 attribute[1] ghi=300");
             System.out.println("treeModel=net.sf.saxon.om.TreeModel$TinyTree");
             System.out.println();
-        }
-                catch(Exception e){
+        } catch (Exception e) {
         }
     }
 
@@ -1702,7 +1701,7 @@ public class DOMTest {
      */
 
     @Test
-    public void testNamespaceSerialization() {
+    public void testNamespaceSerialization4858() {
         // bug 4858
         try {
             // Stylesheet
@@ -1721,12 +1720,43 @@ public class DOMTest {
             Transformer transformer = templates.newTransformer();
             StringWriter sw = new StringWriter();
             transformer.transform(new StreamSource(new StringReader("<a/>")), new StreamResult(sw));
-            System.err.println(sw.toString());
+            err.println(sw.toString());
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
+
+
+    @Test
+    public void testNamespaceSerializationBug4937 () {
+        try {
+            String xml = "<a xmlns='someNS' name='test'><b xmlns=''/></a>";
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(new InputSource(new StringReader(xml)));
+
+            Transformer tf = TransformerFactory.newInstance().newTransformer();
+
+            StringWriter writer = new StringWriter(512);
+
+            tf.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes"); //$NON-NLS-1$ //$NON-NLS-2$
+            tf.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$ //$NON-NLS-2$
+            tf.transform(new DOMSource(doc.getDocumentElement()), new StreamResult(writer));
+
+            String transformed = writer.toString();
+            System.out.println(writer.toString());
+
+            Document doc2 = builder.parse(new InputSource(new StringReader(transformed)));
+
+        } catch (Exception err) {
+            fail();
+        }
+    }
+
+
 
 
 }
