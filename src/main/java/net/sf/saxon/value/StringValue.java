@@ -114,7 +114,7 @@ public class StringValue extends AtomicValue {
     }
 
     /**
-     * Construct a StringItem whose content is known to consist entirely of BMP characters
+     * Construct a StringValue whose content is known to consist entirely of BMP characters
      * (codepoints less than 65536, with no surrogate pairs)
      * @param content the content of the string, which the caller guarantees to contain
      *                no surrogate pairs

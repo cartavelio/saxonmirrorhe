@@ -1609,7 +1609,8 @@ public final class DateTimeValue extends CalendarValue
      *
      * @param o the other date time value
      * @return true if the two values represent the same instant in time. Return false if one value has
-     * a timezone and the other does not (this is the result needed when using keys in a map)
+     * a timezone and the other does not (this is the result needed when using keys in a map, and also the
+     * result needed for XSD comparisons for example in enumeration facets and identity constraints)
      */
 
     public boolean equals(Object o) {
