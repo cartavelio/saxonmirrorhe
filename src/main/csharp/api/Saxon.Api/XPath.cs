@@ -131,7 +131,7 @@ namespace Saxon.Api
 
         public string GetNamespaceURI(string lexicalName, Boolean useDefault)
         {
-            String[] parts = net.sf.saxon.om.NameChecker.checkQNameParts(net.sf.saxon.value.Whitespace.trimWhitespace(lexicalName));
+            String[] parts = net.sf.saxon.om.NameChecker.checkQNameParts(net.sf.saxon.value.Whitespace.trim(lexicalName));
 
             return compiler.getUnderlyingStaticContext().getNamespaceResolver().getURIForPrefix(parts[0], useDefault);
         }
