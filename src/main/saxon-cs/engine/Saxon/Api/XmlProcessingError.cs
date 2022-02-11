@@ -87,7 +87,6 @@ namespace Saxon.Api {
         /// <summary>
         /// Property indicating whether this static error has already been reported.
         /// </summary>
-        /// <returns></returns>
         public bool IsAlreadyReported {
             get => incident.isAlreadyReported();
             set => incident.setAlreadyReported(value);
