@@ -303,16 +303,20 @@ public class XPathParser {
         if (errorCode == null) {
             errorCode = new StructuredQName("err", NamespaceConstant.ERR, "XPST0003");
         }
-        String nearbyText = t.recentText(-1);
-        int line;
-        int column;
-        if (offset == -1) {
-            line = t.getLineNumber();
-            column = t.getColumnNumber();
-        } else {
-            line = t.getLineNumber(offset);
-            column = t.getColumnNumber(offset);
+        String nearbyText = null;
+        int line = -1;
+        int column = -1;
+        if (t != null) {
+            nearbyText = t.recentText(-1);
+            if (offset == -1) {
+                line = t.getLineNumber();
+                column = t.getColumnNumber();
+            } else {
+                line = t.getLineNumber(offset);
+                column = t.getColumnNumber(offset);
+            }
         }
+
         Location loc = makeNestedLocation(env.getContainingLocation(), line, column, nearbyText);
 
         XPathException err = new XPathException(message);

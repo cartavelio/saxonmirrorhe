@@ -62,7 +62,7 @@ public class Err {
      * @return the delimited variable information
      */
     public static String wrap(String cs, int valueType) {
-        return wrap(StringView.of(cs), GENERAL);
+        return wrap(StringView.of(cs), valueType);
     }
 
     /**
