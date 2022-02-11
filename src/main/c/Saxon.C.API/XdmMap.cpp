@@ -490,7 +490,7 @@ XdmMap::XdmMap(jobject obj): XdmFunctionItem(obj) {
 
 
 
-        XdmAtomicValue** XdmMap::keys(){
+        XdmAtomicValue ** XdmMap::keys(){
             XdmAtomicValue ** keysArr = nullptr;
 
             jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");

@@ -38,6 +38,11 @@ XdmValue* XdmArray::get(int n){
     jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmArray");
     static jmethodID tbmID = nullptr;
 
+    if(n<0) {
+        return nullptr;
+
+    }
+
     if(tbmID == nullptr) {
 
         tbmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmArrayClass, "get",
@@ -62,6 +67,11 @@ XdmValue* XdmArray::get(int n){
 XdmArray* XdmArray::put(int n, XdmValue * valuei) {
     jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmArray");
     static jmethodID tbpmID = nullptr;
+
+    if(n<0) {
+        return nullptr;
+
+    }
 
     if(tbpmID == nullptr) {
         tbpmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmArrayClass, "put",
