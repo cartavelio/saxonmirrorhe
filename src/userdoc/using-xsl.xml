@@ -1929,9 +1929,9 @@
       <p>The output produced by a stylesheet comes in three forms:</p>
       
       <ul>
-         <li>The principal output</li>
-         <li>Secondary outputs produced by use of <code>xsl:result-document</code></li>
-         <li>Messages produced using <code>xsl:message</code></li>
+         <li>The principal output.</li>
+         <li>Secondary outputs produced by use of <code>xsl:result-document</code>.</li>
+         <li>Messages produced using <code>xsl:message</code>.</li>
       </ul>
       
       <p>Saxon allows applications to control both the destination of the output, and its format.</p>
@@ -1956,12 +1956,12 @@
       <p>the raw output is a sequence of five integers; the tree output is an in-memory 
          XML document fragment holding
       a single text node whose string value is <code>"1 2 3 4 5"</code>, and the serialized output
-      (assuming the XML output method) might be 
-         <code><![CDATA[<?xml version="1.0" encoding="utf-8">1 2 3 4 5]]></code>.</p>
+      (assuming the XML output method) might be:</p>
+      <samp><![CDATA[<?xml version="1.0" encoding="utf-8">1 2 3 4 5]]></samp>
       
  
       <p>The following sections describe the mechanisms for controlling where stylesheet output is
-      sent and how it is formatted.</p>
+      sent and how it is formatted:</p>
       
       <nav>
          <ul/>
@@ -1972,7 +1972,7 @@
          <p>When a transformation is run from the command line, the destination of the
          principal output is given by the <code>-o</code> option, and defaults to the standard
          output stream (that is, the console). The output is always serialized; the format
-         of the serialization is determined by <code>xsl:output</code> declarations within
+         of the serialization is determined by <a class="bodylink code" href="/xsl-elements/output">xsl:output</a> declarations within
          the stylesheet itself, or by options such as <code>!indent=yes</code> on the command line.
          Command line options take precedence.</p>
          <p>When running from an application, the destination of the principal output is
@@ -1985,43 +1985,47 @@
             <code>DOMResult</code>, or <code>StAXResult</code>. Raw output is not possible,
             since JAXP was designed for XSLT 1.0.</p> 
                <p>Saxon also supplies more
-            specialized implementations of the <code>Result</code> interface such as <code>JDOM2Writer</code>,
-            <code>XOMWriter</code>, and <code>DOM4JWriter</code> for writing to third party tree models.
+                  specialized implementations of the <code>Result</code> interface such as <code
+                     java="net.sf.saxon.option.jdom2.JDOM2Writer">JDOM2Writer</code>,
+                  <code java="net.sf.saxon.option.xom.XOMWriter">XOMWriter</code>, and <code
+                     java="net.sf.saxon.option.dom4j.DOM4JWriter">DOM4JWriter</code> for writing to third party tree models.
                </p>
-            <p>More generally, Saxon's internal <code>Receiver</code> interface implements a general-purpose
+               <p>More generally, Saxon's internal <code java="net.sf.saxon.event.Receiver">Receiver</code> interface implements a general-purpose
                push pipeline, and <code>Receiver</code> extends <code>Result</code> so any <code>Receiver</code>
             can be used as the target of a transformation.</p></li>
             <li class="javaonly"><p>In the Java s9api interface, transformation output is sent to
-               a <code>Destination</code> object, which has multiple implementations.</p>
-               <p>For serialized output, supply a <code>Serializer</code>, which allows you
+               a <code java="net.sf.saxon.s9api.Destination">Destination</code> object, which has multiple implementations.</p>
+               <p>For serialized output, supply a <code java="net.sf.saxon.s9api.Serializer">Serializer</code>, which allows you
                   to set serialization options that override the parameters in the <code>xsl:output</code>
                   declaration.</p>
-               <p>You can capture the raw output of the transformation as an <code>XdmValue</code>
-                  by supplying a <code>RawDestination</code>.</p>
-               <p>All other options produce tree output. These include the <code>XdmDestination</code>
-            for building a tree, the <code>SAXDestination</code> which wraps a SAX <code>ContentHandler</code>,
-               and the <code>DOMDestination</code> for building a DOM in memory. There is also
-               a <code>NullDestination</code> which discards the output, and a <code>TeeDestination</code>
+               <p>You can capture the raw output of the transformation as an <code java="net.sf.saxon.s9api.XdmValue">XdmValue</code>
+                  by supplying a <code java="net.sf.saxon.s9api.RawDestination">RawDestination</code>.</p>
+               <p>All other options produce tree output. These include the <code java="net.sf.saxon.s9api.XdmDestination">XdmDestination</code>
+                  for building a tree, the <code java="net.sf.saxon.s9api.SAXDestination">SAXDestination</code> which wraps a SAX <code>ContentHandler</code>,
+                  and the <code java="net.sf.saxon.s9api.DOMDestination">DOMDestination</code> for building a DOM in memory. There is also
+                  a <code java="net.sf.saxon.s9api.NullDestination">NullDestination</code> which discards the
+                  output, and a <code java="net.sf.saxon.s9api.TeeDestination">TeeDestination</code>
                which duplicates it.</p>
             <p>If you want to perform further processing on the output, you can send it to a
-            <code>SchemaValidator</code> for validation, or to an <code>XsltTransformer</code>
+               <code java="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</code> for validation, or to an
+               <code java="net.sf.saxon.s9api.XsltTransformer">XsltTransformer</code>
             for further transformation.</p>
                
            </li>
             <li class="csonly"><p>In the C# Saxon.Api interface, transformation output is sent to
-               an <code>IDestination</code> object, which has multiple implementations.</p>
-               <p>For serialized output, supply a <code>Serializer</code>, which allows you
+               an <code cs="Saxon.Api.IDestination">IDestination</code> object, which has multiple implementations.</p>
+               <p>For serialized output, supply a <code cs="Saxon.Api.Serializer">Serializer</code>, which allows you
                   to set serialization options that override the parameters in the <code>xsl:output</code>
                   declaration.</p>
-               <p>You can capture the raw output of the transformation as an <code>XdmValue</code>
-                  by supplying a <code>RawDestination</code>.</p>
-               <p>All other options produce tree output. These include the <code>XdmDestination</code> 
-               for building a tree, the <code>XmlWriterDestination</code> which wraps a <code>System.Xml.XmlWriter</code>,
-                  and the <code>DomDestination</code> for building a DOM in memory. There is also
-                  a <code>NullDestination</code> which discards the output, and a <code>TeeDestination</code>
+               <p>You can capture the raw output of the transformation as an <code cs="Saxon.Api.XdmValue">XdmValue</code>
+                  by supplying a <code cs="Saxon.Api.RawDestination">RawDestination</code>.</p>
+               <p>All other options produce tree output. These include the <code cs="Saxon.Api.XdmDestination">XdmDestination</code> 
+                  for building a tree, the <code cs="Saxon.Api.XmlWriterDestination">XmlWriterDestination</code> which wraps a <code>System.Xml.XmlWriter</code>,
+                  and the <code cs="Saxon.Api.DomDestination">DomDestination</code> for building a DOM in memory. There is also
+                  a <code cs="Saxon.Api.NullDestination">NullDestination</code> which discards the output, and a <code>TeeDestination</code>
                   which duplicates it.</p>
                <p>If you want to perform further processing on the output, you can send it to a
-                  <code>SchemaValidator</code> for validation, or to an <code>XsltTransformer</code>
+                  <code cs="Saxon.Api.SchemaValidator">SchemaValidator</code> for validation, or to an <code cs="Saxon.Api.XsltTransformer">XsltTransformer</code>
                   for further transformation.</p>
                
             </li>
@@ -2030,7 +2034,7 @@
       
       <section id="secondary-output" title="Secondary output">
          <h1>Secondary output</h1>
-         <p>The term <code>secondary output</code> refers to values produced using the
+         <p>The term <b>secondary output</b> refers to values produced using the
             <a class="bodylink code"
                href="/xsl-elements/result-document">xsl:result-document</a> instruction. 
             As with the principal output,
@@ -2044,7 +2048,7 @@
          <p>By default, secondary outputs are written to a file whose name is established
             by resolving the relative URI given in the <code>@href</code> attribute of <a class="bodylink code"
                href="/xsl-elements/result-document">xsl:result-document</a>
-         against the <code>base output URI</code> of the transformation. The
+         against the <b>base output URI</b> of the transformation. The
          base output URI defaults to the destination of the principal output.</p>
          <p>The destination and format of secondary outputs can be influenced using the
          Java or C# API:</p>
@@ -2055,15 +2059,16 @@
             multiple results should therefore use s9api.</p></li>
             <li class="javaonly">
                
-               <p>Various Java interfaces, such as the s9api <code>Xslt30Transformer</code>, have a method
+               <p>Various Java interfaces, such as the s9api <code java="net.sf.saxon.s9api.Xslt30Transformer">Xslt30Transformer</code>, have a method
                   <code>setResultDocumentHandler()</code> which accepts a Java <code>Function&lt;URI, Destination&gt;</code>,
-                  that is, a function that accepts an absolute URI and returns a <code>Destination</code> for the output. For example, you
+                  that is, a function that accepts an absolute URI and returns a <code java="net.sf.saxon.s9api.Destination">Destination</code> for the output. For example, you
                   might write:</p>
                
-               <p><code>transformer.setResultDocumentHandler(uri -> processor.newSerializer(....));</code></p>
+               <samp>transformer.setResultDocumentHandler(uri -> processor.newSerializer(....));</samp>
                
                <p>When writing to the secondary result document is complete, Saxon will call the method <code>Destination.close()</code>,
-                  whose effect depends on the kind of destination. For example, in the case of a <code>Serializer</code>, the <code>close()</code>
+                  whose effect depends on the kind of destination. For example, in the case of a <code
+                     java="net.sf.saxon.s9api.Serializer">Serializer</code>, the <code>close()</code>
                   method will close any input stream that Saxon created, but not one that the user created, unless the method <code>Serializer.setCloseOnCompletion()</code>
                   is called to request this.</p>
                
@@ -2071,7 +2076,7 @@
                   to be performed when the destination is closed. For example, if the URI is a <code>mailto:</code> URI, you might
                   want to attach the serialized result to an email message and send it to a nominated recipient.</p>
                
-               <p>The older <code>OutputURIResolver</code> mechanism is retained for backwards compatibility. This is limited by the fact
+               <p>The older <code java="net.sf.saxon.lib.OutputURIResolver">OutputURIResolver</code> mechanism is retained for backwards compatibility. This is limited by the fact
                   that it returns a JAXP <code>Result</code> object, which doesn't allow, for example, for returning a "raw" result in which the
                   XSLT results are not wrapped in a document node.</p>
                
@@ -2079,12 +2084,12 @@
                
             </li>
             <li class="csonly">
-               <p>Various C# interfaces, such as the Saxon.Api <code>Xslt30Transformer</code>, have a property
+               <p>Various C# interfaces, such as the Saxon.Api <code cs="Saxon.Api.Xslt30Transformer">Xslt30Transformer</code>, have a property
                   <code>ResultDocumentHandler</code> whose value is a delegate that accepts a relative URI
-                  and base URI, and returns an <code>IDestination</code> for the output. For example, you
+                  and base URI, and returns an <code cs="Saxon.Api.IDestination">IDestination</code> for the output. For example, you
                   might write:</p>
                
-               <p><code>transformer.ResultDocumentHandler = (href, base) => processor.NewSerializer(....)</code>;</p>
+               <samp>transformer.ResultDocumentHandler = (href, base) => processor.NewSerializer(....);</samp>
                              
                <p>You can set the property <code>Destination.OnClose</code> to supply an application-specific action
                   to be performed when the destination is closed. For example, if the URI is a <code>mailto:</code> URI, you might
@@ -2101,7 +2106,7 @@
             side-effects, which runs against the grain of XSLT's pure functional language philosophy,
             the XSLT specification defines a number of rules constraining what the instruction can do.
          Notably (a) you can't write more than one output to the same URI, and (b) you can't write to
-         a URI that the transformation also reads from. Using a <code>ResultDocumentHandler</code>,
+         a URI that the transformation also reads from. Using a <code cs="Saxon.Api.ResultDocumentHandler">ResultDocumentHandler</code>,
          it's very easy to circumvent these rules (for example by using URIs containing an arbitrary
          query part, and having the result handler drop the query part), but the consequences 
          might be unpredictable behaviour
@@ -2113,27 +2118,27 @@
       </section>
       <section id="message-output" title="Message output">
          <h1>Message output</h1>
-         <p>XSLT defines the <code>xsl:message</code> instruction to produce output, but leaves
+         <p>XSLT defines the <a class="bodylink code" href="/xsl-elements/message">xsl:message</a> instruction to produce output, but leaves
          nearly all details of its behaviour implementation-defined. Although the content of a message
          is often a simple text string, the specification defines it as an XML document fragment.
          By default Saxon serializes this document and writes it to the standard error stream.</p>
          
          <div class="javaonly">
          <p>A Java application can customize the handling of <code>xsl:message</code>
-         output by calling the <code>setMessageHandler()</code> method on the <code>XsltTransformer</code>
-         or <code>Xslt30Transformer</code>. The argument to the message is of type <code>Consumer&lt;Message&gt;</code>
+            output by calling the <code>setMessageHandler()</code> method on the <code java="net.sf.saxon.s9api.XsltTransformer">XsltTransformer</code>
+            or <code java="net.sf.saxon.s9api.Xslt30Transformer">Xslt30Transformer</code>. The argument to the message is of type <code>Consumer&lt;Message&gt;</code>
          and it will typically be supplied as a lambda expression, for example:</p>
          
-            <p><code>transformer.setMessageHandler(msg -> System.err.println(">>" + msg.getContent().getStringValue()));</code></p>
+            <samp>transformer.setMessageHandler(msg -> System.err.println(">>" + msg.getContent().getStringValue()));</samp>
             
          </div>
          <div class="csonly">
             <p>A C# application can customize the handling of <code>xsl:message</code>
-               output by setting the <code>MessageListener</code> property on the <code>XsltTransformer</code>
-               or <code>Xslt30Transformer</code>. The argument to the message is of type <code>Action&lt;Message&gt;</code>
+               output by setting the <code>MessageListener</code> property on the <code cs="Saxon.Api.XsltTransformer">XsltTransformer</code>
+               or <code cs="Saxon.Api.Xslt30Transformer">Xslt30Transformer</code>. The argument to the message is of type <code>Action&lt;Message&gt;</code>
                and it will typically be supplied as a lambda expression, for example:</p>
             
-            <p><code>transformer.MessageListener = msg => Console.Error.WriteLine(">>" + msg.Content.StringValue);</code></p>
+            <samp>transformer.MessageListener = msg => Console.Error.WriteLine(">>" + msg.Content.StringValue);</samp>
             
          </div>
          
