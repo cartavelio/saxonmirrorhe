@@ -1653,12 +1653,12 @@
         <p>In Saxon-PE and Saxon-EE, support for a variety of other languages is provided by
           facilities from the <a href="http://site.icu-project.org/">ICU - International Components
             for Unicode</a>. For full details see <a
-            href="/extensibility/localizing/ICU-numbering-dates">Numbers and Dates
+            href="/localization/ICU-numbers-and-dates">Numbers and Dates
             from ICU</a>.</p>
         <p>Details of additional numbering support for several European languages: specifically
             <code>da</code>, <code>de</code>, <code>fr</code>, <code>fr_BE</code>, <code>he</code>,
             <code>it</code>, <code>nl</code>, <code>nl_BE</code>, and <code>sv</code>, can be found
-          in <a href="/extensibility/localizing/other-numberings">Numberings for
+          in <a href="/localization/localizing-numbers-and-dates/other-numberings">Numberings for
             selected languages</a>. These features are used by Saxon-PE/EE in the absence of a
           loaded ICU library. They are not built in with Saxon-HE, but are available as open source
           code, and it is possible to configure them by writing a subclass of <a class="javalink"
@@ -1675,7 +1675,7 @@
             <code>class</code> property is set to the name of the relevant <code>Numberer</code>
           class; or by setting an entry in the <a href="/configuration/configuration-file"
             >configuration file</a>. For more information on writing localization modules, see <a
-            href="/extensibility/localizing">Localizing numbers and dates</a>.</p>
+              href="/localization/localizing-numbers-and-dates">Localizing numbers and dates</a>.</p>
 
         <p>If a calendar other than AD or ISO is specified, the result is prefixed "[Calendar: AD]"
           and is otherwise output as if the default calendar were used.</p>
