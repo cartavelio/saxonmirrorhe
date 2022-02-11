@@ -316,7 +316,7 @@
      root = "$in"
      select = "?*[?customer = 'Jones the Baker'] ? orders?*[?order-no = 123] 
         ? order-lines?*[contains(?product, 'flour')]"
-     action = "map:put(., 'quantity', ?quantity * 2"/>
+     action = "map:put(., 'quantity', ?quantity * 2)"/>
 </xsl:variable>
 <xsl:value-of select="serialize($updated, map{'method':'json', 'indent':true()})"/>
 ]]></samp>
