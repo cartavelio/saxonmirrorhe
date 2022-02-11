@@ -77,7 +77,7 @@
             <xsl:text>Singulink.Numerics.BigDecimal.Parse</xsl:text>
             <xsl:text>(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-            <xsl:text>)</xsl:text>
+            <xsl:text>, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture)</xsl:text>
          </xsl:when>
          <xsl:when test="$argType = ('double', 'java.lang.Double') and $arity=1">
             <xsl:text>Singulink.Numerics.BigDecimal.FromDouble</xsl:text>
