@@ -595,6 +595,9 @@ public class REMatcher {
         int pos = 0;
         int len = in.length32();
 
+        boolean firstMatch = true;
+        boolean simpleReplacement = false;
+
         // Try a match at each position
         while (pos < len && match(in, pos)) {
             // Append chars from input string before match
@@ -602,13 +605,19 @@ public class REMatcher {
                 sb.append(in.codePointAt(i));
             }
 
-            if (!program.flags.isLiteral()) {
+            if (firstMatch) {
+                simpleReplacement = program.flags.isLiteral();
+                firstMatch = false;
+            }
+
+            if (!simpleReplacement) {
                 // Process references to captured substrings
                 int maxCapture = program.maxParens - 1;
-
+                simpleReplacement = true;
                 for (int i = 0; i < replacement.length(); i++) {
                     int ch = replacement.codePointAt(i);
                     if (ch == '\\') {
+                        simpleReplacement = false;
                         int index = ++i;
                         ch = replacement.codePointAt(index);
                         if (ch == '\\' || ch == '$') {
@@ -617,6 +626,7 @@ public class REMatcher {
                             throw new RESyntaxException("Invalid escape '" + ch + "' in replacement string");
                         }
                     } else if (ch == '$') {
+                        simpleReplacement = false;
                         int index = ++i;
                         ch = replacement.codePointAt(index);
                         if (!(ch >= '0' && ch <= '9')) {
@@ -667,9 +677,7 @@ public class REMatcher {
 
             } else {
                 // Append substitution without processing backreferences
-                for (int i = 0; i < replacement.length(); i++) {
-                    sb.append(replacement.codePointAt(i));
-                }
+                sb.append(replacement);
             }
 
             // Move forward, skipping past match
