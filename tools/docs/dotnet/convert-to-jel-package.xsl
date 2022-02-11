@@ -252,6 +252,11 @@
             <xsl:copy-of select="@set[.='true']"/>
             <xsl:copy-of select="@init[.='true']"/>
             <xsl:apply-templates/>
+            <xsl:if test="comments/exception">
+                <exceptions>
+                    <xsl:apply-templates select="comments/exception"/>
+                </exceptions>
+            </xsl:if>
         </property>
     </xsl:template>
     
@@ -334,6 +339,16 @@
                 </div>
             </body>
         </return>
+    </xsl:template>
+    
+    <xsl:template match="value">
+        <value>
+            <body>
+                <div>
+                    <xsl:apply-templates/>
+                </div>
+            </body>
+        </value>
     </xsl:template>
     
     <xsl:template match="exception">

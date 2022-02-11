@@ -287,7 +287,7 @@ namespace Saxon.Api {
         ///     <c>Saxon.Hej.s9api.XsltTransformer</c>. Information about this class is available in the
         ///     Saxon-EE Javadoc documentation for the very similar Java class <c>net.sf.saxon.s9api.XsltTransformer</c>.
         /// </value>
-        public Destination UnderlyingDestination {
+        public Saxon.Hej.s9api.Destination UnderlyingDestination {
             get { return s9Transformer; }
         }
 
