@@ -181,8 +181,31 @@
    <!-- Convert method calls applied to java.lang.String -->
    <xsl:template match="*[@RESOLVED_TYPE=('java.lang.String','java.lang.CharSequence')]" 
       priority="30" mode="methods">
+      
+      <xsl:sequence select="f:applyFormat(., map{
+         'toLowerCase#0':     '%scope%.ToLower()',
+         'toUpperCase#0':     '%scope%.ToUpper()',
+         'hashCode#0':        '%scope%.GetHashCode()',
+         'charAt#1':          '%scope%[%args%]',
+         'equalsIgnoreCase#1':'Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(%scope%, %args%)',
+         'getChars#0':        'Saxon.Impl.Helpers.StringUtils.stringToCharArray(%scope%, %args%)',
+         'getBytes#1':        'Encoding.GetEncoding(%args%).GetBytes(%scope%)',
+         'intern#0':          'System.String.Intern(%scope%)',
+         'isEmpty#0':         '%scope%.Length==0',
+         'length#0':          '%scope%.Length',
+         'matches#1':         'System.Text.RegularExpressions.Regex.IsMatch(%scope%, %args%)',
+         'replaceFirst#2':    'new System.Text.RegularExpressions.Regex(%arg1%).Replace(%scope%, %arg2%, 1)',
+         'replaceAll#2':      'System.Text.RegularExpressions.Regex.Replace(%scope%, %args%)',
+         'split#1':           'System.Text.RegularExpressions.Regex.Split(%scope%, %args%)',
+         'substring#1':       '%scope%.Substring(%args%)',
+         'substring#2':       '%scope%.Substring(%arg1%, %arg2% - %arg1%)',
+         'subSequence#1':     '%scope%.Substring(%args%)',
+         'subSequence#2':     '%scope%.Substring(%arg1%, %arg2% - %arg1%)',
+         '*':                 '%scope%.%Name%(%args%)' 
+         })"/>
+      
       <!--<xsl:message>String.{name/@identifier}()</xsl:message>-->
-      <xsl:variable name="renamedMethods" as="map(*)" select="map{
+      <!--<xsl:variable name="renamedMethods" as="map(*)" select="map{
          'toLowerCase': 'ToLower',
          'toUpperCase': 'ToUpper',
          'hashCode':    'GetHashCode'}"/>
@@ -191,11 +214,11 @@
             <xsl:sequence select="f:formatCall(., '%scope%[%args%]')"/>
          </xsl:when>
          <xsl:when test="name/@identifier = 'equalsIgnoreCase'">
-            <!-- Java str.getChars(begin, end, array, dest) => C# str.CopyTo(begin, array, dest, count) -->
+            <!-\- Java str.getChars(begin, end, array, dest) => C# str.CopyTo(begin, array, dest, count) -\->
             <xsl:sequence select="f:formatCall(., 'Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(%scope%, %args%)')"/>
          </xsl:when>
          <xsl:when test="name/@identifier = 'getChars'">
-            <!-- Java str.getChars(begin, end, array, dest) => C# str.CopyTo(begin, array, dest, count) -->
+            <!-\- Java str.getChars(begin, end, array, dest) => C# str.CopyTo(begin, array, dest, count) -\->
             <xsl:sequence select="f:formatCall(., 'Saxon.Impl.Helpers.StringUtils.stringToCharArray(%scope%, %args%)')"/>
          </xsl:when> 
          <xsl:when test="name/@identifier = 'intern'">
@@ -211,12 +234,12 @@
             <xsl:sequence select="f:formatCall(., 'System.Text.RegularExpressions.Regex.IsMatch(%scope%, %args%)')"/>
          </xsl:when>
          <xsl:when test="name/@identifier = 'replaceFirst'">
-            <!-- Java str.replaceFirst(pattern, replacement) ==> C# new Regex(pattern).Replace(str, replacement, 1) -->
+            <!-\- Java str.replaceFirst(pattern, replacement) ==> C# new Regex(pattern).Replace(str, replacement, 1) -\->
             <xsl:sequence select="f:formatCall(., 
                'new System.Text.RegularExpressions.Regex(%arg1%).Replace(%scope%, %arg2%, 1)')"/>
          </xsl:when>         
          <xsl:when test="name/@identifier = 'replaceAll'">
-            <!-- Java str.replaceAll(pattern, replacement) ==> C# Regex.Replace(str, pattern, replacement) -->
+            <!-\- Java str.replaceAll(pattern, replacement) ==> C# Regex.Replace(str, pattern, replacement) -\->
             <xsl:sequence select="f:formatCall(., 'System.Text.RegularExpressions.Regex.Replace(%scope%, %args%)')"/>
          </xsl:when> 
          <xsl:when test="name/@identifier = 'split'">
@@ -228,7 +251,7 @@
                   <xsl:sequence select="f:formatCall(., '%scope%.Substring(%args%)')"/>
                </xsl:when>
                <xsl:otherwise>
-                  <!-- Java has substring(start, end), C# has Substring(start, length) -->
+                  <!-\- Java has substring(start, end), C# has Substring(start, length) -\->
                   <xsl:sequence select="f:formatCall(., '%scope%.Substring(%arg1%, %arg2%-%arg1%)')"/>
                </xsl:otherwise>
             </xsl:choose>
@@ -244,24 +267,20 @@
          <xsl:otherwise>
             <xsl:sequence select="f:formatCall(., '%scope%.%Name%(%args%)')"/>
          </xsl:otherwise>
-      </xsl:choose>
+      </xsl:choose>-->
    </xsl:template>
    
 
    
    <xsl:template match="*[@RESOLVED_TYPE='java.lang.Integer']" priority="30" mode="methods">
-      <xsl:if test="name/@identifier = 'parseInt' 
-         and count(arguments/argument) = 2
-         and not(arguments/argument[2]/@value='16')">
-         <xsl:message terminate="yes">Cannot convert Integer.parseInt(x, '{}arguments/argument[2]/@value')</xsl:message>
-      </xsl:if>
       <xsl:sequence select="f:applyFormat(., map{
          'parseInt#1':     'System.Int32.Parse(%args%)',
-         'parseInt#2':     'System.Int32.Parse(%arg1%, System.Globalization.NumberStyles.HexNumber)',
+         'parseInt#2':     'Saxon.Impl.Helpers.Utils.ParseInt(%args%)',
          'signum#1':       'System.Math.Sign(%args%)',
          'valueOf#1':      'System.Int32.Parse(%args%)',
          'compare#2':      '%arg1%.CompareTo(%arg2%)',
          'toHexString#1':  'Saxon.Impl.Helpers.Utils.intToHexString(%args%)',
+         'toString#1':     '%args%.ToString()',
          '*':              '%scope%.%Name%(%args%)' 
          })"/>
    </xsl:template>
@@ -315,14 +334,15 @@
    <xsl:template match="*[@RESOLVED_TYPE='java.lang.Double']" 
       priority="30" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'parseDouble#1':     'System.Double.Parse(%args%)',
-         'signum#1':          'System.Math.Sign(%args%)',
-         'compare#2':         '%arg1%.CompareTo(%arg2%)',
-         'isInfinite#1':      'System.Double.IsInfinity(%args%)',
-         'valueOf#1':         '(%args%)',
-         'doubleToLongBits#1':'System.BitConverter.DoubleToInt64Bits(%args%)',
-         'toString#1':        '(%args%).ToString(System.Globalization.CultureInfo.InvariantCulture)',
-         '*':                 '%scope%.%Name%(%args%)' 
+         'parseDouble#1':         'System.Double.Parse(%args%)',
+         'signum#1':              'System.Math.Sign(%args%)',
+         'compare#2':             '%arg1%.CompareTo(%arg2%)',
+         'isInfinite#1':          'System.Double.IsInfinity(%args%)',
+         'valueOf#1':             '(%args%)',
+         'doubleToLongBits#1':    'System.BitConverter.DoubleToInt64Bits(%args%)',
+         'doubleToRawLongBits#1': 'System.BitConverter.DoubleToInt64Bits(%args%)',
+         'toString#1':            '(%args%).ToString(System.Globalization.CultureInfo.InvariantCulture)',
+         '*':                     '%scope%.%Name%(%args%)' 
          })"/>
    </xsl:template>
    
@@ -330,14 +350,15 @@
    <xsl:template match="*[@RESOLVED_TYPE='java.lang.Float']" 
       priority="30" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'parseDouble#1':     'System.Single.Parse(%args%)',
-         'signum#0':          'System.Math.Sign(%args%)',
-         'compare#2':         '%arg1%.CompareTo(%arg2%)',
-         'isInfinite#1':      'System.Single.IsInfinity(%args%)',
-         'valueOf#1':         '(%args%)',
-         'floatToIntBits#1':  'System.BitConverter.SingleToInt32Bits(%args%)',
-         'toString#1':        '(%args%).ToString(System.Globalization.CultureInfo.InvariantCulture)',
-         '*':                 '%scope%.%Name%(%args%)' 
+         'parseDouble#1':         'System.Single.Parse(%args%)',
+         'signum#0':              'System.Math.Sign(%args%)',
+         'compare#2':             '%arg1%.CompareTo(%arg2%)',
+         'isInfinite#1':          'System.Single.IsInfinity(%args%)',
+         'valueOf#1':             '(%args%)',
+         'floatToIntBits#1':      'System.BitConverter.SingleToInt32Bits(%args%)',
+         'floatToRawIntBits#1':   'System.BitConverter.SingleToInt32Bits(%args%)',
+         'toString#1':            '(%args%).ToString(System.Globalization.CultureInfo.InvariantCulture)',
+         '*':                     '%scope%.%Name%(%args%)' 
          })"/>
    </xsl:template>
    
@@ -451,6 +472,11 @@
          <xsl:when test="name/@identifier = 'empty'">
             <xsl:text>null</xsl:text>
          </xsl:when>
+         <xsl:when test="name/@identifier = 'isEmpty'">
+            <xsl:text>!</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>.HasValue</xsl:text>
+         </xsl:when>
          <xsl:when test="name/@identifier = 'isPresent'">
             <xsl:variable name="paramType" select="f:extract-type-arguments(@RESOLVED_TYPE)"/>
             <xsl:message>paramType = {$paramType}</xsl:message>
@@ -478,6 +504,9 @@
                </xsl:otherwise>
             </xsl:choose>  
          </xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
    
@@ -506,7 +535,7 @@
          'normalize#0':               'Saxon.Impl.Helpers.UriUtils.Normalize(%scope%)',
          'resolve#1':                 'new System.Uri(%scope%, %args%)',
          'toASCIIString#0':           '%scope%.ToString()',
-         'toURL':                     '%scope%.ToURL()',
+         'toURL':                     'Saxon.Impl.Helpers.UriUtils.ToURL(%scope%)',
          '*':                         '%scope%.%Name%(%args%)' 
          })"/>
  
@@ -637,7 +666,7 @@
    <xsl:template match="*[@RESOLVED_TYPE = 'java.lang.Math']" priority="30" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
          'random#0':          '(new System.Random()).NextDouble()',
-         'round#1':           'System.Math.Round(%args%, System.MidpointRounding.AwayFromZero)',
+         'round#1':           '(long)System.Math.Round(%args%, System.MidpointRounding.AwayFromZero)',
          'ceil#1':            'System.Math.Ceiling(%args%)',
          '*':                 'System.Math.%Name%(%args%)' 
          })"/>
@@ -730,13 +759,37 @@
       </xsl:choose>
    </xsl:template>-->
    
-   <!--Handle List, ArrayList, LinkedList -->
+   <!--Handle List, ArrayList -->
    <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 
-      ('java.util.List', 'java.util.ArrayList', 'java.util.LinkedList', 'java.util.Collection')]" 
+      ('java.util.List', 'java.util.ArrayList', 'java.util.Collection')]" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
          'add#2':         '%scope%.Insert(%args%)',
          'addAll#1':      'Saxon.Impl.Helpers.ListUtils.AddAll(%scope%, %args%)',
+         'get#1':         '%scope%[%args%]',
+         'getFirst#0':    '%scope%.First.Value',
+         'isEmpty#0':     '%scope%.Count==0',
+         'iterator#0':    '%scope%.GetEnumerator()',
+         'offer#1':       '%scope%.AddLast(%args%)',
+         'remove#1':      'Saxon.Impl.Helpers.ListUtils.Remove(%scope%, %args%)',
+         'removeFirst#0': '%scope%.RemoveFirst()',
+         'set#2':         '%scope%[%arg1%] = %arg2%',
+         'size#0':        '%scope%.Count',
+         'subList#2':     'Saxon.Impl.Helpers.ListUtils.SubList(%scope%, %args%)',
+         'toArray#1':     '%scope%.ToArray()', (: Linq extension method :)
+         'trimToSize#0':  'Saxon.Impl.Helpers.ListUtils.TrimToSize(%scope%)',
+         '*':             '%scope%.%Name%(%args%)' 
+         })"/>
+   </xsl:template>
+   
+   <!--Handle LinkedList -->
+   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 'java.util.LinkedList']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'add#1':         '%scope%.AddLast(%args%)',
+         'add#2':         '%scope%.Insert(%args%)',
+         'addAll#1':      'Saxon.Impl.Helpers.ListUtils.AddAll(%scope%, %args%)',
+         'addFirst#1':    '%scope%.AddFirst(%args%)',
          'get#1':         '%scope%[%args%]',
          'getFirst#0':    '%scope%.First.Value',
          'isEmpty#0':     '%scope%.Count==0',
@@ -769,7 +822,8 @@
    <xsl:template match="*[f:targetType(.) = 
          ('java.util.Map', 'java.util.HashMap', 'java.util.concurrent.ConcurrentHashMap',
          'java.util.TreeMap',
-         'java.util.LinkedHashMap', 'java.util.IdentityHashMap')]" 
+         'java.util.LinkedHashMap', 'java.util.IdentityHashMap',
+         'net.sf.saxon.type.ValidationParams')]" 
          priority="20" mode="methods">
       <xsl:choose>
          <xsl:when test="name/@identifier='entrySet' and count(arguments/argument)=0 and self::iterable">
@@ -778,24 +832,31 @@
          </xsl:when>
          <xsl:otherwise>
             <xsl:sequence select="f:applyFormat(., map{
-               'computeIfAbsent#2': 'Saxon.Impl.Helpers.MapUtils.ComputeIfAbsent(%scope%, %args%)',
-               'get#1':             'Saxon.Impl.Helpers.MapUtils.Get(%scope%, %args%)',
-               'getOrDefault#2':    'Saxon.Impl.Helpers.MapUtils.GetOrDefault(%scope%, %args%)',
-               'isEmpty#0':         '%scope%.Count==0',
-               'keySet#0':          'Saxon.Impl.Helpers.MapUtils.KeySet(%scope%)',
-               'put#2':             '%scope%[%arg1%] = %arg2%',
-               'putIfAbsent#2':     'Saxon.Impl.Helpers.MapUtils.PutIfAbsent(%scope%, %args%)',
-               'putAll#1':          'Saxon.Impl.Helpers.MapUtils.PutAll(%scope%, %args%)',
-               'size#0':            '%scope%.Count',
-               'values#0':          '%scope%.Values',
-               '*':                 '%scope%.%Name%(%args%)' 
+               'ceilingKey#1':          'Saxon.Impl.Helpers.TreeMapUtils.CeilingKey(%scope%, %args%)',
+               'computeIfAbsent#2':     'Saxon.Impl.Helpers.MapUtils.ComputeIfAbsent(%scope%, %args%)',
+               'firstKey#0':            'Saxon.Impl.Helpers.TreeMapUtils.FirstKey(%scope%)',
+               'floorKey#1':            'Saxon.Impl.Helpers.TreeMapUtils.FloorKey(%scope%, %args%)',
+               'get#1':                 'Saxon.Impl.Helpers.MapUtils.Get(%scope%, %args%)',
+               'getOrDefault#2':        'Saxon.Impl.Helpers.MapUtils.GetOrDefault(%scope%, %args%)',
+               'higherKey#1':           'Saxon.Impl.Helpers.TreeMapUtils.HigherKey(%scope%, %args%)',
+               'isEmpty#0':             '%scope%.Count==0',
+               'keySet#0':              'Saxon.Impl.Helpers.MapUtils.KeySet(%scope%)',
+               'lastKey#0':             'Saxon.Impl.Helpers.TreeMapUtils.FirstKey(%scope%)',
+               'merge#3':               'Saxon.Impl.Helpers.MapUtils.Merge(%scope%, %args%)',
+               'put#2':                 '%scope%[%arg1%] = %arg2%',
+               'putIfAbsent#2':         'Saxon.Impl.Helpers.MapUtils.PutIfAbsent(%scope%, %args%)',
+               'putAll#1':              'Saxon.Impl.Helpers.MapUtils.PutAll(%scope%, %args%)',
+               'setValidationParams#3': '%scope%.%name%(%args%)', 
+               'size#0':                '%scope%.Count',
+               'values#0':              '%scope%.Values',
+               '*':                     '%scope%.%Name%(%args%)' 
                })"/>     
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
    
    <!-- ImmutableHashTrieMap -->
-   <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.ma.trie.ImmutableHashTrieMap']" 
+   <xsl:template match="*[f:targetType(.) = ('net.sf.saxon.ma.trie.ImmutableHashTrieMap', 'net.sf.saxon.ma.trie.ImmutableMap')]" 
       priority="20" mode="methods">
       <xsl:choose>
          <xsl:when test="name/@identifier='entrySet' and count(arguments/argument)=0 and self::iterable">
@@ -817,6 +878,29 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
+   
+   <!-- net.sf.saxon.ma.trie.ImmutableList -->
+   
+   <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.ma.trie.ImmutableList']" 
+      priority="20" mode="methods">
+            <xsl:sequence select="f:applyFormat(., map{
+               'prepend#1':         '%scope%.Insert(0, %args%)',
+               'reverse#0':         '%scope%.Reverse()',
+               '*':                 '%scope%.%Name%(%args%)' 
+               })"/>     
+   </xsl:template>
+   
+   
+   <!--net.sf.saxon.ma.trie.TrieKVP-->
+   <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.ma.trie.TrieKVP']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'getKey#0':          '%scope%.Key',
+         'getValue#0':        '%scope%.Value',
+         '*':                 '%scope%.%Name%(%args%)' 
+         })"/>     
+   </xsl:template>
+   
    
    <!-- java.util.Map.Entry (which becomes Collections.Generic.KeyValuePair) -->
    <xsl:template match="*[f:targetType(.) = 'java.util.Map.Entry']" 
@@ -843,7 +927,7 @@
          'add#1':             '%scope%.Add(%args%)',
          'addAll#1':          'Saxon.Impl.Helpers.SetUtils.AddAll(%scope%, %args%)',
          'contains#1':        '%scope%.Contains(%args%)',
-         'containsAll#1':     'Saxon.Impl.Helpers.SetUtils.ContainsAll(%scope%, %args%)',
+         'containsAll#1':     '(%args%).All(%scope%.Contains)',
          'isEmpty#0':         '%scope%.Count==0',
          'iterator#0':        '%scope%.GetEnumerator()',
          'pollFirst#0':       'Saxon.Impl.Helpers.SetUtils.PollFirst(%scope%)',
@@ -1183,6 +1267,13 @@
          <xsl:when test="name/@identifier = 'toByteArray' and count(arguments/argument) eq 0">
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>.ToArray()</xsl:text>           
+         </xsl:when>
+         <!-- stream.skip(n) becomes stream.Seek(n, SeekOrigin.Current). -->
+         <xsl:when test="name/@identifier = 'Seek' and count(arguments/argument) eq 1">
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>.Seek(</xsl:text>
+            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
+            <xsl:text>, System.IO.SeekOrigin.Current)</xsl:text>
          </xsl:when>
          <!-- writer.getEncoding() becomes writer.Encoding.EncodingName -->
          <xsl:when test="name/@identifier = 'getEncoding' and count(arguments/argument) eq 0">
