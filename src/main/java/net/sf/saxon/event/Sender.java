@@ -72,7 +72,7 @@ public abstract class Sender {
         receiver.setSystemId(systemId);
         Receiver next = receiver;
 
-        int schemaValidation = options.getSchemaValidationMode();
+        next = makeValidator(next, source.getSystemId(), options);
 
         List<FilterFactory> filters = options.getFilters();
         if (filters != null) {

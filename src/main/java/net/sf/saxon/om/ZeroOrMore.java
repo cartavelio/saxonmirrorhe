@@ -13,7 +13,6 @@ import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
@@ -145,7 +144,7 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
      */
 
     /*@NotNull*/
-    public UnfailingIterator reverseIterate() {
+    public SequenceIterator reverseIterate() {
         return Reverse.reverseIterator(value);
     }
 

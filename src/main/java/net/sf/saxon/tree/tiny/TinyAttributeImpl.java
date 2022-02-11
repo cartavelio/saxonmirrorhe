@@ -236,7 +236,7 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
     public void generateId(StringBuilder buffer) {
         getParent().generateId(buffer);
         buffer.append("a");
-        buffer.append(Integer.toString(tree.attCode[nodeNr]));
+        buffer.append(tree.attCode[nodeNr]);
         // we previously used the attribute name. But this breaks the requirement
         // that the result of generate-id consists entirely of alphanumeric ASCII
         // characters

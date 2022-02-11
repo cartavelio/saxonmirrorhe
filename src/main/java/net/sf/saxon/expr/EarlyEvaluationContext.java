@@ -376,7 +376,7 @@ public class EarlyEvaluationContext implements XPathContext {
 
     /**
      * Get the implicit timezone, as a positive or negative offset from UTC in minutes.
-     * The range is -14hours to +14hours. This implementation returns {@link CalendarValue#NO_TIMEZONE},
+     * The range is -14hours to +14hours. This implementation returns {@link CalendarValue#MISSING_TIMEZONE},
      * meaning the value is unknown.
      *
      * @return the implicit timezone, as an offset from UTC in minutes

@@ -14,6 +14,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.*;
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public abstract class SequenceExtent implements GroundedValue {
      */
 
     public static SequenceExtent.Of<Item> from(SequenceIterator iter) {
-        List<Item> list = new ArrayList<>(!iter.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)
+        List<Item> list = new ArrayList<>(!SequenceTool.supportsGetLength(iter)
                                                       ? 20
                                                       : ((LastPositionFinder) iter).getLength());
         Item item;
@@ -66,7 +67,7 @@ public abstract class SequenceExtent implements GroundedValue {
      */
 
     public static GroundedValue makeResidue(SequenceIterator iter) {
-        if (iter.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
+        if (iter instanceof GroundedIterator && ((GroundedIterator)iter).isActuallyGrounded()) {
             return ((GroundedIterator) iter).getResidue();
         }
         SequenceExtent extent = from(iter);
@@ -95,10 +96,10 @@ public abstract class SequenceExtent implements GroundedValue {
         }
     }
 
-    public abstract UnfailingIterator reverseIterate();
+    public abstract SequenceIterator reverseIterate();
 
 
-    public static class Of<T extends Item> extends SequenceExtent {
+    public static class Of<T extends Item> extends SequenceExtent implements Iterable<T> {
 
         private List<T> items;
 
@@ -146,6 +147,7 @@ public abstract class SequenceExtent implements GroundedValue {
 
         /*@NotNull*/
         @Override
+        @CSharpModifiers(code={"public", "override"})
         public ListIterator.Of<T> iterate() {
             return new ListIterator.Of<T>(items);
         }
@@ -157,7 +159,7 @@ public abstract class SequenceExtent implements GroundedValue {
          */
 
         /*@NotNull*/
-        public UnfailingIterator reverseIterate() {
+        public SequenceIterator reverseIterate() {
             return Reverse.reverseIterator(items);
         }
 
@@ -166,6 +168,7 @@ public abstract class SequenceExtent implements GroundedValue {
          */
 
         @Override
+        @CSharpModifiers(code = {"public", "override"})
         public boolean effectiveBooleanValue() throws XPathException {
             int len = getLength();
             if (len == 0) {
@@ -191,6 +194,7 @@ public abstract class SequenceExtent implements GroundedValue {
          */
 
         @Override
+        @CSharpModifiers(code = {"public", "override"})
         public T itemAt(int n) {
             if (n >= 0 && n < items.size()) {
                 return items.get(n);
@@ -200,6 +204,7 @@ public abstract class SequenceExtent implements GroundedValue {
         }
 
         @Override
+        @CSharpModifiers(code = {"public", "override"})
         public T head() {
             if (items.isEmpty()) {
                 return null;
@@ -209,11 +214,13 @@ public abstract class SequenceExtent implements GroundedValue {
         }
 
         @Override
+        @CSharpModifiers(code = {"public", "override"})
         public int getLength() {
             return items.size();
         }
 
         @Override
+        @CSharpModifiers(code = {"public", "override"})
         public UnicodeString getUnicodeStringValue() throws XPathException {
             switch (getLength()) {
                 case 0:
@@ -233,6 +240,7 @@ public abstract class SequenceExtent implements GroundedValue {
         }
 
         @Override
+        @CSharpModifiers(code = {"public", "override"})
         public String getStringValue() throws XPathException {
             switch (getLength()) {
                 case 0:
@@ -266,17 +274,21 @@ public abstract class SequenceExtent implements GroundedValue {
 
         /*@NotNull*/
         @Override
+        @CSharpModifiers(code = {"public", "override"})
         public GroundedValue subsequence(int start, int length) {
             if (start < 0) {
                 start = 0;
             }
-            if (start > getLength()) {
+            int size = getLength();
+            if (start > size) {
                 return EmptySequence.getInstance();
             }
-            return new SequenceExtent.Of<T>(items.subList(start, start + length)).reduce();
+            int limit =  ((long)start + (long)length > size) ? size : start + length;
+            return new SequenceExtent.Of<T>(items.subList(start, limit)).reduce();
         }
 
         /*@NotNull*/
+        @CSharpModifiers(code = {"public", "override"})
         public String toString() {
             StringBuilder fsb = new StringBuilder(64);
             for (int i = 0; i < getLength(); i++) {
@@ -296,6 +308,7 @@ public abstract class SequenceExtent implements GroundedValue {
          * @return the simplified sequence
          */
         @Override
+        @CSharpModifiers(code = {"public", "override"})
         public GroundedValue reduce() {
             int len = getLength();
             if (len == 0) {
@@ -315,6 +328,7 @@ public abstract class SequenceExtent implements GroundedValue {
          */
 
         //@Override
+        @CSharpModifiers(code = {"public", "override"})
         public Iterator<T> iterator() {
             return items.iterator();
         }

@@ -11,8 +11,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 
-import java.util.EnumSet;
-
 /**
  * This class wraps any sequence iterator, turning it into a lookahead iterator,
  * by looking ahead one item
@@ -29,12 +27,18 @@ public class LookaheadIteratorImpl implements LookaheadIterator {
 
     /*@NotNull*/
     public static LookaheadIterator makeLookaheadIterator(/*@NotNull*/ SequenceIterator base) throws XPathException {
-        if (base.getProperties().contains(SequenceIteratorProperty.LOOKAHEAD)) {
+        if (base instanceof LookaheadIterator && ((LookaheadIterator)base).supportsHasNext()) {
             return (LookaheadIterator) base;
         } else {
             return new LookaheadIteratorImpl(base);
         }
     }
+
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
 
     @Override
     public boolean hasNext() {
@@ -56,9 +60,5 @@ public class LookaheadIteratorImpl implements LookaheadIterator {
         base.close();
     }
 
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
-    }
 }
 

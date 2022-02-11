@@ -11,9 +11,9 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
 
-import java.util.EnumSet;
 import java.util.function.Supplier;
 
 
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
  * which are set manually. Calling last() is an error. Calling next() always returns null.
  */
 
-public class ManualIterator implements FocusIterator, UnfailingIterator,
+public class ManualIterator implements FocusIterator, SequenceIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
     private Item item;
@@ -79,6 +79,11 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
         this._position = position;
     }
 
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
     /**
      * Determine whether there are more items to come. Note that this operation
      * is stateless and it is not necessary (or usual) to call it before calling
@@ -114,6 +119,20 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
         return _position;
     }
 
+    /**
+     * Ask whether this iterator supports use of the {@link #getLength()} method. This
+     * method should always be called before calling {@link #getLength()}, because an iterator
+     * that implements this interface may support use of {@link #getLength()} in some situations
+     * and not in others
+     *
+     * @return true if the {@link #getLength()} method can be called to determine the length
+     * of the underlying sequence.
+     */
+    @Override
+    public boolean supportsGetLength() {
+        return true;
+    }
+
     @Override
     public int getLength() {
         if (lengthFinder == null) {
@@ -121,6 +140,10 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
         } else {
             return lengthFinder.get();
         }
+    }
+
+    public boolean isActuallyGrounded() {
+        return true;
     }
 
     @Override
@@ -145,21 +168,6 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
     @Override
     public GroundedValue getResidue() {
         return item;
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.GROUNDED, SequenceIteratorProperty.LAST_POSITION_FINDER);
     }
 
 }

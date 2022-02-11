@@ -143,8 +143,10 @@ public class PackageLibrary {
         String name = vp.packageName;
         PackageVersion version = vp.packageVersion;
         List<PackageVersion> versions = packageVersions.get(name);
+        //noinspection Java8MapApi
         if (versions == null) {
             versions = new ArrayList<>();
+            packageVersions.put(name, versions);
         }
         versions.add(version);
         packages.put(vp, details);

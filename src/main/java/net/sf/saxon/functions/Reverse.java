@@ -21,8 +21,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.ReversibleIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.List;
@@ -78,7 +76,7 @@ public class Reverse extends SystemFunction {
 //    }
 
 
-    public static SequenceIterator getReverseIterator(SequenceIterator forwards) throws XPathException {
+    public static SequenceIterator getReverseIterator(SequenceIterator forwards) {
         if (forwards instanceof ReversibleIterator) {
             return ((ReversibleIterator) forwards).getReverseIterator();
         } else {
@@ -122,8 +120,8 @@ public class Reverse extends SystemFunction {
 
     }
 
-    @CSharpReplaceBody(code="return new Saxon.Impl.Helpers.ReverseListIterator(list);")
-    public static <T extends Item> UnfailingIterator reverseIterator(List<T> list) {
+    @CSharpReplaceBody(code="return new Saxon.Impl.Helpers.ReverseListIterator<T>(list);")
+    public static <T extends Item> SequenceIterator reverseIterator(List<T> list) {
         return new ReverseListIterator(list);
     }
 
@@ -133,7 +131,7 @@ public class Reverse extends SystemFunction {
     }
 
     //#if CSHARP==false
-    public static class ReverseListIterator implements UnfailingIterator, LastPositionFinder, ReversibleIterator {
+    public static class ReverseListIterator implements SequenceIterator, LastPositionFinder, ReversibleIterator {
 
         private final java.util.ListIterator<? extends Item> listIter;
         private final List<? extends Item> list;
@@ -143,16 +141,14 @@ public class Reverse extends SystemFunction {
             this.listIter = list.listIterator(list.size());
         }
 
+        @Override
+        public boolean supportsGetLength() {
+            return true;
+        }
+
         /**
-         * Get the last position (that is, the number of items in the sequence). This method is
-         * non-destructive: it does not change the state of the iterator.
-         * The result is undefined if the next() method of the iterator has already returned null.
-         * This method must not be called unless the result of getProperties() on the iterator
-         * includes the bit setting {@link SequenceIteratorProperty#LAST_POSITION_FINDER}
-         *
+         * Get the last position (that is, the number of items in the sequence).
          * @return the number of items in the sequence
-         * @throws XPathException if an error occurs evaluating the sequence in order to determine
-         *                        the number of items
          */
         @Override
         public int getLength() {

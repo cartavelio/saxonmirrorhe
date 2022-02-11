@@ -22,6 +22,7 @@ import net.sf.saxon.trace.*;
 import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.Type;
@@ -37,7 +38,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -362,7 +363,7 @@ public class Query {
                     if (allowExit) {
                         System.exit(2);
                     } else {
-                        throw new RuntimeException(err);
+                        throw new RuntimeException(err.getMessage());
                     }
                 } else {
                     quit(e.getMessage(), 2);
@@ -409,7 +410,7 @@ public class Query {
                 try {
                     XdmValue jsonTree = builder.parseJson(
                             new BufferedReader(
-                                    new InputStreamReader(new FileInputStream(sourceJsonFileName), Charset.forName("utf8"))));
+                                    new InputStreamReader(new FileInputStream(sourceJsonFileName), StandardCharsets.UTF_8)));
                     if (!jsonTree.isEmpty()) {
                         evaluator.setContextItem(jsonTree.itemAt(0));
                     }
@@ -809,7 +810,7 @@ public class Query {
             throws SaxonApiException, IOException {
         XQueryExecutable exp;
         if (queryFileName.equals("-")) {
-            Reader queryReader = new InputStreamReader(System.in);
+            Reader queryReader = standardInputReader();
             compiler.setBaseURI(new File(System.getProperty("user.dir")).toURI());
             exp = compiler.compile(queryReader);
         } else if (queryFileName.startsWith("{") && queryFileName.endsWith("}")) {
@@ -871,6 +872,11 @@ public class Query {
         return exp;
     }
 
+    @CSharpReplaceBody(code="return System.Console.In;")
+    private Reader standardInputReader() {
+        return new InputStreamReader(System.in);
+    }
+
     /**
      * Explain the results of query compilation
      *
@@ -880,17 +886,24 @@ public class Query {
      */
 
     protected void explain(XQueryExpression exp) throws FileNotFoundException, XPathException {
-        OutputStream explainOutput;
+        StreamResult explainOutput;
         if (explainOutputFileName == null || "".equals(explainOutputFileName)) {
-            explainOutput = System.err;
+            explainOutput = standardErrorResult();
         } else {
-            explainOutput = new FileOutputStream(new File(explainOutputFileName));
+            explainOutput = fileResult(explainOutputFileName);
         }
         SerializationProperties props = ExpressionPresenter.makeDefaultProperties(config);
-        Receiver diag = config.getSerializerFactory().getReceiver(
-                new StreamResult(explainOutput), props);
+        Receiver diag = config.getSerializerFactory().getReceiver(explainOutput, props);
         ExpressionPresenter expressionPresenter = new ExpressionPresenter(config, diag);
         exp.explain(expressionPresenter);
+    }
+
+    private StreamResult standardErrorResult() {
+        return new StreamResult(System.err);
+    }
+
+    private StreamResult fileResult(String fileName) throws FileNotFoundException {
+        return new StreamResult(new FileOutputStream(fileName));
     }
 
     /**

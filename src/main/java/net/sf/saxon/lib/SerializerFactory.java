@@ -838,7 +838,11 @@ public class SerializerFactory {
 
     protected Emitter newXHTMLEmitter(Properties properties) {
         boolean is5 = SaxonOutputKeys.isXhtmlHtmlVersion5(properties);
-        return is5 ? new XHTML5Emitter() : new XHTML1Emitter();
+        if (is5) {
+            return new XHTML5Emitter();
+        } else {
+            return new XHTML1Emitter();
+        }
     }
 
     /**

@@ -10,11 +10,10 @@ package net.sf.saxon.tree.iter;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-
-import java.util.EnumSet;
 
 /**
  * AtomizingIterator returns the atomization of an underlying sequence supplied
@@ -61,25 +60,27 @@ public class UntypedAtomizingIterator implements SequenceIterator,
     }
 
     /**
-     * Get properties of this iterator, as a bit-significant integer.
+     * Ask whether this iterator supports use of the {@link #getLength()} method. This
+     * method should always be called before calling {@link #getLength()}, because an iterator
+     * that implements this interface may support use of {@link #getLength()} in some situations
+     * and not in others
      *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
+     * @return true if the {@link #getLength()} method can be called to determine the length
+     * of the underlying sequence.
      */
-
     @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        EnumSet<SequenceIteratorProperty> p = EnumSet.copyOf(base.getProperties());
-        p.retainAll(EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER, SequenceIteratorProperty.LOOKAHEAD));
-        return p;
+    public boolean supportsGetLength() {
+        return SequenceTool.supportsGetLength(base);
     }
 
     @Override
     public int getLength() {
-        return ((LastPositionFinder) base).getLength();
+        return SequenceTool.getLength(base);
+    }
+
+    @Override
+    public boolean supportsHasNext() {
+        return true;
     }
 
     @Override

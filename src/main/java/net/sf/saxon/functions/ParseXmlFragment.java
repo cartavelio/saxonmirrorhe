@@ -48,7 +48,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    @CSharpReplaceBody(code="return net.sf.saxon.om.EmptySequence.getInstance();")  // TODO: implement me!
+    @CSharpReplaceBody(code="return net.sf.saxon.value.EmptySequence.getInstance(); // TODO: implement me!")
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringItem input = (StringItem) arguments[0].head();
         if (input == null) {

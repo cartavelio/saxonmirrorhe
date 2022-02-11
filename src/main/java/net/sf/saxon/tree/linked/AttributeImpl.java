@@ -232,7 +232,7 @@ public class AttributeImpl extends NodeImpl {
     public void generateId(/*@NotNull*/ StringBuilder buffer) {
         getParent().generateId(buffer);
         buffer.append('a');
-        buffer.append(Integer.toString(getSiblingPosition()));
+        buffer.append(getSiblingPosition());
     }
 
     /**

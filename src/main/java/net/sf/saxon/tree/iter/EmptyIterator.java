@@ -12,9 +12,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 
-import java.util.EnumSet;
-import java.util.function.Consumer;
-
 /**
  * EmptyIterator: an iterator over an empty sequence. Since such an iterator has no state,
  * only one instance is required; therefore a singleton instance is available via the static
@@ -23,7 +20,7 @@ import java.util.function.Consumer;
 
 public class EmptyIterator implements SequenceIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator,
-        LookaheadIterator, UnfailingIterator, AtomizedValueIterator {
+        LookaheadIterator, AtomizedValueIterator {
 
     private static final EmptyIterator theInstance = new EmptyIterator();
 
@@ -70,6 +67,11 @@ public class EmptyIterator implements SequenceIterator,
         return null;
     }
 
+    @Override
+    public boolean supportsGetLength() {
+        return true;
+    }
+
     /**
      * Get the position of the last item in the sequence.
      *
@@ -94,21 +96,6 @@ public class EmptyIterator implements SequenceIterator,
     }
 
     /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.GROUNDED, SequenceIteratorProperty.LAST_POSITION_FINDER, SequenceIteratorProperty.ATOMIZING);
-    }
-
-    /**
      * Return a Value containing all the items in the sequence returned by this
      * SequenceIterator. This should be an "in-memory" value, not a Closure.
      *
@@ -125,6 +112,11 @@ public class EmptyIterator implements SequenceIterator,
         return EmptySequence.getInstance();
     }
 
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
     /**
      * Determine whether there are more items to come. Note that this operation
      * is stateless and it is not necessary (or usual) to call it before calling
@@ -139,10 +131,8 @@ public class EmptyIterator implements SequenceIterator,
         return false;
     }
 
-
-    @Override
-    public void forEach(Consumer<? super Item> consumer) {
-        // No action
+    public boolean isActuallyGrounded() {
+        return true;
     }
 
     /**
@@ -184,7 +174,7 @@ public class EmptyIterator implements SequenceIterator,
      * An empty iterator for use where a sequence of atomic values is required
      */
 
-    private static class OfAtomic implements AtomicIterator {
+    private static class OfAtomic extends EmptyIterator implements AtomicIterator {
 
         public final static OfAtomic THE_INSTANCE = new OfAtomic();
 

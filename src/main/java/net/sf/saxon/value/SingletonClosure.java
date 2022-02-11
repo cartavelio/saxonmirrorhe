@@ -13,7 +13,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 
 /**
  * A SingletonClosure represents a value that has not yet been evaluated: the value is represented
@@ -56,7 +55,7 @@ public class SingletonClosure extends Closure implements Sequence {
 
     /*@NotNull*/
     @Override
-    public UnfailingIterator iterate() {
+    public SequenceIterator iterate() {
         try {
             return SingletonIterator.makeIterator(asItem());
         } catch (XPathException e) {

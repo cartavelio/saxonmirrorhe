@@ -10,13 +10,14 @@ package net.sf.saxon.tree.iter;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
 
 /**
  * An iterator over a pair of objects (typically sub-expressions of an expression)
  */
-public class TwoItemIterator implements UnfailingIterator, LookaheadIterator, GroundedIterator, LastPositionFinder {
+public class TwoItemIterator implements SequenceIterator, LookaheadIterator, GroundedIterator, LastPositionFinder {
 
     private final Item one;
     private final Item two;
@@ -32,6 +33,11 @@ public class TwoItemIterator implements UnfailingIterator, LookaheadIterator, Gr
     public TwoItemIterator(Item one, Item two) {
         this.one = one;
         this.two = two;
+    }
+
+    @Override
+    public boolean supportsHasNext() {
+        return true;
     }
 
     /**
@@ -65,15 +71,24 @@ public class TwoItemIterator implements UnfailingIterator, LookaheadIterator, Gr
     }
 
     @Override
+    public boolean supportsGetLength() {
+        return true;
+    }
+
+    @Override
     public int getLength() {
         return 2;
+    }
+
+    public boolean isActuallyGrounded() {
+        return true;
     }
 
     @Override
     public GroundedValue getResidue() {
         switch (pos) {
             case 0:
-                return new SequenceExtent.Of<>(new Item[]{one, two});
+                return new SequenceExtent.Of<Item>(new Item[]{one, two});
             case 1:
                 return two;
             default:

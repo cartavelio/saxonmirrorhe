@@ -183,7 +183,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private transient Logger traceOutput = new StandardLogger();
     private ModuleURIResolver standardModuleURIResolver;
     private String styleParserClass;
-    private final StandardURIResolver systemURIResolver = new StandardURIResolver(this);
+    private StandardURIResolver systemURIResolver;
     private UnparsedTextURIResolver unparsedTextURIResolver = new StandardUnparsedTextResolver();
 
     private transient XPathContext theConversionContext = null;
@@ -389,13 +389,14 @@ public class Configuration implements SourceResolver, NotationSet {
 
         collectionFinder = standardCollectionFinder;
         defaultXsltCompilerInfo = makeCompilerInfo();
+        systemURIResolver = new StandardURIResolver(this);
         standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
         serializerFactory = new net.sf.saxon.lib.SerializerFactory(this);
         sourceResolver = this;
         mediaQueryEvaluator = (o1, o2) -> 0;
 
         Version.platform.initialize(this);
-        defaultXsltCompilerInfo.setURIResolver(getSystemURIResolver());
+        defaultXsltCompilerInfo.setURIResolver(systemURIResolver);
 
         //#if CSHARP==false
         StandardEntityResolver resolver = new StandardEntityResolver(this);
@@ -4001,7 +4002,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /*@Nullable*/
     @Override
-    @CSharpInnerClass(outer=false, extra={"javax.xml.transform.Source source", "net.sf.saxon.Configuration config"})
+    @CSharpInnerClass(outer=true, extra={"javax.xml.transform.Source source", "net.sf.saxon.Configuration config"})
     public ActiveSource resolveSource(Source source, Configuration config) throws XPathException {
         if (source instanceof ActiveSource) {
             return (ActiveSource) source;

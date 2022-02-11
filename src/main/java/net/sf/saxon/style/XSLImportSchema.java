@@ -13,12 +13,12 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.Whitespace;
 
@@ -96,8 +96,8 @@ public class XSLImportSchema extends StyleElement {
                 xe.setLocator(this);
                 throw xe;
             }
-            NodeImpl inlineSchema = null;
-            for (NodeImpl child : children()) {
+            NodeInfo inlineSchema = null;
+            for (NodeInfo child : children()) {
                 if (inlineSchema != null) {
                     compileError(getDisplayName() + " must not have more than one child element");
                 }

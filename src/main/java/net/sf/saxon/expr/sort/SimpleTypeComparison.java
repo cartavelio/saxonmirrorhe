@@ -148,10 +148,11 @@ public class SimpleTypeComparison implements EqualityMatcher<AtomicSequence> {
                     h ^= ((DateTimeValue) a).getSchemaComparable().hashCode();
                     break;
                 case 'A': // date
+                case 'G': // gYear
                 case 'H': // gYearMonth
                 case 'I': // gMonth
                 case 'J': // gMonthDay
-                case 'G': // gYear
+                case 'K': // gDay
                     h ^= ((GDateValue) a).getSchemaComparable().hashCode();
                     break;
                 case 'T': // time
@@ -173,10 +174,10 @@ public class SimpleTypeComparison implements EqualityMatcher<AtomicSequence> {
                 case 'D': // decimal
                 case 'F': // float
                 case 'O': // double
-                    h ^= ((NumericValue)a).hashCode();
+                    h ^= a.hashCode();
                     break;
                 default:
-                    throw new IllegalStateException();
+                    throw new IllegalStateException("Alphacode " + type);
             }
             h <<= 1;
         }

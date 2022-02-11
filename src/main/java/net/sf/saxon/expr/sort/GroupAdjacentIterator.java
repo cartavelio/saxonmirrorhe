@@ -19,11 +19,9 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -67,6 +65,11 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
             nextKey = getKey(runningContext);
             nextComparisonKey = getComparisonKey(nextKey, baseContext);
         }
+    }
+
+    @Override
+    public boolean supportsGetLength() {
+        return true;
     }
 
     @Override
@@ -149,6 +152,11 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+    @Override
     public boolean hasNext() {
         return nextItem != null;
     }
@@ -179,21 +187,6 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
     @Override
     public void close() {
         population.close();
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
     }
 
 

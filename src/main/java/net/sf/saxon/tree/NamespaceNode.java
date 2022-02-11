@@ -488,7 +488,7 @@ public class NamespaceNode implements NodeInfo {
     public void generateId(/*@NotNull*/ StringBuilder buffer) {
         element.generateId(buffer);
         buffer.append("n");
-        buffer.append(Integer.toString(position));
+        buffer.append(position);
     }
 
     /**

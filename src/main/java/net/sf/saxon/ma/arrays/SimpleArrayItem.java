@@ -53,11 +53,15 @@ public class SimpleArrayItem extends AbstractArrayItem {
     public static SimpleArrayItem makeSimpleArrayItem(SequenceIterator input) throws XPathException {
         List<GroundedValue> members = new ArrayList<>();
         SequenceTool.supply(input, (ItemConsumer<? super Item>) item -> {
+            //#if CSHARP==false
             if (item.getClass().getName().equals("com.saxonica.functions.extfn.ArrayMemberValue")) {
                 members.add((GroundedValue) ((ExternalObject<GroundedValue>) item).getObject());
             } else {
+                //#endif
                 members.add(item);
+                //#if CSHARP==false
             }
+            //#endif
         });
         SimpleArrayItem result = new SimpleArrayItem(members);
         result.knownToBeGrounded = true;

@@ -13,11 +13,8 @@ import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
-import net.sf.saxon.transpile.CSharpInnerClass;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -129,25 +126,12 @@ public class XPathExecutable {
      * @since 9.2
      */
 
-    @CSharpInnerClass(outer=false, extra="java.util.Iterator<net.sf.saxon.sxpath.XPathVariable> varIterator")
     public Iterator<QName> iterateExternalVariables() {
-        final Iterator<XPathVariable> varIterator = env.getExternalVariables().iterator();
-        return new Iterator<QName>() {
-            @Override
-            public boolean hasNext() {
-                return varIterator.hasNext();
-            }
-
-            @Override
-            public QName next() {
-                return new QName(varIterator.next().getVariableQName());
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException("remove");
-            }
-        };
+        List<QName> list = new ArrayList<>();
+        for (XPathVariable var : env.getExternalVariables()) {
+            list.add(new QName(var.getVariableQName()));
+        }
+        return list.iterator();
     }
 
     /**

@@ -17,7 +17,7 @@ import net.sf.saxon.om.SequenceIterator;
  * ConstrainedIterator: an iterator over a sequence of zero or one values
  */
 
-public interface ConstrainedIterator<T extends Item> extends SequenceIterator, UnfailingIterator,
+public interface ConstrainedIterator<T extends Item> extends SequenceIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
 
@@ -44,6 +44,7 @@ public interface ConstrainedIterator<T extends Item> extends SequenceIterator, U
     /*@NotNull*/
     @Override
     GroundedValue materialize();
+
 
 
 }

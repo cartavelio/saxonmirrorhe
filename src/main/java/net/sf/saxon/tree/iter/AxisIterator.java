@@ -8,6 +8,7 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 
 
 /**
@@ -18,7 +19,7 @@ import net.sf.saxon.om.NodeInfo;
  * user of the class and is not enforced.)
  */
 
-public interface AxisIterator extends UnfailingIterator {
+public interface AxisIterator extends SequenceIterator {
 
     @Override
     NodeInfo next();

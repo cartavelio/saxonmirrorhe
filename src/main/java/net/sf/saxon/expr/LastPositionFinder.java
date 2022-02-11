@@ -8,7 +8,6 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.trans.UncheckedXPathException;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 
 /**
@@ -19,15 +18,27 @@ import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 public interface LastPositionFinder {
 
     /**
+     * Ask whether this iterator supports use of the {@link #getLength()} method. This
+     * method should always be called before calling {@link #getLength()}, because an iterator
+     * that implements this interface may support use of {@link #getLength()} in some situations
+     * and not in others
+     * @return true if the {@link #getLength()} method can be called to determine the length
+     * of the underlying sequence.
+     */
+
+    boolean supportsGetLength();
+
+    /**
      * Get the last position (that is, the number of items in the sequence). This method is
      * non-destructive: it does not change the state of the iterator.
      * The result is undefined if the next() method of the iterator has already returned null.
-     * This method must not be called unless the result of getProperties() on the iterator
-     * includes the bit setting {@link SequenceIteratorProperty#LAST_POSITION_FINDER}
+     * This method must not be called unless the {@link #supportsGetLength()} has been called
+     * and has returned true.
      *
      * @return the number of items in the sequence
      * @throws UncheckedXPathException if an error occurs evaluating the sequence in order to determine
      *                        the number of items
+     * @throws ClassCastException if the capability is not available. (This exception is not guaranteed.)
      */
 
     int getLength();

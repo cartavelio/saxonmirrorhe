@@ -10,7 +10,6 @@ package net.sf.saxon.regex;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.trans.UncheckedXPathException;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -20,7 +19,6 @@ import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntToIntHashMap;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,6 +58,11 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
         this._regex = regex;
         this._matcher = matcher;
         nextSubstring = null;
+    }
+
+    @Override
+    public boolean supportsGetLength() {
+        return true;
     }
 
     @Override
@@ -149,21 +152,6 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
         return new StringItem(current);
     }
 
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER);
-    }
 
     /**
      * Determine whether the current item is a matching item or a non-matching item

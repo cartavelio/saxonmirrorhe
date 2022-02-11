@@ -24,6 +24,7 @@ import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.DateTimeValue;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -37,7 +38,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -91,8 +92,10 @@ public class Transform {
      */
 
     public void setPermittedOptions(CommandLineOptions options) {
+        //#if CSHARP==false
         options.addRecognizedOption("a", CommandLineOptions.TYPE_BOOLEAN,
                                     "Use <?xml-stylesheet?> processing instruction to identify stylesheet");
+        //#endif
         options.addRecognizedOption("catalog", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified catalog file to resolve URIs");
         options.addRecognizedOption("config", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
@@ -229,7 +232,7 @@ public class Transform {
 
     }
 
-
+    //#if CSHARP==false
     private static class TransformThread extends Thread {
         private final Transform transform;
         private final File outputDir;
@@ -261,7 +264,7 @@ public class Transform {
         }
 
     }
-
+    //#endif
 
     /**
      * Support method for main program. This support method can also be invoked from subclasses
@@ -279,7 +282,7 @@ public class Transform {
         String styleFileName = null;
         File outputFile = null;
         String outputFileName = null;
-        boolean useAssociatedStylesheet;
+        boolean useAssociatedStylesheet = false;
         boolean wholeDirectory = false;
         boolean dtdValidation = false;
         String styleParserName = null;
@@ -289,7 +292,9 @@ public class Transform {
         String exportOutputFileName = null;
         String additionalSchemas = null;
         TraceListener traceListener = null;
+        //#if CSHARP==false
         TransformThread[] th = null;
+        //#endif
         int threadCount = 0;
         boolean jit = true;
 
@@ -352,7 +357,9 @@ public class Transform {
 
             allowExit = !"off".equals(options.getOptionValue("quit"));
 
+            //#if CSHARP==false
             useAssociatedStylesheet = "on".equals(options.getOptionValue("a"));
+            //#endif
 
             String value = options.getOptionValue("explain");
             if (value != null) {
@@ -691,11 +698,13 @@ public class Transform {
             }
 
             if (useAssociatedStylesheet) {
+                //#if CSHARP==false
                 if (wholeDirectory) {
                     processDirectoryAssoc(sources, outputFile, options);
                 } else {
                     processFileAssoc(sources.get(0), null, outputFile, options);
                 }
+                //#endif
             } else {
 
                 long startTime = now();
@@ -845,6 +854,7 @@ public class Transform {
 
                     try {
                         if (wholeDirectory) {
+                            //#if CSHARP==false
                             if ((threadCount > 0) && (sources.size() > 1)) {
                                 if (threadCount > sources.size()) {
                                     threadCount = sources.size();
@@ -870,8 +880,11 @@ public class Transform {
 
 
                             } else {
+                                //#endif
                                 processDirectory(this, sources, sheet, outputFile, options);
+                                //#if CSHARP==false
                             }
+                            //#endif
                         } else {
                             Source source = sources == null || sources.isEmpty() ? null : sources.get(0);
                             processFile(source, sheet, outputFile, options);
@@ -893,9 +906,15 @@ public class Transform {
         } catch (SaxonApiException err) {
             //err.printStackTrace();
             quit(err.getMessage(), 2);
-        } catch (TransformerException | LicenseException | TransformerFactoryConfigurationError err) {
+        } catch (TransformerException err) {
             //err.printStackTrace();
             quit("Transformation failed: " + err.getMessage(), 2);
+        } catch (LicenseException err) {
+            //err.printStackTrace();
+            quit("Transformation failed with license problem: " + err.getMessage(), 2);
+        } catch (TransformerFactoryConfigurationError err) {
+            //err.printStackTrace();
+            quit("Transformation failed with configuration problem: " + err.getMessage(), 2);
         } catch (Exception err2) {
             err2.printStackTrace();
             quit("Fatal error during transformation: " + err2.getClass().getName() + ": " +
@@ -998,6 +1017,7 @@ public class Transform {
         }
     }
 
+    //#if CSHARP==false
     /**
      * Process each file in the source directory using its own associated stylesheet
      *
@@ -1028,6 +1048,7 @@ public class Transform {
                                              (failures == 1 ? "" : "s") + " failed");
         }
     }
+    //#endif
 
     /**
      * Make an output file in the output directory, with filename extension derived from the
@@ -1057,7 +1078,7 @@ public class Transform {
         return new File(directory, prefix + suffix);
     }
 
-
+    //#if CSHARP==false
     /**
      * Process a single source file using its associated stylesheet(s)
      *
@@ -1080,7 +1101,7 @@ public class Transform {
 
         XdmNode sourceDoc = processor.newDocumentBuilder().build(sourceInput);
 
-        Source style = compiler.getAssociatedStylesheet(sourceDoc.asSource(), null, null, null);
+        Source style = compiler.getAssociatedStylesheet(xdmNodeAsSource(sourceDoc), null, null, null);
         XsltExecutable sheet = compiler.compile(style);
 
         if (showTime) {
@@ -1113,6 +1134,7 @@ public class Transform {
             getConfiguration().getLogger().info("Execution time: " + CommandLineOptions.showExecutionTimeNano(endTime - startTime));
         }
     }
+    //#endif
 
     /**
      * Create a new Transformer. This method is protected so it can be overridden in a subclass, allowing additional
@@ -1299,6 +1321,7 @@ public class Transform {
                 }
                 if (buildSourceTree) {
                     DocumentBuilder builder = processor.newDocumentBuilder();
+                    //#if CSHARP==false
                     StylesheetPackage top = pss.getTopLevelPackage();
                     if (!top.isStripsTypeAnnotations()) {
                         int validationMode = getConfiguration().getSchemaValidationMode();
@@ -1310,6 +1333,7 @@ public class Transform {
                             builder.setSchemaValidator(validator);
                         }
                     }
+                    //#endif
                     builder.setDTDValidation(getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION));
                     builder.setWhitespaceStrippingPolicy(sheet.getWhitespaceStrippingPolicy());
                     if (getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION_RECOVERABLE)) {
@@ -1317,7 +1341,7 @@ public class Transform {
                     }
                     XdmNode node = builder.build(source);
                     transformer.setGlobalContextItem(node, true);
-                    source = node.asSource();
+                    source = xdmNodeAsSource(node);
                 }
             }
 
@@ -1327,7 +1351,7 @@ public class Transform {
                 try {
                     XdmValue jsonTree = builder.parseJson(
                             new BufferedReader(
-                                    new InputStreamReader(new FileInputStream(jsonSource), Charset.forName("utf8"))));
+                                    new InputStreamReader(new FileInputStream(jsonSource), StandardCharsets.UTF_8)));
                     if (!jsonTree.isEmpty()) {
                         transformer.setGlobalContextItem(jsonContextItem = jsonTree.itemAt(0));
                     }
@@ -1374,7 +1398,9 @@ public class Transform {
                 CommandLineOptions.showMemoryUsed();
                 if (repeat > 1) {
                     getConfiguration().getLogger().info("-------------------------------");
+                    //#if CSHARP==false
                     Runtime.getRuntime().gc();
+                    //#endif
                 }
                 if (Instrumentation.ACTIVE) {
                     Instrumentation.report();
@@ -1389,6 +1415,11 @@ public class Transform {
             getConfiguration().getLogger().info("*** Average execution time over last " + runs + " runs: " +
                                        CommandLineOptions.showExecutionTimeNano(totalTime / runs));
         }
+    }
+
+    @CSharpReplaceBody(code="return node.Implementation;")
+    private Source xdmNodeAsSource(XdmNode node) {
+        return node.asSource();
     }
 
 

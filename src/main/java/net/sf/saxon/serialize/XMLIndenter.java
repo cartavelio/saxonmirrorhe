@@ -40,7 +40,6 @@ public class XMLIndenter extends ProxyReceiver {
 
     private int level = 0;
 
-    //protected char[] indentChars = {'\n', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
     private boolean sameline = false;
     private boolean afterStartTag = false;
     private boolean afterEndTag = true;
@@ -50,8 +49,6 @@ public class XMLIndenter extends ProxyReceiver {
     private int suppressedAtLevel = -1;
     private Set<NodeName> suppressedElements = null;
     private final XMLEmitter emitter;
-    //private AttributeCollectionImpl bufferedAttributes;
-    //private List<NamespaceBindingSet> bufferedNamespaces = new ArrayList<NamespaceBindingSet>(8);
 
 
     /**
@@ -63,7 +60,6 @@ public class XMLIndenter extends ProxyReceiver {
     public XMLIndenter(XMLEmitter next) {
         super(next);
         emitter = next;
-        //bufferedAttributes = new AttributeCollectionImpl(getConfiguration());
     }
 
     /**
@@ -287,21 +283,6 @@ public class XMLIndenter extends ProxyReceiver {
                 return;     // there's already enough white space, don't add more
             }
         }
-//        if (spaces + 2 >= indentChars.length) {
-//            int increment = 5 * getIndentation();
-//            if (spaces + 2 > indentChars.length + increment) {
-//                increment += spaces + 2;
-//            }
-//            char[] c2 = new char[indentChars.length + increment];
-//            System.arraycopy(indentChars, 0, c2, 0, indentChars.length);
-//            Arrays.fill(c2, indentChars.length, c2.length, ' ');
-//            indentChars = c2;
-//        }
-        // output the initial newline character only if line==0
-//        int start = line == 0 ? 0 : 1;
-        //super.characters(indentChars.subSequence(start, start+spaces+1), 0, ReceiverOption.NO_SPECIAL_CHARS);
-//        emitter.characters(new Twine8(indentChars, start, spaces + 1),
-//                           Loc.NONE, ReceiverOption.NO_SPECIAL_CHARS);
         emitter.characters(CompressedWhitespace.makeIndent(line == 0 ? 1 : 0, spaces),
                            Loc.NONE, ReceiverOption.NO_SPECIAL_CHARS);
         sameline = false;

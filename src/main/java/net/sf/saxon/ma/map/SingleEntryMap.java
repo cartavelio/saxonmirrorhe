@@ -11,7 +11,6 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SingleAtomicIterator;
-import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -19,7 +18,8 @@ import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A key and a corresponding value to be held in a Map. A key-value pair also acts as a singleton
@@ -83,13 +83,9 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-        // For C# - don't use a lambda expression here
-        return new Iterable<KeyValuePair>() {
-            @Override
-            public Iterator<KeyValuePair> iterator() {
-                return new MonoIterator<>(new KeyValuePair(key, value));
-            }
-        };
+        List<KeyValuePair> list = new ArrayList<>(1);
+        list.add(new KeyValuePair(key, value));
+        return list;
     }
 
     /**

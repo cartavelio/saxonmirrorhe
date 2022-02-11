@@ -10,11 +10,8 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.NumericValue;
-
-import java.util.EnumSet;
 
 /**
  * The XPath 2.0 remove() function
@@ -59,7 +56,7 @@ public class Remove extends SystemFunction {
         if (pos < 1) {
             return arguments[0];
         }
-        return SequenceTool.toLazySequence2(new RemoveIterator(arguments[0].iterate(), pos));
+        return SequenceTool.toLazySequence(new RemoveIterator(arguments[0].iterate(), pos));
     }
 
     /**
@@ -96,6 +93,20 @@ public class Remove extends SystemFunction {
         }
 
         /**
+         * Ask whether this iterator supports use of the {@link #getLength()} method. This
+         * method should always be called before calling {@link #getLength()}, because an iterator
+         * that implements this interface may support use of {@link #getLength()} in some situations
+         * and not in others
+         *
+         * @return true if the {@link #getLength()} method can be called to determine the length
+         * of the underlying sequence.
+         */
+        @Override
+        public boolean supportsGetLength() {
+            return SequenceTool.supportsGetLength(base);
+        }
+
+        /**
          * Get the last position (that is, the number of items in the sequence). This method is
          * non-destructive: it does not change the state of the iterator.
          * The result is undefined if the next() method of the iterator has already returned null.
@@ -103,34 +114,14 @@ public class Remove extends SystemFunction {
 
         @Override
         public int getLength() {
-            if (base instanceof LastPositionFinder) {
-                int x = ((LastPositionFinder) base).getLength();
-                if (removePosition >= 1 && removePosition <= x) {
-                    return x - 1;
-                } else {
-                    return x;
-                }
+            int x = SequenceTool.getLength(base);
+            if (removePosition >= 1 && removePosition <= x) {
+                return x - 1;
             } else {
-                // This shouldn't happen, because this iterator only has the LAST_POSITION_FINDER property
-                // if the base iterator has the LAST_POSITION_FINDER property
-                throw new AssertionError("base of removeIterator is not a LastPositionFinder");
+                return x;
             }
         }
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         * properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-         * and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-         * acceptable to return the value zero, indicating that there are no known special properties.
-         * It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        @Override
-        public EnumSet<SequenceIteratorProperty> getProperties() {
-            return EnumSetTool.intersect(base.getProperties(), EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER));
-        }
     }
 
     @Override

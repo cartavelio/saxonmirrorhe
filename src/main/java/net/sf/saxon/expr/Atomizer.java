@@ -24,14 +24,11 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomizingIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.iter.UntypedAtomizingIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
-
-import java.util.EnumSet;
 
 
 /**
@@ -554,16 +551,15 @@ public final class Atomizer extends UnaryExpression {
      */
 
     public static SequenceIterator getAtomizingIterator(SequenceIterator base, boolean oneToOne) throws XPathException {
-        EnumSet<SequenceIteratorProperty> properties = base.getProperties();
-        if (properties.contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
-            int count = ((LastPositionFinder) base).getLength();
+        if (SequenceTool.supportsGetLength(base)) {
+            int count = SequenceTool.getLength(base);
             if (count == 0) {
                 return EmptyIterator.emptyIterator();
             } else if (count == 1) {
                 Item first = base.next();
                 return first.atomize().iterate();
             }
-        } else if (properties.contains(SequenceIteratorProperty.ATOMIZING)) {
+        } else if (base instanceof AtomizedValueIterator) {
             return new AxisAtomizingIterator((AtomizedValueIterator)base);
         }
         if (oneToOne) {

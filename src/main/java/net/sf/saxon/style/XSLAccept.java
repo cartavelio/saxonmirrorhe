@@ -125,6 +125,8 @@ public class XSLAccept extends XSLAcceptExpose {
             case FINAL:
                 return exposed == Visibility.PRIVATE ||
                         exposed == Visibility.FINAL || exposed == Visibility.HIDDEN;
+            case UNDEFINED:
+                return true;
             default:
                 return false;
         }

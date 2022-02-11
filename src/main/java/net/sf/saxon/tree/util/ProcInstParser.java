@@ -64,7 +64,6 @@ public class ProcInstParser {
 
     /*@Nullable*/
     public static String getPseudoAttribute(/*@NotNull*/ String content, /*@NotNull*/ String name) throws XPathException {
-
         try {
             List<String> result = new ArrayList<>();
             XMLFilterImpl filter = new AttributeProcessor(name, result);

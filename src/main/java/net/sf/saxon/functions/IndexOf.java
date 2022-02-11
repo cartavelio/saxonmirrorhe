@@ -12,7 +12,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.om.AbstractSequenceIterator;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -63,7 +62,7 @@ public class IndexOf extends CollatingFunctionFixed  {
         }
     }
 
-    private static class IndexIterator extends AbstractSequenceIterator {
+    private static class IndexIterator implements SequenceIterator {
         private int index = 0;
         private final SequenceIterator base;
         private final BuiltInAtomicType searchType;

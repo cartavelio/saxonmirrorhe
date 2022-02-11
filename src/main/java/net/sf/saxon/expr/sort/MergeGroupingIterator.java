@@ -16,7 +16,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
@@ -116,6 +115,11 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+    @Override
     public boolean hasNext() {
         return nextItem != null;
     }
@@ -144,13 +148,13 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     }
 
     @Override
-    public int getLength() {
-        return lastPositionFinder.getLength();
+    public boolean supportsGetLength() {
+        return true;
     }
 
     @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
+    public int getLength() {
+        return lastPositionFinder.getLength();
     }
 
     @Override

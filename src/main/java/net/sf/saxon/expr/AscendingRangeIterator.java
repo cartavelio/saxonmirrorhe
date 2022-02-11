@@ -8,12 +8,9 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.value.*;
-
-import java.util.EnumSet;
 
 /**
  * An Iterator that produces numeric values in a monotonic sequence,
@@ -134,6 +131,11 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+    @Override
     public boolean hasNext() {
         return currentValue + step <= limit;
     }
@@ -148,24 +150,18 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
         return Int64Value.makeIntegerValue(currentValue);
     }
 
+    public boolean isActuallyGrounded() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsGetLength() {
+        return true;
+    }
+
     @Override
     public int getLength() {
         return (int) ((limit - start) + 1);
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER, SequenceIteratorProperty.GROUNDED);
     }
 
     @Override

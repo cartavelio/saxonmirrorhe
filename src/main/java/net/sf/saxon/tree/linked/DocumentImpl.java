@@ -461,7 +461,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
     @Override
     public void generateId(/*@NotNull*/ StringBuilder buffer) {
         buffer.append('d');
-        buffer.append(Long.toString(documentNumber));
+        buffer.append(documentNumber);
     }
 
     /**

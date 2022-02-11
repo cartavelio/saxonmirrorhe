@@ -14,7 +14,6 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Whitespace;
 
@@ -39,7 +38,7 @@ public class ContainsToken extends CollatingFunctionFixed  {
         }
         Item item;
         while ((item = arg0.next()) != null) {
-            UnfailingIterator tokens = new Whitespace.Tokenizer(item.getUnicodeStringValue());
+            SequenceIterator tokens = new Whitespace.Tokenizer(item.getUnicodeStringValue());
             Item token;
             while ((token = tokens.next()) != null) {
                 if (collator.comparesEqual(search, token.getUnicodeStringValue())) {

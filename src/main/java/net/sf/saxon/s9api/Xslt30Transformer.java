@@ -200,9 +200,9 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
         }
         for (Map.Entry<QName, T> param : parameters.entrySet()) {
             StructuredQName name = param.getKey().getStructuredQName();
+            XdmValue value = param.getValue();
             try {
-                globalParameterSet.put(name,
-                                       ((Sequence) param.getValue().getUnderlyingValue()).materialize());
+                globalParameterSet.put(name, value.getUnderlyingValue());
             } catch (UncheckedXPathException e) {
                 throw new SaxonApiException(e);
             }
@@ -257,7 +257,9 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
     public synchronized <T extends XdmValue> void setInitialTemplateParameters(Map<QName, T> parameters, boolean tunnel) throws SaxonApiException {
         Map<StructuredQName, Sequence> templateParams = new HashMap<>();
         for (Map.Entry<QName, T> entry : parameters.entrySet()) {
-            templateParams.put(entry.getKey().getStructuredQName(), entry.getValue().getUnderlyingValue());
+            QName key = entry.getKey();
+            XdmValue value = entry.getValue();
+            templateParams.put(key.getStructuredQName(), value.getUnderlyingValue());
         }
         controller.setInitialTemplateParameters(templateParams, tunnel);
     }
@@ -646,7 +648,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * @since 9.9
      */
 
-    @CSharpInnerClass(outer=false, extra={"net.sf.saxon.s9api.Destination finalDestination"})
+    @CSharpInnerClass(outer=true, extra={"net.sf.saxon.s9api.Destination finalDestination"})
     public Destination asDocumentDestination(Destination finalDestination) {
         return new AbstractDestination() {
 

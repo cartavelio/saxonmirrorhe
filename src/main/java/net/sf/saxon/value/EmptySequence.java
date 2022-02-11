@@ -9,10 +9,10 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.EmptyUniString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 
 /**
  * An EmptySequence object represents a sequence containing no members.
@@ -66,11 +66,12 @@ public final class EmptySequence implements GroundedValue {
 
     /**
      * Return an iteration over the sequence
+     * @return
      */
 
     /*@NotNull*/
     @Override
-    public UnfailingIterator iterate() {
+    public SequenceIterator iterate() {
         return EmptyIterator.emptyIterator();
     }
 

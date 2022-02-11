@@ -635,6 +635,8 @@ public class Block extends Instruction {
     private void flushCurrentLiteralList(List<Item> currentLiteralList, List<Expression> list) {
         if (currentLiteralList != null) {
             ListIterator.Of<Item> iter = new ListIterator.Of<>(currentLiteralList);
+            Literal lit = Literal.makeLiteral(iter.materialize(), this);
+            list.add(lit);
         }
     }
 

@@ -95,7 +95,7 @@ public class TEXTEmitter extends XMLEmitter {
             int badchar = testCharacters(chars);
             if (badchar != 0) {
                 throw new XPathException(
-                        "Output character not available in this encoding (x" + Integer.toString(badchar, 16) + ")", "SERE0008");
+                        "Output character not available in this encoding (x" + Integer.toHexString(badchar) + ")", "SERE0008");
             }
         }
         if (newlineMatcher != null) {

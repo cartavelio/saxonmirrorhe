@@ -8,10 +8,8 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.trans.UncheckedXPathException;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.io.Closeable;
-import java.util.EnumSet;
 
 /**
  * A SequenceIterator is used to iterate over any XPath 2 sequence (of values or nodes).
@@ -27,7 +25,9 @@ import java.util.EnumSet;
  * iterator in an XPathContext. SequenceIterators than maintain the value of position()
  * and last() are represented by the interface {@link FocusIterator}.</p>
  *
- * @since 8.4. Significant changes in 9.6. Generics added in 9.9, removed again in 10.0
+ * @since 8.4. Significant changes in 9.6. Generics added in 9.9, removed again in 10.0.
+ * getProperties() method dropped in 11 (instead, callers should check whether the
+ * iterator implements a more specific interface such as {@link net.sf.saxon.expr.LastPositionFinder})
  */
 
 public interface SequenceIterator extends Closeable {
@@ -41,7 +41,8 @@ public interface SequenceIterator extends Closeable {
      * action for an iterator if subsequent calls on next() are made is to return
      * null again, and all implementations within Saxon follow this rule.
      * @throws UncheckedXPathException if an error occurs retrieving the next item
-     * @since 8.4
+     * @since 8.4. Changed in 11 so it no longer throws a checked exception;
+     * instead, any error that occurs is thrown as an unchecked exception.
      */
 
     /*@Nullable*/
@@ -65,23 +66,6 @@ public interface SequenceIterator extends Closeable {
 
     @Override
     default void close() {
-    }
-
-    /**
-     * Get properties of this iterator.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     * properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     * and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     * acceptable to return the default value {@code EnumSet.noneOf(Property.class)},
-     * indicating that there are no known special properties.
-     * It is acceptable (though unusual) for the properties of the iterator to change depending
-     * on its state.
-     * @since 8.6. Default implementation added in 9.9.
-     */
-
-    default EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.noneOf(SequenceIteratorProperty.class);
     }
 
 
