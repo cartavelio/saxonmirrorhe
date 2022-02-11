@@ -6,20 +6,13 @@
     exclude-result-prefixes="xs java doc map"
     extension-element-prefixes="saxon sql">
 
-    <!-- insert your database details here, or supply them in parameters -->
-    <!--<xsl:param name="database" select="'jdbc:hsqldb:file:db/test'"/>  
-    <xsl:param name="user" select="'mike'"/>
-<xsl:param name="password" select="'saxonxxx'"/>
-<xsl:param name="driver" select="'org.hsqldb.jdbc.JDBCDriver'"/>
-    -->
+    <xsl:param name="driver" select="'org.postgresql.Driver'"/>
+    <xsl:param name="database" select="'jdbc:postgresql://localhost/sample'"/>  
+    <xsl:param name="user" select="'testeditor'"/>
+    <xsl:param name="password" select="'sekrit'"/>
 
     <!-- Note that there are problems with single character values when used in sql:column,
     hence there are some normalizations of strings, or using sql:execute instead -->
-
-    <xsl:param name="database" static='yes' select="'jdbc:mysql://localhost/saxontest'"/>
-    <xsl:param name="user" static='yes' select="'jwl'"/>
-    <xsl:param name="password" static='yes' select="'john'"/>
-    <xsl:param name="driver" select="'com.mysql.jdbc.Driver'"/>
 
     <!-- This stylesheet writes the book list to a SQL database -->
     
@@ -72,12 +65,12 @@
         <!--<xsl:message select="'RESULTS: ' || serialize($results, map{'method':'adaptive'})"/>-->
 
         <out rows="{count($results)}">
-            <xsl:for-each-group select="$results?CATEGORY" group-by=".">
-                <xsl:sort select="current-grouping-key()"/>
-                <c>
-                    <xsl:value-of select="normalize-space(current-grouping-key())"/>
-                </c>
-            </xsl:for-each-group>
+          <xsl:for-each-group select="$results?category" group-by=".">
+            <xsl:sort select="current-grouping-key()"/>
+            <c>
+              <xsl:value-of select="normalize-space(current-grouping-key())"/>
+            </c>
+          </xsl:for-each-group>
         </out>
         
         <saxon:do action="$connection?close()"/>
@@ -90,10 +83,10 @@
         <xsl:variable name="predicate">CATEGORY='S'</xsl:variable>      
         <xsl:variable name="results" as="map(*)*" select="sql:query($connection, 'book', 'TITLE', $predicate)"/>
         
-        <xsl:message select="'RESULTS: ' || serialize($results, map{'method':'adaptive'})"/>
+        <!--<xsl:message select="'RESULTS: ' || serialize($results, map{'method':'adaptive'})"/>-->
         
         <out rows="{count($results)}">
-            <xsl:for-each select="$results?TITLE">
+            <xsl:for-each select="$results?title">
                 <xsl:sort select="."/>
                 <title>
                     <xsl:value-of select="."/>
@@ -110,7 +103,8 @@
         <xsl:call-template name="DB-load"/>
 
         <xsl:variable name="results"
-            select="sql:query($connection,'book',('author','title'),'author LIKE ''%a%''')"/>
+            select="sql:query($connection,'book',('author','title'),'author LIKE ''%Dan%''')"/>
+
         <out rows="{count($results)}">[
             <xsl:value-of select="$results!serialize(., map{'method':'json'})" separator=",&#xa;"/>
         ]    
@@ -122,10 +116,10 @@
         <xsl:call-template name="DB-load"/>
  
         <xsl:variable name="predicate">author='Bonner'</xsl:variable>
-        <xsl:sequence select="sql:update($connection, 'BOOK', $predicate,
-            map{'CATEGORY': 'F'})"/>
+        <xsl:sequence select="sql:update($connection, 'book', $predicate,
+            map{'category': 'F'})"/>
         <xsl:variable name="results" select="sql:query($connection, 'book', '*')"/>       
-        <out bonner-category="{$results[?AUTHOR='Bonner']?CATEGORY}"/>
+        <out bonner-category="{$results[?author='Bonner']?CATEGORY}{$results[?author='Bonner']?category}"/>
         <saxon:do action="$connection?close()"/>
     </xsl:template>
     
