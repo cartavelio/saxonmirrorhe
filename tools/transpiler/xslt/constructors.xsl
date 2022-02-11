@@ -150,7 +150,7 @@
       </xsl:choose>
    </xsl:template>
    
-   <!-- new FileOutputStream(java.io.File f) ==> new FileStream(f.getPath(), FileMode.OpenOrCreate) -->
+   <!-- new FileOutputStream(java.io.File f) ==> new FileStream(f.getPath(), FileMode.Create) -->
    <xsl:template match="*[type/@RESOLVED_TYPE='java.io.FileOutputStream']" priority="30">
       <xsl:variable name="argType" select="f:expressionType(arguments/argument[1])"/>
       <xsl:variable name="arity" select="count(arguments/argument)"/>
@@ -158,7 +158,7 @@
          <xsl:when test="$arity = 1 and $argType = 'java.io.File'">
             <xsl:text>new System.IO.FileStream(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-            <xsl:text>.getPath(), System.IO.FileMode.OpenOrCreate)</xsl:text>
+            <xsl:text>.getPath(), System.IO.FileMode.Create)</xsl:text>
          </xsl:when>
          <xsl:when test="$arity = 1 and $argType = 'java.lang.String'">
             <xsl:text>new System.IO.FileStream(</xsl:text>
@@ -170,7 +170,7 @@
             <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
             <xsl:text>, </xsl:text>
             <xsl:apply-templates select="arguments/argument[2]" mode="xml-to-cs"/>
-            <xsl:text>? System.IO.FileMode.Append : System.IO.FileMode.OpenOrCreate)</xsl:text>
+            <xsl:text>? System.IO.FileMode.Append : System.IO.FileMode.Create)</xsl:text>
          </xsl:when>
          <xsl:otherwise>
             <xsl:text>/* No match for FileInputStream constructor */</xsl:text>

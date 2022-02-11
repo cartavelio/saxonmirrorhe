@@ -87,6 +87,7 @@
       'java.lang.Character': 'System.Char',
       'java.lang.CharSequence': 'string',
       'java.lang.Class': 'System.Type',
+      'java.lang.ClassCastException': 'System.InvalidCastException',
       'java.lang.Double': 'System.Double',
       'java.lang.Exception': 'System.Exception',
       'java.lang.Float': 'System.Single',
@@ -134,6 +135,7 @@
       'net.sf.saxon.expr.sort.LFUCache.EntryWithCounter': 'net.sf.saxon.expr.sort.LFUCache&lt;K,V>.EntryWithCounter',
       (: 'net.sf.saxon.lib.ExtensionFunctionCall': 'Saxon.Api.ExtensionFunctionCall', :)
       (: 'net.sf.saxon.lib.ExtensionFunctionDefinition': 'Saxon.Api.ExtensionFunctionDefinition', :)
+      'net.sf.saxon.functions.ParseXmlFragment': 'Saxon.Impl.Helpers.ParseXmlFragment',
       'net.sf.saxon.lib.StandardLogger': 'Saxon.Callbacks.StandardLogger',
       'net.sf.saxon.lib.StandardModuleURIResolver': 'Saxon.Callbacks.StandardModuleURIResolver',
       'net.sf.saxon.lib.StandardUnparsedTextResolver': 'Saxon.Callbacks.StandardUnparsedTextResolver',
@@ -162,8 +164,10 @@
       'net.sf.saxon.s9api.XdmMap': 'Saxon.Api.XdmMap',
       'net.sf.saxon.s9api.XdmNode': 'Saxon.Api.XdmNode',
       'net.sf.saxon.s9api.XdmValue': 'Saxon.Api.XdmValue',
+      'net.sf.saxon.resource.Loader': 'Saxon.Impl.Overrides.ResourceLoader',
       (:'net.sf.saxon.s9api.XmlProcessingError': 'Saxon.Api.XmlProcessingError':)
-      'net.sf.saxon.tree.util.ProcInstParser': 'Saxon.Impl.Helpers.ProcInstParser'
+      'net.sf.saxon.tree.util.ProcInstParser': 'Saxon.Impl.Helpers.ProcInstParser',
+      'net.sf.saxon.tree.jiter.MappingJavaIterator': 'Saxon.Impl.Overrides.MappingEnumerator'
       }"/>
    
    <xsl:variable name="jdkExceptionTypes" as="xs:string*" select="
@@ -202,12 +206,13 @@
                <xsl:text>{ancestor::module[1]/@package}.{ancestor::interface[1]/@name}#{ancestor::method[1]/(@name || '!' || @sig)}</xsl:text>
             </xsl:when>
             <xsl:otherwise>
+               <xsl:variable name="sig" select="string-join(parameters/parameter/
+                  ((type/@RESOLVED_TYPE) || (if (@isVarArgs='true') then '[]' else '')), ',')"/>
                <xsl:variable name="unescaped" as="xs:string">
                   <xsl:value-of>
                      <xsl:text>{f:qualifiedName(ancestor::root/packageDeclaration/name)}.</xsl:text>
                      <xsl:value-of select="ancestor::*[@nodeType='ClassOrInterfaceDeclaration']/name/@identifier" separator="."/>
-                     <xsl:text>#{name/@identifier}!</xsl:text>
-                     <xsl:value-of select="parameters/parameter/type/(name/@identifier, @type)[1]" separator=","/>
+                     <xsl:text>#{name/@identifier}!{$sig}</xsl:text>
                   </xsl:value-of>
                </xsl:variable>
                <xsl:sequence select="translate($unescaped, '@', '')"/>

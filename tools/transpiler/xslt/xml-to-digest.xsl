@@ -139,7 +139,8 @@
       <method name="{name/@identifier}"              
               returns="{replace(type/@RESOLVED_TYPE, '\? extends ', '')}">
          <xsl:if test="parameters/parameter or $isInterface">
-            <xsl:attribute name="sig" select="string-join(parameters/parameter/type/(name/@identifier, @type)[1], ',')"/>
+            <xsl:attribute name="sig" select="string-join(parameters/parameter/
+                            ((type/@RESOLVED_TYPE) || (if (@isVarArgs='true') then '[]' else '')), ',')"/>
             <xsl:attribute name="params" select="string-join(parameters/parameter/type/@RESOLVED_TYPE, '|')"/>
          </xsl:if>
          <xsl:if test="modifiers/modifier[@keyword='STATIC']">
