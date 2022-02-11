@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -94,6 +96,24 @@ public class XPathPerformance extends PerformanceTestCase {
             };
             measure(task2);
 
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    @Tag("performance")
+    public void testXPathOptimization() {
+        try {
+            Processor proc = new Processor(true);
+            String xml="<a><b c='1'/><b c='2'/><b c='3'/><b c='4'/><b c='5'/><b c='6'/><b c='7'/><b c='8'/><b c='9'/></a>";
+            XdmNode doc = proc.newDocumentBuilder().build(new StreamSource(new StringReader(xml)));
+            XPathCompiler xpc = proc.newXPathCompiler();
+            XdmValue val1 = xpc.evaluateSingle("/a/b[@c='6']/@c!string()", doc);
+            assertEquals("6", val1.itemAt(0).getStringValue());
+            XPathCompiler xpc2 = proc.newXPathCompiler();
+            XdmValue val2 = xpc2.evaluateSingle("/a/b[@c='2']/@c!string()", doc);
+            assertEquals("2", val2.itemAt(0).getStringValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }

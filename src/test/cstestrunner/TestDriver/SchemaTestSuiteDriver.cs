@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using net.sf.saxon.functions;
@@ -29,11 +30,13 @@ namespace TestRunner {
          */
         private string testSuiteDir;
 
+        private string exceptionsFile;
         
         private bool onwards = false;
         private bool debug = false;
         private StreamWriter results;
         private QName xlinkHref;
+        private SortedSet<string> failingTests = new SortedSet<string>();
 
         private XdmNode getChildElement(XdmNode parent, QName child) {
             IEnumerator e = parent.EnumerateAxis(XdmAxis.Child, child);
@@ -105,6 +108,9 @@ namespace TestRunner {
                 testSuiteDir = testSuiteDir.Substring(0, testSuiteDir.Length - 1);
             }
 
+            string saxonDir = testSuiteDir.Replace("xsdtests", "xsdtests-results");
+            exceptionsFile = saxonDir + "/exceptions11.xml";
+
             string testSetPattern = null; // TODO use a regex
             string testGroupPattern = null;
             string contributor = null;
@@ -117,6 +123,9 @@ namespace TestRunner {
                 else if (args[i] == ("-onwards")) {
                     onwards = true;
                 }
+                else if (args[i] == ("-debug")) {
+                    debug = true;
+                }
                 else if (args[i].StartsWith("-c:")) {
                     contributor = args[i].Substring(3);
                 }
@@ -125,6 +134,9 @@ namespace TestRunner {
                 }
                 else if (args[i].StartsWith("-g:")) {
                     testGroupPattern = args[i].Substring(3);
+                }
+                else if (args[i].StartsWith("-exceptions:")) {
+                    exceptionsFile = args[i].Substring("-exceptions:".Length);
                 }
                 else if (args[i] == "-?") {
                     Console.WriteLine(
@@ -155,8 +167,8 @@ namespace TestRunner {
                 QName validityAtt = new QName("", "", "validity");
                 QName nameAtt = new QName("", "", "name");
                 QName contributorAtt = new QName("", "", "contributor");
-                QName setAtt = new QName("", "", "set");
-                QName groupAtt = new QName("", "", "group");
+                QName setAtt = new QName("", "", "test-set");
+                QName groupAtt = new QName("", "", "test-case");
                 QName statusAtt = new QName("", "", "status");
                 QName bugzillaAtt = new QName("", "", "bugzilla");
                 QName targetNamespaceAtt = new QName("", "", "targetNamespace");
@@ -168,7 +180,7 @@ namespace TestRunner {
                 XdmNode catalog = builder.Build(
                     new FileStream(testSuiteDir + "/suite.xml", FileMode.Open, FileAccess.Read, FileShare.Read));
 
-                string saxonDir = testSuiteDir.Replace("xsdtests", "xsdtests-results");
+                
                 results = new StreamWriter(saxonDir + "/SaxonResults"
                                                         + processor.ProductVersion + "n.xml");
 
@@ -177,17 +189,13 @@ namespace TestRunner {
                               "processor='Saxon-SA (Java) 8.8++' submitDate='2007-01-05' publicationPermission='public'>\n");
 
                 XdmNode exceptionsDoc = builder.Build(
-                    new FileStream(saxonDir + "/exceptions.xml",
+                    new FileStream(exceptionsFile,
                         FileMode.Open, FileAccess.Read, FileShare.Read));
 
-
-                IEnumerator exceptionTestCases =
-                    exceptionsDoc.EnumerateAxis(XdmAxis.Descendant, new QName("", "testcase"));
-                while (exceptionTestCases.MoveNext()) {
-                    XdmNode testCase = (XdmNode) exceptionTestCases.Current;
-                    String set = testCase.GetAttributeValue(setAtt);
-                    String group = testCase.GetAttributeValue(groupAtt);
-                    String comment = getChildElement(testCase, commentNT).StringValue;
+                foreach (XdmNode exception in exceptionsDoc.Select(Steps.Descendant("exception"))) {
+                    string set = exception.GetAttributeValue("test-set");
+                    string group = exception.GetAttributeValue("test-case");
+                    string comment = exception.Children("reason").First().GetStringValue();
                     exceptions[set + "#" + group] = comment;
                 }
 
@@ -218,8 +226,7 @@ namespace TestRunner {
                         XdmNode testGroup = (XdmNode) testGroups.Current;
 
                         string testGroupName = testGroup.GetAttributeValue(nameAtt);
-                        string exception = null;
-                        bool isException = exceptions.TryGetValue(testSetName + "#" + testGroupName, out exception);
+                        bool isException = exceptions.TryGetValue(testSetName + "#" + testGroupName, out var exception);
 
                         if (testGroupPattern != null && !testGroupName.StartsWith(testGroupPattern)) {
                             continue;
@@ -253,7 +260,7 @@ namespace TestRunner {
 
                             bugzillaRef = null;
                             string testName = schemaTest.GetAttributeValue(nameAtt);
-                            if (exception != null) {
+                            if (isException) {
                                 results.Write("<testResult set='" + testSetName +
                                               "' group='" + testGroupName +
                                               "' test='" + testName +
@@ -353,6 +360,7 @@ namespace TestRunner {
                                                                      + " (expected " + (expectedSuccess ? "validity)" : "invalidity)"), true);
                                 }
                                 failed++;
+                                failingTests.Add(contributor + "/" + testSetName + "/" + testGroupName + "/" + testName);
                             }
 
                             //feedback("Passed " + passed + " failed " + failed + " total " + total, true);
@@ -410,6 +418,7 @@ namespace TestRunner {
                                                                      + " (expected " + (expectedSuccess ? "validity)" : "invalidity)"), true);
                                 }
                                 failed++;
+                                failingTests.Add(contributor + "/" + testSetName + "/" + testGroupName + "/" + testName);
                             }
 
                             //feedback("Passed " + passed + " failed " + failed + " total " + total, true);
@@ -424,6 +433,10 @@ namespace TestRunner {
                     }
                 }
                 feedback("Passed " + passed + " failed " + failed + " total " + total, true);
+                foreach (string testDetails in failingTests)
+                {
+                    feedback("Failed " + testDetails, true);
+                }
                 results.Write("</testSuiteResults>");
                 results.Close();
             }
