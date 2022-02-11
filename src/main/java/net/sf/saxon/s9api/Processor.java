@@ -46,9 +46,7 @@ import java.util.Objects;
 public class Processor implements Configuration.ApiProvider {
 
     private Configuration config;
-    //#if CSHARP==false
     private SchemaManager schemaManager;
-    //#endif
 
     /**
      * Create a Processor
@@ -290,7 +288,7 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     //#endif
-    //#if CSHARP==false
+
     /**
      * Get the associated SchemaManager. The SchemaManager provides capabilities to load and cache
      * XML schema definitions. There is exactly one SchemaManager in a schema-aware Processor, and none
@@ -302,7 +300,7 @@ public class Processor implements Configuration.ApiProvider {
     public SchemaManager getSchemaManager() {
         return schemaManager;
     }
-    //#endif
+
     /**
      * Test whether this processor is schema-aware
      *

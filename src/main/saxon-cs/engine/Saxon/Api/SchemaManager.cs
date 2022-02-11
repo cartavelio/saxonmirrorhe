@@ -34,7 +34,7 @@ namespace Saxon.Api {
     [Serializable]
     public class SchemaManager
     {
-        //private net.sf.saxon.s9api.SchemaManager schemaManager;
+        private net.sf.saxon.s9api.SchemaManager s9schemaManager;
         private Configuration config;
         private IList<StaticError> errorList = null;
         private Processor processor;
@@ -45,7 +45,7 @@ namespace Saxon.Api {
         internal SchemaManager(Processor processor)
         {
             this.processor = processor;
-            //this.schemaManager = processor.JProcessor.getSchemaManager();
+            this.s9schemaManager = processor.JProcessor.getSchemaManager();
             this.config = processor.Implementation;
             reporter = null;
         }

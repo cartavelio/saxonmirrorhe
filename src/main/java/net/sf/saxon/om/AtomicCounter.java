@@ -3,27 +3,41 @@ package net.sf.saxon.om;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * An integer that can be incremented atomically with thread safety
  */
 
-@CSharpInjectMembers(code="private int counter = 0;")
+@CSharpInjectMembers(code="private long counter = 0;")
 public class AtomicCounter {
 
     //#if CSHARP==false
-    private AtomicInteger counter;
+    private AtomicLong counter;
     //#endif
 
-    @CSharpReplaceBody(code="counter = initialValue;")
+
     public AtomicCounter(int initialValue) {
-        counter = new AtomicInteger(initialValue);
+        init(initialValue);
+    }
+
+    @CSharpReplaceBody(code = "counter = initialValue;")
+    private void init(int initialValue) {
+        counter = new AtomicLong(initialValue);
     }
 
     @CSharpReplaceBody(code = "return System.Threading.Interlocked.Increment(ref counter);")
-    public int getAndIncrement() {
+    public long getAndIncrement() {
         return counter.getAndIncrement();
+    }
+
+    public long incrementAndGet() {
+        return getAndIncrement() + 1L;
+    }
+
+    @CSharpReplaceBody(code="return counter;")
+    public long get() {
+        return counter.get();
     }
 
 }
