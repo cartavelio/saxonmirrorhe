@@ -29,9 +29,9 @@ public class StringLiteral extends Literal {
     }
 
     /**
-     * Create a StringLiteral that wraps any CharSequence (including, of course, a String)
+     * Create a StringLiteral that wraps any UnicodeString
      *
-     * @param value     the CharSequence to be wrapped
+     * @param value the UnicodeString to be wrapped
      */
 
     public StringLiteral(UnicodeString value) {

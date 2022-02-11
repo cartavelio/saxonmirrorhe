@@ -33,16 +33,16 @@ public class Adjust_2 extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         CalendarValue in = (CalendarValue) arguments[0].head();
         if (in == null) {
             return ZeroOrOne.empty();
         } else {
             DayTimeDurationValue tz = (DayTimeDurationValue) arguments[1].head();
             if (tz == null) {
-                return new ZeroOrOne(in.removeTimezone());
+                return in.removeTimezone();
             } else {
-                return new ZeroOrOne(in.adjustTimezone(tz));
+                return in.adjustTimezone(tz);
             }
         }
     }

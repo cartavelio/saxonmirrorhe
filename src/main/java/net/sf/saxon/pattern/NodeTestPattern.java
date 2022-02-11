@@ -113,7 +113,7 @@ public class NodeTestPattern extends Pattern {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return 0x7aeffea8 ^ nodeTest.hashCode();
     }
 

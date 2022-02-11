@@ -38,16 +38,16 @@ public class Path_1 extends ScalarSystemFunction {
         while ((n = iter.next()) != null) {
             if (n.getParent() == null) {
                 if (n.getNodeKind() == Type.DOCUMENT) {
-                    return new StringItem(fsb);
+                    return new StringItem(fsb.toString());
                 } else {
                     fsb.insert(0, "Q{http://www.w3.org/2005/xpath-functions}root()");
-                    return new StringItem(fsb);
+                    return new StringItem(fsb.toString());
                 }
             }
             StringBuilder fsb2 = new StringBuilder(256);
             switch (n.getNodeKind()) {
                 case Type.DOCUMENT:
-                    return new StringItem(fsb);
+                    return new StringItem(fsb.toString());
                 case Type.ELEMENT:
                     fsb2.append("/Q{").append(n.getURI()).append("}");
                     fsb2.append(n.getLocalPart());
@@ -96,7 +96,7 @@ public class Path_1 extends ScalarSystemFunction {
         }
         // should not reach here...
         fsb.insert(0, "Q{http://www.w3.org/2005/xpath-functions}root()");
-        return new StringItem(fsb);
+        return new StringItem(fsb.toString());
     }
 
 }

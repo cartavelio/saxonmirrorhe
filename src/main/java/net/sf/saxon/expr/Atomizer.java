@@ -320,7 +320,7 @@ public final class Atomizer extends UnaryExpression {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         p &= ~StaticProperty.NODESET_PROPERTIES;
         return p | StaticProperty.NO_NODES_NEWLY_CREATED;
@@ -484,7 +484,7 @@ public final class Atomizer extends UnaryExpression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         ItemType in = getOperandItemType();
         Expression operand = getBaseExpression();
         if (singleValued) {

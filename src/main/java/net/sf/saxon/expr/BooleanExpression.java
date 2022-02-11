@@ -86,7 +86,7 @@ public abstract class BooleanExpression extends BinaryExpression implements Nega
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 

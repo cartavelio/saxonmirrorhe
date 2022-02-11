@@ -24,7 +24,7 @@ import java.util.GregorianCalendar;
  * A value of type Date. Note that a Date may include a TimeZone.
  */
 
-public class DateValue extends GDateValue implements Comparable {
+public class DateValue extends GDateValue implements Comparable<DateValue> {
 
     /**
      * Private constructor of a skeletal DateValue
@@ -426,9 +426,9 @@ public class DateValue extends GDateValue implements Comparable {
      */
 
     @Override
-    public int compareTo(Object v2) {
+    public int compareTo(DateValue v2) {
         try {
-            return compareTo((DateValue) v2, MISSING_TIMEZONE);
+            return compareTo(v2, MISSING_TIMEZONE);
         } catch (Exception err) {
             throw new ClassCastException("Date comparison requires access to implicit timezone");
         }

@@ -250,7 +250,7 @@ public class CastExpression extends CastingExpression implements Callable {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return allowsEmpty() && Cardinality.allowsZero(getBaseExpression().getCardinality())
                 ? StaticProperty.ALLOWS_ZERO_OR_ONE : StaticProperty.EXACTLY_ONE;
     }
@@ -283,7 +283,7 @@ public class CastExpression extends CastingExpression implements Callable {
      * @return the expression properties
      */
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         if (getTargetType() == BuiltInAtomicType.UNTYPED_ATOMIC) {
             p = p &~ StaticProperty.NOT_UNTYPED_ATOMIC;
@@ -423,7 +423,7 @@ public class CastExpression extends CastingExpression implements Callable {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return super.computeHashCode() ^ getTargetType().hashCode();
     }
 

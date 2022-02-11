@@ -9,10 +9,9 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.One;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.NumericValue;
 
 /**
@@ -40,24 +39,24 @@ public final class RoundHalfToEven extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NumericValue val0 = (NumericValue) arguments[0].head();
         if (val0 == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
 
         int scale = 0;
         if (arguments.length == 2) {
             NumericValue scaleVal = (NumericValue) arguments[1].head();
             if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
-                return new ZeroOrOne(val0);
+                return val0;
             } else if (scaleVal.compareTo(Integer.MIN_VALUE) < 0) {
                 scale = Integer.MIN_VALUE;
             } else {
                 scale = (int) scaleVal.longValue();
             }
         }
-        return new One(val0.roundHalfToEven(scale));
+        return val0.roundHalfToEven(scale);
     }
 
     @Override

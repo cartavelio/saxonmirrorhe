@@ -53,12 +53,12 @@ public class XSLCopy extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String copyNamespacesAtt = null;
         String validationAtt = null;

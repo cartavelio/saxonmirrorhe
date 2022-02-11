@@ -216,7 +216,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
     }
 
     /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
+     * Get the value of the item as a UnicodeString. This is in some cases more efficient than
      * the version of the method that returns a String.
      * @return
      */

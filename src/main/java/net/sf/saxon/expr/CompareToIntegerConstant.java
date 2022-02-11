@@ -98,7 +98,7 @@ public class CompareToIntegerConstant extends CompareToConstant {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         int h = 0x836b12a0;
         return h + getLhsExpression().hashCode() ^ (int)comparand;
     }
@@ -127,7 +127,7 @@ public class CompareToIntegerConstant extends CompareToConstant {
     }
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 

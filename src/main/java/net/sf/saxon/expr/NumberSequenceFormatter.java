@@ -210,7 +210,7 @@ public class NumberSequenceFormatter extends Expression {
     }
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 

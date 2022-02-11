@@ -123,7 +123,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
     public void resetLocalStaticProperties() {
         super.resetLocalStaticProperties();
         references = new ArrayList<>(); // bug 3233
-        if (evaluator == Evaluator.VARIABLE && !(getSequence() instanceof VariableReference)) {
+        if (evaluator == Evaluator.VARIABLE.INSTANCE && !(getSequence() instanceof VariableReference)) {
             evaluator = null;
             setEvaluator();
         }
@@ -388,7 +388,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
         if (needsEagerEvaluation) {
             setEvaluator(ExpressionTool.eagerEvaluator(getSequence()));
         } else if (isIndexedVariable()) {
-            setEvaluator(Evaluator.MAKE_INDEXED_VARIABLE);
+            setEvaluator(Evaluator.MAKE_INDEXED_VARIABLE.INSTANCE);
         } else if (evaluator == null) {
             setEvaluator(ExpressionTool.lazyEvaluator(getSequence(), getNominalReferenceCount() > 1));
         }
@@ -550,7 +550,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
             assert false;
             int savedOutputState = context.getTemporaryOutputState();
             context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
-            Sequence result = Evaluator.EAGER_SEQUENCE.evaluate(getSequence(), context);
+            Sequence result = Evaluator.EAGER_SEQUENCE.INSTANCE.evaluate(getSequence(), context);
             context.setTemporaryOutputState(savedOutputState);
             return result;
         }
@@ -659,7 +659,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return getAction().getCardinality();
     }
 
@@ -670,7 +670,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int props = getAction().getSpecialProperties();
         int seqProps = getSequence().getSpecialProperties();
         if ((seqProps & StaticProperty.NO_NODES_NEWLY_CREATED) == 0) {

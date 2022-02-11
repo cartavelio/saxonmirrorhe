@@ -70,7 +70,7 @@ public class LiteralResultElement extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 
@@ -88,7 +88,7 @@ public class LiteralResultElement extends StyleElement {
      */
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         // Process the values of all attributes. At this stage we deal with attribute
         // values (especially AVTs), but we do not apply namespace aliasing to the

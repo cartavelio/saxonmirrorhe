@@ -151,7 +151,7 @@ public abstract class ParentNodeConstructor extends Instruction
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 

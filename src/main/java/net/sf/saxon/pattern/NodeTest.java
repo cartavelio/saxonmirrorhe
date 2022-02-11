@@ -33,7 +33,7 @@ import java.util.function.Predicate;
  * a single method, {@link #matches(int, NodeName, SchemaType)}</p>
  */
 
-public abstract class NodeTest implements Predicate<NodeInfo>, ItemType.WithSequenceTypeCache {
+public abstract class NodeTest implements Predicate<NodeInfo>, ItemTypeWithSequenceTypeCache {
 
     private SequenceType _one;
     private SequenceType _oneOrMore;
@@ -237,8 +237,7 @@ public abstract class NodeTest implements Predicate<NodeInfo>, ItemType.WithSequ
      * @param node the node to be matched
      * @return true if the node test is satisfied by the supplied node, false otherwise
      */
-
-    @Override
+    
     public boolean test(/*@NotNull*/ NodeInfo node) {
         return matches(node.getNodeKind(), NameOfNode.makeName(node), node.getSchemaType());
     }

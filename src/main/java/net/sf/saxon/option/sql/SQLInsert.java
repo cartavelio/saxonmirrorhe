@@ -37,7 +37,7 @@ public class SQLInsert extends ExtensionInstruction {
     String table;
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         table = attributes().getValue("", "table");
         // TODO: allow table to be an AVT

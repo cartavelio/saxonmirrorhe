@@ -216,7 +216,7 @@ public abstract class BinaryExpression extends Expression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         Expression lhs = getLhsExpression();
         Expression rhs = getRhsExpression();
         if (!Cardinality.allowsZero(lhs.getCardinality()) &&
@@ -237,7 +237,7 @@ public abstract class BinaryExpression extends Expression {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         return p | StaticProperty.NO_NODES_NEWLY_CREATED;
     }
@@ -380,7 +380,7 @@ public abstract class BinaryExpression extends Expression {
      * @return true if the two lists are equal
      */
 
-    private boolean pairwiseEqual(List a, List b) {
+    private boolean pairwiseEqual(List<?> a, List<?> b) {
         if (a.size() != b.size()) {
             return false;
         }
@@ -398,7 +398,7 @@ public abstract class BinaryExpression extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         // Ensure that an operator and its inverse get the same hash code,
         // so that (A lt B) has the same hash code as (B gt A)
         int op = Math.min(operator, Token.inverse(operator));

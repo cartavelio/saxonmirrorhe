@@ -68,7 +68,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 
@@ -184,7 +184,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         if (state == 2) {
             return;
         }

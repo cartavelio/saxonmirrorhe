@@ -113,7 +113,7 @@ public class StructuredQName implements IdentityComparable {
                                                    boolean allowEQName, NamespaceResolver resolver)
             throws XPathException {
         lexicalName = Whitespace.trim(lexicalName);
-        if (allowEQName && lexicalName.length() >= 4 && lexicalName.codePointAt(0) == 'Q' && lexicalName.codePointAt(1) == '{') {
+        if (allowEQName && lexicalName.length() >= 4 && lexicalName.charAt(0) == 'Q' && lexicalName.charAt(1) == '{') {
             String name = lexicalName.toString();
             int endBrace = name.indexOf('}', 2);
             if (endBrace < 0) {

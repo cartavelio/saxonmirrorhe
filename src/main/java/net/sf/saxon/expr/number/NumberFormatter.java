@@ -8,8 +8,8 @@
 package net.sf.saxon.expr.number;
 
 import net.sf.saxon.lib.Numberer;
-import net.sf.saxon.str.*;
 import net.sf.saxon.regex.charclass.Categories;
+import net.sf.saxon.str.*;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -128,7 +128,7 @@ public class NumberFormatter {
      * @return the formatted output string.
      */
 
-    public UnicodeString format(List numbers, int groupSize, String groupSeparator,
+    public UnicodeString format(List<Object> numbers, int groupSize, String groupSeparator,
                                 String letterValue, String ordinal, /*@NotNull*/ Numberer numberer) {
 
         UnicodeBuilder sb = new UnicodeBuilder();

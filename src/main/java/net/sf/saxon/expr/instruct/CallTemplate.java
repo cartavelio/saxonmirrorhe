@@ -274,7 +274,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         if (template == null) {
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
         } else {

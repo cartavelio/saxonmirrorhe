@@ -371,7 +371,7 @@ public final class ItemChecker extends UnaryExpression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return super.computeHashCode() ^ requiredItemType.hashCode();
     }
 

@@ -9,7 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.One;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringItem;
 
@@ -26,8 +26,8 @@ public class UpperCase extends ScalarSystemFunction {
     }
 
     @Override
-    public One resultWhenEmpty() {
-        return ZERO_LENGTH_STRING;
+    public Sequence resultWhenEmpty() {
+        return StringItem.EMPTY_STRING;
     }
 
     @Override

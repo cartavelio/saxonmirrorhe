@@ -139,7 +139,7 @@ public class IntersectPattern extends VennPattern {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return 0x13d7dfa6 ^ p1.hashCode() ^ p2.hashCode();
     }
 

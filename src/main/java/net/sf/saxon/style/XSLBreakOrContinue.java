@@ -35,7 +35,7 @@ public abstract class XSLBreakOrContinue extends StyleElement {
      */
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
             checkUnknownAttribute(attName);

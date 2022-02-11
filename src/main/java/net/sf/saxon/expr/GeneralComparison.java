@@ -171,7 +171,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 

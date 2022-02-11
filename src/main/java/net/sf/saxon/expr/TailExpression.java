@@ -87,7 +87,7 @@ public class TailExpression extends UnaryExpression {
     }
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return getBaseExpression().getCardinality() | StaticProperty.ALLOWS_ZERO;
     }
 
@@ -120,7 +120,7 @@ public class TailExpression extends UnaryExpression {
     }
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return super.computeHashCode() ^ start;
     }
 

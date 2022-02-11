@@ -54,7 +54,7 @@ public class XSLApplyTemplates extends StyleElement {
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String selectAtt;
 
@@ -178,7 +178,7 @@ public class XSLApplyTemplates extends StyleElement {
      */
 
     @Override
-    public boolean markTailCalls() {
+    protected boolean markTailCalls() {
         useTailRecursion = true;
         return true;
     }

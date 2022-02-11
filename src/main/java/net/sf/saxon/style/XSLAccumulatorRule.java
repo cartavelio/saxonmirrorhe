@@ -27,7 +27,7 @@ public class XSLAccumulatorRule extends StyleElement {
     private boolean capture;
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String matchAtt = null;
         String newValueAtt = null;

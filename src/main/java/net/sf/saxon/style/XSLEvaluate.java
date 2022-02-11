@@ -86,13 +86,13 @@ public class XSLEvaluate extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return false;
     }
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         AttributeMap atts = attributes();
 

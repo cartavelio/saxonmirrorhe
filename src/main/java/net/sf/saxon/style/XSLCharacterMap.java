@@ -80,7 +80,7 @@ public class XSLCharacterMap extends StyleElement {
      */
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String name = null;
         use = null;

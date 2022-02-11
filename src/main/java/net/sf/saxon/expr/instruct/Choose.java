@@ -761,7 +761,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         int card = 0;
         boolean includesTrue = false;
         for (int i = 0; i < size(); i++) {
@@ -786,7 +786,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         // The special properties of a conditional are those which are common to every branch of the conditional
         int props = getAction(0).getSpecialProperties();
         for (int i = 1; i < size(); i++) {

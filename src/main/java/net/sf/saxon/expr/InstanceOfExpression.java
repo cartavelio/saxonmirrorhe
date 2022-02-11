@@ -181,7 +181,7 @@ public final class InstanceOfExpression extends UnaryExpression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return super.computeHashCode() ^ targetType.hashCode() ^ targetCardinality;
     }
 
@@ -190,7 +190,7 @@ public final class InstanceOfExpression extends UnaryExpression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 

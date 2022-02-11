@@ -82,7 +82,7 @@ public abstract class XSLLeafNodeConstructor extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 

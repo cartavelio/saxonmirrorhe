@@ -66,7 +66,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         if (!prepared) {
             prepared = true;
             sourceBinding.setProperty(SourceBinding.BindingProperty.PARAM, true);

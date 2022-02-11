@@ -14,8 +14,7 @@ import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.One;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -39,8 +38,8 @@ public class String_1 extends ScalarSystemFunction {
     }
 
     @Override
-    public ZeroOrOne resultWhenEmpty() {
-        return new One(StringItem.EMPTY_STRING);
+    public Sequence resultWhenEmpty() {
+        return StringItem.EMPTY_STRING;
     }
 
     /**

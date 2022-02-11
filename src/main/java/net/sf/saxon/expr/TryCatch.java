@@ -121,7 +121,7 @@ public class TryCatch extends Expression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         int card = getTryExpr().getCardinality();
         for (CatchClause catchClause : catchClauses) {
             card = Cardinality.union(card, catchClause.catchOp.getChildExpression().getCardinality());
@@ -204,7 +204,7 @@ public class TryCatch extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         int h = 0x836b12a0;
         for (int i = 0; i < catchClauses.size(); i++) {
             h ^= catchClauses.get(i).hashCode()<<i;

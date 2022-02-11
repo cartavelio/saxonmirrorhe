@@ -111,12 +111,12 @@ public class XSLResultDocument extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         String formatAttribute = null;
         String hrefAttribute = null;
         String validationAtt = null;

@@ -314,7 +314,7 @@ public class SortExpression extends Expression
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return getSelect().getCardinality();
     }
 
@@ -338,7 +338,7 @@ public class SortExpression extends Expression
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int props = 0;
         if (getSelect().hasSpecialProperty(StaticProperty.CONTEXT_DOCUMENT_NODESET)) {
             props |= StaticProperty.CONTEXT_DOCUMENT_NODESET;

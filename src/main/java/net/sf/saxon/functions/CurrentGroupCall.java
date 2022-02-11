@@ -172,7 +172,7 @@ public class CurrentGroupCall extends Expression implements Callable {
      * @return {@link net.sf.saxon.expr.StaticProperty#NO_NODES_NEWLY_CREATED} (unless the variable is assignable using saxon:assign)
      */
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         if (getControllingInstruction() == null) {
             return 0;
         } else {

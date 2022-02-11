@@ -77,7 +77,7 @@ public abstract class CompareToConstant extends UnaryExpression implements Compa
     }
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return StaticProperty.NO_NODES_NEWLY_CREATED;
     }
 

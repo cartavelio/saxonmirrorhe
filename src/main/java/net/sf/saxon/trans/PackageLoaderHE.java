@@ -301,7 +301,7 @@ public class PackageLoaderHE implements IPackageLoader {
         readKeys(packageElement);
         readComponents(packageElement, false);
         NodeInfo overridden = packageElement.iterateAxis(AxisInfo.CHILD,
-                           new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT, "overridden", config.getNamePool())).next();
+                                                         new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT, "overridden", config.getNamePool())).next();
         if (overridden != null) {
             readComponents(overridden, true);
         }

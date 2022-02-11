@@ -195,7 +195,7 @@ public class PartialApply extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         int h = 0x836b92a0;
         int i = 0;
         for (Operand o : operands()) {

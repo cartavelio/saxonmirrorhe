@@ -399,7 +399,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         if (staticType == null) {
             if (binding == null) {
                 return StaticProperty.ALLOWS_ZERO_OR_MORE;
@@ -424,7 +424,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         if (binding == null || !binding.isAssignable()) {
             // if the variable reference is assignable, we mustn't move it, or any expression that contains it,
@@ -463,7 +463,7 @@ public abstract class VariableReference extends Expression implements BindingRef
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return binding == null ? 73619830 : binding.hashCode();
     }
 

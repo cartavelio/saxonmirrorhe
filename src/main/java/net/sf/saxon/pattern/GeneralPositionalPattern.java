@@ -324,7 +324,7 @@ public class GeneralPositionalPattern extends Pattern {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return nodeTest.hashCode() ^ positionExpr.hashCode();
     }
 

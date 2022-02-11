@@ -751,7 +751,7 @@ public final class AxisExpression extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         // generate an arbitrary hash code that depends on the axis and the node test
         int h = 9375162 + axis << 20;
         if (test != null) {
@@ -789,7 +789,7 @@ public final class AxisExpression extends Expression {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return StaticProperty.CONTEXT_DOCUMENT_NODESET |
                 StaticProperty.SINGLE_DOCUMENT_NODESET |
                 StaticProperty.NO_NODES_NEWLY_CREATED |
@@ -889,7 +889,7 @@ public final class AxisExpression extends Expression {
      */
 
     @Override
-    public final int computeCardinality() {
+    protected final int computeCardinality() {
         NodeTest originNodeType;
         NodeTest nodeTest = test;
         ItemType contextItemType = staticInfo.getItemType();

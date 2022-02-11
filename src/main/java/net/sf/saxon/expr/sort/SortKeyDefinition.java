@@ -675,7 +675,7 @@ public class SortKeyDefinition extends PseudoExpression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         int h = 0;
         h ^= getOrder().hashCode();
         h ^= getCaseOrder().hashCode();

@@ -174,7 +174,7 @@ public final class ComputedAttribute extends AttributeCreator {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return super.computeSpecialProperties() |
                 StaticProperty.SINGLE_DOCUMENT_NODESET;
     }

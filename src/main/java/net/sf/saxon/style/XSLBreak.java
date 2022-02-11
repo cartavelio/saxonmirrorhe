@@ -23,7 +23,7 @@ public class XSLBreak extends XSLBreakOrContinue {
     private Expression select;
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String selectAtt = null;
 

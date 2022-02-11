@@ -53,7 +53,7 @@ public class XSLLocalVariable extends XSLGeneralVariable {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         sourceBinding.prepareAttributes(permittedAttributes);
     }
 

@@ -42,12 +42,12 @@ public class SQLConnect extends ExtensionInstruction {
     Expression autoCommit = Literal.makeEmptySequence();
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return false;
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         // Get mandatory database attribute
 
@@ -151,7 +151,7 @@ public class SQLConnect extends ExtensionInstruction {
         }
 
         @Override
-        public int computeCardinality() {
+        protected int computeCardinality() {
             return StaticProperty.EXACTLY_ONE;
         }
 

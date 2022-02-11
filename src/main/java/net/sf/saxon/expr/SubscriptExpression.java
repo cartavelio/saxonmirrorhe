@@ -123,7 +123,7 @@ public class SubscriptExpression extends SingleItemFilter {
     }
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return getBaseExpression().hashCode() ^ getSubscript().hashCode();
     }
 
@@ -133,7 +133,7 @@ public class SubscriptExpression extends SingleItemFilter {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_ONE;
     }
 

@@ -120,7 +120,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 
@@ -282,7 +282,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         AttributeMap atts = attributes();
         String extraAsAtt = null;
@@ -611,7 +611,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      */
 
     @Override
-    public boolean markTailCalls() {
+    protected boolean markTailCalls() {
         StyleElement last = getLastChildInstruction();
         return last != null && last.markTailCalls();
     }

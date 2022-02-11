@@ -20,6 +20,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.value.StringItem;
 
 import java.util.function.Function;
 
@@ -196,7 +197,7 @@ public class DotNetRegularExpression implements RegularExpression {
      */
 
     @Override
-    public AtomicIterator tokenize(UnicodeString input) {
+    public AtomicIterator<StringItem> tokenize(UnicodeString input) {
         return new DotNetTokenIterator(input.toString(), pattern);
     }
 
@@ -208,7 +209,7 @@ public class DotNetRegularExpression implements RegularExpression {
      * @throws XPathException if the supplied value is invalid
      */
 
-    public static RegexOptions setFlags(CharSequence inFlags) throws XPathException {
+    public static RegexOptions setFlags(String inFlags) throws XPathException {
         int flags = 0;
         for (int i = 0; i < inFlags.length(); i++) {
             char c = inFlags.charAt(i);
@@ -257,39 +258,6 @@ public class DotNetRegularExpression implements RegularExpression {
         }
         return flags;
     }
-
-    /**
-     * Test whether the 'x' flag is set.
-     *
-     * @param inFlags the flags as a string, e.g. "im"
-     * @return true if the 'x' flag is set
-     */
-
-    public static boolean isIgnoreWhitespace(CharSequence inFlags) {
-        for (int i = 0; i < inFlags.length(); i++) {
-            if (inFlags.charAt(i) == 'x') {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Test whether the 'i' flag is set.
-     *
-     * @param inFlags the flags as a string, e.g. "im"
-     * @return true if the 'i' flag is set
-     */
-
-    public static boolean isCaseBlind(CharSequence inFlags) {
-        for (int i = 0; i < inFlags.length(); i++) {
-            if (inFlags.charAt(i) == 'i') {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
 }
 
