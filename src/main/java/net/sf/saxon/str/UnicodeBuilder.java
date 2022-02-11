@@ -1,5 +1,7 @@
 package net.sf.saxon.str;
 
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
@@ -72,6 +74,21 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
     public UnicodeBuilder appendLatin(String str) {
         return append(new BMPString(str));
+    }
+
+    /**
+     * Append the string values of all the items in a sequence, with no separator
+     * @param iter the sequence of items
+     * @return this builder, with the new items added
+     */
+
+    public UnicodeBuilder appendAll(SequenceIterator iter) {
+        // Note: used from bytecode
+        Item item;
+        while ((item = iter.next()) != null) {
+            append(item.getUnicodeStringValue());
+        }
+        return this;
     }
 
     /**
