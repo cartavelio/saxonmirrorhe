@@ -85,7 +85,7 @@ public class DistinctValues extends CollatingFunctionFixed {
                 if (nextBase.isNaN()) {
                     key = NaN_MATCH_KEY;
                 } else {
-                    key = nextBase.getXPathComparable(false, collator, implicitTimezone);
+                    key = nextBase.getXPathMatchKey(collator, implicitTimezone);
                 }
                 if (lookup.add(key)) {
                     // returns true if newly added (if not, keep looking)

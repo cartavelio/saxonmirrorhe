@@ -8,12 +8,14 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -558,7 +560,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     public BigDecimal getTotalSeconds() {
-        BigDecimal dec = new BigDecimal(_negative ? -_seconds : _seconds);
+        BigDecimal dec = BigDecimal.valueOf(_negative ? -_seconds : _seconds);
         if (_nanoseconds != 0) {
             dec = dec.add(new BigDecimal(BigInteger.valueOf(_negative ? -_nanoseconds : _nanoseconds), 9));
         }
@@ -660,7 +662,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
                 String ms = "000000000" + _nanoseconds;
                 ms = ms.substring(ms.length() - 9);
                 sb.append((_negative ? "-" : "") + getSeconds() + '.' + ms);
-                return BigDecimalValue.parse(sb);
+                return BigDecimalValue.parse(sb.toString());
             case WHOLE_SECONDS:
                 return Int64Value.makeIntegerValue(_negative ? -_seconds : _seconds);
             case MICROSECONDS:
@@ -682,17 +684,19 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * using the getXPathComparable() method. A context argument is supplied for use in cases where the comparison
      * semantics are context-sensitive, for example where they depend on the implicit timezone or the default
      * collation.
-     *
-     * @param ordered  true if an ordered comparison is required. In this case the result is null if the
-     *                 type is unordered; in other cases the returned value will be a Comparable.
-     * @param collator collation used for comparing string values
+     *  @param collator collation used for comparing string values
      * @param implicitTimezone  the XPath dynamic evaluation context, used in cases where the comparison is context
      */
 
     /*@Nullable*/
     @Override
-    public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
-        return ordered ? null : this;
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
+
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+        return null;
     }
 
     /**
@@ -824,8 +828,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     /*@NotNull*/
-    @Override
-    public SchemaComparable getSchemaComparable() {
+    public DurationComparable getSchemaComparable() {
         int m = this._months;
         long s = this._seconds;
         int n = this._nanoseconds;
@@ -842,7 +845,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * having ordering rules that implement the XML Schema specification.
      */
 
-    private static class DurationComparable implements SchemaComparable {
+    public static class DurationComparable implements Comparable<DurationComparable> {
 
         private final int months;
         private final long seconds;
@@ -857,39 +860,34 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         /**
          * Compare two durations according to the XML Schema rules.
          *
-         * @param o the other duration
+         * @param other the other duration
          * @return -1 if this duration is smaller; 0 if they are equal; +1 if this duration is greater;
          *         {@link net.sf.saxon.om.SequenceTool#INDETERMINATE_ORDERING} if there is no defined order
          */
 
         @Override
-        public int compareTo(SchemaComparable o) {
-            if (o instanceof DurationComparable) {
-                DurationComparable other = (DurationComparable) o;
-                if (months == other.months) {
-                    if (seconds == other.seconds) {
-                        return Integer.compare(nanoseconds, other.nanoseconds);
-                    } else {
-                        return Long.compare(seconds, other.seconds);
-                    }
+        public int compareTo(DurationComparable other) {
+            if (months == other.months) {
+                if (seconds == other.seconds) {
+                    return Integer.compare(nanoseconds, other.nanoseconds);
                 } else {
-                    // The months figure varies, but the seconds figure might tip things over if it's high
-                    // enough. We make the assumption, however, that the nanoseconds won't affect things.
-                    double oneDay = 24e0 * 60e0 * 60e0;
-                    double min0 = monthsToDaysMinimum(months) * oneDay + seconds;
-                    double max0 = monthsToDaysMaximum(months) * oneDay + seconds;
-                    double min1 = monthsToDaysMinimum(other.months) * oneDay + other.seconds;
-                    double max1 = monthsToDaysMaximum(other.months) * oneDay + other.seconds;
-                    if (max0 < min1) {
-                        return -1;
-                    } else if (min0 > max1) {
-                        return +1;
-                    } else {
-                        return SequenceTool.INDETERMINATE_ORDERING;
-                    }
+                    return Long.compare(seconds, other.seconds);
                 }
             } else {
-                return SequenceTool.INDETERMINATE_ORDERING;
+                // The months figure varies, but the seconds figure might tip things over if it's high
+                // enough. We make the assumption, however, that the nanoseconds won't affect things.
+                double oneDay = 24e0 * 60e0 * 60e0;
+                double min0 = monthsToDaysMinimum(months) * oneDay + seconds;
+                double max0 = monthsToDaysMaximum(months) * oneDay + seconds;
+                double min1 = monthsToDaysMinimum(other.months) * oneDay + other.seconds;
+                double max1 = monthsToDaysMaximum(other.months) * oneDay + other.seconds;
+                if (max0 < min1) {
+                    return -1;
+                } else if (min0 > max1) {
+                    return +1;
+                } else {
+                    return SequenceTool.INDETERMINATE_ORDERING;
+                }
             }
         }
 

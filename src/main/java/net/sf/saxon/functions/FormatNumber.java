@@ -18,6 +18,7 @@ import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.DecimalSymbols;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.*;
 
 import java.math.BigDecimal;
@@ -182,6 +183,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
      * @return the result of conversion to a double
      */
 
+    @CSharpReplaceBody(code="return (Singulink.Numerics.BigDecimal)value;") // keep it simple for now...
     public static BigDecimal adjustToDecimal(double value, int precision) {
         final String zeros = precision == 1 ? "00000" : "000000000";
         final String nines = precision == 1 ? "99999" : "999999999";
@@ -739,9 +741,12 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             if (minExponentSize == 0) {
                 dval = dval.setScale(maxFractionPartSize, RoundingMode.HALF_EVEN);
             } else if (dval.signum() != 0) {
+                //#if CSHARP==false
+                //TODO: reinstate for C#, in some form
                 exponent = dval.precision() - dval.scale() - scalingFactor;
                 dval = dval.movePointLeft(exponent);
                 dval = dval.setScale(maxFractionPartSize, RoundingMode.HALF_EVEN);
+                //#endif
             }
             BigDecimalValue.decimalToString(dval, fsb);
 
@@ -777,7 +782,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             }
             if (minExponentSize != 0) {
                 fsb.append('e');
-                IntegerValue exp = (IntegerValue) IntegerValue.makeIntegerValue(exponent);
+                IntegerValue exp = (IntegerValue) IntegerValue.fromDouble(exponent);
                 String expStr = exp.getUnicodeStringValue().toString();
                 char first = expStr.charAt(0);
                 if (first == '-') {

@@ -10,11 +10,10 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -122,9 +121,13 @@ public final class FloatValue extends NumericValue {
      *          if the value cannot be converted, for example if it is NaN or infinite
      */
     @Override
-    @CSharpReplaceBody(code="return System.Numerics.BigDecimal.Parse(value.toString());")
+    //@CSharpReplaceBody(code="return Singulink.Numerics.BigDecimal.Parse(value.ToString(System.Globalization.CultureInfo.InvariantCulture));")
     public BigDecimal getDecimalValue() throws ValidationException {
-        return new BigDecimal(value);
+        try {
+            return BigDecimal.valueOf(value);
+        } catch (NumberFormatException e) {
+            throw new ValidationException(e);
+        }
     }
 
     /**
@@ -305,7 +308,7 @@ public final class FloatValue extends NumericValue {
      * @return true if this value is float or double negative zero
      */
     @Override
-    @CSharpReplaceBody(code="return value == 0.0 && double.IsNegativeInfinity(1.0 / value);")  // Better solutions exist but have dependencies
+    @CSharpReplaceBody(code="return value == 0.0f && float.IsNegativeInfinity(1.0f / value);")  // Better solutions exist but have dependencies
     public boolean isNegativeZero() {
         return value == 0.0 && (Float.floatToIntBits(value) & FloatingPointConverter.FLOAT_SIGN_MASK) != 0;
     }
@@ -353,22 +356,26 @@ public final class FloatValue extends NumericValue {
     }
 
     @Override
-    public int compareTo(NumericValue other) {
-        if (other instanceof FloatValue) {
-            float otherFloat = ((FloatValue) other).value;
-            // Do not rewrite as Float.compare() - see IntelliJ bug IDEA-196419
-            if (value == otherFloat) {
-                return 0;
-            } else if (value < otherFloat) {
-                return -1;
-            } else {
-                return +1;
+    public int compareTo(XPathComparable other) {
+        if (other instanceof NumericValue) {
+            if (other instanceof FloatValue) {
+                float otherFloat = ((FloatValue) other).value;
+                // Do not rewrite as Float.compare() - see IntelliJ bug IDEA-196419
+                if (value == otherFloat) {
+                    return 0;
+                } else if (value < otherFloat) {
+                    return -1;
+                } else {
+                    return +1;
+                }
             }
+            if (other instanceof DoubleValue) {
+                return super.compareTo(other);
+            }
+            return compareTo(Converter.NumericToFloat.INSTANCE.convert((NumericValue)other));
+        } else {
+            throw new ClassCastException("Cannot compare xs:float to " + other);
         }
-        if (other instanceof DoubleValue) {
-            return super.compareTo(other);
-        }
-        return compareTo(Converter.NumericToFloat.INSTANCE.convert(other));
     }
 
     /**
@@ -385,50 +392,6 @@ public final class FloatValue extends NumericValue {
             return 0;
         }
         return value < otherFloat ? -1 : +1;
-    }
-
-    /**
-     * Get an object that implements XML Schema comparison semantics
-     * @return
-     */
-
-    @Override
-    public SchemaComparable getSchemaComparable() {
-        // Convert negative to positive zero because Float.compareTo() does the wrong thing
-        // Note that for NaN, we return NaN, and rely on the user of the Comparable to use it in a way
-        // that ensures NaN != NaN.
-        return new FloatComparable(value == 0.0f ? 0.0f : value);
-    }
-
-    /**
-     * A Comparable that performs comparison of xs:double values either with other
-     * BigInteger values or with other representations of XPath numeric values
-     */
-
-    protected static class FloatComparable implements SchemaComparable {
-
-        protected float value;
-
-        public FloatComparable(float value) {
-            this.value = value;
-        }
-
-        @Override
-        public int compareTo(SchemaComparable o) {
-            if (o instanceof FloatComparable) {
-                return Double.compare(value, ((FloatComparable) o).value);
-            } else {
-                return SequenceTool.INDETERMINATE_ORDERING;
-            }
-        }
-
-        public boolean equals(/*@NotNull*/ Object o) {
-            return o instanceof SchemaComparable && compareTo((SchemaComparable) o) == 0;
-        }
-
-        public int hashCode() {
-            return Float.hashCode(value);
-        }
     }
 
     /**

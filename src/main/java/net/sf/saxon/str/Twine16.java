@@ -7,7 +7,9 @@
 
 package net.sf.saxon.str;
 
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.tree.iter.AtomicIterator;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.z.IntIterator;
 
@@ -192,12 +194,14 @@ public class Twine16 extends UnicodeString {
      */
 
     /*@NotNull*/
+    @CSharpInnerClass(outer=true)
     public synchronized AtomicIterator iterateCharacters() {
         return new AtomicIterator() {
             private final IntIterator cp = codePoints();
 
             @Override
-            public Int64Value next() {
+            //@CSharpModifiers(code = {"public", "override"})
+            public AtomicValue next() {
                 return cp.hasNext() ? new Int64Value(cp.next()) : null;
             }
         };
@@ -223,11 +227,13 @@ public class Twine16 extends UnicodeString {
             int i = 0;
 
             @Override
+            //@CSharpModifiers(code = {"public"})
             public boolean hasNext() {
                 return i < chars.length;
             }
 
             @Override
+            //@CSharpModifiers(code = {"public"})
             public int next() {
                 return chars[i++];
             }
@@ -276,7 +282,7 @@ public class Twine16 extends UnicodeString {
             Twine16 o = (Twine16) other;
             char[] a = chars;
             char[] b = o.chars;
-            int len = Integer.min(a.length, b.length);
+            int len = Math.min(a.length, b.length);
             for (int i = 0; i < len; i++) {
                 int diff = a[i] - b[i];
                 if (diff != 0) {

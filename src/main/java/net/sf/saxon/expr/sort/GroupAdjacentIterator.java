@@ -94,7 +94,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
             if (aKey.isNaN()) {
                 comparisonKey = DistinctValues.NaN_MATCH_KEY;
             } else {
-                comparisonKey = aKey.getXPathComparable(false, collator, keyContext.getImplicitTimezone());
+                comparisonKey = aKey.getXPathMatchKey(collator, keyContext.getImplicitTimezone());
             }
             ckey.add(comparisonKey);
         }
@@ -140,7 +140,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
 
     @Override
     public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator(currentMembers);
+        return new ListIterator.Of<>(currentMembers);
     }
 
     @Override
@@ -208,7 +208,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
 
         @Override
         public SequenceIterator iterateCurrentGroup() {
-            return new ListIterator(cMembers);
+            return new ListIterator.Of<>(cMembers);
         }
 
     }

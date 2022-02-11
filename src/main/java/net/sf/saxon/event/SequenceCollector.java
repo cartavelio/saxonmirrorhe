@@ -9,10 +9,10 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.value.EmptySequence;
@@ -96,10 +96,9 @@ public final class SequenceCollector extends SequenceWriter {
             case 0:
                 return EmptySequence.getInstance();
             case 1:
-                //noinspection unchecked
                 return list.get(0);
             default:
-                return new SequenceExtent(list);
+                return new SequenceExtent.Of<>(list);
         }
     }
 
@@ -113,7 +112,7 @@ public final class SequenceCollector extends SequenceWriter {
         if (list.isEmpty()) {
             return EmptyIterator.emptyIterator();
         } else {
-            return new ListIterator(list);
+            return new ListIterator.Of<>(list);
         }
     }
 

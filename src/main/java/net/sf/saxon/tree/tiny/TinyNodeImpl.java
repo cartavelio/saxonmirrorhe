@@ -531,7 +531,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @return the node number of the parent node, or -1 if there is no parent.
      */
 
-    static int getParentNodeNr(/*@NotNull*/ TinyTree tree, int nodeNr) {
+    protected static int getParentNodeNr(/*@NotNull*/ TinyTree tree, int nodeNr) {
 
         if (tree.depth[nodeNr] == 0) {
             return -1;

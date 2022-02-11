@@ -18,7 +18,9 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trace.TemplateRuleTraceListener;
 import net.sf.saxon.trans.Mode;
+import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.XPathException;
 
@@ -94,14 +96,20 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
             TemplateRule nh = (TemplateRule) rule.getAction();
             nh.initialize();
             c2.setOrigin(this);
-            //c2.setOriginatingConstructType(Location.TEMPLATE);
             c2.setLocalParameters(params);
             c2.setTunnelParameters(tunnels);
             c2.openStackFrame(nh.getStackFrameMap());
             c2.setCurrentTemplateRule(rule);
             c2.setCurrentComponent(modeComponent);
             c2.setCurrentMergeGroupIterator(null);
-            nh.apply(output, c2);
+            if (mode.isModeTracing()) {
+                TemplateRuleTraceListener tracer = ((XsltController) controller).getTemplateRuleTraceListener();
+                tracer.enter("apply-imports", getLocation(), currentItem, nh);
+                nh.apply(output, c2);
+                tracer.leave();
+            } else {
+                nh.apply(output, c2);
+            }
         }
         return null;
         // We never treat apply-imports as a tail call, though we could

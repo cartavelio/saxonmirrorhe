@@ -7,10 +7,13 @@
 
 package net.sf.saxon.event;
 
+import net.sf.saxon.transpile.CSharpDelegate;
+
 /**
  * Factory class to create a ProxyReceiver which filters events on a push pipeline
  */
 @FunctionalInterface
+@CSharpDelegate(true)
 public interface FilterFactory {
 
     /**

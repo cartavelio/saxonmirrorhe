@@ -8,9 +8,10 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -27,7 +28,7 @@ import java.math.RoundingMode;
  * to be represented.</p>
  */
 
-public final class YearMonthDurationValue extends DurationValue implements Comparable<YearMonthDurationValue> {
+public final class YearMonthDurationValue extends DurationValue implements XPathComparable, ContextFreeAtomicValue {
 
     /**
      * Private constructor for internal use
@@ -277,8 +278,22 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      */
 
     @Override
-    public int compareTo(YearMonthDurationValue other) {
-        return Integer.compare(getLengthInMonths(), other.getLengthInMonths());
+    public int compareTo(XPathComparable other) {
+        if (other instanceof YearMonthDurationValue) {
+            return Integer.compare(getLengthInMonths(), ((YearMonthDurationValue) other).getLengthInMonths());
+        } else {
+            throw new ClassCastException("Cannot compare xs:yearMonthDuration with " + other);
+        }
+    }
+
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
+
+    @Override
+    public XPathComparable getXPathComparable() {
+        return this;
     }
 
     /**
@@ -286,14 +301,12 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      * Returns null if the value is not comparable according to XPath rules. The default implementation
      * returns the value itself. This is modified for types such as
      * xs:duration which allow ordering comparisons in XML Schema, but not in XPath.
-     *
-     * @param ordered true if ordered comparisons need to be supported
-     * @param collator for comparing strings - not used
+     *  @param collator for comparing strings - not used
      * @param implicitTimezone implicit timezone in the dynamic context - not used
      */
 
     @Override
-    public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
         return this;
     }
 

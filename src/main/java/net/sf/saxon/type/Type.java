@@ -250,8 +250,10 @@ public abstract class Type {
                 default:
                     return "";
             }
-        } else if (item instanceof ExternalObject) {
+        //#if CSHARP==false
+        } else if (item.getGenre() == Genre.EXTERNAL) {
             return ObjectValue.displayTypeName(((ExternalObject) item).getObject());
+        //#endif
         } else if (item instanceof AtomicValue) {
             return ((AtomicValue) item).getItemType().toString();
         } else if (item instanceof Function) {
@@ -342,11 +344,13 @@ public abstract class Type {
         if (t2 instanceof ErrorType) {
             return t1;
         }
+        //#if CSHARP==false
         if (t1 instanceof JavaExternalObjectType && t2 instanceof JavaExternalObjectType) {
             Class<?> c1 = ((JavaExternalObjectType) t1).getJavaClass();
             Class<?> c2 = ((JavaExternalObjectType) t2).getJavaClass();
             return new JavaExternalObjectType(leastCommonSuperClass(c1, c2));
         }
+        //#endif
         if (t1 instanceof MapType && t2 instanceof MapType) {
             if (t1 == MapType.EMPTY_MAP_TYPE) {
                 return t2;
@@ -420,11 +424,13 @@ public abstract class Type {
         if (t1 instanceof NodeTest && t2 instanceof NodeTest) {
             return AnyNodeTest.getInstance();
         }
+        //#if CSHARP==false
         if (t1 instanceof JavaExternalObjectType && t2 instanceof JavaExternalObjectType) {
             Class<?> c1 = ((JavaExternalObjectType) t1).getJavaClass();
             Class<?> c2 = ((JavaExternalObjectType) t2).getJavaClass();
             return new JavaExternalObjectType(leastCommonSuperClass(c1, c2));
         }
+        //#endif
         return AnyItemType.getInstance();
 
         // Note: for function items, the result is always AnyFunctionType, since all functions have the same primitive type
@@ -440,6 +446,7 @@ public abstract class Type {
         }
     }
 
+    //#if CSHARP==false
     private static Class<?> leastCommonSuperClass(Class<?> class1, Class<?> class2) {
         if (class1 == class2) {
             return class1;
@@ -458,7 +465,7 @@ public abstract class Type {
         }
         return leastCommonSuperClass(class1.getSuperclass(), class2.getSuperclass());
     }
-
+    //#endif
 
     /**
      * Determine whether a given atomic type is a primitive type. The primitive types are

@@ -11,7 +11,7 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.GenericListIterator;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
@@ -133,8 +133,8 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
 
     /*@NotNull*/
     @Override
-    public GenericListIterator<T> iterate() {
-        return new GenericListIterator<T>(value);
+    public ListIterator.Of<T> iterate() {
+        return new ListIterator.Of<T>(value);
     }
 
     /**
@@ -145,7 +145,7 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
 
     /*@NotNull*/
     public UnfailingIterator reverseIterate() {
-        return new GenericListIterator<>(new ReverseList<>(value));
+        return new ListIterator.Of<>(ReverseList.of(value));
     }
 
     /**

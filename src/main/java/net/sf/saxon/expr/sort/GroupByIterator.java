@@ -123,7 +123,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
                 if (key.isNaN()) {
                     comparisonKey = DistinctValues.NaN_MATCH_KEY;
                 } else {
-                    comparisonKey = key.getXPathComparable(false, collator, implicitTimezone);
+                    comparisonKey = key.getXPathMatchKey(collator, implicitTimezone);
                 }
                 List<Item> g = index.get(comparisonKey);
                 if (g == null) {
@@ -178,7 +178,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
                 if (key.isNaN()) {
                     comparisonKey = DistinctValues.NaN_MATCH_KEY;
                 } else {
-                    comparisonKey = key.getXPathComparable(false, collator, implicitTimezone);
+                    comparisonKey = key.getXPathMatchKey(collator, implicitTimezone);
                 }
                 ckList.add(comparisonKey);
             }
@@ -221,7 +221,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
 
     @Override
     public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator(groups.get(position - 1));
+        return new ListIterator.Of<Item>(groups.get(position - 1));
     }
 
     /**
@@ -302,7 +302,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
 
         @Override
         public SequenceIterator iterateCurrentGroup()  {
-            return new ListIterator(currentGroup);
+            return new ListIterator.Of<>(currentGroup);
         }
 
         @Override

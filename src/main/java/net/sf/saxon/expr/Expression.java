@@ -798,8 +798,8 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
         return null;
     }
 
-    public static final IntegerValue UNBOUNDED_LOWER = (IntegerValue) IntegerValue.makeIntegerValue(new DoubleValue(-1e100));
-    public static final IntegerValue UNBOUNDED_UPPER = (IntegerValue) IntegerValue.makeIntegerValue(new DoubleValue(+1e100));
+    public static final IntegerValue UNBOUNDED_LOWER = (IntegerValue) IntegerValue.fromDouble(-1e100);
+    public static final IntegerValue UNBOUNDED_UPPER = (IntegerValue) IntegerValue.fromDouble(+1e100);
     public static final IntegerValue MAX_STRING_LENGTH = Int64Value.makeIntegerValue(Integer.MAX_VALUE);
     public static final IntegerValue MAX_SEQUENCE_LENGTH = Int64Value.makeIntegerValue(Integer.MAX_VALUE);
 

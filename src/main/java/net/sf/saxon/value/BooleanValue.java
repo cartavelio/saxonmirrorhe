@@ -8,8 +8,8 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
@@ -17,12 +17,13 @@ import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A boolean XPath value
  */
 
-public final class BooleanValue extends AtomicValue implements Comparable<BooleanValue>, AtomicMatchKey {
+public final class BooleanValue extends AtomicValue implements XPathComparable, AtomicMatchKey, ContextFreeAtomicValue {
     private final boolean value;
 
     /**
@@ -172,48 +173,7 @@ public final class BooleanValue extends AtomicValue implements Comparable<Boolea
     public UnicodeString getPrimitiveStringValue() {
         return value ? StringConstants.TRUE : StringConstants.FALSE;
     }
-
-    /**
-     * Get a Comparable value that implements the XML Schema ordering comparison semantics for this value.
-     * The default implementation returns "this". This is overridden for particular atomic types.
-     * <p>In the case of data types that are partially ordered, the returned Comparable extends the standard
-     * semantics of the compareTo() method by returning the value {@link net.sf.saxon.om.SequenceTool#INDETERMINATE_ORDERING} when there
-     * is no defined order relationship between two given values.</p>
-     *
-     * @return a Comparable that follows XML Schema comparison rules
-     */
-
-    @Override
-    public SchemaComparable getSchemaComparable() {
-        return new BooleanComparable(this);
-    }
-
-    private static class BooleanComparable implements SchemaComparable {
-
-        private final BooleanValue value;
-        public BooleanComparable(BooleanValue value) {
-            this.value = value;
-        }
-
-        public boolean asBoolean() {
-            return value.getBooleanValue();
-        }
-
-        @Override
-        public int compareTo(SchemaComparable o) {
-            return equals(o) ? 0 : SequenceTool.INDETERMINATE_ORDERING;
-        }
-
-        public boolean equals(Object o) {
-            return o instanceof BooleanComparable && asBoolean() == ((BooleanComparable) o).asBoolean();
-        }
-
-        public int hashCode() {
-            return asBoolean() ? 9999999 : 8888888;
-        }
-
-    }
-
+    
     /**
      * Get a Comparable value that implements the XPath ordering comparison semantics for this value.
      * Returns null if the value is not comparable according to XPath rules. The default implementation
@@ -221,8 +181,6 @@ public final class BooleanValue extends AtomicValue implements Comparable<Boolea
      * string, date, time, dateTime, yearMonthDuration, dayTimeDuration, and anyURI.
      *
      *
-     * @param ordered  true if an ordered comparison is required. In this case the result is null if the
-     *                 type is unordered; in other cases the returned value will be a Comparable.
      * @param collator the collation to be used when comparing strings
      * @param implicitTimezone  the XPath dynamic evaluation context, used in cases where the comparison is context
      *                 sensitive
@@ -232,7 +190,17 @@ public final class BooleanValue extends AtomicValue implements Comparable<Boolea
      */
 
     @Override
-    public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
+
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
+
+    @Override
+    public XPathComparable getXPathComparable()  {
         return this;
     }
 
@@ -248,14 +216,18 @@ public final class BooleanValue extends AtomicValue implements Comparable<Boolea
      */
 
     @Override
-    public int compareTo(BooleanValue other) {
-        if (value == other.value) {
-            return 0;
+    public int compareTo(@NotNull XPathComparable other) {
+        if (other instanceof BooleanValue) {
+            if (value == ((BooleanValue)other).value) {
+                return 0;
+            }
+            if (value) {
+                return +1;
+            }
+            return -1;
+        } else {
+            throw new ClassCastException("Cannot compare xs:boolean to " + other);
         }
-        if (value) {
-            return +1;
-        }
-        return -1;
     }
 
     /**

@@ -31,7 +31,7 @@ import javax.xml.transform.URIResolver;
  */
 @CSharpInjectMembers(code = {
         "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
                 + "    }"
 })
 public class DynamicQueryContext {
@@ -273,7 +273,7 @@ public class DynamicQueryContext {
         return unparsedTextURIResolver;
     }
 
-
+    //#if CSHARP==false
     /**
      * Set the error listener. The error listener receives reports of all run-time
      * errors and can decide how to report them.
@@ -303,6 +303,7 @@ public class DynamicQueryContext {
             return null;
         }
     }
+    //#endif
 
     /**
      * Set a callback that will be used when reporting a dynamic error or warning

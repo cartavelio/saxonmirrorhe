@@ -9,11 +9,11 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
-import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ConversionResult;
@@ -256,20 +256,14 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      * using the getXPathComparable() method. A context argument is supplied for use in cases where the comparison
      * semantics are context-sensitive, for example where they depend on the implicit timezone or the default
      * collation.
-     *
-     * @param ordered  true if an ordered comparison is required. In this case the result is null if the
-     *                 type is unordered; in other cases the returned value will be a Comparable.
-     * @param collator collation used for strings
+     *  @param collator collation used for strings
      * @param implicitTimezone  the XPath dynamic evaluation context, used in cases where the comparison is context
      */
 
     /*@Nullable*/
     @Override
-    public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone)
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone)
     throws NoDynamicContextException {
-        if (ordered && !(this instanceof Comparable)) {
-            return null;
-        }
         if (hasTimezone()) {
             return this;
         }
@@ -277,17 +271,6 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
             throw new NoDynamicContextException("Unknown implicit timezone");
         }
         return hasTimezone() ? this : adjustTimezone(implicitTimezone);
-    }
-
-    /**
-     * Method retained only because it is used in a test case
-     */
-    public AtomicMatchKey getComparisonKey(XPathContext context) {
-        try {
-            return getXPathComparable(false, CodepointCollator.getInstance(), context.getImplicitTimezone());
-        } catch (NoDynamicContextException e) {
-            return null;
-        }
     }
 
     /**
@@ -299,6 +282,11 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
     @Override
     public AtomicMatchKey asMapKey() {
         return new CalendarValueMapKey(this);
+    }
+
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+        return null;
     }
 
     /**

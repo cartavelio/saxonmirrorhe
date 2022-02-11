@@ -20,11 +20,14 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.TupleType;
+import net.sf.saxon.om.AbstractSequenceIterator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 
 import java.util.ArrayList;
@@ -224,48 +227,47 @@ public class LookupAllExpression extends UnaryExpression {
 
     /*@NotNull*/
     @Override
+    @CSharpInnerClass(outer=true, extra={"net.sf.saxon.expr.XPathContext context"})
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
 
-        return new SequenceIterator() {
+        return new AbstractSequenceIterator() {
 
             final SequenceIterator level0 = getBaseExpression().iterate(context);
-            Iterator<?> level1 = null;
+            Iterator<GroundedValue> level1forArrays = null;
+            Iterator<KeyValuePair> level1forMaps = null;
                 // delivers GroundedValue in the case of an array, or KeyValuePair in the case of a map
             SequenceIterator level2 = null;
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public Item next() throws XPathException {
                 if (level2 == null) {
-                    if (level1 == null) {
+                    if (level1forArrays == null && level1forMaps == null) {
                         Item lhs = level0.next();
                         if (lhs == null) {
                             return null;
                         } else if (lhs instanceof ArrayItem) {
-                            level1 = ((ArrayItem)lhs).members().iterator();
+                            level1forArrays = ((ArrayItem)lhs).members().iterator();
                             return next();
                         } else if (lhs instanceof MapItem) {
-                            level1 = ((MapItem)lhs).keyValuePairs().iterator();
+                            level1forMaps = ((MapItem)lhs).keyValuePairs().iterator();
                             return next();
                         } else {
                             LookupExpression.mustBeArrayOrMap(LookupAllExpression.this, lhs);
                             return null;
                         }
+                    } else if (level1forArrays != null && level1forArrays.hasNext()) {
+                        GroundedValue nextEntry = level1forArrays.next();
+                        level2 = nextEntry.iterate();
+                    } else if (level1forMaps != null && level1forMaps.hasNext()) {
+                        KeyValuePair nextEntry = level1forMaps.next();
+                        GroundedValue value = nextEntry.value;
+                        level2 = value.iterate();
                     } else {
-                        if (level1.hasNext()) {
-                            Object nextEntry = level1.next();
-                            if (nextEntry instanceof KeyValuePair) {
-                                GroundedValue value = ((KeyValuePair)nextEntry).value;
-                                level2 = value.iterate();
-                            } else if (nextEntry instanceof GroundedValue) {
-                                level2 = ((GroundedValue) nextEntry).iterate();
-                            } else {
-                                throw new IllegalStateException();
-                            }
-                        } else {
-                            level1 = null;
-                        }
-                        return next();
+                        level1forMaps = null;
+                        level1forArrays = null;
                     }
+                    return next();
                 } else {
                     Item nextItem = level2.next();
                     if (nextItem == null) {
@@ -278,6 +280,7 @@ public class LookupAllExpression extends UnaryExpression {
             }
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public void close() {
                 if (level0 != null) {
                     level0.close();

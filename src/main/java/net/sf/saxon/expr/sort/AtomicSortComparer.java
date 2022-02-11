@@ -9,6 +9,7 @@ package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
@@ -16,6 +17,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.StringItem;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An AtomicComparer used for comparing atomic values of arbitrary item types. It encapsulates
@@ -166,13 +168,13 @@ public class AtomicSortComparer implements AtomicComparer {
             return collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
         } else {
             int implicitTimezone = context.getImplicitTimezone();
-            AtomicMatchKey ac = a.getXPathComparable(true, collator, implicitTimezone);
-            AtomicMatchKey bc = b.getXPathComparable(true, collator, implicitTimezone);
+            XPathComparable ac = a.getXPathComparable(collator, implicitTimezone);
+            XPathComparable bc = b.getXPathComparable(collator, implicitTimezone);
             if (ac == null || bc == null) {
                 return compareNonComparables(a, b);
             } else {
                 try {
-                    return ((Comparable<AtomicMatchKey>)ac).compareTo(bc);
+                    return ac.compareTo(bc);
                 } catch (ClassCastException e) {
                     String message = "Cannot compare " + a.getPrimitiveType().getDisplayName() +
                             " with " + b.getPrimitiveType().getDisplayName();
@@ -229,6 +231,11 @@ public class AtomicSortComparer implements AtomicComparer {
             // value. We use StructuredQName because it has a simple equals() method.
 
             return new QNameValue("saxon", "http://saxon.sf.net/collation-key", "NaN");
+        }
+
+        //@Override
+        public int compareTo(@NotNull AtomicMatchKey o) {
+            return SequenceTool.INDETERMINATE_ORDERING;
         }
     };
 

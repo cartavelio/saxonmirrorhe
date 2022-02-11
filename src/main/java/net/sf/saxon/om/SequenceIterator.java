@@ -116,7 +116,7 @@ public interface SequenceIterator extends Closeable {
      */
 
     default GroundedValue materialize() throws XPathException {
-        return new SequenceExtent(this).reduce();
+        return SequenceExtent.from(this).reduce();
     }
 
 

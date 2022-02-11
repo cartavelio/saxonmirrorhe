@@ -275,6 +275,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         return names;
     }
 
+    //#if CSHARP==false
     /**
      * Execute a the compiled Query, returning the results as a List of objects
      * obtained by converting the items in the query result to the nearest appropriate
@@ -299,7 +300,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         iterator(env).forEachOrFail(item -> list.add(SequenceTool.convertToJava(item)));
         return list;
     }
-
+    //#endif
     /**
      * Execute the compiled Query, returning the first item in the result.
      * This is useful where it is known that the expression will only return

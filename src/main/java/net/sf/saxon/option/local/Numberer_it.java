@@ -104,6 +104,7 @@ public class Numberer_it extends AbstractNumberer {
                             break;
                         default:
                             s = s + italianUnits[rem].substring(0, italianUnits[rem].length() - 1) + "esimo";
+                            break;
                     }
                 }
             }

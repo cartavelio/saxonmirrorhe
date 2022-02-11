@@ -15,6 +15,8 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 
@@ -110,12 +112,14 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
         }
     }
 
+    @CSharpInnerClass(outer=false, extra={"net.sf.saxon.type.PlainType requiredItemType", "net.sf.saxon.expr.Expression operand"})
     public static UntypedSequenceConverter makeUntypedSequenceRejector(Configuration config, final Expression operand, final PlainType requiredItemType) {
         UntypedSequenceConverter atomicSeqConverter = new UntypedSequenceConverter(operand, requiredItemType);
         final ConversionRules rules = config.getConversionRules();
         final Converter untypedConverter = new Converter() {
             // called when an untyped atomic value is encountered
             @Override
+            @CSharpModifiers(code={"public","override"})
             public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
                 ValidationFailure vf = new ValidationFailure(
                         "Implicit conversion of untypedAtomic value to " + requiredItemType.toString() + " is not allowed");

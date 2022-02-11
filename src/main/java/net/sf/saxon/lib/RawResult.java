@@ -69,7 +69,7 @@ public class RawResult implements Result {
      */
 
     public Sequence getResultSequence() {
-        return new SequenceExtent(content);
+        return new SequenceExtent.Of<>(content);
     }
 }
 

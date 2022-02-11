@@ -156,7 +156,7 @@ public class Numberer_de extends AbstractNumberer {
     /**
      * Get a day name or abbreviation
      *
-     * @param day      The month number (1=Sunday, 7=Saturday)
+     * @param day      The month number (1=Monday, 7=Sunday)
      * @param minWidth The minimum number of characters
      * @param maxWidth The maximum number of characters
      */

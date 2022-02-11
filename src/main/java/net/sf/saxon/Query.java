@@ -285,7 +285,7 @@ public class Query {
             }
 
             if (moduleURIResolverClass != null) {
-                Object mr = config.getInstance(moduleURIResolverClass, null);
+                Object mr = config.getInstance(moduleURIResolverClass);
                 if (!(mr instanceof ModuleURIResolver)) {
                     badUsage(moduleURIResolverClass + " is not a ModuleURIResolver");
                 }
@@ -774,12 +774,16 @@ public class Query {
                 quit("Source file " + sourceFile + " does not exist", 2);
             }
 
+            //#if CSHARP==false
             if (Version.platform.isJava()) {
                 InputSource eis = new InputSource(sourceFile.toURI().toString());
                 sourceInput = new SAXSource(eis);
             } else {
+            //#endif
                 sourceInput = new StreamSource(sourceFile.toURI().toString());
+            //#if CSHARP==false
             }
+            //#endif
         }
         return sourceInput;
     }

@@ -33,7 +33,7 @@ import javax.xml.transform.Source;
 
 @CSharpInjectMembers(code = {
         "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
                 + "    }"
 })
 public abstract class SchemaManager {
@@ -58,6 +58,7 @@ public abstract class SchemaManager {
 
     public abstract String getXsdVersion();
 
+    //#if CSHARP==false
     /**
      * Set the ErrorListener to be used while loading and validating schema documents
      *
@@ -78,6 +79,7 @@ public abstract class SchemaManager {
 
     /*@Nullable*/
     public abstract ErrorListener getErrorListener();
+    //#endif
 
     public abstract void setErrorReporter(ErrorReporter reporter);
 

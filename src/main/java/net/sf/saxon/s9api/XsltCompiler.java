@@ -67,7 +67,7 @@ import java.util.Objects;
 
 @CSharpInjectMembers(code = {
         "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
                 + "    }"
 })
 public class XsltCompiler {
@@ -164,6 +164,7 @@ public class XsltCompiler {
         return compilerInfo.getURIResolver();
     }
 
+    //#if CSHARP==false
     /**
      * Set the ErrorListener to be used during this compilation episode
      *
@@ -192,6 +193,7 @@ public class XsltCompiler {
     public ErrorListener getErrorListener() {
         return compilerInfo.getErrorListener();
     }
+    //#endif
 
     /**
      * Supply a (typically empty) {@code List} which will be populated with information about any static errors
@@ -206,8 +208,7 @@ public class XsltCompiler {
      */
 
     public void setErrorList(List<? super StaticError> errorList) {
-        //noinspection Convert2MethodRef
-        compilerInfo.setErrorReporter(err -> errorList.add(err));
+        compilerInfo.setErrorReporter(errorList::add);
     }
 
     /**

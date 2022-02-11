@@ -9,8 +9,10 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -18,12 +20,14 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -49,8 +53,14 @@ import java.util.*;
  * it to interoperate with Java 8 temporal classes such as {@link Instant} and {@link ZonedDateTime}.</p>
  */
 
+@CSharpInjectMembers(code={""
+        + "public static net.sf.saxon.value.DateTimeValue fromDateTime(System.DateTime dt) {"
+        + "    return new net.sf.saxon.value.DateTimeValue(dt.Year, (byte)dt.Month, (byte)dt.Day, (byte)dt.Hour, (byte)dt.Minute, (byte)dt.Second, dt.Millisecond * 1000000, 0);"
+        + "}"
+})
+
 public final class DateTimeValue extends CalendarValue
-        implements Comparable<DateTimeValue>
+        implements XPathComparable
         //#if CSHARP==false
         , TemporalAccessor
         //#endif
@@ -100,10 +110,12 @@ public final class DateTimeValue extends CalendarValue
      * @return the current dateTime, in the local timezone for the platform.
      */
 
+    @CSharpReplaceBody(code="return net.sf.saxon.value.DateTimeValue.fromDateTime(System.DateTime.Now);")
     public static DateTimeValue now() {
         return DateTimeValue.fromZonedDateTime(ZonedDateTime.now());
     }
 
+    //#if CSHARP==false
     /**
      * Constructor: create a dateTime value given a Java calendar object.
      * The {@code #hasNoYearZero} flag is set to {@code true}.
@@ -133,6 +145,7 @@ public final class DateTimeValue extends CalendarValue
         hasNoYearZero = true;
     }
 
+
     /**
      * Factory method: create a dateTime value given a Java Date object. The returned dateTime
      * value will always have a timezone, which will always be UTC.
@@ -147,6 +160,7 @@ public final class DateTimeValue extends CalendarValue
         long millis = suppliedDate.getTime();
         return EPOCH.add(DayTimeDurationValue.fromMilliseconds(millis));
     }
+    //#endif
 
     /**
      * Factory method: create a dateTime value given a Java time, expressed in milliseconds since 1970. The returned dateTime
@@ -177,10 +191,11 @@ public final class DateTimeValue extends CalendarValue
     /*@NotNull*/
     public static DateTimeValue fromJavaInstant(long seconds, int nano) throws XPathException {
         return EPOCH
-                .add(DayTimeDurationValue.fromSeconds(new BigDecimal(seconds))
+                .add(DayTimeDurationValue.fromSeconds(BigDecimal.valueOf(seconds))
                              .add(DayTimeDurationValue.fromNanoseconds(nano)));
     }
 
+    //#if CSHARP==false
     /**
      * Factory method: create a dateTime value given a Java {@link Instant}. The {@code java.time.Instant} class
      * is new in JDK 8.
@@ -255,6 +270,7 @@ public final class DateTimeValue extends CalendarValue
         dtv.hasNoYearZero = false;
         return dtv;
     }
+    //#endif
 
     /**
      * Fixed date/time used by Java (and Unix) as the origin of the universe: 1970-01-01T00:00:00Z
@@ -915,7 +931,11 @@ public final class DateTimeValue extends CalendarValue
                 hour, minute, (byte) js, nanoseconds.intValue(), 0);
     }
 
-    @CSharpReplaceBody(code="return (((long)minute)*360 + ((long)second))*60) * 1000000000L + (long)nanoseconds;")
+    /**
+     * Generate a value from the current date and time that can be used to seed a random number generator
+     * @return a long derived arbitrarily from the current date and time
+     */
+    @CSharpReplaceBody(code="return ((((long)minute)*360 + ((long)second))*60) * 1000000000L + (long)nanosecond;")
     public long randomSeed() {
         return getCalendar().getTimeInMillis();
     }
@@ -1154,7 +1174,7 @@ public final class DateTimeValue extends CalendarValue
         int mi = minute;
         mi += tz;
         if (mi < 0 || mi > 59) {
-            h += Math.floor(mi / 60.0);
+            h += mi / 60;  // was Math.floor(mi / 60.0); - MHK 2021-02-25
             mi = (mi + 60 * 24) % 60;
         }
 
@@ -1287,7 +1307,7 @@ public final class DateTimeValue extends CalendarValue
                 return Int64Value.makeIntegerValue(minute);
             case SECONDS:
                 BigDecimal d = BigDecimal.valueOf(nanosecond);
-                d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, BigDecimal.ROUND_HALF_UP);
+                d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, RoundingMode.HALF_UP);
                 d = d.add(BigDecimal.valueOf(second));
                 return new BigDecimalValue(d);
             case WHOLE_SECONDS: //(internal use only)
@@ -1481,6 +1501,17 @@ public final class DateTimeValue extends CalendarValue
         return adjustToUTC(implicitTimezone).compareTo(v2.adjustToUTC(implicitTimezone), implicitTimezone);
     }
 
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+        if (hasTimezone()) {
+            return this;
+        } else if (implicitTimezone == MISSING_TIMEZONE) {
+            throw new NoDynamicContextException("Unknown implicit timezone");
+        } else {
+            return adjustTimezone(implicitTimezone);
+        }
+    }
+
     /**
      * Context-free comparison of two DateTimeValue values. For this to work,
      * the two values must either both have a timezone or both have none.
@@ -1493,17 +1524,20 @@ public final class DateTimeValue extends CalendarValue
      */
 
     @Override
-    public int compareTo(DateTimeValue v2) {
-        try {
-            return compareTo(v2, MISSING_TIMEZONE);
-        } catch (Exception err) {
-            throw new ClassCastException("DateTime comparison requires access to implicit timezone");
+    public int compareTo(@NotNull XPathComparable v2) {
+        if (v2 instanceof DateTimeValue) {
+            try {
+                return compareTo((DateTimeValue)v2, MISSING_TIMEZONE);
+            } catch (Exception err) {
+                throw new ClassCastException("DateTime comparison requires access to implicit timezone");
+            }
+        } else {
+            throw new ClassCastException("Cannot compare xs:dateTime with " + v2.toString());
         }
     }
 
     /*@NotNull*/
-    @Override
-    public SchemaComparable getSchemaComparable() {
+    public DateTimeComparable getSchemaComparable() {
         return new DateTimeComparable(this);
     }
 
@@ -1511,60 +1545,50 @@ public final class DateTimeValue extends CalendarValue
      * DateTimeComparable is an object that implements the XML Schema rules for comparing date/time values
      */
 
-    private static class DateTimeComparable implements SchemaComparable {
+    public static class DateTimeComparable implements Comparable<DateTimeComparable> {
 
         private final DateTimeValue value;
         public DateTimeComparable(DateTimeValue value) {
             this.value = value;
         }
-
-        /*@NotNull*/
-        private DateTimeValue asDateTimeValue() {
-            return value;
-        }
-
+        
         // Rules from XML Schema Part 2
         @Override
-        public int compareTo(SchemaComparable o) {
-            if (o instanceof DateTimeComparable) {
-                DateTimeValue dt0 = value;
-                DateTimeValue dt1 = ((DateTimeComparable) o).value;
-                if (dt0.hasTimezone()) {
-                    if (dt1.hasTimezone()) {
-                        dt0 = dt0.adjustTimezone(0);
-                        dt1 = dt1.adjustTimezone(0);
-                        return dt0.compareTo(dt1);
-                    } else {
-                        DateTimeValue dt1max = dt1.adjustTimezone(14 * 60);
-                        if (dt0.compareTo(dt1max) < 0) {
-                            return -1;
-                        }
-                        DateTimeValue dt1min = dt1.adjustTimezone(-14 * 60);
-                        if (dt0.compareTo(dt1min) > 0) {
-                            return +1;
-                        }
-                        return SequenceTool.INDETERMINATE_ORDERING;
-                    }
+        public int compareTo(DateTimeComparable o) {
+            DateTimeValue dt0 = value;
+            DateTimeValue dt1 = o.value;
+            if (dt0.hasTimezone()) {
+                if (dt1.hasTimezone()) {
+                    dt0 = dt0.adjustTimezone(0);
+                    dt1 = dt1.adjustTimezone(0);
+                    return dt0.compareTo(dt1);
                 } else {
-                    if (dt1.hasTimezone()) {
-                        DateTimeValue dt0min = dt0.adjustTimezone(-14 * 60);
-                        if (dt0min.compareTo(dt1) < 0) {
-                            return -1;
-                        }
-                        DateTimeValue dt0max = dt0.adjustTimezone(14 * 60);
-                        if (dt0max.compareTo(dt1) > 0) {
-                            return +1;
-                        }
-                        return SequenceTool.INDETERMINATE_ORDERING;
-                    } else {
-                        dt0 = dt0.adjustTimezone(0);
-                        dt1 = dt1.adjustTimezone(0);
-                        return dt0.compareTo(dt1);
+                    DateTimeValue dt1max = dt1.adjustTimezone(14 * 60);
+                    if (dt0.compareTo(dt1max) < 0) {
+                        return -1;
                     }
+                    DateTimeValue dt1min = dt1.adjustTimezone(-14 * 60);
+                    if (dt0.compareTo(dt1min) > 0) {
+                        return +1;
+                    }
+                    return SequenceTool.INDETERMINATE_ORDERING;
                 }
-
             } else {
-                return SequenceTool.INDETERMINATE_ORDERING;
+                if (dt1.hasTimezone()) {
+                    DateTimeValue dt0min = dt0.adjustTimezone(-14 * 60);
+                    if (dt0min.compareTo(dt1) < 0) {
+                        return -1;
+                    }
+                    DateTimeValue dt0max = dt0.adjustTimezone(14 * 60);
+                    if (dt0max.compareTo(dt1) > 0) {
+                        return +1;
+                    }
+                    return SequenceTool.INDETERMINATE_ORDERING;
+                } else {
+                    dt0 = dt0.adjustTimezone(0);
+                    dt1 = dt1.adjustTimezone(0);
+                    return dt0.compareTo(dt1);
+                }
             }
         }
 
@@ -1610,7 +1634,7 @@ public final class DateTimeValue extends CalendarValue
         int mi = minute;
         mi += tz;
         if (mi < 0 || mi > 59) {
-            h += Math.floor(mi / 60.0);
+            h += mi / 60;  // was Math.floor(mi / 60.0);  - MHK 2021-02-25
             mi = (mi + 60 * 24) % 60;
         }
         while (h < 0) {

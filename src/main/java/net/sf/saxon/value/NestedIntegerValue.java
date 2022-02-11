@@ -8,9 +8,11 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -28,7 +30,7 @@ import java.util.StringTokenizer;
  */
 
 
-public class NestedIntegerValue extends AtomicValue implements Comparable<NestedIntegerValue>, AtomicMatchKey {
+public class NestedIntegerValue extends AtomicValue implements XPathComparable, AtomicMatchKey {
 
     public static NestedIntegerValue ONE = new NestedIntegerValue(new int[]{1});
     public static NestedIntegerValue TWO = new NestedIntegerValue(new int[]{2});
@@ -87,14 +89,13 @@ public class NestedIntegerValue extends AtomicValue implements Comparable<Nested
         }
     }
 
-
     @Override
-    public SchemaComparable getSchemaComparable() {
-        throw new UnsupportedOperationException();
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+        return this;
     }
 
     @Override
-    public AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
         return this;
     }
 
@@ -127,17 +128,22 @@ public class NestedIntegerValue extends AtomicValue implements Comparable<Nested
 
 
     @Override
-    public int compareTo(NestedIntegerValue v2) {
-        for (int i = 0; i < value.length && i < v2.value.length; i++) {
-            if (value[i] != v2.value[i]) {
-                if (value[i] < v2.value[i]) {
-                    return -1;
-                } else {
-                    return 1;
+    public int compareTo(XPathComparable other) {
+        if (other instanceof NestedIntegerValue) {
+            NestedIntegerValue v2 = (NestedIntegerValue)other;
+            for (int i = 0; i < value.length && i < v2.value.length; i++) {
+                if (value[i] != v2.value[i]) {
+                    if (value[i] < v2.value[i]) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
                 }
             }
+            return Integer.signum(value.length - v2.value.length);
+        } else {
+            throw new ClassCastException("Cannot compare nested integer value to " + other);
         }
-        return Integer.signum(value.length - v2.value.length);
     }
 
 }

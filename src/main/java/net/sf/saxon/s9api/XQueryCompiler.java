@@ -40,7 +40,7 @@ import java.util.List;
 
 @CSharpInjectMembers(code = {
         "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
                 + "    }"
 })
 public class XQueryCompiler {
@@ -104,6 +104,7 @@ public class XQueryCompiler {
         }
     }
 
+    //#if CSHARP==false
     /**
      * Set the ErrorListener to be used during this query compilation episode.
      *
@@ -132,6 +133,7 @@ public class XQueryCompiler {
     public ErrorListener getErrorListener() {
         return staticQueryContext.getErrorListener();
     }
+    //#endif
 
     /**
      * Supply a callback which will be notified of all static errors and warnings

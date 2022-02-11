@@ -10,15 +10,18 @@ package net.sf.saxon.trace;
 import net.sf.saxon.Controller;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.instruct.ApplyTemplates;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.CodeInjector;
-import net.sf.saxon.s9api.Location;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.Logger;
+import net.sf.saxon.lib.StandardDiagnostics;
+import net.sf.saxon.lib.StandardLogger;
+import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Mode;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
@@ -169,7 +172,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     protected abstract String tag(Traceable info);
 
     protected int level(Traceable info) {
-        if (info instanceof TraceableComponent) {
+        if (info instanceof TraceableComponent || info instanceof ApplyTemplates) {
             return 1;
         } if (info instanceof Instruction) {
             return 2;

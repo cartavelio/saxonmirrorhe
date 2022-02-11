@@ -16,6 +16,7 @@ import net.sf.saxon.regex.charclass.SingletonCharacterClass;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.z.*;
 
 import java.util.Iterator;
@@ -28,10 +29,10 @@ import java.util.Stack;
  */
 public abstract class Operation {
 
-    static final int MATCHES_ZLS_AT_START = 1;
-    static final int MATCHES_ZLS_AT_END = 2;
-    static final int MATCHES_ZLS_ANYWHERE = 7;
-    static final int MATCHES_ZLS_NEVER = 1024;
+    protected static final int MATCHES_ZLS_AT_START = 1;
+    protected static final int MATCHES_ZLS_AT_END = 2;
+    protected static final int MATCHES_ZLS_ANYWHERE = 7;
+    protected static final int MATCHES_ZLS_NEVER = 1024;
 
     /**
      * Get an iterator returning all the matches for this operation
@@ -61,7 +62,7 @@ public abstract class Operation {
 
     public int getMinimumMatchLength() {
         int fixed = getMatchLength();
-        return fixed < 0 ? 0 : fixed;
+        return Math.max(fixed, 0);
     }
 
     /**
@@ -212,6 +213,7 @@ public abstract class Operation {
         }
 
         @Override
+        @CSharpInnerClass(outer=true, extra={"net.sf.saxon.regex.REMatcher matcher", "int position"})
         public IntIterator iterateMatches(final REMatcher matcher, final int position) {
             return new IntIterator() {
                 final Iterator<Operation> branchIter = branches.iterator();
@@ -276,7 +278,7 @@ public abstract class Operation {
      */
 
     public static class OpSequence extends Operation {
-        private final List<Operation> operations;
+        protected final List<Operation> operations;
 
         OpSequence(List<Operation> operations) {
             this.operations = operations;
@@ -427,6 +429,12 @@ public abstract class Operation {
         }
 
         @Override
+        @CSharpInnerClass(outer = true, extra = {
+                "net.sf.saxon.regex.REMatcher matcher",
+                "java.util.Stack<net.sf.saxon.z.IntIterator> iterators",
+                "int backtrackingLimit",
+                "net.sf.saxon.regex.REMatcher.State savedState",
+                "int position"})
         public IntIterator iterateMatches(final REMatcher matcher, final int position) {
 
             // A stack of iterators, one for each piece in the sequence
@@ -857,6 +865,12 @@ public abstract class Operation {
         }
 
         @Override
+        @CSharpInnerClass(outer = true, extra = {
+                "net.sf.saxon.regex.REMatcher matcher",
+                "java.util.Stack<net.sf.saxon.z.IntIterator> iterators",
+                "java.util.Stack<System.Int32> positions",
+                "int bound",
+                "int position"})
         public IntIterator iterateMatches(final REMatcher matcher, int position) {
             final Stack<IntIterator> iterators = new Stack<>();
             final Stack<Integer> positions = new Stack<>();
@@ -1028,6 +1042,9 @@ public abstract class Operation {
         }
 
         @Override
+        @CSharpInnerClass(outer = true, extra = {
+                "net.sf.saxon.regex.REMatcher matcher",
+                "int position"})
         public IntIterator iterateMatches(final REMatcher matcher, final int position) {
             return new IntIterator() {
                 private int pos = position;
@@ -1243,20 +1260,25 @@ public abstract class Operation {
         }
 
         @Override
+        @CSharpInnerClass(outer = true, extra = {
+                "net.sf.saxon.regex.REMatcher matcher",
+                "int position",
+                "net.sf.saxon.z.IntIterator basis"
+        })
         public IntIterator iterateMatches(final REMatcher matcher, final int position) {
             if ((matcher.program.optimizationFlags & REProgram.OPT_HASBACKREFS) != 0) {
                 matcher.startBackref[groupNr] = position;
             }
-            final IntIterator base = childOp.iterateMatches(matcher, position);
+            final IntIterator basis = childOp.iterateMatches(matcher, position);
             return new IntIterator() {
                 @Override
                 public boolean hasNext() {
-                    return base.hasNext();
+                    return basis.hasNext();
                 }
 
                 @Override
                 public int next() {
-                    int next = base.next();
+                    int next = basis.next();
                     // Increase valid paren count
                     if (groupNr >= matcher._captureState.parenCount) {
                         matcher._captureState.parenCount = groupNr + 1;
@@ -1419,6 +1441,11 @@ public abstract class Operation {
         }
 
         @Override
+        @CSharpInnerClass(outer=true,
+                          extra={
+                            "net.sf.saxon.z.IntIterator baseIter",
+                            "int iterNr"
+                          })
         public IntIterator iterateMatches(REMatcher matcher, int position) {
             final IntIterator baseIter = base.iterateMatches(matcher, position);
             final int iterNr = counter++;

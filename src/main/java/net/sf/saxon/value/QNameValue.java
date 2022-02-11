@@ -7,10 +7,12 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -176,39 +178,9 @@ public class QNameValue extends QualifiedNameValue {
         return other instanceof QNameValue && qName.equals(((QNameValue) other).qName);
     }
 
-    /*@NotNull*/
     @Override
-    public SchemaComparable getSchemaComparable() {
-        return new QNameComparable(this);
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+        return null;
     }
-
-    private static class QNameComparable implements SchemaComparable {
-
-        private final QNameValue value;
-
-        public QNameComparable(QNameValue value) {
-            this.value = value;
-        }
-
-
-        /*@NotNull*/
-        public QNameValue getQNameValue() {
-            return value;
-        }
-
-        @Override
-        public int compareTo(SchemaComparable o) {
-            return equals(o) ? 0 : SequenceTool.INDETERMINATE_ORDERING;
-        }
-
-        public boolean equals(/*@NotNull*/ Object o) {
-            return (o instanceof QNameComparable && value.equals(((QNameComparable) o).getQNameValue().qName));
-        }
-
-        public int hashCode() {
-            return value.hashCode();
-        }
-    }
-
 }
 

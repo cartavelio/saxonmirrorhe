@@ -43,7 +43,7 @@ public class AvailableEnvironmentVariables extends SystemFunction {
                 myList.add(new StringItem(s));
             }
         }
-        return new SequenceExtent(myList);
+        return new SequenceExtent.Of<>(myList);
     }
 
     @Override

@@ -449,6 +449,7 @@ public class SerializerFactory {
 //#endif
         } else {
             if (pipe != null) {
+//#if CSHARP==false
                 // try to find an external object model that knows this kind of Result
                 List<ExternalObjectModel> externalObjectModels = pipe.getConfiguration().getExternalObjectModels();
                 for (ExternalObjectModel model : externalObjectModels) {
@@ -459,6 +460,7 @@ public class SerializerFactory {
                         return new TreeReceiver(builder);
                     }
                 }
+//#endif
             }
         }
 
@@ -524,8 +526,9 @@ public class SerializerFactory {
         if (attributeOrder != null && !attributeOrder.isEmpty()) {
             target = newAttributeSorter(target, props);
         }
-        if (params.getValidationFactory() != null) {
-            target = params.getValidationFactory().makeFilter(target);
+        FilterFactory validationFactory = params.getValidationFactory();
+        if (validationFactory != null) {
+            target = validationFactory.makeFilter(target);
         }
         return makeSequenceNormalizer(target, props);
     }
@@ -547,8 +550,9 @@ public class SerializerFactory {
         target = injectUnicodeNormalizer(params, emitter);
         target = injectCharacterMapExpander(params, target, false);
         target = addTextOutputFilter(target, props);
-        if (params.getValidationFactory() != null) {
-            target = params.getValidationFactory().makeFilter(target);
+        FilterFactory validationFactory = params.getValidationFactory();
+        if (validationFactory != null) {
+            target = validationFactory.makeFilter(target);
         }
         return makeSequenceNormalizer(target, props);
     }
@@ -734,6 +738,7 @@ public class SerializerFactory {
         Receiver userReceiver;// See if this output method is recognized by the Configuration
         userReceiver = pipe.getConfiguration().makeEmitter(method, props);
         userReceiver.setPipelineConfiguration(pipe);
+        //#if CSHARP==false
         if (userReceiver instanceof ContentHandlerProxy &&
                 "yes".equals(props.getProperty(SaxonOutputKeys.SUPPLY_SOURCE_LOCATOR))) {
             if (pipe.getConfiguration().isCompileWithTracing() && pipe.getController() != null) {
@@ -744,6 +749,7 @@ public class SerializerFactory {
                         "Cannot use saxon:supply-source-locator unless tracing was enabled at compile time", SaxonErrorCode.SXSE0002);
             }
         }
+        //#endif
         return userReceiver instanceof SequenceReceiver ? (SequenceReceiver)userReceiver : new TreeReceiver(userReceiver);
     }
 
@@ -769,6 +775,7 @@ public class SerializerFactory {
         return out;
     }
 
+    //#if CSHARP==false
     /**
      * Create a ContentHandlerProxy. This method exists so that it can be overridden in a subclass.
      *
@@ -778,7 +785,8 @@ public class SerializerFactory {
     protected ContentHandlerProxy newContentHandlerProxy() {
         return new ContentHandlerProxy();
     }
-
+    //#endif
+    
     /**
      * Create an UncommittedSerializer. This method exists so that it can be overridden in a subclass.
      *

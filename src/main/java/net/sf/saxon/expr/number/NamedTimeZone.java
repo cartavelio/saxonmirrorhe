@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.number;
 
 
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.DateTimeValue;
 import net.sf.saxon.str.UnicodeBuilder;
 
@@ -297,6 +298,7 @@ public class NamedTimeZone {
      * the dateTimeValue supplied has no timezone, return a zero-length string.
      */
 
+    @CSharpReplaceBody(code="return formatTimeZoneOffset(date);")
     public static String getTimeZoneNameForDate(DateTimeValue date, /*@Nullable*/ String place) {
         if (!date.hasTimezone()) {
             return "";
@@ -384,6 +386,7 @@ public class NamedTimeZone {
      * the dateTimeValue supplied has no timezone, return a zero-length string.
      */
 
+    @CSharpReplaceBody(code = "return formatTimeZoneOffset(date);")
     public static String getOlsenTimeZoneName(DateTimeValue date, String country) {
         if (!date.hasTimezone()) {
             return "";
@@ -425,6 +428,7 @@ public class NamedTimeZone {
      * information is available for the specified region.
      */
 
+    @CSharpReplaceBody(code="return false;")
     public static Boolean inSummerTime(DateTimeValue date, String region) {
         String olsenName;
         if (region.length() == 2) {
@@ -454,6 +458,7 @@ public class NamedTimeZone {
      * date/time
      */
 
+    @CSharpReplaceBody(code="return 0;")
     public static int civilTimeOffset(DateTimeValue date, String olsenName) {
         TimeZone zone = TimeZone.getTimeZone(olsenName);
         return zone.getOffset(date.getCalendar().getTime().getTime());

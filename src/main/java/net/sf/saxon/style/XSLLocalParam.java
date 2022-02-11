@@ -27,7 +27,8 @@ import java.util.EnumSet;
 
 public class XSLLocalParam extends XSLGeneralVariable {
 
-    private final EnumSet<SourceBinding.BindingProperty> permittedAttributes = EnumSet.of(
+    @SuppressWarnings("FieldMayBeFinal")
+    private EnumSet<SourceBinding.BindingProperty> permittedAttributes = EnumSet.of(
             SourceBinding.BindingProperty.TUNNEL,
             SourceBinding.BindingProperty.REQUIRED,
             SourceBinding.BindingProperty.SELECT,

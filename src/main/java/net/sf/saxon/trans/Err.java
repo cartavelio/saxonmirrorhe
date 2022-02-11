@@ -11,11 +11,11 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
-
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntIterator;
@@ -287,5 +287,9 @@ public class Err {
 
     public static String describeVisibility(Visibility vis) {
         return vis.toString().toLowerCase();
+    }
+
+    public static String show(Location loc) {
+        return abbreviateURI(loc.getSystemId()) + "#" + loc.getLineNumber();
     }
 }

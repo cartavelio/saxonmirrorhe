@@ -36,6 +36,7 @@ public class Loc implements Location {
         columnNumber = loc.getColumnNumber();
     }
 
+    //#if CSHARP==false
     /**
      * Create an ExpressionLocation, taking the data from a supplied SAX Locator
      *
@@ -45,6 +46,7 @@ public class Loc implements Location {
     public static Loc makeFromSax(org.xml.sax.Locator loc) {
         return new Loc(loc.getSystemId(), loc.getLineNumber(), loc.getColumnNumber());
     }
+    //#endif
 
     /**
      * Create an ExpressionLocation corresponding to a given module, line number, and column number

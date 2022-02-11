@@ -1531,7 +1531,7 @@ public class XPathParser {
             Class theClass;
             try {
                 String className = JavaExternalObjectType.localNameToClassName(local);
-                theClass = config.getClass(className, false, null);
+                theClass = config.getClass(className, false);
             } catch (XPathException err) {
                 grumble("Unknown Java class " + local, "XPST0051");
                 return AnyItemType.getInstance();

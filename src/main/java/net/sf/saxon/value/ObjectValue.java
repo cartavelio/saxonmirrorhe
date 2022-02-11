@@ -144,8 +144,8 @@ public class ObjectValue<T> implements ExternalObject<T> {
      */
 
     public boolean equals(/*@NotNull*/ Object other) {
-        if (other instanceof ObjectValue) {
-            Object o = ((ObjectValue) other).value;
+        if (other instanceof ObjectValue<?>) {
+            Object o = ((ObjectValue<?>) other).value;
             return value.equals(o);
         } else {
             return false;

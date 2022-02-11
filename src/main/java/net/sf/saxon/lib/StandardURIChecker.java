@@ -7,7 +7,7 @@
 
 package net.sf.saxon.lib;
 
-import net.sf.saxon.expr.sort.LRUCache;
+import net.sf.saxon.expr.sort.LFUCache;
 import net.sf.saxon.functions.IriToUri;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.value.Whitespace;
@@ -33,8 +33,8 @@ public class StandardURIChecker implements URIChecker {
      * valid only after escaping, as otherwise an exception occurs during the validation process
      */
 
-    /*@NotNull*/ private static final ThreadLocal<LRUCache<CharSequence, Boolean>> caches =
-            new ThreadLocal<LRUCache<CharSequence, Boolean>>();
+    /*@NotNull*/ private static final ThreadLocal<LFUCache<CharSequence, Boolean>> caches =
+            new ThreadLocal<LFUCache<CharSequence, Boolean>>();
 
     /**
      * Protected constructor to allow subclassing
@@ -52,9 +52,9 @@ public class StandardURIChecker implements URIChecker {
 
     @Override
     public boolean isValidURI(String value) {
-        LRUCache<CharSequence, Boolean> cache = caches.get();
+        LFUCache<CharSequence, Boolean> cache = caches.get();
         if (cache == null) {
-            cache = new LRUCache<CharSequence, Boolean>(50);
+            cache = new LFUCache<CharSequence, Boolean>(50);
             caches.set(cache);
         }
 

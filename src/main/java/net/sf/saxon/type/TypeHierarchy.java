@@ -808,13 +808,13 @@ public class TypeHierarchy {
                 case SUBSUMES:
                     if (nillable2) {
                         contentRelationship = OVERLAPS;
-                        break;
                     }
+                    break;
                 case SUBSUMED_BY:
                     if (nillable1) {
                         contentRelationship = OVERLAPS;
-                        break;
                     }
+                    break;
                 case SAME_TYPE:
                     if (nillable1) {
                         contentRelationship = SUBSUMES;

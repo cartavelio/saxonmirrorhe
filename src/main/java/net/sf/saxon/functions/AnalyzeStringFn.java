@@ -100,6 +100,7 @@ public class AnalyzeStringFn extends RegexFunction {
         if (vocab.resultName == null) {
             boolean schemaAware = context.getController().getExecutable().isSchemaAware();
             Configuration config = context.getConfiguration();
+            //#if CSHARP==false
             //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized(config) {
                 if (schemaAware && !config.isSchemaAvailable(NamespaceConstant.FN)) {
@@ -114,6 +115,7 @@ public class AnalyzeStringFn extends RegexFunction {
                     config.addSchemaSource(new SAXSource(is));
                 }
             }
+            //#endif
             init(context.getConfiguration(), schemaAware);
         }
 

@@ -12,10 +12,8 @@ import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomicListIterator;
-import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
+import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
@@ -238,7 +236,7 @@ public class Parts extends SystemFunction implements Callable {
                      for (byte b : ((HexBinaryValue)a).getBinaryValue()) {
                          result.add(new Int64Value(b & 0xFF, BuiltInAtomicType.UNSIGNED_BYTE));
                      }
-                     return new AtomicListIterator(result);
+                     return new ListIterator.Of<>(result);
                  }
         );
 
@@ -248,7 +246,7 @@ public class Parts extends SystemFunction implements Callable {
                      for (byte b : ((Base64BinaryValue) a).getBinaryValue()) {
                          result.add(new Int64Value(b & 0xFF, BuiltInAtomicType.UNSIGNED_BYTE));
                      }
-                     return new AtomicListIterator(result);
+                     return new ListIterator.Of<>(result);
                  }
         );
 

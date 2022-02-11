@@ -28,6 +28,7 @@ import net.sf.saxon.trace.TraceEventMulticaster;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
@@ -82,7 +83,7 @@ import java.util.function.Function;
 
 @CSharpInjectMembers(code = {
         "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
                 + "    }"
 })
 public class Controller implements ContextOriginator {
@@ -481,6 +482,7 @@ public class Controller implements ContextOriginator {
         errorReporter.report(warning);
     }
 
+    @CSharpReplaceBody(code="reportFatalError(err); throw err;")
     protected void handleXPathException(XPathException err) throws XPathException {
         Throwable cause = err.getException();
         if (cause instanceof SAXParseException) {
@@ -1302,7 +1304,9 @@ public class Controller implements ContextOriginator {
         if (source instanceof SAXSource && config.getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
             // This option is provided to allow the parser set by applications such as Ant to be overridden by
             // the parser requested using FeatureKeys.SOURCE_PARSER
+            //#if CSHARP==false
             ((SAXSource) source).setXMLReader(null);
+            //#endif
         } else if (source instanceof StreamSource && ((StreamSource)source).getSystemId() != null &&
                 ((StreamSource) source).getInputStream() == null && ((StreamSource) source).getReader() == null) {
             // Check to see if the document is already in the document pool. This can happen when a Transformer

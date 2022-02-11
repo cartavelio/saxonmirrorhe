@@ -204,7 +204,7 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
             for (int i = 0; i < nodes.length; i++) {
                 nodes[i] = wrapNode(((Node[]) object)[i], config);
             }
-            return new SequenceExtent(nodes);
+            return new SequenceExtent.Of<>(nodes);
         } else {
             return null;
         }

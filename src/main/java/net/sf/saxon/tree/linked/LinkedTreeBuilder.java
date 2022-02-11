@@ -216,8 +216,11 @@ public class LinkedTreeBuilder extends Builder
 
         namespaceStack.push(namespaces);
 
-        boolean isTopWithinEntity = location instanceof ReceivingContentHandler.LocalLocator &&
-                ((ReceivingContentHandler.LocalLocator) location).levelInEntity == 0;
+        boolean isTopWithinEntity = false;
+        //#if CSHARP==false
+        isTopWithinEntity = location instanceof ReceivingContentHandler.LocalLocator &&
+                      ((ReceivingContentHandler.LocalLocator) location).levelInEntity == 0;
+        //#endif
 
         AttributeInfo xmlId = suppliedAttributes.get(NamespaceConstant.XML, "id");
         if (xmlId != null && Whitespace.containsWhitespace(StringTool.codePoints(xmlId.getValue()))) {

@@ -33,7 +33,7 @@ import java.util.EnumSet;
 
 @CSharpInjectMembers(code={
         "public ItemMappingIterator(net.sf.saxon.om.SequenceIterator first, net.sf.saxon.expr.ItemMapper.Lambda action) : this(first, net.sf.saxon.expr.ItemMapper.of(action)) {}",
-        "public ItemMappingIterator(net.sf.saxon.om.SequenceIterator first, net.sf.saxon.expr.ItemMapper.ItemMapper.Lambda action, bool oneToOne) : this(first, net.sf.saxon.expr.ItemMapper.of(action), oneToOne) {}"
+        "public ItemMappingIterator(net.sf.saxon.om.SequenceIterator first, net.sf.saxon.expr.ItemMapper.Lambda action, bool oneToOne) : this(first, net.sf.saxon.expr.ItemMapper.of(action), oneToOne) {}"
 })
 
 public class ItemMappingIterator

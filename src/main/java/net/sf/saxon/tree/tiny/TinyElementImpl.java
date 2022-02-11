@@ -449,6 +449,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
 
                 case Type.PARENT_POINTER: {
                     closePending = false;
+                    break;
                 }
             }
 

@@ -28,10 +28,10 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
-
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -58,9 +58,9 @@ public class MergeInstr extends Instruction {
 
         private final MergeInstr instruction;
         public Location location;
-        private Operand forEachItemOp = null;
-        private Operand forEachStreamOp = null;
-        private Operand rowSelectOp = null;
+        public Operand forEachItemOp = null;
+        public Operand forEachStreamOp = null;
+        public Operand rowSelectOp = null;
         public String sourceName = null;
         public SortKeyDefinitionList mergeKeyDefinitions = null;
         public String baseURI = null;
@@ -735,26 +735,31 @@ public class MergeInstr extends Instruction {
         return mergeSources[0].mergeKeyDefinitions.getSortKeyDefinition(0).getSortKey();
     }
 
+    @CSharpInnerClass(outer=false)
     public ItemOrderComparer getComparer(final SortKeyDefinitionList sKeys, final AtomicComparer[] comps) {
-        return (a, b) -> {
-            ObjectValue aObj = (ObjectValue) a;
-            ObjectValue bObj = (ObjectValue) b;
-            ItemWithMergeKeys aItem = (ItemWithMergeKeys) aObj.getObject();
-            ItemWithMergeKeys bItem = (ItemWithMergeKeys) bObj.getObject();
+        //noinspection Convert2Lambda
+        return new ItemOrderComparer() {
+            @Override
+            public int compare(Item a, Item b) {
+                ObjectValue<ItemWithMergeKeys> aObj = (ObjectValue<ItemWithMergeKeys>) a;
+                ObjectValue<ItemWithMergeKeys> bObj = (ObjectValue<ItemWithMergeKeys>) b;
+                ItemWithMergeKeys aItem = aObj.getObject();
+                ItemWithMergeKeys bItem = bObj.getObject();
 
-            for (int i = 0; i < sKeys.size(); i++) {
-                int val;
-                try {
-                    val = comps[i].compareAtomicValues(aItem.sortKeyValues.get(i), bItem.sortKeyValues.get(i));
-                } catch (NoDynamicContextException e) {
-                    throw new IllegalStateException(e);
-                }
+                for (int i = 0; i < sKeys.size(); i++) {
+                    int val;
+                    try {
+                        val = comps[i].compareAtomicValues(aItem.sortKeyValues.get(i), bItem.sortKeyValues.get(i));
+                    } catch (NoDynamicContextException e) {
+                        throw new IllegalStateException(e);
+                    }
 
-                if (val != 0) {
-                    return val;
+                    if (val != 0) {
+                        return val;
+                    }
                 }
+                return 0;
             }
-            return 0;
         };
     }
 

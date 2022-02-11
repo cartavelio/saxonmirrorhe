@@ -1133,8 +1133,7 @@ public final class Navigator {
         if (predicate instanceof NodeTest) {
             return (NodeTest)predicate;
         } else {
-            //noinspection Convert2MethodRef
-            return NodeSelector.of(node -> predicate.test(node));
+            return NodeSelector.of(predicate::test);
         }
     }
 

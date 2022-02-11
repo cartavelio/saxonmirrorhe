@@ -12,15 +12,16 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.number.*;
 import net.sf.saxon.lib.Numberer;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.regex.charclass.Categories;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntIterator;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -95,7 +96,8 @@ public class FormatDate extends SystemFunction implements Callable {
         if (value.hasTimezone() && place.contains("/")) {
             TimeZone tz = TimeZone.getTimeZone(place);
             if (tz != null) {
-                int milliOffset = tz.getOffset(value.toDateTime().getCalendar().getTime().getTime());
+                BigDecimal seconds = value.toDateTime().secondsSinceEpoch();
+                int milliOffset = tz.getOffset(seconds.longValue()*1000);
                 value = value.adjustTimezone(milliOffset / 60000);
             }
         }

@@ -16,7 +16,11 @@ import javax.xml.transform.SourceLocator;
  * or stylesheet. The interface combines the two JAXP interfaces SourceLocator and Locator.
  */
 
-public interface Location extends SourceLocator, Locator {
+public interface Location extends SourceLocator
+        //#if CSHARP==false
+        , Locator
+        //#endif
+{
 
     /**
      * Get the system ID. This should be the system identifier of an XML external entity; if a stylesheet module

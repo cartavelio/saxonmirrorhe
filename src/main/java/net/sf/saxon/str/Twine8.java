@@ -10,6 +10,7 @@ package net.sf.saxon.str;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.serialize.UTF8Writer;
 import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
 
@@ -230,16 +231,19 @@ public class Twine8 extends UnicodeString {
      */
 
     @Override
+    @CSharpInnerClass(outer=false, extra={"byte[] bytes"})
     public IntIterator codePoints() {
         return new IntIterator() {
             int i = 0;
 
             @Override
+            //@CSharpModifiers(code = {"public", "override"})
             public boolean hasNext() {
                 return i < bytes.length;
             }
 
             @Override
+            //@CSharpModifiers(code = {"public", "override"})
             public int next() {
                 return bytes[i++] & 0xff;
             }
@@ -313,7 +317,7 @@ public class Twine8 extends UnicodeString {
      */
 
     /*@NotNull*/
-    @CSharpReplaceBody(code="return com.saxonica.glue.StringUtils.LATIN_1.GetString(bytes);")
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.StringUtils.LATIN_1.GetString(bytes);")
     public String toString() {
         return new String(bytes, StandardCharsets.ISO_8859_1);
     }

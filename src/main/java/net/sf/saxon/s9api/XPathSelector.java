@@ -18,6 +18,7 @@ import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
+import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.URIResolver;
 import java.util.Map;
@@ -28,7 +29,7 @@ import java.util.Map;
  */
 @CSharpInjectMembers(code = {
         "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
                 + "    }"
 })
 @SuppressWarnings({"ForeachStatement"})
@@ -222,9 +223,9 @@ public class XPathSelector implements Iterable<XdmItem> {
      */
 
     @Override
-    public XdmSequenceIterator<XdmItem> iterator() throws SaxonApiUncheckedException {
+    public @NotNull XdmSequenceIterator<XdmItem> iterator() throws SaxonApiUncheckedException {
         try {
-            return new XdmSequenceIterator(exp.iterate(dynamicContext));
+            return new XdmSequenceIterator<>(exp.iterate(dynamicContext));
         } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
         }

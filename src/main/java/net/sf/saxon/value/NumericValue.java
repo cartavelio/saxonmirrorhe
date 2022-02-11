@@ -8,7 +8,9 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationException;
@@ -22,7 +24,7 @@ import java.math.BigDecimal;
  */
 
 public abstract class NumericValue extends AtomicValue
-        implements Comparable<NumericValue>, AtomicMatchKey {
+        implements XPathComparable, AtomicMatchKey, ContextFreeAtomicValue {
 
     /**
      * Get a numeric value by parsing a string; the type of numeric value depends
@@ -212,8 +214,6 @@ public abstract class NumericValue extends AtomicValue
      * Returns null if the value is not comparable according to XPath rules. The implementation
      * for all kinds of NumericValue returns the value itself.
      *
-     * @param ordered  true if an ordered comparison is required. In this case the result is null if the
-     *                 type is unordered; in other cases the returned value will be a Comparable.
      * @param collator the collation to be used when comparing strings
      * @param implicitTimezone  the implicit timezone in the dynamic context, used when comparing
      * dates/times with and without timezone
@@ -222,7 +222,17 @@ public abstract class NumericValue extends AtomicValue
 
     /*@NotNull*/
     @Override
-    public final AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone) {
+    public final AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
+
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+        return this;
+    }
+
+    @Override
+    public XPathComparable getXPathComparable() {
         return this;
     }
 
@@ -241,20 +251,24 @@ public abstract class NumericValue extends AtomicValue
     // This is the default implementation. Subclasses of number avoid the conversion to double
     // when comparing with another number of the same type.
     @Override
-    public int compareTo(/*@NotNull*/ NumericValue other) {
-        double a = getDoubleValue();
-        double b = other.getDoubleValue();
-        // IntelliJ says this can be replaced with Double.compare(). But it can't. Double.compare()
-        // treats positive and negative zero as not equal; we want them treated as equal. XSLT3 test case
-        // boolean-014.  MHK 2020-02-17
-        //noinspection UseCompareMethod
-        if (a == b) {
-            return 0;
+    public int compareTo(/*@NotNull*/ XPathComparable other) {
+        if (other instanceof NumericValue) {
+            double a = getDoubleValue();
+            double b = ((NumericValue)other).getDoubleValue();
+            // IntelliJ says this can be replaced with Double.compare(). But it can't. Double.compare()
+            // treats positive and negative zero as not equal; we want them treated as equal. XSLT3 test case
+            // boolean-014.  MHK 2020-02-17
+            //noinspection UseCompareMethod
+            if (a == b) {
+                return 0;
+            }
+            if (a < b) {
+                return -1;
+            }
+            return +1;
+        } else {
+            throw new ClassCastException("Cannot compare numeric value to " + other.toString());
         }
-        if (a < b) {
-            return -1;
-        }
-        return +1;
     }
 
     /**

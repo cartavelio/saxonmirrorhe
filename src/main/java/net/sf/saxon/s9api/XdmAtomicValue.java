@@ -143,7 +143,7 @@ public class XdmAtomicValue extends XdmItem {
         this(new QNameValue(value.getStructuredQName(), BuiltInAtomicType.QNAME), true);
     }
 
-
+    //#if CSHARP==false
     /**
      * Create an <tt>xs:dateTime</tt> atomic value from a {@link Instant}. The resulting value
      * will always have a timezone component.
@@ -205,6 +205,8 @@ public class XdmAtomicValue extends XdmItem {
         this(new DateValue(value), true);
     }
 
+    //#endif
+    
     /**
      * Construct an atomic value given its lexical representation and the name of the required
      * built-in atomic type.

@@ -125,12 +125,17 @@ public class StandardInvalidityHandler extends StandardDiagnostics implements In
         AbsolutePath path;
         String nodeMessage = null;
         int lineNumber = err.getLineNumber();
+        //#if CSHARP==false
         if (err instanceof DOMLocator) {
             nodeMessage = "at " + ((DOMLocator) err).getOriginatingNode().getNodeName() + ' ';
-        } else if (lineNumber == -1 && (path = err.getPath()) != null) {
-            nodeMessage = "at " + path + ' ';
-        } else if (node != null) {
-            nodeMessage = "at " + Navigator.getPath(node) + ' ';
+        }
+        //#endif
+        if (nodeMessage == null) {
+            if (lineNumber == -1 && (path = err.getPath()) != null) {
+                nodeMessage = "at " + path + ' ';
+            } else if (node != null) {
+                nodeMessage = "at " + Navigator.getPath(node) + ' ';
+            }
         }
         boolean containsLineNumber = lineNumber != -1;
         if (nodeMessage != null) {

@@ -13,8 +13,8 @@ import net.sf.saxon.value.AtomicValue;
  * Marker interface to identify an object that acts as a surrogate for an atomic value, with the property
  * that if two atomic values are equal under the XPath 'eq' operator, then their corresponding surrogates
  * are equal under the Java equals() comparison (and by implication, they have equal hash codes).
- * <p>In general this is used only for equality comparison. Match keys representing atomic values
- * of an ordered type, however, must also implement Comparable, and their compareTo() method must
+ * <p>Match keys representing atomic values
+ * of an ordered type, however, must also implement Comparable<AtomicMatchKey, and their compareTo() method must
  * reflect the ordering semantics. In the case of strings this means the keys must reflect the
  * semantics of the relevant collation.</p>
  */
@@ -24,7 +24,8 @@ public interface AtomicMatchKey {
 
     /**
      * Get an atomic value that encapsulates this match key. Needed to support the collation-key() function.
-     * @return an atomic value that encapsulates this match key
+     * @return an atomic value that encapsulates this match key. NB: this is NOT (necessarily) the atomic value
+     * from which the {@code AtomicMatchKey} was derived.
      */
 
     AtomicValue asAtomic();

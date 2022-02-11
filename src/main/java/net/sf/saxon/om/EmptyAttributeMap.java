@@ -8,6 +8,8 @@
 package net.sf.saxon.om;
 
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -62,13 +64,18 @@ public class EmptyAttributeMap implements AttributeMap {
     }
 
     @Override
-    public Iterator<AttributeInfo> iterator() {
+    public @NotNull Iterator<AttributeInfo> iterator() {
         return Collections.emptyIterator();
     }
 
     @Override
     public AttributeMap apply(java.util.function.Function<AttributeInfo, AttributeInfo> mapper) {
         return this;
+    }
+
+    @Override
+    public AttributeInfo itemAt(int index) {
+        throw new IndexOutOfBoundsException();
     }
 }
 

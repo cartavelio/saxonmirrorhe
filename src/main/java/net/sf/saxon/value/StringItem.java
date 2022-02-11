@@ -8,11 +8,12 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.*;
+import net.sf.saxon.trans.NoDynamicContextException;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.tree.iter.AtomicIterator;
-
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.z.IntIterator;
@@ -211,7 +212,7 @@ public class StringItem extends AtomicValue {
         return new AtomicIterator() {
             final IntIterator cp = codePoints();
             @Override
-            public Int64Value next() {
+            public AtomicValue next() {
                 return cp.hasNext() ? new Int64Value(cp.next()) : null;
             }
         };
@@ -220,17 +221,11 @@ public class StringItem extends AtomicValue {
 
     /**
      * Get an object value that implements the XPath equality and ordering comparison semantics for this value.
-     * If the ordered parameter is set to true, the result will be a Comparable and will support a compareTo()
-     * method with the semantics of the XPath lt/gt operator, provided that the other operand is also obtained
-     * using the getXPathComparable() method. In all cases the result will support equals() and hashCode() methods
-     * that support the semantics of the XPath eq operator, again provided that the other operand is also obtained
-     * using the getXPathComparable() method. A context argument is supplied for use in cases where the comparison
+     * A context argument is supplied for use in cases where the comparison
      * semantics are context-sensitive, for example where they depend on the implicit timezone or the default
      * collation.
      *
      *
-     * @param ordered  true if an ordered comparison is required. In this case the result is null if the
-     *                 type is unordered; in other cases the returned value will be a Comparable.
      * @param collator Collation to be used for comparing strings
      * @param implicitTimezone  the XPath dynamic evaluation context, used in cases where the comparison is context
      *                 sensitive
@@ -240,7 +235,7 @@ public class StringItem extends AtomicValue {
      */
 
     @Override
-    public AtomicMatchKey getXPathComparable(boolean ordered, /*@NotNull*/ StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(/*@NotNull*/ StringCollator collator, int implicitTimezone) {
         return collator.getCollationKey(this.getUnicodeStringValue());
     }
 
@@ -343,43 +338,19 @@ public class StringItem extends AtomicValue {
         return s;
     }
 
-    /**
-     * Get a Comparable value that implements the XML Schema comparison semantics for this value.
-     * Returns null if the value is not comparable according to XML Schema rules. This implementation
-     * returns the underlying Java string, which works because strings will only be compared for
-     * equality, not for ordering, and the equality rules for strings in XML schema are the same as in Java.
-     * @return
-     */
-
     @Override
-    public SchemaComparable getSchemaComparable() {
-        return new StringComparable(getUnicodeStringValue());
-    }
-
-    private static class StringComparable implements SchemaComparable {
-        private final UnicodeString value;
-        public StringComparable(UnicodeString value) {
-            this.value = value;
-        }
-
-        @Override
-        public int compareTo(@NotNull SchemaComparable o) {
-            if (o instanceof StringComparable) {
-                return value.compareTo(((StringComparable)o).value);
-            } else {
-                return SequenceTool.INDETERMINATE_ORDERING;
+    @CSharpInnerClass(outer=true, extra={"net.sf.saxon.lib.StringCollator collator"})
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+        return new XPathComparable() {
+            @Override
+            public int compareTo(@NotNull XPathComparable o) {
+                if (o instanceof StringItem) {
+                    return collator.compareStrings(getContent(), ((StringItem)o).content);
+                } else {
+                    throw new ClassCastException("Cannot compare xs:string to " + o.toString());
+                }
             }
-        }
-
-        @Override
-        public int hashCode() {
-            return value.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof StringComparable && value.equals(((StringComparable)obj).value);
-        }
+        };
     }
 
     /**

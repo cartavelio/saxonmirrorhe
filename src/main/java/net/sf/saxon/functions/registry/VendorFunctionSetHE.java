@@ -311,7 +311,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
             for (GroundedValue value : array.members()) {
                 mapList.add(new SingleEntryMap(valueKey, value));
             }
-            return new SequenceExtent(mapList);
+            return new SequenceExtent.Of<>(mapList);
         }
     }
 
@@ -331,7 +331,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 dictionary.initialPut("value",pair.value);
                 mapList.add(dictionary);
             }
-            return new SequenceExtent(mapList);
+            return new SequenceExtent.Of<>(mapList);
         }
     }
 

@@ -80,7 +80,7 @@ public abstract class IntegerValue extends DecimalValue {
      * @return the result of the conversion, or the validation failure if the input is NaN or infinity
      */
 
-    public static ConversionResult makeIntegerValue(double value) {
+    public static ConversionResult fromDouble(double value) {
         if (Double.isNaN(value)) {
             ValidationFailure err = new ValidationFailure("Cannot convert double NaN to an integer");
             err.setErrorCode("FOCA0002");
@@ -95,22 +95,10 @@ public abstract class IntegerValue extends DecimalValue {
             if (value == Math.floor(value)) {
                 return new BigIntegerValue(FormatNumber.adjustToDecimal(value, 2).toBigInteger());
             } else {
-                return new BigIntegerValue(new BigDecimal(value).toBigInteger());
+                return new BigIntegerValue(BigDecimal.valueOf(value).toBigInteger());
             }
         }
         return Int64Value.makeIntegerValue((long) value);
-    }
-
-    /**
-     * Convert a double to an integer
-     *
-     * @param doubleValue the double to be converted
-     * @return the result of the conversion, or the validation failure if the input is NaN or infinity
-     */
-
-    public static ConversionResult makeIntegerValue(DoubleValue doubleValue) {
-        double value = doubleValue.getDoubleValue();
-        return makeIntegerValue(value);
     }
 
     /**
