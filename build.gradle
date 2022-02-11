@@ -9,7 +9,7 @@ plugins {
   id 'java'
   id 'maven-publish'
   id 'signing'
-  id 'com.nwalsh.gradle.docker.container' version '0.0.3'
+  id 'com.nwalsh.gradle.docker.container' version '0.0.5'
 }
 
 apply plugin: 'java'
@@ -79,6 +79,7 @@ ext {
   DSTAMP=new Date().format("yyyyMMdd")
   // Docker containers
   c_sqlserver = "sqlserver"
+  c_documentation = "saxonicadocs"
   dotnetex = null
   csver = null
   csrid = null
