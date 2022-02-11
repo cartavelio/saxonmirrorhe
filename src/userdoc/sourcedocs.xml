@@ -103,13 +103,20 @@
             registered at the level of
           a particular component such as the <code>XsltCompiler</code>, <code>XsltTransformer</code>,
           <code>XQueryCompiler</code>, or <code>XQueryEvaluator</code>. If no resolver has been
-          supplied, this stage is skipped.</p></li>
-          <li><p>If this fails to resolve the URI, it is passed to a resolver registered centrally
+          supplied, this stage is skipped.</p>
+          <p>Most of these components provide a method <code>setResourceResolver()</code> (in Java)
+          or a settable property <code>ResourceResolver</code> (in C#) allowing the resolver to
+          be supplied using a lambda expression. In some cases (for legacy reasons) 
+          there are also specialized methods for particular kinds of resources: for example
+          <code>setURIResolver()</code>, <code>setSchemaURIResolver()</code>, 
+          <code>setUnparsedTextResolver()</code>, <code>setModuleURIResolver()</code>.</p></li>
+          <li><p>If the local resolver fails to resolve the URI, it is passed to a resolver registered centrally
           with the Saxon <code>Configuration</code>. The default resolver at this level is designed
-          to invoke a third-party component called the <emph>catalog resolver</emph>, which looks
-          up known URIs in an XML-based catalog. By default the only catalog is a built-in catalog
+          to invoke a third-party library called the <emph>catalog resolver</emph>, which looks
+          up known URIs in an XML-based catalog. By default there is a single built-in catalog 
           containing local copies of popular W3C-defined resources such as the DTDs for XHTML and
-          SVG; additional catalogs can be registered using an API, or from the command line, or
+          SVG. Additional catalog files can be registered using an API (<code>Processor.setCatalogFiles()</code>
+            in Java, <code>Processor.SetCatalogFiles()</code> in C#), or from the command line, or
           from the Saxon configuration file. </p>
           <p class="javaonly">The catalog resolver for SaxonJ and SaxonC also has built-in support for
           URIs using the <code>classpath</code> and <code>data</code> schemes.</p>
@@ -121,11 +128,9 @@
           the Java or .NET file I/O libraries.</li>
         </ol>
         
-        <p>User-written resolvers for the first two steps are typically written as a function
+        <p>A user-written <code>ResourceResolver</code> for the first two steps is typically written as a function
         (lambda expression) that takes a <code>ResourceRequest</code> as input, and produces
-        a <code>Source</code> (Java) or <code>Resource</code> (C#) as output. There are variations
-        on this theme to support externally-defined APIs such as the Java <code>URIResolver</code>
-        and the .NET <code>XmlResolver</code>.</p>
+        a <code>Source</code> (Java) or <code>Resource</code> (C#) as output.</p>
       
       </li>
     </ul>
@@ -134,6 +139,10 @@
       a little different since they are generally handled by the XML parser, and not by Saxon itself.
       Nevertheless, Saxon attempts to offer an integrated approach. For more information on this, 
       see <a href="../resolving-entities" class="bodylink">Resolving Entities</a>.</p>
+    
+    <p>URIs for result documents produced using the <code>xsl:result-document</code> instruction
+    are handled using a <code>ResultDocumentHandler</code> registered with the <code>XsltTransformer</code>
+    or <code>Xslt30Transformer</code>.</p>
   </section>
     
     <section id="xml-catalogs" title="Using XML Catalogs">
