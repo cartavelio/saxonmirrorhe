@@ -185,7 +185,7 @@
     Although not shipped with Saxon-HE, the code of the these extension functions itself
     is open-source and is issued under the Mozilla Public License 2.0, meaning that you are free to
     extend it and customize it to your needs, even though it requires SaxonJ-PE or SaxonJ-EE to run.
-    (See <a href="/extensions/functions/exslt">EXSLT extensions</a> for more information on the
+    (See <a href="/extensions/functions/exslt" class="bodylink">EXSLT extensions</a> for more information on the
     functions available.)</p>
   
   <p class="csonly">In SaxonCS, just two <a href="http://www.exslt.org/"
@@ -196,7 +196,7 @@
 
   <p>Note: this does not apply to implementations of the <a href="http://www.expath.org/"
       class="bodylink">EXPath</a> extension functions, which since Saxon 9.6 are implemented in code
-    that is Saxonica-proprietary. (See <a href="/extensions/functions/expath">EXPath extensions</a>
+    that is Saxonica-proprietary. (See <a href="/extensions/functions/expath" class="bodylink">EXPath extensions</a>
     for more information on the functions available.)</p>
 
   <h2 class="subtitle">Redistribution</h2>
@@ -886,13 +886,13 @@
       <strong>ICU-J</strong>
     </p>
     
-    <p>See <a href="http://site.icu-project.org//">http://site.icu-project.org//</a></p>
+      <p>See <a href="http://site.icu-project.org//" class="bodylink">http://site.icu-project.org//</a></p>
     
     <p>SaxonJ-EE includes portions of the International Components for
       Unicode library, principally to support use of the Unicode Collation Algorithm, and localization
       features such as formatting of numbers and dates.</p>
     
-    <p>The license can be found at <a
+      <p>The license can be found at <a class="bodylink"
       href="http://source.icu-project.org/repos/icu/icu/trunk/license.html"
       >http://source.icu-project.org/repos/icu/icu/trunk/license.html</a>, which contains details
       of the licences for third-party software components that <em>it</em> includes, not all of
@@ -1065,8 +1065,10 @@
         <strong>XmlResolver</strong>
       </p>
       
-      <p>See <a class="bodylink" href="https://github.com/xmlresolver/xmlresolver">https://github.com/xmlresolver/xmlresolver</a> 
-        and <a class="bodylink" href="https://github.com/xmlresolver/xmlresolverdata">https://github.com/xmlresolver/xmlresolverdata</a></p>
+      <p>See <a class="bodylink"
+        href="https://github.com/xmlresolver/xmlresolver">https://github.com/xmlresolver/xmlresolver</a> 
+        and <a class="bodylink"
+          href="https://github.com/xmlresolver/xmlresolverdata">https://github.com/xmlresolver/xmlresolverdata</a>.</p>
       
       <p>The <code>xmlresolver</code> library
       provides an advanced implementation of the SAX <code>EntityResolver</code>,
@@ -1078,7 +1080,8 @@
       use with the XML Resolver. These resources carry individual copyright statements; most
       of them are <emph>Copyright W3C (MIT, ERCIM, Keio)</emph>, with a variety of dates, 
         and are distributed under the 
-        <a href="https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document">W3C Software and Document Notice and License</a>.</p>
+        <a href="https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document"
+          class="bodylink">W3C Software and Document Notice and License</a>.</p>
 
 
     </div>

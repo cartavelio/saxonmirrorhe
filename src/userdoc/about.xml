@@ -814,7 +814,7 @@
             variable, or it can be included in the <code>java</code> command that invokes the
             application.</p>
          
-         <p>The manifest of the main Saxon JAR file (for example <code>saxon-he-11.1.jar</code>
+         <p>The manifest of the main Saxon JAR file (for example <code>saxon-he-11.1.jar</code>)
             includes a <code>Class-Path</code> entry that automatically brings in the <code>jline</code>
             and <code>xmlresolver</code> dependencies, so you should not normally need to add these
             to the classpath manually. In fact these dependencies are present in two forms: a versioned
