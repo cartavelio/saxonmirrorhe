@@ -14,7 +14,8 @@ namespace SaxonCS3.Saxon.Impl.Helpers {
          *
          * @param config the Configuration
          * @param uri the collation URI
-         * @param props  the desired properties of the collation  @return a collation with these properties
+         * @param props  the desired properties of the collation
+         * @return a collation with these properties
          * @throws net.sf.saxon.trans.XPathException
          *          if it is not possible to create a collation with the
          *          requested properties

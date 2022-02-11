@@ -8,6 +8,7 @@ using net.sf.saxon;
 using net.sf.saxon.lib;
 using net.sf.saxon.om;
 using net.sf.saxon.pull;
+using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
 using Saxon.Impl.Dom;
 
@@ -23,17 +24,17 @@ namespace Saxon.Api {
         private Configuration config;
         private XmlResolver xmlResolver;
         private SchemaValidationMode validation;
-        //private SchemaValidator schemaValidator;
+        private SchemaValidator schemaValidator;
         private Uri baseUri;
         private QName topLevelElement;
         private XQueryExecutable projectionQuery;
 
-        private net.sf.saxon.s9api.DocumentBuilder builder;
+        private net.sf.saxon.s9api.DocumentBuilder s9Builder;
 
 
         internal DocumentBuilder(Processor processor) {
             this.processor = processor;
-            this.builder = processor.JProcessor.newDocumentBuilder();
+            this.s9Builder = processor.JProcessor.newDocumentBuilder();
             this.config = processor.Implementation;
             this.xmlResolver = new XmlUrlResolver();
         }
@@ -73,13 +74,15 @@ namespace Saxon.Api {
         /// </remarks>
 
         public bool IsLineNumbering {
-            get => builder.isLineNumbering();
-            set => builder.setLineNumbering(value);
+            get => s9Builder.isLineNumbering();
+            set => s9Builder.setLineNumbering(value);
         }
 
         /// <summary>
         /// Determines whether schema validation is applied to documents loaded using this
-        /// <c>DocumentBuilder</c>, and if so, whether it is strict or lax.
+        /// <c>DocumentBuilder</c>, and if so, whether it is strict or lax. If schema validation
+        /// is requested and the document is not valid, then the <c>Build</c> method will fail
+        /// with an exception.
         /// </summary>
         /// <remarks>
         /// <para>By default, no schema validation takes place.</para>
@@ -88,22 +91,33 @@ namespace Saxon.Api {
 
         public SchemaValidationMode SchemaValidationMode {
             get => validation;
-            set => validation = value;
+            set {
+                validation = value;
+                if (value == SchemaValidationMode.Strict || value == SchemaValidationMode.Lax) {
+                    schemaValidator = processor.SchemaManager.NewSchemaValidator();
+                    schemaValidator.IsLax = value == SchemaValidationMode.Lax;
+                    s9Builder.setSchemaValidator(schemaValidator.UnderlyingSchemaValidator);
+                }
+            }
         }
 
 
-        // /// <summary>
-        // /// Property to set and get the schemaValidator to be used. This determines whether schema validation is applied
-        // /// to an input document and whether type annotations in a supplied document are retained. If no schemaValidator
-        // /// is supplied, then schema validation does not take place.
-        // /// </summary>
-        // public SchemaValidator SchemaValidator {
-        //     get => schemaValidator;
-        //     set {
-        //         schemaValidator = value;
-        //         builder.setSchemaValidator(schemaValidator == null ? null : schemaValidator.UnderlyingSchemaValidator);
-        //     }
-        // }
+        /// <summary>
+        /// Property to set and get the schemaValidator to be used. This determines whether schema validation is applied
+        /// to an input document and whether type annotations in a supplied document are retained. If no schemaValidator
+        /// is supplied, then schema validation does not take place.
+        /// </summary>
+        /// <remarks>If validation is requested using this mechanism, and the document is not valid,
+        /// then no exception is raised; it is for the application to handle any invalidity reports
+        /// from the SchemaValidator.
+        /// </remarks>
+        public SchemaValidator SchemaValidator {
+            get => schemaValidator;
+            set {
+                schemaValidator = value;
+                s9Builder.setSchemaValidator(schemaValidator == null ? null : schemaValidator.UnderlyingSchemaValidator);
+            }
+        }
 
         /// <summary>
         /// The required name of the top level element in a document instance being validated
@@ -132,8 +146,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public bool DtdValidation {
-            get => builder.isDTDValidation();
-            set => builder.setDTDValidation(value);
+            get => s9Builder.isDTDValidation();
+            set => s9Builder.setDTDValidation(value);
         }
 
         /// <summary>
@@ -146,8 +160,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public WhitespacePolicy WhitespacePolicy {
-            get => builder.getWhitespaceStrippingPolicy();
-            set => builder.setWhitespaceStrippingPolicy(value);
+            get => s9Builder.getWhitespaceStrippingPolicy();
+            set => s9Builder.setWhitespaceStrippingPolicy(value);
         }
 
 
@@ -158,8 +172,8 @@ namespace Saxon.Api {
         ///</summary>
 
         public TreeModel TreeModel {
-            get => (TreeModel) builder.getTreeModel().getSymbolicValue();
-            set => builder.setTreeModel(net.sf.saxon.om.TreeModel.getTreeModel((int) value));
+            get => (TreeModel) s9Builder.getTreeModel().getSymbolicValue();
+            set => s9Builder.setTreeModel(net.sf.saxon.om.TreeModel.getTreeModel((int) value));
         }
 
         /// <summary>
@@ -178,7 +192,7 @@ namespace Saxon.Api {
             set {
                 baseUri = value;
                 if (baseUri != null) {
-                    builder.setBaseURI(new Uri(value.AbsoluteUri));
+                    s9Builder.setBaseURI(new Uri(value.AbsoluteUri));
                 }
             }
         }
@@ -209,7 +223,7 @@ namespace Saxon.Api {
             get => projectionQuery;
             set {
                 projectionQuery = value;
-                builder.setDocumentProjectionQuery(projectionQuery?.getUnderlyingCompiledQuery());
+                s9Builder.setDocumentProjectionQuery(projectionQuery?.getUnderlyingCompiledQuery());
             }
         }
 
@@ -282,7 +296,7 @@ namespace Saxon.Api {
         internal XdmNode Build(Stream input, Uri baseUri) {
             Source source;
             ParseOptions options = new ParseOptions(config.getParseOptions());
-
+            
             if (processor.GetProperty("http://saxon.sf.net/feature/preferJaxpParser") == "true") {
                 source = new StreamSource(input, baseUri.ToString());
                 //options.setEntityResolver(new JDotNetURIResolver(XmlResolver));
@@ -304,12 +318,17 @@ namespace Saxon.Api {
             }
 
             try {
-                XdmNode node = builder.build(source);
+                XdmNode node = s9Builder.build(source);
+                if (schemaValidator != null 
+                        && schemaValidator.ErrorList != null 
+                        && schemaValidator.ErrorList.Count > 0) {
+                    throw new SaxonApiException("Validation errors were reported");
+                }
                 node.SetProcessor(processor);
                 return node;
             }
             catch (XPathException ex) {
-                throw new StaticError(ex);
+                throw new SaxonApiException(ex);
             }
         }
 
@@ -371,7 +390,7 @@ namespace Saxon.Api {
             //augmentParseOptions(options);
             XdmNode doc = null;
             try {
-                doc = builder.build(source);
+                doc = s9Builder.build(source);
             }
             catch (net.sf.saxon.s9api.SaxonApiException ex) {
                 throw new Exception(ex.getMessage());
@@ -426,7 +445,7 @@ namespace Saxon.Api {
             ParseOptions options = new ParseOptions(config.getParseOptions());
 
             source = augmentSource(source, options);
-            XdmNode doc = builder.build(source);
+            XdmNode doc = s9Builder.build(source);
             return doc;
         }
 

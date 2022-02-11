@@ -36,13 +36,13 @@ namespace Saxon.Api {
         private Source source;
         private List<Source> sources = new List<Source>();
         private IList<ValidationFailure> errorList = null;
-        private net.sf.saxon.s9api.SchemaValidator jSchemaValidator;
+        private net.sf.saxon.s9api.SchemaValidator s9SchemaValidator;
         private SchemaType documentElementType;
 
         // internal constructor
 
         internal SchemaValidator(net.sf.saxon.s9api.SchemaValidator validator, Processor processor) {
-            this.jSchemaValidator = validator;
+            this.s9SchemaValidator = validator;
             this.config = processor.Implementation;
         }
 
@@ -54,8 +54,8 @@ namespace Saxon.Api {
         /// </summary>
 
         public bool IsLax {
-            get => jSchemaValidator.isLax();
-            set => jSchemaValidator.setLax(value);
+            get => s9SchemaValidator.isLax();
+            set => s9SchemaValidator.setLax(value);
         }
 
         /// <summary>
@@ -65,22 +65,22 @@ namespace Saxon.Api {
         /// </summary>
 
         public bool UseXsiSchemaLocation {
-            get => jSchemaValidator.isUseXsiSchemaLocation();
-            set => jSchemaValidator.setUseXsiSchemaLocation(value);
+            get => s9SchemaValidator.isUseXsiSchemaLocation();
+            set => s9SchemaValidator.setUseXsiSchemaLocation(value);
         }
 
 
         /// <summary>Set the validation reporting feature, which saves the validation errors in an XML file</summary>
         /// <param name="destination"> destination where XML will be sent</param>
         public void SetValidityReporting(XmlDestination destination) {
-            jSchemaValidator.setValidityReporting(destination.GetUnderlyingDestination());
+            s9SchemaValidator.setValidityReporting(destination.GetUnderlyingDestination());
         }
 
 
         /// <summary>Set the <c>InvalidityHandler</c> to be used when validating instance documents</summary>
         /// <param name="inHandler">the <c>InvalidityHandler</c> to be used</param>
         public void SetInvalidityHandler(IInvalidityHandler inHandler) {
-            jSchemaValidator.setInvalidityHandler(new InvalidityHandlerWrapper(inHandler));
+            s9SchemaValidator.setInvalidityHandler(new InvalidityHandlerWrapper(inHandler));
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Saxon.Api {
         public void AddSource(XmlReader reader) {
             PullProvider pp = new DotNetPullProvider(reader);
             PipelineConfiguration pipe = config.makePipelineConfiguration();
-            pipe.setUseXsiSchemaLocation(jSchemaValidator.isUseXsiSchemaLocation());
+            pipe.setUseXsiSchemaLocation(s9SchemaValidator.isUseXsiSchemaLocation());
             pp.setPipelineConfiguration(pipe);
             // pp = new PullTracer(pp);  /* diagnostics */
             PullSource pSource = new PullSource(pp);
@@ -170,7 +170,7 @@ namespace Saxon.Api {
         public void SetSource(XmlReader reader) {
             PullProvider pp = new DotNetPullProvider(reader);
             PipelineConfiguration pipe = config.makePipelineConfiguration();
-            pipe.setUseXsiSchemaLocation(jSchemaValidator.isUseXsiSchemaLocation());
+            pipe.setUseXsiSchemaLocation(s9SchemaValidator.isUseXsiSchemaLocation());
             pp.setPipelineConfiguration(pipe);
             // pp = new PullTracer(pp);  /* diagnostics */
             PullSource psource = new PullSource(pp);
@@ -212,7 +212,7 @@ namespace Saxon.Api {
         /// The destination to hold the validated document.
         /// </param>
         public void SetDestination(XmlDestination destination) {
-            jSchemaValidator.setDestination(destination.GetUnderlyingDestination());
+            s9SchemaValidator.setDestination(destination.GetUnderlyingDestination());
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace Saxon.Api {
         /// when it has finished writing to the destination
         /// </summary>
         public void Close() {
-            jSchemaValidator.close();
+            s9SchemaValidator.close();
         }
 
 
@@ -230,8 +230,8 @@ namespace Saxon.Api {
         /// if no value is supplied, there is no constraint on the required type
         /// </summary>
         public QName DocumentElementName {
-            get => jSchemaValidator.getDocumentElementName();
-            set => jSchemaValidator.setDocumentElementName(value);
+            get => s9SchemaValidator.getDocumentElementName();
+            set => s9SchemaValidator.setDocumentElementName(value);
         }
 
 
@@ -241,16 +241,16 @@ namespace Saxon.Api {
         /// If no value is supplied, there is no constrin on the required type
         /// </summary>
         public QName DocumentElementTypeName {
-            get => jSchemaValidator.getDocumentElementTypeName();
+            get => s9SchemaValidator.getDocumentElementTypeName();
             set {
-                jSchemaValidator.setDocumentElementTypeName(value);
+                s9SchemaValidator.setDocumentElementTypeName(value);
                 documentElementType = config.getSchemaType(value.GetStructuredQName());
             }
         }
 
         internal SchemaType DocumentElementType => documentElementType;
 
-        internal net.sf.saxon.s9api.SchemaValidator UnderlyingSchemaValidator => jSchemaValidator;
+        internal net.sf.saxon.s9api.SchemaValidator UnderlyingSchemaValidator => s9SchemaValidator;
 
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace Saxon.Api {
         /// <param name="value">the value of the schema  parameter, or null to clear a previously set value</param>
         public void SetParameter(QName name, XdmValue value) {
             try {
-                jSchemaValidator.setParameter(name, value);
+                s9SchemaValidator.setParameter(name, value);
             }
             catch (net.sf.saxon.s9api.SaxonApiUncheckedException ex) {
                 throw new StaticError(ex);
@@ -275,7 +275,7 @@ namespace Saxon.Api {
         /// <param name="name">the parameter whose name is required</param>
         /// <returns>the value that has been set for the parameter, or the EmptySequence if no value has been set</returns>
         public XdmValue GetParameter(QName name) {
-            return jSchemaValidator.getParameter(name);
+            return s9SchemaValidator.getParameter(name);
         }
 
 
@@ -285,8 +285,8 @@ namespace Saxon.Api {
         /// the document during validation as if they were present in the instance being validated)
         /// </summary>
         public bool ExpendAttributeDefaults {
-            get => jSchemaValidator.isExpandAttributeDefaults();
-            set => jSchemaValidator.setExpandAttributeDefaults(value);
+            get => s9SchemaValidator.isExpandAttributeDefaults();
+            set => s9SchemaValidator.setExpandAttributeDefaults(value);
         }
 
         /// <summary>
@@ -307,7 +307,7 @@ namespace Saxon.Api {
         public IList<ValidationFailure> ErrorList {
             set {
                 errorList = value;
-                jSchemaValidator.setInvalidityHandler(new InvalidityGatherer(errorList));
+                s9SchemaValidator.setInvalidityHandler(new InvalidityGatherer(errorList));
             }
             get => errorList;
         }
@@ -325,7 +325,7 @@ namespace Saxon.Api {
                 }
 
                 try {
-                    jSchemaValidator.validateMultiple(sources);
+                    s9SchemaValidator.validateMultiple(sources);
                 }
                 catch (net.sf.saxon.s9api.SaxonApiException ex) {
                     throw new StaticError(ex);
@@ -335,9 +335,10 @@ namespace Saxon.Api {
                 AugmentedSource aug = AugmentedSource.makeAugmentedSource(source);
                 aug.setSchemaValidationMode(lax ? Validation.LAX : Validation.STRICT);
                 try {
-                    jSchemaValidator.validate(aug);
+                    s9SchemaValidator.validate(aug);
                 }
                 catch (net.sf.saxon.s9api.SaxonApiException ex) {
+                    Console.Error.WriteLine(ex.StackTrace);
                     throw new StaticError(ex);
                 }
             }

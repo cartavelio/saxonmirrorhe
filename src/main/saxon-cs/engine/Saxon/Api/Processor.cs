@@ -89,6 +89,7 @@ namespace Saxon.Api {
             Configuration config = Configuration.readConfiguration(ss);
             //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
             jProcessor = new net.sf.saxon.s9api.Processor(config);
+            config.setProcessor(this);
         }
 
         /// <summary>
@@ -102,6 +103,12 @@ namespace Saxon.Api {
             Configuration config = Configuration.readConfiguration(ss);
             //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
             jProcessor = new net.sf.saxon.s9api.Processor(config);
+            config.setProcessor(this);
+        }
+
+        public Processor(Configuration config) {
+            jProcessor = new net.sf.saxon.s9api.Processor(config);
+            config.setProcessor(this);
         }
 
         // public ICollectionFinder CollectionFinder {

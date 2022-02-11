@@ -7,7 +7,7 @@ using net.sf.saxon.value;
 
 namespace SaxonCS3.Saxon.Impl.Helpers {
     
-    public class DotNetComparator : StringCollator {
+    public class DotNetComparator : SubstringMatcher {
 
         private readonly CompareInfo comparer;
         private readonly CompareOptions options;

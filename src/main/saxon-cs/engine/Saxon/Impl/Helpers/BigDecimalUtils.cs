@@ -26,7 +26,8 @@ namespace Saxon.Impl.Helpers {
         }
         
         public static Singulink.Numerics.BigDecimal Idiv(Singulink.Numerics.BigDecimal a, Singulink.Numerics.BigDecimal b) {
-            throw new NotImplementedException();
+            Singulink.Numerics.BigDecimal quot = a / b;
+            return quot.Sign < 0 ? Singulink.Numerics.BigDecimal.Ceiling(quot) : Singulink.Numerics.BigDecimal.Floor(quot);
         }
         
         public static Singulink.Numerics.BigDecimal Round(Singulink.Numerics.BigDecimal a, int scale) {
