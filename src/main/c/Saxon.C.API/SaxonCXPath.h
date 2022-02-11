@@ -34,7 +34,7 @@ jobject booleanValue(sxnc_environment* environi, bool);
      * @param val - int value
      */
 
-jobject integerValue(sxnc_environment environi, int i);
+jobject integerValue(sxnc_environment *environi, int i);
 
 
     /**
