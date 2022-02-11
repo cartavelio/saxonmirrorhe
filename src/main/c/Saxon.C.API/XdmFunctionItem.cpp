@@ -74,13 +74,13 @@
              return nullptr;
         }
              jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
-             static jmethodID xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getSystemFunction",
-             "(Lnet/sf/saxon/s9api/Procesor;Ljava/lang/String;I)Lnet/sf/saxon/s9api/XdmFunctionItem");
-             if (!xmID) {
+             static jmethodID xsfmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getSystemFunction",
+             "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;I)Lnet/sf/saxon/s9api/XdmFunctionItem;");
+             if (!xsfmID) {
                        std::cerr << "Error: SaxonC." << "getSystemFunction" << " not found\n" << std::endl;
                          			return nullptr;
                          		} else {
-                         			jobject result = (jobject)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID, processor->proc, SaxonProcessor::sxn_environ->env->NewStringUTF(name), arity));
+                         			jobject result = (jobject)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xsfmID, processor->proc, SaxonProcessor::sxn_environ->env->NewStringUTF(name), arity));
                          			if(result) {
                          			    auto functionItem = new XdmFunctionItem(result);
                          			    return functionItem;

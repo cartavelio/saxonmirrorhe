@@ -19,6 +19,12 @@ cdef extern from "../SaxonProcessor.h":
         void setcwd(char* cwd)
         const char* getcwd()
 
+
+        XdmValue ** createXdmValueArray(int len)
+
+
+        XdmAtomicValue ** createXdmAtomicValueArray(int len)
+
         #SaxonProcessor * getProcessor()
 
         #Set a configuration property specific to the processor in use. 
@@ -42,7 +48,7 @@ cdef extern from "../SaxonProcessor.h":
 
         SchemaValidator * newSchemaValidator()
 
-        DocumentBuilder * newDocumentBuilder();
+        DocumentBuilder * newDocumentBuilder()
 
         XdmAtomicValue * makeStringValue(const char* str1)
 
@@ -61,6 +67,26 @@ cdef extern from "../SaxonProcessor.h":
         XdmAtomicValue * makeQNameValue(const char* str)
 
         XdmAtomicValue * makeAtomicValue(const char* type, const char* value)
+
+
+        XdmArray *makeArray(const char **input, int length)
+
+        XdmArray *makeArray(short *input, int length)
+
+
+        XdmArray *makeArray(int *input, int length)
+
+        XdmArray *makeArray(long *input, int length)
+
+        XdmArray *makeArray(bool *input, int length)
+
+
+        XdmArray *makeArray(XdmValue ** values, int length)
+
+
+        XdmMap *makeMap2(map[string, XdmValue *] dataMap)
+
+        XdmMap *makeMap3(XdmAtomicValue ** keys, XdmValue ** values, int len_)
 
         void setCatalog(const char * filename, bool isTracing)
 
@@ -84,29 +110,29 @@ cdef extern from "../SaxonProcessor.h":
     cdef cppclass DocumentBuilder:
         DocumentBuilder() except +
 
-        void setLineNumbering(bool option);
+        void setLineNumbering(bool option)
 
-        bool isLineNumbering();
+        bool isLineNumbering()
 
-        void setSchemaValidator(SchemaValidator * validator);
+        void setSchemaValidator(SchemaValidator * validator)
 
-        SchemaValidator * getSchemaValidator();
-
-
-        void setDTDValidation(bool option);
-
-        bool isDTDValidation();
-
-        void setBaseUri(const char* uri);
-
-        const char * getBaseUri();
+        SchemaValidator * getSchemaValidator()
 
 
-        XdmNode* parseXmlFromString(const char * content);
+        void setDTDValidation(bool option)
 
-        XdmNode* parseXmlFromFile(const char * filename);
+        bool isDTDValidation()
 
-        XdmNode * parseXmlFromUri(const char* source);
+        void setBaseUri(const char* uri)
+
+        const char * getBaseUri()
+
+
+        XdmNode* parseXmlFromString(const char * content)
+
+        XdmNode* parseXmlFromFile(const char * filename)
+
+        XdmNode * parseXmlFromUri(const char* source)
 
 
 
@@ -235,7 +261,7 @@ cdef extern from "../SaxonProcessor.h":
 
         # Produce a representation of the compiled stylesheet, in XML form, suitable for
         # distribution and reloading.
-        void exportStylesheet(const char * filename);
+        void exportStylesheet(const char * filename)
 
         # Set the value of a stylesheet parameter
         void setParameter(const char* name, XdmValue*value)
@@ -274,7 +300,7 @@ cdef extern from "../SaxonProcessor.h":
         void setSaveXslMessage(bool show, const char* filename)
 
         # Get the messages written using the xsl:message instruction
-        #XdmValue * getXslMessages();
+        #XdmValue * getXslMessages()
 
         # Perform a one shot transformation. The result is stored in the supplied outputfile.
         void transformFileToFile(const char* sourcefile, const char* outputfile)
@@ -328,7 +354,7 @@ cdef extern from "../SaxonProcessor.h":
         bool exceptionOccurred()
 
         # Check for exception thrown.
-        SaxonApiException* getException();
+        SaxonApiException* getException()
 
         # Get the error message if there are any error
         const char * getErrorMessage()
@@ -557,21 +583,27 @@ cdef extern from "../XdmAtomicValue.h":
 
         long getLongValue()
 
+        int getHashCode()
+
+        
+
 cdef extern from "../XdmFunctionItem.h":
     cdef cppclass XdmFunctionItem(XdmItem):
-        const char* getName();
+        const char* getName()
 
         int getArity()
 
         XdmFunctionItem * getSystemFunction(SaxonProcessor * processor, const char * name, int arity)
 
-        XdmValue * call(XdmValue ** arguments, int argument_length);
+        XdmValue * call(XdmValue ** arguments, int argument_length)
+
+        XdmValue ** createXdmValueArray(int len)
 
 
 
 cdef extern from "../XdmMap.h":
     cdef cppclass XdmMap(XdmFunctionItem):
-        int mapSize();
+        int mapSize()
 
         XdmValue * get(XdmAtomicValue* key)
 
@@ -589,13 +621,19 @@ cdef extern from "../XdmMap.h":
 
         list[XdmAtomicValue*] keySet()
 
+        XdmAtomicValue** keys()
+
         map[string, XdmValue*]& asMap()
 
         bool isEmpty()
 
         bool containsKey(XdmAtomicValue* key)
 
-        list[XdmValue*] values()
+        XdmValue ** createXdmValueArray(int len)
+
+        list[XdmValue*] valuesAsList()
+
+        XdmValue** values()
 
 
 cdef extern from "../XdmArray.h":
@@ -611,6 +649,10 @@ cdef extern from "../XdmArray.h":
 
         XdmArray* concat(XdmArray * value)
 
+        XdmValue ** createXdmValueArray(int len)
+
         list[XdmValue *] asList()
 
-        int getArity();
+        XdmValue ** values()
+
+        int getArity()
