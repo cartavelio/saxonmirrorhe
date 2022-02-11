@@ -632,7 +632,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
 
                 PipelineConfiguration pipe = out.getPipelineConfiguration();
                 if (copyLineNumbers) {
-                    LocationCopier copier = new LocationCopier(false);
+                    LocationCopier copier = new LocationCopier(false, out.getSystemId());
                     //noinspection Convert2MethodRef
                     pipe.setCopyInformee(element -> copier.notifyElementNode(element));
                 }
@@ -702,7 +702,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 PipelineConfiguration savedPipe = null;
                 if (copyLineNumbers) {
                     savedPipe = new PipelineConfiguration(val.getPipelineConfiguration());
-                    LocationCopier copier = new LocationCopier(true);
+                    LocationCopier copier = new LocationCopier(true, item.getBaseURI());
                     //noinspection Convert2MethodRef
                     val.getPipelineConfiguration().setCopyInformee(element -> copier.notifyElementNode(element));
 
