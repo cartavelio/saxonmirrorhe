@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Xml;
+using Saxon.Api.Support;
 using Saxon.Hej.trans;
 using Saxon.Callbacks;
 
@@ -21,6 +22,7 @@ namespace Saxon.Api {
     [Serializable]
     public class XPathSelector : IEnumerable {
         Saxon.Hej.s9api.XPathSelector selector;
+        private ResourceResolver xmlDocumentResolver;
 
         // internal constructor
 
@@ -75,16 +77,37 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// The <code>XmlResolver</code> to be used at run-time to resolve and dereference URIs
-        /// supplied to the <c>doc()</c> function.
+        /// The <code>ResourceResolver</code> to be used at run-time to resolve and dereference URIs
+        /// supplied to the <c>fn:doc()</c> and <c>fn:doc-available()</c> functions, and also
+        /// <c>fn:transform</c>.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The URI supplied as the first argument to the resolver is the absolute URI requested,
+        /// that is, the result of resolving the requested relative URI against the relevant base URI.
+        /// </para>
+        /// <para>The requested relative URI and the corresponding base URI are supplied as separate
+        /// properties within the <c>ResourceProperties</c> argument, in case they are needed.
+        /// </para>
+        /// <para>The returned <c>IResource</c> must be one of the following:
+        /// <ul>
+        /// <li>An <c>IResource</c> such as a <c>NodeResource</c> or an <c>XmlReaderResource</c>
+        /// whose <c>getItem()</c> method delivers an <c>XdmNode</c>;</li>
+        /// <li>A <c>TextResource</c> delivering lexical XML in its <c>Content</c> property; this
+        /// will then be parsed to deliver the corresponding XML document.</li>
+        /// </ul>
+        /// </para>
+        /// <para>If no <c>XmlDocumentResolver</c> is supplied, or if it returns null, then
+        /// the <c>CommonResourceResolver</c> associated with the Saxon Configuration is invoked.
+        /// </para>
+        /// </remarks>
 
-        public XmlResolver InputXmlResolver {
-            get => ((StandardURIResolver) selector.getURIResolver()).getXmlResolver();
-            set => selector.setURIResolver(
-                new StandardURIResolver(
-                    selector.getUnderlyingXPathContext().getXPathContextObject().getConfiguration(), 
-                    value));
+        public ResourceResolver XmlDocumentResolver {
+            get => xmlDocumentResolver;
+            set {
+                xmlDocumentResolver = value;
+                selector.setURIResolver(new UriResolverWrappingDocumentResolver(value));
+            }
         }
 
         /// <summary>

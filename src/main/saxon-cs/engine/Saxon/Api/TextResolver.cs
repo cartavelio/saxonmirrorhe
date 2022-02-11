@@ -12,8 +12,8 @@ namespace Saxon.Api {
     /// this resolver.</param>
     /// <param name="encoding">The encoding, if known. This will be supplied when an encoding
     /// name is given in the XPath function call; in the case of <c>json-doc</c> it defaults to utf-8.</param>
-    /// <returns>A <c>TextReader</c> that delivers the content of the resource. Saxon will consume the
-    /// content of the <c>TextReader</c> and close it after use.
+    /// <returns>A <c>TextResource</c> that delivers the content of the resource. Saxon will consume the
+    /// content of any <c>TextReader</c> or <c>Stream</c> held by the <c>TextResource</c>, and close it after use.
     /// </returns>
     /// <remarks>
     /// <para>The XPath specifications imposes rules on how the encoding is inferred if not supplied.
@@ -21,7 +21,7 @@ namespace Saxon.Api {
     /// implement these rules. Saxon does not enforce this.</para>
     /// </remarks>
     /// 
-    public delegate TextReader TextResolver(Uri uri, Encoding encoding);
+    public delegate TextResource TextResolver(Uri uri, Encoding encoding);
 }
 
 // Copyright (c) 2021 Saxonica Limited
