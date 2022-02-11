@@ -67,10 +67,14 @@ namespace Saxon.Api
         private TextWriter textWriter = Console.Error;
         private JProcessor processor;
         private IQueryResolver moduleResolver;
+        private ICollectionFinder collectionFinder = null;
+        private StandardCollectionFinder standardCollectionFinder;
 
         internal Processor(JProcessor p) {
             processor = p;
             processor.getUnderlyingConfiguration().setProcessor(this);
+            collectionFinder = new StandardCollectionFinder(Implementation.getCollectionFinder());
+            standardCollectionFinder = new StandardCollectionFinder(Implementation.getStandardCollectionFinder());
         }
 
         /// <summary>
@@ -83,6 +87,8 @@ namespace Saxon.Api
             processor = new JProcessor(false);
             processor.getUnderlyingConfiguration().setProcessor(this);
             processor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
+            collectionFinder = new StandardCollectionFinder(Implementation.getCollectionFinder());
+            standardCollectionFinder = new StandardCollectionFinder(Implementation.getStandardCollectionFinder());
         }
 
         /// <summary>
@@ -143,6 +149,40 @@ namespace Saxon.Api
             config.registerExternalObjectModel(new DotNetObjectModelDefinition());
             processor = new JProcessor(config);
         }
+
+        public ICollectionFinder CollectionFinder{  
+            set {
+                if (value != null)
+                {
+                    collectionFinder = value;
+                    Implementation.setCollectionFinder(new CollectionFinderWrapper(collectionFinder));
+
+                }
+
+            }
+            get {
+                return collectionFinder;
+            }
+
+        }
+
+
+        public StandardCollectionFinder StandardCollectionFinder
+        {
+            get
+            {
+                return standardCollectionFinder;
+            }
+
+        }
+
+        public void RegisterCollection(String collectionURI, IResourceCollection collection) {
+            StandardCollectionFinder.RegisterCollection(collectionURI, collection);
+            if (CollectionFinder is StandardCollectionFinder && collectionFinder != standardCollectionFinder) {
+                ((StandardCollectionFinder)collectionFinder).RegisterCollection(collectionURI, collection);
+            }
+        }
+
 
 
         /// <summary>
