@@ -498,7 +498,7 @@ class TestSuite {
 
       def msg = "Run the QT3 test suite driver for ${testLang} with dotnet"
       if (testByteCode != null || testUnfolded != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
+        msg += " (unfolded: ${testUnfolded ? 'yes' : 'no'})"
       }
       description msg
       dependsOn "dotnetTestDrivers", "cloneQT3TestSuite"
@@ -682,9 +682,9 @@ class TestSuite {
       outputs.file "${testReportDirectory}/${testReportFilename}.xml"
       outputs.upToDateWhen { false }
 
-      def msg = "Run the QT3 extra test suite driver for ${testLang} with dotnet}"
+      def msg = "Run the QT3 extra test suite driver for ${testLang} with dotnet"
       if (testByteCode != null || testUnfolded != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
+        msg += " (unfolded: ${testUnfolded ? 'yes' : 'no'})"
       }
       description msg
       dependsOn "dotnetTestDrivers", "cloneQT3TestSuite"
@@ -984,10 +984,6 @@ class TestSuite {
       outputs.upToDateWhen { false }
 
       def msg = "Run the XSLT 3.0 test suite driver for ${testLang} with dotnet"
-      if (testByteCode != null || testExport != null || testJit != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, export: ${testExport ? 'yes' : 'no'}, "
-        msg += "jit: ${testJit ? 'on' : 'off'})"
-      }
       description msg
       dependsOn "dotnetTestDrivers", "cloneQT3TestSuite"
 
