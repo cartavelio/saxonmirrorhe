@@ -125,7 +125,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="source">Source document supplied as an <c>XdmNode</c> value</param>
         public void AddSource(XdmNode source) {
-            sources.Add((NodeInfo) source.value);
+            sources.Add(((NodeInfo) source.value).asActiveSource());
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace Saxon.Api {
         /// <param name="source">The document or element node at the root of the tree
         /// to be validated</param>        
         public void SetSource(XdmNode source) {
-            this.source = (NodeInfo) source.value;
+            this.source = ((NodeInfo) source.value).asActiveSource();
             sources.Clear();
         }
 

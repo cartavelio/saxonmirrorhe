@@ -1,67 +1,100 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using com.saxonica.ee.config;
+using com.saxonica.ee.trans;
 using net.sf.saxon.expr;
 using net.sf.saxon.om;
+using net.sf.saxon.value;
 
 namespace Saxon.Impl.Parallel {
-
     public class MultithreadedItemMappingIterator : net.sf.saxon.expr.ItemMappingIterator {
-        private readonly ConcurrentQueue<Task<Item>> resultQueue = new();
+        private readonly Channel<Outcome<Item>> resultQueue = Channel.CreateBounded<Outcome<Item>>(64);
         private readonly CancellationTokenSource tokenSource = new();
-        private readonly CancellationToken token;
+        private bool allDone;
+        private static readonly Item STOPPER = new StringValue("stopper");
         
         public MultithreadedItemMappingIterator(SequenceIterator inputIterator, ItemMappingFunction action, MultithreadingFactory factory) : base (inputIterator, action) {
-            token = tokenSource.Token;
+            CancellationToken token = tokenSource.Token;
             int maxThreads = getMaxThreads();
-            int n = 0;
-            int prime = (maxThreads*3);
-            try {
-                while ((++n<prime)) {
-                    Item item = inputIterator.next();
-                    if ((item == null)) {
-                        return ;
-                    }
-                    mapOneItem(item);
+            ParallelOptions options = new() {
+                MaxDegreeOfParallelism = maxThreads,
+                CancellationToken = token
+            };
+            
+            //Console.Error.WriteLine("Input sequence size: " + inputSequence.Count);
+
+            ChannelWriter<Outcome<Item>> writer = resultQueue.Writer;
+            System.Threading.Tasks.Parallel.ForEach(InputAsEnumerable(inputIterator), options, (item) => {
+                Item mapped = action.mapItem(item);
+                if (mapped != null) {
+                    writer.WriteAsync(new Outcome<Item>(mapped));
                 }
-            }
-            catch (net.sf.saxon.trans.UncheckedXPathException e) {
-                close();
-                throw e.getXPathException();
+            });
+            writer.WriteAsync(new Outcome<Item>(STOPPER));
+            
+            //Console.Error.WriteLine("Output sequence size: " + resultQueue.Count);
+
+        }
+
+        private static IEnumerable<Item> InputAsEnumerable(SequenceIterator iter)
+        {
+            for (Item item; (item = iter.next()) != null; ) {
+                yield return item;
             }
         }
 
-        private int getMaxThreads() {
+        private static int getMaxThreads() {
             int maxThreads = Environment.ProcessorCount;
             return ((maxThreads>0) ? maxThreads : 1);
         }
-        public override net.sf.saxon.om.Item next() {
-            while (true) {
-                net.sf.saxon.om.Item nextIn = getBaseIterator().next();
-                if ((nextIn != null)) {
-                    mapOneItem(nextIn);
+
+        public net.sf.saxon.om.Item next() {
+            if (allDone) {
+                return null;
+            }
+
+            try {
+                Task<Outcome<Item>> readTask = resultQueue.Reader.ReadAsync().AsTask();
+                //var task = Task.Run(async () => { await WriteToLogAsync(text); });
+                try {
+                    readTask.Wait();
                 }
-                bool available = resultQueue.TryDequeue(out Task<Item> first);
-                if (!available) {
+                catch (System.Exception e) when (e is ChannelClosedException || e is System.AggregateException) {
                     return null;
-                } else {
-                    return first.Result;
-                    // TODO: exception handling
+                }
+
+                Outcome<Item> next = readTask.Result;
+                if (next.isSuccess()) {
+                    //Console.WriteLine("HAVE READ " + next.getResult().getStringValue());
+                    Item item = next.getResult();
+                    return item == STOPPER ? null : item;
+                }
+                else {
+                    net.sf.saxon.trans.XPathException xpe =
+                        net.sf.saxon.trans.XPathException.makeXPathException(next.getException());
+                    throw new net.sf.saxon.trans.UncheckedXPathException(xpe);
                 }
             }
+            catch (ChannelClosedException e) {
+                allDone = true;
+                return null;
+            }
+            catch (System.Threading.ThreadInterruptedException e) {
+                net.sf.saxon.trans.XPathException xpie = net.sf.saxon.trans.XPathException.makeXPathException(e);
+                throw new net.sf.saxon.trans.UncheckedXPathException(xpie);
+            }
         }
+
         public override void close() {
             base.close();
             tokenSource.Cancel();
         }
-        
-        private void mapOneItem(net.sf.saxon.om.Item inputItem) {
-            net.sf.saxon.expr.ItemMappingFunction action = getMappingFunction();
-            Task<net.sf.saxon.om.Item> task = Task.Run(() => action.mapItem(inputItem), token);
-            resultQueue.Enqueue(task);
-        }
-        
+
     }
+    
+    
 }

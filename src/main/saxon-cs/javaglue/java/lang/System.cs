@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using java.util;
 using Sys = System;
+using SysIO = System.IO;
 using SysColl = System.Collections;
 using SysCollGen = System.Collections.Generic;
 
@@ -26,6 +27,10 @@ namespace java.lang
         public static string getProperty(string name) {
             if (name == "user.dir") {
                 return Sys.Environment.CurrentDirectory;
+            } else if (name == "line.separator") {
+                return Sys.Environment.NewLine;
+            } else if (name == "java.io.tmpdir") {
+                return SysIO.Path.GetTempPath();
             }
             return Sys.Environment.GetEnvironmentVariable(name);
         }

@@ -1,5 +1,4 @@
 using System.Xml;
-using net.sf.saxon.dotnet;
 using net.sf.saxon.@event;
 using net.sf.saxon.s9api;
 using net.sf.saxon.serialize;

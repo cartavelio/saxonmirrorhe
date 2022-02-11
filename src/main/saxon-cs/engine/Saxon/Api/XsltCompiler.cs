@@ -194,9 +194,9 @@ namespace Saxon.Api {
         /// </remarks>
 
         public string XsltLanguageVersion {
-            get => "3.0";
+            get => jXsltCompiler.getXsltLanguageVersion();
             set {
-                if (value == null) throw new ArgumentNullException(nameof(value));
+                jXsltCompiler.setXsltLanguageVersion(value);
             }
         }
         
@@ -713,7 +713,7 @@ namespace Saxon.Api {
         /// thread. The <c>XsltExecutable</c> is not affected by any changes made to the <c>XsltCompiler</c>
         /// once it has been compiled.</returns>
         public XsltExecutable Compile(XdmNode node) {
-            XsltExecutable executable = new XsltExecutable(jXsltCompiler.compile(node.Implementation));
+            XsltExecutable executable = new XsltExecutable(jXsltCompiler.compile(node.Implementation.asActiveSource()));
             executable.InternalProcessor = processor;
             return executable;
         }

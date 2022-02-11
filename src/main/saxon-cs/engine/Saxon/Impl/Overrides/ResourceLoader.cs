@@ -63,8 +63,13 @@ namespace Saxon.Impl.Overrides {
          * @throws IOException If more than MAX_REDIRECTS are occur or if a loop is detected.
          */
         public static Stream urlStream(URL url) {
-            URLConnection conn = urlConnection(url);
-            return conn.getInputStream();
+            try {
+                URLConnection conn = urlConnection(url);
+                return conn.getInputStream();
+            }
+            catch (Exception e) {
+                throw new java.io.IOException("Failed to open connection to " + url + ": " + e.Message);
+            }
         }
     }
 }

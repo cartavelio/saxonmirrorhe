@@ -10,7 +10,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public static Singulink.Numerics.BigDecimal ValueOf(double val) {
-            return Singulink.Numerics.BigDecimal.FromDouble(val, true);
+            return Singulink.Numerics.BigDecimal.FromDouble(val, Singulink.Numerics.FloatConversion.Roundtrip);
         }
 
         public static Singulink.Numerics.BigDecimal ValueOf(string s) {
@@ -38,21 +38,19 @@ namespace Saxon.Impl.Helpers {
             //     BigDecimal factor = BigDecimal.Pow10(scale);
             //     return Round(a * factor, 0) / factor;
             // }
-            switch (a.Sign) {
-                case -1:
-                    // MidpointRoundingMode.ToPositiveInfinity does not do what the name suggests;
-                    // it is a "directed rounding" mode that also affects non-midpoint values
-                    // Choose a positive shift that is (a) big enough to make the value positive, and 
-                    // (b) a multiple of 10^N where N is ge -scale. Then add the shift, perform the
-                    // rounding away from zero, and finally subtract the shift.
-                    int digits = BigDecimal.Round(a).Precision;
-                    BigDecimal shift = BigInteger.Pow(10, digits);
-                    return BigDecimal.Round(a + shift, scale, MidpointRounding.AwayFromZero) - shift;
-                case 0:
-                    return a;
-                default:
-                    return BigDecimal.Round(a, scale, MidpointRounding.AwayFromZero);
-            }
+            return a.Sign switch {
+                // case -1:
+                //     // MidpointRoundingMode.ToPositiveInfinity does not do what the name suggests;
+                //     // it is a "directed rounding" mode that also affects non-midpoint values
+                //     // Choose a positive shift that is (a) big enough to make the value positive, and 
+                //     // (b) a multiple of 10^N where N is ge -scale. Then add the shift, perform the
+                //     // rounding away from zero, and finally subtract the shift.
+                //     int digits = BigDecimal.Round(a).Precision;
+                //     BigDecimal shift = BigInteger.Pow(10, digits);
+                //     return BigDecimal.Round(a + shift, scale, Singulink.Numerics.RoundingMode.MidpointToPositiveInfinity) - shift;
+                0 => a,
+                _ => BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.MidpointToPositiveInfinity)
+            };
         }
     }
 }

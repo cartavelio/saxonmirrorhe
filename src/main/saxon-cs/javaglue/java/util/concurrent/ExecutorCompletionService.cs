@@ -14,20 +14,20 @@ namespace java.util.concurrent {
             this.completionQueue = queue;
         }
         
-        public Future<V> submit(Callable<V> task) {
+        public virtual Future<V> submit(Callable<V> task) {
             throw new System.NotImplementedException();
         }
         
-        public Future<V> submit(java.lang.Runnable task, V result) {
+        public virtual Future<V> submit(java.lang.Runnable task, V result) {
             throw new System.NotImplementedException();
             
         }
 
-        public Future<V> take() {
+        public virtual Future<V> take() {
             return completionQueue.Take();
         }
         
-        public Future<V> poll() {
+        public virtual Future<V> poll() {
             throw new System.NotImplementedException();
         }
     }

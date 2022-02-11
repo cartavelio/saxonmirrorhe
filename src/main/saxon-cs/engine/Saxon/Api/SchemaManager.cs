@@ -189,7 +189,7 @@ namespace Saxon.Api {
 
         public void Compile(XdmNode node)
         {
-            javax.xml.transform.Source source = node.Implementation;
+            javax.xml.transform.Source source = node.Implementation.asActiveSource();
             try {
                 s9schemaManager.load(source);
             }
