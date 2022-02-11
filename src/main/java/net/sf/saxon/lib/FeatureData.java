@@ -56,7 +56,7 @@ public class FeatureData {
                 
        featureList.add(new FeatureData("http://saxon.sf.net/feature/configuration", 13, "HE PE EE", net.sf.saxon.Configuration.class, null));     
                 
-       featureList.add(new FeatureData("http://saxon.sf.net/feature/configuration-file", 14, "PE EE", String.class, null));     
+       featureList.add(new FeatureData("http://saxon.sf.net/feature/configuration-file", 14, "HE PE EE", String.class, null));     
                 
        featureList.add(new FeatureData("http://saxon.sf.net/feature/debugByteCode", 15, "EE", Boolean.class, Boolean.FALSE));     
                 
@@ -131,8 +131,6 @@ public class FeatureData {
        featureList.add(new FeatureData("http://saxon.sf.net/feature/outputURIResolverClass", 50, "HE PE EE", String.class, null));     
                 
        featureList.add(new FeatureData("http://saxon.sf.net/feature/preEvaluateDocFunction", 51, "HE PE EE", Boolean.class, Boolean.FALSE));     
-                
-       featureList.add(new FeatureData("http://saxon.sf.net/feature/preferJaxpParser", 52, "HE PE EE", Boolean.class, Boolean.FALSE));     
                 
        featureList.add(new FeatureData("http://saxon.sf.net/feature/recognize-uri-query-parameters", 53, "HE PE EE", Boolean.class, Boolean.FALSE));     
                 

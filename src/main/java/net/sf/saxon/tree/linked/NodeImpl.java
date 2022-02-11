@@ -170,6 +170,11 @@ public abstract class NodeImpl
         return this == other;
     }
 
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
+
     /**
      * Get the name of the node. Returns null for an unnamed node
      *

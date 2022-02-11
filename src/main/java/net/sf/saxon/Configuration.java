@@ -410,7 +410,7 @@ public class Configuration implements SourceResolver, NotationSet {
             ((StandardModuleURIResolver) standardModuleURIResolver).setConfiguration(this);
         }
         
-        internalSetBooleanProperty(FeatureCode.PREFER_JAXP_PARSER, FeatureKeys.PREFER_JAXP_PARSER, true);
+        //internalSetBooleanProperty(FeatureCode.PREFER_JAXP_PARSER, FeatureKeys.PREFER_JAXP_PARSER, true);
         internalSetBooleanProperty(FeatureCode.ALLOW_EXTERNAL_FUNCTIONS, FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS, true);
         internalSetBooleanProperty(FeatureCode.DISABLE_XSL_EVALUATE, FeatureKeys.DISABLE_XSL_EVALUATE, false);
         //internalSetBooleanProperty(FeatureKeys.STABLE_COLLECTION_URI, true);
@@ -4937,7 +4937,7 @@ public class Configuration implements SourceResolver, NotationSet {
         booleanFeatures.add(FeatureCode.MONITOR_HOT_SPOT_BYTE_CODE);
         booleanFeatures.add(FeatureCode.MULTIPLE_SCHEMA_IMPORTS);
         booleanFeatures.add(FeatureCode.PRE_EVALUATE_DOC_FUNCTION);
-        booleanFeatures.add(FeatureCode.PREFER_JAXP_PARSER);
+        //booleanFeatures.add(FeatureCode.PREFER_JAXP_PARSER);
         booleanFeatures.add(FeatureCode.RETAIN_DTD_ATTRIBUTE_TYPES);
         booleanFeatures.add(FeatureCode.STABLE_COLLECTION_URI);
         booleanFeatures.add(FeatureCode.STABLE_UNPARSED_TEXT);
