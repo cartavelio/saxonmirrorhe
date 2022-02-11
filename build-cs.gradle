@@ -567,7 +567,7 @@ task eecs_hello_world(
 
     exec {
         workingDir = "${buildDir}/csout"
-        commandLine dotnetex, "engine.dll", "query", "-qs:'Hello World'", "-t" 
+        commandLine dotnetex, "engine.dll", "query", "-qs:'Hello World at ' || current-dateTime()", "-t" 
     }
   }
 }
