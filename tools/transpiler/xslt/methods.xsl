@@ -320,6 +320,8 @@
          'compare#2':         '%arg1%.CompareTo(%arg2%)',
          'isInfinite#1':      'System.Double.IsInfinity(%args%)',
          'valueOf#1':         '(%args%)',
+         'doubleToLongBits#1':'System.BitConverter.DoubleToInt64Bits(%args%)',
+         'toString#1':        '(%args%).ToString(System.Globalization.CultureInfo.InvariantCulture)',
          '*':                 '%scope%.%Name%(%args%)' 
          })"/>
    </xsl:template>
@@ -333,6 +335,8 @@
          'compare#2':         '%arg1%.CompareTo(%arg2%)',
          'isInfinite#1':      'System.Single.IsInfinity(%args%)',
          'valueOf#1':         '(%args%)',
+         'floatToIntBits#1':  'System.BitConverter.SingleToInt32Bits(%args%)',
+         'toString#1':        '(%args%).ToString(System.Globalization.CultureInfo.InvariantCulture)',
          '*':                 '%scope%.%Name%(%args%)' 
          })"/>
    </xsl:template>
@@ -523,11 +527,9 @@
             <xsl:text>InnerException</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'printStackTrace'">
-            <xsl:text>Console.Write(</xsl:text>
+            <xsl:text>System.Console.Error.WriteLine(</xsl:text>
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>.ToString() + </xsl:text>
-            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>.StackTrace)</xsl:text>
+            <xsl:text>)</xsl:text>
          </xsl:when>
          <xsl:otherwise>
             <xsl:call-template name="scopeIfPresent"/>
@@ -633,29 +635,12 @@
    
    <!-- Convert method calls applied to java.lang.Math (which becomes System.Math) -->
    <xsl:template match="*[@RESOLVED_TYPE = 'java.lang.Math']" priority="30" mode="methods">
-      <!--<xsl:message>Class.{name/@identifier}()</xsl:message>-->
-      <xsl:choose>
-         <xsl:when test="name/@identifier = 'random' and count(arguments/argument)=0">
-            <xsl:text>(new System.Random()).NextDouble()</xsl:text>
-         </xsl:when>
-         <xsl:when test="name/@identifier = 'round' and count(arguments/argument)=1">
-            <xsl:text>(long)System.Math.Round(</xsl:text>
-            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-            <xsl:text>, System.MidpointRounding.AwayFromZero)</xsl:text>
-         </xsl:when>
-         <xsl:when test="name/@identifier = 'ceil' and count(arguments/argument)=1">
-            <xsl:text>(long)System.Math.Ceiling(</xsl:text>
-            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-            <xsl:text>)</xsl:text>
-         </xsl:when>
-         <xsl:otherwise>
-            <xsl:text>System.Math.</xsl:text>
-            <xsl:apply-templates select="f:capitalize(name/@identifier)" mode="xml-to-cs"/>
-            <xsl:text>(</xsl:text>
-            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-            <xsl:text>)</xsl:text>
-         </xsl:otherwise>
-      </xsl:choose>
+      <xsl:sequence select="f:applyFormat(., map{
+         'random#0':          '(new System.Random()).NextDouble()',
+         'round#1':           'System.Math.Round(%args%, System.MidpointRounding.AwayFromZero))',
+         'ceil#1':            'System.Math.Ceiling(%args%)',
+         '*':                 '%scope%.%Name%(%args%)' 
+         })"/>
    </xsl:template>
    
    <!-- Convert method calls applied to java.math.BigInteger (which becomes System.Numerics.BigInteger) -->
@@ -679,6 +664,7 @@
          'intValueExact#0': 'Saxon.Impl.Helpers.BigIntegerUtils.IntValueExact(%scope%)',
          'doubleValue#0': '((double)%scope%)',
          'pow#1':       'System.Numerics.BigInteger.Pow(%scope%, %args%)',
+         'shiftLeft#1': '((%scope%) &lt;&lt; (%args%))',
          '*':           '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
@@ -1069,6 +1055,23 @@
          '*':                     '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
+   <!--<xsl:template match="*[f:targetType(.) = 'net.sf.saxon.s9api.XmlProcessingError']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'getCause#0':              '%scope%.Cause',
+         'getErrorCode#0':          '%scope%.ErrorCode',
+         'getHostLanguage#0':       '%scope%.HostLanguage',
+         'getLocation#0':           '%scope%.Location',
+         'getMessage#0':            '%scope%.Message',
+         'getTerminationMessage#0': '%scope%.TerminationMessage',
+         'isStaticError#0':         '%scope%.IsStaticError',
+         'isTypeError#0':           '%scope%.IsTypeError',
+         'isWarning#0':             '%scope%.IsWarning',
+         'setFatal#1':              '%scope%.IsFatal = true',
+         'setTerminationMessage#1': '%scope%.TerminationMessage = %args%',
+         '*':                       '%scope%.%Name%(%args%)'
+         })"/>
+   </xsl:template>-->
    
    <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.s9api.MessageListener2']" 
       priority="20" mode="methods">
