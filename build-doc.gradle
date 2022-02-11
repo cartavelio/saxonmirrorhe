@@ -92,7 +92,8 @@ task product_javadoc(
 
     command = ["javadoc",
                "-sourcepath", "${buildDir}/javadoc_src",
-               "-Xdoclint:none",
+               "-Xdoclint:none", // -Xdoclint:all, accessibility, html, missing, reference, syntax, none
+               "-quiet",
                "-d", "${buildDir}/javadoc",
                "-protected",
                "-classpath", cp,
@@ -276,7 +277,8 @@ task javadoc_linkchecker(
   main = "com.saxonica.Transform"
   args "-s:${buildDir}/javadoc-xml/javadoc-types.xml",
     "-xsl:${projectDir}/tools/docs/javadoc/check-tag-links.xsl",
-    "-o:${buildDir}/javadoc-tag-check.xml"
+    "-o:${buildDir}/javadoc-tag-check.xml",
+    "base-dir=${buildDir}/javadoc-xml/"
 }
 
 task dotnet_doc_parsecs(
