@@ -4,16 +4,11 @@ using Saxon.Api;
 using System.IO;
 using System.Text.RegularExpressions;
 
-//using net.sf.saxon.Version;
-using JFeatureKeys = net.sf.saxon.lib.FeatureKeys;
-using javax.xml.transform.stream;
+using JFeatureKeys = Saxon.Hej.lib.FeatureKeys;
 using System.Diagnostics;
 using System.Linq;
-using ICU4N.Text;
-using Singulink.Numerics;
-using TestDriver;
+using Saxon.Ejavax.xml.transform.stream;
 using TestRunner;
-using Environment = System.Environment;
 
 namespace TestDriver {
     public abstract class Driver {
@@ -115,22 +110,30 @@ namespace TestDriver {
             {
                 if (a.StartsWith("-lang:XT")) {
                     language = "XT";
-                    break;
                 } else if (a.StartsWith("-lang:XSD")) {
                     language = "XSD";
                 } else if (a.StartsWith("-lang:XMark")) {
                     language = "XMark";
+                } else if (a.StartsWith("-lang:XQ")) {
+                    language = "XQ";
+                } else if (a.StartsWith("-lang:XP")) {
+                    language = "XP";
                 }
             }
 
-            if (language == "XT") {
-                Xslt30TestSuiteDriver.MainXSLT(args);
-            } else if (language == "XSD") {
-                SchemaTestSuiteDriver.MainXSD(args);
-            } else if (language == "XMark") {
-                XMarkBenchmark.XMark(args);
-            } else {
-                QT3TestSuiteDriver.MainQT(args);
+            switch (language) {
+                case "XT":
+                    Xslt30TestSuiteDriver.MainXSLT(args);
+                    break;
+                case "XSD":
+                    SchemaTestSuiteDriver.MainXSD(args);
+                    break;
+                case "XMark":
+                    XMarkBenchmark.XMark(args);
+                    break;
+                case "XQ" or "XP":
+                    QT3TestSuiteDriver.MainQT(args);
+                    break;
             }
         }
 
@@ -148,15 +151,18 @@ namespace TestDriver {
 
                 System.Environment.SetEnvironmentVariable("expath.base.directory", testSuiteDir + "/expath/file");
 
-                resultsDir = args[1];
-                if (resultsDir.EndsWith("/")) {
-                    resultsDir = resultsDir.Substring(0, resultsDir.Length - 1);
-                }
+                
 
                 string catalog = testSuiteDir + "/catalog.xml";
                 string specStr = null;
 
-                for (int i = 2; i < args.Length; i++) {
+                for (int i = 1; i < args.Length; i++) {
+                    if (args[i].StartsWith("-o")) {
+                        resultsDir = args[i].Substring(3);
+                        if (resultsDir.EndsWith("/")) {
+                            resultsDir = resultsDir.Substring(0, resultsDir.Length - 1);
+                        }
+                    }
                     if (args[i].StartsWith("-t:")) {
                         testPattern = new Regex(args[i].Substring(3));
                     }
@@ -238,7 +244,7 @@ namespace TestDriver {
 
         protected abstract void processSpec(string specStr);
 
-        internal class MyLogger : net.sf.saxon.lib.Logger {
+        internal class MyLogger : Saxon.Hej.lib.Logger {
             public MyLogger() {
                 // writer =File.CreateText("logger.txt");
             }

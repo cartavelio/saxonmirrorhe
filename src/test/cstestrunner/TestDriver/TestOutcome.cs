@@ -6,25 +6,25 @@ using System.IO;
 using Saxon.Api;
 using System.Collections;
 using System.Xml;
-using net.sf.saxon.om;
-using net.sf.saxon.regex;
-using net.sf.saxon.str;
-using JWhitespace = net.sf.saxon.value.Whitespace;
-using JFeatureKeys = net.sf.saxon.lib.FeatureKeys;
-using JDeepEqual = net.sf.saxon.functions.DeepEqual;
-using JSequenceIterator = net.sf.saxon.om.SequenceIterator;
-using JAxisInfo = net.sf.saxon.om.AxisInfo;
-using JGenericAtomicComparer = net.sf.saxon.expr.sort.GenericAtomicComparer;
-using JCodepointCollator = net.sf.saxon.expr.sort.CodepointCollator;
-using JItemMappingIterator = net.sf.saxon.expr.ItemMappingIterator;
-using JNodeInfo = net.sf.saxon.om.NodeInfo;
-using JNamespaceConstant = net.sf.saxon.lib.NamespaceConstant;
-using JXPathContext = net.sf.saxon.expr.XPathContext;
-using JConfiguration = net.sf.saxon.Configuration;
-using JRegularExpression = net.sf.saxon.regex.RegularExpression;
-using JItemMappingFunction = net.sf.saxon.expr.ItemMappingFunction;
-using JItem = net.sf.saxon.om.Item;
-using JGroundedValue = net.sf.saxon.om.GroundedValue;
+using Saxon.Hej.om;
+using Saxon.Hej.regex;
+using Saxon.Hej.str;
+using JWhitespace = Saxon.Hej.value.Whitespace;
+using JFeatureKeys = Saxon.Hej.lib.FeatureKeys;
+using JDeepEqual = Saxon.Hej.functions.DeepEqual;
+using JSequenceIterator = Saxon.Hej.om.SequenceIterator;
+using JAxisInfo = Saxon.Hej.om.AxisInfo;
+using JGenericAtomicComparer = Saxon.Hej.expr.sort.GenericAtomicComparer;
+using JCodepointCollator = Saxon.Hej.expr.sort.CodepointCollator;
+using JItemMappingIterator = Saxon.Hej.expr.ItemMappingIterator;
+using JNodeInfo = Saxon.Hej.om.NodeInfo;
+using JNamespaceConstant = Saxon.Hej.lib.NamespaceConstant;
+using JXPathContext = Saxon.Hej.expr.XPathContext;
+using JConfiguration = Saxon.Hej.Configuration;
+using JRegularExpression = Saxon.Hej.regex.RegularExpression;
+using JItemMappingFunction = Saxon.Hej.expr.ItemMappingFunction;
+using JItem = Saxon.Hej.om.Item;
+using JGroundedValue = Saxon.Hej.om.GroundedValue;
 
 namespace TestDriver {
     public class TestOutcome {
@@ -576,7 +576,7 @@ namespace TestDriver {
             else {
                 return result.value.Count == 1 &&
                        ((XdmAtomicValue) result.value.Simplify).IsAtomic() &&
-                       ((XdmAtomicValue) result.value.Simplify).GetPrimitiveTypeName().Equals(QName.XS_BOOLEAN) &&
+                       ((XdmAtomicValue) result.value.Simplify).PrimitiveTypeName.Equals(QName.XS_BOOLEAN) &&
                        !((XdmAtomicValue) result.value.Simplify).GetBooleanValue();
             }
         }
@@ -588,7 +588,7 @@ namespace TestDriver {
             else {
                 return result.value.Count == 1 &&
                        ((XdmAtomicValue) result.value.Simplify).IsAtomic() &&
-                       ((XdmAtomicValue) result.value.Simplify).GetPrimitiveTypeName().Equals(QName.XS_BOOLEAN) &&
+                       ((XdmAtomicValue) result.value.Simplify).PrimitiveTypeName.Equals(QName.XS_BOOLEAN) &&
                        ((XdmAtomicValue) result.value.Simplify).GetBooleanValue();
             }
         }
@@ -617,7 +617,7 @@ namespace TestDriver {
                 }
                 else {
                     bool first = true;
-                    //net.sf.saxon.tree.util.FastStringBuffer fsb = new net.sf.saxon.tree.util.FastStringBuffer(256);
+                    //Saxon.Hej.tree.util.FastStringBuffer fsb = new Saxon.Hej.tree.util.FastStringBuffer(256);
                     StringBuilder fsb = new StringBuilder(256);
                     foreach (XdmItem item in result.value) {
                         if (first) {
@@ -1004,7 +1004,7 @@ namespace TestDriver {
         private class RemoveWhitespace : JItemMappingFunction {
             public JItem mapItem(JItem it) {
                 JNodeInfo item = (JNodeInfo) it;
-                bool isWhite = item.getNodeKind() == net.sf.saxon.type.Type.TEXT &&
+                bool isWhite = item.getNodeKind() == Saxon.Hej.type.Type.TEXT &&
                                JWhitespace.isAllWhite(item.getUnicodeStringValue());
                 return (isWhite ? null : item);
             }
