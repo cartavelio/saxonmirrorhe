@@ -19,20 +19,19 @@ import net.sf.saxon.trans.XPathException;
 
 public class ComparisonException extends ClassCastException {
 
-    XPathException cause;
+    XPathException reason;
 
-    public ComparisonException(XPathException cause) {
-        this.cause = cause;
+    public ComparisonException(XPathException reason) {
+        this.reason = reason;
     }
 
     @Override
     public String getMessage() {
-        return cause.getMessage();
+        return reason.getMessage();
     }
-
-    @Override
-    public XPathException getCause() {
-        return cause;
+    
+    public XPathException getReason() {
+        return reason;
     }
 }
 

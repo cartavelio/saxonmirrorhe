@@ -20,8 +20,8 @@ import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AnyExternalObject;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.SequenceExtent;
 
 import javax.xml.transform.OutputKeys;
@@ -154,7 +154,7 @@ public class XdmValue implements Iterable<XdmItem> {
                 return new XdmArray((ArrayItem)first);
             } else if (first instanceof Function) {
                 return new XdmFunctionItem((Function) first);
-            } else if (first instanceof ExternalObject) {
+            } else if (first instanceof AnyExternalObject) {
                 return new XdmExternalObject(first);
             } else {
                 throw new IllegalArgumentException("Unknown item type " + first.getClass());

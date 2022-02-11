@@ -176,11 +176,8 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public String getRegexGroup(int number) {
-        return getRegexGroupUnicode(number).toString();
-    }
 
-    public UnicodeString getRegexGroupUnicode(int number) {
+    public UnicodeString getRegexGroup(int number) {
         if (!isMatching()) {
             return null;
         }

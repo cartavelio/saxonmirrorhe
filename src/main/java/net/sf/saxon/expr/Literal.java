@@ -581,10 +581,10 @@ public class Literal extends Expression {
             out.endElement();
         } else if (value instanceof Function) {
             ((Function) value).export(out);
-        } else if (value instanceof Item && ((Item)value).getGenre() == Genre.EXTERNAL) {
+        } else if (value instanceof AnyExternalObject) {
             if (((ExpressionPresenter.ExportOptions)out.getOptions()).explaining) {
                 out.startElement("externalObject");
-                out.emitAttribute("class", ((ExternalObject<?>)value).getObject().getClass().getName());
+                out.emitAttribute("class", ((AnyExternalObject)value).getWrappedObject().getClass().getName());
                 out.endElement();
             } else {
                 throw new XPathException("Cannot export a stylesheet containing literal values bound to external Java objects");

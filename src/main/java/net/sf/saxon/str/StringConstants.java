@@ -20,6 +20,7 @@ public class StringConstants {
 
     public static final UnicodeString MIN_LONG = new Twine8(bytes("-9223372036854775808"));
     public static final UnicodeString POINT_ZERO = new Twine8(bytes(".0"));
+    public static final UnicodeString ASTERISK = new Twine8(bytes("*"));
 
     public static final byte[] COMMENT_START = bytes("<!--");
     public static final byte[] COMMENT_END = bytes("-->");

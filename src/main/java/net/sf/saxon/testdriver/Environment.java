@@ -278,7 +278,7 @@ public class Environment implements URIResolver {
         // Support this only in EE - an unusable environment in PE/HE
         for (XdmItem stylesheet : xpc.evaluate("package[@role='secondary']", env)) {
             String fileName = ((XdmNode) stylesheet).attribute("file");
-            Source styleSource = new StreamSource(((XdmNode) env).getBaseURI().resolve(fileName).toString());
+            Source styleSource = new StreamSource(env.getBaseURI().resolve(fileName).toString());
             try {
                 XsltPackage pkg = environment.xsltCompiler.compilePackage(styleSource);
                 environment.xsltCompiler.importPackage(pkg);

@@ -22,7 +22,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 
 import java.io.Closeable;
@@ -257,7 +256,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         // Get an iterator over the items representing the resources
         SequenceIterator result = context.getConfiguration()
                 .getMultithreadedItemMappingIterator(sourceSeq,
-                                                     ItemMapper.of(it -> ((ExternalObject<Resource>) it).getObject().getItem(context)));
+                                                     ItemMapper.of(it -> ((ObjectValue<Resource>) it).getObject().getItem(context)));
 
         // In XSLT, apply space-stripping to document nodes in the collection
         if (whitespaceRule != null) {

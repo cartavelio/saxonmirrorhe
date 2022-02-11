@@ -444,7 +444,8 @@ public class XPathCompiler {
     }
 
     /**
-     * Say whether the compiler should maintain a cache of compiled expressions.
+     * Say whether the compiler should maintain a cache of compiled expressions. The initial
+     * default value is false.
      *
      * @param caching if set to true, caching of compiled expressions is enabled.
      *                If set to false, any existing cache is cleared, and future compiled expressions
@@ -570,12 +571,19 @@ public class XPathCompiler {
      * <code>for (XdmItem item : xpath.evaluate("//x", doc) {...}</code>
      * @throws SaxonApiException if any static error is detected while analyzing the expression,
      *                           or if any dynamic error is detected while evaluating it.
-     * @since 9.3
+     * @since 9.3. Changed in 11.0 to use FastCompilation (i.e., to suppress most optimizations)
      */
 
     public XdmValue evaluate(String expression, /*@Nullable*/ XdmItem contextItem) throws SaxonApiException {
         Objects.requireNonNull(expression);
+        boolean oldFastCompileOption = isFastCompilation();
+        if (!isCaching()) {
+            setFastCompilation(true);
+        }
         XPathSelector selector = compile(expression).load();
+        if (!isCaching()) {
+            setFastCompilation(oldFastCompileOption);
+        }
         if (contextItem != null) {
             selector.setContextItem(contextItem);
         }
@@ -596,12 +604,19 @@ public class XPathCompiler {
      * any items after the first are ignored.
      * @throws SaxonApiException if any static error is detected while analyzing the expression,
      *                           or if any dynamic error is detected while evaluating it.
-     * @since 9.3
+     * @since 9.3. Changed in 11.0 to use FastCompilation (i.e., to suppress most optimizations)
      */
 
     public XdmItem evaluateSingle(String expression, XdmItem contextItem) throws SaxonApiException {
         Objects.requireNonNull(expression);
+        boolean oldFastCompileOption = isFastCompilation();
+        if (!isCaching()) {
+            setFastCompilation(true);
+        }
         XPathSelector selector = compile(expression).load();
+        if (!isCaching()) {
+            setFastCompilation(oldFastCompileOption);
+        }
         if (contextItem != null) {
             selector.setContextItem(contextItem);
         }

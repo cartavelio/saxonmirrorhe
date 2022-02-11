@@ -480,9 +480,7 @@ public final class DayTimeDurationValue extends DurationValue
             BigDecimal v1 = getTotalSeconds();
             BigDecimal v2 = other.getTotalSeconds();
             if (v2.signum() == 0) {
-                XPathException err = new XPathException("Divide by zero (durations)");
-                err.setErrorCode("FOAR0001");
-                throw err;
+                throw new XPathException("Divide by zero (durations)", "FOAR0001");
             }
             return new BigDecimalValue(v1.divide(v2, 20, RoundingMode.HALF_EVEN));
         } else {

@@ -544,7 +544,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
                 actionOps[i].optimize(visitor, contextItemType);
             } catch (XPathException err) {
                 // mustn't throw the error unless the branch is actually selected, unless its a type error
-                if (err.isTypeError()) {
+                if (err.isTypeError() && !visitor.isInliningFunctions()) {
                     throw err;
                 } else {
                     ErrorExpression ee = new ErrorExpression(new XmlProcessingException(err));

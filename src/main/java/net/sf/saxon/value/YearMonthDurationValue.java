@@ -231,15 +231,11 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
             BigDecimal v1 = BigDecimal.valueOf(getLengthInMonths());
             BigDecimal v2 = BigDecimal.valueOf(((YearMonthDurationValue) other).getLengthInMonths());
             if (v2.signum() == 0) {
-                XPathException err = new XPathException("Divide by zero (durations)");
-                err.setErrorCode("FOAR0001");
-                throw err;
+                throw new XPathException("Divide by zero (durations)", "FOAR0001");
             }
             return new BigDecimalValue(v1.divide(v2, 20, RoundingMode.HALF_EVEN));
         } else {
-            XPathException err = new XPathException("Cannot divide two durations of different type");
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new XPathException("Cannot divide two durations of different type", "XPTY0004");
         }
     }
 

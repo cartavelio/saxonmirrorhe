@@ -611,10 +611,10 @@ public abstract class PJConverter {
 
         @Override
         public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
-            if (value instanceof ExternalObject && targetClass.isAssignableFrom(((ExternalObject) value).getObject().getClass())) {
-                return ((ExternalObject) value).getObject();
+            if (value instanceof AnyExternalObject && targetClass.isAssignableFrom(((AnyExternalObject) value).getWrappedObject().getClass())) {
+                return ((AnyExternalObject) value).getWrappedObject();
             }
-            Class componentClass = targetClass.getComponentType();
+            Class<?> componentClass = targetClass.getComponentType();
             List<Object> list = new ArrayList<>(20);
             SequenceIterator iter = value.iterate();
             Item item;
@@ -753,7 +753,7 @@ public abstract class PJConverter {
             if (head == null) {
                 return null;
             }
-            if (!(head instanceof ExternalObject)) {
+            if (!(head instanceof AnyExternalObject)) {
                 if (Sequence.class.isAssignableFrom(targetClass)) {
                     head = new ObjectValue<>(value);
                 } else {
@@ -761,7 +761,7 @@ public abstract class PJConverter {
                             ", got " + head.getClass());
                 }
             }
-            Object obj = ((ExternalObject) head).getObject();
+            Object obj = ((AnyExternalObject) head).getWrappedObject();
             if (!targetClass.isAssignableFrom(obj.getClass())) {
                 throw new XPathException("External object has wrong class (is "
                         + obj.getClass().getName() + ", expected " + targetClass.getName() + ")");

@@ -99,7 +99,7 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
         long i=0;
         while (iter.hasNext()) {
             int ch = iter.next();
-            if (!map.find(ch)) {
+            if (!map.contains(ch)) {
                 map.put(ch, i >= arg2len ? -1 : arg2.getContent().codePointAt(i));
             }
             i++;
