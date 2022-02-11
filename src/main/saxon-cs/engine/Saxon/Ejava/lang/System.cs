@@ -29,7 +29,7 @@ namespace Saxon.Ejava.lang
                 return Sys.Environment.CurrentDirectory;
             } else if (name == "line.separator") {
                 return Sys.Environment.NewLine;
-            } else if (name == "Saxon.Ejava.io.tmpdir") {
+            } else if (name == "java.io.tmpdir") {
                 return SysIO.Path.GetTempPath();
             }
             return Sys.Environment.GetEnvironmentVariable(name);
