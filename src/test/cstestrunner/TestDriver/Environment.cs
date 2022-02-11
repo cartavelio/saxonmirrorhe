@@ -315,7 +315,9 @@ namespace TestDriver {
                 if (defaultAtt != null && (defaultAtt.Trim().Equals("true") || defaultAtt.Trim().Equals("1"))) {
                     environment.xpathCompiler.DeclareDefaultCollation(uri);
                     //environment.xqueryCompiler.DeclareCollation(uri, true);
-                    environment.xsltCompiler.DefaultCollationName = uri;
+                    if (environment.xsltCompiler != null) {
+                        environment.xsltCompiler.DefaultCollationName = uri;
+                    }
                 }
             }
         }
