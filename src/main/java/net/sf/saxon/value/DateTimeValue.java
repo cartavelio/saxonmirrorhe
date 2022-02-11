@@ -27,7 +27,6 @@ import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -1524,7 +1523,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     @Override
-    public int compareTo(@NotNull XPathComparable v2) {
+    public int compareTo(XPathComparable v2) {
         if (v2 instanceof DateTimeValue) {
             try {
                 return compareTo((DateTimeValue)v2, MISSING_TIMEZONE);

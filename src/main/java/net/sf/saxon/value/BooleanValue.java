@@ -17,7 +17,6 @@ import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * A boolean XPath value
@@ -216,7 +215,7 @@ public final class BooleanValue extends AtomicValue implements XPathComparable, 
      */
 
     @Override
-    public int compareTo(@NotNull XPathComparable other) {
+    public int compareTo(XPathComparable other) {
         if (other instanceof BooleanValue) {
             if (value == ((BooleanValue)other).value) {
                 return 0;

@@ -25,7 +25,6 @@ import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.tree.linked.TextImpl;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
-import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
@@ -285,7 +284,6 @@ public class StyleNodeFactory implements NodeFactory {
         }
     }
 
-    @NotNull
     @CSharpReplaceBody(code = "return (net.sf.saxon.style.StyleElement)System.Activator.CreateInstance(actualClass);")
     protected StyleElement makeStyleElement(Class<? extends StyleElement> actualClass) {
         StyleElement node;

@@ -1,7 +1,5 @@
 package net.sf.saxon.resource;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -81,7 +79,7 @@ public class Loader {
      * @return An InputStream for the resource content.
      * @throws IOException If more than MAX_REDIRECTS are occur or if a loop is detected.
      */
-    public static InputStream urlStream(@NotNull URL url) throws IOException  {
+    public static InputStream urlStream(URL url) throws IOException  {
         URLConnection conn = Loader.urlConnection(url);
         InputStream inputStream =  conn.getInputStream();
         String contentEncoding = conn.getContentEncoding();

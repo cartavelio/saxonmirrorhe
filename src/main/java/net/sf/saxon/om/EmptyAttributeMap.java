@@ -7,9 +7,6 @@
 
 package net.sf.saxon.om;
 
-
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -64,7 +61,7 @@ public class EmptyAttributeMap implements AttributeMap {
     }
 
     @Override
-    public @NotNull Iterator<AttributeInfo> iterator() {
+    public Iterator<AttributeInfo> iterator() {
         return Collections.emptyIterator();
     }
 

@@ -1,7 +1,5 @@
 package net.sf.saxon.tree.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.Iterator;
@@ -146,7 +144,7 @@ public class IndexedStack<T> implements Iterable<T>{
      * @return an iterator that starts at the bottom of the stack and proceeds to the top
      */
 
-    public @NotNull Iterator<T> iterator() {
+    public Iterator<T> iterator() {
         return items.iterator();
     }
 

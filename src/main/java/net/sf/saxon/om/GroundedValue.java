@@ -13,7 +13,6 @@ import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * A value that exists in memory and that can be directly addressed
@@ -157,7 +156,7 @@ public interface GroundedValue extends Sequence {
         return Err.depictSequence(this).toString();
     }
 
-    default @NotNull Iterable<? extends Item> asIterable() {
+    default Iterable<? extends Item> asIterable() {
         return new GroundedValueAsIterable<Item>(this);
     }
 

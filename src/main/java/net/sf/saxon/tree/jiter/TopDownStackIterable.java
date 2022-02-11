@@ -1,7 +1,5 @@
 package net.sf.saxon.tree.jiter;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Iterator;
 import java.util.Stack;
 
@@ -22,7 +20,7 @@ public class TopDownStackIterable<T> implements Iterable<T> {
      * Returns an iterator over elements in the stack, starting at the top of stack and proceeding to the bottom
      * @return a descending Iterator.
      */
-    @NotNull
+
     @Override
     public Iterator<T> iterator() {
         return new Iterator<T>() {

@@ -99,7 +99,6 @@ dependencies {
     [group: 'xml-resolver', name: 'xml-resolver', version: '1.2' ],
     [group: 'com.ibm.icu', name: 'icu4j', version: icu4jVersion ],
     [group: 'jline', name: 'jline', version: jlineVersion ],
-    [group: 'org.jetbrains', name: 'annotations', version: '20.1.0' ],
     [group: 'com.github.javaparser', name: 'javaparser-symbol-solver-core', version: '3.17.0'],
     [group: 'com.github.javaparser', name: 'javaparser-core', version: '3.17.0'],
     // PE and EE
