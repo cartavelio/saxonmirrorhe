@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using Saxon.Api;
 using TestRunner;
+using static Saxon.Api.Steps;
+using static Saxon.Api.Predicates;
 
 // file:////C:/work/repositories/hg/qt3-testsuite/ C:/work/repositories/hg/qt3-testsuite/results/saxon/ -lang:XQ30
 //using net.sf.saxon.Version;
@@ -91,7 +93,7 @@ namespace TestRunner {
             catch (Exception) {
             }
 
-            foreach (XdmNode env in catalog.Select(Steps.Descendant("environment"))) {
+            foreach (XdmNode env in catalog.Select(Descendant("environment"))) {
                 environment = Environment.processEnvironment(
                     this, xpc, env, globalEnvironments, defaultEnv);
             }
@@ -118,12 +120,13 @@ namespace TestRunner {
                 }
 
                 if (value.Contains("1.1") && !inverse) {
-                    if (env != null) {
-                        env.processor.SetProperty(JFeatureKeys.XML_VERSION, "1.1");
-                    }
-                    else {
-                        return false;
-                    }
+                    return false;
+                    // if (env != null) {
+                    //     env.processor.SetProperty(JFeatureKeys.XML_VERSION, "1.1");
+                    // }
+                    // else {
+                    //     return false;
+                    // }
                 }
                 else if (value.Contains("1.0") && !inverse) {
                     if (env != null) {
@@ -173,7 +176,7 @@ namespace TestRunner {
                 return ("true".Equals(value) != inverse);
             }
             else if ("language".Equals(type)) {
-                return (("en".Equals(value) || "de".Equals(value) || "fr".Equals(value)) != inverse);
+                return "en".Equals(value) != inverse;
             }
             else if ("calendar".Equals(type)) {
                 return (("AD".Equals(value) || "ISO".Equals(value)) != inverse);
@@ -305,58 +308,58 @@ namespace TestRunner {
         }
         
 
-    protected bool makeSchemaAware(Environment env, bool inverse) {
-         // if (!env.processor.SchemaAware) {
-         //     return false; // cannot use the selected tree model for schema-aware tests
-         // }
+        protected bool makeSchemaAware(Environment env, bool inverse) {
+            // if (!env.processor.SchemaAware) {
+            //     return false; // cannot use the selected tree model for schema-aware tests
+            // }
 
-         if (inverse) {
-             // force use of a non-schema-aware processor by creating a ProfessionalConfiguration
-             Processor savedProcessor = env.processor;
-             com.saxonica.config.ProfessionalConfiguration pConfig = new com.saxonica.config.ProfessionalConfiguration();
-             pConfig.setNamePool(env.processor.Implementation.getNamePool());
-             env.processor = new Processor(pConfig);
-             env.processor.SetProperty(Feature<bool>.STABLE_UNPARSED_TEXT, true);
+            if (inverse) {
+                // force use of a non-schema-aware processor by creating a ProfessionalConfiguration
+                Processor savedProcessor = env.processor;
+                com.saxonica.config.ProfessionalConfiguration pConfig = new com.saxonica.config.ProfessionalConfiguration();
+                pConfig.setNamePool(env.processor.Implementation.getNamePool());
+                env.processor = new Processor(pConfig);
+                env.processor.SetProperty(Feature<bool>.STABLE_UNPARSED_TEXT, true);
 
 
-             // Note that at present no variables are copied across
-             bool xpcState = env.xpathCompiler.SchemaAware;
-             bool xqcState = env.xqueryCompiler.SchemaAware;
-             bool xtState = env.xsltCompiler != null && env.xsltCompiler.SchemaAware;
-             env.xpathCompiler = env.processor.NewXPathCompiler();
-             env.xqueryCompiler = env.processor.NewXQueryCompiler();
-             env.xsltCompiler = env.processor.NewXsltCompiler();
-             env.xpathCompiler.SchemaAware = false;
-             env.xqueryCompiler.SchemaAware = false;
-             env.xsltCompiler.SchemaAware = false;
-             env.resetActions.Add((envt) =>  {
-                 envt.xpathCompiler.SchemaAware = (xpcState);
-                 envt.xqueryCompiler.SchemaAware = (xqcState);
-                     if (envt.xsltCompiler != null) {
-                         envt.xsltCompiler.SchemaAware = (xtState);
-                     }
-                 }
-                 );
-         } else {
-             bool xpcState = env.xpathCompiler.SchemaAware;
-             bool xqcState = env.xqueryCompiler.SchemaAware;
-             bool xtState = env.xsltCompiler != null && env.xsltCompiler.SchemaAware;
-             env.xpathCompiler.SchemaAware = (true);
-             env.xqueryCompiler.SchemaAware = (true);
-             if (env.xsltCompiler != null) {
-                env.xsltCompiler.SchemaAware = (true);
-             }
-             env.resetActions.Add((envt) =>  {
-                     envt.xpathCompiler.SchemaAware=(xpcState);
-                     envt.xqueryCompiler.SchemaAware=(xqcState);
-                     if (envt.xsltCompiler != null) {
-                         envt.xsltCompiler.SchemaAware=(xtState);
-                     }
-                 });
-         }
+                // Note that at present no variables are copied across
+                bool xpcState = env.xpathCompiler.SchemaAware;
+                bool xqcState = env.xqueryCompiler.SchemaAware;
+                bool xtState = env.xsltCompiler != null && env.xsltCompiler.SchemaAware;
+                env.xpathCompiler = env.processor.NewXPathCompiler();
+                env.xqueryCompiler = env.processor.NewXQueryCompiler();
+                env.xsltCompiler = env.processor.NewXsltCompiler();
+                env.xpathCompiler.SchemaAware = false;
+                env.xqueryCompiler.SchemaAware = false;
+                env.xsltCompiler.SchemaAware = false;
+                env.resetActions.Add((envt) =>  {
+                        envt.xpathCompiler.SchemaAware = (xpcState);
+                        envt.xqueryCompiler.SchemaAware = (xqcState);
+                        if (envt.xsltCompiler != null) {
+                            envt.xsltCompiler.SchemaAware = (xtState);
+                        }
+                    }
+                );
+            } else {
+                bool xpcState = env.xpathCompiler.SchemaAware;
+                bool xqcState = env.xqueryCompiler.SchemaAware;
+                bool xtState = env.xsltCompiler != null && env.xsltCompiler.SchemaAware;
+                env.xpathCompiler.SchemaAware = (true);
+                env.xqueryCompiler.SchemaAware = (true);
+                if (env.xsltCompiler != null) {
+                    env.xsltCompiler.SchemaAware = (true);
+                }
+                env.resetActions.Add((envt) =>  {
+                    envt.xpathCompiler.SchemaAware=(xpcState);
+                    envt.xqueryCompiler.SchemaAware=(xqcState);
+                    if (envt.xsltCompiler != null) {
+                        envt.xsltCompiler.SchemaAware=(xtState);
+                    }
+                });
+            }
 
-         return true;
-     }
+            return true;
+        }
 
         private bool isSlow(String name) {
             return name == "RangeExpr-409d" || name.StartsWith("unicode90");
@@ -380,17 +383,17 @@ namespace TestRunner {
             string testCaseName = testCase.GetAttributeValue(new QName("name"));
             string testSetName = testCase.Parent.GetAttributeValue(new QName("name"));
 
-            XdmNode resultElement = testCase.Select(Steps.Child("result")).FirstOrDefault();
+            XdmNode resultElement = testCase.Select(Child("result")).FirstOrDefault();
             ;
-            bool needSerializedResult = resultElement.Select(Steps.Descendant("assert-serialization-error")).Any()
-                                        || resultElement.Select(Steps.Descendant("serialization-matches")).Any();
+            bool needSerializedResult = resultElement.Select(Descendant("assert-serialization-error")).Any()
+                                        || resultElement.Select(Descendant("serialization-matches")).Any();
             bool needResultValue = true;
             if (needSerializedResult) {
-                needResultValue = resultElement.Select(Steps.Descendant(Predicates.IsElement()).Where(Predicates.Not(
-                    Predicates.HasLocalName("serialization-matches")
-                        .Or(Predicates.HasLocalName("assert-serialization-error"))
-                        .Or(Predicates.HasLocalName("any-of"))
-                        .Or(Predicates.HasLocalName("all-of"))))).Any();
+                needResultValue = resultElement.Select(Descendant(IsElement()).Where(Not(AnyOf(
+                    HasLocalName("serialization-matches"),
+                    HasLocalName("assert-serialization-error"),
+                    HasLocalName("any-of"),
+                    HasLocalName("all-of"))))).Any();
             }
 
 
@@ -419,15 +422,15 @@ namespace TestRunner {
 			Console.WriteLine ("ICUNum: " + (icuNumCheck ? "true" : "false"));*/
             //end of test
             SysCollGen.IList<XdmNode> dependencies =
-                new SysCollGen.List<XdmNode>(testCase.Select(Steps.Child("dependency")));
-            dependencies.Concat(testCase.Select(Steps.Child("dependency")));
+                new SysCollGen.List<XdmNode>(testCase.Select(Child("dependency")));
+            dependencies.Concat(testCase.Select(Child("dependency")));
             foreach (XdmNode dependency in dependencies) {
-                string type = (dependency).GetAttributeValue(new QName("type"));
+                string type = dependency.GetAttributeValue("type");
                 if (type == null) {
                     // throw new IllegalStateException("dependency/@type is missing"); //TODO
                 }
 
-                string value = (dependency).GetAttributeValue(new QName("value"));
+                string value = (dependency).GetAttributeValue("value");
                 if (value == null) {
                     //throw new IllegalStateException("dependency/@value is missing"); //TODO
                 }
@@ -714,6 +717,9 @@ namespace TestRunner {
 
                 XPathCompiler assertXpc = env.processor.NewXPathCompiler();
                 assertXpc.XPathLanguageVersion = "3.1";
+                if (env.xpathCompiler.SchemaAware || env.xqueryCompiler.SchemaAware) {
+                    assertXpc.SchemaAware = true;
+                }
                 assertXpc.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
                 assertXpc.DeclareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
                 assertXpc.DeclareNamespace("math", "http://www.w3.org/2005/xpath-functions/math");
@@ -932,7 +938,7 @@ namespace TestRunner {
         private void buildDependencyDictionary(Processor processor, Environment env) {
             XQueryCompiler xqCompiler = processor.NewXQueryCompiler();
             xqCompiler.XQueryLanguageVersion = "3.1";
-            xqCompiler.BaseUri = Path.GetFullPath(testSuiteDir) + "/";
+            xqCompiler.BaseUri = System.IO.Path.GetFullPath(testSuiteDir) + "/";
             XdmValue result = xqCompiler.Compile(
                 "        declare namespace fots = \"http://www.w3.org/2010/09/qt-fots-catalog\";\n" +
                 "        let $testsets := doc('" + testSuiteDir +

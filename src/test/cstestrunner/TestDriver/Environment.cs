@@ -28,6 +28,7 @@ using net.sf.saxon.expr;
 using net.sf.saxon.lib;
 using net.sf.saxon.om;
 using net.sf.saxon.resource;
+using net.sf.saxon.style;
 using Saxon.Impl.Helpers;
 using TestRunner;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
@@ -350,19 +351,24 @@ namespace TestRunner {
                     String href = ((XdmNode) schema).GetAttributeValue(new QName("file"));
                     String ns = schema.GetAttributeValue("uri");
                     if (href == null) {
-                        Uri uri = res.ResolveUri(null, ns);
-                        Console.Error.WriteLine("Load schema document " + uri);
-                        Stream file = KnownResourceFinder.fetchSystemId(uri.ToString(), config).stream;
-                        if (file == null) {
-                            file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                        if (ns == "http://www.w3.org/2005/xpath-functions") {
+                            Console.Error.WriteLine("No need to load schema document " + ns);
                         }
+                        else {
+                            Uri uri = res.ResolveUri(null, ns);
+                            Console.Error.WriteLine("Load schema document " + uri);
+                            Stream file = KnownResourceFinder.fetchSystemId(uri.ToString(), config).stream;
+                            if (file == null) {
+                                file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                            }
 
-                        try {
-                            manager.Compile(file, uri);
-                        }
-                        catch (Exception err) {
-                            System.Console.WriteLine("*** Failed to load schema: " + err.Message + ", Trace:" +
-                                                     err.StackTrace);
+                            try {
+                                manager.Compile(file, uri);
+                            }
+                            catch (Exception err) {
+                                System.Console.WriteLine("*** Failed to load schema: " + err.Message + ", Trace:" +
+                                                         err.StackTrace);
+                            }
                         }
                     }
                     else {
@@ -503,34 +509,72 @@ namespace TestRunner {
             // for that resource
             
             foreach (XdmItem resource in xpc.Evaluate("resource", env)) {
-                String uri = ((XdmNode) resource).GetAttributeValue(new QName("uri"));
+                String nominalUriStr = ((XdmNode) resource).GetAttributeValue(new QName("uri"));
+                Uri nominalUri = new Uri(nominalUriStr, UriKind.RelativeOrAbsolute);
+                if (!nominalUri.IsAbsoluteUri) {
+                    nominalUri = new Uri(((XdmNode) env).BaseUri, nominalUri);
+                }
                 String href = ((XdmNode) resource).GetAttributeValue(new QName("file"));
                 String encoding = ((XdmNode) resource).GetAttributeValue(new QName("encoding"));
+                if (encoding == null) {
+                    encoding = "utf-8"; // TODO: should infer from content etc?
+                }
+                
+                Encoding enc1 = Encoding.GetEncoding(encoding, 
+                    EncoderFallback.ExceptionFallback, 
+                    new DecoderExceptionFallback());
                 String mediaType = ((XdmNode) resource).GetAttributeValue(new QName("media-type"));
                 if (href != null) {
                     if (href.StartsWith("http")) {
-                        resources.Add(new Uri(uri), () => {
+                        resources.Add(nominalUri, () => {
                             WebClient wc = new WebClient();
-                            string str = wc.DownloadString(href);
+                            wc.Encoding = enc1;
+                            byte[] content = wc.DownloadData(href);
+                            string str = enc1.GetString(content);
+                            //string str = wc.DownloadString(href);
                             return new StringReader(str);
                         });
                     }
                     else {
                         Uri resourceUri = new Uri(((XdmNode) env).BaseUri, href);
-                        Uri alias = new Uri(uri, UriKind.RelativeOrAbsolute);
-                        if (!alias.IsAbsoluteUri) {
-                            alias = new Uri(((XdmNode) env).BaseUri, alias);
-                        }
-                        resources.Add(alias, () => {
-                            WebClient wc = new WebClient();
-                            string str = wc.DownloadString(resourceUri);
-                            return new StringReader(str);
+                        // //Uri alias = new Uri(uri, UriKind.RelativeOrAbsolute);
+                        // if (!resourceUri.IsAbsoluteUri) {
+                        //     alias = new Uri(((XdmNode) env).BaseUri, alias);
+                        // }
+
+                        
+                        resources.Add(nominalUri, () => {
+                            try {
+                                // TODO: this logic should surely be in the standard UnparsedTextResolver?
+                                WebClient wc = new WebClient();
+                                byte[] content = wc.DownloadData(resourceUri);
+                                Encoding enc2 = enc1;
+                                if (encoding == "utf-16" && content.Length >= 2) {
+                                    // Seems we need to resolve endianness ourselves
+                                    if (content[0] == 0xfe && content[1] == 0xff) {
+                                        enc2 = Encoding.BigEndianUnicode;
+                                    } else if (content[0] == 0xff && content[1] == 0xfe) {
+                                        enc2 = Encoding.Unicode;
+                                    }
+                                }
+                                string str = enc2.GetString(content);
+                                if (str.Length > 0 && str[0] == 0xfffe) {
+                                    str = str.Substring(1);
+                                }
+                                //string str = wc.DownloadString(href);
+                                return new StringReader(str);
+                            }
+                            catch (System.Text.DecoderFallbackException e) {
+                                throw new JXpathException(e.Message, "FOUT1190");
+                            }
                         });
+                        
                     }
+                    
 
                     try {
-                        encodings.Add(new Uri(uri), encoding);
-                        // TODO: apply the encoding within the WebClient function above
+                        encodings.Add(nominalUri, encoding);
+                        
 
                         // environment.catalogResources.Add();
                     }
@@ -539,7 +583,7 @@ namespace TestRunner {
                     }
 
                     if (mediaType != null && mediaType.EndsWith("xquery")) {
-                        driver.RegisterXQueryModule(new Uri(uri),
+                        driver.RegisterXQueryModule(nominalUri,
                             res.ResolveUri(((XdmNode) env).BaseUri, href).AbsolutePath);
                     }
                 }
@@ -624,7 +668,7 @@ namespace TestRunner {
                 
                 Uri u;
                 try {
-                    u = new Uri(collectionURI);
+                    u = new Uri(collectionURI, UriKind.RelativeOrAbsolute);
                 }
                 catch (Exception e) {
                     driver.println("**** Invalid collection URI " + collectionURI);
@@ -634,6 +678,7 @@ namespace TestRunner {
                 if (!collectionURI.Equals("") && !u.IsAbsoluteUri) {
                     u = res.ResolveUri(env.BaseUri, collectionURI);
                     collectionURI = u.ToString();
+                    driver.println("Registering collection URI: " + collectionURI);
                 }
         
                 ExplicitResourceCollection collection = new ExplicitResourceCollection(collectionURI, resourceList);

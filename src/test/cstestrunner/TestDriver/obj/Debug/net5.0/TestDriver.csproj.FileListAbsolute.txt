@@ -22,3 +22,15 @@
 /Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/obj/Debug/net5.0/TestDriver.pdb
 /Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/obj/Debug/net5.0/TestDriver.genruntimeconfig.cache
 /Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/HtmlAgilityPack.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/ICU4N.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/ICU4N.LanguageData.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/J2N.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.Extensions.Caching.Abstractions.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.Extensions.Caching.Memory.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.Extensions.Options.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.Extensions.Primitives.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/ICU4N.Collation.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/ICU4N.CurrencyData.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/ICU4N.RegionData.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/ICU4N.Transliterator.dll
