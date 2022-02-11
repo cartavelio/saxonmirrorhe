@@ -1398,10 +1398,16 @@
       <xsl:variable name="includeThis" 
          select="not($directive/pairs/pair[name/@identifier='outer']/value/@value='false')
          and not(ancestor::member[1]/modifiers/modifier[@keyword='STATIC'])"/>
-      <xsl:variable name="containingClass" select="ancestor::*[@nodeType='ClassOrInterfaceDeclaration'][1]/name/@identifier" as="xs:string"/>
+      <xsl:variable name="containingClassDecl" select="ancestor::*[@nodeType='ClassOrInterfaceDeclaration'][1]"/>
+      <xsl:variable name="containingClass" select="$containingClassDecl/name/@identifier" as="xs:string"/>
+      <xsl:variable name="containingClassParams" as="xs:string?">
+         <xsl:if test="$containingClassDecl/typeParameters/typeParameter">
+            <xsl:text>&lt;{string-join($containingClassDecl/typeParameters/typeParameter/name/@identifier, ',')}&gt;</xsl:text>
+         </xsl:if>
+      </xsl:variable>
       <xsl:if test="$includeThis">
          <xsl:call-template name="indent-extra"/>
-         <xsl:text>private readonly {$containingClass} outerInstance;{$NL}</xsl:text>
+         <xsl:text>private readonly {$containingClass}{$containingClassParams} outerInstance;{$NL}</xsl:text>
       </xsl:if>
       <xsl:call-template name="indent-extra"/>
       
@@ -1411,13 +1417,13 @@
       <xsl:variable name="extraParams" select="$directive/pairs/pair[name/@identifier='extra']//value/@value"/>
       <xsl:variable name="constructedParams" as="xs:string*">
          <xsl:if test="$includeThis">
-            <xsl:sequence select="$containingClass || ' outerInstance'"/>
+            <xsl:text>{$containingClass}{$containingClassParams} outerInstance</xsl:text>
          </xsl:if>
          <xsl:for-each select="../arguments/argument">
             <xsl:variable name="declaredType" as="text()">
                <xsl:choose>
                   <xsl:when test="@RESOLVED_TYPE">{f:escapeDottedName(@RESOLVED_TYPE)}</xsl:when>
-                  <xsl:when test="@nodeType='ThisExpr'">{$containingClass}</xsl:when>
+                  <xsl:when test="@nodeType='ThisExpr'">{$containingClass}{$containingClassParams}</xsl:when>
                   <xsl:otherwise>/* UNKNOWN ARG TYPE */ object</xsl:otherwise>
                </xsl:choose>
             </xsl:variable>
