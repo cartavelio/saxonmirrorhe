@@ -101,7 +101,7 @@ public final class TailCallLoop extends UnaryExpression {
         final XPathContextMajor cm = (XPathContextMajor) context;
         while (true) {
             SequenceIterator iter = getBaseExpression().iterate(cm);
-            GroundedValue extent = iter.materialize();
+            GroundedValue extent = SequenceTool.toGroundedValue(iter);
             TailCallInfo tail = cm.getTailCallInfo();
             if (tail == null) {
                 return extent.iterate();

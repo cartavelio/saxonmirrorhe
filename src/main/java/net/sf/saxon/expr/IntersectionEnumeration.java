@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.Comparator;
@@ -54,16 +55,16 @@ public class IntersectionEnumeration implements SequenceIterator {
      *
      * @param iter the iterator from which the next item is to be taken
      * @return the next value returned by that iterator
-     * @throws XPathException if a failure occurs reading from the input sequence
+     * @throws UncheckedXPathException if a failure occurs reading from the input sequence
      */
 
-    private NodeInfo nextNode(SequenceIterator iter) throws XPathException {
+    private NodeInfo nextNode(SequenceIterator iter) {
         return (NodeInfo)iter.next();
         // rely on type-checking to prevent a ClassCastException
     }
 
     @Override
-    public NodeInfo next() throws XPathException {
+    public NodeInfo next() {
         // main merge loop: iterate whichever sequence has the lower value, returning when a pair
         // is found that match.
 

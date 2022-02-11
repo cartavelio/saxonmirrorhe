@@ -300,7 +300,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         }
 
         private void processSequence(Sequence in, AtomicValue key, List<GroundedValue> result) throws XPathException {
-            in.iterate().forEachOrFail(item -> {
+            SequenceTool.supply(in.iterate(), (ItemConsumer<? super Item>) item -> {
                 if (item instanceof ArrayItem) {
                     for (Sequence sequence : ((ArrayItem) item).members()) {
                         processSequence(sequence, key, result);
@@ -328,7 +328,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             AtomicValue key = (AtomicValue) arguments[0].head();
             assert key != null;
-            GroundedValue value = arguments[1].iterate().materialize();
+            GroundedValue value = SequenceTool.toGroundedValue(arguments[1].iterate());
             return new SingleEntryMap(key, value);
         }
 
@@ -562,7 +562,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                         case "combine":
                                             InsertBefore.InsertIterator combinedIter =
                                                     new InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
-                                            GroundedValue combinedValue = combinedIter.materialize();
+                                            GroundedValue combinedValue = SequenceTool.toGroundedValue(combinedIter);
                                             baseMap.initialPut(pair.key.getStringValue(), combinedValue);
                                             break;
                                         case "use-callback":
@@ -611,14 +611,14 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                     case "combine": {
                                         InsertBefore.InsertIterator combinedIter =
                                                 new InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
-                                        GroundedValue combinedValue = combinedIter.materialize();
+                                        GroundedValue combinedValue = SequenceTool.toGroundedValue(combinedIter);
                                         larger = larger.addEntry(pair.key, combinedValue);
                                         break;
                                     }
                                     case "combine-reverse": {
                                         InsertBefore.InsertIterator combinedIter =
                                                 new InsertBefore.InsertIterator(existing.iterate(), pair.value.iterate(), 1);
-                                        GroundedValue combinedValue = combinedIter.materialize();
+                                        GroundedValue combinedValue = SequenceTool.toGroundedValue(combinedIter);
                                         larger = larger.addEntry(pair.key, combinedValue);
                                         break;
                                     }

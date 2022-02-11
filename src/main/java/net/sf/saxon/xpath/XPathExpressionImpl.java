@@ -236,7 +236,7 @@ public class XPathExpressionImpl implements XPathExpression {
             } else if (qName.equals(XPathConstants.NODESET)) {
                 context.openStackFrame(stackFrameMap);
                 SequenceIterator iter = expression.iterate(context);
-                GroundedValue extent = iter.materialize();
+                GroundedValue extent = SequenceTool.toGroundedValue(iter);
                 PJConverter pj = PJConverter.allocateNodeListCreator(config, node);
                 return pj.convert(extent, Object.class, context);
             } else {

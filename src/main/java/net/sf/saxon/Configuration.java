@@ -48,15 +48,13 @@ import net.sf.saxon.trace.XSLTTraceCodeInjector;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.packages.IPackageLoader;
 import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TreeStatistics;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
-import net.sf.saxon.z.IntHashMap;
-import net.sf.saxon.z.IntHashSet;
-import net.sf.saxon.z.IntPredicateProxy;
-import net.sf.saxon.z.IntSet;
+import net.sf.saxon.z.*;
 import org.xml.sax.*;
 import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.ext.LexicalHandler;
@@ -134,7 +132,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     private Predicate<URI> allowedUriTest = uri -> true;
     private final StandardCollectionFinder standardCollectionFinder = new StandardCollectionFinder();
-    private CollectionFinder collectionFinder = standardCollectionFinder;
+    private CollectionFinder collectionFinder;
     private EnvironmentVariableResolver environmentVariableResolver = new StandardEnvironmentVariableResolver();
     private String defaultCollection = null;
     private final ParseOptions defaultParseOptions = new ParseOptions();
@@ -142,7 +140,7 @@ public class Configuration implements SourceResolver, NotationSet {
     protected transient StaticQueryContext defaultStaticQueryContext;
     private StaticQueryContextFactory staticQueryContextFactory = new StaticQueryContextFactory();
     protected OptimizerOptions optimizerOptions = OptimizerOptions.FULL_HE_OPTIMIZATION;
-    protected CompilerInfo defaultXsltCompilerInfo = makeCompilerInfo();
+    protected CompilerInfo defaultXsltCompilerInfo;
     private java.util.function.Function<Configuration, ? extends ErrorReporter> errorReporterFactory = config -> {
         StandardErrorReporter reporter = new StandardErrorReporter();
         reporter.setLogger(config.getLogger());
@@ -175,15 +173,15 @@ public class Configuration implements SourceResolver, NotationSet {
 
     protected Optimizer optimizer = null;
 
-    private SerializerFactory serializerFactory = new SerializerFactory(this);
+    private SerializerFactory serializerFactory;
     //#if CSHARP==false
     private volatile ConcurrentLinkedQueue<XMLReader> sourceParserPool = new ConcurrentLinkedQueue<>();
     private volatile ConcurrentLinkedQueue<XMLReader> styleParserPool = new ConcurrentLinkedQueue<>();
     //#endif
     private String sourceParserClass;
-    private transient SourceResolver sourceResolver = this;
+    private transient SourceResolver sourceResolver;
     private transient Logger traceOutput = new StandardLogger();
-    private final ModuleURIResolver standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
+    private ModuleURIResolver standardModuleURIResolver;
     private String styleParserClass;
     private final StandardURIResolver systemURIResolver = new StandardURIResolver(this);
     private UnparsedTextURIResolver unparsedTextURIResolver = new StandardUnparsedTextResolver();
@@ -205,7 +203,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private int xpathVersionForXsd = 20;
     private int xpathVersionForXslt = 31;
     // Plug-in to allow media queries in an xml-stylesheet processing instruction to be evaluated
-    private Comparator<String> mediaQueryEvaluator = (o1, o2) -> 0;
+    private Comparator<String> mediaQueryEvaluator;
     private final Map<String, String> fileExtensions = new HashMap<>();
     private final Map<String, ResourceFactory> resourceFactoryMapping = new HashMap<>();
     private final Map<String, FunctionAnnotationHandler> functionAnnotationHandlers = new HashMap<>();
@@ -385,6 +383,17 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     protected void init() {
+
+        // Note that some initializations have been moved here because C# is more restrictive about
+        // how fields can be initialized when first declared.
+
+        collectionFinder = standardCollectionFinder;
+        defaultXsltCompilerInfo = makeCompilerInfo();
+        standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
+        serializerFactory = new net.sf.saxon.lib.SerializerFactory(this);
+        sourceResolver = this;
+        mediaQueryEvaluator = (o1, o2) -> 0;
+
         Version.platform.initialize(this);
         defaultXsltCompilerInfo.setURIResolver(getSystemURIResolver());
 
@@ -434,6 +443,7 @@ public class Configuration implements SourceResolver, NotationSet {
         registerFunctionAnnotationHandler(new XQueryFunctionAnnotationHandler());
     }
 
+    //#if CSHARP==false
     /**
      * Static method to instantiate a professional or enterprise configuration.
      * <p>This method fails if the specified configuration class cannot be loaded,
@@ -461,6 +471,7 @@ public class Configuration implements SourceResolver, NotationSet {
             throw new RuntimeException(e);
         }
     }
+    //#endif
 
     public void importLicenseDetails(Configuration config) {
         // No action for an HE configuration
@@ -1020,9 +1031,9 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public IntPredicateProxy getValidCharacterChecker() {
         if (xmlVersion == XML10) {
-            return XMLCharacterData::isValid10;
+            return IntPredicateLambda.of(XMLCharacterData::isValid10);
         } else {
-            return XMLCharacterData::isValid11;
+            return IntPredicateLambda.of(XMLCharacterData::isValid11);
         }
     }
 
@@ -3601,7 +3612,7 @@ public class Configuration implements SourceResolver, NotationSet {
         if (getBooleanProperty(Feature.EAGER_EVALUATION)) {
             // Using eager evaluation can make for easier debugging
             SequenceIterator iter = expression.iterate(context);
-            return iter.materialize();
+            return SequenceTool.toGroundedValue(iter);
         }
 
         Closure closure = ref > 1 ? new MemoClosure() : new Closure();
@@ -3623,7 +3634,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public GroundedValue makeSequenceExtent(Expression expression, int ref, XPathContext context) throws XPathException {
-        return expression.iterate(context).materialize();
+        return SequenceTool.toGroundedValue(expression.iterate(context));
     }
 
 
@@ -3836,6 +3847,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public NodeInfo unravel(Source source) {
+        //#if CSHARP==false
         List<ExternalObjectModel> externalObjectModels = getExternalObjectModels();
         if (!(source instanceof NodeInfo)) {
             for (ExternalObjectModel model : externalObjectModels) {
@@ -3848,6 +3860,7 @@ public class Configuration implements SourceResolver, NotationSet {
                 }
             }
         }
+        //#endif
         if (source instanceof NodeInfo) {
             if (!((NodeInfo) source).getConfiguration().isCompatible(this)) {
                 throw new IllegalArgumentException("Externally supplied NodeInfo belongs to the wrong Configuration");
@@ -3988,6 +4001,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /*@Nullable*/
     @Override
+    @CSharpInnerClass(outer=false, extra={"javax.xml.transform.Source source", "net.sf.saxon.Configuration config"})
     public ActiveSource resolveSource(Source source, Configuration config) throws XPathException {
         if (source instanceof ActiveSource) {
             return (ActiveSource) source;
@@ -4191,11 +4205,13 @@ public class Configuration implements SourceResolver, NotationSet {
 
         if (handler instanceof Receiver) {
             return (Receiver) handler;
+            //#if CSHARP==false
         } else if (handler instanceof ContentHandler) {
             ContentHandlerProxy emitter = new ContentHandlerProxy();
             emitter.setUnderlyingContentHandler((ContentHandler) handler);
             emitter.setOutputProperties(props);
             return emitter;
+            //#endif
         } else {
             throw new XPathException("Output method " + className +
                                              " is neither a Receiver nor a SAX2 ContentHandler");

@@ -43,7 +43,7 @@ public class AdjacentTextNodeMergingIterator implements LookaheadIterator {
 
     /*@Nullable*/
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         Item current = _next;
         if (current == null) {
             return null;

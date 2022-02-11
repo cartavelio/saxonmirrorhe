@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
@@ -57,10 +58,10 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
      *
      * @param iter the sequence from which a node is to be read
      * @return the node that was read
-     * @throws XPathException if reading from either of the input sequences fails
+     * @throws UncheckedXPathException if reading from either of the input sequences fails
      */
 
-    private NodeInfo nextNode(SequenceIterator iter) throws XPathException {
+    private NodeInfo nextNode(SequenceIterator iter) {
         return (NodeInfo) iter.next();
         // we rely on the type-checking mechanism to prevent a ClassCastException here
     }
@@ -71,7 +72,7 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
     }
 
     @Override
-    public NodeInfo next() throws XPathException {
+    public NodeInfo next() {
 
         // main merge loop: take a value from whichever set has the lower value
 

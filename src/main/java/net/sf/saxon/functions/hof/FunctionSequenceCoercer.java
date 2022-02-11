@@ -11,10 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.FunctionAnnotationHandler;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -69,7 +66,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         setBaseExpression(getBaseExpression().simplify());
         if (getBaseExpression() instanceof Literal) {
             GroundedValue val =
-                    iterate(new EarlyEvaluationContext(getConfiguration())).materialize();
+                    SequenceTool.toGroundedValue(iterate(new EarlyEvaluationContext(getConfiguration())));
             return Literal.makeLiteral(val, this);
         }
         return this;

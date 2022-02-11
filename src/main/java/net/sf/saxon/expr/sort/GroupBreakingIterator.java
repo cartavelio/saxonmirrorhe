@@ -11,6 +11,7 @@ import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -98,16 +99,20 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
     }
 
     @Override
-    public Item next() throws XPathException {
-        if (nextItem == null) {
-            current = null;
-            position = -1;
-            return null;
+    public Item next() {
+        try {
+            if (nextItem == null) {
+                current = null;
+                position = -1;
+                return null;
+            }
+            current = nextItem;
+            position++;
+            advance();
+            return current;
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
         }
-        current = nextItem;
-        position++;
-        advance();
-        return current;
     }
 
     @Override

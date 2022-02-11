@@ -546,7 +546,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     !ExpressionTool.refersToVariableOrFunction(getFilter()) &&
                     (getFilter().getDependencies() & ~StaticProperty.DEPENDS_ON_FOCUS) == 0) {
                 XPathContext context = visitor.getStaticContext().makeEarlyEvaluationContext();
-                return iterate(context).materialize();
+                return SequenceTool.toGroundedValue(iterate(context));
             }
         } catch (Exception e) {
             // can happen for a variety of reasons, for example the filter references a global parameter,

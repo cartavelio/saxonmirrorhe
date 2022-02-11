@@ -7,9 +7,9 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.om.EnumSetTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
@@ -51,7 +51,7 @@ public class ItemCheckingIterator
     }
 
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         Item nextSource = base.next();
         if (nextSource == null) {
             return null;
@@ -67,7 +67,7 @@ public class ItemCheckingIterator
     }
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         // Must only be called if this is a last-position-finder iterator, which will only be true if the base iterator
         // is a last-position-finder iterator and one-to-one is true
         return ((LastPositionFinder) base).getLength();
@@ -86,7 +86,7 @@ public class ItemCheckingIterator
 
     @Override
     public EnumSet<SequenceIteratorProperty> getProperties() {
-        return base.getProperties();
+        return EnumSetTool.except(base.getProperties(), EnumSet.of(SequenceIteratorProperty.GROUNDED));
     }
 }
 

@@ -15,10 +15,7 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.LocalOrderComparer;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -171,7 +168,7 @@ public class KeyIndex {
             xc.openStackFrame(map);
         }
 
-        match.selectNodes(doc, xc).forEachOrFail(node -> processNode((NodeInfo)node, keydef, xc, isFirst));
+        SequenceTool.supply(match.selectNodes(doc, xc), (ItemConsumer<? super Item>) node -> processNode((NodeInfo) node, keydef, xc, isFirst));
 
     }
 
@@ -208,9 +205,7 @@ public class KeyIndex {
         SequenceIterator useval = use.iterate(xc);
         if (keydef.isComposite()) {
             List<AtomicMatchKey> amks = new ArrayList<>(4);
-            useval.forEachOrFail(
-                    keyVal -> amks.add(getCollationKey((AtomicValue)keyVal, collation, implicitTimezone))
-            );
+            SequenceTool.supply(useval, (ItemConsumer<? super Item>) keyVal -> amks.add(getCollationKey((AtomicValue) keyVal, collation, implicitTimezone)));
             addEntry(new CompositeAtomicMatchKey(amks), node, isFirst);
         } else {
             AtomicValue keyVal;
@@ -376,8 +371,7 @@ public class KeyIndex {
 
     public SequenceIterator getComposite(SequenceIterator soughtValue) throws XPathException {
         List<AtomicMatchKey> amks = new ArrayList<>(4);
-        soughtValue.forEachOrFail(
-                keyVal -> amks.add(getCollationKey((AtomicValue)keyVal, collation, implicitTimezone)));
+        SequenceTool.supply(soughtValue, (ItemConsumer<? super Item>) keyVal -> amks.add(getCollationKey((AtomicValue) keyVal, collation, implicitTimezone)));
         Object value = index.get(new CompositeAtomicMatchKey(amks));
         return entryIterator(value);
     }

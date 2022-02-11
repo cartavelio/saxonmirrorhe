@@ -10,6 +10,7 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 
@@ -88,7 +89,7 @@ public class Closure implements Sequence, ContextOriginator {
                     if (local[i] instanceof Closure) {
                         int cdepth = ((Closure) local[i]).depth;
                         if (cdepth >= 10) {
-                            local[i] = local[i].iterate().materialize();
+                            local[i] = SequenceTool.toGroundedValue(local[i].iterate());
                         } else if (cdepth + 1 > depth) {
                             depth = cdepth + 1;
                         }
@@ -150,11 +151,15 @@ public class Closure implements Sequence, ContextOriginator {
 
     /*@NotNull*/
     @Override
-    public SequenceIterator iterate() throws XPathException {
+    public SequenceIterator iterate() {
 
         if (inputIterator == null) {
-            inputIterator = expression.iterate(savedXPathContext);
-            return inputIterator;
+            try {
+                inputIterator = expression.iterate(savedXPathContext);
+                return inputIterator;
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e);
+            }
         } else {
             // In an ideal world this shouldn't happen: if the value is needed more than once, we should
             // have chosen a MemoClosure.
@@ -178,7 +183,7 @@ public class Closure implements Sequence, ContextOriginator {
      */
 
     public GroundedValue reduce() throws XPathException {
-        return iterate().materialize();
+        return SequenceTool.toGroundedValue(iterate());
     }
 
     @Override

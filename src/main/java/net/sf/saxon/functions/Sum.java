@@ -8,12 +8,9 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -81,7 +78,7 @@ public class Sum extends FoldingFunction {
     public static AtomicValue total(SequenceIterator in, XPathContext context, Location locator) throws XPathException {
         try {
             SumFold fold = new SumFold(context, null);
-            in.forEachOrFail(fold::processItem);
+            SequenceTool.supply(in, (ItemConsumer<? super Item>) fold::processItem);
             return (AtomicValue)fold.result().head();
         } catch (XPathException e) {
             e.maybeSetLocation(locator);

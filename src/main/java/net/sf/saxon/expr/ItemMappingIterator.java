@@ -10,6 +10,7 @@ package net.sf.saxon.expr;
 import net.sf.saxon.om.EnumSetTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -137,18 +138,22 @@ public class ItemMappingIterator
     }
 
     @Override
-    public Item next() throws XPathException {
-        while (true) {
-            Item nextSource = base.next();
-            if (nextSource == null) {
-                return null;
+    public Item next() {
+        try {
+            while (true) {
+                Item nextSource = base.next();
+                if (nextSource == null) {
+                    return null;
+                }
+                // Call the supplied mapping function
+                Item current = action.mapItem(nextSource);
+                if (current != null) {
+                    return current;
+                }
+                // otherwise go round the loop to get the next item from the base sequence
             }
-            // Call the supplied mapping function
-            Item current = action.mapItem(nextSource);
-            if (current != null) {
-                return current;
-            }
-            // otherwise go round the loop to get the next item from the base sequence
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
         }
     }
 
@@ -158,7 +163,7 @@ public class ItemMappingIterator
     }
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         // Must only be called if this is a last-position-finder iterator, which will only be true if the base iterator
         // is a last-position-finder iterator and one-to-one is true
         return ((LastPositionFinder) base).getLength();

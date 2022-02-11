@@ -17,7 +17,7 @@ import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.SequenceSlice;
+import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -146,7 +146,7 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
 
     /*@NotNull*/
     public UnfailingIterator reverseIterate() {
-        return new Reverse.ReverseListIterator(value);
+        return Reverse.reverseIterator(value);
     }
 
     /**
@@ -194,7 +194,7 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
         if (start > value.size()) {
             return EmptySequence.getInstance();
         }
-        return new SequenceSlice(this, start, length).reduce();
+        return new SequenceExtent.Of<T>(value.subList(start, start+length)).reduce();
     }
 
     /*@NotNull*/

@@ -11,6 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -40,30 +41,34 @@ public class ReturnClauseIterator implements SequenceIterator {
     }
 
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         Item nextItem;
         while (true) {
-            if (results != null) {
-                nextItem = results.next();
-                if (nextItem != null) {
-                    break;
+            try {
+                if (results != null) {
+                    nextItem = results.next();
+                    if (nextItem != null) {
+                        break;
+                    } else {
+                        results = null;
+                    }
+                }
+                if (base.nextTuple(context)) {
+                    // Call the supplied return expression
+                    results = action.iterate(context);
+                    nextItem = results.next();
+                    if (nextItem == null) {
+                        results = null;
+                    } else {
+                        break;
+                    }
+                    // now go round the loop to get the next item from the base sequence
                 } else {
                     results = null;
+                    return null;
                 }
-            }
-            if (base.nextTuple(context)) {
-                // Call the supplied return expression
-                results = action.iterate(context);
-                nextItem = results.next();
-                if (nextItem == null) {
-                    results = null;
-                } else {
-                    break;
-                }
-                // now go round the loop to get the next item from the base sequence
-            } else {
-                results = null;
-                return null;
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e);
             }
         }
 

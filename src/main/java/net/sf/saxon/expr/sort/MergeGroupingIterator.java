@@ -11,6 +11,7 @@ import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -120,17 +121,21 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     }
 
     @Override
-    public Item next() throws XPathException {
-        if (nextItem == null) {
-            currenti = null;
-            position = -1;
-            return null;
+    public Item next() {
+        try {
+            if (nextItem == null) {
+                currenti = null;
+                position = -1;
+                return null;
+            }
+            currenti = nextItem;
+            position++;
+            compositeMergeKey = nextItem.getObject().sortKeyValues;
+            advance();
+            return currenti.getObject().baseItem;
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
         }
-        currenti = nextItem;
-        position++;
-        compositeMergeKey = nextItem.getObject().sortKeyValues;
-        advance();
-        return currenti.getObject().baseItem;
     }
 
     @Override
@@ -139,7 +144,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     }
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         return lastPositionFinder.getLength();
     }
 
@@ -190,7 +195,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
 
         @Override
-        public int getLength() throws XPathException {
+        public int getLength() {
             return currentMembers.size();
         }
 

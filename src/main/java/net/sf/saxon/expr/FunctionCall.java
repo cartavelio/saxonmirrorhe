@@ -296,7 +296,7 @@ public abstract class FunctionCall extends Expression {
             return this;
         }
         try {
-            Literal lit = Literal.makeLiteral(iterate(visitor.getStaticContext().makeEarlyEvaluationContext()).materialize(), this);
+            Literal lit = Literal.makeLiteral(SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext())), this);
             Optimizer.trace(visitor.getConfiguration(), "Pre-evaluated function call " + toShortString(), lit);
             return lit;
         } catch (NoDynamicContextException e) {

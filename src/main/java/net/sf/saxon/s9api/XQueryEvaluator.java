@@ -183,7 +183,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
         try {
             context.setParameter(name.getStructuredQName(),
                                  value == null ? null : ((Sequence) value.getUnderlyingValue()).materialize());
-        } catch (XPathException e) {
+        } catch (UncheckedXPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
     }
@@ -431,7 +431,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
         }
         try {
             SequenceIterator iter = expression.iterator(context);
-            return XdmValue.wrap(iter.materialize());
+            return XdmValue.wrap(SequenceTool.toGroundedValue(iter));
         } catch (UncheckedXPathException e) {
             throw new SaxonApiException(e.getXPathException());
         } catch (XPathException e) {

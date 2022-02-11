@@ -53,7 +53,7 @@ public abstract class AbstractArrayItem extends ArrayItem {
     public AtomicSequence atomize() throws XPathException {
         List<AtomicValue> list = new ArrayList<>(arrayLength());
         for (GroundedValue seq : members()) {
-            seq.iterate().forEachOrFail(item -> {
+            SequenceTool.supply(seq.iterate(), (ItemConsumer<? super Item>) item -> {
                 AtomicSequence atoms = item.atomize();
                 for (AtomicValue atom : atoms) {
                     list.add(atom);

@@ -106,8 +106,8 @@ public class XSLContextItem extends StyleElement {
                 "XTSE0020");
         }
         ((XSLTemplate)getParent()).setContextItemRequirements(requiredType, mayBeOmitted, absentFocus);
-        iterateAxis(AxisInfo.PRECEDING_SIBLING).forEachOrFail(prec -> {
-            if (((NodeInfo)prec).getNodeKind() != Type.TEXT || !Whitespace.isAllWhite(prec.getUnicodeStringValue())) {
+        SequenceTool.supply(iterateAxis(AxisInfo.PRECEDING_SIBLING), (ItemConsumer<? super Item>) prec -> {
+            if (((NodeInfo) prec).getNodeKind() != Type.TEXT || !Whitespace.isAllWhite(prec.getUnicodeStringValue())) {
                 compileError("xsl:context-item must be the first child of xsl:template");
             }
         });

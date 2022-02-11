@@ -11,6 +11,7 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 
@@ -48,7 +49,7 @@ public class AtomizingIterator implements SequenceIterator /* of AtomicValue */ 
 
     /*@Nullable*/
     @Override
-    public AtomicValue next() throws XPathException {
+    public AtomicValue next() {
         while (true) {
             if (currentValue != null) {
                 if (currentValuePosition < currentValueSize) {
@@ -71,10 +72,11 @@ public class AtomizingIterator implements SequenceIterator /* of AtomicValue */ 
                     }
                 } catch (XPathException e) {
                     if (roleDiagnostic == null) {
-                        throw e;
+                        throw new UncheckedXPathException(e);
                     } else {
                         String message = e.getMessage() + ". Failed while atomizing the " + roleDiagnostic.getMessage();
-                        throw new XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                        XPathException err = new XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                        throw new UncheckedXPathException(err);
                     }
                 }
             } else {

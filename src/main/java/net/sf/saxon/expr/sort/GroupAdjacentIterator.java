@@ -15,6 +15,7 @@ import net.sf.saxon.functions.Count;
 import net.sf.saxon.functions.DistinctValues;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -69,9 +70,13 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
     }
 
     @Override
-    public int getLength() throws XPathException {
-        GroupAdjacentIterator another = new GroupAdjacentIterator(select, keyExpression, baseContext, collator, composite);
-        return Count.steppingCount(another);
+    public int getLength() {
+        try {
+            GroupAdjacentIterator another = new GroupAdjacentIterator(select, keyExpression, baseContext, collator, composite);
+            return Count.steppingCount(another);
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
     }
 
     private List<AtomicValue> getKey(XPathContext context) throws XPathException {
@@ -149,22 +154,26 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
     }
 
     @Override
-    public Item next() throws XPathException {
-        if (nextItem == null) {
-            current = null;
-            position = -1;
-            return null;
+    public Item next() {
+        try {
+            if (nextItem == null) {
+                current = null;
+                position = -1;
+                return null;
+            }
+            current = nextItem;
+            if (nextKey.size() == 1) {
+                currentKey = nextKey.get(0);
+            } else {
+                currentKey = new AtomicArray(nextKey);
+            }
+            currentComparisonKey = nextComparisonKey;
+            position++;
+            advance();
+            return current;
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
         }
-        current = nextItem;
-        if (nextKey.size() == 1) {
-            currentKey = nextKey.get(0);
-        } else {
-            currentKey = new AtomicArray(nextKey);
-        }
-        currentComparisonKey = nextComparisonKey;
-        position++;
-        advance();
-        return current;
     }
 
     @Override

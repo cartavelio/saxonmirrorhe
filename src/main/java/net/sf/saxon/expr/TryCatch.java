@@ -367,9 +367,7 @@ public class TryCatch extends Expression {
                         if (tci instanceof BreakInstr) {
                             ((BreakInstr) tci).markContext(context);
                         }
-                        ((GroundedValue) v).iterate().forEachOrFail(
-                                item -> output.append(item)
-                        );
+                        SequenceTool.supply(((GroundedValue) v).iterate(), (ItemConsumer<? super Item>) item -> output.append(item));
                         return;
                     }
                 }

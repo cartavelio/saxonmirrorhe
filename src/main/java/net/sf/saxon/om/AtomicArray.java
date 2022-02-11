@@ -55,7 +55,7 @@ public class AtomicArray implements AtomicSequence {
 
     public AtomicArray(SequenceIterator iter) throws XPathException {
         ArrayList<AtomicValue> list = new ArrayList<>(10);
-        iter.forEachOrFail(item -> list.add((AtomicValue)item));
+        SequenceTool.supply(iter, (ItemConsumer<? super Item>) item -> list.add((AtomicValue) item));
         content = list;
     }
 

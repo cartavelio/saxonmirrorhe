@@ -13,9 +13,7 @@ import net.sf.saxon.expr.flwor.OuterForExpression;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -404,7 +402,7 @@ public class ForExpression extends Assignation {
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
         int slot = getLocalSlotNumber();
-        getSequence().iterate(context).forEachOrFail(item -> {
+        SequenceTool.supply(getSequence().iterate(context), (ItemConsumer<? super Item>) item -> {
             context.setLocalVariable(slot, item);
             getAction().process(output, context);
         });
@@ -423,7 +421,7 @@ public class ForExpression extends Assignation {
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         int slot = getLocalSlotNumber();
-        getSequence().iterate(context).forEachOrFail(item -> {
+        SequenceTool.supply(getSequence().iterate(context), (ItemConsumer<? super Item>) item -> {
             context.setLocalVariable(slot, item);
             getAction().evaluatePendingUpdates(context, pul);
         });

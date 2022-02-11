@@ -779,7 +779,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     private static void setLocalParamDetails(XSLTemplate source, NamedTemplate nt) throws XPathException {
         AxisIterator kids = source.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         List<NamedTemplate.LocalParamInfo> details = new ArrayList<>();
-        kids.forEachOrFail(child -> {
+        SequenceTool.supply(kids, (ItemConsumer<? super Item>) child -> {
             if (child instanceof XSLLocalParam) {
                 XSLLocalParam lp = (XSLLocalParam) child;
                 lp.prepareTemplateSignatureAttributes();

@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.Comparator;
@@ -58,16 +59,16 @@ public class DifferenceEnumeration implements SequenceIterator {
      *
      * @param iter the iterator from which the next node is to be read
      * @return the node that was read, or null if the stream is exhausted
-     * @throws XPathException if a failure occurs reading the input
+     * @throws UncheckedXPathException if a failure occurs reading the input
      */
 
-    private NodeInfo nextNode(SequenceIterator iter) throws XPathException {
+    private NodeInfo nextNode(SequenceIterator iter) {
         return (NodeInfo)iter.next();
         // rely on type-checking to prevent a ClassCastException
     }
 
     @Override
-    public NodeInfo next() throws XPathException {
+    public NodeInfo next() {
         // main merge loop: if the node in p1 has a lower key value that that in p2, return it;
         // if they are equal, advance both nodesets; if p1 is higher, advance p2.
 
@@ -104,9 +105,9 @@ public class DifferenceEnumeration implements SequenceIterator {
      * look-ahead for the next item, and setting the current and position variables.
      *
      * @return the next node from the first node-set
-     * @throws XPathException if a failure occurs reading from the input
+     * @throws UncheckedXPathException if a failure occurs reading from the input
      */
-    private NodeInfo deliver() throws XPathException {
+    private NodeInfo deliver() {
         NodeInfo current = nextNode1;
         nextNode1 = nextNode(p1);
         return current;

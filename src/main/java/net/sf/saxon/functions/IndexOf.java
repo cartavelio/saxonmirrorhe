@@ -16,6 +16,8 @@ import net.sf.saxon.om.AbstractSequenceIterator;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.trans.NoDynamicContextException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -101,20 +103,24 @@ public class IndexOf extends CollatingFunctionFixed  {
          * on next() has returned null, no further calls should be made. The preferred
          * action for an iterator if subsequent calls on next() are made is to return
          * null again, and all implementations within Saxon follow this rule.
-         * @throws net.sf.saxon.trans.XPathException if an error occurs retrieving the next item
+         * @throws UncheckedXPathException if an error occurs retrieving the next item
          * @since 8.4
          */
         @Override
-        public Int64Value next() throws XPathException {
-            AtomicValue baseItem;
-            while ((baseItem = (AtomicValue) base.next()) != null) {
-                index++;
-                if (Type.isGuaranteedComparable(searchType, baseItem.getPrimitiveType(), false) &&
-                        comparer.comparesEqual(baseItem, key)) {
-                    return new Int64Value(index);
+        public Int64Value next() {
+            try {
+                AtomicValue baseItem;
+                while ((baseItem = (AtomicValue) base.next()) != null) {
+                    index++;
+                    if (Type.isGuaranteedComparable(searchType, baseItem.getPrimitiveType(), false) &&
+                            comparer.comparesEqual(baseItem, key)) {
+                        return new Int64Value(index);
+                    }
                 }
+                return null;
+            } catch (NoDynamicContextException e) {
+                throw new UncheckedXPathException(e);
             }
-            return null;
         }
 
     }

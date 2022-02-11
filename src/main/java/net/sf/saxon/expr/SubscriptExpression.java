@@ -165,7 +165,7 @@ public class SubscriptExpression extends SingleItemFilter {
                 MemoSequence mem = ((MemoSequence.ProgressiveIterator)iter).getMemoSequence();
                 item = mem.itemAt(intindex - 1);
             } else if (iter.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
-                GroundedValue value = iter.materialize();
+                GroundedValue value = SequenceTool.toGroundedValue(iter);
                 item = value.itemAt(intindex - 1);
             } else {
                 SequenceIterator tail = TailIterator.make(iter, intindex);

@@ -154,21 +154,16 @@ public class Literal extends Expression {
         } else if (value instanceof AtomicValue) {
             return StaticProperty.EXACTLY_ONE;
         }
-        try {
-            SequenceIterator iter = value.iterate();
-            Item next = iter.next();
-            if (next == null) {
-                return StaticProperty.EMPTY;
+        SequenceIterator iter = value.iterate();
+        Item next = iter.next();
+        if (next == null) {
+            return StaticProperty.EMPTY;
+        } else {
+            if (iter.next() != null) {
+                return StaticProperty.ALLOWS_MANY;
             } else {
-                if (iter.next() != null) {
-                    return StaticProperty.ALLOWS_MANY;
-                } else {
-                    return StaticProperty.EXACTLY_ONE;
-                }
+                return StaticProperty.EXACTLY_ONE;
             }
-        } catch (XPathException err) {
-            // can't actually happen
-            return StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
     }
 
@@ -351,7 +346,7 @@ public class Literal extends Expression {
         if (value instanceof Item) {
             output.append((Item) value, getLocation(), ReceiverOption.ALL_NAMESPACES);
         } else {
-            value.iterate().forEachOrFail(it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES));
+            SequenceTool.supply(value.iterate(), (ItemConsumer<? super Item>) it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES));
         }
     }
 
@@ -439,50 +434,46 @@ public class Literal extends Expression {
         }
         GroundedValue v0 = value;
         GroundedValue v1 = ((Literal) obj).value;
-        try {
-            SequenceIterator i0 = v0.iterate();
-            SequenceIterator i1 = v1.iterate();
-            while (true) {
-                Item m0 = i0.next();
-                Item m1 = i1.next();
-                if (m0 == null && m1 == null) {
-                    return true;
-                }
-                if (m0 == null || m1 == null) {
-                    return false;
-                }
-                if (m0 == m1) {
-                    continue;
-                }
-                boolean n0 = m0 instanceof NodeInfo;
-                boolean n1 = m1 instanceof NodeInfo;
-                if (n0 != n1) {
-                    return false;
-                }
-                if (n0) {
-                    if (m0.equals(m1)) {
-                        continue;
-                    } else {
-                        return false;
-                    }
-                }
-                boolean a0 = m0 instanceof AtomicValue;
-                boolean a1 = m1 instanceof AtomicValue;
-                if (a0 != a1) {
-                    return false;
-                }
-                if (a0) {
-                    if (((AtomicValue) m0).isIdentical((AtomicValue) m1) &&
-                            ((AtomicValue) m0).getItemType() == ((AtomicValue) m1).getItemType()) {
-                        continue;
-                    } else {
-                        return false;
-                    }
-                }
-                // don't attempt to compare functions, maps, and arrays
+        SequenceIterator i0 = v0.iterate();
+        SequenceIterator i1 = v1.iterate();
+        while (true) {
+            Item m0 = i0.next();
+            Item m1 = i1.next();
+            if (m0 == null && m1 == null) {
+                return true;
+            }
+            if (m0 == null || m1 == null) {
                 return false;
             }
-        } catch (XPathException err) {
+            if (m0 == m1) {
+                continue;
+            }
+            boolean n0 = m0 instanceof NodeInfo;
+            boolean n1 = m1 instanceof NodeInfo;
+            if (n0 != n1) {
+                return false;
+            }
+            if (n0) {
+                if (m0.equals(m1)) {
+                    continue;
+                } else {
+                    return false;
+                }
+            }
+            boolean a0 = m0 instanceof AtomicValue;
+            boolean a1 = m1 instanceof AtomicValue;
+            if (a0 != a1) {
+                return false;
+            }
+            if (a0) {
+                if (((AtomicValue) m0).isIdentical((AtomicValue) m1) &&
+                        ((AtomicValue) m0).getItemType() == ((AtomicValue) m1).getItemType()) {
+                    continue;
+                } else {
+                    return false;
+                }
+            }
+            // don't attempt to compare functions, maps, and arrays
             return false;
         }
     }
@@ -603,7 +594,7 @@ public class Literal extends Expression {
             if (value instanceof GroundedValue) {
                 out.emitAttribute("count", ((GroundedValue) value).getLength() + "");
             }
-            value.iterate().forEachOrFail(it -> exportValue(it, out));
+            SequenceTool.supply(value.iterate(), (ItemConsumer<? super Item>) it -> exportValue(it, out));
             out.endElement();
 
         }

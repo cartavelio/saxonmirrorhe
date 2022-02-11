@@ -45,11 +45,7 @@ public class WrappingJavaIterator<T extends Item> implements Iterator<T> {
 
     @Override
     public T next() {
-        try {
-            return (T)input.next();
-        } catch (XPathException e) {
-            throw new AssertionError(e);
-        }
+        return (T)input.next();
     }
 
     @Override

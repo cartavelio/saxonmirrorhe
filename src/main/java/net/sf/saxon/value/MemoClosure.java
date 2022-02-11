@@ -12,6 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -77,8 +78,12 @@ public class MemoClosure extends Closure implements ContextOriginator {
 
     /*@NotNull*/
     @Override
-    public synchronized SequenceIterator iterate() throws XPathException {
-        makeSequence();
+    public synchronized SequenceIterator iterate()  {
+        try {
+            makeSequence();
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
         return sequence.iterate();
     }
 
@@ -120,10 +125,14 @@ public class MemoClosure extends Closure implements ContextOriginator {
     /*@Nullable*/
     @Override
     public GroundedValue reduce() throws XPathException {
-        if (sequence instanceof GroundedValue) {
-            return (GroundedValue)sequence;
-        } else {
-            return iterate().materialize();
+        try {
+            if (sequence instanceof GroundedValue) {
+                return (GroundedValue)sequence;
+            } else {
+                return SequenceTool.toGroundedValue(iterate());
+            }
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
     }
 

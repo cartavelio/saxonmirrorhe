@@ -44,5 +44,20 @@ public class EnumSetTool {
         e.addAll(b);
         return e;
     }
+
+    /**
+     * Return a new EnumSet as the difference of two supplied EnumSets. Neither is modified
+     *
+     * @param a   the first EnumSet
+     * @param b   the second EnumSet
+     * @param <P> the Enum class containing properties in (a) except those in (b)
+     * @return the combined EnumSet
+     */
+
+    public static <P extends Enum<P>> EnumSet<P> except(EnumSet<P> a, EnumSet<P> b) {
+        EnumSet<P> e = EnumSet.copyOf(a);
+        e.removeAll(b);
+        return e;
+    }
 }
 

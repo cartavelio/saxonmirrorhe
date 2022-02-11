@@ -86,7 +86,7 @@ public class DirectoryCollection extends AbstractResourceCollection {
     }
 
     @Override
-    public Iterator<Resource> getResources(final XPathContext context) {
+    public Iterator<? extends Resource> getResources(final XPathContext context) {
         final ParseOptions options = optionsFromQueryParameters(params, context);
         options.setSpaceStrippingRule(whitespaceRules);
         Optional<Boolean> metadataParam = params.getMetaData();

@@ -12,8 +12,8 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -46,7 +46,7 @@ public class TailExpression extends UnaryExpression {
         getOperand().optimize(visitor, contextInfo);
         if (getBaseExpression() instanceof Literal) {
             GroundedValue value =
-                    iterate(visitor.getStaticContext().makeEarlyEvaluationContext()).materialize();
+                    SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext()));
             return Literal.makeLiteral(value, this);
         }
         return this;

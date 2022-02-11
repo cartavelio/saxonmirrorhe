@@ -6,14 +6,8 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceivingContentHandler;
 import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.number.Numberer_en;
-import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.lib.StandardErrorHandler;
-import net.sf.saxon.lib.Validation;
-import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.trans.XmlProcessingException;
-import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.lib.*;
+import net.sf.saxon.trans.*;
 import org.xml.sax.*;
 
 import javax.xml.transform.sax.SAXSource;
@@ -54,12 +48,17 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
             if (options.getErrorHandler() != null) {
                 parser.setErrorHandler(parser.getErrorHandler());
             } else if (options.getErrorReporter() != null) {
-                // TODO:
+                parser.setErrorHandler(new StandardErrorHandler(options.getErrorReporter()));
+            } else {
+                parser.setErrorHandler(new StandardErrorHandler(new StandardErrorReporter()));
             }
             parser.parse(getInputSource());
+        } catch (UncheckedXPathException uxpe) {
+            throw new XPathException(uxpe);
         } catch (IOException|SAXException e) {
             throw new XPathException("Error reported by XML parser: " + e);
         } catch (Exception x) {
+            x.printStackTrace();
             throw new IllegalStateException();
         }
     }

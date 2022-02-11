@@ -235,7 +235,7 @@ public class ExpressionContext implements StaticContext {
             Component comp = element.getCompilation().getPrincipalStylesheetModule().getComponent(sn);
             if (comp != null) { // test variable-0118
                 // See tests variable-0118 and variable-0120
-                element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF).forEachOrFail(parent -> {
+                SequenceTool.supply(element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF), (ItemConsumer<? super Item>) parent -> {
                     if (parent instanceof XSLGlobalVariable && ((XSLGlobalVariable) parent).getVariableQName().equals(qName)) {
                         XPathException err = new XPathException("Variable " + qName.getDisplayName() +
                                                                         " cannot be used within its own declaration", "XPST0008");

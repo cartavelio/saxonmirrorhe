@@ -83,15 +83,11 @@ public class XdmSequenceIterator<T extends XdmItem> implements Iterator<T> {
      */
     @Override
     public T next() {
-        try {
-            Item it = base.next();
-            if (it == null) {
-                throw new NoSuchElementException();
-            } else {
-                return (T) XdmItem.wrapItem(it);
-            }
-        } catch (XPathException xe) {
-            throw new SaxonApiUncheckedException(xe);
+        Item it = base.next();
+        if (it == null) {
+            throw new NoSuchElementException();
+        } else {
+            return (T) XdmItem.wrapItem(it);
         }
     }
 

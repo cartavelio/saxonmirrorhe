@@ -391,7 +391,7 @@ public class JsonHandlerXML extends JsonHandler {
     public void writeBoolean(boolean value) throws XPathException {
         startElement(booleanQN, isInMap() ? "booleanWithinMapType" : "booleanType");
         startContent();
-        characters(Boolean.toString(value));
+        characters(value ? "true" : "false");
         endElement();
     }
 

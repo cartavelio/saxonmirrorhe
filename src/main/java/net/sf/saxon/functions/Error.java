@@ -69,7 +69,7 @@ public class Error extends SystemFunction implements Callable {
         e.setErrorCodeQName(qname.getStructuredQName());
         e.setXPathContext(context);
         if (getArity() > 2 && errObject != null) {
-            GroundedValue errorObject = errObject.materialize();
+            GroundedValue errorObject = SequenceTool.toGroundedValue(errObject);
             if (errorObject.getLength() == 1) {
                 Item root = errorObject.head();
                 if ((root instanceof NodeInfo) && ((NodeInfo) root).getNodeKind() == Type.DOCUMENT) {

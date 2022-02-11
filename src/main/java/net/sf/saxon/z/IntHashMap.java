@@ -25,10 +25,10 @@ import java.util.NoSuchElementException;
 
 @CSharpInjectMembers(code={""
         + "public class IntHashMapValueSet<V> : System.Collections.Generic.IEnumerable<V> {"
-        + "    internal IntHashMap<V> container;"
+        + "    internal readonly IntHashMap<V> container;"
         + "    public IntHashMapValueSet(IntHashMap<V> container) {this.container = container;}"
         + "    public System.Collections.Generic.IEnumerator<V> GetEnumerator() {return container.valueIterator();}"
-        + "    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {return GetEnumerator();}}"
+        + "    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {return GetEnumerator();}"
         + "}"})
 
 public class IntHashMap<T> {

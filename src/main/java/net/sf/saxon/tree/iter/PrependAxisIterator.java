@@ -8,7 +8,6 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.trans.XPathException;
 
 /**
  * An iterator over nodes, that prepends a given node to the nodes
@@ -33,11 +32,7 @@ public class PrependAxisIterator extends PrependSequenceIterator implements Axis
     /*@Nullable*/
     @Override
     public NodeInfo next() {
-        try {
-            return (NodeInfo)super.next();
-        } catch (XPathException e) {
-            throw new AssertionError();
-        }
+        return (NodeInfo)super.next();
     }
 
 

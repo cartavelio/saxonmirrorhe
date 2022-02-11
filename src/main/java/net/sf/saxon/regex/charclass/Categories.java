@@ -13,7 +13,6 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -132,10 +131,11 @@ public class Categories {
         int fp_t = config.getNamePool().allocateFingerprint("", "t");
 
         AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, "", "cat", config.getNamePool()));
-        for (Item item : iter) {
+        NodeInfo item;
+        while ((item = iter.next()) != null) {
             String cat = ((TinyElementImpl)item).getAttributeValue(fp_name);
             IntRangeSet irs = new IntRangeSet();
-            for (NodeInfo r : ((NodeInfo)item).children(NodeKindTest.ELEMENT)) {
+            for (NodeInfo r : item.children(NodeKindTest.ELEMENT)) {
                 String from = ((TinyElementImpl)r).getAttributeValue(fp_f);
                 String to = ((TinyElementImpl) r).getAttributeValue(fp_t);
                 irs.addRange(Integer.parseInt(from, 16), Integer.parseInt(to, 16));

@@ -95,11 +95,7 @@ public class XPathContextMajor extends XPathContextMinor {
         if (item != null) {
             UnfailingIterator iter = SingletonIterator.makeIterator(item);
             currentIterator = new FocusTrackingIterator(iter);
-            try {
-                currentIterator.next();
-            } catch (XPathException e) {
-                // cannot happen
-            }
+            currentIterator.next();
             last = new LastValue(1);
         }
         origin = controller;

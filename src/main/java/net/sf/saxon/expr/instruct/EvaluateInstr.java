@@ -401,9 +401,9 @@ public final class EvaluateInstr extends Expression {
 
             Map<StructuredQName, Integer> locals = new HashMap<>();
             if (dynamicParams != null) {
-                dynamicParams.keys().forEachOrFail(paramName -> {
+                SequenceTool.supply(dynamicParams.keys(), (ItemConsumer<? super Item>) paramName -> {
                     if (!(paramName instanceof QNameValue)) {
-                        final AtomicType primitiveItemType =((AtomicValue) paramName).getPrimitiveType();
+                        final AtomicType primitiveItemType = ((AtomicValue) paramName).getPrimitiveType();
                         XPathException err = new XPathException(
                                 "Parameter names supplied to xsl:evaluate must have type xs:QName, not " +
                                         primitiveItemType.getDisplayName(), "XTTE3165");

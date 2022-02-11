@@ -13,6 +13,7 @@ import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
 
@@ -304,8 +305,12 @@ public abstract class Evaluator {
         public static EAGER_SEQUENCE INSTANCE = new EAGER_SEQUENCE();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
-            SequenceIterator iter = expr.iterate(context);
-            return iter.materialize();
+            try {
+                SequenceIterator iter = expr.iterate(context);
+                return SequenceTool.toGroundedValue(iter);
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
         /**
@@ -335,7 +340,7 @@ public abstract class Evaluator {
                 for (Operand o : children) {
                     Expression child = o.getChildExpression();
                     if (Cardinality.allowsMany(child.getCardinality())) {
-                        subsequences.add(child.iterate(context).materialize());
+                        subsequences.add(SequenceTool.toGroundedValue(child.iterate(context)));
                     } else {
                         Item j = child.evaluateItem(context);
                         if (j != null) {
@@ -346,7 +351,7 @@ public abstract class Evaluator {
                 return new Chain(subsequences);
             } else {
                 // it's not a Block: it must have been rewritten after deciding to use this evaluation mode
-                return expr.iterate(context).materialize();
+                return SequenceTool.toGroundedValue(expr.iterate(context));
             }
         }
 
@@ -452,7 +457,7 @@ public abstract class Evaluator {
             Sequence base = Evaluator.VARIABLE.INSTANCE.evaluate(vr, context);
             if (base instanceof MemoClosure) {
                 SequenceIterator it = base.iterate();
-                base = it.materialize();
+                base = SequenceTool.toGroundedValue(it);
             }
             if (base instanceof IntegerRange) {
                 long step = ((IntegerRange) base).getStep();

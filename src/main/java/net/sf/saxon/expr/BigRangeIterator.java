@@ -60,11 +60,11 @@ public class BigRangeIterator extends RangeIterator implements AtomicIterator, L
      * consume the iterator).
      *
      * @return the corresponding Value
-     * @throws XPathException in the cases of subclasses (such as the iterator over a MemoClosure)
+     * @throws UncheckedXPathException in the cases of subclasses (such as the iterator over a MemoClosure)
      *                        which cause evaluation of expressions while materializing the value.
      */
     @Override
-    public GroundedValue getResidue() throws XPathException {
+    public GroundedValue getResidue() {
         return SequenceExtent.makeResidue(this);
     }
 

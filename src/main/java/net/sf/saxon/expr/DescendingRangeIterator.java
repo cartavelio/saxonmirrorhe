@@ -8,12 +8,8 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.RangeIterator;
-import net.sf.saxon.tree.iter.ReversibleIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerRange;
 import net.sf.saxon.value.IntegerValue;
@@ -67,7 +63,7 @@ public class DescendingRangeIterator extends RangeIterator implements AtomicIter
      * iterator).
      *
      * @return the corresponding Value
-     * @throws XPathException in the cases of subclasses (such as the iterator over a MemoClosure)
+     * @throws UncheckedXPathException in the cases of subclasses (such as the iterator over a MemoClosure)
      *                        which cause evaluation of expressions while materializing the value.
      */
     @Override
@@ -82,11 +78,11 @@ public class DescendingRangeIterator extends RangeIterator implements AtomicIter
      * consume the iterator).
      *
      * @return the corresponding Value
-     * @throws XPathException in the cases of subclasses (such as the iterator over a MemoClosure)
+     * @throws UncheckedXPathException in the cases of subclasses (such as the iterator over a MemoClosure)
      *                        which cause evaluation of expressions while materializing the value.
      */
     @Override
-    public GroundedValue getResidue() throws XPathException {
+    public GroundedValue getResidue() {
         return new IntegerRange(currentValue, -step, limit);
     }
 

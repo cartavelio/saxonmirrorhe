@@ -8,14 +8,12 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import org.jetbrains.annotations.NotNull;
@@ -110,7 +108,7 @@ public class XPathSelector implements Iterable<XdmItem> {
         }
         try {
             dynamicContext.setVariable(var, value.getUnderlyingValue());
-        } catch (XPathException e) {
+        } catch (XPathException | UncheckedXPathException e) {
             throw new SaxonApiException(e);
         }
     }
@@ -169,7 +167,7 @@ public class XPathSelector implements Iterable<XdmItem> {
     public XdmValue evaluate() throws SaxonApiException {
         Sequence value;
         try {
-            value = exp.iterate(dynamicContext).materialize();
+            value = SequenceTool.toGroundedValue(exp.iterate(dynamicContext));
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }

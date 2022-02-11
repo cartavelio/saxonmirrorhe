@@ -70,7 +70,7 @@ public final class CardinalityCheckingIterator implements SequenceIterator {
     }
 
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         if (position < 2) {
             if (position == 0) {
                 Item current = first;

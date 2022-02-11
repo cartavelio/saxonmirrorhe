@@ -14,6 +14,8 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.NoDynamicContextException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
@@ -74,7 +76,7 @@ public class DistinctValues extends CollatingFunctionFixed {
          */
 
         @Override
-        public AtomicValue next() throws XPathException {
+        public AtomicValue next() {
             int implicitTimezone = context.getImplicitTimezone();
             while (true) {
                 AtomicValue nextBase = (AtomicValue)base.next();
@@ -85,7 +87,11 @@ public class DistinctValues extends CollatingFunctionFixed {
                 if (nextBase.isNaN()) {
                     key = NaN_MATCH_KEY;
                 } else {
-                    key = nextBase.getXPathMatchKey(collator, implicitTimezone);
+                    try {
+                        key = nextBase.getXPathMatchKey(collator, implicitTimezone);
+                    } catch (NoDynamicContextException e) {
+                        throw new UncheckedXPathException(e);
+                    }
                 }
                 if (lookup.add(key)) {
                     // returns true if newly added (if not, keep looking)

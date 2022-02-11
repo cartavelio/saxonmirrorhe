@@ -58,7 +58,7 @@ public class CatalogCollection extends AbstractResourceCollection {
 
 
     @Override
-    public Iterator<Resource> getResources(final XPathContext context) throws XPathException {
+    public Iterator<? extends Resource> getResources(final XPathContext context) throws XPathException {
 
         StandardCollectionFinder.checkNotNull(collectionURI, context);
 

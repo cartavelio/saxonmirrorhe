@@ -11,6 +11,7 @@ import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.z.IntPredicateProxy;
@@ -62,7 +63,7 @@ public abstract class TextLinesIterator implements SequenceIterator {
 
     /*@Nullable*/
     @Override
-    public StringItem next() throws XPathException {
+    public StringItem next() {
         if (position < 0) {
             // input already exhausted
             close();
@@ -90,13 +91,9 @@ public abstract class TextLinesIterator implements SequenceIterator {
             if (location != null) {
                 e.setLocator(location);
             }
-            throw e;
-//        } catch (Exception err) {
-//            XPathException e = new XPathException(err.getMessage(), "XPST0001");
-//            if (location != null) {
-//                e.setLocator(location);
-//            }
-//            throw e;
+            throw new UncheckedXPathException(e);
+        } catch (XPathException err) {
+            throw new UncheckedXPathException(err);
         }
     }
 

@@ -11,10 +11,7 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -208,9 +205,7 @@ public abstract class SimpleExpression extends Expression implements Callable {
     @Override
     public final void process(Outputter output, XPathContext context) throws XPathException {
         SequenceIterator iter = call(context, evaluateArguments(context)).iterate();
-        iter.forEachOrFail(
-                it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES)
-        );
+        SequenceTool.supply(iter, (ItemConsumer<? super Item>) it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES));
     }
 
     /**

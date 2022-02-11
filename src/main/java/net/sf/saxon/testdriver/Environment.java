@@ -739,7 +739,7 @@ public class Environment implements URIResolver {
                 }
 
                 @Override
-                public Iterator<Resource> getResources(XPathContext context) {
+                public Iterator<? extends Resource> getResources(XPathContext context) {
                     return resourcesi.iterator();
                 }
 
