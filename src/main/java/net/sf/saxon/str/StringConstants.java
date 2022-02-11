@@ -20,6 +20,7 @@ public class StringConstants {
     public static final byte[] PI_END = bytes("?>");
     public static final byte[] EMPTY_TAG_MIDDLE = bytes("></");
     public static final byte[] EMPTY_TAG_END = bytes("/>");
+    public static final byte[] EMPTY_TAG_END_XHTML = bytes(" />");
     public static final byte[] END_TAG_START = bytes("</");
 
     public static final byte[] ESCAPE_LT = bytes("&lt;");
