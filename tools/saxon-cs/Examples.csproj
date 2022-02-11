@@ -14,8 +14,8 @@
     <PackageTags>XML,XSLT,Saxonica,SaxonCS</PackageTags>
     <Copyright>Copyright © 2021 Saxonica, Ltd.</Copyright>
     <PackageProjectUrl>https://saxonica.com/</PackageProjectUrl>
-    <PackageReleaseNotes>These example demonstrate the Saxon-CS APIs.</PackageReleaseNotes>
-    <PackageSummary>Examples of the Saxon-CS API.</PackageSummary>
+    <PackageReleaseNotes>These example demonstrate the SaxonCS APIs.</PackageReleaseNotes>
+    <PackageSummary>Examples of the SaxonCS API.</PackageSummary>
   </PropertyGroup>
 
   <ItemGroup>
