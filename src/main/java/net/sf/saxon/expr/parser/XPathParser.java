@@ -3583,7 +3583,7 @@ public class XPathParser {
         }
         setLocation(fcall, offset);
         for (Expression argument : arguments) {
-            if (fcall != argument && !functionName.hasURI(NamespaceConstant.GLOBAL_JS)) {
+            if (fcall != argument && argument.getParentExpression() == null && !functionName.hasURI(NamespaceConstant.GLOBAL_JS)) {
                 // avoid doing this when the function has already been optimized away, e.g. unordered()
                 // Also avoid doing this when a js: function is parsed into an ixsl:call()
                 // TODO move the adoptChildExpression into individual function libraries
