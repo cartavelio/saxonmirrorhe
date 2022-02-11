@@ -3515,10 +3515,11 @@ cdef class PyXdmItem(PyXdmValue):
         cdef const char* c_string = self.derivedptr.getStringValue()
         ustring = make_py_str(c_string)
         return ustring
+     
      def __repr__(self):
-        return make_py_str(self.derivedptr.getStringValue())
+        return make_py_str(self.derivedptr.toString())
      def __str__(self):
-        return make_py_str(self.derivedptr.getStringValue())
+        return make_py_str(self.derivedptr.toString())
 
      @property
      def is_atomic(self):
@@ -3700,7 +3701,7 @@ cdef class PyXdmNode(PyXdmItem):
      @property
      def string_value(self):
         """
-        get_String_value(self)
+        string_value(self)
         Property to get the string value of the node as defined in the XPath data model.
         Returns:
             str: The string value of this node
@@ -3890,13 +3891,13 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         Returns:
             str: String value of this node
         """
-        ustring = make_py_str(self.derivedaptr.getStringValue())
+        ustring = make_py_str(self.derivedaptr.toString())
         return ustring
      def __repr__(self):
         """
         ___repr__
         """
-        ustring = make_py_str(self.derivedaptr.getStringValue())
+        ustring = make_py_str(self.derivedaptr.toString())
         return ustring
 
      def __hash__(self):
@@ -3953,6 +3954,11 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          """
          return self.derivedfptr.getArity()
 
+     def __repr__(self):
+        return make_py_str(self.derivedfptr.toString())
+     def __str__(self):
+        return make_py_str(self.derivedfptr.toString())
+
      @property
      def string_value(self):
         """
@@ -3973,11 +3979,9 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          cdef char * c_str = NULL
          cdef PyXdmFunctionItem func = None
          cdef saxoncClasses.XdmFunctionItem * c_func = NULL
-         py_name_string = name.encode('UTF-8') if name is not None else None
-         c_str = py_name_string if name is not None else ""
          if proc is None:
              return None
-         c_func = self.derivedfptr.getSystemFunction(proc.thisptr, name, arity)
+         c_func = self.derivedfptr.getSystemFunction(proc.thisptr, make_c_str(name), arity)
          if c_func is NULL:
              return None
          func = PyXdmFunctionItem()
@@ -4069,9 +4073,9 @@ cdef class PyXdmMap(PyXdmFunctionItem):
 
 
      def __repr__(self):
-        return make_py_str(self.derivedmmptr.getStringValue())
+        return make_py_str(self.derivedmmptr.toString())
      def __str__(self):
-        return make_py_str(self.derivedmmptr.getStringValue())
+        return make_py_str(self.derivedmmptr.toString())
 
      @property
      def map_size(self):
@@ -4348,9 +4352,9 @@ cdef class PyXdmArray(PyXdmFunctionItem):
 
 
      def __repr__(self):
-        return make_py_str(self.derivedaaptr.getStringValue())
+        return make_py_str(self.derivedaaptr.toString())
      def __str__(self):
-        return make_py_str(self.derivedaaptr.getStringValue())
+        return make_py_str(self.derivedaaptr.toString())
 
      @property
      def array_length(self):

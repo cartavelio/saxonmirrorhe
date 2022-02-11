@@ -263,9 +263,9 @@ if (!mID) {
 
 			xdmItem = new XdmNode(result);
 
-		} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, mapClass)           == JNI_TRUE) {
+		} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapClass)           == JNI_TRUE) {
             xdmItem =  new XdmMap(result);
-        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, arrayClass)           == JNI_TRUE) {
+        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, arrayClass)           == JNI_TRUE) {
             xdmItem =  new XdmArray(result);
         } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
 		    xdmItem = new XdmFunctionItem(result);

@@ -2302,7 +2302,7 @@ PHP_METHOD(XdmFunctionItem, __toString)
          xdmFunctionItem_object* obj = (xdmFunctionItem_object *)((char *)oobj - XtOffsetOf(xdmFunctionItem_object, std));
          xdmFunctionItem = obj->xdmFunctionItem;
          if (xdmFunctionItem != nullptr) {
-        	const char * value = xdmFunctionItem->getStringValue();
+        	const char * value = xdmFunctionItem->toString();
         	if(value != nullptr) {
         	    _RETURN_STRING(value);
         	 } else {
@@ -2569,7 +2569,7 @@ PHP_METHOD(XdmMap, __toString)
          xdmMap_object* obj = (xdmMap_object *)((char *)oobj - XtOffsetOf(xdmMap_object, std));
          xdmMap = obj->xdmMap;
          if (xdmMap != nullptr) {
-        	const char * value = xdmMap->getStringValue();
+        	const char * value = xdmMap->toString();
         	if(value != nullptr) {
         	    _RETURN_STRING(value);
         	 } else {
@@ -2901,7 +2901,7 @@ PHP_METHOD(XdmArray, __toString)
          xdmArray_object* obj = (xdmArray_object *)((char *)oobj - XtOffsetOf(xdmArray_object, std));
          xdmArray = obj->xdmArray;
          if (xdmArray != nullptr) {
-        	const char * value = xdmArray->getStringValue();
+        	const char * value = xdmArray->toString();
         	if(value != nullptr) {
         	    _RETURN_STRING(value);
         	 } else {

@@ -106,6 +106,28 @@ jobject XdmItem::getUnderlyingValue(){
     	}
    }
 
+
+const char * XdmItem::toString(){
+    jclass xdmClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmItem");
+    jmethodID strbbMID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmClass,
+                                                                                   "toString",
+                                                                                   "()Ljava/lang/String;");
+    if (!strbbMID) {
+        std::cerr << "Error: Saxonc." << "toString"
+                  << " not found\n" << std::endl;
+        return nullptr;
+    } else {
+        jstring result = (jstring) (SaxonProcessor::sxn_environ->env->CallObjectMethod(value, strbbMID));
+        if(result) {
+            const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
+            stringValue = str;
+            return str;
+        }
+        return nullptr;
+    }
+
+}
+
 	/**
 	* Get the type of the object
 	*/
