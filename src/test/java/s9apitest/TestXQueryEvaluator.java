@@ -318,7 +318,7 @@ public class TestXQueryEvaluator {
             final XQueryEvaluator ev = exp1.load();
             XdmValue v1 = new XdmAtomicValue(10);
             XdmValue v2 = new XdmAtomicValue("5", ItemType.UNTYPED_ATOMIC);
-            XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), new XdmValue[]{v1, v2});
+            XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), v1, v2);
             assertTrue(result instanceof XdmAtomicValue, "isAtomic");
             assertEquals("2", result.toString(), "equals2");
         } catch (SaxonApiException e) {
@@ -346,7 +346,7 @@ public class TestXQueryEvaluator {
             final XQueryEvaluator ev = exp1.load();
             XdmValue v1 = new XdmAtomicValue(10);
             XdmValue v2 = new XdmAtomicValue("5", ItemType.UNTYPED_ATOMIC);
-            XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), new XdmValue[]{v1, v2});
+            XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), v1, v2);
             assertTrue(result instanceof XdmAtomicValue, "isAtomic");
             assertEquals("91", result.toString(), "equals2");
         } catch (SaxonApiException e) {
@@ -374,7 +374,7 @@ public class TestXQueryEvaluator {
             final XQueryEvaluator ev = exp1.load();
             XdmValue v1 = new XdmAtomicValue(10);
             XdmValue v2 = new XdmAtomicValue("5e0", ItemType.UNTYPED_ATOMIC);
-            XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), new XdmValue[]{v1, v2});
+            XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), v1, v2);
             assertTrue(result instanceof XdmAtomicValue, "isAtomic");
             assertEquals("double", ((XdmAtomicValue) result).getPrimitiveTypeName().getLocalName());
             assertEquals("2", result.toString(), "equals2");
@@ -402,7 +402,7 @@ public class TestXQueryEvaluator {
             final XQueryEvaluator ev = exp1.load();
             XdmValue v1 = new XdmAtomicValue(10);
             XdmValue v2 = new XdmAtomicValue("banana");
-            ev.callFunction(new QName("f.ns", "f:t1"), new XdmValue[]{v1, v2});
+            ev.callFunction(new QName("f.ns", "f:t1"), v1, v2);
             fail("Failed to throw error"); // expect failure
         } catch (SaxonApiException e) {
             //e.printStackTrace();
@@ -430,11 +430,11 @@ public class TestXQueryEvaluator {
             final XQueryEvaluator ev = exp1.load();
             ev.setExternalVariable(new QName("p"), new XdmAtomicValue(39));
             XdmValue v1 = new XdmAtomicValue(10);
-            XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), new XdmValue[]{v1});
+            XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), v1);
             assertTrue(result instanceof XdmAtomicValue);
             assertEquals("44", result.toString());
             v1 = new XdmAtomicValue(20);
-            result = ev.callFunction(new QName("f.ns", "f:t1"), new XdmValue[]{v1});
+            result = ev.callFunction(new QName("f.ns", "f:t1"), v1);
             assertTrue(result instanceof XdmAtomicValue);
             assertEquals("49", result.toString());
         } catch (SaxonApiException e) {
@@ -465,12 +465,12 @@ public class TestXQueryEvaluator {
             final XQueryEvaluator ev = exp.load();
             XdmValue v1 = new XdmAtomicValue("Hello");
             QName foo = new QName("http://example.com/library", "foo");
-            XdmValue result = ev.callFunction(foo, new XdmValue[]{v1});
+            XdmValue result = ev.callFunction(foo, v1);
             assertTrue(result instanceof XdmAtomicValue);
             assertEquals("Hello!", result.toString());
             v1 = new XdmAtomicValue("Goodbye");
             ev.setExternalVariable(new QName("http://example.com/library", "bang"), new XdmAtomicValue("?"));
-            result = ev.callFunction(foo, new XdmValue[]{v1});
+            result = ev.callFunction(foo, v1);
             assertTrue(result instanceof XdmAtomicValue);
             assertEquals("Goodbye?", result.toString());
         } catch (SaxonApiException e) {
@@ -501,7 +501,7 @@ public class TestXQueryEvaluator {
             final XQueryEvaluator ev = exp.load();
 
             QName foo = new QName("http://example.com/library", "foo");
-            XdmValue result = ev.callFunction(foo, new XdmValue[]{});
+            XdmValue result = ev.callFunction(foo);
             assertTrue(result instanceof XdmAtomicValue);
             assertEquals("AZAZ", ((XdmAtomicValue)result).getStringValue());
         } catch (SaxonApiException e) {
@@ -898,6 +898,7 @@ public class TestXQueryEvaluator {
 
     }
 
+    @Test
     public void testLocalURIResolver() {
         try {
             Processor p = new Processor(false);
@@ -912,6 +913,7 @@ public class TestXQueryEvaluator {
         }
     }
 
+    @Test
     public void testGlobalURIResolver() {
         try {
             Processor p = new Processor(false);
