@@ -1164,7 +1164,7 @@
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
          'getUnderlyingValue#0':  '((net.sf.saxon.value.EmptySequence)%scope%.Unwrap())',
-         'getInstance#0':         '%scope%.INSTANCE',
+         'getInstance#0':         '%scope%.Instance',
          '*':                     '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
