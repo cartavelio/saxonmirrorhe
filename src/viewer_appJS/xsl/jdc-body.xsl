@@ -191,6 +191,19 @@
                         </xsl:for-each>
                     </xsl:if>
                     
+                    <xsl:if test="paramtags">
+                        <p class="methodLabel">Type Parameters:</p>
+                        <xsl:for-each select="paramtags/tag">
+                            <div class="params">
+                                <code><xsl:value-of select="."/></code>
+                                <xsl:if test="@comment">
+                                    <xsl:text> - </xsl:text>
+                                    <xsl:value-of select="@comment"/>
+                                </xsl:if>
+                            </div>
+                        </xsl:for-each>
+                    </xsl:if>
+                    
                     <xsl:if test="params">
                         <p class="methodLabel">Parameters:</p>
                         <xsl:for-each select="params/param">
