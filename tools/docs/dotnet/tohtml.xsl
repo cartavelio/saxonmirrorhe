@@ -671,6 +671,12 @@
       <p class="methodLabel">Throws:</p>
       <xsl:apply-templates select="exception" mode="comments"/>
     </xsl:if>
+    <xsl:for-each select="example">
+      <p class="methodLabel">Example:</p>
+      <samp>
+        <xsl:apply-templates select="code/text()"/>
+      </samp>
+    </xsl:for-each>
   </xsl:template>
   
   <xsl:template match="*" mode="comments">
