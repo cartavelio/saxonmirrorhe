@@ -282,6 +282,13 @@
          <xsl:text>#nullable {annotations/annotation[name/@identifier='CSharpNullable']//@value}{$NL}</xsl:text>
          <xsl:call-template name="indent"/>
       </xsl:if>
+      <xsl:if test="members/member[@nodeType='MethodDeclaration']/name/@identifier='computeHashCode'">
+         <!-- Subclasses of Expression have a method computeHashCode(), called by hashCode() on the superclass,
+              which computes the hash code and causes it to be cached. This means that the C# warning indicating
+              that GetHashCode() is not implemented is in fact spurious, so we suppress the warning -->
+         <xsl:text>#pragma warning disable {@value}{$NL}</xsl:text>
+         <xsl:call-template name="indent"/>
+      </xsl:if>
       <xsl:choose>
          <xsl:when test="annotations/annotation[name/@identifier='CSharpModifiers']">
             <xsl:value-of select="annotations/annotation[name/@identifier='CSharpModifiers']//@value ! string()" separator=" "/>
@@ -916,6 +923,7 @@
                   <xsl:call-template name="indent"/>
                   <xsl:text>  case </xsl:text>
                   <xsl:choose>
+                     <xsl:when test="$selectorElem = 'net.sf.saxon.s9api.HostLanguage'">Saxon.Api.HostLanguage.{name/@identifier}</xsl:when>
                      <xsl:when test="$enumType and exists($firstLabel/@RESOLVED_TYPE)">{f:renameType($firstLabel/@RESOLVED_TYPE)}.{if (not($isSimpleEnum)) then 'InnerEnum.' else ''}{name/@identifier}</xsl:when>
                      <xsl:otherwise>
                         <xsl:apply-templates select="."/>
