@@ -21,7 +21,7 @@ import java.util.*;
 
 
 /**
- * * This class is to use with Saxon/C on C++
+ * * This class is to use with SaxonC on C++
  */
 public class Xslt30Processor extends SaxonCAPI {
 

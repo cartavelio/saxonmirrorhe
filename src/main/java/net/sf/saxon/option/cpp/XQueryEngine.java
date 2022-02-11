@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * * XQuery engine class to use with Saxon/C on C++
+ * * XQuery engine class to use with SaxonC on C++
  */
 public class XQueryEngine extends SaxonCAPI {
 
@@ -90,7 +90,7 @@ public class XQueryEngine extends SaxonCAPI {
                 return map;
             }
             if (params.length != values.length) {
-                throw new SaxonApiException("Saxon/C internal Error: params array length does not match values length");
+                throw new SaxonApiException("SaxonC internal Error: params array length does not match values length");
             }
             for (int i = 0; i < params.length; i++) {
                 if (params[i].startsWith("!")) {

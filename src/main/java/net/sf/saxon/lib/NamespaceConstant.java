@@ -269,17 +269,17 @@ public class NamespaceConstant {
     public static final String EXPATH_ZIP = "http://expath.org/ns/zip";
 
     /**
-     * URI for the user extension calls in Saxon.js
+     * URI for the user extension calls in SaxonJS
      */
     public static final String GLOBAL_JS = "http://saxonica.com/ns/globalJS";
 
     /**
-     * URI for the user extension calls in Saxon/C for C++ and PHP
+     * URI for the user extension calls in SaxonC for C++ and PHP
      */
     public static final String PHP = "http://php.net/xsl";
 
     /**
-     * URI for interactive XSLT extensions in Saxon-CE and Saxon-JS
+     * URI for interactive XSLT extensions in Saxon-CE and SaxonJS
      */
     public static final String IXSL = "http://saxonica.com/ns/interactiveXSLT";
 

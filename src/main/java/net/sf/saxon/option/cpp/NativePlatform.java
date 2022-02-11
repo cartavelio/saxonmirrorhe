@@ -20,7 +20,7 @@ import net.sf.saxon.java.JavaPlatform;
  * (as distinct from .NET) for Saxon-PE and Saxon-EE.
  * This is a singleton class with no instance data.
  * The key differences to the JavaPlatformPE is that we have no reference to registerAllBuiltInObjectModels and the
- * environment variable for Saxon/C we use SAXONC_HOME
+ * environment variable for SaxonC we use SAXONC_HOME
  */
 public class NativePlatform extends JavaPlatform {
 
@@ -46,7 +46,7 @@ public class NativePlatform extends JavaPlatform {
      *
      * @param edition The edition of the software that is loaded ("HE", "PE", or "EE")
      * @param config  the Saxon configuration
-     * @return the name of the directory in which Saxon/C is installed, if available, or null otherwise
+     * @return the name of the directory in which SaxonC is installed, if available, or null otherwise
      */
 
     public String getInstallationDirectory(String edition, Configuration config) {
