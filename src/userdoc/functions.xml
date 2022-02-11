@@ -5968,8 +5968,17 @@
         <div>
           <p>This function performs a decimal division to a user-specified precision. The value of
             the first argument is divided by the second argument, and the result is returned to the
-            number of decimal places indicated by the third argument. The exact result is rounded
-            towards zero. For example, <code>decimal-divide(100, 30, 2)</code> returns
+            number of decimal places indicated by the third argument. Specifically, if the third argument
+            is N, then the result will be a multiple of ten to the power of minus N.
+            The exact result is rounded towards zero. </p>
+          <p>Examples:</p>
+          <ul>
+            <li><p><code>decimal-divide(100, 30, 2)</code> returns <code>3.33</code></p></li>
+            <li><p><code>decimal-divide(100, 30, 4)</code> returns <code>3.3333</code></p></li>
+            <li><p><code>decimal-divide(100, 30, 0)</code> returns <code>3</code></p></li>
+            <li><p><code>decimal-divide(100, 3, -1)</code> returns <code>30</code></p></li>
+            <li><p><code>decimal-divide(100, 700, 6)</code> returns <code>0.142857</code></p></li>
+          </ul>For example, <code>decimal-divide(100, 30, 2)</code> returns
               <code>0.33</code>. (The default for decimal division in Saxon using the
               <code>div</code> operator is to return <i>max(18, s1, s2)</i> decimal places in the
             result, where <i>s1</i> is the scale of the first operand and <i>s2</i> the scale of the
@@ -6925,7 +6934,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.7.</p>
+        <p>Available since Saxon 9.7. Not available in Saxon-CS.</p>
       </status>
       <saxon-edition>EE 9.7</saxon-edition>
       <details>
@@ -6949,6 +6958,9 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           <p>If running from the command line, use the option
               <code>--markDefaultedAttributes:on</code> to ensure that the information is
             available.</p>
+          
+          <p>The function is not available in Saxon-CS, because the Microsoft XML parser does
+          not make the information available.</p>
 
 
 
@@ -8153,7 +8165,7 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 10.</p>
+        <p>Available since Saxon 10. Not supported in Saxon-CS.</p>
       </status>
       <saxon-edition>PE/EE 10</saxon-edition>
       <details>
