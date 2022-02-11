@@ -32,7 +32,6 @@ task transpile_to_xml(
   description: "Transpile the Java to XML"
 ) {
   inputs.files fileTree(dir: "${buildDir}/preprocess/hecs")
-  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
   outputs.files fileTree(dir: "${buildDir}/xmlout")
   classpath = configurations.transpiler
   main = "ToXml"
@@ -50,6 +49,7 @@ task xml_digest(
   description: "Make a digest of the transpiled XML"
 ) {
   inputs.files fileTree(dir: "${buildDir}/xmlout")
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
   inputs.file "${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl"
   outputs.files "${buildDir}/digest.xml"
   classpath = configurations.preprocessor
