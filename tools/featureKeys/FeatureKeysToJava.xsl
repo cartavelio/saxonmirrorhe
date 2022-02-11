@@ -247,11 +247,9 @@ public class Feature<T> {
     </xsl:template>
     
     <xsl:template match="desc//a" priority="2" mode="#all">
-        <xsl:text>&lt;span class="link" data-href="</xsl:text>
-        <xsl:value-of select="@href"/>
-        <xsl:text>"&gt;</xsl:text>
+        <xsl:text>{@code </xsl:text>
         <xsl:apply-templates mode="#current"/>
-        <xsl:text>&lt;/span&gt;</xsl:text>
+        <xsl:text>}</xsl:text>
     </xsl:template>
     
     <xsl:template match="desc//text()" mode="#all">
