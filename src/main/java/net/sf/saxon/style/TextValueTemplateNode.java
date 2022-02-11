@@ -8,6 +8,7 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.str.UnicodeString;
@@ -52,7 +53,9 @@ public class TextValueTemplateNode extends TextImpl {
             contentExp = AttributeValueTemplate.make(getUnicodeStringValue().toString(), getStaticContext());
         } catch (XPathException e) {
             e.setLocation(this);
-            throw e;
+            assert getParent() instanceof StyleElement;
+            ((StyleElement) getParent()).compileError(e);
+            contentExp = new StringLiteral(getStringValue());
         }
         contentExp = new ValueOf(contentExp, disable, false);
         assert getParent() != null;
