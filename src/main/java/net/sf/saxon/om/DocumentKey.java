@@ -49,7 +49,7 @@ public class DocumentKey {
         Objects.requireNonNull(uri);
         this.displayValue = uri;
         this.normalizedValue = normalizeURI(uri);
-        this.packageName = packageName;
+        this.packageName = packageName == null ? "" : packageName;
         this.packageVersion = version;
     }
 
