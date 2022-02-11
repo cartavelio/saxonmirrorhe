@@ -614,7 +614,7 @@ namespace TestDriver {
                         //testXqc.DeclareNamespace("math", NamespaceConstant.MATH);
                         testXqc.DeclareNamespace("map", "http://www.w3.org/2005/xpath-functions/map");
                         testXqc.DeclareNamespace("array", "http://www.w3.org/2005/xpath-functions/array");
-                        SysCollGen.List<XmlProcessingError> errorList = new SysCollGen.List<XmlProcessingError>();
+                        SysCollGen.List<Error> errorList = new SysCollGen.List<Error>();
                         testXqc.ErrorReporter = err => errorList.Add(err);
                         string decVars = env.paramDecimalDeclarations.ToString();
                         if (decVars.Length != 0) {

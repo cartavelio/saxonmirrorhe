@@ -167,9 +167,9 @@ namespace TestDriver {
             errorsReported.Add(code);
         }
 
-        public void SetErrorsReported(SysCollGen.IList<XmlProcessingError> errors) {
+        public void SetErrorsReported(SysCollGen.IList<Error> errors) {
             if (errors != null) {
-                foreach (XmlProcessingError err in errors) {
+                foreach (Error err in errors) {
                     if (err.ErrorCode != null) {
                         errorsReported.Add(err.ErrorCode);
                     }
