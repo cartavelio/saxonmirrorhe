@@ -429,7 +429,7 @@ namespace TestDriver {
                 XQueryModuleSource[] sources = new XQueryModuleSource[files.Count];
                 int u = 0;
                 foreach (XdmItem file in files) {
-                    string filename = file.GetStringValue();
+                    string filename = file.StringValue;
                     Uri abs = new Uri(testCase.BaseUri, filename);
                     sources[u++] = new XQueryModuleSource() {
                         BaseUri = abs,
@@ -651,7 +651,7 @@ namespace TestDriver {
                                 XdmItem optResult =
                                     xpc.EvaluateSingle(optimization.GetAttributeValue(new QName("assert")),
                                         explanation);
-                                if (((XdmAtomicValue) optResult).GetBooleanValue()) {
+                                if (((XdmAtomicValue) optResult).AsBoolean()) {
                                     println("Optimization result OK");
                                 }
                                 else {

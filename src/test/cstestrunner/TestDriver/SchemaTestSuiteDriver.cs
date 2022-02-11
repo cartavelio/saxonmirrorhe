@@ -91,7 +91,7 @@ namespace TestDriver {
          * @throws IOException
          * @throws URISyntaxException
          */
-        public void go(String[] args) {
+        private void go(String[] args) {
             if (args.Length == 0 || args[0] == "-?") {
                 Console.WriteLine(
                     "SchemaTestSuiteDriver testDir -lang:XSD [-w] [-onwards] -c:contributor? -s:setName? -g:groupName?");
@@ -124,19 +124,19 @@ namespace TestDriver {
                     debug = true;
                 }
                 else if (args[i].StartsWith("-c:")) {
-                    contributor = args[i].Substring(3);
+                    contributor = args[i][3..];
                 }
                 else if (args[i].StartsWith("-s:")) {
-                    testSetPattern = args[i].Substring(3);
+                    testSetPattern = args[i][3..];
                 }
                 else if (args[i].StartsWith("-g:")) {
-                    testGroupPattern = args[i].Substring(3);
+                    testGroupPattern = args[i][3..];
                 } 
                 else if (args[i].StartsWith("-v:")) {
                     // Note, although we allow setting -v:1.0 to run the tests appropriate to a 1.0 processor,
                     // we don't expect 100% success, because Saxon does not implement a conformant 1.0 processor,
                     // it only offers 1.1 conformance.
-                    versionUnderTest = args[i].Substring(3);
+                    versionUnderTest = args[i][3..];
                 }
                 else if (args[i].StartsWith("-exceptions:")) {
                     exceptionsFile = args[i].Substring("-exceptions:".Length);
@@ -183,7 +183,7 @@ namespace TestDriver {
                 foreach (XdmNode exception in exceptionsDoc.Select(Steps.Descendant("exception"))) {
                     string set = exception.GetAttributeValue("test-set");
                     string group = exception.GetAttributeValue("test-case");
-                    string comment = exception.Children("reason").First().GetStringValue();
+                    string comment = exception.Children("reason").First().StringValue;
                     exceptions[set + "#" + group] = comment;
                 }
 
