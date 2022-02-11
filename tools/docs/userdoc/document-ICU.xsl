@@ -27,8 +27,8 @@
 
   <xsl:include href="map-print.xsl"/>
   <xsl:namespace-alias stylesheet-prefix="X" result-prefix="xsl"/>
-  <xsl:output method="xml" indent="yes"/>
-  <xsl:output name="text" method="text" indent="yes"/>
+  <xsl:output method="xml" indent="no"/>
+  <xsl:output name="text" method="text" indent="no"/>
 
   <xsl:variable name="audit"
     select="'Generated from:',resolve-uri(document('')/base-uri()),format-dateTime(current-dateTime(),'[Y] [MNn] [D01] @ [H01]:[m]')"/>

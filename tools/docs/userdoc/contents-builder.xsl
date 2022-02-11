@@ -5,7 +5,7 @@
   xmlns:ch="http://www.saxonica.com/ns/doc/changes" xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:saxon="http://saxon.sf.net/" exclude-result-prefixes="cat fn ch xs saxon">
 
-  <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
+  <xsl:output method="xml" encoding="UTF-8" indent="no"/>
   
   <xsl:param name="version-number"/>
 
@@ -15,7 +15,7 @@
      format to those in 9.5 onwards; so these are treated as a special case. -->
 
   <xsl:template match="/">
-    <xsl:result-document method="xml" indent="yes">
+    <xsl:result-document method="xml" indent="no">
       <xsl:comment> Generated at <xsl:value-of select="format-dateTime(current-dateTime(), '[D] [MNn] [Y0001] at [H01]:[m01]')"/>
       </xsl:comment>
       <contents>
