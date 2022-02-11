@@ -74,22 +74,35 @@ public class XSLIterate extends StyleElement {
     @Override
     public void prepareAttributes() {
 
-        String selectAtt = null;
-
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
             String value = att.getValue();
             String f = attName.getDisplayName();
-            if (f.equals("select")) {
-                selectAtt = value;
-                select = makeExpression(selectAtt, att);
-            } else {
-                checkUnknownAttribute(attName);
+            switch (f) {
+                case "select":
+                    select = makeExpression(value, att);
+                    break;
+                case "array":
+                    requireXslt40("array");
+                    select = arrayToSequence(makeExpression(value, att));
+                    break;
+                case "map":
+                    requireXslt40("map");
+                    select = mapToSequence(makeExpression(value, att));
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
 
-        if (selectAtt == null) {
-            reportAbsence("select");
+        if (select == null) {
+            select = Literal.makeEmptySequence();
+            if (getEffectiveVersion() >= 40) {
+                compileError("One of the attributes select|array|map must be present");
+            } else {
+                reportAbsence("select");
+            }
         }
 
     }

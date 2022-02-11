@@ -17,20 +17,23 @@ import net.sf.saxon.functions.ApplyFn;
 import net.sf.saxon.functions.Doc_2;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.map.MapCreate;
-import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.MapUntypedContains;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.ma.map.*;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.SourceLocator;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -86,6 +89,22 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
         register("map-untyped-contains", 2, MapUntypedContains.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE, null);
+
+        RecordTest arrayRepresentation = new RecordTest(
+                Collections.singletonList("value"),
+                Collections.singletonList(SequenceType.ANY_SEQUENCE),
+                Collections.emptyList(),
+                false);
+        register("array-as-sequence-of-maps", 1, ArrayAsSequenceOfMaps.class, arrayRepresentation, STAR, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE,null);
+
+        RecordTest mapRepresentation = new RecordTest(
+                Arrays.asList("key", "value"),
+                Arrays.asList(SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE),
+                Collections.emptyList(),
+                false);
+        register("map-as-sequence-of-maps", 1, MapAsSequenceOfMaps.class, mapRepresentation, STAR, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE, null);
 
     }
 
@@ -266,6 +285,45 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     return EmptySequence.getInstance();
             }
 
+        }
+    }
+
+
+    private static StringItem valueKey = new StringItem(new Twine8(StringConstants.bytes("value")));
+
+    /**
+     * Implementation of the function saxon:array-as-sequence-of-maps(array)
+     */
+
+    public static class ArrayAsSequenceOfMaps extends SystemFunction {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem array = (ArrayItem) arguments[0].head();
+            List<Item> mapList = new ArrayList<>();
+            for (GroundedValue value : array.members()) {
+                mapList.add(new SingleEntryMap(valueKey, value));
+            }
+            return new SequenceExtent(mapList);
+        }
+    }
+
+    /**
+     * Implementation of the function saxon:map-as-sequence-of-maps(array)
+     */
+
+    public static class MapAsSequenceOfMaps extends SystemFunction {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            MapItem map = (MapItem) arguments[0].head();
+            List<Item> mapList = new ArrayList<>();
+
+            for (KeyValuePair pair : map.keyValuePairs()) {
+                DictionaryMap dictionary = new DictionaryMap(2);
+                dictionary.initialPut("key", pair.key);
+                dictionary.initialPut("value",pair.value);
+                mapList.add(dictionary);
+            }
+            return new SequenceExtent(mapList);
         }
     }
 
