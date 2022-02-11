@@ -617,7 +617,7 @@ public class ReceivingContentHandler
                     CodePoints data;
                     if (remainder == null) {
                         // allowed by the spec but rarely seen: see Saxon bug 2491
-                        data = EmptyUniString.getInstance();
+                        data = EmptyUnicodeString.getInstance();
                     } else {
                         // not strictly necessary (the parser should have done this) but needed in practice
                         data = Whitespace.removeLeadingWhitespace(StringView.tidy(remainder));

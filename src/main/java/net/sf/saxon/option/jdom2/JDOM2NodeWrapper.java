@@ -15,7 +15,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -237,7 +237,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         } else if (node instanceof Namespace) {
             return StringView.tidy(((Namespace) node).getURI());
         } else {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
     }
 

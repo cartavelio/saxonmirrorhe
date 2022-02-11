@@ -136,7 +136,7 @@ public class AlphanumericCollator implements StringCollator {
     public AtomicMatchKey getCollationKey(/*@NotNull*/ UnicodeString cs) {
         // The string is normalized by removing leading zeros in a numeric component
         String s = cs.toString();
-        UnicodeString sb = EmptyUniString.getInstance();
+        UnicodeString sb = EmptyUnicodeString.getInstance();
         int pos1 = 0;
         Matcher m1 = pattern.matcher(s);
         while (true) {

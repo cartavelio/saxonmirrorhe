@@ -15,7 +15,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.SubstringMatcher;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
@@ -62,7 +62,7 @@ public class StartsWith extends CollatingFunctionFixed {
 
 
     public static boolean startsWith(UnicodeString arg0, UnicodeString arg1, SubstringMatcher collator) {
-        if (arg1 == null || arg1.isEmpty() || collator.comparesEqual(arg1, EmptyUniString.getInstance())) {
+        if (arg1 == null || arg1.isEmpty() || collator.comparesEqual(arg1, EmptyUnicodeString.getInstance())) {
             return true;
         }
 

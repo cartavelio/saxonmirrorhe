@@ -3,7 +3,7 @@ package net.sf.saxon.ma.zeno;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -25,6 +25,11 @@ public class ZenoSequence implements GroundedValue {
 
     public ZenoSequence() {
         chain = new ZenoChain<>();
+    }
+
+    public static ZenoSequence fromList(List<Item> items) {
+        ZenoChain<Item> chain = new ZenoChain<Item>().addAll(items);
+        return new ZenoSequence(chain);
     }
 
     private ZenoSequence(ZenoChain<Item> chain) {
@@ -70,12 +75,12 @@ public class ZenoSequence implements GroundedValue {
     public UnicodeString getUnicodeStringValue() throws XPathException {
         switch (getLength()) {
             case 0:
-                return EmptyUniString.getInstance();
+                return EmptyUnicodeString.getInstance();
             case 1:
                 return this.head().getUnicodeStringValue();
             default:
                 UnicodeBuilder builder = new UnicodeBuilder();
-                UnicodeString separator = EmptyUniString.getInstance();
+                UnicodeString separator = EmptyUnicodeString.getInstance();
                 for (Item item : chain) {
                     builder.append(separator);
                     separator = StringConstants.SINGLE_SPACE;

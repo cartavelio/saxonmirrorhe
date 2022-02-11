@@ -2700,7 +2700,7 @@ public class XPathParser {
         nextToken();
         if (t.currentToken == Token.RPAR) {
             nextToken();
-            return Literal.makeEmptySequence();
+            return makeTracer(Literal.makeEmptySequence(), null);
         }
         Expression seq = parseExpression();
         expect(Token.RPAR);

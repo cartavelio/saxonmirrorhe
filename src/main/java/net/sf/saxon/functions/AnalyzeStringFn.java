@@ -20,7 +20,7 @@ import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegexMatchHandler;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -90,7 +90,7 @@ public class AnalyzeStringFn extends RegexFunction {
         Item inputItem = arguments[0].head();
         UnicodeString input;
         if (inputItem == null) {
-            input = EmptyUniString.getInstance();
+            input = EmptyUnicodeString.getInstance();
         } else {
             input = inputItem.getUnicodeStringValue();
         }

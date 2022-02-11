@@ -12,7 +12,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
@@ -37,7 +37,7 @@ public class NormalizeSpace_1 extends ScalarSystemFunction {
 
     public static UnicodeString normalizeSpace(UnicodeString sv) {
         if (sv == null) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         return Whitespace.collapseWhitespace(sv);
     }

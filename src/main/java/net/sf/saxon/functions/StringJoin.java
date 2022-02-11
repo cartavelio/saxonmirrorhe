@@ -18,7 +18,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -102,7 +102,7 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
 
     @Override
     public Fold getFold(XPathContext context, Sequence... additionalArguments) throws XPathException {
-        CodePoints separator = EmptyUniString.getInstance();
+        CodePoints separator = EmptyUnicodeString.getInstance();
         if (additionalArguments.length > 0) {
             separator = ((GroundedValue) additionalArguments[0].head()).getUnicodeStringValue();
         }
@@ -111,7 +111,7 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
 
     @Override
     public void process(Outputter destination, XPathContext context, Sequence[] arguments) throws XPathException {
-        CodePoints separator = arguments.length > 1 ? ((GroundedValue) arguments[1].head()).getUnicodeStringValue() : EmptyUniString.getInstance();
+        CodePoints separator = arguments.length > 1 ? ((GroundedValue) arguments[1].head()).getUnicodeStringValue() : EmptyUnicodeString.getInstance();
         UniStringConsumer output = destination.getStringReceiver(false);
         output.open();
         boolean first = true;

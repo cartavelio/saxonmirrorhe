@@ -165,7 +165,7 @@ public class HTML5CaseBlindCollator implements StringCollator, SubstringMatcher 
     public UnicodeString substringAfter(UnicodeString s1, UnicodeString s2) {
         long i = normalize(s1).indexOf(normalize(s2), 0);
         if (i < 0) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         return s1.substring(i + s2.length(), s1.length());
     }
@@ -183,7 +183,7 @@ public class HTML5CaseBlindCollator implements StringCollator, SubstringMatcher 
     public UnicodeString substringBefore(/*@NotNull*/ UnicodeString s1, UnicodeString s2) {
         long j = normalize(s1).indexOf(normalize(s2), 0);
         if (j < 0) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         return s1.substring(0, j);
     }

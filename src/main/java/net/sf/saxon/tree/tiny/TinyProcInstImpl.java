@@ -9,7 +9,7 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
@@ -36,7 +36,7 @@ final class TinyProcInstImpl extends TinyNodeImpl {
         int start = tree.alpha[nodeNr];
         int len = tree.beta[nodeNr];
         if (len == 0) {
-            return EmptyUniString.getInstance();    // need to special-case this for the Microsoft JVM
+            return EmptyUnicodeString.getInstance();    // need to special-case this for the Microsoft JVM
         }
         return tree.commentBuffer.substring(start, start + len);
     }

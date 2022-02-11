@@ -375,7 +375,7 @@ public final class ValueOf extends SimpleNodeConstructor {
                 if (noNodeIfEmpty) {
                     return null;
                 } else {
-                    val = EmptyUniString.getInstance();
+                    val = EmptyUnicodeString.getInstance();
                 }
             } else {
                 val = item.getUnicodeStringValue();

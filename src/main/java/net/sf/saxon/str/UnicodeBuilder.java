@@ -29,6 +29,10 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
         segments = new ArrayList<>();
     }
 
+    public UnicodeBuilder(int allocate) {  // used by bytecode, for compatibility with StringBuilder
+        segments = new ArrayList<>();
+    }
+
     public UnicodeBuilder(Consumer<UnicodeString> consumer) {
         segments = new ArrayList<>();
         segmentConsumer = consumer;
@@ -196,7 +200,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
     public UnicodeString toUnicodeString() {
         if (_length == 0) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         } else if (mask <= 0xff) {
             byte[] target = new byte[(int)length()];
             int k = 0;
@@ -458,6 +462,10 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     @Override
     public void write(String chars) throws IOException {
         append(chars);
+    }
+
+    public void trimToSize() {
+        // Used from bytecode: currently has no effect
     }
 
     /**

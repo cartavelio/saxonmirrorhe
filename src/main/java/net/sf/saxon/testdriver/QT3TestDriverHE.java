@@ -117,6 +117,10 @@ public class QT3TestDriverHE extends TestDriver {
 
     }
 
+    public static boolean isSlow(String test) {
+        return test.equals("RangeExpr-409d");
+    }
+
 
     @Override
     protected void createGlobalEnvironments(XdmNode catalog, XPathCompiler xpc) throws SaxonApiException {
@@ -353,6 +357,11 @@ public class QT3TestDriverHE extends TestDriver {
         hostLang = spec.shortSpecName;
         langVersion = spec.version;
 
+        if (isSlow(testCaseName)) {
+            writeTestcaseElement(testCaseName, "tooBig", "test is excessively slow");
+            notrun++;
+            return;
+        }
 
         Environment env = getEnvironment(testCase, xpc);
         if (env == null) {

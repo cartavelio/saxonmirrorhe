@@ -14,7 +14,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.String_1;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -254,7 +254,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
         Item contentItem = getSelect().evaluateItem(context);
         UnicodeString content;
         if (contentItem == null) {
-            content = EmptyUniString.getInstance();
+            content = EmptyUnicodeString.getInstance();
         } else {
             content = contentItem.getUnicodeStringValue();
             content = checkContent(content, context);

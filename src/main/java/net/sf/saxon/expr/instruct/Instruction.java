@@ -15,7 +15,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -397,7 +397,7 @@ public abstract class Instruction extends Expression implements TailCallReturner
     public final UnicodeString evaluateAsString(XPathContext context) throws XPathException {
         Item item = evaluateItem(context);
         if (item == null) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         } else {
             return item.getUnicodeStringValue();
         }

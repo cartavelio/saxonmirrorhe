@@ -12,7 +12,7 @@ import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -212,7 +212,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             case Node.NAMESPACE_NODE:
                 return StringView.tidy(((Namespace) node).getURI());
             default:
-                return EmptyUniString.getInstance();
+                return EmptyUnicodeString.getInstance();
         }
     }
 

@@ -83,7 +83,7 @@ public class Slice16 extends UnicodeString {
             throw new IndexOutOfBoundsException();
         }
         if (end == start) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         } else {
             return new Slice16(chars, requireInt(start) + this.start, requireInt(end) + this.start);
         }
