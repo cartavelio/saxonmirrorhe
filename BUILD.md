@@ -1,6 +1,12 @@
 # Building Saxon HE, PE, and EE
 
-The Saxon family of products  is built with Gradle.
+The Saxon Java, .NET, and C family of products are built with Gradle.
+
+These build scripts are shared across the open source HE repository,
+the commercial EE/PE repository, and an internal repository that is
+used for both current and future development. The same build scripts
+are shared across all of the repositories, even though not all the
+build tasks are applicable in all of the repositories.
 
 ## Prerequisites
 
@@ -32,9 +38,6 @@ If you run the build scripts with `~/.gradlew`, you will be using the
 version and configuration of Gradle that is known to work. (Other
 versions may also work, but then again, they may not.)
 
-These build scripts are shared across the open source HE repository,
-the commercial EE/PE repository, and an internal repository that is
-used for both current and future development.
 
 In the open source HE repository, only the HE product can be built.
 There are build targets for PE and EE artifacts, but they will not,
