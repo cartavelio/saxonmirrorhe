@@ -190,7 +190,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      */
 
     public void setArgumentEvaluators(Evaluator[] evalModes) {
-        argumentEvaluators = new Evaluator[evalModes.length];
+        argumentEvaluators = evalModes;
     }
 
 
