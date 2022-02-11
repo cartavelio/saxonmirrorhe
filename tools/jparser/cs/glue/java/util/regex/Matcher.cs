@@ -11,6 +11,10 @@ namespace java.util.regex {
             return true;
         }
         
+        public bool find(int start) {
+            return true;
+        }
+        
         public string replaceAll(string str) {
             return str;
         }
@@ -26,8 +30,16 @@ namespace java.util.regex {
         public int start() {
             throw new NotImplementedException();
         }
+        
+        public int start(int i) {
+            throw new NotImplementedException();
+        }
 
         public int end() {
+            throw new NotImplementedException();
+        }
+        
+        public int end(int i) {
             throw new NotImplementedException();
         }
     }

@@ -22,10 +22,10 @@
    <xsl:mode on-no-match="shallow-skip"/>
 
    
-   <xsl:function name="f:qualified-name" as="xs:string">
+   <xsl:function name="f:qualifiedName" as="xs:string">
       <xsl:param name="in" as="element(*)"/>
       <xsl:variable name="term" as="xs:string" select="$in/@identifier"/>
-      <xsl:sequence select="(if ($in/qualifier) then f:qualified-name($in/qualifier) || '.' else '') || $term"/>
+      <xsl:sequence select="(if ($in/qualifier) then f:qualifiedName($in/qualifier) || '.' else '') || $term"/>
    </xsl:function>
    
    <xsl:function name="f:degenerify" as="xs:string?">

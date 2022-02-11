@@ -7,7 +7,7 @@
    default-mode="diamond"
    version="3.0">
    
-   <xsl:mode name="diamond" on-no-match="fail"/>
+   <xsl:mode name="diamond" on-no-match="fail" saxon:trace="no" xmlns:saxon="http://saxon.sf.net/"/>
    
    <!-- This module is concerned with expanding the diamond operator found in Java constructs like
         new ArrayList<>(). When generating the C# equivalent code, we need to add explicit type
@@ -19,6 +19,8 @@
         (that is, creation of a new object with an empty list of type arguments)
         and since this has already been matched, there is no need to repeat this
         part of the pattern. The templates use the default mode="diamond".
+        
+        The type inference rules here are also used for constructs such as Collections.emptyList().
    -->
    
    <xsl:function name="f:extract-type-arguments" as="xs:string?">
@@ -28,13 +30,30 @@
       <xsl:value-of>
          <xsl:analyze-string select="$type-param" regex="[a-zA-Z0-9\._]+">
             <xsl:matching-substring>
-               <xsl:value-of select="f:rename-type(.)"/>
+               <xsl:value-of select="f:renameType(.)"/>
             </xsl:matching-substring>
             <xsl:non-matching-substring>
                <xsl:value-of select="."/>
             </xsl:non-matching-substring>
          </xsl:analyze-string>
       </xsl:value-of>
+   </xsl:function>
+   
+   <xsl:function name="f:candidateMethods" as="element(method)*">
+      <xsl:param name="targetTypeOfCall" as="xs:string?"/>
+      <xsl:param name="methodName" as="xs:string"/>
+      <xsl:param name="arity" as="xs:integer"/>
+      <xsl:variable name="targetClassDigest" select="key('digestClassKey', $targetTypeOfCall, $digest)"/>
+      <xsl:choose>
+         <xsl:when test="empty($targetClassDigest)"/>
+         <xsl:when test="$targetClassDigest/method[@name=$methodName and count(tokenize(@params, '\|')) = $arity]">
+            <xsl:sequence select="$targetClassDigest/method[@name=$methodName and count(tokenize(@params, '\|')) = $arity]"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:variable name="superclass" select="($targetClassDigest/extends)[1]/@name"/>
+            <xsl:sequence select="f:candidateMethods($superclass, $methodName, $arity)"/>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:function>
    
    <!-- Assignment to "this.field" -->
@@ -48,11 +67,12 @@
       <xsl:value-of select="f:extract-type-arguments($type)"/>
    </xsl:template>
    
+   <!-- Field assignment some.x = new XXX<>() -->
    <xsl:template match="*[@nodeType='AssignExpr'][target[@nodeType='FieldAccessExpr'][scope/@nodeType='NameExpr']]/*">
       <xsl:variable name="fieldRef" select="../target"/>
-      <xsl:message>Looking for class: {$fieldRef/@RESOLVED_TYPE}</xsl:message>
+      <!--<xsl:message>Looking for class: {$fieldRef/@RESOLVED_TYPE}</xsl:message>-->
       <xsl:variable name="targetClassDigest" select="key('digestClassKey', $fieldRef/@RESOLVED_TYPE, $digest)"/>
-      <xsl:message>Target class digest: {serialize($targetClassDigest)}</xsl:message>
+      <!--<xsl:message>Target class digest: {serialize($targetClassDigest)}</xsl:message>-->
       <xsl:variable name="fieldType" select="$targetClassDigest/field[@name=$fieldRef/name/@identifier]/@type"/>
       <xsl:value-of select="if ($fieldType) then f:extract-type-arguments($fieldType) else '/*UNIDENTIFIED FIELD*/'"/>
    </xsl:template>
@@ -71,7 +91,7 @@
    <!-- constructor call in "return" statement -->
    <!-- return new XXX<>() -->
    <!-- Example in SingletonAttributeMap.iterator() -->
-   <xsl:template match="*[@nodeType='ReturnStmt']/*">
+   <xsl:template match="*[@nodeType='ReturnStmt'][ancestor::member[1]/type/@RESOLVED_TYPE]/*">
       <xsl:variable name="type" select="ancestor::member[1]/type/@RESOLVED_TYPE" as="xs:string"/>
       <xsl:value-of select="f:extract-type-arguments($type)"/>
    </xsl:template>
@@ -80,7 +100,7 @@
    <!-- var = new XXX<>() -->
    <!-- Example in DictionaryMap constructor -->
    
-   <xsl:template match="*[@nodeType='AssignExpr'][target/@nodeType='NameExpr']/*">
+   <xsl:template match="*[@nodeType='AssignExpr'][target[@nodeType='NameExpr' and @RESOLVED_TYPE]]/*">
       <xsl:variable name="fieldRef" select="../target"/>
       <xsl:variable name="fieldDecl" 
          select="ancestor::members/*[@nodeType='FieldDeclaration'][variables/variable/name/@identifier = $fieldRef/name/@identifier]"/>
@@ -124,23 +144,6 @@
          <xsl:otherwise>/*NO UNIQUE METHOD {$targetTypeOfCall}.{$methodName}#{$arity} (FOUND {count($selectedMethods)})*/</xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-   
-   <xsl:function name="f:candidateMethods" as="element(method)*">
-      <xsl:param name="targetTypeOfCall" as="xs:string?"/>
-      <xsl:param name="methodName" as="xs:string"/>
-      <xsl:param name="arity" as="xs:integer"/>
-      <xsl:variable name="targetClassDigest" select="key('digestClassKey', $targetTypeOfCall, $digest)"/>
-      <xsl:choose>
-         <xsl:when test="empty($targetClassDigest)"/>
-         <xsl:when test="$targetClassDigest/method[@name=$methodName and count(tokenize(@params, '\|')) = $arity]">
-            <xsl:sequence select="$targetClassDigest/method[@name=$methodName and count(tokenize(@params, '\|')) = $arity]"/>
-         </xsl:when>
-         <xsl:otherwise>
-            <xsl:variable name="superclass" select="($targetClassDigest/extends)[1]/@name"/>
-            <xsl:sequence select="f:candidateMethods($superclass, $methodName, $arity)"/>
-         </xsl:otherwise>
-      </xsl:choose>
-   </xsl:function>
 
    
    <!-- argument to a constructor for a user-defined class, as in `new MyClass(new ArrayList<>())`.
@@ -161,9 +164,35 @@
       </xsl:choose>
    </xsl:template> 
    
-
+   <!-- Special-case `new SequenceExtent.Of<>(List<X>)` -->
    
+   <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.value.SequenceExtent.Of'][arguments/argument[1]/@RESOLVED_TYPE]" priority="50">
+      <xsl:value-of select="f:extract-type-arguments(arguments/argument[1]/@RESOLVED_TYPE) => replace('\[\]', '')"/>
+   </xsl:template>
    
+   <!-- Special-case `new SequenceExtent.Of<>(new X[])` -->
+   
+   <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.value.SequenceExtent.Of']
+                         [arguments/argument[1]/@RESOLVED_TYPE]
+                         [*/@nodeType='ArrayCreationExpr']" priority="60">
+      <xsl:value-of select="f:extract-type-arguments(arguments/argument[1]/elementType/@RESOLVED_TYPE)"/>
+   </xsl:template>
+   
+   <!-- Special-case `new ListIterator.of<>(List<X>)` -->
+   
+   <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.tree.iter.ListIterator.Of'][arguments/argument[1]/@RESOLVED_TYPE]" priority="50">
+      <xsl:value-of select="f:extract-type-arguments(arguments/argument[1]/@RESOLVED_TYPE) => replace('\[\]', '')"/>
+   </xsl:template>
+   
+   <!-- Special-case `new ArrayIterator.of<>(X[])` -->
+   
+   <xsl:template match="*[type/@RESOLVED_TYPE='net.sf.saxon.tree.iter.ArrayIterator.Of']
+                         [arguments/argument[1]/@RESOLVED_TYPE[ends-with(., '[]')]]" 
+                         priority="50">
+      <xsl:value-of select="arguments/argument[1]/@RESOLVED_TYPE => replace('\[\]$', '')"/>
+   </xsl:template>
+   
+ 
  
  
    <xsl:template match="*">

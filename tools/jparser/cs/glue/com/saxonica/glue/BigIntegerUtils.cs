@@ -18,6 +18,14 @@ namespace com.saxonica.glue {
         public static BigInt[] DivideAndRemainder(BigInt numerator, BigInt denominator) {
             throw new NotImplementedException();
         }
+        
+        public static BigInt Remainder(BigInt numerator, BigInt denominator) {
+            throw new NotImplementedException();
+        }
+        
+        public static BigInt Mod(BigInt numerator, BigInt denominator) {
+            throw new NotImplementedException();
+        }
 
         public static int Signum(BigInt value) {
             if (value > ZERO) {
@@ -27,6 +35,24 @@ namespace com.saxonica.glue {
             }
             else {
                 return 0;
+            }
+        }
+
+        public static long LongValueExact(BigInt value) {
+            if (value <= Int64.MaxValue && value >= Int64.MinValue) {
+                return (long) value;
+            }
+            else {
+                throw new ArithmeticException("BigInteger outwith range of Int64");
+            }
+        }
+        
+        public static long IntValueExact(BigInt value) {
+            if (value <= Int32.MaxValue && value >= Int32.MinValue) {
+                return (int) value;
+            }
+            else {
+                throw new ArithmeticException("BigInteger outwith range of Int32");
             }
         }
     }
