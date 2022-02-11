@@ -20,6 +20,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringItem;
 
@@ -54,10 +55,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, predicate, ONE, null);
 
-        register("highest", 1, Highest.class, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 1, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null);
 
-        register("highest", 2, Highest.class, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 2, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null);
 
@@ -65,7 +66,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.ATOMIC_SEQUENCE);
 
-        register("highest", 3, Highest.class, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 3, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null);
@@ -93,14 +94,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null);
 
-        register("lowest", 1, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+        register("lowest", 1, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null);
 
-        register("lowest", 2, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+        register("lowest", 2, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null);
-        
-        register("lowest", 3, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+
+        register("lowest", 3, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null);
@@ -110,9 +111,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, predicate, ONE, null);
     }
 
-    public static class Highest extends SefFunction {
+    public static class HighestOrLowest extends SefFunction {
 
-        public Highest(){
+        public HighestOrLowest(){
             super();
         };
 
@@ -140,12 +141,13 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 key = SystemFunction.makeFunction("data", getRetainedStaticContext(), 1);
             }
             SymbolicName.F delegate =
-                    new SymbolicName.F(new StructuredQName("", "http://ns.saxonica.com/xpath-functions", "mhk_highest"), 3);
+                    new SymbolicName.F(new StructuredQName("", "http://ns.saxonica.com/xpath-functions", "mhk_highest"), 4);
 
-            Sequence[] args = new Sequence[3];
+            Sequence[] args = new Sequence[4];
             args[0] = input.materialize();
             args[1] = new StringItem(collationUri);
             args[2] = key;
+            args[3] = BooleanValue.get(getDetails().name.getLocalPart().equals("highest"));
 
             return callFunction(context, delegate, args);
         }

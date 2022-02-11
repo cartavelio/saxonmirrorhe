@@ -342,7 +342,7 @@ public abstract class Token {
     /**
      * Arrow operator "=&gt;" (XQuery 3.1)
      */
-    public static final int ARROW = 77;
+    public static final int FAT_ARROW = 77;
     /**
      * First part of a string template. Token value includes all the text from ``[ up to the first `{
      */
@@ -363,6 +363,10 @@ public abstract class Token {
      * "by"
      */
     public static final int BY = 82;
+    /**
+     * Thin arrow operator "-&gt;" (XQuery 4.0)
+     */
+    public static final int THIN_ARROW = 83;
 
 
     // The following tokens are used only in the query prolog. They are categorized
@@ -691,7 +695,8 @@ public abstract class Token {
         tokens[AS] = "as";
 
         tokens[COLON] = ":";
-        tokens[ARROW] = "=>";
+        tokens[FAT_ARROW] = "=>";
+        tokens[THIN_ARROW] = "->";
         tokens[AND_ALSO] = "andAlso";
         tokens[OR_ELSE] = "orElse";
         tokens[BY] = "by";
