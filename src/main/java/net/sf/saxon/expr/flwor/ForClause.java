@@ -16,7 +16,6 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -31,11 +30,11 @@ import static net.sf.saxon.expr.flwor.Clause.ClauseName.FOR;
  */
 public class ForClause extends Clause {
 
-    private LocalVariableBinding rangeVariable;
+    protected LocalVariableBinding rangeVariable;
     /*@Nullable*/
-    private LocalVariableBinding positionVariable;
-    private Operand sequenceOp;
-    private boolean allowsEmpty;
+    protected LocalVariableBinding positionVariable;
+    protected Operand sequenceOp;
+    protected boolean allowsEmpty;
 
     public ForClause() {
     }
@@ -399,7 +398,7 @@ public class ForClause extends Clause {
      */
     @Override
     public void explain(ExpressionPresenter out) throws XPathException {
-        out.startElement("for");
+        out.startElement(getClauseKey().toString().toLowerCase());
         out.emitAttribute("var", getRangeVariable().getVariableQName());
         out.emitAttribute("slot", getRangeVariable().getLocalSlotNumber() + "");
         LocalVariableBinding posVar = getPositionVariable();
@@ -414,7 +413,8 @@ public class ForClause extends Clause {
     @Override
     public String toShortString() {
         StringBuilder fsb = new StringBuilder(64);
-        fsb.append("for $");
+        fsb.append(getClauseKey().toString().toLowerCase());
+        fsb.append(" $");
         fsb.append(rangeVariable.getVariableQName().getDisplayName());
         fsb.append(' ');
         LocalVariableBinding posVar = getPositionVariable();
@@ -430,7 +430,8 @@ public class ForClause extends Clause {
 
     public String toString() {
         StringBuilder fsb = new StringBuilder(64);
-        fsb.append("for $");
+        fsb.append(getClauseKey().toString().toLowerCase());
+        fsb.append(" $");
         fsb.append(rangeVariable.getVariableQName().getDisplayName());
         fsb.append(' ');
         LocalVariableBinding posVar = getPositionVariable();

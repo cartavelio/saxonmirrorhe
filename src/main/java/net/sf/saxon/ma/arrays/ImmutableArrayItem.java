@@ -9,7 +9,6 @@ package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.ma.parray.ImmList;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
 

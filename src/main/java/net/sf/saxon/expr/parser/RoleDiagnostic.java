@@ -51,6 +51,7 @@ public class RoleDiagnostic {
     public static final int AXIS_STEP = 14;
     public static final int OPTION = 15;
     public static final int CHARACTER_MAP_EXPANSION = 16;
+    public static final int FOR_MEMBER = 17;
     //public static final int DOCUMENT_ORDER = 17;  // 9.8 and earlier
     //public static final int MAP_CONSTRUCTOR = 18;  // 9.8 and earlier
     public static final int MATCH_PATTERN = 19;
@@ -173,6 +174,8 @@ public class RoleDiagnostic {
                 return "value of the " + name + " option";
             case CHARACTER_MAP_EXPANSION:
                 return "substitute value for character '" + name + "' in the character map";
+            case FOR_MEMBER:
+                return "'for member $" + name + "' expression";
             case MATCH_PATTERN:
                 return "match pattern";
             case MISC:
