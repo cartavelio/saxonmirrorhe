@@ -147,7 +147,7 @@ void testTransformToStringExtensionFunc(SaxonProcessor * processor, XsltProcesso
 
       <p>The example below illustrates how to write user written extension functions in PHP which
          can be used in XSLT and XQuery. As shown, the use of extension functions is enabled by
-         registering the PHP extension library in Saxon/C, by using the
+         registering the PHP extension library in SaxonC, by using the
             <code>registerPHPFunctions</code> function of the <code>SaxonProcessor</code>, before
          running a transform as specified:</p>
 
