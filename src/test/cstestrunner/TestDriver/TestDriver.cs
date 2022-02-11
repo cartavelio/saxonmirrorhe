@@ -29,7 +29,7 @@ namespace TestRunner {
         protected string testSuiteDir;
         protected Processor driverProc = new Processor(true);
         protected Serializer driverSerializer;
-        protected Spec spec;
+        protected Spec requestedSpec;
         protected Dictionary<string, XdmNode> exceptionsMap = new Dictionary<string, XdmNode>();
         protected Dictionary<string, Environment> globalEnvironments = new Dictionary<string, Environment>();
         protected Dictionary<string, Environment> localEnvironments = new Dictionary<string, Environment>();
@@ -82,9 +82,7 @@ namespace TestRunner {
         }
 
 
-        public Spec Spec {
-            get { return spec; }
-        }
+        public Spec Spec => requestedSpec;
 
         public void setFeedbackListener(IFeedbackListener f) {
             feedback = f;
@@ -107,6 +105,7 @@ namespace TestRunner {
 
         public static void Main(string[] args) {
             experiment();
+            
             string language = "XQ";
             foreach (string a in args)
             {
@@ -143,6 +142,7 @@ namespace TestRunner {
                     testSuiteDir = testSuiteDir.Substring(0, testSuiteDir.Length - 1);
                 }
 
+                System.Environment.SetEnvironmentVariable("expath.base.directory", testSuiteDir + "/expath/file");
 
                 resultsDir = args[1];
                 if (resultsDir.EndsWith("/")) {
@@ -397,7 +397,7 @@ namespace TestRunner {
         private void createLocalEnvironments(XdmNode testSetDocNode) {
             localEnvironments.Clear();
             Environment defaultEnvironment =
-                Environment.createLocalEnvironment(testSetDocNode.BaseUri, unfolded, spec);
+                Environment.createLocalEnvironment(testSetDocNode.BaseUri, unfolded, requestedSpec);
             localEnvironments.Add("default", defaultEnvironment);
         }
 

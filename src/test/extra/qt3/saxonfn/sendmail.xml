@@ -5,6 +5,8 @@
          idref="func-abs"/>
 
    <dependency type="spec" value="XQ30+ XP31+"/>
+   <dependency type="saxon:platform" value="J"/>
+  
    <environment name="contentDoc">
       <source role="." file="sendmail/content.xml">
          <description>The data contains an HTML document</description>
