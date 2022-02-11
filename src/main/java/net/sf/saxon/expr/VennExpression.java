@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.expr.instruct.ForEachGroup;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
@@ -44,29 +45,15 @@ public class VennExpression extends BinaryExpression {
      */
 
     public VennExpression(final Expression p1, final int op, final Expression p2) {
-        super(p1, op, p2);
-    }
-
-    /**
-     * Simplify an expression. This performs any static optimization (by rewriting the expression
-     * as a different expression). The default implementation simplifies its operands.
-     *
-     * @return the simplified expression (or the original if unchanged, or if modified in-situ)
-     * @throws net.sf.saxon.trans.XPathException if an error is discovered during expression
-     *                                           rewriting
-     */
-    @Override
-    public Expression simplify() throws XPathException {
         // Force both operands to be sorted in document order. If this turns out to be unnecessary, it will
         // get optimized away
+        super(p1, op, p2);
         if (!(getLhsExpression() instanceof DocumentSorter)) {
             setLhsExpression(new DocumentSorter(getLhsExpression()));
         }
         if (!(getRhsExpression() instanceof DocumentSorter)) {
             setRhsExpression(new DocumentSorter(getRhsExpression()));
         }
-        super.simplify();
-        return this;
     }
 
     /**
@@ -359,8 +346,13 @@ public class VennExpression extends BinaryExpression {
                         (lhs.getSpecialProperties() & StaticProperty.ORDERED_NODESET) != 0) {
                     return lhs;
                 }
-                if (lhs instanceof CurrentGroupCall && rhs instanceof ContextItemExpression) {
+                if (lhs instanceof CurrentGroupCall && rhs instanceof ContextItemExpression
+                        && hasSameControllingExpression(((CurrentGroupCall) lhs), ((ContextItemExpression) rhs))) {
                     return lhs;
+                }
+                if (rhs instanceof CurrentGroupCall && lhs instanceof ContextItemExpression
+                        && hasSameControllingExpression(((CurrentGroupCall) rhs), ((ContextItemExpression) lhs))) {
+                    return rhs;
                 }
                 break;
             case Token.INTERSECT:
@@ -370,8 +362,13 @@ public class VennExpression extends BinaryExpression {
                 if (Literal.isEmptySequence(rhs)) {
                     return rhs;
                 }
-                if (lhs instanceof CurrentGroupCall && rhs instanceof ContextItemExpression) {
+                if (lhs instanceof CurrentGroupCall && rhs instanceof ContextItemExpression
+                        && hasSameControllingExpression(((CurrentGroupCall) lhs), ((ContextItemExpression) rhs))) {
                     return rhs;
+                }
+                if (rhs instanceof CurrentGroupCall && lhs instanceof ContextItemExpression
+                        && hasSameControllingExpression(((CurrentGroupCall) rhs), ((ContextItemExpression) lhs))) {
+                    return lhs;
                 }
                 break;
             case Token.EXCEPT:
@@ -382,7 +379,8 @@ public class VennExpression extends BinaryExpression {
                         (lhs.getSpecialProperties() & StaticProperty.ORDERED_NODESET) != 0) {
                     return lhs;
                 }
-                if (lhs instanceof CurrentGroupCall && rhs instanceof ContextItemExpression) {
+                if (lhs instanceof CurrentGroupCall && rhs instanceof ContextItemExpression
+                        && hasSameControllingExpression((CurrentGroupCall)lhs, (ContextItemExpression)rhs)) {
                     // Test case si-group-055.
                     // The streaming code has problems with (current-group() except .) so we
                     // optimize it away. This is a bit of a hack, because the difficulty may
@@ -513,6 +511,11 @@ public class VennExpression extends BinaryExpression {
             }
         }
         return this;
+    }
+
+    private static boolean hasSameControllingExpression(CurrentGroupCall currentGroup, ContextItemExpression contextItem) {
+        ForEachGroup feg = currentGroup.getControllingInstruction();
+        return feg != null && feg == ExpressionTool.getFocusSettingContainer(contextItem);
     }
 
     private boolean operandsAreDisjoint(TypeHierarchy th) {
