@@ -299,6 +299,7 @@ def copySourceName(File src, String targetDir) {
 def signJar(String jarfile) {
   // It's convenient to leave this in build.gradle because of the exec closure.
   if (jarsigner.makeSignedJars) {
+    println("Signing ${jarfile}...")
     exec {
       commandLine jarsigner.signJarCommand(jarfile)
     }
@@ -308,6 +309,7 @@ def signJar(String jarfile) {
 def signExe(String exefile) {
   // It's convenient to leave this in build.gradle because of the exec closure.
   if (jarsigner.makeSignedExes) {
+    println("Signing ${exefile}...")
     exec {
       commandLine jarsigner.signExeCommand(exefile)
     }
