@@ -17,12 +17,14 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.util.IndexedStack;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * A PathMap is a description of all the paths followed by an expression.
@@ -733,7 +735,7 @@ public class PathMap {
                         }
                         break;
                     } else {
-                        CSharp.emitCode("goto case net.sf.saxon.om.AxisInfo.ANCESTOR");
+                        //C#//goto case net.sf.saxon.om.AxisInfo.ANCESTOR;
                         // fall through
                     }
 

@@ -17,7 +17,6 @@ import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.StringToDouble;
@@ -502,7 +501,7 @@ public class JsonParser {
                             lineNumber++;
                         }
                         // drop through
-                        CSharp.emitCode("goto case ' ';");
+                        //C#//goto case ' ';
                     case ' ':
                     case '\t':
                         if (++position >= input.length()) {

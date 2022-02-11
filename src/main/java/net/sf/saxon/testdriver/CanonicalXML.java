@@ -8,7 +8,6 @@
 package net.sf.saxon.testdriver;
 
 
-import net.sf.saxon.transpile.CSharp;
 import org.xml.sax.*;
 import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.AttributesImpl;
@@ -447,7 +446,7 @@ public class CanonicalXML extends DefaultHandler implements LexicalHandler {
                         }
                         /* this is an error situation really */
                         /* fall through */
-                        CSharp.emitCode("goto default");
+                        //C#//goto default;
                     default:
                         out.write((((c >> 12) & 0xF) | 0xE0));
                         out.write((((c >> 6) & 0x3F) | 0x80));

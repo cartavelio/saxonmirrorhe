@@ -111,8 +111,8 @@ public abstract class Actor implements ExpressionOwner, Location {
             StylesheetPackage declaringPackage = declaration.getContainingPackage();
             Visibility defaultVisibility = declaration instanceof XSLGlobalParam ? Visibility.PUBLIC : Visibility.PRIVATE;
             Visibility declaredVisibility = declaration.getDeclaredVisibility();
-            Visibility actualVisibility = declaredVisibility == null ? defaultVisibility : declaredVisibility;
-            VisibilityProvenance provenance = declaredVisibility == null ? VisibilityProvenance.DEFAULTED : VisibilityProvenance.EXPLICIT;
+            Visibility actualVisibility = declaredVisibility == Visibility.UNDEFINED ? defaultVisibility : declaredVisibility;
+            VisibilityProvenance provenance = declaredVisibility == Visibility.UNDEFINED ? VisibilityProvenance.DEFAULTED : VisibilityProvenance.EXPLICIT;
             declaringComponent = Component.makeComponent(this, actualVisibility, provenance, declaringPackage, declaringPackage);
         }
         return declaringComponent;

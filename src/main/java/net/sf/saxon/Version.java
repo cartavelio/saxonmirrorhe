@@ -7,7 +7,6 @@
 
 package net.sf.saxon;
 
-import net.sf.saxon.transpile.CSharp;
 
 /**
  * The Version class holds the SAXON version information.
@@ -20,7 +19,6 @@ public final class Version {
     private static final int BUILD = 31609; //mddhh
     private static final String MAJOR_RELEASE_DATE = "2020-03-16";
     private static final String MINOR_RELEASE_DATE = "2020-05-14";
-
 
     private Version() {
         // class is never instantiated
@@ -157,7 +155,7 @@ public final class Version {
     static {
 //#if DOTNET==true
         //#if CSHARP==true
-            CSharp.emitCode("platform = new Saxon.Impl.Helpers.DotNetPlatform();");
+        //C#//  platform = new Saxon.Impl.Helpers.DotNetPlatform();
         //#else
             //#if EE==true || PE==true
             platform = new com.saxonica.config.DotNetPlatformPE();

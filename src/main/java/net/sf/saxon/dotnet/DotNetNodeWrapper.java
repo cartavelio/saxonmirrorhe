@@ -8,7 +8,6 @@
 package net.sf.saxon.dotnet;
 
 import cli.System.Xml.*;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -17,11 +16,13 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
 import net.sf.saxon.tree.util.SteppingNode;
@@ -786,7 +787,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 //                                }
                                 break;
                             }
-                            CSharp.emitCode("goto default");
+                            //C#//goto default;
                             // otherwise fall through to default case
                         default:
                             previousText = thisText;
@@ -833,7 +834,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 //                                }
                                 break;
                             }
-                            CSharp.emitCode("goto default");
+                            //C#//goto default;
                             // otherwise fall through to default case
                         default:
                             previousText = thisText;
