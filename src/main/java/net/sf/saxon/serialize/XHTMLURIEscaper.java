@@ -39,49 +39,49 @@ public class XHTMLURIEscaper extends HTMLURIEscaper {
     private static final HashSet<String> urlTable = new HashSet<String>(70);
     private static final HashSet<String> attTable = new HashSet<String>(20);
 
-    private static void setUrlAttribute(String element, String attribute) {
+    private static void setUrlAttributeX(String element, String attribute) {
         attTable.add(attribute);
         urlTable.add(element + "+" + attribute);
     }
 
     static {
-        setUrlAttribute("form", "action");
-        setUrlAttribute("object", "archive");
-        setUrlAttribute("body", "background");
-        setUrlAttribute("q", "cite");
-        setUrlAttribute("blockquote", "cite");
-        setUrlAttribute("del", "cite");
-        setUrlAttribute("ins", "cite");
-        setUrlAttribute("object", "classid");
-        setUrlAttribute("object", "codebase");
-        setUrlAttribute("applet", "codebase");
-        setUrlAttribute("object", "data");
-        setUrlAttribute("button", "datasrc");
-        setUrlAttribute("div", "datasrc");
-        setUrlAttribute("input", "datasrc");
-        setUrlAttribute("object", "datasrc");
-        setUrlAttribute("select", "datasrc");
-        setUrlAttribute("span", "datasrc");
-        setUrlAttribute("table", "datasrc");
-        setUrlAttribute("textarea", "datasrc");
-        setUrlAttribute("script", "for");
-        setUrlAttribute("a", "href");
-        setUrlAttribute("a", "name");       // see second note in section B.2.1 of HTML 4 specification
-        setUrlAttribute("area", "href");
-        setUrlAttribute("link", "href");
-        setUrlAttribute("base", "href");
-        setUrlAttribute("img", "longdesc");
-        setUrlAttribute("frame", "longdesc");
-        setUrlAttribute("iframe", "longdesc");
-        setUrlAttribute("head", "profile");
-        setUrlAttribute("script", "src");
-        setUrlAttribute("input", "src");
-        setUrlAttribute("frame", "src");
-        setUrlAttribute("iframe", "src");
-        setUrlAttribute("img", "src");
-        setUrlAttribute("img", "usemap");
-        setUrlAttribute("input", "usemap");
-        setUrlAttribute("object", "usemap");
+        setUrlAttributeX("form", "action");
+        setUrlAttributeX("object", "archive");
+        setUrlAttributeX("body", "background");
+        setUrlAttributeX("q", "cite");
+        setUrlAttributeX("blockquote", "cite");
+        setUrlAttributeX("del", "cite");
+        setUrlAttributeX("ins", "cite");
+        setUrlAttributeX("object", "classid");
+        setUrlAttributeX("object", "codebase");
+        setUrlAttributeX("applet", "codebase");
+        setUrlAttributeX("object", "data");
+        setUrlAttributeX("button", "datasrc");
+        setUrlAttributeX("div", "datasrc");
+        setUrlAttributeX("input", "datasrc");
+        setUrlAttributeX("object", "datasrc");
+        setUrlAttributeX("select", "datasrc");
+        setUrlAttributeX("span", "datasrc");
+        setUrlAttributeX("table", "datasrc");
+        setUrlAttributeX("textarea", "datasrc");
+        setUrlAttributeX("script", "for");
+        setUrlAttributeX("a", "href");
+        setUrlAttributeX("a", "name");       // see second note in section B.2.1 of HTML 4 specification
+        setUrlAttributeX("area", "href");
+        setUrlAttributeX("link", "href");
+        setUrlAttributeX("base", "href");
+        setUrlAttributeX("img", "longdesc");
+        setUrlAttributeX("frame", "longdesc");
+        setUrlAttributeX("iframe", "longdesc");
+        setUrlAttributeX("head", "profile");
+        setUrlAttributeX("script", "src");
+        setUrlAttributeX("input", "src");
+        setUrlAttributeX("frame", "src");
+        setUrlAttributeX("iframe", "src");
+        setUrlAttributeX("img", "src");
+        setUrlAttributeX("img", "usemap");
+        setUrlAttributeX("input", "usemap");
+        setUrlAttributeX("object", "usemap");
     }
 
     public XHTMLURIEscaper(Receiver next) {

@@ -261,7 +261,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
     public void computeEvaluationMode() {
         if (getSelectExpression() != null) {
             if (referenceCount == FilterExpression.FILTERED) {
-                evaluator = Evaluator.MAKE_INDEXED_VARIABLE.INSTANCE;
+                evaluator = Evaluator.MakeIndexedVariable.INSTANCE;
             } else {
                 evaluator = ExpressionTool.lazyEvaluator(getSelectExpression(), referenceCount > 1);
             }
@@ -349,7 +349,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
             int savedOutputState = context.getTemporaryOutputState();
             context.setTemporaryOutputState(StandardNames.XSL_WITH_PARAM);
             Sequence result;
-            Evaluator eval = evaluator == null ? Evaluator.EAGER_SEQUENCE.INSTANCE : evaluator;
+            Evaluator eval = evaluator == null ? Evaluator.EagerSequence.INSTANCE : evaluator;
             result = eval.evaluate(select, context);
             context.setTemporaryOutputState(savedOutputState);
             return result;
@@ -430,8 +430,8 @@ public final class LocalParam extends Instruction implements LocalBinding {
         return conversionOp == null ? null : conversionOp.getChildExpression();
     }
 
-    public EvaluationMode getConversionEvaluationMode() {
-        return conversionEvaluator.getEvaluationMode();
+    public Evaluator getConversionEvaluator() {
+        return conversionEvaluator;
     }
 
     /**

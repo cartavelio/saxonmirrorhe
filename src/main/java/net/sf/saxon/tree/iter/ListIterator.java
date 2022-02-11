@@ -58,7 +58,7 @@ public abstract class ListIterator implements SequenceIterator, LastPositionFind
 
         /*@Nullable*/
         @Override
-        public T next() {
+        public Item next() {
             if (index >= list.size()) {
                 return null;
             }
@@ -117,8 +117,8 @@ public abstract class ListIterator implements SequenceIterator, LastPositionFind
             super(nodes);
         }
 
-        public A next() {
-            return super.next();
+        public AtomicValue next() {
+            return (AtomicValue)super.next();
         }
     }
 

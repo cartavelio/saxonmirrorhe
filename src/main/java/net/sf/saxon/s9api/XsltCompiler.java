@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeSource;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.style.*;
 import net.sf.saxon.trace.XSLTTraceCodeInjector;
@@ -26,6 +27,7 @@ import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.VersionedPackageName;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.DocumentImpl;
+import net.sf.saxon.tree.linked.ElementImpl;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -388,12 +390,12 @@ public class XsltCompiler {
     /**
      * Get the XSLT (and XPath) language level supported by the processor.
      *
-     * @return the language level supported. From Saxon 9.8 this always returns "3.0".
+     * @return the language level supported. In Saxon 11 this returns either "3.0" or "4.0".
      * @since 9.3
      */
 
     public String getXsltLanguageVersion() {
-        return "3.0";
+        return compilerInfo.getXsltVersion() == 40 ? "4.0" : "3.0";
     }
 
     /**
@@ -591,10 +593,15 @@ public class XsltCompiler {
 
     public XsltPackage compilePackage(Source source) throws SaxonApiException {
         try {
-            Compilation compilation;
-            if (source instanceof DocumentImpl && ((DocumentImpl)source).getDocumentElement() instanceof StyleElement) {
-                compilation = ((StyleElement)((DocumentImpl) source).getDocumentElement()).getCompilation();
-            } else {
+            Compilation compilation = null;
+            if (source instanceof NodeSource
+                    && ((NodeSource)source).getNode() instanceof DocumentImpl) {
+                ElementImpl elem = ((DocumentImpl) ((NodeSource) source).getNode()).getDocumentElement();
+                if (elem instanceof StyleElement) {
+                    compilation = ((StyleElement)elem).getCompilation();
+                }
+            }
+            if (compilation == null) {
                 compilation = new Compilation(config, new CompilerInfo(compilerInfo));
             }
             compilation.setLibraryPackage(true);

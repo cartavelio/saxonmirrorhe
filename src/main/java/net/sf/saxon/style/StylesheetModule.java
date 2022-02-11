@@ -251,7 +251,7 @@ public class StylesheetModule {
                 compilation.getImportStack().pop();
 
                 PreparedStylesheet pss = new PreparedStylesheet(compilation);
-                PrincipalStylesheetModule psm = compilation.compilePackage(doc);
+                PrincipalStylesheetModule psm = compilation.compilePackage(doc.asActiveSource());
                 if (compilation.getErrorCount() > 0) {
                     XPathException e = new XPathException("Errors were reported during stylesheet compilation");
                     e.setHasBeenReported(true); // only intended as an exception message, not something to report to ErrorListener

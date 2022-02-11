@@ -2,7 +2,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.functions.registry.VendorFunctionSetHE;
+import net.sf.saxon.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -22,7 +22,7 @@ public class XSLArrayMember extends XSLSequence {
         if (getSelectExpression() == null) {
             setSelectExpression(compileSequenceConstructor(exec, decl, false));
         }
-        SystemFunction arrayMem = VendorFunctionSetHE.getInstance().makeFunction("array-member", 1);
+        SystemFunction arrayMem = XPath40FunctionSet.getInstance().makeFunction("parcel", 1);
         return arrayMem.makeFunctionCall(getSelectExpression());
     }
 

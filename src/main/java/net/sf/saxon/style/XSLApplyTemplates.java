@@ -72,7 +72,7 @@ public class XSLApplyTemplates extends StyleElement {
                     defaultedSelectExpression = false;
                     break;
                 case "separator":
-                    requireSyntaxExtensions("separator");
+                    requireXslt40("separator");
                     separator = makeAttributeValueTemplate(value, att);
                     break;
                 default:

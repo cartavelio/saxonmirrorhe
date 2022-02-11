@@ -439,7 +439,7 @@ public class TransformFn extends SystemFunction implements Callable {
                     executable = cache.getStylesheetByNode(stylesheetNode); // if stylesheet is already cached
                 }
                 if (executable == null) {
-                    Source source = stylesheetNode;
+                    Source source = stylesheetNode.asActiveSource();
                     if (stylesheetBaseUri != null) {
                         source = AugmentedSource.makeAugmentedSource(source);
                         source.setSystemId(stylesheetBaseUri.toASCIIString());
@@ -555,7 +555,7 @@ public class TransformFn extends SystemFunction implements Callable {
             Sequence optionValue = vendorOptions.get(new QNameValue("", NamespaceConstant.SAXON, "configuration"));
             if (optionValue != null) {
                 NodeInfo configFile = (NodeInfo) optionValue.head();
-                targetConfig = Configuration.readConfiguration(configFile, targetConfig);
+                targetConfig = Configuration.readConfiguration(configFile.asActiveSource(), targetConfig);
                 allowTypedNodes = false;
                 if (!context.getConfiguration().getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
                     targetConfig.setBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS, false);
@@ -883,7 +883,7 @@ public class TransformFn extends SystemFunction implements Callable {
     private static NodeInfo validate(NodeInfo node, Configuration config, int validation) throws XPathException {
         ParseOptions options = new ParseOptions(config.getParseOptions());
         options.setSchemaValidationMode(validation);
-        return config.buildDocumentTree(node, options).getRootNode();
+        return config.buildDocumentTree(node.asActiveSource(), options).getRootNode();
     }
 
     /**

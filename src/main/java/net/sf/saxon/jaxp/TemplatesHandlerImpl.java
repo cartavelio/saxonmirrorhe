@@ -96,7 +96,7 @@ public class TemplatesHandlerImpl extends ReceivingContentHandler implements Tem
 
             try {
                 XsltCompiler compiler = processor.newXsltCompiler();
-                templates = new TemplatesImpl(compiler.compile(doc));
+                templates = new TemplatesImpl(compiler.compile(doc.asActiveSource()));
             } catch (SaxonApiException tce) {
                 // don't know why we aren't allowed to just throw it!
                 throw new IllegalStateException(tce.getMessage());

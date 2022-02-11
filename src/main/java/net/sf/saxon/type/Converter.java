@@ -218,6 +218,9 @@ public abstract class Converter {
         }
 
         public ConversionResult convert(AtomicValue input, UnicodeString lexicalForm) {
+            if (Type.isSubType(input.getItemType(), newType)) {
+                return input;
+            }
             if (input.getUType() != newType.getUType()) {
                 return new ValidationFailure("Cannot convert " + input.toShortString() + " to " + newType.getDisplayName());
             }

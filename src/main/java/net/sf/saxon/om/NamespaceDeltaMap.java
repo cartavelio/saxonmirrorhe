@@ -7,8 +7,6 @@
 
 package net.sf.saxon.om;
 
-import net.sf.saxon.transpile.CSharpModifiers;
-
 /**
  * Holds a set of namespace bindings as a simple immutable map from prefixes to URIs.
  *
@@ -30,7 +28,6 @@ public class NamespaceDeltaMap extends NamespaceMap implements NamespaceBindingS
      * Get a namespace map containing no namespace bindings
      * @return an empty namespace map
      */
-    @CSharpModifiers(code={"public", "static", "new"})
     public static NamespaceDeltaMap emptyMap() {
         return EMPTY_MAP;
     }

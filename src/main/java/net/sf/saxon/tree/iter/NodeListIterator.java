@@ -31,7 +31,7 @@ public class NodeListIterator extends ListIterator.Of<NodeInfo> implements AxisI
     /*@Nullable*/
     @Override
     public NodeInfo next() {
-        return super.next();
+        return (NodeInfo)super.next();
     }
 
 }

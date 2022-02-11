@@ -82,10 +82,13 @@ public class DocumentFn extends SystemFunction implements Callable {
 
     @SuppressWarnings("RedundantIfStatement")
     public static boolean sourceIsTree(Source source) {
-        if (source instanceof NodeInfo) {
+        if (source instanceof NodeSource) {
             return true;
         }
         //#if CSHARP==false
+        if (source instanceof NodeInfo) {
+            return true;
+        }
         if (source instanceof DOMSource) {
             return true;
         }
@@ -648,7 +651,7 @@ public class DocumentFn extends SystemFunction implements Callable {
         TreeInfo doc = controller.getDocumentPool().find(documentKey);
         Source source = null;
         if (doc != null) {
-            source = doc.getRootNode();
+            source = doc.getRootNode().asActiveSource();
         } else {
 
             try {
@@ -667,7 +670,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                 }
                 if (sourceIsTree(source)) {
                     NodeInfo startNode = controller.prepareInputTree(source);
-                    source = startNode.getRoot();
+                    source = startNode.getRoot().asActiveSource();
                 }
             } catch (TransformerException err) {
                 XPathException xerr = XPathException.makeXPathException(err);

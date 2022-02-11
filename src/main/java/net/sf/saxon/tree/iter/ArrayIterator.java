@@ -150,7 +150,7 @@ public abstract class ArrayIterator implements SequenceIterator,
 
         /*@Nullable*/
         @Override
-        public T next() {
+        public Item next() {
             if (index >= end) {
                 index = end + 1;
                 return null;
@@ -253,8 +253,8 @@ public abstract class ArrayIterator implements SequenceIterator,
         public OfNodes(N[] nodes) {
             super(nodes);
         }
-        public N next() {
-            return super.next();
+        public NodeInfo next() {
+            return (NodeInfo)super.next();
         }
     }
 

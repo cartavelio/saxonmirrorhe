@@ -195,7 +195,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
                 initialSource = null;
                 controller.setGlobalContextItem(null);
             } else {
-                initialSource = node.getUnderlyingNode();
+                initialSource = node.getUnderlyingNode().asActiveSource();
                 controller.setGlobalContextItem(node.getUnderlyingNode().getRoot());
             }
         } catch (XPathException e) {
@@ -335,12 +335,12 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
                 } else if (initialSelection instanceof DOMSource) {
                     NodeInfo node = controller.prepareInputTree(initialSelection);
                     reset = maybeSetGlobalContextItem(node);
-                    initialSelection = node;
+                    initialSelection = node.asActiveSource();
                     //#endif
                 } else {
                     NodeInfo node = controller.makeSourceTree(initialSelection, getSchemaValidationMode().getNumber());
                     reset = maybeSetGlobalContextItem(node);
-                    initialSelection = node;
+                    initialSelection = node.asActiveSource();
                 }
             }
 

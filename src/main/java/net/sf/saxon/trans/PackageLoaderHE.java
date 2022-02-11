@@ -676,7 +676,7 @@ public class PackageLoaderHE implements IPackageLoader {
             streaming = true;
         }
 
-        function.setEvaluationMode(EvaluationMode.forCode(evalMode));
+        function.setEvaluator(Evaluators.getEvaluator(evalMode));
 
         currentFunction = function;
         List<UserFunctionParameter> params = new ArrayList<>();
@@ -2601,7 +2601,7 @@ public class PackageLoaderHE implements IPackageLoader {
             let.setRequiredType(requiredType);
             let.setSlotNumber(slot);
             let.setVariableQName(name);
-            let.setEvaluationMode(EvaluationMode.forCode(evalMode));
+            let.setEvaluator(Evaluators.getEvaluator(evalMode));
 
             loader.localBindings.push(let);
             Expression action = loader.getSecondChildExpression(element);
@@ -3238,11 +3238,11 @@ public class PackageLoaderHE implements IPackageLoader {
             String eval = element.getAttributeValue("", "eval");
             if (eval != null) {
                 String[] evals = eval.split(" ");
-                EvaluationMode[] evalModes = new EvaluationMode[evals.length];
+                Evaluator[] evalModes = new Evaluator[evals.length];
                 for (int i = 0; i < evals.length; i++) {
-                    evalModes[i] = EvaluationMode.forCode(Integer.parseInt(evals[i]));
+                    evalModes[i] = Evaluators.getEvaluator(Integer.parseInt(evals[i]));
                 }
-                call.setArgumentEvaluationModes(evalModes);
+                call.setArgumentEvaluators(evalModes);
             }
             loader.addComponentFixup(call);
             return call;
@@ -3285,7 +3285,6 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("varRef", (loader, element) -> {
             StructuredQName name = loader.getQNameAttribute(element, "name");
-            Stack<LocalBinding> locals = loader.localBindings;
             LocalBinding binding = findLocalBinding(loader.localBindings, name);
 
             if (binding == null) {

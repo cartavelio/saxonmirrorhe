@@ -213,7 +213,7 @@ public class XdmNode extends XdmItem {
      */
 
     public Source asSource() {
-        return getUnderlyingNode();
+        return getUnderlyingNode().asActiveSource();
     }
 
     //#if CSHARP==false

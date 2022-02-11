@@ -3560,9 +3560,6 @@ public class XPathParser {
 
         SystemFunction sf = ArrayFunctionSet.getInstance().makeFunction("_from-sequence", 1);
         Expression result = sf.makeFunctionCall(body);
-//
-//        ArrayFromSequence defn = new ArrArrayFromSequence();
-//        Expression result =  IntegratedFunctionLibrary.makeFunctionCall(defn, new Expression[]{body});
         setLocation(result, offset);
         return result;
     }

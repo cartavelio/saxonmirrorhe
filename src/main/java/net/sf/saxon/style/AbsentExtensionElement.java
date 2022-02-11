@@ -91,7 +91,7 @@ public class AbsentExtensionElement extends StyleElement {
                                 WithParam withParam = new WithParam();
                                 withParam.setVariableQName(name);
                                 withParam.setRequiredType(SequenceType.ANY_SEQUENCE);
-                                if (required.getCardinality() == StaticProperty.EXACTLY_ONE && required.getPrimaryType().isAtomicType()) {
+                                if (required.getCardinality() == StaticProperty.EXACTLY_ONE && required.getPrimaryType().isPlainType()) {
                                     if (required.getPrimaryType() == BuiltInAtomicType.BOOLEAN) {
                                         Expression avt = makeAttributeValueTemplate(att.getValue(), att);
                                         Expression toBool = VendorFunctionSetHE.getInstance().makeFunction("yes-no-boolean", 1).makeFunctionCall(avt);

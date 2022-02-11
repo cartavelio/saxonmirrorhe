@@ -566,7 +566,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
                 throw new SaxonApiException("No source document has been built by the previous pipeline stage");
             }
             doc.getTreeInfo().setSpaceStrippingRule(controller.getSpaceStrippingRule());
-            setSource(doc);
+            setSource(doc.asActiveSource());
             sourceTreeBuilder = null;
             run(destination);
             destination.closeAndNotify();

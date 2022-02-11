@@ -523,9 +523,34 @@ public class XsltController extends Controller {
     }
     //#endif
 
+    /**
+     * Get the resolver for URIs referring to secondary output documents.
+     * <p>XSLT 2.0 introduced the <code>xsl:result-document</code> instruction,
+     * allowing a transformation to have multiple result documents. JAXP does
+     * not support this capability.</p>
+     *
+     * @return An object that implements the ResultDocumentResolver interface, or null.
+     * The value is null (indicating that a system-supplied resolver will be used)
+     * unless an explicit value is set.
+     * @since 9.9.
+     */
+
     public ResultDocumentResolver getResultDocumentResolver() {
         return resultDocumentResolver;
     }
+
+    /**
+     * Set the resolver for URIs referring to secondary output documents.
+     * <p>XSLT 2.0 introduced the <code>xsl:result-document</code> instruction,
+     * allowing a transformation to have multiple result documents. JAXP does
+     * not support this capability. This method allows an {@code ResultDocumentResolver}
+     * to be specified that takes responsibility for deciding the destination
+     * (and, if it wishes, the serialization properties) of secondary output files.</p>
+     *
+     * @param resultDocumentResolver An object that implements the ResultDocumentResolver
+     *                 interface, or null.
+     * @since 9.9.
+     */
 
     public void setResultDocumentResolver(ResultDocumentResolver resultDocumentResolver) {
         this.resultDocumentResolver = resultDocumentResolver;

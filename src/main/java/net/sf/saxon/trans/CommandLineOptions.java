@@ -13,6 +13,7 @@ import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.transpile.CSharpDelegate;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.DayTimeDurationValue;
 import net.sf.saxon.value.NumericValue;
@@ -851,6 +852,7 @@ public class CommandLineOptions {
         }
     }
 
+    @CSharpReplaceBody(code="\"dotnet saxon \" + command.GetType().Name.ToLower();")
     public static String getCommandName(Object command) {
         String s = command.getClass().getName();
         if (s.startsWith("cli.Saxon.Cmd.DotNet")) {
