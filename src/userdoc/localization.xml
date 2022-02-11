@@ -1,0 +1,820 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="Localization" title="Localization">
+  <p>This chapter describes the facilities in Saxon to adapt the behavior to the needs of different
+  countries and different languages.</p>
+  
+  <p>These facilities divide into three categories:</p>
+  
+  <ul>
+    <li>Formatting numbers</li>
+    <li>Formatting dates</li>
+    <li>Collations (sorting and comparison of strings)</li>
+  </ul>
+  
+  <section id="number-formatting" title="Formatting Numbers">
+    <h1>Formatting Numbers</h1>
+    
+    <p>Formatting of numbers affects the output of the <code>xsl:number</code> instruction, and the
+    <code>fn:format-integer</code> function.</p>
+    
+    <aside>
+    <p>The <code>format-number</code> function itself is <b>not</b> directly affected by choice of language or country.
+    If you want to use conventions appropriate to a particular locale, for example using a comma (",") as
+    a decimal point, or using an apostrophe ("'") as a separator between groups of digits, you can define
+    a custom decimal format to achieve this, but this is entirely under the control of the stylesheet or query
+    author, it is not affected by any language settings.</p>
+    
+    <p>Similarly, some of the numbering sequences used by <code>xsl:number</code> are directly under programmer
+    control: for example <code>format="α"</code> (Greek letter alpha, U+03B1) requests a numbering sequence using
+      Greek letters α, β, γ, δ, ε, ζ, ... This is available regardless of the chosen locale.</p>
+    </aside>
+    
+    <p>In <code>xsl:number</code> and in <code>fn:format-integer</code> it is possible to request a specific
+    language using the <code>lang</code> attribute/argument. The default for this may be set using the Saxon configuration
+      property <a class="feature" href="DEFAULT_LANGUAGE"/>; failing this, the default is taken from the
+     operating system settings. This option mainly affects formatting of numbers as words (for example, in English,
+    "one", "two", "three", or "first", "second", "third") as requested using the format token "W", "w", or "Ww".
+    This is referred to as <i>spellout</i> numbering.</p>
+    
+    <ul>
+      <li class="javaonly">In SaxonJ-HE, spellout numbering is supported "out of the box" only for English; if any
+      other language is requested, the output falls back to English. There is an API (<code>Configuration.setLocalizerFactory()</code>)
+      allowing plug-in code to be registered for other languages, and there are some open-source components available (issued with
+      the <code>saxon-resources</code> download) providing plug-ins for some common European languages.</li>
+      <li class="javaonly">In SaxonJ-PE and -EE, spellout numbering is available via the ICU-J library, which supports
+        a large variety of languages. This does not require any special configuration.</li>
+      <li class="csonly">In SaxonCS, spellout numbering is not currently available.</li>
+    </ul>
+    
+    <p>As well as spellout numbering, the choice of language also affects ordinal numbering, for example 10 is output
+      as "10th" in English, "10." in German, "10e" in French, and "10º" in Italian.</p>
+    
+    <p>For more details on numbering using ICU, see TBA</p>
+    
+    <p>For more details on writing a plug-in for localizing numbers and dates, see 
+    <a href="localizing-numbers-and-dates">Localizing Numbers and Dates</a>.</p>
+    
+    <section id="date-formatting" title="Formatting Dates">
+      <h1>Formatting Dates</h1>
+      
+      <p>Formatting of dates is achieved using the functions <code>fn:format-date()</code>, <code>fn:format-time()</code>,
+        and <code>fn:format-dateTime()</code>. The third argument of these functions supplies the requested language;
+      the fifth argument supplies the requested "place". If not supplied, the defaults are taken from the Saxon
+      configuration (properties <a class="feature" href="DEFAULT_LANGUAGE"/> and <a class="feature" href="DEFAULT_COUNTRY"/>;
+      if these are not set, they fall back to values obtained from operating system settings.</p>
+      
+      <p>Where parts of a date are formatted as numbers (for example "1st December") the rules closely follow the rules
+      for formatting of numbers. This includes spellout numbering (for example "December First, Two Thousand and Twenty-One").</p>
+      
+      <p>Month names and day names ("January", "Friday") are handled as follows:</p>
+      
+      <ul class="javaonly">
+        <li>In SaxonJ, the full English month names and day names are hard-coded in the product. Month names are
+        abbreviated to the required length by truncation; for day names, there are custom rules for abbreviation ("Weds" is preferred
+        to "Wedn", and names are never shortened to the point where they become ambiguous (thus "Tu" and "Th" for "Tuesday" and "Thursday").</li>
+        <li>In SaxonJ-HE, month and day names for languages other than English are not available unless a localization plug-in
+        is registered using the <code>Configuration.setLocalizerFactory()</code> mechanism</li>
+        <li>In SaxonJ-PE and -EE, month and day names are obtained using the ICU-J library. If the full name delivered by ICU exceeds
+        the requested maximum lengh, the short name is requested from ICU.</li>
+      </ul>
+      
+      <ul class="csonly">
+        <li>In SaxonCS, month and day names are obtained using the .NET <code>CultureInfo</code> class. If the full name (for example
+        <code>CultureInfo.DateTimeFormat.GetMonthName(m)</code>) exceeds the requested maximum length, then the abbreviated form is used 
+          (<code>DateTimeFormat.GetAbbreviatedMonthName(m)</code>). If necessary the result is space-padded on the right to the requested
+        minimum width.</li>
+      </ul>
+      
+      <p>Formatting of timezones is complex. Named timezones (such as EST, PDT) are used only if the <code>place</code> argument represents
+      the US or UK, and only if the timezone is one of a number of abbreviations that are commonly recognized in those countries. The rules
+      take into account whether the date is in daylight savings (summer) time.</p>
+      
+      <aside class="javaonly">In SaxonJ, the timezone names are obtained from the Java platform, and the result in some cases depends
+      on which version of the JDK is in use.</aside>
+      
+      <p>For more details on writing a plug-in for localizing numbers and dates, see 
+        <a href="localizing-numbers-and-dates">Localizing Numbers and Dates</a>.</p>
+      
+      <section id="sorting-and-collations" title="Sorting and Collations">
+        <h1>Sorting and Collations</h1>
+        
+        <p>Different countries (or languages) have different rules for sorting strings into alphabetical order. For example,
+        in German "Ä" comes between "A" and "B", while in Swedish it comes after "Z". (And the rules are a lot more complicated
+        than this, because diacritical marks are ignored unless all the letters in the word are identical.)</p>
+        
+        <p>In addition, two strings such as ("ALPHA", "alpha"), or ("Jäger", "Jaeger") may or may not be considered to match
+        when comparing for equality. In this case the rules depend less on the language involved, and more on the requirements
+        of the application.</p>
+        
+        <p>All operations in XPath, XSLT, and XQuery that depend on ordering strings therefore allow a collation to be specified.
+        A collation is simply a rule for deciding whether two strings are equal, and if not, which one sorts first. Collations
+        are identified using a URI.</p>
+        
+        <p>A collation URI
+        may be used as an argument to many of the <a class="bodylink" href="/functions">standard
+          functions</a>, and also as an attribute of various instructions (<dfn><code>xsl:sort</code></dfn>,
+        <dfn><code>xsl:for-each-group</code></dfn>, <dfn><code>xsl:merge-key</code></dfn> in XSLT, and
+        in the <dfn><code>order by</code></dfn> clause of a FLWOR expression in XQuery.</p>
+        
+        <p>In Saxon the default collation is always the "codepoint" collation.
+          This collates strings based on the integer values assigned by Unicode to each character: for example "ah!"
+          sorts before "ah?" because the Unicode codepoints for "ah!" are (97, 104, 33) while the
+          codepoints for "ah?" are (97, 104, 63).
+        This generally gives good results for artificial strings such as part numbers, vehicle registration marks, and file names,
+        but it's inadequate for natural language text. The codepoint collation may be requested explicitly using the URI
+          <code>http://www.w3.org/2005/xpath-functions/collation/codepoint</code>.</p>
+        
+        <p>The default collation may be changed for a portion of an XSLT stylesheet by use of an <code>[xsl:]default-collation</code>
+        attribute on an enclosing element; and it can be changed for an XQuery module using the <code>declare default collation</code>
+        declaration in the XQuery prolog. It can also be changed using the Saxon API, for example 
+          <code>XsltCompiler.declareDefaultCollation(X);</code> (SaxonJ) or <code>XsltCompiler.DefaultCollationName = X;</code> (SaxonCS).</p>
+        
+        <p>Two more kinds of collation are defined in the W3C language specifications, and are recognized in all versions of Saxon
+          (though there may be differences in the details of the output):</p>
+        
+        <ul>
+          <li>The ASCII case-blind collation (URI <code>http://www.w3.org/2005/xpath-functions/collation/html-ascii-case-insensitive</code>)
+          uses codepoint comparison for most characters, but treats ASCII lower-case letters as equal to their upper-case equivalents.
+          This collation is defined by the HTML5 standard, and it's an efficient way of matching ASCII keywords such as "ascending" and
+          "descending", but it's not suitable for more general text. It's intended only for use in equality comparisons, not for sorting.</li>
+          <li>The Unicode Collation Algorithm (UCA) represents a family of collations, with the exact rules depending on parameters that
+            are supplied. A typical URI for a UCA collation would be <code>http://www.w3.org/2013/collation/UCA?lang=sv;strength=primary</code>
+          where the parameters after the "?" indicate the detailed rules to be applied.</li>
+        </ul>
+        
+        
+        
+        <p>Further details on the Unicode Collation Algorithm are supplied 
+          <a class="bodylink" href="./unicode-collation-algorithm">below</a>.</p>
+        
+        <p>Saxon also allows a collation to be supplied programmatically:</p>
+        
+        <ul>
+          <li class="javaonly">On SaxonJ, use the method <code>Processor.declareCollation()</code> or 
+            <code>Configuration.registerCollation()</code>.</li>
+          <li class="csonly">On SaxonCS, use the method <code>Processor.DeclareCollation()</code>.</li>
+        </ul>
+        
+        <p>When the <code>xsl:sort</code> instruction is used without an explicit collation, Saxon attempts to construct
+        a collation using the supplied values of attributes such as <code>lang</code> and <code>case-order</code>.</p>
+        
+        <p>For backwards compatibility reasons the standard collation resolver in Saxon also
+          accepts URIs in the form <code>http://saxon.sf.net/collation</code> followed by query
+          parameters; the query parameters that are recognized are the same as those defined by W3C
+          UCA collation URIs.</p>
+        
+        <section id="localizing-numbers-and-dates" title="Localizing numbers and dates" class="javaonly">
+          <h1>Localizing numbers and dates</h1>
+          
+          <p>This section describes how to write and install a plug-in for doing your own localization
+          of numbers and dates, if the facilities provided with the product are inadequate for your needs.</p>
+          
+          <p>It is possible to define a <dfn>localized numbering</dfn> sequence for use by
+            <a class="bodylink code" href="/xsl-elements/number">xsl:number</a> and 
+            <a  class="bodylink code" href="/functions/fn/format-date">format-date()</a>. 
+            This sequence will be used when
+            you specify a language in the <code>lang</code> attribute of the <code>xsl:number</code>
+            element, or in the third argument of the functions <code>format-date()</code>,
+            <code>format-time()</code>, and <code>format-dateTime()</code>. The feature is primarily
+            intended to provide language-dependent numbers and dates, but in fact it can be used to
+            provide arbitrary numbering sequences.</p>
+          
+  
+          <p>Additional numbering sequences are available as described in <a
+            href="/extensibility/localizing/other-numberings">Numberings for selected
+            languages</a>.</p>
+          
+ 
+          
+          <p>To implement a numberer for language X, you need to define a class that implements the
+            interface <a class="javalink" href="net.sf.saxon.lib.Numberer">Numberer</a>; usually it will
+            be convenient to write the class as a subclass of the supplied <a class="javalink"
+              href="net.sf.saxon.expr.number.AbstractNumberer">AbstractNumberer</a>.</p>
+          
+          
+          
+          
+          <p>Normally your localization class will extend the class <code>AbstractNumberer</code> so
+            that you can reuse functionality like roman numerals which do not need to be localized.
+            Alternatively, if you only want to modify the existing English localization, you could
+            choose to implement a subclass of <code>Numberer_en</code>.</p>
+          
+          <p>You can override any of the non-private methods in the base class, but the most useful ones
+            to implement are the following:</p>
+          <table>
+            <thead>
+              <tr>
+                <td>
+                  <p>Method</p>
+                </td>
+                <td>
+                  <p>Effect</p>
+                </td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <p>ordinalSuffix</p>
+                </td>
+                <td>
+                  <p>Supplies a suffix to be appended to a number to create the ordinal form, for
+                    example "1" becomes "1st" in English</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p>toWords</p>
+                </td>
+                <td>
+                  <p>Displays a number in words, in title case: for example "53" becomes "Fifty Three"
+                    in English</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p>toOrdinalWords</p>
+                </td>
+                <td>
+                  <p>Displays an ordinal number in words, in title case: for example "53" becomes "Fifty
+                    Third" in English</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p>monthName</p>
+                </td>
+                <td>
+                  <p>Displays the name of a month, optionally abbreviated</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p>dayName</p>
+                </td>
+                <td>
+                  <p>Displays the name of a day of the week, optionally abbreviated</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <p>The class name can be anything you like, but by convention the Numberer for language LL is
+            named <code>net.sf.saxon.option.local.Numberer_LL</code>.</p>
+          
+          <p>There are two ways to register the numberer with the Saxon 
+            <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>.</p>
+          
+          <p>The first is to supply a
+            <code>LocalizerFactory</code> that responds to the request for a particular language, for
+            example:</p>
+          
+          <samp><![CDATA[Configuration config = new Configuration();
+config.setLocalizerFactory(new LocalizerFactory() {
+  public Numberer getNumberer(String language, String country) {
+    if (language.equals("jp")) {
+      return Numberer_JP.getInstance();
+    } else {
+      return null;
+    }
+  }
+}]]></samp>
+          
+          <p>The alternative is to register the
+            localization module in the <a class="bodylink" href="/configuration/configuration-file"
+              >configuration file</a>.</p>
+          
+ 
+          
+          
+
+          <xi:include href="extensibility/other-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+        </section>
+        
+        <section id="icu-numbering" title="Numbering with ICU">
+          <title>Numbering with ICU</title>
+          <xi:include href="extensibility/locales-ICU-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+        </section>
+        
+  
+        <section id="unicode-collation-algorithm" title="Unicode Collation Algorithm">
+          <h1>Unicode Collation Algorithm</h1>
+  
+        <p>This section provides more detail on Saxon's support for the Unicode Collation Algorithm.</p>
+          
+          <p>The Unicode Collation Algorithm is implemented using different libraries on different platforms, with differing levels
+            of conformance:</p>
+          
+          <ul>
+            <li class="javaonly">On SaxonJ-HE, Saxon uses the collation facilities available directly from the JDK.</li>
+            <li class="javaonly">On SaxonJ-PE and -EE, Saxon uses the collation facilities available from the ICU-J library.</li>
+            <li class="javaonly">On SaxonCS, Saxon uses the collation facilities available from the ICU-N library, which
+              is a port to C# of a subset of ICU-J.</li>
+          </ul>
+          
+  <p>This feature is requested by using a
+    collation (specified either as a <code>collation</code> attribute on an <code>xsl:sort</code>
+    instruction, an <code>xsl:default-collation</code> attribute within an XSLT tree or the
+      <code>$collation</code> argument of a comparison function, such as <code>fn:compare()</code>
+    or <code>fn:deep-equal()</code>) that uses the scheme and path
+      <code>http://www.w3.org/2013/collation/UCA</code> followed by an optional query part.</p>
+  <p>The query is a semicolon-separated sequence of zero or more <code>keyword=value</code> pairs,
+    e.g. <code>...UCA?reorder=digit,space;strength=secondary</code>. Full details of the query
+    format and parameters can be found in <a
+      href="http://www.w3.org/TR/xslt-30#uca-collations" class="bodylink">The
+      Unicode Collation Algorithm</a> section of the specification. This section discusses the Saxon
+    implementation.</p>
+          
+ 
+  <p>Saxon supports the W3C-defined parameters as follows:</p>
+  <table>
+    <thead class="params">
+      <tr>
+        <td>
+          <p> keyword </p>
+        </td>
+        <td>
+          <p> values </p>
+        </td>
+        <td>
+          <p> default </p>
+        </td>
+        <td>
+          <p> Notes </p>
+        </td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="keyword">
+          <p> fallback </p>
+        </td>
+        <td>
+          <p class="value"> yes | no </p>
+        </td>
+        <td>
+          <p class="value"> yes </p>
+        </td>
+        <td>
+          <p>
+            <code>fallback=no</code> will raise errors in the case of unknown parameter keywords or
+            values. Otherwise erroneous parameters are ignored. </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> lang </p>
+        </td>
+        <td>
+          <p>any value allowed for <code>xml:lang</code>, for example <code>en-US</code> for US
+            English, or <code>sr-Cyrl-ME</code> for cyrillic script Serbian in Montenegro </p>
+        </td>
+        <td>
+          <p>From the locale</p>
+        </td>
+        <td>
+          <p> The implementation uses an appropriate collation for the requested locale from the ICU
+            environment, splitting the <code>lang</code> parameter into three possible
+            subcomponents: <code>language-country-variant</code>. The locale used may effect the
+            default values of other parameters - see <code>backwards</code> for an example. </p>
+          <p>For a list of locales supported in this implementation see <a class="bodylink"
+              href="UCA-locales">UCA-supported locales</a></p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> version </p>
+        </td>
+        <td>
+          <p> string </p>
+        </td>
+        <td>
+          <p class="value"> 6.2.0.0 </p>
+        </td>
+        <td>
+          <p>The version of the UCA to be used. Interpreted as an ascending sequence of
+            major.minor.update... version numbers. Requests for versions less than or equal to the
+            current supported version are processed with the current version. Requests for a higher
+            version raise an error. </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> strength </p>
+        </td>
+        <td>
+          <p>
+            <span class="value">primary | secondary | tertiary | quaternary | identical</span>, or
+              <span class="value">1 | 2 | 3 | 4 | 5</span> as synonyms </p>
+        </td>
+        <td>
+          <p>
+            <span class="value">tertiary</span>, but see notes </p>
+        </td>
+        <td>
+          <p> Default strength may be altered by a specific locale. </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> maxVariable </p>
+        </td>
+        <td>
+          <p class="value"> space | punct | symbol | currency </p>
+        </td>
+        <td>
+          <p class="value"> punct </p>
+        </td>
+        <td>
+          <p>Determines which characters are considered as "noise" for the purposes of the <code>alternate</code> parameter. The default
+            value <code>punct</code> causes whitespace and punctuation to be treated as noise characters. (Note that this includes characters
+            that are obviously punctuation, like full-stop, comma, and parentheses, while excluding symbols such as the plus sign, equals sign,
+            and copyright sign. But - (hyphen), #, &amp; %, and * are classed as punctuation.)
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> alternate </p>
+        </td>
+        <td>
+          <p class="value"> non-ignorable | shifted | blanked </p>
+        </td>
+        <td>
+          <p class="value"> non-ignorable </p>
+        </td>
+        <td>
+          <p>This (poorly named) property controls the handling of "noise" characters such as spaces and punctuation.
+            More specifically, it controls the handling of characters up to the value of <code>maxVariable</code>. For example
+            if <code>maxVariable=punct</code> then it affects handling of whitespace and punctuation, while if <code>maxVariable=currency</code>
+            then it also affects the handling of currency symbols. The value <code>non-ignorable</code> causes noise characters
+            to be treated as first-class characters in their own right. The value <code>shifted</code> indicates that noise characters
+            are treated as a quaternary distinction between strings (less significant than differences in accents or case), while
+            <code>blanked</code> indicates that they are used only to distinguish strings that would otherwise be considered identical.
+            The value <code>blanked</code> is not supported directly in the ICU library; if requested, it is handled by requesting
+            <code>alternate=shifted</code> with <code>strength=tertiary</code>.
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> backwards </p>
+        </td>
+        <td>
+          <p class="value"> yes | no </p>
+        </td>
+        <td>
+          <p>
+            <span class="value">no</span>, but see notes </p>
+        </td>
+        <td>
+          <p> This is principally used for backwards-order comparison of (French) accents at
+            secondary strength, and the default may be set by the locale used. For example
+              <code>lang=fr-CA</code> implies a default of <code>backwards=yes</code> whereas
+              <code>lang=fr</code> defaults to <code>backward=no</code>. </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="keyword">
+          <p> normalization </p>
+        </td>
+        <td>
+          <p class="value"> yes | no </p>
+        </td>
+        <td>
+          <p class="value"> no </p>
+        </td>
+        <td>
+          <p>
+            <code>normalization=yes</code> has not been tested. See ICU documentation for further
+            details. </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> caseLevel </p>
+        </td>
+        <td>
+          <p class="value"> yes | no </p>
+        </td>
+        <td>
+          <p class="value"> no </p>
+        </td>
+        <td>
+          <p> As specified by W3C. </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> caseFirst </p>
+        </td>
+        <td>
+          <p class="value"> upper | lower </p>
+        </td>
+        <td>
+          <p> See notes </p>
+        </td>
+        <td>
+          <p> The default is to ignore case preferences. </p>
+        </td>
+      </tr>
+   
+      <tr>
+        <td class="keyword">
+          <p> numeric </p>
+        </td>
+        <td>
+          <p class="value"> yes | no </p>
+        </td>
+        <td>
+          <p class="value"> no </p>
+        </td>
+        <td>
+          <p> As specified by W3C. </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> reorder </p>
+        </td>
+        <td>
+          <p> a comma-separated sequence of reorder codes, where a reorder code is one of
+              <code>space, punct, symbol, currency, digit</code>, or a four-letter script code </p>
+        </td>
+        <td/>
+        <td>
+          <p> As specified by W3C. Saxon testing revealed a bug in the ICU library which has been reported, but
+          is not fixed at the time of writing.</p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+          
+          <h2>Additional Saxon Parameters</h2>
+          
+  <p>In addition to the standard parameters, Saxon supports some further parameters of its own:</p>
+          
+          <table>
+            <thead class="params">
+              <tr>
+                <td>
+                  <p> keyword </p>
+                </td>
+                <td>
+                  <p> values </p>
+                </td>
+                <td>
+                  <p> effect </p>
+                </td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="keyword">
+                  <p>class</p>
+                </td>
+                <td>
+                  <p>fully-qualified Java class name of a class that implements
+                    <code>java.util.Comparator</code>.</p>
+                </td>
+                <td>
+                  <p>This parameter should not be combined with any other parameter. An instance of
+                    the requested class is created, and is used to perform the comparisons. Note that
+                    if the collation is to be used in functions such as <code>contains()</code> and
+                    <code>starts-with()</code>, this class must also be a
+                    <code>java.text.RuleBasedCollator</code>. This approach allows a user-defined
+                    collation to be implemented in Java. This option is also available on the .NET
+                    platform, but the class must implement the Java interface
+                    <code>java.util.Comparator</code>.</p>
+                </td>
+              </tr>
+              <tr>
+                <td class="keyword">
+                  <p>rules</p>
+                </td>
+                <td>
+                  <p>details of the ordering required, using the syntax of the Java
+                    <code>RuleBasedCollator</code>
+                  </p>
+                </td>
+                <td>
+                  <p>This defines exactly how individual characters are collated. (It's not very
+                    convenient to specify this as part of a URI, but the option is provided for
+                    completeness.) This option is also available on the .NET platform, and if used
+                    will select a collation provided using the OpenJDK implementation of
+                    <code>RuleBasedCollator</code>.</p>
+                </td>
+              </tr>
+              <tr>
+                <td class="keyword">
+                  <p>ignore-case</p>
+                </td>
+                <td>
+                  <p class="value">yes | no</p>
+                </td>
+                <td>
+                  <p>Indicates whether the case of letters should be ignored: equivalent to <code>strength=secondary</code>.</p>
+                </td>
+              </tr>
+              <tr>
+                <td class="keyword">
+                  <p>ignore-modifiers</p>
+                </td>
+                <td>
+                  <p class="value">yes | no</p>
+                </td>
+                <td>
+                  <p>Indicates whether non-spacing combining characters (such as accents and
+                    diacritical marks) are considered significant. Note that even when
+                    ignore-modifiers is set to "no", modifiers are less significant than the actual
+                    letter value, so that "Hofen" and "Höfen" will appear next to each other in the
+                    sorted sequence. Equivalent to <code>strength=secondary</code>.</p>
+                </td>
+              </tr>
+              <tr>
+                <td class="keyword">
+                  <p>ignore-symbols</p>
+                </td>
+                <td>
+                  <p class="value">yes | no</p>
+                </td>
+                <td>
+                  <p>Indicates whether symbols such as whitespace characters and punctuation marks are
+                    to be ignored. This option currently has no effect on the Java platform, where
+                    such symbols are in most cases ignored by default.</p>
+                </td>
+              </tr>
+              <tr>
+                <td class="keyword">
+                  <p>ignore-width</p>
+                </td>
+                <td>
+                  <p class="value">yes | no</p>
+                </td>
+                <td>
+                  <p>Indicates whether characters that differ only in width should be considered
+                    equivalent. On the Java platform, setting ignore-width sets the collation strength
+                    to tertiary.</p>
+                </td>
+              </tr>
+              <tr>
+                <td class="keyword">
+                  <p>
+                    <dfn>decomposition</dfn>
+                  </p>
+                </td>
+                <td>
+                  <p class="value">none | standard | full</p>
+                </td>
+                <td>
+                  <p>Indicates how the collator handles Unicode <dfn>composed characters</dfn>. See
+                    the JDK documentation for details. This option is ignored on the .NET
+                    platform.</p>
+                </td>
+              </tr>
+              <tr>
+                <td class="keyword">
+                  <p>alphanumeric</p>
+                </td>
+                <td>
+                  <p class="value">yes | no | codepoint</p>
+                </td>
+                <td>
+                  <p>If set to yes, the string is split into a sequence of alphabetic and numeric
+                    parts (a numeric part is any consecutive sequence of ASCII digits; anything else
+                    is considered alphabetic). Each numeric part is considered to be preceded by an
+                    alphabetic part even if it is zero-length. The parts are then compared pairwise:
+                    alphabetic parts using the collation implied by the other query parameters,
+                    numeric parts using their numeric value. The result is that, for example, AD985
+                    collates before AD1066. (This is sometimes called <dfn>natural sorting</dfn>.) The
+                    value "codepoint" requests <dfn>alphanumeric collation</dfn> with the
+                    "alpha" parts being collated by Unicode codepoint, rather than by the default
+                    collation for the <dfn>Locale</dfn>. This may give better results in the case of
+                    strings that contain spaces. Note that an alphanumeric collation cannot be used in
+                    conjunction with functions such as <code>contains()</code> and <code>substring-before()</code>.</p>
+                </td>
+              </tr>
+              <tr>
+                <td class="keyword">
+                  <p>case-order</p>
+                </td>
+                <td>
+                  <p class="value">upper-first | lower-first</p>
+                </td>
+                <td>
+                  <p>Indicates whether <dfn>upper case</dfn> letters collate before or after
+                    <dfn>lower case</dfn> letters.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+  <h2>UCA Fallback Behaviour</h2>
+  <p>The specification supports fallback behaviour in the case that UCA is not, or only partially,
+    implemented. If the query contains the parameter <code>fallback=no</code> and implementation of
+    UCA is unsupported (as is the case with Saxon-HE, or when ICU features are not loaded), then the
+    request will raise an error of 'unknown collation'. If <code>fallback</code> is <code>yes</code>
+    or absent, the implementation will make best-effort.</p>
+  <p>For Saxon-HE, or in the absence of ICU, this involves building a tailored collation based on
+    the Java library/Unicode implementation as described in <a class="bodylink"
+      href="/extensibility/collation">Implementing a collating sequence</a>, with the following
+    re-mapping of parameters:</p>
+  <table>
+    <thead class="params">
+      <tr>
+        <td class="keyword">
+          <p> keyword(s) </p>
+        </td>
+        <td>
+          <p> values </p>
+        </td>
+        <td>
+          <p> effect </p>
+        </td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="keyword">
+          <p> lang </p>
+        </td>
+        <td>
+          <p> language/locale code </p>
+        </td>
+        <td>
+          <p> Use an appropriate collation for the requested locale from the Java environment, if
+            available, else codepoint collation. </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> strength </p>
+        </td>
+        <td>
+          <p class="value"> primary | secondary | tertiary | identical </p>
+        </td>
+        <td>
+          <p> used as stated. </p>
+        </td>
+      </tr>
+      <tr>
+        <td> </td>
+        <td>
+          <p class="value"> 1 | 2 | 3 </p>
+        </td>
+        <td>
+          <p> remapped to <code>primary | secondary | tertiary</code> respectively. </p>
+        </td>
+      </tr>
+      <tr>
+        <td> </td>
+        <td>
+          <p class="value"> quaternary | 4 | 5 </p>
+        </td>
+        <td>
+          <p> remapped to <code>identical</code>. </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> caseFirst </p>
+        </td>
+        <td>
+          <p class="value"> upper | lower </p>
+        </td>
+        <td>
+          <p> remapped to <code>case-order=upper-first</code> and
+              <code>case-order=lower-first</code> respectively. </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> numeric </p>
+        </td>
+        <td>
+          <p class="value"> yes | no </p>
+        </td>
+        <td>
+          <p> remapped to <code>alphanumeric=yes</code> and <code>alphanumeric=no</code>
+            respectively. </p>
+        </td>
+      </tr>
+      <tr>
+        <td class="keyword">
+          <p> version, alternate, backwards, normalization, caseLevel, reorder
+          </p>
+        </td>
+        <td>
+          <p class="value"> - </p>
+        </td>
+        <td>
+          <p> All ignored. </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <xi:include href="locales-ICU.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+</section>
