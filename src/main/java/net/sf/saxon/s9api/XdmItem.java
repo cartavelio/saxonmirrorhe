@@ -154,7 +154,7 @@ public abstract class XdmItem extends XdmValue {
         return null; // Overridden in XdmMap. The method is retained on this interface for compatibility reasons.
     }
 
-    //#ifdef CSHARP==false
+    //#if CSHARP==false
     /**
      * Get a stream comprising the items in this value
      *

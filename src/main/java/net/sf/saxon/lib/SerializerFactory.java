@@ -69,7 +69,7 @@ public class SerializerFactory {
         return config;
     }
 
-    //#ifdef CSHARP==false
+    //#if CSHARP==false
     /**
      * Create a serializer with given output properties, and return
      * an XMLStreamWriter that can be used to feed events to the serializer.
