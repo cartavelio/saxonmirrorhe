@@ -14,7 +14,7 @@ import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.xpath.XPathFactoryImpl;
 import org.jdom2.input.SAXBuilder;
 import org.junit.jupiter.api.Test;
@@ -373,7 +373,7 @@ public class ExtensionTest {
 
                 @Override
                 public Sequence call(XPathContext context, Sequence[] arguments) {
-                    return StringItem.bmp("TEST");
+                    return StringValue.bmp("TEST");
                 }
             };
         }

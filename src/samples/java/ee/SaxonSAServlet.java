@@ -3,7 +3,7 @@ package ee;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -108,7 +108,7 @@ public class SaxonSAServlet extends HttpServlet {
                 String name = (String)p.nextElement();
                 if (!(name.equals("style") || name.equals("source"))) {
                     String value = req.getParameter(name);
-                    transformer.setParameter(name, new StringItem(value));
+                    transformer.setParameter(name, new StringValue(value));
                 }
             }
 

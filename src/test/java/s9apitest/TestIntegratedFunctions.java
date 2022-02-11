@@ -688,7 +688,7 @@ public class TestIntegratedFunctions {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            StringItem val = (StringItem)arguments[0].head();
+            StringValue val = (StringValue)arguments[0].head();
             if (val == null) {
                 return EmptySequence.getInstance();
             }
@@ -696,7 +696,7 @@ public class TestIntegratedFunctions {
             if (ns == null) {
                 return EmptySequence.getInstance();
             }
-            return new StringItem(ns);
+            return new StringValue(ns);
         }
     }
 
