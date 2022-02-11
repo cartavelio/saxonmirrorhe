@@ -757,10 +757,10 @@ public class QT3TestDriverHE extends TestDriver {
             applicable = true;
         } else if ((spec.specAndVersion.equals("XQ30") || spec.specAndVersion.equals("XQ31")
                     || spec.specAndVersion.equals("XQ40")) &&
-                (value.contains("XQ10+") || value.contains("XQ30+"))) {
+                (value.contains("XQ10+") || value.contains("XQ30+") || value.contains("XQ31+"))) {
             applicable = true;
         } else if ((spec.specAndVersion.equals("XP30") || spec.specAndVersion.equals("XP31") || spec.specAndVersion.equals("XP40")) &&
-                (value.contains("XP20+") || value.contains("XP30+"))) {
+                (value.contains("XP20+") || value.contains("XP30+") || value.contains("XP31+"))) {
             applicable = true;
         }
         return applicable;

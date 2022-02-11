@@ -2765,6 +2765,8 @@ public class XPathParser {
                 args.add(arg);
                 if (t.currentToken == Token.COMMA) {
                     nextToken();
+                } else if (t.currentToken == Token.COLON) {
+                    grumble("Keyword arguments are not allowed in a dynamic function call");
                 } else {
                     break;
                 }
