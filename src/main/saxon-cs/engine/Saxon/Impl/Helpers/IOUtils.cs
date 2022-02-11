@@ -10,7 +10,12 @@ namespace Saxon.Impl.Helpers {
                 textEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
             }
             else {
-                textEncoding = Encoding.GetEncoding(encoding);
+                try {
+                    textEncoding = Encoding.GetEncoding(encoding);
+                }
+                catch (ArgumentException e) {
+                    throw new Saxon.Ejava.io.UnsupportedEncodingException();
+                }
             }
 
             return new System.IO.StreamWriter(stream, textEncoding);

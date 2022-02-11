@@ -1,3 +1,5 @@
+using System;
+
 namespace Saxon.Impl.Helpers {
     public class LineNumberReader : System.IO.TextReader {
         private readonly System.IO.TextReader reader;
@@ -17,12 +19,20 @@ namespace Saxon.Impl.Helpers {
         }
 
         public override int Read() {
-            int b = this.reader.Read();
-            if ((this.b == '\n') || (this.b == '\r' && b != '\n')) {
-                this.line++;
-            }
+            try {
+                int b = this.reader.Read();
+                if ((this.b == '\n') || (this.b == '\r' && b != '\n')) {
+                    this.line++;
+                }
 
-            return this.b = b;
+                return this.b = b;
+            }
+            catch (System.IO.IOException) {
+                throw;
+            }
+            catch (Exception e) {
+                throw new System.IO.IOException(e.Message);
+            }
         }
 
         protected override void Dispose(bool disposing) {
