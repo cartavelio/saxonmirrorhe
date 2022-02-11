@@ -124,10 +124,16 @@ public:
 
 
 
+    //! Declare a variable as part of the static context for XPath expressions compiled using this <code>XPathCompiler</code>.
+    /**
+     *  It is an error for the XPath expression to refer to a variable unless it has been
+     * declared. This method declares the existence of the variable, but it does not
+     * bind any value to the variable; that is done later, when the XPath expression is evaluated.
+     * The variable is allowed to have any type (that is, the required type is <code>item()*</code>).
+     *
+     * @param name The name of the variable, expressions as a clark name string
+     */
     void declareVariable(const char * name);
-
-#if CVERSION_API_NO >= 121
-
 
 
     //! Say whether XPath 1.0 backwards compatibility mode is to be used
@@ -172,7 +178,6 @@ public:
      */
     void importSchemaNamespace(const char * uri);
 
-#endif
      /**
       * Get all parameters as a std::map
      */

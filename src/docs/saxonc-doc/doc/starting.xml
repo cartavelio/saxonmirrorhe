@@ -17,7 +17,7 @@
    <section id="installing" title="Installing SaxonC">
       <h1>Installing SaxonC</h1>
 
-      <p>SaxonC can be installed on Linux, Mac OS and Windows. In this section we provide a step by
+      <p>SaxonC can be installed on Linux, Mac OS and Windows. As a prerequisite SaxonC requires as a minimum C++14. In this section we provide a step by
          step installation guide for the three platforms.</p>
 
       <nav>
@@ -345,7 +345,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
       <p>Please have the following packages on your machine to build SaxonC for the PHP language:
             <code>make</code>, <code>php-devel</code>, (<code>php7.X-dev</code>, tested on 7.1, 7.2 and 7.4),
-            <code>apache2</code> or <code>httpd</code>, <code>gcc-c++</code> or <code>g++</code>.</p>
+            <code>apache2</code> or <code>httpd</code>, <code>gcc-c++</code> or <code>g++</code> (minimum C++14).</p>
 
       <p>SaxonC should already have been installed following the instructions at <a
             href="../installing">Installing SaxonC</a>.</p>

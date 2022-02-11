@@ -166,16 +166,16 @@ public:
 
     //std::map<XdmAtomicValue*, XdmValue*> asMap();
 
-    //! Returns <tt>true</tt> if this map contains no key-value mappings.
+    //! Returns true if this map contains no key-value mappings.
     /**
-     * @return <tt>true</tt> if this map contains no key-value mappings
+     * @return true if this map contains no key-value mappings
      */
     bool isEmpty();
 
-    //! Returns <tt>true</tt> if this map contains a mapping for the specified key.
+    //! Returns <code>true</code> if this map contains a mapping for the specified key.
     /**
-     * More formally, returns <tt>true</tt> if and only if
-     * this map contains a mapping for a key <tt>k</tt> such that
+     * More formally, returns true if and only if
+     * this map contains a mapping for a key k such that
      * <tt>(key==null ? k==null : key.equals(k))</tt>.  (There can be
      * at most one such mapping.)
      *
@@ -211,9 +211,7 @@ public:
         return true;
     }
 
-	/**
-	* Get the type of the object
-	*/
+	//! Get the type of the object
 	XDM_TYPE getType() {
 		return XDM_MAP;
 	}
