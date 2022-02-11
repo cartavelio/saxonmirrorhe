@@ -2961,10 +2961,11 @@
 
     <feature>
         <featureCode>128</featureCode>
-        <name>SAXON_RESOURCE_RESOLVER</name>
+        <name>COMMON_RESOURCE_RESOLVER</name>
         <type>Implementation of <link>net.sf.saxon.lib.CommonResourceResolver</link></type>
         <uri>http://saxon.sf.net/feature/saxon-resource-resolver</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setCommonResourceResolver</setter>
         <getter class="net.sf.saxon.Configuration">getCommonResourceResolver</getter>
         <desc>
@@ -2977,10 +2978,11 @@
 
     <feature>
         <featureCode>129</featureCode>
-        <name>SAXON_RESOURCE_RESOLVER_CLASS</name>
+        <name>COMMON_RESOURCE_RESOLVER_CLASS</name>
         <type>Name of a class implementing <link>net.sf.saxon.lib.CommonResourceResolver</link></type>
         <uri>http://saxon.sf.net/feature/saxon-resource-resolver-class</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setCommonResourceResolver</setter>
         <getter class="net.sf.saxon.Configuration">getCommonResourceResolver</getter>
         <configfile>global/@CommonResourceResolver</configfile>
@@ -2989,7 +2991,7 @@
         </configfiledesc>
         <desc>
             <p>The supplied class is instantiated and the resulting instance is used as the value of
-                the <link>net.sf.saxon.lib.Feature#SAXON_RESOURCE_RESOLVER</link> property.</p>
+                the <link>net.sf.saxon.lib.Feature#COMMON_RESOURCE_RESOLVER</link> property.</p>
         </desc>
     </feature>
 
