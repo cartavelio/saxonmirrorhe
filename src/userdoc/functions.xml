@@ -10234,6 +10234,44 @@ return saxon:transform($splitter, $results)]]></samp>
     </function>
     
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
+      <name namespace="http://saxon.sf.net/">unindexed</name>
+      <description>
+        <p>A pseudo-function that tells the optimizer to avoid indexing a filter expression.</p>
+      </description>
+      <signatures>
+        <proto return-type="xs:string">
+          <arg name="input" type="item()*" desc="The expression to be evaluated without indexing"/>
+        </proto>
+      </signatures>
+      <status>
+        <p>Available since Saxon 11.</p>
+      </status>
+      <saxon-edition>EE 11</saxon-edition>
+      <details>
+        <div>
+          <p>The function returns the value of its argument unchanged.</p>
+          
+          <p>The reason for calling this function is that it signals to the optimizer that the argument expression
+          (which will typically be a filter expression) should not result in construction of an index.</p>
+          
+          <p>For example, Saxon would normally build an index to evaluate an expression such as <code>//person[@ssn=$ssn]</code>.
+          But there are cases where this is not the best strategy, for example:</p>
+          
+          <ul>
+            <li>If the expression will only be evaluated once.</li>
+            <li>If impure extension functions are used to modify the data between evaluations.</li>
+            <li>If the set of nodes selected by <code>//person</code> is small.</li>
+            <li>If most of the nodes selected by <code>//person</code> have the same value for <code>@ssn</code>.</li>
+          </ul>
+          
+          <p>Writing <code>saxon:unindexed(//person[@ssn=$ssn])</code> delivers the same result, 
+            but using a serial search of the data.</p>
+          
+        </div>
+      </details>
+    </function>
+    
+    <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">unparsed-entities</name>
       <description>
         <p>Returns a list of the names of the unparsed entities declared within a document.</p>

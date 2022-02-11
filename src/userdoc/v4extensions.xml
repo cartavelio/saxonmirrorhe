@@ -9,7 +9,7 @@
    are not available unless you explicitly enable them. They should not be considered stable: the
    details are likely to change as the design progresses.</p>
    
-   <p>With the exception of new functions in the function library, these extensions need to be
+   <p>These extensions need to be
    explicitly enabled. Use one of the following mechanisms to enable syntax extensions:</p>
    
    <ul>
@@ -19,8 +19,7 @@
          or <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</li>
       <li>Set the language level to 4.0 in a call to an API method such as 
       <code>XsltCompiler.setXsltLanguageVersion()</code></li>
-      <li>For XQuery, set the language level to 4.0 in the <code>version</code> attribute
-      of <code>xsl:stylesheet</code>, or in the XQuery declaration in the query prolog.</li>
+      <li>For XQuery, set the language level to 4.0 in the XQuery declaration in the query prolog.</li>
    </ul>
    
    <p>Note: in XSLT, setting <code>version="4.0"</code> in the stylesheet is not enough. This gives you an
@@ -31,7 +30,7 @@
       They are also available in Saxon-CS.</p>
    
    <p>Generally, Saxonica aims to avoid making incompatible changes except in major releases.
-   The features described in this section are experimental, so this policy does not apply: the aim
+   But the features described in this section are experimental, so this policy does not apply: the aim
    instead is to respond rapidly to changes in the developing specification.</p>
 
       <p>Further information:</p>
@@ -39,8 +38,7 @@
          <ul/>
       </nav>
    
-   TODO: document xsl:array, xsl:item-type, xsl:array-member, xsl:switch; add additional attributes to element
-   syntax summary. saxon:array and saxon:array-member are now synonyms.
+
 
       <section id="new-types" title="New Types">
          <h1>New Types</h1>
@@ -287,7 +285,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                <li>A commonly used type can be referenced using a <b>type alias</b>, for example
         <code>as="type(cx:complex)"</code>. Type aliases are available in both XSLT and XQuery,
           and are described in <a class="bodylink"
-                     href="/extensions/syntax-extensions/type-aliases"
+                     href="/v4extensions/new-types/type-aliases"
                   >Type Aliases</a>. Type aliases go some way towards
         hiding the implementation details of the type, and allowing the implementation to be changed
         without affecting users of the function library; in addition they simply make the code more
@@ -413,8 +411,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             own, and include that module in each package using <code>xsl:include</code>.</aside>
 
             <p>Type aliases can be used in XSLT match patterns (see <a class="bodylink"
-                  href="/extensions/xslt-syntax-extensions"
-               >XSLT Syntax Extensions</a>). For example:</p>
+                  href="/v4extensions/xslt-syntax-extensions/match-patterns"
+               >XSLT Syntax Extensions: Match Patterns</a>). For example:</p>
 
             <example>
                <samp>&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></samp>
@@ -586,7 +584,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
       <section id="new-function-syntax" title="New Function Syntax">
          
-         <h1>New Function Syntax</h1>
+         <h1>New Syntax for Declaring and Calling Functions</h1>
 
          <p>The proposals for XPath 4.0 include some new syntax for declaring and calling functions. This section
          describes what is experimentally implemented in Saxon 11.</p>
@@ -849,8 +847,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
 
       <p>Enabling syntax extensions not only allows the use of the XSLT extensions described in this section,
     it also allows XPath 4.0 extensions to be used in expressions and sequence types within the stylesheet, 
-    as described in <a class="bodylink" href="/v4extensions/syntax-extensions"
-            >XPath and XQuery Syntax Extensions</a>.</p>
+    as described in <a class="bodylink" href="/v4extensions/other-xpath-extensions"
+            >Other XPath 4.0 Extensions</a> and elsewhere.</p>
       
       <nav>
          <ul/>
@@ -876,7 +874,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
       <p>In particular the syntax <code>ma-type predicate*</code> is allowed in a pattern, where <code>ma-type</code>
       is any of:</p>
 
-      <ol>
+      <ul>
          <li>
             <code>type(...)</code>
          </li>
@@ -895,7 +893,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
          <li>
             <code>array(...)</code>
          </li>
-      </ol>
+      </ul>
 
       <p>For example if a <a class="bodylink" href="/v4extensions/syntax-extensions/type-aliases"
             >type alias</a> has been declared:</p>
@@ -911,7 +909,28 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
       <p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an abbreviation for
       <code>.[. instance of type(T)]</code>.</p>
          
-         <p>TODO: add information on default priority. Add examples.</p>
+         <p>Patterns for record types are particularly useful when JSON is processed using XSLT template rules. For example,
+         a JSON object such as the following: </p>
+         
+         <example>
+            <samp>{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "age": 45,
+  "weight": 67
+}</samp>
+         </example>
+         
+         <p>can be matched with a pattern such as <code>match="record(firstName, lastName, email, *)"</code>. Naming a few of the
+         properties that characterize the object is sufficient (but remember to make the record type extensible by including <code>", *</code>
+         at the end). There's generally no need to include all the properties, or to give their data types, because a test like this
+         is generally sufficient to be unambiguous. The order of properties, of course, is immaterial.</p>
+         
+         <p>Predicates can be added as with any other pattern, for example <code>match="record(firstName, lastName, *)[?department='sales']"</code>.</p>
+         
+      <p>The rules for calculating the default priority of these patterns are not yet stable; explicit priorities should be
+      used if there is any risk of ambiguity.</p>
          
       </section>
       <section id="xslt-conditionals" title="Conditional Instructions">
@@ -1026,9 +1045,11 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
          of the current group so far. For example, <code>break-when="@date lt current-group()[last()]/@date</code>
          causes a new group to be started whenever the date on the current item is earlier than the date on the
          last item in the previous group.</p>
+         
+         <p>For more details see <a class="bodylink" href="/xsl-elements/for-each-group">xsl:map</a>.</p>
       </section>
       
-      <section id="xsl-map-duplicates" title="Controlling duplicates on xsl:map">
+      <section id="xsl-map-duplicates" title="Controlling Duplicates on xsl:map">
          <h1>Controlling duplicates on <code>xsl:map</code></h1>
          
          <p>The <code>on-duplicates</code> attribute can be specified on <code>xsl:map</code> to control what happens
@@ -1043,6 +1064,32 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
             <code>on-duplicates="->($old, $new){$new}</code> takes the last.</p>
          
          <p>See also <a class="bodylink" href="/xsl-elements/map">xsl:map</a>.</p>
+      </section>
+      
+      <section id="creating-arrays" title="Constructing Arrays">
+         <h1>Creating Arrays</h1>
+         
+         <p>The new <code>xsl:array</code> instruction can be used to create an array. The contents of the array are
+         formed from the sequence returned by the contained sequence constructor.</p>
+         
+         <p>There are two forms of the instruction.</p>
+         
+         <ul>
+            <li><p>To create a simple array in which every member is a singleton item, use <code>&lt;xsl:array composite="no"></code>
+            (this is the default so the attribute can be omitted). Every item delivered by the sequence constructor then becomes
+            an individual member of the array.</p></li>
+            <li><p>To create an array in which some members might be non-singleton sequences, use <code>&lt;xsl:array composite="yes"></code>.
+            In this case every item delivered by the sequence constructor must be a <i>parcel</i>. A parcel is an item of type
+            <code>record(value, *)</code>, that is, a map containing an entry whose key is the string "value", and whose corresponding
+            value is an arbitrary sequence. This sequence is used as the value of the array member.</p>
+            <p>It's often convenient to construct a parcel using the <code>xsl:array-member</code> instruction, but that's
+            not the only way to do it. You could also do it, for example, by calling <code>fn:parcel()</code>. Or you could decompose
+            an existing array into parcels using the function <code>array:members</code>, and use some of those parcels to form
+            the new array.</p></li>
+         </ul>
+         
+         <p>For details see <a class="bodylink" href="/xsl-elements/array">xsl:array</a> and 
+            <a class="bodylink" href="/xsl-elements/array-member">xsl:array-member</a>.</p>
       </section>
    </section>
 
