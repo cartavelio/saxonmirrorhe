@@ -273,7 +273,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <p>Similarly for Windows, use the commands:</p>
 
       <kbd>cd samples/cppTests/</kbd>
-      <kbd>buildCPPSaxon[EDITION].bat</kbd>
+      <kbd>build-windows.bat</kbd>
       <kbd>testXPath.exe</kbd>
 
       <p>The <code>samples/cppTest</code> directory provides many more examples in C/C++ which can
