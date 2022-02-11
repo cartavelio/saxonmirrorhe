@@ -4,7 +4,7 @@ using java.lang;
 using NG = System.Collections.Generic;
 
 namespace java.util {
-    public class Stack<E> {
+    public class Stack<E> : List<E> {
         private readonly NG.Stack<E> _stack;
 
         public Stack() {

@@ -6,11 +6,12 @@ namespace java.util {
         bool isEmpty();
         V get(object key);
         bool containsKey(object key);
+        V computeIfAbsent(K key, System.Func<K, V> mappingFn);
         V put(K key, V value);
         void remove(K key);
         Set<K> keySet();
         Collection<V> values();
-        Set<Map_Entry<K, V>> entries();
+        Set<Map_Entry<K, V>> entrySet();
         void putAll(Map<K, V> map);
         void clear();
     }

@@ -42,6 +42,11 @@ namespace java.util {
             dict.Add(key, value);
             return current;
         }
+        public void putIfAbsent(K key, V value) {
+            if (get(key) == null) {
+                dict.Add(key, value);
+            }
+        }
 
         public void remove(K key) {
             dict.Remove(key);
@@ -56,7 +61,7 @@ namespace java.util {
         public Collection<V> values() {
             return null; // TODO
         }
-        public Set<Map_Entry<K, V>> entries() {
+        public Set<Map_Entry<K, V>> entrySet() {
             return null; // TODO
         }
 

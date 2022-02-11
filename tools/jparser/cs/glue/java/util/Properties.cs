@@ -27,8 +27,16 @@ namespace java.util {
                 return null;
             }
         }
+
+        public string getProperty(string key, string defaultValue) {
+            return getProperty(key) ?? defaultValue;
+        }
         public void setProperty(string key, string value) {
             dict.Add(key, value);
+        }
+
+        public void remove(string key) {
+            dict.Remove(key);
         }
 
         // public Enumeration<string> propertyNames() {

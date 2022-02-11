@@ -36,9 +36,36 @@
       <xsl:text>{f:rename-generic-type(@RESOLVED_TYPE)}.{name/@identifier}</xsl:text>
    </xsl:template>
    
-   <!-- Identify a static field accessor such as IntegerValue.MAX -->
+   <!-- Identify a static field accessor such as Integer.MAX_VALUE -->
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.lang.Integer']" priority="19">
-      <xsl:text>java.lang.Integer.{name/@identifier}</xsl:text>
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'MAX_VALUE'">System.Int32.MaxValue</xsl:when>
+         <xsl:when test="name/@identifier = 'MIN_VALUE'">System.Int32.MinValue</xsl:when>
+         <xsl:otherwise>System.Int32.{name/@identifier}</xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Identify a static field accessor such as Long.MAX_VALUE -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.lang.Long']" priority="19">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'MAX_VALUE'">System.Int64.MaxValue</xsl:when>
+         <xsl:when test="name/@identifier = 'MIN_VALUE'">System.Int64.MinValue</xsl:when>
+         <xsl:otherwise>System.Int64.{name/@identifier}</xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Identify a static field accessor such as Character.LETTER_NUMBER -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.lang.Character']" priority="19">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'DECIMAL_DIGIT_NUMBER'">System.Globalization.UnicodeCategory.DecimalDigitNumber</xsl:when>
+         <xsl:when test="name/@identifier = 'LETTER_NUMBER'">System.Globalization.UnicodeCategory.LetterNumber</xsl:when>
+         <xsl:when test="name/@identifier = 'OTHER_NUMBER'">System.Globalization.UnicodeCategory.OtherNumber</xsl:when>
+         <xsl:when test="name/@identifier = 'UPPERCASE_LETTER'">System.Globalization.UnicodeCategory.UppercaseLetter</xsl:when>
+         <xsl:when test="name/@identifier = 'LOWERCASE_LETTER'">System.Globalization.UnicodeCategory.LowercaseLetter</xsl:when>
+         <xsl:when test="name/@identifier = 'MODIFIER_LETTER'">System.Globalization.UnicodeCategory.ModifierLetter</xsl:when>
+         <xsl:when test="name/@identifier = 'OTHER_LETTER'">System.Globalization.UnicodeCategory.OtherLetter</xsl:when> 
+         <xsl:otherwise>System.Globalization.UnicodeCategory.{name/@identifier}</xsl:otherwise>
+      </xsl:choose>
    </xsl:template>
    
    <!-- Identify the static field accessor BigInteger.ZERO -->

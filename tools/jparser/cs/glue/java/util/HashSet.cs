@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using java.lang;
+
 namespace java.util {
     public class HashSet<E> : Set<E> {
         internal System.Collections.Generic.HashSet<E> _set;
@@ -8,6 +11,10 @@ namespace java.util {
         }
         public HashSet(int capacity) {
             _set = new System.Collections.Generic.HashSet<E>(capacity); 
+        }
+        public HashSet(Collection<E> values) {
+            _set = new System.Collections.Generic.HashSet<E>();
+            addAll(values);
         }
         public int size() {
             return _set.Count;
@@ -28,6 +35,10 @@ namespace java.util {
             foreach (E e in other) {
                 add(e);
             }
+        }
+
+        public void clear() {
+            _set.Clear();
         }
     }
 }

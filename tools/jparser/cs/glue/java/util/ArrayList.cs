@@ -13,14 +13,12 @@ namespace java.util {
             this._list = new SysCollGen.List<E>(alloc);
         }
         
-        public ArrayList(ArrayList<E> existing) {
+        public ArrayList(Collection<E> existing) {
             this._list = new SysCollGen.List<E>(existing.size());
             addAll(existing);
         }
 
-        internal ArrayList(SysCollGen.List<E> list) {
-            this._list = list;
-        }
+
         public int size() {
             return _list.Count;
         }
@@ -42,8 +40,15 @@ namespace java.util {
             throw new Exception("not implemented");
         }
 
-        public void remove(int index) {
+        // removeAt(int) corresponds to Java remove(int), which is ambiguous in C#
+        public E removeAt(int index) {
+            E temp = _list[index];
             _list.RemoveAt(index);
+            return temp;
+        }
+
+        public bool remove(E entry) {
+            _list.Remove(entry);
         }
 
         public void set(int index, E entry) {
@@ -56,6 +61,9 @@ namespace java.util {
             return _list.Contains(entry);
         }
 
+        public Iterator<E> iterator() {
+            throw new NotImplementedException();
+        }
         public List<E> subList(int start, int end) {
             return new ArrayList<E>(_list.GetRange(start, end - start));
         }
@@ -74,6 +82,10 @@ namespace java.util {
 
         public SysColl.IEnumerator GetEnumerator() {
             return _list.GetEnumerator();
+        }
+
+        public void sort(Comparison<E> comparer) {
+            _list.Sort(comparer);
         }
         
 
