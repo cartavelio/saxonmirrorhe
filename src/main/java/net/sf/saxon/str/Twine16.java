@@ -335,7 +335,7 @@ public class Twine16 extends UnicodeString {
     @Override
     public long indexWhere(IntPredicate predicate, long from) {
         for (int i = requireInt(from); i < length(); i++) {
-            if (predicate.test(chars[i] & 0xff)) {
+            if (predicate.test(chars[i])) {
                 return i;
             }
         }
