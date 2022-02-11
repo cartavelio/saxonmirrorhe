@@ -95,7 +95,6 @@ public final class Orphan implements MutableNodeInfo {
 
     /**
      * Set the system identifier for this Source.
-     * <p>
      * <p>The system identifier is optional if the source does not
      * get its data from a URL, but it may still be useful to provide one.
      * The application can use a system identifier, for example, to resolve

@@ -21,7 +21,7 @@ import java.util.List;
 
 /**
  * This class implements extension functions in the
- * http://exslt.org/math namespace. <p>
+ * http://exslt.org/math namespace.
  */
 
 public abstract class Math {
