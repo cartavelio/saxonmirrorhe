@@ -1826,11 +1826,11 @@
                         <code>group-by</code> or <code>group-adjacent</code>. If present it must be
                     a collation URI that uses the scheme and path
                         <code>http://www.w3.org/2013/collation/UCA</code>, in which case it requests
-                    use of the <a class="bodylink" href="/extensibility/collation/UCA"
+                    use of the <a class="bodylink" href="/localization/unicode-collation-algorithm"
                         >Unicode Collation Algorithm</a>, or is a collation otherwise recognized by
                     Saxon: see <a class="bodylink"
-                        href="/extensibility/collation"
-                        >Collation</a>.</attribute>
+                        href="/localization/sorting-and-collations"
+                        >Sorting and Collations</a>.</attribute>
             </attributes>
             <details>
                 <p>There are four possible ways of defining the grouping using different attributes:
@@ -2441,8 +2441,8 @@
                 <attribute name="collation" use="optional">The name of a collating sequence, used
                     when comparing strings. If present it must be a collation URI recognized by Saxon: see <a
                         class="bodylink"
-                        href="/extensibility/collation"
-                        >Collation</a>.</attribute>
+                        href="/localization/sorting-and-collations"
+                        >Sorting and Collations</a>.</attribute>
             </attributes>
             <details>
                 <p>Note that: <ol>
@@ -3875,11 +3875,11 @@
                     descendant); and used by certain XSLT constructs within its scope. If present it
                     must be a whitespace-separated list of collation URIs, that use the scheme and
                     path <code>http://www.w3.org/2013/collation/UCA</code> (to request use of the <a
-                        class="bodylink" href="/extensibility/collation/UCA">Unicode
+                        class="bodylink" href="/localization/unicode-collation-algorithm">Unicode
                         Collation Algorithm</a>), or collations otherwise recognized by Saxon (see
                     <a class="bodylink"
-                        href="/extensibility/collation"
-                        >Collations</a>).</attribute>
+                        href="/localization/sorting-and-collations"
+                        >Sorting and Collations</a>).</attribute>
                 <attribute name="extension-element-prefixes" use="optional">Standard attribute that
                     may appear on any XSLT element. Used to declare the use of extension
                     instructions in a particular namespace.</attribute>
@@ -4459,8 +4459,8 @@
                 <attribute name="collation" use="optional">The name of a collating sequence. If
                     present it must be a collation URI recognized by
                     Saxon: see <a class="bodylink"
-                        href="/extensibility/collation"
-                        >Collation</a>.</attribute>
+                        href="/localization/sorting-and-collations"
+                        >Sorting and Collations</a>.</attribute>
                 <attribute name="stable" use="optional">Permitted only on the first
                         <code>xsl:sort</code> element within a sort key. Determines the ordering
                     when two sort key values compare equal. For such elements, the value
@@ -4732,11 +4732,11 @@
                     descendant); and used by certain XSLT constructs within its scope. If present it
                     must be a whitespace-separated list of collation URIs, that use the scheme and
                     path <code>http://www.w3.org/2013/collation/UCA</code> (to request use of the <a
-                        class="bodylink" href="/extensibility/collation/UCA">Unicode
+                        class="bodylink" href="/localization/unicode-collation-algorithm">Unicode
                         Collation Algorithm</a>), or collations otherwise recognized by Saxon (see
                         <a class="bodylink"
-                        href="/extensibility/collation"
-                            >Collation</a>).</attribute>
+                            href="/localization/sorting-and-collations"
+                            >Sorting and Collations</a>).</attribute>
                 <attribute name="extension-element-prefixes" use="optional">Standard attribute that
                     may appear on any XSLT element. Used to declare the use of extension
                     instructions in a particular namespace.</attribute>

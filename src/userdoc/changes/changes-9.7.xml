@@ -630,7 +630,7 @@
 
     <category name="localization">
         <p>Support for the <code>hiraganaQuaternary</code> option of the <a class="bodylink"
-                href="/extensibility/collation/UCA">Unicode Collation Algorithm</a>
+                href="/localization/unicode-collation-algorithm">Unicode Collation Algorithm</a>
             has been dropped, in line with XSLT specification changes.</p>
     </category>
 

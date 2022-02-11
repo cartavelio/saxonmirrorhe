@@ -43,7 +43,7 @@
 
    <p>
       <i>For details of how to set up collation URIs for use in XQuery, see <a class="bodylink"
-            href="/extensibility/collation">Collations</a>.</i>
+         href="/localization/sorting-and-collations">Sorting and Collations</a>.</i>
    </p>
    <section id="commandline" title="From the Command Line">
       <h1>Running XQuery from the Command Line</h1>

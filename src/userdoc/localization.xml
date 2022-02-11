@@ -891,8 +891,7 @@ config.setLocalizerFactory(new LocalizerFactory() {
       raise an error of 'unknown collation'. If <code>fallback</code> is <code>yes</code> or absent, the
       implementation will make best-effort.</p>
     <p>For Saxon-HE, or in the absence of ICU, this involves building a tailored collation based on the Java
-      library/Unicode implementation as described in <a class="bodylink" href="/extensibility/collation"
-        >Implementing a collating sequence</a>, with the following re-mapping of parameters:</p>
+      library/Unicode implementation, with the following re-mapping of parameters:</p>
     <table>
       <thead class="params">
         <tr>
@@ -988,5 +987,36 @@ config.setLocalizerFactory(new LocalizerFactory() {
 
     <xi:include href="extensibility/locales-ICU.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
+  </section>
+  
+  <section id="java-collations" title="Implementing Collations in Java" class="javaonly">
+    <h1>Implementing Collations in Java</h1>
+    
+    <p>If you want to use your own URIs to define collations, there are two ways of doing this:</p>
+    
+    <ul>
+      <li><p>You can use the Saxon configuration file to define collations: see <a class="bodylink"
+        href="/configuration/configuration-file/config-collations">The collations element</a>.</p></li>
+      <li><p>You can register a collation with the Saxon Configuration using the method
+        s9api method <code>Processor.declareCollation()</code> or the underlying method
+        <code>Configuration.registerCollation()</code>.</p></li></ul>
+    
+    <p>In either case, the collation is supplied in the form
+      of an implementation of the interface <code>net.sf.saxon.lib.StringCollator</code>. You must supply methods
+      <code>compareStrings()</code> and <code>comparesEqual()</code> for comparing strings for
+      ordering or equality, and a method getCollationKey() which returns a collation key
+      for any string. If you want your collation to be used in calls of <code>fn:contains()</code>,
+      <code>fn:starts-with()</code>, <code>fn:ends-with()</code>, <code>fn:substring-before()</code>,
+      or <code>fn:substring-after()</code>, then it must also implement the interface 
+      <code>net.sf.saxon.lib.SubstringMatcher</code>.</p>
+    
+    <aside>The set of collation URIs known to Saxon is defined in the <code>Configuration</code>. In earlier releases,
+      it was possible to define collation URIs with narrower scope, for example a single query or stylesheet. Some legacy
+      APIs reflect this capability, but they are generally deprecated and either have no effect, or have a Configuration-wide
+      effect.</aside>
+    
+    <aside>The choice of default collation, however, is local to a query or stylesheet (in XSLT, it can even vary between
+      different parts of a stylesheet). The default collation must always be one of the collations defined in the
+      <code>Configuration</code>.</aside>
   </section>
 </article>

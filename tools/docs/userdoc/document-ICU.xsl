@@ -261,7 +261,7 @@
         <p>In the case that the ICU features have <strong>not</strong> been loaded within
           Saxon-PE/EE, support for numbering and dates for Danish, Dutch, Flemish, French (and
           Belgian French), German, Italian and Swedish is provided as detailed in the table of <a
-            href="/extensibility/localizing/other-numberings">Numberings for selected
+            href="/localization/localizing-numbers-and-dates/other-numberings">Numberings for selected
             languages</a>.</p>
         <h2>Numbering</h2>
         <p>ICU supports a large set of language-specific rulesets for supporting different forms of

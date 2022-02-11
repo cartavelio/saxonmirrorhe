@@ -8615,7 +8615,7 @@ sequence <code>first, second, third, fourth...</code> (in either upper or lower 
 list of supported formats is documented in <a href="/xsl-elements/number">xsl-elements.html</a>.
 Note that these are available only for English; sequences for other languages can be implemented by
 writing a user-defined Numberer, as described in 
-   <a href="/extensibility/localizing">Localization</a>.
+   <a href="/localization/localizing-numbers-and-dates">Localization</a>.
  {numb24, numb25}</p>
  
 <p xmlns="">Sorting a set of numeric values, without specifying data-type="number", now handles NaNs
@@ -8677,7 +8677,7 @@ different defaults for names in the input document and names in the output docum
 <p xmlns="">The <code>typeswitch</code> expression is now implemented. {xmp/addq10}</p>
 
 <p xmlns="">The <code>collation</code> option of the <code>order by</code> clause in a FLWOR expression
-   is now implemented. See <a href="/extensibility/collation">Collation URIs</a> for details of
+   is now implemented. See <a href="/localization/sorting-and-collations">Collation URIs</a> for details of
 the URIs that can be specified. {r/addq1}</p>
 
 <p xmlns="">Sorting a set of numeric values now handles NaNs correctly (NaNs are considered
@@ -8725,7 +8725,7 @@ with no parameters.</p>
 <p xmlns="">Collations can now be specified directly using a URI, without requiring a <code>saxon:collation</code>
 declaration. This makes them available in XQuery and XPath applications as well as XSLT. The URI takes
 a form such as <code>http://saxon.sf.net/collation?lang=de;strength=primary</code> and is specified
-   fully in <a href="/extensibility/collation">Collation URIs</a>. {r/addq1, sort26}</p>
+   fully in <a href="/localization/sorting-and-collations">Collation URIs</a>. {r/addq1, sort26}</p>
 
 <p xmlns="">The <code>collection</code> function is implemented. The Saxon implementation interprets
 the URI of the collection as a reference to an XML document that acts as a catalogue listing the
