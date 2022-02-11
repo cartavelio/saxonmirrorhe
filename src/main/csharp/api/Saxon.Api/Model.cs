@@ -4647,12 +4647,15 @@ namespace Saxon.Api
             /// has the effect of removing this whitespace. In addition to its primary role, the function
             /// can therefore be useful for trimming the content of a single string.</p></remarks>
             /// <returns>A <c>Step</c> whose effect is to take a supplied item and split its string
-		/// value into a sequence of <c>xs:string</c> instances</returns>
+		    /// value into a sequence of <c>xs:string</c> instances</returns>
+		    
             public static Step<XdmAtomicValue, XdmAtomicValue> Tokenize()
             {
                 return new Step<XdmAtomicValue, XdmAtomicValue>(item => {
                     {
-                        var iter = new SequenceEnumerable<XdmAtomicValue>(JSequenceXdmIterator.ofAtomicValues(new net.sf.saxon.value.Whitespace.Tokenizer(item.GetUnicodeStringValue())));
+                        var iter = new SequenceEnumerable<XdmAtomicValue>(
+                            JSequenceXdmIterator.ofAtomicValues(
+                                new net.sf.saxon.value.Whitespace.Tokenizer((XdmItem)item.GetUnderlyingValue()).getUnicodeStringValue())));
                         return iter;
 
                     }
