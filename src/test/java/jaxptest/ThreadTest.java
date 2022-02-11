@@ -2,8 +2,6 @@ package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
 import net.sf.saxon.lib.FeatureKeys;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Templates;
@@ -14,10 +12,13 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -219,27 +220,11 @@ public class ThreadTest {
         }
     }
 
-    @Test
-    @Tag("mikeonly")
-    // Can only pass for Mike
-    public void testNonParallelByteCodeGeneration() {
-        // Same stylesheet as above but not multithreaded, for comparison
-        try {
-            TransformerFactory factory = new net.sf.saxon.TransformerFactoryImpl();
-            factory.setAttribute(FeatureKeys.GENERATE_BYTE_CODE, true);
-            factory.setAttribute(FeatureKeys.DEBUG_BYTE_CODE, true);
-            StreamSource styleSource = new StreamSource(new File("/Users/mike/bugs/2014/nanz/bug-2133/pdf/main.xsl"));
-            final Templates templates = factory.newTemplates(styleSource);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-    }
-
 
     private static final String copyXslSa =
             "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"1.0\">\n" +
                     "    <xsl:output method=\"xml\"/>\n" +
-                    "    <xsl:import-schema namespace='http://schemas.openxmlformats.org/wordprocessingml/2006/main' schema-location='file:///Users/mike/Desktop/ooxml/wml.xsd'/>" +
+                    "    <xsl:import-schema namespace='http://www.millicom.com' schema-location='SubsidyTrackingFactXSD11.xsd'/>" +
                     "\n" +
                     "    <xsl:template match=\"/\">\n" +
                     "        <xsl:apply-templates/>\n" +
@@ -256,7 +241,7 @@ public class ThreadTest {
     public void testParallelSchemaImport() {
         final TransformerFactory factory = new EnterpriseTransformerFactory();
         try {
-
+            List<Throwable> exceptions = new ArrayList<>();
             ExecutorService executor = Executors.newFixedThreadPool(5);
             for (int i = 0; i < 100; i++) {
                 executor.execute(new Runnable() {
@@ -264,20 +249,22 @@ public class ThreadTest {
                     @Override
                     public void run() {
                         try {
-                            //StreamSource styleSource = new StreamSource(new File("/Users/mike/repo/samples/styles/books-sa.xsl"));
-                            StreamSource styleSource = new StreamSource(new StringReader(copyXslSa), "file:///Users/mike/Desktop/ooxml/wml.xsd");
+                            StreamSource styleSource = new StreamSource(new StringReader(copyXslSa), ConfigTest.DATA_DIR + "/");
                             final Templates templates = factory.newTemplates(styleSource);
                             System.out.println("thread-#" + Thread.currentThread().getId() + " OK");
+                            assertNotNull(templates);
                         } catch (Throwable ex) {
-                            System.err.println("thread-# " + Thread.currentThread().getId() + " ERROR");
+                            System.err.println("thread-# " + Thread.currentThread().getId() + " ERROR " + ex.getMessage());
+                            exceptions.add(ex);
                             ex.printStackTrace();
+                            fail("Concurrent schema import failed");
                         }
                     }
                 });
             }
             executor.shutdown();
             executor.awaitTermination(300, TimeUnit.SECONDS);
-
+            assertTrue(exceptions.isEmpty());
         } catch (InterruptedException e) {
             e.printStackTrace();
             fail(e.getMessage());

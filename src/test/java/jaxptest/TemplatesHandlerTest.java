@@ -97,8 +97,8 @@ public class TemplatesHandlerTest {
     @Test
     public void testExtensionNotFound() {
         try {
-            String inputUri = "file:///Users/Mike/bugs/2011/Pedruzzi/base64/books.xml";
-            String xsltUrl = "file:///Users/Mike/bugs/2011/Pedruzzi/base64/TextTobase64.xsl";
+            String inputUri = ConfigTest.DATA_DIR + "base64/books.xml";
+            String xsltUrl = ConfigTest.DATA_DIR + "base64/TextTobase64.xsl";
 
             TransformerFactory tFactory = new net.sf.saxon.TransformerFactoryImpl();
             tFactory.setAttribute(FeatureKeys.RECOGNIZE_URI_QUERY_PARAMETERS, Boolean.TRUE);
@@ -116,6 +116,7 @@ public class TemplatesHandlerTest {
             System.out.println("XSLT finished.");
             assertFalse(true); // should not succeed
         } catch (TransformerException e) {
+            assertTrue(e.getMessage().contains("Cannot find a 1-argument function")) ;
             //e.printStackTrace();
         }
     }
