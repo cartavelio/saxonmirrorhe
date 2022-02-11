@@ -316,7 +316,7 @@ task rejar_Xerces(
         }
           copy {
             into "${buildDir}/c/${release}c/samples/cppTests"
-            from("${projectDir}/src/main/c/samples/cppTests/build64-mac.sh")
+            from("${projectDir}/src/main/c/samples/cppTests/build64-linux.sh")
           }
         copy {
           into "${buildDir}/c/${release}c/samples/cTests"
