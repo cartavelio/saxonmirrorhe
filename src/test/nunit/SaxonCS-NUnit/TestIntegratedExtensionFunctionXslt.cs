@@ -21,11 +21,12 @@ namespace SaxonCS_NUnit
         {
             try
             {
-                Processor proc = new Processor(false);
+                Processor proc = new ();
                 proc.RegisterExtensionFunction(new ZeroArgFunction());
                 proc.RegisterExtensionFunction(new Sqrt());
                 proc.RegisterExtensionFunction(new InscopePrefixFunction());
                 XsltCompiler comp = proc.NewXsltCompiler();
+                comp.ErrorReporter = err => Console.Error.WriteLine(err.Message);
                 StringReader sr = new StringReader(
                         "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='http://math.com/'>" +
                         "<xsl:template name='go'><a sqrt2='{f:sqrt(2)}' insn=\"{f:insn('xsl')}\" zag=\"{f:zag()}\"/></xsl:template>" +
@@ -45,7 +46,7 @@ namespace SaxonCS_NUnit
                 //"inscope "
                 Assert.IsTrue(sw.ToString().Contains("1999/XSL/Transform"));
             }
-            catch (javax.xml.transform.TransformerException e)
+            catch (Exception e)
             {
                 Assert.Fail(e.Message);
             }
@@ -63,10 +64,7 @@ namespace SaxonCS_NUnit
         {
 
 
-            public override QName FunctionName
-            {
-                get { return new QName("", "http://math.com/", "zag"); }
-            }
+            public override QName FunctionName => new QName("", "http://math.com/", "zag");
 
 
             /**
@@ -74,20 +72,14 @@ namespace SaxonCS_NUnit
              * @return the minimum number of arguments that must be supplied in a call to this function
              */
 
-            public override int MinimumNumberOfArguments
-            {
-                get { return 0; }
-            }
+            public override int MinimumNumberOfArguments => 0;
 
             /**
              * Return the maximum number of arguments allowed by the function
              * @return the maximum number of arguments that may be supplied in a call to this function
              */
 
-            public override int MaximumNumberOfArguments
-            {
-                get { return 0; }
-            }
+            public override int MaximumNumberOfArguments => 0;
 
             /**
              * Get the required types for the arguments of this function, counting from zero
@@ -96,17 +88,7 @@ namespace SaxonCS_NUnit
              *         that allow a variable number of arguments, the array can be smaller than this, with the last
              *         entry in the array providing the required type for all the remaining arguments.
              */
-            public override XdmSequenceType[] ArgumentTypes
-            {
-                get
-                {
-                    return new XdmSequenceType[] {
-                            new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?')
-
-                        };
-                }
-            }
-
+            public override XdmSequenceType[] ArgumentTypes => new XdmSequenceType[] {};
 
             /**
              * Get the type of the result of the function
@@ -119,7 +101,7 @@ namespace SaxonCS_NUnit
 
             public override XdmSequenceType ResultType(XdmSequenceType[] ArgumentTypes)
             {
-                return new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?');
+                return new(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?');
             }
 
 
@@ -133,13 +115,10 @@ namespace SaxonCS_NUnit
              *         consequences are unpredictable.
              */
 
-            public bool trustResultType()
-            {
-                return true;
-            }
+            public override bool TrustResultType => true;
 
             /**
-         * Create a call on this function. This method is called by the compiler when it identifies
+             * Create a call on this function. This method is called by the compiler when it identifies
              * a function call that calls this function.
              */
 
@@ -156,7 +135,7 @@ namespace SaxonCS_NUnit
              * Evaluate this function call at run-time
              *
              *
-     * @param context   The XPath dynamic evaluation context
+             * @param context   The XPath dynamic evaluation context
              * @param arguments The values of the arguments to the function call. Each argument value (which is in general
              *                  a sequence) is supplied in the form of an iterator over the items in the sequence. If required, the
              *                  supplied sequence can be materialized by calling, for example, <code>new SequenceExtent(arguments[i])</code>.
@@ -171,7 +150,7 @@ namespace SaxonCS_NUnit
             public override IEnumerator<XdmItem> Call(IEnumerator<XdmItem>[] arguments, DynamicContext context)
             {
                 double val = 123.4e0;
-                Saxon.Api.XdmAtomicValue result = new Saxon.Api.XdmAtomicValue(val);
+                Saxon.Api.XdmAtomicValue result = new (val);
                 return result.GetEnumerator();
             }
         }
@@ -209,10 +188,7 @@ namespace SaxonCS_NUnit
                 return new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?');
             }
 
-            public override bool TrustResultType
-            {
-                get { return true; }
-            }
+            public override bool TrustResultType => true;
 
             public override ExtensionFunctionCall MakeFunctionCall()
             {
@@ -254,10 +230,7 @@ namespace SaxonCS_NUnit
         {
 
 
-            public override QName FunctionName
-            {
-                get { return new QName("", "http://math.com/", "insn"); }
-            }
+            public override QName FunctionName => new QName("", "http://math.com/", "insn");
 
 
             /**
@@ -265,20 +238,14 @@ namespace SaxonCS_NUnit
              * @return the minimum number of arguments that must be supplied in a call to this function
              */
 
-            public override int MinimumNumberOfArguments
-            {
-                get { return 1; }
-            }
+            public override int MinimumNumberOfArguments => 1;
 
             /**
              * Return the maximum number of arguments allowed by the function
              * @return the maximum number of arguments that may be supplied in a call to this function
              */
 
-            public override int MaximumNumberOfArguments
-            {
-                get { return 1; }
-            }
+            public override int MaximumNumberOfArguments => 1;
 
             /**
              * Get the required types for the arguments of this function, counting from zero
@@ -324,13 +291,10 @@ namespace SaxonCS_NUnit
              *         consequences are unpredictable.
              */
 
-            public bool trustResultType()
-            {
-                return true;
-            }
+            public override bool TrustResultType =>  true;
 
             /**
-         * Create a call on this function. This method is called by the compiler when it identifies
+             * Create a call on this function. This method is called by the compiler when it identifies
              * a function call that calls this function.
              */
 
@@ -342,9 +306,7 @@ namespace SaxonCS_NUnit
 
         public class InscopePrefixFunctionCall : ExtensionFunctionCall
         {
-
-            private XmlResolver nsContext;
-            private StaticContext context;
+            private StaticContext staticContext;
 
             /**
               * Supply static context information.
@@ -358,16 +320,16 @@ namespace SaxonCS_NUnit
               * @param context   The static context in which the function call appears. The method must not modify
               *                  the static context.
               * @param locationId
-              *@param arguments The XPath expressions supplied in the call to this function. The method must not
+              * @param arguments The XPath expressions supplied in the call to this function. The method must not
               *                  modify this array, or any of the expressions contained in the array. @throws net.sf.saxon.trans.XPathException
               *          if the implementation is able to detect a static error in the way the
               *          function is being called (for example it might require that the types of the arguments are
               *          consistent with each other).
               */
 
-            public override void SupplyStaticContext(StaticContext context)
+            public override void SupplyStaticContext(StaticContext staticContext)
             {
-                this.context = context;
+                this.staticContext = staticContext;
             }
 
             /**
@@ -380,7 +342,7 @@ namespace SaxonCS_NUnit
 
             public override void CopyLocalData(ExtensionFunctionCall destination)
             {
-                ((InscopePrefixFunctionCall)destination).nsContext = nsContext;
+                ((InscopePrefixFunctionCall)destination).staticContext = staticContext;
             }
 
             public override IEnumerator<XdmItem> Call(IEnumerator<XdmItem>[] arguments, DynamicContext context)
@@ -393,14 +355,14 @@ namespace SaxonCS_NUnit
 
                 if (val == null)
                 {
-                    return  (IEnumerator<XdmAtomicValue>)Enumerable.Empty<XdmAtomicValue>().GetEnumerator();
+                    return  Enumerable.Empty<XdmAtomicValue>().GetEnumerator();
                 }
-                String ns = this.context.GetNamespaceForPrefix(val.ToString());
+                String ns = this.staticContext.GetNamespaceForPrefix(val);
                 if (ns == null)
                 {
-                    return (IEnumerator<XdmAtomicValue>)Enumerable.Empty<XdmAtomicValue>().GetEnumerator();
+                    return Enumerable.Empty<XdmAtomicValue>().GetEnumerator();
                 }
-                XdmAtomicValue result = new XdmAtomicValue(ns);
+                XdmAtomicValue result = new (ns);
                 return result.GetEnumerator();
             }
         }

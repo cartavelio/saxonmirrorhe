@@ -47,10 +47,10 @@ namespace SaxonCS_NUnit
             jam.Add(new XdmAtomicValue("b"), new XdmAtomicValue(2));
             jam.Add(new XdmAtomicValue("c"), new XdmAtomicValue(3));
             XdmMap map = XdmMap.MakeMap(jam);
-            Assert.True(3 == map.Size);
+            Assert.AreEqual(3, map.Size);
             try
             {
-                Assert.True(((XdmAtomicValue)map.Get(new XdmAtomicValue("b"))).GetLongValue() == 2);
+                Assert.AreEqual(2, ((XdmAtomicValue)map.Get(new XdmAtomicValue("b"))).GetLongValue());
             }
             catch (Exception e)
             {
@@ -62,7 +62,7 @@ namespace SaxonCS_NUnit
             Assert.True(map.Size== 2);
             try
             {
-                Assert.True(((XdmAtomicValue)map.Get(new XdmAtomicValue("a"))).GetLongValue() == 4);
+                Assert.AreEqual(4, ((XdmAtomicValue)map.Get(new XdmAtomicValue("a"))).GetLongValue());
             }
             catch (Exception e)
             {

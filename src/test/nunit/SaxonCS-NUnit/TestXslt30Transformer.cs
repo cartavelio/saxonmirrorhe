@@ -3,10 +3,26 @@ using System.Collections.Generic;
 using System.Collections;
 
 using System.IO;
+using System.Net;
 using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
+using DocumentBuilder = Saxon.Api.DocumentBuilder;
+using Location = Saxon.Api.Location;
+using Processor = Saxon.Api.Processor;
+using RawDestination = Saxon.Api.RawDestination;
+using SchemaManager = Saxon.Api.SchemaManager;
+using SchemaValidator = Saxon.Api.SchemaValidator;
+using Serializer = Saxon.Api.Serializer;
+using XdmDestination = Saxon.Api.XdmDestination;
+using XdmNodeKind = Saxon.Api.XdmNodeKind;
+using XmlProcessingError = Saxon.Api.XmlProcessingError;
+using Xslt30Transformer = Saxon.Api.Xslt30Transformer;
+using XsltCompiler = Saxon.Api.XsltCompiler;
+using XsltExecutable = Saxon.Api.XsltExecutable;
+using XsltPackage = Saxon.Api.XsltPackage;
+using XsltTransformer = Saxon.Api.XsltTransformer;
 
 
 namespace SaxonCS_NUnit {
@@ -15,23 +31,26 @@ namespace SaxonCS_NUnit {
         public void TestSimple() {
             // Create a Processor instance.
             try {
-                Processor processor = new Processor(false);
+                Processor processor =  new();
                 //processor.SetProperty("http://saxon.sf.net/feature/timing", "true");
                 processor.SetProperty(FeatureKeys.TIMING, "true");
                 // Create a transformer for the stylesheet.
                 Xslt30Transformer transformer = processor.NewXsltCompiler().Compile(
-                    new XmlTextReader(ConfigTest.DATA_DIR + "caffo/Transform2.xslt")).Load30();
+                    new XmlTextReader(new Uri(ConfigTest.DataDirUri, "caffo/Transform2.xslt").ToString())).Load30();
 
                 // Create a serializer
                 XdmDestination serializer = new XdmDestination();
                 TimeSpan start = DateTime.Now.TimeOfDay;
 
+                int runs = 1;
+
                 // Transform the source XML to System.out.
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < runs; i++) {
                     // Load the source document
                     XdmNode input = processor.NewDocumentBuilder().Build(
-                        new XmlTextReader(ConfigTest.DATA_DIR + "caffo/Input.xml"));
+                        new XmlTextReader(new Uri(ConfigTest.DataDirUri, "caffo/Input.xml").ToString()));
                     // Set the root node of the source document to be the initial context node
+                    transformer.GlobalContextItem = input;
                     transformer.ApplyTemplates(input, serializer);
                 }
 
@@ -39,9 +58,9 @@ namespace SaxonCS_NUnit {
                 Console.WriteLine("Av Time: " + (((end - start).Milliseconds) / 10) + "ms");
                 Assert.True(true);
             }
-            catch (javax.xml.transform.TransformerException e) {
+            catch (Exception e) {
                 //Console.WriteLine (e.printStackTrace());
-                Assert.Fail(e.getMessage());
+                Assert.Fail(e.Message);
             }
         }
 
@@ -70,9 +89,10 @@ namespace SaxonCS_NUnit {
                     foreach (var error in errorList) {
                         errCount++;
                         string message = error.Message;
-
-                        sb.AppendFormat("Error {0} at line {1}:{2} : {3}", errCount, error.Location.getLineNumber(),
-                            error.Location.getColumnNumber(), message);
+                        Location loc = error.Location;
+                        int line = loc == null ? -1 : loc.LineNumber;
+                        int col = loc == null ? -1 : loc.ColumnNumber;
+                        sb.AppendFormat("Error {0} at line {1}:{2} : {3}", errCount, line, col, message);
                         sb.AppendLine();
                     }
 
@@ -82,7 +102,7 @@ namespace SaxonCS_NUnit {
         }
 
 
-        [Test]
+        [Test, Explicit]  // Expect failure when the Crayfish server isn't available!
         public void TestSimpleUNC() {
             // Create a Processor instance.
             try {
@@ -103,46 +123,42 @@ namespace SaxonCS_NUnit {
                 Console.WriteLine(sw.ToString());
                 Assert.True(true);
             }
-            catch (javax.xml.transform.TransformerException e) {
+            catch (Exception e) {
                 //Console.WriteLine (e.printStackTrace());
-                Assert.Fail(e.getMessage());
+                Assert.Fail(e.Message);
             }
         }
 
         [Test]
         public void TestLineNumber() {
-            Processor _processor = new Processor(false);
-            // _processor.SetProperty("http://saxon.sf.net/feature/debugByteCode", "true");
-            // _processor.SetProperty("http://saxon.sf.net/feature/generateByteCode", "true");
-            string sourcePath = Path.GetFullPath("C:\\work\\misc\\xmark\\xmark10.xml");
-            string stylesheetPath = Path.GetFullPath("C:\\work\\misc\\xmark\\q12.xsl");
+            Processor _processor =  new();
+            string sourcePath = Path.GetFullPath(ConfigTest.XMARK_DIR + "xmark1.xml");
+            string stylesheetPath = Path.GetFullPath(ConfigTest.XMARK_DIR + "q12.xsl");
             string outputPath = Path.ChangeExtension(sourcePath, ".out.xml");
 
             DocumentBuilder builder = _processor.NewDocumentBuilder();
             XmlReader reader = XmlReader.Create(sourcePath);
             builder.BaseUri = new Uri("http://example.com");
-            builder.IsLineNumbering = true;
-            Type xtype = reader.GetType();
-            if (typeof(XmlTextReader).IsAssignableFrom(xtype) ||
-                typeof(XmlValidatingReader).IsAssignableFrom(reader.GetType())) {
-                Console.Error.WriteLine("reader is XmlReader !!!!!");
-            }
+            builder.LineNumbering = true;
+
 
             XdmNode node = builder.Build(reader);
+            int prevLine = 0;
+            int prevCol = 0;
             int line; // = ((net.sf.saxon.om.NodeInfo)node.Unwrap()).getLineNumber();
             int col; // = ((net.sf.saxon.om.NodeInfo)node.Unwrap()).getColumnNumber();
             //XmlNode _node = node.Unwrap()
             IEnumerator itr = node.EnumerateAxis(XdmAxis.Descendant);
             while (itr.MoveNext()) {
                 node = (XdmNode) itr.Current;
-                line = ((net.sf.saxon.om.NodeInfo) node.Unwrap()).getLineNumber();
-                col = ((net.sf.saxon.om.NodeInfo) node.Unwrap()).getColumnNumber();
-                Console.Error.WriteLine("Line number : " + line + ", Position:" + col);
+                line = node.LineNumber;
+                col = node.ColumnNumber;
+                Assert.That(line >= prevLine && line < 100000);
+                Assert.That(line > prevLine || col >= prevCol);
+                prevLine = line;
+                prevCol = col;
+                //Console.Error.WriteLine("Line number : " + line + ", Position:" + col);
             }
-            //XmlNode n = (XmlNode)((VirtualNode)node.Unwrap()).getUnderlyingNode();
-            //IXmlLineInfo xInfo = (IXmlLineInfo)n;
-            //int line = xInfo.LineNumber;
-            //int col = xInfo.LinePosition;
         }
 
         [Test]
@@ -243,7 +259,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestContextNotRoot() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 StringReader source = new StringReader("<doc><e>text</e></doc>");
 
                 DocumentBuilder builder = proc.NewDocumentBuilder();
@@ -275,8 +291,8 @@ namespace SaxonCS_NUnit {
                 Assert.False(result.Contains("errorA"), "matched root");
                 Assert.True(result.Contains("[]"), "matched e");
             }
-            catch (javax.xml.transform.TransformerException e) {
-                Assert.Fail(e.getMessage());
+            catch (Exception e) {
+                Assert.Fail(e.Message);
             }
         }
 
@@ -287,7 +303,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestChainedDescendantAxes() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 StringReader source = new StringReader(
                     "<?xml version='1.0' encoding='utf-8' ?><root><item/><item><foo id='foo1'/></item>" +
                     "<item></item><item><foo id='foo2'/></item></root>");
@@ -315,11 +331,11 @@ namespace SaxonCS_NUnit {
                 trans.ApplyTemplates(node, serializer);
 
 
-                String result = sw.ToString();
-                Assert.AreEqual(result, "1 true\n2 false foo1\n3 true\n4 false foo2");
+                string result = sw.ToString();
+                Assert.AreEqual("1 true\n2 false foo1\n3 true\n4 false foo2", result);
             }
-            catch (javax.xml.transform.TransformerException e) {
-                Assert.Fail(e.getMessage());
+            catch (Exception e) {
+                Assert.Fail(e.Message);
             }
         }
 
@@ -330,7 +346,7 @@ namespace SaxonCS_NUnit {
 
             XsltCompiler xsltCompiler = processor.NewXsltCompiler();
             xsltCompiler.BaseUri = new Uri("file:///dummy/");
-            String sr = "<?xml version='1.0' encoding='UTF-8'?>" +
+            string sr = "<?xml version='1.0' encoding='UTF-8'?>" +
                         "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
                         "   xmlns:xs='http://www.w3.org/2001/XMLSchema' exclude-result-prefixes='#all' version='3.0'> " +
                         "<xsl:output method='html' indent='yes' html-version='5'/>" +
@@ -347,31 +363,39 @@ namespace SaxonCS_NUnit {
                         " </xsl:template></xsl:stylesheet>";
 
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 proc.SetProperty(FeatureKeys.TIMING, "true");
                 XsltTransformer transformer =
                     proc.NewXsltCompiler().Compile(new MemoryStream(Encoding.ASCII.GetBytes(sr))).Load();
 
+                // First run without a result document handler
                 transformer.InitialTemplate = new QName("http://www.w3.org/1999/XSL/Transform", "initial-template");
-                transformer.BaseOutputUri = new Uri("file:////C://work//test");
+                transformer.BaseOutputUri = ConfigTest.SandpitDirUri;
                 transformer.Run(proc.NewSerializer(Console.Out));
 
-                Console.WriteLine();
+                Console.WriteLine("Done phase 1");
 
-                MyResultDocumentHandler resDocHandler =
-                    new MyResultDocumentHandler(proc, new Uri("file:////C://work//test"));
-                transformer.BaseOutputUri = new Uri("file:////C://work//test");
+                // Now run with a result document handler
+                List<Serializer> serializers = new();
 
-                transformer.ResultDocumentHandler = resDocHandler;
+                transformer.BaseOutputUri = ConfigTest.SandpitDirUri;
+
+                transformer.ResultDocumentHandler = (href, baseUri) => {
+                    Serializer ser = proc.NewSerializer();
+                    ser.BaseUri = baseUri;
+                    ser.SetOutputFile(ConfigTest.SANDPIT_DIR + href);
+                    serializers.Add(ser);
+                    return ser;
+                };
 
                 transformer.Run(proc.NewSerializer(Console.Out));
 
-                foreach (Serializer ser in resDocHandler.Serializers) {
-                    Console.WriteLine("{0}:\n{1}", ser.ToString());
-                    Console.WriteLine("test");
-                }
-
-                Assert.True(true, "output");
+                Assert.AreEqual(1, serializers.Count);
+                Assert.AreEqual(new Uri(ConfigTest.SandpitDirUri, "result-1.json"), 
+                    serializers[0].BaseUri);
+                string downloadString = new WebClient().DownloadString(new Uri(ConfigTest.SandpitDirUri, "result-1.json"));
+                Assert.That(downloadString.Contains("\"name\": \"foo\""));
+                
             }
             catch (Exception ex) {
                 //e.printStackTrace();
@@ -380,57 +404,10 @@ namespace SaxonCS_NUnit {
             }
         }
 
-        internal class MyResultDocumentHandler : IResultDocumentHandler {
-            private Processor proc;
-            private Uri baseUri;
-
-            public List<Serializer> Serializers { get; set; }
-
-            public MyResultDocumentHandler(Processor proc, Uri baseUri) {
-                this.proc = proc;
-                Serializers = new List<Serializer>();
-                this.baseUri = baseUri;
-            }
-
-            public XmlDestination HandleResultDocument(string href, Uri baseuri) {
-                var ser = proc.NewSerializer();
-                ser.BaseUri = baseUri;
-                ser.SetOutputFile("C://work//test//" + href);
-                Serializers.Add(ser);
-                return ser;
-            }
-        }
-
-        internal class MySerializer {
-            private StringWriter resultWriter;
-
-            public string Result { get; private set; }
-
-            public string Href { get; }
-
-            public MySerializer(Processor processor, string href) {
-                /* SetProcessor(processor);
-
-                 Href = href;
-
-                 resultWriter = new StringWriter();
-
-                 SetOutputWriter(resultWriter);*/
-            }
-
-            /*  public override void Close()
-              {
-                  Result = resultWriter.ToString();
-                  resultWriter.Close();
-                  resultWriter.Dispose();
-                  base.Close();
-              }*/
-        }
-
         [Test]
         public void TestParseFragment() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 StringReader source = new StringReader("<?xml version='1.0' encoding='UTF-8'?>" +
                                                        "<root><bob>&lt;hello&gt;Burt&lt;/hello&gt;</bob></root>");
 
@@ -450,12 +427,12 @@ namespace SaxonCS_NUnit {
                 Serializer serializer = proc.NewSerializer(sw);
 
 
-                String result = sw.ToString();
+                string result = sw.ToString();
                 Console.WriteLine(result);
                 Assert.True(result.Equals(""), "Output received");
             }
-            catch (javax.xml.transform.TransformerException e) {
-                Assert.Fail(e.getMessage());
+            catch (Exception e) {
+                Assert.Fail(e.Message);
             }
         }
 
@@ -480,11 +457,11 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestXmlResolver() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 StringReader source = new StringReader("<doc><e>text</e></doc>");
 
                 DocumentBuilder builder = proc.NewDocumentBuilder();
-                builder.IsLineNumbering = true;
+                builder.LineNumbering = true;
                 builder.BaseUri = new Uri("http://importer/");
                 XdmNode node = builder.Build(source);
                 XsltCompiler xqcomp = proc.NewXsltCompiler();
@@ -555,38 +532,28 @@ namespace SaxonCS_NUnit {
                 Assert.True(true, "ok");
             }
             catch (Exception exc) {
+                Console.WriteLine(exc.Message + "\n" + exc.StackTrace);
                 Assert.Fail(exc.Message);
             }
         }
 
         public class Sqrt : ExtensionFunctionDefinition {
-            public override QName FunctionName {
-                get { return new QName("http://example.math.co.uk/demo", "sqrt"); }
-            }
+            public override QName FunctionName => new QName("http://example.math.co.uk/demo", "sqrt");
 
-            public override int MinimumNumberOfArguments {
-                get { return 1; }
-            }
+            public override int MinimumNumberOfArguments => 1;
 
-            public override int MaximumNumberOfArguments {
-                get { return 1; }
-            }
+            public override int MaximumNumberOfArguments => 1;
 
-            public override XdmSequenceType[] ArgumentTypes {
-                get {
-                    return new XdmSequenceType[] {
-                        new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?')
-                    };
-                }
-            }
+            public override XdmSequenceType[] ArgumentTypes =>
+                new XdmSequenceType[] {
+                    new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?')
+                };
 
             public override XdmSequenceType ResultType(XdmSequenceType[] ArgumentTypes) {
                 return new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?');
             }
 
-            public override bool TrustResultType {
-                get { return true; }
-            }
+            public override bool TrustResultType => true;
 
 
             public override ExtensionFunctionCall MakeFunctionCall() {
@@ -596,13 +563,13 @@ namespace SaxonCS_NUnit {
 
         internal class SqrtCall : ExtensionFunctionCall {
             public override IEnumerator<XdmItem> Call(IEnumerator<XdmItem>[] arguments, DynamicContext context) {
-                Boolean exists = arguments[0].MoveNext();
+                bool exists = arguments[0].MoveNext();
                 if (exists) {
                     XdmAtomicValue arg = (XdmAtomicValue) arguments[0].Current;
                     double val = (double) arg.Value;
                     double sqrt = System.Math.Sqrt(val);
                     XdmAtomicValue result = new XdmAtomicValue(sqrt);
-                    return (IEnumerator<XdmItem>) result;
+                    return result.GetEnumerator();
                 }
                 else {
                     return EmptyEnumerator<XdmItem>.INSTANCE;
@@ -612,11 +579,11 @@ namespace SaxonCS_NUnit {
 
 
         /**
-     * Test location information for run-time errors when stylesheet built as an XdmNode
-     */
+         * Test location information for run-time errors when stylesheet built as an XdmNode
+         */
         [Test]
         public void TestErrorLocationFromXdm() {
-            Processor proc = new Processor(false);
+            Processor proc =  new();
             try {
                 // Norm Walsh reported getting line numbers > 2^20. Can't reproduce.
 
@@ -624,7 +591,7 @@ namespace SaxonCS_NUnit {
                 StringReader source = new StringReader("<doc><e>text</e></doc>");
 
                 DocumentBuilder builder = proc.NewDocumentBuilder();
-                builder.IsLineNumbering = true;
+                builder.LineNumbering = true;
                 builder.BaseUri = new Uri("http://importer/");
                 XdmNode node = builder.Build(source);
                 XsltCompiler xqcomp = proc.NewXsltCompiler();
@@ -713,9 +680,7 @@ namespace SaxonCS_NUnit {
      */
         [Test]
         public void TestErrorInImportedStylesheet() {
-            List<StaticError> warnings = new List<StaticError>();
-            
-            List<StaticError> fatals = new List<StaticError>();
+   
             List<XmlProcessingError> errors = new ();
 
             try {
@@ -736,7 +701,7 @@ namespace SaxonCS_NUnit {
 
                 Assert.Fail("Transformation should fail");
             }
-            catch (StaticError e) {
+            catch (SaxonApiException e) {
                 Assert.True(errors.Count > 0, "errors");
                 //e.printStackTrace();
             }
@@ -749,7 +714,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestContextNotRootNamedTemplate() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 StringReader source = new StringReader("<doc><e>text</e></doc>");
 
                 DocumentBuilder builder = proc.NewDocumentBuilder();
@@ -764,7 +729,7 @@ namespace SaxonCS_NUnit {
                     "</xsl:stylesheet>");
 
                 Xslt30Transformer trans = xtComp
-                    .Compile(new XmlTextReader(ConfigTest.NUNIT_DATA_DIR + "result-document.xsl")).Load30();
+                    .Compile(new XmlTextReader(new Uri(ConfigTest.DataDirUri, "result-document.xsl").ToString())).Load30();
                 StringWriter os = new StringWriter();
                 Serializer serializer = proc.NewSerializer(os);
 
@@ -776,15 +741,15 @@ namespace SaxonCS_NUnit {
                 Assert.False(result.Contains("errorA"), "matched root");
                 Assert.True(result.Contains("[]"), "matched e");
             }
-            catch (javax.xml.transform.TransformerException e) {
-                Assert.Fail(e.getMessage());
+            catch (Exception e) {
+                Assert.Fail(e.Message);
             }
         }
 
         [Test]
         public void TestResultDocument() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 StringReader source = new StringReader("<doc><e>text</e></doc>");
 
                 DocumentBuilder builder = proc.NewDocumentBuilder();
@@ -801,14 +766,14 @@ namespace SaxonCS_NUnit {
                 Xslt30Transformer trans = xqcomp.Compile(style).Load30();
                 StringWriter os = new StringWriter();
                 Serializer serializer = proc.NewSerializer(os);
-
+                serializer.BaseUri = ConfigTest.SandpitDirUri;
 
                 trans.GlobalContextItem = node;
-                trans.CallTemplate(new QName("main"));
-                Assert.True(File.Exists("file:" + ConfigTest.DATA_DIR + "\\a\\b\\c\\d.xml"));
+                trans.CallTemplate(new QName("main"), serializer);
+                Assert.True(File.Exists(new Uri(ConfigTest.SandpitDirUri, "a/b/c/d.xml").AbsolutePath));
             }
-            catch (javax.xml.transform.TransformerException e) {
-                Assert.Fail(e.getMessage());
+            catch (Exception e) {
+                Assert.Fail(e.Message);
             }
         }
 
@@ -816,7 +781,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestUseAssociated() {
             try {
-                Processor processor = new Processor(false);
+                Processor processor =  new();
 
                 XsltCompiler compiler = processor.NewXsltCompiler();
 
@@ -844,7 +809,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestNonRootDomSource() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 XsltCompiler comp = proc.NewXsltCompiler();
                 StringReader sr = new StringReader(
                     "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
@@ -871,9 +836,9 @@ namespace SaxonCS_NUnit {
 
                 Assert.False(writer.ToString().Contains("///"), "started at element node");
             }
-            catch (javax.xml.transform.TransformerException e) {
+            catch (Exception e) {
                 //e.printStackTrace();
-                Assert.Fail(e.getMessage());
+                Assert.Fail(e.Message);
             }
         }
 
@@ -883,7 +848,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestXdmDestination() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 XsltCompiler comp = proc.NewXsltCompiler();
                 StringReader style = new StringReader(
                     "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
@@ -896,16 +861,16 @@ namespace SaxonCS_NUnit {
                 XdmNode root = outDest.XdmNode;
                 Assert.True(XdmNodeKind.ForNode(root) == XdmNodeKind.Document, "result is document node");
             }
-            catch (javax.xml.transform.TransformerException e) {
+            catch (Exception e) {
                 //Console.WriteLine(e.printStackTrace());
-                Assert.Fail(e.getMessage());
+                Assert.Fail(e.Message);
             }
         }
 
         [Test]
         public void TestXdmDestinationWithItemSeparator() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 XsltCompiler comp = proc.NewXsltCompiler();
                 StringReader sr = new StringReader(
                     "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
@@ -918,60 +883,16 @@ namespace SaxonCS_NUnit {
                 xsl.CallTemplate(new QName("go"), outi);
                 XdmNode root = outi.XdmNode;
                 Assert.AreEqual("<!--A-->§<out/>§<!--Z-->", root.ToString());
-                Assert.True(root.NodeKind == XmlNodeType.Document, "result is document node");
+                Assert.True(root.NodeKind == XdmNodeKind.Document, "result is document node");
             }
-            catch (javax.xml.transform.TransformerException e) {
+            catch (Exception e) {
                 //Console.WriteLine(e.printStackTrace());
-                Assert.Fail(e.getMessage());
+                Assert.Fail(e.Message);
             }
         }
 
+ 
         [Test]
-        public void SchematronTest() {
-            Uri schematron =
-                new Uri(ConfigTest.NUNIT_DATA_DIR +
-                        "cmsSchematronErrors.xsl"); //cmsSchematronErrors.xsl //cmsSchematronErrors.xsl
-            Uri data = new Uri(ConfigTest.NUNIT_DATA_DIR + "dummyData001.xml");
-            Processor processor = new Processor();
-
-            try {
-                DocumentBuilder db = processor.NewDocumentBuilder();
-                db.IsLineNumbering = true;
-
-                XdmNode input = db.Build(data);
-
-                XsltCompiler compiler = processor.NewXsltCompiler();
-                compiler.XsltLanguageVersion = "3.0";
-                XsltTransformer transformer = compiler.Compile(schematron).Load();
-
-                transformer.InitialContextNode = input;
-
-                Serializer serializer = processor.NewSerializer();
-                serializer.SetOutputStream(new MemoryStream());
-
-                transformer.MessageListener = msg => {
-                    {
-                        int xx = msg.Content.Implementation.getLineNumber();
-
-                        Console.Out.WriteLine("MESSAGE terminate=" + (msg.Terminate ? "yes" : "no") + " at " +
-                                              DateTime.Now);
-                        Console.Out.WriteLine("From instruction at line " + msg.Location.getLineNumber() +
-                                              " of " + msg.Location.getSystemId());
-                        Console.Out.WriteLine(">>" + msg.Content.StringValue);
-                    }
-                };
-
-                transformer.Run(serializer);
-                Assert.True(true);
-            }
-            catch (javax.xml.transform.TransformerException ex) {
-                Assert.Fail(ex.getMessage());
-            }
-
-            Console.WriteLine("\nOutput written to ExampleSimple2.out\n");
-        }
-
-
         public void TestExtensionWithSchemaAccess() {
             // Create a Processor instance.
             try {
@@ -991,7 +912,7 @@ namespace SaxonCS_NUnit {
                 sm.Compile(new XmlTextReader(ConfigTest.DATA_DIR + "books.xsd"));
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 SchemaValidator schemaValidator = sm.NewSchemaValidator();
-                schemaValidator.SetSource(builder.Build(new Uri(ConfigTest.DATA_DIR + "books.xml")));
+                schemaValidator.Validate(builder.Build(new Uri(ConfigTest.DataDirUri, "books.xml")));
                 // Create a serializer
                 //String outfile = @"C:/MyJava/users/caffo/Output.xml";
                 StringWriter sw = new StringWriter();
@@ -1004,20 +925,16 @@ namespace SaxonCS_NUnit {
                 Assert.True(sw.ToString().Contains("TITLE"));
                 Assert.False(sw.ToString().Contains("AUTHOR"));
             }
-            catch (javax.xml.transform.TransformerException e) {
+            catch (Exception e) {
                 //Console.WriteLine(e.printStackTrace());
-                Assert.Fail(e.getMessage());
+                Assert.Fail(e.Message);
             }
         }
-
-
-        /**
-     * s9api transformation pipeline
-     */
+        
         [Test]
         public void TestPipeline() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 XsltCompiler comp = proc.NewXsltCompiler();
 
                 String xsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
@@ -1051,29 +968,12 @@ namespace SaxonCS_NUnit {
             }
         }
 
-        [Test]
-        public void TestResultDocumentWithDir() {
-            Processor proc = new Processor();
-
-            XsltCompiler comp = proc.NewXsltCompiler();
-
-            String xsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
-                         "<xsl:template name='main'>" +
-                         "<xsl:result-document href='a/b/c/d.xml' omit-xml-declaration='yes'>" +
-                         "<out>test</out>" +
-                         "</xsl:result-document></xsl:template></xsl:stylesheet>";
-            Uri xsl2 = new Uri("C:\\work\\test\\resultDocument.xsl");
-            Xslt30Transformer t1 = comp.Compile(new StringReader(xsl)).Load30(); //new StringReader(xsl)
-            XdmDestination dest = new XdmDestination();
-            dest.BaseUri = new Uri("http://www.example.com");
-
-            t1.CallTemplate(new QName("main"), dest);
-        }
+       
 
 
         /**
-* s9api transformation pipeline on XsltTransformer API
-*/
+        * s9api transformation pipeline on XsltTransformer API
+        */
         [Test]
         public void TestPipelineOnXsltTransformer() {
             try {
@@ -1114,21 +1014,17 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(err.Message);
             }
         }
-
-
-        /**
-     * s9api transformation pipeline
-     */
+        
         [Test]
         public void TestPipeline2() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 XsltCompiler comp = proc.NewXsltCompiler();
 
-                String xsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
-                             "<xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template>" +
-                             "</xsl:stylesheet>";
-                String xml = "<z/>";
+                const string xsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                                   "<xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template>" +
+                                   "</xsl:stylesheet>";
+                const string xml = "<z/>";
 
                 Xslt30Transformer stage1 = comp.Compile(new StringReader(xsl)).Load30();
                 Xslt30Transformer stage2 = comp.Compile(new StringReader(xsl)).Load30();
@@ -1155,21 +1051,21 @@ namespace SaxonCS_NUnit {
 
 
         /**
-   * s9api transformation pipeline
-   */
+        * s9api transformation pipeline
+        */
         [Test]
         public void TestPipelineShort() {
             try {
                 Processor proc = new Processor(true);
                 XsltCompiler comp = proc.NewXsltCompiler();
 
-                String xsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
-                             "<xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template>" +
-                             "</xsl:stylesheet>";
-                String xml = "<z/>";
+                const string xsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                                   "<xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template>" +
+                                   "</xsl:stylesheet>";
+                const string xml = "<z/>";
                 Xslt30Transformer stage1 = comp.Compile(new StringReader(xsl)).Load30();
                 Xslt30Transformer stage2 = comp.Compile(new StringReader(xsl)).Load30();
-                StringWriter sw = new StringWriter();
+                StringWriter sw = new();
                 Serializer outi = proc.NewSerializer(sw);
                 outi.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
                 stage1.ApplyTemplates(new MemoryStream(Encoding.ASCII.GetBytes(xml)),
@@ -1184,12 +1080,10 @@ namespace SaxonCS_NUnit {
         }
 
         /**
-     * Test location information for run-time errors when stylesheet built as an XdmNode
-     */
+         * Test location information for run-time errors when stylesheet built as an XdmNode
+         */
         public void TestErrorNotificationFromSaxonParse() {
-            List<StaticError> warnings = new List<StaticError>();
             List<XmlProcessingError> errors = new ();
-            List<StaticError> fatals = new List<StaticError>();
 
             try {
                 // Norm Walsh reported saxon:parse errors not notified to the ErrorListener. Can't reproduce.
@@ -1270,22 +1164,22 @@ namespace SaxonCS_NUnit {
                 XsltCompiler compiler = processor.NewXsltCompiler();
                 compiler.SchemaAware = true;
 
-                String xsl = "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
-                             "\n" +
-                             "    <xsl:output indent=\"yes\" encoding=\"UTF-8\" />\n" +
-                             "\n" +
-                             "    <xsl:template match=\"/\">\n" +
-                             "        <xsl:document validation='strict'>\n" +
-                             "            <xsl:next-match />\n" +
-                             "        </xsl:document>\n" +
-                             "    </xsl:template>\n" +
-                             "\n" +
-                             "    <xsl:template match=\"*\">\n" +
-                             "        <xsl:element name=\"{name()}\" namespace=\"{namespace-uri()}\">\n" +
-                             "            <invalid-element/>\n" +
-                             "        </xsl:element>\n" +
-                             "    </xsl:template>\n" +
-                             "</xsl:stylesheet> ";
+                const string xsl = "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
+                                   "\n" +
+                                   "    <xsl:output indent=\"yes\" encoding=\"UTF-8\" />\n" +
+                                   "\n" +
+                                   "    <xsl:template match=\"/\">\n" +
+                                   "        <xsl:document validation='strict'>\n" +
+                                   "            <xsl:next-match />\n" +
+                                   "        </xsl:document>\n" +
+                                   "    </xsl:template>\n" +
+                                   "\n" +
+                                   "    <xsl:template match=\"*\">\n" +
+                                   "        <xsl:element name=\"{name()}\" namespace=\"{namespace-uri()}\">\n" +
+                                   "            <invalid-element/>\n" +
+                                   "        </xsl:element>\n" +
+                                   "    </xsl:template>\n" +
+                                   "</xsl:stylesheet> ";
                 Xslt30Transformer transformer = compiler.Compile(new StringReader(xsl)).Load30();
 
                 transformer.ApplyTemplates(new MemoryStream(Encoding.ASCII.GetBytes(xsl)), serializer);
@@ -1293,24 +1187,23 @@ namespace SaxonCS_NUnit {
                 Assert.True(true);
             }
             catch (Exception e) {
-                //e.printStackTrace();
                 Assert.Fail(e.Message);
             }
         }
 
 
         /**
-     * Test that the base URI of the result document is the base output URI
-     */
+         * Test that the base URI of the result document is the base output URI
+         */
         [Test]
         public void TestOutputBaseUri() {
             try {
-                Processor processor = new Processor(false);
+                Processor processor =  new();
 
                 DocumentBuilder builder = processor.NewDocumentBuilder();
                 builder.BaseUri = new Uri("http://www.example.com");
                 //builder.DtdValidation =  false;
-                builder.IsLineNumbering = true;
+                builder.LineNumbering = true;
 
                 XdmNode document = builder.Build(new FileStream(ConfigTest.DATA_DIR + "books.xml", FileMode.Open));
                 XdmNode stylesheet = builder.Build(new FileStream(ConfigTest.DATA_DIR + "books.xsl", FileMode.Open));
@@ -1342,7 +1235,6 @@ namespace SaxonCS_NUnit {
      */
         [Test]
         public void TestGlobalParameters() {
-            //Configuration configuration = Configuration.newConfiguration();
             Processor processor = new Processor(true);
             XsltCompiler xsltCompiler = processor.NewXsltCompiler();
 
@@ -1356,7 +1248,7 @@ namespace SaxonCS_NUnit {
                             "                </xsl:stylesheet>";
 
             XsltExecutable xsltExecutable = xsltCompiler.Compile(new MemoryStream(Encoding.ASCII.GetBytes(source)));
-            Dictionary<QName, XsltExecutable.ParameterDetails> params1 = xsltExecutable.GetGlobalParameters();
+            Dictionary<QName, ParameterDetails> params1 = xsltExecutable.GetGlobalParameters();
 
             Console.WriteLine();
             int i = 0;
@@ -1375,7 +1267,7 @@ namespace SaxonCS_NUnit {
     */
         [Test]
         public void TestGlobalParameterType() {
-            Processor processor = new Processor(false);
+            Processor processor =  new();
             XsltCompiler xsltCompiler = processor.NewXsltCompiler();
 
             String source = "<?xml version='1.0'?>" +
@@ -1390,24 +1282,23 @@ namespace SaxonCS_NUnit {
                             "                </xsl:stylesheet>";
 
             XsltExecutable xsltExecutable = xsltCompiler.Compile(new StringReader(source));
-            Dictionary<QName, XsltExecutable.ParameterDetails> paramsi = xsltExecutable.GetGlobalParameters();
+            Dictionary<QName, ParameterDetails> paramsi = xsltExecutable.GetGlobalParameters();
             XdmItemType t1 = paramsi[(new QName("surname"))].GetDeclaredItemType();
-            Assert.True(t1.ToString().Equals("Q{" + NamespaceConstant.SCHEMA + "}string"), "t1");
+            Assert.AreEqual(t1.ToString(), "Q{" + NamespaceConstant.SCHEMA + "}string", "t1");
             char c1 = paramsi[new QName("surname")].GetDeclaredCardinality();
-            Assert.True(c1 == XdmSequenceType.ONE, "c1");
+            Assert.AreEqual(c1, XdmSequenceType.ONE, "c1");
             XdmItemType t2 = paramsi[new QName("age")].GetDeclaredItemType();
-            Assert.True(t2.ToString().Equals("Q{" + NamespaceConstant.SCHEMA + "}integer"), "t2");
+            Assert.AreEqual(t2.ToString(),"Q{" + NamespaceConstant.SCHEMA + "}integer", "t2");
             char c2 = paramsi[new QName("age")].GetDeclaredCardinality();
-            Assert.True(c2 == XdmSequenceType.ZERO_OR_ONE, "c2");
+            Assert.AreEqual(c2, XdmSequenceType.ZERO_OR_ONE, "c2");
             XdmItemType t3 = paramsi[(new QName("doc"))].GetDeclaredItemType();
-            Assert.True(t3.ToString().Equals("document-node()"), "t3");
+            Assert.AreEqual(t3.ToString(),"document-node()", "t3");
             char c3 = paramsi[(new QName("doc"))].GetDeclaredCardinality();
-            Assert.True(c3 == XdmSequenceType.ONE, "c3");
+            Assert.AreEqual(c3, XdmSequenceType.ONE, "c3");
             XdmItemType t4 = paramsi[(new QName("ele"))].GetDeclaredItemType();
-            Assert.True(t4.ToString().Equals("element(Q{http://pre/}a, Q{" + NamespaceConstant.SCHEMA + "}date)"),
-                "t4");
+            Assert.AreEqual("element(Q{http://pre/}a, Q{" + NamespaceConstant.SCHEMA + "}date)", t4.ToString(), "t4");
             char c4 = paramsi[(new QName("ele"))].GetDeclaredCardinality();
-            Assert.True(c4 == XdmSequenceType.ONE_OR_MORE, "c4");
+            Assert.AreEqual(c4, XdmSequenceType.ONE_OR_MORE, "c4");
         }
 
         /**
@@ -1422,7 +1313,7 @@ namespace SaxonCS_NUnit {
 
                 XsltCompiler xsltCompiler = processor.NewXsltCompiler();
 
-                String source = "<?xml version='1.0'?>" +
+                string source = "<?xml version='1.0'?>" +
                                 "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
                                 "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
                                 "                xmlns:f='http://localhost/'" +
@@ -1448,7 +1339,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestNullInitialContext() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 String sr = "<input/>";
 
                 DocumentBuilder builder = proc.NewDocumentBuilder();
@@ -1511,7 +1402,8 @@ namespace SaxonCS_NUnit {
                 XdmValue v = t.CallFunction(new QName("http://localhost/", "f:add"),
                     new XdmValue[] {new XdmAtomicValue(2), new XdmAtomicValue(3)});
                 Assert.AreEqual(((XdmAtomicValue) v).GetDoubleValue(), 5.0e0);
-                Assert.AreEqual((((XdmAtomicValue) v)).GetPrimitiveTypeName().LocalName, "double");
+                Assert.AreEqual((((XdmAtomicValue) v)).TypeName.LocalName, "double");
+                Assert.AreEqual((((XdmAtomicValue) v)).PrimitiveTypeName.LocalName, "double");
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -1598,7 +1490,7 @@ namespace SaxonCS_NUnit {
                     new XdmValue[] {new XdmAtomicValue(2), new XdmAtomicValue("3")});
                 Assert.Fail("Failed to throw error");
             }
-            catch (DynamicError e) {
+            catch (SaxonApiException e) {
                 Console.WriteLine(e.Message);
                 // OK
             }
@@ -1682,7 +1574,7 @@ namespace SaxonCS_NUnit {
                 t.CallTemplate(new QName("t"), se);
                 Assert.Fail("failed to detect error");
             }
-            catch (DynamicError e) {
+            catch (SaxonApiException e) {
                 //Console.WriteLine(e.printStackTrace());
                 Assert.True(true);
             }
@@ -1727,7 +1619,7 @@ namespace SaxonCS_NUnit {
                 t.CallTemplate(new QName("t"), se);
                 Assert.AreEqual(sw.ToString(), "17");
             }
-            catch (java.io.UnsupportedEncodingException e) {
+            catch (Exception e) {
                 //Console.WriteLine(e.printStackTrace());
                 Assert.Fail();
             }
@@ -1767,10 +1659,10 @@ namespace SaxonCS_NUnit {
                 t.SetInitialTemplateParameters(params1, false);
                 XdmValue val = t.CallTemplate(new QName("t"));
                 Assert.AreEqual(2, val.Count);
-                Assert.AreEqual(13, ((XdmAtomicValue) val.ItemAt(0)).GetLongValue());
-                Assert.AreEqual(6, ((XdmAtomicValue) val.ItemAt(1)).GetLongValue());
+                Assert.AreEqual(13, ((XdmAtomicValue) val[0]).GetLongValue());
+                Assert.AreEqual(6, ((XdmAtomicValue) val[1]).GetLongValue());
             }
-            catch (java.io.UnsupportedEncodingException e) {
+            catch (Exception e) {
                 //Console.WriteLine(e.printStackTrace());
                 Assert.Fail();
             }
@@ -1857,9 +1749,9 @@ namespace SaxonCS_NUnit {
                 t.ApplyTemplates(new MemoryStream(Encoding.ASCII.GetBytes("<e/>")), se); //TODO remove uri argument
                 Assert.AreEqual(sw.ToString(), "e 17");
             }
-            catch (java.io.UnsupportedEncodingException ex) {
+            catch (Exception ex) {
                 //Console.WriteLine(e.printStackTrace());
-                Assert.Fail();
+                Assert.Fail(ex.Message);
             }
         }
 
@@ -2041,7 +1933,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestItemSeparatorToSerializer() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc =  new();
                 XsltCompiler comp = proc.NewXsltCompiler();
                 StringReader sr = new StringReader(
                     "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
@@ -2129,7 +2021,7 @@ namespace SaxonCS_NUnit {
                              "\t \t  specialPart=\"123-AB\" listParts=\"000-SS 000-RR\" xsi:nil=\"true\"/>";
 
                 SchemaValidator validator = manager.NewSchemaValidator();
-                validator.IsLax = false;
+                validator.Lax = false;
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 builder.SchemaValidator = validator;
                 Stream sDoc = new MemoryStream(Encoding.UTF8.GetBytes(inn));
@@ -2148,10 +2040,10 @@ namespace SaxonCS_NUnit {
 
 
         [Test]
-        public void TestTextWriterDestination() {
-            Processor proc = new Processor(true);
+        public void TestXmlWriterDestination() {
+            Processor proc = new (true);
             XsltCompiler comp = proc.NewXsltCompiler();
-            StringReader sr = new StringReader(
+            StringReader sr = new (
                 "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
                 "  <xsl:template match='/'>\n" +
                 "    <xsl:variable name='node'>\n" +
@@ -2162,18 +2054,50 @@ namespace SaxonCS_NUnit {
                 "</xsl:stylesheet>");
             XsltExecutable exec = comp.Compile(sr);
             Xslt30Transformer xsl = exec.Load30();
-            StringReader input = new StringReader("<input/>");
-            DocumentBuilder builder = proc.NewDocumentBuilder();
-            builder.BaseUri = new Uri("http://example.com");
-            XdmNode doc = builder.Build(input);
-            TextWriterDestination dest = new TextWriterDestination(XmlWriter.Create("C:\\work\\output.xml"));
-            xsl.ApplyTemplates(doc, dest);
+            StringReader input = new ("<input size='3'><foo/></input>");
+            StringWriter sw = new();
+            XmlWriterSettings settings = new () {
+                Encoding = new UTF8Encoding(),
+                OmitXmlDeclaration = true
+            };
+            XmlWriterDestination dest = new (XmlWriter.Create(sw, settings));
+            xsl.ApplyTemplates(input, dest);
+            //Console.Error.WriteLine(sw.ToString());
+            Assert.AreEqual("<input size=\"3\"><foo /></input>", sw.ToString());
+        }
+        
+        [Test]
+        public void TestXmlWriterDestinationWithNamespaces() {
+            Processor proc = new (true);
+            XsltCompiler comp = proc.NewXsltCompiler();
+            StringReader sr = new (
+                "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
+                "  <xsl:template match='/'>\n" +
+                "    <xsl:variable name='node'>\n" +
+                "      <xsl:sequence select='.'/>\n" +
+                "    </xsl:variable>\n" +
+                "    <xsl:sequence select='$node/node()'/>\n" +
+                "  </xsl:template>\n" +
+                "</xsl:stylesheet>");
+            XsltExecutable exec = comp.Compile(sr);
+            Xslt30Transformer xsl = exec.Load30();
+            StringReader input = new ("<my:input xmlns:my='http://my.com/' size='3'><foo/></my:input>");
+            StringWriter sw = new();
+            XmlWriterSettings settings = new () {
+                Encoding = new UTF8Encoding(),
+                OmitXmlDeclaration = true
+            };
+            XmlWriterDestination dest = new (XmlWriter.Create(sw, settings));
+            xsl.ApplyTemplates(input, dest);
+            //Console.Error.WriteLine(sw.ToString());
+            Assert.AreEqual("<my:input xmlns:my=\"http://my.com/\" size=\"3\"><foo /></my:input>", sw.ToString());
         }
 
 
-        /**
-    * Test Strip-space with ApplyTemplates
-    */
+
+        // 
+        // Test Strip-space with ApplyTemplates
+        // 
         [Test]
         public void TestStripSpace() {
             try {

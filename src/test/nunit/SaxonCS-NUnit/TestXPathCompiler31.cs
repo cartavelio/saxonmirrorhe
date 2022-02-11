@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Collections.Generic;
-using System.Collections;
 using System.IO;
 using Saxon.Api;
 using NUnit.Framework;
@@ -9,23 +7,19 @@ using NUnit.Framework;
 
 namespace SaxonCS_NUnit {
     class TestXPathCompiler31 {
-        public Processor p = new Processor(true);
-        XPathCompiler compiler = null;
+        Processor proc = new Processor(true);
+        XPathCompiler compiler;
         XdmNode document;
 
-        public XPathCompiler GetCompiler() {
-            if (compiler == null) {
-                compiler = p.NewXPathCompiler();
-            }
-
-            return compiler;
+        private XPathCompiler GetCompiler() {
+            return compiler ??= proc.NewXPathCompiler();
         }
 
 
         public TestXPathCompiler31() {
             try {
                 GetCompiler().XPathLanguageVersion = "3.1";
-                DocumentBuilder b = p.NewDocumentBuilder();
+                DocumentBuilder b = proc.NewDocumentBuilder();
                 b.BaseUri = new Uri("http://www.example.com");
                 document = b.Build(new StringReader("<foo x='1'><bar/><baz/></foo>"));
             }
@@ -34,7 +28,7 @@ namespace SaxonCS_NUnit {
             }
         }
 
-        private String good(String expr) {
+        private string good(string expr) {
             try {
                 XPathExecutable exec = GetCompiler().Compile(expr);
                 XPathSelector selector = exec.Load();
@@ -47,7 +41,7 @@ namespace SaxonCS_NUnit {
             }
         }
 
-        private void bad(String expr) {
+        private void bad(string expr) {
             try {
                 XPathExecutable exec = GetCompiler().Compile(expr);
                 XPathSelector selector = exec.Load();
@@ -61,7 +55,7 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void TestArith() {
-            String result = good("2+2");
+            string result = good("2+2");
             Assert.AreEqual("4", result);
         }
 
@@ -79,7 +73,7 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void TestIf() {
-            String result = good("if (//*) then 3 else 4");
+            string result = good("if (//*) then 3 else 4");
             Assert.AreEqual("3", result);
         }
 
@@ -263,12 +257,12 @@ namespace SaxonCS_NUnit {
 
             String xpath = "//Employees/Employee[1]/age:ag";
             try {
-                Processor p = new Processor(false);
-                XPathCompiler c = p.NewXPathCompiler();
+                Processor proc = new ();
+                XPathCompiler c = proc.NewXPathCompiler();
                 c.DeclareNamespace("age", "http://www.w3.org/2003/01/geo/wgs84_pos#");
                 XPathExecutable e = c.Compile(xpath);
                 XPathSelector s = e.Load();
-                DocumentBuilder builder = p.NewDocumentBuilder();
+                DocumentBuilder builder = proc.NewDocumentBuilder();
                 builder.BaseUri = new Uri("http://www.example.com");
                 s.ContextItem = (builder.Build(new StringReader(xml)));
                 XdmItem val = s.EvaluateSingle();
@@ -276,7 +270,7 @@ namespace SaxonCS_NUnit {
                 Assert.AreEqual("<age:ag xmlns:age=\"http://www.w3.org/2003/01/geo/wgs84_pos#\">29</age:ag>",
                     val.ToString());
             }
-            catch (Exception e1) {
+            catch (Exception) {
                 Assert.Fail();
             }
         }
