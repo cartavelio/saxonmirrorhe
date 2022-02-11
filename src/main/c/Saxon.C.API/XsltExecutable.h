@@ -134,7 +134,8 @@ public:
     /**
     *   Return the result-documents resulting from the execution of the stylesheet.
     *   Null is returned if the user has not enabled this feature via the method setCaptureResultDocuments()
-    *   @return std::map of result-document as the key value pair document uri string and XdmNode.
+    *   @return std::map - the map is indexed by the absolute URI of the result document, and the corresponding
+    *   value is an XdmNode containing the result document (as an in-memory tree, without serialization)
     */
     std::map<std::string,XdmNode*>& getResultDocuments();
 
@@ -280,10 +281,11 @@ public:
 
     //! Enable the capture of the result-document output into an std:map. This overrides the default mechanism.
    /**
-     * When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
-     * via an std::map object where we have the pair document URI and XdmNode object. After the execution of the transformation
-     * A call on the <code>getResultDocuments</code> method is required to get access to the result-documents in a map.
-     * @param flag - true enables map object which is used to save the result documents from the transformation
+     * If this option is enabled, then any document created using xsl:result-document is saved (as an XdmNode)
+     * in an std::map object where it is accessible using the URI as a key. After the execution of the transformation
+     * a call on the <code>getResultDocuments</code> method is required to get access to the result-documents in the map.
+     * @param flag - true causes secondary result documents from the transformation to be saved in a map; false disables
+     * this option.
     */
     void setCaptureResultDocuments(bool flag);
 
