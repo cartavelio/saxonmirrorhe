@@ -272,7 +272,7 @@
 {$nl}    if (hasNext()) {{Current = next(); return true;}} else return false;
 {$nl}}}
 {$nl}public void Reset() {{throw new NotImplementedException();}}
-{$nl}public void Dispose() {{throw new NotImplementedException();}}
+{$nl}public void Dispose() {{}}
       </xsl:text>
    </xsl:template>
    
@@ -429,7 +429,6 @@
       
       <!-- Method name -->
       
-      <xsl:text> /*432*/ </xsl:text>
       <xsl:choose>
          <xsl:when test="name/@identifier = 'iterator' and f:isIteratorType(string(type/@RESOLVED_TYPE))">
             <xsl:text> GetEnumerator</xsl:text>
@@ -635,7 +634,7 @@
       
       <xsl:call-template name="indent-extra"/>
       <!-- The Java language spec says that `values()` returns an array, but returning a list works well enough -->
-      <xsl:text>public static IList&lt;{$className}> values() {{</xsl:text>
+      <xsl:text>public static IList&lt;{$className}> values() {{{$NL}</xsl:text>
       <xsl:call-template name="indent-plus-two"/>
       <xsl:text>return valueList;{$NL}</xsl:text>
       <xsl:call-template name="indent-extra"/>
@@ -671,7 +670,7 @@
          <xsl:text> </xsl:text>
          <xsl:apply-templates select="name"/>
       </xsl:for-each>
-      <xsl:text>) {{{$NL}</xsl:text>
+      <xsl:text>) {{ /*674*/ {$NL}</xsl:text>
       <xsl:for-each select="members/member[@nodeType='ConstructorDeclaration']/parameters/parameter">
          <xsl:call-template name="indent-plus-two"/>
          <xsl:text>this.{name/@identifier} = {name/@identifier};{$NL}</xsl:text>
@@ -682,9 +681,12 @@
       <xsl:call-template name="indent-plus-two"/>
       <xsl:text>ordinalValue = nextOrdinal++;{$NL}</xsl:text>     
       <xsl:call-template name="indent-plus-two"/>
-      <xsl:text>innerEnumValue = innerEnum;{$NL}</xsl:text>     
+      <xsl:text>innerEnumValue = innerEnum;{$NL}</xsl:text>      
+      <xsl:apply-templates select="members/member[@nodeType='ConstructorDeclaration']/body">
+         <xsl:with-param name="indent" select="$indent+4"/>
+      </xsl:apply-templates>
       <xsl:call-template name="indent-extra"/>
-      <xsl:text>}}{$NL}</xsl:text>
+      <xsl:text>}} /*690*/ {$NL}</xsl:text>
       
       <xsl:for-each select="members/member[@nodeType='ConstructorDeclaration']/parameters/parameter
             [not(name/@identifier = $enumDecl/members/member[@nodeType='FieldDeclaration']/variables/variable/name/@identifier)]">
@@ -1813,6 +1815,7 @@
                   <xsl:for-each select="f:getImplementedInterfaces($thisDigest)/method[not(./default or @static='1')]">
                      <!--<xsl:message>Examining {./@name}</xsl:message>-->
                      <xsl:if test="not(f:hasMethod($thisDigest, current()/@name, string(current()/@sig)))
+                        and not(f:hasInheritedConcreteMethod($thisDigest, current()/@name, string(current()/@sig)))
                         and empty(($thisDigest/extends ! key('digestClassKey', @name, $digest) ! f:getImplementedInterfaces(.)) intersect current()/..)
                         and empty($defaults[@name=current()/@name and string(@sig)=string(current()/@sig)])">
                         <!--<xsl:message>Expanding {./@name} on {../@name} with parameters {@sig}</xsl:message>-->

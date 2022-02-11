@@ -17,7 +17,6 @@ import net.sf.saxon.type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * * This utility class consists generic functions for use with XDM data model.
@@ -88,7 +87,7 @@ public class XdmUtils {
 
     public static XdmValue [] convertXdmArrayToArrayObject(XdmArray value) {
         XdmValue arr [] = new XdmValue[value.arrayLength()];
-        value.asList().toArray(arr);
+        arr = value.asList().toArray(arr);
         return arr;
 
     }

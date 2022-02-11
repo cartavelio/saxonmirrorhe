@@ -125,7 +125,7 @@ public abstract class AttributeValueTemplate {
 
         else {
             Expression[] args = new Expression[components.size()];
-            components.toArray(args);
+            args = components.toArray(args);
             Expression fn = SystemFunction.makeCall("concat", new RetainedStaticContext(env), args);
             result = fn.simplify();
         }

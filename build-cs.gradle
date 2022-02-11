@@ -520,9 +520,20 @@ task eecs_sources(
   }
 }
 
+task hecs_project_files (
+  type: Copy,
+  dependsOn: ["generateCSharp"],
+  description: "Prepare the project files used for dotnet build"
+) {
+  from "src/main/saxon-cs/csproj/*.csproj"
+  into "${buildDir}/cs"
+}
+
 task singulink(
+  dependsOn: ["hecs_project_files"],
   description: "Install the Singulink libraries"
 ) {
+  inputs.files "${buildDir}/cs/*.csproj"
   doLast {
     if (dotnet == null) {
       throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
@@ -541,9 +552,11 @@ task singulink(
   }
 }
 
-task immutable(
+task  immutable(
+  dependsOn: ["hecs_project_files"],
   description: "Install System.Collections.Immutable libraries"
 ) {
+  inputs.files "${buildDir}/cs/*.csproj"
   doLast {
     if (dotnet == null) {
       throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
@@ -562,17 +575,10 @@ task immutable(
   }
 }
 
-task hecs_project_files (
-  type: Copy,
-  dependsOn: ["generateCSharp"],
-  description: "Prepare the project files used for dotnet build"
-) {
-  from "src/main/saxon-cs/csproj/*.csproj"
-  into "${buildDir}/cs"
-}
+
 
 task hecs_dll(
-  dependsOn: ["hecs_project_files", "singulink", "immutable"],
+  dependsOn: ["singulink", "immutable"],
   description: "Compile Saxon-CS DLL for HE"
 ) {
   doLast {
@@ -587,108 +593,21 @@ task hecs_dll(
   }
 }
 
-
-//dependsOn: ["generateCSharp", "singulink"],
-task hecs_dllXX(
-    dependsOn: ["generateCSharp"],
-    description: "Compile Saxon-CS DLL for HE"
-  ) {
-    inputs.files("${buildDir}/src/hecs")
-    outputs.file("${buildDir}/cs/bin/he/saxon-cs-${saxonMajorVersion}.${saxonMinorVersion}.dll")
-
-    if (csharpCompiler == null) {
-      throw new GradleException("Cannot build: failed to find csc[.exe] on path.")
+task hecs_hello_world(
+  dependsOn: ["hecs_dll"],
+  description: "Execute a Hello World query"
+) {
+  doLast {
+    if (dotnet == null) {
+      throw new GradleException("Cannot run: failed to find dotnet[.exe] on path.")
     }
 
-    doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/cs/bin/he/saxon-cs-${saxonMajorVersion}.${saxonMinorVersion}.dll",
-                  "-target:library", 
-                  "-doc:${buildDir}/cs/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk",
-                  "-reference:nuget/Singulink.Numerics.BigDecimal.${singulinkBigDecimalVersion}/lib/netstandard2.1/Singulink.Numerics.BigDecimal.dll",
-                  "-reference:nuget/System.Collections.Immutable.5.0.0/lib/netstandard2.0/System.Collections.Immutable.dll",
-                  //"-reference:nuget/NETStandard.Library.2.0.3/build/netstandard2.0/ref/netstandard.dll",
-                  //"-reference:nuget/NETStandard.Library.2.0.3/build/netstandard2.0/ref/mscorlib.dll",
-                  //"-reference:nuget/NETStandard.Library.2.0.3/build/netstandard2.0/ref/System.dll",
-                  //"-reference:nuget/NETStandard.Library.2.0.3/build/netstandard2.0/ref/System.Linq.dll",
-                  "-reference:nuget/NETStandard.Library.2.0.3/build/netstandard2.0/ref/System.Numerics.dll"]
-                  //netstandard, Version=2.1.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51
-
-      //fileTree(dir: "${buildDir}/n/bin/he",
-      //         include: "*.dll").each { dll ->
-      //  args += ["-reference:${dll}"]
-      //}
-      fileTree(dir: "${buildDir}/cs/net",
-               include: "**/*.cs").each { cs ->
-        args += [cs]
-      }
-      fileTree(dir: "${projectDir}/src/main/saxon-cs/engine",
-               include: "**/*.cs").each { cs ->
-        args += [cs]
-      }
-      fileTree(dir: "${projectDir}/src/main/saxon-cs/javaglue",
-               include: "**/*.cs").each { cs ->
-        args += [cs]
-      }
-
-
-      exec {
-        commandLine args
-      }
+    exec {
+        workingDir = "${buildDir}/csout"
+        commandLine dotnet, "engine.dll", "query", "qs:'Hello World'" 
     }
   }
+}
 
-  task hecs_exe_Transform(
-    dependsOn: ["hecs_dll"],
-    description: "Compile Transform.exe for Saxon-CS HE"
-  ) {
-    inputs.files("${buildDir}/src/hecs")
-    inputs.files("${buildDir}/cs/bin/he/saxon-cs-${saxonMajorVersion}.${saxonMinorVersion}.dll")
-    outputs.file("${buildDir}/cs/bin/he/Transform.exe")
 
-    doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/cs/bin/he/Transform.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
-      fileTree(dir: "${buildDir}/cs/bin/he",
-               include: "*.dll").each { dll ->
-        args += ["-reference:${dll}"]
-      }
-      args += ["${buildDir}/cs/csharp\\cmd\\Transform.cs",
-               "${buildDir}\\n\\csharp\\cmd\\AssemblyInfo.cs"]
-
-      exec {
-        commandLine args
-      }
-    }
-  }
-
-  task hecs_exe_Query(
-    dependsOn: ["hecs_dll"],
-    description: "Compile Query.exe for HE"
-  ) {
-    inputs.files("${buildDir}/n/build/dll/he")
-    inputs.files("${buildDir}/n/csharp/cmd")
-    outputs.file("${buildDir}/n/bin/he/Query.exe")
-
-    doLast {
-      def args = [csharpCompiler,
-                  "-out:${buildDir}/n/bin/he/Query.exe",
-                  "-target:exe",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
-      fileTree(dir: "${buildDir}/n/bin/he",
-               include: "*.dll").each { dll ->
-        args += ["-reference:${dll}"]
-      }
-      // This only runs on Windows, so make sure you use "\"
-      args += ["${buildDir}\\n\\csharp\\cmd\\Query.cs",
-               "${buildDir}\\n\\csharp\\cmd\\AssemblyInfo.cs"]
-
-      exec {
-        commandLine args
-      }
-    }
-  }
 

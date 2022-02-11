@@ -1,21 +1,34 @@
 using System;
+using System.IO;
+using Microsoft.VisualBasic;
+using SysIOFile = System.IO.File;
 
 namespace java.io {
     public class File {
+        private readonly string fileName;
         public File(string name) {
-            
+            this.fileName = name;
         }
 
         public File(System.Uri uri) {
-            
+            if (!uri.IsFile) {
+                throw new ArgumentException("URI " + uri + " is not a file URI");
+            }
+            fileName = uri.LocalPath;
         }
         
         public File(File dir, string name) {
-            
+            throw new NotImplementedException(); 
+            // transpiler should convert to call on static factory method Resolve
+        }
+
+        public static File Resolve(File dir, string localName) {
+            return new File(Path.GetFullPath(Path.Combine(dir.fileName, localName)));
         }
 
         public System.Uri toURI() {
-            return null;
+            string abs = Path.GetFullPath(fileName);
+            return new Uri(abs); 
         }
 
         public File getAbsoluteFile() {
@@ -23,11 +36,11 @@ namespace java.io {
         }
 
         public string getName() {
-            return null;
+            return fileName;
         }
 
         public string getPath() {
-            return null;
+            return fileName;
         }
 
         public string getAbsolutePath() {
@@ -38,15 +51,15 @@ namespace java.io {
         }
 
         public bool exists() {
-            return false;
+            return SysIOFile.Exists(this.fileName);
         }
 
         public bool canRead() {
-            return true;
+            return SysIOFile.GetAttributes(fileName).HasFlag(FileAttributes.Normal);
         }
 
         public bool canWrite() {
-            return true;
+            return !SysIOFile.GetAttributes(fileName).HasFlag(FileAttributes.ReadOnly);
         }
 
         public bool canExecute() {
@@ -54,11 +67,11 @@ namespace java.io {
         }
 
         public long lastModified() {
-            return 0;
+            return new FileInfo(fileName).LastWriteTime.ToFileTimeUtc();
         }
 
         public long length() {
-            return 0;
+            return new FileInfo(fileName).Length;
         }
 
         public File getParentFile() {
@@ -66,17 +79,13 @@ namespace java.io {
         }
 
         public bool isDirectory() {
-            return false;
+            return SysIOFile.GetAttributes(Path.GetFullPath(fileName)).HasFlag(FileAttributes.Directory);
         }
 
         public bool isHidden() {
-            return false;
+            return SysIOFile.GetAttributes(Path.GetFullPath(fileName)).HasFlag(FileAttributes.Hidden);
         }
 
-        public bool enameTo(File newName) {
-            throw new NotImplementedException();
-        }
-        
         public void createNewFile() {}
 
         public void mkdirs() {
@@ -87,7 +96,7 @@ namespace java.io {
         }
 
         public string[] list() {
-            return new string[0];
+            return Directory.GetFiles(fileName);
         }
 
         public File[] listFiles(FilenameFilter filter) {

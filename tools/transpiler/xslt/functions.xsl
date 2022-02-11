@@ -505,6 +505,15 @@
          or (some $class in $thisClass/(implements|extends)/@name satisfies f:hasInheritedMethod(key('digestClassKey', $class, $digest), $methodName, $arity))"/>
    </xsl:function>
    
+   <xsl:function name="f:hasInheritedConcreteMethod" as="xs:boolean">
+      <xsl:param name="thisClass" as="element(*)?"/> <!-- 'class' or 'interface' -->
+      <xsl:param name="methodName" as="xs:string"/>
+      <xsl:param name="sig" as="xs:string"/>
+      <!--<xsl:message>Seeking {$thisClass/@name}::{$methodName}#{$arity}</xsl:message>-->
+      <xsl:sequence select="exists($thisClass/method[@name=$methodName and string(@sig)=$sig][not(@abstract='1') and not(parent::interface)])
+         or (some $class in $thisClass/(implements|extends)/@name satisfies f:hasInheritedConcreteMethod(key('digestClassKey', $class, $digest), $methodName, $sig))"/>
+   </xsl:function>
+   
    <xsl:function name="f:unescapeJava" as="xs:string">
       <xsl:param name="in" as="xs:string"/>
       <xsl:text>{$in => replace('\\n', '&#xa;') => replace('\\"', '"')}</xsl:text> 

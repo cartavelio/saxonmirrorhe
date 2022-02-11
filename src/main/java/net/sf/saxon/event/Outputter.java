@@ -16,6 +16,7 @@ import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.StringItem;
@@ -360,6 +361,7 @@ public abstract class Outputter implements Receiver {
                 final UnicodeBuilder buffer = new UnicodeBuilder();
 
                 @Override
+                @CSharpModifiers(code={"public", "override"})
                 public UniStringConsumer accept(CodePoints chars) {
                     buffer.accept(chars);
                     return this;
@@ -376,6 +378,7 @@ public abstract class Outputter implements Receiver {
                 final UnicodeBuilder buffer = new UnicodeBuilder();
 
                 @Override
+                @CSharpModifiers(code = {"public", "override"})
                 public UniStringConsumer accept(CodePoints chars) {
                     buffer.accept(chars);
                     return this;

@@ -4530,7 +4530,7 @@ public class XQueryParser extends XPathParser {
 
 
         Expression[] args = new Expression[components.size()];
-        components.toArray(args);
+        args = components.toArray(args);
         RetainedStaticContext rsc = new RetainedStaticContext(env);
         Expression fn = SystemFunction.makeCall("concat", rsc, args);
         assert fn != null;

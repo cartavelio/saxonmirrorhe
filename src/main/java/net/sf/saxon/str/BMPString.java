@@ -14,16 +14,16 @@ import java.util.function.IntPredicate;
 
 public class BMPString extends UnicodeString {
 
-    private String base;
+    private String baseString;
 
     /**
      * Protected constructor
-     * @param base the string to be wrapped: the caller is responsible for ensuring this
+     * @param baseString the string to be wrapped: the caller is responsible for ensuring this
      *             contains no surrogates
      */
 
-    protected BMPString(String base) {
-        this.base = base;
+    protected BMPString(String baseString) {
+        this.baseString = baseString;
     }
 
     /**
@@ -45,12 +45,12 @@ public class BMPString extends UnicodeString {
 
     @Override
     public long length() {
-        return base.length();
+        return baseString.length();
     }
 
     @Override
     public boolean isEmpty() {
-        return base.isEmpty();
+        return baseString.isEmpty();
     }
 
     @Override
@@ -60,7 +60,7 @@ public class BMPString extends UnicodeString {
 
     @Override
     public IntIterator codePoints() {
-        return StringTool.codePoints(base);
+        return StringTool.codePoints(baseString);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class BMPString extends UnicodeString {
         if (codePoint > 65535) {
             return -1;
         }
-        return base.indexOf((char)codePoint);
+        return baseString.indexOf((char)codePoint);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class BMPString extends UnicodeString {
         if (codePoint > 65535) {
             return -1;
         }
-        return base.indexOf((char)codePoint, from32);
+        return baseString.indexOf((char)codePoint, from32);
     }
 
     /**
@@ -92,8 +92,8 @@ public class BMPString extends UnicodeString {
      */
     @Override
     public long indexWhere(IntPredicate predicate, long from) {
-        for (int i=requireInt(from); i<base.length(); i++) {
-            if (predicate.test(base.charAt(i))) {
+        for (int i = requireInt(from); i< baseString.length(); i++) {
+            if (predicate.test(baseString.charAt(i))) {
                 return i;
             }
         }
@@ -102,20 +102,20 @@ public class BMPString extends UnicodeString {
 
     @Override
     public int codePointAt(long index) {
-        return base.charAt(StringTool.requireInt(index));
+        return baseString.charAt(StringTool.requireInt(index));
     }
 
     @Override
     public UnicodeString substring(long start, long end) {
         int start32 = StringTool.requireInt(start);
         int end32 = StringTool.requireInt(end);
-        return new BMPString(base.substring(start32, end32));
+        return new BMPString(baseString.substring(start32, end32));
     }
 
     @Override
     public CodePoints concat(CodePoints other) {
         if (other instanceof BMPString) {
-            return new BMPString(base + ((BMPString)other).base);
+            return new BMPString(baseString + ((BMPString)other).baseString);
         } else {
             UnicodeBuilder ub = new UnicodeBuilder();
             return ub.accept(this).accept(other).toUnicodeString();
@@ -125,7 +125,7 @@ public class BMPString extends UnicodeString {
     @Override
     public int compareTo(CodePoints other) {
         if (other instanceof BMPString) {
-            return base.compareTo(((BMPString)other).base);
+            return baseString.compareTo(((BMPString)other).baseString);
         } else {
             return super.compareTo(other);
         }
@@ -134,16 +134,20 @@ public class BMPString extends UnicodeString {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof BMPString) {
-            return this.base.equals(((BMPString)obj).base);
+            return this.baseString.equals(((BMPString)obj).baseString);
         } else {
             return super.equals(obj);
         }
     }
 
+    //#if CSHARP==false
+    // In Saxon-J, the hashCode of a UnicodeString is the same as the hashCode
+    // of the corresponding String. This is not the case in Saxon-CS.
     @Override
     public int hashCode() {
-        return base.hashCode();
+        return baseString.hashCode();
     }
+    //#endif
 
     @Override
     public UnicodeString economize() {
@@ -152,12 +156,12 @@ public class BMPString extends UnicodeString {
 
     @Override
     public String toString() {
-        return base;
+        return baseString;
     }
 
     @Override
     public void supplyContent(LargeTextBuffer consumer, long start, long length) {
-        consumer.append16(base.toCharArray(), requireInt(start), requireInt(length));
+        consumer.append16(baseString.toCharArray(), requireInt(start), requireInt(length));
     }
 
 
