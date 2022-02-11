@@ -67,13 +67,10 @@ def testSuiteMatrix = [
       "_exceptions": "${projectDir}/src/test/exceptions/qt4.xml",
       "_depends": ["cloneQT4TestSuite"],
 
-      "XP31": [
+      "XP40": [
         "": [:]
       ],
-      "XQ30": [
-        "": [:]
-      ],
-      "XQ31": [
+      "XQ40": [
         "": [:]
       ]
     ],
@@ -122,13 +119,10 @@ def testSuiteMatrix = [
       "_exceptions": "${projectDir}/src/test/exceptions/qt4.xml",
       "_depends": ["cloneQT4TestSuite"],
 
-      "XP31": [
+      "XP40": [
         "": [:]
       ],
-      "XQ30": [
-        "": [:]
-      ],
-      "XQ31": [
+      "XQ40": [
         "": [:]
       ]
     ],
@@ -201,27 +195,13 @@ def testSuiteMatrix = [
       "_exceptions": "${projectDir}/src/test/exceptions/qt4.xml",
       "_depends": ["cloneQT4TestSuite"],
 
-      "XP30": [
+      "XP40": [
         "": [:],
         "bc": ["bytecode": "on"]
       ],
-      "XP31": [
+      "XQ40": [
         "": [:],
         "bc": ["bytecode": "on"]
-      ],
-      "XQ10": [
-        "": [:],
-        "bc": ["bytecode": "on"]
-      ],
-      "XQ30": [
-        "": [:],
-        "bc": ["bytecode": "on"],
-        "unfold": ["unfolded": "on"],
-      ],
-      "XQ31": [
-        "": [:],
-        "bc": ["bytecode": "on"],
-        "unfold": ["unfolded": "on"],
       ]
     ],
     "xslt30": [
@@ -306,6 +286,17 @@ def testSuiteMatrix = [
       ],
       "XQ40": [
         "": [:]
+      ]
+    ],
+    "qt4": [
+      "_exceptions": "${projectDir}/src/test/exceptions/qt4.xml",
+      "_depends": ["cloneQT4TestSuite"],
+
+      "XP40": [
+        "": [:],
+      ],
+      "XQ40": [
+        "": [:],
       ]
     ],
     "xslt30": [
