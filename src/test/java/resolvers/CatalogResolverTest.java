@@ -1,22 +1,17 @@
 package resolvers;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.CommonResourceResolver;
 import net.sf.saxon.s9api.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.xml.sax.InputSource;
-import org.xmlresolver.ResolverFeature;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Collections;
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 public class CatalogResolverTest {
@@ -51,11 +46,9 @@ public class CatalogResolverTest {
 
     @Test
     public void xmlResolverParse() {
-        Configuration config = new Configuration();
-        CommonResourceResolver resolver = config.getCommonResourceResolver();
+        Processor processor = new Processor(false);
+        processor.setCatalogFile("src/test/testdata/resolvers/catalog.xml");
         try {
-            resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
-            Processor processor = new Processor(config);
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setDTDValidation(true);
             XdmNode doc = builder.build(new File("src/test/testdata/resolvers/input.xml"));
@@ -67,11 +60,9 @@ public class CatalogResolverTest {
 
     @Test
     public void xmlResolverUriResolver() {
-        Configuration config = new Configuration();
-        CommonResourceResolver resolver = config.getCommonResourceResolver();
+        Processor processor = new Processor(false);
+        processor.setCatalogFile("src/test/testdata/resolvers/catalog.xml");
         try {
-            resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
-            Processor processor = new Processor(config);
             XsltCompiler compiler = processor.newXsltCompiler();
 
             Source xsl = new SAXSource(new InputSource(new FileInputStream(new File("src/test/testdata/resolvers/style.xsl"))));
@@ -97,11 +88,9 @@ public class CatalogResolverTest {
 
     @Test
     public void xmlResolverStylesheetUriResolver() {
-        Configuration config = new Configuration();
-        CommonResourceResolver resolver = config.getCommonResourceResolver();
+        Processor processor = new Processor(false);
+        processor.setCatalogFile("src/test/testdata/resolvers/catalog.xml");
         try {
-            resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
-            Processor processor = new Processor(config);
             XsltCompiler compiler = processor.newXsltCompiler();
 
             Source xsl = new SAXSource(new InputSource(new FileInputStream(new File("src/test/testdata/resolvers/stylesheet.xsl"))));
@@ -127,11 +116,9 @@ public class CatalogResolverTest {
 
     @Test
     public void xmlResolverUnparsedTextUriResolver() {
-        Configuration config = new Configuration();
-        CommonResourceResolver resolver = config.getCommonResourceResolver();
+        Processor processor = new Processor(false);
+        processor.setCatalogFile("src/test/testdata/resolvers/catalog.xml");
         try {
-            resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
-            Processor processor = new Processor(config);
             XsltCompiler compiler = processor.newXsltCompiler();
 
             Source xsl = new SAXSource(new InputSource(new FileInputStream(new File("src/test/testdata/resolvers/stylesheet.xsl"))));
@@ -157,11 +144,9 @@ public class CatalogResolverTest {
 
     @Test
     public void xmlResolverModuleUriResolver() {
-        Configuration config = new Configuration();
-        CommonResourceResolver resolver = config.getCommonResourceResolver();
+        Processor processor = new Processor(false);
+        processor.setCatalogFile("src/test/testdata/resolvers/catalog.xml");
         try {
-            resolver.setFeature(ResolverFeature.CATALOG_ADDITIONS, Collections.singletonList("src/test/testdata/resolvers/catalog.xml"));
-            Processor processor = new Processor(config);
             XQueryCompiler compiler = processor.newXQueryCompiler();
 
             File xqy = new File("src/test/testdata/resolvers/module.xqy");
