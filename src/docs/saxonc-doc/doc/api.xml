@@ -298,7 +298,7 @@
                   <a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">Saxon\XdmArray</a>
                </td>
                <td>
-                  <span class="signature">createXdmArrayValue($val)</span>
+                  <span class="signature">createXdmArrayValue(array $val)</span>
                   <div class="fcomment">Make an <a class="bodylink code"
                      href="../saxon_c_php_xdmarray">XdmArray</a> whose argument is a PHP array_map with keys
                      of type integer and values of type XdmValue (or a subclass of XdmValue).</div>
@@ -309,7 +309,7 @@
                   <a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">Saxon\XdmMap</a>
                </td>
                <td>
-                  <span class="signature">createXdmMapValue($val)</span>
+                  <span class="signature">createXdmMapValue(array $val)</span>
                   <div class="fcomment">Make an <a class="bodylink code"
                      href="../saxon_c_php_xdmmap">XdmMap</a> whose argument is a PHP array_map with key and
                      value pair as (string, XdmValue).</div>
@@ -2298,7 +2298,7 @@
                   <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
                </td>
                <td>
-                  <span class="signature">getChildNode(int index)</span>
+                  <span class="signature">getChildNode(int $index)</span>
                   <div class="fcomment">Get the n'th child node of this node. If the child node
                      selected does not exist then return null.</div>
                </td>
@@ -2376,10 +2376,15 @@
                   <code><a class="bodylink code" href="../saxon_c_php_xdmfunctionitem">Saxon/XdmFunctionItem</a></code>
                </td>
                <td>
-                  <span class="signature">getSystemFunction()</span>
+                  <span class="signature">getSystemFunction(<a class="bodylink code"
+                     href="../saxon_c_php_saxonprocessor">SaxonProcessor</a> $proc, string $name, int $arity)</span>
                   <div class="fcomment">Get a system function. This can be any function defined in XPath 3.1 functions and operators,
                      including functions in the math, map, and array namespaces. It can also be a Saxon extension
-                     function, provided a licensed Processor is used. Returns the requested function, or null if there is no such function. Note that some functions
+                     function, provided a licensed Processor is used. 
+                     The first argument is used to supply the SaxonProcessor required to get the system function. 
+                     The second argument is used to provide the name of the requested function, and the last
+                     argument its arity.
+                     Returns the requested function, or null if there is no such function. Note that some functions
                      (those with particular context dependencies) may be unsuitable for dynamic calling.</div>
                </td>
             </tr>
