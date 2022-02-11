@@ -4655,7 +4655,7 @@ namespace Saxon.Api
                     {
                         var iter = new SequenceEnumerable<XdmAtomicValue>(
                             JSequenceXdmIterator.ofAtomicValues(
-                                new net.sf.saxon.value.Whitespace.Tokenizer((XdmItem)item.GetUnderlyingValue()).getUnicodeStringValue()));
+                                new net.sf.saxon.value.Whitespace.Tokenizer(item.GetStringValue()));
                         return iter;
 
                     }
