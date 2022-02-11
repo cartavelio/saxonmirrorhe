@@ -41,10 +41,12 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 /**
- * Implementation of the Platform interface containing methods appropriate to the .NET platform
+ * Implementation of the Platform interface containing methods appropriate to the .NET platform.
+ * Note: this class is used for the IKVM-based Saxon.NET product, but not for Saxon-CS
  */
 
 public class DotNetPlatform implements Platform {
@@ -69,6 +71,23 @@ public class DotNetPlatform implements Platform {
         config.setCollectionFinder(new StandardCollectionFinder());
     }
 
+    /**
+     * Get the default language for localization.
+     *
+     * @return the default language
+     */
+    public String getDefaultLanguage() {
+        return Locale.getDefault().getLanguage();
+    }
+
+    /**
+     * Get the default country for localization.
+     *
+     * @return the default country
+     */
+    public String getDefaultCountry() {
+        return Locale.getDefault().getCountry();
+    }
 
     /**
      * Return true if this is the Java platform
@@ -197,24 +216,6 @@ public class DotNetPlatform implements Platform {
     @Override
     public XMLReader loadParserForXmlFragments(){
         return loadParser();
-    }
-
-    /**
-     * Convert a StreamSource to either a SAXSource or a PullSource, depending on the native
-     * parser of the selected platform
-     *
-     * @param pipe          the pipeline configuration
-     * @param input         the supplied StreamSource
-     * @param validation    indicates whether schema validation is required, adn in what mode
-     * @param dtdValidation true if DTD validation is required
-     * @return the PullSource or SAXSource, initialized with a suitable parser, or the original
-     *         input Source, if now special handling is required or possible. May also return an AugmentedSource
-     *         that wraps one of these.
-     */
-
-    @Override
-    public Source getParserSource(PipelineConfiguration pipe, StreamSource input, int validation, boolean dtdValidation) {
-            return getParserSourceInternal(pipe, input, validation, dtdValidation, 0);
     }
 
     private Source getParserSourceInternal(PipelineConfiguration pipe, StreamSource input, int validation, boolean dtdValidation,

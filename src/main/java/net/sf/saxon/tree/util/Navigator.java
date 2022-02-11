@@ -161,7 +161,9 @@ public final class Navigator {
             URI baseURI;
             try {
                 baseURI = new URI(xmlBase);
-                if (!baseURI.isAbsolute()) {
+                if (baseURI.isAbsolute()) {
+                    return xmlBase;
+                } else {
                     NodeInfo parentNode = node.getParent();
                     if (parentNode == null) {
                         // We have a parentless element with a relative xml:base attribute.

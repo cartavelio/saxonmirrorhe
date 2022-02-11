@@ -27,7 +27,7 @@ import net.sf.saxon.type.Type;
 public abstract class AccumulatorFn extends SystemFunction {
 
     @CSharpSimpleEnum
-    public enum Phase {AFTER, BEFORE}
+    public enum Phase {AFTER, BEFORE, UNSPECIFIED}
 
     public abstract Phase getPhase();
 

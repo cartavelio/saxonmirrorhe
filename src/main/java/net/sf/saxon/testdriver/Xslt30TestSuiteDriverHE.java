@@ -308,6 +308,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             });
         }
 
+        // If a static error is expected, suppress JIT compilation so we catch it eagerly
         Predicate<XdmItem> isStaticError = item -> item.getStringValue().startsWith("XTSE");
         boolean staticError = testCase.select(
                 path("result", "//", "error", "@code").where(isStaticError)).exists();

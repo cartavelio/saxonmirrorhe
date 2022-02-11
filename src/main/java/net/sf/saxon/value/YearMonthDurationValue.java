@@ -173,7 +173,25 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
             err.setErrorCode("FODT0002");
             throw err;
         }
-        return fromMonths((int) Math.round(product));
+        // following code is needed to get the correct rounding on both Java and C#
+        return fromMonths((int)new DoubleValue(product).round(0).longValue());
+    }
+
+    /**
+     * Multiply duration by a decimal.
+     */
+
+    @Override
+    public YearMonthDurationValue multiply(BigDecimal n) throws XPathException {
+        int m = getLengthInMonths();
+        BigDecimal product = n.multiply(BigDecimal.valueOf(m));
+        if (product.abs().compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) > 0) {
+            XPathException err = new XPathException("Overflow when multiplying a duration by a number");
+            err.setErrorCode("FODT0002");
+            throw err;
+        }
+        // following code is needed to get the correct rounding on both Java and C#
+        return fromMonths((int) new BigDecimalValue(product).round(0).longValue());
     }
 
 
@@ -195,7 +213,8 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
             err.setErrorCode("FODT0002");
             throw err;
         }
-        return fromMonths((int) Math.round(product));
+        // following code is needed to get the correct rounding on both Java and C#
+        return fromMonths((int) new DoubleValue(product).round(0).longValue());
     }
 
     /**

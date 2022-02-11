@@ -91,11 +91,9 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         try {
             absoluteURI = ResolveURI.makeAbsolute(href, baseURI);
         } catch (java.net.URISyntaxException err) {
-            XPathException e = new XPathException(err.getReason() + ": " + err.getInput(), err);
-            e.setErrorCode("FOUT1170");
-            throw e;
+            handleURISyntaxException(href, baseURI, err);
+            return null;
         }
-
         if (absoluteURI.getFragment() != null) {
             XPathException e = new XPathException("URI for unparsed-text() must not contain a fragment identifier");
             e.setErrorCode("FOUT1170");
@@ -109,6 +107,23 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         EncodeForUri.checkPercentEncoding(absoluteURI.toString());
         return absoluteURI;
     }
+
+    @CSharpReplaceBody(code="handleURISyntaxExceptionCSharp(href, baseURI, err);")
+    private static void handleURISyntaxException(String href, String baseURI, java.net.URISyntaxException err)
+            throws XPathException {
+        XPathException e = new XPathException(err.getReason() + ": " + err.getInput(), err);
+        e.setErrorCode("FOUT1170");
+        throw e;
+    }
+
+    //#if CSHARP==true
+    private static void handleURISyntaxExceptionCSharp(String href, String base, java.net.URISyntaxException err)
+            throws XPathException {
+        XPathException e = new XPathException("Failed to resolve " + href + " against " + base + ": " + err.getMessage());
+        e.setErrorCode("FOUT1170");
+        throw e;
+    }
+    //#endif
 
     public static XPathException handleIOError(URI absoluteURI, IOException ioErr, XPathContext context) {
         String message = "Failed to read input file";

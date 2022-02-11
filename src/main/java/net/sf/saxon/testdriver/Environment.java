@@ -458,6 +458,9 @@ public class Environment implements URIResolver {
             if (!"secondary".equals(role)) {
                 String href = schema.attribute("file");
                 String ns = schema.attribute("uri");
+                if (NamespaceConstant.FN.equals(ns)) {
+                    manager.setXsdVersion("1.1");
+                }
                 if (href == null) {
                     try {
                         Source[] sources = manager.getSchemaURIResolver().resolve(ns, null, new String[0]);

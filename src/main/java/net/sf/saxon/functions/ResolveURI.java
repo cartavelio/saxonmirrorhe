@@ -8,6 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -132,7 +133,12 @@ public class ResolveURI extends SystemFunction {
         if (!resolved.toASCIIString().startsWith("file:////")) {
             resolved = resolved.normalize();
         }
-        String result = escaped ? unescapeSpaces(resolved.toString()) : resolved.toString();
+        // The spec says that special characters are not escaped. But if the input was percent-escaped,
+        // we want the output to be percent-escaped too. Java achieves this automatically, but on C#
+        // it needs special attention.
+        boolean inputIsPercentEncoded = base.contains("%") || relative.contains("%");
+        String resolvedString = inputIsPercentEncoded ? resolved.toASCIIString() : resolved.toString();
+        String result = escaped ? unescapeSpaces(resolvedString) : resolvedString;
 
         // Test case XSLT3 resolve-uri-022. Java even after normalization can leave a URI with trailing "../" or ".." parts.
         // Pragmatically, we just strip these off. This might not be enough if there are query or fragment parts, but it
@@ -214,14 +220,16 @@ public class ResolveURI extends SystemFunction {
     /*@NotNull*/
     public static URI makeAbsolute(/*@Nullable*/ String relativeURI, /*@Nullable*/ String base) throws URISyntaxException {
         URI absoluteURI;
+        StandardURIChecker checker = StandardURIChecker.getInstance();
         // System.err.println("makeAbsolute " + relativeURI + " against base " + base);
         if (relativeURI == null) {
             if (base == null) {
-                throw new URISyntaxException("", "Relative and Base URI must not both be null");
+                throw failure("", "Relative and Base URI must not both be null");
             }
             absoluteURI = new URI(ResolveURI.escapeSpaces(base));
+            checker.checkThoroughly(absoluteURI);
             if (!absoluteURI.isAbsolute()) {
-                throw new URISyntaxException(base, "Relative URI not supplied, so base URI must be absolute");
+                throw failure(base, "Relative URI not supplied, so base URI must be absolute");
             } else {
                 return absoluteURI;
             }
@@ -253,7 +261,7 @@ public class ResolveURI extends SystemFunction {
                     URL absoluteURL = new URL(baseURL, relativeURI);
                     absoluteURI = absoluteURL.toURI();
                 } catch (MalformedURLException err) {
-                    throw new URISyntaxException(base + " " + relativeURI, err.getMessage());
+                    throw failure(base + " " + relativeURI, err.getMessage());
                 }
             } else if (base.startsWith("classpath:")) {
                 absoluteURI = new URI(relativeURI);
@@ -265,7 +273,7 @@ public class ResolveURI extends SystemFunction {
                 try {
                     baseURI = new URI(base);
                 } catch (URISyntaxException e) {
-                    throw new URISyntaxException(base, "Invalid base URI: " + e.getMessage());
+                    throw failure(base, "Invalid base URI: " + e.getMessage());
                 }
                 if (baseURI.getFragment() != null) {
                     int hash = base.indexOf('#');
@@ -274,23 +282,30 @@ public class ResolveURI extends SystemFunction {
                     }
                     try {
                         baseURI = new URI(base);
+                        checker.checkThoroughly(baseURI);
                     } catch (URISyntaxException e) {
-                        throw new URISyntaxException(base, "Invalid base URI: " + e.getMessage());
+                        throw failure(base, "Invalid base URI: " + e.getMessage());
                     }
                 }
                 try {
-                    absoluteOrRelativeURI(relativeURI);   // for validation only
+                    URI uri = absoluteOrRelativeURI(relativeURI);   // for validation only
+                    checker.checkThoroughly(uri);
                 } catch (URISyntaxException e) {
-                    throw new URISyntaxException(base, "Invalid relative URI: " + e.getMessage());
+                    throw failure(base, "Invalid relative URI: " + e.getMessage());
                 }
                 absoluteURI = relativeURI.isEmpty() ? baseURI : baseURI.resolve(relativeURI);
             }
         } catch (IllegalArgumentException err0) {
             // can be thrown by resolve() when given a bad URI
-            throw new URISyntaxException(relativeURI, "Cannot resolve URI against base " + Err.wrap(base));
+            throw failure(relativeURI, "Cannot resolve URI against base " + Err.wrap(base));
         }
 
         return absoluteURI;
+    }
+
+    @CSharpReplaceBody(code="return new System.UriFormatException(\"Failed to resolve \" + input + \": \" + reason);")
+    private static URISyntaxException failure(String input, String reason) {
+        return new URISyntaxException(input, reason);
     }
 
 

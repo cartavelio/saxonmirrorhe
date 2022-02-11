@@ -12,8 +12,12 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.number.*;
 import net.sf.saxon.lib.Numberer;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.regex.ARegexIterator;
+import net.sf.saxon.regex.ARegularExpression;
+import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.charclass.Categories;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
@@ -23,9 +27,8 @@ import net.sf.saxon.z.IntIterator;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Implement the format-date(), format-time(), and format-dateTime() functions
@@ -36,6 +39,23 @@ public class FormatDate extends SystemFunction implements Callable {
 
     static final String[] knownCalendars = {"AD", "AH", "AME", "AM", "AP", "AS", "BE", "CB", "CE", "CL", "CS", "EE", "FE", "ISO", "JE",
             "KE", "KY", "ME", "MS", "NS", "OS", "RS", "SE", "SH", "SS", "TE", "VE", "VS"};
+
+    private final static UnicodeString STR_0 = BMPString.of("0");
+    private final static UnicodeString STR_01 = BMPString.of("01");
+    private final static UnicodeString STR_1 = BMPString.of("1");
+    private final static UnicodeString STR_f = BMPString.of("f");
+    private final static UnicodeString STR_F = BMPString.of("F");
+    private final static UnicodeString STR_i = BMPString.of("i");
+    private final static UnicodeString STR_I = BMPString.of("I");
+    private final static UnicodeString STR_J = BMPString.of("J");
+    private final static UnicodeString STR_M = BMPString.of("M");
+    private final static UnicodeString STR_N = BMPString.of("N");
+    private final static UnicodeString STR_Nn = BMPString.of("Nn");
+    private final static UnicodeString STR_n = BMPString.of("n");
+    private final static UnicodeString STR_P = BMPString.of("P");
+    private final static UnicodeString STR_s = BMPString.of("s");
+    private final static UnicodeString STR_Y = BMPString.of("Y");
+    private final static UnicodeString STR_Z = BMPString.of("Z");
 
     private String adjustCalendar(String calendarVal, String result, XPathContext context) throws XPathException {
         StructuredQName cal;
@@ -154,8 +174,8 @@ public class FormatDate extends SystemFunction implements Callable {
         return sb.toString();
     }
 
-    private static final Pattern componentPattern =
-            Pattern.compile("([YMDdWwFHhmsfZzPCE])\\s*(.*)");
+    private static final ARegularExpression componentPattern =
+            ARegularExpression.compile("([YMDdWwFHhmsfZzPCE])\\s*(.*)", "");
 
     private static UnicodeString formatComponent(CalendarValue value, String specifier,
                                                  Numberer numberer, String country, XPathContext context)
@@ -164,47 +184,46 @@ public class FormatDate extends SystemFunction implements Callable {
         boolean ignoreTime = value instanceof DateValue;
         DateTimeValue dtvalue = value.toDateTime();
 
-        Matcher matcher = componentPattern.matcher(specifier);
-        if (!matcher.matches()) {
+        UnicodeString uSpecifier = StringView.of(specifier).tidy();
+        ARegexIterator matcher = (ARegexIterator)componentPattern.analyze(uSpecifier);
+        Item firstMatch = matcher.next();
+        if (firstMatch == null || firstMatch.getUnicodeStringValue().length32() != uSpecifier.length32() || !matcher.isMatching()) {
             XPathException error = new XPathException("Unrecognized date/time component [" + specifier + ']');
             error.setErrorCode("FOFD1340");
             error.setXPathContext(context);
             throw error;
         }
-        String component = matcher.group(1);
-        String format = matcher.group(2);
-        if (format == null) {
-            format = "";
-        }
+        UnicodeString component = matcher.getRegexGroupUnicode(1);
+        UnicodeString format = matcher.getRegexGroupUnicode(2);
         boolean defaultFormat = false;
-        if ("".equals(format) || format.startsWith(",")) {
+        if (format.isEmpty() || format.codePointAt(0) == ',') {
             defaultFormat = true;
-            switch (component.charAt(0)) {
+            switch (component.codePointAt(0)) {
                 case 'F':
-                    format = "Nn" + format;
+                    format = STR_Nn.concat(format);
                     break;
                 case 'P':
-                    format = 'n' + format;
+                    format = STR_n.concat(format);
                     break;
                 case 'C':
                 case 'E':
-                    format = 'N' + format;
+                    format = STR_N.concat(format);
                     break;
                 case 'm':
                 case 's':
-                    format = "01" + format;
+                    format = STR_01.concat(format);
                     break;
                 case 'z':
                 case 'Z':
                     //format = "00:00" + format;
                     break;
                 default:
-                    format = '1' + format;
+                    format = STR_1.concat(format);
                     break;
             }
         }
 
-        switch (component.charAt(0)) {
+        switch (component.codePointAt(0)) {
             case 'Y':       // year
                 if (ignoreDate) {
                     XPathException error = new XPathException("In format-time(): an xs:time value does not contain a year component");
@@ -345,15 +364,15 @@ public class FormatDate extends SystemFunction implements Callable {
                     int tzoffset = value.getTimezoneInMinutes();
                     DateTimeValue baseDate =
                             new DateTimeValue(year, (byte)1, (byte)1, (byte)0, (byte)0, (byte)0, 0, tzoffset, false);
-                    Boolean b = NamedTimeZone.inSummerTime(baseDate, country);
-                    if (b != null && b) {
+                    Optional<Boolean> b = NamedTimeZone.inSummerTime(baseDate, country);
+                    if (b.isPresent() && b.get()) {
                         baseDate = new DateTimeValue(year, (byte) 7, (byte) 1, (byte) 0, (byte) 0, (byte) 0, 0, tzoffset, false);
                     }
                     dtv = DateTimeValue.makeDateTimeValue(baseDate.toDateValue(), (TimeValue)value);
                 } else {
                     dtv = value.toDateTime();
                 }
-                return formatTimeZone(dtv, component.charAt(0), format, country);
+                return formatTimeZone(dtv, (char)component.codePointAt(0), format, country);
 
             case 'F':       // day of week
                 if (ignoreDate) {
@@ -388,61 +407,59 @@ public class FormatDate extends SystemFunction implements Callable {
                     return StringView.of(numberer.getEraName(year)).tidy();
                 }
             default:
-                XPathException e = new XPathException("Unknown format-date/time component specifier '" + format.charAt(0) + '\'');
+                XPathException e = new XPathException("Unknown format-date/time component specifier '" + format.substring(0, 1) + '\'');
                 e.setErrorCode("FOFD1340");
                 e.setXPathContext(context);
                 throw e;
         }
     }
 
-    private static final Pattern formatPattern =
-            //Pattern.compile("([^ot,]*?)([ot]?)(,.*)?");   // GNU Classpath has problems with this one
-            Pattern.compile("([^,]*)(,.*)?");           // Note, the group numbers are different from above
+//    private static final Pattern formatPattern =
+//            Pattern.compile("([^,]*)(,.*)?");           // Note, the group numbers are different from above
 
-    private static final Pattern widthPattern =
-            Pattern.compile(",(\\*|[0-9]+)(\\-(\\*|[0-9]+))?");
+    private static final ARegularExpression widthPattern =
+            ARegularExpression.compile(",(\\*|[0-9]+)(\\-(\\*|[0-9]+))?", "");
 
-    private static final Pattern alphanumericPattern =
-            Pattern.compile("([A-Za-z0-9]|\\p{L}|\\p{N})*");
-    // the first term is redundant, but GNU Classpath can't cope with the others...
+//    private static final Pattern alphanumericPattern =
+//            Pattern.compile("([A-Za-z0-9]|\\p{L}|\\p{N})*");
+//    // the first term is redundant, but GNU Classpath can't cope with the others...
 
-    private static final Pattern digitsPattern =
-            Pattern.compile("\\p{Nd}+");
+    private static final ARegularExpression digitsPattern =
+            ARegularExpression.compile("\\p{Nd}+", "");
 
-    private static final Pattern digitsOrOptionalDigitsPattern =
-            Pattern.compile("[#\\p{Nd}]+");
+    private static final ARegularExpression digitsOrOptionalDigitsPattern =
+            ARegularExpression.compile("[#\\p{Nd}]+", "");
 
 
-    private static final Pattern fractionalDigitsPattern =
-            Pattern.compile("\\p{Nd}+#*");
+    private static final ARegularExpression fractionalDigitsPattern =
+            ARegularExpression.compile("\\p{Nd}+#*", "");
 
-    private static UnicodeString formatNumber(String component, int value,
-                                              String format, boolean defaultFormat, Numberer numberer, XPathContext context)
+    private static UnicodeString formatNumber(UnicodeString component, int value,
+                                              UnicodeString format, boolean defaultFormat, Numberer numberer, XPathContext context)
             throws XPathException {
-        int comma = format.lastIndexOf(',');
-        String widths = "";
+        int comma = (int)StringTool.lastIndexOf(format, ',');
+        UnicodeString widths = EmptyUnicodeString.getInstance();
         if (comma >= 0) {
             widths = format.substring(comma);
             format = format.substring(0, comma);
         }
-        String primary = format;
-        String modifier = null;
-        if (primary.endsWith("t")) {
+        UnicodeString primary = format;
+        String letterValue = null;
+        String ordinal = null;
+        int lastCP = StringTool.lastCodePoint(primary);
+        if (lastCP == 't') {
             primary = primary.substring(0, primary.length() - 1);
-            modifier = "t";
-        } else if (primary.endsWith("o")) {
+            letterValue = "traditional";
+        } else if (lastCP == 'o') {
             primary = primary.substring(0, primary.length() - 1);
-            modifier = "o";
+            ordinal = numberer.getOrdinalSuffixForDateTime(component.toString());
         }
-        UnicodeString primarySV = StringView.tidy(primary);
-        String letterValue = "t".equals(modifier) ? "traditional" : null;
-        String ordinal = "o".equals(modifier) ? numberer.getOrdinalSuffixForDateTime(component) : null;
 
         int min = 1;
         int max = Integer.MAX_VALUE;
 
-        if (digitsPattern.matcher(primary).matches()) {
-            int primaryLen = primarySV.length32();
+        if (digitsPattern.matches(primary)) {
+            int primaryLen = primary.length32();
             if (primaryLen > 1) {
                 // "A format token containing leading zeroes, such as 001, sets the minimum and maximum width..."
                 // We interpret this literally: a format token of "1" does not set a maximum, because it would
@@ -451,12 +468,12 @@ public class FormatDate extends SystemFunction implements Callable {
                 max = primaryLen;
             }
         }
-        if ("Y".equals(component)) {
+        if (STR_Y.equals(component)) {
             min = max = 0;
             if (!widths.isEmpty()) {
                 max = getWidths(widths)[1];
-            } else if (digitsPattern.matcher(primary).find()) {
-                IntIterator primaryIter = primarySV.codePoints();
+            } else if (digitsPattern.containsMatch(primary)) {
+                IntIterator primaryIter = primary.codePoints();
                 while (primaryIter.hasNext()) {
                     int c = primaryIter.next();
                     if (c == '#') {
@@ -474,12 +491,12 @@ public class FormatDate extends SystemFunction implements Callable {
                 value = value % (int) Math.pow(10, max);
             }
         }
-        if (primary.equals("I") || primary.equals("i")) {
+        if (primary.equals(STR_I) || primary.equals(STR_i)) {
             int[] range = getWidths(widths);
             min = range[0];
             //max = Integer.MAX_VALUE;
 
-            String roman = numberer.format(value, primarySV, null, letterValue, ordinal);
+            String roman = numberer.format(value, primary, null, letterValue, ordinal);
             UnicodeBuilder s = new UnicodeBuilder();
             s.append(roman);
             int len = StringTool.getStringLength(roman);
@@ -498,55 +515,54 @@ public class FormatDate extends SystemFunction implements Callable {
             }
             if (defaultFormat) {
                 // if format was defaulted, the explicit widths override the implicit format
-                if (primary.endsWith("1") && min != primary.length()) {
-                    StringBuilder sb = new StringBuilder(min + 1);
+                if (StringTool.lastCodePoint(primary) == '1' && min != primary.length()) {
+                    UnicodeBuilder sb = new UnicodeBuilder(min + 1);
                     for (int i = 1; i < min; i++) {
                         sb.append('0');
                     }
                     sb.append('1');
-                    primary = sb.toString();
+                    primary = sb.toUnicodeString();
                 }
             }
         }
 
-        if ("P".equals(component)) {
+        if (STR_P.equals(component)) {
             // A.M./P.M. can only be formatted as a name
-            if (!("N".equals(primary) || "n".equals(primary) || "Nn".equals(primary))) {
-                primary = "n";
+            if (!(STR_N.equals(primary) || STR_n.equals(primary) || STR_Nn.equals(primary))) {
+                primary = STR_n;
             }
             if (max == Integer.MAX_VALUE) {
                 // if no max specified, use 4. An explicit greater value allows use of "noon" and "midnight"
                 max = 4;
             }
-        } else if ("Y".equals(component)) {
+        } else if (STR_Y.equals(component)) {
             if (max < Integer.MAX_VALUE) {
                 value = value % (int) Math.pow(10, max);
             }
-        } else if ("f".equals(component)) {
+        } else if (STR_f.equals(component)) {
             // value is supplied as integer number of microseconds
-            UnicodeString uFormat = StringView.tidy(format);
             // If there is no Unicode digit in the pattern, output is implementation defined, so do what comes easily
-            if (!digitsPattern.matcher(primary).find()) {
-                return formatNumber(component, value, "1", defaultFormat, numberer, context);
+            if (!digitsPattern.containsMatch(primary)) {
+                return formatNumber(component, value, STR_1, defaultFormat, numberer, context);
             }
             // if there are grouping separators, handle as a reverse integer as described in the 3.1 spec
-            if (!digitsOrOptionalDigitsPattern.matcher(primary).matches()) {
-                UnicodeString reverseFormat = reverse(uFormat);
+            if (!digitsOrOptionalDigitsPattern.matches(primary)) {
+                UnicodeString reverseFormat = reverse(format);
                 UnicodeString reverseValue = reverse(BMPString.of("" + value));
                 UnicodeString reverseResult = formatNumber(
-                        "s", Integer.parseInt(reverseValue.toString()), reverseFormat.toString(), false, numberer, context);
+                        STR_s, Integer.parseInt(reverseValue.toString()), reverseFormat, false, numberer, context);
                 UnicodeString correctedResult = reverse(reverseResult);
                 if (correctedResult.length() > max) {
                     correctedResult = correctedResult.substring(0, max);
                 }
                 return correctedResult;
             }
-            if (!fractionalDigitsPattern.matcher(primary).matches()) {
+            if (!fractionalDigitsPattern.matches(primary)) {
                 throw new XPathException("Invalid picture for fractional seconds: " + primary, "FOFD1340");
             }
             UnicodeString str;
             if (value == 0) {
-                str = BMPString.of("0");
+                str = STR_0;
             } else {
                 str = BMPString.of(((1000000 + value) + "").substring(1));
                 if (str.length() > max) {
@@ -555,14 +571,14 @@ public class FormatDate extends SystemFunction implements Callable {
                 }
             }
             while (str.length() < min) {
-                str = str.concat(BMPString.of("0"));
+                str = str.concat(STR_0);
             }
             if (str.length() > min)
             while (str.length() > min && str.codePointAt(str.length() - 1) == '0') {
                 str = str.substring(0, str.length() - 1);
             }
             // for non standard decimal digit family
-            int zeroDigit = Alphanumeric.getDigitFamily(uFormat.codePointAt(0));
+            int zeroDigit = Alphanumeric.getDigitFamily(format.codePointAt(0));
             if (zeroDigit >= 0 && zeroDigit != '0') {
                 int[] digits = new int[10];
                 for (int z = 0; z <= 9; z++) {
@@ -575,20 +591,20 @@ public class FormatDate extends SystemFunction implements Callable {
             return str;
         }
 
-        if ("N".equals(primary) || "n".equals(primary) || "Nn".equals(primary)) {
+        if (STR_N.equals(primary) || STR_n.equals(primary) || STR_Nn.equals(primary)) {
             String s = "";
-            if ("M".equals(component)) {
+            if (STR_M.equals(component)) {
                 s = numberer.monthName(value, min, max);
-            } else if ("F".equals(component)) {
+            } else if (STR_F.equals(component)) {
                 s = numberer.dayName(value, min, max);
-            } else if ("P".equals(component)) {
+            } else if (STR_P.equals(component)) {
                 s = numberer.halfDayName(value, min, max);
             } else {
-                primary = "1";
+                primary = STR_1;
             }
-            if ("N".equals(primary)) {
+            if (STR_N.equals(primary)) {
                 return StringView.tidy(s.toUpperCase());
-            } else if ("n".equals(primary)) {
+            } else if (STR_n.equals(primary)) {
                 return StringView.tidy(s.toLowerCase());
             } else {
                 return StringView.tidy(s);
@@ -598,7 +614,7 @@ public class FormatDate extends SystemFunction implements Callable {
         // deal with grouping separators, decimal digit family, etc. for numeric values
         NumericGroupFormatter picGroupFormat;
         try {
-            picGroupFormat = FormatInteger.getPicSeparators(primarySV);
+            picGroupFormat = FormatInteger.getPicSeparators(primary);
         } catch (XPathException e) {
             if ("FODF1310".equals(e.getErrorCodeLocalPart())) {
                 e.setErrorCode("FOFD1340");
@@ -631,21 +647,22 @@ public class FormatDate extends SystemFunction implements Callable {
         return builder.toUnicodeString();
     }
 
-    private static int[] getWidths(String widths) throws XPathException {
+    private static int[] getWidths(UnicodeString widths) throws XPathException {
         try {
             int min = -1;
             int max = -1;
 
-            if (!"".equals(widths)) {
-                Matcher widthMatcher = widthPattern.matcher(widths);
-                if (widthMatcher.matches()) {
-                    String smin = widthMatcher.group(1);
+            if (!widths.isEmpty()) {
+                RegexIterator widthIter = widthPattern.analyze(widths);
+                StringValue firstMatch = widthIter.next();
+                if (firstMatch != null && firstMatch.length() == widths.length() && widthIter.isMatching()) {
+                    String smin = widthIter.getRegexGroup(1);
                     if (smin == null || "".equals(smin) || "*".equals(smin)) {
                         min = 1;
                     } else {
                         min = Integer.parseInt(smin);
                     }
-                    String smax = widthMatcher.group(3);
+                    String smax = widthIter.getRegexGroup(3);
                     if (smax == null || "".equals(smax) || "*".equals(smax)) {
                         max = Integer.MAX_VALUE;
                     } else {
@@ -662,11 +679,11 @@ public class FormatDate extends SystemFunction implements Callable {
                 }
             }
 
-            if (min > max) {
-                XPathException e = new XPathException("Minimum width in date/time picture exceeds maximum width");
-                e.setErrorCode("FOFD1340");
-                throw e;
-            }
+//            if (min > max) {
+//                XPathException e = new XPathException("Minimum width in date/time picture exceeds maximum width");
+//                e.setErrorCode("FOFD1340");
+//                throw e;
+//            }
             int[] result = new int[2];
             result[0] = min;
             result[1] = max;
@@ -678,17 +695,17 @@ public class FormatDate extends SystemFunction implements Callable {
         }
     }
 
-    private static UnicodeString formatTimeZone(DateTimeValue value, char component, String format, String country) throws XPathException {
-        int comma = format.lastIndexOf(',');
-        String widthModifier = "";
+    private static UnicodeString formatTimeZone(DateTimeValue value, char component, UnicodeString format, String country) throws XPathException {
+        int comma = (int)StringTool.lastIndexOf(format, ',');
+        UnicodeString widthModifier = EmptyUnicodeString.getInstance();
         if (comma >= 0) {
             widthModifier = format.substring(comma);
             format = format.substring(0, comma);
         }
         if (!value.hasTimezone()) {
-            if (format.equals("Z")) {
+            if (format.equals(STR_Z)) {
                 // military "local time"
-                return BMPString.of("J");
+                return STR_J;
             } else {
                 return EmptyUnicodeString.getInstance();
             }
@@ -698,20 +715,20 @@ public class FormatDate extends SystemFunction implements Callable {
             int min = widths[0];
             int max = widths[1];
             if (min <= 1) {
-                format = max >= 4 ? "0:00" : "0";
+                format = BMPString.of(max >= 4 ? "0:00" : "0");
             } else if (min <= 4) {
-                format = max >= 5 ? "00:00" : "00";
+                format = BMPString.of(max >= 5 ? "00:00" : "00");
             } else {
-                format = "00:00";
+                format = BMPString.of("00:00");
             }
         }
         if (format.isEmpty()) {
-            format = "00:00";
+            format = BMPString.of("00:00");
         }
         int tz = value.getTimezoneInMinutes();
-        boolean useZforZero = format.endsWith("t");
+        boolean useZforZero = StringTool.lastCodePoint(format) == 't';
         if (useZforZero && tz == 0) {
-            return BMPString.of("Z");
+            return STR_Z;
         }
         if (useZforZero) {
             format = format.substring(0, format.length() - 1);
@@ -720,7 +737,7 @@ public class FormatDate extends SystemFunction implements Callable {
         int separators = 0;
         int separatorChar = ':';
         int zeroDigit = -1;
-        int[] expandedFormat = StringTool.expand(StringView.of(format));
+        int[] expandedFormat = StringTool.expand(format);
         for (int ch : expandedFormat) {
             if (Character.getType(ch) == Character.DECIMAL_DIGIT_NUMBER) {
                 digits++;
@@ -768,36 +785,36 @@ public class FormatDate extends SystemFunction implements Callable {
             }
 
             return StringTool.fromCodePoints(buffer, used);
-        } else if (format.equals("Z")) {
+        } else if (format.equals(BMPString.of("Z"))) {
             // military timezone formatting
             int hour = tz / 60;
             int minute = tz % 60;
             if (hour < -12 || hour > 12 || minute != 0) {
-                return formatTimeZone(value, 'Z', "00:00", country);
+                return formatTimeZone(value, 'Z', BMPString.of("00:00"), country);
             } else {
                 return BMPString.of("" + "YXWVUTSRQPONZABCDEFGHIKLM".charAt(hour + 12));
             }
-        } else if (format.charAt(0) == 'N' || format.charAt(0) == 'n') {
+        } else if (format.codePointAt(0) == 'N' || format.codePointAt(0) == 'n') {
             return StringView.of(getNamedTimeZone(value, country, format)).tidy();
         } else {
-            return formatTimeZone(value, 'Z', "00:00", country);
+            return formatTimeZone(value, 'Z', BMPString.of("00:00"), country);
         }
 
     }
 
-    private static String getNamedTimeZone(DateTimeValue value, String country, String format) throws XPathException {
+    private static String getNamedTimeZone(DateTimeValue value, String country, UnicodeString format) throws XPathException {
 
         int min = 1;
-        int comma = format.indexOf(',');
+        int comma = (int)format.indexOf(',');
         if (comma > 0) {
-            String widths = format.substring(comma);
+            UnicodeString widths = format.substring(comma);
             int[] range = getWidths(widths);
             min = range[0];
         }
-        if (format.charAt(0) == 'N' || format.charAt(0) == 'n') {
+        if (format.codePointAt(0) == 'N' || format.codePointAt(0) == 'n') {
             if (min <= 5) {
                 String tzname = NamedTimeZone.getTimeZoneNameForDate(value, country);
-                if (format.charAt(0) == 'n') {
+                if (format.codePointAt(0) == 'n') {
                     tzname = tzname.toLowerCase();
                 }
                 return tzname;

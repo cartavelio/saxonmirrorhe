@@ -155,10 +155,8 @@ public class Configuration implements SourceResolver, NotationSet {
     private DocumentNumberAllocator documentNumberAllocator = new DocumentNumberAllocator();
     /*@Nullable*/
     private transient Debugger debugger = null;
-    private String defaultLanguage = Locale.getDefault().getLanguage();
-
-
-    private String defaultCountry = Locale.getDefault().getCountry();
+    private String defaultLanguage = Version.platform.getDefaultLanguage();
+    private String defaultCountry = Version.platform.getDefaultCountry();
     private Properties defaultOutputProperties = new Properties();
     private transient IDynamicLoader dynamicLoader = Version.platform.getDefaultDynamicLoader();
 

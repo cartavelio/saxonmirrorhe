@@ -99,7 +99,7 @@ public class XQueryCompiler {
         try {
             return new URI(staticQueryContext.getBaseURI());
         } catch (URISyntaxException err) {
-            throw new IllegalStateException(err);
+            throw new IllegalStateException("Invalid base URI for query: " + staticQueryContext.getBaseURI());
         }
     }
 

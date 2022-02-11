@@ -778,13 +778,27 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
 
 
     /**
-     * Multiply a duration by a number
+     * Multiply a duration by a double
      *
      * @param factor the number to multiply by
      * @return the result of the multiplication
      */
 
     public DurationValue multiply(double factor) throws XPathException {
+        XPathException err = new XPathException("Only subtypes of xs:duration can be multiplied by a number");
+        err.setErrorCode("XPTY0004");
+        err.setIsTypeError(true);
+        throw err;
+    }
+
+    /**
+     * Multiply a duration by a decimal
+     *
+     * @param factor the number to multiply by
+     * @return the result of the multiplication
+     */
+
+    public DurationValue multiply(BigDecimal factor) throws XPathException {
         XPathException err = new XPathException("Only subtypes of xs:duration can be multiplied by a number");
         err.setErrorCode("XPTY0004");
         err.setIsTypeError(true);

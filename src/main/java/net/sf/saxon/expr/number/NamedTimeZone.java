@@ -8,10 +8,12 @@
 package net.sf.saxon.expr.number;
 
 
-import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.value.DateTimeValue;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.value.CalendarValue;
+import net.sf.saxon.value.DateTimeValue;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -22,8 +24,8 @@ import java.util.*;
  */
 public class NamedTimeZone {
 
-    static Set<String> knownTimeZones = new HashSet<String>(50);
-    static HashMap<String, List<String>> idForCountry = new HashMap<String, List<String>>(50);
+    static Set<String> knownTimeZones = new HashSet<>(50);
+    static HashMap<String, List<String>> idForCountry = new HashMap<>(50);
     static List<String> worldTimeZones = new ArrayList<>(20);
 
     static {
@@ -298,7 +300,7 @@ public class NamedTimeZone {
      * the dateTimeValue supplied has no timezone, return a zero-length string.
      */
 
-    @CSharpReplaceBody(code="return formatTimeZoneOffset(date);")
+    //@CSharpReplaceBody(code="return formatTimeZoneOffset(date);")
     public static String getTimeZoneNameForDate(DateTimeValue date, /*@Nullable*/ String place) {
         if (!date.hasTimezone()) {
             return "";
@@ -318,7 +320,7 @@ public class NamedTimeZone {
             if (possibleZones == null) {
                 possibleZones = new ArrayList<>();
             }
-            long epochDate = date.getCalendar().getTime().getTime();
+            long epochDate = date.secondsSinceEpoch().multiply(BigDecimal.valueOf(1000)).longValue();
             for (String z : possibleZones) {
                 TimeZone tz = TimeZone.getTimeZone(z);
                 if (tz != null && tz.getOffset(epochDate) == tzMinutes * 60000) {
@@ -335,27 +337,19 @@ public class NamedTimeZone {
                     }
                 }
             }
-            if (zone == null) {
-                return formatTimeZoneOffset(date);
-            }
         }
-        Date javaDate;
-        try {
-            javaDate = date.getCalendar().getTime();
-        } catch (IllegalArgumentException e) {
-            // this happens with timezones that are allowed in XPath but not in Java, especially on JDK 1.4
+        if (zone == null) {
             return formatTimeZoneOffset(date);
         }
-        boolean inSummerTime = zone != null && zone.inDaylightTime(javaDate);
-        return zone.getDisplayName(inSummerTime, TimeZone.SHORT);
-//        for (String possibleZone : possibleZones) {
-//            TimeZone possibleTimeZone = TimeZone.getTimeZone(possibleZone);
-//            int offset = possibleTimeZone.getOffset(javaDate.getTime());
-//            if (offset == tzMinutes * 60000) {
-//                return possibleTimeZone.getDisplayName(inSummerTime, TimeZone.SHORT);
-//            }
-//        }
-//        return formatTimeZoneOffset(date);
+
+        boolean inSummerTime = inDaylightTime(zone, date.secondsSinceEpoch().longValue()*1000);
+        String zoneName = zone.getDisplayName(inSummerTime, TimeZone.SHORT);
+        if (zoneName == null) {
+            return formatTimeZoneOffset(date);
+        } else {
+            return zoneName;
+        }
+
     }
 
     /**
@@ -367,7 +361,7 @@ public class NamedTimeZone {
 
     public static String formatTimeZoneOffset(DateTimeValue timeValue) {
         UnicodeBuilder sb = new UnicodeBuilder();
-        DateTimeValue.appendTimezone(timeValue.getTimezoneInMinutes(), sb);
+        CalendarValue.appendTimezone(timeValue.getTimezoneInMinutes(), sb);
         return sb.toString();
     }
 
@@ -385,8 +379,7 @@ public class NamedTimeZone {
      * date/time is in daylight savings time. Otherwise, the formatted (numeric) timezone offset. If
      * the dateTimeValue supplied has no timezone, return a zero-length string.
      */
-
-    @CSharpReplaceBody(code = "return formatTimeZoneOffset(date);")
+    
     public static String getOlsenTimeZoneName(DateTimeValue date, String country) {
         if (!date.hasTimezone()) {
             return "";
@@ -399,13 +392,12 @@ public class NamedTimeZone {
             exampleId = possibleIds.get(0);
         }
         TimeZone exampleZone = TimeZone.getTimeZone(exampleId);
-        Date javaDate = date.getCalendar().getTime();
-        boolean inSummerTime = exampleZone.inDaylightTime(javaDate);
+        long millsecsSinceEpoch = date.secondsSinceEpoch().longValue();
+        boolean inSummerTime = inDaylightTime(exampleZone, millsecsSinceEpoch);
         int tzMinutes = date.getTimezoneInMinutes();
-        for (int i = 0; i < possibleIds.size(); i++) {
-            String olsen = possibleIds.get(i);
+        for (String olsen : possibleIds) {
             TimeZone possibleTimeZone = TimeZone.getTimeZone(olsen);
-            int offset = possibleTimeZone.getOffset(javaDate.getTime());
+            int offset = possibleTimeZone.getOffset(millsecsSinceEpoch);
             if (offset == tzMinutes * 60000) {
                 return inSummerTime ? olsen + "*" : olsen;
             }
@@ -428,13 +420,12 @@ public class NamedTimeZone {
      * information is available for the specified region.
      */
 
-    @CSharpReplaceBody(code="return false;")
-    public static Boolean inSummerTime(DateTimeValue date, String region) {
+    public static Optional<Boolean> inSummerTime(DateTimeValue date, String region) {
         String olsenName;
         if (region.length() == 2) {
             List<String> possibleIds = idForCountry.get(region.toLowerCase());
             if (possibleIds == null) {
-                return null;
+                return Optional.empty();
             } else {
                 olsenName = possibleIds.get(0);
             }
@@ -442,7 +433,12 @@ public class NamedTimeZone {
             olsenName = region;
         }
         TimeZone zone = TimeZone.getTimeZone(olsenName);
-        return Boolean.valueOf(zone.inDaylightTime(date.getCalendar().getTime()));
+        return Optional.of(inDaylightTime(zone, date.secondsSinceEpoch().longValue()));
+    }
+
+    @CSharpReplaceBody(code="return zone.inDaylightTime(millisecsSinceEpoch);")
+    private static boolean inDaylightTime(TimeZone zone, long millisecsSinceEpoch) {
+        return zone.inDaylightTime(new Date(millisecsSinceEpoch));
     }
 
     /**
@@ -458,10 +454,9 @@ public class NamedTimeZone {
      * date/time. Returns zero if the timezone is not recognized.
      */
 
-    @CSharpReplaceBody(code="return 0;")
     public static int civilTimeOffset(DateTimeValue date, String olsenName) {
         TimeZone zone = TimeZone.getTimeZone(olsenName);
-        return zone.getOffset(date.secondsSinceEpoch().longValue()*1000); // doesn't need millisecond precision
+        return zone.getOffset(date.secondsSinceEpoch().longValue()*1000);
     }
 
     /**

@@ -240,7 +240,7 @@ public class XPathCompiler {
         try {
             return new URI(env.getStaticBaseURI());
         } catch (URISyntaxException err) {
-            throw new IllegalStateException(err);
+            throw new IllegalStateException("Invalid base URI for XPath: " + env.getStaticBaseURI());
         }
     }
 

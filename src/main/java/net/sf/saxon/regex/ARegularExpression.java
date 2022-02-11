@@ -66,6 +66,10 @@ public class ARegularExpression implements RegularExpression {
 
     /**
      * Static factory method intended for simple static regular expressions known to be correct
+     * @param pattern the regular expression, using XPath 3.1 syntax
+     * @param flags regular expression flags
+     * @return the compiled regular expression
+     * @throws IllegalArgumentException if the regular expression or the flags are invalid
      */
 
     public static ARegularExpression compile(String pattern, String flags) {
