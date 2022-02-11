@@ -105,12 +105,16 @@ public class XHTMLURIEscaper extends HTMLURIEscaper {
 
     /**
      * Notify the start of an element
-     *  @param nameCode
-     * @param type
-     * @param attributes
-     * @param namespaces
-     * @param location
-     * @param properties
+     *
+     * @param nameCode   the name of the element
+     * @param type       the type annotation of the element
+     * @param attributes the attributes of this element
+     * @param namespaces the in-scope namespaces of this element: generally this is all the in-scope
+     *                   namespaces, without relying on inheriting namespaces from parent elements
+     * @param location   an object providing information about the module, line, and column where the node originated
+     * @param properties bit-significant properties of the element node. If there are no relevant
+     *                   properties, zero is supplied. The definitions of the bits are in class {@link ReceiverOption}
+     * @throws XPathException if an error occurs
      */
     @Override
     public void startElement(NodeName nameCode, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {

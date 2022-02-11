@@ -377,6 +377,8 @@ public class IntRangeSet extends IntSet {
 
     /**
      * Get the start points of the ranges
+     *
+     * @return the start points
      */
 
     public int[] getStartPoints() {
@@ -385,6 +387,8 @@ public class IntRangeSet extends IntSet {
 
     /**
      * Get the end points of the ranges
+     *
+     * @return the end points
      */
 
     public int[] getEndPoints() {
@@ -393,6 +397,8 @@ public class IntRangeSet extends IntSet {
 
     /**
      * Get the number of ranges actually in use
+     *
+     * @return the number of ranges
      */
 
     public int getNumberOfRanges() {
