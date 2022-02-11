@@ -184,6 +184,38 @@
             <assert>contains($result,'atomic')</assert>
         </result>
     </test-case>
+    
+    <test-case name="serialize-xml-saxon-009" covers="fn-serialize">
+        <description>serialize test - params supplied as map, 
+            with saxon:canonical serialization parameter</description>
+        <created by="Michael Kay" on="2021-04-09"/>
+        <environment ref="atomic"/>
+        <dependency type="spec" value="XP31+ XQ31+"/>
+        <test><![CDATA[
+              let $params := map {QName("http://saxon.sf.net/","canonical") : true()}
+              let $data := parse-xml("<a z='2' y='3' x='4'/>")
+              return serialize($data, $params)
+        ]]></test>
+        <result>
+            <assert><![CDATA[contains($result,'<a x="4" y="3" z="2"></a>')]]></assert>
+        </result>
+    </test-case>
+    
+    <test-case name="serialize-xml-saxon-010" covers="fn-serialize">
+        <description>serialize test - params supplied as map, 
+            with saxon:newline serialization parameter</description>
+        <created by="Michael Kay" on="2021-04-09"/>
+        <environment ref="atomic"/>
+        <dependency type="spec" value="XP31+ XQ31+"/>
+        <test><![CDATA[
+              let $params := map {"method":"text", QName("http://saxon.sf.net/","newline") : codepoints-to-string((13, 10))}
+              let $data := ("apple", "banana", "cherry")
+              return serialize(string-join($data, codepoints-to-string(10)), $params)
+        ]]></test>
+        <result>
+            <assert>contains($result, codepoints-to-string((13, 10)))</assert>
+        </result>
+    </test-case>
 
 
 
