@@ -2300,8 +2300,10 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
             <status>
-                <p>Available from Saxon 11; requires syntax extensions to be enabled. In the current
-                    implementation item type names must be unique within the stylesheet;
+                <p>Available from Saxon 11; requires syntax extensions to be enabled.  Also available in
+                    earlier releases under the synonym 
+                    <a class="bodylink code" href="/extensions/instructions/item-type">saxon:item-type</a>.
+                    In the current implementation item type names must be unique within the stylesheet;
                     import precedences for multiple declarations are not implemented, and item types
                     are not visible in other stylesheet packages. The <code>visibility</code> attribute,
                 if present, must have the value <code>"private"</code>.</p>
@@ -2313,6 +2315,9 @@
                     declaration</a> and <a class="bodylink"
                     href="/v4extensions/new-types/type-aliases">Type aliases</a>.</p>
             </status>
+            <status>Available from Saxon 11; requires syntax extensions to be enabled. Also available in
+                earlier releases under the synonym 
+                <a class="bodylink code" href="/extensions/instructions/array">saxon:array</a>.</status>
         </xsl-element>
     </section>
 
