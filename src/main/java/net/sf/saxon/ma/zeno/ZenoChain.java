@@ -115,7 +115,7 @@ public class ZenoChain<T> implements Iterable<T> {
             while (true) {
                 index++;
                 threshold *= 2;
-                if (index < masterList.size()) {
+                if (index <= masterList.size()) {
                     ArrayList<T> newInitialSegment = new ArrayList<>();
                     newInitialSegment.add(item);
                     masterList.add(0, newInitialSegment);
