@@ -39,7 +39,7 @@
     <reason>format-number() is allowed under XPath 2.0 though it should not be</reason>
   </exception>
   
-  <exception test-set="misc-JsonTestSuite" test-case="n_structure_100000_opening_arrays" run="false" report="tooBig">
+  <exception test-set="misc-JsonTestSuite" test-case="n_structure_100000_opening_arrays n_structure_open_array_object" run="false" report="tooBig">
     <created by="Michael Kay" on="2021-10-04"/>
     <reason>Fails with a stack overflow (we've set a limit but it's too low)</reason>
   </exception>
