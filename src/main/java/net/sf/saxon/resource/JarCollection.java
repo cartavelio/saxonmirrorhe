@@ -214,7 +214,7 @@ public class JarCollection extends AbstractResourceCollection {
 
     private class JarIterator implements Iterator<Resource>, Closeable {
         private final FilenameFilter filter;
-        private Resource next = null;
+        private Resource nextItem = null;
         private final XPathContext context;
         private final ZipInputStream zipInputStream;
         private String dirStr = "";
@@ -236,7 +236,7 @@ public class JarCollection extends AbstractResourceCollection {
 
         @Override
         public boolean hasNext() {
-            boolean more = next != null;
+            boolean more = nextItem != null;
             if (!more) {
                 try {
                     zipInputStream.close();
@@ -249,7 +249,7 @@ public class JarCollection extends AbstractResourceCollection {
 
         @Override
         public Resource next() {
-            Resource current = next;
+            Resource current = nextItem;
             advance();
             return current;
         }
@@ -265,11 +265,11 @@ public class JarCollection extends AbstractResourceCollection {
                 try {
                     entry = zipInputStream.getNextEntry();
                     if (entry == null) {
-                        next = null;
+                        nextItem = null;
                         return;
                     }
                 } catch (IOException e) {
-                    next = new FailedResource(null, new XPathException(e));
+                    nextItem = new FailedResource(null, new XPathException(e));
                     break;
                 }
                 if (entry.isDirectory()) {
@@ -305,7 +305,7 @@ public class JarCollection extends AbstractResourceCollection {
                             try {
                                 output.close();
                             } catch (IOException e) {
-                                next = new FailedResource(null, new XPathException(e));
+                                nextItem = new FailedResource(null, new XPathException(e));
                             }
                         }
                         InputDetails details = new InputDetails();
@@ -327,14 +327,14 @@ public class JarCollection extends AbstractResourceCollection {
                         details.parseOptions = options;
                         resourceURI = makeResourceURI(entry.getName());
                         details.resourceUri = resourceURI;
-                        next = makeResource(context.getConfiguration(), details);
+                        nextItem = makeResource(context.getConfiguration(), details);
                         if (metadata) {
                             Map<String, GroundedValue> properties = makeProperties(entry);
-                            next = new MetadataResource(resourceURI, next, properties);
+                            nextItem = new MetadataResource(resourceURI, nextItem, properties);
                         }
                         return;
                     } catch (XPathException e) {
-                        next = new FailedResource(resourceURI, e);
+                        nextItem = new FailedResource(resourceURI, e);
                     }
                 }
             }

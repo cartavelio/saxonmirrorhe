@@ -34,7 +34,7 @@ public class GroupStartingIterator extends GroupMatchingIterator implements Look
         runningContext = context.newMinorContext();
         this.population = runningContext.trackFocus(select.iterate(context));
         // the first item in the population always starts a new group
-        next = population.next();
+        nextItem = population.next();
     }
 
     @Override
@@ -53,13 +53,13 @@ public class GroupStartingIterator extends GroupMatchingIterator implements Look
                 break;
             }
             if (pattern.matches(nextCandidate, runningContext)) {
-                next = nextCandidate;
+                nextItem = nextCandidate;
                 return;
             } else {
                 currentMembers.add(nextCandidate);
             }
         }
-        next = null;
+        nextItem = null;
     }
 
 }

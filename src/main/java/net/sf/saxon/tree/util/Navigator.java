@@ -160,26 +160,26 @@ public final class Navigator {
             try {
                 baseURI = new URI(xmlBase);
                 if (!baseURI.isAbsolute()) {
-                    NodeInfo parent = node.getParent();
-                    if (parent == null) {
+                    NodeInfo parentNode = node.getParent();
+                    if (parentNode == null) {
                         // We have a parentless element with a relative xml:base attribute.
                         // See for example test XQTS fn-base-uri-10 and base-uri-27
-                        URI base = new URI(node.getSystemId());
-                        URI resolved = xmlBase.isEmpty() ? base : base.resolve(baseURI);
+                        URI base2 = new URI(node.getSystemId());
+                        URI resolved = xmlBase.isEmpty() ? base2 : base2.resolve(baseURI);
                         return resolved.toString();
                     }
-                    String startSystemId = node.getSystemId();
-                    if (startSystemId == null) {
+                    String startSysId = node.getSystemId();
+                    if (startSysId == null) {
                         return null;
                     }
-                    String parentSystemId = parent.getSystemId();
+                    String parentSysId = parentNode.getSystemId();
                     boolean isTopWithinEntity = false; // TODO: variable is unused. What's going on here? - MHK 2020-07-04
                     if (node instanceof TinyElementImpl) {
                         isTopWithinEntity = ((TinyElementImpl)node).getTree().isTopWithinEntity(((TinyElementImpl) node).getNodeNumber());
                     } else {
-                        isTopWithinEntity = !startSystemId.equals(parentSystemId);
+                        isTopWithinEntity = !startSysId.equals(parentSysId);
                     }
-                    URI base = new URI(isTopElementWithinEntity.test(node) ? startSystemId : parent.getBaseURI());
+                    URI base = new URI(isTopElementWithinEntity.test(node) ? startSysId : parentNode.getBaseURI());
                     //URI base = new URI(parent.getBaseURI());  //bug 3530
                     baseURI = xmlBase.isEmpty() ? base : base.resolve(baseURI);
                 }

@@ -241,7 +241,7 @@ public class StandardDiagnostics {
      *                2=values of variables
      */
 
-    public void printStackTrace(XPathContext context, Logger out, int level) {
+    public void logStackTrace(XPathContext context, Logger out, int level) {
         if (level > 0) {
             int depth = 20;
             while (depth-- > 0) {

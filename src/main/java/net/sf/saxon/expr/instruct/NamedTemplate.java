@@ -46,7 +46,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
     // which is responsible for any type checking that's needed.
 
     private StructuredQName templateName;
-    private boolean hasRequiredParams;
+    private boolean _hasRequiredParams;
     private boolean bodyIsTailCallReturner;
     private SequenceType requiredType;
     private ItemType requiredContextItemType = AnyItemType.getInstance();
@@ -152,7 +152,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
      */
 
     public void setHasRequiredParams(boolean has) {
-        hasRequiredParams = has;
+        _hasRequiredParams = has;
     }
 
     /**
@@ -162,7 +162,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
      */
 
     public boolean hasRequiredParams() {
-        return hasRequiredParams;
+        return _hasRequiredParams;
     }
 
     /**

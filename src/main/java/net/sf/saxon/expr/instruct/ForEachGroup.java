@@ -50,7 +50,7 @@ public class ForEachGroup extends Instruction
     private StringCollator collator = null;             // collation used for the grouping comparisons
     private transient AtomicComparer[] sortComparators = null;    // comparators used for sorting the groups
     private boolean composite = false;
-    private boolean isInFork = false;
+    private boolean inFork = false;
 
     private final Operand selectOp;
     private final Operand actionOp;
@@ -220,11 +220,11 @@ public class ForEachGroup extends Instruction
     }
 
     public boolean isInFork() {
-        return isInFork;
+        return inFork;
     }
 
     public void setIsInFork(boolean inFork) {
-        isInFork = inFork;
+        this.inFork = inFork;
     }
 
     /**

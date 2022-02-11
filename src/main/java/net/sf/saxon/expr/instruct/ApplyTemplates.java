@@ -40,7 +40,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
     private WithParam[] tunnelParams;
 
     protected boolean useCurrentMode = false;
-    protected boolean useTailRecursion = false;
+    protected boolean _useTailRecursion = false;
     protected Mode mode;
     protected boolean implicitSelect;
     protected boolean inStreamableConstruct = false;
@@ -82,7 +82,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
                         Mode mode) {
         this.setSelect(select);
         this.useCurrentMode = useCurrentMode;
-        this.useTailRecursion = useTailRecursion;
+        this._useTailRecursion = useTailRecursion;
         this.mode = mode;
         adoptChildExpression(select);
     }
@@ -262,7 +262,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
     @Override
     public Expression copy(RebindingMap rebindings) {
         ApplyTemplates a2 = new ApplyTemplates(
-                getSelect().copy(rebindings), useCurrentMode, useTailRecursion, implicitSelect, inStreamableConstruct, mode, ruleManager);
+                getSelect().copy(rebindings), useCurrentMode, _useTailRecursion, implicitSelect, inStreamableConstruct, mode, ruleManager);
         a2.setActualParams(WithParam.copy(a2, getActualParams(), rebindings));
         a2.setTunnelParams(WithParam.copy(a2, getTunnelParams(), rebindings));
         ExpressionTool.copyLocationInfo(this, a2);
@@ -291,7 +291,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return apply(output, context, useTailRecursion);
+        return apply(output, context, _useTailRecursion);
     }
 
 
@@ -321,11 +321,11 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
         ParameterSet tunnels = assembleTunnelParams(context, getTunnelParams());
 
         if (returnTailCall) {
-            XPathContextMajor c2 = context.newContext();
-            c2.setOrigin(this);
+            XPathContextMajor context2 = context.newContext();
+            context2.setOrigin(this);
             return new ApplyTemplatesPackage(
                     ExpressionTool.lazyEvaluate(getSelect(), context, false),
-                    targetMode, params, tunnels, separator, output, c2, getLocation());
+                    targetMode, params, tunnels, separator, output, context2, getLocation());
         }
 
         // Get an iterator to iterate through the selected nodes in original order
@@ -421,7 +421,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      */
 
     public boolean useTailRecursion() {
-        return useTailRecursion;
+        return _useTailRecursion;
     }
 
     /**
@@ -512,7 +512,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
         if (useCurrentMode) {
             flags = "c";
         }
-        if (useTailRecursion) {
+        if (_useTailRecursion) {
             flags += "t";
         }
         if (implicitSelect) {

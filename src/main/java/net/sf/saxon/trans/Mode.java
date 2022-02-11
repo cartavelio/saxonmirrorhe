@@ -25,6 +25,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.ModeTraceListener;
 import net.sf.saxon.trans.rules.*;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -458,7 +459,7 @@ public abstract class Mode extends Actor {
 
         // Iterate over this sequence
 
-        boolean lookahead = iterator.getProperties().contains(SequenceIterator.Property.LOOKAHEAD);
+        boolean lookahead = iterator.getProperties().contains(SequenceIteratorProperty.LOOKAHEAD);
         TemplateRule previousTemplate = null;
         boolean first = true;
 

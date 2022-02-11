@@ -118,20 +118,20 @@ public class RangeKey extends MapItem {
             public Iterator<KeyValuePair> iterator() {
                 return new Iterator<KeyValuePair>() {
                     AtomicIterator keys = keys();
-                    AtomicValue next = keys.next();
+                    AtomicValue nextItem = keys.next();
 
                     @Override
                     public boolean hasNext() {
-                        return next != null;
+                        return nextItem != null;
                     }
 
                     @Override
                     public KeyValuePair next() {
-                        if (next == null) {
+                        if (nextItem == null) {
                             return null;
                         } else {
-                            KeyValuePair kvp = new KeyValuePair(next, get(next));
-                            next = keys.next();
+                            KeyValuePair kvp = new KeyValuePair(nextItem, get(nextItem));
+                            nextItem = keys.next();
                             return kvp;
                         }
                     }

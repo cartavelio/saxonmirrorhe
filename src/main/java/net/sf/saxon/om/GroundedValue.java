@@ -16,7 +16,6 @@ import net.sf.saxon.tree.iter.UnfailingIterator;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -162,28 +161,7 @@ public interface GroundedValue extends Sequence {
     }
 
     default Iterable<? extends Item> asIterable() {
-        // For .NEU - don't use a lambda expression here
-        return new Iterable<Item>() {
-            @Override
-            public Iterator<Item> iterator() {
-                final UnfailingIterator base = iterate();
-                return new Iterator<Item>() {
-
-                    Item pending = null;
-
-                    @Override
-                    public boolean hasNext() {
-                        pending = base.next();
-                        return pending != null;
-                    }
-
-                    @Override
-                    public Item next() {
-                        return pending;
-                    }
-                };
-            }
-        };
+        return SequenceTool.groundedValueAsIterable(this);
     }
 
     /**

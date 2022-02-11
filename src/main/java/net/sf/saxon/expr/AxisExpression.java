@@ -283,10 +283,9 @@ public final class AxisExpression extends Expression {
                                     }
                                     itemType = elementTest;
                                 } else {
-                                    SchemaType contentType = decl.getType();
                                     itemType = new CombinedNodeTest(
                                             elementTest, Token.INTERSECT,
-                                            new ContentTypeTest(Type.ELEMENT, contentType, config, true));
+                                            new ContentTypeTest(Type.ELEMENT, decl.getType(), config, true));
                                 }
                             } else {
                                 itemType = elementTest;

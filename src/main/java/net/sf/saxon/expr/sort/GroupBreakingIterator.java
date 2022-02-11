@@ -14,6 +14,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -35,7 +36,7 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
     private final XPathContext baseContext;
     private final XPathContext runningContext;
     private List<Item> currentMembers;
-    private Item next;
+    private Item nextItem;
     private Item current = null;
     private int position = 0;
 
@@ -48,7 +49,7 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
         this.baseContext = baseContext;
         this.runningContext = baseContext.newMinorContext();
         this.population = runningContext.trackFocus(select.iterate(baseContext));
-        next = population.next();
+        nextItem = population.next();
     }
 
     private void advance() throws XPathException {
@@ -67,7 +68,7 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
                 if (!result.getBooleanValue()) {
                     currentMembers.add(nextCandidate);
                 } else {
-                    next = nextCandidate;
+                    nextItem = nextCandidate;
                     return;
                 }
             } catch (ClassCastException e) {
@@ -78,7 +79,7 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
                 throw err;
             }
         }
-        next = null;
+        nextItem = null;
     }
 
     @Override
@@ -93,17 +94,17 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
 
     @Override
     public boolean hasNext() {
-        return next != null;
+        return nextItem != null;
     }
 
     @Override
     public Item next() throws XPathException {
-        if (next == null) {
+        if (nextItem == null) {
             current = null;
             position = -1;
             return null;
         }
-        current = next;
+        current = nextItem;
         position++;
         advance();
         return current;
@@ -118,15 +119,15 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     * properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     * and {@link Property#LOOKAHEAD}. It is always
+     * properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     * and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      * acceptable to return the value zero, indicating that there are no known special properties.
      * It is acceptable for the properties of the iterator to change depending on its state.
      */
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LOOKAHEAD);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
     }
 
     //#if EE==true

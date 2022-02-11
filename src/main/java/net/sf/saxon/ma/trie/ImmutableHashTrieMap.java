@@ -175,8 +175,8 @@ public abstract class ImmutableHashTrieMap<K, V>
                             Tuple2<K, V> entry2) {
             // These entries must collide
             assert entry1._1.hashCode() == entry2._1.hashCode();
-            entries = ImmutableList.<Tuple2<K, V>>empty().prepend(entry1)
-                    .prepend(entry2);
+            ImmutableList<Tuple2<K, V>> newList = ImmutableList.empty();
+            entries = newList.prepend(entry1).prepend(entry2);
         }
 
         private ListHashNode(final ImmutableList<Tuple2<K, V>> entries) {
@@ -202,8 +202,7 @@ public abstract class ImmutableHashTrieMap<K, V>
             for (Tuple2<K, V> entry : entries) {
                 if (entry._1.equals(key)) {
                     // Node replacement
-                    newList =
-                            newList.prepend(new Tuple2<>(key, value));
+                    newList = newList.prepend(new Tuple2<>(key, value));
                     found = true;
                 } else {
                     newList = newList.prepend(entry);

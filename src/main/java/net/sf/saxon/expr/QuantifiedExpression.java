@@ -96,10 +96,10 @@ public class QuantifiedExpression extends Assignation {
 
         SequenceType decl = getRequiredType();
         if (decl.getCardinality() == StaticProperty.ALLOWS_ZERO) {
-            XPathException err = new XPathException("Range variable will never satisfy the type empty-sequence()", "XPTY0004");
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            throw err;
+            XPathException errNotEmpty = new XPathException("Range variable will never satisfy the type empty-sequence()", "XPTY0004");
+            errNotEmpty.setIsTypeError(true);
+            errNotEmpty.setLocation(getLocation());
+            throw errNotEmpty;
         }
         SequenceType sequenceType = SequenceType.makeSequenceType(decl.getPrimaryType(),
                 StaticProperty.ALLOWS_ZERO_OR_MORE);

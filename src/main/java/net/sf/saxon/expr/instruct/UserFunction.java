@@ -57,7 +57,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
     private SequenceType resultType;
     private SequenceType declaredResultType;
     protected Evaluator evaluator = null;
-    private boolean isUpdating = false;
+    private boolean updating = false;
     private int inlineable = -1; // 0:no 1:yes -1:don't know
     private int inliningCount = 0;
     private boolean overrideExtensionFunction = true;
@@ -427,7 +427,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
      */
 
     public void setUpdating(boolean isUpdating) {
-        this.isUpdating = isUpdating;
+        this.updating = isUpdating;
     }
 
     /**
@@ -437,7 +437,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
      */
 
     public boolean isUpdating() {
-        return isUpdating;
+        return updating;
     }
     
     /**

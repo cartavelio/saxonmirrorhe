@@ -11,14 +11,12 @@ import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -35,7 +33,7 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
     protected XPathContext baseContext;
     protected XPathContext runningContext;
     protected List<Item> currentMembers;
-    /*@Nullable*/ protected Item next;
+    /*@Nullable*/ protected Item nextItem;
     protected Item current = null;
     protected int position = 0;
 
@@ -54,13 +52,13 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
 
     @Override
     public boolean hasNext() {
-        return next != null;
+        return nextItem != null;
     }
 
     @Override
     public Item next() throws XPathException {
-        if (next != null) {
-            current = next;
+        if (nextItem != null) {
+            current = nextItem;
             position++;
             advance();
             return current;
@@ -77,8 +75,8 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
     }
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LOOKAHEAD, Property.LAST_POSITION_FINDER);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
     }
 
 //#if EE==true

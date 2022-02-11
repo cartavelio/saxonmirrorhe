@@ -34,14 +34,14 @@ public class LargeAttributeMap implements AttributeMap {
     private ImmutableHashTrieMap<NodeName, AttributeInfoLink> attributes;
     private NodeName first = null;
     private NodeName last = null;
-    private int size;
+    private int _size;
 
     private LargeAttributeMap() {}
 
     public LargeAttributeMap(List<AttributeInfo> atts) {
         assert !atts.isEmpty();
         this.attributes = ImmutableHashTrieMap.empty();
-        this.size = atts.size();
+        this._size = atts.size();
         AttributeInfoLink current = null;
         for (AttributeInfo att : atts) {
             if (attributes.get(att.getNodeName()) != null) {
@@ -63,7 +63,7 @@ public class LargeAttributeMap implements AttributeMap {
 
     private LargeAttributeMap(ImmutableHashTrieMap<NodeName, AttributeInfoLink> attributes, int size, NodeName first, NodeName last) {
         this.attributes = attributes;
-        this.size = size;
+        this._size = size;
         this.first = first;
         this.last = last;
     }
@@ -76,7 +76,7 @@ public class LargeAttributeMap implements AttributeMap {
 
     @Override
     public int size() {
-        return size;
+        return _size;
     }
 
     @Override
@@ -117,7 +117,7 @@ public class LargeAttributeMap implements AttributeMap {
             link.next = existing.next;
         }
         ImmutableHashTrieMap<NodeName, AttributeInfoLink> att2 = attributes.put(att.getNodeName(), link);
-        int size2 = existing == null ? size + 1 : size;
+        int size2 = existing == null ? _size + 1 : _size;
         return new LargeAttributeMap(att2, size2, first, last2);
     }
 
@@ -151,7 +151,7 @@ public class LargeAttributeMap implements AttributeMap {
             } else {
                 last2 = existing.prior;
             }
-            return new LargeAttributeMap(att2, size - 1, first2, last2);
+            return new LargeAttributeMap(att2, _size - 1, first2, last2);
         }
     }
 
@@ -177,7 +177,7 @@ public class LargeAttributeMap implements AttributeMap {
 
     @Override
     public synchronized List<AttributeInfo> asList() {
-        List<AttributeInfo> result = new ArrayList<>(size);
+        List<AttributeInfo> result = new ArrayList<>(_size);
         iterator().forEachRemaining(result::add);
         return result;
     }

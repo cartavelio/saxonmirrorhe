@@ -401,7 +401,7 @@ public class WindowClause extends Clause {
         public Item endPreviousItem;
         public Item endNextItem;
         public List<Item> contents;
-        public boolean isDespatched = false;
+        public boolean despatched = false;
 
         /**
          * Ask whether we have found the last item in the window
@@ -420,7 +420,7 @@ public class WindowClause extends Clause {
          * @return true if the tuple corresponding to this window has been despatched.
          */
         public boolean isDespatched() {
-            return isDespatched;
+            return despatched;
         }
     }
 }

@@ -39,7 +39,7 @@ public class XQueryFunction implements Declaration, Location {
     private boolean memoFunction;
     private NamespaceResolver namespaceResolver;
     private QueryModule staticContext;
-    private boolean isUpdating = false;
+    private boolean updating = false;
     private AnnotationList annotations = AnnotationList.EMPTY;
 
     /**
@@ -270,7 +270,7 @@ public class XQueryFunction implements Declaration, Location {
      */
 
     public void setUpdating(boolean isUpdating) {
-        this.isUpdating = isUpdating;
+        this.updating = isUpdating;
     }
 
     /**
@@ -280,7 +280,7 @@ public class XQueryFunction implements Declaration, Location {
      */
 
     public boolean isUpdating() {
-        return isUpdating;
+        return updating;
     }
 
     /**
@@ -393,7 +393,7 @@ public class XQueryFunction implements Declaration, Location {
                 compiledFunction.setLineNumber(location.getLineNumber());
                 compiledFunction.setSystemId(location.getSystemId());
                 compiledFunction.setStackFrameMap(map);
-                compiledFunction.setUpdating(isUpdating);
+                compiledFunction.setUpdating(updating);
                 compiledFunction.setAnnotations(annotations);
 
                 if (staticContext.getUserQueryContext().isCompileWithTracing()) {
@@ -424,7 +424,7 @@ public class XQueryFunction implements Declaration, Location {
 
     public void optimize() throws XPathException {
         body.checkForUpdatingSubexpressions();
-        if (isUpdating) {
+        if (updating) {
             if (ExpressionTool.isNotAllowedInUpdatingContext(body)) {
                 XPathException err = new XPathException(
                         "The body of an updating function must be an updating expression", "XUST0002");
@@ -479,7 +479,7 @@ public class XQueryFunction implements Declaration, Location {
         }
         
         // mark tail calls within the function body
-        if (opt.getOptimizerOptions().isSet(OptimizerOptions.TAIL_CALLS) && !isUpdating) {
+        if (opt.getOptimizerOptions().isSet(OptimizerOptions.TAIL_CALLS) && !updating) {
             int tailCalls = ExpressionTool.markTailFunctionCalls(body, functionName, arity);
             if (tailCalls != 0) {
                 compiledFunction.setBody(body);

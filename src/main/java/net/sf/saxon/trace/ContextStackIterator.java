@@ -27,7 +27,7 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
     // still useful to have a programmatic way of obtaining the stack trace, but this class is rather
     // clumsy and probably isn't used.
 
-    private XPathContextMajor next;
+    private XPathContextMajor nextFrame;
 
     /**
      * Create an iterator over the stack of XPath dynamic context objects, starting with the top-most
@@ -41,7 +41,7 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
         if (!(context instanceof XPathContextMajor)) {
             context = getMajorCaller(context);
         }
-        next = (XPathContextMajor) context;
+        nextFrame = (XPathContextMajor) context;
     }
 
     /**
@@ -53,7 +53,7 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
      */
     @Override
     public boolean hasNext() {
-        return next != null;
+        return nextFrame != null;
     }
 
     /**
@@ -69,17 +69,17 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
     /*@Nullable*/
     @Override
     public ContextStackFrame next() {
-        XPathContextMajor context = next;
+        XPathContextMajor context = nextFrame;
         if (context == null) {
             return null;
         }
         ContextOriginator origin = context.getOrigin();
 
         if (origin instanceof Controller) {
-            next = getMajorCaller(context);
+            nextFrame = getMajorCaller(context);
             return new ContextStackFrame.CallingApplication();
         } else if (origin instanceof BuiltInRuleSet) {
-            next = getMajorCaller(context);
+            nextFrame = getMajorCaller(context);
             return new ContextStackFrame.BuiltInTemplateRule(context);
         } else if (origin instanceof UserFunction) {
             ContextStackFrame.FunctionCall sf = new ContextStackFrame.FunctionCall();
@@ -88,7 +88,7 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
             sf.setFunctionName(ufc.getFunctionName());
             sf.setContextItem(context.getContextItem());
             sf.setContext(context);
-            next = getMajorCaller(context);
+            nextFrame = getMajorCaller(context);
             return sf;
         } else if (origin instanceof UserFunctionCall) {
             // No longer used? Bug 3671
@@ -98,7 +98,7 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
             sf.setFunctionName(ufc.getFunctionName());
             sf.setContextItem(context.getContextItem());
             sf.setContext(context);
-            next = getMajorCaller(context);
+            nextFrame = getMajorCaller(context);
             return sf;
         } else if (origin instanceof ApplyTemplates) {
             ContextStackFrame.ApplyTemplates sf = new ContextStackFrame.ApplyTemplates();
@@ -106,7 +106,7 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
             sf.setLocation(loc.getLocation());
             sf.setContextItem(context.getContextItem());
             sf.setContext(context);
-            next = getMajorCaller(context);
+            nextFrame = getMajorCaller(context);
             return sf;
         } else if (origin instanceof CallTemplate) {
             ContextStackFrame.CallTemplate sf = new ContextStackFrame.CallTemplate();
@@ -115,7 +115,7 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
             sf.setTemplateName(loc.getObjectName());
             sf.setContextItem(context.getContextItem());
             sf.setContext(context);
-            next = getMajorCaller(context);
+            nextFrame = getMajorCaller(context);
             return sf;
         } else if (origin instanceof GlobalVariable) {
             ContextStackFrame.VariableEvaluation sf = new ContextStackFrame.VariableEvaluation();
@@ -125,12 +125,12 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
             sf.setVariableName(var.getVariableQName());
             sf.setComponent(var);
             sf.setContext(context);
-            next = getMajorCaller(context);
+            nextFrame = getMajorCaller(context);
             return sf;
         } else {
             //other context changes are not considered significant enough to report
             //out.println("    In unidentified location " + construct);
-            next = getMajorCaller(context);
+            nextFrame = getMajorCaller(context);
             ContextStackFrame csf = next();
             if (csf == null) {
                 // we can't return null, because hasNext() returned true...

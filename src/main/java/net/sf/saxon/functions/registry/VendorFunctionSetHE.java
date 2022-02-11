@@ -80,7 +80,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
         register("doc", 2, Doc_2.class, NodeKindTest.DOCUMENT, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
-                .optionDetails(Doc_2.makeOptionsParameter());
+                .setOptionDetails(Doc_2.makeOptionsParameter());
 
         // Ask whether the supplied element node has any local namespace declarations
         register("has-local-namespaces", 1, HasLocalNamespaces.class, BuiltInAtomicType.BOOLEAN, ONE, 0)

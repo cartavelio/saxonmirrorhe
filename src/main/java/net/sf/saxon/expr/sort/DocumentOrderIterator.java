@@ -10,6 +10,7 @@ package net.sf.saxon.expr.sort;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -43,7 +44,7 @@ public final class DocumentOrderIterator implements SequenceIterator {
 
         this.comparer = comparer;
 
-        int len = base.getProperties().contains(Property.LAST_POSITION_FINDER)
+        int len = base.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)
                 ? ((LastPositionFinder) base).getLength() : 50;
         sequence = new ArrayList<>(len);
         base.forEachOrFail(item -> {

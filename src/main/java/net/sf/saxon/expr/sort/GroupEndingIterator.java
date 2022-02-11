@@ -33,7 +33,7 @@ public class GroupEndingIterator extends GroupMatchingIterator implements GroupI
         runningContext = context.newMinorContext();
         this.population = runningContext.trackFocus(select.iterate(context));
         // the first item in the population always starts a new group
-        next = population.next();
+        nextItem = population.next();
     }
 
     @Override
@@ -47,17 +47,17 @@ public class GroupEndingIterator extends GroupMatchingIterator implements GroupI
         currentMembers = new ArrayList<>(20);
         currentMembers.add(current);
 
-        next = current;
-        while (next != null) {
-            if (pattern.matches(next, runningContext)) {
-                next = population.next();
-                if (next != null) {
+        nextItem = current;
+        while (nextItem != null) {
+            if (pattern.matches(nextItem, runningContext)) {
+                nextItem = population.next();
+                if (nextItem != null) {
                     break;
                 }
             } else {
-                next = population.next();
-                if (next != null) {
-                    currentMembers.add(next);
+                nextItem = population.next();
+                if (nextItem != null) {
+                    currentMembers.add(nextItem);
                 }
             }
         }

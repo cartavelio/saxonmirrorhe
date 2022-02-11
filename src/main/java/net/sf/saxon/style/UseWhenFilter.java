@@ -415,8 +415,8 @@ public class UseWhenFilter extends ProxyReceiver {
             } else {
                 try {
                     staticContext.setContainingLocation(attLoc);
-                    Sequence seq = evaluateStatic(selectStr, location, staticContext);
-                    value = seq.materialize();
+                    Sequence sequence = evaluateStatic(selectStr, location, staticContext);
+                    value = sequence.materialize();
                 } catch (XPathException e) {
                     throw createXPathException("Error in " + elemName.getLocalPart() + " expression. " + e.getMessage(),
                             e.getErrorCodeLocalPart(), attLoc);

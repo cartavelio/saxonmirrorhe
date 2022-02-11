@@ -19,30 +19,30 @@ public class ImmList2<E> extends ImmList<E> {
 
     private final ImmList<E> left;
     private final ImmList<E> right;
-    private final int size;
+    private final int _size;
 
     protected ImmList2(ImmList<E> left, ImmList<E> right) {
         this.left = left;
         this.right = right;
-        this.size = left.size() + right.size();
+        this._size = left.size() + right.size();
     }
 
     @Override
     public E get(int index) {
         if (index < 0) {
-            throw outOfBounds(index, size);
+            throw outOfBounds(index, _size);
         } else if (index < left.size()) {
             return left.get(index);
-        } else if (index < size) {
+        } else if (index < _size) {
             return right.get(index - left.size());
         } else {
-            throw outOfBounds(index, size);
+            throw outOfBounds(index, _size);
         }
     }
 
     @Override
     public int size() {
-        return size;
+        return _size;
     }
 
     @Override
@@ -53,26 +53,26 @@ public class ImmList2<E> extends ImmList<E> {
     @Override
     public ImmList<E> replace(int index, E member) {
         if (index < 0) {
-            throw outOfBounds(index, size);
+            throw outOfBounds(index, _size);
         } else if (index < left.size()) {
             return new ImmList2<>(left.replace(index, member), right);
-        } else if (index < size) {
+        } else if (index < _size) {
             return new ImmList2<>(left, right.replace(index - left.size(), member));
         } else {
-            throw outOfBounds(index, size);
+            throw outOfBounds(index, _size);
         }
     }
 
     @Override
     public ImmList<E> insert(int index, E member) {
         if (index < 0) {
-            throw outOfBounds(index, size);
+            throw outOfBounds(index, _size);
         } else if (index <= left.size()) {
             return new ImmList2<>(left.insert(index, member), right).rebalance();
-        } else if (index <= size) {
+        } else if (index <= _size) {
             return new ImmList2<>(left, right.insert(index - left.size(), member)).rebalance();
         } else {
-            throw outOfBounds(index, size);
+            throw outOfBounds(index, _size);
         }
     }
 
@@ -89,22 +89,22 @@ public class ImmList2<E> extends ImmList<E> {
     @Override
     public ImmList<E> remove(int index) {
         if (index < 0) {
-            throw outOfBounds(index, size);
+            throw outOfBounds(index, _size);
         } else if (index < left.size()) {
             return new ImmList2<>(left.remove(index), right).rebalance();
-        } else if (index < size) {
+        } else if (index < _size) {
             return new ImmList2<>(left, right.remove(index - left.size())).rebalance();
         } else {
-            throw outOfBounds(index, size);
+            throw outOfBounds(index, _size);
         }
     }
 
     @Override
     public ImmList<E> subList(int start, int end) {
-        if (start < 0 || start >= size) {
-            throw outOfBounds(start, size);
-        } else if (end < start || end > size) {
-            throw outOfBounds(end, size);
+        if (start < 0 || start >= _size) {
+            throw outOfBounds(start, _size);
+        } else if (end < start || end > _size) {
+            throw outOfBounds(end, _size);
         }
         if (start < left.size() && end <= left.size()) {
             return left.subList(start, end);

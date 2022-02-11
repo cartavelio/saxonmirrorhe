@@ -24,7 +24,7 @@ import net.sf.saxon.value.AtomicValue;
 
 public class CurrentGroupCall extends Expression implements Callable {
 
-    private boolean isInHigherOrderOperand = false;
+    private boolean inHigherOrderOperand = false;
     private ItemType itemType = AnyItemType.getInstance();
     private ForEachGroup controllingInstruction = null; // may be unknown, when current group has dynamic scope
 
@@ -58,7 +58,7 @@ public class CurrentGroupCall extends Expression implements Callable {
     public void setControllingInstruction(ForEachGroup instruction, ItemType itemType, boolean isHigherOrder) {
         resetLocalStaticProperties();
         this.controllingInstruction = instruction;
-        this.isInHigherOrderOperand = isHigherOrder;
+        this.inHigherOrderOperand = isHigherOrder;
         this.itemType = itemType;
     }
 
@@ -104,7 +104,7 @@ public class CurrentGroupCall extends Expression implements Callable {
      */
 
     public boolean isInHigherOrderOperand() {
-        return isInHigherOrderOperand;
+        return inHigherOrderOperand;
     }
 
     /**
@@ -183,7 +183,7 @@ public class CurrentGroupCall extends Expression implements Callable {
     @Override
     public Expression copy(RebindingMap rebindings) {
         CurrentGroupCall cg = new CurrentGroupCall();
-        cg.isInHigherOrderOperand = isInHigherOrderOperand;
+        cg.inHigherOrderOperand = inHigherOrderOperand;
         cg.itemType = itemType;
         cg.controllingInstruction = controllingInstruction;
         return cg;

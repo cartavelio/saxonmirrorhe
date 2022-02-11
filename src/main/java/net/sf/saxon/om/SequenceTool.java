@@ -19,10 +19,14 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
+
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Utility class for manipulating sequences. Some of these methods should be regarded
@@ -63,7 +67,7 @@ public class SequenceTool {
     public static Sequence toMemoSequence(SequenceIterator iterator) throws XPathException {
         if (iterator instanceof EmptyIterator) {
             return EmptySequence.getInstance();
-        } else if (iterator.getProperties().contains(SequenceIterator.Property.GROUNDED)) {
+        } else if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
             return iterator.materialize();
         } else {
             return new MemoSequence(iterator);
@@ -83,7 +87,7 @@ public class SequenceTool {
      */
 
     public static Sequence toLazySequence(SequenceIterator iterator) throws XPathException {
-        if (iterator.getProperties().contains(SequenceIterator.Property.GROUNDED) &&
+        if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED) &&
                 !(iterator instanceof AscendingRangeIterator) &&
                 !(iterator instanceof DescendingRangeIterator)) {
             return iterator.materialize();
@@ -93,7 +97,7 @@ public class SequenceTool {
     }
 
     public static Sequence toLazySequence2(SequenceIterator iterator) throws XPathException {
-        if (iterator.getProperties().contains(SequenceIterator.Property.GROUNDED) &&
+        if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED) &&
                 !(iterator instanceof AscendingRangeIterator) &&
                 !(iterator instanceof DescendingRangeIterator)) {
             return iterator.materialize();
@@ -131,7 +135,7 @@ public class SequenceTool {
      */
 
     public static boolean hasLength(SequenceIterator iter, int length) throws XPathException {
-        if (iter.getProperties().contains(SequenceIterator.Property.LAST_POSITION_FINDER)) {
+        if (iter.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
             return ((LastPositionFinder) iter).getLength() == length;
         } else {
             int n = 0;
@@ -157,9 +161,9 @@ public class SequenceTool {
      */
 
     public static boolean sameLength(SequenceIterator a, SequenceIterator b) throws XPathException {
-        if (a.getProperties().contains(SequenceIterator.Property.LAST_POSITION_FINDER)) {
+        if (a.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
             return hasLength(b, ((LastPositionFinder) a).getLength());
-        } else if (b.getProperties().contains(SequenceIterator.Property.LAST_POSITION_FINDER)) {
+        } else if (b.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
             return hasLength(a, ((LastPositionFinder) b).getLength());
         } else {
             while (true) {
@@ -463,6 +467,55 @@ public class SequenceTool {
     }
 
 
+    /**
+     * Construct an AttributeMap given a list of {@link AttributeInfo} objects
+     * representing the individual attributes.
+     * @param list the list of attributes. It is the caller's responsibility
+     *             to ensure that this list contains no duplicates. The method
+     *             may detect this, but is not guaranteed to do so. Calling
+     *             {@link AttributeMap#verify} after constructing the attribute map verifies
+     *             that there are no duplicates. The order of items in the input
+     *             list is not necessarily preserved.
+     * @return an AttributeMap containing the specified attributes.
+     * @throws IllegalArgumentException if duplicate attributes are detected
+     */
 
+    public static AttributeMap attributeMapFromList(List<AttributeInfo> list) {
+        int n = list.size();
+        if (n == 0) {
+            return EmptyAttributeMap.getInstance();
+        } else if (n == 1) {
+            return SingletonAttributeMap.of(list.get(0));
+        } else if (n <= SmallAttributeMap.LIMIT) {
+            return new SmallAttributeMap(list);
+        } else {
+            return new LargeAttributeMap(list);
+        }
+    }
+
+    public static Iterable<? extends Item> groundedValueAsIterable(GroundedValue gv) {
+        // For .NEU - don't use a lambda expression here
+        return new Iterable<Item>() {
+            @Override
+            public Iterator<Item> iterator() {
+                final UnfailingIterator base = gv.iterate();
+                return new Iterator<Item>() {
+
+                    Item pending = null;
+
+                    @Override
+                    public boolean hasNext() {
+                        pending = base.next();
+                        return pending != null;
+                    }
+
+                    @Override
+                    public Item next() {
+                        return pending;
+                    }
+                };
+            }
+        };
+    }
 }
 

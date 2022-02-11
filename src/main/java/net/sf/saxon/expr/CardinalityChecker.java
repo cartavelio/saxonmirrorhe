@@ -12,6 +12,7 @@ import net.sf.saxon.event.TypeCheckingFilter;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.s9api.Location;
@@ -218,7 +219,7 @@ public final class CardinalityChecker extends UnaryExpression {
 
         // If the base iterator knows how many items there are, then check it now rather than wasting time
 
-        if (base.getProperties().contains(SequenceIterator.Property.LAST_POSITION_FINDER)) {
+        if (base.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
             int count = ((LastPositionFinder) base).getLength();
             if (count == 0 && !Cardinality.allowsZero(requiredCardinality)) {
                 typeError("An empty sequence is not allowed as the " +

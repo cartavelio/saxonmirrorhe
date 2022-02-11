@@ -64,7 +64,7 @@ public interface Item extends GroundedValue {
     UnicodeString getUnicodeStringValue();
 
     @Override
-    public default String getStringValue() {
+    default String getStringValue() {
         return getUnicodeStringValue().toString();
     }
 
@@ -87,17 +87,6 @@ public interface Item extends GroundedValue {
     default String toShortString() {
         return toString();
     }
-
-//    /**
-//     * Get the contents of this value in the form of a Java {@link java.util.Iterator},
-//     * so that the sequence value can be used in a for-each expression
-//     *
-//     * @return an Iterator delivering a sequence of items containing this single item only
-//     */
-//
-//    default Iterator<Item> iterator() {
-//        return new MonoIterator<>(head());
-//    }
 
     /**
      * Get the n'th item in the value, counting from 0
@@ -159,10 +148,6 @@ public interface Item extends GroundedValue {
     @Override
     default GroundedValue reduce() {
         return this;
-    }
-
-    static GroundedValue toGroundedValue(Item item) {
-        return item.reduce();
     }
 
     /**

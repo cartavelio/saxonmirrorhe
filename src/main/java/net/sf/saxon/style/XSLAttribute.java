@@ -214,13 +214,13 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                 }
                 NodeName attributeName = new FingerprintedQName(parts[0], nsuri, parts[1]);
                 attributeName.obtainFingerprint(getNamePool());
-                FixedAttribute inst = new FixedAttribute(attributeName,
+                FixedAttribute instruction = new FixedAttribute(attributeName,
                         validationAction,
                         schemaType);
-                inst.setInstruction(true);
-                inst.setLocation(allocateLocation());
-                compileContent(compilation, decl, inst, separator);
-                return inst;
+                instruction.setInstruction(true);
+                instruction.setLocation(allocateLocation());
+                compileContent(compilation, decl, instruction, separator);
+                return instruction;
             } else if (namespace instanceof StringLiteral) {
                 String nsuri = ((StringLiteral) namespace).stringify();
                 if (nsuri.equals("")) {
@@ -252,10 +252,10 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                 }
                 NodeName nodeName = new FingerprintedQName(parts[0], nsuri, parts[1]);
                 nodeName.obtainFingerprint(getNamePool());
-                FixedAttribute inst = new FixedAttribute(nodeName, validationAction, schemaType);
-                inst.setInstruction(true);
-                compileContent(compilation, decl, inst, separator);
-                return inst;
+                FixedAttribute fixedAtt = new FixedAttribute(nodeName, validationAction, schemaType);
+                fixedAtt.setInstruction(true);
+                compileContent(compilation, decl, fixedAtt, separator);
+                return fixedAtt;
             }
         } else {
             // if the namespace URI must be deduced at run-time from the attribute name

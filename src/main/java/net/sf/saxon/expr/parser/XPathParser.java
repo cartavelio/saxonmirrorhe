@@ -3490,9 +3490,9 @@ public class XPathParser {
         nextToken();
         if (t.currentToken == Token.RSQB) {
             nextToken();
-            SquareArrayConstructor block = new SquareArrayConstructor(members);
-            setLocation(block, offset);
-            return block;
+            SquareArrayConstructor arrayBlock = new SquareArrayConstructor(members);
+            setLocation(arrayBlock, offset);
+            return arrayBlock;
         }
         while (true) {
             Expression member = parseExprSingle();
@@ -4127,9 +4127,9 @@ public class XPathParser {
                     return b2;
                 }
             }
-            LocalBinding b2 = bindParametersInNestedFunctions(qName, inlineFunctionStack, s);
-            if (b2 != null) {
-                return b2;
+            LocalBinding b3 = bindParametersInNestedFunctions(qName, inlineFunctionStack, s);
+            if (b3 != null) {
+                return b3;
             }
         }
         return null;
@@ -4552,8 +4552,8 @@ public class XPathParser {
                     return new LocalNameTest(pool, nodeType, qname);
             }
         }
-        StructuredQName q = makeStructuredQName(qname, defaultNS);
-        int fp = pool.allocateFingerprint(q.getURI(), q.getLocalPart());
+        StructuredQName qName = makeStructuredQName(qname, defaultNS);
+        int fp = pool.allocateFingerprint(qName.getURI(), qName.getLocalPart());
         return new NameTest(nodeType, fp, pool);
     }
 

@@ -43,7 +43,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
     protected int singletonOperator;
     protected AtomicComparer comparer;
-    protected boolean needsRuntimeCheck = true;
+    protected boolean runtimeCheckNeeded = true;
     protected ComparisonCardinality comparisonCardinality = ComparisonCardinality.MANY_TO_MANY;
     protected boolean doneWarnings = false;
 
@@ -68,7 +68,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      */
 
     public boolean needsRuntimeCheck() {
-        return needsRuntimeCheck;
+        return runtimeCheckNeeded;
     }
 
     /**
@@ -78,7 +78,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      */
 
     public void setNeedsRuntimeCheck(boolean needsCheck) {
-        needsRuntimeCheck = needsCheck;
+        runtimeCheckNeeded = needsCheck;
     }
 
     /**
@@ -279,7 +279,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
         }
 
-        needsRuntimeCheck = !Type.isGuaranteedGenerallyComparable(pt0, pt1, Token.isOrderedOperator(singletonOperator));
+        runtimeCheckNeeded = !Type.isGuaranteedGenerallyComparable(pt0, pt1, Token.isOrderedOperator(singletonOperator));
 
         if (!Cardinality.allowsMany(c0) /*c0 == StaticProperty.EXACTLY_ONE*/ &&
                 !Cardinality.allowsMany(c1) /*c1 == StaticProperty.EXACTLY_ONE */ &&
@@ -449,7 +449,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 mc.comparisonCardinality = ComparisonCardinality.MANY_TO_ONE;
                 ExpressionTool.copyLocationInfo(this, mc);
                 mc.comparer = comparer;
-                mc.needsRuntimeCheck = needsRuntimeCheck;
+                mc.runtimeCheckNeeded = runtimeCheckNeeded;
                 return mc.optimize(visitor, contextInfo);
             } else {
                 comparisonCardinality = ComparisonCardinality.ONE_TO_ONE;
@@ -684,7 +684,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         try {
             return !(value0 == null || value1 == null) &&
                     compare(value0, singletonOperator, value1, comparer.provideContext(context),
-                            needsRuntimeCheck, context, getRetainedStaticContext());
+                            runtimeCheckNeeded, context, getRetainedStaticContext());
         } catch (XPathException e) {
             // re-throw the exception with location information added
             e.maybeSetLocation(getLocation());
@@ -734,7 +734,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             AtomicValue item0;
             AtomicComparer boundComparer = comparer.provideContext(context);
             while ((item0 = (AtomicValue) iter0.next()) != null) {
-                if (compare(item0, singletonOperator, value1, boundComparer, needsRuntimeCheck, context, getRetainedStaticContext())) {
+                if (compare(item0, singletonOperator, value1, boundComparer, runtimeCheckNeeded, context, getRetainedStaticContext())) {
                     iter0.close();
                     return true;
                 }
@@ -785,7 +785,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                         exhausted0 = true;
                     } else {
                         for (AtomicValue item1 : value1) {
-                            if (compare(item0, singletonOperator, item1, boundComparer, needsRuntimeCheck, context, getRetainedStaticContext())) {
+                            if (compare(item0, singletonOperator, item1, boundComparer, runtimeCheckNeeded, context, getRetainedStaticContext())) {
                                 iter0.close();
                                 iter1.close();
                                 return true;
@@ -805,7 +805,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                         exhausted1 = true;
                     } else {
                         for (AtomicValue item0 : value0) {
-                            if (compare(item0, singletonOperator, item1, boundComparer, needsRuntimeCheck, context, getRetainedStaticContext())) {
+                            if (compare(item0, singletonOperator, item1, boundComparer, runtimeCheckNeeded, context, getRetainedStaticContext())) {
                                 iter0.close();
                                 iter1.close();
                                 return true;

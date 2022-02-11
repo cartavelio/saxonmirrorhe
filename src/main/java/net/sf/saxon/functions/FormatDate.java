@@ -439,13 +439,13 @@ public class FormatDate extends SystemFunction implements Callable {
         int max = Integer.MAX_VALUE;
 
         if (digitsPattern.matcher(primary).matches()) {
-            int len = primarySV.length32();
-            if (len > 1) {
+            int primaryLen = primarySV.length32();
+            if (primaryLen > 1) {
                 // "A format token containing leading zeroes, such as 001, sets the minimum and maximum width..."
                 // We interpret this literally: a format token of "1" does not set a maximum, because it would
                 // cause the year 2006 to be formatted as "6".
-                min = len;
-                max = len;
+                min = primaryLen;
+                max = primaryLen;
             }
         }
         if ("Y".equals(component)) {
@@ -541,22 +541,22 @@ public class FormatDate extends SystemFunction implements Callable {
             if (!fractionalDigitsPattern.matcher(primary).matches()) {
                 throw new XPathException("Invalid picture for fractional seconds: " + primary, "FOFD1340");
             }
-            UnicodeString s;
+            UnicodeString str;
             if (value == 0) {
-                s = BMPString.of("0");
+                str = BMPString.of("0");
             } else {
-                s = BMPString.of(((1000000 + value) + "").substring(1));
-                if (s.length() > max) {
+                str = BMPString.of(((1000000 + value) + "").substring(1));
+                if (str.length() > max) {
                     // Spec bug 29749 says we should truncate rather than rounding
-                    s = s.substring(0, max);
+                    str = str.substring(0, max);
                 }
             }
-            while (s.length() < min) {
-                s = s.concat(BMPString.of("0"));
+            while (str.length() < min) {
+                str = str.concat(BMPString.of("0"));
             }
-            if (s.length() > min)
-            while (s.length() > min && s.codePointAt(s.length() - 1) == '0') {
-                s = s.substring(0, s.length() - 1);
+            if (str.length() > min)
+            while (str.length() > min && str.codePointAt(str.length() - 1) == '0') {
+                str = str.substring(0, str.length() - 1);
             }
             // for non standard decimal digit family
             int zeroDigit = Alphanumeric.getDigitFamily(uFormat.codePointAt(0));
@@ -565,11 +565,11 @@ public class FormatDate extends SystemFunction implements Callable {
                 for (int z = 0; z <= 9; z++) {
                     digits[z] = zeroDigit + z;
                 }
-                long n = Long.parseLong(s.toString());
-                int requiredLength = s.length32();
-                s = StringView.tidy(AbstractNumberer.convertDigitSystem(n, digits, requiredLength));
+                long n = Long.parseLong(str.toString());
+                int requiredLength = str.length32();
+                str = StringView.tidy(AbstractNumberer.convertDigitSystem(n, digits, requiredLength));
             }
-            return s;
+            return str;
         }
 
         if ("N".equals(primary) || "n".equals(primary) || "Nn".equals(primary)) {
@@ -604,19 +604,19 @@ public class FormatDate extends SystemFunction implements Callable {
         }
         UnicodeString adjustedPicture = picGroupFormat.getAdjustedPicture();
 
-        String s = numberer.format(value, adjustedPicture, picGroupFormat, letterValue, ordinal);
-        int len = StringTool.getStringLength(s);
-        int zeroDigit;
-        if (len < min) {
-            zeroDigit = Alphanumeric.getDigitFamily(adjustedPicture.codePointAt(0));
-            StringBuilder fsb = new StringBuilder(s);
-            while (len < min) {
-                StringTool.prependWideChar(fsb,zeroDigit);
-                len = len + 1;
+        String formattedStr = numberer.format(value, adjustedPicture, picGroupFormat, letterValue, ordinal);
+        int formattedLen = StringTool.getStringLength(formattedStr);
+        int digitZero;
+        if (formattedLen < min) {
+            digitZero = Alphanumeric.getDigitFamily(adjustedPicture.codePointAt(0));
+            StringBuilder fsb = new StringBuilder(formattedStr);
+            while (formattedLen < min) {
+                StringTool.prependWideChar(fsb, digitZero);
+                formattedLen = formattedLen + 1;
             }
-            s = fsb.toString();
+            formattedStr = fsb.toString();
         }
-        return StringView.tidy(s);
+        return StringView.tidy(formattedStr);
     }
 
     private static UnicodeString reverse(UnicodeString in) {

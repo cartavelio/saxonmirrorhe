@@ -206,7 +206,7 @@ public class DirectoryCollection extends AbstractResourceCollection {
         private final Stack<Iterator<File>> directories;
         private final FilenameFilter filter;
         private final boolean recurse;
-        private String next = null;
+        private String nextItem = null;
 
         public DirectoryIterator(Stack<Iterator<File>> directories, boolean recurse, FilenameFilter filter) {
             this.directories = directories;
@@ -217,12 +217,12 @@ public class DirectoryCollection extends AbstractResourceCollection {
 
         @Override
         public boolean hasNext() {
-            return next != null;
+            return nextItem != null;
         }
 
         @Override
         public String next() {
-            String s = next;
+            String s = nextItem;
             advance();
             return s;
         }
@@ -234,13 +234,13 @@ public class DirectoryCollection extends AbstractResourceCollection {
 
         private void advance() {
             if (directories.isEmpty()) {
-                next = null;
+                nextItem = null;
             } else {
                 Iterator<File> files = directories.peek();
                 while (!files.hasNext()) {
                     directories.pop();
                     if (directories.isEmpty()) {
-                        next = null;
+                        nextItem = null;
                         return;
                     }
                     files = directories.peek();
@@ -252,7 +252,7 @@ public class DirectoryCollection extends AbstractResourceCollection {
                     }
                     advance();
                 } else {
-                    next = nextFile.toURI().toString();
+                    nextItem = nextFile.toURI().toString();
                 }
             }
         }

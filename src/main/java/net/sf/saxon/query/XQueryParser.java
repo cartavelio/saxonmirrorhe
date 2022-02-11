@@ -2627,18 +2627,7 @@ public class XQueryParser extends XPathParser {
         List<LocalVariableReference> retainedRefs = new ArrayList<>();
         List<LocalVariableBinding> groupedBindings = new ArrayList<>();
         for (StructuredQName q : variableNames) {
-            boolean found = false;
-            search:
-            for (int i = clauseList.size() - 1; i >= 0; i--) {
-                for (LocalVariableBinding b : clauseList.get(i).getRangeVariables()) {
-                    if (q.equals(b.getVariableQName())) {
-                        groupedBindings.add(b);
-                        groupingRefs.add(new LocalVariableReference(b));
-                        found = true;
-                        break search;
-                    }
-                }
-            }
+            boolean found = locateDeclaration(clauseList, groupingRefs, groupedBindings, q);
             if (!found) {
                 grumble("The grouping variable " + q.getDisplayName() + " must be the name of a variable bound earlier in the FLWOR expression",
                         "XQST0094");
@@ -2694,6 +2683,20 @@ public class XQueryParser extends XPathParser {
         }
         clause.setComparers(comparers);
         clauseList.add(clause);
+    }
+
+    private boolean locateDeclaration(List<Clause> clauseList, List<LocalVariableReference> groupingRefs,
+                                      List<LocalVariableBinding> groupedBindings, StructuredQName q) {
+        for (int i = clauseList.size() - 1; i >= 0; i--) {
+            for (LocalVariableBinding b : clauseList.get(i).getRangeVariables()) {
+                if (q.equals(b.getVariableQName())) {
+                    groupedBindings.add(b);
+                    groupingRefs.add(new LocalVariableReference(b));
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private StructuredQName readVariableName() throws XPathException {

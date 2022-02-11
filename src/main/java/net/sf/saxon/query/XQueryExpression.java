@@ -34,6 +34,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 
@@ -370,7 +371,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             context.openStackFrame(stackFrameMap);
 
             SequenceIterator iterator = expression.iterate(context);
-            if (iterator.getProperties().contains(SequenceIterator.Property.GROUNDED)) {
+            if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
                 return iterator;
             } else {
                 return new ErrorReportingIterator(iterator, controller.getErrorReporter());

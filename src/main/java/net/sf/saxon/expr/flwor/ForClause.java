@@ -152,10 +152,10 @@ public class ForClause extends Clause {
     public void typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         SequenceType decl = rangeVariable.getRequiredType();
         if (allowsEmpty && !Cardinality.allowsZero(decl.getCardinality())) {
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
+            RoleDiagnostic emptyRole = new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
             Expression checker =
                     CardinalityChecker.makeCardinalityChecker(
-                            getSequence(), StaticProperty.ALLOWS_ONE_OR_MORE, role);
+                            getSequence(), StaticProperty.ALLOWS_ONE_OR_MORE, emptyRole);
             setSequence(checker);
         }
         SequenceType sequenceType = SequenceType.makeSequenceType(

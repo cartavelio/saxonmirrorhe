@@ -1259,8 +1259,8 @@ public abstract class Operation {
                 public int next() {
                     int next = base.next();
                     // Increase valid paren count
-                    if (groupNr >= matcher.captureState.parenCount) {
-                        matcher.captureState.parenCount = groupNr + 1;
+                    if (groupNr >= matcher._captureState.parenCount) {
+                        matcher._captureState.parenCount = groupNr + 1;
                     }
 
                     // Don't set paren if already set later on

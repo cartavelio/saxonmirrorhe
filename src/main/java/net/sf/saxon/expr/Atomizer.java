@@ -24,6 +24,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomizingIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.iter.UntypedAtomizingIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -553,8 +554,8 @@ public final class Atomizer extends UnaryExpression {
      */
 
     public static SequenceIterator getAtomizingIterator(SequenceIterator base, boolean oneToOne) throws XPathException {
-        EnumSet<SequenceIterator.Property> properties = base.getProperties();
-        if (properties.contains(SequenceIterator.Property.LAST_POSITION_FINDER)) {
+        EnumSet<SequenceIteratorProperty> properties = base.getProperties();
+        if (properties.contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
             int count = ((LastPositionFinder) base).getLength();
             if (count == 0) {
                 return EmptyIterator.emptyIterator();
@@ -562,7 +563,7 @@ public final class Atomizer extends UnaryExpression {
                 Item first = base.next();
                 return first.atomize().iterate();
             }
-        } else if (properties.contains(SequenceIterator.Property.ATOMIZING)) {
+        } else if (properties.contains(SequenceIteratorProperty.ATOMIZING)) {
             return new AxisAtomizingIterator((AtomizedValueIterator)base);
         }
         if (oneToOne) {

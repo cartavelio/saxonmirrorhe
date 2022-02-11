@@ -254,7 +254,7 @@ public class WindowClausePull extends TuplePull {
         if (binding != null) {
             context.setLocalVariable(binding.getLocalSlotNumber(), WindowClause.makeValue(w.endPreviousItem));
         }
-        w.isDespatched = true;
+        w.despatched = true;
     }
 
     /**

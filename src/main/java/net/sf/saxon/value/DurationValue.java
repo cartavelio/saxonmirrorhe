@@ -7,6 +7,7 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.Virtual;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.StringCollator;
@@ -632,6 +633,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @return the duration in seconds, as a double
      */
 
+    @Virtual
     public double getLengthInSeconds() {
         double a = months * (365.242199 / 12.0) * 24 * 60 * 60 + seconds + ((double) nanoseconds / 1_000_000_000);
         return negative ? -a : a;
@@ -726,6 +728,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @return the sum of the two durations
      */
 
+    @Virtual
     public DurationValue add(DurationValue other) throws XPathException {
         XPathException err = new XPathException("Only subtypes of xs:duration can be added");
         err.setErrorCode("XPTY0004");
@@ -740,6 +743,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @return the difference of the two durations
      */
 
+    @Virtual
     public DurationValue subtract(DurationValue other) throws XPathException {
         XPathException err = new XPathException("Only subtypes of xs:duration can be subtracted");
         err.setErrorCode("XPTY0004");
@@ -753,6 +757,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @return the original duration with its sign reversed, retaining its type
      */
 
+    @Virtual
     public DurationValue negate() {
         if (negative) {
             return new DurationValue(0, months, 0, 0, 0, seconds, nanoseconds, typeLabel);
@@ -768,6 +773,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @return the result of the multiplication
      */
 
+    @Virtual
     public DurationValue multiply(long factor) throws XPathException {
         return multiply((double)factor);
     }
@@ -780,6 +786,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @return the result of the multiplication
      */
 
+    @Virtual
     public DurationValue multiply(double factor) throws XPathException {
         XPathException err = new XPathException("Only subtypes of xs:duration can be multiplied by a number");
         err.setErrorCode("XPTY0004");
@@ -794,6 +801,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @return the result of the division
      */
 
+    @Virtual
     public DurationValue divide(double factor) throws XPathException {
         XPathException err = new XPathException("Only subtypes of xs:duration can be divided by a number");
         err.setErrorCode("XPTY0004");
@@ -808,6 +816,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @return the result of the division
      */
 
+    @Virtual
     public BigDecimalValue divide(DurationValue other) throws XPathException {
         XPathException err = new XPathException("Only subtypes of xs:duration can be divided by another duration");
         err.setErrorCode("XPTY0004");

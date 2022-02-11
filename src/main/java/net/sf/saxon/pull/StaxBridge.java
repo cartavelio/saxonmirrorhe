@@ -48,7 +48,7 @@ public class StaxBridge implements PullProvider {
     private final HashMap<String, NodeName> nameCache = new HashMap<>();
     private final Stack<NamespaceMap> namespaceStack = new Stack<>();
     private List unparsedEntities = null;
-    Event currentEvent = Event.START_OF_INPUT;
+    PullEvent currentEvent = PullEvent.START_OF_INPUT;
     int depth = 0;
     boolean ignoreIgnorable = false;
     
@@ -138,30 +138,30 @@ public class StaxBridge implements PullProvider {
      * Get the next event
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link Event#END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link PullEvent#END_OF_INPUT} is returned at the end of the sequence.
      */
 
     @Override
-    public Event next() throws XPathException {
-        if (currentEvent == Event.START_OF_INPUT) {
+    public PullEvent next() throws XPathException {
+        if (currentEvent == PullEvent.START_OF_INPUT) {
             // StAX isn't reporting START_DOCUMENT so we supply it ourselves
-            currentEvent = Event.START_DOCUMENT;
+            currentEvent = PullEvent.START_DOCUMENT;
             return currentEvent;
         }
-        if (currentEvent == Event.END_OF_INPUT || currentEvent == Event.END_DOCUMENT) {
+        if (currentEvent == PullEvent.END_OF_INPUT || currentEvent == PullEvent.END_DOCUMENT) {
             try {
                 reader.close();
             } catch (XMLStreamException e) {
                 throw new XPathException(e);
             }
-            return Event.END_OF_INPUT;
+            return PullEvent.END_OF_INPUT;
         }
         try {
             if (reader.hasNext()) {
                 int event = reader.next();
                 //System.err.println("Read event " + event);
                 currentEvent = translate(event);
-                if (currentEvent == Event.START_ELEMENT) {
+                if (currentEvent == PullEvent.START_ELEMENT) {
                     NamespaceMap nsMap = namespaceStack.peek();
                     int n = reader.getNamespaceCount();
                     for (int i = 0; i < n; i++) {
@@ -185,13 +185,13 @@ public class StaxBridge implements PullProvider {
                             AttributeInfo att = new AttributeInfo(fName, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, 0);
                             attList.add(att);
                         }
-                        attributes = AttributeMap.fromList(attList);
+                        attributes = SequenceTool.attributeMapFromList(attList);
                     }
-                } else if (currentEvent == Event.END_ELEMENT) {
+                } else if (currentEvent == PullEvent.END_ELEMENT) {
                     namespaceStack.pop();
                 }
             } else {
-                currentEvent = Event.END_OF_INPUT;
+                currentEvent = PullEvent.END_OF_INPUT;
             }
         } catch (XMLStreamException e) {
             String message = e.getMessage();
@@ -211,13 +211,13 @@ public class StaxBridge implements PullProvider {
     }
 
 
-    private Event translate(int event) throws XPathException {
+    private PullEvent translate(int event) throws XPathException {
         //System.err.println("EVENT " + event);
         switch (event) {
             case XMLStreamConstants.ATTRIBUTE:
-                return Event.ATTRIBUTE;
+                return PullEvent.ATTRIBUTE;
             case XMLStreamConstants.CDATA:
-                return Event.TEXT;
+                return PullEvent.TEXT;
             case XMLStreamConstants.CHARACTERS:
                 if (depth == 0 && reader.isWhiteSpace()) {
                     return next();
@@ -227,28 +227,28 @@ public class StaxBridge implements PullProvider {
 //                        System.err.println("TEXT[" + new String(reader.getTextCharacters(), reader.getTextStart(), reader.getTextLength()) + "]");
 //                        System.err.println("  ARRAY length " + reader.getTextCharacters().length + "[" + new String(reader.getTextCharacters(), 0, reader.getTextStart() + reader.getTextLength()) + "]");
 //                        System.err.println("  START: " + reader.getTextStart() + " LENGTH " + reader.getTextLength());
-                    return Event.TEXT;
+                    return PullEvent.TEXT;
                 }
             case XMLStreamConstants.COMMENT:
-                return Event.COMMENT;
+                return PullEvent.COMMENT;
             case XMLStreamConstants.DTD:
                 unparsedEntities = (List) reader.getProperty("javax.xml.stream.entities");
                 return next();
             case XMLStreamConstants.END_DOCUMENT:
-                return Event.END_DOCUMENT;
+                return PullEvent.END_DOCUMENT;
             case XMLStreamConstants.END_ELEMENT:
                 depth--;
-                return Event.END_ELEMENT;
+                return PullEvent.END_ELEMENT;
             case XMLStreamConstants.ENTITY_DECLARATION:
                 return next();
             case XMLStreamConstants.ENTITY_REFERENCE:
                 return next();
             case XMLStreamConstants.NAMESPACE:
-                return Event.NAMESPACE;
+                return PullEvent.NAMESPACE;
             case XMLStreamConstants.NOTATION_DECLARATION:
                 return next();
             case XMLStreamConstants.PROCESSING_INSTRUCTION:
-                return Event.PROCESSING_INSTRUCTION;
+                return PullEvent.PROCESSING_INSTRUCTION;
             case XMLStreamConstants.SPACE:
                 if (depth == 0) {
                     return next();
@@ -256,14 +256,14 @@ public class StaxBridge implements PullProvider {
                     // (Brave attempt, but Woodstox doesn't seem to report ignorable whitespace)
                     return next();
                 } else {
-                    return Event.TEXT;
+                    return PullEvent.TEXT;
                 }
             case XMLStreamConstants.START_DOCUMENT:
                 return next();  // we supplied the START_DOCUMENT ourselves
             //return START_DOCUMENT;
             case XMLStreamConstants.START_ELEMENT:
                 depth++;
-                return Event.START_ELEMENT;
+                return PullEvent.START_ELEMENT;
             default:
                 throw new IllegalStateException("Unknown StAX event " + event);
 
@@ -280,7 +280,7 @@ public class StaxBridge implements PullProvider {
      */
 
     @Override
-    public Event current() {
+    public PullEvent current() {
         return currentEvent;
     }
 
@@ -348,10 +348,10 @@ public class StaxBridge implements PullProvider {
      */
 
     @Override
-    public Event skipToMatchingEnd() throws XPathException {
+    public PullEvent skipToMatchingEnd() throws XPathException {
         switch (currentEvent) {
             case START_DOCUMENT:
-                currentEvent = Event.END_DOCUMENT;
+                currentEvent = PullEvent.END_DOCUMENT;
                 return currentEvent;
             case START_ELEMENT:
                 try {
@@ -362,7 +362,7 @@ public class StaxBridge implements PullProvider {
                             skipDepth++;
                         } else if (event == XMLStreamConstants.END_ELEMENT) {
                             if (skipDepth-- == 0) {
-                                currentEvent = Event.END_ELEMENT;
+                                currentEvent = PullEvent.END_ELEMENT;
                                 return currentEvent;
                             }
                         }
@@ -381,7 +381,7 @@ public class StaxBridge implements PullProvider {
 
     /**
      * Close the event reader. This indicates that no further events are required.
-     * It is not necessary to close an event reader after {@link Event#END_OF_INPUT} has
+     * It is not necessary to close an event reader after {@link PullEvent#END_OF_INPUT} has
      * been reported, but it is recommended to close it if reading terminates
      * prematurely. Once an event reader has been closed, the effect of further
      * calls on next() is undefined.
@@ -398,9 +398,9 @@ public class StaxBridge implements PullProvider {
 
     /**
      * Get the NodeName identifying the name of the current node. This method
-     * can be used after the {@link Event#START_ELEMENT}, {@link Event#PROCESSING_INSTRUCTION},
-     * {@link Event#ATTRIBUTE}, or {@link Event#NAMESPACE} events. With some PullProvider implementations,
-     * it can also be used after {@link Event#END_ELEMENT}, but this is not guaranteed.
+     * can be used after the {@link PullEvent#START_ELEMENT}, {@link PullEvent#PROCESSING_INSTRUCTION},
+     * {@link PullEvent#ATTRIBUTE}, or {@link PullEvent#NAMESPACE} events. With some PullProvider implementations,
+     * it can also be used after {@link PullEvent#END_ELEMENT}, but this is not guaranteed.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
      * If called when the current node is an unnamed namespace node (a node representing the default namespace)
      * the returned value is null.
@@ -410,7 +410,7 @@ public class StaxBridge implements PullProvider {
      */
     @Override
     public NodeName getNodeName() {
-        if (currentEvent == Event.START_ELEMENT || currentEvent == Event.END_ELEMENT) {
+        if (currentEvent == PullEvent.START_ELEMENT || currentEvent == PullEvent.END_ELEMENT) {
             String local = reader.getLocalName();
             String uri = reader.getNamespaceURI();
             // We keep a cache indexed by local name, on the assumption that most of the time, a given
@@ -428,7 +428,7 @@ public class StaxBridge implements PullProvider {
                 nameCache.put(local, cached);
                 return cached;
             }
-        } else if (currentEvent == Event.PROCESSING_INSTRUCTION) {
+        } else if (currentEvent == PullEvent.PROCESSING_INSTRUCTION) {
             String local = reader.getPITarget();
             return new NoNamespaceName(local);
         } else {
@@ -440,9 +440,9 @@ public class StaxBridge implements PullProvider {
      * Get the string value of the current element, text node, processing-instruction,
      * or top-level attribute or namespace node, or atomic value.
      * <p>In other situations the result is undefined and may result in an IllegalStateException.</p>
-     * <p>If the most recent event was a {@link Event#START_ELEMENT}, this method causes the content
+     * <p>If the most recent event was a {@link PullEvent#START_ELEMENT}, this method causes the content
      * of the element to be read. The current event on completion of this method will be the
-     * corresponding {@link Event#END_ELEMENT}. The next call of next() will return the event following
+     * corresponding {@link PullEvent#END_ELEMENT}. The next call of next() will return the event following
      * the END_ELEMENT event.</p>
      *
      * @return the String Value of the node in question, defined according to the rules in the
@@ -480,7 +480,7 @@ public class StaxBridge implements PullProvider {
                             depth++;
                         } else if (event == XMLStreamConstants.END_ELEMENT) {
                             if (depth-- == 0) {
-                                currentEvent = Event.END_ELEMENT;
+                                currentEvent = PullEvent.END_ELEMENT;
                                 if (combinedText != null) {
                                     return combinedText.toUnicodeString();
                                 } else {
@@ -519,9 +519,9 @@ public class StaxBridge implements PullProvider {
 
     @Override
     public SchemaType getSchemaType() {
-        if (currentEvent == Event.START_ELEMENT) {
+        if (currentEvent == PullEvent.START_ELEMENT) {
             return Untyped.getInstance();
-        } else if (currentEvent == Event.ATTRIBUTE) {
+        } else if (currentEvent == PullEvent.ATTRIBUTE) {
             return BuiltInAtomicType.UNTYPED_ATOMIC;
         } else {
             return null;

@@ -778,52 +778,55 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
      */
     @Override
     public javax.xml.namespace.NamespaceContext getNamespaceContext() {
-        return new NamespaceContext() {
-            final NamespaceContext rootNamespaceContext = StreamWriterToReceiver.this.rootNamespaceContext;
-            final Map<String, String> bindings = new HashMap<>();
+        return new StreamWriterNamespaceContext(this);
+    }
 
-            {
-                for (List<NamespaceBinding> list : setPrefixes) {
-                    for (NamespaceBinding binding : list) {
-                        bindings.put(binding.getPrefix(), binding.getURI());
-                    }
+    private static class StreamWriterNamespaceContext implements javax.xml.namespace.NamespaceContext {
+        final NamespaceContext rootNamespaceContext;
+        final Map<String, String> bindings = new HashMap<>();
+
+        public StreamWriterNamespaceContext(StreamWriterToReceiver streamWriter) {
+            rootNamespaceContext = streamWriter.rootNamespaceContext;
+            for (List<NamespaceBinding> list : streamWriter.setPrefixes) {
+                for (NamespaceBinding binding : list) {
+                    bindings.put(binding.getPrefix(), binding.getURI());
                 }
             }
+        }
 
-            @Override
-            public String getNamespaceURI(String prefix) {
-                String uri = bindings.get(prefix);
-                if (uri != null) {
-                    return uri;
-                }
-                return rootNamespaceContext.getNamespaceURI(prefix);
+        @Override
+        public String getNamespaceURI(String prefix) {
+            String uri = bindings.get(prefix);
+            if (uri != null) {
+                return uri;
             }
+            return rootNamespaceContext.getNamespaceURI(prefix);
+        }
 
-            @Override
-            public String getPrefix(String namespaceURI) {
-                for (Map.Entry<String, String> entry : bindings.entrySet()) {
-                    if (entry.getValue().equals(namespaceURI)) {
-                        return entry.getKey();
-                    }
+        @Override
+        public String getPrefix(String namespaceURI) {
+            for (Map.Entry<String, String> entry : bindings.entrySet()) {
+                if (entry.getValue().equals(namespaceURI)) {
+                    return entry.getKey();
                 }
-                return rootNamespaceContext.getPrefix(namespaceURI);
             }
+            return rootNamespaceContext.getPrefix(namespaceURI);
+        }
 
-            @Override
-            public Iterator<String> getPrefixes(String namespaceURI) {
-                List<String> prefixes = new ArrayList<>();
-                for (Map.Entry<String, String> entry : bindings.entrySet()) {
-                    if (entry.getValue().equals(namespaceURI)) {
-                        prefixes.add(entry.getKey());
-                    }
+        @Override
+        public Iterator<String> getPrefixes(String namespaceURI) {
+            List<String> prefixes = new ArrayList<>();
+            for (Map.Entry<String, String> entry : bindings.entrySet()) {
+                if (entry.getValue().equals(namespaceURI)) {
+                    prefixes.add(entry.getKey());
                 }
-                Iterator root = rootNamespaceContext.getPrefixes(namespaceURI);
-                while (root.hasNext()) {
-                    prefixes.add((String)root.next());
-                }
-                return prefixes.iterator();
             }
-        };
+            Iterator root = rootNamespaceContext.getPrefixes(namespaceURI);
+            while (root.hasNext()) {
+                prefixes.add((String)root.next());
+            }
+            return prefixes.iterator();
+        }
     }
 
     @Override

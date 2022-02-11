@@ -369,9 +369,9 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
 
         private NodeInfo advance() {
             if (base.hasNext()) {
-                OMAttribute next = (OMAttribute) base.next();
+                OMAttribute nextAtt = (OMAttribute) base.next();
                 index++;
-                return new AxiomAttributeWrapper(next, element, index);
+                return new AxiomAttributeWrapper(nextAtt, element, index);
             } else {
                 return null;
             }

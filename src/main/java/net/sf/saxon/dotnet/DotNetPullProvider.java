@@ -14,6 +14,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
@@ -38,7 +39,7 @@ public class DotNetPullProvider implements PullProvider, Location {
     private final XmlReader parser;
     private String baseURI;
     private boolean isEmptyElement = false;
-    private Event current = Event.START_OF_INPUT;
+    private PullEvent currentEvent = PullEvent.START_OF_INPUT;
     private boolean expandDefaults = true;
     private final Stack<NamespaceMap> namespaceStack = new Stack<>();
 
@@ -66,7 +67,7 @@ public class DotNetPullProvider implements PullProvider, Location {
 
     /**
      * Close the event reader. This indicates that no further events are required.
-     * It is not necessary to close an event reader after {@link Event#END_OF_INPUT} has
+     * It is not necessary to close an event reader after {@link PullEvent#END_OF_INPUT} has
      * been reported, but it is recommended to close it if reading terminates
      * prematurely. Once an event reader has been closed, the effect of further
      * calls on next() is undefined.
@@ -86,8 +87,8 @@ public class DotNetPullProvider implements PullProvider, Location {
      */
 
     @Override
-    public Event current() {
-        return current;
+    public PullEvent current() {
+        return currentEvent;
     }
 
     /**
@@ -142,9 +143,9 @@ public class DotNetPullProvider implements PullProvider, Location {
 
     /**
      * Get the NodeName identifying the name of the current node. This method
-     * can be used after the {@link Event#START_ELEMENT}, {@link Event#PROCESSING_INSTRUCTION},
-     * {@link Event#ATTRIBUTE}, or {@link Event#NAMESPACE} events. With some PullProvider implementations,
-     * it can also be used after {@link Event#END_ELEMENT}, but this is not guaranteed: a client who
+     * can be used after the {@link PullEvent#START_ELEMENT}, {@link PullEvent#PROCESSING_INSTRUCTION},
+     * {@link PullEvent#ATTRIBUTE}, or {@link PullEvent#NAMESPACE} events. With some PullProvider implementations,
+     * it can also be used after {@link PullEvent#END_ELEMENT}, but this is not guaranteed: a client who
      * requires the information at that point (for example, to do serialization) should insert an
      * {@link com.saxonica.xqj.pull.ElementNameTracker} into the pipeline.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
@@ -236,9 +237,9 @@ public class DotNetPullProvider implements PullProvider, Location {
      * Get the string value of the current element, text node, processing-instruction,
      * or top-level attribute or namespace node, or atomic value.
      * <p>In other situations the result is undefined and may result in an IllegalStateException.</p>
-     * <p>If the most recent event was a {@link Event#START_ELEMENT}, this method causes the content
+     * <p>If the most recent event was a {@link PullEvent#START_ELEMENT}, this method causes the content
      * of the element to be read. The current event on completion of this method will be the
-     * corresponding {@link Event#END_ELEMENT}. The next call of next() will return the event following
+     * corresponding {@link PullEvent#END_ELEMENT}. The next call of next() will return the event following
      * the END_ELEMENT event.</p>
      *
      * @return the String Value of the node in question, defined according to the rules in the
@@ -268,21 +269,21 @@ public class DotNetPullProvider implements PullProvider, Location {
      * Get the next event
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link Event#END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link PullEvent#END_OF_INPUT} is returned at the end of the sequence.
      */
 
     @Override
-    public Event next() throws XPathException {
+    public PullEvent next() throws XPathException {
         //System.err.println("next(), current = " + current + " empty: " + isEmptyElement);
-        if (current == Event.START_OF_INPUT) {
-            current = Event.START_DOCUMENT;
-            return current;
-        } else if (current == Event.END_DOCUMENT || current == Event.END_OF_INPUT) {
-            current = Event.END_OF_INPUT;
-            return current;
-        } else if (current == Event.START_ELEMENT && isEmptyElement) {
-            current = Event.END_ELEMENT;
-            return current;
+        if (currentEvent == PullEvent.START_OF_INPUT) {
+            currentEvent = PullEvent.START_DOCUMENT;
+            return currentEvent;
+        } else if (currentEvent == PullEvent.END_DOCUMENT || currentEvent == PullEvent.END_OF_INPUT) {
+            currentEvent = PullEvent.END_OF_INPUT;
+            return currentEvent;
+        } else if (currentEvent == PullEvent.START_ELEMENT && isEmptyElement) {
+            currentEvent = PullEvent.END_ELEMENT;
+            return currentEvent;
         }
 
         do {
@@ -315,17 +316,17 @@ public class DotNetPullProvider implements PullProvider, Location {
             isEmptyElement = parser.get_IsEmptyElement();
             //System.err.println("Next event: " + intype + " at depth " + parser.get_Depth() + " empty: " + isEmptyElement + "," + parser.get_IsEmptyElement());
             if (parser.get_EOF()) {
-                current = Event.END_DOCUMENT;
-                return current;
+                currentEvent = PullEvent.END_DOCUMENT;
+                return currentEvent;
             }
             if (intype == XmlNodeType.EntityReference) {
                 //parser.ResolveEntity();
-                current = null;
+                currentEvent = null;
             } else {
-                current = mapInputKindToOutputKind(intype);
-                if (current == Event.TEXT && parser.get_Depth() == 0) {
-                    current = null;
-                } else if (current == Event.START_ELEMENT) {
+                currentEvent = mapInputKindToOutputKind(intype);
+                if (currentEvent == PullEvent.TEXT && parser.get_Depth() == 0) {
+                    currentEvent = null;
+                } else if (currentEvent == PullEvent.START_ELEMENT) {
                     NamespaceMap nsMap = namespaceStack.peek();
                     if (parser.get_HasAttributes()) {
                         int limit = parser.get_AttributeCount();
@@ -341,13 +342,13 @@ public class DotNetPullProvider implements PullProvider, Location {
                         }
                     }
                     namespaceStack.push(nsMap);
-                } else if (current == Event.END_ELEMENT) {
+                } else if (currentEvent == PullEvent.END_ELEMENT) {
                     namespaceStack.pop();
                 }
             }
-        } while (current == null);
+        } while (currentEvent == null);
 
-        return current;
+        return currentEvent;
     }
 
     /**
@@ -358,35 +359,35 @@ public class DotNetPullProvider implements PullProvider, Location {
      * @return the Saxon PullProvider event number
      */
 
-    private Event mapInputKindToOutputKind(int in) {
+    private PullEvent mapInputKindToOutputKind(int in) {
         // Note: we are losing unparsedEntities - see test expr02. Apparently unparsed entities are not
         // available via an XMLValidatingReader. We would have to build a DOM to get them, and that's too high
         // a price to pay.
         switch (in) {
             case XmlNodeType.Attribute:
-                return Event.ATTRIBUTE;
+                return PullEvent.ATTRIBUTE;
             case XmlNodeType.CDATA:
-                return Event.TEXT;
+                return PullEvent.TEXT;
             case XmlNodeType.Comment:
-                return Event.COMMENT;
+                return PullEvent.COMMENT;
             case XmlNodeType.Document:
-                return Event.START_DOCUMENT;
+                return PullEvent.START_DOCUMENT;
             case XmlNodeType.DocumentFragment:
-                return Event.START_DOCUMENT;
+                return PullEvent.START_DOCUMENT;
             case XmlNodeType.Element:
-                return Event.START_ELEMENT;
+                return PullEvent.START_ELEMENT;
             case XmlNodeType.EndElement:
-                return Event.END_ELEMENT;
+                return PullEvent.END_ELEMENT;
             case XmlNodeType.ProcessingInstruction:
-                return Event.PROCESSING_INSTRUCTION;
+                return PullEvent.PROCESSING_INSTRUCTION;
             case XmlNodeType.SignificantWhitespace:
                 //System.err.println("Significant whitespace");
-                return Event.TEXT;
+                return PullEvent.TEXT;
             case XmlNodeType.Text:
-                return Event.TEXT;
+                return PullEvent.TEXT;
             case XmlNodeType.Whitespace:
                 //System.err.println("Plain whitespace");
-                return Event.TEXT;
+                return PullEvent.TEXT;
             //return -1;
             default:
                 return null;
@@ -416,16 +417,16 @@ public class DotNetPullProvider implements PullProvider, Location {
      */
 
     @Override
-    public Event skipToMatchingEnd() throws XPathException {
-        if (current == Event.START_ELEMENT) {
-            current = Event.END_ELEMENT;
+    public PullEvent skipToMatchingEnd() throws XPathException {
+        if (currentEvent == PullEvent.START_ELEMENT) {
+            currentEvent = PullEvent.END_ELEMENT;
             parser.Skip();
-        } else if (current == Event.START_DOCUMENT) {
-            current = Event.END_DOCUMENT;
+        } else if (currentEvent == PullEvent.START_DOCUMENT) {
+            currentEvent = PullEvent.END_DOCUMENT;
         } else {
-            throw new IllegalStateException(current + "");
+            throw new IllegalStateException(currentEvent + "");
         }
-        return current;
+        return currentEvent;
     }
 
     /**

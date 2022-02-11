@@ -852,9 +852,12 @@ public class Query {
                 }
             }
         } else {
+            //noinspection EmptyFinallyBlock
             try (InputStream queryStream = new FileInputStream(queryFileName)) {
                 compiler.setBaseURI(new File(queryFileName).toURI());
                 exp = compiler.compile(queryStream);
+            } finally {
+                // No action (here for C# conversion)
             }
         }
         return exp;

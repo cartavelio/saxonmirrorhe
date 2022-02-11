@@ -40,7 +40,7 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
     private final XsltController controller;
     private boolean usedAsPrimaryResult = false;
     private boolean usedAsSecondaryResult = false;
-    private boolean open = false;
+    private boolean opened = false;
     private boolean closed = false;
 
 
@@ -59,12 +59,12 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
             throw err;
         }
         super.open();
-        open = true;
+        opened = true;
     }
 
     @Override
     public synchronized void startDocument(int properties) throws XPathException {
-        if (!open) {
+        if (!opened) {
             open();
         }
         //checkNotClosed();
