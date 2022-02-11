@@ -252,7 +252,6 @@ public abstract class UnparsedTextFunction extends SystemFunction {
                 }
             }
             int start = 0;
-            int len = actual;
             if (first) {
                 if (buffer[0] == '\ufeff') {
                     start = 1;
@@ -265,7 +264,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
             } else if (mask <= 0xffff) {
                 output.accept(new Twine16(buffer, start, actual));
             } else {
-                output.accept(StringView.of(new String(buffer, start, len)));
+                output.accept(StringView.of(new String(buffer, start, actual)));
             }
         }
         reader.close();
