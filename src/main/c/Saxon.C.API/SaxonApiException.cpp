@@ -92,3 +92,7 @@ SaxonApiException::SaxonApiException(const char * m){
 	    return message.c_str();
 
 	}
+
+	std::string SaxonApiException::getMessageStr(){
+	    return message;
+	}

@@ -44,6 +44,12 @@ public:
 
     void setType(const char* ty);
 
+	 /**
+         * Get the first item in the sequence
+         * @return XdmItem or nullptr if sequence is empty
+         */
+    XdmItem * getHead();
+
     
     bool isAtomic(){
         return true;

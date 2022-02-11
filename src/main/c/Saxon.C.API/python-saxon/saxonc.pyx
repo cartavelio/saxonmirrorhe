@@ -706,7 +706,14 @@ cdef class PyXslt30Processor:
             py_stylesheet_string = kwds["stylesheet_file"]
             c_stylesheet = make_c_str(py_stylesheet_string)
             if py_stylesheet_string  is None or isfile(py_stylesheet_string) == False:
-              raise Exception("Stylesheet file does not exist")
+              raise Exception("Stylesheet file does not exist: "+ py_stylesheet_string)
+            c_stylesheet = make_c_str(py_stylesheet_string)
+            executable = PyXsltExecutable()
+            cexecutable =  self.thisxptr.compileFromFile(c_stylesheet)
+            if cexecutable is NULL:
+                return None
+            executable.thisxptr = cexecutable
+            return executable
           elif "associated_file" in kwds:
             py_stylesheet_string = kwds["associated_file"]
             if py_stylesheet_string  is None or isfile(py_stylesheet_string) == False:
@@ -1162,15 +1169,19 @@ cdef class PyXsltExecutable:
                                         and base_output_uri (str) which is used for for resolving relative URIs in the href
                                         attribute of the xsl:result-document instruction.
         Example:
-            1) result = xsltproc.transform_to_string(source_file="cat.xml", stylesheet_file="test1.xsl")
+            1) result = xsltproc.transform_to_string(source_file="cat.xml")
             2) xsltproc.set_source("cat.xml")\r
-               result = xsltproc.transform_to_string(stylesheet_file="test1.xsl")
-            3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
                result = xsltproc.transform_to_string(stylesheet_file="test1.xsl", xdm_node= node)
+            3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
+               result = xsltproc.transform_to_string(xdm_node= node)
         """
         cdef char * c_sourcefile = NULL
         cdef char * c_stylesheet = NULL
-        cdef PyXdmNode node_ = None
+        cdef const char* c_string = NULL
+        cdef PyXdmNode xdm_node = None
+        cdef saxoncClasses.XdmNode * derivednptr = NULL
+        if len(kwds) > 1:
+          raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, stylesheet_file)")
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "source_file":
@@ -1178,10 +1189,17 @@ cdef class PyXsltExecutable:
             if key == "base_output_uri":
               c_base_output_uri = make_c_str(value)
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
-          elif len(kwds) > 0:
-            raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, stylesheet_file)")
-        cdef const char* c_string
-        c_string = self.thisxptr.transformFileToString(c_sourcefile)
+            if "xdm_node" in kwds:
+              xdm_node = kwds["xdm_node"]
+              if isinstance(xdm_node, PyXdmNode):
+                derivednptr = xdm_node.derivednptr
+            else:
+              raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, stylesheet_file)")
+        if derivednptr is not NULL:
+          c_string = self.thisxptr.transformToString(derivednptr)
+          return make_py_str(c_string)
+        else:
+          c_string = self.thisxptr.transformFileToString(c_sourcefile)
         return make_py_str(c_string)
 
      def transform_to_file(self, **kwds):
@@ -1476,6 +1494,8 @@ cdef class PyXsltExecutable:
         py_source_string = None
         py_template_name_str = None
         py_stylesheet_string = None
+        cdef const char* c_string = NULL
+        print("test callingTemplateReturnStr")
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "source_file":
@@ -1489,8 +1509,9 @@ cdef class PyXsltExecutable:
               value_ = value;
               self.thisxptr.setInitialMatchSelection(value_.thisvptr)
         c_templateName = make_c_str(template_name)
-        cdef const char* c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
+        c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
         return make_py_str(c_string)
+     
      def call_template_returning_file(self, str template_name=None, **kwds):
         """
         call_template_returning_file(self, str template_name, **kwds)
@@ -1740,18 +1761,19 @@ cdef class PyXsltExecutable:
         """
         self.thisxptr.exceptionClear()
 
-     #def get_error_message(self):
+     @property
+     def error_message(self):
         """
-        get_error_message(self, index)
-        A transformation may have a number of errors reported against it. Get the ith error message if there are any errors
-        Args:
-            index (int): The i'th exception
+        get_error_message(self)
+        A transformation may have a number of errors reported against it. Get the error message if there are any errors
+
         Returns:
-            str: The message of the i'th exception. Return None if the i'th exception does not exist.
+            str: The message of the exception. Return None if the exception does not exist.
         """
-        """cdef const char* c_string = self.thisxptr.getErrorMessage()
-        ustring = c_string.decode('UTF-8') if c_string is not NULL else None
-        return ustring"""
+        cdef const char* c_string = self.thisxptr.getErrorMessage()
+        ustring = make_py_str(c_string)
+        return ustring
+
         """def get_error_code(self):  """
         """                        
         get_error_code(self, index)
@@ -2741,7 +2763,7 @@ cdef class PyXdmItem(PyXdmValue):
      def string_value(self):
         """
         string_value(self)
-        Property to get the the strign value of the XdmItem
+        Property to get the the string value of the XdmItem
         """
         cdef const char* c_string = self.derivedptr.getStringValue()
         ustring = make_py_str(c_string)
@@ -2750,6 +2772,7 @@ cdef class PyXdmItem(PyXdmValue):
         return make_py_str(self.derivedptr.getStringValue())
      def __str__(self):
         return make_py_str(self.derivedptr.getStringValue())
+
      @property
      def is_atomic(self):
         """

@@ -189,7 +189,7 @@ cdef extern from "../SaxonProcessor.h":
         # Get number of errors reported during execution or evaluate of stylesheet
         int exceptionCount()
 
-        # Get the ith error message if there are any error
+        # Get the error message if there are any error
         const char * getErrorMessage()
 
         # Get the ith error code if there are any error
@@ -327,6 +327,9 @@ cdef extern from "../SaxonProcessor.h":
 
         # Check for exception thrown.
         SaxonApiException* getException();
+
+        # Get the error message if there are any error
+        const char * getErrorMessage()
 
         # Clear any exception thrown
         void exceptionClear()
