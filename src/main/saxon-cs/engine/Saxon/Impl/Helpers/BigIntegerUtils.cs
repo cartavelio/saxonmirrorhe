@@ -55,5 +55,11 @@ namespace Saxon.Impl.Helpers {
                 throw new ArithmeticException("BigInteger outwith range of Int32");
             }
         }
+
+        public static BigInteger FromBytes(byte[] bytes, int offset, int len, bool unsigned, bool bigEndian) {
+            byte[] copy = new byte[len];
+            Array.Copy(bytes, offset, copy, 0, len);
+            return new System.Numerics.BigInteger(copy, unsigned, bigEndian);
+        }
     }
 }

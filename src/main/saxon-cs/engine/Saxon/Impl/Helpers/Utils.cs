@@ -31,24 +31,6 @@ namespace Saxon.Impl.Helpers {
             throw new NotSupportedException("Unsupported number radix " + radix);
         }
         
- 
-        // Test "instanceof" a generic type. For example,
-        // IsInstanceOfGenericType(new List<string>(), typeof(List<>))
-        // returns true
-        static bool IsInstanceOfGenericType(object instance, Type genericType)
-        {
-            Type type = instance.GetType();
-            while (type != null)
-            {
-                if (type.IsGenericType &&
-                    type.GetGenericTypeDefinition() == genericType)
-                {
-                    return true;
-                }
-                type = type.BaseType;
-            }
-            return false;
-        }
 
         public static double roundDouble(double value, int scale) {
             if (System.Double.IsNaN(value) || System.Double.IsInfinity(value) || value == 0.0) {
@@ -90,7 +72,45 @@ namespace Saxon.Impl.Helpers {
             return (float) roundDouble(value, scale);
         }
 
-
+        /// <summary>
+        /// Convert an array of 8 bytes containing an IEEE representation of a double, to a double
+        /// </summary>
+        /// <param name="bytes">An array of at least 8 bytes</param>
+        /// <param name="start">Offset of the first of the 8 bytes to be considered</param>
+        /// <param name="bigendian">true if the most significant byte comes first</param>
+        /// <returns></returns>
+        public static double bytesToDouble(byte[] bytes, int start, bool bigendian) {
+            if (bigendian == BitConverter.IsLittleEndian) {
+                byte[] copy = new byte[8];
+                System.Array.Copy(bytes, start, copy, 0, 8);
+                // that is, if the actual endianness is different from what the BitConverter expects
+                Array.Reverse(copy);
+                return BitConverter.ToDouble(copy);
+            }
+            else {
+                return BitConverter.ToDouble(bytes, start);
+            }
+        }
+        
+        /// <summary>
+        /// Convert an array of 4 bytes containing an IEEE representation of a float, to a float
+        /// </summary>
+        /// <param name="bytes">An array of at least 4 bytes</param>
+        /// <param name="start">Offset of the first of the 4 bytes to be considered</param>
+        /// <param name="bigendian">true if the most significant byte comes first</param>
+        /// <returns></returns>
+        public static float bytesToFloat(byte[] bytes, int start, bool bigendian) {
+            if (bigendian == BitConverter.IsLittleEndian) {
+                byte[] copy = new byte[4];
+                System.Array.Copy(bytes, start, copy, 0, 4);
+                // that is, if the actual endianness is different from what the BitConverter expects
+                Array.Reverse(copy);
+                return BitConverter.ToSingle(copy);
+            }
+            else {
+                return BitConverter.ToSingle(bytes, start);
+            }
+        }
 
     }
 }

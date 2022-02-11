@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
+using SysCollGen = System.Collections.Generic;
 using java.lang;
 using javax.xml.transform;
 using javax.xml.transform.stream;
@@ -10,11 +11,12 @@ using net.sf.saxon.lib;
 using net.sf.saxon.pull;
 using Saxon.Callbacks;
 using SaxonCS3.Saxon.Impl.Helpers;
+using System;
+using System.Collections.Generic;
+
 
 namespace Saxon.Impl.Helpers {
-    using System;
-    using System.Collections.Generic;
-
+    
     public class DotNetPlatform : net.sf.saxon.Platform {
         public DotNetPlatform() {
         }
@@ -66,7 +68,7 @@ namespace Saxon.Impl.Helpers {
             return "N";
         }
 
-        public System.IO.Stream locateResource(string filename, java.util.List<string> messages) {
+        public System.IO.Stream locateResource(string filename, SysCollGen.List<string> messages) {
             throw new java.lang.UnsupportedOperationException();
         }
 
@@ -326,10 +328,10 @@ namespace Saxon.Impl.Helpers {
             if (source is ActiveSource activeSource) {
                 return activeSource;
             }
-            if (source is StreamSource) {
+            if (source is StreamSource streamSource) {
                 
-                Stream inputStream = ((StreamSource) source).getInputStream();
-                string docTypeName = null;
+                Stream inputStream = streamSource.getInputStream();
+                //string docTypeName = null;
                 // bool hasDTD = false;
                 // if (inputStream.CanSeek) {
                 //     byte[] buffer = new byte[256];
@@ -381,8 +383,8 @@ namespace Saxon.Impl.Helpers {
                     // xmlReader = XmlReader.Create(new StringReader(sb.ToString()),
                     //     settings, parserContext);
                 }
-                else if (((StreamSource) source).getReader() != null) {
-                    xmlReader = XmlReader.Create(((StreamSource) source).getReader(), settings);
+                else if (streamSource.getReader() != null) {
+                    xmlReader = XmlReader.Create(streamSource.getReader(), settings);
                 }
                 else {
                     string sysId = source.getSystemId();
@@ -423,12 +425,12 @@ namespace Saxon.Impl.Helpers {
         public TracingXmlResolver(Uri baseURI) {
             this.baseUri = baseURI;
         }
-        public override object? GetEntity(Uri absoluteUri, string? role, Type? ofObjectToReturn) {
+        public override object GetEntity(Uri absoluteUri, string role, Type? ofObjectToReturn) {
             Console.Error.WriteLine("GetEntity " + absoluteUri);
             return base.GetEntity(absoluteUri, role, ofObjectToReturn);
         }
 
-        public override Uri ResolveUri(Uri? baseUri, string? relativeUri) {
+        public override Uri ResolveUri(Uri baseUri, string relativeUri) {
             Console.Error.WriteLine("Resolve " + baseUri + " .. " + relativeUri);
             if (relativeUri.StartsWith("-//")) {
                 // Looks like a Public ID: this isn't documented, but the parser calls us with a public ID!

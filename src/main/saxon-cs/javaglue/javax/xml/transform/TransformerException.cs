@@ -24,7 +24,7 @@ namespace javax.xml.transform
             
         }
 
-        public SourceLocator getLocator() {
+        public virtual SourceLocator getLocator() {
             return _locator;
         }
 
