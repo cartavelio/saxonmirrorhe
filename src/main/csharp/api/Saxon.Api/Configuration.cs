@@ -496,6 +496,44 @@ namespace Saxon.Api
             processor.registerExtensionFunction(f);
         }
 
+
+        /// <summary>
+        /// Set the media type to be associated with a file extension by  the standard collection handler
+        /// </summary>
+        /// <param name="extension">the file extension, for exmaple "xml". The value "" sets the 
+        /// default media type to be used for unregistered file extensions</param>
+        /// <param name="mediaType">the corresponding media type, for example "application/xml". The
+        /// choice of media type determines how a resource with this extension gets parsed, when the file 
+        /// appears as part of a collection</param>
+        public void RegisterFileExtension(String extension, String mediaType) {
+            Implementation.registerFileExtension(extension, mediaType);
+        }
+
+        /// <summary>
+        /// Associated a media type with a resource factory. This methodm may be called
+        /// to customize the behaviour of a collection to recognize different file extensions
+        /// </summary>
+        /// <param name="contentType">a media type or MIME type, for example application/xsd+xml</param>
+        /// <param name="factory">a ResourceFactory used to parse (or otherweise process) resource of that type</param>
+        public void RegisterMediaType(String contentType, IResourceFactory factory) {
+            Implementation.registerMediaType(contentType, new ResourceFactoryWrapper(factory, this));
+        }
+
+
+        /// <summary>
+        /// Get the media type to be associated with a file extension by the standard 
+        /// collection handler
+        /// </summary>
+        /// <param name="extension">the file extension, for example "xml". The value "" gets
+        /// the default media type to be used for unregistered file extensions. The default 
+        /// media type is also returned if the supplied file extension is not registered</param>
+        /// <returns>the corresponding media type, for example "application/xml". The choice
+        /// of media type determines how a resource with this extension gets parsed, when the file
+        /// appears as part of a collection.</returns>
+        public String GetMediaTypeForFileExtension(String extension) {
+            return Implementation.getMediaTypeForFileExtension(extension);
+        }
+
         /// <summary>
 		/// Copy an <c>XdmValue</c> to an <c>XmlDestination</c>
         /// </summary>
