@@ -414,7 +414,7 @@ XPath xpath = xpathFactory.newXPath();
          <p>The arguments are therefore supplied as a list. Each item in this list represents one
             argument. The rules applied to convert arguments from XDM values to Java objects are the
             same as the rules for Java extension functions described at 
-            <a class="bodylink" href="/extensibility/functions/converting-args">Converting Arguments to
+            <a class="bodylink" href="/extensibility/extension-functions-J/reflexive-functions/converting-args">Converting Arguments to
             Java Extension Functions</a>. Similarly, the return value is converted to an XDM value
             using the rules given at <a class="bodylink" href="/extensibility/java-to-xdm-conversion">Converting Java values to
                XDM values</a>.</p>
