@@ -509,7 +509,7 @@ task dotnetPublishZip(
     }
   }
 
-  archiveFileName = "SaxonCS-${saxonVersion.replaceAll("\\.", "-")}-${csplatform}.zip"
+  archiveFileName = "SaxonCS-${csver.replaceAll("\\.", "-")}-${csplatform}.zip"
   from "${buildDir}/cs/bin/Release/net5.0/${csrid}/publish"
   into "/SaxonCS-${saxonVersion}/"
 }
