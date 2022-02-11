@@ -1,0 +1,8 @@
+#!/bin/bash
+
+CID=$1
+
+until docker exec -t $CID mysqladmin ping -P 3306 -proot --password=admin | grep "mysqld is alive" ; do
+    echo "MySQL is unavailable - waiting for it... 😴"
+    sleep 5
+done
