@@ -673,7 +673,7 @@ namespace Saxon.Impl.Dom {
                 return count == 0 ? 1 : count;
             }
             
-            //  Starting with ix positioned at a node, which in the first in a span, calculate the length
+            //  Starting with ix positioned at a node, which is the first in a span, calculate the length
             //  of the span, that is the number of DOM nodes mapped to this XPath node.
             //  @return the number of nodes spanned
 
