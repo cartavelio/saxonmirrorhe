@@ -16,6 +16,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
+import java.util.Collections;
 
 /**
  * The standard implementation of the CommonResourceResolver used by Saxon.
@@ -39,7 +40,10 @@ public class CatalogResourceResolver extends CommonResourceResolver {
      * the constructor can be passed an existing resolver.
      */
     public CatalogResourceResolver() {
-        resolver = new Resolver(new XMLResolverConfiguration());
+        // We explicitly pass in an empty list so that in the absence of any other configuration,
+        // the resolver doesn't use ./catalog.xml as a default. Historically, Saxon didn't use a
+        // resolver unless a catalog was specified, so this default could have unexpected consequences.
+        resolver = new Resolver(new XMLResolverConfiguration(null, Collections.emptyList()));
     }
 
     /**

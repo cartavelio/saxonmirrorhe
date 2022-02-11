@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class ResolverConfiguration {
+public class ResolverConfigurationTest {
     @Test
     public void defaultCatalogResourceResolver() {
         Configuration config = new Configuration();
