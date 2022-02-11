@@ -119,7 +119,7 @@ public class StandardCollectionFinder implements CollectionFinder {
 
         String regex = context.getConfiguration().getConfigurationProperty(Feature.ZIP_URI_PATTERN);
         if (regex == null) {
-            regex = "^jar:|\\.jar$|\\.zip$";
+            regex = "^jar:|\\.jar$|\\.zip|\\.docx$$";
         }
         if (isJarFileURI(collectionURI) || ARegularExpression.compile(regex, "").containsMatch(StringView.of(collectionURI).tidy())) {
             return new JarCollection(context, collectionURI, params);
@@ -149,8 +149,10 @@ public class StandardCollectionFinder implements CollectionFinder {
     /**
      * Ask whether the collection URI should be interpreted as identifying a JAR (or ZIP) file.
      * This method is provided so that it can be overridden in subclasses. The default implementation
-     * returns true if the collection URI ends with the extension ".jar" or ".zip", or if it
+     * returns true if the collection URI ends with the extension ".jar", ".zip", or ".docx", or if it
      * is a URI using the "jar" scheme.
+     * <p>The set of URIs recognized as ZIP collections can also be extended by setting the
+     * configuration property {@link Feature#ZIP_URI_PATTERN}.</p>
      * @param collectionURI the requested absolute collection URI
      * @return true if the collection URI should be interpreted as a JAR or ZIP file
      */
