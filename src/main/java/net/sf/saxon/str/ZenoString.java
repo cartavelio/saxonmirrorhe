@@ -58,6 +58,12 @@ public class ZenoString extends UnicodeString {
     }
 
     /**
+     * An empty ZenoString
+     */
+
+    public static final ZenoString EMPTY = new ZenoString();
+
+    /**
      * Construct a ZenoString from a supplied UnicodeString
      * @param content the supplied UnicodeString
      * @return the resulting ZenoString
