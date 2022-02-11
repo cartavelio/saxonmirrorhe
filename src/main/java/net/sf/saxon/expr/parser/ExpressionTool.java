@@ -1092,7 +1092,9 @@ public class ExpressionTool {
         if (!visitor.isOptimizeForStreaming()) {
             body = opt.eliminateCommonSubexpressions(body);
         }
+        //#if BYTECODE==true
         opt.injectByteCodeCandidates(body);
+        //#endif
         opt.prepareForStreaming(body);
 
         computeEvaluationModesForUserFunctionCalls(body);

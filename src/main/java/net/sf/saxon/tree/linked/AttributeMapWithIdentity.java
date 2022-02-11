@@ -167,8 +167,10 @@ public class AttributeMapWithIdentity implements AttributeMap {
     }
 
     @Override
-    public List<AttributeInfo> asList() {
-        return attributes.stream().filter(info -> !(info instanceof AttributeInfo.Deleted)).collect(Collectors.toList());
+    public ArrayList<AttributeInfo> asList() {
+        List<AttributeInfo> list = attributes.stream().filter(
+                info -> !(info instanceof AttributeInfo.Deleted)).collect(Collectors.toList());
+        return list instanceof ArrayList ? (ArrayList<AttributeInfo>)list : new ArrayList<>(list);
     }
     //#endif
 

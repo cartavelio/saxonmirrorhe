@@ -702,8 +702,9 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *
      * @return the schema component represented as a function from property names to property values.
      */
+
     @Override
-    public Function getComponentAsFunction() {
+    public net.sf.saxon.om.Function getComponentAsFunction() {
         return UserSimpleType.getComponentAsFunction(this);
     }
     //#endif

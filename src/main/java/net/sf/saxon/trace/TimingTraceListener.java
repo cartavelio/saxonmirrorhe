@@ -22,8 +22,10 @@ import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
-import net.sf.saxon.s9api.Push;
+import net.sf.saxon.s9api.push.Push;
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.push.Document;
+import net.sf.saxon.s9api.push.Element;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.trans.CompilerInfo;
@@ -112,11 +114,11 @@ public class TimingTraceListener implements TraceListener {
             tr.setDestination(result);
 
             Push push = new PushToReceiver(tr);
-            Push.Document doc = push.document(true);
-            Push.Element trace = doc.element("trace")
+            Document doc = push.document(true);
+            Element trace = doc.element("trace")
                     .attribute("t-total", Double.toString((double) t_total / 1000000));
             for (ComponentMetrics ins : instructMap.values()) {
-                Push.Element fn = trace.element("fn");
+                Element fn = trace.element("fn");
                 String name;
                 if (ins.component.getObjectName() != null) {
                     name = ins.component.getObjectName().getDisplayName();

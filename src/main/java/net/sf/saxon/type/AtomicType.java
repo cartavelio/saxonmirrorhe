@@ -73,12 +73,22 @@ public interface AtomicType extends SimpleType, PlainType, CastingTarget {
     /**
      * Determine whether the atomic type is a primitive type.  The primitive types are
      * the 19 primitive types of XML Schema, plus xs:integer, xs:dayTimeDuration and xs:yearMonthDuration;
-     * xs:untypedAtomic; and all supertypes of these (xs:anyAtomicType, xs:numeric, ...)
+     * xs:untypedAtomic; and all supertypes of these (xs:anyAtomicType,  ...)
      *
      * @return true if the type is considered primitive under the above rules
      */
 
     boolean isPrimitiveType();
+
+    /**
+     * Get the primitive base type.  The primitive types are
+     * the 19 primitive types of XML Schema, plus xs:integer, xs:dayTimeDuration and xs:yearMonthDuration;
+     * xs:untypedAtomic; and all supertypes of these (xs:anyAtomicType, ...)
+     */
+
+    default BuiltInAtomicType getPrimitiveAtomicType() {
+        return (BuiltInAtomicType)getPrimitiveItemType();
+    }
 
     /**
      * Ask whether this type is an ID type. This is defined to be any simple type
@@ -156,7 +166,7 @@ public interface AtomicType extends SimpleType, PlainType, CastingTarget {
      */
     @Override
     default double getDefaultPriority() {
-        if (this == BuiltInAtomicType.ANY_ATOMIC) {
+        if (getBasicAlphaCode().equals("A")) {
             return 0;
         }
         double factor = 1;

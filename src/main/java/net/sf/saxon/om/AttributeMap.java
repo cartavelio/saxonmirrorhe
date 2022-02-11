@@ -167,8 +167,8 @@ public interface AttributeMap extends Iterable<AttributeInfo> {
      * @return a list of attributes in the AttributeMap
      */
 
-    default List<AttributeInfo> asList() {
-        List<AttributeInfo> list = new ArrayList<>(size());
+    default ArrayList<AttributeInfo> asList() {
+        ArrayList<AttributeInfo> list = new ArrayList<>(size());
         for (AttributeInfo a : this) {
             list.add(a);
         }

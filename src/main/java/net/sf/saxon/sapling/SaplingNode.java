@@ -9,11 +9,13 @@ package net.sf.saxon.sapling;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.ma.trie.ImmutableList;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.SchemaValidator;
 import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.Type;
 
 import javax.xml.transform.Source;
@@ -63,6 +65,11 @@ import javax.xml.transform.Source;
  */
 
 public abstract class SaplingNode {
+
+    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableList<net.sf.saxon.sapling.SaplingNode>.Empty;")
+    protected ImmutableList<SaplingNode> emptyNodeList() {
+        return ImmutableList.empty();
+    }
 
     /**
      * Get the kind of node (document, element, text, comment, or processing instruction)

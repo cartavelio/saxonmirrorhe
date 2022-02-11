@@ -11,7 +11,10 @@ import com.saxonica.ee.schema.UserComplexType;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.value.UntypedAtomicValue;
 import net.sf.saxon.z.IntHashSet;
 
@@ -639,10 +642,12 @@ public enum Untyped implements ComplexType {
      *
      * @return the schema component represented as a function from property names to property values.
      */
+
     @Override
-    public Function getComponentAsFunction() {
+    public net.sf.saxon.om.Function getComponentAsFunction() {
         return UserComplexType.getComponentAsFunction(this);
     }
+
     //#endif
 
 }

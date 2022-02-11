@@ -159,7 +159,7 @@ public abstract class Sender {
             receiver = new NamePoolConverter(receiver, top.getConfiguration().getNamePool(), targetNamePool);
         }
         LocationCopier copier = new LocationCopier(top.getNodeKind() == Type.DOCUMENT);
-        pipe.setComponent(CopyInformee.class.getName(), copier);
+        pipe.setComponent("net.sf.saxon.event.CopyInformee", copier);
 
         // start event stream
         receiver.open();

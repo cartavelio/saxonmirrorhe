@@ -1,5 +1,6 @@
 package net.sf.saxon.expr.sort;
 
+import net.sf.saxon.transpile.CSharpTypeBounds;
 import net.sf.saxon.z.IntHashMap;
 
 import java.util.ArrayList;
@@ -15,24 +16,14 @@ import java.util.List;
  * </p>
  */
 
+@CSharpTypeBounds(bounds = {"V:class"})
 public class CustomMap<K, V>  {
 
-    private static class EntryChain<K, V> {
-        public K key;
-        public V value;
-        public EntryChain<K, V> next;
-        public EntryChain(K key, V value) {
-            this.key = key;
-            this.value = value;
-            this.next = null;
-        }
-    }
-
-    private final IntHashMap<EntryChain<K, V>> buckets;
+    private final IntHashMap<CustomMapEntryChain<K, V>> buckets;
     private final EqualityMatcher<K> equalityMatcher;
 
     public CustomMap(EqualityMatcher<K> matcher) {
-        buckets = new IntHashMap<EntryChain<K, V>>();
+        buckets = new IntHashMap<>();
         equalityMatcher = matcher;
     }
 
@@ -44,9 +35,9 @@ public class CustomMap<K, V>  {
      */
     public V put(K key, V value) {
         int h = equalityMatcher.hash(key);
-        EntryChain<K, V> bucket = buckets.get(h);
+        CustomMapEntryChain<K, V> bucket = buckets.get(h);
         if (bucket == null) {
-            EntryChain<K, V> entry = new EntryChain<>(key, value);
+            CustomMapEntryChain<K, V> entry = new CustomMapEntryChain<>(key, value);
             buckets.put(h, entry);
             return null;
         } else {
@@ -56,7 +47,9 @@ public class CustomMap<K, V>  {
                     bucket.value = value;
                     return existing;
                 } else if (bucket.next == null) {
-                    bucket.next = new EntryChain<>(key, value);
+                    @SuppressWarnings("UnnecessaryLocalVariable")
+                    CustomMapEntryChain<K, V> entry = new CustomMapEntryChain<>(key, value);
+                    bucket.next = entry;
                     return null;
                 } else {
                     bucket = bucket.next;
@@ -72,7 +65,7 @@ public class CustomMap<K, V>  {
      */
     public V get(K key) {
         int h = equalityMatcher.hash(key);
-        EntryChain<K, V> bucket = buckets.get(h);
+        CustomMapEntryChain<K, V> bucket = buckets.get(h);
         if (bucket == null) {
             return null;
         } else {
@@ -95,7 +88,7 @@ public class CustomMap<K, V>  {
 
     public boolean containsKey(K key) {
         int h = equalityMatcher.hash(key);
-        EntryChain<K, V> bucket = buckets.get(h);
+        CustomMapEntryChain<K, V> bucket = buckets.get(h);
         if (bucket == null) {
             return false;
         } else {
@@ -117,8 +110,8 @@ public class CustomMap<K, V>  {
      */
     public List<K> keys() {
         List<K> result = new ArrayList<>();
-        for (EntryChain<K, V> entry : buckets.valueSet()) {
-            EntryChain<K, V> e = entry;
+        for (CustomMapEntryChain<K, V> entry : buckets.valueSet()) {
+            CustomMapEntryChain<K, V> e = entry;
             do {
                 result.add(e.key);
                 e = e.next;
@@ -133,8 +126,8 @@ public class CustomMap<K, V>  {
      */
     public List<V> values() {
         List<V> result = new ArrayList<>();
-        for (EntryChain<K, V> entry : buckets.valueSet()) {
-            EntryChain<K, V> e = entry;
+        for (CustomMapEntryChain<K, V> entry : buckets.valueSet()) {
+            CustomMapEntryChain<K, V> e = entry;
             do {
                 result.add(e.value);
                 e = e.next;

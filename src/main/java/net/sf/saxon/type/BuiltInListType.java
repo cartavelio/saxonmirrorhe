@@ -348,23 +348,6 @@ public class BuiltInListType implements ListType {
         return 0;
     }
 
-    //#ifdefined SCHEMA
-    /**
-     * Get the schema component in the form of a function item. This allows schema information
-     * to be made visible to XSLT or XQuery code. The function makes available the contents of the
-     * schema component as defined in the XSD specification. The function takes a string as argument
-     * representing a property name, and returns the corresponding property of the schema component.
-     * There is also a property "class" which returns the kind of schema component, for example
-     * "Attribute Declaration".
-     *
-     * @return the schema component represented as a function from property names to property values.
-     */
-    @Override
-    public Function getComponentAsFunction() {
-        return UserSimpleType.getComponentAsFunction(this);
-    }
-    //#endif
-
     /**
      * Get the typed value of a node that is annotated with this schema type. The result of this method will always be consistent with the method
      *
@@ -555,5 +538,24 @@ public class BuiltInListType implements ListType {
     public UnicodeString postprocess(UnicodeString input) {
         return input;
     }
+
+    //#ifdefined SCHEMA
+
+    /**
+     * Get the schema component in the form of a function item. This allows schema information
+     * to be made visible to XSLT or XQuery code. The function makes available the contents of the
+     * schema component as defined in the XSD specification. The function takes a string as argument
+     * representing a property name, and returns the corresponding property of the schema component.
+     * There is also a property "class" which returns the kind of schema component, for example
+     * "Attribute Declaration".
+     *
+     * @return the schema component represented as a function from property names to property values.
+     */
+
+    @Override
+    public net.sf.saxon.om.Function getComponentAsFunction() {
+        return UserSimpleType.getComponentAsFunction(this);
+    }
+    //#endif
 }
 

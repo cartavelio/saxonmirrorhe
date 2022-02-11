@@ -84,7 +84,7 @@ public class TinyTextualElement extends TinyElementImpl {
             }
         }
 
-        CopyInformee informee = (CopyInformee) receiver.getPipelineConfiguration().getComponent(CopyInformee.class.getName());
+        CopyInformee informee = (CopyInformee) receiver.getPipelineConfiguration().getComponent("net.sf.saxon.event.CopyInformee");
         if (informee != null) {
             Object o = informee.notifyElementNode(this);
             if (o instanceof Location) {

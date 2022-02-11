@@ -301,7 +301,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
         SchemaType typeCode = CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS) ?
                 getSchemaType() : Untyped.getInstance();
-        CopyInformee informee = (CopyInformee) out.getPipelineConfiguration().getComponent(CopyInformee.class.getName());
+        CopyInformee informee = (CopyInformee) out.getPipelineConfiguration().getComponent("net.sf.saxon.event.CopyInformee");
         if (informee != null) {
             Object o = informee.notifyElementNode(this);
             if (o instanceof Location) {

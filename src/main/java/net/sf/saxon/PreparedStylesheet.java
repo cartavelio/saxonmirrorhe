@@ -294,11 +294,8 @@ public class PreparedStylesheet extends Executable {
      * <p>This method gets the output properties for the unnamed output
      * format in the stylesheet.</p>
      *
-     * @return An OutputProperties object reflecting the output properties defined
-     * for the default (unnamed) output format in the stylesheet. It may
-     * be mutated and supplied to the setOutputProperties() method of the
-     * Transformer, without affecting other transformations that use the
-     * same stylesheet.
+     * @return A SerializationProperties object reflecting the output properties defined
+     * for the default (unnamed) output format in the stylesheet.
      * @see javax.xml.transform.Transformer#setOutputProperties
      */
 

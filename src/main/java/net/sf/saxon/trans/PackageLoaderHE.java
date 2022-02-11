@@ -477,6 +477,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 component = Component.makeComponent(cc, vis, provenance, pack, declaringPackage);
                 cc.setDeclaringComponent(component);
                 cc.setDeclaredVisibility(vis);
+                //#if BYTECODE==true
                 Optimizer optimizer = config.obtainOptimizer();
                 StructuredQName name = cc.getComponentName();
                 int evaluationModes = Expression.ITERATE_METHOD | Expression.PROCESS_METHOD;
@@ -492,6 +493,7 @@ public class PackageLoaderHE implements IPackageLoader {
                         optimizer.injectByteCodeCandidates(tr.getBody());
                     });
                 }
+                //#endif
             }
             externalReferences.put(component, binds);
             componentIdMap.put(id, component);

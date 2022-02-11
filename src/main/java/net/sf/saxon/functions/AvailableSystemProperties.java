@@ -8,8 +8,8 @@
 package net.sf.saxon.functions;
 
 import com.saxonica.functions.extfn.EXPathArchive.Archive;
-import com.saxonica.functions.extfn.EXPathBinary;
-import com.saxonica.functions.extfn.EXPathFile;
+import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
+import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
@@ -54,8 +54,8 @@ public class AvailableSystemProperties extends SystemFunction {
         myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "xpath-version"));
         myList.add(new QNameValue("xsl", NamespaceConstant.XSLT, "xsd-version"));
 //#if EE==true || PE==true
-        myList.add(new QNameValue("bin", EXPathBinary.NAMESPACE, "version"));
-        myList.add(new QNameValue("file", EXPathFile.NAMESPACE, "version"));
+        myList.add(new QNameValue("bin", EXPathBinaryFunctionSet.NAMESPACE, "version"));
+        myList.add(new QNameValue("file", EXPathFileFunctionSet.NAMESPACE, "version"));
         myList.add(new QNameValue("archive", Archive.NAMESPACE, "version"));
 //#endif
 
