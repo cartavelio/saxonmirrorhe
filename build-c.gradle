@@ -176,13 +176,20 @@ task rejar_Xerces(
           exclude "Saxon.C.API/readme.txt"
           exclude "Saxon.C.API/targetver.h"
 
-          include "samples/**/*"
+          include "samples/**/*.cpp"
+          include "samples/**/*.h"
+          include "samples/**/*.c"
+          include "samples/php/*.php"
+          include "samples/php/xsl"
+          include "samples/php/xml"
+          include "samples/php/query"
+          include "samples/php/trax"
           exclude "samples/cppTests/build*"
           exclude "samples/cppTests/bin"
-          include "samples/cppTests/build64-mac.sh"
+          exclude "samples/cppTests/build64-mac.sh"
           exclude "samples/cppTests/build32-linux.sh"
           exclude "samples/cppTests/build64-linux.sh"
-          include "samples/cppTests/buildCPPSaxonEE.bat"
+          exclude "samples/cppTests/buildCPPSaxonEE.bat"
           exclude "samples/cppTests/buildCPPSaxonHE.bat"
           exclude "samples/cppTests/buildCPPSaxonPE.bat"
           exclude "samples/cppTests/buildpec.sh"
@@ -224,6 +231,11 @@ task rejar_Xerces(
           into "${buildDir}/c/${release}c/Saxon.C.API"
           from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
         }
+        copy {
+          into "${buildDir}/c/${release}c/samples/cppTests"
+          from("${projectDir}/src/main/c/samples/cppTests/build-windows.bat")
+        }
+
       }
     }
 
@@ -249,6 +261,14 @@ task rejar_Xerces(
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
           from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+        }
+        copy {
+          into "${buildDir}/c/${release}c/samples/cppTests"
+          from("${projectDir}/src/main/c/samples/cppTests/build64-mac.sh")
+        }
+        copy {
+          into "${buildDir}/c/${release}c/samples/cTests"
+          from("${projectDir}/src/main/c/samples/cTests/build64-mac.sh")
         }
       }
     }
@@ -280,6 +300,14 @@ task rejar_Xerces(
         copy {
           into "${buildDir}/c/${release}c/Saxon.C.API"
           from("${projectDir}/src/main/c/Saxon.C.API/${RELEASE}C")
+        }
+          copy {
+            into "${buildDir}/c/${release}c/samples/cppTests"
+            from("${projectDir}/src/main/c/samples/cppTests/build64-mac.sh")
+          }
+        copy {
+          into "${buildDir}/c/${release}c/samples/cTests"
+          from("${projectDir}/src/main/c/samples/cTests/build64-linux.sh")
         }
       }
     }
