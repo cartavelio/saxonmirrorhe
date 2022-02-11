@@ -10,6 +10,7 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.streams.XdmStream;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.Map;
@@ -92,6 +93,21 @@ public abstract class XdmItem extends XdmValue {
 
     public String getStringValue() {
         return getUnderlyingValue().getStringValue();
+    }
+
+    /**
+     * Get the string value of the item. For a node, this gets the string value
+     * of the node. For an atomic value, it has the same effect as casting the value
+     * to a string. In all cases the result is the same as applying the XPath string()
+     * function.
+     * <p>The string returned is the same as the result of {@link #getStringValue()},
+     * but represented as an instance of {@link UnicodeString}.</p>
+     *
+     * @return the result of converting the item to a string.
+     */
+
+    public UnicodeString getUnicodeStringValue() {
+        return getUnderlyingValue().getUnicodeStringValue();
     }
 
     /**
