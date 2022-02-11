@@ -1,0 +1,1635 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Regeling xmlns="https://standaarden.overheid.nl/stop/imop/tekst/" xmlns:deltaxml="http://www.deltaxml.com/ns/well-formed-delta-v1" xmlns:dxx="http://www.deltaxml.com/ns/xml-namespaced-attribute" xmlns:http="http://expath.org/ns/http-client" xmlns:dxa="http://www.deltaxml.com/ns/non-namespaced-attribute" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" deltaxml:deltaV2="A!=B" deltaxml:version="2.0" deltaxml:content-type="full-context">
+    <identicatie deltaxml:deltaV2="A!=B" rootNaam="RegelingVersie" work="/akn/nl/act/mnre1034/2019/REG0001">
+        <deltaxml:attributes deltaxml:deltaV2="A!=B">
+            <dxa:start deltaxml:deltaV2="A!=B">
+                <deltaxml:attributeValue deltaxml:deltaV2="A">2021-03-06T10:37:33.153+01:00</deltaxml:attributeValue>
+                <deltaxml:attributeValue deltaxml:deltaV2="B">2021-03-06T10:37:33.34+01:00</deltaxml:attributeValue>
+            </dxa:start>
+            <dxa:expression deltaxml:deltaV2="A!=B">
+                <deltaxml:attributeValue deltaxml:deltaV2="A">/akn/nl/act/mnre1034/2019/REG0001/nld@2019-06-01;1-0</deltaxml:attributeValue>
+                <deltaxml:attributeValue deltaxml:deltaV2="B">/akn/nl/act/mnre1034/2019/REG0001/nld@2019-08-01;2-0</deltaxml:attributeValue>
+            </dxa:expression>
+        </deltaxml:attributes>
+    </identicatie>
+    <InhoudRenvooi deltaxml:deltaV2="A!=B" deltaxml:ordered="false">
+        <Artikelen deltaxml:deltaV2="A!=B" deltaxml:key="Artikelen">
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_1__subchp_1.1__art_1.1" wId="mnre1034__1.0__chp_1__subchp_1.1__art_1.1">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>1.1</Nummer>
+                    <Opschrift>(begripsbepalingen)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>Bijlage I bij deze regeling bevat begripsbepalingen voor de toepassing van deze regeling.</Al>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_1__subchp_1.2__art_1.2" wId="mnre1034__1.0__chp_1__subchp_1.2__art_1.2">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>1.2</Nummer>
+                    <Opschrift>(exclusieve economische zone)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>Deze regeling is van toepassing in de exclusieve economische zone.</Al>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_1__subchp_1.3__art_1.3" wId="mnre1034__1.0__chp_1__subchp_1.3__art_1.3">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>1.3</Nummer>
+                    <Opschrift>(wederzijdse erkenning)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>Met een erkenning, kwaliteitsverklaring, certificaat, keuring of norm als bedoeld in deze regeling wordt gelijkgesteld een erkenning, kwaliteitsverklaring, certificaat, keuring of norm, afgegeven, uitgevoerd of goedgekeurd door een daartoe bevoegde onafhankelijke instelling in een andere lidstaat van de Europese Unie of in een staat die geen lidstaat van de Europese Unie is en partij is bij een verdrag dat Nederland bindt, met een beschermingsniveau dat ten minste gelijkwaardig is aan het niveau dat met de nationale eisen wordt nagestreefd.</Al>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_1__subchp_1.4__art_1.4" wId="mnre1034__1.0__chp_1__subchp_1.4__art_1.4">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>1.4</Nummer>
+                    <Opschrift>(uitgaven en verwijzingen)</Opschrift>
+                </Kop>
+                <Lid eId="chp_1__subchp_1.4__art_1.4__para_1" wId="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_1">
+                    <LidNummer>1.</LidNummer>
+                    <Inhoud>
+                        <Al>Bijlage II bepaalt welke uitgave van een in het Besluit activiteiten leefomgeving, het Besluit bouwwerken leefomgeving, het Besluit kwaliteit leefomgeving of in deze regeling genoemde norm van toepassing is.</Al>
+                    </Inhoud>
+                </Lid>
+                <Lid eId="chp_1__subchp_1.4__art_1.4__para_2" wId="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_2">
+                    <LidNummer>2.</LidNummer>
+                    <Inhoud>
+                        <Al>Een verwijzing in een norm naar een andere norm of een onderdeel daarvan is alleen van toepassing voor zover het gaat om een in bijlage II genoemde norm.</Al>
+                    </Inhoud>
+                </Lid>
+                <Lid eId="chp_1__subchp_1.4__art_1.4__para_3" wId="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_3">
+                    <LidNummer>3.</LidNummer>
+                    <Inhoud>
+                        <Al>In afwijking van het tweede lid zijn de verwijzingen in de normen, genoemd in de paragrafen 3.7.2, 3.7.3, 4.7.2 en 4.7.3 van het Besluit bouwwerken leefomgeving van toepassing, met uitzondering van de verwijzingen in NEN 1010.</Al>
+                    </Inhoud>
+                </Lid>
+                <Lid eId="chp_1__subchp_1.4__art_1.4__para_4" wId="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_4">
+                    <LidNummer>4.</LidNummer>
+                    <Inhoud>
+                        <Al>In dit artikel wordt onder norm verstaan: een document, genoemd in bijlage II.</Al>
+                    </Inhoud>
+                </Lid>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_2__subchp_2.1__art_2.1" wId="mnre1034__1.0__chp_2__subchp_2.1__art_2.1">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>2.1</Nummer>
+                    <Opschrift>(toepassingsbereik)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>Dit hoofdstuk is van toepassing op de aanwijzing of geometrische begrenzing van locaties voor de toepassing van de wet.</Al>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2">
+                <Kop deltaxml:deltaV2="A!=B">
+                    <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                    <Nummer deltaxml:deltaV2="A=B">2.2</Nummer>
+                    <Opschrift deltaxml:deltaV2="A!=B">(geometrische begrenzing 
+                        <deltaxml:textGroup deltaxml:deltaV2="B">
+                            <deltaxml:text deltaxml:deltaV2="B">van </deltaxml:text>
+                        </deltaxml:textGroup>oppervlaktewaterlichamen
+                        <deltaxml:textGroup deltaxml:deltaV2="B">
+                            <deltaxml:text deltaxml:deltaV2="B"> in beheer bij het Rijk</deltaxml:text>
+                        </deltaxml:textGroup>)
+                    </Opschrift>
+                </Kop>
+                <Lid deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_1">
+                    <LidNummer deltaxml:deltaV2="A=B">1.</LidNummer>
+                    <Inhoud deltaxml:deltaV2="A!=B">
+                        <Al deltaxml:deltaV2="A!=B">De geometrische begrenzing van de 
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">oppervlaktewaterlichamen</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-54/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_1__ref_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_1__ref_1">oppervlaktewaterlichamen</IntIoRef>, bedoeld in bijlage II, onder 1, bij het Omgevingsbesluit en waarvan het beheer van de waterkwaliteit bij het Rijk berust, is vastgelegd in bijlage III.
+                        </Al>
+                    </Inhoud>
+                </Lid>
+                <Lid deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_2">
+                    <LidNummer deltaxml:deltaV2="A=B">2.</LidNummer>
+                    <Inhoud deltaxml:deltaV2="A!=B">
+                        <Al deltaxml:deltaV2="A!=B">De geometrische begrenzing van de oppervlaktewaterlichamen, bedoeld in bijlage II, onder 1, bij het Omgevingsbesluit en 
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">waarvan</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-55/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_2__ref_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_2__ref_1">waarvan het beheer van de waterkwantiteit bij het Rijk berust</IntIoRef>
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A"> het beheer van de waterkwantiteit bij het Rijk berust</deltaxml:text>
+                            </deltaxml:textGroup>, is vastgelegd in bijlage III.
+                        </Al>
+                    </Inhoud>
+                </Lid>
+                <Lid deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3">
+                    <LidNummer deltaxml:deltaV2="A=B">3.</LidNummer>
+                    <Inhoud deltaxml:deltaV2="A!=B">
+                        <Al deltaxml:deltaV2="A!=B">De geometrische begrenzing van 
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">de</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-56/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3__ref_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3__ref_1">de oppervlaktewaterlichamen</IntIoRef>
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A"> oppervlaktewaterlichamen</deltaxml:text>
+                            </deltaxml:textGroup>, bedoeld in bijlage II, onder 1, bij Omgevingsbesluit en
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">waarvan</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-56/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3__ref_2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3__ref_2">waarvan het waterstaatkundig beheer bij het Rijk berust</IntIoRef>
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A"> het waterstaatkundig beheer bij het Rijk berust</deltaxml:text>
+                            </deltaxml:textGroup>, is vastgelegd in bijlage III.
+                        </Al>
+                    </Inhoud>
+                </Lid>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.3" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3">
+                <Kop deltaxml:deltaV2="A!=B">
+                    <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                    <Nummer deltaxml:deltaV2="A=B">2.3</Nummer>
+                    <Opschrift deltaxml:deltaV2="A!=B">(aanwijzing en geometrische begrenzing 
+                        <deltaxml:textGroup deltaxml:deltaV2="B">
+                            <deltaxml:text deltaxml:deltaV2="B">van </deltaxml:text>
+                        </deltaxml:textGroup>rijkswateren niet in beheer bij het Rijk)
+                    </Opschrift>
+                </Kop>
+                <Lid deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_1">
+                    <LidNummer deltaxml:deltaV2="A=B">1.</LidNummer>
+                    <Inhoud deltaxml:deltaV2="A!=B">
+                        <Al deltaxml:deltaV2="A!=B">In afwijking van artikel 2.20, tweede lid, onder a, van de wet
+                            <deltaxml:textGroup deltaxml:deltaV2="B">
+                                <deltaxml:text deltaxml:deltaV2="B">,</deltaxml:text>
+                            </deltaxml:textGroup> berust het waterstaatkundig beheer van
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">de</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-57/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_1__ref_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_1__ref_1">de rijkswateren</IntIoRef>
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A"> rijkswateren</deltaxml:text>
+                            </deltaxml:textGroup>, voor zover deze liggen binnen de begrenzing die is vastgelegd in bijlage III,
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">bedoelde </deltaxml:text>
+                            </deltaxml:textGroup>niet tot het Rijk behorende openbare lichaam.
+                        </Al>
+                    </Inhoud>
+                </Lid>
+                <Lid deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_2">
+                    <LidNummer deltaxml:deltaV2="A=B">2.</LidNummer>
+                    <Inhoud deltaxml:deltaV2="A!=B">
+                        <Al deltaxml:deltaV2="A!=B">Het waterstaatskundig beheer van 
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">de</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-56/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_2__ref_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_2__ref_1">de rijkswateren</IntIoRef>
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A"> rijkswateren</deltaxml:text>
+                            </deltaxml:textGroup>, voor zover het gaat om de zorg
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">,</deltaxml:text>
+                            </deltaxml:textGroup> voor het voorkomen van schade aan waterstaatswerken
+                            <deltaxml:textGroup deltaxml:deltaV2="B">
+                                <deltaxml:text deltaxml:deltaV2="B">veroorzaakt </deltaxml:text>
+                            </deltaxml:textGroup>door muskus
+                            <deltaxml:textGroup deltaxml:deltaV2="B">
+                                <deltaxml:text deltaxml:deltaV2="B">-</deltaxml:text>
+                            </deltaxml:textGroup> en beverratten, bedoeld in artikel 2.2, derde lid, berust bij het waterschapsbestuur.
+                        </Al>
+                    </Inhoud>
+                </Lid>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.2__art_2.4" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.2__art_2.4">
+                <Kop deltaxml:deltaV2="A!=B">
+                    <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                    <Nummer deltaxml:deltaV2="A=B">2.4</Nummer>
+                    <Opschrift deltaxml:deltaV2="A!=B">(geometrische begrenzing primaire waterkeringen
+                        <deltaxml:textGroup deltaxml:deltaV2="B">
+                            <deltaxml:text deltaxml:deltaV2="B"> – dijktrajecten</deltaxml:text>
+                        </deltaxml:textGroup>)
+                    </Opschrift>
+                </Kop>
+                <Gereserveerd deltaxml:deltaV2="A=B"/>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.2__art_2.5" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.2__art_2.5">
+                <Kop deltaxml:deltaV2="A!=B">
+                    <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                    <Nummer deltaxml:deltaV2="A=B">2.5</Nummer>
+                    <Opschrift deltaxml:deltaV2="A!=B">(geometrische begrenzing andere dan primaire waterkeringen in beheer bij het Rijk
+                        <deltaxml:textGroup deltaxml:deltaV2="B">
+                            <deltaxml:text deltaxml:deltaV2="B">- dijktrajecten</deltaxml:text>
+                        </deltaxml:textGroup>)
+                    </Opschrift>
+                </Kop>
+                <Gereserveerd deltaxml:deltaV2="A=B"/>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_2__subchp_2.2__subsec_2.2.3__art_2.6" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.3__art_2.6">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>2.6</Nummer>
+                    <Opschrift>(aanwijzing Nederlandse delen stroomgebiedsdistricten)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>De Nederlandse delen van stroomgebiedsdistricten Rijn, Maas, Schelde en Eems, met inbegrip van de toedeling van grondwaterlichamen aan die stroomgebiedsdistricten, zijn de locaties die zijn weergegeven op de kaart in bijlage IV.</Al>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_2__subchp_2.2__subsec_2.2.4__art_2.7" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.4__art_2.7">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>2.7</Nummer>
+                    <Opschrift>(geometrische begrenzing kustfundament)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>De geometrische begrenzing van het kustfundament, bedoeld in artikel 5.39 van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.8" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>2.8</Nummer>
+                    <Opschrift>(geometrische begrenzing rivierbed grote rivieren)</Opschrift>
+                </Kop>
+                <Lid eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_1">
+                    <LidNummer>1.</LidNummer>
+                    <Inhoud>
+                        <Al>De geometrische begrenzing van het rivierbed van de grote rivieren, bedoeld in artikel 5.41, eerste lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                    </Inhoud>
+                </Lid>
+                <Lid eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_2">
+                    <LidNummer>2.</LidNummer>
+                    <Inhoud>
+                        <Al>De geometrische begrenzing van het stroomvoerend deel van het rivierbed van de grote rivieren, bedoeld in artikel 5.41, tweede lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                    </Inhoud>
+                </Lid>
+                <Lid eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_3" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_3">
+                    <LidNummer>3.</LidNummer>
+                    <Inhoud>
+                        <Al>De geometrische begrenzing van het bergend deel van het rivierbed van de grote rivieren, bedoeld in artikel 5.41, derde lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                    </Inhoud>
+                </Lid>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.9" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.9">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>2.9</Nummer>
+                    <Opschrift>(geometrische begrenzing reserveringsgebieden grote rivieren)</Opschrift>
+                </Kop>
+                <Lid eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.9__para_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.9__para_1">
+                    <LidNummer>1.</LidNummer>
+                    <Inhoud>
+                        <Al>De geometrische begrenzing van het reserveringsgebied voor de lange termijn voor de Rijntakken, bedoeld in artikel 5.42, eerste lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                    </Inhoud>
+                </Lid>
+                <Lid eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.9__para_2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.9__para_2">
+                    <LidNummer>2.</LidNummer>
+                    <Inhoud>
+                        <Al>De geometrische begrenzing van het reserveringsgebied voor de lange termijn voor de Maas, bedoeld in artikel 5.42, tweede lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                    </Inhoud>
+                </Lid>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_2__subchp_2.2__subsec_2.2.6__art_2.10" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.6__art_2.10">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>2.10</Nummer>
+                    <Opschrift>(geometrische begrenzing IJsselmeergebied)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>De geometrische begrenzing van het IJsselmeergebied, bedoeld in artikel 5.48 van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="B" eId="chp_2__subchp_2.2__subsec_2.2.7__art_2.11" wId="mnre1034__2.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>2.11</Nummer>
+                    <Opschrift>(geometrische begrenzing Waddenzee en Waddengebied)</Opschrift>
+                </Kop>
+                <Gereserveerd/>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A!=B" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11">
+                <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                    <dxa:eId deltaxml:deltaV2="A!=B">
+                        <deltaxml:attributeValue deltaxml:deltaV2="A">chp_2__subchp_2.2__subsec_2.2.7__art_2.11</deltaxml:attributeValue>
+                        <deltaxml:attributeValue deltaxml:deltaV2="B">chp_2__subchp_2.2__subsec_2.2.8__art_2.12</deltaxml:attributeValue>
+                    </dxa:eId>
+                </deltaxml:attributes>
+                <Kop deltaxml:deltaV2="A!=B">
+                    <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                    <Nummer deltaxml:deltaV2="A!=B">
+                        <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                            <deltaxml:text deltaxml:deltaV2="A">2.11</deltaxml:text>
+                            <deltaxml:text deltaxml:deltaV2="B">2.12</deltaxml:text>
+                        </deltaxml:textGroup>
+                    </Nummer>
+                    <Opschrift deltaxml:deltaV2="A=B">(geometrische begrenzing vrijwaringsgebieden rijksvaarwegen)</Opschrift>
+                </Kop>
+                <Inhoud deltaxml:deltaV2="A">
+                    <Al>De geometrische begrenzing van een vrijwaringsgebied van een rijkswater, met uitzondering van de Noordzee, de Waddenzee, de Westerschelde en het IJsselmeer, dat een vaarweg is, bedoeld in artikel 5.160 van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                </Inhoud>
+                <Lid deltaxml:deltaV2="B" eId="chp_2__subchp_2.2__subsec_2.2.8__art_2.12__para_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11__para_1">
+                    <LidNummer>1.</LidNummer>
+                    <Inhoud>
+                        <Al> De geometrische begrenzing van de Waddenzee, bedoeld in artikel 5.129a, eerste lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III. </Al>
+                    </Inhoud>
+                </Lid>
+                <Lid deltaxml:deltaV2="B" eId="chp_2__subchp_2.2__subsec_2.2.8__art_2.12__para_2" wId="mnre1034_1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11__para_2">
+                    <LidNummer>2.</LidNummer>
+                    <Inhoud>
+                        <Al>De geometrische begrenzing van het Waddengebied, bedoeld in artikel 5.129a, tweede lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III. </Al>
+                    </Inhoud>
+                </Lid>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A" eId="chp_2__subchp_2.2__subsec_2.2.7__art_2.12" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.12">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>2.12</Nummer>
+                    <Opschrift>(geometrische begrenzing vaarwegen)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>De geometrische begrenzing van vaarwegen, bedoeld in artikel 6.17, eerste lid, aanhef en onder d, onder 1° en 2° en eerste lid, onder f, onder 2° van het Besluit activiteiten leefomgeving, is vastgelegd in bijlage III.</Al>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A!=B" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.8__art_2.13">
+                <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                    <dxa:eId deltaxml:deltaV2="A!=B">
+                        <deltaxml:attributeValue deltaxml:deltaV2="A">chp_2__subchp_2.2__subsec_2.2.8__art_2.13</deltaxml:attributeValue>
+                        <deltaxml:attributeValue deltaxml:deltaV2="B">chp_2__subchp_2.2__subsec_2.2.9__art_2.13</deltaxml:attributeValue>
+                    </dxa:eId>
+                </deltaxml:attributes>
+                <Kop deltaxml:deltaV2="A!=B">
+                    <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                    <Nummer deltaxml:deltaV2="A=B">2.13</Nummer>
+                    <Opschrift deltaxml:deltaV2="A!=B">(aanwijzing en geometrische begrenzing beperkingengebieden 
+                        <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                            <deltaxml:text deltaxml:deltaV2="A">waterstaatswerken</deltaxml:text>
+                            <deltaxml:text deltaxml:deltaV2="B">oppervlaktewaterlichamen</deltaxml:text>
+                        </deltaxml:textGroup> in beheer bij het Rijk
+                        <deltaxml:textGroup deltaxml:deltaV2="B">
+                            <deltaxml:text deltaxml:deltaV2="B">, niet zijnde kanalen</deltaxml:text>
+                        </deltaxml:textGroup>)
+                    </Opschrift>
+                </Kop>
+                <Gereserveerd deltaxml:deltaV2="A=B"/>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A" eId="chp_2__subchp_2.2__subsec_2.2.8__art_2.14" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.8__art_2.14">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>2.14</Nummer>
+                    <Opschrift>(aanwijzing en geometrische begrenzing beperkingengebieden oppervlaktewaterlichamen afmeren woonschip of ander drijvend werk)</Opschrift>
+                </Kop>
+                <Gereserveerd/>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.1" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.1">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>7.1</Nummer>
+                    <Opschrift>(toepassingsbereik)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>Deze afdeling is van toepassing op het verstrekken van gegevens en bescheiden bij een aanvraag om een omgevingsvergunning als bedoeld in artikel 5.1 van de wet.</Al>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>7.2</Nummer>
+                    <Opschrift>(algemene aanvraagvereisten)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Lijst eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1" type="expliciet" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1">
+                        <Lijstaanhef>Bij een aanvraag worden de volgende gegevens en bescheiden verstrekt:</Lijstaanhef>
+                        <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_a" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_a">
+                            <LiNummer>a.</LiNummer>
+                            <Al>een aanduiding van de activiteit waarvoor de omgevingsvergunning wordt aangevraagd;</Al>
+                        </Li>
+                        <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_b" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_b">
+                            <LiNummer>b.</LiNummer>
+                            <Al>het telefoonnummer van de aanvrager;</Al>
+                        </Li>
+                        <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_c" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_c">
+                            <LiNummer>c.</LiNummer>
+                            <Al>het adres, de kadastrale aanduiding of coördinaten van de locatie waarop de activiteit wordt verricht;</Al>
+                        </Li>
+                        <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_d" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_d">
+                            <LiNummer>d.</LiNummer>
+                            <Al>de begrenzing van de locatie waarop de activiteit wordt verricht;</Al>
+                        </Li>
+                        <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_e" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_e">
+                            <LiNummer>e.</LiNummer>
+                            <Al>als de activiteit waarop de aanvraag betrekking heeft, wordt verricht door of namens een rechtspersoon of natuurlijke persoon in het kader van het voeren van een onderneming of het uitoefenen van een zelfstandig beroep: het e-mailadres van de aanvrager respectievelijk de gemachtigde;</Al>
+                        </Li>
+                        <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_f" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_f">
+                            <LiNummer>f.</LiNummer>
+                            <Al>als de aanvraag wordt ingediend door een gemachtigde: naam, adres, telefoonnummer en woonplaats van de gemachtigde; en</Al>
+                        </Li>
+                        <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_g" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_g">
+                            <LiNummer>g.</LiNummer>
+                            <Al>als de aanvrager het voornemen heeft om in plaats van een maatregel die is voorgeschreven in regels als bedoeld in artikel 4.3 van de wet, een gelijkwaardige maatregel als bedoeld in artikel 4.7 eerste lid, van de wet te treffen: gegevens waaruit blijkt dat met de gelijkwaardige maatregel ten minste hetzelfde resultaat wordt bereikt als met de voorgeschreven maatregel is beoogd.</Al>
+                        </Li>
+                    </Lijst>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A=B" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>7.3</Nummer>
+                    <Opschrift>(aanvragen langs elektronische weg)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Lijst eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1" type="expliciet" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1">
+                        <Lijstaanhef>Bij een aanvraag die elektronisch wordt ingediend worden gegevens en bescheiden verstrekt in een van de volgende archiefwaardige bestandsformaten die zijn gekenmerkt als alleen lezen:</Lijstaanhef>
+                        <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_a" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_a">
+                            <LiNummer>a.</LiNummer>
+                            <Al>foto’s: PNG en JPG;</Al>
+                        </Li>
+                        <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_b" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_b">
+                            <LiNummer>b.</LiNummer>
+                            <Al>scans: TIFF, JPG, PDF/A-1a, PDF/A-1b en PDF 1.4;</Al>
+                        </Li>
+                        <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_c" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_c">
+                            <LiNummer>c.</LiNummer>
+                            <Al>officedocumenten: PDF/A-1a en PDF 1.4; en</Al>
+                        </Li>
+                        <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_d" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_d">
+                            <LiNummer>d.</LiNummer>
+                            <Al>tekeningen: PDF/X en PDF 1.4.</Al>
+                        </Li>
+                    </Lijst>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="A!=B" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.4" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4">
+                <Kop deltaxml:deltaV2="A=B">
+                    <Label>Artikel</Label>
+                    <Nummer>7.4</Nummer>
+                    <Opschrift>(participatie)</Opschrift>
+                </Kop>
+                <Lid deltaxml:deltaV2="A!=B" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_1" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_1">
+                    <LidNummer deltaxml:deltaV2="A=B">1.</LidNummer>
+                    <Inhoud deltaxml:deltaV2="A!=B">
+                        <Al deltaxml:deltaV2="A!=B">Bij een aanvraag wordt aangegeven of burgers, bedrijven, maatschappelijke organisaties en bestuursorganen bij de voorbereiding van de aanvraag zijn betrokken. De 
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">EU</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <abbr deltaxml:deltaV2="B" title="Europese Unie">EU</abbr> zegt hier ook iets over.
+                        </Al>
+                    </Inhoud>
+                </Lid>
+                <Lid deltaxml:deltaV2="A!=B" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_2" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_2">
+                    <LidNummer deltaxml:deltaV2="A=B">2.</LidNummer>
+                    <Inhoud deltaxml:deltaV2="A!=B">
+                        <Al deltaxml:deltaV2="A!=B">Als burgers, bedrijven, maatschappelijke organisaties en bestuursorganen bij de voorbereiding van de aanvraag zijn betrokken, verstrekt de aanvrager bij de aanvraag gegevens over hoe zij zijn betrokken en wat de resultaten daarvan zijn. Het was benauwd in de 
+                            <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                <deltaxml:text deltaxml:deltaV2="A">2e</deltaxml:text>
+                                <deltaxml:text deltaxml:deltaV2="B">2</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <sup deltaxml:deltaV2="B">e</sup> kamer, men had een sterke behoefte aan
+                            <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                <deltaxml:text deltaxml:deltaV2="A">02</deltaxml:text>
+                                <deltaxml:text deltaxml:deltaV2="B">0</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <sub deltaxml:deltaV2="B">2</sub>.
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">In</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <Noot deltaxml:deltaV2="B" NootNummer="1" id="f234" type="voet">
+                                <Al>In EU directive 123 is hier meer over te vinden.</Al>
+                            </Noot>
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A"> EU directive 123 is hier meer over te vinden.</deltaxml:text>
+                            </deltaxml:textGroup>
+                        </Al>
+                    </Inhoud>
+                </Lid>
+                <Lid deltaxml:deltaV2="A!=B" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_3" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_3">
+                    <LidNummer deltaxml:deltaV2="A=B">3.</LidNummer>
+                    <Inhoud deltaxml:deltaV2="A!=B">
+                        <Al deltaxml:deltaV2="A!=B">Het 
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">eerste</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <b deltaxml:deltaV2="B">eerste en tweede lid</b>
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">en tweede lid </deltaxml:text>
+                            </deltaxml:textGroup>zijn ook van
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">toepassing</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <i deltaxml:deltaV2="B">toepassing op</i>
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">op </deltaxml:text>
+                            </deltaxml:textGroup>een aanvraag om een
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">omgevingsvergunning</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <u deltaxml:deltaV2="B">omgevingsvergunning</u> als bedoeld in
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">artikel</deltaxml:text>
+                            </deltaxml:textGroup>
+                            <strong deltaxml:deltaV2="B">artikel 5.3 of 5.4</strong>
+                            <deltaxml:textGroup deltaxml:deltaV2="A">
+                                <deltaxml:text deltaxml:deltaV2="A">5.3 of 5.4 </deltaxml:text>
+                            </deltaxml:textGroup>van de wet.
+                        </Al>
+                    </Inhoud>
+                </Lid>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="B" eId="chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.5" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.5">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>7.5</Nummer>
+                    <Opschrift>(bouwactiviteit: toepassingsbereik)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>Deze paragraaf is van toepassing op het verstrekken van gegevens en bescheiden bij een aanvraag om een omgevingsvergunning voor een bouwactiviteit als bedoeld in artikel PM van het Besluit bouwwerken leefomgeving.</Al>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="B" eId="chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.6" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.6">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>7.6</Nummer>
+                    <Opschrift>Artikel 7.6 (bouwactiviteit: algemene aanvraagvereisten)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>Bij een aanvraag wordt een opgave van de kosten van de te verrichten werkzaamheden verstrekt.</Al>
+                </Inhoud>
+            </Artikel>
+            <Artikel deltaxml:deltaV2="B" eId="chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.7" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.7">
+                <Kop>
+                    <Label>Artikel</Label>
+                    <Nummer>7.7</Nummer>
+                    <Opschrift>(bouwactiviteit: veiligheid)</Opschrift>
+                </Kop>
+                <Inhoud>
+                    <Al>etcetera</Al>
+                </Inhoud>
+            </Artikel>
+        </Artikelen>
+        <RegelingOpschrift deltaxml:deltaV2="A=B" deltaxml:key="longTitle_1" position="1" wIdPreceding="" wIdFollowing="body_1" eId="longTitle_1" wId="longTitle_1">
+            <Al>Regeling van de Minister van Binnenlandse Zaken en Koninkrijksrelaties, van [datum], houdende regels over het beschermen en benutten van de fysieke leefomgeving (Omgevingsregeling)</Al>
+        </RegelingOpschrift>
+        <Lichaam deltaxml:deltaV2="A!=B" wIdPreceding="longTitle_1" wIdFollowing="mnre1034__1.0__cmp_IV" deltaxml:key="body_1" eId="body_1" wId="body_1" position="2">
+            <Hoofdstuk deltaxml:deltaV2="A=B" deltaxml:key="mnre1034__1.0__chp_1" eId="chp_1" wId="mnre1034__1.0__chp_1">
+                <Kop deltaxml:key="Kop">
+                    <Label>HOOFDSTUK</Label>
+                    <Nummer>1</Nummer>
+                    <Opschrift>ALGEMENE BEPALINGEN</Opschrift>
+                </Kop>
+                <Afdeling deltaxml:key="mnre1034__1.0__chp_1__subchp_1.1" eId="chp_1__subchp_1.1" wId="mnre1034__1.0__chp_1__subchp_1.1">
+                    <Kop deltaxml:key="Kop">
+                        <Label>AFDELING</Label>
+                        <Nummer>1.1</Nummer>
+                        <Opschrift>ALGEMEEN</Opschrift>
+                    </Kop>
+                    <Artikel deltaxml:key="mnre1034__1.0__chp_1__subchp_1.1__art_1.1" eId="chp_1__subchp_1.1__art_1.1" wId="mnre1034__1.0__chp_1__subchp_1.1__art_1.1">
+                        <Kop deltaxml:key="Kop">
+                            <Label>Artikel</Label>
+                            <Nummer>1.1</Nummer>
+                            <Opschrift>(begripsbepalingen)</Opschrift>
+                        </Kop>
+                        <Inhoud>
+                            <Al>Bijlage I bij deze regeling bevat begripsbepalingen voor de toepassing van deze regeling.</Al>
+                        </Inhoud>
+                    </Artikel>
+                </Afdeling>
+                <Afdeling deltaxml:key="mnre1034__1.0__chp_1__subchp_1.2" eId="chp_1__subchp_1.2" wId="mnre1034__1.0__chp_1__subchp_1.2">
+                    <Kop deltaxml:key="Kop">
+                        <Label>AFDELING</Label>
+                        <Nummer>1.2</Nummer>
+                        <Opschrift>TOEPASSINGSBEREIK</Opschrift>
+                    </Kop>
+                    <Artikel deltaxml:key="mnre1034__1.0__chp_1__subchp_1.2__art_1.2" eId="chp_1__subchp_1.2__art_1.2" wId="mnre1034__1.0__chp_1__subchp_1.2__art_1.2">
+                        <Kop deltaxml:key="Kop">
+                            <Label>Artikel</Label>
+                            <Nummer>1.2</Nummer>
+                            <Opschrift>(exclusieve economische zone)</Opschrift>
+                        </Kop>
+                        <Inhoud>
+                            <Al>Deze regeling is van toepassing in de exclusieve economische zone.</Al>
+                        </Inhoud>
+                    </Artikel>
+                </Afdeling>
+                <Afdeling deltaxml:key="mnre1034__1.0__chp_1__subchp_1.3" eId="chp_1__subchp_1.3" wId="mnre1034__1.0__chp_1__subchp_1.3">
+                    <Kop deltaxml:key="Kop">
+                        <Label>AFDELING</Label>
+                        <Nummer>1.3</Nummer>
+                        <Opschrift>INTERNATIONAALRECHTELIJKE VERPLICHTINGEN</Opschrift>
+                    </Kop>
+                    <Artikel deltaxml:key="mnre1034__1.0__chp_1__subchp_1.3__art_1.3" eId="chp_1__subchp_1.3__art_1.3" wId="mnre1034__1.0__chp_1__subchp_1.3__art_1.3">
+                        <Kop deltaxml:key="Kop">
+                            <Label>Artikel</Label>
+                            <Nummer>1.3</Nummer>
+                            <Opschrift>(wederzijdse erkenning)</Opschrift>
+                        </Kop>
+                        <Inhoud>
+                            <Al>Met een erkenning, kwaliteitsverklaring, certificaat, keuring of norm als bedoeld in deze regeling wordt gelijkgesteld een erkenning, kwaliteitsverklaring, certificaat, keuring of norm, afgegeven, uitgevoerd of goedgekeurd door een daartoe bevoegde onafhankelijke instelling in een andere lidstaat van de Europese Unie of in een staat die geen lidstaat van de Europese Unie is en partij is bij een verdrag dat Nederland bindt, met een beschermingsniveau dat ten minste gelijkwaardig is aan het niveau dat met de nationale eisen wordt nagestreefd.</Al>
+                        </Inhoud>
+                    </Artikel>
+                </Afdeling>
+                <Afdeling deltaxml:key="mnre1034__1.0__chp_1__subchp_1.4" eId="chp_1__subchp_1.4" wId="mnre1034__1.0__chp_1__subchp_1.4">
+                    <Kop deltaxml:key="Kop">
+                        <Label>AFDELING</Label>
+                        <Nummer>1.4</Nummer>
+                        <Opschrift>VERWIJZINGEN</Opschrift>
+                    </Kop>
+                    <Artikel deltaxml:key="mnre1034__1.0__chp_1__subchp_1.4__art_1.4" eId="chp_1__subchp_1.4__art_1.4" wId="mnre1034__1.0__chp_1__subchp_1.4__art_1.4">
+                        <Kop deltaxml:key="Kop">
+                            <Label>Artikel</Label>
+                            <Nummer>1.4</Nummer>
+                            <Opschrift>(uitgaven en verwijzingen)</Opschrift>
+                        </Kop>
+                        <Lid deltaxml:key="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_1" eId="chp_1__subchp_1.4__art_1.4__para_1" wId="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_1">
+                            <LidNummer>1.</LidNummer>
+                            <Inhoud>
+                                <Al>Bijlage II bepaalt welke uitgave van een in het Besluit activiteiten leefomgeving, het Besluit bouwwerken leefomgeving, het Besluit kwaliteit leefomgeving of in deze regeling genoemde norm van toepassing is.</Al>
+                            </Inhoud>
+                        </Lid>
+                        <Lid deltaxml:key="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_2" eId="chp_1__subchp_1.4__art_1.4__para_2" wId="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_2">
+                            <LidNummer>2.</LidNummer>
+                            <Inhoud>
+                                <Al>Een verwijzing in een norm naar een andere norm of een onderdeel daarvan is alleen van toepassing voor zover het gaat om een in bijlage II genoemde norm.</Al>
+                            </Inhoud>
+                        </Lid>
+                        <Lid deltaxml:key="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_3" eId="chp_1__subchp_1.4__art_1.4__para_3" wId="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_3">
+                            <LidNummer>3.</LidNummer>
+                            <Inhoud>
+                                <Al>In afwijking van het tweede lid zijn de verwijzingen in de normen, genoemd in de paragrafen 3.7.2, 3.7.3, 4.7.2 en 4.7.3 van het Besluit bouwwerken leefomgeving van toepassing, met uitzondering van de verwijzingen in NEN 1010.</Al>
+                            </Inhoud>
+                        </Lid>
+                        <Lid deltaxml:key="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_4" eId="chp_1__subchp_1.4__art_1.4__para_4" wId="mnre1034__1.0__chp_1__subchp_1.4__art_1.4__para_4">
+                            <LidNummer>4.</LidNummer>
+                            <Inhoud>
+                                <Al>In dit artikel wordt onder norm verstaan: een document, genoemd in bijlage II.</Al>
+                            </Inhoud>
+                        </Lid>
+                    </Artikel>
+                </Afdeling>
+            </Hoofdstuk>
+            <Hoofdstuk deltaxml:deltaV2="A!=B" eId="chp_2" deltaxml:key="mnre1034__1.0__chp_2" wId="mnre1034__1.0__chp_2">
+                <Kop deltaxml:deltaV2="A=B" deltaxml:key="Kop">
+                    <Label>HOOFDSTUK</Label>
+                    <Nummer>2</Nummer>
+                    <Opschrift>AANWIJZING EN GEOMETRISCHE BEGRENZING VAN LOCATIES</Opschrift>
+                </Kop>
+                <Afdeling deltaxml:deltaV2="A=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.1" eId="chp_2__subchp_2.1" wId="mnre1034__1.0__chp_2__subchp_2.1">
+                    <Kop deltaxml:key="Kop">
+                        <Label>AFDELING</Label>
+                        <Nummer>2.1</Nummer>
+                        <Opschrift>ALGEMENE BEPALINGEN</Opschrift>
+                    </Kop>
+                    <Artikel deltaxml:key="mnre1034__1.0__chp_2__subchp_2.1__art_2.1" eId="chp_2__subchp_2.1__art_2.1" wId="mnre1034__1.0__chp_2__subchp_2.1__art_2.1">
+                        <Kop deltaxml:key="Kop">
+                            <Label>Artikel</Label>
+                            <Nummer>2.1</Nummer>
+                            <Opschrift>(toepassingsbereik)</Opschrift>
+                        </Kop>
+                        <Inhoud>
+                            <Al>Dit hoofdstuk is van toepassing op de aanwijzing of geometrische begrenzing van locaties voor de toepassing van de wet.</Al>
+                        </Inhoud>
+                    </Artikel>
+                </Afdeling>
+                <Afdeling deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2" eId="chp_2__subchp_2.2" wId="mnre1034__1.0__chp_2__subchp_2.2">
+                    <Kop deltaxml:deltaV2="A=B" deltaxml:key="Kop">
+                        <Label>AFDELING</Label>
+                        <Nummer>2.2</Nummer>
+                        <Opschrift>WATER</Opschrift>
+                    </Kop>
+                    <Paragraaf deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1" eId="chp_2__subchp_2.2__subsec_2.2.1">
+                        <Kop deltaxml:deltaV2="A!=B" deltaxml:key="Kop">
+                            <Label deltaxml:deltaV2="A=B">§</Label>
+                            <Nummer deltaxml:deltaV2="A=B">2.2.1</Nummer>
+                            <Opschrift deltaxml:deltaV2="A!=B">
+                                <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                    <deltaxml:text deltaxml:deltaV2="A">Oppervlaktewateren en rijkswateren</deltaxml:text>
+                                    <deltaxml:text deltaxml:deltaV2="B">Rijkswateren</deltaxml:text>
+                                </deltaxml:textGroup>
+                            </Opschrift>
+                        </Kop>
+                        <Artikel deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2">
+                            <Kop deltaxml:deltaV2="A!=B" deltaxml:key="Kop">
+                                <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                                <Nummer deltaxml:deltaV2="A=B">2.2</Nummer>
+                                <Opschrift deltaxml:deltaV2="A!=B">(geometrische begrenzing 
+                                    <deltaxml:textGroup deltaxml:deltaV2="B">
+                                        <deltaxml:text deltaxml:deltaV2="B">van </deltaxml:text>
+                                    </deltaxml:textGroup>oppervlaktewaterlichamen
+                                    <deltaxml:textGroup deltaxml:deltaV2="B">
+                                        <deltaxml:text deltaxml:deltaV2="B"> in beheer bij het Rijk</deltaxml:text>
+                                    </deltaxml:textGroup>)
+                                </Opschrift>
+                            </Kop>
+                            <Lid deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_1" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_1">
+                                <LidNummer deltaxml:deltaV2="A=B">1.</LidNummer>
+                                <Inhoud deltaxml:deltaV2="A!=B">
+                                    <Al deltaxml:deltaV2="A!=B">De geometrische begrenzing van de 
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">oppervlaktewaterlichamen</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-54/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_1__ref_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_1__ref_1">oppervlaktewaterlichamen</IntIoRef>, bedoeld in bijlage II, onder 1, bij het Omgevingsbesluit en waarvan het beheer van de waterkwaliteit bij het Rijk berust, is vastgelegd in bijlage III.
+                                    </Al>
+                                </Inhoud>
+                            </Lid>
+                            <Lid deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_2" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_2">
+                                <LidNummer deltaxml:deltaV2="A=B">2.</LidNummer>
+                                <Inhoud deltaxml:deltaV2="A!=B">
+                                    <Al deltaxml:deltaV2="A!=B">De geometrische begrenzing van de oppervlaktewaterlichamen, bedoeld in bijlage II, onder 1, bij het Omgevingsbesluit en 
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">waarvan</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-55/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_2__ref_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_2__ref_1">waarvan het beheer van de waterkwantiteit bij het Rijk berust</IntIoRef>
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A"> het beheer van de waterkwantiteit bij het Rijk berust</deltaxml:text>
+                                        </deltaxml:textGroup>, is vastgelegd in bijlage III.
+                                    </Al>
+                                </Inhoud>
+                            </Lid>
+                            <Lid deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3">
+                                <LidNummer deltaxml:deltaV2="A=B">3.</LidNummer>
+                                <Inhoud deltaxml:deltaV2="A!=B">
+                                    <Al deltaxml:deltaV2="A!=B">De geometrische begrenzing van 
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">de</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-56/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3__ref_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3__ref_1">de oppervlaktewaterlichamen</IntIoRef>
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A"> oppervlaktewaterlichamen</deltaxml:text>
+                                        </deltaxml:textGroup>, bedoeld in bijlage II, onder 1, bij Omgevingsbesluit en
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">waarvan</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-56/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3__ref_2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.2__para_3__ref_2">waarvan het waterstaatkundig beheer bij het Rijk berust</IntIoRef>
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A"> het waterstaatkundig beheer bij het Rijk berust</deltaxml:text>
+                                        </deltaxml:textGroup>, is vastgelegd in bijlage III.
+                                    </Al>
+                                </Inhoud>
+                            </Lid>
+                        </Artikel>
+                        <Artikel deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.3" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3">
+                            <Kop deltaxml:deltaV2="A!=B" deltaxml:key="Kop">
+                                <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                                <Nummer deltaxml:deltaV2="A=B">2.3</Nummer>
+                                <Opschrift deltaxml:deltaV2="A!=B">(aanwijzing en geometrische begrenzing 
+                                    <deltaxml:textGroup deltaxml:deltaV2="B">
+                                        <deltaxml:text deltaxml:deltaV2="B">van </deltaxml:text>
+                                    </deltaxml:textGroup>rijkswateren niet in beheer bij het Rijk)
+                                </Opschrift>
+                            </Kop>
+                            <Lid deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_1" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_1">
+                                <LidNummer deltaxml:deltaV2="A=B">1.</LidNummer>
+                                <Inhoud deltaxml:deltaV2="A!=B">
+                                    <Al deltaxml:deltaV2="A!=B">In afwijking van artikel 2.20, tweede lid, onder a, van de wet
+                                        <deltaxml:textGroup deltaxml:deltaV2="B">
+                                            <deltaxml:text deltaxml:deltaV2="B">,</deltaxml:text>
+                                        </deltaxml:textGroup> berust het waterstaatkundig beheer van
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">de</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-57/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_1__ref_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_1__ref_1">de rijkswateren</IntIoRef>
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A"> rijkswateren</deltaxml:text>
+                                        </deltaxml:textGroup>, voor zover deze liggen binnen de begrenzing die is vastgelegd in bijlage III,
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">bedoelde </deltaxml:text>
+                                        </deltaxml:textGroup>niet tot het Rijk behorende openbare lichaam.
+                                    </Al>
+                                </Inhoud>
+                            </Lid>
+                            <Lid deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_2" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_2">
+                                <LidNummer deltaxml:deltaV2="A=B">2.</LidNummer>
+                                <Inhoud deltaxml:deltaV2="A!=B">
+                                    <Al deltaxml:deltaV2="A!=B">Het waterstaatskundig beheer van 
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">de</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <IntIoRef deltaxml:deltaV2="B" ref="/join/id/regdata/mnre1034/2019/dc-2019-56/@2019-07-01" eId="chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_2__ref_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.1__art_2.3__para_2__ref_1">de rijkswateren</IntIoRef>
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A"> rijkswateren</deltaxml:text>
+                                        </deltaxml:textGroup>, voor zover het gaat om de zorg
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">,</deltaxml:text>
+                                        </deltaxml:textGroup> voor het voorkomen van schade aan waterstaatswerken
+                                        <deltaxml:textGroup deltaxml:deltaV2="B">
+                                            <deltaxml:text deltaxml:deltaV2="B">veroorzaakt </deltaxml:text>
+                                        </deltaxml:textGroup>door muskus
+                                        <deltaxml:textGroup deltaxml:deltaV2="B">
+                                            <deltaxml:text deltaxml:deltaV2="B">-</deltaxml:text>
+                                        </deltaxml:textGroup> en beverratten, bedoeld in artikel 2.2, derde lid, berust bij het waterschapsbestuur.
+                                    </Al>
+                                </Inhoud>
+                            </Lid>
+                        </Artikel>
+                    </Paragraaf>
+                    <Paragraaf deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.2" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.2">
+                        <Kop deltaxml:deltaV2="A=B" deltaxml:key="Kop">
+                            <Label>§</Label>
+                            <Nummer>2.2.2</Nummer>
+                            <Opschrift>Waterkeringen</Opschrift>
+                        </Kop>
+                        <Artikel deltaxml:deltaV2="A!=B" eId="chp_2__subchp_2.2__subsec_2.2.2__art_2.4" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.2__art_2.4" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.2__art_2.4">
+                            <Kop deltaxml:deltaV2="A!=B" deltaxml:key="Kop">
+                                <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                                <Nummer deltaxml:deltaV2="A=B">2.4</Nummer>
+                                <Opschrift deltaxml:deltaV2="A!=B">(geometrische begrenzing primaire waterkeringen
+                                    <deltaxml:textGroup deltaxml:deltaV2="B">
+                                        <deltaxml:text deltaxml:deltaV2="B"> – dijktrajecten</deltaxml:text>
+                                    </deltaxml:textGroup>)
+                                </Opschrift>
+                            </Kop>
+                            <Gereserveerd deltaxml:deltaV2="A=B"/>
+                        </Artikel>
+                        <Artikel deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.2__art_2.5" eId="chp_2__subchp_2.2__subsec_2.2.2__art_2.5" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.2__art_2.5">
+                            <Kop deltaxml:deltaV2="A!=B" deltaxml:key="Kop">
+                                <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                                <Nummer deltaxml:deltaV2="A=B">2.5</Nummer>
+                                <Opschrift deltaxml:deltaV2="A!=B">(geometrische begrenzing andere dan primaire waterkeringen in beheer bij het Rijk
+                                    <deltaxml:textGroup deltaxml:deltaV2="B">
+                                        <deltaxml:text deltaxml:deltaV2="B">- dijktrajecten</deltaxml:text>
+                                    </deltaxml:textGroup>)
+                                </Opschrift>
+                            </Kop>
+                            <Gereserveerd deltaxml:deltaV2="A=B"/>
+                        </Artikel>
+                    </Paragraaf>
+                    <Paragraaf deltaxml:deltaV2="A=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.3" eId="chp_2__subchp_2.2__subsec_2.2.3" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.3">
+                        <Kop deltaxml:key="Kop">
+                            <Label>§</Label>
+                            <Nummer>2.2.3</Nummer>
+                            <Opschrift>Stroomgebiedsdistricten</Opschrift>
+                        </Kop>
+                        <Artikel deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.3__art_2.6" eId="chp_2__subchp_2.2__subsec_2.2.3__art_2.6" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.3__art_2.6">
+                            <Kop deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>2.6</Nummer>
+                                <Opschrift>(aanwijzing Nederlandse delen stroomgebiedsdistricten)</Opschrift>
+                            </Kop>
+                            <Inhoud>
+                                <Al>De Nederlandse delen van stroomgebiedsdistricten Rijn, Maas, Schelde en Eems, met inbegrip van de toedeling van grondwaterlichamen aan die stroomgebiedsdistricten, zijn de locaties die zijn weergegeven op de kaart in bijlage IV.</Al>
+                            </Inhoud>
+                        </Artikel>
+                    </Paragraaf>
+                    <Paragraaf deltaxml:deltaV2="A=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.4" eId="chp_2__subchp_2.2__subsec_2.2.4" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.4">
+                        <Kop deltaxml:key="Kop">
+                            <Label>§</Label>
+                            <Nummer>2.2.4</Nummer>
+                            <Opschrift>Kust</Opschrift>
+                        </Kop>
+                        <Artikel deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.4__art_2.7" eId="chp_2__subchp_2.2__subsec_2.2.4__art_2.7" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.4__art_2.7">
+                            <Kop deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>2.7</Nummer>
+                                <Opschrift>(geometrische begrenzing kustfundament)</Opschrift>
+                            </Kop>
+                            <Inhoud>
+                                <Al>De geometrische begrenzing van het kustfundament, bedoeld in artikel 5.39 van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                            </Inhoud>
+                        </Artikel>
+                    </Paragraaf>
+                    <Paragraaf deltaxml:deltaV2="A=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5" eId="chp_2__subchp_2.2__subsec_2.2.5" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5">
+                        <Kop deltaxml:key="Kop">
+                            <Label>§</Label>
+                            <Nummer>2.2.5</Nummer>
+                            <Opschrift>Grote rivieren</Opschrift>
+                        </Kop>
+                        <Artikel deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8" eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.8" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8">
+                            <Kop deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>2.8</Nummer>
+                                <Opschrift>(geometrische begrenzing rivierbed grote rivieren)</Opschrift>
+                            </Kop>
+                            <Lid deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_1" eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_1">
+                                <LidNummer>1.</LidNummer>
+                                <Inhoud>
+                                    <Al>De geometrische begrenzing van het rivierbed van de grote rivieren, bedoeld in artikel 5.41, eerste lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                                </Inhoud>
+                            </Lid>
+                            <Lid deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_2" eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_2">
+                                <LidNummer>2.</LidNummer>
+                                <Inhoud>
+                                    <Al>De geometrische begrenzing van het stroomvoerend deel van het rivierbed van de grote rivieren, bedoeld in artikel 5.41, tweede lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                                </Inhoud>
+                            </Lid>
+                            <Lid deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_3" eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_3" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.8__para_3">
+                                <LidNummer>3.</LidNummer>
+                                <Inhoud>
+                                    <Al>De geometrische begrenzing van het bergend deel van het rivierbed van de grote rivieren, bedoeld in artikel 5.41, derde lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                                </Inhoud>
+                            </Lid>
+                        </Artikel>
+                        <Artikel deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.9" eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.9" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.9">
+                            <Kop deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>2.9</Nummer>
+                                <Opschrift>(geometrische begrenzing reserveringsgebieden grote rivieren)</Opschrift>
+                            </Kop>
+                            <Lid deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.9__para_1" eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.9__para_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.9__para_1">
+                                <LidNummer>1.</LidNummer>
+                                <Inhoud>
+                                    <Al>De geometrische begrenzing van het reserveringsgebied voor de lange termijn voor de Rijntakken, bedoeld in artikel 5.42, eerste lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                                </Inhoud>
+                            </Lid>
+                            <Lid deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.9__para_2" eId="chp_2__subchp_2.2__subsec_2.2.5__art_2.9__para_2" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.5__art_2.9__para_2">
+                                <LidNummer>2.</LidNummer>
+                                <Inhoud>
+                                    <Al>De geometrische begrenzing van het reserveringsgebied voor de lange termijn voor de Maas, bedoeld in artikel 5.42, tweede lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                                </Inhoud>
+                            </Lid>
+                        </Artikel>
+                    </Paragraaf>
+                    <Paragraaf deltaxml:deltaV2="A=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.6" eId="chp_2__subchp_2.2__subsec_2.2.6" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.6">
+                        <Kop deltaxml:key="Kop">
+                            <Label>§</Label>
+                            <Nummer>2.2.6</Nummer>
+                            <Opschrift>IJsselmeergebied</Opschrift>
+                        </Kop>
+                        <Artikel deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.6__art_2.10" eId="chp_2__subchp_2.2__subsec_2.2.6__art_2.10" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.6__art_2.10">
+                            <Kop deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>2.10</Nummer>
+                                <Opschrift>(geometrische begrenzing IJsselmeergebied)</Opschrift>
+                            </Kop>
+                            <Inhoud>
+                                <Al>De geometrische begrenzing van het IJsselmeergebied, bedoeld in artikel 5.48 van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                            </Inhoud>
+                        </Artikel>
+                    </Paragraaf>
+                    <Paragraaf deltaxml:deltaV2="B" deltaxml:key="mnre1034__2.0__chp_2__subchp_2.2__subsec_2.2.7" eId="chp_2__subchp_2.2__subsec_2.2.7" wId="mnre1034__2.0__chp_2__subchp_2.2__subsec_2.2.7">
+                        <Kop deltaxml:key="Kop">
+                            <Label>§</Label>
+                            <Nummer>2.2.7</Nummer>
+                            <Opschrift>Waddenzee en Waddengebied</Opschrift>
+                        </Kop>
+                        <Artikel deltaxml:key="mnre1034__2.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11" eId="chp_2__subchp_2.2__subsec_2.2.7__art_2.11" wId="mnre1034__2.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11">
+                            <Kop deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>2.11</Nummer>
+                                <Opschrift>(geometrische begrenzing Waddenzee en Waddengebied)</Opschrift>
+                            </Kop>
+                            <Gereserveerd/>
+                        </Artikel>
+                    </Paragraaf>
+                    <Paragraaf deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.7" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.7">
+                        <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                            <dxa:eId deltaxml:deltaV2="A!=B">
+                                <deltaxml:attributeValue deltaxml:deltaV2="A">chp_2__subchp_2.2__subsec_2.2.7</deltaxml:attributeValue>
+                                <deltaxml:attributeValue deltaxml:deltaV2="B">chp_2__subchp_2.2__subsec_2.2.8</deltaxml:attributeValue>
+                            </dxa:eId>
+                        </deltaxml:attributes>
+                        <Kop deltaxml:deltaV2="A!=B" deltaxml:key="Kop">
+                            <Label deltaxml:deltaV2="A=B">§</Label>
+                            <Nummer deltaxml:deltaV2="A!=B">
+                                <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                    <deltaxml:text deltaxml:deltaV2="A">2.2.7</deltaxml:text>
+                                    <deltaxml:text deltaxml:deltaV2="B">2.2.8</deltaxml:text>
+                                </deltaxml:textGroup>
+                            </Nummer>
+                            <Opschrift deltaxml:deltaV2="A=B">Rijksvaarwegen</Opschrift>
+                        </Kop>
+                        <Artikel deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11">
+                            <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                                <dxa:eId deltaxml:deltaV2="A!=B">
+                                    <deltaxml:attributeValue deltaxml:deltaV2="A">chp_2__subchp_2.2__subsec_2.2.7__art_2.11</deltaxml:attributeValue>
+                                    <deltaxml:attributeValue deltaxml:deltaV2="B">chp_2__subchp_2.2__subsec_2.2.8__art_2.12</deltaxml:attributeValue>
+                                </dxa:eId>
+                            </deltaxml:attributes>
+                            <Kop deltaxml:deltaV2="A!=B" deltaxml:key="Kop">
+                                <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                                <Nummer deltaxml:deltaV2="A!=B">
+                                    <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                        <deltaxml:text deltaxml:deltaV2="A">2.11</deltaxml:text>
+                                        <deltaxml:text deltaxml:deltaV2="B">2.12</deltaxml:text>
+                                    </deltaxml:textGroup>
+                                </Nummer>
+                                <Opschrift deltaxml:deltaV2="A=B">(geometrische begrenzing vrijwaringsgebieden rijksvaarwegen)</Opschrift>
+                            </Kop>
+                            <Inhoud deltaxml:deltaV2="A">
+                                <Al>De geometrische begrenzing van een vrijwaringsgebied van een rijkswater, met uitzondering van de Noordzee, de Waddenzee, de Westerschelde en het IJsselmeer, dat een vaarweg is, bedoeld in artikel 5.160 van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                            </Inhoud>
+                            <Lid deltaxml:deltaV2="B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11__para_1" eId="chp_2__subchp_2.2__subsec_2.2.8__art_2.12__para_1" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11__para_1">
+                                <LidNummer>1.</LidNummer>
+                                <Inhoud>
+                                    <Al>De geometrische begrenzing van de Waddenzee, bedoeld in artikel 5.129a, eerste lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                                </Inhoud>
+                            </Lid>
+                            <Lid deltaxml:deltaV2="B" deltaxml:key="mnre1034_1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11__para_2" eId="chp_2__subchp_2.2__subsec_2.2.8__art_2.12__para_2" wId="mnre1034_1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.11__para_2">
+                                <LidNummer>2.</LidNummer>
+                                <Inhoud>
+                                    <Al>De geometrische begrenzing van het Waddengebied, bedoeld in artikel 5.129a, tweede lid, van het Besluit kwaliteit leefomgeving, is vastgelegd in bijlage III.</Al>
+                                </Inhoud>
+                            </Lid>
+                        </Artikel>
+                        <Artikel deltaxml:deltaV2="A" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.12" eId="chp_2__subchp_2.2__subsec_2.2.7__art_2.12" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.7__art_2.12">
+                            <Kop deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>2.12</Nummer>
+                                <Opschrift>(geometrische begrenzing vaarwegen)</Opschrift>
+                            </Kop>
+                            <Inhoud>
+                                <Al>De geometrische begrenzing van vaarwegen, bedoeld in artikel 6.17, eerste lid, aanhef en onder d, onder 1° en 2° en eerste lid, onder f, onder 2° van het Besluit activiteiten leefomgeving, is vastgelegd in bijlage III.</Al>
+                            </Inhoud>
+                        </Artikel>
+                    </Paragraaf>
+                    <Paragraaf deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.8" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.8">
+                        <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                            <dxa:eId deltaxml:deltaV2="A!=B">
+                                <deltaxml:attributeValue deltaxml:deltaV2="A">chp_2__subchp_2.2__subsec_2.2.8</deltaxml:attributeValue>
+                                <deltaxml:attributeValue deltaxml:deltaV2="B">chp_2__subchp_2.2__subsec_2.2.9</deltaxml:attributeValue>
+                            </dxa:eId>
+                        </deltaxml:attributes>
+                        <Kop deltaxml:deltaV2="A!=B" deltaxml:key="Kop">
+                            <Label deltaxml:deltaV2="A=B">§</Label>
+                            <Nummer deltaxml:deltaV2="A!=B">
+                                <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                    <deltaxml:text deltaxml:deltaV2="A">2.2.8</deltaxml:text>
+                                    <deltaxml:text deltaxml:deltaV2="B">2.2.9</deltaxml:text>
+                                </deltaxml:textGroup>
+                            </Nummer>
+                            <Opschrift deltaxml:deltaV2="A!=B">
+                                <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                    <deltaxml:text deltaxml:deltaV2="A">Waterstaatswerken</deltaxml:text>
+                                    <deltaxml:text deltaxml:deltaV2="B">Beperkingengebieden waterstaatswerken</deltaxml:text>
+                                </deltaxml:textGroup> in beheer bij het Rijk
+                            </Opschrift>
+                        </Kop>
+                        <Artikel deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.8__art_2.13" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.8__art_2.13">
+                            <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                                <dxa:eId deltaxml:deltaV2="A!=B">
+                                    <deltaxml:attributeValue deltaxml:deltaV2="A">chp_2__subchp_2.2__subsec_2.2.8__art_2.13</deltaxml:attributeValue>
+                                    <deltaxml:attributeValue deltaxml:deltaV2="B">chp_2__subchp_2.2__subsec_2.2.9__art_2.13</deltaxml:attributeValue>
+                                </dxa:eId>
+                            </deltaxml:attributes>
+                            <Kop deltaxml:deltaV2="A!=B" deltaxml:key="Kop">
+                                <Label deltaxml:deltaV2="A=B">Artikel</Label>
+                                <Nummer deltaxml:deltaV2="A=B">2.13</Nummer>
+                                <Opschrift deltaxml:deltaV2="A!=B">(aanwijzing en geometrische begrenzing beperkingengebieden 
+                                    <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                        <deltaxml:text deltaxml:deltaV2="A">waterstaatswerken</deltaxml:text>
+                                        <deltaxml:text deltaxml:deltaV2="B">oppervlaktewaterlichamen</deltaxml:text>
+                                    </deltaxml:textGroup> in beheer bij het Rijk
+                                    <deltaxml:textGroup deltaxml:deltaV2="B">
+                                        <deltaxml:text deltaxml:deltaV2="B">, niet zijnde kanalen</deltaxml:text>
+                                    </deltaxml:textGroup>)
+                                </Opschrift>
+                            </Kop>
+                            <Gereserveerd deltaxml:deltaV2="A=B"/>
+                        </Artikel>
+                    </Paragraaf>
+                    <Paragraaf deltaxml:deltaV2="A" deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.9" eId="chp_2__subchp_2.2__subsec_2.2.9" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.9">
+                        <Kop deltaxml:key="Kop">
+                            <Label>§</Label>
+                            <Nummer>2.2.9</Nummer>
+                            <Opschrift>Een niet goed doordachte paragraaf</Opschrift>
+                        </Kop>
+                        <Artikel deltaxml:key="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.8__art_2.14" eId="chp_2__subchp_2.2__subsec_2.2.8__art_2.14" wId="mnre1034__1.0__chp_2__subchp_2.2__subsec_2.2.8__art_2.14">
+                            <Kop deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>2.14</Nummer>
+                                <Opschrift>(aanwijzing en geometrische begrenzing beperkingengebieden oppervlaktewaterlichamen afmeren woonschip of ander drijvend werk)</Opschrift>
+                            </Kop>
+                            <Gereserveerd/>
+                        </Artikel>
+                    </Paragraaf>
+                </Afdeling>
+            </Hoofdstuk>
+            <Hoofdstuk deltaxml:deltaV2="A!=B" eId="chp_7" deltaxml:key="mnre1034__1.0__chp_7" wId="mnre1034__1.0__chp_7">
+                <Kop deltaxml:deltaV2="A=B" deltaxml:key="Kop">
+                    <Label>HOOFDSTUK</Label>
+                    <Nummer>7</Nummer>
+                    <Opschrift>GEGEVENS EN BESCHEIDEN</Opschrift>
+                </Kop>
+                <Afdeling deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1" wId="mnre1034__1.0__chp_7__subchp_7.1" eId="chp_7__subchp_7.1">
+                    <Kop deltaxml:deltaV2="A=B" deltaxml:key="Kop">
+                        <Label>AFDELING</Label>
+                        <Nummer>7.1</Nummer>
+                        <Opschrift>OMGEVINGSVERGUNNINGEN</Opschrift>
+                    </Kop>
+                    <Paragraaf deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1" eId="chp_7__subchp_7.1__subsec_7.1.1" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1">
+                        <Kop deltaxml:deltaV2="A=B" deltaxml:key="Kop">
+                            <Label>§</Label>
+                            <Nummer>7.1.1</Nummer>
+                            <Opschrift>Algemene bepalingen</Opschrift>
+                        </Kop>
+                        <Artikel deltaxml:deltaV2="A=B" deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.1" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.1" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.1">
+                            <Kop deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>7.1</Nummer>
+                                <Opschrift>(toepassingsbereik)</Opschrift>
+                            </Kop>
+                            <Inhoud>
+                                <Al>Deze afdeling is van toepassing op het verstrekken van gegevens en bescheiden bij een aanvraag om een omgevingsvergunning als bedoeld in artikel 5.1 van de wet.</Al>
+                            </Inhoud>
+                        </Artikel>
+                        <Artikel deltaxml:deltaV2="A=B" deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2">
+                            <Kop deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>7.2</Nummer>
+                                <Opschrift>(algemene aanvraagvereisten)</Opschrift>
+                            </Kop>
+                            <Inhoud>
+                                <Lijst eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1" type="expliciet" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1">
+                                    <Lijstaanhef deltaxml:key="Lijstaanhef">Bij een aanvraag worden de volgende gegevens en bescheiden verstrekt:</Lijstaanhef>
+                                    <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_a" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_a">
+                                        <LiNummer>a.</LiNummer>
+                                        <Al>een aanduiding van de activiteit waarvoor de omgevingsvergunning wordt aangevraagd;</Al>
+                                    </Li>
+                                    <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_b" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_b">
+                                        <LiNummer>b.</LiNummer>
+                                        <Al>het telefoonnummer van de aanvrager;</Al>
+                                    </Li>
+                                    <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_c" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_c">
+                                        <LiNummer>c.</LiNummer>
+                                        <Al>het adres, de kadastrale aanduiding of coördinaten van de locatie waarop de activiteit wordt verricht;</Al>
+                                    </Li>
+                                    <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_d" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_d">
+                                        <LiNummer>d.</LiNummer>
+                                        <Al>de begrenzing van de locatie waarop de activiteit wordt verricht;</Al>
+                                    </Li>
+                                    <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_e" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_e">
+                                        <LiNummer>e.</LiNummer>
+                                        <Al>als de activiteit waarop de aanvraag betrekking heeft, wordt verricht door of namens een rechtspersoon of natuurlijke persoon in het kader van het voeren van een onderneming of het uitoefenen van een zelfstandig beroep: het e-mailadres van de aanvrager respectievelijk de gemachtigde;</Al>
+                                    </Li>
+                                    <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_f" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_f">
+                                        <LiNummer>f.</LiNummer>
+                                        <Al>als de aanvraag wordt ingediend door een gemachtigde: naam, adres, telefoonnummer en woonplaats van de gemachtigde; en</Al>
+                                    </Li>
+                                    <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_g" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.2__list_1__item_g">
+                                        <LiNummer>g.</LiNummer>
+                                        <Al>als de aanvrager het voornemen heeft om in plaats van een maatregel die is voorgeschreven in regels als bedoeld in artikel 4.3 van de wet, een gelijkwaardige maatregel als bedoeld in artikel 4.7 eerste lid, van de wet te treffen: gegevens waaruit blijkt dat met de gelijkwaardige maatregel ten minste hetzelfde resultaat wordt bereikt als met de voorgeschreven maatregel is beoogd.</Al>
+                                    </Li>
+                                </Lijst>
+                            </Inhoud>
+                        </Artikel>
+                        <Artikel deltaxml:deltaV2="A=B" deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3">
+                            <Kop deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>7.3</Nummer>
+                                <Opschrift>(aanvragen langs elektronische weg)</Opschrift>
+                            </Kop>
+                            <Inhoud>
+                                <Lijst eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1" type="expliciet" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1">
+                                    <Lijstaanhef deltaxml:key="Lijstaanhef">Bij een aanvraag die elektronisch wordt ingediend worden gegevens en bescheiden verstrekt in een van de volgende archiefwaardige bestandsformaten die zijn gekenmerkt als alleen lezen:</Lijstaanhef>
+                                    <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_a" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_a">
+                                        <LiNummer>a.</LiNummer>
+                                        <Al>foto’s: PNG en JPG;</Al>
+                                    </Li>
+                                    <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_b" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_b">
+                                        <LiNummer>b.</LiNummer>
+                                        <Al>scans: TIFF, JPG, PDF/A-1a, PDF/A-1b en PDF 1.4;</Al>
+                                    </Li>
+                                    <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_c" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_c">
+                                        <LiNummer>c.</LiNummer>
+                                        <Al>officedocumenten: PDF/A-1a en PDF 1.4; en</Al>
+                                    </Li>
+                                    <Li eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_d" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.3__list_1__item_d">
+                                        <LiNummer>d.</LiNummer>
+                                        <Al>tekeningen: PDF/X en PDF 1.4.</Al>
+                                    </Li>
+                                </Lijst>
+                            </Inhoud>
+                        </Artikel>
+                        <Artikel deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.4" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4">
+                            <Kop deltaxml:deltaV2="A=B" deltaxml:key="Kop">
+                                <Label>Artikel</Label>
+                                <Nummer>7.4</Nummer>
+                                <Opschrift>(participatie)</Opschrift>
+                            </Kop>
+                            <Lid deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_1" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_1" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_1">
+                                <LidNummer deltaxml:deltaV2="A=B">1.</LidNummer>
+                                <Inhoud deltaxml:deltaV2="A!=B">
+                                    <Al deltaxml:deltaV2="A!=B">Bij een aanvraag wordt aangegeven of burgers, bedrijven, maatschappelijke organisaties en bestuursorganen bij de voorbereiding van de aanvraag zijn betrokken. De 
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">EU</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <abbr deltaxml:deltaV2="B" title="Europese Unie">EU</abbr> zegt hier ook iets over.
+                                    </Al>
+                                </Inhoud>
+                            </Lid>
+                            <Lid deltaxml:deltaV2="A!=B" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_2" deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_2" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_2">
+                                <LidNummer deltaxml:deltaV2="A=B">2.</LidNummer>
+                                <Inhoud deltaxml:deltaV2="A!=B">
+                                    <Al deltaxml:deltaV2="A!=B">Als burgers, bedrijven, maatschappelijke organisaties en bestuursorganen bij de voorbereiding van de aanvraag zijn betrokken, verstrekt de aanvrager bij de aanvraag gegevens over hoe zij zijn betrokken en wat de resultaten daarvan zijn. Het was benauwd in de 
+                                        <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                            <deltaxml:text deltaxml:deltaV2="A">2e</deltaxml:text>
+                                            <deltaxml:text deltaxml:deltaV2="B">2</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <sup deltaxml:deltaV2="B">e</sup> kamer, men had een sterke behoefte aan
+                                        <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                            <deltaxml:text deltaxml:deltaV2="A">02</deltaxml:text>
+                                            <deltaxml:text deltaxml:deltaV2="B">0</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <sub deltaxml:deltaV2="B">2</sub>.
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">In</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <Noot deltaxml:deltaV2="B" NootNummer="1" id="f234" type="voet">
+                                            <Al>In EU directive 123 is hier meer over te vinden.</Al>
+                                        </Noot>
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A"> EU directive 123 is hier meer over te vinden.</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                    </Al>
+                                </Inhoud>
+                            </Lid>
+                            <Lid deltaxml:deltaV2="A!=B" eId="chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_3" deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_3" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__art_7.4__para_3">
+                                <LidNummer deltaxml:deltaV2="A=B">3.</LidNummer>
+                                <Inhoud deltaxml:deltaV2="A!=B">
+                                    <Al deltaxml:deltaV2="A!=B">Het 
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">eerste</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <b deltaxml:deltaV2="B">eerste en tweede lid</b>
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">en tweede lid </deltaxml:text>
+                                        </deltaxml:textGroup>zijn ook van
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">toepassing</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <i deltaxml:deltaV2="B">toepassing op</i>
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">op </deltaxml:text>
+                                        </deltaxml:textGroup>een aanvraag om een
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">omgevingsvergunning</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <u deltaxml:deltaV2="B">omgevingsvergunning</u> als bedoeld in
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">artikel</deltaxml:text>
+                                        </deltaxml:textGroup>
+                                        <strong deltaxml:deltaV2="B">artikel 5.3 of 5.4</strong>
+                                        <deltaxml:textGroup deltaxml:deltaV2="A">
+                                            <deltaxml:text deltaxml:deltaV2="A">5.3 of 5.4 </deltaxml:text>
+                                        </deltaxml:textGroup>van de wet.
+                                    </Al>
+                                </Inhoud>
+                            </Lid>
+                        </Artikel>
+                    </Paragraaf>
+                    <Paragraaf deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.2" eId="chp_7__subchp_7.1__subsec_7.1.2" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.2">
+                        <Kop deltaxml:deltaV2="A=B" deltaxml:key="Kop">
+                            <Label>§</Label>
+                            <Nummer>7.1.2</Nummer>
+                            <Opschrift>Bouwactiviteiten</Opschrift>
+                        </Kop>
+                        <Gereserveerd deltaxml:deltaV2="A"/>
+                        <Subparagraaf deltaxml:deltaV2="B" deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.2__subsec_7.1.2.1" eId="chp_7__subchp_7.1__subsec_7.1.2__subsec_7.1.2.1" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.2__subsec_7.1.2.1">
+                            <Kop deltaxml:key="Kop">
+                                <Label>§</Label>
+                                <Nummer>7.1.2.1</Nummer>
+                                <Opschrift>Algemeen</Opschrift>
+                            </Kop>
+                            <Artikel deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.5" eId="chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.5" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.5">
+                                <Kop deltaxml:key="Kop">
+                                    <Label>Artikel</Label>
+                                    <Nummer>7.5</Nummer>
+                                    <Opschrift>(bouwactiviteit: toepassingsbereik)</Opschrift>
+                                </Kop>
+                                <Inhoud>
+                                    <Al>Deze paragraaf is van toepassing op het verstrekken van gegevens en bescheiden bij een aanvraag om een omgevingsvergunning voor een bouwactiviteit als bedoeld in artikel PM van het Besluit bouwwerken leefomgeving.</Al>
+                                </Inhoud>
+                            </Artikel>
+                            <Artikel deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.6" eId="chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.6" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.6">
+                                <Kop deltaxml:key="Kop">
+                                    <Label>Artikel</Label>
+                                    <Nummer>7.6</Nummer>
+                                    <Opschrift>Artikel 7.6 (bouwactiviteit: algemene aanvraagvereisten)</Opschrift>
+                                </Kop>
+                                <Inhoud>
+                                    <Al>Bij een aanvraag wordt een opgave van de kosten van de te verrichten werkzaamheden verstrekt.</Al>
+                                </Inhoud>
+                            </Artikel>
+                            <Artikel deltaxml:key="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.7" eId="chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.7" wId="mnre1034__1.0__chp_7__subchp_7.1__subsec_7.1.1__subsec_7.1.2.1__art_7.7">
+                                <Kop deltaxml:key="Kop">
+                                    <Label>Artikel</Label>
+                                    <Nummer>7.7</Nummer>
+                                    <Opschrift>(bouwactiviteit: veiligheid)</Opschrift>
+                                </Kop>
+                                <Inhoud>
+                                    <Al>etcetera</Al>
+                                </Inhoud>
+                            </Artikel>
+                        </Subparagraaf>
+                    </Paragraaf>
+                </Afdeling>
+            </Hoofdstuk>
+        </Lichaam>
+        <Bijlage deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__cmp_IV" position="3" wId="mnre1034__1.0__cmp_IV" wIdPreceding="body_1" wIdFollowing="mnre1034__1.0__cmp_X" eId="cmp_IV">
+            <Kop deltaxml:deltaV2="A=B" deltaxml:key="Kop">
+                <Label>BIJLAGE</Label>
+                <Nummer>IV</Nummer>
+                <Opschrift>BIJ ARTIKEL 2.6 VAN DEZE REGELING (AANWIJZING NEDERLANDSE DELEN STROOMGEBIEDSDISTRICTEN)</Opschrift>
+            </Kop>
+            <Divisietekst deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__cmp_IV__content" eId="cmp_IV__content" wId="mnre1034__1.0__cmp_IV__content">
+                <Inhoud deltaxml:deltaV2="A!=B">
+                    <Figuur deltaxml:deltaV2="A!=B" eId="cmp_IV__img_1">
+                        <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                            <dxa:wId deltaxml:deltaV2="A!=B">
+                                <deltaxml:attributeValue deltaxml:deltaV2="A">mnre1034__1.0__cmp_IV__img_1</deltaxml:attributeValue>
+                                <deltaxml:attributeValue deltaxml:deltaV2="B">mnre1034__2.0__cmp_IV__img_1</deltaxml:attributeValue>
+                            </dxa:wId>
+                        </deltaxml:attributes>
+                        <Illustratie deltaxml:deltaV2="A!=B" hoogte="1913" dpi="300" uitlijning="start" formaat="image/png">
+                            <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                                <dxa:breedte deltaxml:deltaV2="A!=B">
+                                    <deltaxml:attributeValue deltaxml:deltaV2="A">1559</deltaxml:attributeValue>
+                                    <deltaxml:attributeValue deltaxml:deltaV2="B">1547</deltaxml:attributeValue>
+                                </dxa:breedte>
+                            </deltaxml:attributes>
+                            <naam deltaxml:deltaV2="A!=B">stcrt-2019-
+                                <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                    <deltaxml:text deltaxml:deltaV2="A">23562</deltaxml:text>
+                                    <deltaxml:text deltaxml:deltaV2="B">39139</deltaxml:text>
+                                </deltaxml:textGroup>-
+                                <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                    <deltaxml:text deltaxml:deltaV2="A">001</deltaxml:text>
+                                    <deltaxml:text deltaxml:deltaV2="B">002</deltaxml:text>
+                                </deltaxml:textGroup>.png
+                            </naam>
+                        </Illustratie>
+                    </Figuur>
+                </Inhoud>
+            </Divisietekst>
+        </Bijlage>
+        <Bijlage deltaxml:deltaV2="A!=B" wIdPreceding="mnre1034__1.0__cmp_IV" eId="cmp_X" deltaxml:key="mnre1034__1.0__cmp_X" wId="mnre1034__1.0__cmp_X" position="4" wIdFollowing="mnre1034__1.0__cmp_XI">
+            <Kop deltaxml:deltaV2="A=B" deltaxml:key="Kop">
+                <Label>BIJLAGE</Label>
+                <Nummer>X</Nummer>
+                <Opschrift>BIJ ARTIKEL 5.6, TWEEDE LID, VAN DEZE REGELING (MODEL ENERGIELABEL GEBOUW)</Opschrift>
+            </Kop>
+            <Divisietekst deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__cmp_X__content" eId="cmp_X__content" wId="mnre1034__1.0__cmp_X__content">
+                <Inhoud deltaxml:deltaV2="A!=B">
+                    <Figuur deltaxml:deltaV2="A!=B" eId="cmp_X__img_1">
+                        <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                            <dxa:wId deltaxml:deltaV2="A!=B">
+                                <deltaxml:attributeValue deltaxml:deltaV2="A">mnre1034__1.0__cmp_X__img_1</deltaxml:attributeValue>
+                                <deltaxml:attributeValue deltaxml:deltaV2="B">mnre1034__2.0__cmp_X__img_1</deltaxml:attributeValue>
+                            </dxa:wId>
+                        </deltaxml:attributes>
+                        <Illustratie deltaxml:deltaV2="A!=B" dpi="300" uitlijning="start" formaat="image/png">
+                            <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                                <dxa:hoogte deltaxml:deltaV2="A!=B">
+                                    <deltaxml:attributeValue deltaxml:deltaV2="A">2504</deltaxml:attributeValue>
+                                    <deltaxml:attributeValue deltaxml:deltaV2="B">2421</deltaxml:attributeValue>
+                                </dxa:hoogte>
+                                <dxa:breedte deltaxml:deltaV2="A!=B">
+                                    <deltaxml:attributeValue deltaxml:deltaV2="A">1772</deltaxml:attributeValue>
+                                    <deltaxml:attributeValue deltaxml:deltaV2="B">1713</deltaxml:attributeValue>
+                                </dxa:breedte>
+                            </deltaxml:attributes>
+                            <naam deltaxml:deltaV2="A!=B">stcrt-2019-
+                                <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                    <deltaxml:text deltaxml:deltaV2="A">23562</deltaxml:text>
+                                    <deltaxml:text deltaxml:deltaV2="B">39139</deltaxml:text>
+                                </deltaxml:textGroup>-
+                                <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                    <deltaxml:text deltaxml:deltaV2="A">039</deltaxml:text>
+                                    <deltaxml:text deltaxml:deltaV2="B">041</deltaxml:text>
+                                </deltaxml:textGroup>.png
+                            </naam>
+                        </Illustratie>
+                    </Figuur>
+                </Inhoud>
+            </Divisietekst>
+        </Bijlage>
+        <Bijlage deltaxml:deltaV2="A!=B" wIdFollowing="mnre1034__1.0__cmp_XII" eId="cmp_XI" deltaxml:key="mnre1034__1.0__cmp_XI" position="5" wIdPreceding="mnre1034__1.0__cmp_X" wId="mnre1034__1.0__cmp_XI">
+            <Kop deltaxml:deltaV2="A!=B" deltaxml:key="Kop">
+                <Label deltaxml:deltaV2="A=B">BIJLAGE</Label>
+                <Nummer deltaxml:deltaV2="A=B">XI</Nummer>
+                <Opschrift deltaxml:deltaV2="A!=B">BIJ ARTIKEL 5.7, DERDE LID, VAN DEZE REGELING (INIJKINGSTABEL VOOR DE ENERGIEPRESTATIE-INDICATOREN
+                    <deltaxml:textGroup deltaxml:deltaV2="B">
+                        <deltaxml:text deltaxml:deltaV2="B"> - tabel met tekstwijzigingen</deltaxml:text>
+                    </deltaxml:textGroup>)
+                </Opschrift>
+            </Kop>
+            <Divisietekst deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__cmp_XI__content" wId="mnre1034__1.0__cmp_XI__content" eId="cmp_XI__content">
+                <Inhoud deltaxml:deltaV2="A!=B">
+                    <Tussenkop deltaxml:deltaV2="A=B">Inijkingstabel voor de energieprestatie-indicatoren</Tussenkop>
+                    <table deltaxml:deltaV2="A!=B" tabstyle="zebra1" eId="cmp_XI__table_1" pgwide="0" rowsep="1" frame="all" colsep="1">
+                        <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                            <dxa:wId deltaxml:deltaV2="A!=B">
+                                <deltaxml:attributeValue deltaxml:deltaV2="A">mnre1034__1.0__cmp_XI__table_1</deltaxml:attributeValue>
+                                <deltaxml:attributeValue deltaxml:deltaV2="B">mnre1034__2.0__cmp_XI__table_1</deltaxml:attributeValue>
+                            </dxa:wId>
+                        </deltaxml:attributes>
+                        <title deltaxml:deltaV2="A=B">Tabel voor energieklassen voor utiliteitsgebouwen</title>
+                        <tgroup deltaxml:deltaV2="A!=B" align="left" cols="2">
+                            <colspec deltaxml:deltaV2="A=B" colname="col1" colnum="1" colwidth="305*"/>
+                            <colspec deltaxml:deltaV2="A=B" colname="col2" colnum="2" colwidth="408*"/>
+                            <thead deltaxml:deltaV2="A!=B" valign="bottom">
+                                <row deltaxml:deltaV2="A!=B" rowsep="1">
+                                    <entry deltaxml:deltaV2="A!=B" rotate="0" valign="top" align="left" colname="col1" colsep="1">
+                                        <Al deltaxml:deltaV2="A!=B">Energieprestatie-
+                                            <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                                <deltaxml:text deltaxml:deltaV2="A">indicator</deltaxml:text>
+                                                <deltaxml:text deltaxml:deltaV2="B">indicatoren</deltaxml:text>
+                                            </deltaxml:textGroup>
+                                        </Al>
+                                    </entry>
+                                    <entry deltaxml:deltaV2="A!=B" rotate="0" valign="top" align="left" colsep="1" colname="col2">
+                                        <Al deltaxml:deltaV2="A=B">Grenswaarden Energie-Index (EI)</Al>
+                                        <Al deltaxml:deltaV2="A!=B">Energieprestatie 
+                                            <deltaxml:textGroup deltaxml:deltaV2="B">
+                                                <deltaxml:text deltaxml:deltaV2="B">voor </deltaxml:text>
+                                            </deltaxml:textGroup>utiliteitsgebouwen
+                                        </Al>
+                                    </entry>
+                                </row>
+                            </thead>
+                            <tbody deltaxml:deltaV2="A!=B" valign="top">
+                                <row deltaxml:deltaV2="A!=B" rowsep="1">
+                                    <entry deltaxml:deltaV2="A=B" align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>A</Al>
+                                    </entry>
+                                    <entry deltaxml:deltaV2="A!=B" rotate="0" valign="top" align="left" colsep="1" colname="col2">
+                                        <Al deltaxml:deltaV2="A!=B">Kleiner of gelijk aan 
+                                            <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                                <deltaxml:text deltaxml:deltaV2="A">1,05</deltaxml:text>
+                                                <deltaxml:text deltaxml:deltaV2="B">2,05</deltaxml:text>
+                                            </deltaxml:textGroup>
+                                        </Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="A!=B" rowsep="1">
+                                    <entry deltaxml:deltaV2="A=B" align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>B</Al>
+                                    </entry>
+                                    <entry deltaxml:deltaV2="A!=B" rotate="0" valign="top" align="left" colsep="1" colname="col2">
+                                        <Al deltaxml:deltaV2="A!=B">
+                                            <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                                <deltaxml:text deltaxml:deltaV2="A">1,06</deltaxml:text>
+                                                <deltaxml:text deltaxml:deltaV2="B">2</deltaxml:text>
+                                            </deltaxml:textGroup>–1,15
+                                        </Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="A=B" rowsep="1">
+                                    <entry align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>C</Al>
+                                    </entry>
+                                    <entry align="left" colname="col2" colsep="1" rotate="0" valign="top">
+                                        <Al>1,16–1,30</Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="A=B" rowsep="1">
+                                    <entry align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>D</Al>
+                                    </entry>
+                                    <entry align="left" colname="col2" colsep="1" rotate="0" valign="top">
+                                        <Al>1,31–1,45</Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="A!=B" rowsep="1">
+                                    <entry deltaxml:deltaV2="A=B" align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>E</Al>
+                                    </entry>
+                                    <entry deltaxml:deltaV2="A!=B" rotate="0" valign="top" align="left" colsep="1" colname="col2">
+                                        <Al deltaxml:deltaV2="A!=B">
+                                            <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                                <deltaxml:text deltaxml:deltaV2="A">1,46</deltaxml:text>
+                                                <deltaxml:text deltaxml:deltaV2="B">1,56</deltaxml:text>
+                                            </deltaxml:textGroup>–1,60
+                                        </Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="A!=B" rowsep="1">
+                                    <entry deltaxml:deltaV2="A=B" align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>F</Al>
+                                    </entry>
+                                    <entry deltaxml:deltaV2="A!=B" rotate="0" valign="top" align="left" colsep="1" colname="col2">
+                                        <Al deltaxml:deltaV2="A!=B">
+                                            <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                                <deltaxml:text deltaxml:deltaV2="A">1,61</deltaxml:text>
+                                                <deltaxml:text deltaxml:deltaV2="B">1,67</deltaxml:text>
+                                            </deltaxml:textGroup>–1,75
+                                        </Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="A!=B" rowsep="1">
+                                    <entry deltaxml:deltaV2="A=B" align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>G</Al>
+                                    </entry>
+                                    <entry deltaxml:deltaV2="A!=B" rotate="0" valign="top" align="left" colsep="1" colname="col2">
+                                        <Al deltaxml:deltaV2="A!=B">Groter dan 
+                                            <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                                <deltaxml:text deltaxml:deltaV2="A">1,75</deltaxml:text>
+                                                <deltaxml:text deltaxml:deltaV2="B">2</deltaxml:text>
+                                            </deltaxml:textGroup>
+                                        </Al>
+                                    </entry>
+                                </row>
+                            </tbody>
+                        </tgroup>
+                    </table>
+                </Inhoud>
+            </Divisietekst>
+        </Bijlage>
+        <Bijlage deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__cmp_XII" position="6" wIdFollowing="" eId="cmp_XII" wId="mnre1034__1.0__cmp_XII" wIdPreceding="mnre1034__1.0__cmp_XI">
+            <Kop deltaxml:deltaV2="A=B" deltaxml:key="Kop">
+                <Label>BIJLAGE</Label>
+                <Nummer>XII</Nummer>
+                <Opschrift>BIJ ARTIKEL 5.8, VIERDE LID, VAN DEZE REGELING (INIJKINGSTABEL VOOR DE ENERGIEKLASSEN)</Opschrift>
+            </Kop>
+            <Divisietekst deltaxml:deltaV2="A!=B" deltaxml:key="mnre1034__1.0__cmp_XII__content" wId="mnre1034__1.0__cmp_XII__content" eId="cmp_XII__content">
+                <Inhoud deltaxml:deltaV2="A!=B">
+                    <Tussenkop deltaxml:deltaV2="A=B">Inijkingstabel voor de energieklassen</Tussenkop>
+                    <table deltaxml:deltaV2="A!=B" tabstyle="zebra1" eId="cmp_XII__table_1" pgwide="0" rowsep="1" frame="all" colsep="1">
+                        <deltaxml:attributes deltaxml:deltaV2="A!=B">
+                            <dxa:wId deltaxml:deltaV2="A!=B">
+                                <deltaxml:attributeValue deltaxml:deltaV2="A">mnre1034__1.0__cmp_XII__table_1</deltaxml:attributeValue>
+                                <deltaxml:attributeValue deltaxml:deltaV2="B">mnre1034__2.0__cmp_XII__table_1</deltaxml:attributeValue>
+                            </dxa:wId>
+                        </deltaxml:attributes>
+                        <title deltaxml:deltaV2="A!=B">Tabel voor energieklassen voor overige categorieën
+                            <deltaxml:textGroup deltaxml:deltaV2="B">
+                                <deltaxml:text deltaxml:deltaV2="B"> (met een rij toegevoegd)</deltaxml:text>
+                            </deltaxml:textGroup>
+                        </title>
+                        <tgroup deltaxml:deltaV2="A!=B" align="left" cols="2">
+                            <colspec deltaxml:deltaV2="A=B" colname="col1" colnum="1" colwidth="208*"/>
+                            <colspec deltaxml:deltaV2="A=B" colname="col2" colnum="2" colwidth="505*"/>
+                            <thead deltaxml:deltaV2="A=B" valign="bottom">
+                                <row rowsep="1">
+                                    <entry align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>Energieklasse</Al>
+                                    </entry>
+                                    <entry align="left" colname="col2" colsep="1" rotate="0" valign="top">
+                                        <Al>Grenswaarden E
+                                            <sub>P;tot</sub> / E
+                                            <sub>P;adm;tot;nb</sub> (E/E)
+                                        </Al>
+                                        <Al>Energieprestatie overige categorieën</Al>
+                                    </entry>
+                                </row>
+                            </thead>
+                            <tbody deltaxml:deltaV2="A!=B" valign="top">
+                                <row deltaxml:deltaV2="A=B" rowsep="1">
+                                    <entry align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>A++++</Al>
+                                    </entry>
+                                    <entry align="left" colname="col2" colsep="1" rotate="0" valign="top">
+                                        <Al>Kleiner of gelijk aan 0,30</Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="A=B" rowsep="1">
+                                    <entry align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>A+++</Al>
+                                    </entry>
+                                    <entry align="left" colname="col2" colsep="1" rotate="0" valign="top">
+                                        <Al>0,31–0,65</Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="A=B" rowsep="1">
+                                    <entry align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>A++</Al>
+                                    </entry>
+                                    <entry align="left" colname="col2" colsep="1" rotate="0" valign="top">
+                                        <Al>0,66–1,00</Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="A=B" rowsep="1">
+                                    <entry align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>A+</Al>
+                                    </entry>
+                                    <entry align="left" colname="col2" colsep="1" rotate="0" valign="top">
+                                        <Al>1,01–1,15</Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="A=B" rowsep="1">
+                                    <entry align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>A</Al>
+                                    </entry>
+                                    <entry align="left" colname="col2" colsep="1" rotate="0" valign="top">
+                                        <Al>1,16–1,35</Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="B" rowsep="1">
+                                    <entry align="left" colname="col1" colsep="1" rotate="0" valign="top">
+                                        <Al>B</Al>
+                                    </entry>
+                                    <entry align="left" colname="col2" colsep="1" rotate="0" valign="top">
+                                        <Al>1,36-1.45</Al>
+                                    </entry>
+                                </row>
+                                <row deltaxml:deltaV2="A!=B" rowsep="1">
+                                    <entry deltaxml:deltaV2="A!=B" rotate="0" valign="top" align="left" colname="col1" colsep="1">
+                                        <Al deltaxml:deltaV2="A!=B">
+                                            <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                                <deltaxml:text deltaxml:deltaV2="A">B</deltaxml:text>
+                                                <deltaxml:text deltaxml:deltaV2="B">C</deltaxml:text>
+                                            </deltaxml:textGroup>
+                                        </Al>
+                                    </entry>
+                                    <entry deltaxml:deltaV2="A!=B" rotate="0" valign="top" align="left" colsep="1" colname="col2">
+                                        <Al deltaxml:deltaV2="A!=B">Groter dan 
+                                            <deltaxml:textGroup deltaxml:deltaV2="A!=B">
+                                                <deltaxml:text deltaxml:deltaV2="A">1,35</deltaxml:text>
+                                                <deltaxml:text deltaxml:deltaV2="B">1,45</deltaxml:text>
+                                            </deltaxml:textGroup>
+                                        </Al>
+                                    </entry>
+                                </row>
+                            </tbody>
+                        </tgroup>
+                    </table>
+                </Inhoud>
+            </Divisietekst>
+        </Bijlage>
+    </InhoudRenvooi>
+</Regeling>
