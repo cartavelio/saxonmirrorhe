@@ -6,6 +6,7 @@ import jaxptest.ConfigTest;
 import millicom.MillicomTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.om.NodeInfo;
@@ -37,10 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for the s9api schema validation interface
@@ -1317,9 +1315,9 @@ public class TestValidator {
                     + "</schema>";
 
             SchemaFactory proc = new SchemaFactoryImpl();
-            proc.setProperty(Feature.GENERATE_BYTE_CODE.name, byteCodeOn);
+            proc.setProperty(FeatureKeys.GENERATE_BYTE_CODE, byteCodeOn);
             //proc.setProperty(Feature.DEBUG_BYTE_CODE.name, byteCodeOn);
-            proc.setProperty(Feature.DEBUG_BYTE_CODE_DIR.name, ConfigTest.TEMP_DIR + "Saxon-bytecode");
+            proc.setProperty(FeatureKeys.DEBUG_BYTE_CODE_DIR, ConfigTest.TEMP_DIR + "Saxon-bytecode");
             Schema sch = proc.newSchema(new StreamSource(new StringReader(sch1)));
             Validator val = sch.newValidator();
             StringBuilder sb = new StringBuilder();
@@ -1346,67 +1344,6 @@ public class TestValidator {
     @Test
     public void testByteCodeJaxpOff() {
         testByteCodeJaxp(false);
-    }
-
-
-    @Test
-    public void testErrorListenerBug4744() {
-
-        // This validation run should report exactly two validation errors.
-
-
-        final List<TransformerException> errorList = new ArrayList<>();
-        FileOutputStream out = null;
-        try {
-            out = new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/validation.out");
-            Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
-            StreamSource source_xsd = new StreamSource(new File("/Users/mike/bugs/2020/4744-Skorek/UniqueKeyBug.xsd"));
-            StreamSource source_xml = new StreamSource(new File("/Users/mike/bugs/2020/4744-Skorek/UniqueKeyBug.xml"));
-            ErrorListener listener = new ErrorListener() {
-                @Override
-                public void error(TransformerException exception) {
-                    errorList.add(exception);
-                }
-
-                @Override
-                public void fatalError(TransformerException exception) throws TransformerException {
-                    throw exception;
-                }
-
-                @Override
-                public void warning(TransformerException exception) {
-                    errorList.add(exception);
-                }
-            };
-
-            SchemaValidator sv = sm.newSchemaValidator();
-            sv.setErrorListener(listener);
-            sm.load(source_xsd);
-
-
-            Serializer serializer = proc.newSerializer();
-            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
-            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            serializer.setOutputStream(out);
-            sv.setDestination(serializer);
-
-
-            sv.validate(source_xml);
-
-            out.close();
-            //fail("Validation errors not detected");
-
-        } catch (SaxonApiException sapie) {
-            try {
-                out.close();
-            } catch (IOException ee) {
-                fail();
-            }
-            assertEquals(1, errorList.size());
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
     }
 
 

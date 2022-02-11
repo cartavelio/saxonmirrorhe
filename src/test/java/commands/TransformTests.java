@@ -7,7 +7,7 @@ import net.sf.saxon.lib.Initializer;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.SourceResolver;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.resource.ActiveSource;
+import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 

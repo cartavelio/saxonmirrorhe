@@ -2,7 +2,7 @@ package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
 import net.sf.saxon.TransformerFactoryImpl;
-import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.FeatureKeys;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.XMLConstants;
@@ -240,7 +240,7 @@ public class AllowedProtocolsTest {
 
             TransformerFactoryImpl factory = new EnterpriseTransformerFactory();
             // Apache Xerces does not recognise ACCESS_EXTERNAL_DTD, so use the JDK parser
-            factory.setAttribute(Feature.SOURCE_PARSER_CLASS.name, "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
+            factory.setAttribute(FeatureKeys.SOURCE_PARSER_CLASS, "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
             factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, rule);
             StreamSource xslS = new StreamSource(new StringReader(xsl), baseURI);
             Templates templates = factory.newTemplates(xslS);

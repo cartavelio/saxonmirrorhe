@@ -1,6 +1,6 @@
 package internaltests;
 
-import net.sf.saxon.tree.iter.UnfailingIterator;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.*;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +16,7 @@ public class UnicodeTests {
         int[] ch = new int[]{65536, 65537, 65538};
         String s = new String(ch, 0, ch.length);
         StringItem sv = new StringItem(s);
-        UnfailingIterator it = sv.iterateCharacters();
+        SequenceIterator it = sv.iterateCharacters();
         long next = ((Int64Value)it.next()).longValue();
         assertTrue(next == 65536);
         next = ((Int64Value)it.next()).longValue();

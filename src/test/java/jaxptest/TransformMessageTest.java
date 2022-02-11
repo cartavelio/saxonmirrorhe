@@ -4,7 +4,7 @@ import com.saxonica.config.EnterpriseTransformerFactory;
 import com.saxonica.config.ProfessionalTransformerFactory;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.jaxp.TransformerImpl;
-import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.serialize.MessageEmitter;
 import net.sf.saxon.serialize.MessageWarner;
@@ -25,10 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class TransformMessageTest {
@@ -49,7 +46,7 @@ public class TransformMessageTest {
     public void testMessageWarner() throws Exception {
 
         SAXTransformerFactory tFactory = new net.sf.saxon.TransformerFactoryImpl();
-        tFactory.setFeature(Feature.ALLOW_MULTITHREADING.name, false);
+        tFactory.setFeature(FeatureKeys.ALLOW_MULTITHREADING, false);
 
         Source src = new StreamSource(new StringReader("<test/>"));
 
@@ -415,7 +412,7 @@ public class TransformMessageTest {
                     "</xsl:stylesheet>";
 
             TransformerFactory transFactory = new TransformerFactoryImpl();
-            transFactory.setAttribute(Feature.ALLOW_MULTITHREADING.name, "false");
+            transFactory.setAttribute(FeatureKeys.ALLOW_MULTITHREADING, "false");
             //transFactory.setAttribute(FeatureKeys.MESSAGE_EMITTER_CLASS, "jaxptest.TransformMessageTest$MyMessageEmitter");
 
             Templates templates = transFactory.newTemplates(
