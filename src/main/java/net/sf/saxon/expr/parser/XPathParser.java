@@ -33,6 +33,7 @@ import net.sf.saxon.style.ExpressionContext;
 import net.sf.saxon.style.SourceBinding;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.*;
@@ -767,7 +768,7 @@ public class XPathParser {
                     return parseTryCatchExpression();
                 }
                 // else drop through
-                //C#//goto default;
+                CSharp.emitCode("goto default;");
             default:
                 Expression e1 = parseBinaryExpression(parseUnaryExpression(), 4);
                 // Process ternary conditional
@@ -2151,7 +2152,7 @@ public class XPathParser {
                     exp = parseValidateExpression();
                     break;
                 }
-                //C#//goto default;
+                CSharp.emitCode("goto default;");
                 // else fall through
             default:
                 exp = parseSimpleMappingExpression();
@@ -2587,7 +2588,7 @@ public class XPathParser {
                     AnnotationList annotations = AnnotationList.EMPTY;
                     return parseInlineFunction(annotations);
                 }
-                //C#//goto case net.sf.saxon.expr.parser.Token.NAME;
+                CSharp.emitCode("goto case net.sf.saxon.expr.parser.Token.NAME;");
                 // fall through!
             case Token.NAME:
             case Token.PREFIX:
@@ -2676,7 +2677,7 @@ public class XPathParser {
                     case "_":
                         return parserExtension.parseUnderscoreFunction(this);
                 }
-                //C#//goto case net.sf.saxon.expr.parser.Token.ELEMENT_QNAME;
+                CSharp.emitCode("goto case net.sf.saxon.expr.parser.Token.ELEMENT_QNAME;");
                 // else fall through
             case Token.ELEMENT_QNAME:
             case Token.ATTRIBUTE_QNAME:

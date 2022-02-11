@@ -10,6 +10,7 @@ package net.sf.saxon.om;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.pattern.AnyNodeTest;
@@ -527,9 +528,7 @@ public interface NodeInfo extends ActiveSource, Item, Location {
 
     @Override
     default void deliver(Receiver receiver, ParseOptions options) throws XPathException {
-        receiver.open();
-        Navigator.copy(this, receiver, CopyOptions.ALL_NAMESPACES|CopyOptions.TYPE_ANNOTATIONS, new Loc(getSystemId(), -1, -1));
-        receiver.close();
+        Sender.sendDocumentInfo(this, receiver,new Loc(getSystemId(), -1, -1));
     }
 
     /**

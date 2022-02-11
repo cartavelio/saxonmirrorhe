@@ -12,13 +12,11 @@ import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An Evaluator evaluates an expression to return a sequence
@@ -336,19 +334,19 @@ public abstract class Evaluator {
             if (expr instanceof Block) {
                 Block block = (Block) expr;
                 Operand[] children = block.getOperanda();
-                List<GroundedValue> subsequences = new ArrayList<>(children.length);
+                ZenoSequence chain = new ZenoSequence();
                 for (Operand o : children) {
                     Expression child = o.getChildExpression();
                     if (Cardinality.allowsMany(child.getCardinality())) {
-                        subsequences.add(SequenceTool.toGroundedValue(child.iterate(context)));
+                        chain.appendSequence(SequenceTool.toGroundedValue(child.iterate(context)));
                     } else {
                         Item j = child.evaluateItem(context);
                         if (j != null) {
-                            subsequences.add(j);
+                            chain.append(j);
                         }
                     }
                 }
-                return new Chain(subsequences);
+                return chain;
             } else {
                 // it's not a Block: it must have been rewritten after deciding to use this evaluation mode
                 return SequenceTool.toGroundedValue(expr.iterate(context));

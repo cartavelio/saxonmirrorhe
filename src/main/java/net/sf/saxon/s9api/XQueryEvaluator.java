@@ -639,7 +639,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
                 if (!type.matches(gVal, th)) {
                     RoleDiagnostic role = new RoleDiagnostic(
                             RoleDiagnostic.FUNCTION, function.getStructuredQName().getDisplayName(), i);
-                    gVal = th.applyFunctionConversionRules(vr[i], type, role, Loc.NONE);
+                    gVal = th.applyFunctionConversionRules(gVal, type, role, Loc.NONE);
                 }
                 vr[i] = gVal;
             }

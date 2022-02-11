@@ -376,7 +376,7 @@ public class StylesheetModule {
         InputSource composite = new InputSource();
         composite.setSystemId(baseURI);
         composite.setCharacterStream(new StringReader(sb.toString()));
-        return new SAXSource(config.getSourceParser(), composite);
+        return new SAXSource(composite);
     }
 
     public void setImporter(StylesheetModule importer) {
