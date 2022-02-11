@@ -102,7 +102,7 @@ it may be necessary to host this directory on a localhost web-server.
 </xsl:variable>
    
    <xsl:template name="main">
-      <xsl:sequence select="$readTextCS"/>
+      <xsl:sequence select="$readText"/>
    </xsl:template>
    
 </xsl:stylesheet>

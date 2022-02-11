@@ -2,9 +2,9 @@ task resources(
   dependsOn: ["resources_notices",
               "resources_userdoc_xml",
               "resources_userdoc_html",
-              //"resources_drivers", // exclude Java only stuff for now
+              "resources_drivers",
               "samples_common",
-              //"samples_j", // exclude Java only stuff for now
+              "samples_j",
               "samples_n",
               "gen_readme"],
   description: "Build the saxon-resources download"
