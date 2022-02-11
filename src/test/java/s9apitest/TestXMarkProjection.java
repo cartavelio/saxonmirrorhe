@@ -22,8 +22,8 @@ public class TestXMarkProjection {
         try {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.TIMING, true);
-            File queryFile = new File(ConfigTest.DATA_DIR + "../../xmark/" + query + ".xq");
-            File source = new File(ConfigTest.DATA_DIR + "../../xmark/xmark4.xml");
+            File queryFile = new File(ConfigTest.DATA_DIR + "../xmark/" + query + ".xq");
+            File source = new File(ConfigTest.DATA_DIR + "../xmark/xmark4.xml");
             DocumentBuilder b1 = proc.newDocumentBuilder();
             XdmNode fullDoc = b1.build(source);
             XQueryCompiler c1 = proc.newXQueryCompiler();

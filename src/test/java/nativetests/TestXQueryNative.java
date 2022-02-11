@@ -301,7 +301,7 @@ public class TestXQueryNative {
         DynamicQueryContext dqc = new DynamicQueryContext(config);
         dqc.setApplyFunctionConversionRulesToExternalVariables(false);
 
-        String query = "declare base-uri \"../../xmark/\";\n" +
+        String query = "declare base-uri \"../xmark/\";\n" +
                 "let $auction := fn:doc(\"xmark1.xml\") return\n" +
                 "for $i in $auction/site//item\n" +
                 "where contains(string(exactly-one($i/description)), \"gold\")\n" +
@@ -325,7 +325,7 @@ public class TestXQueryNative {
         DynamicQueryContext dqc = new DynamicQueryContext(config);
         dqc.setApplyFunctionConversionRulesToExternalVariables(false);
 
-        String query = "declare base-uri \"../../xmark/\";\n" +
+        String query = "declare base-uri \"../xmark/\";\n" +
                 "let $auction := fn:doc(\"xmark1.xml\") return\n" +
                 "for $i in $auction/site//item\n" +
                 "where contains(string(exactly-one($i/description)), \"gold\", "
