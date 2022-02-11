@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections;
 
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using Saxon.Api;
@@ -566,17 +567,17 @@ namespace SaxonCS_NUnit {
         }
 
         internal class SqrtCall : ExtensionFunctionCall {
-            public override IEnumerator<XdmItem> Call(IEnumerator<XdmItem>[] arguments, DynamicContext context) {
-                bool exists = arguments[0].MoveNext();
+            public override XdmValue Call(XdmValue[] arguments, DynamicContext context) {
+                bool exists = arguments[0].Any();
                 if (exists) {
-                    XdmAtomicValue arg = (XdmAtomicValue) arguments[0].Current;
+                    XdmAtomicValue arg = (XdmAtomicValue) arguments[0][0];
                     double val = (double) arg.Value;
                     double sqrt = System.Math.Sqrt(val);
-                    XdmAtomicValue result = new XdmAtomicValue(sqrt);
-                    return result.GetEnumerator();
+                    XdmAtomicValue result = new(sqrt);
+                    return result;
                 }
                 else {
-                    return EmptyEnumerator<XdmItem>.INSTANCE;
+                    return XdmEmptySequence.Instance;
                 }
             }
         };
@@ -901,16 +902,18 @@ namespace SaxonCS_NUnit {
             try {
                 Processor proc = new Processor(true);
                 proc.SetProperty("http://saxon.sf.net/feature/timing", "true");
-                proc.RegisterExtensionFunction(new QName("java:s9apitest.TestXslt30Transformer", "isOptional"), 2,
+                XdmItemType isOptionalType = proc.ParseItemType("function(node(), xs:QName) as xs:boolean");
+                proc.RegisterExtensionFunction(new QName("java:s9apitest.TestXslt30Transformer", "isOptional"), 
+                        isOptionalType,
                     (args) => {
-                        XdmNode parent = (XdmNode) args[0];
-                        QName qName = ((XdmAtomicValue) args[1]).AsQName();
-                        Configuration config = proc.Implementation;
-                        SchemaType parentType = parent.Implementation.getSchemaType();
-                        int fp = config.getNamePool().allocateFingerprint(qName.Uri, qName.LocalName);
-                        int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, true);
-                        return new XdmAtomicValue(Cardinality.allowsZero(cardinality));
-                    });
+                                XdmNode parent = (XdmNode) args[0];
+                                QName qName = ((XdmAtomicValue) args[1]).AsQName();
+                                Configuration config = proc.Implementation;
+                                SchemaType parentType = parent.Implementation.getSchemaType();
+                                int fp = config.getNamePool().allocateFingerprint(qName.Uri, qName.LocalName);
+                                int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, true);
+                                return new XdmAtomicValue(Cardinality.allowsZero(cardinality));
+                            });
                 XsltCompiler comp = proc.NewXsltCompiler();
                 comp.SchemaAware = true;
                 StringReader style = new StringReader(

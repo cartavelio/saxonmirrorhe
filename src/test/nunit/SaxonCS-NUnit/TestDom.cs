@@ -195,7 +195,8 @@ namespace SaxonCS_NUnit {
                 doc.Load(new StringReader(xml));
                 XdmNode xdmNode = builder.Wrap(doc);
 
-                proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "showDomNodes"), 1, args => {
+                XdmItemType showDomType = proc.ParseItemType("function(node()*) as xs:atomicValue*");
+                proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "showDomNodes"), showDomType, args => {
                     System.Collections.Generic.List<XdmAtomicValue> result = new();
                     foreach (XdmItem item in args[0]) {
                         XmlElement domElement = (XmlElement) ((XdmNode) item).getUnderlyingXmlNode();
@@ -567,9 +568,12 @@ namespace SaxonCS_NUnit {
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 XmlDocument doc = new();
                 XdmNode wrappedDoc = builder.Wrap(doc);
-                proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "makeElementList"), 3, args => {
+                XdmItemType makeElementListType =
+                    proc.ParseItemType("function(xs:string, xs:string, xs:integer) as node()*");
+                proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "makeElementList"), 
+                        makeElementListType, args => {
                     long repeat = ((XdmAtomicValue) args[2]).AsLong();
-                    XdmValue result = XdmEmptySequence.INSTANCE;
+                    XdmValue result = XdmEmptySequence.Instance;
                     for (int i = 0; i < repeat; i++) {
                         XmlElement e = doc.CreateElement(((XdmAtomicValue) args[0]).StringValue);
                         result = result.Append(builder.Wrap(wrappedDoc, e));
@@ -591,22 +595,6 @@ namespace SaxonCS_NUnit {
 
         }
 
-        public static XmlNodeList makeElementList(string rootName, string elementName, double counter) {
-            try {
-                XmlDocument document = new();
-                XmlElement element = document.CreateElement(rootName);
-                document.AppendChild(element);
-                for (int i = 0; i < counter; i++) {
-                    element.AppendChild(document.CreateElement(elementName));
-                }
-
-                return element.ChildNodes;
-            }
-            catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        }
-
 
         /**
          * Test showing a DOM NodeList returned by an extension function
@@ -616,14 +604,18 @@ namespace SaxonCS_NUnit {
         public void testXPathNodeListFromExtensionFunction() {
             try {
                 Processor proc = new();
-                proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest","sortArrayToNodeList"), 1, args => {
-                    XdmItem[] array = args[0].ToArray();
-                    Array.Sort(array, Comparer<XdmItem>.Create((x,y) => 
-                         StringComparer.InvariantCulture.Compare(x.StringValue, y.StringValue)));
-                    return new XdmValue(array);
-                });
-                string xml = "<?xml version='1.0'?> \n" +
-                             "<books><book>fred</book><book>jane</book><book>anne</book><book>sue</book></books>";
+                XdmItemType sortType = proc.ParseItemType("function(item()*) as item()*");
+                proc.RegisterExtensionFunction(
+                        new QName("java:jaxptest.DOMTest","sortArrayToNodeList"),
+                        sortType, 
+                        args => {
+                            XdmItem[] array = args[0].ToArray();
+                            Array.Sort(array, Comparer<XdmItem>.Create((x,y) => 
+                                 StringComparer.InvariantCulture.Compare(x.StringValue, y.StringValue)));
+                            return new XdmValue(array);
+                        });
+                const string xml = "<?xml version='1.0'?> \n" +
+                                   "<books><book>fred</book><book>jane</book><book>anne</book><book>sue</book></books>";
                 XmlDocument doc = new();
                 doc.Load(new StringReader(xml));
                 string exp = "ext:sortArrayToNodeList(//book)";
@@ -1273,8 +1265,9 @@ namespace SaxonCS_NUnit {
                     "</root>";
 
                 Processor proc = new();
+                XdmItemType countType = proc.ParseItemType("function(item()*) as xs:integer");
                 proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "count"),
-                    1,
+                    countType,
                     args => new XdmAtomicValue(args[0].Count));
                 XmlDocument doc = new XmlDocument();
                 doc.Load(new StringReader(xml));
@@ -1309,7 +1302,8 @@ namespace SaxonCS_NUnit {
                     "</xsl:template>\n" +
                     "</xsl:stylesheet>";
                 Processor proc = new();
-                proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "foo"), 1,
+                XdmItemType fooType = proc.ParseItemType("function(node()) as xs:string");
+                proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "foo"), fooType,
                     args => new XdmAtomicValue(((XdmNode) args[0])
                         .Select(Steps.Child("test").Then(Steps.Attribute("width"))).First().StringValue));
             
@@ -1485,7 +1479,9 @@ namespace SaxonCS_NUnit {
 
                 // Run a transformation that invokes an extension function returning this DOM
                 Processor proc = new();
-                proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "makeBodyElement"), 0, args => {
+                XdmItemType makeBodyElementType = proc.ParseItemType("function() as node()");
+                proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "makeBodyElement"), 
+                        makeBodyElementType, args => {
                     XmlDocument doc = new();
                     XmlElement body = doc.CreateElement("xhtml:body", NamespaceConstant.XHTML);
                     XmlElement para = doc.CreateElement("xhtml:p", NamespaceConstant.XHTML);
