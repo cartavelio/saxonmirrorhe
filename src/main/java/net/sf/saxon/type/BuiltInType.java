@@ -96,7 +96,7 @@ public abstract class BuiltInType {
      * @param type        the SchemaType representing the built in type
      */
 
-    static void register(int fingerprint, SchemaType type) {
+    public static void register(int fingerprint, SchemaType type) {
         lookup.put(fingerprint, type);
         lookupByLocalName.put(type.getName(), type);
     }

@@ -101,14 +101,6 @@ public abstract class Sender {
         if (strippingRule != null && !(strippingRule instanceof NoElementsSpaceStrippingRule)) {
             next = strippingRule.makeStripper(next);
         }
-//        else if (options.getStripSpace() == Whitespace.ALL) {
-//            next = new Stripper(AllElementsSpaceStrippingRule.getInstance(), next);
-//        } else if (options.getStripSpace() == Whitespace.XSLT) {
-//            Controller controller = pipe.getController();
-//            if (controller != null) {
-//                next = controller.makeStripper(next);
-//            }
-//        }
 
         if (source instanceof TreeInfo) {
             source = ((TreeInfo)source).getRootNode();
@@ -133,7 +125,7 @@ public abstract class Sender {
         } else if (source instanceof PullSource) {
             sendPullSource((PullSource) source, next, options);
             return;
-
+//#if CSHARP=false
         } else if (source instanceof EventSource) {
             ((EventSource) source).send(next);
             return;
@@ -141,41 +133,21 @@ public abstract class Sender {
         } else if (source instanceof SAXSource) {
             sendSAXSource((SAXSource) source, next, options);
             return;
-
+//#endif
         } else if (source instanceof StreamSource) {
             StreamSource ss = (StreamSource) source;
             // Following code allows the .NET platform to use a Pull parser
             boolean dtdValidation = options.getDTDValidationMode() == Validation.STRICT;
-            Source ps = Version.platform.getParserSource(
-                pipe, ss, schemaValidation, dtdValidation);
+            Source ps = Version.platform.getParserSource(pipe, ss, schemaValidation, dtdValidation);
             if (ps == ss) {
-                String url = source.getSystemId();
-                InputSource is = new InputSource(url);
-                is.setCharacterStream(ss.getReader());
-                is.setByteStream(ss.getInputStream());
-                boolean reuseParser = false;
-                XMLReader parser = options.obtainXMLReader();
-                if (parser == null) {
-                    parser = config.getSourceParser();
-                    if (options.getEntityResolver() != null && parser.getEntityResolver() == null) {
-                        parser.setEntityResolver(options.getEntityResolver());
-                    }
-                    reuseParser = true;
-                }
-                //System.err.println("Using parser: " + parser.getClass().getName());
-                SAXSource sax = new SAXSource(parser, is);
-                sax.setSystemId(source.getSystemId());
-                sendSAXSource(sax, next, options);
-                if (reuseParser) {
-                    config.reuseSourceParser(parser);
-                }
-
+                processStreamSource(source, options, config, next, ss);
             } else {
                 // the Platform substituted a different kind of source
-                // On .NET with a default URIResolver we can expect an AugnmentedSource wrapping a PullSource
+                // On .NET with a default URIResolver we can expect an AugmentedSource wrapping a PullSource
                 send(ps, next, options);
             }
             return;
+//#if CSHARP==false
         } else if (source instanceof StAXSource) {
             XMLStreamReader reader = ((StAXSource) source).getXMLStreamReader();
             if (reader == null) {
@@ -185,13 +157,14 @@ public abstract class Sender {
             bridge.setXMLStreamReader(reader);
             sendPullSource(new PullSource(bridge), next, options);
             return;
+//#endif
         } else if (source instanceof SaplingDocument) {
             ((SaplingDocument)source).sendTo(next);
             return;
         } else {
             next = makeValidator(next, source.getSystemId(), options);
 
-            // See if there is a registered SourceResolver than can handle it
+            // See if there is a registered SourceResolver that can handle it
             Source newSource = config.getSourceResolver().resolveSource(source, config);
             if (newSource instanceof StreamSource ||
                     newSource instanceof SAXSource ||
@@ -206,9 +179,8 @@ public abstract class Sender {
             // See if there is a registered external object model that knows about this kind of source
             // (Note, this should pick up the platform-specific DOM model)
 
-            List externalObjectModels = config.getExternalObjectModels();
-            for (Object externalObjectModel : externalObjectModels) {
-                ExternalObjectModel model = (ExternalObjectModel) externalObjectModel;
+            List<ExternalObjectModel> externalObjectModels = config.getExternalObjectModels();
+            for (ExternalObjectModel model : externalObjectModels) {
                 boolean done = model.sendSource(source, next);
                 if (done) {
                     return;
@@ -219,6 +191,31 @@ public abstract class Sender {
 
         throw new XPathException("A source of type " + source.getClass().getName() +
                 " is not supported in this environment");
+    }
+
+    private static void processStreamSource(Source source, ParseOptions options, Configuration config, Receiver next, StreamSource ss) throws XPathException {
+//#if CSHARP=false
+        String url = source.getSystemId();
+        InputSource is = new InputSource(url);
+        is.setCharacterStream(ss.getReader());
+        is.setByteStream(ss.getInputStream());
+        boolean reuseParser = false;
+        XMLReader parser = options.obtainXMLReader();
+        if (parser == null) {
+            parser = config.getSourceParser();
+            if (options.getEntityResolver() != null && parser.getEntityResolver() == null) {
+                parser.setEntityResolver(options.getEntityResolver());
+            }
+            reuseParser = true;
+        }
+        //System.err.println("Using parser: " + parser.getClass().getName());
+        SAXSource sax = new SAXSource(parser, is);
+        sax.setSystemId(source.getSystemId());
+        sendSAXSource(sax, next, options);
+        if (reuseParser) {
+            config.reuseSourceParser(parser);
+        }
+//#endif
     }
 
     /**
@@ -265,7 +262,7 @@ public abstract class Sender {
         // end event stream
         receiver.close();
     }
-
+//#if CSHARP=false
     /**
      * Send the contents of a SAXSource to a given Receiver
      *
@@ -488,6 +485,7 @@ public abstract class Sender {
             config.reuseSourceParser(parser);
         }
     }
+//#endif
 
     private static String namedParser(XMLReader parser) {
         return "Selected XML parser " + parser.getClass().getName();

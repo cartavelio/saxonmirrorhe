@@ -9,11 +9,11 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -37,10 +37,10 @@ public class ResolveURI extends SystemFunction {
      */
     /*@Nullable*/
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue arg0 = (AtomicValue) arguments[0].head();
         if (arg0 == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
         String relative = arg0.getStringValue();
         String base;
@@ -54,7 +54,7 @@ public class ResolveURI extends SystemFunction {
             }
         }
 
-        return new ZeroOrOne(resolve(base, relative, context));
+        return resolve(base, relative, context);
     }
 
     /*@NotNull*/

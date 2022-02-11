@@ -19,6 +19,7 @@ import net.sf.saxon.pattern.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpParameterType;
 import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
@@ -1123,6 +1124,18 @@ public final class Navigator {
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
+     * Convert a {@code Predicate<NodeInfo>} (if necessary) to a NodeTest
+     */
+
+    public static NodeTest nodeTestFromPredicate(Predicate<? super NodeInfo> predicate) {
+        if (predicate instanceof NodeTest) {
+            return (NodeTest)predicate;
+        } else {
+            return new NodePredicate(predicate);
+        }
+    }
+
+    /**
      * Create an iterator over a singleton node, if it exists and matches a nodetest;
      * otherwise return an empty iterator
      *
@@ -1132,7 +1145,8 @@ public final class Navigator {
      */
 
     /*@NotNull*/
-    public static AxisIterator filteredSingleton(NodeInfo node, NodeTest nodeTest) {
+    public static AxisIterator filteredSingleton(NodeInfo node,
+                                                 @CSharpParameterType(key="net.sf.saxon.pattern.NodeTest") Predicate<? super NodeInfo> nodeTest) {
         if (node != null && nodeTest.test(node)) {
             return SingleNodeIterator.makeIterator(node);
         } else {
@@ -1172,7 +1186,7 @@ public final class Navigator {
 
     public static class AxisFilter implements AxisIterator {
         private final AxisIterator base;
-        private final NodeTest nodeTest;
+        private final Predicate<? super NodeInfo> nodeTest;
 
         /**
          * Construct a AxisFilter
@@ -1184,7 +1198,7 @@ public final class Navigator {
          *             returned by the AxisFilter
          */
 
-        public AxisFilter(AxisIterator base, NodeTest test) {
+        public AxisFilter(AxisIterator base, Predicate<? super NodeInfo> test) {
             this.base = base;
             nodeTest = test;
         }

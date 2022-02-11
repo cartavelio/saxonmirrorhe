@@ -102,7 +102,7 @@ public final class Validation {
      */
 
     /*@NotNull*/
-    public static String toString(int value) {
+    public static String describe(int value) {
         switch (value) {
             case STRICT:
                 return "strict";

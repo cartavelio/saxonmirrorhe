@@ -12,7 +12,6 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -71,7 +70,7 @@ public class Reverse extends SystemFunction {
 //    }
 
 
-    public static <T extends Item> SequenceIterator getReverseIterator(SequenceIterator forwards) throws XPathException {
+    public static SequenceIterator getReverseIterator(SequenceIterator forwards) throws XPathException {
         if (forwards instanceof ReversibleIterator) {
             return ((ReversibleIterator) forwards).getReverseIterator();
         } else {

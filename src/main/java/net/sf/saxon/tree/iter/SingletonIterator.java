@@ -20,10 +20,10 @@ import java.util.EnumSet;
  * SingletonIterator: an iterator over a sequence of zero or one values
  */
 
-public class SingletonIterator<T extends Item> implements SequenceIterator, UnfailingIterator,
+public class SingletonIterator implements SequenceIterator, UnfailingIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
-    private final T item;
+    private final Item item;
     boolean gone = false;
 
     /**
@@ -32,7 +32,7 @@ public class SingletonIterator<T extends Item> implements SequenceIterator, Unfa
      * @param value the item to iterate over
      */
 
-    public SingletonIterator(T value) {
+    public SingletonIterator(Item value) {
         this.item = value;
     }
 
@@ -45,11 +45,11 @@ public class SingletonIterator<T extends Item> implements SequenceIterator, Unfa
      */
 
     /*@NotNull*/
-    public static <T extends Item> UnfailingIterator makeIterator(T item) {
+    public static UnfailingIterator makeIterator(Item item) {
         if (item == null) {
             return EmptyIterator.emptyIterator();
         } else {
-            return new SingletonIterator<>(item);
+            return new SingletonIterator(item);
         }
     }
 
@@ -61,9 +61,9 @@ public class SingletonIterator<T extends Item> implements SequenceIterator, Unfa
      */
 
 
-    public static <T extends Item> SingletonIterator<T> rawIterator(T item) {
+    public static SingletonIterator rawIterator(Item item) {
         assert item != null;
-        return new SingletonIterator<>(item);
+        return new SingletonIterator(item);
     }
 
     /**
@@ -82,7 +82,7 @@ public class SingletonIterator<T extends Item> implements SequenceIterator, Unfa
 
     /*@Nullable*/
     @Override
-    public T next() {
+    public Item next() {
         if (gone) {
             return null;
         } else {
@@ -98,11 +98,11 @@ public class SingletonIterator<T extends Item> implements SequenceIterator, Unfa
 
     /*@NotNull*/
     @Override
-    public SingletonIterator<T> getReverseIterator() {
-        return new SingletonIterator<>(item);
+    public SingletonIterator getReverseIterator() {
+        return new SingletonIterator(item);
     }
 
-    public T getValue() {
+    public Item getValue() {
         return item;
     }
 

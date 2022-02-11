@@ -190,7 +190,7 @@ public class Serialize extends SystemFunction implements Callable {
         HashTrieMap result = new HashTrieMap();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
 
-        AtomicIterator<?> keysIterator = map.keys();
+        AtomicIterator keysIterator = map.keys();
         AtomicValue key;
         while ((key = keysIterator.next()) != null) {
             if (key instanceof StringItem) {
@@ -333,7 +333,7 @@ public class Serialize extends SystemFunction implements Callable {
     }
 
     public static CharacterMap toCharacterMap(MapItem charMap) throws XPathException {
-        AtomicIterator<?> iterator = charMap.keys();
+        AtomicIterator iterator = charMap.keys();
         AtomicValue charKey;
         IntHashMap<String> intHashMap = new IntHashMap<>();
         while ((charKey = iterator.next()) != null) {
@@ -491,7 +491,7 @@ public class Serialize extends SystemFunction implements Callable {
             } else if (param instanceof MapItem) {
                 // If any parameters are supplied as QNames in the Saxon namespace, convert them to EQName strings
                 MapItem paramMap = (MapItem)param;
-                AtomicIterator<?> keyIter = ((MapItem)param).keys();
+                AtomicIterator keyIter = ((MapItem)param).keys();
                 AtomicValue k;
                 while ((k = keyIter.next()) != null) {
                     if (k instanceof QNameValue) {

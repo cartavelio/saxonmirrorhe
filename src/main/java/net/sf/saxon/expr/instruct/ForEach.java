@@ -28,7 +28,7 @@ import net.sf.saxon.value.Cardinality;
  * is known that the rhs delivers atomic values.
  */
 
-public class ForEach extends Instruction implements ContextMappingFunction, ContextSwitchingExpression {
+public class ForEach extends Instruction implements ContextSwitchingExpression {
 
     protected boolean containsTailCall;
     protected Operand selectOp;
@@ -557,32 +557,18 @@ public class ForEach extends Instruction implements ContextMappingFunction, Cont
         XPathContextMinor c2 = context.newMinorContext();
         c2.trackFocus(getSelect().iterate(context));
         if (separatorOp == null) {
-            return new ContextMappingIterator(this, c2);
+            return new ContextMappingIterator(c3 -> getAction().iterate(c3), c2);
         } else {
             NodeInfo separator = makeSeparator(context);
             ContextMappingFunction mapper = cxt -> {
                if (cxt.getCurrentIterator().position() == 1) {
-                   return ForEach.this.map(cxt);
+                   return getAction().iterate(cxt);
                } else {
-                   return new PrependSequenceIterator(separator, ForEach.this.map(cxt));
+                   return new PrependSequenceIterator(separator, getAction().iterate(cxt));
                }
             };
             return new ContextMappingIterator(mapper, c2);
         }
-    }
-
-    /**
-     * Map one item to a sequence.
-     *
-     * @param context The processing context. The item to be mapped is the context item identified
-     *                from this context: the values of position() and last() also relate to the set of items being mapped
-     * @return a SequenceIterator over the sequence of items that the supplied input
-     *         item maps to
-     */
-
-    @Override
-    public SequenceIterator map(XPathContext context) throws XPathException {
-        return getAction().iterate(context);
     }
 
     /**

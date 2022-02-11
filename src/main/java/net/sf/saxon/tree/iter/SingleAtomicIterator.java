@@ -15,9 +15,9 @@ import net.sf.saxon.value.AtomicValue;
  * SingletonIterator: an iterator over a sequence of zero or one values
  */
 
-public class SingleAtomicIterator<T extends AtomicValue>
-        extends SingletonIterator<T>
-        implements AtomicIterator<T>,
+public class SingleAtomicIterator
+        extends SingletonIterator
+        implements AtomicIterator,
         ReversibleIterator, LastPositionFinder,
         GroundedIterator, LookaheadIterator {
 
@@ -27,17 +27,20 @@ public class SingleAtomicIterator<T extends AtomicValue>
      * @param value the item to iterate over
      */
 
-    public SingleAtomicIterator(T value) {
+    public SingleAtomicIterator(AtomicValue value) {
         super(value);
     }
 
 
     /*@NotNull*/
     @Override
-    public SingleAtomicIterator<T> getReverseIterator() {
-        return new SingleAtomicIterator<T>(getValue());
+    public SingleAtomicIterator getReverseIterator() {
+        return new SingleAtomicIterator((AtomicValue)getValue());
     }
 
-
+    @Override
+    public AtomicValue next() {
+        return (AtomicValue)super.next();
+    }
 }
 

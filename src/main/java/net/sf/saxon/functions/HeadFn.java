@@ -12,7 +12,7 @@ import net.sf.saxon.expr.FirstItemExpression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -38,6 +38,6 @@ public class HeadFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item head = arguments[0].head();
-        return new ZeroOrOne<>(head);
+        return SequenceTool.itemOrEmpty(head);
     }
 }

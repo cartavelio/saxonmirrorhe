@@ -319,7 +319,7 @@ public class SlashExpression extends BinaryExpression
             // diagnosable error behaviour, we retain the original order.
             Stack<Expression> filters = new Stack<Expression>();
             while (underlyingStep instanceof FilterExpression) {
-                filters.add(((FilterExpression) underlyingStep).getFilter());
+                filters.push(((FilterExpression) underlyingStep).getFilter());
                 underlyingStep = ((FilterExpression) underlyingStep).getSelectExpression();
             }
             while (!filters.isEmpty()) {

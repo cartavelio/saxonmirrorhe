@@ -19,7 +19,7 @@ public class IntBlockSet extends IntSet {
     private final int endPoint;
 
     // Hashcode, evaluated lazily
-    private int hashCode = -1;
+    private int cachedHashCode = -1;
 
     /**
      * Create an IntRangeSet given the start point and end point of the integer range.
@@ -121,10 +121,10 @@ public class IntBlockSet extends IntSet {
 
     public int hashCode() {
         // Note, hashcodes are NOT the same as those used by IntHashSet and IntArraySet
-        if (hashCode == -1) {
-            hashCode = 0x836a89f1 ^ (startPoint + (endPoint << 3));
+        if (cachedHashCode == -1) {
+            cachedHashCode = 0x836a89f1 ^ (startPoint + (endPoint << 3));
         }
-        return hashCode;
+        return cachedHashCode;
     }
 
     /**

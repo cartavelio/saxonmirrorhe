@@ -176,8 +176,7 @@ public class GenericTreeInfo implements TreeInfo {
      */
     @Override
     public Iterator<String> getUnparsedEntityNames() {
-        List<String> e = Collections.emptyList();
-        return e.iterator();
+        return Collections.emptyIterator();
     }
 
     /**

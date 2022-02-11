@@ -287,8 +287,7 @@ public abstract class Actor implements ExpressionOwner, Location {
      */
 
     public Iterator<String> getProperties() {
-        final List<String> list = Collections.emptyList();
-        return list.iterator();
+        return Collections.emptyIterator();
     }
 
     /**

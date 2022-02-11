@@ -19,6 +19,7 @@ import net.sf.saxon.str.EmptyUniString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpParameterType;
 import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -29,6 +30,7 @@ import net.sf.saxon.type.Type;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.function.Predicate;
 
 /**
  * ParentNodeImpl is an implementation of a non-leaf node (specifically, an Element node

@@ -182,7 +182,7 @@ public class QNameValue extends QualifiedNameValue {
         return new QNameComparable(this);
     }
 
-    private class QNameComparable implements SchemaComparable {
+    private static class QNameComparable implements SchemaComparable {
 
         private final QNameValue value;
 
@@ -202,11 +202,11 @@ public class QNameValue extends QualifiedNameValue {
         }
 
         public boolean equals(/*@NotNull*/ Object o) {
-            return (o instanceof QNameComparable && qName.equals(((QNameComparable) o).getQNameValue().qName));
+            return (o instanceof QNameComparable && value.equals(((QNameComparable) o).getQNameValue().qName));
         }
 
         public int hashCode() {
-            return qName.hashCode();
+            return value.hashCode();
         }
     }
 

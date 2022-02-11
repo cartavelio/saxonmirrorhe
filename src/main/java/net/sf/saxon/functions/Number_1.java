@@ -14,8 +14,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.One;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.Converter;
@@ -35,8 +33,8 @@ public class Number_1 extends ScalarSystemFunction {
     }
 
     @Override
-    public ZeroOrOne resultWhenEmpty() {
-        return new One(DoubleValue.NaN);
+    public DoubleValue resultWhenEmpty() {
+        return DoubleValue.NaN;
     }
 
     /**

@@ -617,6 +617,7 @@ public class ExpressionPresenter {
                     } else {
                         out.append(c);
                     }
+                    break;
             }
         }
         return out.toString();

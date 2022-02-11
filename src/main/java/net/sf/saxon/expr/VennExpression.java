@@ -402,7 +402,11 @@ public class VennExpression extends BinaryExpression {
             final AxisExpression a2 = (AxisExpression) rhs;
             if (a1.getAxis() == a2.getAxis()) {
                 if (a1.getNodeTest().equals(a2.getNodeTest())) {
-                    return operator == Token.EXCEPT ? Literal.makeEmptySequence() : a1;
+                    if (operator == Token.EXCEPT) {
+                        return Literal.makeEmptySequence();
+                    } else {
+                        return a1;
+                    }
                 } else {
                     AxisExpression ax = new AxisExpression(a1.getAxis(),
                                                            new CombinedNodeTest(a1.getNodeTest(),

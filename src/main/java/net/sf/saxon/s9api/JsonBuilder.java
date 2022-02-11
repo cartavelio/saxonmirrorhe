@@ -9,6 +9,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSetPredicate;
 
 import java.io.IOException;
@@ -16,7 +17,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.IntPredicate;
 
 /**
  * A {@code JsonBuilder} is used to parse JSON documents
@@ -80,7 +80,7 @@ public class JsonBuilder {
     public XdmValue parseJson(Reader jsonReader) throws SaxonApiException {
         try {
             XPathContext context = new Controller(processor.getUnderlyingConfiguration()).newXPathContext();
-            IntPredicate checker = IntSetPredicate.ALWAYS_TRUE;
+            IntPredicateProxy checker = IntSetPredicate.ALWAYS_TRUE;
             CodePoints content = UnparsedTextFunction.readFile(checker, jsonReader);
             Map<String, Sequence> options = new HashMap<>();
             options.put("liberal", BooleanValue.get(liberal));

@@ -24,20 +24,20 @@ import net.sf.saxon.pattern.QNameTest;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.StringTool;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.trans.*;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationParamsHandler;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.AttributeValueTemplate;
-
+import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.util.NamespaceResolverWithDefault;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashSet;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.function.IntPredicate;
 import java.util.regex.Pattern;
 
 /**
@@ -4914,9 +4913,9 @@ public class XQueryParser extends XPathParser {
 
     public static class Unescaper {
 
-        private final IntPredicate characterChecker;
+        private final IntPredicateProxy characterChecker;
 
-        public Unescaper(IntPredicate characterChecker) {
+        public Unescaper(IntPredicateProxy characterChecker) {
             this.characterChecker = characterChecker;
         }
 

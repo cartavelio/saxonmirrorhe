@@ -413,10 +413,10 @@ public class AlphaCode {
         StringBuilder out = new StringBuilder();
 
         StringItem indicator = (StringItem) map.get(StringItem.bmp("o"));
-        out.append(indicator == null ? "1" : indicator.getUnicodeStringValue());
+        out.append(indicator == null ? "1" : indicator.getStringValue());
 
         StringItem alphaCode = (StringItem) map.get(StringItem.bmp("p"));
-        out.append(alphaCode == null ? "" : alphaCode.getUnicodeStringValue());
+        out.append(alphaCode == null ? "" : alphaCode.getStringValue());
 
         out.append(" ");
 
@@ -430,7 +430,7 @@ public class AlphaCode {
                 case "c":
                 case "t":
                     out.append(key);
-                    out.append(((StringItem) kvp.value).getUnicodeStringValue());
+                    out.append(((StringItem) kvp.value).getStringValue());
                     out.append(" ");
                     break;
                 case "k":

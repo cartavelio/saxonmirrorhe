@@ -8,7 +8,7 @@
 package net.sf.saxon.testdriver;
 
 
-import net.sf.saxon.annotate.CSharp;
+import net.sf.saxon.transpile.CSharp;
 import org.xml.sax.*;
 import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.AttributesImpl;

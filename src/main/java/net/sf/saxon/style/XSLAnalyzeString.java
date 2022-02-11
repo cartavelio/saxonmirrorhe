@@ -51,7 +51,7 @@ public class XSLAnalyzeString extends StyleElement {
      */
 
     @Override
-    public boolean mayContainFallback() {
+    protected boolean mayContainFallback() {
         return true;
     }
 

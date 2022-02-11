@@ -37,7 +37,7 @@ import java.net.URISyntaxException;
  */
 
 public class ForEachGroup extends Instruction
-        implements SortKeyEvaluator, ContextMappingFunction, ContextSwitchingExpression {
+        implements SortKeyEvaluator, ContextSwitchingExpression {
 
     public static final int GROUP_BY = 0;
     public static final int GROUP_ADJACENT = 1;
@@ -742,22 +742,7 @@ public class ForEachGroup extends Instruction
         c2.trackFocus(master);
         c2.setCurrentGroupIterator(master);
         c2.setCurrentTemplateRule(null);
-        return new ContextMappingIterator(this, c2);
-    }
-
-    /**
-     * Map one item to a sequence.
-     *
-     * @param context The processing context. This is supplied only for mapping constructs that
-     *                set the context node, position, and size. Otherwise it is null.
-     * @return either (a) a SequenceIterator over the sequence of items that the supplied input
-     *         item maps to, or (b) an Item if it maps to a single item, or (c) null if it maps to an empty
-     *         sequence.
-     */
-
-    @Override
-    public SequenceIterator map(XPathContext context) throws XPathException {
-        return getActionExpression().iterate(context);
+        return new ContextMappingIterator(cc -> getActionExpression().iterate(cc), c2);
     }
 
     /**

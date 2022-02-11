@@ -12,7 +12,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
@@ -61,7 +61,7 @@ public abstract class ScalarSystemFunction extends SystemFunction {
         if (val0 == null) {
             return resultWhenEmpty();
         }
-        return new ZeroOrOne<>(evaluate(val0, context));
+        return SequenceTool.itemOrEmpty(evaluate(val0, context));
 
     }
 

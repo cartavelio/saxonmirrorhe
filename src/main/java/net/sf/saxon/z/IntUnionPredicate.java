@@ -12,14 +12,18 @@ package net.sf.saxon.z;
  * an integer if either of the operands matches the integer
  */
 
-public class IntUnionPredicate implements java.util.function.IntPredicate {
+public class IntUnionPredicate implements IntPredicateProxy {
 
-    private final java.util.function.IntPredicate p1;
-    private final java.util.function.IntPredicate p2;
+    private final IntPredicateProxy p1;
+    private final IntPredicateProxy p2;
 
-    public IntUnionPredicate(java.util.function.IntPredicate p1, java.util.function.IntPredicate p2) {
+    private IntUnionPredicate(IntPredicateProxy p1, IntPredicateProxy p2) {
         this.p1 = p1;
         this.p2 = p2;
+    }
+
+    public static IntPredicateProxy makeUnion(IntPredicateProxy p1, IntPredicateProxy p2) {
+        return new IntUnionPredicate(p1, p2);
     }
 
     /**
@@ -39,8 +43,8 @@ public class IntUnionPredicate implements java.util.function.IntPredicate {
      * @return an array containing the two operands
      */
 
-    public java.util.function.IntPredicate[] getOperands() {
-        return new java.util.function.IntPredicate[]{p1, p2};
+    public IntPredicateProxy[] getOperands() {
+        return new IntPredicateProxy[]{p1, p2};
     }
 
     @Override

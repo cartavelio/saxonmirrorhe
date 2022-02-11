@@ -201,7 +201,7 @@ public final class Cardinality {
      * @return the representation as a string, for example "zero or one", "zero or more"
      */
 
-    public static String toString(int cardinality) {
+    public static String describe(int cardinality) {
         switch (cardinality) {
             case StaticProperty.ALLOWS_ZERO_OR_ONE:
                 return "zero or one";

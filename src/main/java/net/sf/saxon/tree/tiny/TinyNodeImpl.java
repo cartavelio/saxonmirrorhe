@@ -8,18 +8,21 @@
 package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.tree.NamespaceNode;
-import net.sf.saxon.tree.iter.*;
-
+import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.PrependAxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
+
+import java.util.function.Predicate;
 
 
 /**
@@ -375,13 +378,13 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * Return an iterator over the nodes reached by the given axis from this node
      *
      * @param axisNumber Identifies the required axis, eg. Axis.CHILD or Axis.PARENT
-     * @param nodeTest   A condition to be matched by the returned nodes.
+     * @param predicate   A condition to be matched by the returned nodes.
      * @return a AxisIteratorImpl that scans the nodes reached by the axis in turn.
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
-
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+        NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
         int type = getNodeKind();
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
@@ -408,7 +411,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
                 if (hasChildNodes()) {
                     if (nodeTest instanceof NameTest && ((NameTest) nodeTest).getNodeKind() == Type.ELEMENT) {
                         // fast path for common case
-                        return new NamedChildIterator(tree, this, nodeTest.getFingerprint());
+                        return new NamedChildIterator(tree, this, ((NameTest)nodeTest).getFingerprint());
                     } else {
                         return new SiblingIterator(tree, this, nodeTest, true);
                     }

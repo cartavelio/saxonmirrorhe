@@ -7,16 +7,12 @@
 
 package net.sf.saxon.type;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.value.*;
 
@@ -204,7 +200,7 @@ public abstract class Type {
                 default:
                     throw new IllegalArgumentException("Unknown node kind " + node.getNodeKind());
             }
-        } else if (item instanceof ExternalObject) {
+        } else if (item.getGenre() == Genre.EXTERNAL) {
             if (th == null) {
                 throw new IllegalArgumentException("typeHierarchy is required for an external object");
             }

@@ -12,10 +12,10 @@ import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.util.function.IntPredicate;
 
 /**
  * This class contains static methods used to read a query as a byte stream, infer the encoding if
@@ -44,7 +44,7 @@ public class QueryReader {
      * @return the text of the query
      */
 
-    public static String readSourceQuery(/*@NotNull*/ StreamSource ss, IntPredicate charChecker) throws XPathException {
+    public static String readSourceQuery(/*@NotNull*/ StreamSource ss, IntPredicateProxy charChecker) throws XPathException {
         CharSequence queryText;
         if (ss.getInputStream() != null) {
             InputStream is = ss.getInputStream();
@@ -98,7 +98,7 @@ public class QueryReader {
      * @return the content of the InputStream as a string
      */
 
-    public static String readInputStream(InputStream is, String encoding, IntPredicate nameChecker) throws XPathException {
+    public static String readInputStream(InputStream is, String encoding, IntPredicateProxy nameChecker) throws XPathException {
         if (encoding == null) {
             if (!is.markSupported()) {
                 is = new BufferedInputStream(is);
@@ -125,7 +125,7 @@ public class QueryReader {
      * @throws XPathException if the file cannot be read or contains illegal characters
      */
 
-    private static String readQueryFromReader(Reader reader, IntPredicate charChecker) throws XPathException {
+    private static String readQueryFromReader(Reader reader, IntPredicateProxy charChecker) throws XPathException {
         try {
             CodePoints content = UnparsedTextFunction.readFile(charChecker, reader);
             return content.toString();

@@ -138,8 +138,14 @@ public class IntegratedFunctionLibrary implements FunctionLibrary {
     @Override
     public FunctionLibrary copy() {
         IntegratedFunctionLibrary lib = new IntegratedFunctionLibrary();
-        lib.functions = new HashMap<>(functions);
+        // Type parameters needed for C#
+        lib.functions = copyHashMap(functions);
         return lib;
+    }
+
+    private HashMap<StructuredQName, ExtensionFunctionDefinition> copyHashMap(HashMap<StructuredQName, ExtensionFunctionDefinition> functions) {
+        // Separate method for C# type inference
+        return new HashMap<>(functions);
     }
 
 }

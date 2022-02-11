@@ -7,9 +7,13 @@
 
 package net.sf.saxon.tree.util;
 
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.transpile.CSharpParameterType;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
+
+import java.util.function.Predicate;
 
 
 /**
@@ -29,8 +33,8 @@ public abstract class SteppingNavigator {
      * or null if no such node is found
      */
 
-    static <N extends SteppingNode<N>> N getFollowingNode(N start, N anchor) {
-        N nodei = start.getFirstChild();
+    static SteppingNode getFollowingNode(SteppingNode start, SteppingNode anchor) {
+        SteppingNode nodei = start.getFirstChild();
         if (nodei != null) {
             return nodei;
         }
@@ -38,7 +42,7 @@ public abstract class SteppingNavigator {
             return null;
         }
         nodei = start;
-        N parenti = start.getParent();
+        SteppingNode parenti = start.getParent();
         do {
             nodei = nodei.getNextSibling();
             if (nodei != null) {
@@ -57,14 +61,14 @@ public abstract class SteppingNavigator {
      * Interface representing a function to step from one node to another within a tree
      */
 
-    private interface Stepper<N extends SteppingNode<N>> {
+    private interface Stepper {
         /**
          * Step from one node to another
          *
          * @param node the start node
          * @return the end node
          */
-        N step(N node);
+        SteppingNode step(SteppingNode node);
     }
 
     /**
@@ -73,9 +77,9 @@ public abstract class SteppingNavigator {
      * is reached.
      */
 
-    private static class FollowingNodeStepper<N extends SteppingNode<N>> implements Stepper<N> {
+    private static class FollowingNodeStepper implements Stepper {
 
-        N anchor;
+        SteppingNode anchor;
 
         /**
          * Create a stepper to step successively through all nodes in a subtree
@@ -83,12 +87,12 @@ public abstract class SteppingNavigator {
          * @param anchor the root of the subtree, marking the end point of the iteration
          */
 
-        FollowingNodeStepper(N anchor) {
+        FollowingNodeStepper(SteppingNode anchor) {
             this.anchor = anchor;
         }
 
         @Override
-        public N step(N node) {
+        public SteppingNode step(SteppingNode node) {
             return getFollowingNode(node, anchor);
         }
     }
@@ -99,9 +103,9 @@ public abstract class SteppingNavigator {
      * is reached, and including only nodes that match a specified node test
      */
 
-    private static class FollowingFilteredNodeStepper<N extends SteppingNode<N>> implements Stepper<N> {
+    private static class FollowingFilteredNodeStepper implements Stepper {
 
-        N anchor;
+        SteppingNode anchor;
         NodeTest test;
 
         /**
@@ -111,13 +115,13 @@ public abstract class SteppingNavigator {
          * @param test   the test that returned nodes must satisfy
          */
 
-        FollowingFilteredNodeStepper(N anchor, NodeTest test) {
+        FollowingFilteredNodeStepper(SteppingNode anchor, NodeTest test) {
             this.anchor = anchor;
             this.test = test;
         }
 
         @Override
-        public N step(N node) {
+        public SteppingNode step(SteppingNode node) {
             do {
                 node = getFollowingNode(node, anchor);
             } while (node != null && !test.test(node));
@@ -132,9 +136,9 @@ public abstract class SteppingNavigator {
      * and/or local name.
      */
 
-    private static class FollowingElementStepper<N extends SteppingNode<N>> implements Stepper<N> {
+    private static class FollowingElementStepper implements Stepper {
 
-        N anchor;
+        SteppingNode anchor;
         String uri;
         String local;
 
@@ -146,14 +150,14 @@ public abstract class SteppingNavigator {
          * @param local  either null, or a local name which the selected elements must match
          */
 
-        FollowingElementStepper(N anchor, String uri, String local) {
+        FollowingElementStepper(SteppingNode anchor, String uri, String local) {
             this.anchor = anchor;
             this.uri = uri;
             this.local = local;
         }
 
         @Override
-        public N step(N node) {
+        public SteppingNode step(SteppingNode node) {
             return node.getSuccessorElement(anchor, uri, local);
         }
     }
@@ -164,9 +168,9 @@ public abstract class SteppingNavigator {
      * is reached, and including only elements, with a constraint on the fingerprint of the element
      */
 
-    private static class FollowingFingerprintedElementStepper<N extends SteppingNode<N>> implements Stepper<N> {
+    private static class FollowingFingerprintedElementStepper implements Stepper {
 
-        N anchor;
+        SteppingNode anchor;
         int fingerprint;
 
         /**
@@ -176,13 +180,13 @@ public abstract class SteppingNavigator {
          * @param fingerprint a fingerprint which selected elements must match
          */
 
-        FollowingFingerprintedElementStepper(N anchor, int fingerprint) {
+        FollowingFingerprintedElementStepper(SteppingNode anchor, int fingerprint) {
             this.anchor = anchor;
             this.fingerprint = fingerprint;
         }
 
         @Override
-        public N step(N node) {
+        public SteppingNode step(SteppingNode node) {
             do {
                 node = getFollowingNode(node, anchor);
             } while (node != null && node.getFingerprint() != fingerprint);
@@ -195,12 +199,12 @@ public abstract class SteppingNavigator {
      * An iterator over the descendant or descendant-or-self axis
      */
 
-    public static class DescendantAxisIterator<N extends SteppingNode<N>> implements AxisIterator {
+    public static class DescendantAxisIterator implements AxisIterator {
 
-        private final N start;
-        private N current;
+        private final SteppingNode start;
+        private SteppingNode current;
 
-        private final Stepper<N> stepper;
+        private final Stepper stepper;
 
         /**
          * Create an iterator over the descendant or descendant-or-self axis
@@ -210,7 +214,7 @@ public abstract class SteppingNavigator {
          * @param test        the node-test that selected nodes must satisfy
          */
 
-        public DescendantAxisIterator(N start, boolean includeSelf, NodeTest test) {
+        public DescendantAxisIterator(SteppingNode start, boolean includeSelf, NodeTest test) {
             this.start = start;
 
             if (!(includeSelf && test.test(start))) {
@@ -219,52 +223,52 @@ public abstract class SteppingNavigator {
             }
 
             if (test == null || test == AnyNodeTest.getInstance()) {
-                stepper = new FollowingNodeStepper<>(start);
+                stepper = new FollowingNodeStepper(start);
             } else if (test instanceof NameTest) {
                 if (((NameTest)test).getPrimitiveType() == Type.ELEMENT) {
                     NameTest nt = (NameTest) test;
                     if (start.hasFingerprint()) {
-                        stepper = new FollowingFingerprintedElementStepper<>(start, nt.getFingerprint());
+                        stepper = new FollowingFingerprintedElementStepper(start, nt.getFingerprint());
                     } else {
-                        stepper = new FollowingElementStepper<>(start, nt.getNamespaceURI(), nt.getLocalPart());
+                        stepper = new FollowingElementStepper(start, nt.getNamespaceURI(), nt.getLocalPart());
                     }
                 } else {
-                    stepper = new FollowingFilteredNodeStepper<>(start, test);
+                    stepper = new FollowingFilteredNodeStepper(start, test);
                 }
             } else if (test instanceof NodeKindTest) {
                 if (((NodeKindTest)test).getPrimitiveType() == Type.ELEMENT) {
-                    stepper = new FollowingElementStepper<>(start, null, null);
+                    stepper = new FollowingElementStepper(start, null, null);
                 } else {
-                    stepper = new FollowingFilteredNodeStepper<>(start, test);
+                    stepper = new FollowingFilteredNodeStepper(start, test);
                 }
             } else if (test instanceof LocalNameTest) {
                 if (((LocalNameTest)test).getPrimitiveType() == Type.ELEMENT) {
                     LocalNameTest nt = (LocalNameTest) test;
-                    stepper = new FollowingElementStepper<>(start, null, nt.getLocalName());
+                    stepper = new FollowingElementStepper(start, null, nt.getLocalName());
                 } else {
-                    stepper = new FollowingFilteredNodeStepper<>(start, test);
+                    stepper = new FollowingFilteredNodeStepper(start, test);
                 }
             } else if (test instanceof NamespaceTest) {
                 if (((NamespaceTest)test).getPrimitiveType() == Type.ELEMENT) {
                     NamespaceTest nt = (NamespaceTest) test;
-                    stepper = new FollowingElementStepper<>(start, nt.getNamespaceURI(), null);
+                    stepper = new FollowingElementStepper(start, nt.getNamespaceURI(), null);
                 } else {
-                    stepper = new FollowingFilteredNodeStepper<>(start, test);
+                    stepper = new FollowingFilteredNodeStepper(start, test);
                 }
             } else {
-                stepper = new FollowingFilteredNodeStepper<>(start, test);
+                stepper = new FollowingFilteredNodeStepper(start, test);
             }
         }
 
 
         @Override
-        public N next() {
+        public SteppingNode next() {
             if (current == null) {
                 // implies includeSelf: first time round, return the start node
                 current = start;
                 return start;
             }
-            N curr = stepper.step(current);
+            SteppingNode curr = stepper.step(current);
 
             return current = curr;
         }

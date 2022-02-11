@@ -8,7 +8,7 @@
 package net.sf.saxon.dotnet;
 
 import cli.System.Xml.*;
-import net.sf.saxon.annotate.CSharp;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -42,7 +42,7 @@ import java.util.Set;
  * provided in the .NET System.Xml implementation.</p>
  */
 
-public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNode<DotNetNodeWrapper>, SiblingCountingNode {
+public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNode, SiblingCountingNode {
 
     protected XmlNode node;
     protected short nodeKind;
@@ -627,8 +627,8 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
     }
 
     @Override
-    public DotNetNodeWrapper getSuccessorElement(DotNetNodeWrapper anchor, String uri, String local) {
-        XmlNode stop = (anchor == null ? null : anchor.node);
+    public SteppingNode getSuccessorElement(SteppingNode anchor, String uri, String local) {
+        XmlNode stop = (anchor == null ? null : ((DotNetNodeWrapper)anchor).node);
         XmlNode next = node;
         do {
             next = getSuccessorNode(next, stop);

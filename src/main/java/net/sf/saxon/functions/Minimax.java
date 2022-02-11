@@ -16,7 +16,7 @@ import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -329,9 +329,13 @@ public abstract class Minimax extends CollatingFunctionFixed {
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return new ZeroOrOne(
-                minimax(arguments[0].iterate(), isMaxFunction(), getAtomicComparer(context), ignoreNaN, context));
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        return SequenceTool.itemOrEmpty(minimax(
+                        arguments[0].iterate(),
+                        isMaxFunction(),
+                        getAtomicComparer(context),
+                        ignoreNaN,
+                        context));
     }
 
     @Override

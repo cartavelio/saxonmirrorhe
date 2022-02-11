@@ -95,7 +95,7 @@ public class UnicodeBlocks {
             }
             String blockName = normalizeBlockName(item.getAttributeValue("", "name"));
             IntSet range = null;
-            for (NodeInfo rangeElement : item.children(NodeKindTest.ELEMENT::test)) {
+            for (NodeInfo rangeElement : item.children(NodeKindTest.ELEMENT)) {
                 int from = Integer.parseInt(rangeElement.getAttributeValue("", "from").substring(2), 16);
                 int to = Integer.parseInt(rangeElement.getAttributeValue("", "to").substring(2), 16);
                 IntSet cr = new IntBlockSet(from, to);

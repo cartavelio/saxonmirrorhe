@@ -490,7 +490,7 @@ public final class ComputedAttribute extends AttributeCreator {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("compAtt", this);
         if (getValidationAction() != Validation.SKIP) {
-            out.emitAttribute("validation", Validation.toString(getValidationAction()));
+            out.emitAttribute("validation", Validation.describe(getValidationAction()));
         }
         SimpleType type = getSchemaType();
         if (type != null) {

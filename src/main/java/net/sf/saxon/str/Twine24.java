@@ -204,9 +204,9 @@ public class Twine24 extends UnicodeString {
      */
 
     /*@NotNull*/
-    public synchronized AtomicIterator<Int64Value> iterateCharacters() {
-        return new AtomicIterator<Int64Value>() {
-            IntIterator cp = codePoints();
+    public synchronized AtomicIterator iterateCharacters() {
+        return new AtomicIterator() {
+            private final IntIterator cp = codePoints();
 
             @Override
             public Int64Value next() {

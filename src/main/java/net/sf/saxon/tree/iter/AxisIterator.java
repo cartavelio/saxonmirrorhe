@@ -9,8 +9,6 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.NodeInfo;
 
-import java.util.function.Consumer;
-
 
 /**
  * A SequenceIterator is used to iterate over a sequence of items. An AxisIterator
@@ -25,11 +23,5 @@ public interface AxisIterator extends UnfailingIterator {
     @Override
     NodeInfo next();
 
-    default void forEachNode(Consumer<? super NodeInfo> consumer) {
-        NodeInfo item;
-        while ((item = next()) != null) {
-            consumer.accept(item);
-        }
-    }
 }
 

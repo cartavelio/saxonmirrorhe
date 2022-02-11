@@ -38,7 +38,7 @@ import java.util.List;
  * @author Wolfgang Hoschek (ported net.sf.saxon.jdom to XOM)
  */
 
-public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCountingNode, SteppingNode<XOMNodeWrapper> {
+public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCountingNode, SteppingNode {
 
     protected Node node;
 
@@ -536,8 +536,8 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    public XOMNodeWrapper getSuccessorElement(XOMNodeWrapper anchor, String uri, String local) {
-        Node stop = anchor == null ? null : anchor.node;
+    public SteppingNode getSuccessorElement(SteppingNode anchor, String uri, String local) {
+        Node stop = anchor == null ? null : ((XOMNodeWrapper)anchor).node;
         Node next = node;
         do {
             next = getSuccessorNode(next, stop);
@@ -650,12 +650,12 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     @Override
     protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         if (includeSelf) {
-            return new SteppingNavigator.DescendantAxisIterator<>(
+            return new SteppingNavigator.DescendantAxisIterator(
                     this, true, nodeTest);
 
         } else {
             if (hasChildNodes()) {
-                return new SteppingNavigator.DescendantAxisIterator<>(
+                return new SteppingNavigator.DescendantAxisIterator(
                         this, false, nodeTest);
             } else {
                 return EmptyIterator.ofNodes();

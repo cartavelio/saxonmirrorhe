@@ -104,7 +104,7 @@ public class Chain implements GroundedValue {
     @Override
     public UnfailingIterator iterate() {
         if (extent != null) {
-            return new net.sf.saxon.tree.iter.ListIterator<>(extent);
+            return new net.sf.saxon.tree.iter.ListIterator(extent);
         } else {
             return new ChainIterator(this);
         }
@@ -135,7 +135,11 @@ public class Chain implements GroundedValue {
 
     private void consolidate() {
         if (extent == null) {
-            extent = iterate().toList();
+            List<Item> list = new ArrayList<>();
+            for (Item item : iterate()) {
+                list.add(item);
+            }
+            extent = list;
         }
     }
 

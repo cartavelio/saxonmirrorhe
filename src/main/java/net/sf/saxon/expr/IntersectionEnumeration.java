@@ -43,8 +43,8 @@ public class IntersectionEnumeration implements SequenceIterator {
 
         // move to the first node in each input nodeset
 
-        nextNode1 = next(e1);
-        nextNode2 = next(e2);
+        nextNode1 = nextNode(e1);
+        nextNode2 = nextNode(e2);
     }
 
     /**
@@ -56,7 +56,7 @@ public class IntersectionEnumeration implements SequenceIterator {
      * @throws XPathException if a failure occurs reading from the input sequence
      */
 
-    private NodeInfo next(SequenceIterator iter) throws XPathException {
+    private NodeInfo nextNode(SequenceIterator iter) throws XPathException {
         return (NodeInfo)iter.next();
         // rely on type-checking to prevent a ClassCastException
     }
@@ -73,13 +73,13 @@ public class IntersectionEnumeration implements SequenceIterator {
         while (nextNode1 != null && nextNode2 != null) {
             int c = comparer.compare(nextNode1, nextNode2);
             if (c < 0) {
-                nextNode1 = next(e1);
+                nextNode1 = nextNode(e1);
             } else if (c > 0) {
-                nextNode2 = next(e2);
+                nextNode2 = nextNode(e2);
             } else {            // keys are equal
                 NodeInfo current = nextNode2;    // which is the same as next1
-                nextNode2 = next(e2);
-                nextNode1 = next(e1);
+                nextNode2 = nextNode(e2);
+                nextNode1 = nextNode(e1);
                 return current;
             }
         }

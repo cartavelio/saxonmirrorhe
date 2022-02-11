@@ -7,14 +7,13 @@
 
 package net.sf.saxon.tree.iter;
 
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringItem;
-
-import java.util.function.IntPredicate;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -26,7 +25,7 @@ import java.net.URI;
 public abstract class TextLinesIterator implements SequenceIterator {
 
     protected LineNumberReader reader;
-    protected IntPredicate checker;
+    protected IntPredicateProxy checker;
     StringItem current = null;
     int position = 0;
     protected Location location;
@@ -47,7 +46,7 @@ public abstract class TextLinesIterator implements SequenceIterator {
      *          if a dynamic error occurs
      */
 
-    public TextLinesIterator(LineNumberReader reader, Location location, URI uri, IntPredicate checker) throws XPathException {
+    public TextLinesIterator(LineNumberReader reader, Location location, URI uri, IntPredicateProxy checker) throws XPathException {
         this.reader = reader;
         this.location = location;
         this.uri = uri;
@@ -111,7 +110,7 @@ public abstract class TextLinesIterator implements SequenceIterator {
     }
 
 
-    private void checkLine(IntPredicate checker, /*@NotNull*/ String buffer) throws XPathException {
+    private void checkLine(IntPredicateProxy checker, /*@NotNull*/ String buffer) throws XPathException {
         for (int c = 0; c < buffer.length(); ) {
             int ch32 = buffer.charAt(c++);
             if (UTF16CharacterSet.isHighSurrogate(ch32)) {

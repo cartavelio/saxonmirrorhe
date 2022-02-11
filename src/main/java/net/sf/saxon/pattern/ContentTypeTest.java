@@ -15,9 +15,9 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.*;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Optional;
-import java.util.function.IntPredicate;
 
 /**
  * NodeTest is an interface that enables a test of whether a node matches particular
@@ -110,7 +110,7 @@ public class ContentTypeTest extends NodeTest {
     }
 
     @Override
-    public IntPredicate getMatcher(final NodeVectorTree tree) {
+    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         return nodeNr -> (nodeKindArray[nodeNr]&0x0f) == kind &&
                 matchesAnnotation(((TinyTree) tree).getSchemaType(nodeNr)) &&

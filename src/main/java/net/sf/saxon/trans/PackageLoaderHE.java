@@ -2021,7 +2021,7 @@ public class PackageLoaderHE implements IPackageLoader {
             int count = Count.count(args.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT));
             Sequence[] argValues = new Sequence[count];
             count = 0;
-            for (NodeInfo child : args.children(NodeKindTest.ELEMENT::test)) {
+            for (NodeInfo child : args.children(NodeKindTest.ELEMENT)) {
                 if (child.getLocalPart().equals("x")) {
                     argValues[count++] = null;
                 } else {
@@ -2949,7 +2949,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression base = null;
             Expression[] args = new Expression[count - 1];
             count = 0;
-            for (NodeInfo child : element.children(NodeKindTest.ELEMENT::test)) {
+            for (NodeInfo child : element.children(NodeKindTest.ELEMENT)) {
                 if (count == 0) {
                     base = loader.loadExpression(child);
                 } else if (child.getLocalPart().equals("null")) {

@@ -186,7 +186,9 @@ public class XPathExpression {
 
     public List<Item> evaluate(XPathDynamicContext context) throws XPathException {
         List<Item> list = new ArrayList<>(20);
-        expression.iterate(context.getXPathContextObject()).forEachOrFail(list::add);
+        // Don't replace with list::add - C# doesn't like it because list.add() returns boolean
+        //noinspection Convert2MethodRef 
+        expression.iterate(context.getXPathContextObject()).forEachOrFail(item -> list.add(item));
         return list;
     }
 

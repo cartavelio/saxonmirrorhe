@@ -179,7 +179,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
             }
         }
         if (!extensible) {
-            AtomicIterator<? extends AtomicValue> keyIter = map.keys();
+            AtomicIterator keyIter = map.keys();
             AtomicValue key;
             while ((key = keyIter.next()) != null) {
                 if (!(key instanceof StringItem) || !fieldTypes.containsKey(key.getStringValue())) {
@@ -500,7 +500,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
                 }
             }
             if (!extensible) {
-                AtomicIterator<? extends AtomicValue> keyIter = ((MapItem)item).keys();
+                AtomicIterator keyIter = ((MapItem)item).keys();
                 AtomicValue key;
                 while ((key = keyIter.next()) != null) {
                     if (!(key instanceof StringItem)) {

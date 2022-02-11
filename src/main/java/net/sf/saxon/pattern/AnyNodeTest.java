@@ -14,8 +14,7 @@ import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
-
-import java.util.function.IntPredicate;
+import net.sf.saxon.z.IntPredicateProxy;
 
 /**
  * NodeTest is an interface that enables a test of whether a node has a particular
@@ -76,7 +75,7 @@ public final class AnyNodeTest extends NodeTest implements QNameTest {
     }
 
     @Override
-    public IntPredicate getMatcher(NodeVectorTree tree) {
+    public IntPredicateProxy getMatcher(NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         return nodeNr -> nodeKindArray[nodeNr] != Type.PARENT_POINTER;
     }

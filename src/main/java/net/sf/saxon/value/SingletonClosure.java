@@ -9,9 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
@@ -107,8 +105,8 @@ public class SingletonClosure extends Closure implements Sequence {
      */
 
     @Override
-    public ZeroOrOne materialize() throws XPathException {
-        return new ZeroOrOne(asItem());
+    public GroundedValue materialize() throws XPathException {
+        return SequenceTool.itemOrEmpty(asItem());
     }
 
     @Override

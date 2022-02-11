@@ -276,7 +276,7 @@ public class IntRangeSet extends IntSet {
 
     @Override
     public IntIterator iterator() {
-        return new IntRangeSetIterator();
+        return new IntRangeSetIterator(this);
     }
 
 
@@ -314,7 +314,7 @@ public class IntRangeSet extends IntSet {
     public int hashCode() {
         // Note, hashcodes are NOT the same as those used by IntHashSet and IntArraySet
         if (hashCode == -1) {
-            int h = 0x836a89f1;
+            int h = 0x436a89f1;
             for (int i = 0; i < used; i++) {
                 h ^= startPoints[i] + (endPoints[i] << 3);
             }
@@ -404,12 +404,14 @@ public class IntRangeSet extends IntSet {
      * Iterator class
      */
 
-    private class IntRangeSetIterator implements IntIterator {
+    private static class IntRangeSetIterator implements IntIterator {
 
+        private IntRangeSet intRangeSet;
         private int i = 0;
         private int current = 0;
 
-        public IntRangeSetIterator() {
+        public IntRangeSetIterator(IntRangeSet intRangeSet) {
+            this.intRangeSet = intRangeSet;
             i = -1;
             current = Integer.MIN_VALUE;
         }
@@ -417,9 +419,9 @@ public class IntRangeSet extends IntSet {
         @Override
         public boolean hasNext() {
             if (i < 0) {
-                return count > 0;
+                return intRangeSet.count > 0;
             } else {
-                return current < endPoints[used - 1];
+                return current < intRangeSet.endPoints[intRangeSet.used - 1];
             }
         }
 
@@ -427,11 +429,11 @@ public class IntRangeSet extends IntSet {
         public int next() {
             if (i < 0) {
                 i = 0;
-                current = startPoints[0];
+                current = intRangeSet.startPoints[0];
                 return current;
             }
-            if (current == endPoints[i]) {
-                current = startPoints[++i];
+            if (current == intRangeSet.endPoints[i]) {
+                current = intRangeSet.startPoints[++i];
                 return current;
             } else {
                 return ++current;

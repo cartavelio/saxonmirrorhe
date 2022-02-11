@@ -12,6 +12,7 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -27,7 +28,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.IntPredicate;
 
 /**
  * Data for Regular expression character categories. The data is in an XML file derived from the Unicode
@@ -46,9 +46,9 @@ public class Categories {
     public static class Category implements CharacterClass {
 
         private final String label;
-        private final IntPredicate predicate;
+        private final IntPredicateProxy predicate;
 
-        public Category(String label, java.util.function.IntPredicate predicate) {
+        public Category(String label, IntPredicateProxy predicate) {
             this.label = label;
             this.predicate = predicate;
         }
@@ -94,7 +94,7 @@ public class Categories {
             return extent(predicate);
         }
 
-        private static IntSet extent(IntPredicate predicate) {
+        private static IntSet extent(IntPredicateProxy predicate) {
             if (predicate instanceof IntSetPredicate) {
                 return ((IntSetPredicate) predicate).getIntSet();
             }
@@ -131,24 +131,24 @@ public class Categories {
         int fp_t = config.getNamePool().allocateFingerprint("", "t");
 
         AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, "", "cat", config.getNamePool()));
-        iter.forEach(item -> {
+        for (Item item : iter) {
             String cat = ((TinyElementImpl)item).getAttributeValue(fp_name);
             IntRangeSet irs = new IntRangeSet();
-            for (NodeInfo r : ((NodeInfo)item).children(NodeKindTest.ELEMENT::test)) {
+            for (NodeInfo r : ((NodeInfo)item).children(NodeKindTest.ELEMENT)) {
                 String from = ((TinyElementImpl)r).getAttributeValue(fp_f);
                 String to = ((TinyElementImpl) r).getAttributeValue(fp_t);
                 irs.addRange(Integer.parseInt(from, 16), Integer.parseInt(to, 16));
             }
             CATEGORIES.put(cat, new Category(cat, new IntSetPredicate(irs)));
-        });
+        };
 
         String c = "CLMNPSZ";
         for (int i = 0; i < c.length(); i++) {
             char ch = c.charAt(i);
-            IntPredicate ip = null;
+            IntPredicateProxy ip = null;
             for (Map.Entry<String, Category> entry : CATEGORIES.entrySet()) {
                 if (entry.getKey().charAt(0) == ch) {
-                    ip = ip == null ? entry.getValue() : ip.or(entry.getValue());
+                    ip = ip == null ? entry.getValue() : IntUnionPredicate.makeUnion(ip, entry.getValue());
                 }
             }
             String label = ch + "";

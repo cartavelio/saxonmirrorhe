@@ -14,6 +14,7 @@ import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
+import net.sf.saxon.trace.ContextStackFrame;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -346,7 +347,7 @@ public interface XPathContext {
      * @return an iterator over a copy of the run-time call stack
      */
 
-    Iterator iterateStackFrames();
+    Iterator<ContextStackFrame> iterateStackFrames();
 
     /**
      * Get the current exception (in saxon:catch)

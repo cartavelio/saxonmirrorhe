@@ -8,7 +8,10 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -19,11 +22,11 @@ import java.util.List;
  * Class ListIterator, iterates over a sequence of items held in a Java List
  */
 
-public class ListIterator<T extends Item>
+public class ListIterator
         implements UnfailingIterator, LastPositionFinder, LookaheadIterator, GroundedIterator, ReversibleIterator {
 
     private int index = 0;
-    protected List<T> list;
+    protected List<? extends Item> list;
 
     /**
      * Create a ListIterator over a given List
@@ -31,7 +34,7 @@ public class ListIterator<T extends Item>
      * @param list the list: all objects in the list must be instances of {@link Item}
      */
 
-    public ListIterator(List<T> list) {
+    public ListIterator(List<? extends Item> list) {
         index = 0;
         this.list = list;
     }
@@ -43,7 +46,7 @@ public class ListIterator<T extends Item>
 
     /*@Nullable*/
     @Override
-    public T next() {
+    public Item next() {
         if (index >= list.size()) {
             return null;
         }
@@ -85,7 +88,7 @@ public class ListIterator<T extends Item>
 
     @Override
     public GroundedValue getResidue()  {
-        List<T> l2 = list;
+        List<? extends Item> l2 = list;
         if (index != 0) {
             l2 = l2.subList(index, l2.size());
         }
@@ -94,23 +97,26 @@ public class ListIterator<T extends Item>
 
     @Override
     public SequenceIterator getReverseIterator() {
-        return new ReverseListIterator<>(list);
+        return new ReverseListIterator(list);
     }
 
-    public static class Atomic extends ListIterator<AtomicValue> implements AtomicIterator {
-        public Atomic (List<AtomicValue> list) {
+    public static class Atomic extends ListIterator implements AtomicIterator {
+        public Atomic (List<? extends AtomicValue> list) {
             super(list);
+        }
+        public AtomicValue next() {
+            return (AtomicValue)super.next();
         }
     }
 
-    public static class OfNodes extends ListIterator<NodeInfo> implements AxisIterator {
+    public static class OfNodes extends ListIterator implements AxisIterator {
         public OfNodes(List<NodeInfo> list) {
             super(list);
         }
 
         @Override
         public NodeInfo next() {
-            return super.next();
+            return (NodeInfo)super.next();
         }
 
     }

@@ -8,6 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.Item;
@@ -190,7 +191,7 @@ public class Sum extends FoldingFunction {
         @Override
         public Sequence result() {
             if (atStart) {
-                return zeroValue == null ? EmptySequence.getInstance() : zeroValue;
+                return SequenceTool.itemOrEmpty(zeroValue);
             } else {
                 return data;
             }

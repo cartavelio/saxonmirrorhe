@@ -98,7 +98,7 @@ public class IntegerRange implements AtomicSequence {
 
     /*@NotNull*/
     @Override
-    public AtomicIterator<IntegerValue> iterate() {
+    public AtomicIterator iterate() {
         // Written this way for C# conversion
         if (step > 0) {
             return new AscendingRangeIterator(start, step, end);
@@ -301,7 +301,7 @@ public class IntegerRange implements AtomicSequence {
          *          iteration has no more elements.
          */
         @Override
-        public IntegerValue next() {
+        public AtomicValue next() {
             return new Int64Value(current++);
 
         }

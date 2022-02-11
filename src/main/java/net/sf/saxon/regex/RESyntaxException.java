@@ -54,4 +54,12 @@ public class RESyntaxException extends RuntimeException {
     public RESyntaxException(String s, int offset) {
         super("Syntax error at char " + offset + " in regular expression: " + s);
     }
+
+    /**
+     * Redundant override of getMessage(), added for ease of C# conversion
+     * @return the message associated with the error
+     */
+    public String getMessage() {
+        return super.getMessage();
+    }
 }

@@ -325,7 +325,7 @@ public abstract class Pattern extends PseudoExpression {
                 nodeTest = new MultipleNodeKindTest(uType);
             }
             AxisIterator allChildren = doc.iterateAxis(AxisInfo.DESCENDANT, nodeTest);
-            ItemMappingFunction selection = item -> matches(item, context) ? (NodeInfo)item : null;
+            ItemMappingFunction selection = ItemFilter.of(item -> matches(item, context));
             return new ItemMappingIterator(allChildren, selection);
         } else {
             int axis = uType.subsumes(UType.DOCUMENT) ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.DESCENDANT;

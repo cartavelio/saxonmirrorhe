@@ -65,7 +65,7 @@ public abstract class MapItem implements Function {
      * @return a set containing all the key values present in the map, in unpredictable order
      */
 
-    abstract public AtomicIterator<? extends AtomicValue> keys();
+    abstract public AtomicIterator keys();
 
     /**
      * Get the set of all key-value pairs in the map
@@ -133,10 +133,10 @@ public abstract class MapItem implements Function {
     public String toShortString() {
         StringBuilder sb = new StringBuilder();
         sb.append("map{");
-        int size = size();
-        if (size == 0) {
+        int count = size();
+        if (count == 0) {
             sb.append("}");
-        } else if (size <= 5) {
+        } else if (count <= 5) {
             int pos = 0;
             for (KeyValuePair pair : keyValuePairs()) {
                 if (pos++ > 0) {
@@ -148,7 +148,7 @@ public abstract class MapItem implements Function {
             }
             sb.append("}");
         } else {
-            sb.append("(:size ").append(size).append(":)}");
+            sb.append("(:size ").append(count).append(":)}");
         }
         return sb.toString();
     }
@@ -419,7 +419,7 @@ public abstract class MapItem implements Function {
     public boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
-            AtomicIterator<?> keys = keys();
+            AtomicIterator keys = keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 Sequence thisValue = get(key);

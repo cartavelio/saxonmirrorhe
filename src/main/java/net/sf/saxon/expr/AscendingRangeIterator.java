@@ -21,7 +21,7 @@ import java.util.EnumSet;
  * a DescendinggRangeIterator.
  */
 
-public class AscendingRangeIterator extends RangeIterator implements AtomicIterator<IntegerValue>,
+public class AscendingRangeIterator extends RangeIterator implements AtomicIterator,
         ReversibleIterator,
         LastPositionFinder,
         LookaheadIterator,
@@ -32,7 +32,7 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
     long currentValue;
     long limit;
 
-    public static AtomicIterator<IntegerValue> makeRangeIterator(IntegerValue start, IntegerValue step, IntegerValue end) throws XPathException {
+    public static AtomicIterator makeRangeIterator(IntegerValue start, IntegerValue step, IntegerValue end) throws XPathException {
         if (start == null || step == null || end == null) {
             return EmptyIterator.ofAtomic();
         } else {
@@ -66,7 +66,7 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
      * Factory method for use from bytecode
      */
 
-    public static AtomicIterator<IntegerValue> makeLongRangeIterator(long start, long step, long end) throws XPathException {
+    public static AtomicIterator makeLongRangeIterator(long start, long step, long end) throws XPathException {
         int direction = Long.compare(step, 0);
         if (direction == 0
                 || direction > 0 && start > end
@@ -169,7 +169,7 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
     }
 
     @Override
-    public AtomicIterator<IntegerValue> getReverseIterator() {
+    public AtomicIterator getReverseIterator() {
         return new DescendingRangeIterator(limit, step, start);
     }
 
