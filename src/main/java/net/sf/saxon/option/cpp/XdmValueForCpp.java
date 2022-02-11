@@ -51,6 +51,8 @@ public class XdmValueForCpp {
         Converter converter = rules.getConverter(BuiltInAtomicType.STRING, type);
 
         value = XdmValue.wrap(converter.convert(new StringValue(valueStr)).asAtomic());
+
+
     }
 
 
@@ -61,7 +63,7 @@ public class XdmValueForCpp {
 
     public XdmValueForCpp(int i) throws SaxonApiException {
         try {
-            value = XdmValue.wrap(IntegerValue.fromDouble(i).asAtomic());
+            value = XdmValue.wrap(IntegerValue.makeIntegerValue(i).asAtomic());
             type = BuiltInAtomicType.INT;
         } catch (ValidationException e) {
             throw new SaxonApiException(e);

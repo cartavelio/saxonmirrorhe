@@ -15,8 +15,11 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.Type;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * * This utility class consists generic functions for use with XDM data model.
@@ -87,7 +90,7 @@ public class XdmUtils {
 
     public static XdmValue [] convertXdmArrayToArrayObject(XdmArray value) {
         XdmValue arr [] = new XdmValue[value.arrayLength()];
-        arr = value.asList().toArray(arr);
+        value.asList().toArray(arr);
         return arr;
 
     }
@@ -162,6 +165,16 @@ public class XdmUtils {
         }
     }
 
+
+
+    public static String getLocalName(XdmNode node) {
+        QName qname = node.getNodeName();
+        if (qname == null) {
+            return null;
+        }
+        return qname.getLocalName();
+    }
+
     /**
      * Get the name of the node, as a EQName
      *
@@ -177,6 +190,10 @@ public class XdmUtils {
         return XdmUtils.getEQName(qname);
 
     }
+
+
+
+
 
 
     /**
@@ -222,6 +239,20 @@ public class XdmUtils {
         return children.toArray(new XdmNode[0]);
     }
 
+
+
+    public static XdmNode getChild(XdmNode node, int i) {
+        XdmSequenceIterator iter = node.axisIterator(Axis.CHILD);
+        int pos = 0;
+        while (iter.hasNext()) {
+            if(pos == i) {
+                 return (XdmNode) iter.next();
+            }
+            pos++ ;
+        }
+        return null;
+    }
+
     public static int getChildCount(XdmNode node) {
         int num = 0;
         XdmSequenceIterator iter = node.axisIterator(Axis.CHILD);
@@ -242,6 +273,20 @@ public class XdmUtils {
         }
 
         return num;
+    }
+
+
+
+    public static void setDocBuilderBaseURI(DocumentBuilder builder, String baseStr) throws SaxonApiException {
+        URI baseURI = null;
+        try {
+            baseURI = new URI(baseStr);
+        } catch (URISyntaxException e) {
+            throw new SaxonApiException(e.getMessage());
+        }
+        builder.setBaseURI(baseURI);
+
+
     }
 
 }
