@@ -15,5 +15,6 @@ namespace java.util {
         E[] toArray();
         S[] toArray<S>(S[] supplied) where S : E;
         Iterator<E> iterator();
+        void sort(java.util.Comparator<E> comparer);
     }
 }

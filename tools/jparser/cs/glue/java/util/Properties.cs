@@ -31,7 +31,11 @@ namespace java.util {
             dict.Add(key, value);
         }
 
-        public Enumeration<string> propertyNames() {
+        // public Enumeration<string> propertyNames() {
+        //     throw new UnsupportedOperationException("not yet implemented");
+        // }
+        
+        public java.util.Set<string> stringPropertyNames() {
             throw new UnsupportedOperationException("not yet implemented");
         }
 

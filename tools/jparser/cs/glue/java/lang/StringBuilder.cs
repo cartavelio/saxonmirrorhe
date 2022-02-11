@@ -23,6 +23,11 @@ namespace java.lang {
             return this;
         }
         
+        public StringBuilder append(StringBuilder str) {
+            this._builder.Append(str);
+            return this;
+        }
+        
         public StringBuilder append(string str, int start, int end) {
             this._builder.Append(str, start, end);
             return this;

@@ -184,7 +184,7 @@ task hen_preprocess(
   args "/c",
     "/i:${buildDir}/filtered/hen", "/o:${buildDir}/preprocess/hen",
     "/p:EE=false", "/p:PE=false", "/p:DOTNET=true",
-    "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=true"
+    "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
   doFirst {
     mkdir "${buildDir}/preprocess/hen"
   }
@@ -202,7 +202,7 @@ task pen_preprocess(
   args "/c",
     "/i:${buildDir}/filtered/pen", "/o:${buildDir}/preprocess/pen",
     "/p:EE=false", "/p:PE=true", "/p:DOTNET=true",
-    "/p:SAXONC=false", "/p:BYTECODE=false", "/p:HOF=true", "/p:CSHARP=true"
+    "/p:SAXONC=false", "/p:BYTECODE=false", "/p:HOF=true", "/p:CSHARP=false"
   doFirst {
     mkdir "${buildDir}/preprocess/pen"
   }
@@ -221,7 +221,7 @@ task een_preprocess(
     "/i:${buildDir}/filtered/een", "/o:${buildDir}/preprocess/een",
     "/p:EE=true", "/p:PE=false", "/p:DOTNET=true",
     "/p:SAXONC=false", "/p:BYTECODE=true", "/p:HOF=true",
-    "/p:STREAM=true", "/p:SCHEMA=true", "/p:CSHARP=true"
+    "/p:STREAM=true", "/p:SCHEMA=true", "/p:CSHARP=false"
   doFirst {
     mkdir "${buildDir}/preprocess/een"
   }
