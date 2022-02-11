@@ -2,6 +2,7 @@ using System.Xml;
 using Saxon.Hej.@event;
 using Saxon.Hej.s9api;
 using JDestination = Saxon.Hej.s9api.Destination;
+using JAbstractDestination = Saxon.Hej.s9api.AbstractDestination;
 using Saxon.Hej.serialize;
 using Saxon.Impl.Helpers;
 
@@ -19,7 +20,7 @@ namespace Saxon.Api {
     /// is to be controlled from the stylesheet or query, use a <c>Serializer</c> as the
     /// <c>Destination</c>.</para>
     /// </remarks>
-    public class XmlWriterDestination : Saxon.Hej.s9api.AbstractDestination, IDestination {
+	public class XmlWriterDestination : JAbstractDestination, IDestination {
         private readonly XmlWriter writer;
         private bool closeAfterUse = true;
 

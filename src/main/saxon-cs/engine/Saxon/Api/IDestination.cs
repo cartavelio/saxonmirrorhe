@@ -25,13 +25,13 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <returns>returns the underlying Destination object</returns>
-        JDestination GetUnderlyingDestination();
+		/**public**/ JDestination GetUnderlyingDestination();
 
         /// <summary>
         /// Define an action to be performed when writing to the Destination is complete.
         /// </summary>
         /// <param name="action">The action to be performed.</param>
-        void OnClose(System.Action action);
+		/**public**/ void OnClose(System.Action action);
 
     }
 }
