@@ -262,7 +262,7 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
         } else {
             if (config != null) {
                 try {
-                    source = config.getSaxonResourceResolver().resolve(relativeURI, base);
+                    source = config.getCommonResourceResolver().resolve(relativeURI, base);
                 } catch (Exception ex) {
                     throw XPathException.makeXPathException(ex);
                 }

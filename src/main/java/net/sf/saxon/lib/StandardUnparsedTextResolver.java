@@ -81,7 +81,7 @@ public class StandardUnparsedTextResolver
 
         // Do this early in case it returns a data: or classpath: URI.
         try {
-            Source resolved = config.getSaxonResourceResolver().resolve(absoluteURI.toString(), null);
+            Source resolved = config.getCommonResourceResolver().resolve(absoluteURI.toString(), null);
             if (resolved != null) {
                 absoluteURI = new URI(resolved.getSystemId());
             }
