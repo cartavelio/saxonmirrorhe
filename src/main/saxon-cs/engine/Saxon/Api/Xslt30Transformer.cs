@@ -10,6 +10,7 @@ using Saxon.Hej.lib;
 using Saxon.Hej.s9api;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
+using Saxon.Ejavax.xml.transform;
 using Saxon.Hej;
 using Saxon.Hej.pull;
 using StandardMessageHandler = Saxon.Callbacks.StandardMessageHandler;
@@ -302,7 +303,7 @@ namespace Saxon.Api {
             get => xmlDocumentResolver;
             set {
                 xmlDocumentResolver = value;
-                s9Transformer.setURIResolver(new UriResolverWrappingDocumentResolver(
+                s9Transformer.setResourceResolver(new JResourceResolverWrappingCS(
                     value, s9Transformer.getUnderlyingController().getConfiguration()));
             }
         }
@@ -706,10 +707,21 @@ namespace Saxon.Api {
         public void CallFunction(QName function, XdmValue[] arguments, IDestination destination) {
             s9Transformer.callFunction(function, arguments, destination.UnderlyingDestination);
         }
+
+
+        protected internal static UnparsedTextURIResolver WrapTextResolver(Saxon.Api.ResourceResolver value) {
+            return new WrappedTextResolver(value);
+        }
         
-        
-        protected internal static UnparsedTextURIResolver WrapTextResolver(ResourceResolver value) {
-            return (uri, encoding, config) => {
+        public class WrappedTextResolver : UnparsedTextURIResolver {
+            
+            private readonly Saxon.Api.ResourceResolver resolver;
+
+            public WrappedTextResolver(Saxon.Api.ResourceResolver resolver) {
+                this.resolver = resolver;
+            }
+
+            public TextReader resolve(Uri absoluteURI, string encoding, Configuration config) {
                 Encoding enc;
                 if (encoding == null) {
                     enc = null;
@@ -719,34 +731,27 @@ namespace Saxon.Api {
                         encoding = "us-ascii";
                     }
                     try {
-                        enc = Encoding.GetEncoding(encoding);
+                        enc = Encoding.GetEncoding((string)encoding);
                     }
                     catch (System.ArgumentException e) {
                         throw new Saxon.Hej.trans.XPathException("Unparsed-text encoding problem: " + e.Message, "FOUT1190");
                     }
                 }
-                ResourceRequest request = new() {
-                    BaseUri = uri,
-                    Uri = uri,
+                Saxon.Api.ResourceRequest request = new() {
+                    BaseUri = absoluteURI,
+                    Uri = absoluteURI,
                     Encoding = enc,
                     Nature = ResourceRequest.TEXT_NATURE
                 };
-                IResource resource = value(request);
-                if (resource == null) {
-                    IResource fallback = config.getCommonResourceResolver().chain(new DirectResourceResolver()).Resolve(request);
-                    if (fallback is TextResource text) {
-                        return text.TextReader;
-                    }
-                    else {
-                        throw new Saxon.Hej.trans.XPathException("Failed to resolve unparsed-text URI: " + uri, "FOUT1170");
-                    }
-                } else if (resource is TextResource text) {
-                    return text.TextReader;
-                }
-                else {
-                    throw new Saxon.Hej.trans.XPathException("Resolver for unparsed-text URI " + uri + " returned an IResource that is not a TextResource", "FOUT1170");
-                }
-            };
+                IResource resource = resolver.Invoke(request);
+                return resource switch {
+                    null => null,
+                    TextResource text => text.TextReader,
+                    _ => throw new Saxon.Hej.trans.XPathException(
+                        "Resolver for unparsed-text URI " + absoluteURI + " returned an IResource that is not a TextResource",
+                        "FOUT1170")
+                };
+            }
         }
         
  

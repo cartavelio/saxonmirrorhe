@@ -5,6 +5,7 @@ using System.Xml;
 using Saxon.Callbacks;
 using Saxon.Ejava.lang;
 using Saxon.Ejavax.xml.transform;
+using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
 using Saxon.Hej.lib;
 using Saxon.Hej.pull;
@@ -34,9 +35,6 @@ namespace Saxon.Api {
             this.processor = processor;
             this.s9Builder = processor.JProcessor.newDocumentBuilder();
             this.config = processor.Implementation;
-            this.resourceResolver = config.getCommonResourceResolver().chain(new DirectResourceResolver()).Resolve;
-            this.EntityResolver = config.getCommonResourceResolver().GetEntityResolver();
-
         }
         
         /// <summary>
@@ -55,18 +53,18 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// An <c>XmlResolver</c>, which will be used to resolve references to external entities
+        /// A <c>System.Xml.XmlResolver</c>, which will be used to resolve references to external entities
         /// within XML documents being loaded (including any external DTD) when the <c>DocumentBuilder</c>
         /// allocates an <c>XmlReader</c>.
         /// </summary>
         /// <remarks>
-        /// <para>If no <c>EntityResolver</c> is supplied, the <c>XmlResolver</c> associated with the
-        /// Saxon configuration is used (<c>Configuration.getCommonResourceResolver().GetEntityResolver()</c>)</para>
-        /// <para>In Saxon releases prior to 11.1, an <c>XmlResolver</c> was also used to
-        /// resolve the URI passed to the <c>DocumentBuilder.Build()</c> method.</para>
+        /// <para>If no <c>EntityResolver</c> is supplied, the <c>ResourceResolver</c> associated with the
+        /// Saxon configuration is used (<c>Configuration.getResourceResolver()</c>)</para>
+        /// <para>In Saxon releases prior to 11.1, the supplied <c>XmlResolver</c> was also used to
+        /// resolve any relative URI passed to the <c>DocumentBuilder.Build()</c> method.</para>
         /// </remarks>
 
-        public XmlResolver EntityResolver { get; set; }
+        public XmlResolver XmlResolver { get; set; }
 
         /// <summary>
         /// Determines whether line numbering is enabled for documents loaded using this
@@ -258,15 +256,16 @@ namespace Saxon.Api {
         /// in-memory document.
         /// </returns>
         public XdmNode Build(Uri uri) {
+            if (XmlDocumentResolver == null) {
+                return s9Builder.build(new StreamSource(uri.ToString()));
+            }
             ResourceRequest request = new () {
                 Uri = uri,
                 Nature = ResourceRequest.XML_NATURE
             };
-            IResource resource = XmlDocumentResolver.Invoke(request) 
-                                 ?? processor.Implementation.getCommonResourceResolver().Resolve(request);
-
+            IResource resource = XmlDocumentResolver.Invoke(request);
             if (resource == null) {
-                throw new SaxonApiException("Unable to resolve URI " + uri);
+                return s9Builder.build(new StreamSource(uri.ToString()));
             }
             switch (resource) {
                 case TextResource text when text.hasReader():
@@ -323,8 +322,8 @@ namespace Saxon.Api {
                 DtdProcessing = DtdProcessing.Parse // must expand entity references
             };
 
-            if (EntityResolver != null) {
-                settings.XmlResolver = EntityResolver;
+            if (XmlResolver != null) {
+                settings.XmlResolver = XmlResolver;
             }
 
             settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);
@@ -377,8 +376,8 @@ namespace Saxon.Api {
                 DtdProcessing = DtdProcessing.Parse // must expand entity references
             };
 
-            if (EntityResolver != null) {
-                settings.XmlResolver = EntityResolver;
+            if (XmlResolver != null) {
+                settings.XmlResolver = XmlResolver;
             }
 
             settings.ValidationType = (DtdValidation ? ValidationType.DTD : ValidationType.None);

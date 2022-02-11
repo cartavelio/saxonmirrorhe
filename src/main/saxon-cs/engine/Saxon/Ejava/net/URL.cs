@@ -1,10 +1,11 @@
 using System;
+using System.Net;
 using SysUri = System.Uri;
 
 namespace Saxon.Ejava.net {
     
     /// <summary>
-    /// A partial emulation of the Saxon.Ejava.net.URI class, implemented as a wrapper around a .NET System.Uri
+    /// A partial emulation of the java.net.URL class, implemented as a wrapper around a .NET System.Uri
     /// </summary>
     public class URL {
 
@@ -29,6 +30,10 @@ namespace Saxon.Ejava.net {
         public System.Uri toURI() {
             return uri;
         }
+
+        public System.IO.Stream openStream() {
+            return new WebClient().OpenRead(uri);
+        } 
 
         
     }

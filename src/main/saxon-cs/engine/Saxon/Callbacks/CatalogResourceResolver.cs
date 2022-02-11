@@ -6,6 +6,8 @@ using Org.XmlResolver;
 using Org.XmlResolver.Features;
 using Org.XmlResolver.Utils;
 using Saxon.Api;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Ejavax.xml.transform.stream;
 
 namespace Saxon.Callbacks {
 
@@ -14,7 +16,7 @@ namespace Saxon.Callbacks {
     /// resource resolver, which is incorporated into SaxonCS as a dependency. It provides its own
     /// API for resolving URIs, as well as implementing the (highly fragile) .NET XmlResolver interface.
     /// </summary>
-    public class CatalogResourceResolver : CommonResourceResolver {
+    internal class CatalogResourceResolver : Saxon.Hej.lib.JJ_ResourceResolver, Saxon.Callbacks.ConfigurableResourceResolver {
         private readonly Org.XmlResolver.Resolver catalogBasedResolver;
 
         /// <summary>
@@ -36,10 +38,8 @@ namespace Saxon.Callbacks {
             this.catalogBasedResolver = resolver;
         }
 
-        public override CommonResourceResolver NewInstance() {
-            CommonResourceResolver newResolver = new CatalogResourceResolver(catalogBasedResolver);
-            newResolver.CopyFrom(this);
-            return newResolver;
+        public CatalogResourceResolver NewInstance() {
+            return new CatalogResourceResolver(catalogBasedResolver);
         }
 
         /// <summary>
@@ -50,28 +50,28 @@ namespace Saxon.Callbacks {
         /// <returns>An <c>IResource</c> containing the content of the resource as a <c>Stream</c> or
         /// <c>TextReader</c>, together with a <c>SystemId</c> that identifies the base URI of the
         /// resource.</returns>
-        public override IResource Resolve(ResourceRequest request) {
+        public Saxon.Ejavax.xml.transform.Source resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
             if (catalogBasedResolver != null) {
                 try {
                     ResolvedResource rr;
-                    if (request.UriIsNamespace) {
+                    if (request.uriIsNamespace) {
                         rr = catalogBasedResolver.CatalogResolver.ResolveNamespace(
-                            request.Uri.ToString(), null, request.Nature, request.Purpose);
+                            request.uri, null, request.nature, request.purpose);
+                    }
+                    else if (request.nature == Saxon.Hej.lib.JJ_ResourceRequest.DTD_NATURE || request.nature == Saxon.Hej.lib.JJ_ResourceRequest.EXTERNAL_ENTITY_NATURE) {
+                        string href = request.relativeUri ?? request.uri;
+                        string baseUri = request.baseUri ?? request.uri;
+                        rr = catalogBasedResolver.CatalogResolver.ResolveEntity(
+                            request.entityName, request.publicId, href, baseUri);
                     }
                     else {
-                        string href = request.RelativeUri ?? request.Uri.ToString();
-                        Uri baseUri = request.BaseUri ?? request.Uri;
-                        rr = catalogBasedResolver.CatalogResolver.ResolveUri(href, baseUri.ToString());
+                        string href = request.relativeUri ?? request.uri;
+                        string baseUri = request.baseUri ?? request.uri;
+                        rr = catalogBasedResolver.CatalogResolver.ResolveUri(href, baseUri);
                         
                     }
                     if (rr != null) {
-                        //return null;
-                        // Uri abs = new Uri(baseUri, href);
-                        // Stream stream = UriUtils.GetStream(abs);
-                        // return new TextResource(stream, abs);
-                    //}
-                    //else {
-                        return new TextResource(rr.GetInputStream(), rr.GetResolvedUri());
+                        return new StreamSource(rr.GetInputStream(), rr.GetResolvedUri().ToString());
                     }
                 }
 
@@ -87,10 +87,10 @@ namespace Saxon.Callbacks {
           
             }
 
-            return nextResourceResolver?.Resolve(request);
+            return null;
         }
 
-        public override void SetFeature(ResolverFeature feature, object value) {
+        public void setFeature(ResolverFeature feature, object value) {
             if (catalogBasedResolver == null) {
                 throw new NullReferenceException();
             }
@@ -98,82 +98,14 @@ namespace Saxon.Callbacks {
             catalogBasedResolver.GetConfiguration().SetFeature(feature, value);
         }
 
-        public override object GetFeature(ResolverFeature resolverFeature) {
+        public object getFeature(ResolverFeature resolverFeature) {
             return catalogBasedResolver?.GetConfiguration().GetFeature(resolverFeature);
         }
 
-        public override XmlResolver GetEntityResolver() {
-            return new XmlResolverWrapper(this);
+        public XmlResolver GetEntityResolver() {
+            return catalogBasedResolver;
         }
-
-
-        private class XmlResolverWrapper : System.Xml.XmlResolver {
-
-            private readonly CatalogResourceResolver _commonResourceResolver;
-
-            public XmlResolverWrapper(CatalogResourceResolver resolver) {
-                _commonResourceResolver = resolver;
-            }
-
-
-            public override object GetEntity(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) {
-                object result = null;
-                Org.XmlResolver.Resolver resolver = _commonResourceResolver.catalogBasedResolver;
-                if (resolver != null) {
-                    CatalogResolver catalogResolver = resolver.CatalogResolver;
-                    string arg = absoluteUri.ToString();
-                    ResolvedResource rr;
-                    if (arg.StartsWith("-//")) {
-                        // Assume it's actually a Public ID
-                        rr = catalogResolver.ResolveEntity(null, arg, "http://public-id/" + arg, null);
-                    }
-                    else {
-                        rr = catalogResolver.ResolveEntity(null, null, arg, null);
-                    }
-
-                    if (rr == null) {
-                        return UriUtils.GetStream(absoluteUri);
-                    }
-                    else {
-                        return rr.GetInputStream();
-                    }
-                }
-
-                if (_commonResourceResolver.nextResourceResolver != null) {
-                    result = _commonResourceResolver.nextResourceResolver.GetEntityResolver()
-                        .GetEntity(absoluteUri, role, ofObjectToReturn);
-                }
-
-                return result;
-            }
-
-            /// <summary>
-            /// Resolve a relative URI against a base URI
-            /// </summary>
-            /// <param name="baseUri">The base URI</param>
-            /// <param name="relativeUri">The relative URI reference</param>
-            /// <returns>The resolved URI</returns>
-
-            public override Uri ResolveUri(Uri baseUri, string relativeUri) {
-                Uri result = null;
-                if (relativeUri.StartsWith("-//")) {
-                    // then it's probably a Public ID, which the Microsoft parser doesn't seem to understand.
-                    // We'll pass it back unresolved
-                    return new Uri(relativeUri, UriKind.Relative);
-                }
-
-                Org.XmlResolver.Resolver resolver = _commonResourceResolver.catalogBasedResolver;
-                if (resolver != null) {
-                    result = resolver.ResolveUri(baseUri, relativeUri);
-                }
-
-                if (result == null && _commonResourceResolver.nextResourceResolver != null) {
-                    result = _commonResourceResolver.nextResourceResolver.GetEntityResolver().ResolveUri(baseUri, relativeUri);
-                }
-
-                return result;
-            }
-        }
-
     }
+
+
 }
