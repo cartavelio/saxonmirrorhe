@@ -1057,7 +1057,7 @@
          directly from Java if required.</p>
       
       <div class="javaonly">
-      <h2>Calling XQuery Functions from Java</h2>
+      <h2 class="subtitle">Calling XQuery Functions from Java</h2>
 
 
        <p>This is achieved as follows:</p>
@@ -1104,7 +1104,7 @@ XdmValue result = ev.callFunction(new QName("http://www.w3.org/2005/xquery-local
       </div>  
  
       <div class="csonly">
-      <h2>Calling XQuery Functions from C#</h2>
+      <h2 class="subtitle">Calling XQuery Functions from C#</h2>
       
       
       <p>This is achieved as follows:</p>

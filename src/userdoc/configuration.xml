@@ -115,7 +115,7 @@
 
          <p>Saxon implements a number of JAXP interfaces, notably the APIs for transformation, XPath processing, and validation.</p>
          
-         <h2>XSLT</h2>
+         <h2 class="subtitle">XSLT</h2>
          
          <p>For transformation, the root object of the API is the JAXP <code>TransformerFactory</code>. Saxon provides several implementations of this interface:</p>
          
@@ -153,7 +153,7 @@
             This causes any previously-initialized configuration to be discarded, and replaced with a new <code>Configuration</code> object built from the
             settings in the specified configuration file.</p>
 
-         <h2>XPath</h2>
+         <h2 class="subtitle">XPath</h2>
          
          <p>Saxon implements the JAXP XPath interface <code>javax.xml.xpath.XPathFactory</code>; the implementation class is <a class="javalink"
                href="net.sf.saxon.xpath.XPathFactoryImpl">net.sf.saxon.xpath.XPathFactoryImpl</a>.</p>
@@ -172,7 +172,7 @@
             that are not boolean-valued, it is necessary to navigate to the underlying <code>Configuration</code> object and use its native interfaces. Saxon's
             implementation class for the <code>XPathFactory</code> is <code>net.sf.saxon.xpath.XPathFactoryImpl</code>, regardless which Saxon edition is in use.</p>
 
-         <h2>XSD (Schema processing)</h2>
+         <h2 class="subtitle">XSD (Schema processing)</h2>
 
          <p>Saxon-EE also implements the JAXP <code>SchemaFactory</code> in class <a class="javalink" href="com.saxonica.ee.jaxp.SchemaFactoryImpl"
                >com.saxonica.ee.jaxp.SchemaFactoryImpl</a>. The interface offers methods <code>getProperty(name)</code> and <code>setProperty(name,

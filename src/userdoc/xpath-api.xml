@@ -64,7 +64,7 @@
    <aside>It's also possible to build adapters for other tree models,
       though this is not for the faint-hearted.</aside>
    
-   <h2>Namespaces</h2>
+   <h2 class="subtitle">Namespaces</h2>
    
    <p>When XPath expressions use prefixed element or attribute names (such as <code>p:foo//p:bar</code>) it is
    necessary to declare the prefix (here <code>p</code>) so that the XPath processor knows which namespace it
@@ -106,7 +106,7 @@
       without worrying too much about what namespace they are in.</li>
    </ul>
    
-   <h2>XPath Versions</h2>
+   <h2 class="subtitle">XPath Versions</h2>
    
    <p>W3C has published four versions of XPath: 1.0, 2.0, 3.0, and 3.1. In addition, there is a W3C Community Group,
    led by Saxonica, working on ideas for a version 4.0, some of which are implemented experimentally in Saxon 11.</p>
@@ -130,7 +130,7 @@
       <li>The experimental features of early 4.0 drafts are not available unless you explicitly enable them.</li>
    </ul>
    
-   <h2>XPath Variables</h2>
+   <h2 class="subtitle">XPath Variables</h2>
    
    <p>Very often you will want to execute the same XPath expression repeatedly, but with some parameter taking
    different values: for example <code>//person[@id='A1234']</code> where the required ID changes each time.</p>
