@@ -34,7 +34,6 @@ public class SchemaURIResolverTest {
         }
     }
 
-    /*
     @Test
     public void resolveXLinkNamespace() {
         Configuration config = new EnterpriseConfiguration();
@@ -55,6 +54,5 @@ public class SchemaURIResolverTest {
             fail();
         }
     }
-     */
 
 }
