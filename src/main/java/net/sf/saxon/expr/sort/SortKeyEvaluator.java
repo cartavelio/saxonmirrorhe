@@ -23,6 +23,7 @@ public interface SortKeyEvaluator {
      *
      * @param n the requested index
      * @param context the XPath context
+     * @return the evaluated sort key
      * @throws XPathException if any error occurs
      */
 

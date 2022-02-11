@@ -41,8 +41,8 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
      *
      * @return N &lt; 0 if a &lt; b, N = 0 if a=b, N &gt; 0 if a &gt; b
      * @throws ClassCastException if the objects are of the wrong type for this Comparer
-     * @param a
-     * @param b
+     * @param a the first string
+     * @param b the second string
      */
 
     @Override
