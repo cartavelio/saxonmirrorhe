@@ -386,6 +386,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
         StylesheetCache cache = context.getController().getStylesheetCache();
         XsltExecutable executable = null;
+        Configuration config = xsltCompiler.getProcessor().getUnderlyingConfiguration();
         switch (styleOptionStr) {
             case "stylesheet-location":
                 String stylesheetLocation = styleOptionItem.getStringValue();
@@ -393,15 +394,20 @@ public class TransformFn extends SystemFunction implements Callable {
                     executable = cache.getStylesheetByLocation(stylesheetLocation); // if stylesheet is already cached
                 }
                 if (executable == null) {
-                    Source style;
+                    Source style = null;
                     try {
                         String base = getStaticBaseUriString();
-                        style = xsltCompiler.getURIResolver().resolve(stylesheetLocation, base);
-                        // returns null when stylesheetLocation is relative, and (QT3TestDriver) TestURIResolver
-                        // is wrongly being used for URIResolver. Next step directs to correct URIResolver.
-                        if (style == null) {
-                            style = xsltCompiler.getProcessor().getUnderlyingConfiguration().getSystemURIResolver().resolve(stylesheetLocation, base);
-                        }
+                        ResourceRequest request = new ResourceRequest();
+                        request.baseUri = base;
+                        request.relativeUri = stylesheetLocation;
+                        request.uri = ResolveURI.makeAbsolute(stylesheetLocation, base).toString();
+                        request.nature = ResourceRequest.XSLT_NATURE;
+                        request.purpose = "transformation";
+                        style = request.resolve(xsltCompiler.getResourceResolver(),
+                                                config.getResourceResolver(),
+                                                new DirectResourceResolver(config));
+                    } catch (URISyntaxException e) {
+                        throw new XPathException("Failed to resolve stylesheet-location in fn:transform: " + e.getMessage());
                     } catch (TransformerException e) {
                         throw new XPathException(e);
                     }
@@ -611,7 +617,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
 
         XsltCompiler xsltCompiler = processor.newXsltCompiler();
-        xsltCompiler.setURIResolver(context.getURIResolver());
+        xsltCompiler.setResourceResolver(context.getResourceResolver());
         xsltCompiler.setJustInTimeCompilation(false);
 
         // Set static params on XsltCompiler before compiling stylesheet (XSLT 3.0 processing only)
@@ -758,20 +764,26 @@ public class TransformFn extends SystemFunction implements Callable {
                 } else if (sourceLocation != null) {
                     try {
                         String base = getStaticBaseUriString();
-                        Source ss = xsltCompiler.getURIResolver().resolve(sourceLocation, base);
-                        if (ss == null) {
-                            ss = targetConfig.getURIResolver().resolve(sourceLocation, base);
-                            if (ss == null) {
-                                throw new XPathException("Cannot locate document at sourceLocation " + sourceLocation, "FOXT0003");
-                            }
+                        ResourceRequest rr = new ResourceRequest();
+                        rr.relativeUri = sourceLocation;
+                        rr.baseUri = base;
+                        rr.nature = ResourceRequest.XML_NATURE;
+                        rr.purpose = "source document";
+                        try {
+                            rr.uri = ResolveURI.makeAbsolute(sourceLocation, base).toString();
+                        } catch (URISyntaxException err) {
+                            throw new XPathException("Unresolvable sourceLocation URI " + sourceLocation, "FOXT0003");
                         }
+                        Source ss = rr.resolve(xsltCompiler.getResourceResolver(),
+                                               targetConfig.getResourceResolver(),
+                                               new DirectResourceResolver(targetConfig));
                         ParseOptions parseOptions = new ParseOptions(targetConfig.getParseOptions());
                         parseOptions.setSchemaValidationMode(schemaValidation);
                         TreeInfo tree = targetConfig.buildDocumentTree(ss, parseOptions);
                         sourceNode = tree.getRootNode();
                         sourceLocation = null;
-                    } catch (TransformerException e) {
-                        throw XPathException.makeXPathException(e);
+                    } catch (XPathException e) {
+                        e.setErrorCode("FOXT0003");
                     }
                 }
                 if (globalContextItem instanceof XdmNode) {

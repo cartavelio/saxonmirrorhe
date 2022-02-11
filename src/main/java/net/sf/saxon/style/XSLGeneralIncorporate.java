@@ -9,6 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.DocumentFn;
+import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.DocumentKey;
 import net.sf.saxon.om.NodeName;
@@ -18,7 +19,6 @@ import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.value.Whitespace;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.URIResolver;
 
 
 /**
@@ -103,12 +103,10 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
         try {
             PrincipalStylesheetModule psm = importer.getPrincipalStylesheetModule();
             //PreparedStylesheet pss = psm.getPreparedStylesheet();
-            URIResolver resolver = getCompilation().getCompilerInfo().getURIResolver();
-            Configuration config = getConfiguration();
             XSLStylesheet includedSheet;
             StylesheetModule incModule;
 
-            DocumentKey key = DocumentFn.computeDocumentKey(href, getBaseURI(), getCompilation().getPackageData(), resolver, false);
+            DocumentKey key = DocumentFn.computeDocumentKey(href, getBaseURI(), getCompilation().getPackageData(), false);
             includedSheet = (XSLStylesheet)psm.getStylesheetDocument(key);
             if (includedSheet != null) {
                 // we already have the stylesheet document in cache; but we need to create a new module,

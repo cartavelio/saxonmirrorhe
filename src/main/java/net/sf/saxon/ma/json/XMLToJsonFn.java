@@ -103,7 +103,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
     private void convertToJson(NodeInfo xml, UniStringConsumer output, Options options, XPathContext context) throws XPathException {
         PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
         pipe.setXPathContext(context);
-        JsonReceiver receiver = new JsonReceiver(pipe, output);
+        JsonReceiver receiver = new JsonReceiver(pipe, context, output);
         receiver.setIndenting(options.indent);
         if (options.numberFormatter != null) {
             receiver.setNumberFormatter(options.numberFormatter);

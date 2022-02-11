@@ -30,7 +30,6 @@ import org.xml.sax.XMLReader;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXSource;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -93,7 +92,6 @@ public class StylesheetModule {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         pipe.setErrorReporter(compilation.getCompilerInfo().getErrorReporter());
         LinkedTreeBuilder styleBuilder = new LinkedTreeBuilder(pipe);
-        pipe.setURIResolver(compilation.getCompilerInfo().getURIResolver());
         styleBuilder.setSystemId(styleSource.getSystemId());
         //styleBuilder.freezeSystemIdAndBaseURI();
         styleBuilder.setNodeFactory(compilation.getStyleNodeFactory(topLevelModule));
@@ -197,7 +195,6 @@ public class StylesheetModule {
         pipe.setErrorReporter(compilation.getCompilerInfo().getErrorReporter());
 
         LinkedTreeBuilder styleBuilder = new LinkedTreeBuilder(pipe);
-        pipe.setURIResolver(compilation.getCompilerInfo().getURIResolver());
         styleBuilder.setSystemId(styleSource.getSystemId());
         //styleBuilder.freezeSystemIdAndBaseURI();
         styleBuilder.setNodeFactory(compilation.getStyleNodeFactory(true));
@@ -304,13 +301,13 @@ public class StylesheetModule {
 
 
     public static Source getAssociatedStylesheet(
-            Configuration config, URIResolver resolver, Source source, String media, String title, String charset)
+            Configuration config, ResourceResolver resolver, Source source, String media, String title, String charset)
             throws XPathException {
         PIGrabber grabber = new PIGrabber(new Sink(config.makePipelineConfiguration()));
         grabber.setFactory(config);
         grabber.setCriteria(media, title);
         grabber.setBaseURI(source.getSystemId());
-        grabber.setURIResolver(resolver);
+        grabber.setResourceResolver(resolver);
 
         try {
             Sender.send(source, grabber, null);

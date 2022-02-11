@@ -11,6 +11,8 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.ResourceResolver;
+import net.sf.saxon.lib.ResourceResolverWrappingURIResolver;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeSource;
@@ -105,23 +107,39 @@ public class XsltCompiler {
     }
 
     /**
-     * Set the URIResolver to be used during stylesheet compilation. This URIResolver, despite its name,
-     * is <b>not</b> used for resolving relative URIs against a base URI; it is used for dereferencing
-     * an absolute URI (after resolution) to return a {@link javax.xml.transform.Source} representing the
+     * Set the URIResolver to be used during stylesheet compilation. This interface is
+     * retained for backwards compatibility reasons. The supplied <code>URIResolver</code>
+     * is wrapped in a <code>ResourceResolver</code>. The <code>ResourceResolver</code>
+     * interface is preferred because more information is made available; most obviously,
+     * the absolute URI formed by combining the base URI and relative URI.
+     *
+     * @param resolver the URIResolver to be used during stylesheet compilation.
+     * @deprecated since 11.1. Use {@link #setResourceResolver}
+     */
+
+    public void setURIResolver(URIResolver resolver) {
+        compilerInfo.setResourceResolver(
+                new ResourceResolverWrappingURIResolver(resolver));
+    }
+
+    /**
+     * Set the <code>ResourceResolver</code> to be used during stylesheet compilation.
+     * The <code>ResourceResolver</code> is used for dereferencing
+     * an absolute URI (after URI resolution) to return a {@link javax.xml.transform.Source} representing the
      * location where a stylesheet module can be found.
-     * <p>This URIResolver is used to dereference the URIs appearing in <code>xsl:import</code>,
+     * <p>This <code>ResourceResolver</code> is used to dereference the URIs appearing in <code>xsl:import</code>,
      * <code>xsl:include</code>, and <code>xsl:import-schema</code> declarations. It is not used
      * for resolving the URI supplied for the main stylesheet module (as supplied to the
      * {@link #compile(javax.xml.transform.Source)} or {@link #compilePackage(javax.xml.transform.Source)} methods.
      * It is not used at run-time for resolving requests to the <code>document()</code> or similar functions.
-     * (Instead, such functions use the run-time URIResolver passed to the {@link XsltTransformer}
+     * (Instead, such functions use the run-time <code>ResourceResolver</code> passed to the {@link XsltTransformer}
      * or {@link Xslt30Transformer}).</p>
      *
-     * @param resolver the URIResolver to be used during stylesheet compilation.
+     * @param resolver the <code>ResourceResolver</code> to be used during stylesheet compilation.
      */
 
-    public void setURIResolver(URIResolver resolver) {
-        compilerInfo.setURIResolver(resolver);
+    public void setResourceResolver(ResourceResolver resolver) {
+        compilerInfo.setResourceResolver(resolver);
     }
 
     /**
@@ -158,10 +176,27 @@ public class XsltCompiler {
      *
      * @return the URIResolver used during stylesheet compilation. Returns null if no user-supplied
      * URIResolver has been set.
+     * @deprecated since 11.1 - use a <code>ResourceResolver</code> instead
      */
 
     public URIResolver getURIResolver() {
-        return compilerInfo.getURIResolver();
+        ResourceResolver rr = compilerInfo.getResourceResolver();
+        if (rr instanceof ResourceResolverWrappingURIResolver) {
+            return ((ResourceResolverWrappingURIResolver)rr).getWrappedURIResolver();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the ResourceResolver to be used during stylesheet compilation.
+     *
+     * @return the ResourceResolver used during stylesheet compilation. Returns null if no user-supplied
+     * ResourceResolver has been set.
+     */
+
+    public ResourceResolver getResourceResolver() {
+        return compilerInfo.getResourceResolver();
     }
 
     //#if CSHARP==false
@@ -577,7 +612,7 @@ public class XsltCompiler {
     public Source getAssociatedStylesheet(Source source, String media, String title, String charset)
             throws SaxonApiException {
         try {
-            return StylesheetModule.getAssociatedStylesheet(config, compilerInfo.getURIResolver(), source, media, title, charset);
+            return StylesheetModule.getAssociatedStylesheet(config, compilerInfo.getResourceResolver(), source, media, title, charset);
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }

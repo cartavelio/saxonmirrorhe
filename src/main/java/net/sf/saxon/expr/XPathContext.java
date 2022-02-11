@@ -12,6 +12,7 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trace.ContextStackFrame;
@@ -21,7 +22,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.value.DateTimeValue;
 
-import javax.xml.transform.URIResolver;
 import java.util.Iterator;
 
 /**
@@ -176,15 +176,15 @@ public interface XPathContext {
     boolean isAtLast() throws XPathException;
 
     /**
-     * Get the URI resolver. This gets the local URIResolver set in the XPathContext if there
-     * is one; if not, it gets the URIResolver from the Controller (which itself defaults to the
+     * Get the resource resolver. This gets the local resource resolver set in the XPathContext if there
+     * is one; if not, it gets the Resolver from the Controller (which itself defaults to the
      * one set in the Configuration).
      *
      * @return the user-supplied URI resolver if there is one, or null otherwise.
      * @since 9.6
      */
 
-    URIResolver getURIResolver();
+    ResourceResolver getResourceResolver();
 
     /**
      * Get the error reporter. If no ErrorReporter

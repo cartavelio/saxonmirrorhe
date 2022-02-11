@@ -237,7 +237,7 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
 
     @Override
     public void setURIResolver(URIResolver resolver) {
-        getConfiguration().setURIResolver(resolver);
+        getConfiguration().setResourceResolver(new ResourceResolverWrappingURIResolver(resolver));
     }
 
     /**
@@ -249,7 +249,10 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
 
     @Override
     public URIResolver getURIResolver() {
-        return getConfiguration().getURIResolver();
+        if (getConfiguration().getResourceResolver() instanceof ResourceResolverWrappingURIResolver) {
+            return ((ResourceResolverWrappingURIResolver) getConfiguration().getResourceResolver()).getWrappedURIResolver();
+        }
+        return null;
     }
 
     //======= CONFIGURATION METHODS =======

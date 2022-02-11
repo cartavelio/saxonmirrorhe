@@ -88,9 +88,9 @@ public class StandardCollectionFinder
             throw new XPathException(e);
         }
 
-        if (!context.getConfiguration().getAllowedUriTest().test(resolvedURI)) {
-            throw new XPathException("URI scheme '" + resolvedURI.getScheme() + "' has been disallowed");
-        }
+//        if (!context.getConfiguration().getAllowedUriTest().test(resolvedURI)) {
+//            throw new XPathException("URI scheme '" + resolvedURI.getScheme() + "' has been disallowed");
+//        }
 
         if ("file".equals(resolvedURI.getScheme())) {
             File file = new File(resolvedURI);

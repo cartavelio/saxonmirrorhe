@@ -3353,9 +3353,8 @@ public class PackageLoaderHE implements IPackageLoader {
      * @param locals the stack to be searched
      * @param name the required variable name
      * @return the first (nearest-to-top) binding found with this name
-     * @implNote Complicated by the difference between Java and C# stacks. In Java, we iterate
-     * over the stack by index. In C#, a stack is enumerable in the top-to-bottom direction,
-     * and is not addressable by index.
+     * @implNote Complicated by the difference between Java and C# stacks. Java stacks iterate
+     * from bottom to top, C# stacks from top to bottom.
      */
 
     private static LocalBinding findLocalBinding(Stack<LocalBinding> locals, StructuredQName name) {

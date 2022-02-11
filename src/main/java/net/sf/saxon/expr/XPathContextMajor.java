@@ -14,7 +14,7 @@ import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.lib.StandardURIResolver;
+import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trans.XPathException;
@@ -23,7 +23,6 @@ import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.tree.iter.SingletonIterator;
 
-import javax.xml.transform.URIResolver;
 import java.util.Arrays;
 
 /**
@@ -50,7 +49,7 @@ public class XPathContextMajor extends XPathContextMinor {
     private ContextOriginator origin;
     private ThreadManager threadManager = null;
 
-    private URIResolver uriResolver;
+    private ResourceResolver resourceResolver;
     private ErrorReporter errorReporter;
     private Component currentComponent;
     XPathException currentException;
@@ -126,7 +125,7 @@ public class XPathContextMajor extends XPathContextMinor {
         c.threadManager = threadManager;
         c.currentComponent = currentComponent;
         c.errorReporter = errorReporter;
-        c.uriResolver = uriResolver;
+        c.resourceResolver = resourceResolver;
         return c;
     }
 
@@ -160,7 +159,7 @@ public class XPathContextMajor extends XPathContextMinor {
         c.threadManager = ((XPathContextMajor) p).threadManager;
         c.currentComponent = ((XPathContextMajor) p).currentComponent;
         c.errorReporter = ((XPathContextMajor) p).errorReporter;
-        c.uriResolver = ((XPathContextMajor) p).uriResolver;
+        c.resourceResolver = ((XPathContextMajor) p).resourceResolver;
         c.temporaryOutputState = prev.temporaryOutputState;
         return c;
     }
@@ -580,38 +579,23 @@ public class XPathContextMajor extends XPathContextMinor {
         boolean checked = params.isTypeChecked(index);
         return checked ? ParameterSet.SUPPLIED_AND_CHECKED : ParameterSet.SUPPLIED;
     }
-
-    /**
-     * Set an object that will be used to resolve URIs used in
-     * document(), etc. This method allows a URIResolver to be set that is local
-     * to this particular XPathContext, which is useful when local behaviour is
-     * needed, e.g. during schema validation. The URIResolver set in the Controller
-     * and in the Configuration are not affected by this call.
-     *
-     * @param resolver An object that implements the URIResolver interface, or
-     *                 null.
-     * @since 9.6
-     */
-
-    public void setURIResolver(URIResolver resolver) {
-        uriResolver = resolver;
-        if (resolver instanceof StandardURIResolver) {
-            ((StandardURIResolver) resolver).setConfiguration(getConfiguration());
-        }
+    
+    public void setResourceResolver(ResourceResolver resolver) {
+        this.resourceResolver = resolver;
     }
 
     /**
-     * Get the URI resolver. This gets the local URIResolver set in the XPathContext if there
+     * Get the resource resolver. This gets the local URIResolver set in the XPathContext if there
      * is one; if not, it gets the URIResolver from the Controller (which itself defaults to the
      * one set in the Configuration).
      *
      * @return the user-supplied URI resolver if there is one, or null otherwise.
-     * @since 9.6
+     * @since 11.1 (replaces getURIResolver())
      */
 
     @Override
-    public URIResolver getURIResolver() {
-        return uriResolver == null ? controller.getURIResolver() : uriResolver;
+    public ResourceResolver getResourceResolver() {
+        return resourceResolver==null ? controller.getResourceResolver() : resourceResolver;
     }
 
     /**

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.style;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
@@ -19,9 +20,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.ElementAvailable;
 import net.sf.saxon.functions.FunctionLibraryList;
-import net.sf.saxon.lib.EmptySource;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -36,8 +35,6 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.StringReader;
@@ -291,23 +288,24 @@ public class UseWhenFilter extends ProxyReceiver {
         if (href == null) {
             throw new XPathException("Missing href attribute on " + elemName.getDisplayName(), "XTSE0010");
         }
-
-        URIResolver resolver = compilation.getCompilerInfo().getURIResolver();
+        Configuration config = getConfiguration();
+        ResourceResolver resolver = compilation.getCompilerInfo().getResourceResolver();
         String baseUriStr = baseUri.toString();
-        DocumentKey key = DocumentFn.computeDocumentKey(href, baseUriStr, compilation.getPackageData(), resolver, false);
+        DocumentKey key = DocumentFn.computeDocumentKey(href, baseUriStr, compilation.getPackageData(), false);
         Map<DocumentKey, TreeInfo> map = compilation.getStylesheetModules();
         if (map.containsKey(key)) {
             return (DocumentImpl) map.get(key);
         } else {
-            Source source;
-            try {
-                source = resolver.resolve(href, baseUriStr);
-            } catch (TransformerException e) {
-                throw XPathException.makeXPathException(e);
-            }
-            if (source == null) {
-                source = getConfiguration().getSystemURIResolver().resolve(href, baseUriStr);
-            }
+            ResourceRequest request = new ResourceRequest();
+            request.relativeUri = href;
+            request.baseUri = baseUriStr;
+            request.uri = key.getAbsoluteURI();
+            request.nature = ResourceRequest.XSLT_NATURE;
+            request.purpose = "stylesheet module";
+            Source source = request.resolve(resolver,
+                                            config.getResourceResolver(),
+                                            new DirectResourceResolver(config));
+
             if (source instanceof EmptySource) {
                 source = new StreamSource(
                         new StringReader("<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'/>"));
@@ -461,7 +459,7 @@ public class UseWhenFilter extends ProxyReceiver {
                 } else {
                     newName = new FingerprintedQName(attName.getPrefix(), NamespaceConstant.SAXON, plainName);
                 }
-                ;
+
                 // if a corresponding attribute exists with no underscore, overwrite it.
                 // Drop the shadow attribute itself.
                 AttributeInfo newAtt = new AttributeInfo(newName, att.getType(), newValue, att.getLocation(), ReceiverOption.NONE);
@@ -652,7 +650,9 @@ public class UseWhenFilter extends ProxyReceiver {
         Controller controller = new Controller(getConfiguration());
         controller.getExecutable().setFunctionLibrary((FunctionLibraryList) staticContext.getFunctionLibrary());
         if (staticContext.getXPathVersion() < 30) {
-            controller.setURIResolver(new URIPreventer());
+            controller.setResourceResolver(request -> {
+                throw new XPathException("No external documents are available within an [xsl]use-when expression");
+            });
         }
         controller.setCurrentDateTime(currentDateTime);
         // this is to ensure that all use-when expressions in a module use the same date and time
@@ -682,31 +682,6 @@ public class UseWhenFilter extends ProxyReceiver {
         XPathContext dynamicContext = makeDynamicContext(staticContext);
         ((XPathContextMajor) dynamicContext).openStackFrame(stackFrameMap);
         return SequenceTool.toGroundedValue(expr.iterate(dynamicContext));
-    }
-
-
-    /**
-     * Define a URIResolver that disallows all URIs
-     */
-
-    private static class URIPreventer implements URIResolver {
-        /**
-         * Called by the processor when it encounters
-         * an xsl:include, xsl:import, or document() function.
-         *
-         * @param href An href attribute, which may be relative or absolute.
-         * @param base The base URI against which the first argument will be made
-         *             absolute if the absolute URI is required.
-         * @return A Source object, or null if the href cannot be resolved,
-         * and the processor should try to resolve the URI itself.
-         * @throws XPathException if an error occurs when trying to
-         *                        resolve the URI.
-         */
-        /*@NotNull*/
-        @Override
-        public Source resolve(String href, String base) throws XPathException {
-            throw new XPathException("No external documents are available within an [xsl]use-when expression");
-        }
     }
 
 
