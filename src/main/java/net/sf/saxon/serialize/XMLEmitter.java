@@ -46,6 +46,7 @@ public class XMLEmitter extends Emitter {
     protected int indentForNextAttribute = -1;
     protected boolean undeclareNamespaces = false;
     protected boolean unfailing = false;
+    protected String internalSubset = null;
     protected char delimiter = '"';
     protected boolean[] attSpecials = specialInAtt;
 
@@ -187,6 +188,7 @@ public class XMLEmitter extends Emitter {
         undeclareNamespaces = "yes".equals(outputProperties.getProperty(SaxonOutputKeys.UNDECLARE_PREFIXES));
         canonical = "yes".equals(outputProperties.getProperty(SaxonOutputKeys.CANONICAL));
         unfailing = "yes".equals(outputProperties.getProperty(SaxonOutputKeys.UNFAILING));
+        internalSubset = outputProperties.getProperty(SaxonOutputKeys.INTERNAL_DTD_SUBSET);
 
         if ("yes".equals(outputProperties.getProperty(SaxonOutputKeys.SINGLE_QUOTES))) {
             delimiter = '\'';
@@ -358,22 +360,24 @@ public class XMLEmitter extends Emitter {
                 if (systemId != null && publicId == null) {
                     writer.writeAscii(SYSTEM);
                     writer.write(quotedSystemId);
-                    writer.writeAscii(RIGHT_ANGLE_NEWLINE);
-                    //writer.write("  SYSTEM " + quotedSystemId + ">\n");
                 } else if (systemId == null && publicId != null) {     // handles the HTML case
                     writer.writeAscii(PUBLIC);
                     writer.write(publicId);
                     writer.writeCodePoint('"');
-                    writer.writeAscii(RIGHT_ANGLE_NEWLINE);
-                    //writer.write("  PUBLIC \"" + publicId + "\">\n");
-                } else {
+                } else if (publicId != null) {
                     writer.writeAscii(PUBLIC);
                     writer.write(publicId);
                     writer.writeAscii(QUOTE_SPACE);
                     writer.write(quotedSystemId);
-                    writer.writeAscii(RIGHT_ANGLE_NEWLINE);
-                    //writer.write("  PUBLIC \"" + publicId + "\" " + quotedSystemId + ">\n");
                 }
+                if (internalSubset != null) {
+                    writer.writeCodePoint('[');
+                    writer.writeCodePoint(0x0A);
+                    writer.write(internalSubset);
+                    writer.writeCodePoint(0x0A);
+                    writer.writeCodePoint(']');
+                }
+                writer.writeAscii(RIGHT_ANGLE_NEWLINE);
             }
         } catch (java.io.IOException err) {
             throw new XPathException("Failure writing to " + getSystemId(), err);
@@ -483,7 +487,7 @@ public class XMLEmitter extends Emitter {
     }
 
     protected boolean writeDocTypeWithNullSystemId() {
-        return false;
+        return internalSubset != null;
     }
 
     public void namespace(String nsprefix, String nsuri, boolean isFirst) throws XPathException {
