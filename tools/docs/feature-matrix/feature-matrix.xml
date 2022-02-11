@@ -53,7 +53,7 @@
   <feature class="XSLT" lang="XSLT 3.0">
     <shortName>XSLT 3.0 Compatibility</shortName>
     <description>
-      <p>Provides XSLT 1.0 compatibility mode as defined in the XSLT 3.0 specification. If a stylesheeet
+      <p>Provides XSLT 1.0 compatibility mode as defined in the XSLT 3.0 specification. If a stylesheet
         specifies <code>version="1.0"</code>, this causes certain constructs to behave in a way that retains
         the XSLT 1.0 behavior.</p>
     </description>
@@ -433,7 +433,7 @@
         feasible.</p>
     </description>
     <products>
-      <product level="Basic" editions="HE PE EE-V JS2 CS">
+      <product level="Basic" editions="HE PE EE-V JS2">
         <p>The <i>Basic</i> optimizer provided with all Saxon editions provides a wide range of
           static and dynamic optimizations including full pipelining of list operations, lazy
           evaluation of variables, elimination of redundant sorting operations, etc.</p>
