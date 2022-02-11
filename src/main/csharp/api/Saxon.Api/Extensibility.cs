@@ -15,6 +15,10 @@ using JExpression = net.sf.saxon.expr.Expression;
 using JXdmSequenceType = net.sf.saxon.s9api.SequenceType;
 using JItem = net.sf.saxon.om.Item;
 using System.Collections.Generic;
+using net.sf.saxon.expr;
+using net.sf.saxon.lib;
+using net.sf.saxon.om;
+using java.util;
 
 namespace Saxon.Api
 {
@@ -35,8 +39,8 @@ namespace Saxon.Api
         /// <summary>
         /// The URI of the module where an expression appears, suitable for use in diagnostics
         /// </summary>
-        
-		public Uri ModuleUri {
+
+        public Uri ModuleUri {
             get {
                 return new Uri(env.getSystemId());
             }
@@ -46,12 +50,12 @@ namespace Saxon.Api
         /// <summary>
         /// The static base URI of the expression. Often the same as the URI of the containing module,
         /// but not necessarily so, for example in a stylesheet that uses external XML entities or the
-		/// <c>xml:base</c> attribute
+        /// <c>xml:base</c> attribute
         /// </summary>
-        
-		public Uri BaseUri {
+
+        public Uri BaseUri {
             get {
-				return new Uri(env.getStaticBaseURI());
+                return new Uri(env.getStaticBaseURI());
             }
         }
 
@@ -61,13 +65,13 @@ namespace Saxon.Api
         /// </summary>
         /// <param name="Prefix">The namespace prefix</param>
         /// <returns>The corresponding namespace URI if there is one, or null otherwise</returns>
-        
-		public String GetNamespaceForPrefix(string Prefix) {
+
+        public String GetNamespaceForPrefix(string Prefix) {
             if (Prefix == "") {
                 return env.getDefaultElementNamespace();
             }
             try {
-				return env.getNamespaceResolver().getURIForPrefix(Prefix, false);
+                return env.getNamespaceResolver().getURIForPrefix(Prefix, false);
             } catch (JXPathException) {
                 return null;
             }
@@ -128,8 +132,8 @@ namespace Saxon.Api
     /// <summary>
     /// The class <c>DynamicContext</c> provides information about the dynamic context of an expression
     /// </summary>
-    
-	public class DynamicContext {
+
+    public class DynamicContext {
 
         internal JXPathContext context;
 
@@ -140,30 +144,30 @@ namespace Saxon.Api
         /// <summary>
         /// The context item. May be null if no context item is defined
         /// </summary>
-        
-		public XdmItem ContextItem {
+
+        public XdmItem ContextItem {
             get {
-                return context.getContextItem()== null ? null : (XdmItem)XdmItem.Wrap(context.getContextItem());
+                return context.getContextItem() == null ? null : (XdmItem)XdmItem.Wrap(context.getContextItem());
             }
         }
 
         /// <summary>
-		/// The context position (equivalent to the XPath <c>position()</c> function).
+        /// The context position (equivalent to the XPath <c>position()</c> function).
         /// </summary>
         /// <remarks>Calling this method throws an exception if the context item is undefined.</remarks>
-        
-		public int ContextPosition {
+
+        public int ContextPosition {
             get {
                 return context.getCurrentIterator().position();
             }
         }
 
         /// <summary>
-		/// The context size (equivalent to the XPath <c>last()</c> function).
+        /// The context size (equivalent to the XPath <c>last()</c> function).
         /// </summary>
         /// <remarks>Calling this method throws an exception if the context item is undefined.</remarks>
-        
-		public int ContextSize {
+
+        public int ContextSize {
             get {
                 return context.getLast();
             }
@@ -187,7 +191,7 @@ namespace Saxon.Api
         public JXPathContext Implementation
         {
             get { return context; }
-        }        
+        }
 
     }
 
@@ -221,7 +225,7 @@ namespace Saxon.Api
         /// A getter for this property must be implemented in every subclass.
         /// </remarks>
 
-        public abstract QName FunctionName {get;}
+        public abstract QName FunctionName { get; }
 
         /// <summary>
         /// Read-only property giving the minimum number of arguments in a call to this extension function.
@@ -230,7 +234,7 @@ namespace Saxon.Api
         /// A getter for this property must be implemented in every subclass.
         /// </remarks>
 
-        public abstract int MinimumNumberOfArguments {get;}
+        public abstract int MinimumNumberOfArguments { get; }
 
         /// <summary>
         /// Read-only property giving the maximum number of arguments in a call to this extension function.
@@ -238,8 +242,8 @@ namespace Saxon.Api
         /// <remarks>
         /// A getter for this property must be implemented in every subclass.
         /// </remarks>
-        
-        public abstract int MaximumNumberOfArguments {get;}
+
+        public abstract int MaximumNumberOfArguments { get; }
 
         /// <summary>
         /// Read-only property giving the required types of the arguments to this extension function. 
@@ -255,7 +259,7 @@ namespace Saxon.Api
 		/// to the extension function.
 		/// </returns>
 
-        public abstract XdmSequenceType[] ArgumentTypes {get;}
+        public abstract XdmSequenceType[] ArgumentTypes { get; }
 
         /// <summary>
         /// Method returning the declared type of the return value from the function. The type of the return
@@ -288,7 +292,7 @@ namespace Saxon.Api
         /// </remarks>
 
         public virtual Boolean TrustResultType {
-            get{return false;}
+            get { return false; }
         }
 
         /// <summary>
@@ -304,7 +308,7 @@ namespace Saxon.Api
         /// </remarks>
 
         public virtual Boolean DependsOnFocus {
-            get{return false;}
+            get { return false; }
         }
 
         /// <summary>
@@ -319,7 +323,7 @@ namespace Saxon.Api
         /// </remarks>
 
         public virtual Boolean HasSideEffects {
-            get{return false;}
+            get { return false; }
         }
 
         /// <summary>
@@ -394,6 +398,214 @@ namespace Saxon.Api
         public abstract IEnumerator<XdmItem> Call(IEnumerator<XdmItem>[] arguments, DynamicContext context);
     }
 
+
+
+    /// <summary>
+    ///  An instance of CollectionFinder can be registered with the Saxon configuration; it is called in response
+    ///  to calls on the fn:collection() and fn:uri-collection() functions.
+    ///  When these functions are called, the <c>FindCollection(XPathContext, String)</c> method is
+    ///  called to get a <c>ResourceCollection</c>
+    ///  object representing the collection of resources identified by the supplied collection URI.
+    /// </summary>
+    public interface ICollectionFinder
+    {
+
+
+        /// <summary>
+        /// Locate the collection of resources corresponding to a collection URI.
+        /// </summary>
+        /// <param name="context">The XPath dynamic evaluation context</param>
+        /// <param name="collectionURI">The collection URI: an absolute URI, formed by resolving the argument
+        /// supplied to the fn:collection or fn:uri-collection against the staticbase URI</param>
+        /// <returns>a ResourceCollection object representing the resources in the collection identified
+        ///  by this collection URI. Result should not be null.</returns>
+        IResourceCollection FindCollection(DynamicContext context, String collectionURI);
+
+    }
+
+
+    /// <summary>
+    /// This interface defines a ResourceCollection. This class
+    /// is used to map the URI of collection into a sequence of Resource objects.
+    /// It is used to support the fn:collection() and fn:uri-collection() functions.
+    /// </summary>
+    public interface IResourceCollection
+    {
+        /// <summary>
+        /// Get the URI of the collection
+        /// </summary>
+        /// <returns> The URI as passed to the fn:collection() or fn:uri-collection()
+        /// function, resolved if it is relative against the static base URI.
+        /// If the collection() or uri-collection() function
+        /// was called with no arguments(to get the "default collection") this
+        /// will be the URI of the default collection registered with the Configuration.</returns>
+        String CollectionURI();
+
+        /// <summary>
+        /// Get the URIs of the resources in the collection. This supports the fn:uri-collection()
+        /// function.It is not required that all collections expose a list of URIs in this way, or
+        /// that the URIs bear any particular relationship to the resources returned by the
+        /// getResources() method for the same collection URI.The URIs that are returned should be
+        /// suitable for passing to the registered URIResolver (in the case of XML resources),
+        /// or the { @link UnparsedTextURIResolver }
+        /// (in the case of unparsed text and JSON resources), etc.
+        /// </summary>
+        /// <param name="context">context the XPath evaluation context</param>
+        /// <returns>an iterator over the URIs of the resources in the collection. The URIs are represented
+        /// as Strings.They should preferably be absolute URIs.</returns>
+        List<String> GetResouecesURIs(DynamicContext context);
+
+        /// <summary>
+        /// Get the resources in the collection. This supports the fn:collection() function. It is not
+        /// required that all collections expose a set of resources in this way, or that the resources
+        /// returned bear any particular relationship to the URIs returned by the getResourceURIs() method
+        /// for the same collection URI.
+        /// </summary>
+        /// <param name="context">the XPath evaluation context</param>
+        /// <returns>a List over the resources in the collection. This returns objects of class
+        /// <c>Riesource</c>.</returns>
+        List<IResource> GetResources(DynamicContext context);
+
+        /// <summary>
+        /// Ask whether the collection is stable: in this case Saxon will retain the contents of the
+        /// collection in memory, and will not make a second request on the CollectionFinder for the
+        /// same collection URI.
+        /// </summary>
+        /// <param name="context">the XPath dynamic evaluation context (in case the decision is context dependent)</param>
+        /// <returns>bool value of whether the collection is stable</returns>
+        bool IsStable(DynamicContext context);
+
+        /// <summary>
+        /// Supply information about the whitespace stripping rules that apply to this collection.
+        /// This method will only be called when the collection() function is invoked from XSLT.
+        /// (If in doubt, the implementation of this method should do nothing and return false.)
+        /// </summary>
+        /// <param name="rules">the space-stripping rules that apply to this collection, derived from
+        /// the xsl:strip-space and xsl:preserve-space declarations in the stylesheet
+        /// package containing the call to the collection() function.</param>
+        /// <returns></returns>
+        bool StripWhitespace(WhitespacePolicy rules);
+    }
+
+
+    internal class ResourceCollectionWrapper : net.sf.saxon.lib.ResourceCollection
+    {
+
+        IResourceCollection resourceCollection;
+
+        public ResourceCollectionWrapper(IResourceCollection rc) {
+            resourceCollection = rc;
+        }
+
+        public string getCollectionURI()
+        {
+            return resourceCollection.CollectionURI();
+        }
+
+        public Iterator getResources(JXPathContext xpc)
+        {
+            java.util.List iter = new java.util.ArrayList();
+            List<IResource> list = resourceCollection.GetResources(new DynamicContext(xpc));
+            foreach (IResource src in list)
+            {
+                iter.add(new ResourceWrapper(src));
+            }
+
+            return iter.iterator();
+
+        }
+
+        public Iterator getResourceURIs(JXPathContext xpc)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool isStable(JXPathContext xpc)
+        {
+           return resourceCollection.IsStable(new DynamicContext(xpc));
+        }
+
+        public bool stripWhitespace(net.sf.saxon.om.SpaceStrippingRule ssr)
+        {
+            //TODO fix the interface
+            return false;//resourceCollection.StripWhitespace(new WhitespacePolicy(ssr));
+        }
+    }
+
+
+    /// <summary>
+    /// This interface defines a Resource. The Resource objects belong to a collection.
+    /// It is used to support the fn:collection() and fn:uri-collection() functions.
+    /// <para>It is recommended (but is not universally the case) that fetching (and where necessary parsing)
+    /// the content of a Resource should be delayed until the <c>getItem</c> method is called. This means
+    /// that errors in fetching the resource or parsing its contents may go undetected until the resource
+    /// is materialized in this way.</para>
+    /// </summary>
+    public interface IResource
+    {
+        /// <summary>
+        /// Get a URI that identifies this resource
+        /// </summary>
+        /// <returns>a URI identifying the resource</returns>
+        String GetResourceURI();
+
+        /// <summary>
+        /// Get an XDM Item holding the contents of this resource.
+        /// </summary>
+        /// <param name="context">the XPath evaluation context</param>
+        /// <returns>an item holding the contents of the resource. The type of item will
+        /// reflect the type of the resource: a document node for XML resources, a string
+        /// for text resources, a map or array for JSON resources, a base64Binary value
+        /// for binary resource.May also return null if the resource cannot be materialized
+        /// and this is not to be treated as an error.</returns>
+        XdmItem GetXdmItem(DynamicContext context);
+
+        /// <summary> 
+        /// Get the media type (MIME type) of the resource if known
+        /// </summary>
+        /// <returns>the media type if known; otherwise null</returns>
+        String GetContentType();
+    }
+
+
+    internal class ResourceWrapper : net.sf.saxon.lib.Resource
+    {
+
+        IResource resource;
+
+        public ResourceWrapper(IResource resource) {
+            this.resource = resource;
+        }
+        public string getContentType()
+        {
+            return resource.GetContentType();
+        }
+
+        public JItem getItem(JXPathContext xpc)
+        {
+            return (JItem) resource.GetXdmItem(new DynamicContext(xpc)).Unwrap();
+        }
+
+        public string getResourceURI()
+        {
+            return resource.GetResourceURI();
+        }
+    }
+    
+
+    internal class CollectionFinderWrapper : net.sf.saxon.lib.CollectionFinder
+    {
+
+        ICollectionFinder collectionFinder;
+
+        public ResourceCollection findCollection(JXPathContext xpc, string str)
+        {
+            IResourceCollection rcollection = collectionFinder.FindCollection(new DynamicContext(xpc), str);
+
+            return new ResourceCollectionWrapper(rcollection);
+        }
+    }
+
     /// <summary>
     /// This is an interface for simple external/extension functions.
     /// Users can implement this interface and register the implementation with the <see cref="Saxon.Api.Processor"/>;
@@ -447,6 +659,8 @@ namespace Saxon.Api
 		/**public**/ 
 		XdmValue Call(XdmValue[] arguments);
     }
+
+
 
     internal class WrappedExtensionFunction : JExtensionFunction
     {
