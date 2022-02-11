@@ -758,7 +758,7 @@ saxon:evaluate($expression)
       <p>XInclude processing can also be enabled using the configuration property 
         <a class="feature" href="XINCLUDE"/> or the command-line option
         <code>-xi</code>. For more information, see <a class="bodylink code"
-          href="/sourcedocs/XInclude">XInclude processing</a>.</p>
+          href="/sourcedocs/beyond-parsing/XInclude">XInclude processing</a>.</p>
       
       <p></p>
       

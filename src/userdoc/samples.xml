@@ -401,7 +401,7 @@
             classpath must include these third-party JAR files as well as Saxon. See <a
                 class="bodylink" href="/about/installationjava/jarfiles">JAR files</a> for more
             information about running applications and the classpath, and <a class="bodylink"
-                href="/sourcedocs/thirdparty">Third-party Object Models</a> for more information on
+                href="/sourcedocs/tree-models/thirdparty">Third-party Object Models</a> for more information on
             the object models.</p>
     </section>
 
