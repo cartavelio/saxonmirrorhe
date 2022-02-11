@@ -197,7 +197,7 @@
     <p>The command:</p>
     <kbd>list //city[@name='Paris']</kbd>
     <p>displays:</p>
-    <samp>Line 3: /cities/city[2]</samp>
+    <samp>/cities/city[2]</samp>
     
   </section> 
   
@@ -643,7 +643,7 @@
     <h3 class="subtitle">Example</h3>
     
     <p>The command:</p> 
-    <kbd>suffix //page with &lt;copyright>Copyright (c) Saxonica 2020&lt;/page></kbd> 
+    <kbd>suffix //page with &lt;copyright>Copyright (c) Saxonica 2020&lt;/copyright></kbd> 
     <p>injects a <code>copyright</code> element at the end of every <code>page</code>.</p>
     
   </section>
