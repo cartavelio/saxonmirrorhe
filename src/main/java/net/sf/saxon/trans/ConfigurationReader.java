@@ -27,6 +27,7 @@ import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.VersionedPackageName;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.SchemaType;
 
 import javax.xml.transform.Source;
@@ -201,6 +202,10 @@ public class ConfigurationReader implements Receiver {
                 if (edition == null) {
                     edition = "HE";
                 }
+                //#if CSHARP==true
+                String editionEE = "EE";
+                CSharp.emitCode("edition = editionEE;");
+                //#endif
                 switch (edition) {
                     case "HE":
                         targetConfig = new Configuration();

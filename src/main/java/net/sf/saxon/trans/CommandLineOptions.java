@@ -9,15 +9,12 @@ package net.sf.saxon.trans;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
-import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.transpile.CSharpDelegate;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.value.DayTimeDurationValue;
-import net.sf.saxon.value.NumericValue;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
@@ -26,7 +23,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
-import java.math.BigDecimal;
 import java.text.Collator;
 import java.util.*;
 
@@ -820,7 +816,7 @@ public class CommandLineOptions {
         return sb.toString();
     }
 
-    @CSharpReplaceBody(code="return \"dotnet saxon \" + command.GetType().Name.ToLower();")
+    @CSharpReplaceBody(code="return \"dotnet saxoncs \" + command.GetType().Name.ToLower();")
     public static String getCommandName(Object command) {
         String s = command.getClass().getName();
         if (s.startsWith("cli.Saxon.Cmd.DotNet")) {

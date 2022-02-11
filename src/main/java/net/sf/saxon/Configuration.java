@@ -460,20 +460,17 @@ public class Configuration implements SourceResolver, NotationSet {
      * @since 9.2 (renamed from makeSchemaAwareConfiguration)
      */
 
+    @CSharpReplaceBody(code = "return new Saxon.Eej.config.EnterpriseConfiguration();")
     public static Configuration makeLicensedConfiguration(ClassLoader classLoader, /*@Nullable*/ String className)
             throws RuntimeException {
         if (className == null) {
             className = "com.saxonica.config.ProfessionalConfiguration";
         }
-        //#if CSHARP==false
         try {
-            //#endif
             return instantiateConfiguration(className, classLoader);
-            //#if CSHARP==false
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        //#endif
     }
 
     public void importLicenseDetails(Configuration config) {
