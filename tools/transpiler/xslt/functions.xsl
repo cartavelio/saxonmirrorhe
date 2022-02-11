@@ -169,6 +169,7 @@
       'net.sf.saxon.s9api.SaxonApiException': 'Saxon.Api.SaxonApiException',
       'net.sf.saxon.s9api.SaxonApiUncheckedException': 'Saxon.Api.SaxonApiException',
       'net.sf.saxon.s9api.SequenceType': 'Saxon.Api.XdmSequenceType',
+      'net.sf.saxon.s9api.UnprefixedElementMatchingPolicy': 'Saxon.Api.UnprefixedElementMatchingPolicy',
       'net.sf.saxon.s9api.WhitespaceStrippingPolicy': 'Saxon.Api.WhitespacePolicy',
       'net.sf.saxon.s9api.XdmArray': 'Saxon.Api.XdmArray',
       'net.sf.saxon.s9api.XdmAtomicValue': 'Saxon.Api.XdmAtomicValue',

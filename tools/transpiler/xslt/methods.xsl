@@ -1099,7 +1099,7 @@
       <xsl:sequence select="f:applyFormat(., map{
          'getAvailableLocales#0':         'ICU4N.Text.RuleBasedCollator.',
          'getStrength#0':                 '(int)%scope%.Strength',
-         'getVariableTop#0':              '%scope%.MaxVariable',
+         'getVariableTop#0':              '%scope%.VariableTop',
          'isFrenchCollation#0':           '%scope%.IsFrenchCollation',
          'isLowerCaseFirst#0':            '%scope%.IsLowerCaseFirst',
          'isUpperCaseFirst#0':            '%scope%.IsUpperCaseFirst',
