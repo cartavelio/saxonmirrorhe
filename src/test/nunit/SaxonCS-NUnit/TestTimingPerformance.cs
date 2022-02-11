@@ -69,7 +69,7 @@ namespace SaxonCS_NUnit
                 var compiler = _processor.NewXsltCompiler();
 
                 compiler.BaseUri = stylesheetUri; //required to resolve stylesheet includes
-                List<XmlProcessingError> errorList = new();
+                List<Error> errorList = new();
                 compiler.ErrorReporter = error => errorList.Add(error);
                 var executable = compiler.Compile(stylesheet);
                 var transformer = executable.Load();
@@ -103,7 +103,7 @@ namespace SaxonCS_NUnit
         //         var compiler = _processor.NewXsltCompiler();
         //
         //         compiler.BaseUri = stylesheetUri; //required to resolve stylesheet includes
-        //         List<XmlProcessingError> errorList = new();
+        //         List<Error> errorList = new();
         //         compiler.ErrorReporter = errorList.Add;
         //          ConcurrentDictionary<Uri, XsltExecutable> _executables = new ConcurrentDictionary<Uri, XsltExecutable>();
         //         XsltExecutable executable = null;// compiler.Compile(stylesheet);

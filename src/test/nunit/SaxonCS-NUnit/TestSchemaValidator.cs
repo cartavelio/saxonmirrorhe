@@ -12,7 +12,6 @@ using Processor = Saxon.Api.Processor;
 using SchemaManager = Saxon.Api.SchemaManager;
 using SchemaValidator = Saxon.Api.SchemaValidator;
 using XdmDestination = Saxon.Api.XdmDestination;
-using XmlProcessingError = Saxon.Api.XmlProcessingError;
 
 namespace SaxonCS_NUnit
 {
@@ -32,7 +31,7 @@ namespace SaxonCS_NUnit
             //saxon.SetProperty("http://saxon.sf.net/feature/streamability", "standard");
 
             SchemaManager manager = saxon.SchemaManager;
-            List<XmlProcessingError> errors = new();
+            List<Error> errors = new();
             manager.ErrorReporter = errors.Add;
           
             manager.XsdVersion = "1.1";
@@ -46,7 +45,7 @@ namespace SaxonCS_NUnit
             catch (Exception ex)
             {
                 Console.WriteLine("Schema compilation failed with " + errors.Count + " errors");
-                foreach (XmlProcessingError error in errors)
+                foreach (Error error in errors)
                 {
                     Console.WriteLine("At line " + error.Location.LineNumber + ": " + error.Message);
                 }
@@ -121,7 +120,7 @@ namespace SaxonCS_NUnit
 
 
             SchemaManager manager = saxon.SchemaManager;
-            List<XmlProcessingError> errors = new();
+            List<Error> errors = new();
             manager.ErrorReporter = errors.Add;
             manager.XsdVersion = "1.1";
 
@@ -133,7 +132,7 @@ namespace SaxonCS_NUnit
             catch (Exception ex)
             {
                 Console.WriteLine("Schema compilation failed with " + errors.Count + " errors");
-                foreach (XmlProcessingError error in errors)
+                foreach (Error error in errors)
                 {
                     Console.WriteLine("At line " + error.Location.LineNumber + ": " + error.Message);
                 }

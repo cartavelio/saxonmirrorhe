@@ -18,7 +18,6 @@ using Serializer = Saxon.Api.Serializer;
 using TreeModel = Saxon.Api.TreeModel;
 using XdmDestination = Saxon.Api.XdmDestination;
 using XdmNodeKind = Saxon.Api.XdmNodeKind;
-using XmlProcessingError = Saxon.Api.XmlProcessingError;
 using XPathCompiler = Saxon.Api.XPathCompiler;
 using XQueryCompiler = Saxon.Api.XQueryCompiler;
 using XQueryEvaluator = Saxon.Api.XQueryEvaluator;
@@ -1103,7 +1102,7 @@ namespace SaxonCS_NUnit {
                 "\t</xs:element>\n" +
                 "</xs:schema>";
 
-            List<XmlProcessingError> errors = new();
+            List<Error> errors = new();
             try {
                 Processor proc = new Processor(true);
                 SchemaManager sm = proc.SchemaManager;
@@ -1146,7 +1145,7 @@ namespace SaxonCS_NUnit {
             try {
                 Processor proc = new(true);
                 SchemaManager sm = proc.SchemaManager;
-                List<XmlProcessingError> schemaErrors = new();
+                List<Error> schemaErrors = new();
                 sm.ErrorReporter = schemaErrors.Add;
                 sm.Compile(new Uri(ConfigTest.DataDirUri, "../bugs/4744/UniqueKeyBug.xsd"));
                 Assert.That(schemaErrors.Count == 0);
