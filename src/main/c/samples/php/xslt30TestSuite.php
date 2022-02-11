@@ -129,7 +129,7 @@ function check_dependency($xml)
                     case "year_component_values":
                         if($child->getAttributeValue('value') == "support negative year")  {
                             //return true;
-                            continue;
+                            break;
                         }  else {
                             //if value = 'support year zero' then set schema_aware and return true
                             return false;
@@ -142,7 +142,7 @@ function check_dependency($xml)
                         $attrStr == "assertSerializationMatches" or $attrStr == "default_output_encoding" or $attrStr == "maximum_number_of_decimal_digits" or $attrStr == "supported_calendars_in_date_formatting_functions" or
                         $attrStr == "default_calendar_in_date_formatting_functions" or $attrStr == "disabling_output_escaping") {
                             //return true;
-                            continue;
+                            break;
                         } elseif ($attrStr == "streaming") {
 
                             return false;
@@ -153,7 +153,7 @@ function check_dependency($xml)
                     case "spec":
                         if ($child->getAttributeValue('value')== "XSLT30" or $child->getAttributeValue('value')== "XSLT20+" or $child->getAttributeValue('value')== "XSLT30+" or $child->getAttributeValue('value')== "XSLT10+") {
                            //true
-                            continue;
+                            break;
                         } else {
                             return false;
                         }

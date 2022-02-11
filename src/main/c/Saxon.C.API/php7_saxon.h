@@ -196,7 +196,7 @@ PHP_RINIT_FUNCTION(saxon);
 
     PHP_METHOD(SaxonProcessor,  createXdmMapValue);  //TODO implement
     PHP_METHOD(SaxonProcessor,  createXdmArrayValue); //TODO implement
-    PHP_METHOD(SaxonProcessor,  createQNameValue);    //TODO implement
+    PHP_METHOD(SaxonProcessor,  createQNameValue);
 
     PHP_METHOD(SaxonProcessor,  parseXmlFromString);
     PHP_METHOD(SaxonProcessor,  parseXmlFromFile);
