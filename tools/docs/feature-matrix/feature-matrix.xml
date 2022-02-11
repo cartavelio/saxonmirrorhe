@@ -1,4 +1,4 @@
-<featureMatrix version="11" release="Oct 2021" Cversion="1.2" Crelease="Oct 2019" JSversion="2" JSrelease="Jun 2020">
+<featureMatrix version="11" release="Oct 2021" Jrelease="Jan 2022" Crelease="Jan 2022" JSversion="2" JSrelease="Jun 2020">
   
   <!-- For different descriptions in the Product Descriptions, but not the feature matrix table,
       use description and alt-description elements --> 

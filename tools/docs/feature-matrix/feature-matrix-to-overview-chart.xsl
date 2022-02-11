@@ -5,7 +5,7 @@
     <xsl:output method="xhtml" indent="yes"/>
     
     <xsl:variable name="version" select="featureMatrix/@version" as="xs:string"/>
-    <xsl:variable name="Cversion" select="featureMatrix/@Cversion" as="xs:string"/>
+    <xsl:variable name="Cversion" select="if (featureMatrix/@Cversion) then featureMatrix/@Cversion else featureMatrix/@version" as="xs:string"/>
     <xsl:variable name="JSversion" select="featureMatrix/@JSversion" as="xs:string"/>
 
     <xsl:template match="featureMatrix">
@@ -26,10 +26,10 @@
             <body class="main">
                 <h1>Saxon <xsl:value-of select="$version"/> product comparison (Feature Matrix)</h1>
                 <p>This chart describes the features present in each edition of Saxon <xsl:value-of
-                    select="$version"/> available for Java and .NET, and in each edition for the
-                    latest releases of SaxonC and SaxonJS.</p>
-                <p><b>At the time of publication, not all editions of Saxon 11 are available. The information
-                for editions that are not yet available is provisional and subject to change.</b></p>
+                    select="$version"/> available for Java, .NET, and C/C++, PHP and Python, and the latest
+                    release of SaxonJS.</p>
+                <p>Full <a class="bodylink" href="#PDs">Product descriptions</a> are also available
+                    below.</p>
                 <p>
                     <i>For features in older versions of the products, see the relevant Feature Matrix:<br />
                         <xsl:for-each select="(10, 9.9, 9.8, 9.7, 9.6)[number($version) ge .]">
@@ -47,7 +47,7 @@
                     product packages are ordered as: PE &#x2282; EEV &#x2282; (EET | EEQ) &#x2282; EE. For
                     instance, this means all PE and EEV features are available with all EE packages.</p>
                 <p>'&#x25cf;' means the feature is available for all editions on that platform.</p>
-                <table class="feature-matrix feature-matrix-11" id="overview">
+                <table class="feature-matrix feature-matrix-11" id="overview" style="margin-bottom:15px">
                         <tbody>
                             <xsl:for-each select="feature">
                                 <xsl:variable name="feature-desc" select="description"/>
@@ -155,6 +155,46 @@
                         </tbody>
                     </table>
                 
+                <a id="PDs" class="anchor"></a>
+                <h2>Product descriptions</h2>
+                <p>This chart describes the features present in each edition of Saxon <xsl:value-of
+                    select="$version"/> available for Java, .NET, and C/C++, PHP and Python, and the latest
+                    release of SaxonJS.</p>
+                <p>The table below contains links to the full product descriptions for each edition of Saxon <xsl:value-of
+                    select="$version"/> available for Java, .NET, and C/C++, PHP and Python, and the latest
+                    release of SaxonJS.</p>
+                <table class="download-table2 PDs">
+                    <tbody>
+                        <tr>
+                            <td class="col1"><b>Edition</b></td>
+                            <td><b>Java</b></td>
+                            <td><b>.NET</b></td>
+                            <td><b>Native</b></td>
+                            <td><b>JavaScript</b></td>
+                        </tr>
+                        <xsl:for-each select="packages/package">
+                            <xsl:variable name="package" select="."/>
+                            <tr>
+                                <td class="col1"><xsl:value-of select="string($package/@edition)"/></td>
+                                <xsl:for-each select="('J', 'CS', 'C', 'JS')">
+                                    <xsl:variable name="platform" select="."/>
+                                    <xsl:variable name="variant" select="if ($platform eq 'JS') then
+                                        'SaxonJS' else concat('Saxon', $platform, '-', $package/@edition)"/>
+                                    <xsl:variable name="versionNo" select="if ($platform eq 'JS') then
+                                        $JSversion else if ($platform eq 'C') then $Cversion else
+                                        $version"/>
+                                    <xsl:variable name="PDlink" select="concat($version, '/', $variant, '.pdf')"/>
+                                    <td><xsl:if test="tokenize($package/@platforms, '\s') =
+                                        $platform"><a class="bodylink" 
+                                            href="http://www.saxonica.com/products/PD{$PDlink}"><div
+                                                class="DownloadButton"><xsl:value-of
+                                                select="concat($variant, ' ', $versionNo)"/></div></a></xsl:if></td>
+                                </xsl:for-each>
+                            </tr>
+                        </xsl:for-each>
+                    </tbody>
+                </table>
+                
                 <xsl:call-template name="aside"/>
                 
                     
@@ -203,9 +243,9 @@
             <xsl:otherwise>
                 <div id="aside">
                     <h2>Packages by platform</h2>
-                    <p><b>Java: Note that SaxonJ 11 is not yet released.</b></p>
-                    <p><b>.NET: SaxonCS for .NET 5 is only available as the Enterprise Edition.</b></p>
-                    <p><b>Native:</b> The latest version is SaxonC 1.2 built from Saxon 9.9.1.</p>
+                    <p><b>Java:</b> SaxonJ 11 first released Jan 2022.</p>
+                    <p><b>.NET:</b> SaxonCS 11 for .NET 5 available only as the Enterprise Edition.</p>
+                    <p><b>Native:</b> SaxonC 11 first release (built from SaxonJ 11) released Jan 2022.</p>
                     <p><b>JavaScript:</b> SaxonJS 2 does not require a commercial license.</p>
                 </div>
                 
