@@ -74,16 +74,9 @@
             </p>
             <xsl:apply-templates select="description" mode="f"/>
             <xsl:if test="$output-spec-references">
-                <xsl:variable name="namespace" select="ancestor::section/@id"/>
-                <xsl:variable name="default.saxon"
-                    select="$implementation-doc/implement/default[@id = $namespace]/@saxon"/>
-                
                 <aside>
                     <xsl:value-of select="fc:specs(in-spec)"/>
-                    <xsl:value-of select="fc:edition((string-join((../../saxon-edition, ../../saxon-edition/@platform), ' '),$default.saxon,'default')[1])"/>
                 </aside>
-                
-                
             </xsl:if>
             <table class="fn-prototype" style="margin-bottom:10px;">
                 <tr>

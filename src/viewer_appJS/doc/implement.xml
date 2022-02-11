@@ -11,17 +11,17 @@
     <default id='exslt-math' saxon="PE/EE"/>
     <default id='exslt-random' saxon="PE/EE"/>
     <default id='exslt-sets' saxon="PE/EE"/>
-    <default id='exslt-dates-and-times' saxon="PE/EE J"/>
+    <default id='exslt-dates-and-times' saxon="PE/EE" platform="J"/>
     
-    <default id='expath-archive' saxon="9.6 PE/EE J" xpath="2.0"/> 
+    <default id='expath-archive' saxon="9.6 PE/EE" xpath="2.0" platform="J"/> 
     <default id='expath-binary' saxon="9.6 PE/EE" xpath="2.0"/>
     <default id='expath-file' saxon="9.5 PE/EE" xpath="2.0"/>
     
-    <default id='sql' saxon="PE/EE J"/> <!-- saxon SQL functions -->
+    <default id='sql' saxon="PE/EE" platform="J"/> <!-- saxon SQL functions -->
     
     <default id='xsl-elements' saxon="PE/EE"/> 
     <default id='instructions' saxon="PE/EE"/> <!-- saxon extension instructions -->
-    <default id='sql-extension' saxon="PE/EE"/> <!-- saxon SQL extension instructions -->
+    <default id='sql-extension' saxon="PE/EE" platform="J"/> <!-- saxon SQL extension instructions -->
     
     <xpath version="2.0"> Available whether or not support for XPath 3.0 is enabled.</xpath> <!-- Expath functions message -->
     <xpath version="3.0"> Requires support for XPath 3.0 to be enabled.</xpath> <!-- Expath functions message -->
@@ -58,7 +58,11 @@
     <saxon version="PE/EE_9.5"> Implemented in Saxon-PE and Saxon-EE since Saxon 9.5.</saxon>
     <saxon version="PE/EE_9.4"> Implemented in Saxon-PE and Saxon-EE since Saxon 9.4.</saxon>
     
-    <saxon version="J"> Not available on the .NET platform.</saxon>
+    <saxon platform="J"> Available for Java only.</saxon>
+    <saxon platform="CS"> Available for .NET only.</saxon>
+    <saxon platform="J_C"> Available for Java and C/C++ only (not .NET).</saxon>
+    <saxon platform="J_CS"> Available for Java and .NET only (not C/C++).</saxon>
+    <saxon platform="ALL"> Available for all platforms.</saxon>
     
     <saxon version="11"> Implemented since Saxon 11.</saxon>
     <saxon version="10"> Implemented since Saxon 10.</saxon>

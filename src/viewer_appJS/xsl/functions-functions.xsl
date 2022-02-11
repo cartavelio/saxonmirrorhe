@@ -65,7 +65,7 @@
         </xsl:choose>
     </xsl:function>
 
-    <!-- Determine text within 'Specs versions & Saxon editions' note: 
+    <!-- Determine specifications text within 'Saxon availability' section: 
   Spec versions in which the functions are defined; or for 'expath' functions, the xpath requirement information. -->
     <xsl:function name="fc:specs" as="xs:string*">
         <xsl:param name="in" as="element(fc:in-spec)*"/>
@@ -93,7 +93,7 @@
         </xsl:choose>
     </xsl:function>
 
-    <!-- Determine text within 'Specs versions & Saxon editions' note: Saxon editons & versions. -->
+    <!-- Determine editions & versions text within 'Saxon availability' section. -->
     <xsl:function name="fc:edition" as="xs:string*">
         <xsl:param name="available" as="xs:string"/>
         <xsl:variable name="available"
@@ -104,6 +104,31 @@
             as="xs:string*"/>
         <xsl:for-each select="$available">
             <xsl:value-of select="$implementation-doc/implement/saxon[@version = current()]"/>
+        </xsl:for-each>
+    </xsl:function>
+    
+    <!-- Determine platform text within 'Saxon availability' section. -->
+    <xsl:function name="fc:platform" as="xs:string*">
+        <xsl:param name="available" as="xs:string"/>
+        <xsl:variable name="availableSeq"
+            select="for $t in tokenize($available, '\s+') return upper-case($t)" as="xs:string*"/>
+        <xsl:variable name="platforms" as="xs:string">
+            <xsl:choose>
+                <xsl:when test="$availableSeq = 'J' and $availableSeq = 'C'">
+                    <xsl:value-of select="'J_C'"/>
+                </xsl:when>
+                <xsl:when test="$availableSeq = 'J' and $availableSeq = 'CS'">
+                    <xsl:value-of select="'J_CS'"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$available"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:message>platforms: <xsl:value-of select="$platforms"/></xsl:message>
+        
+        <xsl:for-each select="$platforms">
+            <xsl:value-of select="$implementation-doc/implement/saxon[@platform = current()]"/>
         </xsl:for-each>
     </xsl:function>
 
