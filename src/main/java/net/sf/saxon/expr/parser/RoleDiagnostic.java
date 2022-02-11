@@ -216,6 +216,7 @@ public class RoleDiagnostic {
      *
      * @param requiredItemType the item type required by the context of a particular expression
      * @param supplied the supplied expression
+     * @param th       the type hierarchy
      * @return a message of the form "Required item type of A is R; supplied value has item type S"
      */
 
@@ -241,6 +242,7 @@ public class RoleDiagnostic {
      *
      * @param requiredItemType the item type required by the context of a particular expression
      * @param item the actual item in error. Must NOT be null (unlike earlier releases).
+     * @param th   the type hierarchy
      * @return a message of the form "Required item type of A is R; supplied value has item type S"
      */
 
@@ -300,6 +302,7 @@ public class RoleDiagnostic {
     /**
      * Reconstruct from a saved string
      * @param in the saved string representation of the RoleDiagnostic
+     * @return the RoleDiagnostic
      */
 
     public static RoleDiagnostic reconstruct(String in) {

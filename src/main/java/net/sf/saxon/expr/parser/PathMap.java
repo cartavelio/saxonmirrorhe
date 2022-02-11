@@ -396,6 +396,8 @@ public class PathMap {
 
         /**
          * Set the returnable property on all nodes in this nodeset
+         *
+         * @param isReturned true if nodes should be returnable
          */
 
         public void setReturnable(boolean isReturned) {
@@ -406,6 +408,8 @@ public class PathMap {
 
         /**
          * Test whether there are any returnable nodes reachable from nodes in this nodeset
+         *
+         * @return true if there are any reachable returnable nodes
          */
 
         public boolean hasReachableReturnables() {
@@ -420,6 +424,8 @@ public class PathMap {
         /**
          * Determine whether the path is entirely within a streamable snapshot of a streamed document:
          * that is, it must only navigate to ancestors and to attributes of ancestors
+         *
+         * @return true if the path is entirely within a streamable snapshot
          */
 
         public boolean allPathsAreWithinStreamableSnapshot() {
