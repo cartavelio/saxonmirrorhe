@@ -283,10 +283,12 @@ def check_xmarkbenchmark(output):
               help="Saxon edition that produced the sample output")
 @click.option("--sample", required=True,
               help="The name (key, really) of the sample to check")
+@click.option("--ignore-errors", is_flag=True,
+              help="Exit with an error code of 0 even if errors occur")
 @click.argument("output",
                 type=click.Path(file_okay=True, dir_okay=False,
                                 resolve_path=True, readable=True))
-def check_samples(edition, sample, output):
+def check_samples(edition, sample, output, ignore_errors):
     try:
         if sample == "JAXPExamples":
             check_jaxpexamples(output)
@@ -335,7 +337,8 @@ def check_samples(edition, sample, output):
     except RuntimeError as err:
         print(f"👎 {sample}")
         print("\t", str(err))
-        sys.exit(1)
+        if (not ignore_errors):
+            sys.exit(1)
 
 if __name__ == "__main__":
     check_samples()
