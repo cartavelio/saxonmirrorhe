@@ -25,7 +25,7 @@
                 <h1>Saxon <xsl:value-of select="$version"/> product comparison (Feature Matrix)</h1>
                 <p>This chart describes the features present in each edition of Saxon <xsl:value-of
                     select="$version"/> available for Java and .NET, and in each edition for the
-                    latest releases of Saxon/C and Saxon-JS.</p>
+                    latest releases of SaxonC and SaxonJS.</p>
                 <p><b>At the time of publication, not all editions of Saxon 11 are available. The information
                 for editions that are not yet available is provisional and subject to change.</b></p>
                 <p>
@@ -55,10 +55,10 @@
                                             <td style="text-align:left;">
                                                 <xsl:value-of select="shortName"/> 
                                             </td>
-                                            <td>Java Saxon/J</td>
-                                            <td>.NET Saxon-CS</td>
-                                            <td>Native Saxon/C</td>
-                                            <td>JavaScript Saxon-JS</td>
+                                            <td>Java SaxonJ</td>
+                                            <td>.NET SaxonCS</td>
+                                            <td>Native SaxonC</td>
+                                            <td>JavaScript SaxonJS</td>
                                         </tr>
                                     </xsl:when>
                                     <xsl:otherwise>
@@ -185,29 +185,29 @@
                             Schema processing only)</a></li>
                         <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/CS.pdf">
                             <b>CS: </b>Saxon Enterprise Edition for .NET 5</a></li>
-                        <li><a class="title" href="../saxon-js/index.xml"><b>JS2: </b>Saxon-JS 2, JavaScript processor</a></li>
+                        <li><a class="title" href="../saxon-js/index.xml"><b>JS2: </b>SaxonJS 2, JavaScript processor</a></li>
                     </ul>
                 </div>
             </xsl:when>
             <xsl:otherwise>
                 <div id="aside">
                     <h2>Packages by platform</h2>
-                    <p><b>Java: Note that Saxon 11 for Java is not yet released.</b></p>
-                    <p><b>.NET: Saxon-CS for .NET 5 is only available as the Enterprise Edition.</b></p>
-                    <p><b>Native:</b> The latest version is Saxon/C 1.2 built from Saxon 9.9.1.</p>
-                    <p><b>JavaScript:</b> Saxon-JS 2 does not require a commercial license.</p>
+                    <p><b>Java: Note that SaxonJ 11 is not yet released.</b></p>
+                    <p><b>.NET: SaxonCS for .NET 5 is only available as the Enterprise Edition.</b></p>
+                    <p><b>Native:</b> The latest version is SaxonC 1.2 built from Saxon 9.9.1.</p>
+                    <p><b>JavaScript:</b> SaxonJS 2 does not require a commercial license.</p>
                 </div>
                 
                 <div id="aside">
                     <h2>Product packages</h2>
-                    <p>Editions available for Saxon 11 for Java, and Saxon/C:</p>
+                    <p>Editions available for SaxonJ and SaxonC:</p>
                     <ul>
                         <li>
                             <b>HE: </b>Saxon Home Edition (open source)</li>
                         <li>
                             <b>PE: </b>Saxon Professional Edition</li>
                     </ul>
-                    <p>Enterprise Edition packages for Java, Saxon-CS, and Saxon/C:</p>
+                    <p>Enterprise Edition packages for SaxonJ, SaxonCS, and SaxonC:</p>
                     <ul>
                         <li>
                             <b>EE: </b>Saxon Enterprise Edition</li>
