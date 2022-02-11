@@ -101,7 +101,7 @@ namespace Saxon.Api {
             //         groundedResult = th.applyFunctionConversionRules(groundedResult, required, role, Loc.NONE);
             //     }
             // }
-            return XdmValue.Wrap(result);
+            return XdmValue.Wrap(groundedResult);
         }
     }
 }
