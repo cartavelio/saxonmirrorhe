@@ -474,7 +474,7 @@
       : config.getStandardCollectionFinder().findCollection(context, uri)
 )]]></samp>
             <p>where <code>sqlCollection(uri)</code> returns some user-defined implementation
-              of <code>IEnumerable&lt;IResource</code>, perhaps one that retrieves XML documents from
+              of <code>IEnumerable&lt;IResource&gt;</code>, perhaps one that retrieves XML documents from
               a relational database.</p>
         </li>
       </ul>
@@ -506,31 +506,31 @@
     <div class="javaonly">
     <ul>
       <li><code>StreamSource</code>, which represents lexical XML
-        held in a file or input stream</li>
-      <li><code>SAXSource</code>, which represents a source of SAX events</li>
-      <li><code>DOMSource</code>, representing an already-parsed XML document held in a DOM tree</li>
-      <li><code>StAXSource, which represents a
-        class that responds to requests for STAX (pull-parser) events</code></li>
-      <li><code>ActiveSource</code>: this is a Saxon extension of the JAXP <code>Source</code> interface,
+        held in a file or input stream.</li>
+      <li><code>SAXSource</code>, which represents a source of SAX events.</li>
+      <li><code>DOMSource</code>, representing an already-parsed XML document held in a DOM tree.</li>
+      <li><code>StAXSource</code>, which represents a
+        class that responds to requests for STAX (pull-parser) events.</li>
+      <li><code java="net.sf.saxon.lib.ActiveSource">ActiveSource</code>, a Saxon extension of the JAXP <code>Source</code> interface,
       allowing you to define your own kind of input source: all you need to do is implement the method
-      <code>deliver()</code>, which delivers the contents of the resource to a Saxon <code>Receiver</code></li>
-      <li><code>NodeInfo</code>, representing a node in an XDM tree, implements <code>ActiveSource</code>.</li>
+      <code>deliver()</code>, which delivers the contents of the resource to a Saxon <code>Receiver</code>.</li>
+      <li><code java="net.sf.saxon.om.NodeInfo">NodeInfo</code>, representing a node in an XDM tree, implements <code>ActiveSource</code>.</li>
     </ul>
     </div>
      <p>In addition, the s9api <a class="javalink"
         href="net.sf.saxon.s9api.XdmNode">XdmNode</a> class has an <code>asSource()</code> method,
       so it is always possible to supply an existing Saxon tree as the source for any of these interfaces.</p>
 
-    <p class="csonly">On .NET, the <code>DocumentBuilder</code> has an overloaded <code>Build</code> method
-    allowing input to be supplied from:</p>
+    <p class="csonly">On .NET, the <code cs="Saxon.Api.DocumentBuilder">DocumentBuilder</code> has an overloaded <code>Build</code> method
+    allowing input to be supplied from sources of the following kinds:</p>
     
     <div class="csonly">
     <ul>
-      <li>A <code>Stream</code> (containing lexical XML as a stream of bytes)</li>
-      <li>A <code>TextReader</code> (containing lexical XML as a stream of characters)</li>
-      <li>A <code>Uri</code> (which can be dereferenced to fetch a stream of bytes)</li>
-      <li>An <code>XmlNode</code> (Microsoft's DOM implementation)</li>
-      <li>An <code>XmlReader</code> (An XML parser, primed with a source of input)</li>
+      <li><code>Stream</code>, containing lexical XML as a stream of bytes.</li>
+      <li><code>TextReader</code>, containing lexical XML as a stream of characters.</li>
+      <li><code>Uri</code>, which can be dereferenced to fetch a stream of bytes.</li>
+      <li><code>XmlNode</code>, Microsoft's DOM implementation.</li>
+      <li><code>XmlReader</code>, an XML parser, primed with a source of input.</li>
     </ul>
     </div>
     
