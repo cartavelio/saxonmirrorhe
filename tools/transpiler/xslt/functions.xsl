@@ -157,8 +157,9 @@
       'net.sf.saxon.s9api.XdmItem': 'Saxon.Api.XdmItem',
       'net.sf.saxon.s9api.XdmMap': 'Saxon.Api.XdmMap',
       'net.sf.saxon.s9api.XdmNode': 'Saxon.Api.XdmNode',
-      'net.sf.saxon.s9api.XdmValue': 'Saxon.Api.XdmValue'
+      'net.sf.saxon.s9api.XdmValue': 'Saxon.Api.XdmValue',
       (:'net.sf.saxon.s9api.XmlProcessingError': 'Saxon.Api.XmlProcessingError':)
+      'net.sf.saxon.tree.util.ProcInstParser': 'Saxon.Impl.Helpers.ProcInstParser'
       }"/>
    
    <xsl:variable name="jdkExceptionTypes" as="xs:string*" select="

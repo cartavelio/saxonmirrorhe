@@ -1,7 +1,10 @@
 using System;
-using System.IO;
+using System.Text;
+using SysUri = System.Uri;
+using SysIO = System.IO;
 using Microsoft.VisualBasic;
 using SysIOFile = System.IO.File;
+using System = java.lang.System;
 
 namespace java.io {
     public class File {
@@ -10,7 +13,7 @@ namespace java.io {
             this.fileName = name;
         }
 
-        public File(System.Uri uri) {
+        public File(SysUri uri) {
             if (!uri.IsFile) {
                 throw new ArgumentException("URI " + uri + " is not a file URI");
             }
@@ -29,12 +32,16 @@ namespace java.io {
         public static string separator = "/";
 
         public static File Resolve(File dir, string localName) {
-            return new File(Path.GetFullPath(Path.Combine(dir.fileName, localName)));
+            return new File(SysIO.Path.GetFullPath(SysIO.Path.Combine(dir.fileName, localName)));
         }
 
-        public System.Uri toURI() {
-            string abs = Path.GetFullPath(fileName);
+        public SysUri toURI() {
+            string abs = SysIO.Path.GetFullPath(fileName);
             return new Uri(abs); 
+        }
+        
+        public SysUri toUri() { // method on java.nio.Path
+            return toURI();
         }
 
         public File getAbsoluteFile() {
@@ -61,11 +68,11 @@ namespace java.io {
         }
 
         public bool canRead() {
-            return SysIOFile.GetAttributes(fileName).HasFlag(FileAttributes.Normal);
+            return SysIOFile.GetAttributes(fileName).HasFlag(SysIO.FileAttributes.Normal);
         }
 
         public bool canWrite() {
-            return !SysIOFile.GetAttributes(fileName).HasFlag(FileAttributes.ReadOnly);
+            return !SysIOFile.GetAttributes(fileName).HasFlag(SysIO.FileAttributes.ReadOnly);
         }
 
         public bool canExecute() {
@@ -73,23 +80,23 @@ namespace java.io {
         }
 
         public long lastModified() {
-            return new FileInfo(fileName).LastWriteTime.ToFileTimeUtc();
+            return new SysIO.FileInfo(fileName).LastWriteTime.ToFileTimeUtc();
         }
 
         public long length() {
-            return new FileInfo(fileName).Length;
+            return new SysIO.FileInfo(fileName).Length;
         }
 
         public File getParentFile() {
-            return new File(Path.GetDirectoryName(fileName));
+            return new File(SysIO.Path.GetDirectoryName(fileName));
         }
         
         public string getParent() {
-            return Path.GetDirectoryName(fileName);
+            return SysIO.Path.GetDirectoryName(fileName);
         }
 
         public bool isDirectory() {
-            return SysIOFile.GetAttributes(Path.GetFullPath(fileName)).HasFlag(FileAttributes.Directory);
+            return SysIOFile.GetAttributes(SysIO.Path.GetFullPath(fileName)).HasFlag(SysIO.FileAttributes.Directory);
         }
         
         public bool isFile() {
@@ -97,7 +104,7 @@ namespace java.io {
         }
         
         public bool isAbsolute() {
-            return Path.IsPathRooted(fileName);
+            return SysIO.Path.IsPathRooted(fileName);
         }
 
         public File getCanonicalFile() {
@@ -105,7 +112,7 @@ namespace java.io {
         }
 
         public bool isHidden() {
-            return SysIOFile.GetAttributes(Path.GetFullPath(fileName)).HasFlag(FileAttributes.Hidden);
+            return SysIOFile.GetAttributes(SysIO.Path.GetFullPath(fileName)).HasFlag(SysIO.FileAttributes.Hidden);
         }
 
         public bool delete() {
@@ -117,7 +124,7 @@ namespace java.io {
         }
 
         public void createNewFile() {
-            Stream stream = SysIOFile.Create(fileName); // TODO: use the returned stream...
+            SysIO.Stream stream = SysIOFile.Create(fileName); // TODO: use the returned stream...
             stream.Close();
         }
         
@@ -126,7 +133,7 @@ namespace java.io {
         }
 
         public bool mkdirs() {
-            Directory.CreateDirectory(fileName);
+            SysIO.Directory.CreateDirectory(fileName);
             return true;
         }
 
@@ -143,7 +150,7 @@ namespace java.io {
         }
 
         public string[] list() {
-            return Directory.GetFiles(fileName);
+            return SysIO.Directory.GetFiles(fileName);
         }
         
         public File[] listFiles() {
@@ -154,8 +161,19 @@ namespace java.io {
             throw new NotImplementedException();
         }
 
-        public System.IO.FileStream makeAppendOutputStream() {
-            return new(fileName, FileMode.Append, FileAccess.Write);
+        public SysIO.FileStream makeAppendOutputStream() {
+            return new(fileName, SysIO.FileMode.Append, SysIO.FileAccess.Write);
+        }
+
+        public SysIO.TextReader getInputStreamReader(string encoding) {
+            SysIO.Stream stream = SysIO.File.OpenRead(fileName);
+            return new SysIO.StreamReader(stream, Encoding.GetEncoding(encoding));
+        }
+
+        public java.io.File toPath() {
+            // Probably not good enough in the long term, but for now we can ignore the
+            // distinction between java.io.File and java.nio.Path.
+            return this;
         }
     }
 }
