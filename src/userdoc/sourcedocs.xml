@@ -2296,11 +2296,12 @@
     <p>Saxon implements the <a class="bodylink code" href="/functions/fn/collection"
         >collection()</a> and <a class="bodylink code" href="/functions/fn/uri-collection"
         >uri-collection()</a> functions by passing the given collection URI (or null, if the default
-      collection is requested) to a user-provided <a class="javalink"
-        href="net.sf.saxon.lib.CollectionFinder">CollectionFinder</a>. This section describes how
+      collection is requested) to a user-provided Java <code
+        java="net.sf.saxon.lib.CollectionFinder">CollectionFinder</code> or C# <code
+        cs="Saxon.Api.CollectionFinder">CollectionFinder</code>. This section describes how
       the standard (default) collection finder behaves, if no user-written collection finder is
-      supplied. (For information on supplying a user-written <code>CollectionFinder</code>, see <a
-        class="bodylink" href="user-collections">Writing your own Collection Finder</a>.)
+      supplied. For information on supplying a user-written <code>CollectionFinder</code>, see <a
+        class="bodylink" href="user-collections">Writing your own Collection Finder</a>.
     There are some differences between Java and C#.</p>
     
     <p>In XSLT 3.0 and XQuery 3.1, collections can contain resources other than XML documents: for
@@ -2313,30 +2314,30 @@
     <section id="collection-uris" title="Collection URIs">
       <h1>Collection URIs</h1>
 
-    <p>The default collection can be registered with the <code>Processor</code> 
-      (or with its underlying <code>Configuration</code>) by setting the Feature <a class="feature" href="DEFAULT_COLLECTION"/>.
-      The value takes the form of a
-      collection URI. When the <code>collection()</code> function is called with no arguments, this
-      is exactly the same as supplying this default collection URI. If no default collection URI has
-      been registered, an empty collection is returned.</p>
+      <p>The default collection can be registered with the Java <code
+        java="net.sf.saxon.s9api.Processor">Processor</code> or C# <code cs="Saxon.Api.Processor">Processor</code>
+        (or with its underlying <code java="net.sf.saxon.Configuration">Configuration</code>) by setting the
+        configuration feature <a class="feature" href="DEFAULT_COLLECTION"/>. The value takes the form of a
+        collection URI. When the <a class="bodylink code" href="/functions/fn/collection">collection()</a>
+        function is called with no arguments, this is exactly the same as supplying this default collection
+        URI. If no default collection URI has been registered, an empty collection is returned.</p>
 
     <p>The standard collection finder supports four different kinds of collection: registered collections,
       catalog-based collections, directory-based collections, and (on Java only) zip-based collections:</p>
     
     <ul>
       <li><p>A registered collection is one that has been explicitly registered with the Configuration, by calling
-      <code>Configuration.registerCollection()</code>.</p>
-      <p><i>Note: this cannot currently be done at the level of the <code>Processor</code> object.</i></p></li>
-      <li><p>If the collection URI
-        corresponds to a directory name, then a directory-based collection is used: the collection contains
-      selected files from the named directory.</p></li>
-      <li class="javaonly"><p>If the collection URI identifies a
-        ZIP or JAR file (for details see below) then a zip-based collection is used.</p>
-        
-      </li>
-      <li><p>Otherwise, the collection URI must be
-        the URI of an XML file which acts as a catalog, that is, it contains a list of the resources
-        in the collection.</p></li>
+        <code java="net.sf.saxon.Configuration#registerCollection">Configuration.registerCollection()</code>
+        in Java, or <code cs="Saxon.Api.Processor#RegisterCollection">Processor.RegisterCollection()</code> in
+        C#. (See <a class="bodylink" href="../registered-collections">Registered Collections</a>.)</p></li>
+      <li><p>If the collection URI corresponds to a directory name, then a directory-based collection is used:
+        the collection contains selected files from the named directory. (See <a class="bodylink"
+          href="../collection-directories">Directories as Collections</a>.)</p></li>
+      <li class="javaonly"><p>If the collection URI identifies a ZIP or JAR file then a zip-based collection
+        is used. (See <a class="bodylink" href="../ZIP-collections">ZIP collections</a>.)</p></li>
+      <li><p>Otherwise, the collection URI must be the URI of an XML file which acts as a catalog, that is, it
+        contains a list of the resources in the collection. (See <a class="bodylink"
+          href="../collection-catalogs">Collection Catalogs</a>.)</p></li>
     </ul>
 
 
@@ -2628,7 +2629,7 @@
       <li>A custom collection finder is used and the method <code>isJarfileURI(collectionURI)</code>
         returns true;</li>
       <li>A regular expression is supplied as the value of the configuration property
-        <code>ZIP_URI_PATTERN</code>, and the collection URI matches this regular expression.</li>
+        <a class="feature" href="ZIP_URI_PATTERN"/>, and the collection URI matches this regular expression.</li>
     </ul>
     
     <p>The value of the <code>recurse</code> option is ignored in this case, and
@@ -2645,10 +2646,12 @@
     
     <p>It is possible to register a collection explicitly with the Saxon <code>Configuration</code>.</p>
     
-    <p>This is done using the method <code>Configuration.registerCollection()</code>;
-      the equivalent on .NET is <code>Processor.RegisterCollection()</code>. When the URI provided
-      to <code>fn:collection()</code> has been registered in this way, the <code>CollectionFinder</code>
-      is not invoked.</p>
+      <p>On Java, this is done using the method <code
+        java="net.sf.saxon.Configuration#registerCollection">Configuration.registerCollection()</code>; the
+        equivalent on .NET is <code
+        cs="Saxon.Api.Processor#RegisterCollection">Processor.RegisterCollection()</code>. When the URI
+        provided to <code>fn:collection()</code> has been registered in this way, the
+        <code>CollectionFinder</code> is not invoked.</p>
     
     <p class="javaonly">On Java, the argument supplied to <code>Configuration.registerCollection()</code> is an object of type
       <a class="javalink" href="net.sf.saxon.lib.ResourceCollection">ResourceCollection</a>, and
@@ -2656,15 +2659,14 @@
     <code>DirectoryCollection</code>, <code>JarCollection</code>, etc), or you can implement
     your own.</p>
     
-    <p class="csonly">On .NET, <code>Processor.RegisterCollection()</code> accepts on object of type
-      <code>IEnumerable&lt;IResource&gt;</code>: you can implement your own kind of <code>IEnumeration</code>
-    and your own kind of <code>IResource</code>, or you can use an existing implementation.</p>
+    <p class="csonly">On .NET, <code>Processor.RegisterCollection()</code> accepts an object of type
+      <code>IEnumerable&lt;IResource&gt;</code>: you can implement your own kind of <code>IEnumerable</code>
+      and your own kind of <code cs="Saxon.Api.IResource">IResource</code>, or you can use an existing implementation.</p>
     </section>
     <section id="user-collections" title="Writing your own Collection Finder">
       <h1>Writing your own Collection Finder</h1>
       
-      <p>The <a class="javalink" href="net.sf.saxon.lib.CollectionFinder">CollectionFinder</a>
-        interface enables you to define a mapping from a collection URI to
+      <p>The <code>CollectionFinder</code> interface enables you to define a mapping from a collection URI to
         a set of resources (which can be arbitrary XDM values: they are not restricted
         to be XML documents).</p> 
              
@@ -2673,14 +2675,14 @@
       <p>The details differ between Java and .NET:</p>
       
       <ul>
-        <li class="javaonly"><p>On Java, the <code>CollectionFinder</code> is a functional
+        <li class="javaonly"><p>On Java, the <code java="net.sf.saxon.lib.CollectionFinder">CollectionFinder</code> is a functional
         interface, so you can either write a class that implements the interface, or you can
         supply an implementation directly as a lambda expression. It accepts a URI as input
         (supplied as a string), and returns an instance of <code>ResourceCollection</code>.</p>
           <p>You can either reuse the existing implementations of <a class="javalink"
-            href="net.sf.saxon.lib.ResourceCollection">ResourceCollection</a>, such as
+            href="net.sf.saxon.lib.ResourceCollection">ResourceCollection</a> (such as
             <code>CatalogCollection</code>, <code>DirectoryCollection</code>, 
-            <code>JarCollection</code>, and <code>ExplicitCollection</code>
+            <code>JarCollection</code>, and <code>ExplicitCollection</code>),
             or you can write your own. You can also of course subclass
             the existing collection classes. The <code>ResourceCollection</code> object provides two
             key methods that you need to implement: <code>getResources()</code>, which returns a
@@ -2709,10 +2711,10 @@
             a relational database.</p>
         </li>
         <li class="csonly">
-          <p>On .NET, the <code>CollectionFinder</code> is a delegate
+          <p>On .NET, the <code cs="Saxon.Api.CollectionFinder">CollectionFinder</code> is a delegate
             so you will typically implement it directly as a lambda expression. It accepts a URI as input
             (supplied as a string), and returns an instance of <code>IEnumerable&lt;IResource&gt;</code>.</p>
-            <p>You can either reuse the existing implementations of <code>IResource</code>,
+          <p>You can either reuse the existing implementations of <code cs="Saxon.Api.IResource">IResource</code>,
               or you can write your own. The key method that the <code>IResource</code> object must
               provide is <code>GetItem()</code> which returns the resource in the form of an XDM item.
               It is good practice to delay any extensive work such as parsing until the
