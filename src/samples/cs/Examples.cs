@@ -1230,7 +1230,7 @@ namespace SaxonEE
         {
             // Create a Processor instance.
             Processor processor = new();
-            processor.SetProperty(Saxon.Api.Feature<bool>.TIMING, true);
+            processor.SetProperty(Saxon.Api.Feature.TIMING, true);
 
             // Load the source document
             XdmNode input = processor.NewDocumentBuilder().Build(new Uri(samplesDir, "data/othello.xml"));

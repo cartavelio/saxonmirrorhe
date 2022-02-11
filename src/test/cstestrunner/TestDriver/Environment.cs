@@ -648,7 +648,7 @@ namespace TestDriver {
                     if (encoding == null) {
                         encoding = Encoding.UTF8;
                     }
-                    return new StandardUnparsedTextResolver().resolve(absoluteURI, encoding.WebName, config);
+                    return new StandardUnparsedTextResolver(config).resolve(absoluteURI, encoding.WebName, config);
                 }
 
             }

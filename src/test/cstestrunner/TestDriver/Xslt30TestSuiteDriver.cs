@@ -366,9 +366,9 @@ namespace TestDriver {
                 Child("result").Then(Steps.Descendant("error"))
                     .Where(AttributeEq("code", "XTSE3430"))).Any();
             if (strictStreamability) {
-                env.processor.SetProperty(Saxon.Api.Feature<bool>.STRICT_STREAMABILITY, true);
+                env.processor.SetProperty(Saxon.Api.Feature.STRICT_STREAMABILITY, true);
                 env.resetActions.Add(env =>
-                    env.processor.SetProperty(Saxon.Api.Feature<bool>.STRICT_STREAMABILITY, false));
+                    env.processor.SetProperty(Saxon.Api.Feature.STRICT_STREAMABILITY, false));
             }
 
             // If a static error is expected, suppress JIT compilation so we catch it eagerly
@@ -1200,12 +1200,12 @@ namespace TestDriver {
                         }
 
                         case "XSD_1.1": {
-                            String requiredVersion = (inverse ? "1.0" : "1.1");
-                            String oldVersion = env.processor.GetProperty(Saxon.Api.Feature<string>.XSD_VERSION);
+                            string requiredVersion = (inverse ? "1.0" : "1.1");
+                            string oldVersion = (string)env.processor.GetProperty(Saxon.Api.Feature.XSD_VERSION);
                             if (!oldVersion.Equals(requiredVersion)) {
-                                env.processor.SetProperty(Saxon.Api.Feature<string>.XSD_VERSION, requiredVersion);
+                                env.processor.SetProperty(Saxon.Api.Feature.XSD_VERSION, requiredVersion);
                                 env.resetActions.Add(envi => {
-                                    envi.processor.SetProperty(Saxon.Api.Feature<String>.XSD_VERSION, oldVersion);
+                                    envi.processor.SetProperty(Saxon.Api.Feature.XSD_VERSION, oldVersion);
                                 });
                             }
 
@@ -1220,11 +1220,11 @@ namespace TestDriver {
                             return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
                         case "streaming-fallback":
                             bool requiredi = !inverse;
-                            bool old = (bool) env.processor.GetProperty(Saxon.Api.Feature<bool>.STREAMING_FALLBACK);
+                            bool old = (bool) env.processor.GetProperty(Saxon.Api.Feature.STREAMING_FALLBACK);
                             if (old != requiredi) {
-                                env.processor.SetProperty(Saxon.Api.Feature<bool>.STREAMING_FALLBACK, requiredi);
+                                env.processor.SetProperty(Saxon.Api.Feature.STREAMING_FALLBACK, requiredi);
                                 env.resetActions.Add(envi => {
-                                    env.processor.SetProperty(Saxon.Api.Feature<bool>.STREAMING_FALLBACK, old);
+                                    env.processor.SetProperty(Saxon.Api.Feature.STREAMING_FALLBACK, old);
                                 });
                             }
 
@@ -1242,11 +1242,11 @@ namespace TestDriver {
                     string[] platforms = value.Split(' ');
                     return Array.IndexOf(platforms, "CS") >= 0;
                 case "default_language_for_numbering": {
-                    string old = env.processor.GetProperty(Saxon.Api.Feature<string>.DEFAULT_LANGUAGE);
+                    string old = (string)env.processor.GetProperty(Saxon.Api.Feature.DEFAULT_LANGUAGE);
                     if (!value.Equals(old)) {
-                        env.processor.SetProperty(Saxon.Api.Feature<string>.DEFAULT_LANGUAGE, value);
+                        env.processor.SetProperty(Saxon.Api.Feature.DEFAULT_LANGUAGE, value);
                         env.resetActions.Add(envi => {
-                                env.processor.SetProperty(Saxon.Api.Feature<string>.DEFAULT_LANGUAGE, old);
+                                env.processor.SetProperty(Saxon.Api.Feature.DEFAULT_LANGUAGE, old);
                             }
                         );
                     }
@@ -1278,7 +1278,7 @@ namespace TestDriver {
                 case "year_component_values":
                     if ("support year zero".Equals(value)) {
                         if (env != null) {
-                            env.processor.SetProperty(Saxon.Api.Feature<string>.XSD_VERSION, inverse ? "1.0" : "1.1");
+                            env.processor.SetProperty(Saxon.Api.Feature.XSD_VERSION, inverse ? "1.0" : "1.1");
                             return true;
                         }
                         else {
