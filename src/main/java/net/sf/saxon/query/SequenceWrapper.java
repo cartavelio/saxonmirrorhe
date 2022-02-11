@@ -74,7 +74,8 @@ public class SequenceWrapper extends SequenceReceiver {
         out.startElement(name, Untyped.getInstance(),
                          Loc.NONE,
                          ReceiverOption.NONE);
-        out.namespace("", "", ReceiverOption.NONE);
+        out.namespace("xs", NamespaceConstant.SCHEMA, ReceiverOption.NONE);
+        out.namespace("xsi", NamespaceConstant.SCHEMA_INSTANCE, ReceiverOption.NONE);
         out.startContent();
     }
 
@@ -103,11 +104,6 @@ public class SequenceWrapper extends SequenceReceiver {
 
         out.open();
         out.startDocument(ReceiverOption.NONE);
-
-        namespaces = NamespaceMap.emptyMap()
-                .put("result", RESULT_NS)
-                .put("xs", NamespaceConstant.SCHEMA)
-                .put("xsi", NamespaceConstant.SCHEMA_INSTANCE);
 
         startWrapper(resultSequence);
 
@@ -146,7 +142,6 @@ public class SequenceWrapper extends SequenceReceiver {
             startWrapper(resultElement);
         }
         out.startElement(elemName, type, location, properties);
-        out.namespace("", "", properties);
         for (AttributeInfo att : attributes) {
             out.attribute(att.getNodeName(), att.getType(), att.getValue(),
                           att.getLocation(), att.getProperties());
@@ -221,7 +216,6 @@ public class SequenceWrapper extends SequenceReceiver {
         if (item instanceof AtomicValue) {
             final NamePool pool = getNamePool();
             out.startElement(resultAtomicValue, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
-            out.namespace("", "", ReceiverOption.NONE);
             AtomicType type = ((AtomicValue) item).getItemType();
             StructuredQName name = type.getStructuredQName();
             String prefix = name.getPrefix();
@@ -234,7 +228,6 @@ public class SequenceWrapper extends SequenceReceiver {
                 }
             }
             String displayName = prefix + ':' + localName;
-            out.namespace("", "", ReceiverOption.NONE);
             out.namespace(prefix, uri, ReceiverOption.NONE);
             out.attribute(xsiType, BuiltInAtomicType.UNTYPED_ATOMIC, displayName, locationId, ReceiverOption.NONE);
             out.startContent();
