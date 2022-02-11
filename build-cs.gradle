@@ -496,18 +496,30 @@ task dotnetPublish(
   inputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
   outputs.files fileTree(dir: "${buildDir}/cs/bin/Release/net5.0/${csrid}/publish")
 
+  def singleFile="true"
+  if (systemOs.isMacOsX()) {
+    singleFile="false"
+  }
+
   doLast {
     exec {
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'publish', 'SaxonCS.sln',
         '--configuration', 'Release', '-r', csrid,
         '--self-contained', 'true',
-        '-p:PublishSingleFile=true',
+        "-p:PublishSingleFile=${singleFile}",
         "-p:Version=${csver}", "-p:PackageVersion=${csver}"
     }
   }
   doLast {
     println("Published SaxonCS release for ${csplatform}")
+  }
+  doLast {
+    if (systemOs.isWindows()) {
+      signExe("${buildDir}/cs/bin/Release/net5.0/${csrid}/publish/SaxonCS.exe")
+    } else {
+      signExe("${buildDir}/cs/bin/Release/net5.0/${csrid}/publish/SaxonCS")
+    }
   }
 }
 
