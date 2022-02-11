@@ -138,8 +138,9 @@
                 </xsl:for-each> 
             </xsl:when>
             <xsl:otherwise>
-                <strong>No changes in <i><xsl:value-of select="$cats[@name = $catName]/@title"/></i> 
-                    for this range of versions.</strong>
+                <p><strong>No changes in <i><xsl:value-of select="$cats[@name = $catName]/@title"/></i> 
+                    for this range of versions.</strong></p>
+                <xsl:apply-templates select="$orderedReleases/ch:head"/>
             </xsl:otherwise>
         </xsl:choose>
 
