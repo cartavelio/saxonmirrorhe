@@ -15,6 +15,8 @@ import net.sf.saxon.expr.instruct.ComponentTracer;
 import net.sf.saxon.expr.instruct.TraceExpression;
 import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.trans.XPathException;
 
 /**
  * A code injector that wraps every expression (other than a literal) in a TraceExpression, which causes
@@ -57,6 +59,12 @@ public class TraceCodeInjector implements CodeInjector {
 
     @Override
     public Clause injectClause(FLWORExpression expression, Clause clause) {
+        try {
+            clause.processOperands(operand -> operand.setChildExpression(
+                    ExpressionTool.injectCode(operand.getChildExpression(), this)));
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
         return new TraceClause(expression, clause);
     }
 }
