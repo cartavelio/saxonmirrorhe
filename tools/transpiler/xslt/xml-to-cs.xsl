@@ -887,11 +887,11 @@
    </xsl:template>
      
    <xsl:template match="*[@nodeType='LabeledStmt']">
-      <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
+      <!--<xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:call-template name="indent">
          <xsl:with-param name="indent" select="$indent - 1" tunnel="yes"/>
       </xsl:call-template>
-      <xsl:text>{label/@identifier}:{$NL}</xsl:text>
+      <xsl:text>{label/@identifier}:{$NL}</xsl:text>-->
       <xsl:apply-templates select="statement"/>
    </xsl:template>
    
@@ -967,7 +967,7 @@
       <xsl:call-template name="indent"/>
       <xsl:text>throw</xsl:text>
       <xsl:if test="not(ancestor::catchClause) 
-         or ancestor::*[@nodeType='LambdaExpr'] 
+         or ancestor::*[@nodeType='LambdaExpr']/ancestor::catchClause 
          or not(ancestor::catchClause[1]/parameter/name/@identifier = expression/name/@identifier)">
          <!-- Use C# re-throw where possible to preserve stack trace -->
          <xsl:text> </xsl:text>
