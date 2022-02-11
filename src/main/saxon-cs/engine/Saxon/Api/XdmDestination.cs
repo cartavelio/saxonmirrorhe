@@ -22,8 +22,8 @@ namespace Saxon.Api {
     /// if the <c>Reset</c> method is first called to reset its state.</para>
     /// </remarks>
     public class XdmDestination : IDestination {
-        internal Saxon.Hej.s9api.XdmDestination destination;
-        internal Action<XdmNode> closeAction;
+        private Saxon.Hej.s9api.XdmDestination destination;
+        //internal Action<XdmNode> closeAction;
 
         /// <summary>Construct an <c>XdmDestination</c></summary>
         public XdmDestination() {

@@ -302,7 +302,7 @@ namespace Saxon.Api {
         /// exhausted; if compilation failed, the current position of the stream on exit is
         /// undefined.</para>
         /// </remarks>
-        /// /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if errors were detected
         /// during static analysis of the stylesheet. Details of the errors will be reported to the
         /// <c>ErrorReporter</c> if supplied; otherwise they will be written to the standard
         /// error stream. The exception that is returned from this method is merely a summary indicating the
@@ -342,7 +342,7 @@ namespace Saxon.Api {
         /// error stream. The exception that is returned from this method is merely a summary indicating the
         /// status, and is not useful for diagnosing the actual error.</exception> 
 
-        internal XsltExecutable Compile(Stream input, String theBaseUri, bool closeStream) {
+        internal XsltExecutable Compile(Stream input, string theBaseUri, bool closeStream) {
             //See bug 2306
 
             StreamSource ss = new StreamSource(input);

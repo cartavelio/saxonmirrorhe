@@ -551,8 +551,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <remarks>
         /// <para>This method provides a type-safe way of getting the value of a configuration
-        /// property of any type: for example, <code>GetProperty(Feature&lt;bool>.XQUERY_ALLOW_UPDATE)</code>
-        /// returns a boolean property as a boolean. 
+        /// property of any type: for example, <c>GetProperty(Feature&lt;bool>.XQUERY_ALLOW_UPDATE)</c>
+        /// returns a boolean property as a boolean. </para>
         /// </remarks>
         /// <typeparam name="T">See the class <c>Feature</c> for constants 
         /// representing the properties that can be requested.</typeparam>
