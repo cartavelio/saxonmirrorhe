@@ -41,11 +41,7 @@
                 held within Saxon. These copies are now held in the <code>XmlResolver</code>. They will therefore not be used
                 if the Configuration-level <code>ResourceResolver</code> is replaced with a user-written resolver, unless it delegates
                 to the catalog-based <code>XmlResolver</code>.</p></li>
-            <li><p></p></li>
-            <li><p></p></li>
-            <li><p></p></li>
-            <li><p></p></li>
-            <li><p></p></li>
+   
         </ul>
         
         <p>The <code>xsl:source-document</code> instruction now allows the document URI to contain a fragment identifier.</p>
@@ -58,6 +54,10 @@
             <code>p.SetProperty(Feature&lt;boolean>.ALLOW_MULTITHREADING, false)</code> needs to be changed to
             <code>p.SetProperty(Feature.ALLOW_MULTITHREADING, false)</code>. For the rationale, see bug 5183.</p>
             
+    </category>
+    
+    <category name="command-line">
+        <p>The <code>-m</code> option on the <code>Transform</code> command now has no effect.</p>
     </category>
     
     <!--<category name="localization">
