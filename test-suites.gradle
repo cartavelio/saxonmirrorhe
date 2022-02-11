@@ -285,10 +285,6 @@ def testSuiteMatrix = [
         "": [:],
         "unfolded": ["unfolded": "on"]
       ],
-      "XP30": [
-        "": [:],
-        "unfolded": ["unfolded": "on"]
-      ],
       "XP31": [
         "": [:],
         "unfolded": ["unfolded": "on"]
@@ -301,10 +297,6 @@ def testSuiteMatrix = [
     "qt3extra": [
       "_exceptions": "${projectDir}/src/test/exceptions/qt3extra-cs.xml",
 
-      "XP30": [
-        "": [:],
-        "bc": ["bytecode": "on"]
-      ],
       "XP31": [
         "": [:],
         "bc": ["bytecode": "on"]
