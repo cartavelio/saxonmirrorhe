@@ -18,9 +18,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -72,7 +70,7 @@ public class UnionIteratorTest {
             }
             List<SequenceIterator> iters = new ArrayList<>();
             for (List<NodeInfo> list : listOfLists) {
-                iters.add(new ListIterator(list));
+                iters.add(new ListIterator.Of<>(list));
             }
             UnionIterator union = new UnionIterator(iters, LocalOrderComparer.getInstance());
             assertEquals("a", union.next().getLocalPart());
