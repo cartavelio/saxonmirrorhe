@@ -33,7 +33,13 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
         <None Include="../../tools/saxon-cs/LICENSE.txt" Pack="true" PackagePath=""/>
         <None Include="../../tools/saxon-cs/README.md" Pack="true" PackagePath=""/>
     </ItemGroup>    
-    
+
+    <ItemGroup>
+      <EmbeddedResource Include="../../src/main/resources/**/*">
+        <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('%(Identity)'))</LogicalName>
+      </EmbeddedResource>
+    </ItemGroup>
+
     <ItemGroup>
       <PackageReference Include="HtmlAgilityPack" Version="1.11.33" />
       <PackageReference Include="ICU4N" Version="60.1.0-alpha.354" />
