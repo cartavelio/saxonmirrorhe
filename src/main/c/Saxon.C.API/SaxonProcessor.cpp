@@ -792,7 +792,7 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator 
 
     jobject xdmNodei = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mID,
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                                        cwd.c_str()), proc, nullptr, (validator != nullptr ? validator->getUnderlyingValidator(): NULL),
+                                                                                        cwd.c_str()), proc, NULL, (validator != nullptr ? validator->getUnderlyingValidator(): NULL),
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         source));
     if (xdmNodei) {
@@ -857,7 +857,7 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *source, SchemaValidator * 
 //TODO SchemaValidator
     jobject xdmNodei = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mID, proc,
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                                        cwd.c_str()), nullptr, (validator != nullptr ? validator->getUnderlyingValidator(): nullptr),
+                                                                                        cwd.c_str()), NULL, (validator != nullptr ? validator->getUnderlyingValidator(): NULL),
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         source));
     if (xdmNodei) {
@@ -881,7 +881,7 @@ XdmNode *SaxonProcessor::parseXmlFromUri(const char *source, SchemaValidator * v
     }
     jobject xdmNodei = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mID, proc,
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                                        ""),  nullptr, (validator != nullptr ? validator->getUnderlyingValidator(): nullptr),
+                                                                                        ""),  NULL, (validator != nullptr ? validator->getUnderlyingValidator(): NULL),
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         source));
     if (xdmNodei) {
