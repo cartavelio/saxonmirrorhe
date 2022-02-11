@@ -225,7 +225,7 @@ public abstract class Token {
      */
     public static final int QMARK_QMARK = 48;
     /*
-     * operator "!!
+     * operator "!!"
      */
     public static final int BANG_BANG = 49;
     /**
