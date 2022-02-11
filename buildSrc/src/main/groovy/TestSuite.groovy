@@ -264,7 +264,7 @@ class TestSuite {
 
     def errorFn = "${options['reportDirectory']}/"
     errorFn += "SaxonFailures${project.ext.saxonVersion}-"
-    errorFn += options['language'] + ".xml"
+    errorFn += options['language'] + "-errors.xml"
 
     Task run = project.task("${testTaskName}_test_suite", type: JavaExec) {
       inputs.files project.fileTree(dir: "${project.projectDir}/src")
