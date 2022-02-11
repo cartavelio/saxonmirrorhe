@@ -43,8 +43,8 @@ public class HTML5CaseBlindCollator implements StringCollator, SubstringMatcher 
      *
      * @return &lt;0 if a&lt;b, 0 if a=b, &gt;0 if a&gt;b
      * @throws ClassCastException if the objects are of the wrong type for this Comparer
-     * @param a
-     * @param b
+     * @param a the first string
+     * @param b the second string
      */
 
     @Override

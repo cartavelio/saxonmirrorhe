@@ -104,7 +104,7 @@ public class SimpleCollation implements StringCollator {
      * Get a collation key for a String. The essential property of collation keys
      * is that if two values are equal under the collation, then the collation keys are
      * compare correctly under the equals() method.
-     * @param s
+     * @param s the string whose collation key is required
      */
 
     @Override

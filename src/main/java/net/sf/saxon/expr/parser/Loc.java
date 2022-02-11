@@ -41,6 +41,7 @@ public class Loc implements Location {
      * Create an ExpressionLocation, taking the data from a supplied SAX Locator
      *
      * @param loc the SAX Locator
+     * @return the ExpressionLocation
      */
 
     public static Loc makeFromSax(org.xml.sax.Locator loc) {
@@ -119,6 +120,9 @@ public class Loc implements Location {
 
     /**
      * Ask whether this is an "unknown location"
+     *
+     * @param location a location
+     * @return true if this is an "unknown location"
      */
 
     public static boolean isUnknown(Location location) {

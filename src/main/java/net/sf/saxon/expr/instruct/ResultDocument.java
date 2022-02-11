@@ -83,6 +83,7 @@ public class ResultDocument extends Instruction
      * @param validationAction        for example {@link net.sf.saxon.lib.Validation#STRICT}
      * @param schemaType              schema type against which output is to be validated
      * @param serializationAttributes computed local properties
+     * @param characterMapIndex       index of named character maps
      */
 
     public ResultDocument(Properties globalProperties,      // properties defined on static xsl:output

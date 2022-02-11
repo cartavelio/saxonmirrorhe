@@ -166,6 +166,8 @@ public class Copy extends ElementCreator {
 
     /**
      * Set the item type of the input
+     *
+     * @param type the item type
      */
 
     public void setSelectItemType(ItemType type) {

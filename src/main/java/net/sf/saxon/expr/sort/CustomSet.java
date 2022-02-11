@@ -65,6 +65,7 @@ public class CustomSet<T>  {
 
     /**
      * Ask if a value exists in the set
+     * @param value the requested value
      * @return true if it exists
      */
 

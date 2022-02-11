@@ -31,6 +31,8 @@ public class TextComparer implements AtomicComparer {
 
     /**
      * Get the underlying comparer (which doesn't do conversion to string)
+     *
+     * @return the underlying comparer
      */
 
     public AtomicComparer getBaseComparer() {

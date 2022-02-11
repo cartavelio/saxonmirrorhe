@@ -23,6 +23,8 @@ public class OnNonEmptyExpr extends UnaryExpression {
 
     /**
      * Create the instruction
+     *
+     * @param base the base expression
      */
     public OnNonEmptyExpr(Expression base) {
         super(base);

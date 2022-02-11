@@ -99,6 +99,7 @@ public class AttributeSet extends Actor {
     /**
      * Evaluate an attribute set
      *
+     * @param output  the destination for the result
      * @param context the dynamic context
      * @throws XPathException if any failure occurs
      */
@@ -119,6 +120,8 @@ public class AttributeSet extends Actor {
     /**
      * Get a name identifying the object of the expression, for example a function name, template name,
      * variable name, key name, element name, etc. This is used only where the name is known statically.
+     *
+     * @return the name
      */
 
     public StructuredQName getObjectName() {

@@ -49,6 +49,8 @@ public class WithParam  {
 
     /**
      * Get the select operand
+     *
+     * @return the select operand
      */
 
     public Operand getSelectOperand() {
@@ -215,8 +217,9 @@ public class WithParam  {
 
     /**
      * Static method to copy a set of parameters
-     * @param parent the new parent expression
-     * @param params the parameters to be copied
+     * @param parent     the new parent expression
+     * @param params     the parameters to be copied
+     * @param rebindings the rebinding map
      * @return the resulting copy
      */
 
@@ -260,6 +263,7 @@ public class WithParam  {
      * @param params the set of parameters to be exported
      * @param out    the destination for the output
      * @param tunnel true if these are tunnel parameters
+     * @throws XPathException if any error occurs
      */
 
     public static void exportParameters(WithParam[] params, ExpressionPresenter out, boolean tunnel) throws XPathException{

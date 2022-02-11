@@ -27,6 +27,8 @@ public class SequenceInstr extends UnaryExpression {
 
     /**
      * Create the instruction
+     *
+     * @param base the base expression
      */
     public SequenceInstr(Expression base) {
         super(base);

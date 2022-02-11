@@ -44,7 +44,7 @@ public abstract class Instruction extends Expression implements TailCallReturner
     
     /**
      * An implementation of Expression must provide at least one of the methods evaluateItem(), iterate(), or process().
-     * This method indicates which of these methods is prefered. For instructions this is the process() method.
+     * This method indicates which of these methods is preferred. For instructions this is the process() method.
      */
 
     @Override

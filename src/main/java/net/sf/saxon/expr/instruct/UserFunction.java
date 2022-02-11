@@ -673,6 +673,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
      *                   It is acceptable to supply a {@link net.sf.saxon.value.Closure} to represent a value whose
      *                   evaluation will be delayed until it is needed. The array must be the correct size to match
      *                   the number of arguments: again, it is the caller's responsibility to check this.
+     * @param output     the destination for the result
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs while evaluating the function
      */
 

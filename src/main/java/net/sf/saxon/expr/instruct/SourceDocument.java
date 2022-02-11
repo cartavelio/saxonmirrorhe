@@ -306,6 +306,7 @@ public class SourceDocument extends Instruction {
 
     /**
      * Evaluate the instruction in push mode
+     * @param output  the destination for the result
      * @param context the evaluation context
      * @throws XPathException in the event of a failure
      * @throws QuitParsingException if there was an early exit, that is, if the instruction was evaluated

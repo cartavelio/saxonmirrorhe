@@ -90,6 +90,7 @@ public class CustomMap<K, V>  {
 
     /**
      * Ask if a key exists in the set of keys
+     * @param key the requested key
      * @return true if it exists
      */
 
