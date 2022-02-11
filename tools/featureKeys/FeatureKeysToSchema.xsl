@@ -52,7 +52,8 @@
         'ENVIRONMENT_VARIABLE_RESOLVER', 'EXPATH_FILE_DELETE_TEMPORARY_FILES',
         'MODULE_URI_RESOLVER', 'NAME_POOL', 'OUTPUT_URI_RESOLVER', 'RECOVERY_POLICY',
         'RETAIN_DTD_ATTRIBUTE_TYPES', 'SCHEMA_URI_RESOLVER', 'SCHEMA_VALIDATION', 'TRACE_LISTENER',
-        'TREE_MODEL', 'UNPARSED_TEXT_URI_RESOLVER', 'XML_PARSER_FEATURE', 'XML_PARSER_PROPERTY')"/>
+        'TREE_MODEL', 'UNPARSED_TEXT_URI_RESOLVER', 'XML_PARSER_FEATURE', 'XML_PARSER_PROPERTY',
+        'COMMON_RESOURCE_RESOLVER')"/>
     
     <xsl:template name="consistency-check">
         <xsl:for-each select="doc($FeatureKeys)//feature[not(configfile) and not(string(name) = $exceptions)]">
