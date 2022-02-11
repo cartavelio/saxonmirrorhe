@@ -199,12 +199,12 @@ public class TestValidator {
                     "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace='http://ns.example.com/'>" +
                             "<xs:element name=\"b\"/>\n" +
                             "</xs:schema>";
-            p.getUnderlyingConfiguration().setURIResolver(
-                    (href, base) -> {
-                        if ("file:///1".equals(href)) {
+            p.getUnderlyingConfiguration().setResourceResolver(
+                    request -> {
+                        if ("file:///1".equals(request.relativeUri)) {
                             return new StreamSource(new StringReader(xsd1), "file:///1");
                         }
-                        if ("file:///2".equals(href)) {
+                        if ("file:///2".equals(request.relativeUri)) {
                             return new StreamSource(new StringReader(xsd2), "file:///2");
                         }
                         return null;
@@ -257,12 +257,12 @@ public class TestValidator {
                     "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:a'>" +
                             "<xs:element name='c'/>\n" +
                             "</xs:schema>";
-            p.getUnderlyingConfiguration().setURIResolver(
-                    (href, base) -> {
-                        if ("file:///1".equals(href)) {
+            p.getUnderlyingConfiguration().setResourceResolver(
+                    request -> {
+                        if ("file:///1".equals(request.relativeUri)) {
                             return new StreamSource(new StringReader(xsd1), "file:///1");
                         }
-                        if ("file:///2".equals(href)) {
+                        if ("file:///2".equals(request.relativeUri)) {
                             return new StreamSource(new StringReader(xsd2), "file:///2");
                         }
                         return null;

@@ -5,14 +5,11 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.ErrorListener;
-import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
@@ -530,24 +527,20 @@ public class TestXQueryCompiler {
         Processor p = new Processor(false);
         XQueryCompiler c = p.newXQueryCompiler();
         final List<String> counter = new ArrayList<>();
-        p.getUnderlyingConfiguration().setURIResolver(new StandardURIResolver() {
-            @Override
-            public Source resolve(String href, String base) throws XPathException {
-                switch (href) {
+        p.getUnderlyingConfiguration().setResourceResolver(request -> {
+                switch (request.relativeUri) {
                     case "http://example.com/bad":
                         String badXml = "<bad>";
-                        counter.add(href);
+                        counter.add(request.relativeUri);
                         return new StreamSource(new StringReader(badXml));
                     case "http://example.com/good":
                         String goodXml = "<good/>";
-                        counter.add(href);
+                        counter.add(request.relativeUri);
                         return new StreamSource(new StringReader(goodXml));
                     default:
-                        return super.resolve(href, base);
+                        return null;
                 }
-            }
-
-        });
+            });
         p.setConfigurationProperty(Feature.PRE_EVALUATE_DOC_FUNCTION, false);
         XQueryExecutable q = null;
         try {

@@ -2,17 +2,13 @@ package resolvers;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.StandardModuleURIResolver;
-import net.sf.saxon.lib.StandardURIResolver;
+import net.sf.saxon.s9api.Processor;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.xmlresolver.ResolverFeature;
 
-import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
 
 import static org.junit.Assert.fail;
 
@@ -62,10 +58,10 @@ public class StandardModuleURIResolverTest {
 
     @Test
     public void withCatalog() {
-        Configuration config = new Configuration();
+        Processor proc = new Processor(false);
+        Configuration config = proc.getUnderlyingConfiguration();
         try {
-            List<String> catalogs = Collections.singletonList(cwd + "src/test/testdata/resolvers/catalog.xml");
-            config.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogs);
+            proc.setCatalogFile(cwd + "src/test/testdata/resolvers/catalog.xml");
 
             StandardModuleURIResolver resolver = new StandardModuleURIResolver(config);
 
@@ -78,11 +74,11 @@ public class StandardModuleURIResolverTest {
 
     @Test
     public void withCatalogAndHints() {
-        Configuration config = new Configuration();
+        Processor proc = new Processor(false);
+        Configuration config = proc.getUnderlyingConfiguration();
         try {
-            List<String> catalogs = Collections.singletonList(cwd + "src/test/testdata/resolvers/catalog.xml");
-            config.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogs);
-
+            proc.setCatalogFile(cwd + "src/test/testdata/resolvers/catalog.xml");
+            
             StandardModuleURIResolver resolver = new StandardModuleURIResolver(config);
 
             String namespace = "http://irrelevant/";

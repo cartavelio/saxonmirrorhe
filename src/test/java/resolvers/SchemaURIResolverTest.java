@@ -2,10 +2,8 @@ package resolvers;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.config.StandardSchemaResolver;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SchemaURIResolver;
-import net.sf.saxon.lib.StandardURIResolver;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,10 +14,9 @@ import static org.junit.Assert.fail;
 
 public class SchemaURIResolverTest {
     @Test
-    public void resolveXLink() {
-        Configuration config = new EnterpriseConfiguration();
-        SchemaURIResolver resolver = new StandardSchemaResolver();
-        resolver.setConfiguration(config);
+    public void resolveXLinkNamespaceSchema() {
+        EnterpriseConfiguration config = new EnterpriseConfiguration();
+        SchemaURIResolver resolver = new StandardSchemaResolver(config);
 
         String cwd = System.getProperty("user.dir").replaceAll("\\\\", "/"); // Windows
         if (!cwd.endsWith("/")) {
@@ -35,10 +32,9 @@ public class SchemaURIResolverTest {
     }
 
     @Test
-    public void resolveXLinkNamespace() {
-        Configuration config = new EnterpriseConfiguration();
-        SchemaURIResolver resolver = new StandardSchemaResolver();
-        resolver.setConfiguration(config);
+    public void resolveCatalogSchemaByNamespace() {
+        EnterpriseConfiguration config = new EnterpriseConfiguration();
+        SchemaURIResolver resolver = new StandardSchemaResolver(config);
 
         String cwd = System.getProperty("user.dir").replaceAll("\\\\", "/"); // Windows
         if (!cwd.endsWith("/")) {
