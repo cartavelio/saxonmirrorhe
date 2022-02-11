@@ -53,9 +53,8 @@
     <p>
       <i>This section describes extension functions built in to the Saxon product. For information
         on writing your own extension functions, see <a class="bodylink"
-          href="/extensibility/functions">Writing extension functions (Java)</a> or <a
-          class="bodylink" href="/extensibility/dotnetextensions">Writing extension functions
-          (.NET)</a>.</i>
+          href="/extensibility/integratedfunctions">Integrated extension functions</a> and <a
+            class="bodylink" href="/extensibility/functions">Writing extension functions (Java)</a>.</i>
     </p>
 
     <p>Full details of all extension functions, along with functions in the core library, are found

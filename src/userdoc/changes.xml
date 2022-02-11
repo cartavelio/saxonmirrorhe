@@ -4411,8 +4411,8 @@ implementations.</p>
 
          <p xmlns="">On the .NET platform, extension functions represented as methods in a .NET assembly may now be
 invoked dynamically. These may be written in any .NET language. The facility also allows methods in
-the standard .NET system classes to be invoked. For further details, see 
-<xref section="extensibility" page="dotnetextensions">Writing extension functions (.NET)</xref></p>
+the standard .NET system classes to be invoked. For further details, see Writing extension functions
+(.NET).</p>
 
          <p xmlns="">In accordance with .NET naming conventions, the interface <code>QueryResolver</code> has been renamed
 <code>IQueryResolver</code>.</p>
