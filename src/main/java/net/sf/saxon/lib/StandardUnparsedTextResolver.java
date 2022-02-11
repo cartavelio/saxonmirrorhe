@@ -12,11 +12,10 @@ import net.sf.saxon.resource.*;
 import net.sf.saxon.trans.XPathException;
 
 
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.nio.charset.*;
 import java.util.zip.GZIPInputStream;
 
@@ -66,6 +65,7 @@ public class StandardUnparsedTextResolver
     @Override
     public Reader resolve(URI absoluteURI, String encoding, Configuration config) throws XPathException {
         URL absoluteURL;
+
         Logger err = config.getLogger();
         if (debug) {
             err.info("unparsed-text(): processing " + absoluteURI);
@@ -78,6 +78,20 @@ public class StandardUnparsedTextResolver
         if (!config.getAllowedUriTest().test(absoluteURI)) {
             throw new XPathException("URI scheme '" + absoluteURI.getScheme() + "' has been disallowed");
         }
+
+        // Do this early in case it returns a data: or classpath: URI.
+        try {
+            Source resolved = config.getSaxonResourceResolver().resolve(absoluteURI.toString(), null);
+            if (resolved != null) {
+                absoluteURI = new URI(resolved.getSystemId());
+            }
+        } catch (TransformerException te) {
+            // nevermind, we'll just fall through and try the old way
+        } catch (URISyntaxException mue) {
+            // let this fall through too; it shouldn't be possible, but if it is,
+            // try the old way.
+        }
+
         InputStream inputStream = null;
         String contentEncoding;
         boolean isXmlMediaType = false;
