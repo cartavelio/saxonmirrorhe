@@ -1,0 +1,64 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using Org.XmlResolver;
+using Org.XmlResolver.Features;
+using Org.XmlResolver.Utils;
+using Saxon.Api;
+
+namespace Saxon.Callbacks {
+    /// <summary>
+    /// This implementation of <c>CommonResourceResolver</c> attempts direct resolution of requested
+    /// URIs using standard .NET mechanisms. It uses the services of the <c>UriUtils</c> class in the
+    /// <c>Org.XmlResolver</c> package, which should be able to handle standard file URIs, http and https
+    /// URIs, as well as more specialized schemes such as <c>data</c> and <c>pack</c>. 
+    /// </summary>
+    /// <remarks>
+    /// <para>This resolver will normally be used after other mechanisms have been exhausted; it will often
+    /// appear at the end of a chain of resolvers.
+    /// </para>
+    /// </remarks>
+    public class DirectResourceResolver : CommonResourceResolver {
+
+        public DirectResourceResolver() {
+
+        }
+
+        public override CommonResourceResolver NewInstance() {
+            return new DirectResourceResolver();
+        }
+
+        /// <summary>
+        /// Get a stream, and associated base URI, for a resource identified by a URI, supplied typically
+        /// as the combination of a relative URI amd base URI
+        /// </summary>
+        /// <param name="request">Details of the required resource, including its URI</param>
+        /// <returns>An <c>IResource</c> containing the content of the resource as a <c>Stream</c> or
+        /// <c>TextReader</c>, together with a <c>SystemId</c> that identifies the base URI of the
+        /// resource. Returns null if the request cannot be resolved.</returns>
+        public override IResource Resolve(ResourceRequest request) {
+
+            try {
+                string href = request.RelativeUri ?? request.Uri.ToString();
+                Uri baseUri = request.BaseUri ?? request.Uri;
+                Uri abs = new Uri(baseUri, href);
+                Stream stream = UriUtils.GetStream(abs);
+                return new TextResource(stream, abs);
+            }
+
+            catch (WebException) {
+                // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent URI
+            }
+            catch (System.ArgumentException) {
+                // Thrown for an unknown URI scheme
+            }
+            catch (System.IO.FileNotFoundException) {
+                // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent file
+            }
+
+            return nextResourceResolver?.Resolve(request);
+        }
+
+    }
+}
