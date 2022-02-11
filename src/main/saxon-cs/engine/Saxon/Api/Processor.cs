@@ -10,7 +10,6 @@ using net.sf.saxon.lib;
 using net.sf.saxon.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
-using SaxonCS3.engine.Saxon.Api.Support;
 using Version = net.sf.saxon.Version;
 
 namespace Saxon.Api {
@@ -37,7 +36,7 @@ namespace Saxon.Api {
             jProcessor = p;
             jProcessor.getUnderlyingConfiguration().setProcessor(this);
             collectionFinder = new StandardCollectionFinder(Implementation.getCollectionFinder());
-            //standardCollectionFinder = new StandardCollectionFinder(Implementation.getStandardCollectionFinder());
+            QueryResolver = null;
         }
 
         /// <summary>
@@ -490,13 +489,21 @@ namespace Saxon.Api {
         public Configuration Implementation => jProcessor.getUnderlyingConfiguration();
 
         /// <summary>
-        /// A user-supplied <c>IQueryResolver</c> used to resolve location hints appearing in an
-        /// <c>import module</c> declaration.
+        /// A user-supplied <c>IQueryResolver</c> used to resolve module URIs and location hints
+        /// appearing in an XQuery <c>import module</c> declaration.
         /// </summary>
         /// <remarks>
-        /// <para>This acts as the default value for the ModuleURIResolver.</para>
-        /// <para> The URI Resolver for XQuery modules. May be null, in which case any 
-        /// existing Module URI Resolver is removed  from the Configuration</para>
+        /// <para>When a new <c>XQueryCompiler</c> is created, it is initialized
+        /// to use the <c>IQueryResolver</c> from the originating <c>Processor</c>.
+        /// Subsequent changes to the <c>Processor</c> have no effect on pre-existing
+        /// <c>QueryCompiler</c> instances.</para>
+        /// <para>The <c>IQueryResolver</c> registered with the <c>Processor</c> is
+        /// also used when XQuery modules are loaded dynamically using the <c>fn:load-xquery-module</c>
+        /// function, whether the call occurs in XSLT, XQuery, or XPath.</para>
+        /// <para>The default <c>IQueryResolver</c> attempts to locate modules using each of the
+        /// "location hints" supplied, using the URI dereferencing mechanisms provided by the
+        /// underlying platform (which may themselves be configurable).</para> 
+        /// <para>If the property is set to null, the query resolver reverts to its default setting.</para>
         /// </remarks>
         public IQueryResolver QueryResolver {
             get => moduleResolver;

@@ -1,6 +1,6 @@
 namespace Saxon.Api {
     /// <summary>
-    /// Identifiies a host language in which XPath expressions appear. Generally used when different error codes
+    /// Identifies a host language in which XPath expressions appear. Generally used when different error codes
     /// need to be returned depending on the host language.
     /// </summary>
     public enum HostLanguage
