@@ -172,7 +172,6 @@ javadoc {
 
 test {
   useJUnitPlatform {
-    excludeTags 'bytecode'
   }
 }
 
@@ -1051,7 +1050,7 @@ task eejJar(
   from ("${buildDir}/classes/eej") {
     include "net/**/*.class"
     include "com/saxonica/**/*.class"
-    include "org/objectweb/asm/xml/*.class"
+    //include "org/objectweb/asm/xml/*.class" // we think these aren't needed
     include "javax/xml/xquery/*.class"
     exclude "**/sql/**/*.class"
     exclude "com/saxonica/StatsTransform*.class"
@@ -1111,6 +1110,12 @@ task eejTests(
   type: JavaExec,
   dependsOn: ["eej_compile_junit_tests"]
 ) {
+  doFirst {
+    // This is (should be!) the same logic as ConfigTest.DATA_DIR
+    String testdata = System.getenv("SAXON_TEST_DATA") ?: "${projectDir}/src/test/testdata"
+    mkdir "${testdata}/sandpit/welch-ser/out"
+  }
+
   // By default, run all the tests
   def largs = ["--scan-class-path"]
 
@@ -1122,6 +1127,8 @@ task eejTests(
   def lpargs = []
   def lcargs = []
   def lmargs = []
+
+  //println("P:${packages}; C:${classes}; M:${methods}")
 
   if (packages != null || classes != null || methods != null) {
     if (packages == null) {
@@ -1226,6 +1233,18 @@ task eejTests(
       largs = largs + ["--include-tag", tag]
     }
   }
+
+  def excludeTags = project.findProperty("junitExcludeTags")
+  if (excludeTags != null) {
+    junitExcludeTags.split(",").each { tag ->
+      if (tag.trim() != '') {
+        largs.add("--exclude-tag")
+        largs.add(tag.trim())
+      }
+    }
+  }
+
+  // println(largs)
 
   classpath = configurations.productTests + files("${buildDir}/classes/eej") + files("${buildDir}/test_classes/eej")
   main = "org.junit.platform.console.ConsoleLauncher"
