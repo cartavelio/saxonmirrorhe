@@ -14,7 +14,6 @@ import net.sf.saxon.functions.Count;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -41,9 +40,9 @@ public class RangeKey extends MapItem {
     private final UnicodeString max;
     private final TreeMap<AtomicMatchKey, Object> index;
 
-    public RangeKey(String min, String max, TreeMap<AtomicMatchKey, Object> index) {
-        this.min = min == null ? null : StringView.tidy(min);
-        this.max = max == null ? null : StringView.tidy(max);
+    public RangeKey(UnicodeString min, UnicodeString max, TreeMap<AtomicMatchKey, Object> index) {
+        this.min = min;  // null allowed
+        this.max = max;  // null allowed
         this.index = index;
     }
 
@@ -59,15 +58,15 @@ public class RangeKey extends MapItem {
                 (max == null || max.compareTo(k) >= 0)) {
             Object value = index.get(k);
             if (value == null) {
-                return EmptySequence.getInstance();
+                return null;
             } else if (value instanceof NodeInfo) {
                 return ((NodeInfo)value);
             } else {
                 List<NodeInfo> nodes = (List<NodeInfo>)value;
-                return new SequenceExtent.Of<>(nodes);
+                return nodes.isEmpty() ? null : new SequenceExtent.Of<>(nodes);
             }
         }
-        return EmptySequence.getInstance();
+        return null;
     }
 
     /**
