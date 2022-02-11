@@ -33,7 +33,7 @@ import java.util.Properties;
 
 public class CharacterSetFactory {
 
-    private final HashMap<String, CharacterSet> characterSets = new HashMap<String, CharacterSet>(10);
+    private final HashMap<String, CharacterSet> characterSets = new HashMap<>(10);
 
     /**
      * Class has a single instance per Configuration
@@ -111,7 +111,7 @@ public class CharacterSetFactory {
 
             // Otherwise see if the Java VM knows anything about the character set
 
-            CSharp.emitCode("throw new XPathException(\"Unknown encoding requested: \" + encoding);");
+            CSharp.emitCode("throw new net.sf.saxon.trans.XPathException(\"Unknown encoding requested: \" + encoding);");
 
 //#if CSHARP==false
             Charset charset;

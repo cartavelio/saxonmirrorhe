@@ -7,11 +7,14 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.FilterFactory;
+import net.sf.saxon.event.ProxyReceiver;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Stripper;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
 
@@ -59,6 +62,7 @@ public class WhitespaceStrippingPolicy {
      *                    text node children of the element are to be stripped, false if they are to be retained.
      */
 
+    @CSharpInnerClass(outer=false, extra="System.Predicate<net.sf.saxon.s9api.QName> elementTest")
     public static WhitespaceStrippingPolicy makeCustomPolicy(final Predicate<QName> elementTest) {
         SpaceStrippingRule rule = new SpaceStrippingRule() {
             @Override
@@ -75,7 +79,7 @@ public class WhitespaceStrippingPolicy {
 
 
             @Override
-            public void export(ExpressionPresenter presenter) throws XPathException {
+            public void export(ExpressionPresenter presenter) {
                 throw new UnsupportedOperationException();
             }
         };

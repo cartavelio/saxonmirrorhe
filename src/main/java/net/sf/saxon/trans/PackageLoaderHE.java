@@ -248,7 +248,7 @@ public class PackageLoaderHE implements IPackageLoader {
         pack.setStripsTypeAnnotations("1".equals(packageElement.getAttributeValue("", "stripType")));
         pack.setKeyManager(new KeyManager(pack.getConfiguration(), pack));
         pack.setDeclaredModes("1".equals(packageElement.getAttributeValue("", "declaredModes")));
-        for (NodeInfo usePack : packageElement.children(n -> n.getLocalPart().equals("package"))) {
+        for (NodeInfo usePack : packageElement.children(NodeSelector.of(n -> n.getLocalPart().equals("package")))) {
             StylesheetPackage subPack = config.makeStylesheetPackage();
             subPack.setRuleManager(new RuleManager(pack));
             subPack.setCharacterMapIndex(new CharacterMapIndex());
@@ -318,8 +318,8 @@ public class PackageLoaderHE implements IPackageLoader {
 
     private void readGlobalContext(NodeInfo packageElement) throws XPathException {
         GlobalContextRequirement req = null;
-        NameTest condition = new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT, "glob", config.getNamePool());
-        for (NodeInfo varElement : packageElement.children(n -> n.getLocalPart().equals("glob"))) {
+        //NameTest condition = new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT, "glob", config.getNamePool());
+        for (NodeInfo varElement : packageElement.children(NodeSelector.of(n -> n.getLocalPart().equals("glob")))) {
             if (req == null) {
                 req = new GlobalContextRequirement();
                 packStack.peek().setContextItemRequirements(req);
@@ -687,7 +687,8 @@ public class PackageLoaderHE implements IPackageLoader {
             localBindings.pop();
         }
         if (function.getDeclaredStreamability() != FunctionStreamability.UNCLASSIFIED) {
-            addCompletionAction(function::prepareForStreaming);
+            //noinspection Convert2MethodRef
+            addCompletionAction(() -> function.prepareForStreaming());
         }
         return function;
     }
@@ -815,7 +816,8 @@ public class PackageLoaderHE implements IPackageLoader {
             mode.setHasRules(true);
         }
 
-        addCompletionAction(mode::prepareStreamability);
+        //noinspection Convert2MethodRef
+        addCompletionAction(() -> mode.prepareStreamability());
 
 
         return mode;
@@ -1913,10 +1915,7 @@ public class PackageLoaderHE implements IPackageLoader {
             inst.setContentExpression(content);
             return inst.simplify();
         });
-
-        // generated (redundantly) prior to 9.7.0.4
-        eMap.put("compiledExpression", PackageLoaderHE::getFirstChildExpression);
-
+        
         eMap.put("conditionalSort", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
@@ -1944,8 +1943,11 @@ public class PackageLoaderHE implements IPackageLoader {
             ItemType toType = loader.parseAlphaCodeForItemType(element, "to");
             AtomicSequenceConverter asc = new AtomicSequenceConverter(body, (PlainType) toType);
             if ("p".equals(element.getAttributeValue("", "flags"))) {
-                Converter c = toType.equals(BuiltInAtomicType.DOUBLE) ? new Converter.PromoterToDouble() : new Converter.PromoterToFloat();
-                asc.setConverter(c);
+                if (toType.equals(BuiltInAtomicType.DOUBLE)) {
+                    asc.setConverter(new Converter.PromoterToDouble());
+                } else {
+                    asc.setConverter(new Converter.PromoterToFloat());
+                }
             } else {
                 Converter c = asc.allocateConverter(loader.config, false, fromType);
                 asc.setConverter(c);
@@ -2197,17 +2199,14 @@ public class PackageLoaderHE implements IPackageLoader {
             String namespaces = element.getAttributeValue("", "schNS");
             if (namespaces != null) {
                 String[] uris = namespaces.split(" ");
-                for (String uri : uris) {
-                    if (uri.equals("##")) {
-                        uri = "";
-                    }
-                    inst.importSchemaNamespace(uri);
+                for (String nsUri : uris) {
+                    inst.importSchemaNamespace(nsUri.equals("##") ? "" : nsUri);
                 }
             }
 
             List<WithParam> nonTunnelParams = new ArrayList<>();
             int slotNumber = 0;
-            for (NodeInfo wp : element.children(n -> n.getLocalPart().equals("withParam"))) {
+            for (NodeInfo wp : element.children(NodeSelector.of(n -> n.getLocalPart().equals("withParam")))) {
                 WithParam withParam = new WithParam();
                 StructuredQName paramName = loader.getQNameAttribute(wp, "name");
                 withParam.setVariableQName(paramName);
@@ -2667,7 +2666,8 @@ public class PackageLoaderHE implements IPackageLoader {
                 String flagsAtt = msElem.getAttributeValue("", "flags");
                 ms.streamable = "s".equals(flagsAtt);
                 if (ms.streamable) {
-                    loader.addCompletionAction(ms::prepareForStreaming);
+                    //noinspection Convert2MethodRef
+                    loader.addCompletionAction(() -> ms.prepareForStreaming());
                 }
                 RetainedStaticContext rsc = loader.makeRetainedStaticContext(element);
                 ms.baseURI = rsc.getStaticBaseUriString();
@@ -2714,7 +2714,8 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression mergeAction = loader.getExpressionWithRole(element, "action");
             MergeInstr.MergeSource[] mergeSources = list.toArray(new MergeInstr.MergeSource[0]);
             inst.init(mergeSources, mergeAction);
-            loader.completionActions.add(inst::fixupGroupReferences);
+            //noinspection Convert2MethodRef
+            loader.completionActions.add(() -> inst.fixupGroupReferences());
             return inst;
         });
 
@@ -2927,7 +2928,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 param.setRequiredParam(flags.contains("r"));
                 param.setImplicitlyRequiredParam(flags.contains("i"));
             }
-            loader.localBindings.add(param);
+            loader.localBindings.push(param);
             return param;
         });
 

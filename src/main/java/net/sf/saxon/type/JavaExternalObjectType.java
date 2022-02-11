@@ -8,6 +8,7 @@
 package net.sf.saxon.type;
 
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.value.ObjectValue;
@@ -122,7 +123,7 @@ public class JavaExternalObjectType extends ExternalObjectType {
      */
     @Override
     public boolean matches(/*@NotNull*/ Item item, /*@NotNull*/TypeHierarchy th) {
-        if (item instanceof ObjectValue) {
+        if (item.getGenre() == Genre.EXTERNAL) {
             Object obj = ((ObjectValue<?>) item).getObject();
             return javaClass.isAssignableFrom(obj.getClass());
         }

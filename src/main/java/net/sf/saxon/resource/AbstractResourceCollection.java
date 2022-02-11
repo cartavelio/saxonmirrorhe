@@ -13,6 +13,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.SpaceStrippingRule;
+import net.sf.saxon.query.InputStreamMarker;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
@@ -267,9 +268,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
 
     protected String guessContentTypeFromContent(InputStream stream) {
         try {
-            if (!stream.markSupported()) {
-                stream = new BufferedInputStream(stream);
-            }
+            stream = InputStreamMarker.ensureMarkSupported(stream);
             return URLConnection.guessContentTypeFromStream(stream);
         } catch (IOException err) {
             return null;

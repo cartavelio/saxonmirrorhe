@@ -1245,8 +1245,8 @@ public class SimpleMode extends Mode {
 //        }
 
         public void allocateRanks() {
-            rules.sort(Rule::compareComputedRank);
-            //GenericSorter.quickSort(0, rules.size(), this);
+            //noinspection Convert2MethodRef
+            rules.sort((x,y) -> x.compareComputedRank(y));
             int rank = start;
             for (int i = 0; i < rules.size(); i++) {
                 if (i > 0 && rules.get(i - 1).compareComputedRank(rules.get(i)) != 0) {

@@ -83,6 +83,7 @@ public interface Platform {
     /*@Nullable*/
     InputStream locateResource(String filename, List<String> messages);
 
+    //#if CSHARP==false
     /**
      * Get a parser by instantiating the SAXParserFactory
      *
@@ -101,7 +102,7 @@ public interface Platform {
      */
 
     XMLReader loadParserForXmlFragments();
-
+    //#endif
     /**
      * Convert a StreamSource to a different kind of Source, depending on the native
      * parser of the selected platform

@@ -137,9 +137,11 @@ public class SerializationProperties {
             next = getValidationFactory().makeFilter(next);
         }
         String itemSeparator = properties.getProperty(SaxonOutputKeys.ITEM_SEPARATOR);
-        return itemSeparator == null || "#absent".equals(itemSeparator)
-                ? new SequenceNormalizerWithSpaceSeparator(next)
-                : new SequenceNormalizerWithItemSeparator(next, StringView.of(itemSeparator));
+        if (itemSeparator == null || "#absent".equals(itemSeparator)) {
+            return new SequenceNormalizerWithSpaceSeparator(next);
+        } else {
+            return new SequenceNormalizerWithItemSeparator(next, StringView.of(itemSeparator));
+        }
     }
 
     /**

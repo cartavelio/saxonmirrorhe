@@ -10,6 +10,8 @@ package net.sf.saxon.type;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
 
+import java.util.List;
+
 /**
  * A "plain type" is either an atomic type, or a union type that (a) imposes no restrictions other
  * than those imposed by its member types, and (b) has exclusively plain types as its member types
@@ -31,7 +33,7 @@ public interface PlainType extends ItemType, HyperType {
      *         in its transitive membership
      */
 
-    Iterable<? extends PlainType> getPlainMemberTypes() throws MissingComponentException;
+    List<? extends PlainType> getPlainMemberTypes() throws MissingComponentException;
 
     /**
      * Test whether a given item conforms to this type

@@ -67,7 +67,11 @@ public class KeyIndex {
     private Status status;
 
     public KeyIndex(boolean isRangeKey) {
-        index = isRangeKey ? new TreeMap<AtomicMatchKey, Object>() : new HashMap<AtomicMatchKey, Object>(100);
+        if (isRangeKey) {
+            index = new TreeMap<>();     // TODO: should be using an XPathComparable here, for sorting purposes?
+        } else {
+            index = new HashMap<>(100);
+        }
         creatingThread = Thread.currentThread().getId();
         status = Status.UNDER_CONSTRUCTION;
     }

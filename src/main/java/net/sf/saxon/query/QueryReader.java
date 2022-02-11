@@ -49,9 +49,7 @@ public class QueryReader {
         CharSequence queryText;
         if (ss.getInputStream() != null) {
             InputStream is = ss.getInputStream();
-            if (!is.markSupported()) {
-                is = new BufferedInputStream(is);
-            }
+            is = InputStreamMarker.ensureMarkSupported(is);
             String encoding = readEncoding(is);
             queryText = readInputStream(is, encoding, charChecker);
         } else if (ss.getReader() != null) {
@@ -73,16 +71,17 @@ public class QueryReader {
 
     public static String readEncoding(/*@NotNull*/ InputStream is) throws XPathException {
         try {
-            if (!is.markSupported()) {
+            InputStreamMarker marker = new InputStreamMarker(is);
+            if (!marker.isMarkSupported()) {
                 throw new IllegalArgumentException("InputStream must have markSupported() = true");
             }
-            is.mark(100);
+            marker.mark(100);
             byte[] start = new byte[100];
             int read = is.read(start, 0, 100);
             if (read == -1) {
                 throw new XPathException("Query source file is empty");
             }
-            is.reset();
+            marker.reset();
             return inferEncoding(start, read);
         } catch (IOException e) {
             throw new XPathException("Failed to read query source file", e);
@@ -101,9 +100,7 @@ public class QueryReader {
 
     public static String readInputStream(InputStream is, String encoding, IntPredicateProxy nameChecker) throws XPathException {
         if (encoding == null) {
-            if (!is.markSupported()) {
-                is = new BufferedInputStream(is);
-            }
+            is = InputStreamMarker.ensureMarkSupported(is);
             encoding = readEncoding(is);
         }
         try {

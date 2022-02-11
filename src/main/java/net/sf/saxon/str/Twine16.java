@@ -7,10 +7,6 @@
 
 package net.sf.saxon.str;
 
-import net.sf.saxon.transpile.CSharpInnerClass;
-import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.Arrays;
@@ -186,28 +182,6 @@ public class Twine16 extends UnicodeString {
     public boolean isEmpty() {
         return chars.length == 0;
     }
-
-    /**
-     * Iterate over a string, returning a sequence of integers representing the Unicode code-point values
-     *
-     * @return an iterator over the characters (Unicode code points) in the string
-     */
-
-    /*@NotNull*/
-    @CSharpInnerClass(outer=true)
-    public synchronized AtomicIterator iterateCharacters() {
-        return new AtomicIterator() {
-            private final IntIterator cp = codePoints();
-
-            @Override
-            //@CSharpModifiers(code = {"public", "override"})
-            public AtomicValue next() {
-                return cp.hasNext() ? new Int64Value(cp.next()) : null;
-            }
-        };
-    }
-
-
 
     @Override
     public int getWidth() {

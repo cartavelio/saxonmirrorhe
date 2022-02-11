@@ -300,7 +300,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         iterator(env).forEachOrFail(item -> list.add(SequenceTool.convertToJava(item)));
         return list;
     }
-    //#endif
+
     /**
      * Execute the compiled Query, returning the first item in the result.
      * This is useful where it is known that the expression will only return
@@ -326,7 +326,8 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         }
         return SequenceTool.convertToJava(item);
     }
-
+    //#endif
+    
     /**
      * Get an iterator over the results of the expression. This returns results without
      * any conversion of the returned items to "native" Java classes. The iterator will

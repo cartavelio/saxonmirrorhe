@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.str.*;
+import net.sf.saxon.transpile.CSharpDelegate;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.z.IntIterator;
@@ -171,6 +172,7 @@ public class Whitespace {
     private enum TokenCategory {INITIAL_WHITESPACE, SEPARATOR_WHITESPACE, FINAL_WHITESPACE, CONTENT}
 
     @FunctionalInterface
+    @CSharpDelegate(true)
     private interface TokenHandler {
         void handleToken(int start, int end, TokenCategory category);
     }

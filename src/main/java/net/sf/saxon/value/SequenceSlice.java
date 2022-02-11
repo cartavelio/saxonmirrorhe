@@ -14,9 +14,6 @@ import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.UnfailingIterator;
-import net.sf.saxon.tree.jiter.WrappingJavaIterator;
-
-import java.util.Iterator;
 
 
 /**
@@ -210,13 +207,5 @@ public class SequenceSlice implements GroundedValue {
         }
     }
 
-    /**
-     * Get an iterator (a Java {@link Iterator}) over the items in this sequence.
-     * @return an iterator over the items in this sequence.
-     */
-
-    public Iterator<? extends Item> iterator() {
-        return new WrappingJavaIterator<>(iterate());
-    }
-}
+ }
 

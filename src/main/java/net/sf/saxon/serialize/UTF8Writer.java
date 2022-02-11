@@ -8,6 +8,7 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.str.*;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.z.IntIterator;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +27,9 @@ import java.util.Arrays;
  * @author Tatu Saloranta. Modified by Michael Kay to enable efficient output
  * of Unicode strings.
  */
+
+@CSharpInjectMembers(code="public override System.Text.Encoding Encoding { get { return System.Text.Encoding.UTF8; } }")
+
 public final class UTF8Writer extends Writer implements UnicodeWriter {
 
     private final static int MIN_BUF_LEN = 32;
@@ -297,7 +301,7 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
             }
 
             int available = outBufLast - outPtr;
-            int count = Integer.min(len, available);
+            int count = Math.min(len, available);
 
             System.arraycopy(chars, off, outBuf, outPtr, count);
             outPtr += count;
@@ -326,7 +330,7 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
             }
 
             int available = outBufLast - outPtr;
-            int count = Integer.min(repeat, available);
+            int count = Math.min(repeat, available);
 
             Arrays.fill(outBuf, outPtr, outPtr+count, ch);
             outPtr += count;

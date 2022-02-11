@@ -8,9 +8,7 @@
 package net.sf.saxon.lib;
 
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
+import java.io.*;
 
 /**
  * The default Logger used by Saxon on the Java platform. All messages are written by default
@@ -19,7 +17,7 @@ import java.io.PrintStream;
  */
 public class StandardLogger extends Logger {
 
-    private PrintStream out = System.err;
+    private PrintWriter writer = new PrintWriter(System.err);
     private int threshold = Logger.INFO;
     private boolean mustClose = false;
 
@@ -63,7 +61,19 @@ public class StandardLogger extends Logger {
      */
 
     public void setPrintStream(PrintStream stream) {
-        out = stream;
+        this.writer = new PrintWriter(stream);
+    }
+
+    /**
+     * Set the output destination for messages
+     *
+     * @param writer the stream to which messages will be written. Defaults to System.err. The caller
+     *               is responsible for closing the stream after use (it will not be closed by the
+     *               close() method on the Logger)
+     */
+
+    public void setPrintWriter(PrintWriter writer) {
+        this.writer = writer;
     }
 
     /**
@@ -72,8 +82,8 @@ public class StandardLogger extends Logger {
      * @return the stream to which messages are written
      */
 
-    public PrintStream getPrintStream() {
-        return out;
+    public PrintWriter getPrintWriter() {
+        return writer;
     }
 
     /**
@@ -106,7 +116,7 @@ public class StandardLogger extends Logger {
      */
     @Override
     public StreamResult asStreamResult() {
-        return new StreamResult(out);
+        return new StreamResult(writer);
     }
 
     /**
@@ -120,7 +130,7 @@ public class StandardLogger extends Logger {
     @Override
     public void println(String message, int severity) {
         if (severity >= threshold) {
-            out.println(message);
+            writer.write(message + "\n");
         }
     }
 
@@ -130,7 +140,7 @@ public class StandardLogger extends Logger {
     @Override
     public void close() {
         if (mustClose) {
-            out.close();
+            writer.close();
         }
     }
 }

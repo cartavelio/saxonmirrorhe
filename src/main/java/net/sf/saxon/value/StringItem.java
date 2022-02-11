@@ -209,13 +209,7 @@ public class StringItem extends AtomicValue {
 
     /*@NotNull*/
     public synchronized AtomicIterator iterateCharacters() {
-        return new AtomicIterator() {
-            final IntIterator cp = codePoints();
-            @Override
-            public AtomicValue next() {
-                return cp.hasNext() ? new Int64Value(cp.next()) : null;
-            }
-        };
+        return new CodepointIterator(codePoints());
     }
 
 
