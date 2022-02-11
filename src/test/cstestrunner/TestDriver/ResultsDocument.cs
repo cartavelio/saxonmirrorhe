@@ -35,7 +35,7 @@ namespace TestDriver
             //  StreamWriter resultWriter = File.CreateText(fileName);   
             Serializer serializer =processor.NewSerializer();
               
-            serializer.SetOutputWriter(null);
+            serializer.OutputWriter = null;
             serializer.SetOutputProperty(Serializer.METHOD, "xml");
             serializer.SetOutputProperty(Serializer.INDENT, "yes");
             //serializer.SetOutputProperty(Serializer.Property.SAXON_LINE_LENGTH, "120");
