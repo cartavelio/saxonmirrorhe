@@ -2821,17 +2821,12 @@ PHP_METHOD(XdmMap, keys)
 
 }
 
-PHP_METHOD(XdmMap,asMap)
+
+/*PHP_METHOD(XdmMap, values)
 {
 
 
-}
-
-PHP_METHOD(XdmMap, values)
-{
-
-
-}
+} */
 
 
 
@@ -3309,18 +3304,7 @@ zend_function_entry xdmArray_methods[] = {
     {nullptr, nullptr, nullptr}
 };
 
-/**
-     PHP_METHOD(XdmArray,  __construct);
-     PHP_METHOD(XdmArray,  __destruct);
-     PHP_METHOD(XdmArray,  get);
-     PHP_METHOD(XdmArray,  put);
-     PHP_METHOD(XdmArray,  addMember);
-     PHP_METHOD(XdmArray,  concat);
-     PHP_METHOD(XdmArray,  values);
-     PHP_METHOD(XdmArray,  getArity);
-     PHP_METHOD(XdmArray,  arrayLength);
 
-*/
 
 PHP_MINIT_FUNCTION(saxon)
 {

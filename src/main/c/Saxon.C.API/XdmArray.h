@@ -76,7 +76,7 @@ public:
      *
      * @param n the position of the member that is to be replaced, counting the first member
      *          in the array as member zero
-     * @param value the new value for this member
+     * @param value - is the new member for the the new array
      * @return a new array, the same length as the original, with one member replaced
      * by a new value
      * @remark if n is less than zero or greater than or equal to the number
@@ -86,7 +86,7 @@ public:
 
     /**
      * Append a new member to an array
-     * @param value the new member
+     * @param value - the new member
      * @return a new array, one item longer than the original
      * @remark if the value is lazily evaluated, and evaluation fails then return null
      */
@@ -95,7 +95,7 @@ public:
     /**
      * Concatenate another array
      *
-     * @param value the other array
+     * @param value - the other array
      * @return a new array, containing the members of this array followed by the members of the
      * other array
      */
