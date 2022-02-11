@@ -268,7 +268,17 @@ def testSuiteMatrix = [
       "XT30": [
         "": [:],
       ]
-    ]
+    ] /* ,
+    "xsd": [
+      "XSD10": [
+        "_exceptions": "${projectDir}/src/test/exceptions/xsd.xml",
+        "": [:]
+      ],
+      "XSD11": [
+        "_exceptions": "${projectDir}/src/test/exceptions/xsd11.xml",
+        "": [:]
+      ]
+    ] */
   ]
 ]
 
