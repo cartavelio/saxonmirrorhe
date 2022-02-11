@@ -10,6 +10,7 @@ package net.sf.saxon.expr.parser;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -24,6 +25,8 @@ import java.util.List;
 
 public final class Tokenizer {
 
+    @CSharpModifiers(code={"public", "const"})    // The transpiler handles this for int but not for char??
+    public final static char NUL = (char)0;
 
     private int state = DEFAULT_STATE;
     // we may need to make this a stack at some time
@@ -81,7 +84,7 @@ public final class Tokenizer {
      */
     public int inputOffset = 0;
     /**
-     * The length of the input string
+     * The length of the input string (in 2-byte chars)
      */
     private int inputLength;
     /**
@@ -1105,21 +1108,21 @@ public final class Tokenizer {
     /**
      * Read next character directly. Used by the XQuery parser when parsing pseudo-XML syntax
      *
-     * @return the next character from the input
-     * @throws StringIndexOutOfBoundsException
-     *          if an attempt is made to read beyond
-     *          the end of the string. This will only occur in the event of a syntax error in the
-     *          input.
+     * @return the next character from the input, or NUL at the end of the input
      */
 
-    public char nextChar() throws StringIndexOutOfBoundsException {
-        char c = input.charAt(inputOffset++);
-        //c = normalizeLineEnding(c);
-        if (c == '\n') {
-            incrementLineNumber();
-            lineNumber++;
+    public char nextChar() {
+        if (inputOffset < inputLength) {
+            char c = input.charAt(inputOffset++);
+            //c = normalizeLineEnding(c);
+            if (c == '\n') {
+                incrementLineNumber();
+                lineNumber++;
+            }
+            return c;
+        } else {
+            return NUL;
         }
-        return c;
     }
 
     /**
