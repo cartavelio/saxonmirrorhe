@@ -14,6 +14,7 @@ import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.linked.SystemIdMap;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -1470,6 +1471,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @return true if the document contains elements whose type is other than UNTYPED
      */
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public boolean isTyped() {
         return typeArray != null;
     }
