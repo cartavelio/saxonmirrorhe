@@ -321,6 +321,18 @@ class.)</p>
       <p>There have been some changes to the API for declaring collections.</p>
       
       <p>JAR/ZIP file collections are not supported.</p>
+      
+      <p>The classes Saxon.Api.Predicate and Saxon.Api.IPredicate have gone, 
+         replaced by use of System.Predicate. All the predicates obtained using the Saxon.Api.Predicates 
+         factory class (e.g. Predicates.IsElement()) remain available. 
+         It's now possible to use a lambda expression wherever a predicate was expected, 
+         e.g. as the argument to Step.Where() or XdmNode.Children().
+      </p>
+      <p>It's no longer possible to combine predicates using P.And(Q) or P.Or(Q). Instead you can do 
+         Predicates.AllOf(P, Q, R, ...) or Predicates.AnyOf(P, Q, R, ...). 
+         Also it's no longer possible to define a subclass of Saxon.Api.Predicate, 
+         but there's not much of a use case for doing that anyway.
+      </p>
    </section>
    
 </article>
