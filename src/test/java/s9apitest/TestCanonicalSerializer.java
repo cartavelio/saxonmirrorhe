@@ -83,7 +83,7 @@ public class TestCanonicalSerializer {
     public void testCanonicalization2() {
         File dir = new File (ConfigTest.DATA_DIR + "collection");
         for (File file : dir.listFiles()) {
-            if (!file.isDirectory()) {
+            if (!file.isDirectory() && !file.getName().endsWith("atrs15.xml")) {
                 System.err.println("Processing " + file);
                 compareCanonical(file);
             }
