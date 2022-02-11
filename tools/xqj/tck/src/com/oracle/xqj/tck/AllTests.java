@@ -2,10 +2,8 @@
 package com.oracle.xqj.tck;
 
 import com.oracle.xqj.tck.testcases.*;
-import junit.framework.Test;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
-
 
 public class AllTests {
 
@@ -16,7 +14,7 @@ public class AllTests {
    result = null;
   */}
   
-  public static Test suite() {
+  public static TestSuite suite() {
     TestSuite suite = new TestSuite("JSR 225 (XQJ) Technology Compatibility Kit");
     suite.addTestSuite(SignatureTest.class);
     suite.addTestSuite(XQConnectionTest.class);

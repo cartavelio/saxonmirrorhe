@@ -1,10 +1,12 @@
 // Copyright (c) 2003, 2006, 2007, 2008 Oracle. All rights reserved.
 package com.oracle.xqj.tck.testcases;
 
+import org.junit.Assert;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.xquery.*;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -12,6 +14,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import java.io.*;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,14 +27,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromAtomicValue("Hello world!", null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromAtomicValue() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromAtomicValue() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createItemFromAtomicValue(null, null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
       e = null;
@@ -39,14 +42,14 @@ public class XQDataFactoryTest extends XQJTestCase {
 
     try {
       xqc.createItemFromAtomicValue("Hello world!", xqc.createCommentType());
-      junit.framework.Assert.fail("A-XQDF-1.3: An invalid type of the value to be bound must fail.");
+      fail("A-XQDF-1.3: An invalid type of the value to be bound must fail.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createItemFromAtomicValue("Hello world!", xqc.createAtomicType(XQItemType.XQBASETYPE_DECIMAL));
-      junit.framework.Assert.fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
+      fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -55,9 +58,9 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromAtomicValue("Hello world!", xqc.createAtomicType(XQItemType.XQBASETYPE_STRING));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromAtomicValue() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromAtomicValue() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "Hello world!", xqi.getAtomicValue());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "Hello world!", xqi.getAtomicValue());
   }
 
   public void testCreateItemFromString() throws XQException {
@@ -66,14 +69,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromString("Hello world!", null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromString() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromString() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createItemFromString(null, null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -89,11 +92,11 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");
     
     try {
       xqc.createItemFromString("123", xqc.createAtomicType(XQItemType.XQBASETYPE_NCNAME));
-      junit.framework.Assert.fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
+      fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -102,18 +105,18 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromString("Hello world!", xqc.createAtomicType(XQItemType.XQBASETYPE_STRING));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromString() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromString() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "Hello world!", xqi.getAtomicValue());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "Hello world!", xqi.getAtomicValue());
 
     try {
       xqi = xqc.createItemFromString("Hello", xqc.createAtomicType(XQItemType.XQBASETYPE_NCNAME));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromString() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromString() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_NCNAME, xqi.getItemType().getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "Hello", xqi.getObject());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_NCNAME, xqi.getItemType().getBaseType());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "Hello", xqi.getObject());
   }
   
   public void testCreateItemFromDocument_String() throws XQException {
@@ -122,14 +125,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromDocument("<e>Hello world!</e>", null, null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromDocument() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromDocument() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createItemFromDocument((String)null, null, null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -147,11 +150,11 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");
 
     try {
       xqc.createItemFromDocument("<e>", null, null);
-      junit.framework.Assert.fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
+      fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -160,10 +163,10 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromDocument("<e>Hello world!</e>", null, null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromDocument() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromDocument() failed with message: " + e.getMessage());
     }
     String result = xqi.getItemAsString(null);
-    junit.framework.Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
+    Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
   }
   
   public void testCreateItemFromDocument_Reader() throws XQException {
@@ -171,14 +174,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromDocument(new StringReader("<e>Hello world!</e>"), null, null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromDocument() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromDocument() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createItemFromDocument((Reader)null, null, null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -196,11 +199,11 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");
 
     try {
       xqc.createItemFromDocument(new StringReader("<e>"), null, null);
-      junit.framework.Assert.fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
+      fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -209,10 +212,10 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromDocument(new StringReader("<e>Hello world!</e>"), null, null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromDocument() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromDocument() failed with message: " + e.getMessage());
     }
     String result = xqi.getItemAsString(null);
-    junit.framework.Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
+    Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
   }
   
   public void testCreateItemFromDocument_InputStream() throws XQException, UnsupportedEncodingException {
@@ -220,14 +223,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromDocument(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?><e>Hello world!</e>".getBytes("UTF-8")), null, null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromDocument() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromDocument() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createItemFromDocument((InputStream)null, null, null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -245,11 +248,11 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");    
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");    
 
     try {
       xqc.createItemFromDocument(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?><e>".getBytes("UTF-8")), null, null);
-      junit.framework.Assert.fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
+      fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -258,10 +261,10 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromDocument(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?><e>Hello world!</e>".getBytes("UTF-8")), null, null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromDocument() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromDocument() failed with message: " + e.getMessage());
     }
     String result = xqi.getItemAsString(null);
-    junit.framework.Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
+    Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
   }
   
   public void testCreateItemFromDocument_XMLStreamReader() throws XQException {
@@ -273,14 +276,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromDocument(xqe.executeQuery("<e>Hello world!</e>").getSequenceAsStream(), null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromDocument() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromDocument() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createItemFromDocument((XMLStreamReader)null, null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -298,16 +301,16 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");    
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");    
 
     XQItem xqi = null;
     try {
       xqi = xqc.createItemFromDocument(xqe.executeQuery("<e>Hello world!</e>").getSequenceAsStream(), null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromDocument() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromDocument() failed with message: " + e.getMessage());
     }
     String result = xqi.getItemAsString(null);
-    junit.framework.Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
+    Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
     
     xqe.close();
   }
@@ -317,14 +320,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromDocument(new StreamSource(new StringReader("<e>Hello world!</e>")), null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromDocument() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromDocument() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createItemFromDocument((Source)null, null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -342,11 +345,11 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");     
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");     
 
     try {
       xqc.createItemFromDocument(new StreamSource(new StringReader("<e>")), null);
-      junit.framework.Assert.fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
+      fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -355,10 +358,10 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromDocument(new StreamSource(new StringReader("<e>Hello world!</e>")), null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromDocument() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromDocument() failed with message: " + e.getMessage());
     }
     String result = xqi.getItemAsString(null);
-    junit.framework.Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
+    Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
 
   }
 
@@ -368,14 +371,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromObject("Hello world!", null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromObject() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromObject() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createItemFromObject(null, null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -391,11 +394,11 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT."); 
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT."); 
 
     try {
       xqc.createItemFromObject("123", xqc.createAtomicType(XQItemType.XQBASETYPE_NCNAME));
-      junit.framework.Assert.fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
+      fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -405,18 +408,18 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromObject("Hello world!", xqc.createAtomicType(XQItemType.XQBASETYPE_STRING));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromObject() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromObject() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful bindXXX.", "Hello world!", xqi.getAtomicValue());
+    Assert.assertEquals("A-XQDF-1.5: Successful bindXXX.", "Hello world!", xqi.getAtomicValue());
 
     try {
       xqi = xqc.createItemFromObject("Hello", xqc.createAtomicType(XQItemType.XQBASETYPE_NCNAME));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromObject() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromObject() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_NCNAME, xqi.getItemType().getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "Hello", xqi.getObject());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_NCNAME, xqi.getItemType().getBaseType());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "Hello", xqi.getObject());
   }
 
   public void testCreateItemFromBoolean() throws XQException {
@@ -425,7 +428,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromBoolean(true, null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromBoolean() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromBoolean() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -441,15 +444,15 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT."); 
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT."); 
 
     XQItem xqi = null;
     try {
       xqi = xqc.createItemFromBoolean(true, xqc.createAtomicType(XQItemType.XQBASETYPE_BOOLEAN));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromBoolean() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromBoolean() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "true", xqi.getAtomicValue());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "true", xqi.getAtomicValue());
   }
   
   public void testCreateItemFromByte() throws XQException {
@@ -458,7 +461,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromByte((byte)1, null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromByte() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromByte() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -474,7 +477,7 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");  
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");  
 
     // Can't think of a way to verify A-XQDF-1.4 with the createItemFromByte() method
 
@@ -482,19 +485,19 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromByte((byte)1, null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromByte() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromByte() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "1", xqi.getAtomicValue());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "1", xqi.getAtomicValue());
 
     try {
       xqi = xqc.createItemFromByte((byte)1, xqc.createAtomicType(XQItemType.XQBASETYPE_INTEGER));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromByte() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromByte() failed with message: " + e.getMessage());
     }
 
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_INTEGER, xqi.getItemType().getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "1", xqi.getAtomicValue());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_INTEGER, xqi.getItemType().getBaseType());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "1", xqi.getAtomicValue());
   }
 
   public void testCreateItemFromDouble() throws XQException {
@@ -502,7 +505,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromDouble(1d, null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromDouble() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromDouble() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -518,7 +521,7 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");     
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");     
 
     // Can't think of a way to verify A-XQDF-1.4 with the createItemFromDouble() method
 
@@ -526,11 +529,11 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromDouble(1d, xqc.createAtomicType(XQItemType.XQBASETYPE_DOUBLE));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromDouble() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromDouble() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_DOUBLE, xqi.getItemType().getBaseType());
-    junit.framework.Assert.assertTrue("A-XQDF-1.5: Successful createItemFromXXX.", 1d == xqi.getDouble());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_DOUBLE, xqi.getItemType().getBaseType());
+    Assert.assertTrue("A-XQDF-1.5: Successful createItemFromXXX.", 1d == xqi.getDouble());
   }
   
   public void testCreateItemFromFloat() throws XQException {
@@ -539,7 +542,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromFloat(1f, null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromFloat() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromFloat() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -555,7 +558,7 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");       
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");       
 
     // Can't think of a way to verify A-XQDF-1.4 with the createItemFromDouble() method
 
@@ -563,11 +566,11 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromFloat(1f, xqc.createAtomicType(XQItemType.XQBASETYPE_FLOAT));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromDouble() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromDouble() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_FLOAT, xqi.getItemType().getBaseType());
-    junit.framework.Assert.assertTrue("A-XQDF-1.5: Successful createItemFromXXX.", 1d == xqi.getFloat());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_FLOAT, xqi.getItemType().getBaseType());
+    Assert.assertTrue("A-XQDF-1.5: Successful createItemFromXXX.", 1d == xqi.getFloat());
 }
 
   public void testCreateItemFromInt() throws XQException {
@@ -576,7 +579,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromInt(1, null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromInt() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromInt() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -592,11 +595,11 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");       
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");       
 
     try {
       xqc.createItemFromInt(128, xqc.createAtomicType(XQItemType.XQBASETYPE_BYTE));
-      junit.framework.Assert.fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
+      fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -605,18 +608,18 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromInt(1, null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromInt() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromInt() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful bindXXX.", "1",xqi.getAtomicValue());
+    Assert.assertEquals("A-XQDF-1.5: Successful bindXXX.", "1",xqi.getAtomicValue());
 
     try {
       xqi = xqc.createItemFromInt(1, xqc.createAtomicType(XQItemType.XQBASETYPE_INTEGER));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromInt() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromInt() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_INTEGER, xqi.getItemType().getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "1", xqi.getAtomicValue());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_INTEGER, xqi.getItemType().getBaseType());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "1", xqi.getAtomicValue());
   }
   
   public void testCreateItemFromLong() throws XQException {
@@ -624,7 +627,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromLong(1, null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromLong() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromLong() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -640,11 +643,11 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");       
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");       
 
     try {
       xqc.createItemFromLong(128, xqc.createAtomicType(XQItemType.XQBASETYPE_BYTE));
-      junit.framework.Assert.fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
+      fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -653,18 +656,18 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromLong(1, null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromLong() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromLong() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful bindXXX.", "1",xqi.getAtomicValue());
+    Assert.assertEquals("A-XQDF-1.5: Successful bindXXX.", "1",xqi.getAtomicValue());
 
     try {
       xqi = xqc.createItemFromLong(1, xqc.createAtomicType(XQItemType.XQBASETYPE_INTEGER));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromLong() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromLong() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_INTEGER, xqi.getItemType().getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "1", xqi.getAtomicValue()); 
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_INTEGER, xqi.getItemType().getBaseType());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "1", xqi.getAtomicValue()); 
   }
 
   public void testCreateItemFromNode() throws XQException, IOException, SAXException, ParserConfigurationException {
@@ -677,14 +680,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromNode(document, null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromNode() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromNode() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createItemFromNode(null, null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -700,17 +703,17 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");       
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");       
 
     XQItem xqi = null;
     
     try {
       xqi = xqc.createItemFromNode(document, null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromNode() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromNode() failed with message: " + e.getMessage());
     }
     String result = xqi.getItemAsString(null);
-    junit.framework.Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
+    Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains '<e>Hello world!</e>', but it is '" + result + "'", result.indexOf("<e>Hello world!</e>") != -1);
   }
   
   public void testCreateItemFromShort() throws XQException {
@@ -718,7 +721,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemFromShort((short)1, null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemFromShort() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemFromShort() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -734,11 +737,11 @@ public class XQDataFactoryTest extends XQJTestCase {
       // Expect an XQException
     }   
     if (failed)
-      junit.framework.Assert.fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");       
+      fail("A-XQDF-1.3: The conversion is subject to the following constraints. Either it fails with an XQException, either it is successful in which case it must result in an instance of XDT.");       
 
     try {
       xqc.createItemFromShort((short)128, xqc.createAtomicType(XQItemType.XQBASETYPE_BYTE));
-      junit.framework.Assert.fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
+      fail("A-XQDF-1.4: The conversion of the value to an XDM instance must fail.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -747,18 +750,18 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqi = xqc.createItemFromShort((short)1, null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromShort() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromShort() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful bindXXX.", "1",xqi.getAtomicValue());
+    Assert.assertEquals("A-XQDF-1.5: Successful bindXXX.", "1",xqi.getAtomicValue());
 
     try {
       xqi = xqc.createItemFromShort((short)1, xqc.createAtomicType(XQItemType.XQBASETYPE_INTEGER));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItemFromLong() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItemFromLong() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_INTEGER, xqi.getItemType().getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "1", xqi.getAtomicValue()); 
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQITEMKIND_ATOMIC, xqi.getItemType().getItemKind());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", XQItemType.XQBASETYPE_INTEGER, xqi.getItemType().getBaseType());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItemFromXXX.", "1", xqi.getAtomicValue()); 
   }
 
   public void testCreateItem() throws XQException {
@@ -770,14 +773,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItem(xqi);
-      junit.framework.Assert.fail("A-XQDF-1.1: createItem() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItem() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createItem(null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -786,14 +789,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqresult = xqc.createItem(xqi);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createItem() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createItem() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-1.5: Successful createItem().", "Hello world!", xqresult.getAtomicValue());
+    Assert.assertEquals("A-XQDF-1.5: Successful createItem().", "Hello world!", xqresult.getAtomicValue());
     
     xqi.close();
     try {
       xqc.createItem(xqi);
-      junit.framework.Assert.fail("A-XQDF-1.6: Passing a closed XQItem or XQSequence object as argument msut result in an XQException.");
+      fail("A-XQDF-1.6: Passing a closed XQItem or XQSequence object as argument msut result in an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -811,7 +814,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqs = xqpe.executeQuery();
     try {
       xqdf.createSequence(xqs);
-      junit.framework.Assert.fail("A-XQDF-1.1: createSequence() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createSequence() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -819,7 +822,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     
     try {
       xqc.createSequence((XQSequence)null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -829,15 +832,15 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqsresult = xqc.createSequence(xqs);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createSequence() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createSequence() failed with message: " + e.getMessage());
     }
     String result = xqsresult.getSequenceAsString(null);
-    junit.framework.Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains 'Hello world!', but it is '" + result + "'", result.indexOf("Hello world!") != -1);
+    Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains 'Hello world!', but it is '" + result + "'", result.indexOf("Hello world!") != -1);
     
     xqs.close();
     try {
       xqc.createSequence(xqs);
-      junit.framework.Assert.fail("A-XQDF-1.6: Passing a closed XQItem or XQSequence object as argument msut result in an XQException.");
+      fail("A-XQDF-1.6: Passing a closed XQItem or XQSequence object as argument msut result in an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -855,14 +858,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createSequence(list.iterator());
-      junit.framework.Assert.fail("A-XQDF-1.1: createSequence() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createSequence() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createSequence((Iterator)null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -871,10 +874,10 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqsresult = xqc.createSequence(list.iterator());
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-1.5: createSequence() failed with message: " + e.getMessage());
+      fail("A-XQDF-1.5: createSequence() failed with message: " + e.getMessage());
     }
     String result = xqsresult.getSequenceAsString(null);
-    junit.framework.Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains 'Hello world!', but it is '" + result + "'", result.indexOf("Hello world!") != -1);
+    Assert.assertTrue("A-XQDF-1.5: Expects serialized result contains 'Hello world!', but it is '" + result + "'", result.indexOf("Hello world!") != -1);
   }
 
   public void testCreateAtomicType() throws XQException {
@@ -884,14 +887,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createAtomicType(XQItemType.XQBASETYPE_UNTYPEDATOMIC);
-      junit.framework.Assert.fail("A-XQDF-1.1: createAtomicType() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createAtomicType() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createAtomicType(XQItemType.XQBASETYPE_UNTYPED);
-      junit.framework.Assert.fail("A-XQDF-2.1: createAtomicType() detects invalid xqbasetype arguments.");
+      fail("A-XQDF-2.1: createAtomicType() detects invalid xqbasetype arguments.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -899,26 +902,26 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqtype = xqc.createAtomicType(XQItemType.XQBASETYPE_UNTYPEDATOMIC);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-2.2: createAtomicType() failed with message: " + e.getMessage());
+      fail("A-XQDF-2.2: createAtomicType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.XQITEMKIND_ATOMIC, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.XQBASETYPE_UNTYPEDATOMIC, xqtype.getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
-    junit.framework.Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
-    junit.framework.Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", "untypedAtomic", xqtype.getTypeName().getLocalPart());
+    Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.XQITEMKIND_ATOMIC, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.XQBASETYPE_UNTYPEDATOMIC, xqtype.getBaseType());
+    Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
+    Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", "untypedAtomic", xqtype.getTypeName().getLocalPart());
     
     try {
       xqtype = xqc.createAtomicType(XQItemType.XQBASETYPE_UNTYPEDATOMIC,
                                     new QName("http://www.w3.org/2001/XMLSchema", "untypedAtomic"),
                                     null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-2.2: createAtomicType() failed with message: " + e.getMessage());
+      fail("A-XQDF-2.2: createAtomicType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.XQITEMKIND_ATOMIC, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.XQBASETYPE_UNTYPEDATOMIC, xqtype.getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
-    junit.framework.Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
-    junit.framework.Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", "untypedAtomic", xqtype.getTypeName().getLocalPart());
+    Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.XQITEMKIND_ATOMIC, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.XQBASETYPE_UNTYPEDATOMIC, xqtype.getBaseType());
+    Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
+    Assert.assertEquals("A-XQDF-2.2: Successful createAtomicType.", "untypedAtomic", xqtype.getTypeName().getLocalPart());
   }
   
   public void testCreateAttributeType() throws XQException {
@@ -928,14 +931,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createAttributeType(new QName("a"), XQItemType.XQBASETYPE_INTEGER);
-      junit.framework.Assert.fail("A-XQDF-1.1: createAttributeType() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createAttributeType() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createAttributeType(new QName("a"), XQItemType.XQBASETYPE_UNTYPED);
-      junit.framework.Assert.fail("A-XQDF-3.1: createAtomicType() detects invalid xqbasetype arguments.");
+      fail("A-XQDF-3.1: createAtomicType() detects invalid xqbasetype arguments.");
     } catch (XQException e) {
       // Expect an XQException
     }    
@@ -943,14 +946,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqtype = xqc.createAttributeType(new QName("a"), XQItemType.XQBASETYPE_INTEGER);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-3.2: createAttributeType() failed with message: " + e.getMessage());
+      fail("A-XQDF-3.2: createAttributeType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.XQITEMKIND_ATTRIBUTE, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", new QName("a"), xqtype.getNodeName());
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", "integer", xqtype.getTypeName().getLocalPart());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.XQITEMKIND_ATTRIBUTE, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getBaseType());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", new QName("a"), xqtype.getNodeName());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", "integer", xqtype.getTypeName().getLocalPart());
     
     try {
       xqtype = xqc.createAttributeType(new QName("a"),
@@ -958,14 +961,14 @@ public class XQDataFactoryTest extends XQJTestCase {
                                        new QName("http://www.w3.org/2001/XMLSchema", "integer"),
                                        null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-3.2: createAtomicType() failed with message: " + e.getMessage());
+      fail("A-XQDF-3.2: createAtomicType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.XQITEMKIND_ATTRIBUTE, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", new QName("a"), xqtype.getNodeName());
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
-    junit.framework.Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", "integer", xqtype.getTypeName().getLocalPart());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.XQITEMKIND_ATTRIBUTE, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getBaseType());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", new QName("a"), xqtype.getNodeName());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
+    Assert.assertEquals("A-XQDF-3.2: Successful createAttributeType.", "integer", xqtype.getTypeName().getLocalPart());
   }
   
   public void testCreateSchemaAttributeType() throws XQException {
@@ -979,7 +982,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createCommentType();
-      junit.framework.Assert.fail("A-XQDF-1.1: createCommentType() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createCommentType() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -987,10 +990,10 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqtype = xqc.createCommentType();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-4.1: createCommentType() failed with message: " + e.getMessage());
+      fail("A-XQDF-4.1: createCommentType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-4.1: Successful createCommentType.", XQItemType.XQITEMKIND_COMMENT, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-4.1: Successful createCommentType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-4.1: Successful createCommentType.", XQItemType.XQITEMKIND_COMMENT, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-4.1: Successful createCommentType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
   }
   
   public void testCreateDocumentElementType() throws XQException {
@@ -1000,21 +1003,21 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createDocumentElementType(xqc.createElementType(new QName("e"), XQItemType.XQBASETYPE_UNTYPED));
-      junit.framework.Assert.fail("A-XQDF-1.1: createDocumentElementType() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createDocumentElementType() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createDocumentElementType(xqc.createCommentType());
-      junit.framework.Assert.fail("A-XQDF-5.1: createDocumentElementType() detects invalid elementType argument.");
+      fail("A-XQDF-5.1: createDocumentElementType() detects invalid elementType argument.");
     } catch (XQException e) {
       // Expect an XQException
     }    
 
     try {
       xqc.createDocumentElementType(null);
-      junit.framework.Assert.fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
+      fail("A-XQDF-1.2: null argument is invalid and throws an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }   
@@ -1022,14 +1025,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqtype = xqc.createDocumentElementType(xqc.createElementType(new QName("e"), XQItemType.XQBASETYPE_INTEGER));
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-5.2: createDocumentElementType() failed with message: " + e.getMessage());
+      fail("A-XQDF-5.2: createDocumentElementType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", XQItemType.XQITEMKIND_DOCUMENT_ELEMENT, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
-    junit.framework.Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", new QName("e"), xqtype.getNodeName());
-    junit.framework.Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
-    junit.framework.Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", "integer", xqtype.getTypeName().getLocalPart());
+    Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", XQItemType.XQITEMKIND_DOCUMENT_ELEMENT, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getBaseType());
+    Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", new QName("e"), xqtype.getNodeName());
+    Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
+    Assert.assertEquals("A-XQDF-5.2: Successful createDocumentElementType.", "integer", xqtype.getTypeName().getLocalPart());
   }
 
   public void testCreateDocumentSchemaElementType() throws XQException {
@@ -1043,7 +1046,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createDocumentType();
-      junit.framework.Assert.fail("A-XQDF-1.1: createDocumentType() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createDocumentType() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -1051,10 +1054,10 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqtype = xqc.createDocumentType();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-6.1: createDocumentType() failed with message: " + e.getMessage());
+      fail("A-XQDF-6.1: createDocumentType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-6.1: Successful createDocumentType.", XQItemType.XQITEMKIND_DOCUMENT, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-6.1: Successful createDocumentType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-6.1: Successful createDocumentType.", XQItemType.XQITEMKIND_DOCUMENT, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-6.1: Successful createDocumentType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
   }  
 
   public void testCreateElementType() throws XQException {
@@ -1064,7 +1067,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createElementType(new QName("a"), XQItemType.XQBASETYPE_INTEGER);
-      junit.framework.Assert.fail("A-XQDF-1.1: createElementType() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createElementType() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -1072,14 +1075,14 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqtype = xqc.createElementType(new QName("a"), XQItemType.XQBASETYPE_INTEGER);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-7.1: createElementType() failed with message: " + e.getMessage());
+      fail("A-XQDF-7.1: createElementType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.XQITEMKIND_ELEMENT, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", new QName("a"), xqtype.getNodeName());
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", "integer", xqtype.getTypeName().getLocalPart());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.XQITEMKIND_ELEMENT, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getBaseType());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", new QName("a"), xqtype.getNodeName());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", "integer", xqtype.getTypeName().getLocalPart());
     
     try {
       xqtype = xqc.createElementType(new QName("a"),
@@ -1088,14 +1091,14 @@ public class XQDataFactoryTest extends XQJTestCase {
                                        null,
                                        true);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-7.1: createElementType() failed with message: " + e.getMessage());
+      fail("A-XQDF-7.1: createElementType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.XQITEMKIND_ELEMENT, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", new QName("a"), xqtype.getNodeName());
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
-    junit.framework.Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", "integer", xqtype.getTypeName().getLocalPart());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.XQITEMKIND_ELEMENT, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getBaseType());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", new QName("a"), xqtype.getNodeName());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", "http://www.w3.org/2001/XMLSchema", xqtype.getTypeName().getNamespaceURI());
+    Assert.assertEquals("A-XQDF-7.1: Successful createElementType.", "integer", xqtype.getTypeName().getLocalPart());
   }
   
   public void testCreateSchemaElementType() throws XQException {
@@ -1109,7 +1112,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createItemType();
-      junit.framework.Assert.fail("A-XQDF-1.1: createItemType() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createItemType() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -1117,10 +1120,10 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqtype = xqc.createItemType();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-8.1: createItemType() failed with message: " + e.getMessage());
+      fail("A-XQDF-8.1: createItemType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-8.1: Successful createItemType.", XQItemType.XQITEMKIND_ITEM, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-8.1: Successful createItemType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-8.1: Successful createItemType.", XQItemType.XQITEMKIND_ITEM, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-8.1: Successful createItemType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
   }  
 
   public void testCreateNodeType() throws XQException {
@@ -1130,7 +1133,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createNodeType();
-      junit.framework.Assert.fail("A-XQDF-1.1: createNodeType() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createNodeType() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -1138,10 +1141,10 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqtype = xqc.createNodeType();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-9.1: createNodeType() failed with message: " + e.getMessage());
+      fail("A-XQDF-9.1: createNodeType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-9.1: Successful createNodeType.", XQItemType.XQITEMKIND_NODE, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-9.1: Successful createNodeType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-9.1: Successful createNodeType.", XQItemType.XQITEMKIND_NODE, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-9.1: Successful createNodeType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
   }   
 
   public void testCreateProcessingInstructionType() throws XQException {
@@ -1151,7 +1154,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createProcessingInstructionType(null);
-      junit.framework.Assert.fail("A-XQDF-1.1: createProcessingInstructionType() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createProcessingInstructionType() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -1159,20 +1162,20 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqtype = xqc.createProcessingInstructionType(null);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-9.1: createProcessingInstructionType() failed with message: " + e.getMessage());
+      fail("A-XQDF-9.1: createProcessingInstructionType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", XQItemType.XQITEMKIND_PI, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", (String)null, xqtype.getPIName());
-    junit.framework.Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", XQItemType.XQITEMKIND_PI, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", (String)null, xqtype.getPIName());
+    Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
     
     try {
       xqtype = xqc.createProcessingInstructionType("Hello");
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-9.1: createProcessingInstructionType() failed with message: " + e.getMessage());
+      fail("A-XQDF-9.1: createProcessingInstructionType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", XQItemType.XQITEMKIND_PI, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", "Hello", xqtype.getPIName());
-    junit.framework.Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", XQItemType.XQITEMKIND_PI, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", "Hello", xqtype.getPIName());
+    Assert.assertEquals("A-XQDF-9.1: Successful createProcessingInstructionType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
   }  
   
   public void testCreateTextType() throws XQException {
@@ -1182,7 +1185,7 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createTextType();
-      junit.framework.Assert.fail("A-XQDF-1.1: createTextType() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createTextType() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -1190,10 +1193,10 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqtype = xqc.createTextType();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-10.1: createTextType() failed with message: " + e.getMessage());
+      fail("A-XQDF-10.1: createTextType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-10.1: Successful createTextType.", XQItemType.XQITEMKIND_TEXT, xqtype.getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-10.1: Successful createTextType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-10.1: Successful createTextType.", XQItemType.XQITEMKIND_TEXT, xqtype.getItemKind());
+    Assert.assertEquals("A-XQDF-10.1: Successful createTextType.", XQItemType.OCC_EXACTLY_ONE, xqtype.getItemOccurrence());
   }    
 
   public void testCreateSequenceType() throws XQException {
@@ -1203,28 +1206,28 @@ public class XQDataFactoryTest extends XQJTestCase {
     xqdf.close();
     try {
       xqdf.createSequenceType(xqc.createElementType(new QName("e"), XQItemType.XQBASETYPE_UNTYPED), XQSequenceType.OCC_EXACTLY_ONE);
-      junit.framework.Assert.fail("A-XQDF-1.1: createSequenceType() throws an XQException when the data factory is in closed state.");
+      fail("A-XQDF-1.1: createSequenceType() throws an XQException when the data factory is in closed state.");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createSequenceType(xqc.createElementType(new QName("e"), XQItemType.XQBASETYPE_UNTYPED), XQSequenceType.OCC_EMPTY);
-      junit.framework.Assert.fail("A-XQDF-11.1: item type parameter of createSequenceType() must be null with occurrence indicator empty.");
+      fail("A-XQDF-11.1: item type parameter of createSequenceType() must be null with occurrence indicator empty.");
     } catch (XQException e) {
       // Expect an XQException
     }    
 
     try {
       xqc.createSequenceType(null, XQSequenceType.OCC_EXACTLY_ONE);
-      junit.framework.Assert.fail("A-XQDF-11.2: item type parameter of createSequenceType() must be not null with occurrence indicator different from empty.");
+      fail("A-XQDF-11.2: item type parameter of createSequenceType() must be not null with occurrence indicator different from empty.");
     } catch (XQException e) {
       // Expect an XQException
     }   
 
     try {
       xqc.createSequenceType(xqc.createElementType(new QName("e"), XQItemType.XQBASETYPE_UNTYPED), 777);
-      junit.framework.Assert.fail("A-XQDF-11.3: createSequenceType() detects invalid occurrence indicator.");
+      fail("A-XQDF-11.3: createSequenceType() detects invalid occurrence indicator.");
     } catch (XQException e) {
       // Expect an XQException
     }  
@@ -1232,13 +1235,13 @@ public class XQDataFactoryTest extends XQJTestCase {
     try {
       xqtype = xqc.createSequenceType(xqc.createElementType(new QName("e"), XQItemType.XQBASETYPE_INTEGER), XQSequenceType.OCC_ONE_OR_MORE);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQDF-11.4: createSequenceType() failed with message: " + e.getMessage());
+      fail("A-XQDF-11.4: createSequenceType() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", XQItemType.XQITEMKIND_ELEMENT, xqtype.getItemType().getItemKind());
-    junit.framework.Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getItemType().getBaseType());
-    junit.framework.Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", XQItemType.OCC_ONE_OR_MORE, xqtype.getItemOccurrence());
-    junit.framework.Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", new QName("e"), xqtype.getItemType().getNodeName());
-    junit.framework.Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", "http://www.w3.org/2001/XMLSchema", xqtype.getItemType().getTypeName().getNamespaceURI());
-    junit.framework.Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", "integer", xqtype.getItemType().getTypeName().getLocalPart());
+    Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", XQItemType.XQITEMKIND_ELEMENT, xqtype.getItemType().getItemKind());
+    Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", XQItemType.XQBASETYPE_INTEGER, xqtype.getItemType().getBaseType());
+    Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", XQItemType.OCC_ONE_OR_MORE, xqtype.getItemOccurrence());
+    Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", new QName("e"), xqtype.getItemType().getNodeName());
+    Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", "http://www.w3.org/2001/XMLSchema", xqtype.getItemType().getTypeName().getNamespaceURI());
+    Assert.assertEquals("A-XQDF-11.4: Successful createSequenceType.", "integer", xqtype.getItemType().getTypeName().getLocalPart());
   }
 }

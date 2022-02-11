@@ -1,8 +1,11 @@
 // Copyright (c) 2003, 2006, 2007, Oracle. All rights reserved.
 package com.oracle.xqj.tck.testcases;
 
+import org.junit.Assert;
+
 import javax.xml.namespace.QName;
 import java.util.Locale;
+import javax.xml.xquery.*;
 
 public class SaxonXQExternalFunctionTest extends XQJTestCase {
 
@@ -29,7 +32,8 @@ public class SaxonXQExternalFunctionTest extends XQJTestCase {
         exp.bindItem(new QName("locale"), italianLocale);
         XQResultSequence result = exp.executeQuery();
         result.next();
-        junit.framework.Assert.assertEquals("A-SXQEF-1.1: wrong result", result.getAtomicValue(), "Italian");
+
+        Assert.assertEquals("A-SXQEF-1.1: wrong result", result.getAtomicValue(), "Italian");
 
     }
 

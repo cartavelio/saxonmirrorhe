@@ -4,6 +4,10 @@ package com.oracle.xqj.tck.testcases;
 import javax.xml.xquery.*;
 import java.io.*;
 
+import org.junit.Assert;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class XQConnectionTest extends XQJTestCase {
 
   public void testClose() throws XQException {
@@ -20,11 +24,11 @@ public class XQConnectionTest extends XQJTestCase {
       my_xqc.close(); 
       my_xqc.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-1.1: closing connection failed with message: " + e.getMessage());
+      fail("A-XQC-1.1: closing connection failed with message: " + e.getMessage());
     }
 
-    junit.framework.Assert.assertEquals("A-XQC-1.2: closing a connection, closes dependent objects", true, xqe.isClosed());    
-    junit.framework.Assert.assertEquals("A-XQC-1.2: closing a connection, closes dependent objects", true, xqs.isClosed());
+    Assert.assertEquals("A-XQC-1.2: closing a connection, closes dependent objects", true, xqe.isClosed());    
+    Assert.assertEquals("A-XQC-1.2: closing a connection, closes dependent objects", true, xqs.isClosed());
   }
 
   public void testSetAutoCommit() throws XQException {
@@ -36,7 +40,7 @@ public class XQConnectionTest extends XQJTestCase {
       
       try {
         my_xqc.setAutoCommit(true);
-        junit.framework.Assert.fail("A-XQC-2.1: closed connection supports setAutoCommit()");
+        fail("A-XQC-2.1: closed connection supports setAutoCommit()");
       } catch (XQException e) {
         // Expect an XQException
       }
@@ -45,7 +49,7 @@ public class XQConnectionTest extends XQJTestCase {
         xqc.setAutoCommit(false);
         xqc.setAutoCommit(true);
       } catch (XQException e) {
-        junit.framework.Assert.fail("A-XQC-2.2: changing auto commit mode failed with message: " + e.getMessage());
+        fail("A-XQC-2.2: changing auto commit mode failed with message: " + e.getMessage());
       }
     }
   }
@@ -59,7 +63,7 @@ public class XQConnectionTest extends XQJTestCase {
       
       try {
         my_xqc.getAutoCommit();
-        junit.framework.Assert.fail("A-XQC-3.1: closed connection supports getAutoCommit()");
+        fail("A-XQC-3.1: closed connection supports getAutoCommit()");
       } catch (XQException e) {
         // Expect an XQException
       }
@@ -68,18 +72,18 @@ public class XQConnectionTest extends XQJTestCase {
       try {
         mode = xqc.getAutoCommit();
       } catch (XQException e) {
-        junit.framework.Assert.fail("A-XQC-3.2: getAutoCommit() failed with message: " + e.getMessage());
+        fail("A-XQC-3.2: getAutoCommit() failed with message: " + e.getMessage());
       }
-      junit.framework.Assert.assertTrue("A-XQC-3.2: The default auto commit mode is true.", mode);
+      Assert.assertTrue("A-XQC-3.2: The default auto commit mode is true.", mode);
       
       mode = true;
       try {
         xqc.setAutoCommit(false);
         mode = xqc.getAutoCommit();
       } catch (XQException e) {
-        junit.framework.Assert.fail("A-XQC-3.3: Retrieve the auto commit mode failed with message: " + e.getMessage());
+        fail("A-XQC-3.3: Retrieve the auto commit mode failed with message: " + e.getMessage());
       }
-      junit.framework.Assert.assertFalse("A-XQC-3.3: Successfully retrieve the auto commit mode.", mode);
+      Assert.assertFalse("A-XQC-3.3: Successfully retrieve the auto commit mode.", mode);
     }
   }
 
@@ -92,14 +96,14 @@ public class XQConnectionTest extends XQJTestCase {
       
       try {
         my_xqc.commit();
-        junit.framework.Assert.fail("A-XQC-4.1: closed connection supports commit()");
+        fail("A-XQC-4.1: closed connection supports commit()");
       } catch (XQException e) {
         // Expect an XQException
       }
 
       try {
         xqc.commit();
-        junit.framework.Assert.fail("A-XQC-4.2: commit() on a connection in auto commit mode must fail");
+        fail("A-XQC-4.2: commit() on a connection in auto commit mode must fail");
       } catch (XQException e) {
         // Expect an XQException
       }
@@ -108,7 +112,7 @@ public class XQConnectionTest extends XQJTestCase {
         xqc.setAutoCommit(false);
         xqc.commit();
       } catch (XQException e) {
-        junit.framework.Assert.fail("A-XQC-4.3: commit() failed with message: " + e.getMessage());
+        fail("A-XQC-4.3: commit() failed with message: " + e.getMessage());
       }
     }
   }
@@ -121,7 +125,7 @@ public class XQConnectionTest extends XQJTestCase {
     
     try {
       my_xqc.createExpression();
-      junit.framework.Assert.fail("A-XQC-5.1: closed connection supports creating expressions");
+      fail("A-XQC-5.1: closed connection supports creating expressions");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -132,7 +136,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqe = xqc.createExpression();
       xqe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-5.2: creating an expression failed with message: " + e.getMessage());
+      fail("A-XQC-5.2: creating an expression failed with message: " + e.getMessage());
     }
     
     try {
@@ -143,7 +147,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqe.executeQuery("<foo:e/>");
       xqe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-5.3: Failed to copy the default static context with message: " + e.getMessage());
+      fail("A-XQC-5.3: Failed to copy the default static context with message: " + e.getMessage());
     }
   }
 
@@ -156,14 +160,14 @@ public class XQConnectionTest extends XQJTestCase {
     
     try {
       my_xqc.createExpression(my_xqsc);
-      junit.framework.Assert.fail("A-XQC-5.1: closed connection supports creating expressions");
+      fail("A-XQC-5.1: closed connection supports creating expressions");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.createExpression(null);
-      junit.framework.Assert.fail("A-XQC-5.5: createExpression() with a null XQStaticContext must throw an XQException.");
+      fail("A-XQC-5.5: createExpression() with a null XQStaticContext must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -175,7 +179,7 @@ public class XQConnectionTest extends XQJTestCase {
      xqe = xqc.createExpression(xqsc);
      xqe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-5.2: creating an expression failed with message: " + e.getMessage());
+      fail("A-XQC-5.2: creating an expression failed with message: " + e.getMessage());
     }
     
     try {
@@ -184,7 +188,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqe.executeQuery("<foo:e/>");
       xqe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-5.4: Properties of the explicitly specified static context are used- failed with message: " + e.getMessage());
+      fail("A-XQC-5.4: Properties of the explicitly specified static context are used- failed with message: " + e.getMessage());
     }
   }
   
@@ -196,7 +200,7 @@ public class XQConnectionTest extends XQJTestCase {
     
     try {
       my_xqc.getMetaData();
-      junit.framework.Assert.fail("A-XQC-6.1: closed connection supports getting meta data");
+      fail("A-XQC-6.1: closed connection supports getting meta data");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -204,7 +208,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
      xqc.getMetaData();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-6.2: getting the meta data failed with message: " + e.getMessage());
+      fail("A-XQC-6.2: getting the meta data failed with message: " + e.getMessage());
     }
   }
   
@@ -213,9 +217,9 @@ public class XQConnectionTest extends XQJTestCase {
     XQConnection my_xqc;
     my_xqc = xqds.getConnection();
     
-    junit.framework.Assert.assertEquals("A-XQC-7.1: isClosed() on open connection", false, my_xqc.isClosed());
+    Assert.assertEquals("A-XQC-7.1: isClosed() on open connection", false, my_xqc.isClosed());
     my_xqc.close();
-    junit.framework.Assert.assertEquals("A-XQC-7.2: isClosed() on closed connection", true, my_xqc.isClosed());
+    Assert.assertEquals("A-XQC-7.2: isClosed() on closed connection", true, my_xqc.isClosed());
   }
 
   public void testPrepareExpression() throws XQException {
@@ -226,7 +230,7 @@ public class XQConnectionTest extends XQJTestCase {
     
     try {
       my_xqc.prepareExpression("'Hello world!'");
-      junit.framework.Assert.fail("A-XQC-8.1: closed connection supports preparing expressions");
+      fail("A-XQC-8.1: closed connection supports preparing expressions");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -236,7 +240,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression("'Hello world!");
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
+      fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -244,7 +248,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression((String)null);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
+      fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -253,7 +257,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe = xqc.prepareExpression("'Hello world!'");
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
+      fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
     }
     
     try {
@@ -264,7 +268,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe.executeQuery();
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.3: Failed to copy the default static context with message: " + e.getMessage());
+      fail("A-XQC-8.3: Failed to copy the default static context with message: " + e.getMessage());
     }
   }
 
@@ -277,7 +281,7 @@ public class XQConnectionTest extends XQJTestCase {
     
     try {
       my_xqc.prepareExpression("'Hello world!'", my_xqsc);
-      junit.framework.Assert.fail("A-XQC-8.1: closed connection supports preparing expressions");
+      fail("A-XQC-8.1: closed connection supports preparing expressions");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -288,7 +292,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression("'Hello world!", xqsc);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
+      fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -296,7 +300,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression("'Hello world!'", (XQStaticContext)null);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.5: prepareExpression() with a null XQStaticContext must throw an XQException.");
+      fail("A-XQC-8.5: prepareExpression() with a null XQStaticContext must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -304,7 +308,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression((String)null, xqsc);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
+      fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -313,7 +317,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe = xqc.prepareExpression("'Hello world!'", xqsc);
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
+      fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
     }
     
     try {
@@ -322,7 +326,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe.executeQuery();
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.4: Properties of the explicitly specified static context are used - failed with message: " + e.getMessage());
+      fail("A-XQC-8.4: Properties of the explicitly specified static context are used - failed with message: " + e.getMessage());
     }
   }
 
@@ -334,7 +338,7 @@ public class XQConnectionTest extends XQJTestCase {
     
     try {
       my_xqc.prepareExpression(new StringReader("'Hello world!'"));
-      junit.framework.Assert.fail("A-XQC-8.1: closed connection supports preparing expressions");
+      fail("A-XQC-8.1: closed connection supports preparing expressions");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -344,7 +348,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression(new StringReader("'Hello world!"));
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
+      fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -352,7 +356,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression((Reader)null);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
+      fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -361,7 +365,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe = xqc.prepareExpression(new StringReader("'Hello world!'"));
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
+      fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
     }
     
     try {
@@ -372,7 +376,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe.executeQuery();
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.3: Failed to copy the default static context with message: " + e.getMessage());
+      fail("A-XQC-8.3: Failed to copy the default static context with message: " + e.getMessage());
     }
   }
 
@@ -385,7 +389,7 @@ public class XQConnectionTest extends XQJTestCase {
     
     try {
       my_xqc.prepareExpression(new StringReader("'Hello world!'"), my_xqsc);
-      junit.framework.Assert.fail("A-XQC-8.1: closed connection supports preparing expressions");
+      fail("A-XQC-8.1: closed connection supports preparing expressions");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -396,7 +400,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression(new StringReader("'Hello world!"), xqsc);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
+      fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -404,7 +408,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression(new StringReader("'Hello world!'"), (XQStaticContext)null);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.5: prepareExpression() with a null XQStaticContext must throw an XQException.");
+      fail("A-XQC-8.5: prepareExpression() with a null XQStaticContext must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -412,7 +416,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression((Reader)null, xqsc);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
+      fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -421,7 +425,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe = xqc.prepareExpression(new StringReader("'Hello world!'"), xqsc);
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
+      fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
     }
     
     try {
@@ -430,7 +434,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe.executeQuery();
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.4: Properties of the explicitly specified static context are used - failed with message: " + e.getMessage());
+      fail("A-XQC-8.4: Properties of the explicitly specified static context are used - failed with message: " + e.getMessage());
     }
   }
 
@@ -442,7 +446,7 @@ public class XQConnectionTest extends XQJTestCase {
     
     try {
       my_xqc.prepareExpression(new ByteArrayInputStream("'Hello world!'".getBytes("UTF-8")));
-      junit.framework.Assert.fail("A-XQC-8.1: closed connection supports preparing expressions");
+      fail("A-XQC-8.1: closed connection supports preparing expressions");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -452,7 +456,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression(new ByteArrayInputStream("'Hello world!".getBytes("UTF-8")));
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
+      fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -460,7 +464,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression((InputStream)null);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
+      fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -469,7 +473,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe = xqc.prepareExpression(new ByteArrayInputStream("'Hello world!'".getBytes("UTF-8")));
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
+      fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
     }
     
     try {
@@ -480,7 +484,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe.executeQuery();
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.3: Failed to copy the default static context with message: " + e.getMessage());
+      fail("A-XQC-8.3: Failed to copy the default static context with message: " + e.getMessage());
     }
   }
 
@@ -493,7 +497,7 @@ public class XQConnectionTest extends XQJTestCase {
     
     try {
       my_xqc.prepareExpression(new ByteArrayInputStream("'Hello world!'".getBytes("UTF-8")), my_xqsc);
-      junit.framework.Assert.fail("A-XQC-8.1: closed connection supports preparing expressions");
+      fail("A-XQC-8.1: closed connection supports preparing expressions");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -504,7 +508,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression(new ByteArrayInputStream("'Hello world!".getBytes("UTF-8")), xqsc);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
+      fail("A-XQC-8.7: prepareExpression() with invalid XQuery expression must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -512,7 +516,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression(new ByteArrayInputStream("'Hello world!'".getBytes("UTF-8")), (XQStaticContext)null);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.5: prepareExpression() with a null XQStaticContext must throw an XQException.");
+      fail("A-XQC-8.5: prepareExpression() with a null XQStaticContext must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -520,7 +524,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqpe = xqc.prepareExpression((InputStream)null, xqsc);
       xqpe.close();
-      junit.framework.Assert.fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
+      fail("A-XQC-8.6: prepareExpression() with a null xquery argument must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -529,7 +533,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe = xqc.prepareExpression(new ByteArrayInputStream("'Hello world!'".getBytes("UTF-8")), xqsc);
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
+      fail("A-XQC-8.2: preparing an expression failed with message: " + e.getMessage());
     }
     
     try {
@@ -538,7 +542,7 @@ public class XQConnectionTest extends XQJTestCase {
       xqpe.executeQuery();
       xqpe.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-8.4: Properties of the explicitly specified static context are used - failed with message: " + e.getMessage());
+      fail("A-XQC-8.4: Properties of the explicitly specified static context are used - failed with message: " + e.getMessage());
     }
   }
 
@@ -551,14 +555,14 @@ public class XQConnectionTest extends XQJTestCase {
       
       try {
         my_xqc.rollback();
-        junit.framework.Assert.fail("A-XQC-9.1: closed connection supports rollback()");
+        fail("A-XQC-9.1: closed connection supports rollback()");
       } catch (XQException e) {
         // Expect an XQException
       }
 
       try {
         xqc.rollback();
-        junit.framework.Assert.fail("A-XQC-9.2: rollback() on a connection in auto commit mode must fail");
+        fail("A-XQC-9.2: rollback() on a connection in auto commit mode must fail");
       } catch (XQException e) {
         // Expect an XQException
       }
@@ -567,7 +571,7 @@ public class XQConnectionTest extends XQJTestCase {
         xqc.setAutoCommit(false);
         xqc.rollback();
       } catch (XQException e) {
-        junit.framework.Assert.fail("A-XQC-9.3: rollback() failed with message: " + e.getMessage());
+        fail("A-XQC-9.3: rollback() failed with message: " + e.getMessage());
       }
     }
   }
@@ -580,7 +584,7 @@ public class XQConnectionTest extends XQJTestCase {
     
     try {
       my_xqc.getStaticContext();
-      junit.framework.Assert.fail("A-XQC-10.1: closed connection supports getting the static context");
+      fail("A-XQC-10.1: closed connection supports getting the static context");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -588,7 +592,7 @@ public class XQConnectionTest extends XQJTestCase {
     try {
       xqc.getStaticContext();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-10.2: getting the static context failed with message: " + e.getMessage());
+      fail("A-XQC-10.2: getting the static context failed with message: " + e.getMessage());
     }
   }
 
@@ -601,14 +605,14 @@ public class XQConnectionTest extends XQJTestCase {
     
     try {
       my_xqc.setStaticContext(my_xqsc);
-      junit.framework.Assert.fail("A-XQC-11.1: closed connection supports setting the static context");
+      fail("A-XQC-11.1: closed connection supports setting the static context");
     } catch (XQException e) {
       // Expect an XQException
     }
 
     try {
       xqc.setStaticContext(null);
-      junit.framework.Assert.fail("A-XQC-11.2: setStaticContext() with a null argument must throw an XQException.");
+      fail("A-XQC-11.2: setStaticContext() with a null argument must throw an XQException.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -617,7 +621,7 @@ public class XQConnectionTest extends XQJTestCase {
       XQStaticContext xqsc = xqc.getStaticContext();
       xqc.setStaticContext(xqsc);
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQC-11.3: getting the static context failed with message: " + e.getMessage());
+      fail("A-XQC-11.3: getting the static context failed with message: " + e.getMessage());
     }
   }
 
