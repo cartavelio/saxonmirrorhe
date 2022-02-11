@@ -41,10 +41,21 @@ import javax.xml.transform.URIResolver;
  * </ul>
  *
  * Each <code>Configuration</code> has its own resource resolver and they are independent of each other.
- * It is possible to specify a new, common resolver by providing a concrete extension of the
- * <code>CommonResourceResolver</code> class. This does not replace the existing APIs which allow
+ * It is possible to specify a new, common resolver for a <code>Configuration</code> by providing a concrete extension of the
+ * <code>CommonResourceResolver</code> class to {@link net.sf.saxon.Configuration#setCommonResourceResolver}.
+ * This does not replace the existing APIs which allow
  * an application to specify individual resolvers in various places. Those resolvers will take precedence
  * over the common resolver.
+ *
+ * It is a common feature of existing resolver APIs that they chain together. For example,
+ * it is often the case that when a new <code>EntityResolver</code> is added to an <code>XMLReader</code>,
+ * it is configured so that the existing (possibly underlying, implementation defined) resolver will be called
+ * if the newly specified resolver fails to resolve the URI.
+ *
+ * The <code>chain</code> methods allow for this kind of chaining. A <code>CommonResourceResolver</code>
+ * can be instructed to chain failed entity resolution through a previous or different resolver.
+ *
+ * The chain methods returns "this" so that calls to the chain methods can be strung together in a fluent style.
  *
  * @since 11
  */
@@ -55,8 +66,33 @@ public abstract class CommonResourceResolver implements EntityResolver, EntityRe
     protected URIResolver nextURIResolver = null;
     protected NamespaceResolver nextNamespaceResolver = null;
 
+    /**
+     * Return a new instance of the resolver. This method allows a new resolver to be constructed
+     * that has the same underlying (implementation specific) configuration as an existing resolver.
+     * @return a new resolver.
+     */
     public abstract CommonResourceResolver newInstance();
+
+    /**
+     * Returns a feature setting from the resolver. As the standard version of this resolver is
+     * built on top of the XML Resolver, we simply reuse those feature keys. An alternate implementation
+     * is not required to support all the keys and may choose alternate implementations for them.
+     * @param feature The feature setting
+     * @param <T> The type of the feature
+     * @return The value of the feature
+     */
     public abstract <T> T getFeature(ResolverFeature<T> feature);
+
+    /**
+     * Sets a feature in the resolver. As the standard version of this resolver is
+     * built on top of the XML Resolver, we simply reuse those feature keys. An alternate implementation
+     * is not required to support all the keys and may choose alternate implementations for them.
+     * @param feature The feature setting
+     * @param value The desired value for that feature
+     * @param <T> The type of the feature
+     * @throws XPathException if the feature is unsupported or the value is not usable
+     * @throws NullPointerException if the feature is null or if the value is null and null is not an acceptable value for the feature.
+     */
     public abstract <T> void setFeature(ResolverFeature<T> feature, T value) throws XPathException;
 
     protected void copyFrom(CommonResourceResolver resolver) {
@@ -66,6 +102,13 @@ public abstract class CommonResourceResolver implements EntityResolver, EntityRe
         nextNamespaceResolver = resolver.nextNamespaceResolver;
     }
 
+    /**
+     * Chains an <code>EntityResolver</code> to this resolver.
+     *
+     * @param resolver the fallback resolver. If the fallback resolver is an instance of <code>EntityResolver2</code>,
+     *                 it will be used as the fallback for that interface as well.
+     * @return this
+     */
     public CommonResourceResolver chain(EntityResolver resolver) {
         nextEntityResolver = resolver;
         if (resolver instanceof EntityResolver2) {
@@ -74,17 +117,35 @@ public abstract class CommonResourceResolver implements EntityResolver, EntityRe
         return this;
     }
 
+    /**
+     * Chains an <code>EntityResolver2</code> to this resolver.
+     *
+     * @param resolver the fallback resolver.
+     * @return this
+     */
     public CommonResourceResolver chain(EntityResolver2 resolver) {
         nextEntityResolver = resolver;
         nextEntityResolver2 = resolver;
         return this;
     };
 
+    /**
+     * Chains a <code>URIResolver</code> to this resolver.
+     *
+     * @param resolver the fallback resolver.
+     * @return this
+     */
     public CommonResourceResolver chain(URIResolver resolver) {
         nextURIResolver = resolver;
         return this;
     }
 
+    /**
+     * Chains a <code>NamespaceResolver</code> to this resolver.
+     *
+     * @param resolver the fallback resolver.
+     * @return this
+     */
     public CommonResourceResolver chain(NamespaceResolver resolver) {
         nextNamespaceResolver = resolver;
         return this;
