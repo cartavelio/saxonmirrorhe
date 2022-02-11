@@ -63,7 +63,7 @@ public class JsonBuilder {
 
     /**
      * Parse a JSON input string, supplied as a {@code Reader} and construct an {@code XdmValue} representing
-     * its content. The {@code XdmValue} will usually be an {@code XdmMap} or {@code XdmArray}.
+     * its content. The {@link XdmValue} will usually be an {@link XdmMap} or {@link XdmArray}.
      * If the JSON input consists simply of a string, number, or boolean, then the result will be an
      * {@code XdmAtomicValue}. If the input is the JSON string "null", the method returns an
      * {@code XdmEmptySequence}.
@@ -72,7 +72,8 @@ public class JsonBuilder {
      * default options.</p>
      *
      * @param jsonReader supplies the input JSON as a stream of characters
-     * @return the result of parsing the JSON input
+     * @return the result of parsing the JSON input. This will be an {@code XdmItem} in all cases except
+     * where the input JSON text is the string "null".
      * @throws SaxonApiException if the JSON input is invalid, or if the reader throws an IOException
      * @since 11
      */
