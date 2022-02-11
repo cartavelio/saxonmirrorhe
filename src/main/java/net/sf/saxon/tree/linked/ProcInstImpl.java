@@ -127,10 +127,11 @@ public class ProcInstImpl extends NodeImpl {
      * Rename this node
      *
      * @param newNameCode the new name
+     * @param inherit
      */
 
     @Override
-    public void rename(NodeName newNameCode) {
+    public void rename(NodeName newNameCode, boolean inherit) {
         name = newNameCode.getLocalPart();
     }
 

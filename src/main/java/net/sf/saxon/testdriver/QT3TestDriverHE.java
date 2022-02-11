@@ -293,10 +293,10 @@ public class QT3TestDriverHE extends TestDriver {
             } else if ("advanced-uca-fallback".equals(value)) {
                 return (edition.equals("PE") || edition.equals("EE")) ^ inverse;
             } else if ("XQUpdate".equals(value)) {
-                if (!inverse) {
+                if (edition.equals("EE") && !inverse) {
                     env.xqueryCompiler.setUpdatingEnabled(true);
                 }
-                return (edition.equals("EE")) ^ inverse;
+                return edition.equals("EE") ^ inverse;
             } else {
                 println("**** feature = " + value + "  ????");
                 return false;
