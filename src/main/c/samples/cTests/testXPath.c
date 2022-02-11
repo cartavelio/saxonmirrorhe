@@ -35,7 +35,7 @@ int main()
     initJavaRT (environi->myDllHandle, &(environi->jvm), &(environi->env));
     const char *verCh = version(*environi);
     printf("XPath Tests\n\nSaxon version: %s \n", verCh);
-    setProperty(&properties, &propLen, &propCap, "s", "cat.xml");
+    setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
     
 
     sxnc_value * result = evaluate(environi,&processor, NULL, "/out/person", 0, properties, 0, propLen);

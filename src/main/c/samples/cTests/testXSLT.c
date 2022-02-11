@@ -40,7 +40,7 @@ int main()
     setParameter(&parameters, &parLen, &parCap,"", "numParam", num);
   
 
-    const char *result = xsltApplyStylesheet(*environi, &processor, NULL, "cat.xml","test.xsl", 0 ,0, 0, 0);
+    const char *result = xsltApplyStylesheet(*environi, &processor, NULL, "../data/cat.xml","../data/test.xsl", 0 ,0, 0, 0);
   
 	
 
