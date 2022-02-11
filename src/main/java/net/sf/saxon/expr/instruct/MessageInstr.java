@@ -14,8 +14,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryResult;
-import net.sf.saxon.s9api.HostLanguage;
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
@@ -36,10 +35,10 @@ import javax.xml.transform.stream.StreamResult;
 import java.util.Properties;
 
 /**
- * An xsl:message element in the stylesheet.
+ * An xsl:message or xsl:assert element in the stylesheet.
  */
 
-public class Message extends Instruction {
+public class MessageInstr extends Instruction {
 
     private final Operand selectOp;
     private final Operand terminateOp;
@@ -56,7 +55,7 @@ public class Message extends Instruction {
      * @param errorCode expression used to compute the error code
      */
 
-    public Message(Expression select, Expression terminate, Expression errorCode) {
+    public MessageInstr(Expression select, Expression terminate, Expression errorCode) {
         if (errorCode == null) {
             errorCode = new StringLiteral(BMPString.of("Q{" + NamespaceConstant.ERR + "}XTMM9000"));
         }
@@ -116,7 +115,7 @@ public class Message extends Instruction {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        Message exp = new Message(getSelect().copy(rebindings), getTerminate().copy(rebindings), getErrorCode().copy(rebindings));
+        MessageInstr exp = new MessageInstr(getSelect().copy(rebindings), getTerminate().copy(rebindings), getErrorCode().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
@@ -246,33 +245,15 @@ public class Message extends Instruction {
 
         controller.incrementMessageCounter(errorCode);
 
-
-        Receiver emitter = controller.makeMessageReceiver();
-        PipelineConfiguration pipe = controller.makePipelineConfiguration();
-        pipe.setHostLanguage(HostLanguage.XSLT);
-        pipe.setXPathContext(context);
-        emitter.setPipelineConfiguration(pipe);
-
-        Builder builder = null;
-        Receiver rec;
-        if (abort) {
-            builder = controller.makeBuilder();
-            rec = new MessageAdapter(new TreeReceiver(builder), errorCode.getEQName(), getLocation());
-            rec.open();
-        } else {
-            rec = new MessageAdapter(new TreeReceiver(emitter), errorCode.getEQName(), getLocation());
-        }
+        Builder builder = controller.makeBuilder();
+        Receiver rec = new MessageAdapter(new TreeReceiver(builder), errorCode.getEQName(), getLocation());
+        rec.open();
 
         ComplexContentOutputter cco = new ComplexContentOutputter(rec);
         cco.startDocument(abort ? ReceiverOption.TERMINATE : ReceiverOption.NONE);
 
         try {
             getSelect().process(cco, context);
-//            SequenceIterator iter = getSelect().iterate(context);
-//            Item item;
-//            while ((item = iter.next()) != null) {
-//                rec.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
-//            }
         } catch (XPathException e) {
             cco.append(StringItem.bmp("Error " + e.getErrorCodeLocalPart() +
                                                " while evaluating xsl:message at line "
@@ -282,16 +263,11 @@ public class Message extends Instruction {
 
         cco.endDocument();
         cco.close();
+        builder.close();
+        NodeInfo content = builder.getCurrentRoot();
+        Message message = new Message((XdmNode)XdmNode.wrap(content), new QName(errorCode), abort, getLocation());
+        controller.getMessageHandler().accept(message);
         if (abort) {
-            builder.close();
-            NodeInfo content = builder.getCurrentRoot();
-            emitter = new ProxyReceiver(emitter) {
-                @Override
-                public void startDocument(int properties) throws XPathException {
-                    super.startDocument(ReceiverOption.TERMINATE);
-                }
-            };
-            content.copy(emitter, CopyOptions.ALL_NAMESPACES, getLocation());
             TerminationException te = new TerminationException(
                     "Processing terminated by " + StandardDiagnostics.getInstructionNameDefault(this) +
                             " at line " + getLocation().getLineNumber() +
@@ -332,10 +308,6 @@ public class Message extends Instruction {
      * The MessageAdapter is a filter applied to the message pipeline which is designed to ensure that outputting an attribute
      * with no containing element (for example &lt;xsl:message select="@x"/>) is not an error. Such an attribute is wrapped in
      * a processing instruction so it can exist as a child of a document node.
-     * <p>
-     * The MessageAdapter also inserts (as the first event after startDocument) a processing instruction
-     * containing the error code, in the form &lt;?error-code Q{uri}local?>; the Location object passed
-     * with this processing instruction represents the stylesheet location of the xsl:message instruction.
      */
 
     private static class MessageAdapter extends ProxyReceiver {
@@ -351,7 +323,7 @@ public class Message extends Instruction {
         @Override
         public void startDocument(int properties) throws XPathException {
             super.startDocument(properties);
-            processingInstruction("error-code", errorCode, location, ReceiverOption.NONE);
+            //processingInstruction("error-code", errorCode, location, ReceiverOption.NONE);
         }
 
         @Override

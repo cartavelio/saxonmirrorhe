@@ -10,7 +10,7 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.Block;
-import net.sf.saxon.expr.instruct.Message;
+import net.sf.saxon.expr.instruct.MessageInstr;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
@@ -137,7 +137,7 @@ public final class XSLMessage extends StyleElement {
                 errorCode = new StringLiteral(name.getEQName());
             }
         }
-        Message m = new Message(select, terminate, errorCode);
+        MessageInstr m = new MessageInstr(select, terminate, errorCode);
         m.setRetainedStaticContext(makeRetainedStaticContext());
         return m;
     }

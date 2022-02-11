@@ -41,7 +41,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
     private static final String[] keywords = {"fallback", "lang", "version", "strength",
             "alternate", "backwards", "normalization", "maxVariable",
             "caseLevel", "caseFirst", "numeric", "reorder"}; //, "hiraganaQuaternary"
-    private static final Set<String> keys = new HashSet<String>(Arrays.asList(keywords));
+    private static final Set<String> keys = new HashSet<>(Arrays.asList(keywords));
 
     /**
      * Create a collation from a given collation URI

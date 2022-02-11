@@ -152,7 +152,7 @@ public class CommandLineOptions {
                     } else {
                         option = arg.substring(1);
                     }
-                    if (recognizedOptions.get(option) == null) {
+                    if (recognizedOptions.getOrDefault(option, -1) == -1) {
                         throw new XPathException("Command line option -" + option +
                                 " is not recognized. Options available: " + displayPermittedOptions());
                     }

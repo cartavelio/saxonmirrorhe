@@ -12,6 +12,8 @@ namespace Saxon.Api {
     /// <para>If an <c>IMessageListener</c> is nominated, however, its
     /// <c>Message</c> method will be called whenever an <c>xsl:message</c>
     /// instruction is evaluated.</para> 
+    /// <para>The <c>MessageListener2</c> interface differs from <c>MessageListener</c>
+    /// in allowing the error code supplied to <c>xsl:message</c> to be made available.</para>
     /// </remarks>
 
     public interface IMessageListener
@@ -23,12 +25,13 @@ namespace Saxon.Api {
         /// <param name="content">a document node representing the message content. Note the putput of <c>xsl:message</c>
         /// is always an XML document node. It can be flattened to obtain the stringvalue if required by calling
         /// <c>GetStringValue()</c></param>
+        /// <param name="errorCode">a QName containing the error supplied to the called on xsl:message, or its default of err:XTM9000.</param>
         /// <param name="terminate">Set to true if <c>terminate ='yes'</c> was specified or to false otherwise</param>
         /// <param name="location">an object that contains the location of the <c>xsl:message</c> This provides access to the URI of the stylesheet
         /// module and the line number of the <c>xsl:message</c></param>
 
         /**public**/
-        void Message(XdmNode content, bool terminate, IXmlLocation location);
+        void Message(XdmNode content, QName errorCode,  bool terminate, IXmlLocation location);
 
     }
 }

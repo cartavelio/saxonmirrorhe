@@ -377,11 +377,11 @@ public final class Tokenizer {
 
                     }
                     String composite = currentTokenValue + ' ' + nextTokenValue;
-                    Integer val = Token.doubleKeywords.get(composite);
-                    if (val == null) {
+                    int possibleToken = Token.doubleKeywords.getOrDefault(composite, Token.UNKNOWN);
+                    if (possibleToken == Token.UNKNOWN) {
                         break;
                     } else {
-                        currentToken = val;
+                        currentToken = possibleToken;
                         currentTokenValue = composite;
                         // some tokens are actually triples
                         if (currentToken == Token.REPLACE_VALUE) {

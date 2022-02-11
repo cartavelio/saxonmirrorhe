@@ -12,7 +12,7 @@ import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.Choose;
-import net.sf.saxon.expr.instruct.Message;
+import net.sf.saxon.expr.instruct.MessageInstr;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
@@ -123,7 +123,7 @@ public final class XSLAssert extends StyleElement {
                     errorCode = new StringLiteral(name.getEQName());
                 }
             }
-            Message msg = new Message(select, new StringLiteral("yes"), errorCode);
+            MessageInstr msg = new MessageInstr(select, new StringLiteral("yes"), errorCode);
             msg.setIsAssert(true);
             if (!(errorCode instanceof StringLiteral)) {
                 // evaluation of the error code may need the namespace context

@@ -1,4 +1,5 @@
 using System;
+using SysCollGen = System.Collections.Generic;
 using net.sf.saxon.trans.packages;
 
 namespace java.util {
@@ -11,7 +12,34 @@ namespace java.util {
         }
         
         public StringTokenizer(string input, string delim = " \t\n\r\f", bool returnDelimiters = false) {
-            // TODO:
+            if (returnDelimiters) {
+                char[] delimChars = delim.ToCharArray();
+                int start = 0;
+                SysCollGen.List<string> result = new SysCollGen.List<string>();
+                while (true) {
+                    int index = input.IndexOfAny(delimChars, start);
+                    if (index >= 0) {
+                        if (index > start) {
+                            result.Add(input.Substring(start, index - start));
+                        }
+                        result.Add(input.Substring(index, 1));
+                        start = index+1;
+                    }
+                    else {
+                        result.Add(input.Substring(start));
+                        break;
+                    }
+
+                    if (start >= input.Length) {
+                        break;
+                    }
+                }
+                tokens = result.ToArray();
+            }
+            else {
+                char[] delimChars = delim.ToCharArray();
+                tokens = input.Split(delimChars);
+            }
             
         }
 

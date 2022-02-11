@@ -27,7 +27,7 @@ namespace Saxon.Api {
         // as a wrapper around the s9api Processor, which is C# code converted from Java
 
         private net.sf.saxon.s9api.Processor jProcessor;
-        //private SchemaManager schemaManager = null;
+        private SchemaManager schemaManager = null;
         private TextWriter textWriter = Console.Error;
         private IQueryResolver moduleResolver;
         private ICollectionFinder collectionFinder = null;
@@ -48,7 +48,7 @@ namespace Saxon.Api {
             jProcessor = new net.sf.saxon.s9api.Processor(false);
             jProcessor.getUnderlyingConfiguration().setProcessor(this);
             //jProcessor.getUnderlyingConfiguration().registerExternalObjectModel(new DotNetObjectModelDefinition());
-            collectionFinder = new StandardCollectionFinder(Implementation.getCollectionFinder());
+            //collectionFinder = new StandardCollectionFinder(Implementation.getCollectionFinder());
             //standardCollectionFinder = new StandardCollectionFinder(Implementation.getStandardCollectionFinder());
         }
 
@@ -171,15 +171,17 @@ namespace Saxon.Api {
         // /// if the <c>Processor</c> is not schema-aware.
         // /// </summary>
         //
-        // public SchemaManager SchemaManager => null; // pro tem
+        public SchemaManager SchemaManager {
 
-        // get {
-        //     if (schemaManager == null) {
-        //         schemaManager = new SchemaManager(this);
-        //     }
-        //
-        //     return schemaManager;
-        // }
+            get {
+                if (schemaManager == null) {
+                    schemaManager = new SchemaManager(this);
+                }
+
+                return schemaManager;
+            }
+        }
+
         /// <summary>
         /// An <c>XmlResolver</c>, which will be used while compiling and running queries, 
         /// XPath expressions, and stylesheets, if no other <c>XmlResolver</c> is nominated
