@@ -10,6 +10,7 @@ package net.sf.saxon.tree.wrapper;
 import net.sf.saxon.om.GenericTreeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import java.util.function.Function;
 
@@ -74,6 +75,7 @@ public class RebasedDocument extends GenericTreeInfo {
      * @return true if the document contains elements whose type is other than UNTYPED
      */
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public boolean isTyped() {
         return underlyingTree.isTyped();
     }

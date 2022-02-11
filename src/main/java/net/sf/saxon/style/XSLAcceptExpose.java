@@ -80,7 +80,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
             visibility = Visibility.PRIVATE;
         } else {
             visibility = interpretVisibilityValue(visibilityAtt, this instanceof XSLAccept ? "ha" : "");
-            if (visibility == null) {
+            if (visibility == Visibility.UNDEFINED) {
                 visibility = Visibility.PRIVATE; // fall back in case of errors
             }
         }

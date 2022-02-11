@@ -801,7 +801,7 @@ public class ParseOptions {
      */
 
     public boolean isXIncludeAwareSet() {
-        return parserFeatures != null && parserFeatures.get("http://apache.org/xml/features/xinclude") != null;
+        return parserFeatures != null && parserFeatures.containsKey("http://apache.org/xml/features/xinclude");
     }
 
     /**
@@ -811,12 +811,8 @@ public class ParseOptions {
      */
 
     public boolean isXIncludeAware() {
-        if (parserFeatures == null) {
-            return false;
-        } else {
-            Boolean b = parserFeatures.get("http://apache.org/xml/features/xinclude");
-            return b != null && b;
-        }
+            return parserFeatures != null
+                    && parserFeatures.getOrDefault("http://apache.org/xml/features/xinclude", false);
     }
 
     /**

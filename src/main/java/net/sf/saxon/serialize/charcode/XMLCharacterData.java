@@ -121,6 +121,8 @@ public class XMLCharacterData {
      * Static code to initialize the data table
      */
 
+    // Note: this code is broken up into sections to circumvent a performance bug in JavaParser
+
     static {
         data[0] = (byte) 0;
         Arrays.fill(data, 1, 9, (byte) 8);
@@ -195,6 +197,8 @@ public class XMLCharacterData {
         data[991] = (byte) 57;
         data[992] = (byte) 63;
         data[993] = (byte) 57;
+    }
+    static {
         Arrays.fill(data, 994, 1012, (byte) 63);
         Arrays.fill(data, 1012, 1025, (byte) 57);
         Arrays.fill(data, 1025, 1037, (byte) 63);
@@ -293,6 +297,8 @@ public class XMLCharacterData {
         Arrays.fill(data, 2474, 2481, (byte) 63);
         data[2481] = (byte) 57;
         data[2482] = (byte) 63;
+    }
+    static {
         Arrays.fill(data, 2483, 2486, (byte) 57);
         Arrays.fill(data, 2486, 2490, (byte) 63);
         Arrays.fill(data, 2490, 2492, (byte) 57);
@@ -389,6 +395,8 @@ public class XMLCharacterData {
         Arrays.fill(data, 2874, 2876, (byte) 57);
         data[2876] = (byte) 59;
         data[2877] = (byte) 63;
+    }
+    static {
         Arrays.fill(data, 2878, 2884, (byte) 59);
         Arrays.fill(data, 2884, 2887, (byte) 57);
         Arrays.fill(data, 2887, 2889, (byte) 59);
@@ -489,6 +497,8 @@ public class XMLCharacterData {
         data[3332] = (byte) 57;
         Arrays.fill(data, 3333, 3341, (byte) 63);
         data[3341] = (byte) 57;
+    }
+    static {
         Arrays.fill(data, 3342, 3345, (byte) 63);
         data[3345] = (byte) 57;
         Arrays.fill(data, 3346, 3369, (byte) 63);
@@ -587,6 +597,8 @@ public class XMLCharacterData {
         Arrays.fill(data, 4017, 4024, (byte) 59);
         data[4024] = (byte) 57;
         data[4025] = (byte) 59;
+    }
+    static {
         Arrays.fill(data, 4026, 4256, (byte) 57);
         Arrays.fill(data, 4256, 4294, (byte) 63);
         Arrays.fill(data, 4294, 4304, (byte) 57);
@@ -686,6 +698,8 @@ public class XMLCharacterData {
         Arrays.fill(data, 8127, 8130, (byte) 57);
         Arrays.fill(data, 8130, 8133, (byte) 63);
         data[8133] = (byte) 57;
+    }
+    static {
         Arrays.fill(data, 8134, 8141, (byte) 63);
         Arrays.fill(data, 8141, 8144, (byte) 57);
         Arrays.fill(data, 8144, 8148, (byte) 63);

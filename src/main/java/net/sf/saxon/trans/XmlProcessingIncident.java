@@ -35,7 +35,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
     private boolean _isTypeError;
     private String fatalErrorMessage;
     private boolean _hasBeenReported = false;
-    private HostLanguage hostLanguage;
+    private HostLanguage hostLanguage = HostLanguage.UNKNOWN;
     private boolean _isStaticError;
 
     /**
@@ -312,7 +312,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
 
 
     public static void maybeSetHostLanguage(XmlProcessingError error, HostLanguage lang) {
-        if (error.getHostLanguage() == null) {
+        if (error.getHostLanguage() == HostLanguage.UNKNOWN) {
             if (error instanceof XmlProcessingIncident) {
                 ((XmlProcessingIncident) error).setHostLanguage(lang);
             } else if (error instanceof XmlProcessingException) {

@@ -10,6 +10,7 @@ package net.sf.saxon.tree.wrapper;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.ComplexType;
@@ -61,6 +62,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
      * @return true if the document contains elements whose type is other than UNTYPED
      */
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public boolean isTyped() {
         return underlyingTree.isTyped();
     }

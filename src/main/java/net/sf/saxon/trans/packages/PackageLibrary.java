@@ -200,8 +200,8 @@ public class PackageLibrary {
             PackageDetails details = packages.get(new VersionedPackageName(name, pv));
             if (ranges.contains(pv)) {
                 candidates.add(details);
-                Integer priority = details.priority;
-                if (priority != null && priority > maxPriority) {
+                int priority = details.priority;
+                if (priority > maxPriority) {
                     maxPriority = priority;
                 }
             }
@@ -228,9 +228,10 @@ public class PackageLibrary {
                 }
             } else {
                 for (PackageDetails details : candidates) {
-                    Integer priority = details.priority;
+                    int priority = details.priority;
                     PackageVersion pv = details.nameAndVersion.packageVersion;
-                    if (priority != null && priority == maxPriority && (highest == null || pv.compareTo(highest.nameAndVersion.packageVersion) > 0)) {
+                    if (priority != Integer.MIN_VALUE && priority == maxPriority
+                            && (highest == null || pv.compareTo(highest.nameAndVersion.packageVersion) > 0)) {
                         highest = details;
                     }
                 }

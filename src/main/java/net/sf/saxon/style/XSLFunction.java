@@ -50,7 +50,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     private boolean overrideExtensionFunction = true;
     private int numberOfArguments = -1;  // -1 means not yet known
     private UserFunction compiledFunction;
-    private Visibility visibility;
+    private Visibility visibility = Visibility.UNDEFINED;
     private FunctionStreamability streamability;
     private UserFunction.Determinism determinism = UserFunction.Determinism.PROACTIVE;
     private boolean explaining;
@@ -306,7 +306,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
     @Override
     public Visibility getVisibility() {
-        if (visibility == null || visibility == Visibility.UNDEFINED) {
+        if (visibility == Visibility.UNDEFINED) {
             String vAtt = getAttributeValue("", "visibility");
             return vAtt == null ? Visibility.PRIVATE : interpretVisibilityValue(Whitespace.trim(vAtt), "");
         }

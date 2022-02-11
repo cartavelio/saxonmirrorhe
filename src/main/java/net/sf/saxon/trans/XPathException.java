@@ -17,6 +17,7 @@ import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.XmlProcessingError;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
@@ -194,6 +195,7 @@ public class XPathException extends TransformerException {
      * contained exception
      */
 
+    @CSharpModifiers(code = {"public", "override"})
     public String getMessage() {
         if (getCause() == null) {
             return super.getMessage();
@@ -369,7 +371,7 @@ public class XPathException extends TransformerException {
      */
 
     public void setHostLanguage(HostLanguage language) {
-        this.hostLanguage = language == null ? null : language.toString();
+        this.hostLanguage = language == HostLanguage.UNKNOWN ? null : language.toString();
     }
 
     /**

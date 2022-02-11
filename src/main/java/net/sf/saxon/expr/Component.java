@@ -227,8 +227,8 @@ public class Component {
     }
 
     private int obtainComponentId(Component component, Map<Component, Integer> componentIdMap) {
-        Integer id = componentIdMap.get(component);
-        if (id == null) {
+        int id = componentIdMap.getOrDefault(component, Integer.MIN_VALUE);
+        if (id == Integer.MIN_VALUE) {
             id = componentIdMap.size();
             componentIdMap.put(component, id);
         }

@@ -287,7 +287,7 @@ public abstract class SequenceExtent implements GroundedValue {
         }
 
         /*@NotNull*/
-        @CSharpModifiers(code = {"public"})
+        @CSharpModifiers(code = {"public", "override"})
         public String toString() {
             StringBuilder fsb = new StringBuilder(64);
             for (int i = 0; i < getLength(); i++) {
@@ -307,7 +307,7 @@ public abstract class SequenceExtent implements GroundedValue {
          * @return the simplified sequence
          */
         @Override
-        @CSharpModifiers(code = {"public"})
+        @CSharpModifiers(code = {"public", "override"})
         public GroundedValue reduce() {
             int len = getLength();
             if (len == 0) {

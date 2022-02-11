@@ -513,7 +513,6 @@ public class ResultDocument extends Instruction
                                         XPathContext context, ResultDocumentResolver resolver,
                                         SerializationProperties params,
                                         boolean resolveAgainstStaticBase) throws XPathException {
-        String resultURI = null;
         Controller controller = context.getController();
         try {
             String base;

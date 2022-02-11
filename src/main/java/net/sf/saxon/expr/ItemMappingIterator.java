@@ -13,6 +13,7 @@ import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
 /**
@@ -141,6 +142,7 @@ public class ItemMappingIterator
     }
 
     @Override
+    @CSharpModifiers(code={"public", "virtual"})
     public Item next() {
         try {
             while (true) {
@@ -161,6 +163,7 @@ public class ItemMappingIterator
     }
 
     @Override
+    @CSharpModifiers(code = {"public", "virtual"})
     public void close() {
         base.close();
     }

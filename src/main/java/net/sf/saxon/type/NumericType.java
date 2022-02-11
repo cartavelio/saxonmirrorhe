@@ -14,6 +14,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpReplaceMethod;
 import net.sf.saxon.value.*;
@@ -598,6 +599,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * @return text identifing the type, for use in a phrase such as "the type XXXX".
      */
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public String getDescription() {
         return "xs:numeric";
     }

@@ -262,7 +262,7 @@ public class StandardErrorReporter
 
         HostLanguage lang = err.getHostLanguage();
         String langText = "";
-        if (lang != null) {
+        if (lang != HostLanguage.UNKNOWN) {
             switch (lang) {
                 case XSLT:
                     break;
