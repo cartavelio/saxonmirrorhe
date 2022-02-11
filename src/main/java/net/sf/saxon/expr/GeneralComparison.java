@@ -362,7 +362,11 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         if (Cardinality.allowsMany(exp.getCardinality())) {
             SystemFunction fn = SystemFunction.makeFunction(function, exp.getRetainedStaticContext(), 1);
             ((Minimax)fn).setIgnoreNaN(true);
-            return fn.makeOptimizedFunctionCall(visitor, contextInfo, exp);
+            Expression x = fn.makeOptimizedFunctionCall(visitor, contextInfo, exp);
+            if (x == null) {
+                x = fn.makeFunctionCall(exp);
+            }
+            return x;
         } else {
             return exp;
         }
