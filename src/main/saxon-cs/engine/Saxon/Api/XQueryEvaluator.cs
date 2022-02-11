@@ -122,12 +122,12 @@ namespace Saxon.Api {
         /// properties within the <c>ResourceProperties</c> argument, in case they are needed.
         /// </para>
         /// <para>The returned <c>IResource</c> must be one of the following:
-        /// <ul>
-        /// <li>An <c>IResource</c> such as a <c>NodeResource</c> or an <c>XmlReaderResource</c>
-        /// whose <c>getItem()</c> method delivers an <c>XdmNode</c>;</li>
-        /// <li>A <c>TextResource</c> delivering lexical XML in its <c>Content</c> property; this
-        /// will then be parsed to deliver the corresponding XML document.</li>
-        /// </ul>
+        /// <list>
+        /// <item>An <c>IResource</c> such as a <c>NodeResource</c> or an <c>XmlReaderResource</c>
+        /// whose <c>getItem()</c> method delivers an <c>XdmNode</c>;</item>
+        /// <item>A <c>TextResource</c> delivering lexical XML in its <c>Content</c> property; this
+        /// will then be parsed to deliver the corresponding XML document.</item>
+        /// </list>
         /// </para>
         /// <para>If no <c>XmlDocumentResolver</c> is supplied, or if it returns null, then
         /// the <c>CommonResourceResolver</c> associated with the Saxon Configuration is invoked.
