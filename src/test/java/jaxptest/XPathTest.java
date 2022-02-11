@@ -108,12 +108,12 @@ public class XPathTest {
                 }
 
                 @Override
-                public String getPrefix(String string) {
+                public String getPrefix(String str) {
                     return null;
                 }
 
                 @Override
-                public Iterator getPrefixes(String string) {
+                public Iterator getPrefixes(String str) {
                     return null;
                 }
             });
