@@ -36,14 +36,11 @@ namespace Saxon.Api {
     [Serializable]
     public class SchemaManager
     {
-
+        private net.sf.saxon.s9api.SchemaManager schemaManager;
         private Configuration config;
         private IList<StaticError> errorList = null;
-        private net.sf.saxon.s9api.SchemaManager schemaManager;
         private Processor processor;
         private ErrorReporter reporter;
-
-
 
         // internal constructor
 
@@ -66,23 +63,21 @@ namespace Saxon.Api {
         /// </remarks>
         /// 
         public String XsdVersion {
-            get {
-                return schemaManager.getXsdVersion();
-            }
-            set {
-                schemaManager.setXsdVersion (value);
-            }
+            get => schemaManager.getXsdVersion();
+            set => schemaManager.setXsdVersion (value);
         }
 
 
         /// <summary>
         /// This property provides a way to set the catalog file which will be used by the Apache catalog resolver.
+        /// Not supported in Saxon-CS.
         /// </summary>
         
         public String Catalog
         {
             set {
-                net.sf.saxon.trans.XmlCatalogResolver.setCatalog(value, this.config, false);
+                throw new NotSupportedException("Saxon-CS does not support catalogs");
+                //net.sf.saxon.trans.XmlCatalogResolver.setCatalog(value, this.config, false);
             }
         }
 
@@ -316,7 +311,7 @@ namespace Saxon.Api {
             else if (type is AtomicType)
             {
                 ItemTypeFactory factory = new ItemTypeFactory(processor.JProcessor);
-                return new XdmAtomicType(factory.getAtomicType(qname.UnderlyingQName()));
+                return new XdmAtomicType(factory.getAtomicType(qname);
             }
             else
             {

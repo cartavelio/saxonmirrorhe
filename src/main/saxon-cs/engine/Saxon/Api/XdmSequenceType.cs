@@ -95,7 +95,7 @@ namespace Saxon.Api {
        
 
         internal SequenceType ToSequenceType() {
-            ItemType jit = itemType.Unwrap().getUnderlyingItemType();
+            ItemType jit = itemType.Unwrap();
             return SequenceType.makeSequenceType(jit, occurrence);
         }
 
@@ -118,8 +118,8 @@ namespace Saxon.Api {
 
         internal net.sf.saxon.s9api.SequenceType ToJXdmSequenceType()
         {
-            ItemType jit = itemType.Unwrap().getUnderlyingItemType();
-            return net.sf.saxon.s9api.SequenceType.makeSequenceType(itemType.Unwrap(), GetJOccurrenceIndicator(occurrence));
+            ItemType jit = itemType.Unwrap();
+            return net.sf.saxon.s9api.SequenceType.makeSequenceType(itemType, GetJOccurrenceIndicator(occurrence));
         }
 
 

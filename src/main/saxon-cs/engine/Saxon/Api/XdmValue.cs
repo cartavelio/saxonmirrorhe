@@ -268,9 +268,7 @@ namespace Saxon.Api {
                     return result;
                 }
                 else if (first is NodeInfo) {
-                    result = new XdmNode();
-                    result.value = (NodeInfo) first;
-                    return result;
+                    return new XdmNode((NodeInfo)first);
                 }
                 else if (first is ZeroOrOne<Item>) {
                     return Wrap(((JZeroOrOne) value).head());
@@ -279,28 +277,19 @@ namespace Saxon.Api {
                     return Wrap(((JOne) value).head());
                 }
                 else if (first is MapItem) {
-                    result = new XdmMap();
-                    result.value = (MapItem) first;
-                    return result;
+                    return new XdmMap((MapItem) first);
                 }
                 else if (first is ArrayItem) {
-                    result = new XdmArray();
-                    result.value = (ArrayItem) first;
-                    return result;
+                    return new XdmArray((ArrayItem) first);
                 }
                 else if (first is Function) {
-                    result = new XdmFunctionItem();
-                    result.value = (Function) first;
-                    return result;
+                    return new XdmFunctionItem((Function) first);
                 }
                 else if (first is JObjectValue) {
-                    result = new XdmExternalObjectValue(((JObjectValue) first).getObject());
-                    return result;
+                    return new XdmExternalObjectValue(((JObjectValue) first).getObject());
                 }
                 else {
-                    result = new XdmValue();
-                    result.value = first;
-                    return result;
+                    return new XdmValue(first);
                 }
             }
             else {
@@ -333,10 +322,6 @@ namespace Saxon.Api {
                 default:
                     return new XdmValue(value);
             }
-        }
-
-        static internal net.sf.saxon.s9api.XdmValue FromGroundedValueToJXdmValue(GroundedValue value) {
-            return net.sf.saxon.s9api.XdmValue.wrap(value);
         }
 
         /// <summary>
@@ -385,7 +370,7 @@ namespace Saxon.Api {
         }
 
         private static XdmValue MakeSequence(IEnumerable o) {
-            JArrayList list = new JArrayList();
+            List<XdmItem> list = new List<XdmItem>();
 
             if (o is string) {
                 return XdmAtomicValue.MakeAtomicValue((object) o);
@@ -394,7 +379,7 @@ namespace Saxon.Api {
             foreach (object oi in o) {
                 XdmValue v = XdmValue.MakeValue(oi);
                 if (v is XdmItem) {
-                    list.add((Item) v.Unwrap());
+                    list.Add((Item) v.Unwrap());
                 }
                 else {
                     list.add(new XdmArray(v).Unwrap());

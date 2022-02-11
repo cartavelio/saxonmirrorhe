@@ -265,7 +265,7 @@ namespace Saxon.Api {
         /// </summary>
 
         public XdmItemType ContextItemType {
-            get => XdmItemType.MakeXdmItemType(compiler.getRequiredContextItemType().getUnderlyingItemType());
+            get => compiler.getRequiredContextItemType();
             set => compiler.setRequiredContextItemType(value);
         }
 
@@ -294,8 +294,8 @@ namespace Saxon.Api {
         /// constructs.</para></remarks>
 
         public Boolean BackwardsCompatible {
-            get { return compiler.isBackwardsCompatible(); }
-            set { compiler.setBackwardsCompatible(value); }
+            get => compiler.isBackwardsCompatible();
+            set => compiler.setBackwardsCompatible(value);
         }
 
         /// <summary>
@@ -306,9 +306,9 @@ namespace Saxon.Api {
         /// by default.
         /// </summary>
 
-        public Boolean Caching {
-            get { return compiler.isCaching(); }
-            set { compiler.setCaching(value); }
+        public bool Caching {
+            get => compiler.isCaching();
+            set => compiler.setCaching(value);
         }
 
 
@@ -322,9 +322,9 @@ namespace Saxon.Api {
         /// defined in the Configuration.
         /// </remarks>
 
-        public bool FastCompliation {
-            set { compiler.setFastCompilation(value); }
-            get { return compiler.isFastCompilation(); }
+        public bool FastCompilation {
+            set => compiler.setFastCompilation(value);
+            get => compiler.isFastCompilation();
         }
 
         /// <summary>

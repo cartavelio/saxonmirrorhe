@@ -20,16 +20,13 @@ namespace Saxon.Api {
     /// <para>The class <c>XPathSelector</c> implements <c>IEnumerable</c>, so it is possible to
     /// enumerate the results in a <c>for</c> expression.</para>
     /// </remarks>     
-
     [Serializable]
-    public class XPathSelector : IEnumerable
-    {
+    public class XPathSelector : IEnumerable {
         net.sf.saxon.s9api.XPathSelector selector;
 
         // internal constructor
 
-        internal XPathSelector(net.sf.saxon.s9api.XPathSelector selector)
-        {
+        internal XPathSelector(net.sf.saxon.s9api.XPathSelector selector) {
             this.selector = selector;
         }
 
@@ -41,21 +38,17 @@ namespace Saxon.Api {
         /// using the <c>Build</c> method of the <c>DocumentBuilder</c> object.
         /// </remarks>
 
-        public XdmItem ContextItem
-        {
-            get { return (XdmItem)XdmValue.Wrap(selector.getContextItem().getUnderlyingValue()); }
-            set
-            {
-                if (value == null)
-                {
+        public XdmItem ContextItem {
+            get { return (XdmItem) XdmValue.Wrap(selector.getContextItem()); }
+            set {
+                if (value == null) {
                     throw new ArgumentException("contextItem is null");
                 }
-                try
-                {
-                    selector.setContextItem(XdmItem.FromXdmItemItemToJXdmItem(value));
+
+                try {
+                    selector.setContextItem(value);
                 }
-                catch (net.sf.saxon.trans.XPathException err)
-                {
+                catch (net.sf.saxon.trans.XPathException err) {
                     throw new StaticError(err);
                 }
             }
@@ -65,10 +58,7 @@ namespace Saxon.Api {
         /// Escape hatch to the <c>net.sf.saxon.s9api.XPathSelector</c> object in the underlying Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.XPathSelector Implementation
-        {
-            get { return selector; }
-        }
+        public net.sf.saxon.s9api.XPathSelector Implementation => selector;
 
         /// <summary>
         /// Set the value of a variable
@@ -77,16 +67,11 @@ namespace Saxon.Api {
         /// that was declared to the <c>XPathCompiler</c>. No error occurs if the expression does not
         /// actually reference a variable with this name.</param>
         /// <param name="value">The value to be given to the variable.</param>
-
-        public void SetVariable(QName name, XdmValue value)
-        {
-            try
-            {
-                selector.setVariable(name.UnderlyingQName(), value== null ? null : XdmValue.FromGroundedValueToJXdmValue(value.value));
-
+        public void SetVariable(QName name, XdmValue value) {
+            try {
+                selector.setVariable(name, value);
             }
-            catch (XPathException err)
-            {
+            catch (XPathException err) {
                 throw new StaticError(err);
             }
         }
@@ -96,16 +81,9 @@ namespace Saxon.Api {
         /// supplied to the <c>doc()</c> function.
         /// </summary>
 
-        public XmlResolver InputXmlResolver
-        {
-            get
-            {
-                return ((DotNetURIResolver)selector.getURIResolver()).getXmlResolver();
-            }
-            set
-            {
-                selector.setURIResolver(new DotNetURIResolver(value));
-            }
+        public XmlResolver InputXmlResolver {
+            get => ((DotNetURIResolver) selector.getURIResolver()).getXmlResolver();
+            set => selector.setURIResolver(new DotNetURIResolver(value));
         }
 
         /// <summary>
@@ -125,13 +103,11 @@ namespace Saxon.Api {
         /// Throws <c>Saxon.Api.DynamicError</c> if the evaluation of the XPath expression fails
         /// with a dynamic error.
         /// </exception>
-
-        public XdmValue Evaluate()
-        {
+        public XdmValue Evaluate() {
             try {
-                net.sf.saxon.s9api.XdmValue value = selector.evaluate();
-                return value == null ? null : XdmValue.Wrap(value.getUnderlyingValue());
-            } catch(SaxonApiException err) {
+                return selector.evaluate();
+            }
+            catch (SaxonApiException err) {
                 throw new DynamicError(err);
             }
         }
@@ -149,23 +125,15 @@ namespace Saxon.Api {
         /// Throws <c>Saxon.Api.DynamicError</c> if the evaluation of the XPath expression fails
         /// with a dynamic error.
         /// </exception>
-
-
-        public XdmItem EvaluateSingle()
-        {
-
-            try
-            {
-                net.sf.saxon.s9api.XdmItem item = selector.evaluateSingle();
-                return item == null ? null : (XdmItem)XdmValue.Wrap(item.getUnderlyingValue().materialize());
+        public XdmItem EvaluateSingle() {
+            try {
+                return selector.evaluateSingle();
             }
-            catch (SaxonApiException err)
-            {
+            catch (SaxonApiException err) {
                 throw new DynamicError(err);
             }
-
         }
-        
+
         /// <summary>
         /// Evaluate the effective boolean value of the XPath expression, returning the result as a <c>Boolean</c>
         /// </summary>
@@ -177,18 +145,15 @@ namespace Saxon.Api {
         /// Throws <c>Saxon.Api.DynamicError</c> if the evaluation of the XPath expression fails
         /// with a dynamic error.
         /// </exception>
-
-
-        public Boolean EffectiveBooleanValue()
-        {
-            try
-            {
+        public Boolean EffectiveBooleanValue() {
+            try {
                 return selector.effectiveBooleanValue();
-            } catch(SaxonApiException err) {
+            }
+            catch (SaxonApiException err) {
                 throw new DynamicError(err);
             }
         }
-        
+
 
         /// <summary>
         /// Evaluate the expression, returning the result as an <c>IEnumerator</c> (that is,
@@ -206,15 +171,13 @@ namespace Saxon.Api {
         /// with a dynamic error. However, some errors will not be detected during the invocation of this
         /// method, but only when stepping through the returned <c>SequenceEnumerator</c>.
         /// </exception>
-
-        public IEnumerator GetEnumerator()
-        {
+        public IEnumerator GetEnumerator() {
             try {
                 return new SequenceEnumerator<XdmItem>(selector.iterator());
-            } catch (net.sf.saxon.s9api.SaxonApiUncheckedException err) {
+            }
+            catch (net.sf.saxon.s9api.SaxonApiUncheckedException err) {
                 throw new DynamicError(XPathException.makeXPathException(err));
             }
         }
-
     }
 }

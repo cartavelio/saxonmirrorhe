@@ -35,24 +35,14 @@ namespace Saxon.Api {
         /// An <c>IEnumerator</c> over the names of the external variables, as instances of <c>QName</c>.
         /// </returns>
         public IEnumerator EnumerateExternalVariables() {
-            ArrayList list = new ArrayList();
-            System.Collections.Generic.IEnumerator<net.sf.saxon.s9api.QName> iter =
-                executable.iterateExternalVariables();
-            while (iter.MoveNext()) {
-                net.sf.saxon.s9api.QName var = (net.sf.saxon.s9api.QName) iter.Current;
-                list.Add(new QName(var));
-            }
-
-            return list.GetEnumerator();
+            return executable.iterateExternalVariables();
         }
 
         /// <summary>
         /// Escape hatch to the <c>net.sf.saxon.s9api.XPathExecutable</c> object in the underlying Java implementation
         /// </summary>
 
-        public net.sf.saxon.s9api.XPathExecutable Implementation {
-            get { return executable; }
-        }
+        public net.sf.saxon.s9api.XPathExecutable Implementation => executable;
 
         /// <summary>
         /// Get a list of external variables used by the expression. This will include both variables that were explicitly
@@ -63,15 +53,7 @@ namespace Saxon.Api {
         /// An <c>IEnumerator</c> over the names of the external variables, as instances of <c>QName</c>.
         /// </returns>
         public IEnumerator<QName> EnumerateExternalVariables2() {
-            IList<QName> list = new List<QName>();
-            System.Collections.Generic.IEnumerator<net.sf.saxon.s9api.QName> iter =
-                executable.iterateExternalVariables();
-            while (iter.MoveNext()) {
-                net.sf.saxon.s9api.QName var = iter.Current;
-                list.Add(new QName(var));
-            }
-
-            return list.GetEnumerator();
+            return executable.iterateExternalVariables();
         }
 
 
