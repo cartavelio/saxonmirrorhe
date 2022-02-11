@@ -47,6 +47,9 @@
                             <xsl:for-each select="method">
                                 <j id="{@name}" in="m" qy="{lower-case(@name)}"/>
                             </xsl:for-each>
+                            <xsl:for-each select="indexer">
+                                <j id="{@name}" in="i" qy="{lower-case(@name)}"/>
+                            </xsl:for-each>
                         </j>
                     </xsl:for-each>
                 </j>
