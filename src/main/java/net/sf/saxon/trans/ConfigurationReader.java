@@ -810,9 +810,11 @@ public class ConfigurationReader implements Receiver {
             }
         }
 
+        //#if CSHARP==false
         if (level == 2 && "resources".equals(localName) && catalogFiles.size() != 0) {
             targetConfig.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogFiles);
         }
+        //#endif
 
         level--;
         buffer.setLength(0);

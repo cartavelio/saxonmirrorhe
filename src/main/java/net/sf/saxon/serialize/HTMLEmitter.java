@@ -300,8 +300,8 @@ public abstract class HTMLEmitter extends XMLEmitter {
         int segstart = 0;
         final boolean[] specialChars = inAttribute ? attSpecials : specialInText;
 
-        if (chars instanceof CompressedWhitespace) {
-            ((CompressedWhitespace) chars).writeEscape(specialChars, writer);
+        if (chars instanceof WhitespaceString) {
+            ((WhitespaceString) chars).writeEscape(specialChars, writer);
             return;
         }
         boolean disabled = false;

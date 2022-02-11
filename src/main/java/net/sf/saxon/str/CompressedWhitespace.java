@@ -10,7 +10,6 @@ package net.sf.saxon.str;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.Arrays;
-import java.util.function.IntPredicate;
 
 /**
  * This class provides a compressed representation of a sequence of whitespace characters. The representation
@@ -20,7 +19,7 @@ import java.util.function.IntPredicate;
  * in the TinyTree arrays.
  */
 
-public class CompressedWhitespace extends UnicodeString {
+public class CompressedWhitespace extends WhitespaceString {
 
     private static final char[] WHITE_CHARS = {'\t', '\n', '\r', ' '};
     private static final int[] CODES =
@@ -73,34 +72,34 @@ public class CompressedWhitespace extends UnicodeString {
         return new CompressedWhitespace(value);
     }
 
-    /**
-     * Make a compressed whitespace text node suitable for inserting indentation into
-     * serialized output. (When the output is UTF8, the output writer has a method for
-     * outputting repeated characters that uses {@code Arrays.fill()} to directly
-     * populate the output buffer.)
-     * @param newlines the number of newlines to include at the start (generally zero or one)
-     * @param spaces the number of spaces to include
-     * @return a {@link UnicodeString} representing the whitespace
-     */
-    public static CompressedWhitespace makeIndent(int newlines, int spaces) {
-        newlines = Math.min(newlines, 63);
-        spaces = Math.min(spaces, 63*7);
-        int outlength = 0;
-        long result = 0L;
-
-        if (newlines > 0) {
-            result = CODES[10]<<6 | newlines;
-            outlength++;
-        }
-        while (spaces > 0) {
-            int run = Math.min(spaces, 63);
-            result = (result << 8) | (long)(CODES[32] << 6) | (long)run;
-            spaces -= run;
-            outlength++;
-        }
-        result = result << (8 * (8 - outlength));
-        return new CompressedWhitespace(result);
-    }
+//    /**
+//     * Make a compressed whitespace text node suitable for inserting indentation into
+//     * serialized output. (When the output is UTF8, the output writer has a method for
+//     * outputting repeated characters that uses {@code Arrays.fill()} to directly
+//     * populate the output buffer.)
+//     * @param newlines the number of newlines to include at the start (generally zero or one)
+//     * @param spaces the number of spaces to include
+//     * @return a {@link UnicodeString} representing the whitespace
+//     */
+//    public static CompressedWhitespace makeIndent(int newlines, int spaces) {
+//        newlines = Math.min(newlines, 63);
+//        spaces = Math.min(spaces, 63*7);
+//        int outlength = 0;
+//        long result = 0L;
+//
+//        if (newlines > 0) {
+//            result = CODES[10]<<6 | newlines;
+//            outlength++;
+//        }
+//        while (spaces > 0) {
+//            int run = Math.min(spaces, 63);
+//            result = (result << 8) | (long)(CODES[32] << 6) | (long)run;
+//            spaces -= run;
+//            outlength++;
+//        }
+//        result = result << (8 * (8 - outlength));
+//        return new CompressedWhitespace(result);
+//    }
 
     /**
      * Uncompress the whitespace to a (normal) UnicodeString
@@ -154,25 +153,14 @@ public class CompressedWhitespace extends UnicodeString {
         return count;
     }
 
-    @Override
-    public int getWidth() {
-        return 7;
-    }
-
     /**
-     * Returns the <code>char</code> value at the specified index.  An index ranges from zero
-     * to <tt>length() - 1</tt>.  The first <code>char</code> value of the sequence is at
-     * index zero, the next at index one, and so on, as for array
-     * indexing.
-     * <p>If the <code>char</code> value specified by the index is a
-     * <a href="Character.html#unicode">surrogate</a>, the surrogate
-     * value is returned.</p>
+     * Get the code point at a given position in the string
      *
-     * @param index the index of the <code>char</code> value to be returned
-     * @return the specified <code>char</code> value
-     * @throws IndexOutOfBoundsException if the <tt>index</tt> argument is negative or not less than
-     *                                   <tt>length()</tt>
+     * @param index the given position (0-based)
+     * @return the code point at the given position
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
+
     @Override
     public int codePointAt(long index) {
         int count = 0;
@@ -189,35 +177,10 @@ public class CompressedWhitespace extends UnicodeString {
         throw new IndexOutOfBoundsException(index + "");
     }
 
-    /**
-     * Returns a new <code>CharSequence</code> that is a subsequence of this sequence.
-     * The subsequence starts with the <code>char</code> value at the specified index and
-     * ends with the <code>char</code> value at index <tt>end - 1</tt>.  The length
-     * (in <code>char</code>s) of the
-     * returned sequence is <tt>end - start</tt>, so if <tt>start == end</tt>
-     * then an empty sequence is returned.
-     *
-     * @param start the start index, inclusive
-     * @param end   the end index, exclusive
-     * @return the specified subsequence
-     * @throws IndexOutOfBoundsException if <tt>start</tt> or <tt>end</tt> are negative,
-     *                                   if <tt>end</tt> is greater than <tt>length()</tt>,
-     *                                   or if <tt>start</tt> is greater than <tt>end</tt>
-     */
-    @Override
-    public UnicodeString substring(long start, long end) {
-        return uncompress().substring(start, end);
-    }
 
     @Override
     public IntIterator codePoints() {
         return uncompress().codePoints();
-    }
-
-    @Override
-    public long indexOf(int codePoint, long from) {
-        // Faster implementations are possible, but not needed
-        return uncompress().indexOf(codePoint, from);
     }
 
     /**
@@ -230,18 +193,10 @@ public class CompressedWhitespace extends UnicodeString {
         return uncompress().equals(obj);
     }
 
-    /**
-     * Returns a hash code value for the object.
-     */
+    @Override
     public int hashCode() {
-        return uncompress().hashCode();
-    }
-
-    /**
-     * Returns a string representation of the object.
-     */
-    public String toString() {
-        return uncompress().toString();
+        // Included to prevent C# compiler warnings
+        return super.hashCode();
     }
 
     /**
@@ -251,6 +206,7 @@ public class CompressedWhitespace extends UnicodeString {
      * @throws java.io.IOException if an error occurs downstream
      */
 
+    @Override
     public void write(/*@NotNull*/ UnicodeWriter writer) throws java.io.IOException {
         for (int s = 56; s >= 0; s -= 8) {
             final byte b = (byte) ((value >> s) & 0xff);
@@ -264,35 +220,6 @@ public class CompressedWhitespace extends UnicodeString {
 
     }
 
-    void copy8bit(byte[] target, int offset) {
-        uncompress().copy8bit(target, offset);
-    }
-
-    void copy16bit(char[] target, int offset) {
-        uncompress().copy16bit(target, offset);
-    }
-
-    void copy24bit(byte[] target, int offset) {
-        uncompress().copy24bit(target, offset);
-    }
-
-
-
-    /**
-     * Get the position of the first occurrence of the specified codepoint,
-     * starting the search at a given position in the string
-     *
-     * @param predicate condition that the codepoint must satisfy
-     * @param from      the position from which the search should start (0-based)
-     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
-     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
-     *                                       for codePoint access
-     */
-    @Override
-    public long indexWhere(IntPredicate predicate, long from) {
-        return uncompress().indexWhere(predicate, from);
-    }
-
     /**
      * Write the value to a Writer with escaping of special characters
      *
@@ -301,6 +228,7 @@ public class CompressedWhitespace extends UnicodeString {
      * @throws java.io.IOException if an error occurs downstream
      */
 
+    @Override
     public void writeEscape(boolean[] specialChars, UnicodeWriter writer) throws java.io.IOException {
         for (int s = 56; s >= 0; s -= 8) {
             final byte b = (byte) ((value >> s) & 0xff);
