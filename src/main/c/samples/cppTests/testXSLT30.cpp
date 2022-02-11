@@ -661,9 +661,8 @@ void testContext2NotRootNamedTemplate(SaxonProcessor * saxonproc, Xslt30Processo
     const char * resultStr = item1->getStringValue();
 
     cerr<<"result = "<<resultStr<<std::endl;
-    XdmValue * result2 = executable->callTemplateReturningValue("main");
-    XdmItem * item2 = result2->getHead();
-    const char * result2Str = executable->callTemplateReturningString("main"); //item2->getStringValue();
+
+    const char * result2Str = executable->callTemplateReturningString("main");
     if (result2Str == nullptr) {
             if (executable->exceptionOccurred()) {
                 SaxonApiException *exception = executable->getException();
@@ -677,12 +676,10 @@ void testContext2NotRootNamedTemplate(SaxonProcessor * saxonproc, Xslt30Processo
 
 
     cerr<<"result2 = "<<result2Str<<std::endl;
-    delete result2;
-    //delete item1;
-    //delete item2;
-    delete result;
-    delete resultStr;
     delete result2Str;
+    delete item1;
+
+    delete result;
     delete input_;
     delete executable;
   }
@@ -2275,7 +2272,7 @@ int main(int argc, char* argv[]) {
     }
     //testValidation(trans,sresult);
 
-   /* testInitialTemplate(processor, trans, sresult);
+    testInitialTemplate(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
@@ -2319,10 +2316,10 @@ int main(int argc, char* argv[]) {
     testTransformToString4(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
-     */
+
     //testCatalog(cwd, processor,  sresult); //not to run in DEBUG mode - setCatalog throws SEG error
 
-   /* cout<<endl<<"============================================================="<<endl<<endl;
+    cout<<endl<<"============================================================="<<endl<<endl;
 
     testTransformToString2b(processor, trans, sresult);
 
@@ -2415,7 +2412,7 @@ int main(int argc, char* argv[]) {
 
     testSaxSourceDTDValidation(processor, sresult);
 
-    cout<<endl<<"============================================================="<<endl<<endl;  */
+    cout<<endl<<"============================================================="<<endl<<endl;
 
 
     testContext2NotRootNamedTemplate(processor, trans, sresult);

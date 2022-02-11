@@ -250,7 +250,7 @@ def testEmbeddedStylesheet(saxonproc, data_dir):
 def testContext2NotRootNamedTemplate(saxonproc, files_dir, data_dir):
     trans = saxonproc.new_xslt30_processor()
     input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
-    executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>")
+    executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='$x'/>]</xsl:template></xsl:stylesheet>")
     if executable is None and trans.exception_occurred:
         print(trans.error_message)
     assert executable is not None
@@ -260,19 +260,22 @@ def testContext2NotRootNamedTemplate(saxonproc, files_dir, data_dir):
         print(executable.error_message)
     assert result is not None
     print(result.head.string_value)
-    assert "[]" in result.head.string_value
+    assert "[text]" in result.head.string_value
 
     result2 = executable.call_template_returning_string("main")
     if executable.exception_occurred:
         print(executable.error_message)
     print(result2)
     assert result2 is not None
-    assert "test" in result2
+    assert "text" in result2
 
 def testUseAssociated(saxonproc, files_dir):
     trans = saxonproc.new_xslt30_processor()
     foo_xml = files_dir+"/trax/xml/foo.xml"
     executable = trans.compile_stylesheet(associated_file=foo_xml)
+    if executable is None and trans.exception_occurred:
+        print(trans.get_error_message)
+    assert executable is not None
     executable.set_initial_match_selection(file_name=foo_xml)
     result = executable.apply_templates_returning_string()
     assert result is not None
@@ -282,10 +285,11 @@ def testnullptrStylesheet(saxonproc):
     result = trans.transform_to_string()
     assert result is None
 
-def testXdmDestination(saxonproc):
+def testXdmDestination1(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template name='go'><a/></xsl:template></xsl:stylesheet>")
     root = executable.call_template_returning_value("go")
+    assert isinstance(root, PyXdmValue)
     assert root is not None
     assert root.head is not None
     assert root.head.is_atomic == False
@@ -295,10 +299,10 @@ def testXdmDestination(saxonproc):
     assert node.node_kind == 9
 def testXdmDestinationWithItemSeparator(saxonproc):
     trans = saxonproc.new_xslt30_processor()
-    stylesheetStr = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template name='go'><xsl:comment>A</xsl:comment><out/><xsl:comment>Z</xsl:comment></xsl:template><xsl:output method='xml' item-separator='§'/></xsl:stylesheet>".encode('latin-1')
+    stylesheetStr = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template name='go'><xsl:comment>A</xsl:comment><out/><xsl:comment>Z</xsl:comment></xsl:template><xsl:output method='xml' item-separator='§'/></xsl:stylesheet>"
     executable = trans.compile_stylesheet(stylesheet_text=stylesheetStr)
-    root = trans.call_template_returning_value("go")
-    node  = root
+    root = executable.call_template_returning_value("go")
+    node  = root.head
 
     assert "<!--A-->§<out/>§<!--Z-->" == node.__str__()
     assert node.node_kind == 9
@@ -325,13 +329,13 @@ def testPipeline(saxonproc):
     assert d1 is not None
     executable2.set_property("!omit-xml-declaration", "yes")
     executable2.set_property("!indent", "no")
-    stage2.set_initial_match_selection(xdm_value=d1)
+    executable2.set_initial_match_selection(xdm_value=d1)
     d2 = executable2.apply_templates_returning_value()
     assert d2 is not None
     executable3.set_property("!omit-xml-declaration", "yes")
     executable3.set_property("!indent", "no")
     executable3.set_initial_match_selection(xdm_value=d2)
-    d3 = stage3.apply_templates_returning_value()
+    d3 = executable3.apply_templates_returning_value()
     assert d3 is not None
     executable4.set_property("!omit-xml-declaration", "yes")
     executable4.set_property("!indent", "no")
@@ -391,10 +395,15 @@ def testCallFunctionWrapResults(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     source = "<?xml version='1.0'?><xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema'  xmlns:f='http://localhost/'  version='3.0'> <xsl:param name='x' as='xs:integer'/>  <xsl:param name='y' select='.+2'/>  <xsl:function name='f:add' visibility='public'>  <xsl:param name='a' as='xs:double'/> <xsl:param name='b' as='xs:double'/> <xsl:sequence select='$a + $b + $x + $y'/> </xsl:function> </xsl:stylesheet>"
     executable= trans.compile_stylesheet(stylesheet_text=source)
+    assert executable is not None
     executable.set_property("!omit-xml-declaration", "yes")
     executable.set_parameter("x",  saxonproc.make_integer_value(30))
     executable.set_global_context_item(xdm_item=saxonproc.make_integer_value(20))
+    if executable.exception_occurred:
+        print(executable.error_message)
     sw = executable.call_function_returning_string("{http://localhost/}add", [saxonproc.make_integer_value(2), saxonproc.make_integer_value(3)])
+    if sw is None and executable.exception_occurred:
+        print(executable.error_message)
     assert sw is not None
     assert "57" in sw
     trans.clear_parameters()
