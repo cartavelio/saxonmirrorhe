@@ -14,6 +14,7 @@ import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.FunctionAnnotationHandler;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -69,13 +70,14 @@ public class TypeHierarchy {
     public Sequence applyFunctionConversionRules(Sequence value, SequenceType requiredType, final RoleDiagnostic role, Location locator)
             throws XPathException {
 
-        if (requiredType.matches(value, this)) {
-            return value;
+        GroundedValue groundedValue = value.materialize();
+        if (requiredType.matches(groundedValue, this)) {
+            return groundedValue;
         }
 
         ItemType suppliedItemType = SequenceTool.getItemType(value, this);
 
-        SequenceIterator iterator = value.iterate();
+        SequenceIterator iterator = groundedValue.iterate();
         final ItemType requiredItemType = requiredType.getPrimaryType();
 
         if (requiredItemType.isPlainType()) {

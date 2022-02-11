@@ -39,21 +39,6 @@ public class Concat extends SystemFunction implements PushableFunction {
     }
 
     /**
-     * Get the roles of the arguments, for the purposes of streaming
-     *
-     * @return an array of OperandRole objects, one for each argument
-     */
-    @Override
-    public OperandRole[] getOperandRoles() {
-        OperandRole[] roles = new OperandRole[getArity()];
-        OperandRole operandRole = new OperandRole(0, OperandUsage.ABSORPTION);
-        for (int i = 0; i < getArity(); i++) {
-            roles[i] = operandRole;
-        }
-        return roles;
-    }
-
-    /**
      * Get the item type of the function item
      *
      * @return the function item's type
@@ -126,8 +111,9 @@ public class Concat extends SystemFunction implements PushableFunction {
         UniStringConsumer output = destination.getStringReceiver(false);
         output.open();
         for (Sequence arg : arguments) {
-            Item item = arg.head();
-            if (item != null) {
+            SequenceIterator iter = arg.iterate();
+            Item item;
+            while ((item = iter.next()) != null) {
                 output.append(item.getUnicodeStringValue());
             }
         }
