@@ -24,13 +24,6 @@ namespace TestDriver
             this.reportFilename = fn;
         }
 
-        protected ResultsDocument(String rdir, Spec sp)
-        {
-            this.resultsDir = rdir;
-            this.spec = sp;
-            this.reportFilename = null;
-        }
-
         protected void createWriter(Processor processor) {
 
             string fileName = resultsDir + "/results"
