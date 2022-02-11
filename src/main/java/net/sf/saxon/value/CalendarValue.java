@@ -131,6 +131,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
         return tzMinutes;
     }
 
+    //#if CSHARP==false
     /**
      * Get a Java Calendar object that represents this date/time value. The Calendar
      * object will be newly created for the purpose. This will respect the timezone
@@ -143,7 +144,9 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      */
 
     public abstract GregorianCalendar getCalendar();
+    //#endif
 
+    //#if CSHARP==false
     /**
      * Get an XMLGregorianCalendar object that represents this date/time value The object
      * will be newly created for the purpose
@@ -154,7 +157,8 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
     public XMLGregorianCalendar getXMLGregorianCalendar() {
         return new SaxonXMLGregorianCalendar(this);
     }
-
+    //#endif
+    
     /**
      * Add a duration to this date/time value
      *
@@ -366,7 +370,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      * @param size  the number of digits required (max 9)
      */
 
-    static void appendString(UnicodeBuilder sb, int value, int size) {
+    protected static void appendString(UnicodeBuilder sb, int value, int size) {
         String s = "000000000" + value;
         sb.append(s.substring(s.length() - size));
     }
@@ -378,7 +382,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      * @param value the integer to be formatted (must be in the range 0..99
      */
 
-    static void appendTwoDigits(UnicodeBuilder sb, int value) {
+    protected static void appendTwoDigits(UnicodeBuilder sb, int value) {
         sb.append((char) (value / 10 + '0'));
         sb.append((char) (value % 10 + '0'));
     }

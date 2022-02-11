@@ -23,6 +23,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.query.*;
+import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -222,12 +223,15 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         HashTrieMap functionsMap = new HashTrieMap();
         XQueryFunctionLibrary functionLib = lib.getGlobalFunctionLibrary();
         Iterator<XQueryFunction> functionIterator = functionLib.getFunctionDefinitions();
-        ExportAgent agent = out -> {
-            XPathException err = new XPathException(
-                    "Cannot export a stylesheet that statically incorporates XQuery functions",
-                    SaxonErrorCode.SXST0069);
-            err.setIsStaticError(true);
-            throw err;
+        ExportAgent agent = new ExportAgent() {
+            @Override
+            public void export(ExpressionPresenter out) throws XPathException {
+                XPathException err = new XPathException(
+                        "Cannot export a stylesheet that statically incorporates XQuery functions",
+                        SaxonErrorCode.SXST0069);
+                err.setIsStaticError(true);
+                throw err;
+            }
         };
         if (functionIterator.hasNext()) {
             XQueryFunction function;
@@ -255,6 +259,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         map.initialPut("functions", functionsMap);
         return map;
     }
+
 }
 
 // Copyright (c) 2018-2020 Saxonica Limited

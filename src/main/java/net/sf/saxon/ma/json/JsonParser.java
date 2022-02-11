@@ -17,6 +17,8 @@ import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.StringToDouble;
 import net.sf.saxon.value.*;
@@ -213,7 +215,7 @@ public class JsonParser {
         JsonToken tok = tokenizer.next();
         while (tok != JsonToken.RCURLY) {
             if (tok != JsonToken.STRING_LITERAL && !(tok == JsonToken.UNQUOTED_STRING && liberal)) {
-                invalidJSON("Property name must be a string literal (found " + toString(tok, tokenizer.currentTokenValue.toString() + ")"),
+                invalidJSON("Property name must be a string literal (found " + showToken(tok, tokenizer.currentTokenValue.toString() + ")"),
                             ERR_GRAMMAR, tokenizer.lineNumber);
             }
             String key = tokenizer.currentTokenValue.toString();
@@ -296,7 +298,7 @@ public class JsonParser {
             } else if (tok == JsonToken.RSQB) {
                 break;
             } else {
-                invalidJSON("Unexpected token (" + toString(tok, tokenizer.currentTokenValue.toString()) +
+                invalidJSON("Unexpected token (" + showToken(tok, tokenizer.currentTokenValue.toString()) +
                                     ") after entry in array", ERR_GRAMMAR, tokenizer.lineNumber);
             }
         }
@@ -418,6 +420,7 @@ public class JsonParser {
                             String xx = next < 256 ? next + "" : "x" + Integer.toHexString(next);
                             throw new XPathException("Unknown escape sequence \\" + xx, errorCode);
                         }
+                        break;
                 }
             } else {
                 buffer.append(c);
@@ -447,12 +450,13 @@ public class JsonParser {
      * @throws net.sf.saxon.trans.XPathException always
      */
 
-    private void invalidJSON(String message, String code, int lineNumber)
+    private static void invalidJSON(String message, String code, int lineNumber)
             throws XPathException {
         error("Invalid JSON input on line " + lineNumber + ": " + message, code);
     }
 
-    private enum JsonToken {
+    @CSharpSimpleEnum
+    public enum JsonToken {
         LSQB, RSQB, LCURLY, RCURLY, STRING_LITERAL, NUMERIC_LITERAL, TRUE,
         FALSE, NULL, COLON, COMMA, UNQUOTED_STRING, EOF
     }
@@ -461,11 +465,11 @@ public class JsonParser {
      * Inner class to do the tokenization
      */
 
-    private class JsonTokenizer {
+    private static class JsonTokenizer {
 
-        private final String input;
-        private int position;
-        private int lineNumber = 1;
+        public final String input;
+        public int position;
+        public int lineNumber = 1;
         public JsonToken currentToken;
         public StringBuilder currentTokenValue = new StringBuilder(64);
 
@@ -497,6 +501,7 @@ public class JsonParser {
                             lineNumber++;
                         }
                         // drop through
+                        CSharp.emitCode("goto case ' ';");
                     case ' ':
                     case '\t':
                         if (++position >= input.length()) {
@@ -616,7 +621,7 @@ public class JsonParser {
     }
 
 
-    public static String toString(JsonToken token, String currentTokenValue) {
+    public static String showToken(JsonToken token, String currentTokenValue) {
         switch (token) {
             case LSQB:
                 return "[";

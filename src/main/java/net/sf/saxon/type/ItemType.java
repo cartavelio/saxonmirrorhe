@@ -177,8 +177,6 @@ public interface ItemType {
     }
 
 
-    String toString();
-
     /**
      * Get extra diagnostic information about why a supplied item does not conform to this
      * item type, if available. If extra information is returned, it should be in the form of a complete

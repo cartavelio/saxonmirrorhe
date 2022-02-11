@@ -8,6 +8,8 @@
 package net.sf.saxon.om;
 
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -76,13 +78,13 @@ public class SmallAttributeMap implements AttributeMap {
     }
 
     @Override
-    public Iterator<AttributeInfo> iterator() {
+    public @NotNull Iterator<AttributeInfo> iterator() {
         return attributes.iterator();
     }
 
     @Override
     public List<AttributeInfo> asList() {
-        return new ArrayList<>(attributes);
+        return attributes;
     }
 
     @Override

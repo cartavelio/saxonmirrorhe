@@ -20,9 +20,10 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.tree.iter.NodeListIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.StringConverter;
@@ -51,13 +52,14 @@ import java.util.*;
  */
 public class KeyIndex {
 
+    @CSharpSimpleEnum
     public enum Status {UNDER_CONSTRUCTION, BUILT, FAILED}
 
     // The entry in an index is either a NodeInfo or a List<NodeInfo>
     private final Map <AtomicMatchKey, Object> index;
     private UType keyTypesPresent = UType.VOID;
     private final UType keyTypesConvertedFromUntyped = UType.STRING_LIKE;
-    private List <StringItem> untypedKeys;
+    private List<StringItem> untypedKeys;
     private ConversionRules rules;
     private int implicitTimezone;
     private StringCollator collation;
@@ -355,7 +357,7 @@ public class KeyIndex {
             return SingleNodeIterator.makeIterator((NodeInfo) value);
         } else {
             List<NodeInfo> nodes = (List<NodeInfo>) value;
-            return new ListIterator(nodes);
+            return new NodeListIterator(nodes);
         }
     }
 

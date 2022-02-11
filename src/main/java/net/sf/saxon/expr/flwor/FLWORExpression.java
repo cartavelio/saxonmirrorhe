@@ -265,7 +265,7 @@ public class FLWORExpression extends Expression {
         boolean repeatable = false;
         try {
             for (Clause c : clauses) {
-                c.processOperands(list::add);
+                c.processOperands(op -> list.add(op));
                 if (c instanceof ForClause) {
                     repeatable = true;
                 }

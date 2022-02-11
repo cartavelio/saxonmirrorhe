@@ -257,7 +257,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
         Configuration config = tree.getConfiguration();
         NamePool pool = config.getNamePool();
         int next = nodeNr;
-        CopyInformee<Location> informee = (CopyInformee<Location>) receiver.getPipelineConfiguration().getComponent(CopyInformee.class.getName());
+        CopyInformee informee = (CopyInformee) receiver.getPipelineConfiguration().getComponent(CopyInformee.class.getName());
         SchemaType elementType = Untyped.getInstance();
         SimpleType attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
 
@@ -299,7 +299,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                         }
                     }
                     if (informee != null) {
-                        Location loc = informee.notifyElementNode(tree.getNode(next));
+                        Location loc = (Location)informee.notifyElementNode(tree.getNode(next));
                         if (loc != null) {
                             location = loc;
                         }

@@ -8,6 +8,7 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 
 /**
  * Identifies a host language in which XPath expressions appear. Generally used when different error codes
@@ -15,6 +16,7 @@ import net.sf.saxon.Configuration;
  * @since 10.0; previously an integer constant in class {@link Configuration} was used
  */
 
+@CSharpSimpleEnum
 public enum HostLanguage {
     XSLT,
     XQUERY,

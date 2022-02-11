@@ -7,6 +7,7 @@
 
 package net.sf.saxon.event;
 
+import net.sf.saxon.om.Item;
 import org.xml.sax.Locator;
 
 import java.util.Stack;
@@ -101,7 +102,7 @@ public class ContentHandlerProxyLocator implements Locator {
      */
 
     /*@Nullable*/
-    public Stack getContextItemStack() {
+    public Stack<Item> getContextItemStack() {
         final ContentHandlerProxy.ContentHandlerProxyTraceListener traceListener = parent.getTraceListener();
         if (traceListener == null) {
             return null;

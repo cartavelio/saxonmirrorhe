@@ -14,7 +14,6 @@ import net.sf.saxon.functions.AbstractFunction;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
@@ -22,6 +21,7 @@ import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
 /**
@@ -99,10 +99,10 @@ public class AtomicConstructorFunction extends AbstractFunction {
      *          if a dynamic error occurs within the function
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] args) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
         AtomicValue val = (AtomicValue) args[0].head();
         if (val == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
         Configuration config = context.getConfiguration();
         Converter converter = config.getConversionRules().getConverter(val.getItemType(), targetType);
@@ -112,7 +112,7 @@ public class AtomicConstructorFunction extends AbstractFunction {
             throw ex;
         }
         converter = converter.setNamespaceResolver(nsResolver);
-        return new ZeroOrOne(converter.convert(val).asAtomic());
+        return converter.convert(val).asAtomic();
     }
 
     @Override

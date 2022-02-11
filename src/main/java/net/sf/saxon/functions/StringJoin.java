@@ -105,7 +105,7 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
         if (additionalArguments.length > 0) {
             separator = ((GroundedValue) additionalArguments[0].head()).getUnicodeStringValue();
         }
-        return new StringJoinFold(separator);
+        return new StringJoinFold(separator, returnEmptyIfEmpty);
     }
 
     @Override
@@ -120,9 +120,9 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
             if (first) {
                 first = false;
             } else {
-                output.append(separator);
+                output.accept(separator);
             }
-            output.append(it.getUnicodeStringValue());
+            output.accept(it.getUnicodeStringValue());
         }
         output.close();
     }
@@ -132,10 +132,12 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
         private int position = 0;
         private final CodePoints separator;
         private final UnicodeBuilder data;
+        private final boolean returnEmptyIfEmpty;
 
-        public StringJoinFold(CodePoints separator) {
+        public StringJoinFold(CodePoints separator, boolean returnEmptyIfEmpty) {
             this.separator = separator;
             this.data = new UnicodeBuilder();
+            this.returnEmptyIfEmpty = returnEmptyIfEmpty;
         }
 
         /**
@@ -146,10 +148,10 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
         @Override
         public void processItem(Item item) {
             if (position == 0) {
-                data.append(item.getUnicodeStringValue());
+                data.accept(item.getUnicodeStringValue());
                 position = 1;
             } else {
-                data.append(separator).append(item.getUnicodeStringValue());
+                data.accept(separator).accept(item.getUnicodeStringValue());
             }
         }
 

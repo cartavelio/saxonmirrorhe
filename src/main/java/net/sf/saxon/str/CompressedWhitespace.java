@@ -21,8 +21,8 @@ import java.util.function.IntPredicate;
 
 public class CompressedWhitespace extends UnicodeString {
 
-    /*@NotNull*/ private static final char[] WHITE_CHARS = {0x09, 0x0A, 0x0D, 0x20};
-    /*@NotNull*/ private static final int[] CODES =
+    private static final char[] WHITE_CHARS = {'\t', '\n', '\r', ' '};
+    private static final int[] CODES =
             {-1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, -1, -1, 2, -1, -1,
                     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                     3};
@@ -68,7 +68,7 @@ public class CompressedWhitespace extends UnicodeString {
         for (int i = 0; i < outlength; i++) {
             value = (value << 8) | out[i];
         }
-        value <<= 8L * (8 - outlength);
+        value = value << (8 * (8 - outlength));
         return new CompressedWhitespace(value);
     }
 
@@ -97,7 +97,7 @@ public class CompressedWhitespace extends UnicodeString {
             spaces -= run;
             outlength++;
         }
-        result <<= 8L * (8 - outlength);
+        result = result << (8 * (8 - outlength));
         return new CompressedWhitespace(result);
     }
 

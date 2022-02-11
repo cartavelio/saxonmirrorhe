@@ -53,13 +53,14 @@ public class XPathExecutable {
 
     public XPathSelector load() {
         Map<StructuredQName, XPathVariable> declaredVariables = new LinkedHashMap<StructuredQName, XPathVariable>();
-        for (Iterator iter = env.iterateExternalVariables(); iter.hasNext(); ) {
-            XPathVariable var = (XPathVariable) iter.next();
+        for (Iterator<XPathVariable> iter = env.iterateExternalVariables(); iter.hasNext(); ) {
+            XPathVariable var = iter.next();
             declaredVariables.put(var.getVariableQName(), var);
         }
         return new XPathSelector(exp, declaredVariables);
     }
 
+    //#if CSHARP==false
     /**
      * Treat the compiled XPath expression as a {@link Step}, so that it can be used in a call on
      * {@link XdmValue#select}.
@@ -84,7 +85,7 @@ public class XPathExecutable {
             }
         };
     }
-
+    //#endif
 
 
     /**
@@ -129,7 +130,7 @@ public class XPathExecutable {
      */
 
     public Iterator<QName> iterateExternalVariables() {
-        final Iterator varIterator = env.iterateExternalVariables();
+        final Iterator<XPathVariable> varIterator = env.iterateExternalVariables();
         return new Iterator<QName>() {
             @Override
             public boolean hasNext() {
@@ -138,7 +139,7 @@ public class XPathExecutable {
 
             @Override
             public QName next() {
-                return new QName(((XPathVariable) varIterator.next()).getVariableQName());
+                return new QName(varIterator.next().getVariableQName());
             }
 
             @Override

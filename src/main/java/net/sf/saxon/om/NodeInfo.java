@@ -12,23 +12,18 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpExtendInterface;
-import net.sf.saxon.transpile.CSharpParameterType;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.jiter.WrappingJavaIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import org.xml.sax.Locator;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
-import java.util.Collections;
-import java.util.function.Predicate;
 
 /**
  * The NodeInfo interface represents a node in Saxon's implementation of the XPath 2.0 data model.
@@ -59,7 +54,6 @@ import java.util.function.Predicate;
  * a new implementation of this interface.
  */
 
-@CSharpExtendInterface(key = "net.sf.saxon.om.NodeInfoCSharpExtension")
 public interface NodeInfo extends Source, Item, Location {
 
     /**
@@ -262,23 +256,6 @@ public interface NodeInfo extends Source, Item, Location {
     int compareOrder(NodeInfo other);
 
     /**
-     * Return the string value of the node as defined in the XPath data model.
-     * <p>The interpretation of this depends on the type
-     * of node. For an element it is the accumulated character content of the element,
-     * including descendant elements.</p>
-     * <p>This method returns the string value as if the node were untyped. Unlike the string value
-     * accessor in the XPath 2.0 data model, it does not report an error if the element has a complex
-     * type, instead it returns the concatenation of the descendant text nodes as it would if the element
-     * were untyped.</p>
-     *
-     * @return the string value of the node
-     * @since 8.4
-     */
-
-    @Override
-    UnicodeString getUnicodeStringValue();
-
-    /**
      * Ask whether this NodeInfo implementation holds a fingerprint identifying the name of the
      * node in the NamePool. If the answer is true, then the {@link #getFingerprint} method must
      * return the fingerprint of the node. If the answer is false, then the {@link #getFingerprint}
@@ -426,7 +403,7 @@ public interface NodeInfo extends Source, Item, Location {
      *
      * @param axisNumber an integer identifying the axis; one of the constants
      *                   defined in class {@link AxisInfo}
-     * @param nodeTest   A condition to be satisfied by the returned nodes; nodes
+     * @param predicate  A condition to be satisfied by the returned nodes; nodes
      *                   that do not satisfy this condition are not included in the result
      * @return an AxisIterator that delivers the nodes reached by the axis in
      *         turn.  The nodes are returned in axis order (document order for a forwards
@@ -437,8 +414,7 @@ public interface NodeInfo extends Source, Item, Location {
      * @since 8.4. Changed in 10.0 to accept any {@code Predicate<NodeInfo>} as the second argument. It is still
      * possible to supply a {@link NodeTest}, because {@code NodeTest} implements {@code Predicate<NodeInfo>}.
      */
-     AxisIterator iterateAxis(int axisNumber,
-                              @CSharpParameterType(key = "net.sf.saxon.pattern.NodeTest") Predicate<? super NodeInfo> nodeTest);
+     AxisIterator iterateAxis(int axisNumber, NodePredicate predicate);
 
 
     /**
@@ -485,31 +461,12 @@ public interface NodeInfo extends Source, Item, Location {
      */
 
     default Iterable<? extends NodeInfo> children() {
-        if (hasChildNodes()) {
-            NodeInfo parent = this;
-            return () -> new WrappingJavaIterator<>(parent.iterateAxis(AxisInfo.CHILD));
-        } else {
-            return Collections.emptyList();
-        }
+        return new Navigator.ChildrenAsIterable(this);
     }
 
-    /**
-     * Return the sequence of children of this node, filtered by a supplied predicate,
-     * as an {@code Iterable}.
-     * @param filter a condition that the selected children must satisfy
-     * @return the children of the node, as an {@code Iterable}.
-     */
-
-    default Iterable<? extends NodeInfo> children(
-            @CSharpParameterType(key = "net.sf.saxon.pattern.NodeTest") Predicate<? super NodeInfo> filter) {
-        if (hasChildNodes()) {
-            NodeInfo parent = this;
-            return () -> new WrappingJavaIterator<>(parent.iterateAxis(AxisInfo.CHILD, filter));
-        } else {
-            return Collections.emptyList();
-        }
+    default Iterable<? extends NodeInfo> children(NodePredicate filter) {
+        return new Navigator.ChildrenAsIterable(this, filter);
     }
-
 
     default AttributeMap attributes() {
         AttributeMap atts = EmptyAttributeMap.getInstance();

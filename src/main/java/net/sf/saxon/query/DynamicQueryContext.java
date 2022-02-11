@@ -17,6 +17,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.value.DateTimeValue;
 
 import javax.xml.transform.ErrorListener;
@@ -28,7 +29,11 @@ import javax.xml.transform.URIResolver;
  * operationally (or modified) by the XQuery processor itself, which copies all required
  * information into its own internal representation.
  */
-
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "    }"
+})
 public class DynamicQueryContext {
 
     /*@Nullable*/ private Item contextItem;

@@ -14,6 +14,7 @@ import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 
 /**
@@ -77,7 +78,7 @@ public final class AnyNodeTest extends NodeTest implements QNameTest {
     @Override
     public IntPredicateProxy getMatcher(NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
-        return nodeNr -> nodeKindArray[nodeNr] != Type.PARENT_POINTER;
+        return IntPredicateLambda.of(nodeNr -> nodeKindArray[nodeNr] != Type.PARENT_POINTER);
     }
 
     /**

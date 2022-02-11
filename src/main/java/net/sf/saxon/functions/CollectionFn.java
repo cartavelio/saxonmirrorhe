@@ -252,7 +252,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         // In XSLT, apply space-stripping to document nodes in the collection
         if (whitespaceRule != null) {
             final SpaceStrippingRule rule = whitespaceRule;
-            ItemMappingFunction stripper = ItemMapper.of(item -> {
+            result = ItemMappingIterator.map(result, item -> {
                 if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.DOCUMENT) {
                     TreeInfo treeInfo = ((NodeInfo) item).getTreeInfo();
                     if (treeInfo.getSpaceStrippingRule() != rule) {
@@ -261,7 +261,6 @@ public class CollectionFn extends SystemFunction implements Callable {
                 }
                 return item;
             });
-            result = new ItemMappingIterator(result, stripper);
         }
 
         // If the collection is stable, cache the result

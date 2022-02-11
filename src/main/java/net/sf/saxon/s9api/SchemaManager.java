@@ -9,6 +9,7 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.SchemaURIResolver;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -29,6 +30,12 @@ import javax.xml.transform.Source;
  * include adding to the substitution group of an existing element declaration, adding subtypes
  * to an existing type, or redefining components using &lt;xs:redefine&gt;</p>
  */
+
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "    }"
+})
 public abstract class SchemaManager {
 
     public SchemaManager() {

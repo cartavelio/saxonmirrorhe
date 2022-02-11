@@ -25,11 +25,9 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.iter.ManualIterator;
-
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -42,7 +40,7 @@ public class SourceDocument extends Instruction {
     protected Operand bodyOp;
 
     protected ParseOptions parseOptions;
-    protected Set<? extends Accumulator> accumulators = new HashSet<>();
+    protected Set<? extends Accumulator> accumulators;
 
     public SourceDocument(Expression hrefExp, Expression body, ParseOptions options) {
         hrefOp = new Operand(this, hrefExp, OperandRole.SINGLE_ATOMIC);

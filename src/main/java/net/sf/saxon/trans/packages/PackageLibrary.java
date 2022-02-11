@@ -142,7 +142,10 @@ public class PackageLibrary {
         VersionedPackageName vp = details.nameAndVersion;
         String name = vp.packageName;
         PackageVersion version = vp.packageVersion;
-        List<PackageVersion> versions = packageVersions.computeIfAbsent(name, k -> new ArrayList<>());
+        List<PackageVersion> versions = packageVersions.get(name);
+        if (versions == null) {
+            versions = new ArrayList<>();
+        }
         versions.add(version);
         packages.put(vp, details);
     }

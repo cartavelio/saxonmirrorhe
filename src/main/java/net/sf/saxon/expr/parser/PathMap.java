@@ -62,7 +62,7 @@ public class PathMap {
          * Create a node in the PathMap (initially with no arcs)
          */
 
-        private PathMapNode() {
+        protected PathMapNode() {
             arcs = new ArrayList<PathMapArc>();
         }
 
@@ -249,14 +249,14 @@ public class PathMap {
     public static class PathMapRoot extends PathMapNode {
 
         private final Expression rootExpression;
-        private boolean isDownwardsOnly;
+        public boolean isDownwardsOnly;
 
         /**
          * Create a PathMapRoot
          *
          * @param root the expression at the root of a path
          */
-        private PathMapRoot(Expression root) {
+        protected PathMapRoot(Expression root) {
             this.rootExpression = root;
         }
 
@@ -288,7 +288,7 @@ public class PathMap {
          * @param test   the node test
          * @param target the node reached by following this arc
          */
-        private PathMapArc(int axis, /*@NotNull*/ NodeTest test, /*@NotNull*/ PathMapNode target) {
+        protected PathMapArc(int axis, /*@NotNull*/ NodeTest test, /*@NotNull*/ PathMapNode target) {
             this.axis = axis;
             this.test = test;
             this.target = target;
@@ -809,25 +809,25 @@ public class PathMap {
 
     }
 
-    /**
-     * Display a printed representation of the path map
-     *
-     * @param out the output stream to which the output will be written
-     */
-
-    public void diagnosticDump(/*@NotNull*/ Logger out) {
-        for (int i = 0; i < pathMapRoots.size(); i++) {
-            out.info("\nROOT EXPRESSION " + i);
-            PathMapRoot mapRoot = pathMapRoots.get(i);
-            if (mapRoot.hasUnknownDependencies()) {
-                out.info("  -- has unknown dependencies --");
-            }
-            Expression exp = mapRoot.rootExpression;
-            exp.explain(out);
-            out.info("\nTREE FOR EXPRESSION " + i);
-            showArcs(out, mapRoot, 2);
-        }
-    }
+//    /**
+//     * Display a printed representation of the path map
+//     *
+//     * @param out the output stream to which the output will be written
+//     */
+//
+//    public void diagnosticDump(/*@NotNull*/ Logger out) {
+//        for (int i = 0; i < pathMapRoots.size(); i++) {
+//            out.info("\nROOT EXPRESSION " + i);
+//            PathMapRoot mapRoot = pathMapRoots.get(i);
+//            if (mapRoot.hasUnknownDependencies()) {
+//                out.info("  -- has unknown dependencies --");
+//            }
+//            Expression exp = mapRoot.rootExpression;
+//            exp.explain(out);
+//            out.info("\nTREE FOR EXPRESSION " + i);
+//            showArcs(out, mapRoot, 2);
+//        }
+//    }
 
     /**
      * Internal helper method called by diagnosticDump, to show the arcs emanating from a node.
@@ -844,13 +844,13 @@ public class PathMap {
         String pad = "                                           ".substring(0, indent);
         List<PathMapArc> arcs = node.arcs;
         for (PathMapArc arc : arcs) {
-            out.info(pad + AxisInfo.axisName[arc.axis] +
+            out.info(pad + AxisInfo.axisName[arc.getAxis()] +
                     "::" +
-                    arc.test.toString() +
-                    (arc.target.isAtomized() ? " @" : "") +
-                    (arc.target.isReturnable() ? " #" : "") +
-                    (arc.target.hasUnknownDependencies() ? " ...??" : ""));
-            showArcs(out, arc.target, indent + 2);
+                    arc.getNodeTest().toString() +
+                    (arc.getTarget().isAtomized() ? " @" : "") +
+                    (arc.getTarget().isReturnable() ? " #" : "") +
+                    (arc.getTarget().hasUnknownDependencies() ? " ...??" : ""));
+            showArcs(out, arc.getTarget(), indent + 2);
         }
     }
 

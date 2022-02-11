@@ -82,9 +82,8 @@ public class DOM4JDocumentWrapper extends GenericTreeInfo {
      */
 
     public static Branch searchForParent(Branch subtree, Node node) {
-        List content = subtree.content();
-        for (Object o : content) {
-            Node child = (Node) o;
+        List<Node> content = (List<Node>)subtree.content();
+        for (Node child : content) {
             if (child == node) {
                 return subtree;
             } else if (child.hasContent()) {

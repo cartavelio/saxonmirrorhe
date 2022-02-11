@@ -100,7 +100,6 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return the builder, with the new string added
      */
 
-    @Override
     public UnicodeBuilder append(CodePoints str) {
         if (!str.isEmpty()) {
             flushLooseCodepoints();
@@ -138,14 +137,14 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
                 for (int i : loose) {
                      content[k++] = (byte)(i & 0xff);
                 }
-                append(new Twine8(content));
+                accept(new Twine8(content));
             } else if (max < 65535) {
                 char[] content = new char[loose.size()];
                 int k = 0;
                 for (int i : loose) {
                     content[k++] = (char) (i & 0xffff);
                 }
-                append(new Twine16(content));
+                accept(new Twine16(content));
             } else {
                 byte[] content = new byte[loose.size() * 3];
                 int k = 0;
@@ -154,7 +153,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
                     content[k++] = (byte) ((cp >> 8) & 0xff);
                     content[k++] = (byte) (cp & 0xff);
                 }
-                append(new Twine24(content));
+                accept(new Twine24(content));
             }
         }
     }
@@ -428,10 +427,14 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * Process a supplied string
      *
      * @param chars the characters to be processed
-     * @throws IOException if processing fails for any reason
      */
     @Override
-    public void write(CodePoints chars) throws IOException {
+    public UnicodeBuilder accept(CodePoints chars) {
+        return append(chars);
+    }
+
+    @Override
+    public void write(CodePoints chars) {
         append(chars);
     }
 
@@ -443,7 +446,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
     @Override
     public void writeAscii(byte[] content) throws IOException {
-        append(new Twine8(content));
+        accept(new Twine8(content));
     }
 
     /**

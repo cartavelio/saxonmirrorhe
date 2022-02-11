@@ -1,6 +1,7 @@
 package net.sf.saxon.str;
 
 import net.sf.saxon.serialize.UTF8Writer;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
 
 import java.io.IOException;
@@ -164,6 +165,7 @@ public class Slice8 extends UnicodeString {
      */
 
     /*@NotNull*/
+    @CSharpReplaceBody(code="return com.saxonica.glue.StringUtils.LATIN_1.GetString(bytes, start, end - start);")
     public String toString() {
         return new String(bytes, start, end - start, StandardCharsets.ISO_8859_1);
     }

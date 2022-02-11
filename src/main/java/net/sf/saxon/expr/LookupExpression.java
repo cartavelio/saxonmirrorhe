@@ -137,7 +137,7 @@ public class LookupExpression extends BinaryExpression {
         isArrayLookup = containerType instanceof ArrayItemType;
         boolean isTupleLookup = containerType instanceof TupleType || originalType instanceof TupleType;
         isMapLookup = containerType instanceof MapType || isTupleLookup;
-        if (containerType instanceof AnyExternalObjectType) {
+        if (th.isSubType(containerType, AnyExternalObjectType.THE_INSTANCE)) {
             config.checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION, "use of lookup expressions on external objects", -1);
             return config.makeObjectLookupExpression(getLhsExpression(), getRhsExpression())
                     .typeCheck(visitor, contextInfo);
@@ -316,7 +316,7 @@ public class LookupExpression extends BinaryExpression {
                 SequenceIterator baseIterator = getLhsExpression().iterate(context);
                 IntegerValue subscriptValue = (IntegerValue) getRhsExpression().evaluateItem(context);
                 int subscript = subscriptValue.asSubscript() - 1;
-                return new MappingIterator(baseIterator, baseItem -> {
+                return MappingIterator.map(baseIterator, baseItem -> {
                     ArrayItem array = (ArrayItem) baseItem;
                     if (subscript >= 0 && subscript < array.arrayLength()) {
                         return array.get(subscript).iterate();
@@ -329,14 +329,13 @@ public class LookupExpression extends BinaryExpression {
             } else {
                 SequenceIterator baseIterator = getLhsExpression().iterate(context);
                 GroundedValue rhs = getRhsExpression().iterate(context).materialize();
-                return new MappingIterator(baseIterator, baseItem -> {
-                    final MappingFunction arrayMapper = index -> {
+                return MappingIterator.map(baseIterator, baseItem ->
+                    MappingIterator.map(rhs.iterate(), index -> {
                         ArrayItem array = (ArrayItem) baseItem;
                         int subscript = ArrayFunctionSet.checkSubscript((IntegerValue) index, array.arrayLength()) - 1;
                         return array.get(subscript).iterate();
-                    };
-                    return new MappingIterator(rhs.iterate(), arrayMapper);
-                });
+                    })
+                );
             }
         } else if (isMapLookup) {
             if (isSingleContainer && isSingleEntry) {
@@ -346,15 +345,15 @@ public class LookupExpression extends BinaryExpression {
             } else if (isSingleEntry) {
                 SequenceIterator baseIterator = getLhsExpression().iterate(context);
                 AtomicValue key = (AtomicValue) getRhsExpression().evaluateItem(context);
-                return new MappingIterator(baseIterator, baseItem ->
+                return MappingIterator.map(baseIterator, baseItem ->
                     optionalGroundedValueIterator(((MapItem) baseItem).get(key))
                 );
             } else {
                 SequenceIterator baseIterator = getLhsExpression().iterate(context);
                 GroundedValue rhs = getRhsExpression().iterate(context).materialize();
-                return new MappingIterator(baseIterator,
-                                           baseItem -> new MappingIterator(rhs.iterate(), index ->
-                        optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) index))
+                return MappingIterator.map(baseIterator, baseItem ->
+                        MappingIterator.map(rhs.iterate(), index ->
+                            optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) index))
                     ));
 
             }
@@ -382,10 +381,9 @@ public class LookupExpression extends BinaryExpression {
                     return new MappingIterator(rhsIter, arrayAccess);
                 } else if (baseItem instanceof MapItem) {
                     SequenceIterator rhsIter = rhs.iterate();
-                    return new MappingIterator(rhsIter, key -> {
-                        GroundedValue value = ((MapItem) baseItem).get((AtomicValue) key);
-                        return optionalGroundedValueIterator(value);
-                    });
+                    return MappingIterator.map(rhsIter, key ->
+                        optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) key))
+                    );
                 } else if (baseItem instanceof ObjectValue) {
                     if (!(rhs instanceof StringItem)) {
                         XPathException exception = new XPathException(

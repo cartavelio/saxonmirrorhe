@@ -247,7 +247,7 @@ public class IntHashSet extends IntSet {
 
     @Override
     public IntIterator iterator() {
-        return new IntHashSetIterator();
+        return new IntHashSetIterator(this);
     }
 
 
@@ -302,60 +302,19 @@ public class IntHashSet extends IntSet {
     }
 
     public String toString() {
-        return toString(iterator());
+        return stringify(iterator());
     }
 
-    public static String toString(IntIterator it) {
+    public static String stringify(IntIterator it) {
         StringBuilder sb = new StringBuilder(100);
         while (it.hasNext()) {
             if (sb.length() == 0) {
-                sb.appendCodePoint(it.next());
+                sb.append(it.next());
             } else {
-                sb.append(' ').appendCodePoint(it.next());
+                sb.append(' ').append(it.next());
             }
         }
         return sb.toString();
-    }
-
-    /**
-     * Diagnostic output
-     */
-
-    public void diagnosticDump() {
-        System.err.println("Contents of IntHashSet");
-        StringBuilder sb = new StringBuilder(100);
-        for (int i = 0; i < _values.length; i++) {
-            if (i % 10 == 0) {
-                System.err.println(sb.toString());
-                sb.setLength(0);
-            }
-            if (_values[i] == ndv) {
-                sb.append("*, ");
-            } else {
-                sb.append(_values[i] + ", ");
-            }
-        }
-        System.err.println(sb.toString());
-        sb.setLength(0);
-        System.err.println("size: " + _size);
-        System.err.println("ndv: " + ndv);
-        System.err.println("nlo: " + _nlo);
-        System.err.println("nhi: " + _nhi);
-        System.err.println("nmax: " + _nmax);
-        System.err.println("shift: " + _shift);
-        System.err.println("mask: " + _mask);
-        System.err.println("Result of iterator:");
-        IntIterator iter = iterator();
-        int j = 0;
-        while (iter.hasNext()) {
-            if (j++ % 10 == 0) {
-                System.err.println(sb.toString());
-                sb.setLength(0);
-            }
-            sb.append(iter.next() + ", ");
-        }
-        System.err.println(sb.toString());
-        System.err.println("=====================");
     }
 
     /**
@@ -374,22 +333,23 @@ public class IntHashSet extends IntSet {
 
     /**
      * Iterator class
-     *
-     * @author Saxonica Limited
+     * @implNote implemented as a static inner class for ease of conversion to C#
      */
 
-    private class IntHashSetIterator implements IntIterator {
+    private static class IntHashSetIterator implements IntIterator {
 
+        private final IntHashSet container;
         private int i;
 
-        IntHashSetIterator() {
+        IntHashSetIterator(IntHashSet container) {
+            this.container = container;
             i = 0;
         }
 
         @Override
         public boolean hasNext() {
-            while (i < _values.length) {
-                if (_values[i] != ndv) {
+            while (i < container._values.length) {
+                if (container._values[i] != container.ndv) {
                     return true;
                 } else {
                     i++;
@@ -400,7 +360,7 @@ public class IntHashSet extends IntSet {
 
         @Override
         public int next() {
-            return _values[i++];
+            return container._values[i++];
         }
     }
 

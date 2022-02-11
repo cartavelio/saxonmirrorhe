@@ -12,6 +12,7 @@ import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.Optional;
@@ -142,7 +143,7 @@ public interface AtomicType extends SimpleType, PlainType, CastingTarget {
         if (item instanceof AtomicValue) {
             return Optional.of("The supplied value is of type " + ((AtomicValue) item).getItemType());
         } else {
-            return Optional.of("The supplied value is " + item.getGenre().getDescription());
+            return Optional.of("The supplied value is " + Err.describeGenre(item.getGenre()));
         }
     }
 

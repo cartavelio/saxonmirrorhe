@@ -10,7 +10,11 @@ package net.sf.saxon.pattern;
 import net.sf.saxon.om.*;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyTree;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.Type;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.UType;
+import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
 
@@ -104,14 +108,14 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
              Map<String, IntSet> localNameIndex = ((TinyTree)tree).getLocalNameIndex();
              IntSet intSet = localNameIndex.get(localName);
              if (intSet == null) {
-                 return i -> false;
+                 return IntPredicateLambda.of(n -> false);
              } else {
-                 return nodeNr -> intSet.contains(nameCodeArray[nodeNr] & NamePool.FP_MASK)
-                         && (nodeKindArray[nodeNr] & 0x0f) == Type.ELEMENT;
+                 return IntPredicateLambda.of(nodeNr -> intSet.contains(nameCodeArray[nodeNr] & NamePool.FP_MASK)
+                         && (nodeKindArray[nodeNr] & 0x0f) == Type.ELEMENT);
              }
         } else {
-            return nodeNr -> (nodeKindArray[nodeNr] & 0x0f) == nodeKind &&
-                    localName.equals(namePool.getLocalName(nameCodeArray[nodeNr] & NamePool.FP_MASK));
+            return IntPredicateLambda.of(nodeNr -> (nodeKindArray[nodeNr] & 0x0f) == nodeKind &&
+                    localName.equals(namePool.getLocalName(nameCodeArray[nodeNr] & NamePool.FP_MASK)));
         }
     }
 

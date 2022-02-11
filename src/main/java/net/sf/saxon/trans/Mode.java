@@ -24,6 +24,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.ModeTraceListener;
 import net.sf.saxon.trans.rules.*;
+import net.sf.saxon.transpile.CSharpDelegate;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -34,6 +35,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A Mode is a collection of rules; the selection of a rule to apply to a given element
@@ -138,12 +140,16 @@ public abstract class Mode extends Actor {
 
     /**
      * Get a title for the mode: either "Mode mode-name" or "The unnamed mode" as appropriate
-     *
+     * @param initialCaps true if the first letter should be upper case
      * @return a title for the mode
      */
 
-    public String getModeTitle() {
-        return isUnnamedMode() ? "The unnamed mode" : "Mode " + getModeName().getDisplayName();
+    public String getModeTitle(boolean initialCaps) {
+        if (initialCaps) {
+            return isUnnamedMode() ? "The unnamed mode" : "Mode " + getModeName().getDisplayName();
+        } else {
+            return isUnnamedMode() ? "the unnamed mode" : "mode " + getModeName().getDisplayName();
+        }
     }
 
     /**
@@ -164,7 +170,11 @@ public abstract class Mode extends Actor {
      * @return the list of accumulators applicable when this is the initial mode
      */
     public Set<? extends Accumulator> getAccumulators() {
-        return accumulators == null ? Collections.emptySet() : accumulators;
+        if (accumulators == null) {
+            return Collections.emptySet();
+        } else {
+            return accumulators;
+        }
     }
 
     /**
@@ -273,29 +283,6 @@ public abstract class Mode extends Actor {
 
     public abstract void processRules(RuleAction action) throws XPathException;
 
-//    /**
-//     * Ask whether any template rule in this mode invokes the last() function in the
-//     * context of the calling xsl:apply-templates
-//     * @return true if any rule has a "top-level" call on the last() function
-//     */
-//
-//    public boolean callsLast() {
-//        List<Boolean> result = new ArrayList<>();
-//        try {
-//            processRules((rule) -> {
-//                if (result.isEmpty()) {
-//                    int dep = (((TemplateRule) rule.getAction()).getBody()).getDependencies();
-//                    if ((dep & StaticProperty.DEPENDS_ON_LAST) != 0) {
-//                        result.add(true);
-//                    }
-//                }
-//            });
-//            return !result.isEmpty();
-//        } catch (XPathException e) {
-//            return true;
-//        }
-//    }
-
     /**
      * Make a new XPath context for evaluating patterns if there is any possibility that the
      * pattern uses local variables
@@ -337,7 +324,7 @@ public abstract class Mode extends Actor {
 
 
     /*@Nullable*/
-    public abstract Rule getRule(Item item, XPathContext context, SimpleMode.RuleFilter filter) throws XPathException;
+    public abstract Rule getRule(Item item, XPathContext context, Predicate<Rule> filter) throws XPathException;
 
     /**
      * Get the rule corresponding to a given Node, by finding the best Pattern match, subject to a minimum
@@ -352,11 +339,10 @@ public abstract class Mode extends Actor {
      */
 
     public Rule getRule(Item item, final int min, final int max, XPathContext context) throws XPathException {
-        RuleFilter filter = r -> {
+        return getRule(item, context, r -> {
             int p = r.getPrecedence();
             return p >= min && p <= max;
-        };
-        return getRule(item, context, filter);
+        });
     }
 
     /**
@@ -371,7 +357,7 @@ public abstract class Mode extends Actor {
      */
 
     public Rule getNextMatchRule(Item item, final Rule currentRule, XPathContext context) throws XPathException {
-        SimpleMode.RuleFilter filter = r -> {
+        return getRule(item, context, r -> {
             int comp = r.compareRank(currentRule);
             if (comp < 0) {
                 // the rule has lower precedence or priority than the current rule
@@ -387,8 +373,7 @@ public abstract class Mode extends Actor {
                 }
             }
             return false;
-        };
-        return getRule(item, context, filter);
+        });
     }
 
     /**
@@ -499,7 +484,7 @@ public abstract class Mode extends Actor {
                     if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
                         SchemaType annotation = ((NodeInfo) item).getSchemaType();
                         if (annotation == Untyped.getInstance() || annotation == BuiltInAtomicType.UNTYPED_ATOMIC) {
-                            throw new XPathException(getModeTitle() + " requires typed nodes, but the input is untyped", "XTTE3100");
+                            throw new XPathException(getModeTitle(true) + " requires typed nodes, but the input is untyped", "XTTE3100");
                         }
                     }
                 }
@@ -509,7 +494,7 @@ public abstract class Mode extends Actor {
                     if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
                         SchemaType annotation = ((NodeInfo) item).getSchemaType();
                         if (!(annotation == Untyped.getInstance() || annotation == BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                            throw new XPathException(getModeTitle() + " requires untyped nodes, but the input is typed", "XTTE3110");
+                            throw new XPathException(getModeTitle(true) + " requires untyped nodes, but the input is typed", "XTTE3110");
                         }
                     }
                 }
@@ -718,7 +703,7 @@ public abstract class Mode extends Actor {
      * Interface for helper classes used to filter a chain of rules
      */
 
-    protected interface RuleFilter {
+    public interface RuleFilter {
         /**
          * Test a rule to see whether it should be included
          *
@@ -732,6 +717,8 @@ public abstract class Mode extends Actor {
      * Interface for helper classes used to process all the rules in the Mode
      */
 
+    @FunctionalInterface
+    @CSharpDelegate(true)
     public interface RuleAction {
         /**
          * Process a given rule

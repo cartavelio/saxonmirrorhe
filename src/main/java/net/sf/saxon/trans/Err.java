@@ -99,6 +99,7 @@ public class Err {
                     } else {
                         sb.appendCodePoint(c);
                     }
+                    break;
             }
         }
         String s;
@@ -264,4 +265,27 @@ public class Err {
     }
 
 
+    public static String describeGenre(Genre genre) {
+        switch (genre) {
+            case ANY:
+                return "any item";
+            case ATOMIC:
+                return "an atomic value";
+            case NODE:
+                return "a node";
+            case FUNCTION:
+                return "a function";
+            case MAP:
+                return "a map";
+            case ARRAY:
+                return "an array";
+            case EXTERNAL:
+            default:
+                return "an external object";
+        }
+    }
+
+    public static String describeVisibility(Visibility vis) {
+        return vis.toString().toLowerCase();
+    }
 }

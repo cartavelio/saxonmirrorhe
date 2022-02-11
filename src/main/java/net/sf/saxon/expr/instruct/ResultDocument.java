@@ -652,8 +652,7 @@ public class ResultDocument extends Instruction
 
         // First handle the properties with fixed values on xsl:result-document
 
-        for (Object keyo : localProperties.keySet()) {
-            String key = (String) keyo;
+        for (String key : localProperties.stringPropertyNames()) {
             StructuredQName qName = StructuredQName.fromClarkName(key);
             try {
                 setSerializationProperty(computedLocalProps, qName.getURI(), qName.getLocalPart(),
@@ -896,10 +895,8 @@ public class ResultDocument extends Instruction
                 // TODO: other QName-valued fields such as cdata-section-elements??
                 val = val.replace("{", "Q{");
             }
-            if (key.startsWith("{")) {
-                key = "Q" + key;
-            }
-            writer.append(key).append("=").append(val).append("\n");
+            String adjustedKey = key.startsWith("{") ? "Q" + key : key;
+            writer.append(adjustedKey).append("=").append(val).append("\n");
         }
         return writer.toString();
     }

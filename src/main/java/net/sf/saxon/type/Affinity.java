@@ -7,10 +7,13 @@
 
 package net.sf.saxon.type;
 
+import net.sf.saxon.transpile.CSharpSimpleEnum;
+
 /**
  * A set of constants enumerating the possible relationships between one type and another
  */
 
+@CSharpSimpleEnum
 public enum Affinity {
 
     /**

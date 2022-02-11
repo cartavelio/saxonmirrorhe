@@ -11,6 +11,7 @@ import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntPredicateProxy;
 
@@ -222,7 +223,7 @@ public class QueryReader {
      * is a sequence of characters delimited either by whitespace, or by single or double quotes; the
      * quotes if present are returned as part of the token.
      *
-     * @param in  the character buffer
+     * @param in  the raw content buffer, whose encoding is at this point unknown
      * @param i   offset where to start reading
      * @param len the length of buffer
      * @return the next token
@@ -249,7 +250,7 @@ public class QueryReader {
             }
         }
         if (p >= len) {
-            return new String(in, i, len - i);
+            return fromAsciiByteArray(in, i, len - i);
         }
         StringBuilder sb = new StringBuilder(p - i + 1);
         for (int c = i; c <= p; c++) {
@@ -259,14 +260,26 @@ public class QueryReader {
     }
 
     /**
+     * Form a string from an ascii byte array
+     * @param bytes the byte array
+     * @param start offset of the first byte to be included
+     * @param length the number of bytes to be included
+     */
+
+    @CSharpReplaceBody(code="return System.Text.Encoding.ASCII.GetString(bytes, start, length);")
+    private static String fromAsciiByteArray(byte[] bytes, int start, int length) {
+        return new String(bytes, start, length);
+    }
+
+    /**
      * Convert a byte containing an ASCII character to that character
      *
      * @param b the input byte
      * @return the ASCII character
      */
 
-    private static int ch(byte b) {
-        return (int) b & 0xff;
+    private static char ch(byte b) {
+        return (char)(b & 0xff);
     }
 
 }

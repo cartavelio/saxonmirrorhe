@@ -779,7 +779,7 @@ public class XsltController extends Controller {
 
     private void warningIfStreamable(Mode mode) {
         if (mode.isDeclaredStreamable()) {
-            warning((initialMode == null ? "" : getInitialMode().getModeTitle()) +
+            warning((initialMode == null ? "" : getInitialMode().getModeTitle(true)) +
                             " is streamable, but the input is not supplied as a stream", SaxonErrorCode.SXWN9000, Loc.NONE);
         }
     }
@@ -835,7 +835,8 @@ public class XsltController extends Controller {
                 throw new XPathException("Template " + initialTemplateName.getDisplayName() + " does not exist", "XTDE0040");
             }
             if (!pack.isImplicitPackage() && !(initialComponent.getVisibility() == Visibility.PUBLIC || initialComponent.getVisibility() == Visibility.FINAL)) {
-                throw new XPathException("Template " + initialTemplateName.getDisplayName() + " is " + initialComponent.getVisibility().show(), "XTDE0040");
+                throw new XPathException("Template " + initialTemplateName.getDisplayName()
+                                                 + " is " + Err.describeVisibility(initialComponent.getVisibility()), "XTDE0040");
             }
             NamedTemplate t = (NamedTemplate) initialComponent.getActor();
 
@@ -1064,7 +1065,8 @@ public class XsltController extends Controller {
 
     public synchronized Stack<AttributeSet> getAttributeSetEvaluationStack() {
         long thread = Thread.currentThread().getId();
-        return attributeSetEvaluationStacks.computeIfAbsent(thread, k -> new Stack<>());
+        //noinspection Convert2Diamond
+        return attributeSetEvaluationStacks.computeIfAbsent(thread, k -> new Stack<AttributeSet>());
     }
 
     public synchronized void releaseAttributeSetEvaluationStack() {

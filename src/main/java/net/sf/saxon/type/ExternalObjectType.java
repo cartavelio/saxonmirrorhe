@@ -50,5 +50,8 @@ public abstract class ExternalObjectType extends AnyExternalObjectType {
         return false;
     }
 
-
+    @Override
+    public String toString() {
+        return getTypeName().toString();
+    }
 }

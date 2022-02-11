@@ -13,7 +13,7 @@ import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
@@ -93,7 +93,7 @@ class DOMAttributeMap implements NamedNodeMap {
             }
             return null;
         } else {
-            AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE, new NodePredicate(att -> att.getDisplayName().equals(name)));
+            AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE, NodeSelector.of(att -> att.getDisplayName().equals(name)));
             NodeInfo att = atts.next();
             return att == null ? null : NodeOverNodeInfo.wrap(att);
         }

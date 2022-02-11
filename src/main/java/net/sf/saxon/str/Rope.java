@@ -44,15 +44,10 @@ public class Rope extends UnicodeString {
         this._depth = Math.max(depth(left), depth(right)) + 1;
     }
 
-    private static int depth(UnicodeString string) {
-        return string instanceof Rope ? ((Rope)string)._depth : 0;
+    private static int depth(UnicodeString str) {
+        return str instanceof Rope ? ((Rope)str)._depth : 0;
     }
-
-//    private int depth() {
-//        int d1 = left instanceof Rope ? ((Rope)left).depth() : 0;
-//        int d2 = right instanceof Rope ? ((Rope)right).depth() : 0;
-//        return Math.max(d1, d2) + 1;
-//    }
+    
 
 
 
@@ -260,12 +255,12 @@ public class Rope extends UnicodeString {
         }
     }
 
-    private static void writeToBuilder(UnicodeString string, UnicodeBuilder builder) {
-        if (string instanceof Rope) {
-            writeToBuilder(((Rope) string).left, builder);
-            writeToBuilder(((Rope) string).right, builder);
+    private static void writeToBuilder(UnicodeString str, UnicodeBuilder builder) {
+        if (str instanceof Rope) {
+            writeToBuilder(((Rope) str).left, builder);
+            writeToBuilder(((Rope) str).right, builder);
         } else {
-            builder.append(string);
+            builder.accept(str);
         }
     }
 
@@ -276,18 +271,19 @@ public class Rope extends UnicodeString {
         return builder.toString();
     }
 
-    private static void writeToStringBuilder(UnicodeString string, StringBuilder builder) {
-        if (string instanceof Rope) {
-            writeToStringBuilder(((Rope) string).left, builder);
-            writeToStringBuilder(((Rope) string).right, builder);
+    private static void writeToStringBuilder(UnicodeString str, StringBuilder builder) {
+        if (str instanceof Rope) {
+            writeToStringBuilder(((Rope) str).left, builder);
+            writeToStringBuilder(((Rope) str).right, builder);
         } else {
-            builder.append(string);
+            builder.append(str);
         }
     }
 
     @Override
     public IntIterator codePoints() {
-        return new ConcatenatingIntIterator(left.codePoints(), right::codePoints);
+        //noinspection Convert2MethodRef
+        return new ConcatenatingIntIterator(left.codePoints(), () -> right.codePoints());
     }
 
     private static final int THRESHOLD = 10;
@@ -327,8 +323,8 @@ public class Rope extends UnicodeString {
                                     (prev.getWidth() > leaf.getWidth() && leaf.length() < minLength)
                     )) {
                         UnicodeBuilder ub = new UnicodeBuilder();
-                        ub.append(prev);
-                        ub.append(leaf);
+                        ub.accept(prev);
+                        ub.accept(leaf);
                         prev = ub.toUnicodeString();
                     } else {
                         merged.add(prev);

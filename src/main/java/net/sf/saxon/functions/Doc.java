@@ -18,6 +18,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
 
 /**
  * Implement the fn:doc() function - a simplified form of the Document function
@@ -121,10 +122,10 @@ public class Doc extends SystemFunction implements Callable {
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue hrefVal = (AtomicValue) arguments[0].head();
         if (hrefVal == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
         String href = hrefVal.getStringValue();
         PackageData packageData = getRetainedStaticContext().getPackageData();
@@ -139,7 +140,7 @@ public class Doc extends SystemFunction implements Callable {
                     item.getTreeInfo(), parseOptions.getApplicableAccumulators()
             );
         }
-        return new ZeroOrOne(item);
+        return item;
     }
 
     /**

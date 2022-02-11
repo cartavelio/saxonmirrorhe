@@ -43,7 +43,7 @@ public interface BuiltInRuleSet extends ContextOriginator {
 
     /**
      * Identify this built-in rule set
-     * @return the XSLT keyword used to identify this rule-set, for example "deep-copy
+     * @return the XSLT keyword used to identify this rule-set, for example "deep-copy"
      */
 
     String getName();

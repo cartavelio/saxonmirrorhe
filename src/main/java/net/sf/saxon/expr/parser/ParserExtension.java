@@ -8,9 +8,7 @@
 package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.hof.FunctionLiteral;
@@ -26,19 +24,16 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryParser;
-import net.sf.saxon.style.ExpressionContext;
 import net.sf.saxon.style.SourceBinding;
-import net.sf.saxon.style.StylesheetPackage;
-import net.sf.saxon.trans.*;
+import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * Dummy Parser extension for syntax in XPath that is accepted only in particular product variants.
@@ -328,7 +323,8 @@ public class ParserExtension {
         if (target == null) {
             // This will not happen in XQuery; instead, a dummy function will be created in the
             // UnboundFunctionLibrary in case it's a forward reference to a function not yet compiled
-            return parser.reportMissingFunction(offset, name, args, new ArrayList<>());
+            List<String> reasons = new ArrayList<>();
+            return parser.reportMissingFunction(offset, name, args, reasons);
         }
         Expression targetExp = makeNamedFunctionReference(name, target);
         parser.setLocation(targetExp, offset);

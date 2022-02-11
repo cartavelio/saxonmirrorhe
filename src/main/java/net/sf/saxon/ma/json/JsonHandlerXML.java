@@ -60,9 +60,9 @@ public class JsonHandlerXML extends JsonHandler {
     private FingerprintedQName escapedKeyQN;
 
     private static final Untyped UNTYPED = Untyped.getInstance();
-    private static final AnySimpleType SIMPLE_TYPE = AnySimpleType.getInstance();
-    private static final BuiltInAtomicType BOOLEAN_TYPE = BuiltInAtomicType.BOOLEAN;
-    private static final BuiltInAtomicType STRING_TYPE = BuiltInAtomicType.STRING;
+    private static final SimpleType SIMPLE_TYPE = AnySimpleType.getInstance();
+    private static final SimpleType BOOLEAN_TYPE = BuiltInAtomicType.BOOLEAN;
+    private static final SimpleType STRING_TYPE = BuiltInAtomicType.STRING;
 
     public HashMap<String, SchemaType> types;
     private final Stack<HashSet<String>> mapKeys = new Stack<>();

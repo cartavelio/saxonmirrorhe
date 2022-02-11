@@ -20,11 +20,9 @@ import java.util.Arrays;
 
 /**
  * A value of type xs:base64Binary
- * <p><i>Rewritten for Saxon 9.5 to avoid dependency on the open-source Netscape code, whose
- * license many users were unhappy with.</i></p>
  */
 
-public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Comparable {
+public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Comparable<Base64BinaryValue> {
 
     private final byte[] binaryValue;
 
@@ -282,7 +280,7 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
         int u = 0;
         int pad = 0;
         int chars = 0;
-        int last = 0;
+        char last = 0;
 
         // process characters 4 at a time: 4 characters => 3 bytes
         while (i < in.length()) {
@@ -365,8 +363,8 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
     }
 
     @Override
-    public int compareTo(Object o) {
-        byte[] other = ((Base64BinaryValue)o).binaryValue;
+    public int compareTo(Base64BinaryValue o) {
+        byte[] other = o.binaryValue;
         int len0 = binaryValue.length;
         int len1 = other.length;
         int shorter = java.lang.Math.min(len0, len1);

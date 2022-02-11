@@ -6,7 +6,6 @@ import java.util.Iterator;
 
 /**
  * Class IteratorWrapper - provides an an SequenceIterator over a Java Iterator.
- * Note: used in .NET only.
  */
 public class IteratorWrapper implements SequenceIterator {
 

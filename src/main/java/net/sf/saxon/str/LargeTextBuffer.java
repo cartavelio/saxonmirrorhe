@@ -411,11 +411,11 @@ public final class LargeTextBuffer {
             //System.err.println("Cross-segment s=" + start + " e=" + end);
             UnicodeBuilder ub = new UnicodeBuilder();
             int segNr = firstSeg;
-            ub.append(getSegment(segNr++).substring(start & MASK, SEGLEN));
+            ub.accept(getSegment(segNr++).substring(start & MASK, SEGLEN));
             while (segNr < lastSeg) {
-                ub.append(getSegment(segNr++).asUnicodeString());
+                ub.accept(getSegment(segNr++).asUnicodeString());
             }
-            ub.append(getSegment(lastSeg).substring(0, lastCP));
+            ub.accept(getSegment(lastSeg).substring(0, lastCP));
             return ub.toUnicodeString();
 
         }

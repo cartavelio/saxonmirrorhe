@@ -132,12 +132,12 @@ public class SQLUpdate extends ExtensionInstruction {
 
         private UpdateInstruction(){}
 
-        public UpdateInstruction(Expression connection, String statement, List columnInstructions, Expression where) {
+        public UpdateInstruction(Expression connection, String statement, List<Expression> columnInstructions, Expression where) {
             Expression[] sub = new Expression[columnInstructions.size() + 2];
             sub[CONNECTION] = connection;
             sub[WHERE] = where;
             for (int i = 0; i < columnInstructions.size(); i++) {
-                sub[i + FIRST_COLUMN] = (Expression) columnInstructions.get(i);
+                sub[i + FIRST_COLUMN] = columnInstructions.get(i);
             }
             this.statement = statement;
             setArguments(sub);

@@ -8,16 +8,15 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.*;
-import net.sf.saxon.tree.iter.ListIterator;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -25,8 +24,7 @@ import java.util.*;
  * by allocating memory to each item in the sequence.
  */
 
-public class SequenceExtent implements GroundedValue {
-    private final List<? extends Item> value;
+public class SequenceExtent extends ZeroOrMore<Item> {
 
     /**
      * Construct an sequence from an array of items. Note, the array of items is used as is,
@@ -36,7 +34,7 @@ public class SequenceExtent implements GroundedValue {
      */
 
     public SequenceExtent(Item[] items) {
-        value = Arrays.asList(items);
+        super(Arrays.asList(items));
     }
 
     /**
@@ -59,8 +57,8 @@ public class SequenceExtent implements GroundedValue {
      * @param list the list of items to be included in the sequence
      */
 
-    public SequenceExtent(List<? extends Item> list) {
-        this.value = list;
+    public SequenceExtent(List<Item> list) {
+        super(list);
     }
 
     /**
@@ -75,54 +73,57 @@ public class SequenceExtent implements GroundedValue {
      */
 
     public SequenceExtent(SequenceIterator iter) throws XPathException {
-        int len = !iter.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)
-                ? 20
-                : ((LastPositionFinder)iter).getLength();
-        List<Item> list = new ArrayList<>(len);
-        iter.forEachOrFail(list::add);
-        value = list;
+        super(new ArrayList<Item>(!iter.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)
+                                                     ? 20
+                                                     : ((LastPositionFinder) iter).getLength()));
+
+        List<Item> list = getValue();
+        Item item;
+        while ((item = iter.next()) != null) {
+            list.add(item);
+        }
     }
 
-    /**
-     * Factory method to make a GroundedValue holding the contents of any SequenceIterator.
-     *
-     * @param iter a Sequence iterator that may or may not be consumed to deliver the items in the sequence.
-     *             The iterator must be positioned at the start.
-     * @return a GroundedValue holding the items delivered by the SequenceIterator. If the
-     *         sequence is empty the result will be an instance of {@link EmptySequence}. If it is of length
-     *         one, the result will be an {@link Item}. In all other cases, it will be an instance of
-     *         {@link SequenceExtent}.
-     * @throws net.sf.saxon.trans.XPathException
-     *          if an error occurs processing the values from
-     *          the iterator.
-     * @deprecated since 9.9: use {@link SequenceIterator#materialize()}
-     */
+//    /**
+//     * Factory method to make a GroundedValue holding the contents of any SequenceIterator.
+//     *
+//     * @param iter a Sequence iterator that may or may not be consumed to deliver the items in the sequence.
+//     *             The iterator must be positioned at the start.
+//     * @return a GroundedValue holding the items delivered by the SequenceIterator. If the
+//     *         sequence is empty the result will be an instance of {@link EmptySequence}. If it is of length
+//     *         one, the result will be an {@link Item}. In all other cases, it will be an instance of
+//     *         {@link SequenceExtent}.
+//     * @throws net.sf.saxon.trans.XPathException
+//     *          if an error occurs processing the values from
+//     *          the iterator.
+//     * @deprecated since 9.9: use {@link SequenceIterator#materialize()}
+//     */
+//
+//    public static GroundedValue makeSequenceExtent(SequenceIterator iter) throws XPathException {
+//        return iter.materialize();
+//    }
 
-    public static GroundedValue makeSequenceExtent(SequenceIterator iter) throws XPathException {
-        return iter.materialize();
-    }
-
-    /**
-     * Factory method to make a GroundedValue holding the contents of any SequenceIterator.
-     *
-     * @param iter a Sequence iterator that may or may not be consumed to deliver the items in the sequence.
-     *             The iterator must be positioned at the start.
-     * @return a GroundedValue holding the items delivered by the SequenceIterator. If the
-     * sequence is empty the result will be an instance of {@link EmptySequence}. If it is of length
-     * one, the result will be an {@link Item}. In other cases, the actual implementation class
-     * is not defined.
-     * <p>This method is intended primarily for internal use. For external applications, calling
-     * {@link SequenceIterator#materialize()} is preferable, because it recognizes cases that can
-     * be optimized (notably, cases where the iterator is already backed by an array or list in memory).</p>
-     *
-     * @throws net.sf.saxon.trans.XPathException if an error occurs processing the values from
-     *                                           the iterator.
-     * @deprecated since 9.9: use {@link SequenceIterator#materialize()}
-     */
-
-    public static GroundedValue fromIterator(SequenceIterator iter) throws XPathException {
-        return new SequenceExtent(iter).reduce();
-    }
+//    /**
+//     * Factory method to make a GroundedValue holding the contents of any SequenceIterator.
+//     *
+//     * @param iter a Sequence iterator that may or may not be consumed to deliver the items in the sequence.
+//     *             The iterator must be positioned at the start.
+//     * @return a GroundedValue holding the items delivered by the SequenceIterator. If the
+//     * sequence is empty the result will be an instance of {@link EmptySequence}. If it is of length
+//     * one, the result will be an {@link Item}. In other cases, the actual implementation class
+//     * is not defined.
+//     * <p>This method is intended primarily for internal use. For external applications, calling
+//     * {@link SequenceIterator#materialize()} is preferable, because it recognizes cases that can
+//     * be optimized (notably, cases where the iterator is already backed by an array or list in memory).</p>
+//     *
+//     * @throws net.sf.saxon.trans.XPathException if an error occurs processing the values from
+//     *                                           the iterator.
+//     * @deprecated since 9.9: use {@link SequenceIterator#materialize()}
+//     */
+//
+//    public static GroundedValue fromIterator(SequenceIterator iter) throws XPathException {
+//        return new SequenceExtent(iter).reduce();
+//    }
 
     /**
      * Factory method to make a GroundedValue holding the remaining contents of any SequenceIterator,
@@ -158,7 +159,7 @@ public class SequenceExtent implements GroundedValue {
      *         {@link SequenceExtent}.
      */
 
-    public static GroundedValue makeSequenceExtent(/*@NotNull*/ List<? extends Item> input) {
+    public static GroundedValue makeSequenceExtent(/*@NotNull*/ List<Item> input) {
         int len = input.size();
         if (len == 0) {
             return EmptySequence.getInstance();
@@ -169,73 +170,7 @@ public class SequenceExtent implements GroundedValue {
         }
     }
 
-    @Override
-    public UnicodeString getUnicodeStringValue() throws XPathException {
-        return SequenceTool.getStringValue(this);
-    }
 
-    @Override
-    public String getStringValue() throws XPathException {
-        return SequenceTool.stringify(this);
-    }
-
-    /**
-     * Get the first item in the sequence.
-     *
-     * @return the first item in the sequence if there is one, or null if the sequence
-     *         is empty
-     */
-    @Override
-    public Item head() {
-        return itemAt(0);
-    }
-
-    /**
-     * Get the number of items in the sequence
-     *
-     * @return the number of items in the sequence
-     */
-
-    @Override
-    public int getLength() {
-        return value.size();
-    }
-
-    /**
-     * Determine the cardinality
-     *
-     * @return the cardinality of the sequence, using the constants defined in
-     *         net.sf.saxon.value.Cardinality
-     * @see net.sf.saxon.value.Cardinality
-     */
-
-    public int getCardinality() {
-        switch (value.size()) {
-            case 0:
-                return StaticProperty.EMPTY;
-            case 1:
-                return StaticProperty.EXACTLY_ONE;
-            default:
-                return StaticProperty.ALLOWS_ONE_OR_MORE;
-        }
-    }
-
-    /**
-     * Get the n'th item in the sequence (starting with 0 as the first item)
-     *
-     * @param n the position of the required item
-     * @return the n'th item in the sequence, or null if the position is out of range
-     */
-
-    /*@Nullable*/
-    @Override
-    public Item itemAt(int n) {
-        if (n < 0 || n >= getLength()) {
-            return null;
-        } else {
-            return value.get(n);
-        }
-    }
 
     /**
      * Return an iterator over this sequence.
@@ -247,7 +182,7 @@ public class SequenceExtent implements GroundedValue {
     /*@NotNull*/
     @Override
     public ListIterator iterate() {
-        return new ListIterator(value);
+        return new ListIterator(getValue());
     }
 
     /**
@@ -258,7 +193,7 @@ public class SequenceExtent implements GroundedValue {
 
     /*@NotNull*/
     public UnfailingIterator reverseIterate() {
-        return new ReverseListIterator(value);
+        return new ListIterator(new ReverseList<>(getValue()));
     }
 
     /**
@@ -271,7 +206,7 @@ public class SequenceExtent implements GroundedValue {
         if (len == 0) {
             return false;
         } else {
-            Item first = value.get(0);
+            Item first = getValue().get(0);
             if (first instanceof NodeInfo) {
                 return true;
             } else if (len == 1 && first instanceof AtomicValue) {
@@ -303,18 +238,18 @@ public class SequenceExtent implements GroundedValue {
         if (start < 0) {
             start = 0;
         }
-        if (start > value.size()) {
+        if (start > getLength()) {
             return EmptySequence.getInstance();
         }
-        return new SequenceSlice(value, start, length).reduce();
+        return new SequenceSlice(this, start, length).reduce();
     }
 
     /*@NotNull*/
     public String toString() {
         StringBuilder fsb = new StringBuilder(64);
-        for (int i = 0; i < value.size(); i++) {
+        for (int i = 0; i < getLength(); i++) {
             fsb.append(i == 0 ? "(" : ", ");
-            fsb.append(value.get(i).toString());
+            fsb.append(getValue().get(i).toString());
         }
         fsb.append(')');
         return fsb.toString();
@@ -347,8 +282,8 @@ public class SequenceExtent implements GroundedValue {
      */
 
     @Override
-    public Iterable<? extends Item> asIterable() {
-        return value;
+    public Iterable<Item> asIterable() {
+        return getValue();
     }
 
 
@@ -358,8 +293,8 @@ public class SequenceExtent implements GroundedValue {
      */
 
     //@Override
-    public Iterator<? extends Item> iterator() {
-        return value.iterator();
+    public Iterator<Item> iterator() {
+        return getValue().iterator();
     }
 }
 

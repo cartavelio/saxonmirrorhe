@@ -538,7 +538,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                 break;
             }
             if (next instanceof NodeInfo && ((NodeInfo) next).getNodeKind() == Type.TEXT) {
-                textBuffer.append(next.getUnicodeStringValue());
+                textBuffer.accept(next.getUnicodeStringValue());
                 prevIsText = true;
             } else {
                 if (prevIsText) {

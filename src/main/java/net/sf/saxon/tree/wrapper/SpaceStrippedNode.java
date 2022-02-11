@@ -13,6 +13,7 @@ import net.sf.saxon.event.Stripper;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -25,8 +26,6 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.Whitespace;
-
-import java.util.function.Predicate;
 
 
 /**
@@ -224,7 +223,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
                 UnicodeBuilder sb = new UnicodeBuilder();
                 NodeInfo it;
                 while ((it = iter.next()) != null) {
-                    sb.append(it.getUnicodeStringValue());
+                    sb.accept(it.getUnicodeStringValue());
                 }
                 return sb.toUnicodeString();
             default:
@@ -249,7 +248,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
     }
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         if (nodeTest instanceof NodeTest &&
                 ((NodeTest)nodeTest).getUType().intersection(UType.TEXT) == UType.VOID ||
                 axisNumber == AxisInfo.ATTRIBUTE || axisNumber == AxisInfo.NAMESPACE) {
@@ -333,7 +332,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * skips them.
      */
 
-    private final class StrippingIterator implements AxisIterator {
+    private static class StrippingIterator implements AxisIterator {
 
         AxisIterator base;
         SpaceStrippedNode parent;
@@ -359,18 +358,15 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         @Override
         public NodeInfo next() {
             NodeInfo nextRealNode;
-            while (true) {
+            do {
                 nextRealNode = base.next();
                 if (nextRealNode == null) {
                     return null;
                 }
-                if (isPreserved(nextRealNode)) {
-                    break;
-                }
                 // otherwise skip this whitespace text node
-            }
+            } while (!isPreserved(nextRealNode));
 
-            currentVirtualNode = makeWrapper(nextRealNode, (SpaceStrippedDocument) docWrapper, parent);
+            currentVirtualNode = makeWrapper(nextRealNode, (SpaceStrippedDocument) parent.docWrapper, parent);
             position++;
             return currentVirtualNode;
         }
@@ -381,7 +377,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
             }
             NodeInfo actualParent =
                     parent == null ? nextRealNode.getParent() : parent.node;
-            return isPreservedNode(nextRealNode, (SpaceStrippedDocument)docWrapper, actualParent);
+            return isPreservedNode(nextRealNode, (SpaceStrippedDocument)parent.docWrapper, actualParent);
         }
 
         @Override

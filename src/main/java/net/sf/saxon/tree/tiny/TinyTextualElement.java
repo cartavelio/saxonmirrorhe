@@ -12,6 +12,7 @@ import net.sf.saxon.event.CopyNamespaceSensitiveException;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -26,7 +27,6 @@ import net.sf.saxon.value.UntypedAtomicValue;
 import javax.xml.transform.SourceLocator;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * An element node in the TinyTree that has no attributes or namespace declarations and that
@@ -129,7 +129,7 @@ public class TinyTextualElement extends TinyElementImpl {
                 List<NodeInfo> list = new ArrayList<>(2);
                 list.add(this);
                 list.add(getTextNode());
-                return new ListIterator.OfNodes(list);
+                return new NodeListIterator(list);
 
             default:
                 return super.iterateAxis(axisNumber);
@@ -137,7 +137,7 @@ public class TinyTextualElement extends TinyElementImpl {
     }
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ATTRIBUTE:
                 return EmptyIterator.ofNodes();
@@ -154,7 +154,7 @@ public class TinyTextualElement extends TinyElementImpl {
                 if (nodeTest.test(getTextNode())) {
                     list.add(getTextNode());
                 }
-                return new ListIterator.OfNodes(list);
+                return new NodeListIterator(list);
 
             default:
                 return super.iterateAxis(axisNumber, nodeTest);
@@ -568,7 +568,7 @@ public class TinyTextualElement extends TinyElementImpl {
 
         /*@NotNull*/
         @Override
-        public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+        public AxisIterator iterateAxis(int axisNumber, NodePredicate predicate) {
             NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
             switch (axisNumber) {
                 case AxisInfo.ANCESTOR:

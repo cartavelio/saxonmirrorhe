@@ -15,7 +15,7 @@ import net.sf.saxon.om.NodeInfo;
  * code will first call notifyElementNode(), giving the informee extra information about the element currently
  * being copied.
  */
-public interface CopyInformee<T extends Object> {
+public interface CopyInformee {
 
     /**
      * Provide information about the node being copied. This method is called immediately before
@@ -25,6 +25,6 @@ public interface CopyInformee<T extends Object> {
      * @return information about this node
      */
 
-    T notifyElementNode(NodeInfo element);
+    Object notifyElementNode(NodeInfo element);
 }
 

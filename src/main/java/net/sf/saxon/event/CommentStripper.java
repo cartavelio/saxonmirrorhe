@@ -75,14 +75,14 @@ public class CommentStripper extends ProxyReceiver {
             if (buffer.isEmpty() && savedWhitespace == null) {
                 savedWhitespace = (CompressedWhitespace) chars;
             } else {
-                buffer.append(((CompressedWhitespace) chars).uncompress());
+                buffer.accept(((CompressedWhitespace) chars).uncompress());
             }
         } else {
             if (savedWhitespace != null) {
-                buffer.append(savedWhitespace.uncompress());
+                buffer.accept(savedWhitespace.uncompress());
                 savedWhitespace = null;
             }
-            buffer.append(chars);
+            buffer.accept(chars);
         }
 
     }

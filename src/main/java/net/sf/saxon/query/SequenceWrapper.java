@@ -267,8 +267,8 @@ public class SequenceWrapper extends SequenceReceiver {
                 out.characters(StringView.of(((Function)item).getDescription()), locationId, ReceiverOption.NONE);
                 out.endElement();
             }
-        } else if (item instanceof ObjectValue) {
-            Object obj = ((ObjectValue)item).getObject();
+        } else if (item.getGenre() == Genre.EXTERNAL) {
+            Object obj = ((ObjectValue<?>)item).getObject();
             out.startElement(resultExternalValue, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             out.attribute(new NoNamespaceName("class"), BuiltInAtomicType.UNTYPED_ATOMIC,
                           obj.getClass().getName(), Loc.NONE, ReceiverOption.NONE);

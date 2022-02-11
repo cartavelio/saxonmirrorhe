@@ -306,16 +306,16 @@ public abstract class Pattern extends PseudoExpression {
             }
         } else if (UType.ATTRIBUTE.subsumes(uType)) {
             AxisIterator allElements = doc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
-            MappingFunction atts = SequenceMapper.of(item -> ((NodeInfo)item).iterateAxis(AxisInfo.ATTRIBUTE));
-            SequenceIterator allAttributes = new MappingIterator(allElements, atts);
-            ItemMappingFunction selection = ItemFilter.of(item -> matches(item, context));
-            return new ItemMappingIterator(allAttributes, selection);
+            SequenceIterator allAttributes =
+                    MappingIterator.map(allElements,
+                                        item -> ((NodeInfo) item).iterateAxis(AxisInfo.ATTRIBUTE));
+            return ItemMappingIterator.filter(allAttributes, item -> matches(item, context));
         } else if (UType.NAMESPACE.subsumes(uType)) {
             AxisIterator allElements = doc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
-            MappingFunction atts = SequenceMapper.of(item -> ((NodeInfo)item).iterateAxis(AxisInfo.NAMESPACE));
-            SequenceIterator allNamespaces = new MappingIterator(allElements, atts);
-            ItemMappingFunction selection = ItemFilter.of(item -> matches(item, context));
-            return new ItemMappingIterator(allNamespaces, selection);
+            SequenceIterator allNamespaces =
+                    MappingIterator.map(allElements,
+                                        item -> ((NodeInfo) item).iterateAxis(AxisInfo.NAMESPACE));
+            return ItemMappingIterator.filter(allNamespaces, item -> matches(item, context));
 
         } else if (UType.CHILD_NODE_KINDS.subsumes(uType)) {
             NodeTest nodeTest;
@@ -325,24 +325,24 @@ public abstract class Pattern extends PseudoExpression {
                 nodeTest = new MultipleNodeKindTest(uType);
             }
             AxisIterator allChildren = doc.iterateAxis(AxisInfo.DESCENDANT, nodeTest);
-            ItemMappingFunction selection = ItemFilter.of(item -> matches(item, context));
-            return new ItemMappingIterator(allChildren, selection);
+            return ItemMappingIterator.filter(allChildren, item -> matches(item, context));
         } else {
             int axis = uType.subsumes(UType.DOCUMENT) ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.DESCENDANT;
             AxisIterator allChildren = doc.iterateAxis(axis);
-            MappingFunction processElement = SequenceMapper.of(item -> {
-                AxisIterator mapper = SingleNodeIterator.makeIterator((NodeInfo)item);
-                if (uType.subsumes(UType.NAMESPACE)) {
-                    mapper = new ConcatenatingAxisIterator(mapper, ((NodeInfo)item).iterateAxis(AxisInfo.NAMESPACE));
-                }
-                if (uType.subsumes(UType.ATTRIBUTE)) {
-                    mapper = new ConcatenatingAxisIterator(mapper, ((NodeInfo) item).iterateAxis(AxisInfo.ATTRIBUTE));
-                }
-                return mapper;
-            });
-            SequenceIterator attributesOrSelf = new MappingIterator(allChildren, processElement);
-            ItemMappingFunction test = ItemFilter.of(item -> matches(item, context));
-            return new ItemMappingIterator(attributesOrSelf, test);
+            SequenceIterator attributesOrSelf =
+                    MappingIterator.map(allChildren, item -> {
+                        AxisIterator mapper = SingleNodeIterator.makeIterator((NodeInfo) item);
+                        if (uType.subsumes(UType.NAMESPACE)) {
+                            mapper = new ConcatenatingAxisIterator(mapper,
+                                                                   ((NodeInfo) item).iterateAxis(AxisInfo.NAMESPACE));
+                        }
+                        if (uType.subsumes(UType.ATTRIBUTE)) {
+                            mapper = new ConcatenatingAxisIterator(mapper,
+                                                                   ((NodeInfo) item).iterateAxis(AxisInfo.ATTRIBUTE));
+                        }
+                        return mapper;
+                    });
+            return ItemMappingIterator.filter(attributesOrSelf, item -> matches(item, context));
 
         }
     }

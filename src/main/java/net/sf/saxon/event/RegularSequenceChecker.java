@@ -11,6 +11,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
@@ -79,8 +80,11 @@ public class RegularSequenceChecker extends ProxyReceiver {
 
     private final Stack<Short> stack = new Stack<>();
 
+    @CSharpSimpleEnum
     public enum State {Initial, Open, StartTag, Content, Final, Failed}
     // StartTag is used only in an incremental Receiver where attributes and namespaces are notified separately
+
+    @CSharpSimpleEnum
     private enum Transition {
         OPEN, APPEND, TEXT, COMMENT, PI, START_DOCUMENT,
         START_ELEMENT, END_ELEMENT, END_DOCUMENT, CLOSE}
@@ -90,7 +94,8 @@ public class RegularSequenceChecker extends ProxyReceiver {
     private static final Map<State, Map<Transition, State>> machine = new HashMap<>();
 
     private static void edge(State from, Transition event, State to) {
-        Map<Transition, State> edges = machine.computeIfAbsent(from, s -> new HashMap<>());
+        @SuppressWarnings("Convert2Diamond") // for C#
+        Map<Transition, State> edges = machine.computeIfAbsent(from, s -> new HashMap<Transition, State>());
         edges.put(event, to);
     }
 
@@ -115,13 +120,12 @@ public class RegularSequenceChecker extends ProxyReceiver {
 
     private void transition(Transition event) {
         final Map<Transition, State> map = machine.get(state);
-        State newState = map==null ? null : map.get(event);
-        if (newState == null) {
-            //assert false;
-            throw new IllegalStateException("Event " + event + " is not permitted in state " + state);
+        assert map != null;
+        if (map.containsKey(event)) {
+            state = map.get(event);
         } else {
-            state = newState;
-        }
+            throw new IllegalStateException("Event " + event + " is not permitted in state " + state);
+        } 
     }
 
 

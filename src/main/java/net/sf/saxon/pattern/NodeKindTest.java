@@ -10,8 +10,10 @@ package net.sf.saxon.pattern;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
+import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Optional;
@@ -119,12 +121,12 @@ public class NodeKindTest extends NodeTest {
     public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         if (kind == Type.TEXT) {
-            return nodeNr -> {
+            return IntPredicateLambda.of(nodeNr -> {
                 int k = nodeKindArray[nodeNr];
                 return k == Type.TEXT || k == Type.WHITESPACE_TEXT;
-            };
+            });
         } else {
-            return nodeNr -> (nodeKindArray[nodeNr] & 0x0f) == kind;
+            return IntPredicateLambda.of(nodeNr -> (nodeKindArray[nodeNr] & 0x0f) == kind);
         }
     }
 
@@ -219,10 +221,10 @@ public class NodeKindTest extends NodeTest {
 
     /*@NotNull*/
     public String toString() {
-        return toString(kind);
+        return describe(kind);
     }
 
-    public static String toString(int kind) {
+    public static String describe(int kind) {
         switch (kind) {
             case Type.DOCUMENT:
                 return "document-node()";
@@ -311,7 +313,7 @@ public class NodeKindTest extends NodeTest {
                 return Optional.empty();
             }
         } else {
-            return Optional.of("The supplied value is " + item.getGenre().getDescription());
+            return Optional.of("The supplied value is " + Err.describeGenre(item.getGenre()));
         }
     }
 

@@ -17,6 +17,7 @@ import net.sf.saxon.expr.accum.IAccumulatorData;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 
@@ -25,6 +26,7 @@ import net.sf.saxon.type.Type;
  */
 public abstract class AccumulatorFn extends SystemFunction {
 
+    @CSharpSimpleEnum
     public enum Phase {AFTER, BEFORE}
 
     public abstract Phase getPhase();

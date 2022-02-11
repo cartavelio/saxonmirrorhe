@@ -30,6 +30,7 @@ import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * A Mode is a collection of rules; the selection of a rule to apply to a given element
@@ -703,7 +704,7 @@ public class SimpleMode extends Mode {
 
     /*@Nullable*/
     @Override
-    public Rule getRule(Item item, XPathContext context, RuleFilter filter) throws XPathException {
+    public Rule getRule(Item item, XPathContext context, Predicate<Rule> filter) throws XPathException {
 
         // If there are match patterns in the stylesheet that use local variables, we need to allocate
         // a new stack frame for evaluating the match patterns. We base this on the match pattern with
@@ -822,13 +823,14 @@ public class SimpleMode extends Mode {
      */
 
     protected Rule searchRuleChain(Item item, XPathContext context,
-                                   Rule/*@Nullable*/ bestRule, RuleChain chain, RuleSearchState ruleSearchState, RuleFilter filter) throws XPathException {
+                                   Rule/*@Nullable*/ bestRule, RuleChain chain,
+                                   RuleSearchState ruleSearchState, Predicate<Rule> filter) throws XPathException {
         Rule head = chain == null ? null : chain.head();
         while (!(context instanceof XPathContextMajor)) {
             context = context.getCaller();
         }
         while (head != null) {
-            if (filter == null || filter.testRule(head)) {
+            if (filter == null || filter.test(head)) {
                 if (bestRule != null) {
                     int rank = head.compareRank(bestRule);
                     if (rank < 0) {
@@ -927,7 +929,7 @@ public class SimpleMode extends Mode {
 
     private static String showPattern(Pattern p) {
         // Complex patterns can be laid out with lots of whitespace, which looks messy in the error message
-        return Whitespace.collapseWhitespace(StringView.of(p.toString()).tidy()).toString();
+        return Whitespace.collapseWhitespace(StringView.of(p.toShortString()).tidy()).toString();
     }
 
     /**
@@ -1009,37 +1011,42 @@ public class SimpleMode extends Mode {
     @Override
     public void explainTemplateRules(final ExpressionPresenter out) throws XPathException {
         RuleAction action = r -> r.export(out, isDeclaredStreamable());
-        RuleGroupAction group = new RuleGroupAction() {
-            String type;
-
-            @Override
-            public void start() {
-                out.startElement("ruleSet");
-                out.emitAttribute("type", type);
-            }
-
-            @Override
-            public void setString(String type) {
-                this.type = type;
-            }
-
-            @Override
-            public void start(int i) {
-                out.startElement("ruleChain");
-                out.emitAttribute("key", out.getNamePool().getClarkName(i));
-            }
-
-            @Override
-            public void end() {
-                out.endElement();
-            }
-        };
         try {
-            processRules(action, group);
+            processRules(action, new RuleGroupExplainAction(out));
         } catch (XPathException err) {
             // can't happen, and doesn't matter if it does
         }
 
+    }
+
+    private static class RuleGroupExplainAction implements RuleGroupAction {
+        private String type;
+        private final ExpressionPresenter presenter;
+
+        public RuleGroupExplainAction(ExpressionPresenter presenter) {
+            this.presenter = presenter;
+        }
+        @Override
+        public void start() {
+            presenter.startElement("ruleSet");
+            presenter.emitAttribute("type", type);
+        }
+
+        @Override
+        public void setLabel(String type) {
+            this.type = type;
+        }
+
+        @Override
+        public void start(int i) {
+            presenter.startElement("ruleChain");
+            presenter.emitAttribute("key", presenter.getNamePool().getClarkName(i));
+        }
+
+        @Override
+        public void end() {
+            presenter.endElement();
+        }
     }
 
     /**
@@ -1052,16 +1059,9 @@ public class SimpleMode extends Mode {
 
     @Override
     public void exportTemplateRules(final ExpressionPresenter out) throws XPathException {
-        //final Set<RuleTarget> processedRules = new HashSet<RuleTarget>();
         // TODO: if two rules share the same template, avoid duplicate output. This can happen with union patterns, and also
         // when a template is present in more than one mode.
-        RuleAction action = r -> {
-            // if (processedRules.add(r.getAction())) {
-            r.export(out, isDeclaredStreamable());
-            // }
-        };
-
-        processRules(action);
+        processRules(r -> r.export(out, isDeclaredStreamable()));
 
     }
 
@@ -1107,7 +1107,7 @@ public class SimpleMode extends Mode {
      */
     protected RuleGroupAction setGroup(RuleGroupAction group, String type) {
         if (group != null) {
-            group.setString(type);
+            group.setLabel(type);
         }
         return group;
     }
@@ -1178,22 +1178,16 @@ public class SimpleMode extends Mode {
     @Override
     public int getMaxPrecedence() {
         try {
-            MaxPrecedenceAction action = new MaxPrecedenceAction();
-            processRules(action);
-            return action.max;
+            List<Integer> capturedPrecedence = new ArrayList<>(1);
+            capturedPrecedence.add(0);
+            processRules(r -> {
+                if (r.getPrecedence() > capturedPrecedence.get(0)) {
+                    capturedPrecedence.set(0, r.getPrecedence());
+                }
+            });
+            return capturedPrecedence.get(0);
         } catch (XPathException e) {
             throw new AssertionError(e);
-        }
-    }
-
-    private static class MaxPrecedenceAction implements RuleAction {
-        public int max = 0;
-
-        @Override
-        public void processRule(Rule r) {
-            if (r.getPrecedence() > max) {
-                max = r.getPrecedence();
-            }
         }
     }
 
@@ -1211,7 +1205,8 @@ public class SimpleMode extends Mode {
         // Now sort the rules into ranking order
         final RuleSorter sorter = new RuleSorter(start);
         // add all the rules in this Mode to the sorter
-        processRules(sorter::addRule);
+        //noinspection Convert2MethodRef
+        processRules(r -> sorter.addRule(r));
         // now allocate ranks to all the rules in this Mode
         sorter.allocateRanks();
         highestRank = start + sorter.getNumberOfRules();
@@ -1278,7 +1273,7 @@ public class SimpleMode extends Mode {
          *
          * @param s a string value to be used for the group
          */
-        void setString(String s);
+        void setLabel(String s);
 
         /**
          * Start of a generic group
@@ -1307,13 +1302,12 @@ public class SimpleMode extends Mode {
         final List<Integer> count = new ArrayList<>(1);  // used to allow inner class to have side-effects
         count.add(0);
         final SlotManager slotManager = new SlotManager(); // TODO: allocate this via the Configuration
-        final RuleAction slotAllocator = r -> {
-            int slots = r.getPattern().allocateSlots(slotManager, 0);
-            int max = Math.max(count.get(0), slots);
-            count.set(0, max);
-        };
         try {
-            processRules(slotAllocator);
+            processRules(r -> {
+                int slots = r.getPattern().allocateSlots(slotManager, 0);
+                int max = Math.max(count.get(0), slots);
+                count.set(0, max);
+            });
         } catch (XPathException e) {
             throw new AssertionError(e);
         }

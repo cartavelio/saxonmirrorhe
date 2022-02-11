@@ -27,6 +27,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.TraceEventMulticaster;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
@@ -79,6 +80,11 @@ import java.util.function.Function;
  * was split into two: XSLT-specific functionality has been moved into the subclass {@link XsltController}.
  */
 
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "    }"
+})
 public class Controller implements ContextOriginator {
 
     private final Configuration config;
@@ -1411,6 +1417,7 @@ public class Controller implements ContextOriginator {
      * @throws XPathException if adding this dependency creates a cycle of dependencies among global variables.
      */
 
+    @SuppressWarnings("Java8MapApi")
     public synchronized void registerGlobalVariableDependency(GlobalVariable one, GlobalVariable two) throws XPathException {
         if (one == two) {
             throw new XPathException.Circularity("Circular dependency among global variables: "
@@ -1429,8 +1436,11 @@ public class Controller implements ContextOriginator {
                 registerGlobalVariableDependency(one, var);
             }
         }
-        Set<GlobalVariable> existingDependencies =
-                globalVariableDependencies.computeIfAbsent(one, k -> new HashSet<>());
+        Set<GlobalVariable> existingDependencies = globalVariableDependencies.get(one);
+        if (existingDependencies == null) {
+            existingDependencies = new HashSet<>();
+            globalVariableDependencies.put(one, existingDependencies);
+        }
         existingDependencies.add(two);
 
     }

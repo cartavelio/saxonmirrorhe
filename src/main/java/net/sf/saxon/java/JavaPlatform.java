@@ -38,7 +38,10 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.Iterator;
@@ -58,6 +61,64 @@ public class JavaPlatform implements Platform {
      */
 
     public JavaPlatform() {
+    }
+
+    /**
+     * Read a resource file issued with the Saxon product
+     *
+     * @param filename the filename of the file to be read
+     * @param messages List to be populated with messages in the event of failure
+     * @return an InputStream for reading the file/resource
+     */
+
+    /*@Nullable*/
+    public InputStream locateResource(String filename, List<String> messages) {
+        filename = "net/sf/saxon/data/" + filename;
+        ClassLoader loader = null;
+        try {
+            loader = Thread.currentThread().getContextClassLoader();
+        } catch (Exception err) {
+            messages.add("Failed to getContextClassLoader() - continuing\n");
+        }
+
+        InputStream in = null;
+
+        if (loader != null) {
+            URL u = loader.getResource(filename);
+            in = loader.getResourceAsStream(filename);
+            if (in == null) {
+                messages.add("Cannot read " + filename + " file located using ClassLoader " +
+                                     loader + " - continuing\n");
+            }
+        }
+
+        if (in == null) {
+            loader = Configuration.class.getClassLoader();
+            if (loader != null) {
+                in = loader.getResourceAsStream(filename);
+                if (in == null) {
+                    messages.add("Cannot read " + filename + " file located using ClassLoader " +
+                                         loader + " - continuing\n");
+                }
+            }
+        }
+
+        if (in == null) {
+            // Means we're in a very strange class-loading environment, things are getting desperate
+            URL url = ClassLoader.getSystemResource(filename);
+            if (url != null) {
+                try {
+                    in = url.openStream();
+                } catch (IOException ioe) {
+                    messages.add("IO error " + ioe.getMessage() +
+                                         " reading " + filename + " located using getSystemResource(): using defaults");
+                    in = null;
+                }
+            }
+        }
+        //loaders.add(loader);
+        return in;
+
     }
 
 

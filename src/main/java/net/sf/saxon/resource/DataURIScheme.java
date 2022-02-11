@@ -12,6 +12,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.Base64BinaryValue;
 
 import java.net.URI;
@@ -59,7 +60,7 @@ public class DataURIScheme {
             if (encoding == null) {
                 encoding = "US-ASCII";
             }
-            byte[] utf8content = content.getBytes(StandardCharsets.UTF_8);
+            byte[] utf8content = stringToUTF8(content);
             AbstractResourceCollection.InputDetails details = new AbstractResourceCollection.InputDetails();
             details.resourceUri = uri.toString();
             details.contentType = getMediaType(contentType);
@@ -88,6 +89,11 @@ public class DataURIScheme {
             }
         }
         return null;
+    }
+
+    @CSharpReplaceBody(code="return System.Text.UTF8Encoding.UTF8.GetBytes(input);")
+    private static byte[] stringToUTF8(String input) {
+        return input.getBytes(StandardCharsets.UTF_8);
     }
 }
 

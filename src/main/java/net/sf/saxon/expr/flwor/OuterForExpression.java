@@ -100,8 +100,10 @@ public class OuterForExpression extends ForExpression {
         SequenceIterator base = getSequence().iterate(context);
         LookaheadIterator ahead = LookaheadIteratorImpl.makeLookaheadIterator(base);
         if (ahead.hasNext()) {
-            MappingFunction map = new MappingAction(context, getLocalSlotNumber(), getAction());
-            return new MappingIterator(ahead, map);
+            return MappingIterator.map(ahead, item -> {
+                context.setLocalVariable(slotNumber, item);
+                return getAction().iterate(context);
+            });
         } else {
             context.setLocalVariable(getLocalSlotNumber(), EmptySequence.getInstance());
             return getAction().iterate(context);

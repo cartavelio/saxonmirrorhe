@@ -49,10 +49,10 @@ public class UTF16CharacterSet implements CharacterSet {
     public static final int NONBMP_MIN = 0x10000;
     public static final int NONBMP_MAX = 0x10FFFF;
 
-    public static final char SURROGATE1_MIN = 0xD800;
-    public static final char SURROGATE1_MAX = 0xDBFF;
-    public static final char SURROGATE2_MIN = 0xDC00;
-    public static final char SURROGATE2_MAX = 0xDFFF;
+    public static final char SURROGATE1_MIN = (char)0xD800;
+    public static final char SURROGATE1_MAX = (char)0xDBFF;
+    public static final char SURROGATE2_MIN = (char)0xDC00;
+    public static final char SURROGATE2_MAX = (char)0xDFFF;
 
     /**
      * Return the non-BMP character corresponding to a given surrogate pair

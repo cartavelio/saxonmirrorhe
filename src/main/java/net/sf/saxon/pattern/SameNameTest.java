@@ -13,6 +13,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
 import net.sf.saxon.z.IntSingletonSet;
@@ -96,7 +97,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
     public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         final int[] nameCodeArray = tree.getNameCodeArray();
-        return nodeNr -> {
+        return IntPredicateLambda.of(nodeNr -> {
             int k = nodeKindArray[nodeNr] & 0x0f;
             if (k == Type.WHITESPACE_TEXT) {
                 k = Type.TEXT;
@@ -108,7 +109,7 @@ public class SameNameTest extends NodeTest implements QNameTest {
             } else {
                 return Navigator.haveSameName(tree.getNode(nodeNr), origin);
             }
-        };
+        });
     }
 
     /**

@@ -112,6 +112,7 @@ public class QName {
         }
     }
 
+    //#if CSHARP==false
     /**
      * Construct a QName from a JAXP QName object
      *
@@ -121,7 +122,8 @@ public class QName {
     public QName(javax.xml.namespace.QName qName) {
         sqName = new StructuredQName(qName.getPrefix(), qName.getNamespaceURI(), qName.getLocalPart());
     }
-
+    //#endif
+    
     /**
      * Construct a QName from a StructuredQName
      *

@@ -9,7 +9,8 @@ package net.sf.saxon.str;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.serialize.UTF8Writer;
-import net.sf.saxon.value.Base64BinaryValue;
+import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.util.function.IntPredicate;
  * to 2^31-1 codepoints.
  */
 
+@CSharpInjectMembers(code="")
 public class Twine8 extends UnicodeString {
 
     // Array of bytes containing codepoints in the range 0-255
@@ -214,23 +216,6 @@ public class Twine8 extends UnicodeString {
         return bytes.length == 0;
     }
 
-    /**
-     * Get an atomic value that encapsulates this match key. Needed to support the collation-key() function.
-     *
-     * @return an atomic value that encapsulates this match key
-     */
-
-    public Base64BinaryValue getCodepointCollationKey() {
-        int len = length32();
-        byte[] result = new byte[len * 3];
-        for (int i = 0, j = 0; i < len; i++) {
-            int c = codePointAt(i);
-            result[j++] = (byte) (c >> 16);
-            result[j++] = (byte) (c >> 8);
-            result[j++] = (byte) c;
-        }
-        return new Base64BinaryValue(result);
-    }
 
     @Override
     public int getWidth() {
@@ -328,6 +313,7 @@ public class Twine8 extends UnicodeString {
      */
 
     /*@NotNull*/
+    @CSharpReplaceBody(code="return com.saxonica.glue.StringUtils.LATIN_1.GetString(bytes);")
     public String toString() {
         return new String(bytes, StandardCharsets.ISO_8859_1);
     }

@@ -14,6 +14,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
@@ -64,7 +65,7 @@ public class JsonToXMLFn extends SystemFunction {
             options = (MapItem) arguments[1].head();
         }
         Item result = eval(input, options, context);
-        return result == null ? EmptySequence.getInstance() : result;
+        return SequenceTool.itemOrEmpty(result);
     }
 
 

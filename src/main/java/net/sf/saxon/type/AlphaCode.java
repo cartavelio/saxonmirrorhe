@@ -18,6 +18,7 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.sxpath.IndependentContext;
@@ -109,7 +110,7 @@ public class AlphaCode {
 
         @Override
         public void setMultiStringProperty(DictionaryMap container, String key, List<String> value) {
-            List<StringItem> xdmValue = new ArrayList<>();
+            List<Item> xdmValue = new ArrayList<>();
             for (String v : value) {
                 xdmValue.add(new StringItem(v));
             }
@@ -121,9 +122,14 @@ public class AlphaCode {
             container.initialPut(key, value);
         }
 
+        @SuppressWarnings("UseBulkOperation")
         @Override
         public void setMultiTypeProperty(DictionaryMap container, String key, List<DictionaryMap> value) {
-            List<GroundedValue> contents = new ArrayList<>(value);
+            List<GroundedValue> contents = new ArrayList<>();
+            // Written this way for C# conversion
+            for (DictionaryMap map : value) {
+                contents.add(map);
+            }
             container.initialPut(key, new SimpleArrayItem(contents));
         }
 
@@ -235,7 +241,7 @@ public class AlphaCode {
         private int position = 0;
         private final ParserCallBack<T> callBack;
 
-        private AlphaCodeParser(String input, ParserCallBack<T> callBack) {
+        public AlphaCodeParser(String input, ParserCallBack<T> callBack) {
             this.input = input;
             this.callBack = callBack;
         }

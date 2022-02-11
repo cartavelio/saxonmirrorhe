@@ -256,8 +256,7 @@ public class CommandLineOptions {
 
         Configuration config = processor.getUnderlyingConfiguration();
 
-        for (Enumeration e = configOptions.propertyNames(); e.hasMoreElements(); ) {
-            String name = (String) e.nextElement();
+        for (String name : configOptions.stringPropertyNames()) {
             String value = configOptions.getProperty(name);
             String fullName = "http://saxon.sf.net/feature/" + name;
             if (!name.startsWith("parserFeature?") && !name.startsWith("parserProperty?")) {
@@ -492,7 +491,8 @@ public class CommandLineOptions {
 
     public String displayPermittedOptions() {
         String[] options = new String[recognizedOptions.size()];
-        options = new ArrayList<>(recognizedOptions.keySet()).toArray(options);
+        ArrayList<String> keys = new ArrayList<>(recognizedOptions.keySet());
+        options = keys.toArray(options);
         Arrays.sort(options, Collator.getInstance());
         StringBuilder sb = new StringBuilder(100);
         for (String opt : options) {
@@ -575,14 +575,12 @@ public class CommandLineOptions {
 
     public void setParams(Processor processor, ParamSetter paramSetter)
             throws SaxonApiException {
-        for (Enumeration e = paramValues.propertyNames(); e.hasMoreElements(); ) {
-            String name = (String) e.nextElement();
+        for (String name : paramValues.stringPropertyNames()) {
             String value = paramValues.getProperty(name);
             paramSetter.setParam(QName.fromClarkName(name), new XdmAtomicValue(value, ItemType.UNTYPED_ATOMIC));
         }
         applyFileParameters(processor, paramSetter);
-        for (Enumeration e = paramExpressions.propertyNames(); e.hasMoreElements(); ) {
-            String name = (String) e.nextElement();
+        for (String name : paramExpressions.stringPropertyNames()) {
             String value = paramExpressions.getProperty(name);
             // parameters starting with "?" are taken as XPath expressions
             XPathCompiler xpc = processor.newXPathCompiler();
@@ -594,8 +592,7 @@ public class CommandLineOptions {
 
     private void applyFileParameters(Processor processor, ParamSetter paramSetter) throws SaxonApiException {
         boolean useURLs = "on".equals(getOptionValue("u"));
-        for (Enumeration e = paramFiles.propertyNames(); e.hasMoreElements(); ) {
-            String name = (String) e.nextElement();
+        for (String name : paramFiles.stringPropertyNames()) {
             String value = paramFiles.getProperty(name);
             List<Source> sourceList = new ArrayList<>();
             loadDocuments(value, useURLs, processor, true, sourceList);
@@ -621,8 +618,7 @@ public class CommandLineOptions {
      */
 
     public void setSerializationProperties(Serializer serializer) {
-        for (Enumeration e = serializationParams.propertyNames(); e.hasMoreElements(); ) {
-            String name = (String) e.nextElement();
+        for (String name : serializationParams.stringPropertyNames()) {
             String value = serializationParams.getProperty(name);
             // parameters starting with "!" are taken as output properties
             // Allow the prefix "!saxon:" instead of "!{http://saxon.sf.net}"
@@ -649,13 +645,11 @@ public class CommandLineOptions {
     public void applyStaticParams(XsltCompiler compiler)
             throws SaxonApiException {
         Processor processor = compiler.getProcessor();
-        for (Enumeration e = paramValues.propertyNames(); e.hasMoreElements(); ) {
-            String name = (String) e.nextElement();
+        for (String name : paramValues.stringPropertyNames()) {
             String value = paramValues.getProperty(name);
             compiler.setParameter(QName.fromClarkName(name), new XdmAtomicValue(value, ItemType.UNTYPED_ATOMIC));
         }
-        for (Enumeration e = paramExpressions.propertyNames(); e.hasMoreElements(); ) {
-            String name = (String) e.nextElement();
+        for (String name : paramExpressions.stringPropertyNames()) {
             String value = paramExpressions.getProperty(name);
             // parameters starting with "?" are taken as XPath expressions
             XPathCompiler xpc = processor.newXPathCompiler();

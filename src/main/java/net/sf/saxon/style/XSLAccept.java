@@ -107,7 +107,8 @@ public class XSLAccept extends XSLAcceptExpose {
     protected void checkCompatibility(SymbolicName name, Visibility declared, Visibility exposed) {
         if (!isCompatible(declared, exposed)) {
             String code = "XTSE3040";
-            compileError("The " + name + " is declared as " + declared.show() + " and cannot be accepted as " + exposed.show(), code);
+            compileError("The " + name + " is declared as " + Err.describeVisibility(declared)
+                                 + " and cannot be accepted as " + Err.describeVisibility(exposed), code);
         }
     }
 

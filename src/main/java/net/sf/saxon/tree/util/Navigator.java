@@ -19,18 +19,20 @@ import net.sf.saxon.pattern.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpParameterType;
 import net.sf.saxon.tree.iter.*;
+import net.sf.saxon.tree.jiter.WrappingJavaIterator;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
 import net.sf.saxon.tree.tiny.TinyTextualElement;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -1127,11 +1129,12 @@ public final class Navigator {
      * Convert a {@code Predicate<NodeInfo>} (if necessary) to a NodeTest
      */
 
-    public static NodeTest nodeTestFromPredicate(Predicate<? super NodeInfo> predicate) {
+    public static NodeTest nodeTestFromPredicate(NodePredicate predicate) {
         if (predicate instanceof NodeTest) {
             return (NodeTest)predicate;
         } else {
-            return new NodePredicate(predicate);
+            //noinspection Convert2MethodRef
+            return NodeSelector.of(node -> predicate.test(node));
         }
     }
 
@@ -1146,7 +1149,7 @@ public final class Navigator {
 
     /*@NotNull*/
     public static AxisIterator filteredSingleton(NodeInfo node,
-                                                 @CSharpParameterType(key="net.sf.saxon.pattern.NodeTest") Predicate<? super NodeInfo> nodeTest) {
+                                                 NodePredicate nodeTest) {
         if (node != null && nodeTest.test(node)) {
             return SingleNodeIterator.makeIterator(node);
         } else {
@@ -1180,13 +1183,42 @@ public final class Navigator {
     }
 
     /**
+     * A class that delivers the children of a node as a Java Iterable
+     */
+
+    public static class ChildrenAsIterable implements Iterable<NodeInfo> {
+        private final NodeInfo parent;
+        private NodePredicate filter = null;
+
+        public ChildrenAsIterable(NodeInfo parent) {
+            this.parent = parent;
+        }
+
+        public ChildrenAsIterable(NodeInfo parent, NodePredicate filter) {
+            this.parent = parent;
+            this.filter = filter;
+        }
+        @NotNull
+        @Override
+        public Iterator<NodeInfo> iterator() {
+            AxisIterator basis;
+            if (filter == null) {
+                basis = parent.iterateAxis(AxisInfo.CHILD);
+            } else {
+                basis = parent.iterateAxis(AxisInfo.CHILD, filter);
+            }
+            return new WrappingJavaIterator<NodeInfo>(basis);
+        }
+    }
+
+    /**
      * AxisFilter is an iterator that applies a NodeTest filter to
      * the nodes returned by an underlying AxisIterator.
      */
 
     public static class AxisFilter implements AxisIterator {
         private final AxisIterator base;
-        private final Predicate<? super NodeInfo> nodeTest;
+        private final NodePredicate nodeTest;
 
         /**
          * Construct a AxisFilter
@@ -1198,7 +1230,7 @@ public final class Navigator {
          *             returned by the AxisFilter
          */
 
-        public AxisFilter(AxisIterator base, Predicate<? super NodeInfo> test) {
+        public AxisFilter(AxisIterator base, NodePredicate test) {
             this.base = base;
             nodeTest = test;
         }
@@ -1374,7 +1406,7 @@ public final class Navigator {
                             while ((n = forwards.next()) != null) {
                                 list.addFirst(n);
                             }
-                            children = new ListIterator.OfNodes(list);
+                            children = new NodeListIterator(list);
                         }
                     }
                 } else {
@@ -1434,6 +1466,7 @@ public final class Navigator {
                     break;
                 default:
                     siblingEnum = EmptyIterator.ofNodes();
+                    break;
             }
         }
 
@@ -1512,6 +1545,7 @@ public final class Navigator {
                     break;
                 default:
                     siblingEnum = EmptyIterator.ofNodes();
+                    break;
             }
         }
 

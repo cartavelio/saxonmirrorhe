@@ -8,6 +8,7 @@
 package net.sf.saxon.regex;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Version;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AllElementsSpaceStrippingRule;
@@ -18,7 +19,6 @@ import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-
 import net.sf.saxon.type.Type;
 import net.sf.saxon.z.IntBlockSet;
 import net.sf.saxon.z.IntSet;
@@ -64,6 +64,7 @@ public class UnicodeBlocks {
                     break;
                 default:
                     fsb.append(c);
+                    break;
             }
         }
         return fsb.toString();
@@ -71,7 +72,7 @@ public class UnicodeBlocks {
 
     private synchronized static void readBlocks(Configuration config) throws RESyntaxException {
         blocks = new HashMap<>(250);
-        InputStream in = Configuration.locateResource("unicodeBlocks.xml", new ArrayList<>(), new ArrayList<ClassLoader>());
+        InputStream in = Version.platform.locateResource("unicodeBlocks.xml", new ArrayList<>());
         if (in == null) {
             throw new RESyntaxException("Unable to read unicodeBlocks.xml file");
         }

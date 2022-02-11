@@ -363,9 +363,11 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             if (source instanceof NodeInfo) {
                 controller.setGlobalContextItem((NodeInfo)source);
                 sourceNode = (NodeInfo) source;
+                //#if CSHARP==false
             } else if (source instanceof DOMSource) {
                 sourceNode = controller.prepareInputTree(source);
                 controller.setGlobalContextItem(sourceNode);
+                //#endif
             } else {
                 sourceNode = controller.makeSourceTree(source, getSchemaValidationMode().getNumber());
                 controller.setGlobalContextItem(sourceNode);

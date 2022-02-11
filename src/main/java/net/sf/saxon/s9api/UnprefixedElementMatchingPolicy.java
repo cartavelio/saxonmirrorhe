@@ -7,11 +7,14 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.transpile.CSharpSimpleEnum;
+
 /**
  * An enumeration defining possible strategies for resolving unprefixed element names appearing
  * as name tests in the steps of a path expression or XSLT match pattern
  */
 
+@CSharpSimpleEnum
 public enum UnprefixedElementMatchingPolicy {
 
     /**

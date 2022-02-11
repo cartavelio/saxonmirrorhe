@@ -66,9 +66,9 @@ public class TransformFn extends SystemFunction implements Callable {
     private final static String dummyBaseOutputUriScheme = "dummy";
 
 
-    private boolean isTransformOptionName30(String string) {
+    private boolean isTransformOptionName30(String str) {
         for (String s : transformOptionNames30) {
-            if (s.equals(string)) {
+            if (s.equals(str)) {
                 return true;
             }
         }

@@ -48,14 +48,14 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
      * to obtain each matching substring. But the iterator also returns non-matching substrings
      * if these appear between the matching substrings.
      *
-     * @param string  the string to be analysed
+     * @param str  the string to be analysed
      * @param pattern the regular expression
      */
 
-    public JRegexIterator(String string, Pattern pattern) {
-        theString = string;
+    public JRegexIterator(String str, Pattern pattern) {
+        theString = str;
         this.pattern = pattern;
-        matcher = pattern.matcher(string);
+        matcher = pattern.matcher(str);
         nextSubstring = null;
     }
 

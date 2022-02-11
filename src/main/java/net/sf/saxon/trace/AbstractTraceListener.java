@@ -86,9 +86,8 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     public void enter(Traceable info, Map<String, Object> properties, XPathContext context) {
         if (isApplicable(info)) {
             Location loc = info.getLocation();
-            String tag = tag(info);
             String file = abbreviateLocationURI(loc.getSystemId());
-            StringBuilder msg = new StringBuilder(AbstractTraceListener.spaces(indent) + '<' + tag);
+            StringBuilder msg = new StringBuilder(AbstractTraceListener.spaces(indent) + '<' + tag(info));
             for (Map.Entry<String, Object> entry : properties.entrySet()) {
                 Object val = entry.getValue();
                 if (val instanceof StructuredQName) {
@@ -158,9 +157,8 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     @Override
     public void leave(Traceable info) {
         if (isApplicable(info)) {
-            String tag = tag(info);
             indent--;
-            out.info(AbstractTraceListener.spaces(indent) + "</" + tag + '>');
+            out.info(AbstractTraceListener.spaces(indent) + "</" + tag(info) + '>');
         }
     }
 

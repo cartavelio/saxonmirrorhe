@@ -11,7 +11,6 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.EmptySequence;
@@ -26,7 +25,7 @@ public class BaseUri_1 extends SystemFunction implements Callable {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo node = (NodeInfo)arguments[0].head();
         if (node == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
         String s = node.getBaseURI();
         if (s == null) {

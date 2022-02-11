@@ -874,7 +874,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         }
         for (Map.Entry<StructuredQName, List<ComponentDeclaration>> entry : attributeSetDeclarations.entrySet()) {
             List<Expression> content = new ArrayList<>();
-            Visibility vis = null;
+            Visibility vis = Visibility.UNDEFINED;
             boolean explicitVisibility = false;
             boolean streamable = false;
 
@@ -1185,9 +1185,9 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             // If any XQuery functions were imported, fix up all function calls
             // registered against these functions.
             XQueryFunctionLibrary queryFunctions = stylesheetPackage.getXQueryFunctionLibrary();
-            Iterator qf = queryFunctions.getFunctionDefinitions();
+            Iterator<XQueryFunction> qf = queryFunctions.getFunctionDefinitions();
             while (qf.hasNext()) {
-                XQueryFunction f = (XQueryFunction) qf.next();
+                XQueryFunction f = qf.next();
                 f.fixupReferences();
             }
 

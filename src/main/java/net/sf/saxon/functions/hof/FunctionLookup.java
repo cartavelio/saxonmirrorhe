@@ -17,10 +17,12 @@ import net.sf.saxon.functions.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
+import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.QNameValue;
 
@@ -128,21 +130,37 @@ public class FunctionLookup extends ContextAccessorFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         XPathContext c = boundContext == null ? context : boundContext;
         QNameValue qname = (QNameValue) arguments[0].head();
         IntegerValue arity = (IntegerValue) arguments[1].head();
         Function fi = lookup(qname.getStructuredQName(), (int) arity.longValue(), c);
         if (fi == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
         if (fi instanceof ContextAccessorFunction) {
             fi = ((ContextAccessorFunction) fi).bindContext(c);
         }
         Component target = fi instanceof UserFunction ? ((UserFunction) fi).getDeclaringComponent() : null;
-        ExportAgent agent = out -> makeFunctionCall(Literal.makeLiteral(qname), Literal.makeLiteral(arity)).export(out);
-        Function result = new UserFunctionReference.BoundUserFunction(agent, fi, target, c.getController());
-        return new ZeroOrOne(result);
+        ExportAgent agent = new FunctionLookupExportAgent(this, qname, arity);
+        return new UserFunctionReference.BoundUserFunction(agent, fi, target, c.getController());
+    }
+
+    public static class FunctionLookupExportAgent implements ExportAgent {
+
+        private final QNameValue qName;
+        private final IntegerValue arity;
+        private final FunctionLookup container;
+
+        public FunctionLookupExportAgent(FunctionLookup container, QNameValue qName, IntegerValue arity) {
+            this.arity = arity;
+            this.qName = qName;
+            this.container = container;
+        }
+        @Override
+        public void export(ExpressionPresenter out) throws XPathException {
+            container.makeFunctionCall(Literal.makeLiteral(qName), Literal.makeLiteral(arity)).export(out);
+        }
     }
 }
 

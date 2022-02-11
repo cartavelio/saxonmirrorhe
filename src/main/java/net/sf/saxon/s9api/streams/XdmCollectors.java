@@ -62,7 +62,7 @@ public class XdmCollectors {
         @Override
         public Supplier<List<I>> supplier() {
             //noinspection Convert2MethodRef
-            return () -> new ArrayList<>();   // done this way for Java-C# conversion
+            return () -> new ArrayList<I>();   // done this way for Java-C# conversion
         }
 
         @Override

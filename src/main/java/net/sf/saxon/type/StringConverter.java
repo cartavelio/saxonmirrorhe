@@ -12,12 +12,10 @@ import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.QNameException;
 import net.sf.saxon.regex.ARegularExpression;
-import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
-import net.sf.saxon.z.IntIterator;
 
 /**
  * A {@link Converter} that accepts a string as input. This subclass of Converter is provided
@@ -400,22 +398,7 @@ public abstract class StringConverter extends Converter {
             }
 
             // if not, replace any colons by underscores and then test if it's a valid NCName
-            UnicodeBuilder buff = new UnicodeBuilder();
-            buff.append(trimmed);
-            IntIterator trimmedIter = trimmed.codePoints();
-            IntIterator mappedIter = new IntIterator() {
-                @Override
-                public boolean hasNext() {
-                    return trimmedIter.hasNext();
-                }
-
-                @Override
-                public int next() {
-                    int ch = trimmedIter.next();
-                    return ch == ':' ? '_' : ch;
-                }
-            };
-            if (NameChecker.isValidNCName(mappedIter)) {
+            if (NameChecker.isValidNCName(trimmed.toString().replace(':', '_'))) {
                 return null;
             } else {
                 return new ValidationFailure("The value '" + trimmed + "' is not a valid xs:Name");
@@ -1000,7 +983,8 @@ public abstract class StringConverter extends Converter {
         @Override
         public ConversionResult convertString(UnicodeString input) {
             try {
-                return ((UnionType)targetType).getTypedValue(input, null, rules).head();
+                //noinspection RedundantCast
+                return (AtomicValue)((UnionType)targetType).getTypedValue(input, null, rules).head();
             } catch (ValidationException err) {
                 return err.getValidationFailure();
             }

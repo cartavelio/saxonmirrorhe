@@ -322,15 +322,18 @@ public abstract class BinaryExpression extends Expression {
                 if (isCommutative(operator) && lhs1.isEqual(rhs2) && rhs1.isEqual(lhs2)) {
                     return true;
                 }
-                if (isAssociative(operator) &&
-                        pairwiseEqual(flattenExpression(new ArrayList<>(4)),
-                                b.flattenExpression(new ArrayList<>(4)))) {
+                if (isAssociative(operator) && pairwiseEqual(flattenExpression(), b.flattenExpression())) {
                     return true;
                 }
             }
             return isInverse(operator, b.operator) && lhs1.isEqual(rhs2) && rhs1.isEqual(lhs2);
         }
         return false;
+    }
+
+    private List<Expression> flattenExpression() {
+        List<Expression> list = new ArrayList<>();
+        return flattenExpression(list);
     }
 
     /**
@@ -380,7 +383,7 @@ public abstract class BinaryExpression extends Expression {
      * @return true if the two lists are equal
      */
 
-    private boolean pairwiseEqual(List<?> a, List<?> b) {
+    private <T> boolean pairwiseEqual(List<T> a, List<T> b) {
         if (a.size() != b.size()) {
             return false;
         }

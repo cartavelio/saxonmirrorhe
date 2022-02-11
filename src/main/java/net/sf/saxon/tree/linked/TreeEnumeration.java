@@ -8,21 +8,18 @@
 package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.transpile.CSharpParameterType;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.EnumSet;
-import java.util.function.Predicate;
 
 abstract class TreeEnumeration implements AxisIterator, LookaheadIterator {
 
     protected NodeImpl start;
     /*@Nullable*/ protected NodeImpl nextNode;
-    protected @CSharpParameterType(key = "net.sf.saxon.pattern.NodeTest")
-              Predicate<? super NodeInfo> nodeTest;
+    protected NodePredicate nodeTest;
     /*@Nullable*/ protected NodeImpl current = null;
     protected int position = 0;
 
@@ -35,7 +32,7 @@ abstract class TreeEnumeration implements AxisIterator, LookaheadIterator {
      *                 are to be returned.
      */
 
-    public TreeEnumeration(NodeImpl origin, NodeTest nodeTest) {
+    public TreeEnumeration(NodeImpl origin, NodePredicate nodeTest) {
         nextNode = origin;
         start = origin;
         this.nodeTest = nodeTest;

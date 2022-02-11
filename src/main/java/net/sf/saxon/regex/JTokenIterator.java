@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 public class JTokenIterator implements AtomicIterator {
 
-    private final CharSequence input;
+    private final String input;
     private final Pattern pattern;
     private final Matcher matcher;
     /*@Nullable*/ private CharSequence current;
@@ -34,7 +34,7 @@ public class JTokenIterator implements AtomicIterator {
      * Construct a JTokenIterator.
      */
 
-    public JTokenIterator(CharSequence input, Pattern pattern) {
+    public JTokenIterator(String input, Pattern pattern) {
         this.input = input;
         this.pattern = pattern;
         matcher = pattern.matcher(input);
@@ -49,10 +49,10 @@ public class JTokenIterator implements AtomicIterator {
         }
 
         if (matcher.find()) {
-            current = input.subSequence(prevEnd, matcher.start());
+            current = input.substring(prevEnd, matcher.start());
             prevEnd = matcher.end();
         } else {
-            current = input.subSequence(prevEnd, input.length());
+            current = input.substring(prevEnd, input.length());
             prevEnd = -1;
         }
         return StringItem.makeStringValue(current);

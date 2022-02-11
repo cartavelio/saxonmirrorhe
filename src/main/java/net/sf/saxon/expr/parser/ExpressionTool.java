@@ -36,6 +36,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.*;
+import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.SourceLocator;
 import java.io.File;
@@ -843,7 +844,7 @@ public class ExpressionTool {
             } else if (item instanceof NumericValue) {
                 final NumericValue n = (NumericValue) item;
                 return (n.compareTo(0) != 0) && !n.isNaN();
-            } else if (item instanceof ExternalObject) {
+            } else if (item.getGenre() == Genre.EXTERNAL) {
                 return true;
             } else {
                 ebvError("an atomic value of type " + ((AtomicValue) item).getPrimitiveType().getDisplayName());
@@ -1258,37 +1259,6 @@ public class ExpressionTool {
         return false;
     }
 
-//    /**
-//     * Process all references to a particular variable within a subtree
-//     *
-//     * @param exp     the expression at the root of the subtree
-//     * @param binding the variable binding whose references are sought
-//     * @param action  the action to be applied to all references to this variable
-//     * @return true if processing finished early at the request of an action invocation; false if processing ran to completion
-//     */
-//
-//    public static boolean processVariableReferences(Expression exp, Binding binding, ExpressionAction<VariableReference> action) throws XPathException {
-//        if (exp instanceof VariableReference && ((VariableReference) exp).getBinding() == binding) {
-//            return action.process((VariableReference) exp);
-//        } else {
-//            for (Operand o : exp.operands()) {
-//                boolean done = processVariableReferences(o.getChildExpression(), binding, action);
-//                if (done) {
-//                    return true;
-//                }
-//            }
-//            return false;
-//        }
-//    }
-
-    /**
-     * Callback for selecting expressions in the tree
-     */
-
-    public interface ExpressionSelector {
-        boolean matches(Expression exp);
-    }
-
     /**
      * Replace all selected subexpressions within a subtree
      *
@@ -1301,14 +1271,14 @@ public class ExpressionTool {
      */
 
     public static boolean replaceSelectedSubexpressions(
-            Expression exp, ExpressionSelector selector, Expression replacement, boolean mustCopy) {
+            Expression exp, Predicate<Expression> selector, Expression replacement, boolean mustCopy) {
         boolean replaced = false;
         for (Operand o : exp.operands()) {
             if (replaced) {
                 mustCopy = true;
             }
             Expression child = o.getChildExpression();
-            if (selector.matches(child)) {
+            if (selector.test(child)) {
                 Expression e2 = mustCopy ? replacement.copy(new RebindingMap()) : replacement;
                 o.setChildExpression(e2);
                 replaced = true;
@@ -1329,7 +1299,7 @@ public class ExpressionTool {
      */
 
     public static void replaceVariableReferences(Expression exp, final Binding binding, Expression replacement, boolean mustCopy) {
-        ExpressionSelector selector =
+        Predicate<Expression> selector =
                 child -> child instanceof VariableReference && ((VariableReference) child).getBinding() == binding;
         replaceSelectedSubexpressions(exp, selector, replacement, mustCopy);
     }
@@ -1561,17 +1531,13 @@ public class ExpressionTool {
                 if (info.hasSameFocus()) {
                     Expression child = info.getChildExpression();
                     if (child instanceof ContextItemExpression) {
-                        VariableReference ref = variable.isGlobal() ?
-                                new GlobalVariableReference((GlobalVariable) variable) :
-                                new LocalVariableReference((LocalBinding) variable);
+                        VariableReference ref = makeReference(variable);
                         copyLocationInfo(child, ref);
                         info.setChildExpression(ref);
                         changed = true;
                     } else if (child instanceof AxisExpression ||
                             child instanceof RootExpression) {
-                        VariableReference ref = variable.isGlobal() ?
-                                new GlobalVariableReference((GlobalVariable) variable) :
-                                new LocalVariableReference((LocalBinding) variable);
+                        VariableReference ref = makeReference(variable);
                         copyLocationInfo(child, ref);
                         Expression path = ExpressionTool.makePathExpression(ref, child);
                         info.setChildExpression(path);
@@ -1586,6 +1552,15 @@ public class ExpressionTool {
             exp.resetLocalStaticProperties();
         }
         return changed;
+    }
+
+    @NotNull
+    private static VariableReference makeReference(Binding variable) {
+        if (variable.isGlobal()) {
+            return new GlobalVariableReference((GlobalVariable) variable);
+        } else {
+            return new LocalVariableReference((LocalBinding) variable);
+        }
     }
 
     /**
@@ -1791,7 +1766,7 @@ public class ExpressionTool {
     }
 
     private static boolean hasTwoOrMoreOperands(Expression exp) {
-        Iterator ops = exp.operands().iterator();
+        Iterator<Operand> ops = exp.operands().iterator();
         if (!ops.hasNext()) {
             return false;
         }

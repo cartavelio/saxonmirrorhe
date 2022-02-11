@@ -71,10 +71,10 @@ public class StringTool {
         return sb.toUnicodeString();
     }
 
-    public static UnicodeString fromLatin1(String string) {
-        byte[] bytes = new byte[string.length()];
-        for (int i = 0; i<string.length(); i++) {
-            bytes[i] = (byte)(string.charAt(i) & 0xff);
+    public static UnicodeString fromLatin1(String str) {
+        byte[] bytes = new byte[str.length()];
+        for (int i = 0; i<str.length(); i++) {
+            bytes[i] = (byte)(str.charAt(i) & 0xff);
         }
         return new Twine8(bytes);
     }

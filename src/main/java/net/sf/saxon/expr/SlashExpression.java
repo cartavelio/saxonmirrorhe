@@ -930,7 +930,7 @@ public class SlashExpression extends BinaryExpression
         Expression step = getStep();
         if (contextFree && step instanceof AxisExpression) {
             // See bug 4730: the step might have been changed to something else
-            return new MappingIterator(
+            return MappingIterator.map(
                     getStart().iterate(context),
                     item -> ((AxisExpression) step).iterate((NodeInfo)item));
         }

@@ -29,6 +29,10 @@ public class Put extends SystemFunction {
     public Expression makeFunctionCall(Expression[] arguments) {
         return new SystemFunctionCall(this, arguments) {
 
+            private String staticBaseUri() {
+                return getTargetFunction().getStaticBaseUriString();
+            }
+
             @Override
             public boolean isUpdatingExpression() {
                 return true;
@@ -54,10 +58,10 @@ public class Put extends SystemFunction {
                 String relative = getArg(1).evaluateItem(context).getStringValue();
                 String abs;
                 try {
-                    URI resolved = ResolveURI.makeAbsolute(relative, getStaticBaseUriString());
+                    URI resolved = ResolveURI.makeAbsolute(relative, staticBaseUri());
                     abs = resolved.toString();
                 } catch (URISyntaxException err) {
-                    throw new XPathException("Base URI " + Err.wrap(getStaticBaseUriString()) + " is invalid: " + err.getMessage(),
+                    throw new XPathException("Base URI " + Err.wrap(staticBaseUri()) + " is invalid: " + err.getMessage(),
                                              "FOUP0002", context);
                 }
                 pul.addPutAction(node, abs, this);

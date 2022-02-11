@@ -9,6 +9,7 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
@@ -20,7 +21,6 @@ import net.sf.saxon.z.IntUniversalSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * A NodeTest is a simple kind of pattern that enables a context-free test of whether
@@ -34,11 +34,7 @@ import java.util.function.Predicate;
  * a single method, {@link #matches(int, NodeName, SchemaType)}</p>
  */
 
-public abstract class NodeTest implements ItemTypeWithSequenceTypeCache
-        //#if CSHARP==false
-        , Predicate<NodeInfo>
-        //#endif
-{
+public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTypeCache {
 
     private SequenceType _one;
     private SequenceType _oneOrMore;
@@ -393,7 +389,7 @@ public abstract class NodeTest implements ItemTypeWithSequenceTypeCache
             }
             return Optional.empty();
         } else {
-            return Optional.of("The supplied value is " + item.getGenre().getDescription());
+            return Optional.of("The supplied value is " + Err.describeGenre(item.getGenre()));
         }
     }
 

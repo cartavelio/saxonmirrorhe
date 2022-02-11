@@ -8,6 +8,7 @@
 package net.sf.saxon.regex;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Version;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AxisInfo;
@@ -43,7 +44,7 @@ public class CaseVariants {
         monoVariants = new IntToIntHashMap(2500);
         polyVariants = new IntHashMap<>(100);
 
-        InputStream in = Configuration.locateResource("casevariants.xml", new ArrayList<>(), new ArrayList<>());
+        InputStream in = Version.platform.locateResource("casevariants.xml", new ArrayList<>());
         if (in == null) {
             throw new RuntimeException("Unable to read casevariants.xml file");
         }

@@ -302,7 +302,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
             }
             final ItemType type = resultType.getPrimaryType();
             if (type != AnyItemType.getInstance()) {
-                result = new ItemMappingIterator(result, item -> {
+                result = new ItemMappingIterator(result, ItemMapper.of(item -> {
                      if (!type.matches(item, th)) {
                          String msg = role.composeErrorMessage(type, item, th);
                          XPathException err = new XPathException(msg, "XPTY0004");
@@ -310,7 +310,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
                          throw err;
                      }
                      return item;
-                 }, true);
+                 }), true);
             }
             if (th.relationship(type, AnyNodeTest.getInstance()) != Affinity.DISJOINT) {
                 result = new ItemMappingIterator(
