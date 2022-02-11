@@ -105,6 +105,7 @@
               <xsl:variable name="is-readonly" select="$tokens = 'readonly'"/>
               <xsl:variable name="is-initializer" select="contains($line-pre-arrow, '=')"/>
               <xsl:variable name="is-method" select="contains($line-pre-arrow, '(') and not($is-initializer)"/>
+              <xsl:variable name="is-indexer" select="$tokens!starts-with(., 'this[') = true()"/>
               
               <xsl:variable name="has-explicit-base" select="($is-enum or $is-class or $is-interface) and contains($line, ':')"/>
               <xsl:variable name="explicitBase" select="if ($has-explicit-base) 
@@ -199,6 +200,9 @@
                   </xsl:when>
                   <xsl:when test="$is-method">
                     <xsl:sequence select="replace($line-pre-arrow, '^.*\s([A-Za-z0-9_]+)\s*\(.*', '$1')"/>
+                  </xsl:when>
+                  <xsl:when test="$is-indexer">
+                    <xsl:sequence select="'this'"/>
                   </xsl:when>
                   <xsl:when test="$is-initializer">
                     <xsl:analyze-string select="$line-pre-arrow" regex="([A-Za-z0-9_]+)\s*=">
@@ -396,6 +400,16 @@
                       <xsl:sequence select="f:getTypeParamTypes($type)"/>
                     </xsl:if>
                   </field>
+                </xsl:when>
+                <xsl:when test="$is-indexer">
+                  <indexer name="Item" public="{$is-public}" static="{$is-static}" abstract="{$is-abstract}" 
+                    override="{$is-override}" virtual="{$is-virtual}" readonly="{$is-readonly}"
+                    type="{if ($is-generic-type) then substring-before($type, '&lt;') else $type}">
+                    <xsl:variable name="index-tokens"
+                      select="tokenize(normalize-space(substring-before(substring-after($line-pre-arrow,
+                      '['),']')), ' ')"/>
+                    <index type="{$index-tokens[1]}" name="{$index-tokens[2]}"/>
+                  </indexer>
                 </xsl:when>
                 <xsl:otherwise>
                   <property initializer="{$is-initializer}" name="{$name}" public="{$is-public}" static="{$is-static}" readonly="{$is-readonly}" 

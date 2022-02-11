@@ -245,7 +245,49 @@
                 </xsl:for-each>
               </table>
               <p><xsl:text>&#xa0;</xsl:text></p>
-            </xsl:if>        
+            </xsl:if>
+            
+            <xsl:if test="indexer[@public='true']">
+              <a name="indexer_summary"/>
+              
+              <table>
+                <tr class="TableHeading">
+                  <th colspan="2"><h3>Indexer Summary</h3></th>
+                </tr>
+                <xsl:for-each select="indexer[@public='true']">
+                  <xsl:sort select="lower-case(@name)"/>
+                  <tr class="TableRow">
+                    <td class="col1">
+                      <xsl:if test="@static='true'">static</xsl:if>
+                      <xsl:text>&#xa0;</xsl:text>
+                      <xsl:sequence select="f:showGenericType(., $depth)"/>
+                    </td>
+                    <td>
+                      <span class="signature">
+                        <a href="#{@name}" class="apilink"><xsl:value-of select="@name"/></a>
+                        <xsl:text> [</xsl:text>
+                        <xsl:for-each select="param">
+                          <xsl:variable name="position" select="position()"/>
+                          <xsl:sequence select="f:showGenericType(., $depth)"/>
+                          <xsl:text>&#xa0;</xsl:text>
+                          <xsl:variable name="paramName" select="../comments/param[$position]/@name"/>
+                          <xsl:if test="not($paramName)">
+                            <xsl:message>Missing parameter description in <xsl:value-of select="../../@name, ../@name"/></xsl:message>
+                          </xsl:if>
+                          <xsl:value-of select="($paramName, @name)[1]"/>
+                          <xsl:if test="position() ne last()"><xsl:text>, </xsl:text></xsl:if>
+                        </xsl:for-each>
+                        <xsl:text>]</xsl:text>
+                      </span>
+                      <div class="fnormal"><xsl:apply-templates select="(comments/obsolete, comments/summary)[1]" mode="comments">
+                        <xsl:with-param name="is-nested" select="$is-nested" tunnel="yes"/>
+                      </xsl:apply-templates></div>
+                    </td>
+                  </tr>
+                </xsl:for-each>
+              </table>
+              <p><xsl:text>&#xa0;</xsl:text></p>
+            </xsl:if>
     
             <xsl:if test="method[@public='true']">
               <a name="method_summary"/>
@@ -269,7 +311,7 @@
                     <td>
                       <span class="signature">
                         <a href="#{f:makeMethodAnchor(.)}" class="apilink"><xsl:value-of select="@name"/></a>
-                        <xsl:text>(</xsl:text>
+                        <xsl:text> (</xsl:text>
                         <xsl:for-each select="param">
                           <xsl:variable name="position" select="position()"/>
                           <xsl:sequence select="f:showGenericType(., $depth)"/>
@@ -356,7 +398,7 @@
                 </xsl:for-each>
               </div>
               
-            </xsl:if>        
+            </xsl:if>
     
             <xsl:if test="property[@public='true']">
               <a name="property_detail"/>
@@ -392,7 +434,51 @@
                 </xsl:for-each>
               </div>
               
-            </xsl:if> 
+            </xsl:if>
+            
+            <xsl:if test="indexer[@public='true']">
+              <a name="indexer_detail"/>
+              
+              <div class="section">
+                <h2>Indexer Detail</h2>
+                
+                <xsl:for-each select="indexer[@public='true']">
+                  <xsl:sort select="lower-case(@name)"/>
+                  <a name="{@name}"/>
+                  <div class="member">
+                    <h3><xsl:value-of select="@name"/></h3>
+                    <div class="code">
+                      <xsl:if test="@public='true'">public&#xa0;</xsl:if>
+                      <xsl:if test="@static='true'">static&#xa0;</xsl:if>
+                      <xsl:if test="@abstract='true'">abstract&#xa0;</xsl:if>
+                      <xsl:if test="@readonly='true'">readonly&#xa0;</xsl:if>
+                      <xsl:if test="@virtual='true'">virtual&#xa0;</xsl:if>
+                      <xsl:if test="@override='true'">override&#xa0;</xsl:if>
+                      <xsl:sequence select="f:showGenericType(., $depth)"/>
+                      <xsl:text>&#xa0;</xsl:text>
+                      <xsl:value-of select="'this'"/>
+                      <xsl:text>[</xsl:text>
+                      <xsl:for-each select="param">
+                        <xsl:variable name="position" select="position()"/>
+                        <xsl:sequence select="f:showGenericType(., $depth)"/>
+                        <xsl:text>&#xa0;</xsl:text>
+                        <xsl:value-of select="../comments/param[$position]/@name"/>
+                        <xsl:if test="position() ne last()">
+                          <xsl:text>,</xsl:text>
+                          <br/>
+                          <xsl:for-each select="1 to (8 + string-length(../@name))">&#xa0;</xsl:for-each>
+                        </xsl:if>
+                      </xsl:for-each>
+                      <xsl:text>]</xsl:text>
+                    </div>
+                    <xsl:apply-templates select="comments">
+                      <xsl:with-param name="is-nested" select="$is-nested" tunnel="yes"/>
+                    </xsl:apply-templates>
+                  </div>
+                </xsl:for-each>
+              </div>
+              
+            </xsl:if>
     
             <xsl:if test="method[@public='true']">
               <a name="method_detail"/>
