@@ -29,7 +29,7 @@ namespace Saxon.Impl.Helpers {
             closeAfterUse = close;
         }
         
-        public override void characters(Saxon.Hej.str.CodePoints chars, Saxon.Hej.s9api.Location locationId, int properties) {
+        public override void characters(Saxon.Hej.str.UnicodeString chars, Saxon.Hej.s9api.Location locationId, int properties) {
             writer.WriteString(chars.ToString());
         }
         public override void close() {
@@ -40,7 +40,7 @@ namespace Saxon.Impl.Helpers {
             }
         }
         
-        public override void comment(Saxon.Hej.str.CodePoints content, Saxon.Hej.s9api.Location locationId, int properties) {
+        public override void comment(Saxon.Hej.str.UnicodeString content, Saxon.Hej.s9api.Location locationId, int properties) {
             writer.WriteComment(content.ToString());
         }
         public override void endDocument() {
@@ -52,7 +52,7 @@ namespace Saxon.Impl.Helpers {
 
         public override void open() {
         }
-        public override void processingInstruction(string name, Saxon.Hej.str.CodePoints data, Saxon.Hej.s9api.Location locationId, int properties) {
+        public override void processingInstruction(string name, Saxon.Hej.str.UnicodeString data, Saxon.Hej.s9api.Location locationId, int properties) {
             writer.WriteProcessingInstruction(name, data.ToString());
         }
         

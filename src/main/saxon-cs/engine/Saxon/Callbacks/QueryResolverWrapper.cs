@@ -6,28 +6,27 @@ using Saxon.Api;
 
 namespace Saxon.Callbacks {
     public class QueryResolverWrapper : Saxon.Hej.lib.ModuleURIResolver {
-        private readonly IQueryResolver queryResolver;
+        private readonly XQueryResolver _xQueryResolver;
         private readonly XmlResolver xmlResolver;
 
-        public QueryResolverWrapper(IQueryResolver queryResolver, XmlResolver xmlResolver) {
-            this.queryResolver = queryResolver;
+        public QueryResolverWrapper(XQueryResolver xQueryResolver, XmlResolver xmlResolver) {
+            this._xQueryResolver = xQueryResolver;
             this.xmlResolver = xmlResolver;
         }
 
         public Saxon.Ejavax.xml.transform.stream.StreamSource[] resolve(string moduleURI, string baseURI, string[] locations) {
-            Uri[] uris = queryResolver.GetModules(moduleURI, new Uri(baseURI), locations);
-            StreamSource[] sss = new StreamSource[uris.Length];
-            for (int i = 0; i < uris.Length; i++) {
-                object o = queryResolver.GetEntity(uris[i])
-                           ?? xmlResolver.GetEntity(uris[i], "query", typeof(Stream));
-                sss[i] = o switch {
-                    Stream stream =>
-                        new StreamSource(stream, uris[i].ToString()),
-                    string s =>
-                        new StreamSource(new StringReader(s), uris[i].ToString()),
-                    _ =>
-                        new StreamSource(uris[i].ToString())
-                };
+            Uri[] locationUris = new Uri[locations.Length];
+            for (int i=0; i<locations.Length; i++) {
+                locationUris[i] = new Uri(locations[i], UriKind.RelativeOrAbsolute);
+            }
+            XQueryModuleSource[] modules = _xQueryResolver(moduleURI, baseURI==null ? null : new Uri(baseURI), locationUris);
+            if (modules == null) {
+                return null;
+            }
+            StreamSource[] sss = new StreamSource[modules.Length];
+            for (int i = 0; i < modules.Length; i++) {
+                Uri returnedBaseUri = modules[i].BaseUri;
+                sss[i] = new StreamSource(new StringReader(modules[i].Content), returnedBaseUri == null ? null : returnedBaseUri.ToString());
             }
 
             return sss;

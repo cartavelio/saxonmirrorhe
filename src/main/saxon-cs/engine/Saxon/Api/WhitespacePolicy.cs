@@ -60,7 +60,10 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Create a custom whitespace stripping policy
+        /// Create a custom whitespace stripping policy, by supplying a predicate that indicates for any given element,
+        /// whether whitespace text nodes among its children should be stripped or preserved. Note that this decision
+        /// ignores any xml:space attributes that might be present, and the decision applies only to immediate children,
+        /// not to descendants.
         /// </summary>
         /// <param name="elementTest">a predicate applied to element names, which should return true if whitespace-only
         /// text node children of the element are to be stripped, false if they are to be retained.</param>

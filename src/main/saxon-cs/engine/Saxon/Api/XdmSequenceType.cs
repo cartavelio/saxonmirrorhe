@@ -1,6 +1,7 @@
 using System;
 using Saxon.Hej.expr;
 using Saxon.Hej.s9api;
+using Saxon.Hej.type;
 using ItemType = Saxon.Hej.type.ItemType;
 using SequenceType = Saxon.Hej.value.SequenceType;
 
@@ -23,6 +24,9 @@ namespace Saxon.Api {
         public const char ZERO_OR_ONE = '?';
         public const char ZERO = '0'; 
         public const char ONE = ' ';
+
+        public static XdmSequenceType AnySequenceType = new XdmSequenceType(
+            XdmItemType.MakeXdmItemType(AnyItemType.getInstance()), ZERO_OR_MORE);
 
         /// <summary>
         /// Create an <c>XdmSequenceType</c> corresponding to a given <c>XdmItemType</c> and occurrence indicator
