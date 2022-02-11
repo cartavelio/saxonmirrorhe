@@ -20,7 +20,7 @@
    
  
    
-   <xsl:mode on-no-match="shallow-skip"/>
+   <xsl:mode on-no-match="fail"/>
 
    
    <xsl:function name="f:qualified-name" as="xs:string">
@@ -33,8 +33,12 @@
       <xsl:param name="typeName" as="xs:string?"/>
       <xsl:sequence select="replace($typeName, '&lt;.*$', '')"/>
    </xsl:function>
-
    
+   <xsl:function name="f:typeParams" as="xs:string?">
+      <xsl:param name="typeName" as="xs:string?"/>
+      <xsl:sequence select="replace($typeName, '^[^&lt;]+', '')"/>
+   </xsl:function>
+  
    <xsl:param name="xmlDir" as="xs:string" required="yes"/>
    
    <xsl:template name="xsl:initial-template">
@@ -49,10 +53,19 @@
       </module>
    </xsl:template>
    
+   <xsl:function name="f:isDelegate" as="xs:boolean">
+      <xsl:param name="interfaceDecl" as="element()"/>
+      <xsl:sequence select="exists($interfaceDecl[@nodeType='ClassOrInterfaceDeclaration'][@isInterface='true']
+         [annotations/annotation/name/@identifier='FunctionalInterface'][count(members/member)=1])"/>
+   </xsl:function>
+   
    <xsl:template match="*[@nodeType='ClassOrInterfaceDeclaration'][@isInterface='true']">
       <interface name="{f:degenerify(name/@identifier)}">
-         <xsl:apply-templates select="extendedTypes/ExtendedType"/>
-         <xsl:apply-templates select="members/member">
+         <xsl:if test="f:isDelegate(.)">
+            <xsl:attribute name="delegate" select="1"/>
+         </xsl:if>
+         <xsl:apply-templates select="extendedTypes/extendedType"/>
+         <xsl:apply-templates select="members/member[@nodeType='MethodDeclaration']">
             <xsl:with-param name="isInterface" select="true()" tunnel="yes"/>
          </xsl:apply-templates>
       </interface>
@@ -60,28 +73,56 @@
    
    <xsl:template match="*[@nodeType='ClassOrInterfaceDeclaration'][@isInterface='false']">
       <class name="{f:degenerify(name/@identifier)}">
+         <xsl:if test="modifiers/modifier[@keyword='ABSTRACT']">
+            <xsl:attribute name="abstract" select="1"/>
+         </xsl:if>
          <xsl:apply-templates select="extendedTypes/extendedType"/>
          <xsl:apply-templates select="implementedTypes/implementedType"/>
-         <xsl:apply-templates select="members/member">
+         <xsl:apply-templates select="members/member[@nodeType='MethodDeclaration']">
+            <xsl:with-param name="isInterface" select="false()" tunnel="yes"/>
+         </xsl:apply-templates>
+         <xsl:apply-templates select="members/member[@nodeType='ClassOrInterfaceDeclaration'][@isInterface='false']">
+            <xsl:with-param name="isInterface" select="false()" tunnel="yes"/>
+         </xsl:apply-templates>
+         <xsl:apply-templates select="members/member[@nodeType='EnumDeclaration']">
             <xsl:with-param name="isInterface" select="false()" tunnel="yes"/>
          </xsl:apply-templates>
       </class>
    </xsl:template>
    
+   <xsl:template match="*[@nodeType='EnumDeclaration']">
+      <enum name="{f:degenerify(name/@identifier)}"/>
+   </xsl:template>
+   
    <xsl:template match="extendedType">
-      <extends name="{f:degenerify(@RESOLVED_TYPE)}"/>
+      <extends name="{f:degenerify(@RESOLVED_TYPE)}">
+         <xsl:variable name="typeParams" select="f:typeParams(@RESOLVED_TYPE)"/>
+         <xsl:if test="$typeParams">
+            <xsl:attribute name="params" select="$typeParams"/>
+         </xsl:if>
+      </extends>
    </xsl:template>
    
    <xsl:template match="implementedType">
-      <implements name="{f:degenerify(@RESOLVED_TYPE)}"/>
+      <implements name="{f:degenerify(@RESOLVED_TYPE)}">
+         <xsl:variable name="typeParams" select="f:typeParams(@RESOLVED_TYPE)"/>
+         <xsl:if test="$typeParams">
+            <xsl:attribute name="params" select="$typeParams"/>
+         </xsl:if>
+      </implements>
    </xsl:template>
    
    <xsl:template match="member[@nodeType='MethodDeclaration']">
       <xsl:param name="isInterface" as="xs:boolean" tunnel="yes" select="false()" required="no"/>
       <method name="{name/@identifier}" 
-              static="{count(modifiers/modifier[@keyword='STATIC'])}" 
               arity="{count(parameters/parameter)}" 
-              returns="{type/@RESOLVED_TYPE}">
+              returns="{replace(type/@RESOLVED_TYPE, '\? extends ', '')}">
+         <xsl:if test="modifiers/modifier[@keyword='STATIC']">
+            <xsl:attribute name="static" select="1"/>
+         </xsl:if>
+         <xsl:if test="modifiers/modifier[@keyword='ABSTRACT']">
+            <xsl:attribute name="abstract" select="1"/>
+         </xsl:if>
           <xsl:if test="$isInterface and modifiers/modifier/@keyword='DEFAULT'">
              <default>
                 <xsl:copy-of select="."/>
@@ -89,5 +130,7 @@
           </xsl:if>  
       </method>
    </xsl:template>
+   
+   <xsl:template match="member[@nodeType='FieldDeclaration']"/>
  
 </xsl:stylesheet>

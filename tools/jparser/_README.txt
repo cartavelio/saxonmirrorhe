@@ -23,4 +23,45 @@ available for purchase.)
 
 Further code for this project is on MHK's Mac laptop in IntelliJ project "javaparser".
 
-MHK 2021-01-23
+NOTES
+
+Things that will cause difficulty in conversion:
+
+* Anonymous inner classes. Some have been converted by hand to named static inner classes,
+which appear to work fine. We're attempting to automate this conversion, but it's difficult
+to resolve methods/properties that implicitly refer to "this" in an inherited class, or in 
+the outer class, or in a superclass of the outer class, or in an outer class of the outer
+class, etc.
+
+* Enums. Conversion code written but it's complex.
+
+* Default methods in interfaces. No equivalent in C#. We're expanding the default methods into
+all the derived types.
+
+* Constants and static methods in interfaces. Need to move them elsewhere.
+
+* Static members in generic types. Notably Feature<X>. 
+
+* Multiple variables with the same name: C# rules are more restrictive. Need to rename
+variables to avoid the problem.
+
+* Collection classes. Java foreach over an iterable maps nicely to C# foreach over an
+IEnumerable. But the Iterator classes are fundamentally different: C# MoveNext() is stateful
+Java hasNext() is not. Where we have an implementation of Iterator, we may need a parallel
+implementation of IEnumerator. (The problem here is the close interaction of language features
+with collection classes, which makes emulation difficult.)
+
+* Diamond syntax: new HashMap<>(). We're inferring a type for simple cases where the object creation expression
+is the RHS of an assignment or declaration.
+
+* Covariant return types. We declaring the return type to be the same as the return type of the inherited method,
+and generating a cast of the result on calls where it's needed.
+
+* Predicates, lambda expressions. The rule seems to be that using lambda expressions for a simple functional interface
+works fine (the FI is translated to a delegate), but you can't have classes that subclass such an interface. So NodeTest
+implementing Predicate<> seems to be not possible, instead we'll try having NodeTest.asPredicate() to get the predicate
+when needed.
+
+
+
+MHK 2021-01-26
