@@ -19,15 +19,30 @@ public abstract class TestReport {
     protected Spec spec;
     protected XMLStreamWriter results;
     protected Writer writer;
+    protected String reportFilename;
 
     public TestReport(TestDriver testDriver, Spec sp) {
         this.testDriver = testDriver;
         this.spec = sp;
+
+        reportFilename = testDriver.getResultsDir() + "/results"
+                + "_" + spec.fullName + "_" + testDriver.getProductVersion() + ".xml";
+    }
+
+    public void setReportFilename(String fn) {
+        if (fn.contains(System.getProperty("file.separator"))) {
+            reportFilename = fn;
+        } else {
+            reportFilename = testDriver.getResultsDir() + "/" + fn;
+        }
+
+        if (!reportFilename.contains(".")) {
+            reportFilename = reportFilename + ".xml";
+        }
     }
 
     public void createWriter(Processor processor) throws IOException, SaxonApiException {
-        Writer resultWriter = new BufferedWriter(new FileWriter(new File(testDriver.getResultsDir() + "/results"
-                + "_" + spec.fullName + "_" + testDriver.getProductVersion() + ".xml")));
+        Writer resultWriter = new BufferedWriter(new FileWriter(new File(reportFilename)));
         Serializer serializer = processor.newSerializer(resultWriter);
         serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
         serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
