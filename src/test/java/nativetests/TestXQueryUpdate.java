@@ -1,0 +1,79 @@
+package nativetests;
+
+import com.saxonica.config.EnterpriseConfiguration;
+import junit.framework.TestCase;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Builder;
+import net.sf.saxon.query.DynamicQueryContext;
+import net.sf.saxon.query.QueryResult;
+import net.sf.saxon.query.StaticQueryContext;
+import net.sf.saxon.query.XQueryExpression;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.om.*;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
+import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
+
+
+public class TestXQueryUpdate extends TestCase {
+    private static final String xml =
+            "<?xml version='1.0' encoding='UTF-8'?><record><datafield ind1=' '></datafield></record>";
+
+    // Bug report against 9.1: compiling a query against one Configuration and
+    // running using another appears to give no error
+    public void testUpdateConfig() {
+
+        try {
+            final EnterpriseConfiguration config = new EnterpriseConfiguration();
+            config.setURIResolver(new URIResolver() {
+                 public Source resolve(String href, String base) throws TransformerException {
+                     Source s = new StreamSource(new StringReader(xml));
+                     s.setSystemId(href);
+                     return s;
+                }
+            });
+            config.setTreeModel(Builder.LINKED_TREE);
+            final StaticQueryContext sqc = config.newStaticQueryContext();
+            sqc.setUpdatingEnabled(true);
+            sqc.setBaseURI("http://www.w3.org/");
+            final XQueryExpression exp = sqc.compileQuery(
+                    "insert node <n/> after " +
+                    "doc('file:///D:/My%20Documents/MyProjects/curve_cleaning/trunk/scripts/xml/XXXXs.xml')/record/datafield[1]");
+
+            final DynamicQueryContext dynamicContext = new DynamicQueryContext(config);
+
+            java.util.Set<MutableNodeInfo> s = exp.runUpdate(dynamicContext);
+
+            assertTrue("one updated node", s.size() == 1);
+        } catch (XPathException e) {
+            fail(e.getMessage());
+        }
+
+    }
+
+    // bug report against 9.1 - adding a namespace node to a MutableNodeInfo
+
+    public void testAddNamespace() {
+        try {
+            Configuration config = new EnterpriseConfiguration();
+            config.setTreeModel(Builder.LINKED_TREE);
+            String source = "<foo/>";
+            NodeInfo doc = config.buildDocumentTree(new StreamSource(new StringReader(source))).getRootNode();
+            NodeName name = new FingerprintedQName("a", "http://foo.bar/", "x");
+            NamespaceBinding nsCode = new NamespaceBinding("a", "http://foo.bar/");
+            MutableNodeInfo elem = (MutableNodeInfo)doc.iterateAxis(AxisInfo.CHILD).next();
+            elem.addAttribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, "xxxx", 0);
+            elem.addNamespace(nsCode, false);
+            String s = QueryResult.serialize(elem).trim();
+            assertEquals("result", "<foo xmlns:a=\"http://foo.bar/\" a:x=\"xxxx\"/>", s);
+            //System.err.println(s);
+
+        } catch (XPathException e) {
+            fail(e.getMessage());
+        }
+    }
+}

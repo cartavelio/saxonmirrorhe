@@ -1,0 +1,1096 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+  }
+}
+
+plugins {
+  id "java"
+  id "maven-publish"
+  id "signing"
+//  id "com.cdsap.talaiot" version "1.3.5"
+}
+
+import org.gradle.internal.os.OperatingSystem;
+
+apply plugin: 'java'
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven { url = "https://org.apache.maven" }
+}
+
+configurations.all {
+  resolutionStrategy {
+    force 'xml-apis:xml-apis:1.4.01'
+  }
+}
+
+configurations {
+  preprocessor.extendsFrom(runtimeOnly)
+  jarjarAsm.extendsFrom(implementation)
+  testDrivers.extendsFrom(testImplementation)
+  ikvm.extendsFrom(implementation)
+  compileDotNet.extendsFrom(implementation)
+  asmDotNet.extendsFrom(implementation)
+}
+
+dependencies {
+  preprocessor (
+    [group: 'com.igormaznitsa', name: 'jcp', version: '7.0.4'],
+    [group: 'com.tonicsystems', name: 'jarjar', version: '0.6' ]
+  )
+  implementation (
+    //fileTree(dir: "lib", include: "System*.jar"),
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.2.15'],
+    [group: 'xom', name: 'xom', version: '1.3.5'],
+    [group: 'org.jdom', name: 'jdom', version: '1.1.3'],
+    [group: 'org.jdom', name: 'jdom2', version: '2.0.6'],
+    [group: 'org.lucee', name: 'dom4j', version: '1.6.1'],
+    [group: 'xml-resolver', name: 'xml-resolver', version: '1.2' ],
+    [group: 'com.ibm.icu', name: 'icu4j', version: icu4jVersion ],
+    // PE and EE
+    [group: 'javax.mail', name: 'javax.mail-api', version: mailVersion ],
+    [group: 'com.sun.mail', name: 'javax.mail', version: mailVersion ],
+    [group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: tagsoupVersion],
+  )
+  jarjarAsm (
+    fileTree(dir: "${buildDir}/lib/asm")
+  )
+  ikvm (
+    fileTree(dir: "${ikvmDir}/stubs")
+  )
+  compileDotNet (
+    fileTree(dir: "${ikvmDir}/stubs"),
+    fileTree(dir: "${ikvmDir}/classpath")
+  )
+  asmDotNet (
+    fileTree(dir: "${ikvmDir}/stubs"),
+    fileTree(dir: "${ikvmDir}/classpath"),
+    fileTree(dir: "lib/asm-${asmVersion}")
+  )
+  testImplementation (
+    [group: 'junit', name: 'junit', version: '4.12'],
+    [group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.2'],
+    [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
+    files("${buildDir}/classes/eej"),
+    files("lib/Tidy.jar")
+  )
+  testRuntimeOnly (
+    [group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.4.2'],
+    [group: 'org.junit.vintage', name: 'junit-vintage-engine', version: '5.4.2'],
+    [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
+    files("${buildDir}/classes/eej")
+  )
+}
+
+sourceSets {
+  main {
+    java {
+      exclude "**/*.java"
+    }
+  }
+}
+
+test {
+  useJUnitPlatform()
+}
+
+/*
+talaiot {
+  metrics {
+    performanceMetrics = false
+  }
+  publishers {
+    taskDependencyGraphPublisher {
+      gexf = false
+      dot = true
+      html = false
+    }
+  }
+}
+*/
+
+ext {
+  systemOs = OperatingSystem.current()
+  icu4jJar = null
+  tagsoupJar = null
+  mailJar = null
+  resolverJar = null
+}
+
+def version_h = saxonVersion.replace(".", "-")
+
+// ============================================================
+// Find jar files that need to be part of the build or release
+//
+def filesep = System.getProperty("file.separator")
+icu4jJar = "${filesep}icu4j-${icu4jVersion}.jar"
+tagsoupJar = "${filesep}tagsoup-${tagsoupVersion}.jar"
+mailJar = "${filesep}javax.mail-${mailVersion}.jar"
+resolverJar = "${filesep}xml-resolver-1.2.jar"
+configurations.compileClasspath.each { cp ->
+  if (cp.toString().endsWith(icu4jJar)) {
+    icu4jJar = cp.toString()
+  }
+  if (cp.toString().endsWith(tagsoupJar)) {
+    tagsoupJar = cp.toString()
+  }
+  if (cp.toString().endsWith(mailJar)) {
+    mailJar = cp.toString()
+  }
+  if (cp.toString().endsWith(resolverJar)) {
+    resolverJar = cp.toString()
+    println(resolverJar)
+  }
+}
+
+apply from: "build-n.gradle"
+apply from: "build-c.gradle"
+
+def pathExists(pathname) {
+  // Returns true iff pathame is an existing file or directory
+  try {
+    // This may throw an error for a Windows pathname, c:/path/to/thing
+    if (file(pathname).exists()) {
+      return true;
+    }
+  } catch (GradleException e) {
+    // I don't care
+  }
+
+  if (OperatingSystem.current().isWindows()) {
+    try {
+      // If we're on Windows, try to make c:/path/to/thing work
+      if (file("file:///${pathname}").exists()) {
+        return true;
+      }
+    } catch (GradleException e) {
+      // I don't care
+    }
+  }
+
+  return false
+}
+
+// ============================================================
+// One of the features of Gradle is that you can construct tasks
+// dynamically during the "configure" phase. This is a feature because
+// it avoids a lot of tedious repetition of nearly identical tasks. It
+// has the unfortunate consequence that understanding the tasks
+// involved becomes harder. I've tried to use this feature sparingly.
+
+["h", "p", "e"].each { initial ->
+  def release = initial + "e"
+  def Release = initial.toUpperCase() + "e"
+  def RELEASE = release.toUpperCase()
+
+  if (release != "he") {
+    Task libs = task "${release}j_libs"(
+      description: "Dependency to make sure library files are copie for ${RELEASE}"
+    ) {
+      // Just a container to hang dependencies on
+    }
+
+    Task icu4j = task "${release}j_icu4j"(
+      type: Copy,
+      description: "Copy the ICU4J jar into the ${RELEASE} release directory"
+    ) {
+      from "${icu4jJar}"
+      into "${buildDir}/releases/${release}j"
+    }
+    libs.dependsOn icu4j
+  }
+
+  task "${release}j_notices"(
+    type: Copy,
+    description: "Copy the notices into the ${RELEASE} release directory"
+  ) {
+    into "${buildDir}/releases/${release}j"
+    from ("src/docs") {
+      exclude "saxon9"
+      exclude "tools"
+      exclude "saxonc-doc"
+      exclude "welcome"
+      exclude "notices/APACHE-ANT.txt"
+      exclude "notices/APACHE-RESOLVER.txt"
+      exclude "notices/APACHE-TAGSOUP.txt"
+      exclude "notices/APACHE-XERCES.txt"
+      exclude "notices/ASM.txt"
+      exclude "notices/FRIJTERS.txt"
+      exclude "notices/GPL+CLASSPATH.txt"
+      exclude "notices/ICU-J.txt"
+      exclude "notices/LEGAL.txt"
+    }
+  }
+
+  task "${release}j_copyTestDrivers"(
+    dependsOn: ["${release}j_copyTestDriverSources",
+                "${release}j_copyTestDriverResources"],
+    description: "Copy test driver sources and resources for ${RELEASE}"
+  ) {
+    // Just a container to hang dependencies on
+  }
+}
+
+// ============================================================
+
+task "hej_compileTestDrivers"(
+  type: JavaCompile,
+  dependsOn: ["hej_copyTestDrivers", "hejCompile"],
+  description: "Compile the test classes for HE"
+) {
+  classpath = configurations.testDrivers + files("${buildDir}/classes/hej")
+  source = "${buildDir}/src/testdrivers/hej"
+  destinationDirectory = new File("${buildDir}/classes/hej/testdrivers")
+}
+
+task "pej_compileTestDrivers"(
+  type: JavaCompile,
+  dependsOn: ["pej_copyTestDrivers", "pejCompile", "eejCompile"],
+  description: "Compile the test classes for PE"
+) {
+  classpath = configurations.testDrivers \
+              + files("${buildDir}/classes/pej") \
+              + files("${buildDir}/classes/eej")
+  source = "${buildDir}/src/testdrivers/pej"
+  destinationDirectory = new File("${buildDir}/classes/pej/testdrivers")
+}
+
+task "eej_compileTestDrivers"(
+  type: JavaCompile,
+  dependsOn: ["eej_copyTestDrivers", "eejCompile", "eejCompile"],
+  description: "Compile the test classes for EE"
+) {
+  classpath = configurations.testDrivers \
+              + files("${buildDir}/classes/eej")
+  source = "${buildDir}/src/testdrivers/eej"
+  destinationDirectory = new File("${buildDir}/classes/eej/testdrivers")
+}
+
+task hejJarTests(
+  type: Jar,
+  dependsOn: ["hejCompile", "hej_compileTestDrivers"],
+  description: "Create the tests jar file for HE"
+) {
+  archiveBaseName = "saxon-he-test-${saxonVersion}"
+  manifest {
+    attributes "Project-Name": "Saxon-HE-TestDriver"
+    attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
+  }
+  from ("build/classes/hej/testdrivers") {
+    include "net/sf/saxon/testdriver/**"
+  }
+}
+
+task pejJarTests(
+  type: Jar,
+  dependsOn: ["pejCompile", "pej_compileTestDrivers"],
+  description: "Create the tests jar file for PE"
+) {
+  archiveBaseName = "saxon-pe-test-${saxonVersion}"
+  manifest {
+    attributes "Project-Name": "Saxon-PE-TestDriver"
+    attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
+  }
+  from ("build/classes/pej/testdrivers") {
+    include "net/sf/saxon/testdriver/**"
+    include "com/saxonica/testdriver/**"
+    exclude "com/saxonica/testdriver/ee/**"
+  }
+}
+
+task eejJarTests(
+  type: Jar,
+  dependsOn: ["eejCompile", "eej_compileTestDrivers"],
+  description: "Create the tests jar file for EE"
+) {
+  archiveBaseName = "saxon-ee-test-${saxonVersion}"
+  manifest {
+    attributes "Project-Name": "Saxon-EE-TestDriver"
+    attributes "Main-Class": "com.saxonica.testdriver.gui.TestDriverGui"
+  }
+  from ("build/classes/eej/testdrivers") {
+    include "net/sf/saxon/testdriver/**"
+    include "com/saxonica/testdriver/**"
+  }
+}
+
+// ============================================================
+
+task hej_setupPreprocess(
+  type: Copy,
+  description: "Copy HE sources for preprocessing HE"
+) {
+  from "${projectDir}/src/main/java"
+  into "${buildDir}/filtered/hej"
+  include "net/sf/saxon/**/*.java"
+  include "net/sf/saxon/**/package.html"
+  include "net/sf/saxon/data/**"
+  exclude "javax/xml/xquery/*.java"
+  exclude "**/dotnet/**"
+  exclude "net/sf/saxon/testdriver/**"
+  exclude "net/sf/saxon/option/sql/**"
+  exclude "net/sf/saxon/option/cpp/**"
+  exclude "net/sf/saxon/jetonnet/**"
+}
+
+task hej_setupPreprocessForPej(
+  type: Copy,
+  description: "Copy HE sources for preprocessing PE"
+) {
+  from "${projectDir}/src/main/java"
+  into "${buildDir}/filtered/pej"
+  include "net/sf/saxon/**/*.java"
+  include "javax/xml/xquery/*.java"
+  exclude "**/dotnet/**"
+  include "net/sf/saxon/**/package.html"
+  exclude "net/sf/saxon/testdriver/**"
+  exclude "net/sf/saxon/option/cpp/**"
+  exclude "net/sf/saxon/jetonnet/**"
+  include "net/sf/saxon/data/**"
+}
+
+task eej_setupPreprocessForPej(
+  type: Copy,
+  description: "Copy EE sources for preprocessing PE"
+) {
+  from "${projectDir}/src/main/java"
+  into "${buildDir}/filtered/pej"
+  include "com/saxonica/**/*.java"
+  exclude "com/saxonica/functions/extfn/cpp/*.java"
+  exclude "com/saxonica/testdriver/**"
+  exclude "com/saxonica/testdriver/ee/**/*.java"
+  exclude "com/saxonica/testdriver/old/**/*.java"
+  exclude "com/saxonica/ee/**"
+  exclude "com/saxonica/config/EnterpriseConfiguration.java"
+  exclude "com/saxonica/expr/CastToUnion.java"
+  exclude "com/saxonica/expr/CastableToUnion.java"
+  exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+  exclude "com/saxonica/config/ee/**"
+  exclude "com/saxonica/js/**"
+  exclude "com/saxonica/config/DotNetExtensionLibrary.java"
+  exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
+  exclude "com/saxonica/config/DotNetPlatformPE.java"
+  exclude "com/saxonica/config/JavaPlatformEE.java"
+  exclude "com/saxonica/config/NativePlatformPE.java"
+  exclude "com/saxonica/Validate.java"
+  exclude "com/saxonica/config/EnterpriseTransformerFactory.java"
+  exclude "com/saxonica/config/StreamingTransformerFactory.java"
+  exclude "com/saxonica/config/EnterpriseXPathFactory.java"
+  exclude "com/saxonica/config/DynamicLoaderEE.java"
+  exclude "com/saxonica/config/StandardSchemaResolver.java"
+  exclude "com/saxonica/jaxp/SchemaFactoryImpl11.java"
+  exclude "com/saxonica/functions/extfn/NativeCall.java"
+}
+
+task pej_setupPreprocess(
+  dependsOn: ["hej_setupPreprocessForPej", "eej_setupPreprocessForPej"],
+  description: "Copy sources for preprocessing PE"
+) {
+  // Just a container to hang dependencies on
+}
+
+task hej_setupPreprocessForEej(
+  type: Copy,
+  description: "Copy HE sources for EE build"
+) {
+  from "${projectDir}/src/main/java"
+  into "${buildDir}/filtered/eej"
+  include "net/sf/saxon/**/*.java"
+  include "javax/xml/xquery/*.java"
+  exclude "**/dotnet/**"
+  include "net/sf/saxon/**/package.html"
+  exclude "net/sf/saxon/testdriver/**"
+  exclude "net/sf/saxon/option/cpp/**"
+  exclude "net/sf/saxon/jetonnet/**"
+  exclude "net/sf/saxon/jetonnet/**"
+  include "net/sf/saxon/data/**"
+}
+
+// Rename org.objectweb to com.saxonica.objectweb in the bytecode sources
+task eej_setupPreprocessBytecode(
+  type: Copy,
+  description: "Copy bytecode sources and fix imports"
+) {
+  from "${projectDir}/src/main/java"
+  into "${buildDir}/filtered/eej"
+  include "com/saxonica/ee/bytecode/**/*.java"
+  filter { line ->
+    line.contains("org.objectweb")
+      ? line.replaceAll("org.objectweb", "com.saxonica.objectweb")
+      : line
+  }
+}
+
+// N.B. bytecode is explicitly excluded, see eej_setupPreprocessBytecode
+task eej_setupPreprocess(
+  type: Copy,
+  dependsOn: ["hej_setupPreprocessForEej", "eej_setupPreprocessBytecode"],
+  description: "Copy sources for preprocessing EE"
+) {
+  from "${projectDir}/src/main/java"
+  into "${buildDir}/filtered/eej"
+  include "com/saxonica/**/*.java"
+  exclude "com/saxonica/ee/bytecode/**/*.java"
+  exclude "com/saxonica/functions/extfn/cpp/*.java"
+  exclude "com/saxonica/testdriver/**/*.java"
+  exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
+  exclude "com/saxonica/config/DotNetExtensionLibrary.java"
+  exclude "com/saxonica/config/DotNetPlatformPE.java"
+  exclude "com/saxonica/config/NativePlatformPE.java"
+  exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+  exclude "com/saxonica/functions/extfn/NativeCall.java"
+  include "com/saxonica/**/package.html"
+  exclude "com/saxonica/js/**"
+}
+
+// ============================================================
+
+task hej_preprocess(
+  type: JavaExec,
+  dependsOn: ["hej_setupPreprocess"],
+  description: "Preprocess HE sources"
+) {
+  inputs.files fileTree(dir: "${buildDir}/filtered/hej")
+  outputs.files fileTree(dir: "${buildDir}/preprocess/hej")
+  classpath = configurations.preprocessor
+  main = "com.igormaznitsa.jcp.JcpPreprocessor"
+  args "/c",
+    "/i:${buildDir}/filtered/hej", "/o:${buildDir}/preprocess/hej",
+    "/p:EE=false", "/p:PE=false", "/p:DOTNET=false",
+    "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false"
+  doFirst {
+    mkdir "${buildDir}/preprocess/hej"
+  }
+}
+
+task pej_preprocess(
+  type: JavaExec,
+  dependsOn: ["pej_setupPreprocess"],
+  description: "Preprocess HE sources"
+) {
+  inputs.files fileTree(dir: "${buildDir}/filtered/pej")
+  outputs.files fileTree(dir: "${buildDir}/preprocess/pej")
+  classpath = configurations.preprocessor
+  main = "com.igormaznitsa.jcp.JcpPreprocessor"
+  args "/c",
+    "/i:${buildDir}/filtered/pej", "/o:${buildDir}/preprocess/pej",
+    "/p:EE=false", "/p:PE=true", "/p:DOTNET=false", "/p:HOF=true",
+    "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false"
+  doFirst {
+    mkdir "${buildDir}/preprocess/pej"
+  }
+}
+
+task eej_preprocess(
+  type: JavaExec,
+  dependsOn: ["eej_setupPreprocess", "asm_jarjar"],
+  description: "Preprocess EE sources"
+) {
+  inputs.files fileTree(dir: "${buildDir}/filtered/eej")
+  outputs.files fileTree(dir: "${buildDir}/preprocess/eej")
+  classpath = configurations.preprocessor
+  main = "com.igormaznitsa.jcp.JcpPreprocessor"
+  args "/c",
+    "/i:${buildDir}/filtered/eej", "/o:${buildDir}/preprocess/eej",
+    "/p:EE=true", "/p:PE=false", "/p:DOTNET=false", "/p:HOF=true",
+    "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=true",
+    "/p:STREAM=true", "/p:PACKAGES=true", "/p:SCHEMA=true"
+  doFirst {
+    mkdir "${buildDir}/preprocess/eej"
+  }
+}
+
+// ============================================================
+
+task hej_sources(
+  type: Copy,
+  dependsOn: ["hej_preprocess"],
+  description: "Collect the preprocessed HE sources for compilation"
+) {
+  from "${buildDir}/preprocess/hej"
+  into "${buildDir}/src/hej"
+  filter { line ->
+    line.contains("import com.saxonica") ? null : line.replaceFirst("\\s++\$", "")
+  }
+}
+
+task pej_sources(
+  type: Copy,
+  dependsOn: ["pej_preprocess"],
+  description: "Collect the preprocessed PE sources for compilation"
+) {
+  from "${buildDir}/preprocess/pej"
+  into "${buildDir}/src/pej"
+  filter { line ->
+    if (line.contains("import com.saxonica.ee")
+        || line.contains("import com.saxonica.config.ee")) {
+      null
+    } else {
+      line.replaceFirst("\\s++\$", "")
+    }
+  }
+}
+
+task eej_sources(
+  type: Copy,
+  dependsOn: ["eej_preprocess"],
+  description: "Collect the preprocessed EE sources for compilation"
+) {
+  from "${buildDir}/preprocess/eej"
+  into "${buildDir}/src/eej"
+}
+
+// ============================================================
+
+task hejCompile(
+  type: JavaCompile,
+  dependsOn: ["hej_sources"],
+  description: "Compile HE for Saxon/Java"
+) {
+  classpath = configurations.compileClasspath
+  source "${buildDir}/src/hej"
+  destinationDirectory = new File("${buildDir}/classes/hej")
+}
+compileJava.dependsOn hejCompile
+
+task pejCompile(
+  type: JavaCompile,
+  dependsOn: ["pej_sources"],
+  description: "Compile PE for Saxon/Java"
+) {
+  classpath = configurations.compileClasspath
+  source "${buildDir}/src/pej"
+  destinationDirectory = new File("${buildDir}/classes/pej")
+}
+compileJava.dependsOn pejCompile
+
+task eejCompile(
+  type: JavaCompile,
+  dependsOn: ["eej_sources"],
+  description: "Compile EE for Saxon/Java"
+) {
+  classpath = configurations.compileClasspath + configurations.jarjarAsm
+  source "${buildDir}/src/eej"
+  destinationDirectory = new File("${buildDir}/classes/eej")
+}
+compileJava.dependsOn eejCompile
+
+// ============================================================
+
+task hej_copyTestDriverSources(
+  type: Copy,
+  description: "Copy test drivers sources for HE"
+) {
+  from "src/main/java"
+  into "${buildDir}/src/testdrivers/hej"
+  include "net/sf/saxon/testdriver/*.java"
+}
+
+task pej_copyTestDriverSources(
+  type: Copy,
+  description: "Copy test drivers sources for PE"
+) {
+  from "src/main/java"
+  into "${buildDir}/src/testdrivers/pej"
+  include "net/sf/saxon/testdriver/*.java"
+  include "com/saxonica/testdriver/ee/*.java"
+  include "com/saxonica/testdriver/gui/**"
+  include "com/saxonica/testdriver/QT3TestDriverPE.java"
+  include "com/saxonica/testdriver/XMarkBenchmark.java"
+  include "com/saxonica/testdriver/Xslt30TestSuiteDriverEE.java"
+  include "com/saxonica/testdriver/Xslt30TestSuiteDriverPE.java"
+  include "com/saxonica/testdriver/ee/SchemaTestSuiteDriver.java"
+  include "com/saxonica/testdriver/Licensor.java"
+}
+
+task eej_copyTestDriverSources(
+  type: Copy,
+  description: "Copy test drivers sources for EE"
+) {
+  from "src/main/java"
+  into "${buildDir}/src/testdrivers/eej"
+  include "com/saxonica/testdriver/ee/*.java"
+  include "com/saxonica/testdriver/gui/**"
+  include "com/saxonica/testdriver/QT3TestDriverPE.java"
+  include "com/saxonica/testdriver/XMarkBenchmark.java"
+  include "com/saxonica/testdriver/Xslt30TestSuiteDriverEE.java"
+  include "com/saxonica/testdriver/Xslt30TestSuiteDriverPE.java"
+  include "com/saxonica/testdriver/ee/SchemaTestSuiteDriver.java"
+  include "com/saxonica/testdriver/Licensor.java"
+  include "net/sf/saxon/testdriver/*.java"
+}
+
+task hej_copyTestDriverResources(
+  type: Copy,
+  description: "Copy test drivers resources for HE"
+) {
+  from "src/main/java"
+  into "${buildDir}/classes/hej/testdrivers"
+  include "net/sf/saxon/testdriver/**"
+  exclude "net/sf/saxon/testdriver/**/*.java"
+}
+
+task pej_copyTestDriverResources(
+  type: Copy,
+  description: "Copy test drivers resources for PE"
+) {
+  from "src/main/java"
+  into "${buildDir}/classes/pej/testdrivers"
+  include "net/sf/saxon/testdriver/**"
+  include "com/saxonica/testdriver/**"
+  exclude "net/sf/saxon/testdriver/**/*.java"
+  exclude "com/saxonica/testdriver/**/*.java"
+  exclude "com/saxonica/testdriver/old/**"
+  exclude "com/saxonica/testdriver/gui/cache.xml"
+}
+
+task eej_copyTestDriverResources(
+  type: Copy,
+  description: "Copy test drivers resources for EE"
+) {
+  from "src/main/java"
+  into "${buildDir}/classes/eej/testdrivers"
+  include "net/sf/saxon/testdriver/**"
+  include "com/saxonica/testdriver/**"
+  exclude "net/sf/saxon/testdriver/**/*.java"
+  exclude "com/saxonica/testdriver/**/*.java"
+  exclude "com/saxonica/testdriver/old/**"
+  exclude "com/saxonica/testdriver/gui/cache.xml"
+}
+
+// ============================================================
+// These tasks all relate to renaming (re-jarring) the ASM jar files
+// for EE so that the class names begin com.saxonica. This avoids a
+// problem where a different version of the ASM libraries is used in
+// the application that is using Saxon.
+
+task asm_createRules(
+  description: "Create the jarjar rules file for the ASM libraries"
+) {
+  outputs.file("${buildDir}/jarjar-asm.rules")
+  doLast {
+    new File("${buildDir}/jarjar-asm.rules")
+      .withWriter("utf-8") { writer ->
+        writer.writeLine("rule org.objectweb.** com.saxonica.objectweb.@1")
+      }
+  }
+  doFirst {
+    mkdir "${buildDir}"
+  }
+}
+
+task asm_jarjar(
+  description: "Placeholder for the ASM jarjar dependencies"
+) {
+  // just a task to hang dependencies on
+}
+
+task asm_unzip(
+  type: Copy,
+  description: "Extract classes from the asm-xml-${asmVersion} jar"
+) {
+  // This one is from the original ASM
+  def zipFile = file("lib/asm-${asmVersion}/asm-xml-${asmVersion}.jar")
+  def outputDir = "${buildDir}/classes/eej"
+  from zipTree(zipFile)
+  into outputDir
+}
+
+["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"].each { asm ->
+  Task t = task "asm_${asm}"(
+    type: JavaExec,
+    dependsOn: ["asm_createRules"],
+    description: "Run jarjar on ${asm}-${asmVersion} classes"
+) {
+    inputs.file "lib/asm-${asmVersion}/${asm}-${asmVersion}.jar"
+    outputs.file "${buildDir}/lib/asm/${asm}-${asmVersion}.jar"
+    classpath = configurations.preprocessor
+    main = "com.tonicsystems.jarjar.Main"
+    args "--rules", "${buildDir}/jarjar-asm.rules",
+      "lib/asm-${asmVersion}/${asm}-${asmVersion}.jar",
+      "${buildDir}/lib/asm/${asm}-${asmVersion}.jar"
+    doFirst {
+      mkdir "${buildDir}/lib/asm"
+    }
+  }
+  asm_jarjar.dependsOn t
+
+  t = task "asm_unzip${asm}"(
+    type: Copy,
+    dependsOn: ["asm_jarjar"],
+    description: "Extract the classes from the ${asm}-{$asmVersion} jar"
+  ) {
+    def zipFile = file("${buildDir}/lib/asm/${asm}-${asmVersion}.jar")
+    def outputDir = "${buildDir}/classes/eej"
+    from zipTree(zipFile)
+    into outputDir
+  }
+  asm_unzip.dependsOn t
+}
+
+// ============================================================
+
+task hej_MetaInf(
+  description: "Create META-INF/services/javax.xml.transform.TransformerFactory for HE"
+) {
+  outputs.file("${buildDir}/services/saxon-he/META-INF/services/javax.xml.transform.TransformerFactory")
+  doFirst {
+    mkdir "${buildDir}/services/saxon-he/META-INF/services"
+  }
+  doLast {
+    new File("${buildDir}/services/saxon-he/META-INF/services/javax.xml.transform.TransformerFactory")
+      .withWriter("utf-8") { writer ->
+        writer.writeLine("net.sf.saxon.TransformerFactoryImpl")
+      }
+  }
+}
+
+task pej_MetaInf(
+  description: "Create META-INF/services/javax.xml.transform.TransformerFactory for PE"
+) {
+  outputs.file("${buildDir}/services/saxon-pe/META-INF/services/javax.xml.transform.TransformerFactory")
+  doFirst {
+    mkdir "${buildDir}/services/saxon-pe/META-INF/services"
+  }
+  doLast {
+    new File("${buildDir}/services/saxon-pe/META-INF/services/javax.xml.transform.TransformerFactory")
+      .withWriter("utf-8") { writer ->
+        writer.writeLine("com.saxonica.config.ProfessionalTransformerFactory")
+      }
+  }
+}
+
+task eej_schemaFactoryMetaInf(
+  description: "Create META-INF/services/javax.xml.validation.SchemaFactory for EE"
+) {
+  outputs.file("${buildDir}/services/saxon-ee/META-INF/services/javax.xml.validation.SchemaFactory")
+  doFirst {
+    mkdir "${buildDir}/services/saxon-ee/META-INF/services"
+  }
+  doLast {
+    new File("${buildDir}/services/saxon-ee/META-INF/services/javax.xml.validation.SchemaFactory")
+      .withWriter("utf-8") { writer ->
+        writer.writeLine("com.saxonica.ee.jaxp.SchemaFactoryImpl")
+      }
+  }
+}
+
+task eej_MetaInf(
+  dependsOn: ["eej_schemaFactoryMetaInf"],
+  description: "Create META-INF/services/javax.xml.transform.TransformerFactory for EE"
+) {
+  outputs.file("${buildDir}/services/saxon-ee/META-INF/services/javax.xml.transform.TransformerFactory")
+  doFirst {
+    mkdir "${buildDir}/services/saxon-ee/META-INF/services"
+  }
+  doLast {
+    new File("${buildDir}/services/saxon-ee/META-INF/services/javax.xml.transform.TransformerFactory")
+      .withWriter("utf-8") { writer ->
+        writer.writeLine("com.saxonica.config.EnterpriseTransformerFactory")
+      }
+  }
+}
+
+// ============================================================
+
+task hejJar(
+  type: Jar,
+  dependsOn: ["hej_MetaInf", "hejCompile"],
+  description: "Build the HE jar file"
+) {
+  archiveBaseName = "saxon-he-${saxonVersion}"
+  manifest {
+    attributes "Project-Name": "Saxon-HE"
+    attributes "Main-Class": "net.sf.saxon.Transform"
+  }
+  from ("build/services/saxon-he") {
+    include "META-INF/**"
+  }
+  from ("build/classes/hej") {
+    include "net/**/*.class"
+    exclude "net/sf/saxon/option/**"
+  }
+  from ("src/main/java") {
+    include "net/sf/saxon/data/**"
+  }
+}
+
+// Because the XQJ files are not open source, don't attempt to build
+// the jar unless the EE sources are available.
+if (file("${projectDir}/src/main/java/com/saxonica/xqj").exists()) {
+  task hejJarXqj(
+    type: Jar,
+    dependsOn: ["eejCompile"],
+    description: "Build the XQJ jar file for HE"
+  ) {
+    archiveBaseName = "saxon-he-xqj-${saxonVersion}"
+    from ("build/classes/eej") {
+      include "com/saxonica/xqj/**/*.class"
+      include "javax/xml/xquery/**/*.class"
+    }
+  }
+} else {
+  task hejJarXqj(
+    description: "Ignore the XQJ file; the sources are unavailable"
+  ) {
+    doLast {
+      println("Ignoring XQJ jar file task; the sources are unavailable")
+    }
+  }
+}
+
+task pejJar(
+  type: Jar,
+  dependsOn: ["pej_MetaInf", "pejCompile"],
+  description: "Build the PE jar file"
+) {
+  archiveBaseName = "saxon-pe-${saxonVersion}"
+  manifest {
+    attributes "Project-Name": "Saxon-PE"
+    attributes "Main-Class": "net.sf.saxon.Transform"
+  }
+  from ("build/services/saxon-pe") {
+    include "META-INF/**"
+  }
+  from ("build/classes/pej") {
+    include "net/**/*.class"
+    include "com/saxonica/**/*.class"
+    include "javax/xml/xquery/*.class"
+    exclude "**/sql/**/*.class"
+    exclude "com/saxonica/CompileStylesheet.class"
+    exclude "com/saxonica/CompileStylesheet\$TracingObjectOutputStream.class"
+    exclude "com/saxonica/Validate.class"
+    exclude "com/saxonica/config/EnterpriseConfiguration.class"
+    exclude "com/saxonica/config/EnterpriseConfiguration\$SurrogateSchema.class"
+    exclude "com/saxonica/config/EnterpriseTransformerFactory.class"
+    exclude "com/saxonica/config/EnterpriseXPathFactory.class"
+    exclude "com/saxonica/config/StreamingTransformerFactory.class"
+    exclude "com/saxonica/ee/**/*.class"
+    exclude "com/saxonica/expr/CastToList.class"
+    exclude "com/saxonica/expr/CastToUnion.class"
+    exclude "com/saxonica/expr/CastableToList.class"
+    exclude "com/saxonica/expr/CastableToUnion.class"
+    exclude "com/saxonica/functions/sql/**"
+    exclude "net/sf/saxon/option/sql/**"
+  }
+  from ("src/main/java") {
+    include "net/sf/saxon/data/**"
+  }
+}
+
+task pejJarSql(
+  type: Jar,
+  dependsOn: ["pejCompile"],
+  description: "Build the SQL jar file for PE"
+) {
+  archiveBaseName = "saxon-pe-sql-${saxonVersion}"
+  from ("build/classes/pej") {
+    include "net/sf/saxon/option/sql/*.class"
+    include "com/saxonica/functions/sql/*.class"
+  }
+}
+
+task eejJar(
+  type: Jar,
+  dependsOn: ["eej_MetaInf", "eejCompile", "asm_unzip"],
+  description: "Build the EE jar file"
+) {
+  archiveBaseName = "saxon-ee-${saxonVersion}"
+  manifest {
+    attributes "Project-Name": "Saxon-EE"
+    attributes "Main-Class": "net.sf.saxon.Transform"
+  }
+  from ("build/services/saxon-ee") {
+    include "META-INF/**"
+  }
+  from ("build/classes/eej") {
+    include "net/**/*.class"
+    include "com/saxonica/**/*.class"
+    include "javax/xml/xquery/*.class"
+    include "org/objectweb/**/*.class"
+    exclude "**/sql/**/*.class"
+    exclude "com/saxonica/StatsTransform*.class"
+    exclude "com/saxonica/functions/sql/**"
+    exclude "net/sf/saxon/option/sql/**"
+  }
+  from ("src/main/java") {
+    include "net/sf/saxon/data/**"
+  }
+}
+
+task eejJarSql(
+  type: Jar,
+  dependsOn: ["eejCompile"],
+  description: "Build the SQL jar file for EE"
+) {
+  archiveBaseName = "saxon-ee-sql-${saxonVersion}"
+  from ("build/classes/eej") {
+    include "net/sf/saxon/option/sql/*.class"
+    include "com/saxonica/functions/sql/*.class"
+  }
+}
+
+// ============================================================
+
+task hej_releaseSetup(
+  type: Copy,
+  dependsOn: ["hejJar", "hejJarXqj", "hejJarTests", "hej_notices"],
+  description: "Build the HE release for Java"
+) {
+  from "${buildDir}/libs"
+  into "${buildDir}/releases/hej"
+  include "saxon-he-${saxonVersion}.jar"
+  include "saxon-he-xqj-${saxonVersion}.jar"
+  include "saxon-he-test-${saxonVersion}.jar"
+  rename { filename ->
+    if (filename.startsWith("saxon-he-xqj")) {
+      filename = "saxon9-xqj.jar"
+    } else if (filename.startsWith("saxon-he-test")) {
+      filename = "saxon9-test.jar"
+    } else {
+      filename = "saxon9he.jar"
+    }
+  }
+}
+
+task hejRelease(
+  type: Zip,
+  dependsOn: ["hej_releaseSetup"],
+  description: "Make the HE release ZIP file for Java"
+) {
+  from("${buildDir}/releases/hej")
+  archiveFileName = "SaxonHE${version_h}J.zip"
+}
+
+task pejRelease(
+  type: Copy,
+  dependsOn: ["pejJar", "pejJarSql", "pejJarTests", "pej_libs", "pej_notices"],
+  description: "Build the PE release for Java"
+) {
+  from "${buildDir}/libs"
+  into "${buildDir}/releases/pej"
+  include "saxon-pe-${saxonVersion}.jar"
+  include "saxon-pe-sql-${saxonVersion}.jar"
+  include "saxon-pe-test-${saxonVersion}.jar"
+  rename { filename ->
+    if (filename.startsWith("saxon-pe-sql")) {
+      filename.replace("saxon-pe-sql", "saxon-sql")
+    } else {
+      filename
+    }
+  }
+}
+
+task eejRelease(
+  type: Copy,
+  dependsOn: ["eejJar", "eejJarSql", "eejJarTests", "eej_libs", "eej_notices"],
+  description: "Build the EE release for Java"
+) {
+  from "${buildDir}/libs"
+  into "${buildDir}/releases/eej"
+  include "saxon-ee-${saxonVersion}.jar"
+  include "saxon-ee-sql-${saxonVersion}.jar"
+  include "saxon-ee-test-${saxonVersion}.jar"
+  rename { filename ->
+    if (filename.startsWith("saxon-ee-sql")) {
+      filename.replace("saxon-ee-sql", "saxon-sql")
+    } else {
+      filename
+    }
+  }
+}
+
+task javaReleases(
+  dependsOn: ["hejRelease", "pejRelease", "eejRelease"],
+  description: "Build all of the Java releases"
+) {
+  // Just a container to hang dependencies on
+}
+
+// ============================================================
+
+task dockerCoreContainer(
+  type: Exec,
+  description: "Build the CentOS 8 core container"
+) {
+  inputs.files("${projectDir}/src/docker/centos8-core")
+  commandLine "docker", "build",
+    "-t", "${dockerCentos8Core}",
+    "${projectDir}/src/docker/centos8-core"
+}
+
+// In order to build this container, you must specify the location
+// of the JDK and the Jet software archive. Use
+// -PdockerJdk= to specify the location of the JDK RPM. Use
+// -PdockerJet= to specify the location of the Jet archive.
+task dockerBuilderContainer(
+  type: Exec,
+  dependsOn: ["docker_setupBuilder", "dockerCoreContainer"],
+  description: "Build the Saxonica builder container"
+) {
+  inputs.files("${buildDir}/docker/builder")
+  commandLine "docker", "build",
+    "-t", "${dockerBuildContainer}",
+    "${buildDir}/docker/builder"
+}
+
+task docker_setupBuilder(
+  type: Copy,
+  dependsOn: ["docker_setupJdk", "docker_setupJet"],
+  description: "Setup to build the builder container"
+) {
+  from "src/docker/builder"
+  into "build/docker/builder"
+}
+
+task docker_testJdk(
+  description: "Test that the dockerJdk property has been specified"
+) {
+  doLast {
+    if (dockerJdk == "none") {
+      throw new GradleException("You must specify the JDK with -PdockerJdk=...")
+    }
+  }
+}
+
+task docker_setupJdk(
+  type: Copy,
+  dependsOn: ["docker_testJdk"],
+  description: "Setup the JDK for the builder container"
+) {
+  from dockerJdk
+  into "build/docker/builder"
+}
+
+task docker_testJet(
+  description: "Test that the dockerJet property has been specified"
+) {
+  doLast {
+    if (dockerJet == "none") {
+      throw new GradleException("You must specify Jet archive with -PdockerJet=...")
+    }
+  }
+}
+
+task docker_setupJet(
+  type: Copy,
+  dependsOn: ["docker_testJet"],
+  description: "Setup the Jet archive for the builder container"
+) {
+  from dockerJet
+  into "build/docker/builder"
+}
+
+// ============================================================
+
+// Testing task for various Gradle debugging efforts
+task helloWorld() {
+  doLast {
+    println("Hello, world.")
+  }
+}
+

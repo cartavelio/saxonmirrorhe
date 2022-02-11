@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<implement> <!--  doc:doc="Implementation status notes, keyed by attributes." -->
+    <default id='fn' saxon="ALL"/>
+    <default id='map' saxon="ALL_SINCE_9.7"/>
+    <default id='array' saxon="ALL"/>
+    <default id='math' saxon="ALL_SINCE_9.6"/>
+    <default id='saxon' saxon="PE/EE"/>
+    
+    <default id='exslt-common' saxon="ALL"/>
+    <default id='exslt-math' saxon="PE/EE"/>
+    <default id='exslt-random' saxon="PE/EE"/>
+    <default id='exslt-sets' saxon="PE/EE"/>
+    <default id='exslt-dates-and-times' saxon="PE/EE"/>
+    
+    <default id='expath-archive' saxon="9.6 PE/EE" xpath="2.0"/> 
+    <default id='expath-binary' saxon="9.6 PE/EE" xpath="2.0"/>
+    <default id='expath-file' saxon="9.5 PE/EE" xpath="2.0"/>    
+    
+    <default id='xsl-elements' saxon="PE/EE"/> 
+    <default id='instructions' saxon="PE/EE"/> <!-- saxon extension instructions -->
+    <default id='sql-extension' saxon="PE/EE"/> <!-- saxon SQL extension instructions -->
+    
+    <xpath version="2.0"> Available whether or not support for XPath 3.0 is enabled.</xpath> <!-- Expath functions message -->
+    <xpath version="3.0"> Requires support for XPath 3.0 to be enabled.</xpath> <!-- Expath functions message -->
+    <xpath version="default"> Not implemented thus far in XPath.</xpath> <!-- Expath functions message -->
+    
+    <spec value="xpath31"> Available in XPath 3.1, XSLT 3.0, and XQuery 3.1.</spec>
+    <spec value="xpath30"> Available in XPath 3.0, XSLT 3.0, XQuery 3.0, and later versions.</spec>
+    <spec value="xpath20"> Available in XPath 2.0, XSLT 2.0, XQuery 1.0, and later versions.</spec>
+    <spec value="xslt30"> Available in XSLT 3.0.</spec>
+    <spec value="xslt20"> Available in XSLT 2.0 and later versions.</spec>  
+    <spec value="xslt10"> Available in XSLT 1.0 and later versions.</spec> 
+    <spec value="xquery-update10"> Available in XQuery Update 1.0.</spec>
+           
+    <saxon version="NOT_IMPLEMENTED"> Not implemented in Saxon.</saxon>    
+    <saxon version="ALL_SINCE_9.8"> From Saxon 9.8, available in all editions.</saxon>
+    <saxon version="ALL_SINCE_9.7"> From Saxon 9.7, available in all editions.</saxon>
+    <saxon version="ALL_SINCE_9.6"> From Saxon 9.6, available in all editions.</saxon>
+    
+    <saxon version="ALL_9.8_RESTRICTIONS_HE"> From Saxon 9.8, available in all editions, but restricted use in Saxon-HE.</saxon>
+    <saxon version="RESTRICTIONS_9.6"> Implemented with restrictions in Saxon 9.6.</saxon>
+    <saxon version="PARTIAL_9.7"> Partial experimental implementation in Saxon 9.7.</saxon>
+    <saxon version="PARTIAL_9.6"> Partial experimental implementation in Saxon 9.6.</saxon>
+    <saxon version="9.5.1.1.experimental"> Running experimentally on 9.5.1.1.</saxon>
+    
+    <saxon version="EE_9.7"> Implemented in Saxon-EE since Saxon 9.7.</saxon>
+    <saxon version="EE_9.6"> Implemented in Saxon-EE since Saxon 9.6.</saxon>
+    <saxon version="EE_9.5"> Implemented in Saxon-EE since Saxon 9.5.</saxon>
+    <saxon version="PE/EE_9.7"> Implemented in Saxon-PE and Saxon-EE since Saxon 9.7.</saxon>
+    <saxon version="PE/EE_9.6"> Implemented in Saxon-PE and Saxon-EE since Saxon 9.6.</saxon>
+    <saxon version="PE/EE_9.5"> Implemented in Saxon-PE and Saxon-EE since Saxon 9.5.</saxon>
+    <saxon version="PE/EE_9.4"> Implemented in Saxon-PE and Saxon-EE since Saxon 9.4.</saxon>
+    
+    <saxon version="J"> Not available on the .NET platform.</saxon>
+    
+    <saxon version="9.9"> Implemented since Saxon 9.9.</saxon>
+    <saxon version="9.8"> Implemented since Saxon 9.8.</saxon>
+    <saxon version="9.7"> Implemented since Saxon 9.7.</saxon>
+    <saxon version="9.6"> Implemented since Saxon 9.6.</saxon>
+    <saxon version="9.5"> Implemented since Saxon 9.5.</saxon>
+    <saxon version="ALL"> Available in all Saxon editions.</saxon>
+    <saxon version="PE"> Requires Saxon-PE or Saxon-EE.</saxon>
+    <saxon version="PE/EE"> Requires Saxon-PE or Saxon-EE.</saxon>
+    <saxon version="EE"> Requires Saxon-EE.</saxon>
+    <saxon version="DEFAULT"> Available in all Saxon editions.</saxon>
+    
+</implement>

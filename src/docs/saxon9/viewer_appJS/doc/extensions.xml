@@ -1,0 +1,3353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article id="extensions" title="Saxon Extensions">
+   <h1>Saxon Extensions</h1>
+   <p>This section describes the extensions and <dfn>implementation-defined features</dfn> provided
+    with the Saxon product.</p>
+   <p>If you want to implement your own extensions, see <a class="bodylink" href="/extensibility">Extensibility</a>.</p>
+   <aside>Most of the extensions described in this section require Saxon-PE (Professional Edition) or
+    higher. A few work with Saxon-HE (Home Edition), and some require Saxon-EE (Enterprise Edition).
+    Check the details for each extension.</aside>
+   <p>The extensions described here were provided because there are things that are difficult to
+    achieve, or inefficient, using standard XSLT/XQuery facilities alone. In some cases they are
+    retained from earlier releases even though equivalent functionality is available using the
+    standard language. As always, it is best to stick to the standard if you possibly can: and most
+    things <i>are</i> possible, even if it's not obvious at first sight.</p>
+   <p>All Saxon extensions require a namespace declaration
+      <code>xmlns:saxon="http://saxon.sf.net/"</code> to appear. In XSLT this is typically declared
+    on the <code>xsl:stylesheet</code> element; it is also useful to write
+      <code>exclude-result-prefixes="saxon"</code> to prevent the Saxon namespace appearing in the
+    result tree. In XQuery the namespace is declared by writing <code>declare namespace
+      saxon="http://saxon.sf.net/";</code> in the Query prolog.</p>
+   <p>If you use XSLT extension instructions such as <code>saxon:doctype</code>, it is also necessary
+    to include the attribute <code>extension-element-prefixes="saxon"</code>. This does not apply,
+    however, if you are only using extension functions.</p>
+   <aside>XSLT uses the term "extension functions", XQuery calls them "external functions". They are
+    the same thing.</aside>
+   <p>For details of additional extensions available in Query only, see <a class="bodylink" href="/using-xquery/extensions">Query Extensions</a>.</p>
+   <p>For details of extensions to XML Schema 1.1 used for schema processing, see <a class="bodylink" href="/schema-processing/extensions11">XML Schema 1.1 Extensions</a>.</p>
+   <p>Saxon also provides a set of extension elements providing access to SQL databases, see <a class="bodylink" href="/sql-extension">Saxon SQL Extension</a>.</p>
+   <p>Further information:</p>
+   <nav>
+      <ul/>
+   </nav>
+   <section id="functions" title="Extension functions">
+      <h1>Extension functions</h1>
+      <p>
+         <i>This section describes extension functions built in to the Saxon product. For information
+        on writing your own extension functions, see <a class="bodylink" href="/extensibility/functions">Writing extension functions (Java)</a> or <a class="bodylink" href="/extensibility/dotnetextensions">Writing extension functions
+          (.NET)</a>.</i>
+      </p>
+      <p>Full details of all extension functions, along with functions in the core library, are found
+      in the <a class="bodylink" href="/functions">Function Library</a>.</p>
+      <aside>As a general policy, Saxon's extension functions require Saxon-PE or Saxon-EE. The vast
+      majority are available in Saxon-PE; a few that are related to schema-aware processing or
+      streaming require Saxon-EE. In some cases the source code of these extensions is open source
+      code and can be compiled for use with the open-source Saxon-HE.</aside>
+      <p>The extension functions in Saxon fall into three groups, described in the following
+      subsections:</p>
+      <ul>
+         <li>
+            <p>
+               <a class="bodylink" href="saxon-extension-functions">Saxon extension functions</a>
+          defined by Saxonica and provided in the Saxon namespace
+          <code>http://saxon.sf.net/</code>
+            </p>
+         </li>
+         <li>
+            <p>
+               <a class="bodylink" href="exslt">EXSLT extensions</a> defined by the EXSLT initiative,
+          using namespaces in the <code>http://exslt.org/...</code> family</p>
+         </li>
+         <li>
+            <p>
+               <a class="bodylink" href="expath">EXPath extensions</a> defined by the EXPath initiative,
+          using namespaces in the <code>http://expath.org/...</code> family</p>
+         </li>
+      </ul>
+      <section id="saxon-extension-functions" title="Saxon extension functions">
+         <h1>Saxon extension functions</h1>
+         <p>These functions are listed and fully described, along with functions in the core library,
+        in the <a class="bodylink" href="/functions">Function Library</a>.</p>
+         <aside>These extension functions are available in Saxon-PE and Saxon-EE except where otherwise
+        stated. They are not available in Saxon-HE.</aside>
+         <p>The names of these functions are in the Saxon namespace <code>http://saxon.sf.net/</code>,
+        conventionally prefixed <code>saxon</code>.</p>
+         <p>You can use these functions simply by reference; you do not need to declare them or import
+        them in any way. (Saxon makes no use of the <code>declare function ... external;</code>
+        declaration in XQuery.)</p>
+         <p>For example, to invoke the <code>saxon:evaluate()</code> function in XSLT, write:</p>
+         <samp>&lt;xsl:variable name="expression"
+      select="concat('child::', $param, '[', $index, ']')"/&gt;
+..
+&lt;xsl:copy-of select="saxon:evaluate($expression)"
+     xmlns:saxon="http://saxon.sf.net/"/&gt;
+</samp>
+         <p>The equivalent in XQuery is:</p>
+         <samp>declare namespace saxon="http://saxon.sf.net/";
+declare variable $param as xs:string external;
+declare variable $index as xs:integer external;
+declare variable $expression :=
+      concat('child::', $param, '[', $index, ']');
+saxon:evaluate($expression)
+</samp>
+         <aside>Saxon extension functions are not as stable as functions in the core library. Many of
+        them are retained over a long sequence of releases, but on occasions they are superseded by
+        functions appearing in a standardized or portable library, and when this happens the Saxon
+        version will eventually be dropped. There is a long tradition of functions that were first
+        pioneered in Saxon eventually finding their way (typically in modified form) into a public
+        standard.</aside>
+      </section>
+      <section id="exslt" title="EXSLT extensions">
+         <h1>EXSLT extensions</h1>
+         <p>
+            <a href="http://www.exslt.org/" class="bodylink">EXSLT</a> was an initiative to define a
+        standardized set of extension functions and extension elements that can be used across
+        different XSLT processors. Most of its activity was in the era of XSLT 1.0, and many of the
+        functions that were defined are no longer needed in an XSLT 2.0 environment because there
+        are suitable facilities in the standard. Nevertheless, Saxon implements some of these
+        functions for compatibility reasons.</p>
+         <p>Details of the functions supported (with some additional information about the Saxon
+        implementation) can be found in the main <a class="bodylink" href="/functions">Function
+          Library</a>.</p>
+         <aside> These extensions are available in Saxon-PE and Saxon-EE "out of the box". Except for
+        the Common module functions, they are not available in Saxon-HE. The source code is
+        available in the Subversion repository on the
+        <a href="http://dev.saxonica.com/" class="bodylink">dev.saxonica.com</a> site, package
+          <code>net.sf.saxon.option.exslt</code>. The code is available under the Mozilla Public
+        License version 2.0. </aside>
+         <p>Saxon supports the <dfn>EXSLT</dfn> modules Common, Math, Sets, Dates and Times, and
+        Random. These functions are available both in XSLT and in XQuery. The full list of EXSLT
+        extension functions implemented is:</p>
+         <ul>
+            <li>
+               <p>
+                  <strong>common (namespace http://exslt.org/common):</strong> node-set(), object-type().
+            These are retained for compatibility with XSLT 1.0 stylesheets.</p>
+            </li>
+            <li>
+               <p>
+                  <strong>math (namespace http://exslt.org/math):</strong> abs(), acos(), asin(), atan(),
+            atan2(), constant(), cos(), exp(), highest(), log(), lowest(), max(), min(), power(),
+            random(), sin(), sqrt(), tan() </p>
+            </li>
+            <li>
+               <p>
+                  <strong>sets (namespace http://exslt.org/sets):</strong> difference(), intersection(),
+            leading(), trailing(), has-same-node()</p>
+            </li>
+            <li>
+               <p>
+                  <strong>dates-and-times* (namespace http://exslt.org/dates-and-times):</strong> add(),
+            add-duration(), date(), date-time(), day-abbreviation(), day-in-month(), day-in-week(),
+            day-in-year(), day-name(), day-of-week-in-month(), difference(), duration(),
+            hour-in-day(), leap-year(), minute-in-hour(), month-abbreviation(), month-in-year(),
+            month-name(), second-in-minute(), seconds(), sum(), time(), week-in-month(),
+            week-in-year(), year()</p>
+            </li>
+            <li>
+               <p>
+                  <strong>random (namespace http://exslt.org/random):</strong> random-sequence()</p>
+            </li>
+         </ul>
+         <aside>* The specifications of the EXSLT date-and-time handling functions have
+        little to say about timezones. Saxon generally handles inputs with or without a timezone,
+        and uses the XPath 2.0 concept of implicit timezone to interpret the meaning of dates/times
+        without a timezone. The current date and time used by EXSLT functions is the same as that
+        used by the XPath 2.0 <a class="bodylink code" href="/functions/fn/current-dateTime">current-dateTime()</a> function.</aside>
+         <p>EXSLT extensions that overlap XSLT 2.0 functionality have sometimes been retained in cases
+        where they have no impact on the Saxon core code, but in cases (such as
+          <code>func:function</code>) where the semantics are inconveniently different from XSLT
+        2.0, they have been withdrawn.</p>
+      </section>
+      <section id="expath" title="EXPath extensions">
+         <h1>EXPath extensions</h1>
+         <p>
+            <a href="http://www.expath.org/" class="bodylink">EXPath</a> is a more recent initiative to
+        define a standardized set of extension functions and extension elements that can be used
+        across different XSLT and XQuery processors.</p>
+         <p>Saxon supports the EXPath <strong>file</strong> module since release 9.5. Since 9.6 the
+          <strong>binary</strong> and <strong>archive</strong> modules are supported too. Note that
+        the <strong>zip</strong> module was withdrawn at 9.5.1 and is now replaced by
+          <strong>archive</strong> and that some of the functions of <strong>file</strong> 
+        changed between 9.5 and 9.6 as result of specification changes.</p>
+         <p>Details of the functions supported (with some additional information about the Saxon
+        implementation) can be found in the main <a class="bodylink" href="/functions">Function
+          Library</a>.</p>
+         <h3>The EXPath file module</h3>
+         <p>The file module provides a set of functions to examine and manipulate the local file
+        system. For the specification of the file module see <a href="http://expath.org/spec/file" class="bodylink">EXPath File Module</a>. </p>
+         <aside>These extension functions require Saxon-PE or Saxon-EE. Implemented since Saxon
+        9.5.</aside>
+         <p>All functions in the file module are implemented.</p>
+         <p>Note that many of the functions in this module have side-effects, and therefore need to be
+        used with care to ensure that they are called the right number of times, and in the right
+        order. The best way of achieving this is to imagine that a function like
+          <code>file:write()</code> produces an invisible result, and that this invisible result
+        needs to be inserted into the final result of the query or stylesheet. So, for example, if
+          <code>&lt;body&gt;...&lt;/body&gt;</code> is an element being written to the result tree,
+        then the function call <code>&lt;body&gt;{file:write(...)}&lt;/body&gt;</code> will always
+        be evaluated exactly once. By contrast, a call appearing as the initializer of a variable
+        (for example in <code>let $x := file:write(...) return ...</code>) might be evaluated
+        multiple times or not at all, depending on how the variable is actually used.</p>
+         <p>A good way to invoke functions with side-effects is to use the <a class="bodylink code" href="/extensions/instructions/do">saxon:do</a>
+      extension instruction: for example <code>&lt;saxon:do action="file:create-dir('temp')"/&gt;</code>.
+      This is because instructions within a sequence constructor are always evaluated sequentially, in the order written.</p>
+         <aside>Avoid calling functions with side effects in the initializing expression of a variable. It is unpredictable whether and when
+      such expressions are evaluated. They might not be evaluated at all, or they might be evaluated partially, or they
+      might be evaluated in an unexpected order.</aside>
+         <p>Functions in the EXPath file module use file paths that are specified as being relative to the
+        "current working directory". If the Java system property <code>expath.base.directory</code>
+        is present, this is taken as the current working directory. In other cases, Saxon interprets
+        the file name using the rules of the Java method <code>File.getCanonicalFile()</code>.</p>
+         <aside>Note that the UNIX concept of "current working directory" does not translate directly to Microsoft Windows.
+        On Windows, systems, there is in effect a current drive and an active directory in each drive.
+        A simple relative file name like <code>a.xml</code> is interpreted relative to the active directory
+        of the current drive. A file name of the form <code>E:a.xml</code> is interpreted relative to
+        the active directory of the named drive (<code>E:</code>). A file name in the form <code>\p\q\a.xml</code>
+        is interpreted relative to the root directory of the current drive. More specifically, file names
+        are interpreted using the rules of the Java method <code>File.getCanonicalFile()</code>.</aside>
+         <p>On Windows, a file name starting "//" or "\\" is interpreted as a UNC file name. In particular, 
+        the function <code>file:path-to-uri(name)</code> converts <code>//server/p/q/a.xml</code> to
+        <code>file://server/p/q/a.xml</code> - that is, the server part of the UNC name becomes the authority
+        part of the URI.</p>
+         <h3>The EXPath binary module</h3>
+         <p>The binary module defines a library of functions for manipulating binary data and
+        converting between binary data and string and numeric forms. For the specification of the
+        binary module see <a href="http://expath.org/spec/binary" class="bodylink">EXPath Binary
+          Module</a>. The specification has been stabilised at a Version 1.0 status so the functions
+        can be considered stable.</p>
+         <aside>These extension functions require Saxon-PE or Saxon-EE. Implemented since Saxon
+        9.6.</aside>
+         <p>All functions in the binary module are implemented and tested. Note that this module does
+        not provide binary file i/o - functions from the EXPath file module should be used for such
+        operations.</p>
+         <h3>The EXPath archive module</h3>
+         <p>The archive module defines facilities for reading, creating and manipulating content
+        arranged into archive (ZIP, JAR) collections. For the specification of the archive module
+        see <a href="http://expath.org/spec/archive" class="bodylink">EXPath Archive Module</a>. </p>
+         <aside>These extension functions require Saxon-PE or Saxon-EE. Implemented since Saxon
+        9.6.</aside>
+         <p>Most functions in the archive module are implemented and tested. Note that this module does
+        not provide file i/o of archives directly - functions from the EXPath file module should be
+        used for such operations, or are used indirectly by the archive-file system conversion
+        functions.</p>
+         <p>Two groups of the archive module functions exist - one using element structures, the other
+        using maps - for details see <a href="http://expath.org/spec/archive#using.maps" class="bodylink">Using map types to describe entries and options</a>. Note that mechanisms
+        for describing options and properties through elements and attributes are not yet finalised.
+        If you are using XPath 3.0 then we suggest <b>strongly</b> that you use the map-based function
+        forms (which have names ending in <code>-map</code>), as their specification is much more
+        likely to be stable, and the functions are easier to use. </p>
+         <h3>Other EXPath modules</h3>
+         <p>Implementations of other EXPath modules may be available from third parties.</p>
+      </section>
+   </section>
+   <section id="attributes" title="Extension attributes (XSLT only)">
+      <h1>Extension attributes (XSLT only)</h1>
+      <p>An extension attribute is an extra attribute on an XSLT-defined element. These attributes are
+      all in the Saxon namespace <code>http://saxon.sf.net/</code>. This namespace needs to be
+      declared in a namespace declaration, but it does not need to be listed in the
+        <code>extension-element-prefixes</code> attribute.</p>
+      <p>For example, the <code>saxon:assignable</code> attribute can be set as follows:</p>
+      <samp>&lt;xsl:variable name="counter" saxon:assignable="yes" 
+    xmlns:saxon="http://saxon.sf.net/"&gt;
+</samp>
+      <p>Like standard attributes in no namespace, extension attributes in the Saxon namespace
+    can be prefixed with an underscore and used as shadow attributes (evaluated with a static expression).
+    For example, <code>saxon:_explain="{$EXPLAIN}"</code>, where <code>$EXPLAIN</code> is a global
+    variable or parameter declared with <code>static="yes"</code>.</p>
+      <p>The extension attributes provided with the Saxon product are as follows:</p>
+      <nav>
+         <ul/>
+      </nav>
+      <section id="as" title="saxon:as">
+         <h1>saxon:as</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.9.</aside>
+         <p>This attribute may be set on most XSLT elements that have an <code>as</code> attribute 
+        (<a class="bodylink code" href="/xsl-elements/variable">xsl:variable</a>, <a class="bodylink           code" href="/xsl-elements/param">xsl:param</a>, <a class="bodylink code" href="/xsl-elements/with-param">xsl:with-param</a>, <a class="bodylink code" href="/xsl-elements/function">xsl:function</a>,
+        <a class="bodylink code" href="/xsl-elements/template">xsl:template</a>: but not currently
+        <code>xsl:accumulator</code>) to declare an additional
+        more specific type for a value.</p>
+         <p>For example:</p>
+         <samp>&lt;xsl:param name="options" 
+   as="map(xs:string, xs:anyAtomicType*)"
+   saxon:as="tuple(validate: xs:boolean, duplicates: xs:boolean, limit: xs:integer, 
+      codes: xs:string*)"
+   xmlns:saxon="http://saxon.sf.net/"
+   select="map{'validate': true(), 'duplicates': false(), 'limit': 17, 
+      'codes': ('USD', 'GBP', 'EUR')}"/&gt;</samp>
+         <samp>&lt;xsl:variable name="sqlConnection" 
+   saxon:as="javatype:java.sql.Connection"
+   xmlns:saxon="http://saxon.sf.net/"
+   xmlns:javatype="http://saxon.sf.net/java-type"
+   select="..."/&gt;</samp>
+         <samp>&lt;xsl:param name="when"
+   required="yes"
+   as="xs:anyAtomicType"
+   saxon:as="union(xs:date, xs:time, xs:dateTime)"
+   xmlns:saxon="http://saxon.sf.net/"&gt;</samp>
+         <p>If both the <code>as</code> and <code>saxon:as</code> attributes are present, then the type given in the
+      <code>saxon:as</code> attribute must be a subtype of the type given in the <code>as</code> attribute.</p>
+         <p>The <code>saxon:as</code> attribute will be ignored by a conformant XSLT processor that does not recognize
+      the Saxon namespace. The attribute therefore allows type information to be specified for use by Saxon, which
+      will be ignored by other XSLT processors (this applies to XSLT 1.0 and 2.0 processors as well as XSLT 3.0 processors).
+      It therefore allows stylesheets to take advantage of Saxon extensions to the sequence type syntax (notably,
+      tuple types, union types, and type aliases; see <a class="bodylink" href="/extensions/syntax-extensions">Syntax extensions</a>) without sacrificing stylesheet portability.</p>
+      </section>
+      <section id="assignable" title="saxon:assignable">
+         <h1>saxon:assignable</h1>
+         <aside>Requires Saxon-PE or Saxon-EE.</aside>
+         <p>This attribute may be set on a global <a class="bodylink code" href="/xsl-elements/variable">xsl:variable</a> or <a class="bodylink code" href="/xsl-elements/param">xsl:param</a> element. The permitted values are
+          <code>yes</code> and <code>no</code>. If the variable is the subject of a <a class="bodylink code" href="/extensions/instructions/assign">saxon:assign</a> instruction,
+        it must be set to the value <code>yes</code>. Setting this value to <code>yes</code> also
+        ensures that the variable is actually evaluated, which is useful if the <code>select</code>
+        expression calls extension functions with side-effects; without this, a variable that is
+        never referenced may never be evaluated.</p>
+      </section>
+      <section id="asynchronous" title="saxon:asynchronous">
+         <h1>saxon:asynchronous</h1>
+         <aside>Requires Saxon-EE.</aside>
+         <p>This attribute may be set on the <a class="bodylink code" href="/xsl-elements/result-document">xsl:result-document</a> instruction. The default for
+        Saxon-EE is <code>yes</code>, which causes the instruction to be evaluated in a separate
+        thread, if there is a spare thread available (the maximum number of threads used is
+        configurable using <a class="bodylink code" href="/configuration/config-features">Feature.RESULT_DOCUMENT_THREADS</a>).</p>
+         <p>A possible reason for setting the value to <code>no</code> is that the stylesheet calls
+        extension functions with side-effects, where it is important for the calls to be in the
+        right order.</p>
+         <p>Asynchronous processing of <code>xsl:result-document</code> is automatically suppressed if
+        tracing (using a <code>TraceListener</code>) is enabled.</p>
+      </section>
+      <section id="capture" title="saxon:capture">
+         <h1>saxon:capture</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.9.</aside>
+         <p>This attribute may be set on an <a class="bodylink code" href="/xsl-elements/accumulator-rule">xsl:accumulator-rule</a> element. It has no effect
+      unless the accumulator is declared streamable and the rule has <code>phase="end"</code>. It is intended
+        for use when the accumulator rule matches an element node. The value
+      is a boolean with the default "no".</p>
+         <p>The effect of setting this attribute is that the code for computing the new accumulator
+      value when the element end tag is encountered now has access to a snapshot copy of the matched
+      element (as if taken using the <a class="bodylink code" href="/functions/fn/snapshot">fn:snapshot</a> function), and is no longer required to be
+        motionless.</p>
+         <p>This means that if you want access to the typed value or string value of an element, you
+      can now get this directly with a rule that matches the element, rather than having to write
+      rules that match the element's text node children.</p>
+         <p>It also opens up additional possibilities. For example:</p>
+         <ul>
+            <li>If a large document has a short header section containing metadata, you can capture
+        a copy of the header in an accumulator, and the header then becomes available throughout
+        the rest of the document processing using the <a class="bodylink code" href="/functions/fn/accumulator-after">accumulator-after()</a> function.</li>
+            <li>If you want to produce a sorted index of terms that are marked up using <code>glossary</code>
+        elements scattered throughout the document, you can define an accumulator that retains snapshot
+        copies of all the <code>glossary</code> entries (use <code>select="($value, .)"</code> in the
+          accumulator rule). At the end of processing, you can sort and group these glossary entries,
+        and because they are snapshot copies retaining all the attributes of ancestors, you can link
+        them to the <code>id</code> anchors of the containing sections.</li>
+         </ul>
+      </section>
+      <section id="documentation-prefixes" title="saxon:documentation-prefixes">
+         <h1>saxon:documentation-prefixes</h1>
+         <aside>Requires Saxon-PE or Saxon-EE.</aside>
+         <p>The attribute <code>saxon:documentation-prefixes</code> may appear on the outermost element of the top-level
+      module in a package (<code>xsl:package</code>, <code>xsl:stylesheet</code>, or <code>xsl:transform</code>) to indicate that
+      particular namespaces declared in the stylesheet are used only for documentation purposes. This means that the namespace
+      binding cannot be used in names such as function names, template names, or variable names, and it does not form part of
+      the static context of expressions in the stylesheet, so it is not considered, for example, when casting a string to a QName.</p>
+         <p>One popular tool for documenting XSLT stylesheets is <a href="https://www.pnp-software.com/XSLTdoc/index.html">XSLTdoc</a>,
+        which identifies comments using elements such as <code>xd:doc</code> where the namespace is declared as 
+        <code>xmlns:xd="http://www.pnp-software.com/XSLTdoc"</code>. Ideally, adding this namespace to a stylesheet should have
+      no effect on its semantics. Most of the effects of adding a namespace can be eliminated by listing it in <code>exclude-result-prefixes</code>;
+      however, there is still some residual effect, and in particular, the namespace forms part of the static context of XPath expressions,
+      and needs therefore to be included in SEF files so it is in scope at stylesheet execution time. Listing the namespace using
+      <code>saxon:documentation-prefixes="xd"</code> prevents this effect.</p>
+         <p>The attribute contains a whitespace-separated list of namespace prefixes, which must be declared. The (prefix, URI) pair represented
+      by the prefix is added to a list of namespace bindings that are considered (throughout the package) to be purely documentary. This means
+      that the binding cannot be used in the names of constructs such as variables and functions, and it does not form part of the in-scope
+      namespaces property in the static context of expressions in the module. This means the namespace declaration will not appear in a SEF file
+      containing the exported stylesheet.</p>
+         <p>A prefix that is listed in <code>saxon:documentation-prefixes</code> should generally also be listed (explicitly or implicitly) in
+      <code>exclude-result-prefixes</code>.</p>
+      </section>
+      <section id="explain" title="saxon:explain">
+         <h1>saxon:explain</h1>
+         <aside>Requires Saxon-PE or Saxon-EE.</aside>
+         <p>This attribute may be set on an <a class="bodylink code" href="/xsl-elements/template">xsl:template</a> or <a class="bodylink code" href="/xsl-elements/function">xsl:function</a> declaration. The permitted values are <code>yes</code> and
+          <code>no</code>. If the value is <code>yes</code>, then at compile time Saxon outputs (to
+        the standard error output) a representation of the optimized expression tree for the
+        template or function containing that instruction. The tree is represented by indentation.
+        For example, consider this source code:</p>
+         <samp>&lt;xsl:variable name="p" select="0"/&gt;
+
+ &lt;xsl:template match="/" saxon:explain="yes" xmlns:saxon="http://saxon.sf.net/" exclude-result-prefixes="saxon"&gt;
+   &lt;a&gt;
+     &lt;xsl:choose&gt;
+     &lt;xsl:when test="$p != 0"&gt;&lt;xsl:value-of select="1 div $p"/&gt;&lt;/xsl:when&gt;
+     &lt;xsl:otherwise&gt;12&lt;/xsl:otherwise&gt;
+     &lt;/xsl:choose&gt;
+   &lt;/a&gt;
+ &lt;/xsl:template&gt;</samp>
+         <p>This produces the output:</p>
+         <samp>Optimized expression tree for template at line 8 in file:/e:/temp/test.xsl:
+&lt;directElement name="a" validation="skip"&gt;
+  &lt;valueOf&gt;
+    &lt;literal value="12" type="xs:string"/&gt;
+  &lt;/valueOf&gt;
+&lt;/directElement&gt;</samp>
+         <p>This indicates that the template has been reduced to an instruction to create an element
+        with name <code>a</code>, whose content is a single text node holding the string "12". This
+        is because Saxon has established at compile time that it will always take the "otherwise"
+        branch of the <code>xsl:choose</code> instruction. There is no <code>xsl:value-of</code>
+        instruction in the source code, but the literal text node "12" is compiled to the same code
+        as if the user had written <code>&lt;xsl:value-of select="'12'"/&gt;</code>
+         </p>
+         <p>To get this output for all templates and functions in the stylesheet, you can use the
+          <code>-explain</code> option on the command line.</p>
+      </section>
+      <section id="line-numbering" title="saxon:line-numbering">
+         <h1>saxon:line-numbering</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.9.1.</aside>
+         <p>This attribute may be set on the <a class="bodylink code" href="/xsl-elements/source-document">xsl:source-document</a> instruction to enable line numbering for
+        the document being read. The permitted values are: <code>yes|true|1</code> or <code>no|false|0</code>.</p>
+      </section>
+      <section id="memo-function" title="saxon:memo-function">
+         <h1>saxon:memo-function</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. When running under Saxon-HE, this attribute is ignored
+        with a warning.</aside>
+         <p>This attribute may be set on the <a class="bodylink code" href="/xsl-elements/function">xsl:function</a> element. The permitted values are <code>yes</code> and <code>no</code>.
+        Specifying <code>yes</code> indicates that Saxon should remember the results of calling the
+        function in a cache, and if the function is called again with the same arguments, the result
+        is retrieved from the cache rather than being recalculated. Don't use this if the function
+        has side-effects (for example, if it calls <a class="bodylink code" href="/extensions/instructions/assign">saxon:assign</a>, or an extension function with
+        side-effects). Don't use it if the function accesses context information such as the context
+        node or <code>position()</code> or <code>last()</code>. And be careful if the function
+        constructs and returns a temporary tree: the effect will be that the function returns the
+        same tree each time, rather than a copy of the tree (this difference will only show up if
+        you compare the identity of nodes in the two trees).</p>
+         <p>From Saxon 9.6, when XSLT 3.0 is enabled, the same effect can be achieved by setting the
+        attributes <code>cache="full"</code> and <code>identity-sensitive="no"</code> on the
+          <code>xsl:function</code> element.</p>
+      </section>
+      <section id="options" title="saxon:options">
+         <h1>saxon:options</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.9.</aside>
+         <p>An extension attribute <code>saxon:options</code> is available on the <a class="bodylink code" href="/xsl-elements/evaluate">xsl:evaluate</a> instruction: the value is an expression,
+        which must evaluate to a map. The map allows additional Saxon-specific options for expression evaluation to be defined.</p>
+         <p>Two options are defined:</p>
+         <ul>
+            <li>
+               <p>
+                  <b>allow-any-namespace</b>
+               </p>
+               <p>If this option is set to the value <code>true()</code>, the XPath expression may reference schema components that
+            are present in the Saxon <code>Configuration</code> whether or not they have been imported into the stylesheet
+            using <code>xsl:import-schema</code>.</p>
+            </li>
+            <li>
+               <p>
+                  <b>default-collation</b>
+               </p>
+               <p>The value of this option is a collation URI. This allows the default collation for evaluating the target
+            expression to be selected dynamically (standard XSLT 3.0 facilities only allow it to be selected statically).</p>
+            </li>
+         </ul>
+      </section>
+      <section id="strip-space" title="saxon:strip-space">
+         <h1>saxon:strip-space</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.9.1.</aside>
+         <p>This attribute may be set on the <a class="bodylink code" href="/xsl-elements/source-document">xsl:source-document</a> instruction to specify whitespace
+        stripping for the document being read. The permitted values are: <code>#all</code> strips all
+        whitespace text nodes; <code>#none</code> means no whitespace stripping; <code>#ignorable</code>
+        strips whitespace in elements declared as having element-only content; and <code>#default</code>
+        follows the rules in <a class="bodylink code" href="/xsl-elements/strip-space">xsl:strip-space</a>/<a class="bodylink code" href="/xsl-elements/preserve-space">xsl:preserve-space</a> declarations.</p>
+      </section>
+      <section id="threads" title="saxon:threads">
+         <h1>saxon:threads</h1>
+         <aside>Requires Saxon-EE. When not running under Saxon-EE, this attribute is ignored with a
+        warning.</aside>
+         <p>This attribute may be set on the <a class="bodylink code" href="/xsl-elements/for-each">xsl:for-each</a> instruction. The value must be an integer. When this attribute is used
+        with Saxon-EE, the items selected by the <code>select</code> expression of the instruction
+        are processed in <dfn>parallel</dfn>, using the specified number of threads.</p>
+         <p>The threads are allocated on a round-robin basis: for example if <code>threads="3"</code>
+        is specified, then the first item will be processed using thread 1, the second using thread
+        2, the third using thread 3, the fourth using thread 1 again, and so on. These threads are
+        in addition to the main control thread (so there will be 4 threads in total). Before firing
+        off the processing of the third item, the control thread will read off the results of
+        processing the first item, and send them to the destination of the <code>xsl:for-each</code>
+        instruction.</p>
+         <p>It is possible to specify <code>saxon:threads="1"</code>. In this case all the items in the
+        input will be processed sequentially, but asynchronously with the thread that reads the
+        items in the input sequence.</p>
+         <p>Processing using multiple threads can take advantage of <dfn>multi-core CPUs</dfn>.
+        However, there is an overhead, in that the results of processing each item in the input need
+        to be buffered. The overhead of coordinating multiple threads is proportionally higher if
+        the per-item processing cost is low, while the overhead of buffering is proportionally
+        higher if the amount of data produced when each item is processed is high. Multi-threading
+        therefore works best when the body of the <code>xsl:for-each</code> instruction performs a
+        large amount of computation but produces a small amount of output.</p>
+         <p>It is possible to combine multi-threading with sorting. However, the input is first read
+        and sorted synchronously, and the items in the sorted sequence are then processed in
+        parallel.</p>
+         <p>The effect of using extensions that have side-effects (including <a class="bodylink code" href="/extensions/instructions/assign">saxon:assign</a>) in a multi-threaded loop is
+        undefined (and probably fatal).</p>
+         <p>
+            <dfn>Multi-threaded processing</dfn> is available only with Saxon-EE. The attribute
+          <code>saxon:threads</code> is ignored with a warning if Saxon-EE is not in use. Under
+        Saxon-EE it may also be disabled using the configuration option <a class="bodylink code" href="/configuration/config-features">Feature.ALLOW_MULTITHREADING</a> or
+          <code>xslt/@allowMultiThreading='false'</code> in the configuration file. Multi-threaded
+        processing is also disabled if code is compiled with tracing enabled, for example by using
+        the <code>-T</code> option on the command line or by using an IDE debugger (this is because
+        otherwise, the trace events would be hopelessly intermingled).</p>
+         <p>With multi-threaded processing, the output of different <a class="bodylink code" href="/xsl-elements/message">xsl:message</a> instructions may appear in an unpredictable
+        order. However, Saxon ensures that the <code>xsl:message</code> instruction is atomic, so
+        one message will be completed before another starts. The same is true of the output from the
+          <a class="bodylink code" href="/functions/fn/trace">trace()</a> function call.</p>
+      </section>
+      <section id="time" title="saxon:time">
+         <h1>saxon:time</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.8.</aside>
+         <p>This attribute may be set on the <a class="bodylink code" href="/xsl-elements/message">xsl:message</a>
+        element.</p>
+         <p>The value is a boolean. If set to true (or yes|1) then a timestamp will be added to the output message.</p>
+      </section>
+      <section id="trace" title="saxon:trace">
+         <h1>saxon:trace</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.8.</aside>
+         <p>The attribute <code>saxon:trace</code> on the <a class="bodylink code" href="/xsl-elements/accumulator">xsl:accumulator</a> element causes a trace message to be
+        output (to the Configuration's Logger) whenever the value of the accumulator changes. The
+        message includes the name of the accumulator, the path of the node, and the new accumulator
+        value.</p>
+         <p>Since 9.9.1, the attribute can also be used on the <a class="bodylink code" href="/xsl-elements/mode">xsl:mode</a> element. It causes tracing (messages output to the
+        Configuration's Logger) of all template rules executed in the mode, showing the nodes selected by
+        <code>xsl:apply-templates</code> and the rules used to process them.</p>
+      </section>
+   </section>
+   <section id="syntax-extensions" title="Syntax Extensions">
+      <h1>Syntax Extensions</h1>
+      <p>Saxon (from 9.8) provides a number of extensions to XPath and XQuery syntax. Because use of these extensions makes your code non-conformant
+    with W3C specifications, these extensions are available only if explicitly enabled. This can be achieved using the configuration option
+      <code>Feature.ALLOW_SYNTAX_EXTENSIONS</code> (use <code>--allowSyntaxExtensions:on</code> on the command line, 
+      or <code>global/@allowSyntaxExtensions="true"</code> in the configuration file). </p>
+      <aside>Extended type syntax is automatically enabled in the <code>saxon:as</code> attribute.</aside>
+      <p>Like other Saxon extensions, these require Saxon-PE or higher.</p>
+      <p>Further information:</p>
+      <nav>
+         <ul/>
+      </nav>
+      <section id="union-types" title="Union types">
+         <h1>Union types</h1>
+         <aside>Requires Saxon-EE. Available since Saxon 9.8.</aside>
+         <p>A construct of the form <code>union(type1, type2, type3)</code> can be used to define simple 
+      unions of atomic types. For example, <code>union(xs:base64Binary, xs:hexBinary)</code>
+      defines a union type whose members are <code>xs:base64Binary</code> and <code>xs:hexBinary</code>, while
+      <code>union(xs:date, xs:time, xs:dateTime)</code> defines a union type whose members are <code>xs:date</code>,
+      <code>xs:time</code>, and <code>xs:dateTime</code>. These types can conveniently be used in function signatures
+      when writing a function that is designed to take arguments of more than one type.</p>
+         <p>The names between the parentheses are strictly QNames (not general ItemTypes) and must refer to named atomic types.</p>
+         <p>The order of member type names is significant, in that it determines the order used for casting or validating strings.</p>
+         <p>This construct can be used anywhere that a conventional union
+      type name defined in a schema would be recognized, for example in <code>instance of</code> and <code>cast as</code>
+      expressions, in the <code>as</code> attribute of variable and function declarations, or in <code>typeswitch</code>
+      expressions. The semantics are exactly the same as if the union type were declared in an imported schema and
+    referenced by name.</p>
+         <p>Two additional Saxon extensions help to improve the usability of union types:</p>
+         <ul>
+            <li>A commonly used type can be referenced using a <b>type alias</b>, for example
+          <code>as="~my:date-or-time"</code>. Type aliases are available in both XSLT and XQuery,
+          and are described in <a class="bodylink" href="/extensions/syntax-extensions/type-aliases">Type Aliases</a>. Type aliases go some way towards
+          hiding the implementation details of the type, and allowing the implementation to be changed
+          without affecting users of the function library; in addition they simply make the code more
+          readable.</li>
+            <li>In XSLT only, elements that have an <code>as</code> attribute to define the type
+          of a variable, function, or parameter, also have an optional <a class="bodylink code" href="/extensions/attributes/as">saxon:as</a> attribute
+          which allows additional type information to be supplied using Saxon extension syntax.
+          If both attributes are present, then the type specified in <code>saxon:as</code>
+          must be a subtype of the type specified in the <code>as</code> attribute. Typical usage
+          might be <code>&lt;xsl:param name="x" as="xs:anyAtomicType" saxon:as="union(xs:date, xs:time, xs:dateTime)"/&gt;</code>.
+          This device allows union types to be used without compromising the portability of the stylesheet
+          to an XSLT 3.0 processor that does not recognize Saxon's extension syntax (an XSLT 3.0
+          processor that does not recognize the <code>saxon:as</code> attribute is required to ignore it).</li>
+         </ul>
+         <p>For example, the following code defines an XQuery function that formats a date, time, dateTime, or
+    a string in the form of a date, time, or dateTime using the appropriate variant of the format-date/time
+    function:</p>
+         <samp>declare function local:format(
+              $in as union(xs:dateTime, xs:date, xs:time, xs:string), 
+              $fmt as xs:string) as xs:string {
+   typeswitch ($in) 
+   case xs:dateTime return format-dateTime($in, $fmt)
+   case xs:date return format-date($in, $fmt)
+   case xs:time return format-time($in, $fmt)
+   case xs:string return local:format($in cast as union(xs:dateTime, xs:date, xs:time), $fmt)
+   default return error()
+   };    
+local:format("2016-10-07", $fmt)</samp>
+      </section>
+      <section id="tuple-types" title="Tuple types">
+         <h1>Tuple types</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.8; revised in 9.9.</aside>
+         <p>Wherever an item type can be used (for example, in the type signature of a function or variable,
+    or in an <code>instance of</code> expression), Saxon allows a tuple type to appear. The syntax is:</p>
+         <p>
+            <code>"tuple" "(" fieldName "?"? (":" sequenceType)? ("," fieldName "?"? (":" sequenceType)? )* ("," "*")? ")"</code>
+         </p>
+         <p>where <code>fieldName</code> is an NCName. Whitespace is advisable before or after the colon. A question mark ("?") after
+    a field name indicates that the field is optional. A final ", *" at the end of the list of fields indicates that the tuple
+    type is <i>extensible</i>: additional fields beyond those that are explicitly declared are permitted to appear in the map.</p>
+         <p>For example:</p>
+         <p>
+            <code>tuple(ssn: xs:string, emp: element(employee))</code>
+         </p>
+         <p>or:</p>
+         <p>
+            <code>tuple(ssn, emp)</code>
+         </p>
+         <p>or: </p>
+         <p>
+            <code>tuple(firstName: xs:string, middleInitial?: xs:string, lastName: xs:string, *)</code>
+         </p>
+         <p>A tuple type is essentially a way of defining a more
+      precise type for maps. The first example will be satisfied by any map that has an entry whose key is "ssn" and whose
+      value is a string, plus an entry whose key is "emp" and whose value is an <code>employee</code> element. The second
+    example matches any map with entries having the keys "ssn" and "emp", regardless of the types of the values.</p>
+         <p>More formally, a value <code>M</code> is an instance of a tuple type <code>tuple(N1:T1, N2:T2, ...)</code> (where
+      <code>Tn</code> defaults to <code>item()*</code> if not specified) if
+    and only if:</p>
+         <ol>
+            <li>
+               <p>
+                  <code>M is a map</code>
+               </p>
+            </li>
+            <li>
+               <p>For every (<code>N</code>, <code>T</code>) pair in the tuple definition:</p>
+               <ul>
+                  <li>
+                     <p>If the field is not optional (that is, there is no question mark after the field name in the type definition), then <code>map:contains(M, N)</code> is true.</p>
+                  </li>
+                  <li>
+                     <p>If <code>map:contains(M, N)</code> is true, then <code>map:get(M, N) instance of T</code> returns true</p>
+                  </li>
+               </ul>
+            </li>
+            <li>
+               <p>If the tuple type is not extensible (there is no final ", *" after the list of field names), then every key present in the map is a string
+      equal to one of the field names appearing in the tuple definition.</p>
+            </li>
+         </ol>
+         <p>That is, for every field defined in the tuple definition, the map will typically contain an entry whose key
+    matches the field name and whose value matches the corresponding type. The entry is allowed to be absent only
+    if the type definition indicates that it is optional. Additional entries are allowed only if the type definition indicates
+    that it is extensible.</p>
+         <p>Since a tuple is a map, fields can be accessed using the lookup syntax <code>$T?NNN</code> where <code>$T</code>
+      is an expression that returns a tuple, and <code>NNN</code> is the name of the field.</p>
+         <p>Using tuples makes stronger type checking possible. With a general-purpose map, any atomic value can be
+    supplied as a key, and the <code>map:get()</code> function (or a dynamic call on the map as a function) returns
+    an empty sequence if the entry is not present. With tuples, however, supplying a key value that is not a string,
+    or that is not one of the known field names, results in a static type error if it can be detected at compile time.
+    Furthermore, if <code>$T</code> is known to be a tuple type, then the type of an expression such as <code>$T?field</code>
+    can be statically inferred, which again enables better error detection and better optimization.</p>
+         <p>Tuple types are useful where maps are used to hold information with a regular structure;
+    for example when a function accepts maps as input or returns maps as output. Declaring the argument
+    or result type of a function as a tuple type often gives better information about the expected contents than when it is declared as a map.</p>
+         <p>In XSLT, as described below, it is possible to declare the type in both
+      portable and Saxon-specific syntax, for example 
+        <code>&lt;xsl:param name="location" as="map(xs:string, xs:double)" saxon:as="tuple(x: xs:double, y: xs:double)"/&gt;</code>.</p>
+         <p>A map that contains additional entries beyond those defined in an extensible tuple type still conforms to the type (so if the expected
+        type of a function argument is <code>tuple(a: xs:integer, b: xs:integer, *)</code>, then you can supply any
+        map that contains these two fields, even if it also contains others); however,
+        static references to such entries will result in a type error even if the map is extensible. Static references are only allowed
+      to fields that are explicitly declared.</p>
+         <p>Saxon does not currently attempt to make subtyping inferences about tuple types, so for the time being it is best to avoid
+      using them within the signatures of higher-order functions.</p>
+         <p>The following XSLT example shows a couple of functions from a library designed to perform
+      complex number arithmetic, where a complex number is defined as the type <code>tuple(r:
+        xs:double, i: xs:double)</code>:</p>
+         <samp>&lt;xsl:function name="cx:complex" as="tuple(r: xs:double, i: xs:double)"&gt;
+  &lt;xsl:param name="real" as="xs:double"/&gt;
+  &lt;xsl:param name="imag" as="xs:double"/&gt;
+  &lt;xsl:sequence select="map{'r':$real, 'i':$imag}"/&gt;
+&lt;/xsl:function&gt;
+
+&lt;xsl:function name="cx:add" as="tuple(r: xs:double, i: xs:double)"&gt;
+  &lt;xsl:param name="x" as="tuple(r: xs:double, i: xs:double)"/&gt;
+  &lt;xsl:param name="y" as="tuple(r: xs:double, i: xs:double)"/&gt;
+  &lt;xsl:sequence select="cx:complex($x?r + $y?r, $x?i + $y?i)"/&gt;
+&lt;/xsl:function&gt;</samp>
+         <p>The same functions could be written in XQuery:</p>
+         <samp>declare function cx:complex ($real as xs:double, $imag as xs:double)
+                 as tuple(r: xs:double, i: xs:double) {
+  map{'r':$real, 'i':$imag}
+};
+
+declare function cx:add ($x as tuple(r: xs:double, i: xs:double),
+                         $y as tuple(r: xs:double, i: xs:double))
+                 as tuple(r: xs:double, i: xs:double) {
+  cx:number($x?r + $y?r, $x?i + $y?i)
+};</samp>
+         <p>Two additional Saxon extensions help to improve the usability of tuple types:</p>
+         <ul>
+            <li>A commonly used type can be referenced using a <b>type alias</b>, for example
+        <code>as="~cx:complex"</code>. Type aliases are available in both XSLT and XQuery,
+          and are described in <a class="bodylink" href="/extensions/syntax-extensions/type-aliases">Type Aliases</a>. Type aliases go some way towards
+        hiding the implementation details of the type, and allowing the implementation to be changed
+        without affecting users of the function library; in addition they simply make the code more
+        readable.</li>
+            <li>In XSLT only, elements that have an <code>as</code> attribute to define the type
+        of a variable, function, or parameter, also have an optional <a class="bodylink code" href="/extensions/attributes/as">saxon:as</a> attribute
+        which allows additional type information to be supplied using Saxon extension syntax.
+        If both attributes are present, then the type specified in <code>saxon:as</code>
+        must be a subtype of the type specified in the <code>as</code> attribute. Typical usage
+        might be <code>&lt;xsl:param name="x" as="map(*)" saxon:as="tuple(r: xs:double, i: xs:double)"/&gt;</code>.
+        This device allows tuple types to be used without compromising the portability of the stylesheet
+        to an XSLT 3.0 processor that does not recognize Saxon's extension syntax (an XSLT 3.0
+        processor that does not recognize the <code>saxon:as</code> attribute is required to ignore it).</li>
+         </ul>
+      </section>
+      <section id="type-aliases" title="Type aliases">
+         <h1>Type aliases</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.8.</aside>
+         <p>Wherever an <code>ItemType</code> may appear (for example in a function signature or variable declaration, or
+      in <code>instance of</code> or <code>cast as</code> expressions), the syntax <code>~alias</code> is permitted,
+      where <code>alias</code> is a name for an item type declared elsewhere. Type aliases are QNames, and prefixes are
+      resolved in the usual way (using the default namespace for elements and types).</p>
+         <p>Type aliases are useful because they abstract away from the detail of how a type is
+        implemented: for example <code>~cx:complex</code>
+      is more meaningful than <code>tuple(r: xs:double, i: xs:double)</code>, and it creates more scope for changing the
+      way types are represented as the software evolves. However, type aliases do not provide any real encapsulation or information
+      hiding. Type aliases cannot be used within their own definition, and the definition of a type alias cannot be circular.</p>
+         <p>The mapping of type aliases to item types is an extension to the static context of an expression.</p>
+         <p>In XSLT, type aliases can be defined using the top-level declaration <a class="bodylink code" href="/extensions/instructions/type-alias">saxon:type-alias</a>:</p>
+         <examples>
+            <example>
+               <samp>&lt;saxon:type-alias name="cx:complex" type="tuple(r: xs:double, i: xs:double)"/&gt;
+
+&lt;xsl:function name="cx:complex" as="~cx:complex"&gt;
+  &lt;xsl:param name="r" as="xs:double"/&gt;
+  &lt;xsl:param name="i" as="xs:double"/&gt;
+  &lt;xsl:sequence select="map{'r':$r, 'i':$i}"/&gt;
+&lt;/xsl:function&gt;
+
+&lt;xsl:function name="cx:add" as="~cx:complex"&gt;
+  &lt;xsl:param name="x" as="~cx:complex"/&gt;
+  &lt;xsl:param name="y" as="~cx:complex"/&gt;
+  &lt;xsl:sequence select="cx:complex($x?r + $y?r, $x?i + $y?i)"/&gt;
+&lt;/xsl:function&gt;
+</samp>
+            </example>
+         </examples>
+         <p>XSLT-defined type aliases are scoped to a package. The usual rules for import precedence apply.</p>
+         <p>Type aliases can be used in XSLT match patterns (see <a class="bodylink" href="/extensions/xslt-patterns">XSLT Patterns</a>). For example:</p>
+         <example>
+            <samp>&lt;xsl:template match="~cx:complex[?i=0]"&gt;{?r}&lt;/xsl:template&gt;</samp>
+         </example>
+         <example>
+            <samp>&lt;xsl:template match="~cx:complex"&gt;{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template&gt;</samp>
+         </example>
+         <p>The construct <code>~T</code> at the start of a pattern can be regarded as an abbreviation for
+        <code>.[. instance of ~T]</code>.</p>
+         <p>In XQuery, type aliases can be declared in the query prolog using the syntax <code>declare type QName = ItemType;</code>, 
+        for example: <code>declare type cx:complex = tuple(r: xs:double, i: xs:double);</code>.</p>
+      </section>
+      <section id="simple-inline-functions" title="Simple inline functions">
+         <h1>Simple inline functions</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.8.</aside>
+         <p>An abbreviated syntax is available for defining simple inline functions. For example,
+        the expression <code>fn{.+1}</code> represents a function that takes a single argument and returns the value of that
+        argument plus one. A simple inline function takes a single argument with required type <code>item()</code>,
+        and returns any sequence (type <code>item()*</code>). The function body is evaluated with a singleton focus based
+        on the supplied argument value.</p>
+         <p>Simple inline functions are particularly convenient when providing functions as arguments to higher-order functions,
+        many of which accept a single item as their one argument.
+        For example, to sort employees in order of salary, you can write <code>sort(//employee, fn{@salary})</code>.</p>
+         <p>Simple inline functions can access externally-defined local variables in the usual way (that is, they have a closure).</p>
+         <p>The expression <code>fn{EXPR}</code> is a syntactic shorthand for <code>function($x as item()) as item()* {$x!(EXPR)}</code>.</p>
+      </section>
+      <section id="short-circuit" title="Short-circuit boolean operators">
+         <h1>Short-circuit boolean operators</h1>
+         <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.9.</aside>
+         <p>Saxon provides two additional boolean operators: <code>orElse</code> and <code>andAlso</code>.
+      These have the same effect as <code>or</code> and <code>and</code>, except that there is a guarantee
+      that the second operand will not be evaluated unnecessarily. This makes it possible to ensure that
+      evaluating the second operand does not produce an error. For example, the expression:</p>
+         <p>
+            <code>//chapter[pages=0 orElse length div pages]</code>
+         </p>
+         <p>will never fail with a divide-by-zero error, because the division will never be executed if the
+      value of <code>pages</code> is zero.</p>
+         <p>When the ordinary <code>or</code> and <code>and</code> operators are used, the W3C specification
+      gives XPath processors license to re-arrange the order of execution, and Saxon will occasionally do so.
+      Using these operators is therefore advised when the first condition is a guard to prevent the second condition
+      failing.</p>
+         <p>The same effect can be achieved without relying on extensions, by writing
+      <code>A orElse B</code> as <code>if (A) then true() else boolean(B)</code>, and rewriting 
+        <code>X andAlso Y</code> as <code>if (X) then boolean(Y) else false()</code>.</p>
+      </section>
+   </section>
+   <section id="xslt-patterns" title="XSLT Patterns">
+      <h1>XSLT Patterns</h1>
+      <aside>Requires Saxon-PE or Saxon-EE.</aside>
+      <p>Since Saxon 9.9, the syntax of match patterns is extended to make it easier to match maps and
+      arrays. As for the XPath syntax extensions, these extensions are available only if explicitly enabled. This can be achieved using the configuration option
+      <code>Feature.ALLOW_SYNTAX_EXTENSIONS</code> (use <code>--allowSyntaxExtensions:on</code> on the command line, 
+      or <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</p>
+      <p>In particular the syntax <code>ma-type predicate*</code> is allowed, where <code>ma-type</code>
+      is any of:</p>
+      <ol>
+         <li>~type-alias</li>
+         <li>tuple(...)</li>
+         <li>map(...)</li>
+         <li>array(...)</li>
+      </ol>
+      <p>For example if a <a class="bodylink" href="/extensions/syntax-extensions/type-aliases">type alias</a> has been declared:</p>
+      <samp>&lt;saxon:type-alias name="cx:complex" type="tuple(r: xs:double, i: xs:double)"/&gt;</samp>
+      <p>Then it can be used in a match pattern to match instances of the type, with or without predicates:</p>
+      <samp>&lt;xsl:template match="~cx:complex[?i=0]"&gt;{?r}&lt;/xsl:template&gt;</samp>
+      <samp>&lt;xsl:template match="~cx:complex"&gt;{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template&gt;</samp>
+      <p>The construct <code>~T</code> at the start of a pattern can be regarded as an abbreviation for
+      <code>.[. instance of ~T]</code>.</p>
+   </section>
+   <section id="output-extras" title="Additional serialization parameters">
+      <h1>Additional serialization parameters</h1>
+      <aside> Requires Saxon-PE or Saxon-EE. These extensions are not recognized in Saxon-HE. </aside>
+      <p>Saxon provides a number of additional serialization parameters, and several additional
+      serialization methods: these have names in the Saxon namespace. These can be specified as
+      attributes on the <a class="bodylink code" href="/xsl-elements/output">xsl:output</a> and <a class="bodylink code" href="/xsl-elements/result-document">xsl:result-document</a> elements
+      (XSLT-only), in the Query prolog (XQuery only), as parameters in the <a class="bodylink code" href="/functions/fn/serialize">fn:serialize()</a> function, or as extra parameters on the
+      Query or Transform command line. They can also be specified in the query or transformation
+      API.</p>
+      <p>The Saxon-supplied serialization parameters and methods are described on the following
+      pages:</p>
+      <nav>
+         <ul/>
+      </nav>
+      <p>For example, to request an <dfn>indentation</dfn> depth of one column, specify
+        <code>!{http://saxon.sf.net/}indent-spaces=1</code> on the command line.</p>
+      <p>In XQuery, Saxon allows both standard serialization options and Saxon-specific serialization
+      parameters to be specified by means of a <code>saxon:output</code> option declaration in the
+      query prolog. For example:</p>
+      <samp>declare namespace saxon="http://saxon.sf.net/";
+declare option saxon:output "indent=yes";
+declare option saxon:output "saxon:indent-spaces=3";
+</samp>
+      <h3 class="subtitle">Standard serialization parameters</h3>
+      <p>The standard serialization parameters described in the <a href="http://www.w3.org/TR/xslt-xquery-serialization-30/"
+            class="bodylink">W3C Serialization
+        specification</a> are all available, namely:</p>
+      <ul>
+         <li>
+            <p>allow-duplicate-names (requires XSLT 3.0/XQuery 3.1)</p>
+         </li>
+         <li>
+            <p>build-tree (requires XSLT 3.0/XQuery 3.0)</p>
+         </li>
+         <li>
+            <p>byte-order-mark</p>
+         </li>
+         <li>
+            <p>cdata-section-elements</p>
+         </li>
+         <li>
+            <p>doctype-public</p>
+         </li>
+         <li>
+            <p>doctype-system</p>
+         </li>
+         <li>
+            <p>encoding</p>
+         </li>
+         <li>
+            <p>escape-uri-attributes</p>
+         </li>
+         <li>
+            <p>html-version (requires XSLT 3.0/XQuery 3.0)</p>
+         </li>
+         <li>
+            <p>include-content-type</p>
+         </li>
+         <li>
+            <p>indent</p>
+         </li>
+         <li>
+            <p>item-separator (requires XQuery 3.0)</p>
+         </li>
+         <li>
+            <p>json-node-output-method (requires XSLT 3.0/XQuery 3.1)</p>
+         </li>
+         <li>
+            <p>media-type</p>
+         </li>
+         <li>
+            <p>method</p>
+         </li>
+         <li>
+            <p>normalization-form</p>
+         </li>
+         <li>
+            <p>omit-xml-declaration</p>
+         </li>
+         <li>
+            <p>standalone</p>
+         </li>
+         <li>
+            <p>suppress-indentation (requires XSLT 3.0/XQuery 3.0)</p>
+         </li>
+         <li>
+            <p>undeclare-prefixes</p>
+         </li>
+         <li>
+            <p>use-character-maps (only useful in XSLT)</p>
+         </li>
+         <li>
+            <p>version</p>
+         </li>
+      </ul>
+      <p>
+         <i>Saxon interprets a zero-length value for <dfn>
+               <code>doctype-system</code>
+            </dfn> or
+            <dfn>
+               <code>doctype-public</code>
+            </dfn> as meaning "absent". This is equivalent to
+        omitting the value, except that in some interfaces it will override a value previously set
+        within the query or stylesheet.</i>
+      </p>
+      <h3 class="subtitle">User-defined serialization attributes</h3>
+      <p>Any number of user-defined attributes may be defined on <code>xsl:output</code>. These
+      attributes must have names in a non-null namespace, which must not be either the XSLT or the
+      Saxon namespace. The value of the attribute is inserted into the <code>Properties</code>
+      object made available to the <a class="javalink" href="net.sf.saxon.event.Receiver">Receiver</a> handling the output; they will be ignored by the standard output methods, but
+      can supply arbitrary information to a user-defined output method. The name of the property
+      will be the expanded name of the attribute in JAXP format, for example
+        <code>{http://my-namespace/uri}local-name</code>, and the value will be the value as given
+      in the stylesheet. </p>
+      <section id="serialization-parameters"
+               title="Serialization parameters"
+               xml:base="extensions/serialization-params-expanded.xml">
+         <h1>Serialization parameters</h1>
+         <p>Saxon provides a number of additional serialization parameters, with names in the Saxon
+        namespace. These can be specified as attributes on the <a class="bodylink code" href="/xsl-elements/output">xsl:output</a> and <a class="bodylink code" href="/xsl-elements/result-document">xsl:result-document</a> elements (XSLT-only), in
+        the Query prolog (XQuery only), as parameters in the <a class="bodylink code" href="/functions/fn/serialize">fn:serialize()</a> function, or as extra parameters on
+        the Query or Transform command line. They can also be specified in the query or
+        transformation API.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:attribute-order</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>eqnames</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>Available with the XML, HTML, and XHTML output methods, to control the order in
+                    which attributes appear within an element start tag (in the absence of the
+                    property the order of attributes is unpredictable). 
+                    The value of the parameter is a list of tokens, each of which is either a QName or 
+                    the token "*" to match unspecified attributes. Attributes whose names are
+                    listed before the "*" token appear first, in the order they are listed; other
+                    unlisted attributes follow, sorted first by namespace URI and then by local-name, and finally any attributes
+                    whose names appear after the "*" appear at the end.
+                    For example <code>saxon:attribute-order="a b c * xml:space"</code> will cause attributes to be output in the order
+                    <code>a</code>, then <code>b</code>, then <code>c</code>, then everything else (sorted by URI and local name), 
+                    then <code>xml:space</code>.
+                    
+                    </p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:canonical</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>boolean</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>Available with the XML output method, to request that the serialized XML conforms to the W3C XML Canonicalization 1.1
+                    specification (C14N). This can be useful, for example, when test results are to be compared.
+                    Specifically, this option changes XML serialization as follows:</p>
+                     <ol>
+                        <li>Empty elements are output as <code>&lt;empty&gt;&lt;/empty&gt;</code> rather than <code>&lt;empty/&gt;</code>.</li>
+                        <li>Namespaces within a start tag are sorted in alphabetical order of prefix.</li>
+                        <li>Attributes within a start tag are sorted first by namespace URI, then by local name.</li>
+                        <li>Processing instructions and comments that appear as children of the document node are separated by newlines.</li>
+                     </ol>
+                     <p>Specifying <code>saxon:canonical="yes"</code> forces <code>omit-xml-declaration="yes"</code>, 
+                    <code>indent="no"</code>, and <code>encoding="utf-8"</code>, and causes <code>use-character-maps</code> and <code>cdata-section-elements</code>
+                to be ignored. No DOCTYPE declaration is output. The option does not force Unicode normalization; if in doubt, set <code>normalization-form="C"</code>.</p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:character-representation</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>"native" | "entity" | "decimal" | "hex"</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>Allows greater control over how non-ASCII characters will be represented on
+                    output.</p>
+                     <p>When the output method is XML, two values are supported: <code>decimal</code> and
+                        <code>hex</code>. These control whether numeric character references are
+                    output in decimal or hexadecimal when the character is not available in the
+                    selected encoding. </p>
+                     <p>When the output method is HTML, the value may hold two strings, separated by a
+                    semicolon. The first string defines how non-ASCII characters within the
+                    character encoding will be represented, the values being <code>native</code>,
+                        <code>entity</code>, <code>decimal</code>, or <code>hex</code>. The second
+                    string defines how characters outside the encoding will be represented, the
+                    values being <code>entity</code>, <code>decimal</code>, or <code>hex</code>.
+                    Here <code>native</code> means output the character as itself;
+                        <code>entity</code> means use a defined entity reference (such as
+                    "&amp;eacute;") if known; <code>decimal</code> and <code>hex</code> refer to
+                    numeric character references. For example <code>entity;decimal</code> (the
+                    default) means that with <code>encoding="iso-8859-1"</code>, characters in the
+                    range 160-255 will be represented using standard HTML entity references, while
+                    Unicode characters above 255 will be represented as decimal character
+                    references.</p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:double-space</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>eqnames</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>When the output method is XML with <code>indent="yes"</code>, the
+                        <code>saxon:double-space</code> attribute may be used to generate an extra
+                    blank line before selected elements. The value is a whitespace-separated list of
+                    element names. The attribute follows the same conventions as
+                        <code>cdata-section-elements</code>: values specified in separate <a class="bodylink code" href="/xsl-elements/output">xsl:output</a> or <a class="bodylink code" href="/xsl-elements/result-document">xsl:result-document</a> elements are cumulative, and if the value is
+                    supplied programmatically via an API, or from the command line, then the element
+                    names are given in Clark notation, namely <code>{uri}local</code>. The effect of
+                    the attribute is to cause an extra blank line to be output before the start tag
+                    of the specified elements.</p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:indent-spaces</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>integer</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>When the output method is XML, HTML, or XHTML with <code>indent="yes"</code>, the
+                        <code>saxon:indent-spaces</code> attribute may be used to control the amount
+                    of indentation. The default value in the absence of this attribute is 3.</p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:line-length</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>integer</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>Default value 80. With the XML output method, attributes are output on a new line
+                    if they would otherwise extend beyond this column position. With the HTML output
+                    method, text lines are split at this line length when possible. In releases 9.2
+                    and earlier, the HTML output method attempted to split lines that exceeded 120
+                    characters in length.</p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:newline</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>string</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>Default value x10. Defines the string that is used by the text output method
+                    to represent a newline. The Windows line ending x0Cx0A (CRLF) may sometimes be preferred
+                to the default of a single newline character.</p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:next-in-chain</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>uri</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>XSLT only. Used to direct the output to another stylesheet. The value is the URL
+                    of a stylesheet that should be used to process the output stream. In this case
+                    the output stream must always be pure XML, and attributes that control the
+                    format of the output (e.g. <code>method</code>,
+                        <code>cdata-section-elements</code>, etc) will have no effect. The output of
+                    the second stylesheet will be directed to the destination that would have been
+                    used for the first stylesheet if no <code>saxon:next-in-chain</code> attribute
+                    were present.</p>
+                     <p>This serialization property is available only on <a class="bodylink code" href="/xsl-elements/output">xsl:output</a> declarations and <a class="bodylink code" href="/xsl-elements/result-document">xsl:result-document</a> instructions. It cannot be
+                    supplied as an attribute to any of the various APIs that control serialization; nor can it be used 
+                    on the command line. It is not supported as an XQuery serialization parameter.</p>
+                     <p>Supplying a zero-length string is equivalent to omitting the attribute, except
+                    that it can be used to override a previous setting.</p>
+                     <p>If the value is a relative URI, it is interpreted relative to the base URI of the
+                stylesheet element (<code>xsl:output</code> or <code>xsl:result-document</code>)
+                on which the attribute appears.</p>
+                     <aside>This property is retained for backwards compatibility. A more standard way of 
+                    post-processing the output
+                    of a transformation is to use the XPath 3.1 function
+                    <a class="bodylink code" href="/functions/fn/transform">fn:transform()</a>. Alternatively, both the JAXP and s9api APIs provide
+                mechanisms allowing the output of one transformation to be used as the input of another.</aside>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:property-order</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>eqnames</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>Available with the JSON output method, to control the order in
+                    which properties appear within the serialization of a map/object (in the absence of the
+                    property the order of properties is unpredictable). 
+                    The value of the parameter is a list of tokens, in which the token "*" is treated specially. Properties whose names are
+                    listed before the "*" token appear first, in the order they are listed; other
+                    unlisted properties follow, sorted alphabetically, and finally any properties
+                    whose names are listed after the "*" appear at the end.
+                    For example <code>saxon:property-order="@ a b c * $"</code> will cause properties to be output in the order
+                    <code>@</code>, then <code>a</code>, then <code>b</code>, then <code>c</code>, then everything else (sorted by URI and local name), 
+                    then <code>$</code>. Although JSON property names can include spaces, there is no provision for such names to be included in the list.
+                    
+                </p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:recognize-binary</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>boolean</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>Relevant only when using the text output method. If set to <code>yes</code>, the
+                    processing instructions <code>&lt;?hex XXXX?&gt;</code> and <code>&lt;?b64
+                        XXXX?&gt;</code> will be recognized; the value is taken as a hexBinary or
+                    base64 representation of a character string, encoded using the encoding in use
+                    by the serializer, and this character string will be output without validating
+                    it to ensure it contains valid XML characters. Also recognized are
+                        <code>&lt;?hex.EEEE XXXX?&gt;</code> and <code>&lt;?b64.EEEE
+                        XXXX?&gt;</code>, where EEEE is the name of the encoding of the base64 or
+                    hexBinary data: for example <code>hex.ascii</code> or <code>b64.utf8</code>.</p>
+                     <p>This enables non-XML characters, notably binary zero, to be output.</p>
+                     <p>For example, given <code>&lt;xsl:output method="text"
+                        saxon:recognize-binary="yes"/&gt;</code>, the following instruction:</p>
+                     <p>
+                        <code>&lt;xsl:processing-instruction name="hex.ascii" select="'00'"/&gt;</code>
+                     </p>
+                     <p>outputs the Unicode character with codepoint zero ("NUL"), while</p>
+                     <p>
+                        <code>&lt;xsl:processing-instruction name="b64.utf8"
+                        select="securityKey"/&gt;</code>
+                     </p>
+                     <p>outputs the value of the <code>securityKey</code> element, on the assumption that
+                    this is base64-encoded UTF-8 text.</p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:require-well-formed</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>boolean</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>Affects the handling of result documents that contain multiple top-level elements
+                    or top-level text nodes. The W3C specifications allow such a result document,
+                    even though it is not a well-formed XML document. It is, however, a well-formed
+                        <i>external general parsed entity</i>, which means it can be incorporated
+                    into a well-formed XML document by means of an entity reference.</p>
+                     <p>The default is <code>no</code>. If the value is set to <code>yes</code>, and a
+                    SAX destination (for example a <code>SAXResult</code>, a
+                    <code>JDOMResult</code>, or a user-written <code>ContentHandler</code>) is
+                    supplied to receive the results of the transformation, then Saxon will report an
+                    error rather than sending a non-well-formed stream of SAX events to the
+                        <code>ContentHandler</code>. This attribute is useful when the output of the
+                    stylesheet is sent to a component (for example an XSL-FO rendering engine) that
+                    is not designed to accept non-well-formed XML result trees.</p>
+                     <p>Note also that namespace undeclarations of the form <code>xmlns:p=""</code> (as
+                    permitted by XML Namespaces 1.1) are passed to the
+                        <code>startPrefixMapping()</code> method of a user-defined
+                        <code>ContentHandler</code> only if <code>undeclare-prefixes="yes"</code> is
+                    specified on <a class="bodylink code" href="/xsl-elements/output">xsl:output</a>.</p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:single-quotes</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>boolean</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>If set to <code>yes</code>, the XML, HTML, and XHTML output methods will generally use
+                single quotes (apostrophes) rather than double quotes to delimit attribute values.</p>
+                     <p>This can be useful if the serialized XML/HTML is to be subsequently wrapped in double quotes,
+                for example as part of a JSON text, or within a Java string literal. It does not eliminate the
+                need to escape double quotes (using <code>\"</code>) in such a context, but it means that
+                fewer characters will be affected, which improves the readability of the result.</p>
+                     <p>The property is ignored in the case of attributes affected by character maps, where
+                single or double quotes are used intelligently based on the actual content of the attribute.</p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:supply-source-locator</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>boolean</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>Relevant only when output is sent to a user-written <code>ContentHandler</code>,
+                    that is, a <code>SAXResult</code>. It causes extra information to be maintained
+                    and made available to the <code>ContentHandler</code> for diagnostic purposes:
+                    specifically, the <code>Locator</code> that is passed to the
+                        <code>ContentHandler</code> via the <code>setDocumentLocator</code> method
+                    may be cast to a <code>ContentHandlerProxyLocator</code>, which exposes the
+                    method <code>getContextItemStack()</code>. This returns a
+                        <code>java.util.Stack</code>. The top item on the stack is the current
+                    context item, and below this are previous context items. Each item is
+                    represented by the interface <a class="javalink" href="net.sf.saxon.om.Item">net.sf.saxon.om.Item</a>. If the item is a node, and if the node is one
+                    derived by parsing a source document with the line-numbering option enabled,
+                    then it is possible to obtain the URI and line number of this node in the
+                    original XML source.</p>
+                     <p>For this to work, the code must be compiled with tracing enabled. This can be
+                    achieved by setting the option <code>config.setCompileWithTracing(true)</code>
+                    on the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>
+                    object, or equivalently by setting the property
+                        <code>Feature.COMPILE_WITH_TRACING.name</code> on the JAXP
+                        <code>TransformerFactory</code>. Note that this compile-time option imposes
+                    a substantial run-time overhead, even if tracing is not switched on at run-time
+                    by providing a <code>TraceListener</code>.</p>
+                  </p>
+               </td>
+            </tr>
+         </table>
+      </section>
+      <section id="method" title="Serialization methods">
+         <h1>Serialization methods</h1>
+         <p>The <code>method</code> attribute of <a class="bodylink code" href="/xsl-elements/output">xsl:output</a> can take the standard values <code>xml</code>, <code>html</code>,
+          <code>xhtml</code>, or <code>text</code>, or a QName.</p>
+         <p>If a QName in the Saxon namespace is specified, the name must be one of the Saxon
+        serialization methods supported in Saxon-PE and Saxon-EE. These are:</p>
+         <nav>
+            <ul/>
+         </nav>
+         <p>If a QName is specified, the local name must be the fully-qualified class name of a class
+        that implements either the SAX2 <code>org.xml.sax.ContentHandler</code> interface, or the <a class="javalink" href="net.sf.saxon.event.Receiver">net.sf.saxon.event.Receiver</a>
+        interface. If such a value is specified, output is directed to a newly-created instance of
+        the user-supplied class. You can pass additional information to this class by means of extra
+        user-defined attributes on the <code>xsl:output</code> element.</p>
+         <p> The prefix of the QName must correspond to a valid namespace URI. It is recommended to use
+        the Saxon URI "http://saxon.sf.net/", but this is not enforced.</p>
+         <p>When output is sent to a user-specified <code>ContentHandler</code> or
+          <code>Receiver</code>, other serialization options (for example indentation, addition of
+        meta elements in HTML, and generation of a DOCTYPE declaration) have no effect.</p>
+         <aside>As an alternative to specifying your own output method, you can customize Saxon's
+        serialization pipeline. There is a Saxon class <a class="javalink" href="net.sf.saxon.lib.SerializerFactory">net.sf.saxon.lib.SerializerFactory</a> that
+        constructs the pipeline, from individual components that perform the various stages of
+        serialization. You can define your own subclass of <code>SerializerFactory</code>, and
+        register this using the method <code>setSerializerFactory()</code> on the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a> object. This allows
+        you to insert your own steps into the pipeline, or to override any of the standard pipeline
+        components with classes of your own.</aside>
+         <section id="base64Binary-method"
+                  title="saxon:base64Binary serialization method">
+            <h1>saxon:base64Binary serialization method</h1>
+            <aside> Requires Saxon-PE or Saxon-EE. </aside>
+            <p>The serialization method <code>saxon:base64Binary</code> is intended to be useful when
+          creating <dfn>binary output files</dfn>, for example images. All serialization properties
+          other than <code>method</code> are ignored.</p>
+            <p>As with the <code>text</code> output method, all nodes in the result tree other than text
+          nodes are ignored. Each text node must hold a string that is in the lexical space of the
+            <code>xs:base64Binary</code> data type. The sequence of octets corresponding to this
+          base64 value is written to the binary output file.</p>
+            <p>When invoking this method via an API, use the property value
+            <code>{http://saxon.sf.net/}base64Binary</code>.</p>
+            <p>When using this serialization method, the <code>omit-xml-declaration</code> parameter is
+          automatically set to <code>yes</code>.</p>
+            <p> In the following example, the image displays as a small red dot. Note that whitespace
+          can be freely inserted into the base64Binary string. </p>
+            <samp>&lt;xsl:template name="main"&gt;
+  &lt;html&gt;
+    &lt;head&gt;
+      &lt;title&gt;An image&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+      &lt;h1&gt;An image&lt;/h1&gt;
+      &lt;p&gt;&lt;img src="image.gif"/&gt;&lt;/p&gt;
+    &lt;/body&gt;
+  &lt;/html&gt;
+  &lt;xsl:result-document method="saxon:base64Binary" href="image.gif" media-type="image/gif"&gt;
+    &lt;xsl:text&gt;iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAA
+        LEwAACxMBAJqcGAAAAAd0SU1FB9YGARc5KB0XV+IAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBH
+        SU1Q72QlbgAAAF1JREFUGNO9zL0NglAAxPEfdLTs4BZM4DIO4C7OwQg2JoQ9LE1exdlYvBBeZ7jqch9//q1uH
+        4TLzw4d6+ErXMMcXuHWxId3KOETnnXXV6MJpcq2MLaI97CER3N0vr4MkhoXe0rZigAAAABJRU5ErkJggg==
+    &lt;/xsl:text&gt;
+  &lt;/xsl:result-document&gt;
+&lt;/xsl:template&gt;
+</samp>
+            <p>It is of course possible to construct the base64Binary value programmatically. 
+          The functions in the EXPath binary module are useful for this purpose: see the 
+          <a class="bodylink" href="/functions/expath-binary">EXPath binary function library</a>.
+          See also the Saxon extension function <a class="bodylink code" href="/functions/saxon/octets-to-base64Binary">saxon:octets-to-base64Binary()</a>.</p>
+            <p>When writing output that is not entirely binary, but contains mixed binary and text, it
+          may be more convenient to use the text output method with the
+            <code>saxon:recognize-binary</code>
+               <a class="bodylink"
+                  href="/extensions/output-extras/serialization-parameters">serialization parameter</a>.</p>
+            <p>See also the <a class="bodylink code" href="../hexBinary-method">saxon:hexBinary</a>
+          serialization method.</p>
+         </section>
+         <section id="hexBinary-method" title="saxon:hexBinary serialization method">
+            <h1>saxon:hexBinary serialization method</h1>
+            <aside> Requires Saxon-PE or Saxon-EE. </aside>
+            <p>The serialization method <code>saxon:hexBinary</code> is intended to be useful when
+          creating <dfn>binary output files</dfn>, for example images. All serialization properties
+          other than <code>method</code> are ignored.</p>
+            <p>As with the <code>text</code> output method, all nodes in the result tree other than text
+          nodes are ignored. Each text node must hold a string that is in the lexical space of the
+            <code>xs:hexBinary</code> data type. The sequence of octets corresponding to this
+          hexBinary value is written to the binary output file.</p>
+            <p>When invoking this method via an API, use the property value
+            <code>{http://saxon.sf.net/}hexBinary</code>.</p>
+            <p>When using this serialization method, the <code>omit-xml-declaration</code> parameter is
+          automatically set to <code>yes</code>.</p>
+            <p> In the following example, the image displays as a small red dot. Note that whitespace
+          cannot appear in the middle of an <code>xs:hexBinary</code> value, but the string can be
+          split into multiple text nodes so long as each contains an even number of characters. </p>
+            <samp>&lt;xsl:template name="main"&gt;
+  &lt;html&gt;
+    &lt;head&gt;
+      &lt;title&gt;An image&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+      &lt;h1&gt;An image&lt;/h1&gt;
+      &lt;p&gt;&lt;img src="image004.gif"/&gt;&lt;/p&gt;
+    &lt;/body&gt;
+  &lt;/html&gt;
+  &lt;xsl:result-document method="saxon:hexBinary" href="image004.gif" media-type="image/gif"&gt;
+    &lt;xsl:text&gt;89504E470D0A1A0A0000000D49484452&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;0000000A0000000A08060000008D32CF&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;BD0000000467414D410000B18F0BFC61&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;05000000097048597300000B1300000B&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;1301009A9C180000000774494D4507D6&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;06011739281D1757E20000001D744558&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;74436F6D6D656E740043726561746564&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;2077697468205468652047494D50EF64&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;256E0000005D4944415418D3BDCCBD0D&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;825000C4F11F74B4ECE0164CE0320EE0&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;2ECEC1083626843D2C4D5EC5D958BC10&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;5E67B8EA721F7FFEAD6E1F84CBCF0E1D&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;EBE12B5CC31C5EE1D6C4877728E1139E&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;75D757A309A5CAB630B688F7B0844773&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;74BEBE0C921A177B4AD98A0000000049&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;454E44AE426082&lt;/xsl:text&gt;
+  &lt;/xsl:result-document&gt;
+&lt;/xsl:template&gt;
+</samp>
+            <p>It is of course possible to construct the hexBinary value programmatically. The EXPath binary
+          library is however geared towards creating base64Binary values, so that will usually be a better option.</p>
+            <p>When writing output that is not entirely binary, but contains mixed binary and text, it
+          may be more convenient to use the text output method with the
+            <code>saxon:recognize-binary</code>
+               <a class="bodylink"
+                  href="/extensions/output-extras/serialization-parameters">serialization parameter</a>.</p>
+            <p>See also the <a class="bodylink code" href="../base64Binary-method">saxon:base64Binary</a> serialization method.</p>
+         </section>
+         <section id="ptree-method" title="saxon:ptree serialization method">
+            <h1>saxon:ptree serialization method</h1>
+            <aside> Requires Saxon-PE or Saxon-EE. </aside>
+            <p>The serialization method <code>saxon:ptree</code> causes the result tree to be output as
+          a PTree: see <a class="bodylink" href="/sourcedocs/ptree">The PTree file format</a>. This
+          is a binary XML format that occupies roughly the same amount of disk space as standard
+          lexical XML, but which saves time both on serializing and parsing, making it useful if the
+          data has to be sent to another machine for the next stage of processing.</p>
+            <p>With this method, all serialization properties other than <code>method</code> are
+          ignored.</p>
+         </section>
+         <section id="xquery-method" title="saxon:xquery serialization method">
+            <h1>saxon:xquery serialization method</h1>
+            <aside> Requires Saxon-PE or Saxon-EE. </aside>
+            <p>The serialization method <code>saxon:xquery</code> is intended to be useful when
+          generating an XQuery query as the output of a query or stylesheet. This method differs
+          from the XML serialization method in that "&lt;" and "&gt;" characters appearing between
+          curly braces (but not between quotes) in text nodes and attribute nodes are not escaped.
+          The idea is to allow queries to be generated, or to be written within an XML document, and
+          processed by first serializing them with this output method, then parsing the result with
+          the XQuery parser. For example, the document <code>&lt;a&gt;{$a &amp;lt;
+            '&amp;lt;'}&lt;/a&gt;</code> will serialize as <code>&lt;a&gt;{$a &lt;
+            '&amp;lt;'}&lt;/a&gt;</code>. </p>
+            <p>When invoking this method via an API, use the property value
+            <code>{http://saxon.sf.net/}xquery</code>.</p>
+            <p>When using this serialization method, the <code>omit-xml-declaration</code> parameter is
+          automatically set to <code>yes</code>.</p>
+         </section>
+      </section>
+   </section>
+   <section id="instructions"
+            title="Extension instructions (XSLT only)"
+            xml:base="extensions/instructions-expanded.xml">
+      <h1>Extension instructions (XSLT only)</h1>
+      <p>A Saxon extension instruction is invoked using a name such as
+      <code>&lt;saxon:localname&gt;</code>.</p>
+      <p>The <code>saxon</code> prefix (or whatever prefix you choose to use) must be associated with
+    the Saxon namespace URI <code>http://saxon.sf.net/</code>. The prefix must also be designated as
+    an extension element prefix by including it in the <code>extension-element-prefixes</code>
+    attribute on the <a class="bodylink code" href="/xsl-elements/stylesheet">xsl:stylesheet</a>
+    element, or the <code>xsl:extension-element-prefixes</code> attribute on any enclosing <a class="bodylink" href="/xsl-elements/lre">literal result element</a> or extension element.</p>
+      <p>However, top-level elements can be used without designating the prefix as an extension element
+    prefix.</p>
+      <p>The extension instructions and declarations are:</p>
+      <nav>
+         <ul/>
+      </nav>
+      <section id="array" title="saxon:array">
+         <h1>saxon:array</h1>
+         <p>The <code>saxon:array</code> instruction is used to create an array from a sequence of items.
+        Like the "curly array constructor" in XPath 3.1, each member of the created array will be a singleton
+        item.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.  Implemented since Saxon 9.8.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>instruction<br/>
+            <strong>Content: </strong>
+            <i>sequence-constructor</i>
+            <br/>
+            <strong>Permitted parent elements: </strong>
+           any XSLT element whose content model is 
+        <i>sequence-constructor</i>; any literal result element 
+        </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>select?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The contents of the array may be given either by an expression in the <code>select</code>
+            attribute, or by expanding the sequence constructor contained in the <code>saxon:array</code> element</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>The content model is the same as <code>xsl:sequence</code>: either a <code>select</code> attribute,
+          or a contained sequence constructor, but not both. The effect is the same as evaluating the equivalent
+          <code>xsl:sequence</code> instruction and then passing the result into a curly array constructor.</p>
+         <h3 class="subtitle">Examples</h3>
+         <p>The following example groups transaction elements by date, returning the result as a nested array
+            structure: specifically, an outer array, itself containing arrays of transaction elements, where all
+            the transactions for a particular day are grouped as members of an inner array.</p>
+         <samp>&lt;xsl:variable name="groups" as="array(array(element(*))"&gt;
+  &lt;saxon:array&gt;
+    &lt;xsl:for-each-group select="transaction" group-by="@date"&gt;
+      &lt;saxon:array select="current-group()"/&gt;
+    &lt;/xsl:for-each-group&gt;
+  &lt;/saxon:array&gt;
+&lt;/xsl:variable&gt;
+</samp>
+         <p>Rather than binding the resulting array to a variable, another useful technique is to serialize
+          it as JSON using <code>&lt;xsl:output method="json" build-tree="no"/&gt;</code>.</p>
+         <h3 class="subtitle">See also</h3>
+         <p>
+            <a class="bodylink" href="/extensions/instructions/array-member">saxon:array-member</a>
+         </p>
+      </section>
+      <section id="array-member" title="saxon:array-member">
+         <h1>saxon:array-member</h1>
+         <p>The <code>saxon:array-member</code> instruction is used to create a single member for an array from a sequence of
+          items.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.  Implemented since Saxon 9.8.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>instruction<br/>
+            <strong>Content: </strong>
+            <i>sequence-constructor</i>
+            <br/>
+            <strong>Permitted parent elements: </strong>
+           any XSLT element whose content model is 
+        <i>sequence-constructor</i>; any literal result element 
+        </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>select?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The contents of the array may be given either by an expression in the <code>select</code>
+            attribute, or by expanding the sequence constructor contained in the
+            <code>saxon:array-member</code> element</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>The content model is the same as <code>xsl:sequence</code>: either a <code>select</code> attribute,
+          or a contained sequence constructor, but not both. The effect is the same as evaluating the equivalent
+          <code>xsl:sequence</code> instruction and then passing the result into a square array constructor.</p>
+         <aside>Internally, the result of <code>saxon:array-member</code> is an external Java object of class
+          <code>com.saxonica.functions.extfn.ArrayMemberValue</code> that wraps an arbitrary sequence. This object
+        is specially recognized by (for example) <code>saxon:array</code> and by curly array constructors, causing
+        the constructed array to contain the wrapped sequence as a member.</aside>
+         <h3 class="subtitle">See also</h3>
+         <p>
+            <a class="bodylink" href="/extensions/instructions/array">saxon:array</a>
+         </p>
+         <p>
+            <a class="bodylink" href="/functions/saxon/array-member">saxon:array-member()</a>
+         </p>
+      </section>
+      <section id="assign" title="saxon:assign">
+         <h1>saxon:assign</h1>
+         <p>The <code>saxon:assign</code> instruction is used to change the value of a global
+          variable that has previously been declared using <a class="bodylink code" href="/xsl-elements/variable">xsl:variable</a> (or <a class="bodylink code" href="/xsl-elements/param">xsl:param</a>). The variable or parameter must be marked as
+          assignable by including the extra attribute <a class="bodylink code" href="/extensions/attributes/assignable">saxon:assignable</a> with value
+            <code>yes</code>.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>instruction<br/>
+            <strong>Content: </strong>
+            <i>sequence-constructor</i>
+            <br/>
+            <strong>Permitted parent elements: </strong>
+           any XSLT element whose content model is 
+        <i>sequence-constructor</i>; any literal result element 
+        </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>name</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>eqname</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The name of the variable</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>select?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The new value may be given either by an expression in the <code>select</code>
+            attribute, or by expanding the content of the <code>saxon:assign</code> element</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>
+            <i>This instruction works only with global variables. It should be regarded as deprecated,
+            and may be withdrawn completely at some time in the future, since it is incompatible
+            with many of the optimizations that Saxon now performs.</i>
+         </p>
+         <p>
+            <i>There are better ways of achieving the same effect. Consider constructs such
+          as tunnel parameters, <code>xsl:iterate</code>, higher-order functions, or
+          <code>xsl:accumulator</code>.</i>
+         </p>
+         <p>If <code>saxon:assign</code> is used then multithreading should be disabled by setting
+          the configuration property <a class="bodylink code" href="/configuration/config-features">Feature.ALLOW_MULTITHREADING</a> to false.
+        A compile-time warning is issued if multi-threading is allowed, since the order of execution
+        of instructions in the stylesheet is then unpredictable.</p>
+         <p>If the <code>xsl:variable</code> element has an <code>as</code> attribute, then the value
+          is converted to the required type of the variable in the usual way.</p>
+         <p>The <code>saxon:assign</code> element itself does not allow an <code>as</code> attribute.
+          Instead, it calculates the value of the variable as if <code>as="item()*"</code> were
+          specified. This means that the result of the construct:</p>
+         <samp>&lt;saxon:assign name="a"&gt;London&lt;/saxon:assign&gt;</samp>
+         <p>is a single text node, not a document node containing a text node. If you want to create
+          a document node, use <a class="bodylink code" href="/xsl-elements/document">xsl:document</a>.</p>
+         <p>
+            <strong>Note:</strong> Using <code>saxon:assign</code> is cheating. XSLT is designed as a
+          language that is free of side-effects, which is why variables are not assignable. Once
+          assignment to variables is allowed, certain optimizations become impossible. 
+          There are some circumstances in which the order of execution may not be quite what you
+          expect, in which case <code>saxon:assign</code> may show anomalous behavior. In particular,
+          avoid calling saxon:assign while evaluating variables, or from within a function called
+          from a context such as a predicate. In principle
+          the <code>saxon:assignable</code> attribute is designed to stop Saxon doing optimizations
+          that cause such anomalies, but you can't always rely on this.</p>
+         <p>Saxon issues a warning if <code>saxon:assign</code> is used in a configuration that
+        allows multi-threading, since the construct is not thread-safe. Multi-threading can be
+        disabled using the configuration property <code>Feature.ALLOW_MULTITHREADING</code>.</p>
+         <h3 class="subtitle">Examples</h3>
+         <samp>&lt;xsl:variable name="i" select="0" saxon:assignable="yes"/&gt;
+&lt;xsl:template name="loop"&gt;
+  &lt;saxon:while test="$i &amp;lt; 10"&gt;
+    The value of i is &lt;xsl:value-of select="$i"/&gt;
+    &lt;saxon:assign name="i" select="$i+1"/&gt;
+  &lt;/saxon:while&gt;
+&lt;/xsl:template&gt;
+</samp>
+         <h3 class="subtitle">See also</h3>
+         <p>
+            <a class="bodylink" href="/extensions/attributes/assignable">saxon:assignable</a>
+         </p>
+         <p>
+            <a class="bodylink" href="/xsl-elements/variable">xsl:variable</a>
+         </p>
+         <p>
+            <a class="bodylink" href="/xsl-elements/param">xsl:param</a>
+         </p>
+      </section>
+      <section id="deep-update" title="saxon:deep-update">
+         <h1>saxon:deep-update</h1>
+         <p>The <code>saxon:deep-update</code> instruction is used to make changes to the content of a structure
+          of maps and arrays (which will typically have been obtained by applying the <code>parse-json</code>
+          or <code>json-doc</code> function to JSON input).</p>
+         <aside> Requires Saxon-PE or Saxon-EE.  Implemented since Saxon 9.9.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>instruction<br/>
+            <strong>Content: </strong>none<br/>
+            <strong>Permitted parent elements: </strong>
+           any XSLT element whose content model is 
+        <i>sequence-constructor</i>; any literal result element 
+        </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>root</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>An expression to select the root(s) of the tree(s) to be updated</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>select</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>An expression to select the maps or arrays that are to be directly updated</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>action</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>An expression to perform the update on the selected maps or arrays</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>The effect, in outline, is to return a value that is the same as the value selected by the <code>root</code>
+          expression, except that in the maps or arrays selected by the <code>select</code> expression, the 
+          specified <code>action</code> has been applied.
+        </p>
+         <p>More detailed rules:</p>
+         <ul>
+            <li>
+               <p>The <code>root</code> attribute is an XPath expression that selects a map or array (call this the root item). 
+            It can also select a sequence of maps or arrays, in which case the same processing is applied to each of them, and the 
+            result is a new sequence that corresponds one-for-one with the old.</p>
+            </li>
+            <li>
+               <p>The <code>select</code> attribute is an XPath expression that selects the maps or arrays to which updates are to be applied
+            (call these the leaves: though there is no restriction on what they can contain).</p>
+               <p>This expression must follow certain rules. It is evaluated with the root item as context item, 
+              and it must only select downwards from the root item using a defined set of operators. If the expression 
+              doesn't follow these rules, a dynamic error results indicating that something has been selected which does 
+              not have the root item in its pedigree.
+            </p>
+               <p>The functions and operators that can be used to select downwards within this expression include:</p>
+               <ol>
+                  <li>
+                     <code>map:get($M, $K)</code> and its equivalents <code>$M($K)</code> or <code>$M?($K)</code>
+                  </li>
+                  <li>
+                     <code>array:get($A, $I)</code> and its equivalents <code>$A($I)</code> or <code>$A?($I)</code>
+                  </li>
+                  <li>
+                     <code>$V?*</code> where $V is either a map or an array</li>
+                  <li>
+                     <code>array:subarray()</code>, <code>array:remove()</code>, <code>array:head()</code>,
+              <code>array:tail()</code>
+                  </li>
+                  <li>
+                     <code>map:find()</code>
+                  </li>
+               </ol>
+            </li>
+            <li>
+               <p>The <code>action</code> attribute is an expression that is evaluated with each selected 
+            (leaf) map or array as context item, and it returns a new value (usually, but not necessarily, an updated
+            map or array). The resulting map/array is then substituted for the original in its containing map/array, and so on 
+            recursively up to the root. 
+            The item that results from substituting at the root level is then returned in the result of the 
+            <code>saxon:deep-update</code> instruction.
+          </p>
+            </li>
+         </ul>
+         <p>Internally, the way this works is that the root item is marked as a map/array that retains pedigree
+        information. When downwards selections are made from a map/array with pedigree information, any maps
+        or arrays that are selected in the content will also be marked as having pedigree information: specifically,
+        this information holds the item's containing map or array, and its key within this map or array. At the
+        leaf level, when a map/array with pedigree information is replaced, its known container can be updated
+        to hold the new item in place of the old. This updating then percolates upwards to the root of the
+        pedigree, and the updated root is returned in the result of the instruction.</p>
+         <h3 class="subtitle">Examples</h3>
+         <p>Consider a JSON text holding details of customers, orders, and order-lines like this:</p>
+         <samp>
+[
+  { "customer": "Jones the Baker",
+    "orders" : [{ 
+       "order-no": 123,
+       "date": 2017-02-03,
+       "order-lines": [
+          { "product": "flour, 25Kg"
+            "quantity": 1
+          },
+          { "product": "salt, 1Kg"
+            "quantity": 3
+          }
+        ]   
+     },
+     {
+        "order-no: 456,
+        ....
+     }]
+  },
+  { "customer": "Evans the Butcher",
+    ....    
+  }
+]            
+            </samp>
+         <p>And suppose we want to double the quantity of flour ordered by Jones. This can be done as follows:</p>
+         <samp>&lt;xsl:variable name="in" select="parse-json('customers.json')"/&gt;
+&lt;xsl:variable name="updated" as="array(*)"&gt;
+  &lt;saxon:deep-update
+     root = "$in"
+     select = "?*[?customer = 'Jones the Baker'] ? orders?*[?order-no = 123] 
+        ? order-lines?*[contains(?product, 'flour')]"
+     action = "map:put(., 'quantity', ?quantity * 2"/&gt;
+&lt;/xsl:variable&gt;
+&lt;xsl:value-of select="serialize($updated, map{'method':'json', 'indent':true()})"/&gt;
+</samp>
+      </section>
+      <section id="do" title="saxon:do">
+         <h1>saxon:do</h1>
+         <p>The <code>saxon:do</code> instruction is designed for use when invoking 
+          XPath expressions that have side-effects. Any result of the expression is discarded.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.  Implemented since Saxon 9.9.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>instruction<br/>
+            <strong>Content: </strong>none<br/>
+            <strong>Permitted parent elements: </strong>
+           any XSLT element whose content model is 
+        <i>sequence-constructor</i>; any literal result element 
+        </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>action</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>The expression to be evaluated (typically an expression with side-effects).</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>The instruction is designed for use when invoking 
+          XPath expressions that have side-effects. For example, <code>&lt;saxon:do action="$connection?close()"/&gt;</code>
+          calls the function <code>$connection?close()</code>, while <code>&lt;saxon:do action="saxon:discard-document($doc)"/&gt;</code> 
+          calls <code>saxon:discard-document()</code>. Any result of the expression is discarded. The instruction is useful
+          in preference to <code>xsl:sequence</code> firstly because the result of the expression is discarded, and secondly
+          because it is recognized by the optimizer as signaling an expression that is being evaluated for its side-effects.
+          The optimizer will attempt to avoid aggressive optimizations such as lifting the instruction
+          out of an <code>xsl:for-each</code> loop. Note however that this does not propagate; just
+          because a function <code>F</code> calls <code>saxon:do</code>, for example, does not prevent calls on <code>F</code> being moved
+          out of a loop.</p>
+      </section>
+      <section id="doctype" title="saxon:doctype">
+         <h1>saxon:doctype</h1>
+         <p>The <code>saxon:doctype</code> instruction is used to insert a document type declaration
+          into the current output file. It should be instantiated before the first element in the
+          output file is written. It must be used only when writing a final result tree (not a
+          temporary tree) and only when writing text nodes. The reason for these restrictions is
+          that <code>saxon:doctype</code> writes directly to the serialized output stream
+          (internally it uses disable-output-escaping to achieve this). It is not possible to
+          represent a doctype declaration as a node on a temporary tree.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>declaration<br/>
+            <strong>Content: </strong>
+            <i>sequence-constructor</i>
+            <br/>
+            <strong>Permitted parent elements: </strong>
+            <a href="/xsl-elements/stylesheet" class="bodylink code">xsl:stylesheet</a>
+          ; <a href="/xsl-elements/transform" class="bodylink code">xsl:transform</a>
+            <br/>
+            <strong>
+               <i>Element has no attributes</i>
+            </strong>
+         </p>
+         <h3 class="subtitle">Details</h3>
+         <p>The content of the element is a template-body that is instantiated to create an XML
+          document that represents the DTD to be generated; this XML document is then serialized
+          using a special output method that produces DTD syntax rather than XML syntax.</p>
+         <p>If this element is present the <code>doctype-system</code> and
+            <code>doctype-public</code> attributes of <a class="bodylink code" href="/xsl-elements/output">xsl:output</a> should not be present. Also, the
+            <code>standalone</code> attribute of <code>xsl:output</code> should not be used. This is
+          because the doctype declaration generated by <code>saxon:doctype</code> is output as a
+          text node using disable-output-escaping, and thus appears to the serializer as a document
+          that is not well-formed; the use of <code>standalone</code> with such documents is
+          prohibited by the W3C serialization specification.</p>
+         <p>The generated XML document uses the following elements, where the namespace prefix "dtd"
+          is used for the namespace URI <code>http://saxon.sf.net/dtd</code>:</p>
+         <table>
+            <tr>
+               <td>
+                  <code>dtd:doctype</code>
+               </td>
+               <td> Represents the document type declaration.<br/>
+                  <strong>Category: </strong>declaration<br/>
+                  <strong>Content: </strong>
+                  <code>dtd:element*</code>; <code>dtd:attlist*</code>; <code>dtd:entity*</code>;
+                <code>dtd:notation*</code>
+                  <br/>
+                  <strong>Permitted parent elements: </strong>
+                  <a href="/xsl-elements/stylesheet" class="bodylink code">xsl:stylesheet</a> ; <a href="/xsl-elements/transform" class="bodylink code">xsl:transform</a>
+                  <br/>
+                  <tr>
+                     <td>
+                        <strong>Attributes: </strong>
+                     </td>
+                     <td>
+                        <table>
+                           <tr>
+                              <td>
+                                 <code>
+                                    <strong>name</strong>
+                                 </code>
+                              </td>
+                              <td>The name of the document type</td>
+                           </tr>
+                           <tr>
+                              <td>
+                                 <code>system?</code>
+                              </td>
+                              <td>The system ID</td>
+                           </tr>
+                           <tr>
+                              <td>
+                                 <code>public?</code>
+                              </td>
+                              <td>The public ID</td>
+                           </tr>
+                        </table>
+                     </td>
+                  </tr>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>dtd:element</code>
+               </td>
+               <td>Represents an element type declaration.<br/>
+                  <strong>Category: </strong>declaration<br/>
+                  <strong>Content: </strong> none<br/>
+                  <strong>Permitted parent elements: </strong>
+                  <code>dtd:doctype</code>
+                  <br/>
+                  <tr>
+                     <td>
+                        <strong>Attributes: </strong>
+                     </td>
+                     <td>
+                        <table>
+                           <tr>
+                              <td>
+                                 <code>
+                                    <strong>name</strong>
+                                 </code>
+                              </td>
+                              <td>The name of the element type</td>
+                           </tr>
+                           <tr>
+                              <td>
+                                 <code>
+                                    <strong>content</strong>
+                                 </code>
+                              </td>
+                              <td>The content model, exactly as it appears in a DTD, for example
+                          <code>content="(#PCDATA)"</code> or <code>content="( a | b |
+                        c)*"</code>
+                              </td>
+                           </tr>
+                        </table>
+                     </td>
+                  </tr>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>dtd:attlist</code>
+               </td>
+               <td>Represents an attribute list declaration.<br/>
+                  <strong>Category: </strong>declaration<br/>
+                  <strong>Content: </strong>
+                  <code>dtd:attribute+</code>
+                  <br/>
+                  <strong>Permitted parent elements: </strong>
+                  <code>dtd:doctype</code>
+                  <br/>
+                  <tr>
+                     <td>
+                        <strong>Attributes: </strong>
+                     </td>
+                     <td>
+                        <table>
+                           <tr>
+                              <td>
+                                 <code>
+                                    <strong>element</strong>
+                                 </code>
+                              </td>
+                              <td>The name of the element type</td>
+                           </tr>
+                        </table>
+                     </td>
+                  </tr>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>dtd:attribute</code>
+               </td>
+               <td> Represents an attribute declaration within an attribute list.<br/>
+                  <strong>Category: </strong>declaration<br/>
+                  <strong>Content: </strong> none<br/>
+                  <strong>Permitted parent elements: </strong>
+                  <code>dtd:attlist</code>
+                  <br/>
+                  <tr>
+                     <td>
+                        <strong>Attributes: </strong>
+                     </td>
+                     <td>
+                        <table>
+                           <tr>
+                              <td>
+                                 <code>
+                                    <strong>name</strong>
+                                 </code>
+                              </td>
+                              <td>The name of the attribute</td>
+                           </tr>
+                           <tr>
+                              <td>
+                                 <code>
+                                    <strong>type</strong>
+                                 </code>
+                              </td>
+                              <td>The type of the attribute, exactly as it appears in a DTD, for example
+                          <code>type="ID"</code> or <code>type="( red | green | blue)"</code>
+                              </td>
+                           </tr>
+                           <tr>
+                              <td>
+                                 <code>
+                                    <strong>value</strong>
+                                 </code>
+                              </td>
+                              <td>The default value of the attribute, exactly as it appears in a DTD, for
+                        example <code>value="#REQUIRED"</code> or <code>value="#FIXED
+                        'blue'"</code>
+                              </td>
+                           </tr>
+                        </table>
+                     </td>
+                  </tr>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>dtd:entity</code>
+               </td>
+               <td>Represents an entity declaration. The element may be empty, or it may have content.
+              The content is a template body, which is instantiated to define the value of an
+              internal parsed entity. Note that this value includes the delimiting quotes.<br/>
+                  <strong>Category: </strong>declaration<br/>
+                  <strong>Content: </strong>
+                  <i>sequence-constructor</i>
+                  <br/>
+                  <strong>Permitted parent elements: </strong>
+                  <code>dtd:doctype</code>
+                  <br/>
+                  <tr>
+                     <td>
+                        <strong>Attributes: </strong>
+                     </td>
+                     <td>
+                        <table>
+                           <tr>
+                              <td>
+                                 <code>
+                                    <strong>name</strong>
+                                 </code>
+                              </td>
+                              <td>The name of the entity</td>
+                           </tr>
+                           <tr>
+                              <td>
+                                 <code>system?</code>
+                              </td>
+                              <td>The system identifier</td>
+                           </tr>
+                           <tr>
+                              <td>
+                                 <code>public?</code>
+                              </td>
+                              <td>The public identifier</td>
+                           </tr>
+                           <tr>
+                              <td>
+                                 <code>parameter?</code>
+                              </td>
+                              <td>Set to <code>yes</code> for a parameter entity</td>
+                           </tr>
+                           <tr>
+                              <td>
+                                 <code>notation?</code>
+                              </td>
+                              <td>The name of a notation, for an unparsed entity</td>
+                           </tr>
+                        </table>
+                     </td>
+                  </tr>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>dtd:notation</code>
+               </td>
+               <td>Represents a notation declaration.<br/>
+                  <strong>Category: </strong>declaration<br/>
+                  <strong>Content: </strong> none<br/>
+                  <strong>Permitted parent elements: </strong>
+                  <code>dtd:doctype</code>
+                  <br/>
+                  <tr>
+                     <td>
+                        <strong>Attributes: </strong>
+                     </td>
+                     <td>
+                        <table>
+                           <tr>
+                              <td>
+                                 <code>
+                                    <strong>name</strong>
+                                 </code>
+                              </td>
+                              <td>The name of the notation</td>
+                           </tr>
+                           <tr>
+                              <td>
+                                 <code>system?</code>
+                              </td>
+                              <td>The system identifier</td>
+                           </tr>
+                           <tr>
+                              <td>
+                                 <code>public?</code>
+                              </td>
+                              <td>The public identifier</td>
+                           </tr>
+                        </table>
+                     </td>
+                  </tr>
+               </td>
+            </tr>
+         </table>
+         <p>Note that Saxon will perform only minimal validation on the DTD being generated; it will
+          output the components requested but will not check that this generates well-formed XML,
+          let alone that the output document instance is valid according to this DTD.</p>
+         <h3 class="subtitle">Examples</h3>
+         <samp>&lt;xsl:template match="/"&gt;
+  &lt;saxon:doctype xsl:extension-element-prefixes="saxon"&gt;
+  &lt;dtd:doctype name="booklist"
+        xmlns:dtd="http://saxon.sf.net/dtd" xsl:exclude-result-prefixes="dtd"&gt;
+    &lt;dtd:element name="booklist" content="(book)*"/&gt;
+    &lt;dtd:element name="book" content="EMPTY"/&gt;
+    &lt;dtd:attlist element="book"&gt;
+      &lt;dtd:attribute name="isbn" type="ID" value="#REQUIRED"/&gt;
+      &lt;dtd:attribute name="title" type="CDATA" value="#IMPLIED"/&gt;
+    &lt;/dtd:attlist&gt;
+    &lt;dtd:entity name="blurb"&gt;'A &lt;i&gt;cool&lt;/i&gt; book with &amp;gt; 200 pictures!'&lt;/dtd:entity&gt;
+    &lt;dtd:entity name="cover" system="cover.gif" notation="GIF"/&gt;
+    &lt;dtd:notation name="GIF" system="http://gif.org/"/&gt;
+    &lt;dtd:entity name="ISOEntities" 
+        public="ISO 8879-1986//ENTITIES ISO Character Entities 20030531//EN//XML"
+        system="file:///D:/ent/ISOEntities"
+        parameter="yes"&gt;     
+    &lt;xsl:text&gt;%ISOEntities;&lt;/xsl:text&gt;
+  &lt;/dtd:doctype&gt;
+  &lt;/saxon:doctype&gt;
+  &lt;xsl:apply-templates/&gt;
+&lt;/xsl:template&gt;</samp>
+         <p>Although not shown in this example, there is nothing to stop the DTD being generated as
+            the output of a transformation, using instructions such as <code>xsl:value-of</code> and
+              <code>xsl:call-template</code>. It is also possible to use <code>xsl:text</code> to
+            output DTD constructs not covered by this syntax, for example conditional sections and
+            references to parameter entities. Such text nodes will always be output with escaping
+            disabled.</p>
+      </section>
+      <section id="entity-ref" title="saxon:entity-ref">
+         <h1>saxon:entity-ref</h1>
+         <p>The <code>saxon:entity-ref</code> element is useful to generate entities such as
+          &amp;nbsp; in HTML output. To do this, write: <code>&lt;saxon:entity-ref
+            name="nbsp"/&gt;</code>
+         </p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>instruction<br/>
+            <strong>Content: </strong>none<br/>
+            <strong>Permitted parent elements: </strong>
+           any XSLT element whose content model is 
+        <i>sequence-constructor</i>; any literal result element 
+        </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>name</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>eqname</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>The name of the entity</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>Note that the preferred way to produce a non-breaking space character in the output is
+          simply to write <code>&amp;#160;</code> or <code>&amp;#xa0;</code> in the stylesheet. By
+          default, with HTML output, this will be serialized as <code>&amp;nbsp;</code>, though the
+          way it is serialized doesn't actually matter as far as the HTML browser is concerned.</p>
+         <p>The element <code>saxon:entity-ref</code> is permitted only in contexts where
+            <code>disable-output-escaping</code> would be permitted: that is, when writing to a
+          serialized output destination.</p>
+      </section>
+      <section id="import-query" title="saxon:import-query">
+         <h1>saxon:import-query</h1>
+         <p>The <code>saxon:import-query</code> element is a top-level declaration that causes an
+          XQuery library module to be imported into the stylesheet.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>declaration<br/>
+            <strong>Content: </strong>none<br/>
+            <strong>Permitted parent elements: </strong>
+            <a href="/xsl-elements/stylesheet" class="bodylink code">xsl:stylesheet</a>
+          ; <a href="/xsl-elements/transform" class="bodylink code">xsl:transform</a>
+         </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>href?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>uri</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>The (absolute or relative) URI of the XQuery module.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>namespace</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>uri</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>Identifies the module namespace of the imported module.</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>The <code>namespace</code> attribute is required, and identifies the module namespace of the XQuery library module
+        to be imported.</p>
+         <p>The location of the XQuery library module can be provided in one of two ways:</p>
+         <ol>
+            <li>In Saxon-EE, XQuery library modules can be compiled (from a Java application) using the <code>XQueryCompiler.compileLibrary()</code>
+          method, and can then be made available to an XSLT compiler using the <code>XsltCompiler.importXQueryEnvironment()</code> method.</li>
+            <li>Alternatively, the <code>href</code> attribute can be used to specify the location of the source code of the XQuery library module.
+          (The <code>href</code> attribute is ignored if a compiled version of the library is known to the compiler.)</li>
+         </ol>
+         <p>The effect is that the public functions and variables declared in the library module become available for
+          reference from any XPath expression in the stylesheet. They are
+          available in all modules of the stylesheet.</p>
+         <p>Only the functions and variables actually defined in the given XQuery module become available for reference. Functions
+          and variables that the specified module imports from other XQuery modules are not imported (though they can be referenced indirectly). This follows
+          the semantics of XQuery's <code>import module</code> declaration.</p>
+         <p>Functions and variable annotated as <code>%private</code> are not imported.</p>
+         <p>The imported functions and variables do not have any specific import precedence. A static error occurs
+          if the import leads to any duplicated function or variable names. </p>
+         <p>The <code>saxon:import-xquery</code> declaration has two optional attributes. The
+            <code>href</code> attribute is the (absolute or relative) URI of the XQuery module. The
+            <code>namespace</code> attribute identifies the module namespace of the imported module.
+          If <code>href</code> alone is specified, then the module is loaded from the given
+          location. If <code>namespace</code> alone is specified, then the module must already be
+          present in Saxon's <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>
+          object (you can share a <code>Configuration</code> between multiple stylesheets, which
+          means that imported XQuery modules will not need to be recompiled for each one). If both
+          attributes are specified, then Saxon uses an already-loaded module for the namespace if it
+          can, otherwise it fetches it from the specified location, and checks that the namespace is
+          correct. It is recommended to specify both attributes.</p>
+      </section>
+      <section id="output" title="saxon6:output">
+         <h1>saxon6:output</h1>
+         <p>The <code>saxon6:output</code> element (in namespace <code>xmlns:saxon="http://icl.com/saxon"</code>) is a synonym
+          for <a class="bodylink code" href="/xsl-elements/result-document">xsl:result-document</a>, provided to enable
+          the popular DocBook 1.0 stylesheets to run using Saxon-PE/EE 9.9 and later.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.  Implemented since Saxon 9.9.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>instruction<br/>
+            <strong>Content: </strong>
+            <i>sequence-constructor</i>
+            <br/>
+            <strong>Permitted parent elements: </strong>
+           any XSLT element whose content model is 
+        <i>sequence-constructor</i>; any literal result element 
+        </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>format?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>eqname</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>If present, it gives the name of an <a class="bodylink code" href="../output">xsl:output</a> element that describes
+            the serialization format for this output document; if absent, the unnamed
+            <code>xsl:output</code> declaration is used.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>href?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>uri</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <p>The URI for the result document. If this is a relative URI, it is interpreted
+              relative to the base output URI. The base output URI is the systemID of the
+              result object supplied as the destination for the transformation, or if you
+              are using the command line, the value of the <code>-o</code> flag. If the
+              <code>href</code> attribute is omitted, the document is written to the
+              location identified by the base output URI: this will only work if all the
+              output produced by the stylesheet is within the scope of an
+              <code>xsl:result-document</code> instruction.</p>
+                     <p>If the base output URI is not known, and the supplied <code>href</code> is
+              not absolute, then this results in a failure.</p>
+                     <p>This base output URI must be a writable location. Usually it will therefore
+              be a URI that uses the "file:" scheme. However, Saxon attempts to open a
+              connection whatever URI scheme is used, and it should therefore work with
+              any URI where the Java VM has the capability to open a writable connection.
+              Users have reported success in using "ftp:" and "mailto:" URIs.</p>
+                     <p>If the configuration option <a class="bodylink code" href="/configuration/config-features">Feature.ALLOW-EXTERNAL-FUNCTIONS</a>
+              is set, then for security reasons use of the
+              <code>xsl:result-document</code> instruction with the <code>href</code>
+              attribute is disallowed.</p>
+                  </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>validation?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>"strict" | "lax" | "preserve" | "strip"</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Requires Saxon-PE or
+            Saxon-EE.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>type?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>eqname</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>Determines what happens to any type
+            annotations on element or attribute nodes. Requires Saxon-PE or
+            Saxon-EE.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>method?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            "xml"
+             | "html"
+             | "xhtml"
+             | "text"
+             | "json"
+             | "adaptive"
+             | <i>eqname</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see Details for
+            more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>allow-duplicate-names?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>boolean</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see
+            Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>build-tree?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>boolean</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see Details for
+            more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>byte-order-mark?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>boolean</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see
+            Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>cdata-section-elements?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>eqnames</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see
+            Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>doctype-public?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>string</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see Details
+            for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>doctype-system?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>string</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see Details
+            for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>encoding?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>string</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see Details for
+            more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>escape-uri-attributes?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>boolean</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see
+            Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>html-version?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>decimal</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see Details
+            for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>include-content-type?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>boolean</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see
+            Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>indent?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>boolean</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see Details for
+            more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>item-separator?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>string</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Not available in XSLT.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>json-node-output-method?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            "xml"
+             | "html"
+             | "xhtml"
+             | "text"
+             | <i>eqname</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute,
+            see Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>media-type?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>string</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see Details for
+            more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>normalization-form?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            "NFC"
+             | "NFD"
+             | "NFKC"
+             | "NFKD"
+             | "fully-normalized"
+             | "none"
+             | <i>nmtoken</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see
+            Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>omit-xml-declaration?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>boolean</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see
+            Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>parameter-document?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>uri</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>New in XSLT 3.0. Not implemented
+            in Saxon 9.7. Allows serialization to be configured in an external
+            document.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>standalone?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>boolean</i>
+             | "omit"
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see Details for
+            more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>suppress-indentation?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>eqnames</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see
+            Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>undeclare-prefixes?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>boolean</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see
+            Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>use-character-maps?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>eqnames</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>Serialization attribute, see
+            Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>output-version?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+            <i>nmtoken</i>
+           }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>Overrides the <code>version</code>
+            attribute specified on the output definition. Serialization attribute, see
+            Details for more information.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>saxon:asynchronous?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>boolean</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>The default
+            for Saxon-EE is <code>yes</code>, which causes the instruction to be evaluated
+            in a separate thread, if there is a spare thread available (the maximum number
+            of threads used is configurable using <a class="bodylink code" href="/configuration/config-features">Feature.RESULT_DOCUMENT_THREADS</a>).
+            Use <code>no</code> to suppress multi-threading.
+            Asynchronous processing of <code>xsl:result-document</code> is automatically
+            suppressed if tracing (using a <code>TraceListener</code>) is enabled.
+            For details see <a class="bodylink code" href="/extensions/attributes/asynchronous">saxon:asynchronous</a> and notes
+            below.</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>The instruction is a synonym for <a class="bodylink code" href="/xsl-elements/result-document">xsl:result-document</a>. Historically, support for multiple
+        output documents was first introduced as a Saxon extension to XSLT 1.0 in the form of the <code>saxon:output</code>
+        instruction. Other vendors followed suit, and the idea was eventually standardized in XSLT 2.0 under the
+        name <code>xsl:result-document</code>. The DocBook 1.0 stylesheets, however, remain in widespread use, and include
+          calls on <code>saxon:output</code>. It is
+        often difficult for users to move forwards because they have written their own DocBook customization layers; as a result,
+        many users have been locked into Saxon 6.5.5 which is now obsolete and no longer maintained.</p>
+         <p>Saxon 9.9 reintroduces <code>saxon6:output</code> (in the original Saxon 6.5.5 namespace, which differs from
+          the usual Saxon namespace, so here we use a different prefix) so that the
+        DocBook 1.0 stylesheets can now be executed with a modern Saxon release. Note that the specification is
+        not identical with the Saxon 6.5.5 original, but it serves the purpose in supporting DocBook. The main difference
+        is that in Saxon 6.5.5, the attribute <code>saxon:output/@href</code> was interpreted as a filename (not a URI) 
+        relative to the current working directory.</p>
+         <h3 class="subtitle">See also</h3>
+         <p>
+            <a class="bodylink" href="/xsl-elements/result-document">xsl:result-document</a>
+         </p>
+      </section>
+      <section id="tabulate-maps" title="saxon:tabulate-maps">
+         <h1>saxon:tabulate-maps</h1>
+         <p>The <code>saxon:tabulate-maps</code> instruction selects a collection of maps and expands them by adding
+          information from containing maps and arrays in a hierarchic structure (typically obtained by parsing JSON).
+          The result is an array of maps which can be considered as a table with one row for each leaf in the tree, with data from upper
+          levels of the hierarchy replicated in each relevant row of the table.
+        </p>
+         <aside> Requires Saxon-PE or Saxon-EE.  Implemented since Saxon 9.9.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>instruction<br/>
+            <strong>Content: </strong>none<br/>
+            <strong>Permitted parent elements: </strong>
+           any XSLT element whose content model is 
+        <i>sequence-constructor</i>; any literal result element 
+        </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>root</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>XPath expression selecting the root of a tree of maps and arrays</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>select</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>XPath expression selecting a sequence of maps relative to the root of the tree</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>The effect of the instruction is easiest to illustrate by example. Consider the structure that results
+        from parsing the JSON input:</p>
+         <samp>
+[{ "country": "UK",
+   "cities: [
+      { "name": "London",
+        "population" : 7200000
+      },
+      { "name": "Birmingham",
+        "population": 992000
+      },
+      { "name": "Leeds",
+        "population": 720000
+      }
+    ]},
+ { "country": "France"
+   "cities": [
+      { "name": "Paris",
+        "population" : 12341418
+      },
+      { "name": "Lyon",
+        "population": 2214068
+      },
+      { "name": "Marseille",
+        "population": 1727070
+      }
+    ]}
+ ]
+ </samp>
+         <p>This can be processed using the instruction:</p>
+         <samp>&lt;saxon:tabulate-maps root="parse-json($input)" select="?*?cities?*"/&gt;</samp>
+         <p>which delivers the result (serialized as JSON, with whitespace added for clarity):</p>
+         <samp>
+[{"name":"London",     "population":7.2E6,       "_keys":[1,"cities",1], "country":"UK"},
+ {"name":"Birmingham", "population":992000,      "_keys":[1,"cities",2], "country":"UK"},
+ {"name":"Leeds",      "population":720000,      "_keys":[1,"cities",3], "country":"UK"},
+ {"name":"Paris",      "population":1.2341418E7, "_keys":[2,"cities",1], "country":"France"},
+ {"name":"Lyon",       "population":2.214068E6,  "_keys":[2,"cities",2], "country":"France"},
+ {"name":"Marseille",  "population":1.72707E6,   "_keys":[2,"cities",3], "country":"France"}]         
+          </samp>
+         <p>The result is thus an array of maps, corresponding one-to-one with the maps selected in the <code>select</code>
+        expression, with each map in the output containing:</p>
+         <ol>
+            <li>Copies of the entries (key-value pairs) in the original map</li>
+            <li>Copies of all entries in containing maps, other than the containing entry</li>
+            <li>A new entry, <code>_keys</code>, containing an array of map keys and array indexes representing a path
+          from the root to the selected map.</li>
+         </ol>
+         <p>If the added entries have key values that would conflict with existing entries, the key is modified by the addition
+        of a numeric suffix.</p>
+         <p>The effect of the instruction is thus to create a flat structure (an array of maps) in which data from
+        upper levels of the hierarchic structure is duplicated in each row of the result.</p>
+      </section>
+      <section id="type-alias" title="saxon:type-alias">
+         <h1>saxon:type-alias</h1>
+         <p>The <code>saxon:type-alias</code> element declares a simple name that can be used
+        to represent an item type.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.  Implemented since Saxon 9.8.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>declaration<br/>
+            <strong>Content: </strong>none<br/>
+            <strong>Permitted parent elements: </strong>
+           any XSLT element whose content model is 
+        <i>sequence-constructor</i>; any literal result element 
+        </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>name</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>eqname</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>The name to be used for the type</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>type</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>itemType</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>The item type represented by the name</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>With maps and arrays, item types can become quite complex, and they are not always
+        very meaningful. For example, in a Saxon-JS stylesheet implementing an interactive
+        chess game, the state of the board might be represented by the type <code>array(array(xs:integer))</code>,
+        while a move or possible move might be represented as <code>map(xs:string, xs:integer)</code>.
+        Such types do little to make the code more readable, and they create a potential problem in exposing
+        design decisions as to how particular concepts are implemented internally. Type aliases allow
+        such types to be written as, for example <code>~board</code> and <code>~move</code>. So a function
+        that takes a board and a move as input, and produces a new board as its result, would have the
+        signature <code>function ($board as ~board, $move as ~move) as ~board</code>.</p>
+         <p>The element <code>saxon:type-alias</code> can appear as a top-level declaration in the stylesheet.
+        A type that is declared anywhere in the stylesheet can be referenced using the <code>~typename</code>
+        syntax anywhere within the stylesheet, including in another <code>saxon:type-alias</code>
+        declaration. Forwards references are allowed, but circular references are not.</p>
+         <p>Item types such as <code>~board</code> can be used anywhere an item type is permitted, for example
+        in XSLT <code>as</code> and <code>type</code> attributes, and in XPath <code>instance of</code>
+        and <code>cast as</code> expressions (but not as the name of a constructor function, unless a user-defined
+          function is explicitly written with the same name). Where a Sequence Type is allowed, the name can be followed
+        by an occurrence indicator, for example <code>~move*</code> represents a sequence of moves.</p>
+         <p>Import precedence works in the usual way. Type aliases are currently local to a stylesheet package;
+        if you are writing a library package and want client applications to use aliases for the type names used in your API, issue
+        a stylesheet module containing the aliases, that users can include using <code>xsl:include</code>.</p>
+         <p>Type aliases are not recognized in static expressions (for example, in <code>use-when</code>).</p>
+         <p>Use of the <code>saxon:type-alias</code> syntax requires Saxon-PE or higher. Use of the "~" syntax
+          in XPath expressions requires the configuration option <code>Feature.ALLOW_SYNTAX_EXTENSIONS</code> to be enabled.</p>
+         <p>For further information about the syntax extension, see <a class="bodylink" href="/extensions/syntax-extensions/type-aliases">Type aliases</a>.</p>
+         <h3 class="subtitle">Examples</h3>
+         <samp>&lt;saxon:type-alias name="square" type="xs:integer"/&gt;
+&lt;saxon:type-alias name="piece" type="xs:string"/&gt;
+&lt;saxon:type-alias name="board" type="array(array(~square))"/&gt;
+&lt;saxon:type-alias name="move" type="map(~piece, ~square)"/&gt;</samp>
+      </section>
+      <section id="update" title="saxon:update">
+         <h1>saxon:update</h1>
+         <p>The <code>saxon:update</code> element is used to create a modified copy of an XML node and its subtree,
+          using child instructions that define the specific changes to be made.</p>
+         <p>The semantics are based on corresponding primitives in the XQuery Update specification.</p>
+         <aside> Requires Saxon-EE.  Implemented since Saxon 9.9.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>instruction<br/>
+            <strong>Content: </strong>(
+          saxon:change
+           | saxon:delete
+           | saxon:insert
+           | saxon:rename
+           | saxon:replace
+           | xsl:choose
+           | xsl:for-each
+           | xsl:if
+           | xsl:variable
+        )*<br/>
+            <strong>Permitted parent elements: </strong>
+           any XSLT element whose content model is 
+        <i>sequence-constructor</i>; any literal result element 
+        </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>select</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>An expression to select the nodes whose subtrees are to be updated</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>For example, you can delete selected attributes using the construct:</p>
+         <samp>&lt;saxon:update select="//chapter[1]"&gt;
+    &lt;saxon:delete select=".//para[@deleted='yes']"/&gt;
+&lt;/saxon:update&gt;</samp>
+         <p>The outermost instruction is <code>saxon:update</code>. This has a <code>select</code> attribute to
+          select the nodes whose subtrees will be updated. The default is <code>select="."</code>. The result of the
+          instruction is a sequence of nodes that are modified copies of the selected nodes (unless any of these nodes
+          are deleted, in which case they are omitted from the result). The original tree remains unchanged.</p>
+         <p>
+            <em>Updating instructions, although they give the impression of modifying data in-situ, are in fact
+          side-effect free. The <code>saxon:update</code> instruction returns a modified copy of its input; the original
+          input tree is unaffected. Within the <code>saxon:update</code> instruction, all path expressions access an
+          unmodified deep copy of the selected source nodes. These instructions return pending update actions, which are applied
+          at the end (in a defined order) to create the modified trees returned by the <code>saxon:update</code> instruction.</em>
+         </p>
+         <p>Within the <code>saxon:update</code> instruction, the following subsidiary instructions may be evaluated. They
+          are evaluated once for each node selected by the <code>saxon:update</code> instruction, with that
+          node as the context node.</p>
+         <ul>
+            <li>
+               <code>&lt;saxon:delete select="expression"/&gt;</code>. Deletes the selected node or nodes from the tree.</li>
+            <li>
+               <code>&lt;saxon:rename select="expression" to="expression"/&gt;</code>. Renames the (single) selected node to the specified name.
+            The <code>to</code> expression must return either an <code>xs:QName</code>
+            value, or a string in the form of a legal <code>NCName</code> (representing a name in the default namespace for elements and types).
+            To rename multiple nodes, use within <code>xsl:for-each</code>.</li>
+            <li>
+               <code>&lt;saxon:insert select="expression" position="before|after|first|last"&gt;...&lt;/saxon:insert&gt;</code>. Inserts
+            the node(s) constructed by the contained sequence constructor as attributes, as immediately preceding or following siblings, or as the first
+            or last children, of the (single) node selected by the <code>select</code> expression. Specifically, any attributes returned by the contained
+          sequence constructor are copied as attributes of the selected node, while any elements, text nodes, comments, or processing instructions are
+          copied to appear before or after the selected node, or as its first or last children according to the value of the <code>@position</code> attribute;
+          if there are multiple inserted nodes, then their relative ordering is retained.</li>
+            <li>
+               <code>&lt;saxon:replace select="expression"&gt;...&lt;/saxon:replace&gt;</code>. Replace
+            the (single) node selected by the select expression, with the node(s) constructed by the contained
+            sequence constructor.</li>
+            <li>
+               <code>&lt;saxon:change select="expression" to="expression"/&gt;</code>. Changes the content of
+            the (single) node selected by the select expression, so that its string value becomes the value computed by the "to" expression.</li>
+         </ul>
+         <p>For all these instructions the <code>select</code> attribute defaults to "." (the context item). In all cases except <code>saxon:delete</code>
+          the <code>select</code> expression must select a single node (or nothing); to apply the same operation to multiple nodes,
+          use the instruction within <code>xsl:for-each</code> (and omit the <code>select</code> attribute).</p>
+         <p>The semantics of these subsidiary instructions are as defined for the corresponding expressions in the XQuery Update specification. In most cases
+          the correspondence is obvious. The XQuery Update expression corresponding to <code>&lt;saxon:change select="N" to="V"/&gt;</code> is 
+          <code>replace value of node N with V</code>. </p>
+         <p>Within the <code>saxon:update</code> instruction, the <code>xsl:if</code>, <code>xsl:choose</code>, and
+          <code>xsl:for-each</code> instructions (and no others) can be used to achieve conditional or repeated execution of the subsidiary instructions.
+          Local variables may also be declared within <code>saxon:update</code>.</p>
+         <p>For all expressions contained in subsidiary instructions, the focus for evaluating the expression
+          is the sequence of nodes selected by the containing <code>saxon:update</code> instruction, unless the focus is changed by an intervening
+          instruction such as <code>xsl:for-each</code>.</p>
+         <p>The update extension for XSLT does not provide any equivalent to updating functions; all update instructions must be contained lexically
+          within the <code>saxon:update</code> instruction.</p>
+         <h3 class="subtitle">Examples</h3>
+         <samp>&lt;xsl:template match="book"&gt;
+  &lt;saxon:update&gt;
+    &lt;saxon:delete select=".//price"/&gt;
+    &lt;saxon:rename select="author" to="'editor'"/&gt;
+  &lt;/saxon:update&gt;
+&lt;/xsl:template&gt;
+</samp>
+      </section>
+      <section id="while" title="saxon:while">
+         <h1>saxon:while</h1>
+         <p>The <code>saxon:while</code> element is used to iterate while some condition is true.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <p class="element-syntax">
+            <strong>Category: </strong>instruction<br/>
+            <strong>Content: </strong>
+            <i>sequence-constructor</i>
+            <br/>
+            <strong>Permitted parent elements: </strong>
+           any XSLT element whose content model is 
+        <i>sequence-constructor</i>; any literal result element 
+        </p>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>test</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The boolean expression to be tested.</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>The condition is given as a boolean expression in the mandatory <code>test</code>
+          attribute. Because this expression must change its value if the loop is to terminate, the
+          condition will generally reference a variable that is updated somewhere in the loop using
+          a <a class="bodylink code" href="../assign">saxon:assign</a> element. Alternatively, it
+          may test a condition that is changed by means of a call on an extension function that has
+          side-effects. </p>
+         <p>Note that the while loop does not change the focus: in particular, it does not change
+        the value of <code>position()</code>.</p>
+         <h3 class="subtitle">Examples</h3>
+         <samp>&lt;xsl:variable name="i" select="0" saxon:assignable="yes"/&gt;
+&lt;xsl:template name="loop"&gt;
+  &lt;saxon:while test="$i &amp;lt; 10"&gt;
+    The value of i is &lt;xsl:value-of select="$i"/&gt;
+    &lt;saxon:assign name="i" select="$i+1"/&gt;
+  &lt;/saxon:while&gt;
+&lt;/xsl:template&gt;
+</samp>
+      </section>
+   </section>
+</article>

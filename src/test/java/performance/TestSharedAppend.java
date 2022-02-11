@@ -1,0 +1,129 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018 Saxonica Limited.
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+package performance;
+
+import junit.framework.TestCase;
+import net.sf.saxon.s9api.*;
+
+/**
+ * Performance test of recursive functions that append or prepend to a sequence. This should have linear performance
+ */
+
+public class TestSharedAppend extends TestCase {
+
+    public void testAppend() {
+        try {
+            Processor p = new Processor(false);
+            XQueryCompiler c = p.newXQueryCompiler();
+            String query =
+                    "declare variable $n as xs:integer external;" +
+                    "declare function local:f($seq as xs:integer*, $next as xs:integer, $max as xs:integer) " +
+                            "{if ($next gt $max) then $seq else local:f(($seq, $next), $next+1, $max)};" +
+                    "count(local:f((), 1, $n))";
+            XQueryExecutable exec = c.compile(query);
+            XQueryEvaluator qe = exec.load();
+            QName param = new QName("n");
+            int[] counts = {1000, 10000, 100000, 200000, 300000, 1000000};
+            long last = 0;
+            for (int n : counts) {
+                System.err.println("count = " + n);
+                int totaltime = 0;
+                int runs = n<10000 ? 50 : 1;
+                for (int i=0; i<runs; i++) {
+                    qe.setExternalVariable(param, new XdmAtomicValue(n));
+                    long start = System.nanoTime();
+                    XdmItem result = qe.evaluateSingle();
+                    assertEquals("result", (long)n, ((XdmAtomicValue)result).getLongValue());
+                    long end = System.nanoTime();
+                    totaltime += (end - start) / 1000000e0;
+                }
+                last = totaltime / runs;
+                System.err.println("Append: " + n + " time: " + (totaltime / runs) + " ms");
+            }
+            assertTrue("performance", last < 1200);
+            // Saxon 9.6 with new Chain implementation takes 968ms for n=1000000
+            // Saxon 9.7 - 520ms
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testPrepend() {
+        try {
+            Processor p = new Processor(false);
+            XQueryCompiler c = p.newXQueryCompiler();
+            String query =
+                    "declare variable $n as xs:integer external;" +
+                    "declare function local:f($seq as xs:integer*, $next as xs:integer, $max as xs:integer) " +
+                            "{if ($next gt $max) then $seq else local:f(($next, $seq), $next+1, $max)};" +
+                    "count(local:f((), 1, $n))";
+            XQueryExecutable exec = c.compile(query);
+            XQueryEvaluator qe = exec.load();
+            QName param = new QName("n");
+            int[] counts = {1000, 10000, 100000, 200000, 300000, 1000000};
+            long last = 0;
+            for (int n : counts) {
+                int totaltime = 0;
+                int runs = (n<10000 ? 50 : 1);
+                for (int i=0; i<runs; i++) {
+                    qe.setExternalVariable(param, new XdmAtomicValue(n));
+                    long start = System.nanoTime();
+                    XdmItem result = qe.evaluateSingle();
+                    assertEquals("result", (long)n, ((XdmAtomicValue)result).getLongValue());
+                    long end = System.nanoTime();
+                    totaltime += (end - start) / 1000000e0;
+                }
+                last = totaltime / runs;
+                System.err.println("Prepend: " + n + " time: " + (totaltime / runs) + " ms");
+            }
+            assertTrue("performance", last < 1500);
+            // Saxon 9.6 with new Chain implementation takes 968ms for n=1000000
+            // Saxon 9.7: 699ms
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testChainSubscript() {
+        try {
+            Processor p = new Processor(false);
+            XQueryCompiler c = p.newXQueryCompiler();
+            String query =
+                    "declare variable $n as xs:integer external;" +
+                    "declare function local:f($seq as xs:integer*, $next as xs:integer, $max as xs:integer) " +
+                            "{if ($next gt $max) then $seq else local:f(($seq, $next), $next+1, $max)};" +
+                    "declare variable $s := (local:f((), 1, 100000));" +
+                    "(for $i in 1 to 20 return $s[$n+$i])[6]";
+            XQueryExecutable exec = c.compile(query);
+            XQueryEvaluator qe = exec.load();
+            QName param = new QName("n");
+            int[] counts = {1000, 10000, 20000, 30000, 80000};
+            long last = 0;
+            for (int n : counts) {
+                int totaltime = 0;
+                int runs = 100;
+                for (int i=0; i<runs; i++) {
+                    qe.setExternalVariable(param, new XdmAtomicValue(n));
+                    long start = System.nanoTime();
+                    XdmItem result = qe.evaluateSingle();
+                    assertEquals("result", (long)n+6, ((XdmAtomicValue)result).getLongValue());
+                    long end = System.nanoTime();
+                    totaltime += (end - start) / 1000000e0;
+                }
+                last = totaltime / runs;
+                System.err.println("Subscript: " + n + " time: " + (totaltime / runs) + " ms");
+            }
+            assertTrue("performance", last < 100);
+            // Saxon 9.6 with new Chain implementation takes 76ms regardless of the subscript
+            // Saxon 9.7: 52-56ms
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+}
+

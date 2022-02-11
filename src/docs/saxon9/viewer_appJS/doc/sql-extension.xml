@@ -1,0 +1,839 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article id="sql-extension" title="Saxon SQL Extension">
+   <h1>Saxon SQL Extension</h1>
+   <aside>Requires Saxon-PE or Saxon-EE. Not available on the .NET platform.</aside>
+   <p>The <code>saxon9-sql.jar</code> file, distributed alongside the main JAR file, includes a set of XSLT extension
+      instructions, and from Saxon 9.9 also a set of extension functions, providing access to SQL databases. The JAR
+      must be added to the classpath when these extensions are used.</p>
+   <p>The extension instructions are not intended as being necessarily a production-quality piece of software (there are
+      many limitations in the design), but more as an illustration of how extension instructions can be used to enhance
+      the capability of the processor.</p>
+   <p>More recently, Saxon provides a set of extension functions providing similar capability in a cleaner way (this
+      has become possible with the introduction of new features in XSLT 3.0, such as maps and arrays). New applications
+      should use the <a class="bodylink" href="/functions/sql">SQL extension functions</a> in preference.</p>
+   <p>The SQL extension instructions cannot be represented in SEF files, and any attempt to export a stylesheet using
+      these instructions will fail.</p>
+   <nav>
+      <ul/>
+   </nav>
+   <h3 class="subtitle" id="warning-1">A Warning about Side-Effects</h3>
+   <p>XSLT does not guarantee the order of execution of instructions. In principle, the <a class="bodylink code" href="instructions/close">sql:close</a> instruction could be evaluated before the
+      <a class="bodylink code" href="instructions/query">sql:query</a> instruction, which would obviously be
+      disastrous.</p>
+   <p>In practice, Saxon's order of execution for XSLT instructions is reasonably predictable unless
+      you use variables, or unless you invoke stylesheet functions from within an XPath expression.
+      Using the SQL extension instructions within templates that are directly invoked is thus fairly
+      safe, but it is not a good idea to invoke them as a side-effect of computing a variable or
+      invoking a function. The exceptions are <code>sql:connect</code> and <code>sql:query</code>:
+      if you use these instructions to evaluate the content of a variable, then they will of course
+      be executed before any instruction that uses the value of the variable.</p>
+   <h3 class="subtitle" id="warning-2">A Warning about Security (SQL injection)</h3>
+   <p>The instructions in the SQL extension make no attempt to verify that the SQL being executed is
+      correct and benign. No checks are made against injection attacks; indeed the <a class="bodylink code" href="instructions/execute">sql:execute</a> instruction explicitly allows any SQL
+      statement to be executed.</p>
+   <p>Therefore, the extension should be enabled only if (a) the stylesheet itself is trusted, and
+      (b) any text inserted into the stylesheet to construct dynamic SQL statements is also
+      trusted.</p>
+   <section id="instructions" title="SQL extension instructions">
+      <h1>SQL extension instructions</h1>
+      <p>To use the SQL extension in a stylesheet, you need to define a namespace prefix (for
+         example <code>sql</code>) in the <code>extension-element-prefixes</code> attribute of the
+            <a class="bodylink code" href="/xsl-elements/stylesheet">xsl:stylesheet</a> element, and
+         to map this prefix to a namespace URI, conventionally <code>http://saxon.sf.net/sql</code>.
+         This namespace must be bound in the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a> to the implementation class
+            <code>net.sf.saxon.option.sql.SQLElementFactory</code>. This binding can be done either
+         by calling <a class="javalink"
+            href="com.saxonica.config.ProfessionalConfiguration#setExtensionElementNamespace">ProfessionalConfiguration.setExtensionElementNamespace()</a>, or by means of an entry
+         in the <a class="bodylink" href="/configuration/configuration-file">configuration
+         file</a>.</p>
+      <p>
+         <i>This changed in Saxon 9.2. In Saxon 9.1 and earlier releases it was necessary to use a
+            namespace ending in "/net.sf.saxon.sql.SQLElementFactory". It is still possible to use
+            the same namespace, but it must now be bound explicitly.</i>
+      </p>
+      <p>This extension defines eight new stylesheet instructions described in the following
+         sections:</p>
+      <nav except="example">
+         <ul/>
+      </nav>
+      <p>See the <a class="bodylink" href="example">Example</a> for an example of the use of these
+         SQL extension elements. </p>
+      <section id="connect" title="sql:connect">
+         <h1>sql:connect</h1>
+         <p>Creates a database connection.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>driver</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+                     <i>eqname</i>
+                   }</code>
+                  </p>
+               </td>
+               <td>
+                  <p> The name of the JDBC driver class to be used.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>database</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+                     <i>eqname</i>
+                   }</code>
+                  </p>
+               </td>
+               <td>
+                  <p> The name of the database. Must be a name that JDBC can associate with an
+                     actual database.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>user?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+                     <i>expression</i>
+                   }</code>
+                  </p>
+               </td>
+               <td>
+                  <p/>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>password?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+                     <i>expression</i>
+                   }</code>
+                  </p>
+               </td>
+               <td>
+                  <p/>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>auto-commit?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+                     <i>boolean</i>
+                   }</code>
+                  </p>
+               </td>
+               <td>
+                  <p> If the value is <code>yes</code>, then this causes a call of
+                        <code>connection.setAutoCommit()</code> on the underlying JDBC
+                     connection.</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>The <code>sql:connect</code> instruction returns a database connection as a value,
+                  specifically a value of type "external object", which can be referred to using the
+                  type <code>java:java.sql.Connection</code>. Typically the value will be assigned
+                  to a variable using the construct:</p>
+         <samp>&lt;xsl:variable  name="connection" 
+               as="java:java.sql.Connection" 
+               xmlns:java="http://saxon.sf.net/java-type"&gt;
+  &lt;sql:connect database="jdbc:odbc:testdb" 
+               driver="sun.jdbc.odbc.JdbcOdbcDriver" 
+               xsl:extension-element-prefixes="sql"/&gt;
+&lt;/xsl:variable&gt;
+</samp>
+         <p>This can be a global variable or a local variable; if local, it can be passed to
+                  other templates as a parameter in the normal way. The connection is used on
+                  instructions such as <a class="bodylink code" href="../insert">sql:insert</a> and
+                     <a class="bodylink code" href="../query">sql:query</a> with an attribute such
+                  as <code>connection="$connection"</code>; the value of the <code>connection</code>
+                  attribute is an expression that returns a database connection object.</p>
+      </section>
+      <section id="query" title="sql:query">
+         <h1>sql:query</h1>
+         <p>Performs a query, and writes the results of the query to the result tree, using
+                  elements to represent the rows and columns. If you want to process the results in
+                  the stylesheet, you can write the results to a temporary tree by using the
+                     <code>sql:query</code> instruction as a child of <code>xsl:variable</code>.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>connection</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The database connection. The value is an expression, which must evaluate to
+                     a database connection object as returned by <a class="bodylink code" href="../connect">sql:connect</a>.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>table</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+                     <i>expression</i>
+                   }</code>
+                  </p>
+               </td>
+               <td>
+                  <p> The table to be queried (the contents of the FROM clause of the select
+                     statement). </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>column</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+                     <i>expression</i>
+                   }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>The columns to be retrieved (the contents of the <code>SELECT</code> clause
+                     of the select statement). May be <code>"*"</code> to retrieve all
+                     columns.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>where?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+                     <i>expression</i>
+                   }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>The conditions to be applied (the contents of the <code>WHERE</code> clause
+                     of the select statement). </p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>row-tag?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>NCName</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The element name to be used to contain each row. Must be a simple name (no
+                     colon allowed); alternatively the value <code>#auto</code> (which is the
+                     default) indicates that element name is to be formed from the table name used
+                     in the <code>table</code> attribute if this is a simple NCName, failing which
+                     the element name will be "row".</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>column-tag?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>NCName</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The element name to be used to contain each column. Must be a simple name
+                     (no colon allowed); alternatively the value <code>#auto</code> (which is the
+                     default) indicates that column names are to be formed from the column names in
+                     the database where available. When this option is used, the database column
+                     name will be used as the XML element name, provided it is a valid NCName; if it
+                     is not, the element name will be "col" and the column name will appear as the
+                     value of its <code>name</code> attribute.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>disable-output-escaping?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>boolean</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> Default is <code>no</code>. The value <code>yes</code> causes the content
+                     of all rows/columns to be output as is, without converting special characters
+                     such as "&lt;" to "&amp;lt;". This is useful where the database contains XML or
+                     HTML markup that you want to be copied into the result document. Use this
+                     option with care, however, since it applies to all the columns retrieved, not
+                     only to those that contain XML or HTML. An alternative is to use the <a class="bodylink code" href="/functions/saxon/parse">saxon:parse</a>
+                     extension function to process the contents of an XML column.</p>
+               </td>
+            </tr>
+         </table>
+      </section>
+      <section id="insert" title="sql:insert">
+         <h1>sql:insert</h1>
+         <p>Performs an SQL <code>INSERT</code> statement. This causes a row to be added to
+                  the table identified by the <code>table</code> attribute. The <code>table</code>
+                  attribute holds the table name as a constant string; it is not possible to set the
+                  name of the table (or of the columns) at run-time.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>connection</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The database connection. The value is an expression, which must evaluate to
+                     a database connection object as returned by <a class="bodylink code" href="../connect">sql:connect</a>.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>table</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>string</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The name of the table into which the row is to be added. The value is a
+                     constant string; it is not possible to set the name of the table (or of the
+                     columns) at run-time.</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>An <a class="bodylink code" href="../column">sql:column</a> may be used as a child
+                  element of <code>sql:insert</code>, to identify the name and value of a column to
+                  be included in the <code>INSERT</code> statement. The name of the column is
+                  identified by the <code>name</code> attribute, the value may be indicated either
+                  by evaluating the expression contained in the <code>select</code> attribute, or as
+                  the expanded contents of the <code>sql:column</code> element. The value is converted to
+                  the required data type if possible. </p>
+      </section>
+      <section id="update" title="sql:update">
+         <h1>sql:update</h1>
+         <p>Performs an SQL <code>UPDATE</code> statement. This causes a set of rows to be
+                  selected from a given table; columns identified in a child <a class="bodylink code" href="../column">sql:column</a> element are then updated
+                  with new values.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>connection</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The database connection. The value is an expression, which must evaluate to
+                     a database connection object as returned by <a class="bodylink code" href="../connect">sql:connect</a>.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>table</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>string</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The table to be updated. The value must be known statically (it cannot be
+                     defined as an attribute value template).</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>where?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+                     <i>expression</i>
+                   }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>The conditions to be applied (the contents of the <code>WHERE</code> clause
+                     of the select statement). If present the value is an attribute value template
+                     whose value is a SQL conditional expression. If omitted, all rows in the table
+                     are updated.</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>An <code>sql:column</code> may be used as a child element of
+                     <code>sql:update</code>, to identify the name and value of a column to be
+                  included in the <code>UPDATE</code> statement. The name of the column is
+                  identified by the <code>name</code> attribute, the value may be indicated either
+                  by evaluating the expression contained in the <code>select</code> attribute, or as
+                  the expanded contents of the <code>sql:column</code> element. The value is converted to 
+                  the required data type (the declared type of the column) if possible. </p>
+      </section>
+      <section id="column" title="sql:column">
+         <h1>sql:column</h1>
+         <p>Identifies the name and value of a column to be included in an <code>INSERT</code>
+                  or <code>UPDATE</code> statement. </p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>name</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>eqname</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The name of the column.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>select?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The value may be indicated either by evaluating the expression contained in
+                     the <code>select</code> attribute, or as the expanded contents of the
+                     <code>sql:column</code> element. The value is converted to the declared
+                     data type of the column if possible.</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">See also</h3>
+         <p>
+            <a class="bodylink" href="/sql-extension/instructions/insert">sql:insert</a>
+         </p>
+         <p>
+            <a class="bodylink" href="/sql-extension/instructions/update">sql:update</a>
+         </p>
+      </section>
+      <section id="delete" title="sql:delete">
+         <h1>sql:delete</h1>
+         <p>Performs an SQL <code>DELETE</code> statement. This causes a set of rows to be
+                  selected from a given table and deleted. </p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>connection</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The database connection. The value is an expression, which must evaluate to
+                     a database connection object as returned by <a class="bodylink code" href="../connect">sql:connect</a>.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>table</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>string</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The table containing the rows to be deleted. The value must be known
+                     statically (it cannot be defined as an attribute value template).</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>where?</code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+                     <i>expression</i>
+                   }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>The conditions to be applied (the contents of the <code>WHERE</code> clause
+                     of the select statement). If present the value is an attribute value template
+                     whose value is a SQL conditional expression. If omitted, all rows in the table
+                     are updated.</p>
+               </td>
+            </tr>
+         </table>
+      </section>
+      <section id="close" title="sql:close">
+         <h1>sql:close</h1>
+         <p>Closes the database connection. </p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>connection</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The database connection. The value is an expression, which must evaluate to
+                     a database connection object as returned by <a class="bodylink code" href="../connect">sql:connect</a>.</p>
+               </td>
+            </tr>
+         </table>
+         <h3 class="subtitle">Details</h3>
+         <p>Note that the JDBC documentation advises calling "commit" or "rollback" before
+                  closing the connection; the effects of not doing so are said to be
+                  implementation-defined. It is possible to issue a commit or rollback request using
+                  the <a class="bodylink code" href="../execute">sql:execute</a> instruction.</p>
+         <p>It is important to avoid closing the connection before database access is finished. For
+                  example, if database query results are obtained using <code>sql:query</code> and saved in a variable,
+                  database query might not be finished until the contents of the variable have actually been read.</p>
+      </section>
+      <section id="execute" title="sql:execute">
+         <h1>sql:execute</h1>
+         <p>Allows arbitrary SQL statements to be executed. No result is returned.</p>
+         <aside> Requires Saxon-PE or Saxon-EE.</aside>
+         <h3 class="subtitle">Attributes</h3>
+         <table class="element-att">
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>connection</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>
+                        <i>expression</i>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p> The database connection. The value is an XPath expression, which must
+                     evaluate to a database connection object as returned by <a class="bodylink code" href="../connect">sql:connect</a>.</p>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <p>
+                     <code>
+                        <strong>statement</strong>
+                     </code>
+                  </p>
+               </td>
+               <td>
+                  <p>
+                     <code>{ 
+                     <i>expression</i>
+                   }</code>
+                  </p>
+               </td>
+               <td>
+                  <p>The SQL statement to be executed. The statements <code>COMMIT WORK</code>
+                     and <code>ROLLBACK WORK</code> (spelt exactly like that) are recognized
+                     specially, and cause calls on the JDBC <code>connection.commit()</code> and
+                        <code>connection.rollback()</code> methods respectively.</p>
+               </td>
+            </tr>
+         </table>
+      </section>
+      <section id="example" title="Example">
+         <h1>SQL extension instructions example</h1>
+         <p>A specimen stylesheet that uses these Saxon SQL extension instructions is
+               <code>books-sql.xsl</code>. This loads the contents of the <code>books.xml</code>
+            file into a database table. (These sample resources are found in the
+               <code>saxon-resources</code> download file.) To use it, you need to create a database
+            containing a table "Book" with three character columns, "Title", "Author", and
+            "Category" (see below).</p>
+         <p>Here is the stylesheet:</p>
+         <samp>&lt;xsl:stylesheet
+	xmlns:sql="http://saxon.sf.net/sql"
+ 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
+	xmlns:saxon="http://saxon.sf.net/"
+ 	extension-element-prefixes="saxon sql"&gt;
+
+&lt;!-- insert your database details here, or supply them in parameters --&gt;
+&lt;xsl:param name="driver" select="'sun.jdbc.odbc.JdbcOdbcDriver'"/&gt;
+&lt;xsl:param name="database" select="'jdbc:odbc:test'"/&gt;  
+&lt;xsl:param name="user"/&gt;
+&lt;xsl:param name="password"/&gt;
+
+&lt;!-- This stylesheet writes the book list to a SQL database --&gt;
+
+&lt;xsl:variable name="count" select="0" saxon:assignable="yes"/&gt;
+
+&lt;xsl:output method="xml" indent="yes"/&gt;
+
+&lt;xsl:template match="BOOKLIST"&gt;
+    &lt;xsl:if test="not(element-available('sql:connect'))"&gt;
+        &lt;xsl:message&gt;sql:connect is not available&lt;/xsl:message&gt;
+    &lt;/xsl:if&gt;
+    
+    &lt;xsl:message&gt;Connecting to &lt;xsl:value-of select="$database"/&gt;...&lt;/xsl:message&gt;
+
+    &lt;xsl:variable name="connection" 
+         as="java:java.sql.Connection" xmlns:java="http://saxon.sf.net/java-type"&gt;   
+      &lt;sql:connect driver="{$driver}" database="{$database}" 
+                 user="{$user}" password="{$password}"&gt;
+        &lt;xsl:fallback&gt;
+          &lt;xsl:message terminate="yes"&gt;SQL extensions are not installed&lt;/xsl:message&gt;
+        &lt;/xsl:fallback&gt;
+      &lt;/sql:connect&gt;
+    &lt;/xsl:variable&gt;
+    
+    &lt;xsl:message&gt;Connected...&lt;/xsl:message&gt;
+    
+    &lt;xsl:apply-templates select="BOOKS"&gt;
+      &lt;xsl:with-param name="connection" select="$connection"/&gt;
+    &lt;/xsl:apply-templates&gt;
+    
+    &lt;xsl:message&gt;Inserted &lt;xsl:value-of select="$count"/&gt; records.&lt;/xsl:message&gt;
+
+    &lt;xsl:variable name="book-table"&gt;
+      &lt;sql:query connection="$connection" table="Book" column="*" row-tag="book" column-tag="col"/&gt; 
+    &lt;/xsl:variable&gt;
+    
+    &lt;xsl:message&gt;There are now &lt;xsl:value-of select="count($book-table//Book)"/&gt; books.&lt;/xsl:message&gt;
+    &lt;new-book-table&gt;
+        &lt;xsl:copy-of select="$book-table"/&gt;
+    &lt;/new-book-table&gt;
+    
+    &lt;sql:close connection="$connection"/&gt;
+    
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="BOOKS"&gt;
+    &lt;xsl:param name="connection"/&gt;
+    &lt;xsl:for-each select="ITEM"&gt;
+    	&lt;sql:insert connection="$connection" table="Book"&gt;
+    	    &lt;sql:column name="title" select="TITLE"/&gt;
+            &lt;sql:column name="author" select="AUTHOR"/&gt;
+            &lt;sql:column name="category" select="@CAT"/&gt;
+    	&lt;/sql:insert&gt;
+    	&lt;saxon:assign name="count" select="$count+1"/&gt;
+    &lt;/xsl:for-each&gt;
+&lt;/xsl:template&gt;
+
+&lt;/xsl:stylesheet&gt;	
+</samp>
+         <h2 class="subtitle">Running the example using Microsoft Access</h2>
+         <p>To run this stylesheet you will need to do the following:</p>
+         <ol>
+            <li>
+               <p>Create a database (e.g. Microsoft Access) containing a table "Book" with three
+                  character columns, "Title", "Author", and "Category".</p>
+            </li>
+            <li>
+               <p>Register this database as a JDBC data source. (If you use Microsoft Access,
+                  register it as an ODBC data source called, say, Books, and then it will
+                  automatically be available under JDBC as "jdbc:odbc:Books".)</p>
+            </li>
+            <li>
+               <p>Modify the <code>&lt;sql:connect&gt;</code> element in the stylesheet to specify
+                  the correct JDBC connection name for the database, and if necessary to supply a
+                  username and password. Alternatively you can supply the driver class, database
+                  name, username, and password as parameters on the command line.</p>
+            </li>
+            <li>
+               <p>Execute the stylesheet from the command line, as follows:</p>
+               <kbd> java   net.sf.saxon.Transform  data\books.xml   style\books-sql.xsl <br/>
+               </kbd>
+            </li>
+         </ol>
+         <p>The database will be populated with data from the <code>books.xml</code> document.</p>
+         <h2 class="subtitle">Running the example using MySQL</h2>
+         <p>The following instructions illustrates how to run the stylesheet using MySQL, under a
+            UNIX platform:</p>
+         <ol>
+            <li>
+               <p>Create the database, using MySQL.</p>
+            </li>
+            <li>
+               <p>Register the database as a JDBC data source (same as 2. above). However, change
+                  the <code>xsl:param</code> elements with attribute names "driver" and "database"
+                  as follows (we assume machine is localhost):</p>
+               <samp>&lt;xsl:param name="driver" select="'com.mysql.jdbc.Driver'"/&gt;
+&lt;xsl:param name="database" select="'jdbc:mysql://localhost:3306/Book'"/&gt;   
+</samp>
+            </li>
+            <li>
+               <p>Download the MySQL connector jar file, if missing.</p>
+            </li>
+            <li>
+               <p>Execute the stylesheet from the command line (same as 4. above). The kind of
+                  problems that might occur are as follows:</p>
+               <ul>
+                  <li>
+                     <p>"JDBC Connection Failure: com.mysql.jdbc.Driver": Ensure the MySQL connector
+                        jar file is downloaded and in the classpath.</p>
+                  </li>
+                  <li>
+                     <p>"SQL extensions are not installed": The binding of the namespace for the SQL
+                        extension must be present in the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a> object and must match
+                        the URI in the stylesheet. For execution of the stylesheet from the command
+                        line, the following is required:</p>
+                     <kbd> java   net.sf.saxon.Transform   -config:data/config.xml   data/books.xml
+                          style/books-mysql.xsl <br/>
+                     </kbd>
+                     <p>where the configuration file <code>data/config.xml</code> includes the
+                        following entry:</p>
+                     <samp>&lt;configuration xmlns="http://saxon.sf.net/ns/configuration"
+               edition="EE"&gt;                
+  &lt;xslt&gt;
+    &lt;extensionElement namespace="http://saxon.sf.net/sql" 
+                      factory="net.sf.saxon.option.sql.SQLElementFactory"/&gt;
+  &lt;/xslt&gt;
+&lt;/configuration&gt;
+</samp>
+                  </li>
+               </ul>
+            </li>
+         </ol>
+      </section>
+   </section>
+</article>
