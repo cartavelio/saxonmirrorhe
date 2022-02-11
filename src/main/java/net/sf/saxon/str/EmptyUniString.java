@@ -13,7 +13,6 @@ import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.Writer;
 import java.util.function.IntPredicate;
 
 
@@ -226,21 +225,20 @@ public final class EmptyUniString extends UnicodeString {
         // No action
     }
 
+    /**
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
+     *
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
+     */
     @Override
-    public void write(Writer writer) {
-        // No action
-    }
-
-    @Override
-    public void write(Writer writer, long start, long len) {
-        // no action
-    }
-
-    @Override
-    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) {
+    public long indexWhere(IntPredicate predicate, long from) {
         return -1;
     }
-
 
     public String details() {
         return "empty string";

@@ -7,7 +7,9 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.pull.PullPushCopier;
 import net.sf.saxon.pull.StaxBridge;
+import net.sf.saxon.serialize.UTF8Writer;
 import net.sf.saxon.serialize.XMLEmitter;
+import net.sf.saxon.str.UnicodeWriterToWriter;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
@@ -15,9 +17,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test input from a Stax (JSR173) parser
@@ -36,7 +36,7 @@ public class StaxBridgeTest {
             XMLEmitter emitter = new XMLEmitter();
             emitter.setPipelineConfiguration(pipe);
             emitter.setOutputProperties(new Properties());
-            emitter.setOutputStream(new FileOutputStream(ConfigTest.DATA_DIR + "temp/books.xml"));
+            emitter.setUnicodeWriter(new UTF8Writer(new FileOutputStream(ConfigTest.DATA_DIR + "temp/books.xml")));
             NamespaceReducer r = new NamespaceReducer(emitter);
             puller.setPipelineConfiguration(pipe);
             r.setPipelineConfiguration(pipe);
@@ -137,7 +137,7 @@ public class StaxBridgeTest {
             emitter.setPipelineConfiguration(pipe);
             emitter.setOutputProperties(new Properties());
             StringWriter sw = new StringWriter();
-            emitter.setWriter(sw);
+            emitter.setUnicodeWriter(new UnicodeWriterToWriter(sw));
             NamespaceReducer r = new NamespaceReducer(emitter);
             puller.setPipelineConfiguration(pipe);
             r.setPipelineConfiguration(pipe);

@@ -12,7 +12,6 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
@@ -143,7 +142,6 @@ public class XMLEmitter extends Emitter {
     /**
      * Start of a document node. Nothing is done at this stage: the opening of the output
      * file is deferred until some content is written to it.
-     * @param properties
      */
 
     @Override
@@ -172,9 +170,10 @@ public class XMLEmitter extends Emitter {
      */
 
     protected void openDocument() throws XPathException {
-        if (writer == null) {
-            makeWriter();
-        }
+        assert writer != null;
+//        if (writer == null) {
+//            makeWriter();
+//        }
         if (characterSet == null) {
             characterSet = UTF8CharacterSet.getInstance();
         }
@@ -224,7 +223,7 @@ public class XMLEmitter extends Emitter {
                     "UTF-8".equalsIgnoreCase(encoding) ||
                             "UTF-16LE".equalsIgnoreCase(encoding) ||
                             "UTF-16BE".equalsIgnoreCase(encoding))) {
-                writer.write('\uFEFF');
+                writer.writeCodePoint(0xFEFF);
             }
 
             String omitXMLDeclaration = outputProperties.getProperty(OutputKeys.OMIT_XML_DECLARATION);
@@ -294,8 +293,20 @@ public class XMLEmitter extends Emitter {
             }
 
             if (omitXMLDeclaration.equals("no")) {
-                writer.write("<?xml version=\"" + version + "\" " + "encoding=\"" + encoding + '\"' +
-                                     (standalone != null ? " standalone=\"" + standalone + '\"' : "") + "?>");
+                writer.writeAscii(XML_DECL_VERSION);
+                writer.write(version);
+                writer.writeAscii(QUOTE_SPACE);
+                writer.writeAscii(XML_DECL_ENCODING);
+                writer.write(encoding);
+                writer.writeCodePoint('"');
+                if (standalone != null) {
+                    writer.writeAscii(XML_DECL_STANDALONE);
+                    writer.write(standalone);
+                    writer.writeCodePoint('"');
+                }
+                writer.writeAscii(StringConstants.PI_END);
+//                writer.write("<?xml version=\"" + version + "\" " + "encoding=\"" + encoding + '\"' +
+//                                     (standalone != null ? " standalone=\"" + standalone + '\"' : "") + "?>");
                 // don't write a newline character: it's wrong if the output is an
                 // external general parsed entity
             }
@@ -303,6 +314,15 @@ public class XMLEmitter extends Emitter {
             throw new XPathException("Failure writing to " + getSystemId(), err);
         }
     }
+
+    private static final byte[] XML_DECL_VERSION = StringConstants.bytes("<?xml version=\"");
+    private static final byte[] XML_DECL_ENCODING = StringConstants.bytes("encoding=\"");
+    private static final byte[] XML_DECL_STANDALONE = StringConstants.bytes(" standalone=\"");
+    private static final byte[] QUOTE_SPACE = StringConstants.bytes("\" ");
+    protected static final byte[] DOCTYPE = StringConstants.bytes("<!DOCTYPE ");
+    private static final byte[] SYSTEM = StringConstants.bytes("  SYSTEM ");
+    private static final byte[] PUBLIC = StringConstants.bytes("  PUBLIC ");
+    protected static final byte[] RIGHT_ANGLE_NEWLINE = StringConstants.bytes(">\n");
 
     /**
      * Output the document type declaration
@@ -319,9 +339,11 @@ public class XMLEmitter extends Emitter {
             if (!canonical) {
                 if (declarationIsWritten && !indenting) {
                     // don't add a newline if indenting, because the indenter will already have done so
-                    writer.write("\n");
+                    writer.writeCodePoint(0x0A);
                 }
-                writer.write("<!DOCTYPE " + displayName + '\n');
+                writer.writeAscii(DOCTYPE);
+                writer.write(displayName);
+                writer.writeCodePoint(0x0A);
                 String quotedSystemId = null;
                 if (systemId != null) {
                     if (systemId.contains("\"")) {
@@ -331,11 +353,23 @@ public class XMLEmitter extends Emitter {
                     }
                 }
                 if (systemId != null && publicId == null) {
-                    writer.write("  SYSTEM " + quotedSystemId + ">\n");
+                    writer.writeAscii(SYSTEM);
+                    writer.write(quotedSystemId);
+                    writer.writeAscii(RIGHT_ANGLE_NEWLINE);
+                    //writer.write("  SYSTEM " + quotedSystemId + ">\n");
                 } else if (systemId == null && publicId != null) {     // handles the HTML case
-                    writer.write("  PUBLIC \"" + publicId + "\">\n");
+                    writer.writeAscii(PUBLIC);
+                    writer.write(publicId);
+                    writer.writeAscii(RIGHT_ANGLE_NEWLINE);
+                    //writer.write("  PUBLIC \"" + publicId + "\">\n");
                 } else {
-                    writer.write("  PUBLIC \"" + publicId + "\" " + quotedSystemId + ">\n");
+                    writer.writeAscii(PUBLIC);
+                    writer.write(publicId);
+                    writer.writeAscii(RIGHT_ANGLE_NEWLINE);
+                    writer.writeAscii(QUOTE_SPACE);
+                    writer.write(quotedSystemId);
+                    writer.writeAscii(RIGHT_ANGLE_NEWLINE);
+                    //writer.write("  PUBLIC \"" + publicId + "\" " + quotedSystemId + ">\n");
                 }
             }
         } catch (java.io.IOException err) {
@@ -418,7 +452,7 @@ public class XMLEmitter extends Emitter {
             if (openStartTag) {
                 closeStartTag();
             }
-            writer.write('<');
+            writer.writeCodePoint('<');
             writer.write(displayName);
 
             if (indentForNextAttribute >= 0) {
@@ -451,13 +485,15 @@ public class XMLEmitter extends Emitter {
 
     public void namespace(String nsprefix, String nsuri, boolean isFirst) throws XPathException {
         try {
-
-            String sep = isFirst ? " " : getAttributeIndentString();
-
             if (nsprefix.isEmpty()) {
-                writer.write(sep);
+                if (isFirst) {
+                    writer.writeCodePoint(' ');
+                } else {
+                    writeAttributeIndentString();
+                }
                 writeAttribute(elementCode, "xmlns", nsuri, ReceiverOption.NONE);
-            } else if (nsprefix.equals("xml")) {
+            } else //noinspection StatementWithEmptyBody
+                if (nsprefix.equals("xml")) {
                 //return;
             } else {
                 int badchar = testCharacters(StringView.of(nsprefix));
@@ -468,7 +504,11 @@ public class XMLEmitter extends Emitter {
                     throw err;
                 }
                 if (undeclareNamespaces || !nsuri.isEmpty()) {
-                    writer.write(sep);
+                    if (isFirst) {
+                        writer.writeCodePoint(' ');
+                    } else {
+                        writeAttributeIndentString();
+                    }
                     writeAttribute(elementCode, "xmlns:" + nsprefix, nsuri, ReceiverOption.NONE);
                 }
             }
@@ -507,7 +547,11 @@ public class XMLEmitter extends Emitter {
         }
 
         try {
-            writer.write(isFirst ? " " : getAttributeIndentString());
+            if (isFirst) {
+                writer.writeCodePoint(' ');
+            } else {
+                writeAttributeIndentString();
+            }
         } catch (java.io.IOException err) {
             throw new XPathException("Failure writing to " + getSystemId(), err);
         }
@@ -522,18 +566,15 @@ public class XMLEmitter extends Emitter {
 
     }
 
-    protected String getAttributeIndentString() {
+    protected void writeAttributeIndentString() throws IOException {
         if (indentForNextAttribute < 0) {
-            return " ";
+            writer.writeCodePoint(' ');
         } else {
-            int indent = indentForNextAttribute;
-            while (indent >= indentChars.length()) {
-                //noinspection StringConcatenationInLoop
-                indentChars += "                     ";
-            }
-            return indentChars.substring(0, indent);
+            writer.writeCodePoint('\n');
+            writer.writeRepeatedAscii((byte)0x20, indentForNextAttribute);
         }
     }
+
 
     /**
      * Mark the end of the start tag
@@ -544,7 +585,7 @@ public class XMLEmitter extends Emitter {
     public void closeStartTag() throws XPathException {
         try {
             if (openStartTag) {
-                writer.write('>');
+                writer.writeCodePoint('>');
                 openStartTag = false;
             }
         } catch (java.io.IOException err) {
@@ -554,14 +595,19 @@ public class XMLEmitter extends Emitter {
 
     /**
      * Close an empty element tag. (This is overridden in XHTMLEmitter).
-     *
-     * @param displayName the name of the empty element
+     *  @param displayName the name of the empty element
      * @param nameCode    the fingerprint of the name of the empty element
-     * @return the string used to close an empty element tag.
      */
 
-    protected String emptyElementTagCloser(String displayName, NodeName nameCode) {
-        return canonical ? "></" + displayName + ">" : "/>";
+    protected void writeEmptyElementTagCloser(String displayName, NodeName nameCode) throws IOException {
+        if (canonical) {
+            writer.writeCodePoint('>');
+            writer.writeAscii(StringConstants.END_TAG_START);
+            writer.write(displayName);
+            writer.writeCodePoint('>');
+        } else {
+            writer.writeAscii(StringConstants.EMPTY_TAG_END);
+        }
     }
 
     /**
@@ -580,27 +626,27 @@ public class XMLEmitter extends Emitter {
         try {
             writer.write(attname);
             if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
-                writer.write('=');
-                writer.write(delimiter);
+                writer.writeCodePoint('=');
+                writer.writeCodePoint(delimiter);
                 writer.write(value);
-                writer.write(delimiter);
+                writer.writeCodePoint(delimiter);
             } else if (ReceiverOption.contains(properties, ReceiverOption.USE_NULL_MARKERS)) {
                 // null (0) characters will be used before and after any section of
                 // the value generated from a character map
-                writer.write('=');
+                writer.writeCodePoint('=');
                 char delim = value.indexOf('"') >= 0 && value.indexOf('\'') < 0 ? '\'' : delimiter;
-                writer.write(delim);
+                writer.writeCodePoint(delim);
                 writeEscape(StringView.tidy(value), true);
-                writer.write(delim);
+                writer.writeCodePoint(delim);
             } else {
-                writer.write("=");
-                writer.write(delimiter);
+                writer.writeCodePoint('=');
+                writer.writeCodePoint(delimiter);
                 if (ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
                     writer.write(value);
                 } else {
                     writeEscape(StringView.tidy(value), true);
                 }
-                writer.write(delimiter);
+                writer.writeCodePoint(delimiter);
             }
         } catch (java.io.IOException err) {
             throw new XPathException("Failure writing to " + getSystemId(), err);
@@ -639,7 +685,7 @@ public class XMLEmitter extends Emitter {
             if (c >= 20 && c < 127) {
                 buff.append(c);
             } else {
-                buff.append("_" + (int) c + "_");
+                buff.append("_" + c + "_");
             }
         }
         return buff.toUnicodeString();
@@ -654,12 +700,12 @@ public class XMLEmitter extends Emitter {
         String displayName = elementStack.pop();
         try {
             if (openStartTag) {
-                writer.write(emptyElementTagCloser(displayName, elementCode));
+                writeEmptyElementTagCloser(displayName, elementCode);
                 openStartTag = false;
             } else {
-                writer.write("</");
+                writer.writeAscii(StringConstants.END_TAG_START);
                 writer.write(displayName);
-                writer.write('>');
+                writer.writeCodePoint('>');
             }
         } catch (java.io.IOException err) {
             throw new XPathException("Failure writing to " + getSystemId(), err);
@@ -689,9 +735,9 @@ public class XMLEmitter extends Emitter {
             }
 
             if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
-                chars.write(writer);
+                writer.write(chars);
             } else if (chars instanceof CompressedWhitespace) {
-                chars.write(writer);
+                ((CompressedWhitespace)chars).write(writer);
             } else if (!ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
                 writeEscape(chars.tidy(), false);
             } else {
@@ -700,15 +746,14 @@ public class XMLEmitter extends Emitter {
                     if (!ReceiverOption.contains(properties, ReceiverOption.USE_NULL_MARKERS)) {
                         // null (0) characters will be used before and after any section of
                         // the value generated from a character map
-                        chars.write(writer);
+                        writer.write(chars);
                     } else {
                         // Need to strip out any null markers. See test output-html109
                         IntIterator iter = chars.codePoints();
                         while (iter.hasNext()) {
                             int c = iter.next();
                             if (c != 0) {
-                                writeCodePoint(c);
-                                //writer.write(c);
+                                writer.writeCodePoint(c);
                             }
                         }
                     }
@@ -722,11 +767,9 @@ public class XMLEmitter extends Emitter {
                         int c = iter.next();
                         if (c != 0) {
                             if (characterSet.inCharset(c)) {
-                                writeCodePoint(c);
+                                writer.writeCodePoint(c);
                             } else {
-                                UnicodeBuilder ub = new UnicodeBuilder();
-                                ub.append(c);
-                                writeEscape(ub.toUnicodeString(), false);
+                                writeEscape(new UnicodeChar(c), false);
                             }
                         }
                     }
@@ -773,7 +816,13 @@ public class XMLEmitter extends Emitter {
             if (openStartTag) {
                 closeStartTag();
             }
-            writer.write("<?" + target + (data.isEmpty() ? "" : ' ' + data.toString()) + "?>");
+            writer.writeAscii(StringConstants.PI_START);
+            writer.write(target);
+            if (!data.isEmpty()) {
+                writer.writeCodePoint(0x20);
+                writer.write(data);
+            }
+            writer.writeAscii(StringConstants.PI_END);
         } catch (java.io.IOException err) {
             throw new XPathException("Failure writing to " + getSystemId(), err);
         }
@@ -802,18 +851,19 @@ public class XMLEmitter extends Emitter {
         final long clength = chars.length();
         while (segstart < clength) {
             // find a maximal sequence of "ordinary" characters
-            long found = chars.writeUntil(writer, segstart, clength, special);
+            long found = chars.indexWhere(special, segstart);
             long i = found == -1 ? clength : found;
 
             // if this was the whole string write it out and exit
             if (found < 0) {
+                writer.write(chars.substring(segstart, clength));
                 return;
             }
 
-//            // otherwise write out this sequence
-//            if (i > segstart) {
-//                chars.write(writer, segstart, i - segstart);
-//            }
+            // otherwise write out this sequence
+            if (i > segstart) {
+                writer.write(chars.substring(segstart, i));
+            }
 
             // examine the special character that interrupted the scan
             final int c = chars.codePointAt(i);
@@ -832,28 +882,28 @@ public class XMLEmitter extends Emitter {
                 // process special ASCII characters
                 switch (c) {
                     case '<':
-                        writer.write("&lt;");
+                        writer.writeAscii(StringConstants.ESCAPE_LT);
                         break;
                     case '>':
-                        writer.write("&gt;");
+                        writer.writeAscii(StringConstants.ESCAPE_GT);
                         break;
                     case '&':
-                        writer.write("&amp;");
+                        writer.writeAscii(StringConstants.ESCAPE_AMP);
                         break;
                     case '\"':
-                        writer.write("&#34;");
+                        writer.writeAscii(StringConstants.ESCAPE_QUOT);
                         break;
                     case '\'':
-                        writer.write("&#39;");
+                        writer.writeAscii(StringConstants.ESCAPE_APOS);
                         break;
                     case '\n':
-                        writer.write("&#xA;");
+                        writer.writeAscii(StringConstants.ESCAPE_NL);
                         break;
                     case '\r':
-                        writer.write("&#xD;");
+                        writer.writeAscii(StringConstants.ESCAPE_CR);
                         break;
                     case '\t':
-                        writer.write("&#x9;");
+                        writer.writeAscii(StringConstants.ESCAPE_TAB);
                         break;
                     default:
                         // C0 control characters
@@ -878,12 +928,7 @@ public class XMLEmitter extends Emitter {
     }
 
     protected void writeCodePoint(int c) throws IOException {
-        if (c < 65536) {
-            writer.write((char)c);
-        } else {
-            writer.write(UTF16CharacterSet.highSurrogate(c));
-            writer.write(UTF16CharacterSet.lowSurrogate(c));
-        }
+        writer.writeCodePoint(c);
     }
 
 
@@ -911,9 +956,9 @@ public class XMLEmitter extends Emitter {
             if (openStartTag) {
                 closeStartTag();
             }
-            writer.write("<!--");
-            writer.write(chars.toString());
-            writer.write("-->");
+            writer.writeAscii(StringConstants.COMMENT_START);
+            writer.write(chars);
+            writer.writeAscii(StringConstants.COMMENT_END);
         } catch (java.io.IOException err) {
             throw new XPathException("Failure writing to " + getSystemId(), err);
         }

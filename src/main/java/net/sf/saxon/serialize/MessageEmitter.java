@@ -8,11 +8,13 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeWriterToWriter;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.OutputKeys;
+import java.io.Writer;
 import java.util.Properties;
 
 
@@ -30,15 +32,16 @@ public class MessageEmitter extends XMLEmitter {
 
     }
 
+    public void setWriter(Writer writer) {
+        this.writer = new UnicodeWriterToWriter(writer);
+    }
+
     @Override
     public void setPipelineConfiguration(PipelineConfiguration pipelineConfiguration) {
         super.setPipelineConfiguration(pipelineConfiguration);
-        if (writer == null && outputStream == null) {
-            try {
-                setWriter(getConfiguration().getLogger().asWriter());
-            } catch (XPathException e) {
-                throw new AssertionError(e);
-            }
+        if (writer == null) {
+            Writer w = getConfiguration().getLogger().asWriter();
+            writer = new UnicodeWriterToWriter(w);
         }
         try {
             Properties props = new Properties();
@@ -78,7 +81,7 @@ public class MessageEmitter extends XMLEmitter {
     public void endDocument() throws XPathException {
         try {
             if (writer != null) {
-                writer.write('\n');
+                writer.writeCodePoint('\n');
                 writer.flush();
             }
         } catch (java.io.IOException err) {

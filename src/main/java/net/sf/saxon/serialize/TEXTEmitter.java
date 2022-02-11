@@ -41,10 +41,7 @@ public class TEXTEmitter extends XMLEmitter {
 
     @Override
     protected void openDocument() throws XPathException {
-
-        if (writer == null) {
-            makeWriter();
-        }
+        assert writer != null;
         if (characterSet == null) {
             characterSet = UTF8CharacterSet.getInstance();
         }
@@ -65,7 +62,7 @@ public class TEXTEmitter extends XMLEmitter {
                         "UTF-16LE".equalsIgnoreCase(encoding) ||
                         "UTF-16BE".equalsIgnoreCase(encoding))) {
             try {
-                writer.write('\uFEFF');
+                writer.writeCodePoint(0xFEFF);
             } catch (java.io.IOException err) {
                 // Might be an encoding exception; just ignore it
             }
@@ -105,7 +102,7 @@ public class TEXTEmitter extends XMLEmitter {
             chars = StringView.of(newlineMatcher.matcher(chars.toString()).replaceAll(newlineRepresentation));
         }
         try {
-            writer.write(chars.toString());
+            writer.write(chars);
         } catch (java.io.IOException err) {
             throw new XPathException(err);
         }

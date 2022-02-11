@@ -10,8 +10,6 @@ package net.sf.saxon.str;
 import net.sf.saxon.z.ConcatenatingIntIterator;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntPredicate;
@@ -219,80 +217,25 @@ public class Rope extends UnicodeString {
     }
 
     /**
-     * Write the content of this string to a Writer
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
      *
-     * @param writer the writer to which the string should be written
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
      */
     @Override
-    public void write(Writer writer) throws IOException {
-        left.write(writer);
-        right.write(writer);
-    }
-
-    /**
-     * Write part of this string to a Writer
-     *
-     * @param writer the writer to which the string should be written
-     * @param start  the offset of the first codepoint to be written
-     * @param len    the number of codepoints to be written
-     */
-    @Override
-    public void write(Writer writer, long start, long len) throws IOException {
-        long end = start + len;
-        if (start < 0 || start >= length) {
-            throw outOfBounds(start, length);
-        } else if (end < start || end > length) {
-            throw outOfBounds(end, length);
-        }
-        if (start < left.length()) {
-            if (end <= left.length()) {
-                left.write(writer, start, len);
-            } else {
-                // substring spans the two branches
-                left.write(writer, start, left.length() - start);
-                right.write(writer, 0, end - left.length());
+    public long indexWhere(IntPredicate predicate, long from) {
+        if (from < left.length()) {
+            long found = left.indexWhere(predicate, from);
+            if (found >= 0) {
+                return found;
             }
-        } else {
-            right.write(writer, start - left.length(), len);
         }
-    }
-
-    /**
-     * Write a substring of this string to a supplied Writer, ending the substring
-     * where a specified condition is encountered
-     *
-     * @param writer the destination to which the substring is written
-     * @param start  the offset of the first codepoint to be considered
-     * @param limit  the offset of the first codepoint not to be considered.
-     * @param stop   Predicate to match codepoints. The substring that is written includes
-     *               all characters up to, but excluding, the first character to match
-     *               this predicate
-     * @return the offset of the first character that that matches the predicate, or -1 if not found
-     */
-    @Override
-    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
-        if (start < 0 || start >= length) {
-            throw outOfBounds(start, length);
-        } else if (limit < start || limit > length) {
-            throw outOfBounds(limit, length);
-        }
-        if (start < left.length()) {
-            if (limit <= left.length()) {
-                return left.writeUntil(writer, start, limit, stop);
-            } else {
-                // substring spans the two branches
-                long end = left.writeUntil(writer, start, left.length(), stop);
-                if (end < 0) {
-                    end = right.writeUntil(writer, 0, limit - left.length(), stop);
-                    return end < 0 ? end : end + left.length();
-                } else {
-                    return end;
-                }
-            }
-        } else {
-            long end = right.writeUntil(writer, start - left.length(), limit - left.length(), stop);
-            return end < 0 ? end : end + left.length();
-        }
+        long r = right.indexWhere(predicate, Math.max(0, from - left.length()));
+        return r < 0 ? r : r + left.length();
     }
 
     /**

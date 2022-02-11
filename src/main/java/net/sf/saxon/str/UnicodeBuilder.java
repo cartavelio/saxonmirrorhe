@@ -4,6 +4,7 @@ import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.z.IntIterator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -12,7 +13,7 @@ import java.util.function.Consumer;
  * Builder class to construct a UniString by appending text incrementally
  */
 
-public final class UnicodeBuilder implements UniStringConsumer {
+public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
     // We maintain the data as a list of segments, followed by a list of individual loose
     // codepoints. When short strings are added, we append to the list of loose codepoints.
@@ -412,5 +413,44 @@ public final class UnicodeBuilder implements UniStringConsumer {
         throw new IllegalArgumentException();
     }
 
+    /**
+     * Process a supplied string
+     *
+     * @param chars the characters to be processed
+     * @throws IOException if processing fails for any reason
+     */
+    @Override
+    public void write(CodePoints chars) throws IOException {
+        append(chars);
+    }
+
+    /**
+     * Write a supplied string known to consist entirely of ASCII characters,
+     * supplied as a byte array
+     *
+     * @param content byte array holding ASCII characters only
+     */
+    @Override
+    public void writeAscii(byte[] content) throws IOException {
+        append(new Twine8(content));
+    }
+
+    /**
+     * Process a supplied string
+     *
+     * @param chars the characters to be processed
+     * @throws IOException if processing fails for any reason
+     */
+    @Override
+    public void write(String chars) throws IOException {
+        append(chars);
+    }
+
+    /**
+     * Complete the writing of characters to the result. The default implementation
+     * does nothing.
+     */
+    @Override
+    public void close() { }
 }
 

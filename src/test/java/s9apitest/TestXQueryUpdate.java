@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
@@ -27,13 +28,13 @@ public class TestXQueryUpdate {
         // Copy books.xml to the temp directory so that the updates don't matter
         String tempfn = ConfigTest.TEMP_DIR + "books.xml";
         String origfn = ConfigTest.DATA_DIR + "books.xml";
-        InputStream instream = null;
-        OutputStream outstream = null;
+        InputStream instream;
+        OutputStream outstream;
 
-        instream = new FileInputStream(new File(origfn));
-        outstream = new FileOutputStream(new File(tempfn));
+        instream = new FileInputStream(origfn);
+        outstream = new FileOutputStream(tempfn);
         byte[] buf = new byte[4096];
-        int length = -1;
+        int length;
         while ((length = instream.read(buf)) > 0) {
             outstream.write(buf, 0, length);
         }
@@ -91,7 +92,8 @@ public class TestXQueryUpdate {
         try {
             try {
                 Files.copy(new File(ConfigTest.DATA_DIR + "books.xml").toPath(),
-                           new File(ConfigTest.TEMP_DIR + "books.xml").toPath());
+                           new File(ConfigTest.TEMP_DIR + "books.xml").toPath(),
+                           StandardCopyOption.REPLACE_EXISTING);
             } catch (FileAlreadyExistsException e) {
                 // ignore the failure
             }
@@ -212,9 +214,8 @@ public class TestXQueryUpdate {
             Iterator<XdmNode> updatedDocs = eval.getUpdatedDocuments();
             XdmNode newDoc2 = updatedDocs.hasNext() ? updatedDocs.next() : newDoc;
 
-            newDoc2.select(descendant("ITEM")).forEach(node -> {
-                assertTrue(node.select(child("marker")).count() < 2);
-            });
+            newDoc2.select(descendant("ITEM")).forEach(
+                    node -> assertTrue(node.select(child("marker")).count() < 2));
 
 
         } catch (SaxonApiException e) {

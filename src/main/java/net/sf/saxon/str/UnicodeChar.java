@@ -1,10 +1,9 @@
 package net.sf.saxon.str;
 
+import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSingletonIterator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.function.IntPredicate;
 
 /**
@@ -118,63 +117,26 @@ public class UnicodeChar extends UnicodeString {
     }
 
     /**
-     * Write the content of this string to a Writer
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
      *
-     * @param writer the writer to which the string should be written
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
      */
     @Override
-    public void write(Writer writer) throws IOException {
-        writer.write(toString());
+    public long indexWhere(IntPredicate predicate, long from) {
+        return (from == 0 && predicate.test(codepoint)) ? 0 : -1;
     }
-
-    /**
-     * Write part of this string to a Writer
-     *
-     * @param writer the writer to which the string should be written
-     * @param start  the offset of the first codepoint to be written
-     * @param len    the number of codepoints to be written
-     */
-    @Override
-    public void write(Writer writer, long start, long len) throws IOException {
-        if (start == 0 && len == 1) {
-            writer.write(toString());
-        }
-    }
-
-    /**
-     * Write a substring of this string to a supplied Writer, ending the substring
-     * where a specified ccondition is encountered
-     *
-     * @param writer the destination to which the substring is written
-     * @param start  the offset of the first codepoint to be considered
-     * @param limit  the offset of the first codepoint not to be considered.
-     * @param stop   Predicate to match codepoints. The substring that is written includes
-     *               all characters up to, but excluding, the first character to match
-     *               this predicate
-     * @return the offset of the first character that that matches the predicate, or -1 if not found
-     */
-    @Override
-    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
-        if (start == 0 && limit == 1) {
-            if (stop.test(codepoint)) {
-                return 0;
-            } else {
-                writer.write(toString());
-                return -1;
-            }
-        }
-        return -1;
-    }
-
 
     @Override
     public String toString() {
         if (codepoint < 65536) {
             return "" + (char)codepoint;
         } else {
-            StringBuilder buff = new StringBuilder(2);
-            buff.appendCodePoint(codepoint);
-            return buff.toString();
+            return "" + UTF16CharacterSet.highSurrogate(codepoint) + UTF16CharacterSet.lowSurrogate(codepoint);
         }
     }
 }

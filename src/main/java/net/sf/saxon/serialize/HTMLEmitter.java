@@ -13,14 +13,12 @@ import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CompressedWhitespace;
-import net.sf.saxon.str.StringTool;
-import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
 import javax.xml.transform.OutputKeys;
+import java.io.IOException;
 import java.util.Stack;
 
 /**
@@ -205,9 +203,10 @@ public abstract class HTMLEmitter extends XMLEmitter {
 
     @Override
     protected void openDocument() throws XPathException {
-        if (writer == null) {
-            makeWriter();
-        }
+        assert writer != null;
+//        if (writer == null) {
+//            makeWriter();
+//        }
         if (started) {
             return;
         }
@@ -216,7 +215,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
         if ("yes".equals(byteOrderMark) &&
                 "UTF-8".equalsIgnoreCase(outputProperties.getProperty(OutputKeys.ENCODING))) {
             try {
-                writer.write('\uFEFF');
+                writer.writeCodePoint(0xFEFF);
             } catch (java.io.IOException err) {
                 // Might be an encoding exception; just ignore it
             }
@@ -275,7 +274,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
     protected void writeAttribute(NodeName elCode, String attname, String value, int properties) throws XPathException {
         try {
             if (isHTMLElement(elCode)) {
-                if (isBooleanAttribute(elCode.getLocalPart(), attname, value.toString())) {
+                if (isBooleanAttribute(elCode.getLocalPart(), attname, value)) {
                     writer.write(attname);
                     return;
                 }
@@ -329,13 +328,13 @@ public abstract class HTMLEmitter extends XMLEmitter {
             // if this was the whole string, output the string and quit
 
             if (i == codePoints.length) {
-                chars.write(writer, segstart, i - segstart);
+                writer.write(chars.substring(segstart));
                 return;
             }
 
             // otherwise, output this sequence and continue
             if (i > segstart) {
-                chars.write(writer, segstart, i - segstart);
+                writer.write(chars.substring(segstart, i));
             }
 
             final int c = codePoints[i];
@@ -348,42 +347,42 @@ public abstract class HTMLEmitter extends XMLEmitter {
                 // handle a special ASCII character
                 if (inAttribute) {
                     if (c == '<') {
-                        writer.write('<');      // not escaped
+                        writer.writeCodePoint('<');      // not escaped
                     } else if (c == '>') {
-                        writer.write("&gt;");   // recommended for older browsers
+                        writer.writeAscii(StringConstants.ESCAPE_GT);   // recommended for older browsers
                     } else if (c == '&') {
                         if (i + 1 < codePoints.length && codePoints[i + 1] == '{') {
-                            writer.write('&');                   // not escaped if followed by '{'
+                            writer.writeCodePoint('&');                   // not escaped if followed by '{'
                         } else {
-                            writer.write("&amp;");
+                            writer.writeAscii(StringConstants.ESCAPE_AMP);
                         }
                     } else if (c == '\"') {
-                        writer.write("&#34;");
+                        writer.writeAscii(StringConstants.ESCAPE_QUOT);
                     } else if (c == '\'') {
-                        writer.write("&#39;");
+                        writer.writeAscii(StringConstants.ESCAPE_APOS);
                     } else if (c == '\n') {
-                        writer.write("&#xA;");
+                        writer.writeAscii(StringConstants.ESCAPE_NL);
                     } else if (c == '\t') {
-                        writer.write("&#x9;");
+                        writer.writeAscii(StringConstants.ESCAPE_TAB);
                     } else if (c == '\r') {
-                        writer.write("&#xD;");
+                        writer.writeAscii(StringConstants.ESCAPE_CR);
                     }
                 } else {
                     if (c == '<') {
-                        writer.write("&lt;");
+                        writer.writeAscii(StringConstants.ESCAPE_LT);
                     } else if (c == '>') {
-                        writer.write("&gt;");  // changed to allow for "]]>"
+                        writer.writeAscii(StringConstants.ESCAPE_GT);
                     } else if (c == '&') {
-                        writer.write("&amp;");
+                        writer.writeAscii(StringConstants.ESCAPE_AMP);
                     } else if (c == '\r') {
-                        writer.write("&#xD;");
+                        writer.writeAscii(StringConstants.ESCAPE_CR);
                     }
                 }
 
             } else if (c < 160) {
                 if (rejectControlCharacters()) {
                     // these control characters are illegal in HTML
-                    XPathException err = new XPathException("Illegal HTML character: decimal " + (int) c);
+                    XPathException err = new XPathException("Illegal HTML character: decimal " + c);
                     err.setErrorCode("SERE0014");
                     throw err;
                 } else {
@@ -392,12 +391,12 @@ public abstract class HTMLEmitter extends XMLEmitter {
 
             } else if (c == 160) {
                 // always output NBSP as an entity reference
-                writer.write("&nbsp;");
+                writer.writeAscii(StringConstants.ESCAPE_NBSP);
 
             } else if (c > 65535 || escapeNonAscii || !characterSet.inCharset(c)) {
                 characterReferenceGenerator.outputCharacterReference(c, writer);
             } else {
-                writer.write(c);
+                writer.writeCodePoint(c);
             }
             segstart = ++i;
         }
@@ -413,18 +412,18 @@ public abstract class HTMLEmitter extends XMLEmitter {
 
     /**
      * Close an empty element tag. (This is overridden in XHTMLEmitter).
-     *
-     * @param displayName the name of the empty element
+     *  @param displayName the name of the empty element
      * @param nameCode    the fingerprint of the name of the empty element
-     * @return the string used to close an empty element tag.
      */
 
     @Override
-    protected String emptyElementTagCloser(String displayName, NodeName nameCode) {
+    protected void writeEmptyElementTagCloser(String displayName, NodeName nameCode) throws IOException {
         if (isHTMLElement(nameCode)) {
-            return "></" + displayName + ">";
+            writer.writeAscii(StringConstants.EMPTY_TAG_MIDDLE);
+            writer.write(displayName);
+            writer.writeCodePoint('>');
         } else {
-            return "/>";
+            writer.writeAscii(StringConstants.EMPTY_TAG_END);
         }
     }
 
@@ -483,11 +482,10 @@ public abstract class HTMLEmitter extends XMLEmitter {
             if (openStartTag) {
                 closeStartTag();
             }
-            writer.write("<?");
-            writer.write(target);
-            writer.write(' ');
-            data.write(writer);
-            writer.write('>');
+            writer.writeAscii(StringConstants.PI_START);
+            writer.writeCodePoint(' ');
+            writer.write(data);
+            writer.writeCodePoint('>');
         } catch (java.io.IOException err) {
             throw new XPathException(err);
         }

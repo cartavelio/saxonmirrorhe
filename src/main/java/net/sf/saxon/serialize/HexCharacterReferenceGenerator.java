@@ -7,7 +7,7 @@
 
 package net.sf.saxon.serialize;
 
-import java.io.Writer;
+import net.sf.saxon.str.UnicodeWriter;
 
 /**
  * A class that represents a character as a hexadecimal character reference
@@ -22,10 +22,12 @@ public class HexCharacterReferenceGenerator implements CharacterReferenceGenerat
     }
 
     @Override
-    public void outputCharacterReference(int charval, Writer writer) throws java.io.IOException {
-        writer.write("&#x");
+    public void outputCharacterReference(int charval, UnicodeWriter writer) throws java.io.IOException {
+        writer.writeCodePoint('&');
+        writer.writeCodePoint('#');
+        writer.writeCodePoint('x');
         writer.write(Integer.toHexString(charval));
-        writer.write(';');
+        writer.writeCodePoint(';');
     }
 }
 

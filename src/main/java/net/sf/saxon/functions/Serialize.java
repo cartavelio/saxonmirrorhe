@@ -23,11 +23,9 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.serialize.CharacterMap;
-import net.sf.saxon.serialize.CharacterMapIndex;
-import net.sf.saxon.serialize.SerializationParamsHandler;
-import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.serialize.*;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -39,8 +37,6 @@ import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
 
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -525,13 +521,14 @@ public class Serialize extends SystemFunction implements Callable {
                                                                                   
         // TODO add more spec-defined defaults here (for both cases)
         try {
-            StringWriter result = new StringWriter();
+            UnicodeBuilder builder = new UnicodeBuilder();
+            UnicodeWriterResult result = new UnicodeWriterResult(builder, null);
 
             SerializerFactory sf = context.getConfiguration().getSerializerFactory();
             PipelineConfiguration pipe = context.getConfiguration().makePipelineConfiguration();
-            Receiver out = sf.getReceiver(new StreamResult(result), params, pipe);
+            Receiver out = sf.getReceiver(result, params, pipe);
             SequenceCopier.copySequence(iter, out);
-            return new StringItem(result.toString());
+            return new StringItem(builder.toString());
         } catch (XPathException e) {
             e.maybeSetErrorCode("SENR0001");
             throw e;

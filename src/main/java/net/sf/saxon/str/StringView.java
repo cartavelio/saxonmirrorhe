@@ -3,8 +3,6 @@ package net.sf.saxon.str;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Objects;
 
 /**
@@ -113,9 +111,5 @@ public class StringView extends CodePoints {
         return base;
     }
 
-    @Override
-    public void write(Writer writer) throws IOException {
-        writer.write(base);
-    }
 }
 

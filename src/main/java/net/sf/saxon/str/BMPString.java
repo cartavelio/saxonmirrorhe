@@ -4,8 +4,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.function.IntPredicate;
 
 /**
@@ -82,6 +80,26 @@ public class BMPString extends UnicodeString {
         return base.indexOf(codePoint, from32);
     }
 
+    /**
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
+     *
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
+     */
+    @Override
+    public long indexWhere(IntPredicate predicate, long from) {
+        for (int i=requireInt(from); i<base.length(); i++) {
+            if (predicate.test(base.charAt(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     @Override
     public int codePointAt(long index) {
         return base.charAt(StringTool.requireInt(index));
@@ -142,28 +160,6 @@ public class BMPString extends UnicodeString {
         consumer.append16(base.toCharArray(), requireInt(start), requireInt(length));
     }
 
-    @Override
-    public void write(Writer writer) throws IOException {
-        writer.write(base);
-    }
 
-    @Override
-    public void write(Writer writer, long start, long len) throws IOException {
-        writer.write(base, requireInt(start), requireInt(len));
-    }
-
-    @Override
-    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
-        int from = requireInt(start);
-        int end = requireInt(limit);
-        for (int i=from; i<end; i++) {
-            if (stop.test(base.charAt(i))) {
-                writer.write(base, from, i-from);
-                return i;
-            }
-        }
-        writer.write(base, from, end-from);
-        return -1;
-    }
 }
 

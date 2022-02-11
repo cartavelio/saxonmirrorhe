@@ -124,8 +124,8 @@ import java.util.function.Predicate;
 
 public class Configuration implements SourceResolver, NotationSet {
 
-    protected static Set<Feature> booleanFeatures = new HashSet<>(40);
-    protected static Set<Feature> stringFeatures = new HashSet<>(40);
+    protected static Set<Feature<Boolean>> booleanFeatures = new HashSet<>(40);
+    protected static Set<Feature<String>> stringFeatures = new HashSet<>(40);
     private transient ApiProvider apiProcessor = null;
     private transient CharacterSetFactory characterSetFactory;
 
@@ -3289,7 +3289,7 @@ public class Configuration implements SourceResolver, NotationSet {
     /*@Nullable*/
     public SchemaType getSchemaType(StructuredQName name) {
         if (name.hasURI(NamespaceConstant.SCHEMA)) {
-            return BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
+             BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
         }
         return null;
     }
