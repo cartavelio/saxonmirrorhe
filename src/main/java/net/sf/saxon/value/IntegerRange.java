@@ -7,9 +7,13 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.expr.RangeIterator;
+import net.sf.saxon.expr.AscendingRangeIterator;
+import net.sf.saxon.expr.DescendingRangeIterator;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AtomicArray;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -17,31 +21,38 @@ import net.sf.saxon.tree.iter.AtomicIterator;
 import java.util.Iterator;
 
 /**
- * This class represents a sequence of consecutive ascending integers, for example 1 to 50.
+ * This class represents a sequence of integers, for example 1 by 5 to 50.
  * The integers must be within the range of a Java long.
  */
 
 public class IntegerRange implements AtomicSequence {
 
     public long start;
-    public long end;
+    public long step;
+    public long end;  // the adjusted end, so it is actually the last number returned
 
     /**
      * Construct an integer range expression
      *
      * @param start the first integer in the sequence (inclusive)
+     * @param step the step between consecutive integers in the sequence (non-zero, may be negative)
      * @param end   the last integer in the sequence (inclusive). Must be &gt;= start
      */
 
-    public IntegerRange(long start, long end) {
-        if (end < start) {
-            throw new IllegalArgumentException("end < start in IntegerRange");
+    public IntegerRange(long start, long step, long end) {
+        if (step == 0) {
+            throw new IllegalArgumentException("step = 0 in IntegerRange");
         }
-        if (end - start > Integer.MAX_VALUE) {
+        if ((end < start) != (step < 0)) {
+            throw new IllegalArgumentException(
+                    step > 0 ? "end < start in ascending IntegerRange" : "end > start in descending IntegerRange");
+        }
+        if (Math.abs((end - start)/step) > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Maximum length of sequence in Saxon is " + Integer.MAX_VALUE);
         }
         this.start = start;
-        this.end = end;
+        this.step = step;
+        this.end = start + step * (end - start)/step;
     }
 
     /**
@@ -52,6 +63,16 @@ public class IntegerRange implements AtomicSequence {
 
     public long getStart() {
         return start;
+    }
+
+    /**
+     * Get the increment in the sequence
+     *
+     * @return the increment
+     */
+
+    public long getStep() {
+        return step;
     }
 
     /**
@@ -78,8 +99,10 @@ public class IntegerRange implements AtomicSequence {
 
     /*@NotNull*/
     @Override
-    public AtomicIterator iterate() {
-        return new RangeIterator(start, end);
+    public AtomicIterator<IntegerValue> iterate() {
+        return step > 0
+                ? new AscendingRangeIterator(start, step, end)
+                : new DescendingRangeIterator(start, -step, end);
     }
 
     /**
@@ -91,10 +114,10 @@ public class IntegerRange implements AtomicSequence {
     /*@Nullable*/
     @Override
     public IntegerValue itemAt(int n) {
-        if (n < 0 || n > (end - start)) {
+        if (n < 0 || n >= getLength()) {
             return null;
         }
-        return Int64Value.makeIntegerValue(start + n);
+        return Int64Value.makeIntegerValue(start + (n * step));
     }
 
 
@@ -117,13 +140,13 @@ public class IntegerRange implements AtomicSequence {
         if (length <= 0) {
             return EmptySequence.getInstance();
         }
-        long newStart = this.start + (start > 0 ? start : 0);
-        long newEnd = newStart + length - 1;
+        long newStart = this.start + Math.max(start, 0);
+        long newEnd = newStart + ((long)length * step) - 1L;
         if (newEnd > end) {
             newEnd = end;
         }
         if (newEnd >= newStart) {
-            return new IntegerRange(newStart, newEnd);
+            return new IntegerRange(newStart, step, newEnd);
         } else {
             return EmptySequence.getInstance();
         }
@@ -135,7 +158,7 @@ public class IntegerRange implements AtomicSequence {
 
     @Override
     public int getLength() {
-        return (int) (end - start + 1);
+        return (int) ((end - start) / step) + 1;
     }
 
     @Override
@@ -215,7 +238,7 @@ public class IntegerRange implements AtomicSequence {
     }
 
     public String toString() {
-        return "(" + start + " to " + end + ")";
+        return "(" + start + (step == 1 ? "" : (" by " + step)) + " to " + end + ")";
     }
 
     /**

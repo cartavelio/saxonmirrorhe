@@ -15,28 +15,77 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.IntegerRange;
+import net.sf.saxon.value.IntegerValue;
+import net.sf.saxon.value.SequenceType;
+
+import java.math.BigInteger;
 
 
 /**
  * A RangeExpression is an expression that represents an integer sequence as
- * a pair of end-points (for example "x to y").
- * If the end-points are equal, the sequence is of length one.
- * <p>From Saxon 7.8, the sequence must be ascending; if the end-point is less
- * than the start-point, an empty sequence is returned. This is to allow
- * expressions of the form "for $i in 1 to count($seq) return ...." </p>
+ * a pair of end-points (for example "x to y"). This implementation also
+ * supports the experimental syntax "x by y to z", with y defaulting to 1.
  */
 
-public class RangeExpression extends BinaryExpression {
+public class RangeExpression extends Expression {
+
+    private Operand start;
+    private Operand step;
+    private Operand end;
+    private boolean defaultedStep;
 
     /**
-     * Construct a RangeExpression
+     * Construct a stepping range expression of the form A by B to C.
+     * Because of the way the parser works, this is constructed as if it were a binary
+     * expression (A by (B to C)) even though that doesn't reflect the semantics
+     */
+
+    public static RangeExpression makeSteppingExpression(Expression start, Expression rhs) throws XPathException {
+        if (!(rhs instanceof RangeExpression && ((RangeExpression)rhs).defaultedStep)) {
+            throw new XPathException("'by' operator must be followed by 'x to y'");
+        }
+        return new RangeExpression(start, ((RangeExpression) rhs).getStartExpression(), ((RangeExpression) rhs).getEndExpression());
+    }
+
+    /**
+     * Construct a RangeExpression with increment of 1
      * @param start expression that computes the start of the range
      * @param end   expression that computes the end of the range
      */
 
     public RangeExpression(Expression start, Expression end) {
-        super(start, Token.TO, end);
+        this(start, new Literal(Int64Value.PLUS_ONE), end);
+        defaultedStep = true;
+    }
+
+    /**
+     * Construct a RangeExpression with increment of 1
+     *
+     * @param start expression that computes the start of the range
+     * @param end   expression that computes the end of the range
+     */
+
+    public RangeExpression(Expression start, Expression step, Expression end) {
+        this.start = new Operand(this, start, OperandRole.SINGLE_ATOMIC);
+        this.step = new Operand(this, step, OperandRole.SINGLE_ATOMIC);
+        this.end = new Operand(this, end, OperandRole.SINGLE_ATOMIC);
+        adoptChildExpression(start);
+        adoptChildExpression(step);
+        adoptChildExpression(end);
+    }
+
+    public Expression getStartExpression() {
+        return start.getChildExpression();
+    }
+
+    public Expression getStepExpression() {
+        return step.getChildExpression();
+    }
+
+    public Expression getEndExpression() {
+        return end.getChildExpression();
     }
 
     /**
@@ -46,18 +95,23 @@ public class RangeExpression extends BinaryExpression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        getLhs().typeCheck(visitor, contextInfo);
-        getRhs().typeCheck(visitor, contextInfo);
+        start.typeCheck(visitor, contextInfo);
+        step.typeCheck(visitor, contextInfo);
+        end.typeCheck(visitor, contextInfo);
 
         boolean backCompat = visitor.getStaticContext().isInBackwardsCompatibleMode();
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(backCompat);
         RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "to", 0);
-        setLhsExpression(tc.staticTypeCheck(
-                getLhsExpression(), SequenceType.OPTIONAL_INTEGER, role0, visitor));
+        start.setChildExpression(tc.staticTypeCheck(
+                getStartExpression(), SequenceType.OPTIONAL_INTEGER, role0, visitor));
 
         RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "to", 1);
-        setRhsExpression(tc.staticTypeCheck(
-                getRhsExpression(), SequenceType.OPTIONAL_INTEGER, role1, visitor));
+        step.setChildExpression(tc.staticTypeCheck(
+                getStepExpression(), SequenceType.OPTIONAL_INTEGER, role1, visitor));
+
+        RoleDiagnostic role2 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "to", 2);
+        end.setChildExpression(tc.staticTypeCheck(
+                getEndExpression(), SequenceType.OPTIONAL_INTEGER, role2, visitor));
 
         return makeConstantRange();
     }
@@ -80,33 +134,72 @@ public class RangeExpression extends BinaryExpression {
     /*@NotNull*/
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        getLhs().optimize(visitor, contextInfo);
-        getRhs().optimize(visitor, contextInfo);
+        start.optimize(visitor, contextInfo);
+        step.optimize(visitor, contextInfo);
+        end.optimize(visitor, contextInfo);
         return makeConstantRange();
 
     }
 
+    /**
+     * Get the immediate sub-expressions of this expression, with information about the relationship
+     * of each expression to its parent expression. Default implementation
+     * works off the results of iterateSubExpressions()
+     *
+     * <p>If the expression is a Callable, then it is required that the order of the operands
+     * returned by this function is the same as the order of arguments supplied to the corresponding
+     * call() method.</p>
+     *
+     * @return an iterator containing the sub-expressions of this expression
+     */
+    @Override
+    public Iterable<Operand> operands() {
+        return operandList(start, step, end);
+    }
+
     private Expression makeConstantRange() throws XPathException {
-        if (getLhsExpression() instanceof Literal && getRhsExpression() instanceof Literal) {
-            GroundedValue v0 = ((Literal) getLhsExpression()).getGroundedValue();
-            GroundedValue v1 = ((Literal) getRhsExpression()).getGroundedValue();
-            if (v0 instanceof Int64Value && v1 instanceof Int64Value) {
+        if (getStartExpression() instanceof Literal
+                && getStepExpression() instanceof Literal
+                && getEndExpression() instanceof Literal) {
+            Expression result;
+            GroundedValue v0 = ((Literal) getStartExpression()).getGroundedValue();
+            GroundedValue v1 = ((Literal) getStepExpression()).getGroundedValue();
+            GroundedValue v2 = ((Literal) getEndExpression()).getGroundedValue();
+            if (v0.getLength()==0 || v1.getLength()==0 || v2.getLength()==0) {
+                result = Literal.makeEmptySequence();
+            } else if (v0 instanceof Int64Value && v1 instanceof Int64Value && v2 instanceof Int64Value) {
                 long i0 = ((Int64Value) v0).longValue();
                 long i1 = ((Int64Value) v1).longValue();
-                Literal result;
-                if (i0 > i1) {
+                long i2 = ((Int64Value) v2).longValue();
+                if (i1 == 0 || (i1 > 0 && i0 > i2) || i1 < 0 && i0 < i2) {
                     result = Literal.makeEmptySequence();
-                } else if (i0 == i1) {
+                } else if (i0 == i2) {
                     result = Literal.makeLiteral(Int64Value.makeIntegerValue(i0), this);
                 } else {
-                    if (i1 - i0 > Integer.MAX_VALUE) {
+                    if (Math.abs((i2 - i0)/i1) > Integer.MAX_VALUE) {
                         throw new XPathException("Maximum length of sequence in Saxon is " + Integer.MAX_VALUE, "XPDY0130");
                     }
-                    result = Literal.makeLiteral(new IntegerRange(i0, i1), this);
+                    result = Literal.makeLiteral(new IntegerRange(i0, i1, i2), this);
                 }
-                ExpressionTool.copyLocationInfo(this, result);
-                return result;
+            } else {
+                BigInteger i0 = ((IntegerValue) v0).asBigInteger();
+                BigInteger i1 = ((IntegerValue) v1).asBigInteger();
+                BigInteger i2 = ((IntegerValue) v2).asBigInteger();
+                if (i0.equals(BigInteger.ZERO)
+                        || (i1.compareTo(BigInteger.ZERO) > 0 && i0.compareTo(i2) > 0)
+                        || i1.compareTo(BigInteger.ZERO) < 0 && i0.compareTo(i2) < 0) {
+                    result = Literal.makeEmptySequence();
+                } else if (i0.equals(i2)) {
+                    result = Literal.makeLiteral(Int64Value.makeIntegerValue(i0), this);
+                } else {
+//                    if (Math.abs((i2 - i0) / i1) > Integer.MAX_VALUE) {
+//                        throw new XPathException("Maximum length of sequence in Saxon is " + Integer.MAX_VALUE, "XPDY0130");
+//                    }
+                    return this;
+                }
             }
+            ExpressionTool.copyLocationInfo(this, result);
+            return result;
         }
         return this;
     }
@@ -159,8 +252,8 @@ public class RangeExpression extends BinaryExpression {
     /*@Nullable*/
     @Override
     public IntegerValue[] getIntegerBounds() {
-        IntegerValue[] start = getLhsExpression().getIntegerBounds();
-        IntegerValue[] end = getLhsExpression().getIntegerBounds();
+        IntegerValue[] start = getStartExpression().getIntegerBounds();
+        IntegerValue[] end = getEndExpression().getIntegerBounds();
         if (start == null || end == null) {
             return null;
         } else {
@@ -179,7 +272,10 @@ public class RangeExpression extends BinaryExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        RangeExpression exp = new RangeExpression(getLhsExpression().copy(rebindings), getRhsExpression().copy(rebindings));
+        RangeExpression exp = new RangeExpression(
+                getStartExpression().copy(rebindings),
+                getStepExpression().copy(rebindings),
+                getEndExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
@@ -210,6 +306,72 @@ public class RangeExpression extends BinaryExpression {
     }
 
     /**
+     * Determine the special properties of this expression
+     *
+     * @return {@link StaticProperty#NO_NODES_NEWLY_CREATED}.
+     */
+
+    @Override
+    public int computeSpecialProperties() {
+        int p = super.computeSpecialProperties();
+        return p | StaticProperty.NO_NODES_NEWLY_CREATED;
+    }
+
+
+    /**
+     * Is this expression the same as another expression?
+     */
+
+    public boolean equals(Object other) {
+        if (other instanceof RangeExpression && hasCompatibleStaticContext((Expression) other)) {
+            RangeExpression b = (RangeExpression) other;
+            Expression start1 = getStartExpression();
+            Expression step1 = getStepExpression();
+            Expression end1 = getEndExpression();
+            Expression start2 = b.getStartExpression();
+            Expression step2 = b.getStepExpression();
+            Expression end2 = b.getEndExpression();
+            return start1.equals(start2) && step1.equals(step2) && end1.equals(end2);
+        }
+        return false;
+    }
+
+    /**
+     * Compute a hash code, which will then be cached for later use
+     *
+     * @return a computed hash code
+     */
+    @Override
+    protected int computeHashCode() {
+        return getStartExpression().hashCode() ^ (getStepExpression().hashCode()<<3) ^ (getEndExpression().hashCode()<<7);
+    }
+
+    /**
+     * <p>The toString() method for an expression attempts to give a representation of the expression
+     * in an XPath-like form.</p>
+     * <p>For subclasses of Expression that represent XPath expressions, the result should always be a string that
+     * parses as an XPath 3.0 expression. The expression produced should be equivalent to the original making certain
+     * assumptions about the static context. In general the expansion will make no assumptions about namespace bindings,
+     * except that (a) the prefix "xs" is used to refer to the XML Schema namespace, and (b) the default function namespace
+     * is assumed to be the "fn" namespace.</p>
+     * <p>In the case of XSLT instructions and XQuery expressions, the toString() method gives an abstracted view of the syntax
+     * that is not designed in general to be parseable.</p>
+     *
+     * @return a representation of the expression as a string
+     */
+    @Override
+    public String toString() {
+        String by = getStepExpression().toString();
+        return getStartExpression().toString() + (by.equals("1") ? "" : (" by " + by)) + " to " + getEndExpression().toString();
+    }
+
+    @Override
+    public String toShortString() {
+        String by = getStepExpression().toShortString();
+        return getStartExpression().toShortString() + (by.equals("1") ? "" : (" by " + by)) + " to " + getEndExpression().toShortString();
+    }
+
+    /**
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.
      *
@@ -217,9 +379,10 @@ public class RangeExpression extends BinaryExpression {
      */
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
+        // TODO: export "by" expression
         out.startElement("to", this);
-        getLhsExpression().export(out);
-        getRhsExpression().export(out);
+        getStartExpression().export(out);
+        getEndExpression().export(out);
         out.endElement();
     }
 
@@ -230,9 +393,10 @@ public class RangeExpression extends BinaryExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        IntegerValue av1 = (IntegerValue) getLhsExpression().evaluateItem(context);
-        IntegerValue av2 = (IntegerValue) getRhsExpression().evaluateItem(context);
-        return RangeIterator.makeRangeIterator(av1, av2);
+        IntegerValue av1 = (IntegerValue) getStartExpression().evaluateItem(context);
+        IntegerValue av2 = (IntegerValue) getStepExpression().evaluateItem(context);
+        IntegerValue av3 = (IntegerValue) getEndExpression().evaluateItem(context);
+        return AscendingRangeIterator.makeRangeIterator(av1, av2, av3);
     }
 
 }

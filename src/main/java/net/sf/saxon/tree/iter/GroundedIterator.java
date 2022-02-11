@@ -26,20 +26,6 @@ import net.sf.saxon.trans.XPathException;
 public interface GroundedIterator extends SequenceIterator {
 
     /**
-     * Return a GroundedValue containing all the items in the sequence returned by this
-     * SequenceIterator. This should be an "in-memory" value, not a Closure. This method
-     * does not change the state of the iterator (in particular, it does not consume the
-     * iterator).
-     *
-     * @return the corresponding Value
-     * @throws XPathException in the cases of subclasses (such as the iterator over a MemoClosure)
-     * which cause evaluation of expressions while materializing the value.
-     */
-
-    @Override
-    GroundedValue materialize() throws XPathException;
-
-    /**
      * Return a GroundedValue containing all the remaining items in the sequence returned by this
      * SequenceIterator, starting at the current position. This should be an "in-memory" value, not a
      * Closure. This method does not change the state of the iterator (in particular, it does not

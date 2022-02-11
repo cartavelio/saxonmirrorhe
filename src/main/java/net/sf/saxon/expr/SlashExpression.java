@@ -14,6 +14,7 @@ import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.functions.Doc;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.KeyFn;
+import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -206,6 +207,15 @@ public class SlashExpression extends BinaryExpression
         ContextItemStaticInfo cit = config.makeContextItemStaticInfo(startType, false);
         cit.setContextSettingExpression(getStart());
         getRhs().typeCheck(visitor, cit);
+
+        // Give a warning if people write a/[x = 3]
+        if (getRhsExpression() instanceof SquareArrayConstructor)  {
+            SquareArrayConstructor sq = (SquareArrayConstructor)getRhsExpression();
+            if (sq.getOperanda().getNumberOfOperands() == 1) {
+                visitor.getStaticContext().issueWarning("An array constructor appears immediately after '/' or '//'. Perhaps " +
+                                "'/*[predicate]' was intended? If not, consider using '!' rather than '/' to remove this warning.", getLocation());
+            }
+        }
 
         // If the expression has the form (a//descendant-or-self::node())/b, try to simplify it to
         // use the descendant axis

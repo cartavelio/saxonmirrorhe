@@ -2984,7 +2984,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("range", (loader, element) -> {
             int from = loader.getIntegerAttribute(element, "from");
             int to = loader.getIntegerAttribute(element, "to");
-            return Literal.makeLiteral(new IntegerRange(from, to));
+            return Literal.makeLiteral(new IntegerRange(from, 1, to));
         });
 
         eMap.put("resultDoc", (loader, element) -> {

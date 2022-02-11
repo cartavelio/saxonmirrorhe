@@ -1,0 +1,194 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2020 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+package net.sf.saxon.expr;
+
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.*;
+import net.sf.saxon.value.*;
+
+import java.util.EnumSet;
+
+/**
+ * An Iterator that produces numeric values in a monotonic sequence,
+ * ascending or descending. Applying the reverse() function will produce
+ * a DescendinggRangeIterator.
+ */
+
+public class AscendingRangeIterator extends RangeIterator implements AtomicIterator<IntegerValue>,
+        ReversibleIterator,
+        LastPositionFinder,
+        LookaheadIterator,
+        GroundedIterator {
+
+    long start;
+    long step;
+    long currentValue;
+    long limit;
+
+    public static AtomicIterator<IntegerValue> makeRangeIterator(IntegerValue start, IntegerValue step, IntegerValue end) throws XPathException {
+        if (start == null || end == null) {
+            return EmptyIterator.ofAtomic();
+        } else {
+            int direction = step.compareTo(Int64Value.ZERO);
+            if (direction == 0
+                || direction > 0 && start.compareTo(end) > 0
+                || direction < 0 && start.compareTo(end) < 0) {
+                return EmptyIterator.ofAtomic();
+            }
+            if (start instanceof BigIntegerValue || step instanceof BigIntegerValue || end instanceof BigIntegerValue) {
+                return new BigRangeIterator(start.asBigInteger(), step.asBigInteger(), end.asBigInteger());
+            } else {
+                long startVal = start.longValue();
+                long stepVal = step.longValue();
+                long endVal = end.longValue();
+                if ((endVal - startVal) / stepVal > Integer.MAX_VALUE) {
+                    throw new XPathException("Saxon limit on sequence length exceeded (2^31)", "XPDY0130");
+                }
+                if (stepVal > 0) {
+                    return new AscendingRangeIterator(startVal, stepVal, endVal);
+                } else {
+                    return new DescendingRangeIterator(startVal, -stepVal, endVal);
+                }
+            }
+        }
+    }
+
+    /**
+     * Factory method for use from bytecode
+     */
+
+    public static AtomicIterator<IntegerValue> makeLongRangeIterator(long start, long step, long end) throws XPathException {
+        int direction = Long.compare(step, 0);
+        if (direction == 0
+                || direction > 0 && start > end
+                || direction < 0 && start < end) {
+            return EmptyIterator.ofAtomic();
+        }
+
+        if ((end - start) / step > Integer.MAX_VALUE) {
+            throw new XPathException("Saxon limit on sequence length exceeded (2^31)", "XPDY0130");
+        }
+        if (step > 0) {
+            return new AscendingRangeIterator(start, step, end);
+        } else {
+            return new DescendingRangeIterator(start, -step, end);
+        }
+    }
+
+
+    /**
+     * Create an iterator over a range of monotonically increasing integers
+     *
+     * @param start the first integer in the sequence
+     * @param step the increment; must be > 0
+     * @param end   the last integer in the sequence. Must be >= start.
+     */
+
+    public AscendingRangeIterator(long start, long step, long end) {
+        this.start = start;
+        this.step = step;
+        currentValue = start - step;
+        limit = end;
+        if (step != 1L) {
+            limit = start + ((end - start)/step) * step;
+        }
+    }
+
+    @Override
+    public IntegerValue getFirst() {
+        return new Int64Value(start);
+    }
+
+    @Override
+    public IntegerValue getLast() {
+        return new Int64Value(limit);
+    }
+
+    @Override
+    public IntegerValue getMin() {
+        return new Int64Value(start);
+    }
+
+    @Override
+    public IntegerValue getMax() {
+        return new Int64Value(limit);
+    }
+
+    /**
+     * Get the increment between successive values. For a descending iterator this will be negatiive value.
+     *
+     * @return the increment between successive values
+     */
+    @Override
+    public IntegerValue getStep() {
+        return new Int64Value(step);
+    }
+
+    @Override
+    public boolean hasNext() {
+        return currentValue + step <= limit;
+    }
+
+    /*@Nullable*/
+    @Override
+    public IntegerValue next() {
+        currentValue += step;
+        if (currentValue > limit) {
+            return null;
+        }
+        return Int64Value.makeIntegerValue(currentValue);
+    }
+
+    @Override
+    public int getLength() {
+        return (int) ((limit - start) + 1);
+    }
+
+    /**
+     * Get properties of this iterator, as a bit-significant integer.
+     *
+     * @return the properties of this iterator. This will be some combination of
+     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+     *         and {@link Property#LOOKAHEAD}. It is always
+     *         acceptable to return the value zero, indicating that there are no known special properties.
+     *         It is acceptable for the properties of the iterator to change depending on its state.
+     */
+
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD, Property.LAST_POSITION_FINDER, Property.GROUNDED);
+    }
+
+    @Override
+    public AtomicIterator<IntegerValue> getReverseIterator() {
+        //try {
+            return new DescendingRangeIterator(limit, step, start);
+//        } catch (XPathException err) {
+//            throw new AssertionError(err);
+//        }
+    }
+
+    /**
+     * Return a Value containing all the items in the sequence returned by this
+     * SequenceIterator. This should be an "in-memory" value, not a Closure.
+     *
+     * @return the corresponding Value
+     */
+
+    @Override
+    public GroundedValue materialize() {
+        return new IntegerRange(start, step, limit);
+    }
+
+    @Override
+    public GroundedValue getResidue() {
+        return new IntegerRange(currentValue, step, limit);
+    }
+}
+

@@ -2270,7 +2270,7 @@ public class XQueryParser extends XPathParser {
                 List sortSpecList;
                 t.setState(Tokenizer.BARE_NAME_STATE);
                 nextToken();
-                if (!isKeyword("by")) {
+                if (!(t.currentToken == Token.BY || isKeyword("by"))) {
                     grumble("'order' must be followed by 'by'");
                 }
                 t.setState(Tokenizer.DEFAULT_STATE);
