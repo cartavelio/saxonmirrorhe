@@ -14,7 +14,7 @@ import net.sf.saxon.trans.XPathException;
  * object that is invaluable during the construction of nested arrays.
  */
 
-public class ArrayMember0 extends SystemFunction {
+public class ArrayMember extends SystemFunction {
 
     /**
      * Evaluate this function call at run-time
