@@ -778,10 +778,10 @@
                
                <tr>
                   <td>
-                     <p><span class="nowrap">xmlresolver-4.1.2.jar</span></p>
+                     <p><span class="nowrap">xmlresolver-4.2.0.jar</span></p>
                   </td>
                   <td>
-                     <p>147Kb</p>
+                     <p>150Kb</p>
                   </td>
                   <td>
                      <p>XML Resolver: an open source library supporting the resolution of URIs using
@@ -793,10 +793,10 @@
                
                <tr>
                   <td>
-                     <p><span class="nowrap">xmlresolverdata-x.y.z.jar</span></p>
+                     <p><span class="nowrap">xmlresolverdata-4.2.0.jar</span></p>
                   </td>
                   <td>
-                     <p>TBA</p>
+                     <p>1.0Mb</p>
                   </td>
                   <td>
                      <p>XML Resolver Data: a package of commonly used W3C resources, such as DTDs and
