@@ -149,6 +149,17 @@ namespace SaxonCS_NUnit {
             Assert.AreEqual("bar", foo.StringValue);
         }
         
+        [Test]
+        public void TestLast() {
+            Processor proc = new();
+            DocumentBuilder builder = proc.NewDocumentBuilder();
+            XdmNode doc =
+                builder.Build(
+                    new StringReader("<one foo='bar'>[<two xmlns='http://ns.com/'><three/></two>]</one>"));
+            XdmNode three = doc.Select(Steps.Descendant("*")).Last();
+            Assert.AreEqual("three", three.NodeName.LocalName);
+        }
+        
         
 
     }
