@@ -2348,9 +2348,10 @@
                   <code>string</code>
                </td>
                <td>
-                  <span class="signature">getAttributeValue(int $index)</span>
-                  <div class="fcomment">Get the value of the n'th attribute node of this node. If
-                     the attribute node selected does not exist then return null.</div>
+                  <span class="signature">getAttributeValue(string $name)</span>
+                  <div class="fcomment">Get the string value of a named attribute (in no namespace)
+                     of this element. If this node is not an element, or if this element has no
+                     attribute with the specified name, then return null.</div>
                </td>
             </tr>
          </table>
