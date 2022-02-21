@@ -54,7 +54,14 @@ namespace Saxon.Callbacks {
                 try {
                     ResolvedResource rr;
                     if (request.uriIsNamespace) {
-                        rr = catalogBasedResolver.CatalogResolver.ResolveNamespace(
+                        CatalogResolver cat = catalogBasedResolver.CatalogResolver;
+                        IResolverConfiguration catConfig = cat.GetConfiguration();
+                        CatalogManager catalog = (CatalogManager) catConfig.GetFeature(ResolverFeature.CATALOG_MANAGER);
+                        Uri attempt = catalog.LookupNamespaceUri(request.uri, request.nature, request.purpose);
+                        if (attempt == null) {
+                            return null;
+                        }
+                        rr = cat.ResolveNamespace(
                             request.uri, null, request.nature, request.purpose);
                     }
                     else if (request.nature == Saxon.Hej.lib.JJ_ResourceRequest.DTD_NATURE || request.nature == Saxon.Hej.lib.JJ_ResourceRequest.EXTERNAL_ENTITY_NATURE) {
