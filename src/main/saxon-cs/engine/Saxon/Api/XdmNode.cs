@@ -28,6 +28,8 @@ namespace Saxon.Api {
     /// as its name, its string value, and its typed value. Navigation to other nodes
     /// is supported through a single method, <c>EnumerateAxis</c>, which allows
     /// other nodes to be retrieved by following any of the XPath axes.</para>
+    /// <para>Navigation from a node to other related nodes can be achieved using the
+    /// <c>XdmValue.Select()</c> method, which this class inherits.</para>
     /// </remarks>
     [Serializable]
     public class XdmNode : XdmItem {

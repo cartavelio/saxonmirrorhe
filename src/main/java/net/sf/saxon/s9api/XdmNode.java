@@ -13,6 +13,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.query.QueryResult;
+import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.trans.XPathException;
@@ -38,6 +39,9 @@ import java.util.stream.Stream;
  * <p>Note that node identity cannot be inferred from object identity. The same node may be represented
  * by different <code>XdmNode</code> instances at different times, or even at the same time. The equals()
  * method on this class can be used to test for node identity.</p>
+ * <p>Navigation from a node to other related nodes can be achieved using the {@link XdmValue#select(Step)}
+ * method which this class inherits. Simple navigation to children or attributes can also be achieved using
+ * the {@link #children()} and {@link #attribute} methods.</p>
  * @see net.sf.saxon.sapling.SaplingDocument#toXdmNode(Processor)
  * @see net.sf.saxon.sapling.SaplingElement#toXdmNode(Processor)
  *
@@ -272,7 +276,8 @@ public class XdmNode extends XdmItem {
     
     /**
      * Get an iterator over the nodes reachable from this node via a given axis.
-     *
+     * <p>Note: a more powerful way of achieving this is to use the {@link XdmValue#select(Step)} method
+     * which this class inherits.</p>
      * @param axis identifies which axis is to be navigated
      * @return an iterator over the nodes on the specified axis, starting from this node as the
      *         context node. The nodes are returned in axis order, that is, in document order for a forwards
@@ -287,6 +292,9 @@ public class XdmNode extends XdmItem {
     /**
      * Get an iterator over the nodes reachable from this node via a given axis, selecting only
      * those nodes with a specified name.
+     *
+     * <p>Note: a more powerful way of achieving this is to use the {@link XdmValue#select(Step)} method
+     *  which this class inherits.</p>
      *
      * @param axis identifies which axis is to be navigated
      * @param name identifies the name of the nodes to be selected. The selected nodes will be those
