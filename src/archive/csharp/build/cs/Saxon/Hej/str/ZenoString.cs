@@ -11,6 +11,7 @@ namespace Saxon.Hej.str {
             segments.Add(content);
             offsets.Add(0L);
         }
+        public static readonly Saxon.Hej.str.ZenoString EMPTY = new Saxon.Hej.str.ZenoString();
         public static Saxon.Hej.str.ZenoString of(Saxon.Hej.str.UnicodeString content) {
             if ((content is Saxon.Hej.str.ZenoString)) {
                 return (Saxon.Hej.str.ZenoString)(content);
@@ -225,7 +226,6 @@ namespace Saxon.Hej.str {
                     Saxon.Impl.Helpers.ListUtils.Remove(offsets, (i+1));
                 }
             }
-            verifySegmentLengths();
             return this;
         }
         private Saxon.Hej.str.ZenoString consolidate1() {

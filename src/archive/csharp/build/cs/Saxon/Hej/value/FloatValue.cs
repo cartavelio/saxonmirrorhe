@@ -63,7 +63,7 @@ namespace Saxon.Hej.value {
             return floatToString(value);
         }
         public override Saxon.Hej.str.UnicodeString getCanonicalLexicalRepresentation() {
-            Saxon.Hej.str.UnicodeBuilder fsb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder fsb = new Saxon.Hej.str.UnicodeBuilder(32);
             return Saxon.Hej.value.FloatingPointConverter.appendFloat(fsb, value, true);
         }
         public static Saxon.Hej.str.UnicodeString floatToString(float value) {

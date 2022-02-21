@@ -25,12 +25,12 @@ namespace Saxon.Eej.functions.extfn {
                                 imap.initialPut(key, next);
                             } else {
                                 if ((existingVal is Saxon.Hej.ma.zeno.ZenoSequence)) {
-                                    ((Saxon.Hej.ma.zeno.ZenoSequence)(existingVal)).append(next);
+                                    imap.initialPut(key, ((Saxon.Hej.ma.zeno.ZenoSequence)(existingVal)).append(next));
                                 } else {
-                                    Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-                                    chain.appendSequence(existingVal);
-                                    chain.append(next);
-                                    imap.initialPut(key, chain);
+                                    Saxon.Hej.ma.zeno.ZenoSequence zenoSeq = new Saxon.Hej.ma.zeno.ZenoSequence();
+                                    zenoSeq = zenoSeq.appendSequence(existingVal);
+                                    zenoSeq = zenoSeq.append(next);
+                                    imap.initialPut(key, zenoSeq);
                                 }
                             }
                         }

@@ -171,15 +171,19 @@ namespace Saxon.Eej.config {
                 licenseDesc += ((" (serial number "+serial)+")");
                 int daysLeft = license.daysLeft();
                 if ((daysLeft<0)) {
-                    if (("yes".Equals(features.getProperty("Evaluation")) || (daysLeft<-30))) {
+                    if (("yes".Equals(features.getProperty("Evaluation")) || (daysLeft<-45))) {
                         license.clearFeatures();
                         throw new Saxon.Hej.trans.LicenseException((("The "+licenseDesc)+" has expired"), Saxon.Hej.trans.LicenseException.EXPIRED);
                     } else {
-                        System.Console.Error.WriteLine(((((("Saxon "+licenseDesc)+" has expired. \n*** You are using the software without legal authority. ***")+"\nYou must obtain a new license immediately; meanwhile a delay of ")+(System.Math.Abs(daysLeft)*2))+" seconds will be imposed."));
-                        try {
-                            Saxon.Ejava.lang.Thread.sleep((System.Math.Abs(daysLeft)*2000));
-                        } catch (System.Threading.ThreadInterruptedException e) {
-                            throw new Saxon.Hej.trans.LicenseException((("Saxon license "+licenseDesc)+" has expired"), Saxon.Hej.trans.LicenseException.EXPIRED);
+                        if ((daysLeft<-15)) {
+                            System.Console.Error.WriteLine(((("Saxon "+licenseDesc)+" has expired. \n*** You are using the software without lawful authority. ***")+"\nYou must obtain a new license immediately."));
+                        } else {
+                            System.Console.Error.WriteLine(((((("Saxon "+licenseDesc)+" has expired. \n*** You are using the software without lawful authority. ***")+"\nYou must obtain a new license immediately; meanwhile a delay of ")+(System.Math.Abs(daysLeft)*2))+" seconds will be imposed. This delay will increase every day."));
+                            try {
+                                Saxon.Ejava.lang.Thread.sleep((System.Math.Abs(daysLeft)*2000));
+                            } catch (System.Threading.ThreadInterruptedException e) {
+                                throw new Saxon.Hej.trans.LicenseException((("Saxon license "+licenseDesc)+" has expired"), Saxon.Hej.trans.LicenseException.EXPIRED);
+                            }
                         }
                     }
                 }

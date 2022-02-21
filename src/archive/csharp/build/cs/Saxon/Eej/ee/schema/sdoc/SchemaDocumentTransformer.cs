@@ -28,7 +28,6 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 transformer.applyTemplates(input, new Saxon.Hej.@event.TreeReceiver(builder));
                 return builder.getCurrentRoot().getTreeInfo();
             } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
-                System.Console.Error.WriteLine(e.getMessageAndLocation());
                 throw new Saxon.Hej.type.SchemaException(e);
             }
         }

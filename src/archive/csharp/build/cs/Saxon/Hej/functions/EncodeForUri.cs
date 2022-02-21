@@ -12,7 +12,7 @@ namespace Saxon.Hej.functions {
         }
         public static Saxon.Hej.value.StringValue escape(Saxon.Hej.str.UnicodeString s, string allowedPunctuation) {
             s = s.tidy();
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder((s.length32()+20));
             Saxon.Hej.z.IntIterator iter = s.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();

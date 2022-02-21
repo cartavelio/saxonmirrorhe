@@ -37,11 +37,14 @@ namespace Saxon.Callbacks {
         /// <c>TextReader</c>, together with a <c>SystemId</c> that identifies the base URI of the
         /// resource. Returns null if the request cannot be resolved.</returns>
         public Source resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
+            if (request.uriIsNamespace) {
+                return null;
+            }
             try {
                 string href = request.relativeUri ?? request.uri;
-                string baseUri = request.baseUri ?? request.uri;
+                string baseUri = request.baseUri;
                 if (string.IsNullOrEmpty(baseUri)) {
-                    baseUri = System.IO.Directory.GetCurrentDirectory();
+                    baseUri = Saxon.Ejava.io.File.CurrentDirectoryUri().AbsoluteUri;
                 }
                 Uri abs = new Uri(new Uri(baseUri), href);
                 Stream stream = UriUtils.GetStream(abs);

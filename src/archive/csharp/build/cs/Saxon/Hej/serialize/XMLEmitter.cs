@@ -499,7 +499,7 @@ namespace Saxon.Hej.serialize {
                         writer.write(chars);
                     } else {
                         if (!(Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.DISABLE_ESCAPING))) {
-                            writeEscape(chars.tidy(), false);
+                            writeEscape(chars, false);
                         } else {
                             if ((testCharacters(chars) == 0)) {
                                 if (!(Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.USE_NULL_MARKERS))) {

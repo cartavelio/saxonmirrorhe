@@ -83,6 +83,12 @@ namespace Saxon.Hej.s9api {
         public Saxon.Hej.lib.UnparsedTextURIResolver getUnparsedTextURIResolver() {
             return context.getUnparsedTextURIResolver();
         }
+        public void setErrorReporter(Saxon.Hej.lib.ErrorReporter reporter) {
+            context.setErrorReporter(reporter);
+        }
+        public Saxon.Hej.lib.ErrorReporter getErrorReporter() {
+            return context.getErrorReporter();
+        }
         public void setTraceListener(Saxon.Hej.lib.TraceListener listener) {
             context.setTraceListener(listener);
         }

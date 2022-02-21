@@ -28,6 +28,8 @@ namespace Saxon.Api {
     /// as its name, its string value, and its typed value. Navigation to other nodes
     /// is supported through a single method, <c>EnumerateAxis</c>, which allows
     /// other nodes to be retrieved by following any of the XPath axes.</para>
+    /// <para>Navigation from a node to other related nodes can be achieved using the
+    /// <see cref="XdmValue.Select"/> method, which this class inherits.</para>
     /// </remarks>
     [Serializable]
     public class XdmNode : XdmItem {
@@ -38,7 +40,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// Applications using the class <c>Saxon.Hej.om.NodeInfo</c> should be aware that it is subject to occasional
         /// changes from one release to the next. For documentation on this class, see the Saxon-EE Javadoc documentation
-        /// for the very similar class <c>net.sf.saxon.om.NodeInfo</c>.
+        /// for the very similar class <see cref="Saxon.Hej.om.NodeInfo"/>.
         /// </remarks>
         /// <param name="node">The object to be wrapped</param>
 		public XdmNode(Saxon.Hej.om.NodeInfo node) : base(node) {
@@ -204,7 +206,12 @@ namespace Saxon.Api {
         /// If the method does not wrap a DOM <c>XmlNode</c> then null is returned
         /// </summary>
         /// <returns>The underlying <c>XmlNode</c></returns>
-        public XmlNode getUnderlyingXmlNode() {
+        /// <summary>
+        /// Unwraps the underlying DOM <c>XmlNode</c> object from the <c>XdmValue</c>.
+        /// If the method does not wrap a DOM <c>XmlNode</c> then null is returned
+        /// </summary>
+        /// <returns>The underlying <c>XmlNode</c></returns>
+        public XmlNode GetUnderlyingXmlNode() {
             NodeInfo localNode = (NodeInfo)value;
             if (localNode is VirtualNode virtualNode) {
                 object realNode = virtualNode.getRealNode();
@@ -218,6 +225,17 @@ namespace Saxon.Api {
 
             return null;
         }
+        
+        /// <summary>
+        /// Incorrectly-named synonym of GetUnderlyingXmlNode, retained temporarily for compatibility with 11.0 and 11.1
+        /// </summary>
+        /// <returns>The underlying <c>XmlNode</c> if there is one</returns>
+    
+        [Obsolete("This is an obsolete synonym of GetUnderlyingXmlNode")]
+        public XmlNode getUnderlyingXmlNode() {
+            return GetUnderlyingXmlNode();
+        }
+
 
         /// <summary>
         /// Get the parent of this node.

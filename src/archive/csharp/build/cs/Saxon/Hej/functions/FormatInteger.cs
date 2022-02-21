@@ -210,7 +210,7 @@ namespace Saxon.Hej.functions {
             }
         }
         private static Saxon.Hej.str.UnicodeString extractSeparators(Saxon.Hej.str.UnicodeString arr, Saxon.Hej.z.IntSet excludePositions) {
-            Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder(arr.length32());
             Saxon.Hej.z.IntIterator iter = arr.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();

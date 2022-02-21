@@ -17,7 +17,7 @@ namespace Saxon.Hej.functions {
             if (((sv0.length()*sv1.length())>1000)) {
                 return translateUsingMap(sv0, buildMap(sv1, sv2));
             }
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(sv0.length32());
             long s2len = sv2.length();
             Saxon.Hej.z.IntIterator iter = sv0.codePoints();
             while (iter.hasNext()) {
@@ -44,7 +44,7 @@ namespace Saxon.Hej.functions {
             return map;
         }
         public static Saxon.Hej.value.StringValue translateUsingMap(Saxon.Hej.value.StringValue @in, Saxon.Hej.z.IntToIntMap map) {
-            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder(@in.length32());
             Saxon.Hej.z.IntIterator iter = @in.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();

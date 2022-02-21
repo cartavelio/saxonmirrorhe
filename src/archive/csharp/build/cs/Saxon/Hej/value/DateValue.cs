@@ -75,7 +75,7 @@ namespace Saxon.Hej.value {
             }
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             int yr = year;
             if ((year<=0)) {
                 yr = (-(yr)+((hasNoYearZero ? 1 : 0)));

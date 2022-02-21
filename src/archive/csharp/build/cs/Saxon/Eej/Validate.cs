@@ -306,7 +306,16 @@ namespace Saxon.Eej {
         internal  /* REPLACING protected internal */ void applyLocalOptions(Saxon.Hej.trans.CommandLineOptions options, Saxon.Hej.Configuration config) {
         }
         protected internal int quit(string message, int code) {
-            config.getLogger().info(message);
+            if (((config != null) && (config.getLogger() != null))) {
+                config.getLogger().warning(message);
+            } else {
+                System.Console.Error.WriteLine(message);
+            }
+            if (allowExit) {
+                Saxon.Ejava.lang.System.exit(code);
+            } else {
+                throw new System.Exception(message);
+            }
             return code;
         }
         public static Saxon.Ejavax.xml.transform.Source loadDocument(string sourceFileName, bool useURLs, Saxon.Hej.Configuration config) {

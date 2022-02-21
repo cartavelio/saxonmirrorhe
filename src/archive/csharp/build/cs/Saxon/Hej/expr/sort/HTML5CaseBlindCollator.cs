@@ -73,7 +73,7 @@ namespace Saxon.Hej.expr.sort {
             return normalize(s);
         }
         private Saxon.Hej.str.UnicodeString normalize(Saxon.Hej.str.UnicodeString cs) {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(cs.length32());
             Saxon.Hej.z.IntIterator iter = cs.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();

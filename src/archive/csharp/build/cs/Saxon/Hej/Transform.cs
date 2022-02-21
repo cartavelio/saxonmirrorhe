@@ -413,14 +413,15 @@ namespace Saxon.Hej {
                     if (isURI) {
                         Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                         request.relativeUri = styleFileName;
-                        System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
-                        request.baseUri = cwd.ToString();
+                        System.Uri cwd = getCurrentWorkingDirectory();
+                        request.baseUri = cwd.OriginalString;
                         request.uri = new System.Uri(cwd, styleFileName).ToString();
                         request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSLT_NATURE;
                         request.purpose = "transformation";
+                        styleSource = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     } else {
                         if (styleFileName.Equals("-")) {
-                            string sysId = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI().OriginalString;
+                            string sysId = getCurrentWorkingDirectory().OriginalString;
                             styleSource = new Saxon.Ejavax.xml.transform.stream.StreamSource(System.Console.In, sysId);
                         } else {
                             Saxon.Hej.trans.packages.PackageLibrary library = config.getDefaultXsltCompilerInfo().getPackageLibrary();
@@ -554,6 +555,12 @@ namespace Saxon.Hej {
                 System.Console.Error.WriteLine(err2);
                 quit(((("Fatal error during transformation: "+err2.GetType().Name)+": ")+(((err2.Message == null) ? " (no message)" : err2.Message))), 2);
             }
+        }
+        public void doTransform(string[] args, string command) {
+            doTransform(args);
+        }
+        private static System.Uri getCurrentWorkingDirectory() {
+            return Saxon.Ejava.io.File.CurrentDirectoryUri();
         }
         protected internal void initializeConfiguration(Saxon.Hej.Configuration config) {
         }
@@ -694,7 +701,7 @@ namespace Saxon.Hej {
                 Saxon.Hej.s9api.Xslt30Transformer transformer = newTransformer(sheet, options);
                 Saxon.Hej.s9api.Serializer serializer;
                 if ((outputFile == null)) {
-                    transformer.setBaseOutputURI(new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI().OriginalString);
+                    transformer.setBaseOutputURI(getCurrentWorkingDirectory().OriginalString);
                     serializer = processor.newSerializer(System.Console.Out);
                 } else {
                     serializer = processor.newSerializer(outputFile);

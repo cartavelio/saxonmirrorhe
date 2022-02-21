@@ -12,6 +12,7 @@ namespace Saxon.Hej.expr.flwor {
             ORDER_BY,
             WHERE,
             TRACE,
+            DIAG,
             FOR_MEMBER,
         }
         private Saxon.Hej.s9api.Location location;

@@ -87,13 +87,13 @@ namespace Saxon.Hej.str {
         }
         protected internal void checkSubstringBounds(long start, long end) {
             if ((start<0)) {
-                throw new System.IndexOutOfRangeException("UnicodeString.substring(): start < 0");
+                throw new System.IndexOutOfRangeException((("UnicodeString.substring(): start ("+start)+") < 0"));
             }
             if ((end<start)) {
-                throw new System.IndexOutOfRangeException("UnicodeString.substring(): end < start");
+                throw new System.IndexOutOfRangeException((("UnicodeString.substring(): end ("+end)+") < start ( + start + "));
             }
             if ((end>length())) {
-                throw new System.IndexOutOfRangeException("UnicodeString.substring(): end > length()");
+                throw new System.IndexOutOfRangeException((((("UnicodeString.substring(): end ("+end)+") > length (")+length())+")"));
             }
         }
         public void verifyCharacters() {

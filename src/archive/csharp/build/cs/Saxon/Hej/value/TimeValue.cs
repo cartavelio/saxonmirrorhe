@@ -221,7 +221,7 @@ namespace Saxon.Hej.value {
             return nanosecond;
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             appendTwoDigits(sb, hour);
             sb.append(':');
             appendTwoDigits(sb, minute);

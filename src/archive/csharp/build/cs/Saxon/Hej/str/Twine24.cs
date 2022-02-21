@@ -8,14 +8,16 @@ namespace Saxon.Hej.str {
         protected internal Twine24(byte[] bytes)  {
             this.bytes = bytes;
         }
-        public Twine24(int[] codePoints)  {
-            bytes = new byte[(codePoints.Length*3)];
-            for (int i = 0, j = 0; (i<codePoints.Length); i++, j += 3) {
+        public Twine24(int[] codePoints, int used)  {
+            bytes = new byte[(used*3)];
+            for (int i = 0, j = 0; (i<used); i++, j += 3) {
                 int c = codePoints[i];
                 bytes[j] = (byte)(((((c>>16))&unchecked((int)0xff))));
                 bytes[(j+1)] = (byte)(((((c>>8))&unchecked((int)0xff))));
                 bytes[(j+2)] = (byte)(((c&unchecked((int)0xff))));
             }
+        }
+        public Twine24(int[] codePoints) : this (codePoints, codePoints.Length) {
         }
         public byte[] getByteArray() {
             return bytes;

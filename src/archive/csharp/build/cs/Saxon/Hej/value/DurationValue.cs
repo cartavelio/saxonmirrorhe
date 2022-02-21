@@ -323,7 +323,7 @@ namespace Saxon.Hej.value {
             if ((((_months == 0) && (_seconds == 0L)) && (_nanoseconds == 0))) {
                 return Saxon.Hej.str.BMPString.of("PT0S");
             }
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             if (_negative) {
                 sb.append('-');
             }

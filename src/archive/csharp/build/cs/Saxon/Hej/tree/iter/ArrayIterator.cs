@@ -93,7 +93,12 @@ namespace Saxon.Hej.tree.iter {
                 return seq.reduce();
             }
             public override Saxon.Hej.om.SequenceIterator getReverseIterator() {
-                return Saxon.Hej.functions.Reverse.reverseIterator(Saxon.Ejava.util.Arrays.asList(items));
+                if (((start == 0) && (end == items.Length))) {
+                    return Saxon.Hej.functions.Reverse.reverseIterator(Saxon.Ejava.util.Arrays.asList(items));
+                } else {
+                    System.Collections.Generic.IList<T> sublist = Saxon.Impl.Helpers.ListUtils.SubList(Saxon.Ejava.util.Arrays.asList(items), start, end);
+                    return Saxon.Hej.functions.Reverse.reverseIterator(sublist);
+                }
             }
         
         }

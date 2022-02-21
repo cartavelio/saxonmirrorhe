@@ -455,7 +455,7 @@ namespace Saxon.Hej.value {
             return ((((long)minute)*360 + ((long)second))*60) * 1000000000L + (long)nanosecond;
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(32);
             int yr = year;
             if ((year<=0)) {
                 yr = (-(yr)+((hasNoYearZero ? 1 : 0)));

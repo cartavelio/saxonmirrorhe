@@ -398,7 +398,7 @@ namespace Saxon.Hej.functions {
                 int[] range = getWidths(widths);
                 min = range[0];
                 string roman = numberer.format(value, primary, null, letterValue, ordinal);
-                Saxon.Hej.str.UnicodeBuilder s = new Saxon.Hej.str.UnicodeBuilder();
+                Saxon.Hej.str.UnicodeBuilder s = new Saxon.Hej.str.UnicodeBuilder(32);
                 s.append(roman);
                 int len = Saxon.Hej.str.StringTool.getStringLength(roman);
                 while ((len<min)) {
@@ -538,8 +538,7 @@ namespace Saxon.Hej.functions {
             return Saxon.Hej.str.StringView.tidy(formattedStr);
         }
         private static Saxon.Hej.str.UnicodeString reverse(Saxon.Hej.str.UnicodeString @in) {
-            @in = @in.tidy();
-            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder(@in.length32());
             for (long i = (@in.length()-1); (i>=0); i--) {
                 builder.append(@in.codePointAt(i));
             }
@@ -709,7 +708,7 @@ namespace Saxon.Hej.functions {
                     return Saxon.Hej.expr.number.NamedTimeZone.getOlsonTimeZoneName(value, country);
                 }
             }
-            Saxon.Hej.str.UnicodeBuilder sbz = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sbz = new Saxon.Hej.str.UnicodeBuilder(16);
             value.appendTimezone(sbz);
             return sbz.ToString();
         }

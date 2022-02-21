@@ -25,7 +25,7 @@ namespace Saxon.Hej.value {
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
             int y = getYears();
             int m = getMonths();
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             if (_negative) {
                 sb.append('-');
             }

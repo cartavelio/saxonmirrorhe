@@ -37,7 +37,7 @@ namespace Saxon.Hej.value {
             return Saxon.Hej.type.BuiltInAtomicType.G_MONTH;
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             sb.appendLatin("--");
             appendTwoDigits(sb, month);
             if (hasTimezone()) {

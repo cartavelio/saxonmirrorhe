@@ -75,7 +75,7 @@ namespace Saxon.Hej.value {
             return Saxon.Hej.type.BuiltInAtomicType.DAY_TIME_DURATION;
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             if (_negative) {
                 sb.append('-');
             }

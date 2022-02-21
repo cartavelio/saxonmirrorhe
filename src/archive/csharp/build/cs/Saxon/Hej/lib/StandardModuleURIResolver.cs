@@ -47,16 +47,11 @@ namespace Saxon.Hej.lib {
                     rr.baseUri = baseURI;
                     rr.nature = Saxon.Hej.lib.JJ_ResourceRequest.XQUERY_NATURE;
                     source = config.getResourceResolver().resolve(rr);
-                    if (((source == null) && (baseURI != null))) {
-                        rr.uri = new System.Uri(new System.Uri(baseURI, System.UriKind.RelativeOrAbsolute), moduleURI).ToString();
-                        rr.uriIsNamespace = false;
-                        source = config.getResourceResolver().resolve(rr);
-                    }
                 }
                 if ((source != null)) {
                     return toStreamSource(source);
                 }
-            } catch (Exception ex) when (ex is Saxon.Ejavax.xml.transform.TransformerException || ex is System.UriFormatException) {
+            } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
             }
             return null;
         }

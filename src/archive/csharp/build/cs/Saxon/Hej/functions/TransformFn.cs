@@ -481,11 +481,13 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.s9api.XsltCompiler xsltCompiler = processor.newXsltCompiler();
             xsltCompiler.setResourceResolver(context.getResourceResolver());
             xsltCompiler.setJustInTimeCompilation(false);
+            xsltCompiler.setErrorReporter(context.getErrorReporter());
             if ((Saxon.Impl.Helpers.MapUtils.Get(options, "static-params") != null)) {
                 setStaticParams(options, xsltCompiler, allowTypedNodes);
             }
             Saxon.Hej.s9api.XsltExecutable sheet = getStylesheet(options, xsltCompiler, styleOption, context);
             Saxon.Hej.s9api.Xslt30Transformer transformer = sheet.load30();
+            transformer.setErrorReporter(context.getErrorReporter());
             string deliveryFormat = "document";
             Saxon.Hej.om.NodeInfo sourceNode = null;
             string sourceLocation = null;

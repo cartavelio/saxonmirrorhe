@@ -397,7 +397,7 @@ namespace Saxon.Hej.expr.number {
         public string toWords(long number, int wordCase) {
             string s;
             if ((number == 0)) {
-                s = "Zero";
+                s = zero();
             } else {
                 s = toWords(number);
             }
@@ -409,6 +409,9 @@ namespace Saxon.Hej.expr.number {
               default:
                 return s;
             }
+        }
+        public string zero() {
+            return "Zero";
         }
         public abstract string toOrdinalWords(string ordinalParam, long number, int wordCase);
         public abstract string monthName(int month, int minWidth, int maxWidth);

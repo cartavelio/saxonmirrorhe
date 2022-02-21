@@ -197,7 +197,7 @@ namespace Saxon.Hej.ma.map {
                     Saxon.Hej.om.Sequence seq = dynamicCall(fn, context, new Saxon.Hej.om.Sequence[]{pair.key, pair.value});
                     Saxon.Hej.om.GroundedValue val = seq.materialize();
                     if ((val.getLength()>0)) {
-                        results.appendSequence(val);
+                        results = results.appendSequence(val);
                     }
                 }
                 return results;
@@ -212,7 +212,7 @@ namespace Saxon.Hej.ma.map {
                     Saxon.Hej.ma.map.DictionaryMap kvp = new Saxon.Hej.ma.map.DictionaryMap(2);
                     kvp.initialPut("key", pair.key);
                     kvp.initialPut("value", pair.value);
-                    results.appendSequence(kvp);
+                    results = results.appendSequence(kvp);
                 }
                 return results;
             }

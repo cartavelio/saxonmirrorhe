@@ -80,7 +80,7 @@ namespace Saxon.Hej.serialize {
                             if (isUrlAttribute(nameCode, attName)) {
                                 string value = att.getValue();
                                 try {
-                                    return new Saxon.Hej.om.AttributeInfo(att.getNodeName(), att.getType(), escapeURL(Saxon.Hej.str.StringView.tidy(value), true, getConfiguration()).ToString(), att.getLocation(), (att.getProperties()|Saxon.Hej.@event.ReceiverOption.DISABLE_CHARACTER_MAPS));
+                                    return new Saxon.Hej.om.AttributeInfo(att.getNodeName(), att.getType(), escapeURL(value, true, getConfiguration()), att.getLocation(), (att.getProperties()|Saxon.Hej.@event.ReceiverOption.DISABLE_CHARACTER_MAPS));
                                 } catch (Saxon.Hej.trans.XPathException e) {
                                     throw new Saxon.Hej.trans.UncheckedXPathException(e);
                                 }
@@ -97,25 +97,25 @@ namespace Saxon.Hej.serialize {
             }
             nextReceiver.startElement(nameCode, type, atts2, namespaces, location, properties);
         }
-        public static Saxon.Hej.str.UnicodeString escapeURL(Saxon.Hej.str.UnicodeString url, bool normalize, Saxon.Hej.Configuration config) {
-            Saxon.Hej.z.IntIterator iter = url.codePoints();
+        public static string escapeURL(string url, bool normalize, Saxon.Hej.Configuration config) {
+            Saxon.Hej.z.IntIterator iter = Saxon.Hej.str.StringTool.codePoints(url);
             while (iter.hasNext()) {
                 int ch = iter.next();
                 if (((ch<32) || (ch>126))) {
                     if (normalize) {
-                        string normalized = Saxon.Ejava.text.Normalizer.normalize(url.ToString(), Saxon.Ejava.text.Normalizer.Form.NFC);
-                        return reallyEscapeURL(normalized);
+                        string normalized = Saxon.Ejava.text.Normalizer.normalize(url, Saxon.Ejava.text.Normalizer.Form.NFC);
+                        return reallyEscapeURL(normalized).ToString();
                     } else {
-                        return reallyEscapeURL(url.ToString());
+                        return reallyEscapeURL(url).ToString();
                     }
                 }
             }
             return url;
         }
         private static Saxon.Hej.str.UnicodeString reallyEscapeURL(string url) {
-            Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder((url.Length+20));
             string hex = "0123456789ABCDEF";
-            byte[] array = new byte[4];
+            byte[] array;
             Saxon.Hej.z.IntIterator iter = Saxon.Hej.str.StringTool.codePoints(url);
             while (iter.hasNext()) {
                 int ch = iter.next();

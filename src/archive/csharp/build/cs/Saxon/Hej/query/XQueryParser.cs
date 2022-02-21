@@ -223,6 +223,13 @@ namespace Saxon.Hej.query {
             }
             parseVersionDeclaration();
             allowXPath40Syntax = t.allowSaxonExtensions = (allowXPath40Syntax || env.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_SYNTAX_EXTENSIONS));
+            if ((t.currentToken != Saxon.Hej.expr.parser.Token.MODULE_NAMESPACE)) {
+                if ((t.currentToken == Saxon.Hej.expr.parser.Token.EOF)) {
+                    grumble((("The file imported for module "+env.getModuleNamespace())+(((queryString.Trim().Length == 0) ? " is empty" : " has no significant content"))));
+                } else {
+                    grumble((((("The file imported for module "+env.getModuleNamespace())+" is not a valid XQuery library module. ")+"The content starts: ")+Saxon.Hej.trans.Err.truncate30(Saxon.Hej.str.StringView.of(queryString.Substring(t.currentTokenStartOffset)))));
+                }
+            }
             parseModuleDeclaration();
             parseProlog();
             processPreamble();
@@ -1673,52 +1680,56 @@ namespace Saxon.Hej.query {
                                         clause.setRepeated(containsLoopingClause(clauseList));
                                         clauseList.Add(clause);
                                     } else {
-                                        if ((isKeyword("stable") || isKeyword("order"))) {
-                                            if (isKeyword("stable")) {
-                                                nextToken();
-                                                if (!(isKeyword("order"))) {
-                                                    grumble("'stable' must be followed by 'order by'");
-                                                }
-                                            }
-                                            Saxon.Hej.expr.flwor.TupleExpression tupleExpression = new Saxon.Hej.expr.flwor.TupleExpression();
-                                            System.Collections.Generic.IList<Saxon.Hej.expr.LocalVariableReference> vars = new System.Collections.Generic.List<Saxon.Hej.expr.LocalVariableReference>();
-                                            foreach (Saxon.Hej.expr.flwor.Clause c in clauseList) {
-                                                foreach (Saxon.Hej.expr.flwor.LocalVariableBinding b in c.getRangeVariables()) {
-                                                    vars.Add(new Saxon.Hej.expr.LocalVariableReference(b));
-                                                }
-                                            }
-                                            tupleExpression.setVariables(vars);
-                                            System.Collections.Generic.IList<Saxon.Hej.query.XQueryParser.SortSpec> sortSpecList;
-                                            t.setState(Saxon.Hej.expr.parser.Tokenizer.BARE_NAME_STATE);
-                                            nextToken();
-                                            if (!((((t.currentToken == Saxon.Hej.expr.parser.Token.BY) || isKeyword("by"))))) {
-                                                grumble("'order' must be followed by 'by'");
-                                            }
-                                            t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
-                                            nextToken();
-                                            sortSpecList = parseSortDefinition();
-                                            Saxon.Hej.expr.sort.SortKeyDefinition[] keys = new Saxon.Hej.expr.sort.SortKeyDefinition[sortSpecList.Count];
-                                            for (int i = 0; (i<keys.Length); i++) {
-                                                Saxon.Hej.query.XQueryParser.SortSpec spec = sortSpecList[i];
-                                                Saxon.Hej.expr.sort.SortKeyDefinition key = new Saxon.Hej.expr.sort.SortKeyDefinition();
-                                                key.setSortKey(sortSpecList[i].sortKey, false);
-                                                string str = (spec.ascending ? "ascending" : "descending");
-                                                key.setOrder(new Saxon.Hej.expr.StringLiteral(Saxon.Hej.str.BMPString.of(str)));
-                                                key.setEmptyLeast(spec.emptyLeast);
-                                                if ((spec.collation != null)) {
-                                                    Saxon.Hej.lib.StringCollator comparator = env.getConfiguration().getCollation(spec.collation);
-                                                    if ((comparator == null)) {
-                                                        grumble((("Unknown collation '"+spec.collation)+'\''), "XQST0076");
-                                                    }
-                                                    key.setCollation(comparator);
-                                                }
-                                                keys[i] = key;
-                                            }
-                                            Saxon.Hej.expr.flwor.OrderByClause clause = new Saxon.Hej.expr.flwor.OrderByClause(flwor, keys, tupleExpression);
-                                            clause.setRepeated(containsLoopingClause(clauseList));
-                                            clauseList.Add(clause);
+                                        if (isKeyword("trace")) {
+                                            parseTraceClause(flwor, clauseList);
                                         } else {
-                                            break ;
+                                            if ((isKeyword("stable") || isKeyword("order"))) {
+                                                if (isKeyword("stable")) {
+                                                    nextToken();
+                                                    if (!(isKeyword("order"))) {
+                                                        grumble("'stable' must be followed by 'order by'");
+                                                    }
+                                                }
+                                                Saxon.Hej.expr.flwor.TupleExpression tupleExpression = new Saxon.Hej.expr.flwor.TupleExpression();
+                                                System.Collections.Generic.IList<Saxon.Hej.expr.LocalVariableReference> vars = new System.Collections.Generic.List<Saxon.Hej.expr.LocalVariableReference>();
+                                                foreach (Saxon.Hej.expr.flwor.Clause c in clauseList) {
+                                                    foreach (Saxon.Hej.expr.flwor.LocalVariableBinding b in c.getRangeVariables()) {
+                                                        vars.Add(new Saxon.Hej.expr.LocalVariableReference(b));
+                                                    }
+                                                }
+                                                tupleExpression.setVariables(vars);
+                                                System.Collections.Generic.IList<Saxon.Hej.query.XQueryParser.SortSpec> sortSpecList;
+                                                t.setState(Saxon.Hej.expr.parser.Tokenizer.BARE_NAME_STATE);
+                                                nextToken();
+                                                if (!((((t.currentToken == Saxon.Hej.expr.parser.Token.BY) || isKeyword("by"))))) {
+                                                    grumble("'order' must be followed by 'by'");
+                                                }
+                                                t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
+                                                nextToken();
+                                                sortSpecList = parseSortDefinition();
+                                                Saxon.Hej.expr.sort.SortKeyDefinition[] keys = new Saxon.Hej.expr.sort.SortKeyDefinition[sortSpecList.Count];
+                                                for (int i = 0; (i<keys.Length); i++) {
+                                                    Saxon.Hej.query.XQueryParser.SortSpec spec = sortSpecList[i];
+                                                    Saxon.Hej.expr.sort.SortKeyDefinition key = new Saxon.Hej.expr.sort.SortKeyDefinition();
+                                                    key.setSortKey(sortSpecList[i].sortKey, false);
+                                                    string str = (spec.ascending ? "ascending" : "descending");
+                                                    key.setOrder(new Saxon.Hej.expr.StringLiteral(Saxon.Hej.str.BMPString.of(str)));
+                                                    key.setEmptyLeast(spec.emptyLeast);
+                                                    if ((spec.collation != null)) {
+                                                        Saxon.Hej.lib.StringCollator comparator = env.getConfiguration().getCollation(spec.collation);
+                                                        if ((comparator == null)) {
+                                                            grumble((("Unknown collation '"+spec.collation)+'\''), "XQST0076");
+                                                        }
+                                                        key.setCollation(comparator);
+                                                    }
+                                                    keys[i] = key;
+                                                }
+                                                Saxon.Hej.expr.flwor.OrderByClause clause = new Saxon.Hej.expr.flwor.OrderByClause(flwor, keys, tupleExpression);
+                                                clause.setRepeated(containsLoopingClause(clauseList));
+                                                clauseList.Add(clause);
+                                            } else {
+                                                break ;
+                                            }
                                         }
                                     }
                                 }
@@ -1877,23 +1888,29 @@ namespace Saxon.Hej.query {
             } while ((t.currentToken == Saxon.Hej.expr.parser.Token.COMMA));
         }
         private void parseCountClause(System.Collections.Generic.IList<Saxon.Hej.expr.flwor.Clause> clauseList) {
-            do {
-                Saxon.Hej.expr.flwor.CountClause clause = new Saxon.Hej.expr.flwor.CountClause();
-                setLocation(clause, t.currentTokenStartOffset);
-                clause.setRepeated(containsLoopingClause(clauseList));
-                clauseList.Add(clause);
-                nextToken();
-                expect(Saxon.Hej.expr.parser.Token.DOLLAR);
-                nextToken();
-                expect(Saxon.Hej.expr.parser.Token.NAME);
-                string var = t.currentTokenValue;
-                Saxon.Hej.om.StructuredQName varQName = makeStructuredQName(var, "");
-                Saxon.Hej.value.SequenceType type = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
-                nextToken();
-                Saxon.Hej.expr.flwor.LocalVariableBinding v = new Saxon.Hej.expr.flwor.LocalVariableBinding(varQName, type);
-                clause.setRangeVariable(v);
-                declareRangeVariable(v);
-            } while ((t.currentToken == Saxon.Hej.expr.parser.Token.COMMA));
+            Saxon.Hej.expr.flwor.CountClause clause = new Saxon.Hej.expr.flwor.CountClause();
+            setLocation(clause, t.currentTokenStartOffset);
+            clause.setRepeated(containsLoopingClause(clauseList));
+            clauseList.Add(clause);
+            nextToken();
+            expect(Saxon.Hej.expr.parser.Token.DOLLAR);
+            nextToken();
+            expect(Saxon.Hej.expr.parser.Token.NAME);
+            string var = t.currentTokenValue;
+            Saxon.Hej.om.StructuredQName varQName = makeStructuredQName(var, "");
+            Saxon.Hej.value.SequenceType type = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
+            nextToken();
+            Saxon.Hej.expr.flwor.LocalVariableBinding v = new Saxon.Hej.expr.flwor.LocalVariableBinding(varQName, type);
+            clause.setRangeVariable(v);
+            declareRangeVariable(v);
+        }
+        private void parseTraceClause(Saxon.Hej.expr.flwor.FLWORExpression flwor, System.Collections.Generic.IList<Saxon.Hej.expr.flwor.Clause> clauseList) {
+            Saxon.Hej.expr.flwor.DiagnosticClause clause = new Saxon.Hej.expr.flwor.DiagnosticClause();
+            setLocation(clause, t.currentTokenStartOffset);
+            clause.setRepeated(containsLoopingClause(clauseList));
+            clauseList.Add(clause);
+            nextToken();
+            clause.initSequence(flwor, parseExpression());
         }
         private void parseGroupByClause(Saxon.Hej.expr.flwor.FLWORExpression flwor, System.Collections.Generic.IList<Saxon.Hej.expr.flwor.Clause> clauseList) {
             Saxon.Hej.expr.flwor.GroupByClause clause = new Saxon.Hej.expr.flwor.GroupByClause(env.getConfiguration());

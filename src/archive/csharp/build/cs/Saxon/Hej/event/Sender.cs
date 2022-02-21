@@ -6,6 +6,7 @@ namespace Saxon.Hej.@event {
         private Sender()  {
         }
         public static void send(Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.@event.Receiver receiver, Saxon.Hej.lib.ParseOptions options) {
+            Saxon.Ejavax.xml.transform.Source suppliedSource = source;
             Saxon.Hej.@event.PipelineConfiguration pipe = receiver.getPipelineConfiguration();
             if ((options == null)) {
                 options = new Saxon.Hej.lib.ParseOptions(pipe.getParseOptions());
@@ -42,7 +43,7 @@ namespace Saxon.Hej.@event {
                 source = config.resolveSource(source, config);
             }
             if ((source == null)) {
-                throw new Saxon.Hej.trans.XPathException((("A source of type "+source.GetType().Name)+" is not supported in this environment"));
+                throw new Saxon.Hej.trans.XPathException((("A source of type "+suppliedSource.GetType().Name)+" is not supported in this environment"));
             }
             ((Saxon.Hej.lib.ActiveSource)(source)).deliver(next, options);
             if (((originalAugmentedSource != null) && originalAugmentedSource.isPleaseCloseAfterUse())) {

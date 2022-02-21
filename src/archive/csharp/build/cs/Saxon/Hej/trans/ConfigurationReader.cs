@@ -431,7 +431,7 @@ namespace Saxon.Hej.trans {
             targetConfig.registerFileExtension(extension, mediaType);
         }
         protected internal virtual void readExtensionElement(Saxon.Hej.om.AttributeMap atts) {
-            Saxon.Hej.trans.XmlProcessingIncident err = new Saxon.Hej.trans.XmlProcessingIncident("Extension elements are not available in Saxon-HE");
+            Saxon.Hej.trans.XmlProcessingIncident err = new Saxon.Hej.trans.XmlProcessingIncident(((("Extension elements are not available in Saxon"+Saxon.Hej.Version.getSoftwarePlatform())+"-")+targetConfig.getEditionCode()));
             errors.Add(err);
         }
         protected internal void readXsltPackage(Saxon.Hej.om.AttributeMap atts) {

@@ -47,7 +47,7 @@ namespace Saxon.Hej.value {
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
             string digits = "0123456789ABCDEF";
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder((binaryValue.Length*2));
             foreach (byte aBinaryValue in binaryValue) {
                 sb.append(digits[(((aBinaryValue>>4))&unchecked((int)0xf))]);
                 sb.append(digits[(aBinaryValue&unchecked((int)0xf))]);

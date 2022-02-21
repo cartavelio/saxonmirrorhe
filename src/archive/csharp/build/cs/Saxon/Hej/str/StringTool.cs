@@ -22,6 +22,14 @@ namespace Saxon.Hej.str {
             }
             return array;
         }
+        public static bool containsSurrogates(string str) {
+            for (int i = 0; (i<str.Length); i++) {
+                if (Saxon.Hej.serialize.charcode.UTF16CharacterSet.isSurrogate(str[i])) {
+                    return true;
+                }
+            }
+            return false;
+        }
         public static Saxon.Hej.str.UnicodeString fromCodePoints(int[] codes, int used) {
             Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
             for (int i = 0; (i<used); i++) {
@@ -45,7 +53,7 @@ namespace Saxon.Hej.str {
             return new Saxon.Hej.str.Twine8(bytes);
         }
         public static Saxon.Hej.z.IntIterator codePoints(string value) {
-            return new Inner_IntIterator_26(value);
+            return new Inner_IntIterator_29(value);
         }
         public static string diagnosticDisplay(string s) {
             Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(s.Length);
@@ -170,8 +178,8 @@ namespace Saxon.Hej.str {
             }
         }
     
-        private class Inner_IntIterator_26 : Saxon.Hej.z.IntIterator {
-            public Inner_IntIterator_26(string value) {
+        private class Inner_IntIterator_29 : Saxon.Hej.z.IntIterator {
+            public Inner_IntIterator_29(string value) {
                 this.value = value;
                 i = 0;
             }
@@ -191,9 +199,7 @@ namespace Saxon.Hej.str {
                         }
                         return Saxon.Hej.serialize.charcode.UTF16CharacterSet.combinePair((char)(/*localvar*/c), (char)(/*localvar*/d));
                     } catch (System.IndexOutOfRangeException e) {
-                        System.Console.Error.WriteLine("Invalid surrogate at end of string");
-                        System.Console.Error.WriteLine(/*exception*/e);
-                        throw;
+                        throw new Saxon.Ejava.lang.IllegalStateException("Invalid surrogate at end of string");
                     }
                 } else {
                     return /*localvar*/c;

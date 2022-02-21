@@ -327,7 +327,7 @@ namespace Saxon.Hej.ma.arrays {
             public static Saxon.Hej.om.Sequence toSequence(Saxon.Hej.ma.arrays.ArrayItem array) {
                 Saxon.Hej.ma.zeno.ZenoSequence results = new Saxon.Hej.ma.zeno.ZenoSequence();
                 foreach (Saxon.Hej.om.GroundedValue seq in array.members()) {
-                    results.appendSequence(seq);
+                    results = results.appendSequence(seq);
                 }
                 return results;
             }

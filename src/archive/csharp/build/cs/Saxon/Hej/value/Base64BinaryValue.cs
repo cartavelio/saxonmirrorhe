@@ -64,7 +64,7 @@ namespace Saxon.Hej.value {
         private static readonly int[] encoding = new int[64];
         private static readonly int[] decoding = new int[128];
         public static Saxon.Hej.str.UnicodeString encode(byte[] value) {
-            Saxon.Hej.str.UnicodeBuilder buff = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder buff = new Saxon.Hej.str.UnicodeBuilder((value.Length*2));
             int whole = (value.Length-(value.Length%3));
             for (int i = 0; (i<whole); i += 3) {
                 int val = ((((((((int)(value[i]))&unchecked((int)0xff)))<<16))+((((((int)(value[(i+1)]))&unchecked((int)0xff)))<<8)))+(((((int)(value[(i+2)]))&unchecked((int)0xff)))));

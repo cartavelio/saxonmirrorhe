@@ -161,12 +161,14 @@ namespace Saxon.Hej.expr.parser {
                         Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
                         foreach (Saxon.Hej.expr.Operand o in children) {
                             Saxon.Hej.expr.Expression child = o.getChildExpression();
-                            if (Saxon.Hej.value.Cardinality.allowsMany(child.getCardinality())) {
-                                chain.appendSequence(Saxon.Hej.om.SequenceTool.toGroundedValue(child.iterate(context)));
+                            if ((child is Saxon.Hej.expr.VariableReference)) {
+                                Saxon.Hej.om.GroundedValue seq = ((Saxon.Hej.expr.VariableReference)(child)).evaluateVariable(context).materialize();
+                                chain = chain.appendSequence(seq);
                             } else {
-                                Saxon.Hej.om.Item j = child.evaluateItem(context);
-                                if ((j != null)) {
-                                    chain.append(j);
+                                Saxon.Hej.om.SequenceIterator iter = child.iterate(context);
+                                Saxon.Hej.om.Item item;
+                                while (((item = iter.next()) != null)) {
+                                    chain = chain.append(item);
                                 }
                             }
                         }

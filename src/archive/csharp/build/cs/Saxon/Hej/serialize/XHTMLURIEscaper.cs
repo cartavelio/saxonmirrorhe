@@ -73,7 +73,7 @@ namespace Saxon.Hej.serialize {
                                 string value = att.getValue();
                                 try {
                                     string normalized = ((isAllAscii(value) ? value : Saxon.Ejava.text.Normalizer.normalize(value, Saxon.Ejava.text.Normalizer.Form.NFC)));
-                                    return new Saxon.Hej.om.AttributeInfo(attName, att.getType(), escapeURL(Saxon.Hej.str.StringView.tidy(normalized), true, getConfiguration()).ToString(), att.getLocation(), (att.getProperties()|Saxon.Hej.@event.ReceiverOption.DISABLE_CHARACTER_MAPS));
+                                    return new Saxon.Hej.om.AttributeInfo(attName, att.getType(), escapeURL(normalized, true, getConfiguration()), att.getLocation(), (att.getProperties()|Saxon.Hej.@event.ReceiverOption.DISABLE_CHARACTER_MAPS));
                                 } catch (Saxon.Hej.trans.XPathException e) {
                                     throw new Saxon.Hej.trans.UncheckedXPathException(e);
                                 }

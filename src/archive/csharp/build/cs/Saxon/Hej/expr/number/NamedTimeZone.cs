@@ -282,7 +282,7 @@ namespace Saxon.Hej.expr.number {
             }
         }
         public static string formatTimeZoneOffset(Saxon.Hej.value.DateTimeValue timeValue) {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             Saxon.Hej.value.CalendarValue.appendTimezone(timeValue.getTimezoneInMinutes(), sb);
             return sb.ToString();
         }

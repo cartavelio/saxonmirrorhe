@@ -71,7 +71,7 @@ namespace Saxon.Hej.expr.number {
         }
         private static readonly Saxon.Hej.z.IntPredicateProxy alphanumeric = Saxon.Hej.z.IntUnionPredicate.makeUnion(Saxon.Hej.regex.charclass.Categories.getCategory("N"), (Saxon.Hej.regex.charclass.Categories.getCategory("L")));
         public Saxon.Hej.str.UnicodeString format(System.Collections.Generic.IList<System.Object> numbers, int groupSize, string groupSeparator, string letterValue, string ordinal, Saxon.Hej.lib.Numberer numberer) {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(32);
             int num = 0;
             int tok = 0;
             if (startsWithPunctuation) {

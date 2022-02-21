@@ -293,7 +293,7 @@ namespace Saxon.Hej.tree.tiny {
             int s = (int)(commentBuilder.length());
             commentBuilder.accept(remainder);
             int nameCode = namePool.allocateFingerprint("", piname);
-            nodeNr = tt.addNode(Saxon.Hej.type.Type.PROCESSING_INSTRUCTION, currentDepth, s, remainder.tidy().length32(), nameCode);
+            nodeNr = tt.addNode(Saxon.Hej.type.Type.PROCESSING_INSTRUCTION, currentDepth, s, remainder.length32(), nameCode);
             int prev = prevAtDepth[currentDepth];
             if ((prev>0)) {
                 tt.next[prev] = nodeNr;

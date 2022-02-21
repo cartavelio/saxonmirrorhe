@@ -22,7 +22,7 @@ namespace Saxon.Hej.value {
               case PRESERVE:
                 return value;
               case REPLACE:
-                Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+                Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(value.length32());
                 Saxon.Hej.z.IntIterator iter = value.codePoints();
                 while (iter.hasNext()) {
                     int c = iter.next();
@@ -117,7 +117,7 @@ namespace Saxon.Hej.value {
             return ((c<=32) && C0WHITE[c]);
         }
         public static Saxon.Hej.str.UnicodeString normalizeWhitespace(Saxon.Hej.str.UnicodeString input) {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(input.length32());
             Saxon.Hej.z.IntIterator iter = input.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();
@@ -139,7 +139,7 @@ namespace Saxon.Hej.value {
                 return @in;
             }
             long len = trimmedEnd(@in);
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(@in.length32());
             bool inWhitespace = true;
             for (long i = 0; (i<len); i++) {
                 int c = @in.codePointAt(i);
@@ -224,7 +224,7 @@ namespace Saxon.Hej.value {
             return @in.Substring(firstNonWhite, (lastNonWhite+1) - firstNonWhite);
         }
         public static Saxon.Hej.str.UnicodeString collapse(Saxon.Hej.str.UnicodeString @in) {
-            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder(@in.length32());
             tokenize(@in.codePoints(), (s, e, cat) => {
                 Saxon.Hej.value.Whitespace.TokenCategory category = cat;
                 switch (category) {
@@ -258,7 +258,7 @@ namespace Saxon.Hej.value {
             return builder.ToString();
         }
         public static Saxon.Hej.str.UnicodeString normalize(Saxon.Hej.str.UnicodeString @in) {
-            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder(@in.length32());
             tokenize(@in.codePoints(), (s, e, cat) => {
                 Saxon.Hej.value.Whitespace.TokenCategory category = cat;
                 switch (category) {

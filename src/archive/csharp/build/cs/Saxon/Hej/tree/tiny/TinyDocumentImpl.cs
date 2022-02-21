@@ -49,7 +49,6 @@ namespace Saxon.Hej.tree.tiny {
             return this;
         }
         public override void generateId(Saxon.Ejava.lang.StringBuilder buffer) {
-            System.Console.Error.WriteLine("generateId(/)");
             buffer.append('d');
             buffer.append(getTreeInfo().getDocumentNumber());
         }
