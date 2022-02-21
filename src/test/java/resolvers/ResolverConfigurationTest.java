@@ -1,9 +1,10 @@
 package resolvers;
 
+import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.CatalogResourceResolver;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.lib.*;
+import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import org.junit.Test;
 import org.xml.sax.InputSource;
@@ -12,7 +13,11 @@ import org.xmlresolver.ResolverFeature;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -58,6 +63,60 @@ public class ResolverConfigurationTest {
         } catch (IllegalArgumentException ex) {
             assertTrue(ex.getMessage().contains("RESOURCE_RESOLVER value must be an instance of"));
         } catch (Exception ex) {
+            fail();
+        }
+    }
+
+    @Test
+    public void wrappedUriResolver() {
+        try {
+            Configuration config = new Configuration();
+            config.setResourceResolver(new ResourceResolverWrappingURIResolver(new StandardURIResolver(config)));
+            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml")));
+            assertTrue(info.getRootNode().getBaseURI().endsWith("books.xml"));
+        } catch (XPathException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void wrappedUriResolver2() {
+        try {
+            Configuration config = new Configuration();
+            Processor proc = new Processor(config);
+            config.setResourceResolver(
+                    new ResourceResolverWrappingURIResolver(
+                            new StandardURIResolver(config) {
+                                @Override
+                                public Source resolve(String href, String base)
+                                        throws XPathException {
+                                    if ((href != null) && (base != null) && base.startsWith("classpath:")) {
+                                        try {
+                                            URI uri = new URI(href);
+
+                                            if (!uri.isAbsolute()) {
+                                                href = "classpath:" +
+                                                        new URI(base.substring("classpath:".length())).
+                                                                resolve(uri).
+                                                                toString();
+                                            }
+                                        } catch (URISyntaxException e) {
+                                            fail();
+                                        }
+                                    }
+
+                                    return super.resolve(href, base);
+                                }
+                            }));
+
+            //config.setResourceResolver(new ResourceResolverWrappingURIResolver(new StandardURIResolver(config)));
+            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml")));
+            XQueryCompiler xqc = proc.newXQueryCompiler();
+            xqc.setBaseURI(new File(ConfigTest.DATA_DIR).toURI());
+            XQueryExecutable exec = xqc.compile("doc('books.xml')");
+            exec.load().run(new NullDestination());
+            assertTrue(info.getRootNode().getBaseURI().endsWith("books.xml"));
+        } catch (XPathException | SaxonApiException e) {
             fail();
         }
     }
