@@ -554,7 +554,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>This method provides the ability to set named properties of the configuration.
         /// The property names are set as strings, whose values can be found in the Java
-        /// class <c>Saxon.Hej.FeatureKeys</c>. The property values are always strings. 
+        /// class <see cref="Saxon.Hej.lib.FeatureKeys"/>. The property values are always strings. 
         /// Properties whose values are other types are not available via this interface:
         /// however all properties have an effective equivalent whose value is a string.
         /// Note that on/off properties are set using the strings "true" and "false".</para>
@@ -583,7 +583,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>This method provides the ability to get named properties of the configuration.
         /// The property names are supplied as strings, whose values can be found in the Java
-        /// class <c>Saxon.Hej.FeatureKeys</c>. The property values are always returned as strings. 
+        /// class <see cref="Saxon.Hej.lib.FeatureKeys"/>. The property values are always returned as strings. 
         /// Properties whose values are other types are returned by converting the value to a string.
         /// Note that on/off properties are returned using the strings "true" and "false".</para>
         /// <para><i>Method added in Saxon 9.1</i></para>
