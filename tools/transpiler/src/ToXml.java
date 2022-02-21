@@ -46,7 +46,7 @@ public class ToXml {
      */
 
     public static void main(String[] args) throws Exception {
-        System.err.println("Transpiler ToXML v2021-07-09");
+        System.err.println("Transpiler ToXML v2022-02-11");
         new ToXml().go(args);
     }
 
@@ -54,7 +54,7 @@ public class ToXml {
     private static File repoDir = null;
     private static String repoDirName = null;
     private static String eeJarVersion = null;
-    private static String icu4jVersion = "59.1";
+    private static String icu4jJar = null; // The location of the icu4j jar to read
     private File singleInputFile = null;
     private File historicInputDir = null; // directory holding the Java prior to preprocessing
     private File inputDir = null;
@@ -120,7 +120,7 @@ public class ToXml {
             } else if (arg.startsWith("-ee:")) {
                 eeJarVersion = arg.substring(4);
             } else if (arg.startsWith("-icu4j:")) {
-                icu4jVersion = arg.substring(7);
+                icu4jJar = arg.substring(7);
             } else if (arg.equals("-debug")) {
                 DEBUG = true;
                 compiler.setCompileWithTracing(true);
@@ -305,7 +305,7 @@ public class ToXml {
 
             // This tells the JavaParser to use the Saxon 10.3 JAR file to resolve references to classes and methods
             combinedTypeSolver.add(new JarTypeSolver(String.format("%s/build/libs/saxon-ee-%s.jar", repoDirName, eeJarVersion)));
-            combinedTypeSolver.add(new JarTypeSolver(String.format("%s/lib/icu4j-%s/icu4j-%s.jar", repoDirName, icu4jVersion, icu4jVersion)));
+            combinedTypeSolver.add(new JarTypeSolver(icu4jJar));
             JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
             StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
             StaticJavaParser.getConfiguration().setAttributeComments(false);

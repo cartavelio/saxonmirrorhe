@@ -292,7 +292,7 @@ task eecs_transpile_to_xml(
     "-h:${projectDir}/src/main/java",
     "-src:${projectDir}/src/main/java",
     "-ee:${saxonVersion}",
-    "-icu4j:59.1"
+    "-icu4j:${icu4jJar}"
   doFirst {
     mkdir("${buildDir}/ee_xmlout")
   }
@@ -347,7 +347,7 @@ task eecs_generateCSharp(
     "-xml:${buildDir}/ee_xmlout",
     "-digest:${buildDir}/ee_refined-digest.xml",
     "-ee:${saxonVersion}",
-    "-icu4j:59.1"
+    "-icu4j:${icu4jJar}"
     "-debug"
   doFirst {
     mkdir("${buildDir}/cs")
