@@ -1579,5 +1579,61 @@ public class TestValidator {
             fail();
         }
     }
+
+    @Test
+    public void testSchemaForXslt30Direct() {
+        // This should use the resolver mechanism to load the schema locally
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager schemaManager = proc.getSchemaManager();
+            schemaManager.load(new StreamSource("https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd"));
+
+            SchemaValidator validator = schemaManager.newSchemaValidator();
+            validator.validate(new StreamSource(new File(ConfigTest.DATA_DIR, "caffo/Transform2.xslt")));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            fail();
+        }
+    }
+
+    @Test
+    public void testSchemaForXslt30viaXQuery() {
+        // This should use the resolver mechanism to load the schema locally
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager schemaManager = proc.getSchemaManager();
+
+            XQueryCompiler compiler = proc.newXQueryCompiler();
+            XQueryEvaluator eval = compiler.compile("doc('https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd')").load();
+            XdmNode schema = (XdmNode) eval.evaluate();
+
+            schemaManager.load(schema.asSource());
+            SchemaValidator validator = schemaManager.newSchemaValidator();
+            validator.validate(new StreamSource(new File(ConfigTest.DATA_DIR, "caffo/Transform2.xslt")));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            fail();
+        }
+    }
+
+    @Test
+    public void testSchemaForXslt30viaDocumentBuilder() {
+        // This should use the resolver mechanism to load the schema locally
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager schemaManager = proc.getSchemaManager();
+
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode schema = builder.build(new StreamSource("https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd"));
+            schemaManager.load(schema.asSource());
+
+            SchemaValidator validator = schemaManager.newSchemaValidator();
+            validator.validate(new StreamSource(new File(ConfigTest.DATA_DIR, "caffo/Transform2.xslt")));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            fail();
+        }
+    }
+
 }
 
