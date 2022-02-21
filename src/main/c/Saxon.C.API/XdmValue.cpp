@@ -28,39 +28,49 @@ XdmValue::XdmValue(const XdmValue &other) {
 }
 
 const char * XdmValue::toString() {
-	if (toStringValue.empty()) {
-		jclass xdmValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmValue");
-		jmethodID strMID2 = (jmethodID)SaxonProcessor::sxn_environ->env->GetMethodID(xdmValueClass,
-			"toString",
-			"()Ljava/lang/String;");
-		if (!strMID2) {
-			std::cerr << "Error: Saxonc.XdmValue." << "toString"
-				<< " not found\n" << std::endl;
-			return nullptr;
-		}
-		else {
-			for(int i=0; i<size();i++) {
 
-			
-				jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallObjectMethod(itemAt(i)->getUnderlyingValue(), strMID2));
-				if (result) {
-					toStringValue += SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
-					SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-				
-				}
-			}
-			if(toStringValue.empty()) {
-			    return nullptr;
-			}
+    if(size() == 0) {
+        return nullptr;
+    }
+    if (toStringValue.empty()) {
+        jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
+        jmethodID strMID2 = (jmethodID)SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,
+                                                                                     "xdmValueArrayToString",
+                                                                                     "([Lnet/sf/saxon/s9api/XdmValue;)Ljava/lang/String;");
+        if (!strMID2) {
+            std::cerr << "Error: Saxonc.XdmValue." << "xdmValueArrayToString"
+                      << " not found\n" << std::endl;
+            return nullptr;
+        }
 
-			return toStringValue.c_str();			
-		}
-			
-		
-	}
-	else {
-		return toStringValue.c_str();
-	}
+        jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmValue");
+        jobjectArray objectArray = nullptr;
+
+        objectArray = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) size(),
+                                                                       objectClass, 0);
+
+        for(int i=0; i<size();i++) {
+            SaxonProcessor::sxn_environ->env->SetObjectArrayElement(objectArray, i,itemAt(i)->getUnderlyingValue());
+
+        }
+        jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, strMID2, objectArray));
+        if (result) {
+            toStringValue = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result, nullptr);
+            SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+
+        }
+        SaxonProcessor::sxn_environ->env->DeleteLocalRef(objectArray);
+
+        if(toStringValue.empty()) {
+            return nullptr;
+        }
+
+        return toStringValue.c_str();
+    } else {
+
+        return toStringValue.c_str();
+
+    }
 
 }
 
