@@ -1575,18 +1575,14 @@ if (file("${projectDir}/src/main/java/com").exists()) {
 
 task javaArchiveHE(
   type: Zip,
-  dependsOn: ["hen_copyDevelopmentSources", "hej_preprocess"],
+  dependsOn: ["hej_preprocess"],
   description: "Archive the HE sources"
 ) {
   archiveFileName = "saxon${saxonVersion.replace('.', '-')}source.zip"
   from ("${buildDir}/src/hej") {
     include "net/**/*.java"
   }
-  from ("${buildDir}/n/csharp") {
-    include "api/**/*.cs"
-    include "cmd/**/*.cs"
-  }
-  from "${projectDir}/src/main/resources"
+  from "${buildDir}/resources/main"
 }
 
 task javaArchiveEE(
