@@ -1,5 +1,6 @@
 using System;
 using System.Security.AccessControl;
+using Org.XmlResolver;
 using Saxon.Hej.lib;
 
 namespace Saxon.Callbacks {
@@ -18,6 +19,13 @@ namespace Saxon.Callbacks {
         
         public override object GetEntity(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) {
             if (resolver is CatalogResourceResolver crr) {
+                if (!absoluteUri.IsAbsoluteUri && absoluteUri.ToString().StartsWith("-//")) {
+                    // then it's actually a PublicId which has been thrown at us under the guise of a URI
+                    ResolvedResource rr =
+                        ((Org.XmlResolver.Resolver)crr.GetEntityResolver()).CatalogResolver.ResolveEntity(
+                            null, absoluteUri.ToString(), null, null);
+                    return rr?.GetInputStream();
+                }
                 return crr.GetEntityResolver().GetEntity(absoluteUri, role, ofObjectToReturn);
             }
 
