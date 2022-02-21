@@ -538,8 +538,10 @@ public class ConfigurationReader implements Receiver {
      */
 
     protected void readExtensionElement(AttributeMap atts) {
-        XmlProcessingIncident err = new XmlProcessingIncident("Extension elements are not available in Saxon-HE");
-        //err.setLocation(Loc.makeFromSax(locator));     // TODO: reinstate location info for diagostics
+        XmlProcessingIncident err = new XmlProcessingIncident(
+                "Extension elements are not available in Saxon" +
+                Version.getSoftwarePlatform() + "-" + targetConfig.getEditionCode());
+        //err.setLocation(Loc.makeFromSax(locator));     // TODO: reinstate location info for diagnostics
         errors.add(err);
     }
 
