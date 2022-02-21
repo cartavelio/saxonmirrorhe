@@ -188,7 +188,16 @@ namespace Saxon.Api {
             }
             get => traceFunctionDestination;
         }
-
+        
+        /// <summary>
+        /// Destination for reporting warnings and non-fatal errors (including validation errors
+        /// that occur when validating constructed nodes, which will eventually cause the transformation
+        /// to fail)
+        /// </summary>
+        ///
+        public ErrorReporter ErrorReporter {
+            set => evaluator.setErrorReporter(new ErrorReporterWrapper(value));
+        }
 
         /// <summary>
         /// Evaluate the query, returning the result as an <c>XdmValue</c> (that is,
