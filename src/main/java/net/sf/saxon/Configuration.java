@@ -58,6 +58,7 @@ import net.sf.saxon.z.*;
 import org.xml.sax.*;
 import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.ext.LexicalHandler;
+import org.xmlresolver.ResolverFeature;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -4324,6 +4325,10 @@ public class Configuration implements SourceResolver, NotationSet {
             switch (code) {
                 case FeatureCode.ALLOWED_PROTOCOLS:
                     protocolRestrictor = new ProtocolRestrictor((String)value);
+                    ResourceResolver rsrcResolver = getResourceResolver();
+                    if (rsrcResolver instanceof CatalogResourceResolver) {
+                        ((CatalogResourceResolver) rsrcResolver).setFeature(ResolverFeature.ACCESS_EXTERNAL_DOCUMENT, (String) value);
+                    }
                     break;
                 case FeatureCode.COLLATION_URI_RESOLVER:
                     if (!(value instanceof CollationURIResolver)) {
