@@ -40,7 +40,7 @@ namespace Saxon.Api {
     /// <para>The subtype <see cref="XdmEmptySequence"/> represents an empty sequence: an
     /// <c>XdmValue</c> of length zero. Again, there is no guarantee that every empty sequence
     /// will be represented as an instance of <c>XdmEmptySequence</c>, unless you use
-    /// the <c>Simplify()</c> method.</para>
+    /// the <see cref="Simplify()"/> method.</para>
     /// </remarks>
     [Serializable]
     public class XdmValue : IEnumerable<XdmItem> {
@@ -94,25 +94,25 @@ namespace Saxon.Api {
         /// The following examples assume a <c>using static</c> declaration of the standard Steps:
         /// <code>using static Saxon.Api.Steps;</code>
         /// </para>
-        /// <list type="bullet">
-        ///     <item><term>Select(Child())</term> <description>returns a stream containing all children</description></item>
-        ///     <item><term>Select(Child("*"))</term><description> returns a stream containing all element children</description></item>
-        ///     <item><term>Select(Child("author"))</term><description> returns a stream containing all element children with
-        ///     local name "author" (regardless of namespace)</description></item>
-        ///     <item><term>Select(Child("http://my.ns/", "author"))</term><description> returns a stream containing all element children with
-        ///     local name "author" and namespace "http://my.ns/"</description></item>
-        ///     <item><term>Select(Descendant("author"))</term><description> returns a stream containing all element descendants with
-        ///     local name "author" (regardless of namespace)</description></item>
-        ///     <item><term>Select(Descendant("author").Then(Attribute("name"))</term><description> returns a stream containing the "name"
-        ///     attributes of "author" descendants</description></item>
-        ///     <item><term>Select(Path("//", "author", "@name"))</term><description> returns a stream containing the "name"
-        ///     attributes of "author" descendants</description></item>
-        ///     <item><term>Select(Child("author").Where(AttributeEq("firstName", "Jane"))</term><description> returns a stream
-        ///     containing all the "author" children having a "firstName" attribute whose value is "Jane"</description></item>
-        ///     <item><term>Select(Child("author").First())</term><description> returns the first "author" child
-        ///     (if there is one)</description></item>
-        ///     <item><term>Select(Child("author").Where(attributeEq("firstName", "Jane").Last())</term><description> returns 
-        ///     the last "author" child having a "firstName" attribute whose value is "Jane" (if there is one)</description></item>
+        /// <list>
+        ///     <item><c>Select(Child())</c> returns a stream containing all children</item>
+        ///     <item><c>Select(Child("*"))</c> returns a stream containing all element children</item>
+        ///     <item><c>Select(Child("author"))</c> returns a stream containing all element children with
+        ///     local name "author" (regardless of namespace)</item>
+        ///     <item><c>Select(Child("http://my.ns/", "author"))</c> returns a stream containing all element children with
+        ///     local name "author" and namespace "http://my.ns/"</item>
+        ///     <item><c>Select(Descendant("author"))</c> returns a stream containing all element descendants with
+        ///     local name "author" (regardless of namespace)</item>
+        ///     <item><c>Select(Descendant("author").Then(Attribute("name"))</c> returns a stream containing the "name"
+        ///     attributes of "author" descendants</item>
+        ///     <item><c>Select(Path("//", "author", "@name"))</c> returns a stream containing the "name"
+        ///     attributes of "author" descendants</item>
+        ///     <item><c>Select(Child("author").Where(AttributeEq("firstName", "Jane"))</c> returns a stream
+        ///     containing all the "author" children having a "firstName" attribute whose value is "Jane"</item>
+        ///     <item><c>Select(Child("author").First())</c> returns the first "author" child
+        ///     (if there is one)</item>
+        ///     <item><c>Select(Child("author").Where(attributeEq("firstName", "Jane").Last())</c> returns 
+        ///     the last "author" child having a "firstName" attribute whose value is "Jane" (if there is one)</item>
         /// </list>
         ///
         /// <para>In each of the above examples except the last two, the selected nodes are returned as an <c>Enumerable&lt;XdmNode></c>,
