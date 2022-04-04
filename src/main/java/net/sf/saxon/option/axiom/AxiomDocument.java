@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
+import org.apache.axiom.om.impl.llom.OMDocumentImpl;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,7 +43,9 @@ public class AxiomDocument extends GenericTreeInfo implements ActiveSource {
      */
     public AxiomDocument(OMDocument root, String baseURI, Configuration config) {
         super(config);
+        setRootNode(wrap((OMNode)root));
         setSystemId(baseURI);
+        OMDocumentImpl impl = null;
     }
 
     /**
