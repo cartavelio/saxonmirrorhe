@@ -231,7 +231,7 @@ public class ConfigurationReader implements Receiver {
 
                 packageLibrary = new PackageLibrary(targetConfig.getDefaultXsltCompilerInfo());
                 String licenseLoc = atts.getValue("licenseFileLocation");
-                if (licenseLoc != null && !edition.equals("HE") && !targetConfig.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+                if (licenseLoc != null && !edition.equals("HE")) {
                     String base = getSystemId();
                     try {
                         URI absoluteLoc = ResolveURI.makeAbsolute(licenseLoc, base);
