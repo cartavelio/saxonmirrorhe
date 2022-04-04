@@ -8,6 +8,7 @@
 package performance;
 
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestSharedAppend {
 
     @Test
-    //@Tag("performance")
+    @Tag("performance")
     public void testAppend() {
         try {
             Processor p = new Processor(false);
@@ -61,6 +62,7 @@ public class TestSharedAppend {
     }
 
     @Test
+    @Tag("performance")
     public void testPrepend() {
         try {
             Processor p = new Processor(false);
@@ -112,6 +114,7 @@ public class TestSharedAppend {
     }
 
     @Test
+    @Tag("performance")
     public void testChainSubscript() {
         try {
             Processor p = new Processor(false);
@@ -151,6 +154,7 @@ public class TestSharedAppend {
 
 
     @Test
+    @Tag("performance")
     public void testMapMerge() {  // See bug 4865. Takes about 1.5s in 10.5
         try {
             Processor p = new Processor(false);
