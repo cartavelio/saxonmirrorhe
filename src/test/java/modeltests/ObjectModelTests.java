@@ -37,8 +37,6 @@ public abstract class ObjectModelTests {
     
     abstract TreeModel getTreeModel();
 
-    abstract TreeModel getTreeModel();
-
     abstract XdmNode buildExternalDocument(Processor processor, String fileName);
 
     XdmDestination makeDestination(Processor processor) {
