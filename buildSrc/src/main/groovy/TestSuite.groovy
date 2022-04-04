@@ -213,15 +213,18 @@ class TestSuite {
       def reportdir = options['reportDirectory']
 
       doLast {
-        if (run.executionResult.isPresent()
-            && run.executionResult.get().getExitValue() == 0) {
-          summarize(options, new File("${options['report']}.xml"))
-          if (testReportArchive != null
-              && reportdir.startsWith(resultOutputPath)) {
-            def arcpath = "${this.testReportArchive}/${options['product']}/"
-            arcpath += "${project.ext.saxonVersion}/"
-            arcpath += "${options['suite']}/${project.ext.DSTAMP}"
-            saveTheResults(options, arcpath)
+        if (run.executionResult.isPresent()) {
+          if (run.executionResult.get().getExitValue() == 0) {
+            summarize(options, new File("${options['report']}.xml"))
+            if (testReportArchive != null
+                && reportdir.startsWith(resultOutputPath)) {
+              def arcpath = "${this.testReportArchive}/${options['product']}/"
+              arcpath += "${project.ext.saxonVersion}/"
+              arcpath += "${options['suite']}/${project.ext.DSTAMP}"
+              saveTheResults(options, arcpath)
+            }
+          } else {
+            throw new GradleException("Test suite failed")
           }
         }
       }
@@ -355,15 +358,18 @@ class TestSuite {
       def reportdir = options['reportDirectory']
 
       doLast {
-        if (run.executionResult.isPresent()
-            && run.executionResult.get().getExitValue() == 0) {
-          //summarize(options, new File("${options['report']}.xml"))
-          if (testReportArchive != null
-              && reportdir.startsWith(resultOutputPath)) {
-            def arcpath = "${this.testReportArchive}/${options['product']}/"
-            arcpath += "${project.ext.saxonVersion}/"
-            arcpath += "${options['suite']}/${project.ext.DSTAMP}"
-            saveTheXsdResults(options, arcpath)
+        if (run.executionResult.isPresent()) {
+          if (run.executionResult.get().getExitValue() == 0) {
+            //summarize(options, new File("${options['report']}.xml"))
+            if (testReportArchive != null
+                && reportdir.startsWith(resultOutputPath)) {
+              def arcpath = "${this.testReportArchive}/${options['product']}/"
+              arcpath += "${project.ext.saxonVersion}/"
+              arcpath += "${options['suite']}/${project.ext.DSTAMP}"
+              saveTheXsdResults(options, arcpath)
+            }
+          } else {
+            throw new GradleException("Test suite failed")
           }
         }
       }
@@ -487,15 +493,18 @@ class TestSuite {
       def reportdir = options['reportDirectory']
 
       doLast {
-        if (run.executionResult.isPresent()
-            && run.executionResult.get().getExitValue() == 0) {
-          summarize(options, new File("${options['report']}.xml"))
-          if (testReportArchive != null
-              && reportdir.startsWith(resultOutputPath)) {
-            def arcpath = "${this.testReportArchive}/${options['product']}/"
-            arcpath += "${project.ext.saxonVersion}/"
-            arcpath += "${options['suite']}/${project.ext.DSTAMP}"
-            saveTheResults(options, arcpath)
+        if (run.executionResult.isPresent()) {
+          if (run.executionResult.get().getExitValue() == 0) {
+            summarize(options, new File("${options['report']}.xml"))
+            if (testReportArchive != null
+                && reportdir.startsWith(resultOutputPath)) {
+              def arcpath = "${this.testReportArchive}/${options['product']}/"
+              arcpath += "${project.ext.saxonVersion}/"
+              arcpath += "${options['suite']}/${project.ext.DSTAMP}"
+              saveTheResults(options, arcpath)
+            }
+          } else {
+            throw new GradleException("Test suite failed")
           }
         }
       }
@@ -623,15 +632,18 @@ class TestSuite {
       def reportdir = options['reportDirectory']
 
       doLast {
-        if (run.executionResult.isPresent()
-            && run.executionResult.get().getExitValue() == 0) {
-          //summarize(options, new File("${options['report']}.xml"))
-          if (testReportArchive != null
-              && reportdir.startsWith(resultOutputPath)) {
-            def arcpath = "${this.testReportArchive}/${options['product']}/"
-            arcpath += "${project.ext.saxonVersion}/"
-            arcpath += "${options['suite']}/${project.ext.DSTAMP}"
-            saveTheXsdResults(options, arcpath)
+        if (run.executionResult.isPresent()) {
+          if (run.executionResult.get().getExitValue() == 0) {
+            //summarize(options, new File("${options['report']}.xml"))
+            if (testReportArchive != null
+                && reportdir.startsWith(resultOutputPath)) {
+              def arcpath = "${this.testReportArchive}/${options['product']}/"
+              arcpath += "${project.ext.saxonVersion}/"
+              arcpath += "${options['suite']}/${project.ext.DSTAMP}"
+              saveTheXsdResults(options, arcpath)
+            }
+          } else {
+            throw new GradleException("Test suite failed")
           }
         }
       }
