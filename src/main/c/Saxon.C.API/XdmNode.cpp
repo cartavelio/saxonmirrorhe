@@ -447,14 +447,12 @@ return this;}
        if (cached ) {
 
             if(children == nullptr) {
-                //std::cerr<<"xdmNode c++ - cp0"<<std::endl;
                 getChildren(cached);
 
 
             }
 
             if(i < childCount && children[i] != nullptr) {
-                //std::cerr<<"xdmNode c++ - cp0-1"<<std::endl;
                 return children[i];
 
 
