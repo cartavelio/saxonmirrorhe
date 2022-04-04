@@ -109,7 +109,8 @@ void testTransformToStringExtensionFunc(const char * cwd,SaxonProcessor *process
         return;
     }
     executable->setcwd(cwd);
-    executable->setProperty("extc",  "/home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/cppExtensionFunction");
+    std::string libStr= cwd +  "cppExtensionFunction";
+    executable->setProperty("extc",  libStr);
 
     if (nativeFound) {
         const char *output = executable->transformFileToString("../data/cat.xml");
@@ -864,7 +865,7 @@ void exampleTransformToFile(SaxonProcessor * sproc, Xslt30Processor *proc, sResu
         }
         return;
     }
-    executable->setcwd("/home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests");
+
     const char *filename = "output2.xml";
     executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
     executable->setOutputFile(filename);
@@ -924,8 +925,7 @@ void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sRe
         }
         return;
     }
-    executable->setcwd("/home/ond1/work/repository/saxondev-11/src/main/c/samples");
-    executable->setBaseOutputURI("file:///home/ond1/work/repository/saxondev-11/src/main/c/samples/");
+
     executable->setInitialMatchSelection(xmlfile);
     executable->setGlobalContextItem(xmlfile);
     const char * result = executable->transformToString();
