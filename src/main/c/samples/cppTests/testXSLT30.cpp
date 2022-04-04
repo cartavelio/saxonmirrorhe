@@ -108,9 +108,15 @@ void testTransformToStringExtensionFunc(const char * cwd,SaxonProcessor *process
         }
         return;
     }
+    if(cwd == nullptr) {
+        std::cerr<<"cwd is null"<<std::endl;
+    }
     executable->setcwd(cwd);
-    std::string libStr= cwd +  "cppExtensionFunction";
-    executable->setProperty("extc",  libStr);
+    std::string libStr= std::string(cwd);
+
+    libStr.append("/cppExtensionFunction");
+
+    executable->setProperty("extc",  libStr.c_str());
 
     if (nativeFound) {
         const char *output = executable->transformFileToString("../data/cat.xml");
@@ -2415,7 +2421,7 @@ void testThreads (SaxonProcessor * processor, Xslt30Processor * trans, sResultCo
 int main(int argc, char* argv[]) {
 
 
-    const char * cwd = nullptr;
+    char * cwd = nullptr;
     if(argc > 0) {
 	cwd = argv[1];
     }
@@ -2424,9 +2430,14 @@ int main(int argc, char* argv[]) {
     //processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");
     cout << "Test: Xslt30Processor with Saxon version=" << processor->version() << endl << endl;
 
+
     char buff[FILENAME_MAX]; //create string buffer to hold path
     GetCurrentDir( buff, FILENAME_MAX );
     cout<<"CWD = "<< buff<<endl;
+    if(cwd == nullptr) {
+        cwd = (char *)malloc(strlen(buff)+1);
+        strcpy(cwd, buff);
+    }
     if(cwd != nullptr) {
    	 processor->setcwd(cwd); //set to the current working directory
     } else {
