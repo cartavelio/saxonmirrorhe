@@ -10,6 +10,7 @@ package net.sf.saxon.expr;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.instruct.AnalyzeString;
+import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.Error;
@@ -18,6 +19,7 @@ import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.NodeSetPattern;
 import net.sf.saxon.pattern.Pattern;
@@ -522,10 +524,28 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
     public void export(ExpressionPresenter out) throws XPathException {
         if (getFunctionName().hasURI(NamespaceConstant.FN)) {
             out.startElement("fn", this);
-            out.emitAttribute("name", getFunctionName().getLocalPart());
+            final String localPart = getFunctionName().getLocalPart();
+            out.emitAttribute("name", localPart);
             getTargetFunction().exportAttributes(out);
-            for (Operand o : operands()) {
-                o.getChildExpression().export(out);
+            if (localPart.equals("concat")
+                    && "JS".equals(((ExpressionPresenter.ExportOptions)out.getOptions()).target)
+                    && getArity() == 1
+                    && getArg(0) instanceof Block) {
+                // We've reduced concat to a single sequence-valued argument; now we need to spread it out to multiple
+                // arguments. See bug #5383
+                for (Operand o : getArg(0).operands()) {
+                    if (o.getChildExpression() instanceof Literal) {
+                        for (Item it : ((Literal)o.getChildExpression()).getGroundedValue().asIterable()) {
+                            Literal.exportValue(it, out);
+                        }
+                    } else {
+                        o.getChildExpression().export(out);
+                    }
+                }
+            } else {
+                for (Operand o : operands()) {
+                    o.getChildExpression().export(out);
+                }
             }
             getTargetFunction().exportAdditionalArguments(this, out);
             out.endElement();
