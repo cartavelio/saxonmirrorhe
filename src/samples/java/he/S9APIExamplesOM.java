@@ -168,7 +168,7 @@ public class S9APIExamplesOM {
             } catch (org.jdom2.JDOMException | IOException e) {
                 throw new SaxonApiException(e);
             }
-            Processor processor = new Processor(false);
+            Processor processor = new Processor(true);
             processor.getUnderlyingConfiguration().registerExternalObjectModel(new JDOM2ObjectModel());
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode xdmDoc = builder.wrap(doc);
@@ -208,7 +208,7 @@ public class S9APIExamplesOM {
             } catch (nu.xom.ParsingException | IOException e) {
                 throw new SaxonApiException(e);
             }
-            Processor processor = new Processor(false);
+            Processor processor = new Processor(true);
             processor.getUnderlyingConfiguration().registerExternalObjectModel(new XOMObjectModel());
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode xdmDoc = builder.wrap(doc);
@@ -248,7 +248,7 @@ public class S9APIExamplesOM {
             } catch (org.dom4j.DocumentException e) {
                 throw new SaxonApiException(e);
             }
-            Processor processor = new Processor(false);
+            Processor processor = new Processor(true);
             processor.getUnderlyingConfiguration().registerExternalObjectModel(new DOM4JObjectModel());
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode xdmDoc = builder.wrap(doc);
