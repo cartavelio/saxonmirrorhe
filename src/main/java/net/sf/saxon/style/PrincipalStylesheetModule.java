@@ -677,7 +677,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                                             "(caused by including the containing module more than once)",
                                     "XTSE0630");
                         } else {
-                            varDecl.compileError("Duplicate global variable/parameter declaration (see line " +
+                            varDecl.compileError("Duplicate global variable/parameter $" + qName.getDisplayName() + " (see line " +
                                                          v2.getLineNumber() + " of " + v2.getSystemId() + ')', "XTSE0630");
                         }
                     } else if (thisPrecedence < otherPrecedence && varDecl != otherVarDecl.getSourceElement()) {

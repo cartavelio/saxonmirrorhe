@@ -16,10 +16,7 @@ import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.tree.wrapper.VirtualTreeInfo;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.*;
 
 /**
  * Manager for accumulator functions (XSLT 3.0).
@@ -55,6 +52,18 @@ public class AccumulatorManager {
 
     public void setApplicableAccumulators(TreeInfo tree, Set<? extends Accumulator> accumulators) {
         applicableAccumulators.put(tree, accumulators);
+    }
+
+    /**
+     * Get the set of accumulators applicable to a particular tree
+     *
+     * @param tree        the tree in question
+     * @return true the set of applicable accumulators
+     */
+
+    public Set<? extends Accumulator> getApplicableAccumulators(TreeInfo tree) {
+        Set<? extends Accumulator> accSet = applicableAccumulators.get(tree);
+        return accSet == null ? Collections.emptySet() : accSet;
     }
 
     /**
