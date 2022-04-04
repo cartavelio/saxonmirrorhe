@@ -888,15 +888,15 @@ public abstract class StyleElement extends ElementImpl {
 
     SequenceType makeExtendedSequenceType(String sequenceType)
             throws XPathException {
-        getStaticContext();
+        ExpressionContext env = getStaticContext(new StructuredQName("saxon", NamespaceConstant.SAXON, "as"));
         XPathParser parser =
-                getConfiguration().newExpressionParser("XP", false, 31);
+                getConfiguration().newExpressionParser("XP", false, 40);
         QNameParser qp = new QNameParser(staticContext.getNamespaceResolver())
-                .withAcceptEQName(staticContext.getXPathVersion() >= 30)
+                .withAcceptEQName(true)
                 .withErrorOnBadSyntax("XPST0003")
                 .withErrorOnUnresolvedPrefix("XPST0081");
         parser.setQNameParser(qp);
-        return parser.parseExtendedSequenceType(sequenceType, staticContext);
+        return parser.parseExtendedSequenceType(sequenceType, env);
     }
 
     /**
