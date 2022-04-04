@@ -426,11 +426,11 @@ namespace Saxon.Hej.style {
             return parser.parseSequenceType(sequenceType, staticContext);
         }
         internal Saxon.Hej.value.SequenceType makeExtendedSequenceType(string sequenceType) {
-            getStaticContext();
-            Saxon.Hej.expr.parser.XPathParser parser = getConfiguration().newExpressionParser("XP", false, 31);
-            Saxon.Hej.om.QNameParser qp = new Saxon.Hej.om.QNameParser(staticContext.getNamespaceResolver()).withAcceptEQName((staticContext.getXPathVersion()>=30)).withErrorOnBadSyntax("XPST0003").withErrorOnUnresolvedPrefix("XPST0081");
+            Saxon.Hej.style.ExpressionContext env = getStaticContext(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "as"));
+            Saxon.Hej.expr.parser.XPathParser parser = getConfiguration().newExpressionParser("XP", false, 40);
+            Saxon.Hej.om.QNameParser qp = new Saxon.Hej.om.QNameParser(staticContext.getNamespaceResolver()).withAcceptEQName(true).withErrorOnBadSyntax("XPST0003").withErrorOnUnresolvedPrefix("XPST0081");
             parser.setQNameParser(qp);
-            return parser.parseExtendedSequenceType(sequenceType, staticContext);
+            return parser.parseExtendedSequenceType(sequenceType, env);
         }
         internal void processExtensionElementAttribute(string ns) {
             string ext = getAttributeValue(ns, "extension-element-prefixes");

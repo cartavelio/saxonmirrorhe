@@ -328,7 +328,7 @@ namespace Saxon.Hej.om {
                             i++;
                             j++;
                         } else {
-                            if ((addUndeclarations || other.prefixes[i].Length==0)) {
+                            if ((addUndeclarations || other.prefixes[j].Length==0)) {
                                 result.Add(new Saxon.Hej.om.NamespaceBinding(other.prefixes[j], ""));
                             }
                             j++;

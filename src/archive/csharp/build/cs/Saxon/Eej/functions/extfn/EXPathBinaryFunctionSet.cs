@@ -137,7 +137,7 @@ namespace Saxon.Eej.functions.extfn {
                     string result = Saxon.Hej.resource.BinaryResource.decode(value.getBinaryValue(), offset, len, encoding);
                     return new Saxon.Hej.value.StringValue(result);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName("bin", ERROR_NAMESPACE, Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_CONVERSION));
+                    e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName("bin", ERROR_NAMESPACE, (e.Message.StartsWith("Unsupported encoding") ? Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_UNKNOWN_ENCODING : Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_CONVERSION)));
                     throw;
                 }
             }
@@ -160,7 +160,7 @@ namespace Saxon.Eej.functions.extfn {
                 try {
                     data = Saxon.Hej.resource.BinaryResource.encode(s, encoding);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName("bin", ERROR_NAMESPACE, Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_CONVERSION));
+                    e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName("bin", ERROR_NAMESPACE, (e.Message.StartsWith("Unsupported encoding") ? Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_UNKNOWN_ENCODING : Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_CONVERSION)));
                     throw;
                 }
                 return one(data);

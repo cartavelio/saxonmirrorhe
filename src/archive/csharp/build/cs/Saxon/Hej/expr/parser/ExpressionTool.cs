@@ -314,6 +314,20 @@ namespace Saxon.Hej.expr.parser {
                 }
             }
         }
+        public static int getAxisNavigation(Saxon.Hej.expr.Expression exp) {
+            Saxon.Hej.expr.Expression unfiltered = unfilteredExpression(exp, true);
+            if ((unfiltered is Saxon.Hej.expr.AxisExpression)) {
+                return ((Saxon.Hej.expr.AxisExpression)(unfiltered)).getAxis();
+            }
+            if ((unfiltered is Saxon.Hej.expr.VennExpression)) {
+                int v1 = getAxisNavigation(((Saxon.Hej.expr.VennExpression)(unfiltered)).getLhsExpression());
+                int v2 = getAxisNavigation(((Saxon.Hej.expr.VennExpression)(unfiltered)).getRhsExpression());
+                if ((v1 == v2)) {
+                    return v1;
+                }
+            }
+            return -1;
+        }
         public static bool equalOrNull(System.Object x, System.Object y) {
             if ((x == null)) {
                 return (y == null);
@@ -804,10 +818,14 @@ namespace Saxon.Hej.expr.parser {
             if (((exp is Saxon.Hej.expr.FilterExpression) && ((allowPositional || !(((Saxon.Hej.expr.FilterExpression)(exp)).isFilterIsPositional()))))) {
                 return unfilteredExpression(((Saxon.Hej.expr.FilterExpression)(exp)).getSelectExpression(), allowPositional);
             } else {
-                if (((exp is Saxon.Hej.expr.SingleItemFilter) && allowPositional)) {
-                    return unfilteredExpression(((Saxon.Hej.expr.SingleItemFilter)(exp)).getBaseExpression(), allowPositional);
+                if (((exp is Saxon.Hej.expr.TailExpression) && allowPositional)) {
+                    return unfilteredExpression(((Saxon.Hej.expr.UnaryExpression)(exp)).getBaseExpression(), allowPositional);
                 } else {
-                    return exp;
+                    if (((exp is Saxon.Hej.expr.SingleItemFilter) && allowPositional)) {
+                        return unfilteredExpression(((Saxon.Hej.expr.SingleItemFilter)(exp)).getBaseExpression(), allowPositional);
+                    } else {
+                        return exp;
+                    }
                 }
             }
         }

@@ -444,7 +444,7 @@ namespace Saxon.Hej.expr.instruct {
             }
             @out.setChildRole("select");
             getSelectExpression().export(@out);
-            if (((algorithm == GROUP_BY) || (algorithm == GROUP_ADJACENT))) {
+            if ((((algorithm == GROUP_BY) || (algorithm == GROUP_ADJACENT)) || (algorithm == GROUP_BREAKING_WHEN))) {
                 @out.setChildRole("key");
                 getGroupingKey().export(@out);
             } else {
@@ -473,6 +473,8 @@ namespace Saxon.Hej.expr.instruct {
                 return "starting";
               case GROUP_ENDING:
                 return "ending";
+              case GROUP_BREAKING_WHEN:
+                return "breaking";
               default:
                 return "** unknown algorithm **";
             }

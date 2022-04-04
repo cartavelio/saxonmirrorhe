@@ -148,7 +148,7 @@ namespace Saxon.Hej.style {
             return element.xPath10ModeIsEnabled();
         }
         public int getXPathVersion() {
-            if (((element.getEffectiveVersion() == 40) || (element.getCompilation().getCompilerInfo().getXsltVersion() == 40))) {
+            if ((((element.getEffectiveVersion() == 40) || (element.getCompilation().getCompilerInfo().getXsltVersion() == 40)) || (((attributeName != null) && attributeName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON))))) {
                 return 40;
             } else {
                 return getConfiguration().getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSLT);

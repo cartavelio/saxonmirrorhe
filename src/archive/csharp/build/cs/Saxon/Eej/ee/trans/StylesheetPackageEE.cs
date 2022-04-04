@@ -134,7 +134,7 @@ namespace Saxon.Eej.ee.trans {
         }
         private bool needToExport(Saxon.Hej.expr.Component c) {
             if ((c.getVisibility() == Saxon.Hej.trans.Visibility.HIDDEN)) {
-                return needToExport(c.getBaseComponent());
+                return ((c.getBaseComponent() != null) && needToExport(c.getBaseComponent()));
             } else {
                 if (overriddenComponents.ContainsKey(c.getActor().getSymbolicName())) {
                     return true;

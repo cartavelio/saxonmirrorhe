@@ -280,7 +280,7 @@ namespace Saxon.Hej.expr {
                                             @out.emitAttribute("class", ((Saxon.Hej.value.AnyExternalObject)(value)).getWrappedObject().GetType().Name);
                                             @out.endElement();
                                         } else {
-                                            throw new Saxon.Hej.trans.XPathException("Cannot export a stylesheet containing literal values bound to external Java objects");
+                                            throw new Saxon.Hej.trans.XPathException("Cannot export a stylesheet containing literal values bound to external Java objects", Saxon.Hej.trans.SaxonErrorCode.SXST0070);
                                         }
                                     } else {
                                         @out.startElement("literal");

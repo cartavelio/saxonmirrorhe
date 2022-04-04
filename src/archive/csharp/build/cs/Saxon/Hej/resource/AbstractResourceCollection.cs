@@ -125,20 +125,22 @@ namespace Saxon.Hej.resource {
                     if (((binaryContent != null) && (encoding != null))) {
                         return Saxon.Hej.resource.BinaryResource.decode(binaryContent, encoding);
                     } else {
-                        using (System.IO.Stream stream = getInputStream()) {                            try {
-                                string enc = encoding;
-                                if ((enc == null)) {
-                                    enc = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(stream, null);
-                                }
-                                return characterContent = Saxon.Hej.resource.CatalogCollection.makeStringFromStream(stream, enc);
-                            } catch (System.IO.IOException e) {
-                                if ((onError == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_FAIL)) {
-                                    throw new Saxon.Hej.trans.XPathException(e);
-                                } else {
-                                    return null;
-                                }
+                        try {
+                            System.IO.Stream stream = getInputStream();
+                            string enc = encoding;
+                            if ((enc == null)) {
+                                stream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(stream);
+                                enc = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(stream, null);
                             }
-                        }                    }
+                            return characterContent = Saxon.Hej.resource.CatalogCollection.makeStringFromStream(stream, enc);
+                        } catch (System.IO.IOException e) {
+                            if ((onError == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_FAIL)) {
+                                throw new Saxon.Hej.trans.XPathException(e);
+                            } else {
+                                return null;
+                            }
+                        }
+                    }
                 }
             }
         

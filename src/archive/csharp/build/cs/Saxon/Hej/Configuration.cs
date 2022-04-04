@@ -224,6 +224,11 @@ namespace Saxon.Hej {
         public virtual bool isLicensedFeature(int feature) {
             return false;
         }
+        public void requireProfessionalLicense(string featureName) {
+            if (!(isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION))) {
+                throw new Saxon.Hej.trans.LicenseException((("Use of "+featureName)+" requires a license key for Saxon-PE or Saxon-EE"), Saxon.Hej.trans.LicenseException.NOT_FOUND);
+            }
+        }
         public virtual string getLicenseFeature(string name) {
             return null;
         }
@@ -1105,7 +1110,7 @@ namespace Saxon.Hej {
                 return (Saxon.Hej.lib.ActiveSource)(source);
             }
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
-                return new Inner_ActiveSource_431(this, source, config);
+                return new Inner_ActiveSource_433(this, source, config);
             }
             Saxon.Hej.lib.ActiveSource activeSource = Saxon.Hej.Version.platform.resolveSource(source, config);
             if ((activeSource != null)) {
@@ -1886,9 +1891,9 @@ namespace Saxon.Hej {
             return label;
         }
     
-        private class Inner_ActiveSource_431 : Saxon.Hej.lib.ActiveSource {
+        private class Inner_ActiveSource_433 : Saxon.Hej.lib.ActiveSource {
             private readonly Configuration outerInstance;
-            public Inner_ActiveSource_431(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
+            public Inner_ActiveSource_433(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
                 this.outerInstance = outerInstance;
                 this.source = source;
                 this.config = config;
@@ -1896,7 +1901,8 @@ namespace Saxon.Hej {
             private Saxon.Ejavax.xml.transform.Source source;
             private Saxon.Hej.Configuration config;
             public void deliver(Saxon.Hej.@event.Receiver receiver, Saxon.Hej.lib.ParseOptions options) {
-                outerInstance.resolveSource(((Saxon.Hej.lib.AugmentedSource)(/*extraParam*/source)).getContainedSource(), /*extraParam*/config).deliver(/*localparam*/receiver, ((Saxon.Hej.lib.AugmentedSource)(/*extraParam*/source)).getParseOptions());
+                /*localparam*/options.merge(((Saxon.Hej.lib.AugmentedSource)(/*extraParam*/source)).getParseOptions());
+                outerInstance.resolveSource(((Saxon.Hej.lib.AugmentedSource)(/*extraParam*/source)).getContainedSource(), /*extraParam*/config).deliver(/*localparam*/receiver, /*localparam*/options);
             }
             public void setSystemId(string systemId) {
                 /*extraParam*/source.setSystemId(/*localparam*/systemId);

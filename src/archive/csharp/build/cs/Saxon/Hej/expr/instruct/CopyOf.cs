@@ -520,6 +520,7 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.Controller controller = context.getController();
+            bool isXSLT = getRetainedStaticContext().getPackageData().isXSLT();
             System.Diagnostics.Debug.Assert((controller != null));
             if (((schemaType == null) && !(copyForUpdate))) {
                 if ((validation == Saxon.Hej.lib.Validation.PRESERVE)) {
@@ -536,7 +537,11 @@ namespace Saxon.Hej.expr.instruct {
                             }
                             Saxon.Hej.tree.wrapper.VirtualCopy vc = Saxon.Hej.tree.wrapper.VirtualCopy.makeVirtualCopy((Saxon.Hej.om.NodeInfo)(item));
                             vc.setDropNamespaces(!(copyNamespaces));
-                            ((/*1430*/Saxon.Hej.tree.wrapper.VirtualTreeInfo)vc.getTreeInfo()).setCopyAccumulators(copyAccumulators);
+                            if ((isXSLT && copyAccumulators)) {
+                                ((/*1430*/Saxon.Hej.tree.wrapper.VirtualTreeInfo)vc.getTreeInfo()).setCopyAccumulators(true);
+                                Saxon.Hej.expr.accum.AccumulatorManager am = ((Saxon.Hej.trans.XsltController)(context.getController())).getAccumulatorManager();
+                                am.setApplicableAccumulators(((/*1430*/Saxon.Hej.tree.wrapper.VirtualTreeInfo)vc.getTreeInfo()), am.getApplicableAccumulators(((Saxon.Hej.om.NodeInfo)(item)).getTreeInfo()));
+                            }
                             if ((((Saxon.Hej.om.NodeInfo)(item)).getNodeKind() == Saxon.Hej.type.Type.ELEMENT)) {
                                 vc.setSystemId(computeNewBaseUri((Saxon.Hej.om.NodeInfo)(item), getStaticBaseURIString()));
                             }
@@ -553,7 +558,11 @@ namespace Saxon.Hej.expr.instruct {
                                 return item;
                             }
                             Saxon.Hej.tree.wrapper.VirtualCopy vc = Saxon.Hej.tree.wrapper.VirtualUntypedCopy.makeVirtualUntypedTree((Saxon.Hej.om.NodeInfo)(item), (Saxon.Hej.om.NodeInfo)(item));
-                            ((/*1430*/Saxon.Hej.tree.wrapper.VirtualTreeInfo)vc.getTreeInfo()).setCopyAccumulators(copyAccumulators);
+                            if (copyAccumulators) {
+                                ((/*1430*/Saxon.Hej.tree.wrapper.VirtualTreeInfo)vc.getTreeInfo()).setCopyAccumulators(true);
+                                Saxon.Hej.expr.accum.AccumulatorManager am = ((Saxon.Hej.trans.XsltController)(context.getController())).getAccumulatorManager();
+                                am.setApplicableAccumulators(((/*1430*/Saxon.Hej.tree.wrapper.VirtualTreeInfo)vc.getTreeInfo()), am.getApplicableAccumulators(((Saxon.Hej.om.NodeInfo)(item)).getTreeInfo()));
+                            }
                             vc.setDropNamespaces(!(copyNamespaces));
                             if ((((Saxon.Hej.om.NodeInfo)(item)).getNodeKind() == Saxon.Hej.type.Type.ELEMENT)) {
                                 vc.setSystemId(computeNewBaseUri((Saxon.Hej.om.NodeInfo)(item), getStaticBaseURIString()));

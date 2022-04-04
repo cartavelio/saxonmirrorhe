@@ -248,7 +248,10 @@ namespace Saxon.Hej.expr.parser {
             }
             language = Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.SEQUENCE_TYPE;
             t = new Saxon.Hej.expr.parser.Tokenizer();
-            t.languageLevel = env.getXPathVersion();
+            int version = env.getXPathVersion();
+            t.languageLevel = version;
+            allowXPath30Syntax = (version>=30);
+            allowXPath31Syntax = (version>=31);
             allowXPath40Syntax = t.allowSaxonExtensions = (env.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_SYNTAX_EXTENSIONS) || (t.languageLevel == 40));
             try {
                 t.tokenize(input, 0, -1);
@@ -284,9 +287,9 @@ namespace Saxon.Hej.expr.parser {
             t = new Saxon.Hej.expr.parser.Tokenizer();
             t.languageLevel = languageVersion = env.getXPathVersion();
             allowSaxonExtensions = t.allowSaxonExtensions = true;
-            allowXPath30Syntax = (languageVersion>=30);
-            allowXPath31Syntax = (languageVersion>=31);
-            allowXPath40Syntax = (languageVersion>=40);
+            allowXPath30Syntax = true;
+            allowXPath31Syntax = true;
+            allowXPath40Syntax = true;
             try {
                 t.tokenize(input, 0, -1);
             } catch (Saxon.Hej.trans.XPathException err) {
@@ -1227,7 +1230,7 @@ namespace Saxon.Hej.expr.parser {
                     if ((t.currentToken == Saxon.Hej.expr.parser.Token.DOTDOT)) {
                         p.nextToken();
                         int occ = parseOccurrenceIndicator();
-                        arg = Saxon.Hej.value.SequenceType.makeSequenceType(recordTest, occ);
+                        arg = Saxon.Hej.value.SequenceType.makeSequenceType(new Saxon.Hej.ma.map.SelfReferenceRecordTest(recordTest), occ);
                         if ((!(Saxon.Hej.value.Cardinality.allowsZero(occ)) && !(optionalFieldNames.Contains(name)))) {
                             throw new Saxon.Hej.trans.XPathException("A self-referencing field in a record type must be emptiable or optional", "XPST0140");
                         }

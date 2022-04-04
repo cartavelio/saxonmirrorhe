@@ -279,10 +279,23 @@ namespace Saxon.Hej.expr {
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             if (getFunctionName().hasURI(Saxon.Hej.lib.NamespaceConstant.FN)) {
                 @out.startElement("fn", this);
-                @out.emitAttribute("name", getFunctionName().getLocalPart());
+                string localPart = getFunctionName().getLocalPart();
+                @out.emitAttribute("name", localPart);
                 getTargetFunction().exportAttributes(@out);
-                foreach (Saxon.Hej.expr.Operand o in operands()) {
-                    o.getChildExpression().export(@out);
+                if ((((localPart.Equals("concat") && "JS".Equals(((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions())).target)) && (getArity() == 1)) && (getArg(0) is Saxon.Hej.expr.instruct.Block))) {
+                    foreach (Saxon.Hej.expr.Operand o in getArg(0).operands()) {
+                        if ((o.getChildExpression() is Saxon.Hej.expr.Literal)) {
+                            foreach (Saxon.Hej.om.Item it in ((Saxon.Hej.expr.Literal)(o.getChildExpression())).getGroundedValue().asIterable()) {
+                                Saxon.Hej.expr.Literal.exportValue(it, @out);
+                            }
+                        } else {
+                            o.getChildExpression().export(@out);
+                        }
+                    }
+                } else {
+                    foreach (Saxon.Hej.expr.Operand o in operands()) {
+                        o.getChildExpression().export(@out);
+                    }
                 }
                 getTargetFunction().exportAdditionalArguments(this, @out);
                 @out.endElement();

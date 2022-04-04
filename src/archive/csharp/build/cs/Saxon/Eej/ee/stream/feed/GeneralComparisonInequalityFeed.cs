@@ -48,7 +48,7 @@ namespace Saxon.Eej.ee.stream.feed {
                     while (((val = (Saxon.Hej.value.AtomicValue)(comparand.next())) != null)) {
                         existsUnstreamed = true;
                         if (!(Saxon.Hej.type.Type.isGenerallyComparable(matchType, val.getPrimitiveType(), false))) {
-                            throw new Saxon.Hej.trans.XPathException(((("Cannot compare "+matchType)+" to ")+val.getPrimitiveType()), "FORG0001");
+                            throw new Saxon.Hej.trans.XPathException((((("Comparison between "+matchType)+" and ")+val.getPrimitiveType())+" is not allowed"), "XPTY0004", getExpression().getLocation());
                         }
                         if (val.isUntypedAtomic()) {
                             firstUntypedUnstreamed = (Saxon.Hej.value.StringValue)(val);

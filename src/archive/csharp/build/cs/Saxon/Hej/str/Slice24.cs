@@ -24,7 +24,7 @@ namespace Saxon.Hej.str {
             byte b2 = (byte)(((codePoint&unchecked((int)0xff))));
             for (int i = (((start+System.Math.Max(requireInt(from), 0)))*3); (i<(end*3)); i += 3) {
                 if ((((bytes[(i+2)] == b2) && (bytes[(i+1)] == b1)) && (bytes[i] == b0))) {
-                    return (((i-start))/3);
+                    return ((i/3)-start);
                 }
             }
             return -1;

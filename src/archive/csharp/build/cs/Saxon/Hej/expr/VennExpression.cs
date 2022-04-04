@@ -360,12 +360,19 @@ namespace Saxon.Hej.expr {
             if ((@operator == Saxon.Hej.expr.parser.Token.UNION)) {
                 return new Saxon.Hej.pattern.UnionPattern(getLhsExpression().toPattern(config), getRhsExpression().toPattern(config));
             } else {
-                if ((@operator == Saxon.Hej.expr.parser.Token.EXCEPT)) {
-                    return new Saxon.Hej.pattern.ExceptPattern(getLhsExpression().toPattern(config), getRhsExpression().toPattern(config));
-                } else {
-                    return new Saxon.Hej.pattern.IntersectPattern(getLhsExpression().toPattern(config), getRhsExpression().toPattern(config));
+                int commonAxis = Saxon.Hej.expr.parser.ExpressionTool.getAxisNavigation(this);
+                if (((((commonAxis == Saxon.Hej.om.AxisInfo.CHILD) || (commonAxis == Saxon.Hej.om.AxisInfo.ATTRIBUTE)) || independentOfContextItem(getLhsExpression())) || independentOfContextItem(getRhsExpression()))) {
+                    if ((@operator == Saxon.Hej.expr.parser.Token.EXCEPT)) {
+                        return new Saxon.Hej.pattern.ExceptPattern(getLhsExpression().toPattern(config), getRhsExpression().toPattern(config));
+                    } else {
+                        return new Saxon.Hej.pattern.IntersectPattern(getLhsExpression().toPattern(config), getRhsExpression().toPattern(config));
+                    }
                 }
+                return new Saxon.Hej.pattern.GeneralNodePattern(this, (Saxon.Hej.pattern.NodeTest)(getItemType()));
             }
+        }
+        private bool independentOfContextItem(Saxon.Hej.expr.Expression exp) {
+            return (((exp.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_CONTEXT_ITEM)) == 0);
         }
         private bool isPredicatePattern(Saxon.Hej.expr.Expression exp) {
             if ((exp is Saxon.Hej.expr.ItemChecker)) {

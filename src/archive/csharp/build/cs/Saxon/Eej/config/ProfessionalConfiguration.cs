@@ -14,8 +14,9 @@ namespace Saxon.Eej.config {
             verifier = makeVerifier();
             declareBuiltInExtensionElementNamespaces();
             declareBuiltInExtensionFunctions();
+            Saxon.Hej.Version.platform.registerAllBuiltInObjectModels(this);
             setSerializerFactory(new Saxon.Eej.serialize.SerializerFactoryPE(this));
-            setStaticQueryContextFactory(new Inner_StaticQueryContextFactory_3(this));
+            setStaticQueryContextFactory(new Inner_StaticQueryContextFactory_4(this));
             internalSetBooleanProperty(Saxon.Hej.lib.FeatureCode.DISABLE_XSL_EVALUATE, Saxon.Hej.lib.FeatureKeys.DISABLE_XSL_EVALUATE, false);
         }
         private Saxon.Eej.config.Verifier makeVerifier() {
@@ -50,7 +51,16 @@ namespace Saxon.Eej.config {
             if (name.Equals("http://saxonica.com/oem-data")) {
                 supplyLicenseKey(new System.IO.StringReader((string)(value)));
             } else {
-                base.setConfigurationProperty(name, value);
+                if (name.Equals(Saxon.Hej.lib.Feature<string>.LICENSE_FILE_LOCATION.name)) {
+                    lock (verifier) {
+                        verifier.loadLicense((string)(value));
+                        licenseFound = true;
+                        licenseNotFound = false;
+                        setLicensedFeatures();
+                    }
+                } else {
+                    base.setConfigurationProperty(name, value);
+                }
             }
         }
         public override  /* REPLACING protected internal override */ void setFeature(Saxon.Hej.lib.FeatureData feature, System.Object value) {
@@ -380,9 +390,9 @@ namespace Saxon.Eej.config {
             return new Saxon.Eej.trans.ModePE(modeName);
         }
     
-        private class Inner_StaticQueryContextFactory_3 : Saxon.Hej.lib.StaticQueryContextFactory {
+        private class Inner_StaticQueryContextFactory_4 : Saxon.Hej.lib.StaticQueryContextFactory {
             private readonly ProfessionalConfiguration outerInstance;
-            public Inner_StaticQueryContextFactory_3(ProfessionalConfiguration outerInstance) {
+            public Inner_StaticQueryContextFactory_4(ProfessionalConfiguration outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.query.StaticQueryContext newStaticQueryContext(Saxon.Hej.Configuration config, bool copyFromDefault) {

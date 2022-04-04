@@ -392,6 +392,16 @@ namespace Saxon.Hej.expr {
                 if ((checker.getBaseExpression() is Saxon.Hej.expr.ContextItemExpression)) {
                     return tail.toPattern(config);
                 }
+            } else {
+                if ((tail is Saxon.Hej.expr.VennExpression)) {
+                    Saxon.Hej.expr.VennExpression ve = (Saxon.Hej.expr.VennExpression)(tail);
+                    if ((ve.@operator == Saxon.Hej.expr.parser.Token.UNION)) {
+                        Saxon.Hej.expr.Expression lhExpansion = new Saxon.Hej.expr.SlashExpression(head.copy(new Saxon.Hej.expr.parser.RebindingMap()), ve.getLhsExpression());
+                        Saxon.Hej.expr.Expression rhExpansion = new Saxon.Hej.expr.SlashExpression(head.copy(new Saxon.Hej.expr.parser.RebindingMap()), ve.getRhsExpression());
+                        Saxon.Hej.expr.VennExpression topExpansion = new Saxon.Hej.expr.VennExpression(lhExpansion, ve.@operator, rhExpansion);
+                        return topExpansion.toPattern(config);
+                    }
+                }
             }
             Saxon.Hej.pattern.Pattern tailPattern = tail.toPattern(config);
             if ((tailPattern is Saxon.Hej.pattern.NodeTestPattern)) {
@@ -416,15 +426,8 @@ namespace Saxon.Hej.expr {
                 }
             }
             if ((headPattern == null)) {
-                if ((tail is Saxon.Hej.expr.VennExpression)) {
-                    Saxon.Hej.expr.Expression lhExpansion = new Saxon.Hej.expr.SlashExpression(head.copy(new Saxon.Hej.expr.parser.RebindingMap()), ((Saxon.Hej.expr.VennExpression)(tail)).getLhsExpression());
-                    Saxon.Hej.expr.Expression rhExpansion = new Saxon.Hej.expr.SlashExpression(head.copy(new Saxon.Hej.expr.parser.RebindingMap()), ((Saxon.Hej.expr.VennExpression)(tail)).getRhsExpression());
-                    Saxon.Hej.expr.VennExpression topExpansion = new Saxon.Hej.expr.VennExpression(lhExpansion, ((Saxon.Hej.expr.VennExpression)(tail)).@operator, rhExpansion);
-                    return topExpansion.toPattern(config);
-                } else {
-                    axis = Saxon.Hej.pattern.PatternMaker.getAxisForPathStep(tail);
-                    headPattern = head.toPattern(config);
-                }
+                axis = Saxon.Hej.pattern.PatternMaker.getAxisForPathStep(tail);
+                headPattern = head.toPattern(config);
             }
             return new Saxon.Hej.pattern.AncestorQualifiedPattern(tailPattern, headPattern, axis);
         }

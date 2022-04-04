@@ -10,6 +10,9 @@ namespace Saxon.Hej.expr.accum {
         public void setApplicableAccumulators(Saxon.Hej.om.TreeInfo tree, System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator> accumulators) {
             applicableAccumulators.put(tree, accumulators);
         }
+        public System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator> getApplicableAccumulators(Saxon.Hej.om.TreeInfo tree) {
+            return applicableAccumulators.get(tree);
+        }
         public bool isApplicable(Saxon.Hej.om.TreeInfo tree, Saxon.Hej.expr.accum.Accumulator accumulator) {
             System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator> accSet = applicableAccumulators.get(tree);
             return ((accSet == null) || accSet.Contains(accumulator));

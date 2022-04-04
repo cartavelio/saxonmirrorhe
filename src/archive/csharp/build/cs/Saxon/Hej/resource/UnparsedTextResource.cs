@@ -48,6 +48,7 @@ namespace Saxon.Hej.resource {
                     System.IO.Stream stream = Saxon.Impl.Overrides.ResourceLoader.urlStream(new Saxon.Ejava.net.URL(href));
                     string enc = encoding;
                     if ((enc == null)) {
+                        stream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(stream);
                         enc = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(stream, null);
                     }
                     unparsedText = Saxon.Hej.resource.CatalogCollection.makeStringFromStream(stream, enc);

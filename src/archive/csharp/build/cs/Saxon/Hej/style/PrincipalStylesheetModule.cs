@@ -319,7 +319,7 @@ namespace Saxon.Hej.style {
                             if ((v2 == varDecl)) {
                                 varDecl.compileError(((("Global variable or parameter $"+qName.getDisplayName())+" is declared more than once ")+"(caused by including the containing module more than once)"), "XTSE0630");
                             } else {
-                                varDecl.compileError((((("Duplicate global variable/parameter declaration (see line "+v2.getLineNumber())+" of ")+v2.getSystemId())+')'), "XTSE0630");
+                                varDecl.compileError((((((("Duplicate global variable/parameter $"+qName.getDisplayName())+" (see line ")+v2.getLineNumber())+" of ")+v2.getSystemId())+')'), "XTSE0630");
                             }
                         } else {
                             if (((thisPrecedence<otherPrecedence) && (varDecl != otherVarDecl.getSourceElement()))) {

@@ -698,7 +698,6 @@ namespace Saxon.Hej.trans {
         throw new Saxon.Hej.trans.XPathException(((("Unknown system function "+name)+"#")+args.Length));
     }
     if ((e is Saxon.Hej.expr.SystemFunctionCall)) {
-        ((Saxon.Hej.expr.SystemFunctionCall)(e)).allocateArgumentEvaluators(args);
         Saxon.Hej.functions.SystemFunction fn = ((Saxon.Hej.expr.SystemFunctionCall)(e)).getTargetFunction();
         fn.setRetainedStaticContext(rsc);
         Saxon.Hej.om.SequenceIterator iter = element.iterateAxis(Saxon.Hej.om.AxisInfo.ATTRIBUTE);
@@ -708,6 +707,7 @@ namespace Saxon.Hej.trans {
             props.setProperty(att.getLocalPart(), att.getStringValue());
         }
         fn.importAttributes(props);
+        loader.addCompletionAction(() => ((Saxon.Hej.expr.SystemFunctionCall)(e)).allocateArgumentEvaluators(args));
         loader.addCompletionAction(() => fn.fixArguments(args));
     }
     loader.contextStack.Pop();
@@ -806,7 +806,11 @@ namespace Saxon.Hej.trans {
                 if ("ending".Equals(algorithmAtt)) {
                     algo = Saxon.Hej.expr.instruct.ForEachGroup.GROUP_ENDING;
                 } else {
-                    throw new Saxon.Ejava.lang.AssertionError();
+                    if ("breaking".Equals(algorithmAtt)) {
+                        algo = Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BREAKING_WHEN;
+                    } else {
+                        throw new Saxon.Ejava.lang.AssertionError(("Unknown grouping algorithm: "+algorithmAtt));
+                    }
                 }
             }
         }
@@ -816,7 +820,7 @@ namespace Saxon.Hej.trans {
     bool inFork = ((flags != null) && flags.Contains("k"));
     Saxon.Hej.expr.Expression select = loader.getExpressionWithRole(element, "select");
     Saxon.Hej.expr.Expression key;
-    if (((algo == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BY) || (algo == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_ADJACENT))) {
+    if ((((algo == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BY) || (algo == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_ADJACENT)) || (algo == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BREAKING_WHEN))) {
         key = loader.getExpressionWithRole(element, "key");
     } else {
         key = loader.getPatternWithRole(element, "match");
@@ -1896,6 +1900,7 @@ namespace Saxon.Hej.trans {
             }
             Saxon.Hej.functions.FunctionLibraryList functionLibrary = new Saxon.Hej.functions.FunctionLibraryList();
             functionLibrary.addFunctionLibrary(config.getXSLT30FunctionSet());
+            addVendorFunctionLibrary(functionLibrary, config);
             functionLibrary.addFunctionLibrary(Saxon.Hej.ma.map.MapFunctionSet.getInstance());
             functionLibrary.addFunctionLibrary(Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance());
             functionLibrary.addFunctionLibrary(Saxon.Hej.functions.MathFunctionSet.getInstance());
@@ -1939,6 +1944,8 @@ namespace Saxon.Hej.trans {
             } else {
                 pack.setDefaultMode(defaultModeName);
             }
+        }
+        protected internal virtual void addVendorFunctionLibrary(Saxon.Hej.functions.FunctionLibraryList targetList, Saxon.Hej.Configuration config) {
         }
         private void readGlobalContext(Saxon.Hej.om.NodeInfo packageElement) {
             Saxon.Hej.expr.instruct.GlobalContextRequirement req = null;

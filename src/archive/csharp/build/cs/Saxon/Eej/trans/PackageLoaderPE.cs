@@ -86,6 +86,9 @@ namespace Saxon.Eej.trans {
             }
             return false;
         }
+        protected internal override void addVendorFunctionLibrary(Saxon.Hej.functions.FunctionLibraryList targetList, Saxon.Hej.Configuration config) {
+            targetList.addFunctionLibrary(((Saxon.Eej.config.ProfessionalConfiguration)(config)).getVendorFunctionSet());
+        }
     
     }
 }

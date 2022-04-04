@@ -6,7 +6,7 @@ namespace Saxon.Hej.str {
         private const int BITS = 16;
         private const int SEGLEN = (1<<BITS);
         private const int MASK = (SEGLEN-1);
-        private System.Collections.Generic.IList<Saxon.Hej.str.LargeTextBuffer.Segment> completeSegments;
+        private readonly System.Collections.Generic.IList<Saxon.Hej.str.LargeTextBuffer.Segment> completeSegments;
         private Saxon.Hej.str.LargeTextBuffer.Segment lastSegment;
         private int lastSegmentLength;
         private interface Segment {
@@ -25,9 +25,10 @@ namespace Saxon.Hej.str {
                 return 8;
             }
             public Saxon.Hej.str.LargeTextBuffer.Segment stretch(int oldLength, int newLength, int newWidth) {
+                System.Diagnostics.Debug.Assert((newLength<=SEGLEN));
                 if ((newWidth<=8)) {
                     if ((newLength>bytes.Length)) {
-                        bytes = Saxon.Ejava.util.Arrays.copyOf(bytes, System.Math.Max(newLength, (oldLength*2)));
+                        bytes = Saxon.Ejava.util.Arrays.copyOf(bytes, System.Math.Max(newLength, System.Math.Min((oldLength*2), SEGLEN)));
                     }
                     return this;
                 } else {
@@ -59,9 +60,10 @@ namespace Saxon.Hej.str {
                 return 16;
             }
             public Saxon.Hej.str.LargeTextBuffer.Segment stretch(int oldLength, int newLength, int newWidth) {
+                System.Diagnostics.Debug.Assert((newLength<=SEGLEN));
                 if ((newWidth<=16)) {
                     if ((newLength>chars.Length)) {
-                        chars = Saxon.Ejava.util.Arrays.copyOf(chars, System.Math.Max(newLength, (oldLength*2)));
+                        chars = Saxon.Ejava.util.Arrays.copyOf(chars, System.Math.Max(newLength, System.Math.Min((oldLength*2), SEGLEN)));
                     }
                     return this;
                 } else {
@@ -87,8 +89,9 @@ namespace Saxon.Hej.str {
                 return 24;
             }
             public Saxon.Hej.str.LargeTextBuffer.Segment stretch(int oldLength, int newLength, int newWidth) {
+                System.Diagnostics.Debug.Assert((newLength<=SEGLEN));
                 if (((newLength*3)>bytes.Length)) {
-                    bytes = Saxon.Ejava.util.Arrays.copyOf(bytes, System.Math.Max((newLength*3), (oldLength*6)));
+                    bytes = Saxon.Ejava.util.Arrays.copyOf(bytes, System.Math.Max((newLength*3), System.Math.Min((oldLength*6), (SEGLEN*3))));
                 }
                 return this;
             }

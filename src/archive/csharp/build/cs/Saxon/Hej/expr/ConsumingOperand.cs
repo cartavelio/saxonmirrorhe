@@ -42,9 +42,13 @@ namespace Saxon.Hej.expr {
             return "consume";
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter destination) {
-            destination.startElement("consume", this);
-            getBaseExpression().export(destination);
-            destination.endElement();
+            if ("JS".Equals(((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(destination.getOptions())).target)) {
+                getBaseExpression().export(destination);
+            } else {
+                destination.startElement("consume", this);
+                getBaseExpression().export(destination);
+                destination.endElement();
+            }
         }
         public override string ToString() {
             return (("consume("+getBaseExpression().ToString())+")");

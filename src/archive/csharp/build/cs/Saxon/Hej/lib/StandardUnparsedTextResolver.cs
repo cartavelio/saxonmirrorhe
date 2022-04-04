@@ -99,6 +99,7 @@ namespace Saxon.Hej.lib {
             }
             try {
                 if (((encoding == null) || isXmlMediaType)) {
+                    inputStream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(inputStream);
                     encoding = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(inputStream, (debug ? err : null));
                     if (debug) {
                         err.info(("unparsed-text(): inferred encoding = "+encoding));

@@ -35,6 +35,7 @@ namespace Saxon.Eej.xsltextn.style {
             }
             try {
                 Saxon.Hej.style.PrincipalStylesheetModule top1 = getPrincipalStylesheetModule();
+                top1.getStylesheetPackage().markNonExportable("Uses saxon:import-query", Saxon.Hej.trans.SaxonErrorCode.SXST0069);
                 Saxon.Hej.query.QueryModule importedModule = getQueryLibrary(moduleURI);
                 if ((importedModule == null)) {
                     if ((href == null)) {

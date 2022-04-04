@@ -8,10 +8,10 @@ namespace Saxon.Hej.ma.map {
         private bool extensible;
         public RecordTest()  {
         }
-        public RecordTest(System.Collections.Generic.IList<string> names, System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> types, System.Collections.Generic.IList<string> optionalFieldNames, bool extensible)  {
+        public RecordTest(System.Collections.Generic.IList<string> names, System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> types, System.Collections.Generic.ICollection<string> optionalFieldNames, bool extensible)  {
             setDetails(names, types, optionalFieldNames, extensible);
         }
-        public void setDetails(System.Collections.Generic.IList<string> names, System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> types, System.Collections.Generic.IList<string> optionalFieldNames, bool extensible) {
+        public void setDetails(System.Collections.Generic.IList<string> names, System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> types, System.Collections.Generic.ICollection<string> optionalFieldNames, bool extensible) {
             for (int i = 0; (i<names.Count); i++) {
                 Saxon.Impl.Helpers.MapUtils.Put(fieldTypes, names[i], types[i]);
             }
@@ -116,7 +116,11 @@ namespace Saxon.Hej.ma.map {
                 } else {
                     sb.append(", ");
                 }
-                sb.append(field.Key);
+                if (Saxon.Hej.om.NameChecker.isValidNCName(field.Key)) {
+                    sb.append(field.Key);
+                } else {
+                    sb.append('"').append(field.Key).append('"');
+                }
                 if (isOptionalField(field.Key)) {
                     sb.append('?');
                 }

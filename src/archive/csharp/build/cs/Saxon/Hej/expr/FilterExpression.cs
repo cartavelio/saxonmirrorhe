@@ -118,6 +118,9 @@ namespace Saxon.Hej.expr {
             bool tracing = config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.TRACE_OPTIMIZER_DECISIONS);
             Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
             getLhs().optimize(visitor, contextItemType);
+            if (Saxon.Hej.expr.Literal.isEmptySequence(getSelectExpression())) {
+                return getSelectExpression();
+            }
             getBase().setFiltered(true);
             Saxon.Hej.expr.parser.ContextItemStaticInfo baseItemType = config.makeContextItemStaticInfo(getSelectExpression().getItemType(), false);
             baseItemType.setContextSettingExpression(getBase());

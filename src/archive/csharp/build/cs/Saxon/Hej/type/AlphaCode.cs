@@ -69,7 +69,12 @@ namespace Saxon.Hej.type {
                 if (key.Equals("f")) {
                     tree.fieldNames = value;
                 } else {
-                    throw new Saxon.Ejava.lang.IllegalArgumentException(("Bad alphacode component "+key));
+                    if (key.Equals("optionalFields")) {
+                        tree.optionalFieldNames = new System.Collections.Generic.HashSet<string>();
+                        Saxon.Impl.Helpers.SetUtils.AddAll(tree.optionalFieldNames, value);
+                    } else {
+                        throw new Saxon.Ejava.lang.IllegalArgumentException(("Bad alphacode component "+key));
+                    }
                 }
             }
             public void setTypeProperty(Saxon.Hej.type.AlphaCode.AlphaCodeTree tree, string key, Saxon.Hej.type.AlphaCode.AlphaCodeTree value) {
@@ -85,6 +90,9 @@ namespace Saxon.Hej.type {
                     break ;
                   case "e":
                     tree.elementType = value;
+                    break ;
+                  case "selfReference":
+                    tree.selfReference = value;
                     break ;
                   default:
                     throw new Saxon.Ejava.lang.IllegalArgumentException(("Bad alphacode component "+key));
@@ -165,7 +173,7 @@ namespace Saxon.Hej.type {
                     throw new Saxon.Ejava.lang.IllegalStateException((((("Expected '"+c)+"', found '")+(((d == -1) ? "<eof>" : ((""+(char)(d))))))+"'"));
                 }
             }
-            internal T parseType() {
+            internal T parseType(T parent) {
                 T container = callBack.makeContainer();
                 int indicator = nextChar();
                 if ((indicator<0)) {
@@ -183,6 +191,9 @@ namespace Saxon.Hej.type {
                 }
                 string primary = nextToken();
                 callBack.setStringProperty(container, "p", primary);
+                if (primary.Equals("..")) {
+                    callBack.setTypeProperty(container, "selfReference", parent);
+                }
                 while ((position<input.Length)) {
                     char c = input[position];
                     switch (c) {
@@ -211,7 +222,7 @@ namespace Saxon.Hej.type {
                       case 'e':
                         position++;
                         expect('[');
-                        T nestedType = parseType();
+                        T nestedType = parseType(parent);
                         expect(']');
                         callBack.setTypeProperty(container, (""+c), nestedType);
                         break ;
@@ -228,7 +239,7 @@ namespace Saxon.Hej.type {
                             callBack.setMultiTypeProperty(container, (""+c), nestedTypes);
                         } else {
                             while (true) {
-                                nestedTypes.Add(parseType());
+                                nestedTypes.Add(parseType(container));
                                 if ((input[position] == ',')) {
                                     position++;
                                 } else {
@@ -247,6 +258,7 @@ namespace Saxon.Hej.type {
                         position++;
                         expect('[');
                         System.Collections.Generic.IList<string> fieldNames = new System.Collections.Generic.List<string>();
+                        System.Collections.Generic.IList<string> optionalFieldNames = new System.Collections.Generic.List<string>();
                         Saxon.Ejava.lang.StringBuilder currName = new Saxon.Ejava.lang.StringBuilder();
                         bool escaped = false;
                         while (true) {
@@ -254,19 +266,24 @@ namespace Saxon.Hej.type {
                             if (((ch == '\\') && !(escaped))) {
                                 escaped = true;
                             } else {
-                                if (((ch == ',') && !(escaped))) {
-                                    fieldNames.Add(currName.ToString());
-                                    currName.setLength(0);
-                                    escaped = false;
+                                if (((ch == '?') && !(escaped))) {
+                                    optionalFieldNames.Add(currName.ToString());
                                 } else {
-                                    if (((ch == ']') && !(escaped))) {
+                                    if (((ch == ',') && !(escaped))) {
                                         fieldNames.Add(currName.ToString());
                                         currName.setLength(0);
-                                        callBack.setMultiStringProperty(container, "f", fieldNames);
-                                        break ;
-                                    } else {
-                                        currName.append(ch);
                                         escaped = false;
+                                    } else {
+                                        if (((ch == ']') && !(escaped))) {
+                                            fieldNames.Add(currName.ToString());
+                                            currName.setLength(0);
+                                            callBack.setMultiStringProperty(container, "f", fieldNames);
+                                            callBack.setMultiStringProperty(container, "optionalFields", optionalFieldNames);
+                                            break ;
+                                        } else {
+                                            currName.append(ch);
+                                            escaped = false;
+                                        }
                                     }
                                 }
                             }
@@ -283,7 +300,7 @@ namespace Saxon.Hej.type {
         public static Saxon.Hej.ma.map.MapItem toXdmMap(string input) {
             Saxon.Hej.type.AlphaCode.MapItemCallBack callBack = new Saxon.Hej.type.AlphaCode.MapItemCallBack();
             Saxon.Hej.type.AlphaCode.AlphaCodeParser<Saxon.Hej.ma.map.DictionaryMap> parser = new Saxon.Hej.type.AlphaCode.AlphaCodeParser<Saxon.Hej.ma.map.DictionaryMap>(input, callBack);
-            return parser.parseType();
+            return parser.parseType(null);
         }
         public static string fromXdmMap(Saxon.Hej.ma.map.MapItem map) {
             Saxon.Ejava.lang.StringBuilder @out = new Saxon.Ejava.lang.StringBuilder();
@@ -353,13 +370,15 @@ namespace Saxon.Hej.type {
             internal int vennOperator;
             internal Saxon.Hej.type.AlphaCode.AlphaCodeTree[] vennOperands;
             internal System.Collections.Generic.IList<string> fieldNames;
+            internal System.Collections.Generic.ISet<string> optionalFieldNames;
             internal bool extensibleTupleType;
+            internal Saxon.Hej.type.AlphaCode.AlphaCodeTree selfReference;
         
         }
         public static Saxon.Hej.value.SequenceType toSequenceType(string input, Saxon.Hej.Configuration config) {
             Saxon.Hej.type.AlphaCode.TreeCallBack callBack = new Saxon.Hej.type.AlphaCode.TreeCallBack();
             Saxon.Hej.type.AlphaCode.AlphaCodeParser<Saxon.Hej.type.AlphaCode.AlphaCodeTree> parser = new Saxon.Hej.type.AlphaCode.AlphaCodeParser<Saxon.Hej.type.AlphaCode.AlphaCodeTree>(input, callBack);
-            Saxon.Hej.type.AlphaCode.AlphaCodeTree tree = parser.parseType();
+            Saxon.Hej.type.AlphaCode.AlphaCodeTree tree = parser.parseType(null);
             return sequenceTypeFromTree(tree, config);
         }
         public static Saxon.Hej.type.ItemType toItemType(string input, Saxon.Hej.Configuration config) {
@@ -592,11 +611,18 @@ namespace Saxon.Hej.type {
                                         }
                                     } else {
                                         System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> fieldTypes = new System.Collections.Generic.List<Saxon.Hej.value.SequenceType>(tree.argTypes.Count);
+                                        Saxon.Hej.ma.map.RecordTest recordTest = new Saxon.Hej.ma.map.RecordTest();
                                         foreach (Saxon.Hej.type.AlphaCode.AlphaCodeTree t in tree.argTypes) {
-                                            fieldTypes.Add(sequenceTypeFromTree(t, config));
+                                            if ((t.selfReference != null)) {
+                                                Saxon.Hej.ma.map.SelfReferenceRecordTest selfie = new Saxon.Hej.ma.map.SelfReferenceRecordTest(recordTest);
+                                                int xcardinality = Saxon.Hej.value.Cardinality.fromOccurrenceIndicator(tree.cardinality);
+                                                fieldTypes.Add(Saxon.Hej.value.SequenceType.makeSequenceType(selfie, xcardinality));
+                                            } else {
+                                                fieldTypes.Add(sequenceTypeFromTree(t, config));
+                                            }
                                         }
-                                        System.Collections.Generic.IList<string> optionalFields = new System.Collections.Generic.List<string>();
-                                        itemType = new Saxon.Hej.ma.map.RecordTest(tree.fieldNames, fieldTypes, optionalFields, tree.extensibleTupleType);
+                                        recordTest.setDetails(tree.fieldNames, fieldTypes, tree.optionalFieldNames, tree.extensibleTupleType);
+                                        itemType = recordTest;
                                     }
                                 } else {
                                     Saxon.Hej.type.AlphaCode.AlphaCodeTree returnType = tree.resultType;
@@ -719,11 +745,23 @@ namespace Saxon.Hej.type {
                                                         } else {
                                                             if ((primary is Saxon.Hej.ma.map.RecordTest)) {
                                                                 result.extensibleTupleType = ((Saxon.Hej.ma.map.RecordTest)(primary)).isExtensible();
+                                                                result.optionalFieldNames = new System.Collections.Generic.HashSet<string>();
                                                                 result.fieldNames = new System.Collections.Generic.List<string>();
                                                                 result.argTypes = new System.Collections.Generic.List<Saxon.Hej.type.AlphaCode.AlphaCodeTree>();
                                                                 foreach (string s in ((Saxon.Hej.ma.map.RecordTest)(primary)).getFieldNames()) {
                                                                     result.fieldNames.Add(s);
-                                                                    result.argTypes.Add(makeTree(((Saxon.Hej.ma.map.RecordTest)(primary)).getFieldType(s)));
+                                                                    Saxon.Hej.value.SequenceType fieldType = ((Saxon.Hej.ma.map.RecordTest)(primary)).getFieldType(s);
+                                                                    if ((fieldType.getPrimaryType() is Saxon.Hej.ma.map.SelfReferenceRecordTest)) {
+                                                                        Saxon.Hej.type.AlphaCode.AlphaCodeTree selfRef = new Saxon.Hej.type.AlphaCode.AlphaCodeTree();
+                                                                        selfRef.selfReference = result;
+                                                                        selfRef.cardinality = ((fieldType.getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE) ? "1" : Saxon.Hej.value.Cardinality.getOccurrenceIndicator(fieldType.getCardinality()));
+                                                                        result.argTypes.Add(selfRef);
+                                                                    } else {
+                                                                        result.argTypes.Add(makeTree(((Saxon.Hej.ma.map.RecordTest)(primary)).getFieldType(s)));
+                                                                    }
+                                                                    if (((Saxon.Hej.ma.map.RecordTest)(primary)).isOptionalField(s)) {
+                                                                        result.optionalFieldNames.Add(s);
+                                                                    }
                                                                 }
                                                             } else {
                                                                 if ((primary is Saxon.Hej.ma.map.MapType)) {
@@ -778,6 +816,10 @@ namespace Saxon.Hej.type {
         private static void alphaCodeFromTree(Saxon.Hej.type.AlphaCode.AlphaCodeTree tree, bool withCardinality, Saxon.Ejava.lang.StringBuilder sb) {
             if (withCardinality) {
                 sb.append(tree.cardinality);
+            }
+            if ((tree.selfReference != null)) {
+                sb.append("..");
+                return ;
             }
             sb.append(tree.principal);
             if ((tree.name != null)) {
@@ -855,9 +897,28 @@ namespace Saxon.Hej.type {
                     } else {
                         first = false;
                     }
-                    sb.append(s.Replace("\\", "\\\\").Replace(",", "\\,").Replace("]", "\\]"));
+                    sb.append(escapeNCName(s));
+                    if (tree.optionalFieldNames.Contains(s)) {
+                        sb.append('?');
+                    }
                 }
                 sb.append("]");
+            }
+        }
+        public static string escapeNCName(string ncName) {
+            if (Saxon.Hej.om.NameChecker.isValidNCName(ncName)) {
+                return ncName;
+            } else {
+                Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder();
+                for (int i = 0; (i<ncName.Length); i++) {
+                    char c = ncName[i];
+                    if (((c>=128) || Saxon.Hej.om.NameChecker.isNCNameChar(c))) {
+                        sb.append(c);
+                    } else {
+                        sb.append("\\").append(c);
+                    }
+                }
+                return sb.ToString();
             }
         }
         public static string fromItemType(Saxon.Hej.type.ItemType type) {
