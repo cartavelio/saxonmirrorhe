@@ -4325,12 +4325,10 @@ public class Configuration implements SourceResolver, NotationSet {
             switch (code) {
                 case FeatureCode.ALLOWED_PROTOCOLS:
                     protocolRestrictor = new ProtocolRestrictor((String)value);
-                    //#if CSHARP==false
                     ResourceResolver rsrcResolver = getResourceResolver();
                     if (rsrcResolver instanceof CatalogResourceResolver) {
                         ((CatalogResourceResolver) rsrcResolver).setFeature(ResolverFeature.ACCESS_EXTERNAL_DOCUMENT, (String) value);
                     }
-                    //#endif
                     break;
                 case FeatureCode.COLLATION_URI_RESOLVER:
                     if (!(value instanceof CollationURIResolver)) {
