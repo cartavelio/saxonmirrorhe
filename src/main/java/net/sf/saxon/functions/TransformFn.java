@@ -785,7 +785,8 @@ public class TransformFn extends SystemFunction implements Callable {
                         sourceNode = tree.getRootNode();
                         sourceLocation = null;
                     } catch (XPathException e) {
-                        e.setErrorCode("FOXT0003");
+                        e.maybeSetErrorCode("FOXT0003");
+                        throw e;
                     }
                 }
                 if (globalContextItem instanceof XdmNode) {
