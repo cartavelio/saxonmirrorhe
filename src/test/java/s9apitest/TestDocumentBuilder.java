@@ -147,7 +147,7 @@ public class TestDocumentBuilder {
         try {
             String in = "<?xml version='1.0'?> \n" +
                     "<Document> <e a='13' xml:lang='en'> <c:f xmlns:c='http://c/'/><f xmlns='http://c/'/> </e> </Document>";
-            Processor proc = new Processor(false);
+            Processor proc = new Processor(true);
             DocumentBuilder db = proc.newDocumentBuilder();
             db.setTreeModel(XOMObjectModel.getInstance());
             XdmNode doc = db.build(new StreamSource(new StringReader(in)));
@@ -164,7 +164,7 @@ public class TestDocumentBuilder {
         try {
             String in = "<?xml version='1.0'?> \n" +
                     "<Document> <e a='13' xml:lang='en'> <c:f xmlns:c='http://c/'/><f xmlns='http://c/'/> </e> </Document>";
-            Processor proc = new Processor(false);
+            Processor proc = new Processor(true);
             DocumentBuilder db = proc.newDocumentBuilder();
             db.setTreeModel(JDOM2ObjectModel.getInstance());
             XdmNode doc = db.build(new StreamSource(new StringReader(in)));

@@ -449,7 +449,7 @@ public class TestXsltTransformer {
     @Test
     public void testXOMDestination() {
         try {
-            Processor proc = new Processor(false);
+            Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
             StringReader sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
                     "<xsl:template name='go'><a/></xsl:template>" +
@@ -479,7 +479,7 @@ public class TestXsltTransformer {
     @Test
     public void testJDOM2Destination() {
         try {
-            Processor proc = new Processor(false);
+            Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
             StringReader sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
                     "<xsl:template name='go'><a/></xsl:template>" +
