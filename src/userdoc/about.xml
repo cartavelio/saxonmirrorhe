@@ -479,6 +479,12 @@
       <section id="prerequisites" title="Prerequisites" class="javaonly">
          <h1>Prerequisites</h1>
 
+         <p>The Saxon download includes additional libraries in the <code>lib</code> directory.
+         Some of these, such as JLine and the ICU libraries, are only needed for specific features.
+         The XML Resolver jar files are always required and must be placed on your classpath.
+         If Saxon is downloaded via Maven, the optional
+         and required dependencies are identified in the POM file.</p>
+
          <p>The following software must be installed separately, it is not included with the Saxon
             download.</p>
          <ul>
