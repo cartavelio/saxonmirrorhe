@@ -24,5 +24,10 @@ public class LinkedTreeTests extends ObjectModelTests {
             return null;
         }
     }
+
+    @Override
+    boolean stripsIgnorableWhitespace() {
+        return true;
+    }
 }
 

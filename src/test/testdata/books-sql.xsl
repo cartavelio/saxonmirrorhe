@@ -67,5 +67,7 @@
 	<saxon:assign name="count" select="$count+1"/>
     </xsl:for-each>
 </xsl:template>
+    
+<xsl:template name="UNUSED">(<![CDATA[This is CDATA]]>)</xsl:template>    
 
 </xsl:stylesheet>	
