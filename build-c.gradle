@@ -382,7 +382,6 @@ task hec_setupPreprocess(
     exclude "javax/xml/xquery/*.java"
     exclude "**/dotnet/**"
     include "net/sf/saxon/**/package.html"
-    include "net/sf/saxon/data/**"
     exclude "net/sf/saxon/testdriver/**"
     exclude "net/sf/saxon/option/axiom/**"
     exclude "net/sf/saxon/option/dom4j/**"
@@ -622,8 +621,8 @@ task hec_jar(
   from ("build/classes/hec") {
     include "net/**/*.class"
   }
-  from ("${buildDir}/src") {
-    include "net/sf/saxon/data/**"
+  from ("src/main/resources") {
+    include "net/**"
   }
   from ("${buildDir}/xerces") {
       include "**/*.class"
@@ -679,6 +678,9 @@ task pec_jar(
       exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
       exclude "META-INF/MANIFEST.MF"
     }
+  from ("src/main/resources") {
+    include "net/**"
+  }
   from ("${buildDir}/icu") {
       include "**/*.class"
       include "**/*.*"
